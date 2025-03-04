@@ -12,9 +12,9 @@ export const getFeed: RTE.ReaderTaskEither<FeedType, Error, Feed<FeedItemInterfa
   R.map((feedType) =>
     pipe(
       TE.tryCatch(() => axios.get<string>(`https://console.dev/${feedType}/rss.xml`), E.toError),
-      TE.chain((res) => pipe(TE.tryCatch(() => buildFeed(res.data), E.toError)))
-    )
-  )
+      TE.chain((res) => pipe(TE.tryCatch(() => buildFeed(res.data), E.toError))),
+    ),
+  ),
 );
 
 export const getToolsFeed: TE.TaskEither<Error, Feed<Tool>> = pipe("tools", getFeed);

@@ -20,6 +20,7 @@ export const laravelVersions: Version[] = [
   { newVersion: "8.x", oldVersion: "7.x" },
   { newVersion: "9.x", oldVersion: "8.x" },
   { newVersion: "10.x", oldVersion: "9.x" },
+  { newVersion: "11.x", oldVersion: "10.x" },
 ];
 
 function generateLaravelShifts(): Shift[] {
@@ -48,15 +49,16 @@ function parseCode(code: string): string {
 
 function getShifts(): Shift[] {
   return [
+    { code: "PS", name: "Laravel PreShift", description: "Your Laravel upgrade guide" },
     ...generateLaravelShifts(),
     { code: "UC", name: "Upgrade Checker", description: "Lint your Laravel application" },
+    { code: "LS", name: "Laravel Slimmer", description: "Slim your Laravel application" },
     { code: "LL", name: "Laravel Linter", description: 'Doing it the "Laravel Way"?' },
     { code: "LF", name: "Laravel Fixer", description: 'Make it the "Laravel Way"' },
     { code: "TG", name: "Tests Generator", description: "Create model factories and tests" },
     { code: "NM", name: "Namespace Models", description: "Move models to app/Models" },
     { code: "VC", name: "Vite Converter", description: "Migrate from Laravel Mix to Vite" },
     { code: "NC", name: "Namespace Consolidator", description: "Consolidate custom namespaces" },
-    { code: "DU", name: "Dependency Upgrader", description: "Upgrade composer dependencies" },
   ];
 }
 

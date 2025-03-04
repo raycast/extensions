@@ -39,7 +39,7 @@ export function PlanTask({ notification, mutate }: PlanTaskProps) {
   const [searchText, setSearchText] = useState("");
 
   const { isLoading, data: projects } = useFetch<Array<ProjectSummary>>(
-    `${preferences.universalInboxBaseUrl}/api/tasks/projects/search?matches=${searchText}`,
+    `${preferences.universalInboxBaseUrl.replace(/\/$/, "")}/api/tasks/projects/search?matches=${searchText}`,
     {
       keepPreviousData: true,
       headers: {
@@ -122,7 +122,7 @@ async function planTask(
   try {
     await mutate(
       handleErrors(
-        fetch(`${preferences.universalInboxBaseUrl}/api/tasks/${notification.task.id}`, {
+        fetch(`${preferences.universalInboxBaseUrl.replace(/\/$/, "")}/api/tasks/${notification.task.id}`, {
           method: "PATCH",
           body: JSON.stringify({
             project: taskPlanning.project.name,

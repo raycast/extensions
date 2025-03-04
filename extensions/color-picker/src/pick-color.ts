@@ -1,11 +1,14 @@
-import { Clipboard, closeMainWindow, launchCommand, LaunchType, showHUD } from "@raycast/api";
+import { Clipboard, closeMainWindow, launchCommand, LaunchType, getPreferenceValues, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { callbackLaunchCommand } from "raycast-cross-extension";
+import colorNamer from "color-namer";
+import { pickColor } from "swift:../swift/color-picker";
 import { addToHistory } from "./history";
 import { Color, PickColorCommandLaunchProps } from "./types";
-import { getFormattedColor } from "./utils";
-import { pickColor } from "swift:../swift/color-picker";
-import { showFailureToast } from "@raycast/utils";
+import { getFormattedColor, getColorByProximity } from "./utils";
 
 export default async function command(props: PickColorCommandLaunchProps) {
+  const { showColorName } = getPreferenceValues<Preferences.PickColor>();
   await closeMainWindow();
 
   try {
@@ -21,13 +24,31 @@ export default async function command(props: PickColorCommandLaunchProps) {
       throw new Error("Failed to format color");
     }
 
-    await Clipboard.copy(hex);
+    if (props.launchContext?.callbackLaunchOptions) {
+      if (props.launchContext?.copyToClipboard) {
+        await Clipboard.copy(hex);
+      }
 
-    await showHUD(`Copied color ${hex} to clipboard`);
+      try {
+        await callbackLaunchCommand(props.launchContext.callbackLaunchOptions, { hex });
+      } catch (e) {
+        await showFailureToast(e);
+      }
+    } else {
+      await Clipboard.copy(hex);
+      if (showColorName) {
+        const colors = colorNamer(hex);
+        const colorsByDistance = getColorByProximity(colors);
+        const firstColorName = colorsByDistance[0]?.name;
+        await showHUD(`Copied color ${hex} (${firstColorName}) to clipboard`);
+      } else {
+        await showHUD(`Copied color ${hex} to clipboard`);
+      }
+    }
+
     try {
       await launchCommand({ name: "menu-bar", type: LaunchType.Background });
     } catch (e) {
-      console.log(e);
       if (!(e instanceof Error && e.message.includes("must be activated"))) {
         await showFailureToast(e);
       }

@@ -10,11 +10,11 @@ const Command = () => {
     <MenuBarExtra
       isLoading={isLoading}
       icon={Icon.Sun}
-      tooltip={`Current Keyboard Brightness: ${brightness! * 100}%`}
+      tooltip={`Current Keyboard Brightness: ${(brightness! * 100).toFixed(0)}%`}
     >
       <MenuBarExtra.Item
         icon={Icon.Sun}
-        title={`Current Brightness: ${brightness! * 100}%`}
+        title={`Current Brightness: ${(brightness! * 100).toFixed(0)}%`}
       />
       <MenuBarExtra.Item
         title="Increase Brightness"

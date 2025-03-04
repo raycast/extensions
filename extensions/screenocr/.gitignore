@@ -269,3 +269,8 @@ iOSInjectionProject/
 bun.lockb
 
 raycast-env.d.ts
+
+# Raycast specific files
+.raycast-swift-build
+raycast-env.d.ts
+compiled_raycast_swift

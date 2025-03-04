@@ -2,6 +2,7 @@ import { LinearClient } from "@linear/sdk";
 import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast } from "@raycast/api";
 import { linear } from "./api/linearClient";
 import { getAccessToken, withAccessToken } from "@raycast/utils";
+import { getTeams } from "./api/getTeams";
 
 const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
@@ -17,17 +18,27 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
     }
 
     const viewer = await linearClient.viewer;
-    const teams = await viewer.teams();
+    const { teams } = await getTeams();
 
-    const team = preferences.preferredTeamKey
-      ? teams.nodes.find((t) => t.key === preferences.preferredTeamKey)
-      : teams.nodes[0];
-    if (!team) {
+    let teamId: string | undefined;
+
+    if (preferences.preferredTeamKey) {
+      const team = teams.find((t) => t.key === preferences.preferredTeamKey);
+      if (team) {
+        teamId = team.id;
+      }
+    }
+
+    if (!teamId) {
+      teamId = teams[0].id;
+    }
+
+    if (!teamId) {
       throw Error("No team found");
     }
 
     const payload = await linearClient.createIssue({
-      teamId: team.id,
+      teamId: teamId,
       title: props.arguments.title,
       description: props.arguments.description,
       assigneeId: viewer.id,
@@ -61,7 +72,7 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
     toast.primaryAction = {
       title: "Copy Error Log",
       shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-      onAction: () => Clipboard.copy(e instanceof Error ? e.stack ?? e.message : String(e)),
+      onAction: () => Clipboard.copy(e instanceof Error ? (e.stack ?? e.message) : String(e)),
     };
   }
 };

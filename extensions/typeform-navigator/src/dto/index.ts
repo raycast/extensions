@@ -13,10 +13,6 @@ export type Workspace = {
   shared: boolean;
 };
 
-export type WorkspacesResponse = {
-  items: Workspace[];
-};
-
 export type FormOverview = {
   id: string;
   title: string;
@@ -34,10 +30,6 @@ export type FormOverview = {
   _links: {
     display: string;
   };
-};
-
-export type FormsResponse = {
-  items: FormOverview[];
 };
 
 export type InsightsResponse = {
@@ -62,6 +54,35 @@ export type FormDefinition = {
   settings: {
     language: string;
   };
-  fields: unknown[];
+  fields: Array<{
+    id: string;
+    title: string;
+    ref: string;
+    type: string;
+  }>;
   published_at: string;
+};
+
+type Answer = {
+  field: {
+    id: string;
+    type: string;
+    ref: string;
+  };
+  type: string;
+} & {
+  [type: string]: string | number | boolean;
+};
+export type AnswersResponse = {
+  response_id: string;
+  response_type: string;
+  landed_at: string;
+  submitted_at: string;
+  answers: Answer[];
+};
+
+export type ErrorResponse = {
+  code: string;
+  description: string;
+  help?: string;
 };

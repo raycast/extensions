@@ -1,5 +1,11 @@
 # Hypersonic Changelog
 
+## [2.1.0] - 2024-04-29
+
+#### New
+
+- Use `/` to set the status for a new TODO item during creation
+
 ## [2.0.5] - 2024-02-13
 
 ### Updated

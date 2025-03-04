@@ -1,7 +1,7 @@
-import { Action, Icon, Color, showHUD, ActionPanel } from "@raycast/api";
-import { State } from "@lib/haapi";
-import { ChangelogDetail } from "./detail";
 import { EntityStandardActionSections } from "@components/entity";
+import { State } from "@lib/haapi";
+import { Action, ActionPanel, Color, Icon, showHUD } from "@raycast/api";
+import { ChangelogDetail } from "./detail";
 import { callUpdateInstallService, callUpdateSkipService } from "./utils";
 
 export function UpdateShowChangelogAction(props: { state: State }): JSX.Element | null {
@@ -25,13 +25,7 @@ export function UpdateOpenInBrowserAction(props: { state: State }): JSX.Element 
   if (!s.entity_id.startsWith("update") || !url) {
     return null;
   }
-  return (
-    <Action.OpenInBrowser
-      shortcut={{ modifiers: ["cmd"], key: "b" }}
-      url={url}
-      onOpen={() => showHUD("Open Release Notes in Browser")}
-    />
-  );
+  return <Action.OpenInBrowser url={url} onOpen={() => showHUD("Open Release Notes in Browser")} />;
 }
 
 export function UpdateInstallAction(props: { state: State }): JSX.Element | null {

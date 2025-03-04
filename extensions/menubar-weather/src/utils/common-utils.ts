@@ -1,35 +1,33 @@
-import { Cache, getPreferenceValues, Icon } from "@raycast/api";
+import { Cache, getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../types/preferences";
+import { OpenMeteoWeather } from "../types/types";
 import {
   cityName,
+  iconStyle,
   latitude,
   longitude,
-  tempType,
-  menuUVI,
-  menuPressure,
   menuHumidity,
+  menuPressure,
+  menuUVI,
   menuWind,
+  precipitationUnits,
   showForecast,
   showLocation,
   showSun,
   showUVI,
-  windSpeedUnits,
-  precipitationUnits,
+  tempType,
   tempUnits,
   windAngle2Direction,
-  iconStyle,
+  windSpeedUnits,
 } from "./weather-utils";
-import { OpenMeteoWeather } from "../types/types";
 
 export enum CacheKey {
-  CURRENT_WEATHER = "Open-Meteo Weather",
-  LOCATION = "Location",
-  REFRESH_TIME = "Refresh Time",
+  LATEST_WEATHER = "Open-Meteo Weather",
 
   ICON_STYLE = "Icon Style",
   CITY_NAME = "City Name",
-  LONGITUDE = "Longitude",
   LATITUDE = "Latitude",
+  LONGITUDE = "Longitude",
   TEMP_UNIT = "Temperature unit",
   WIND_SPEED_UNIT = "Wind unit",
   PRECIPITATION_UNIT = "Precipitation Unit",
@@ -106,8 +104,8 @@ const cache = new Cache();
 export function preferencesChanged() {
   const oldIconStyle = getCacheString(CacheKey.ICON_STYLE);
   const oldCityName = getCacheString(CacheKey.CITY_NAME);
-  const oldLon = getCacheString(CacheKey.LONGITUDE);
   const oldLat = getCacheString(CacheKey.LATITUDE);
+  const oldLon = getCacheString(CacheKey.LONGITUDE);
   const oldTempUnits = getCacheString(CacheKey.TEMP_UNIT);
   const oldWindSpeedUnits = getCacheString(CacheKey.WIND_SPEED_UNIT);
   const oldPrecipitationUnits = getCacheString(CacheKey.PRECIPITATION_UNIT);
@@ -122,14 +120,14 @@ export function preferencesChanged() {
   const oldShowForecast = getCacheBoolean(CacheKey.SHOW_FORECAST, true);
 
   const newCityName = typeof cityName === "undefined" ? "" : cityName;
-  const newLon = typeof longitude === "undefined" ? "" : longitude;
   const newLat = typeof latitude === "undefined" ? "" : latitude;
+  const newLon = typeof longitude === "undefined" ? "" : longitude;
 
   cache.set(CacheKey.ICON_STYLE, JSON.stringify(iconStyle));
   cache.set(CacheKey.CITY_NAME, JSON.stringify(newCityName));
   cache.set(CacheKey.CITY_NAME, JSON.stringify(newCityName));
-  cache.set(CacheKey.LONGITUDE, JSON.stringify(newLon));
   cache.set(CacheKey.LATITUDE, JSON.stringify(newLat));
+  cache.set(CacheKey.LONGITUDE, JSON.stringify(newLon));
   cache.set(CacheKey.TEMP_UNIT, JSON.stringify(tempUnits));
   cache.set(CacheKey.WIND_SPEED_UNIT, JSON.stringify(windSpeedUnits));
   cache.set(CacheKey.PRECIPITATION_UNIT, JSON.stringify(precipitationUnits));
@@ -146,8 +144,8 @@ export function preferencesChanged() {
   return (
     oldIconStyle !== iconStyle ||
     oldCityName !== newCityName ||
-    oldLon !== newLon ||
     oldLat !== newLat ||
+    oldLon !== newLon ||
     oldTempUnits !== tempUnits ||
     oldWindSpeedUnits !== windSpeedUnits ||
     oldPrecipitationUnits !== precipitationUnits ||
@@ -186,72 +184,7 @@ function getCacheBoolean(key: string, defaultValue = false) {
 }
 
 export function getDateIcon(day: string) {
-  switch (day) {
-    case "01":
-      return Icon.Number01;
-    case "02":
-      return Icon.Number02;
-    case "03":
-      return Icon.Number03;
-    case "04":
-      return Icon.Number04;
-    case "05":
-      return Icon.Number05;
-    case "06":
-      return Icon.Number06;
-    case "07":
-      return Icon.Number07;
-    case "08":
-      return Icon.Number08;
-    case "09":
-      return Icon.Number09;
-    case "10":
-      return Icon.Number10;
-    case "11":
-      return Icon.Number11;
-    case "12":
-      return Icon.Number12;
-    case "13":
-      return Icon.Number13;
-    case "14":
-      return Icon.Number14;
-    case "15":
-      return Icon.Number15;
-    case "16":
-      return Icon.Number16;
-    case "17":
-      return Icon.Number17;
-    case "18":
-      return Icon.Number18;
-    case "19":
-      return Icon.Number19;
-    case "20":
-      return Icon.Number20;
-    case "21":
-      return Icon.Number21;
-    case "22":
-      return Icon.Number22;
-    case "23":
-      return Icon.Number23;
-    case "24":
-      return Icon.Number24;
-    case "25":
-      return Icon.Number25;
-    case "26":
-      return Icon.Number26;
-    case "27":
-      return Icon.Number27;
-    case "28":
-      return Icon.Number28;
-    case "29":
-      return Icon.Number29;
-    case "30":
-      return Icon.Number30;
-    case "31":
-      return Icon.Number31;
-    default:
-      return Icon.Number00;
-  }
+  return `number-${day}-16`;
 }
 
 export function getMenuItem(weather: OpenMeteoWeather | undefined): string[] {

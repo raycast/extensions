@@ -1,48 +1,77 @@
 import Contacts
 import RaycastSwiftMacros
+import SQLite
+
+struct PhoneNumber: Codable {
+  let number: String
+  let countryCode: String?
+}
 
 struct ContactItem: Codable {
   let id: String
   let givenName: String
   let familyName: String
-  let phoneNumbers: [String]
+  let phoneNumbers: [PhoneNumber]
   let emailAddresses: [String]
+  let imageData: Data?
 }
 
-@raycast func fetchAllContacts() -> [ContactItem] {
+enum MessagesError: Error {
+  case accessDenied
+}
+
+@raycast func fetchContactsForPhoneNumbers(phoneNumbers: [String]) async throws -> [ContactItem] {
+  let store = CNContactStore()
+
+  do {
+    let authorized = try await store.requestAccess(for: .contacts)
+    guard authorized else {
+      throw MessagesError.accessDenied
+    }
+  } catch {
+    throw MessagesError.accessDenied
+  }
+
   let keys =
     [
-      CNContactGivenNameKey, CNContactFamilyNameKey, CNContactPhoneNumbersKey,
-      CNContactEmailAddressesKey, CNContactIdentifierKey,
+      CNContactIdentifierKey,
+      CNContactGivenNameKey,
+      CNContactFamilyNameKey,
+      CNContactPhoneNumbersKey,
+      CNContactEmailAddressesKey,
+      CNContactImageDataKey,
     ] as [CNKeyDescriptor]
-  let store = CNContactStore()
-  let request = CNContactFetchRequest(keysToFetch: keys)
 
   var contacts: [ContactItem] = []
 
-  do {
-    try store.enumerateContacts(with: request) { (contact, stopPointer) in
-      var phoneNumbers = [String]()
-      var emailAddresses = [String]()
-      for phoneNumber in contact.phoneNumbers {
-        phoneNumbers.append(phoneNumber.value.stringValue)
+  for phoneNumber in phoneNumbers {
+    let predicate = CNContact.predicateForContacts(
+      matching: CNPhoneNumber(stringValue: phoneNumber))
+    do {
+      let matchingContacts = try store.unifiedContacts(matching: predicate, keysToFetch: keys)
+      for contact in matchingContacts {
+        let phoneNumbers = contact.phoneNumbers.map { cnPhoneNumber -> PhoneNumber in
+          let number = cnPhoneNumber.value.stringValue
+          let countryCode = cnPhoneNumber.value.value(forKey: "countryCode") as? String
+          return PhoneNumber(
+            number: number, countryCode: countryCode?.isEmpty ?? true ? nil : countryCode)
+        }
+
+        contacts.append(
+          ContactItem(
+            id: contact.identifier,
+            givenName: contact.givenName,
+            familyName: contact.familyName,
+            phoneNumbers: phoneNumbers,
+            emailAddresses: contact.emailAddresses.map { $0.value as String },
+            imageData: contact.imageData
+          ))
       }
-      for emailAddress in contact.emailAddresses {
-        emailAddresses.append(emailAddress.value as String)
-      }
-      contacts.append(
-        ContactItem(
-          id: contact.identifier, givenName: contact.givenName, familyName: contact.familyName,
-          phoneNumbers: phoneNumbers, emailAddresses: emailAddresses))
+    } catch {
+      // If a specific number doesn't match, we'll just skip it
+      continue
     }
-
-  } catch {
-    print("Failed to enumerate contact")
   }
 
-  let sortedContacts = contacts.sorted {
-    ($0.givenName) < ($1.givenName)
-  }
-
-  return sortedContacts
+  return contacts.sorted { $0.givenName < $1.givenName }
 }

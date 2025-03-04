@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, useNavigation, showToast, Toast, Keyboard, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation, showToast, Toast, Keyboard } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { checkClipboardContent } from "../lib/util";
 import { Checklist } from "../types";
@@ -13,7 +13,7 @@ export function CreateChecklistForm(props: {
   const { onCreate, checklist, actionLabel } = props;
 
   const [title, setTitle] = useState<Checklist["title"]>(checklist?.title ?? "");
-  const [tasks, setTasks] = useState<string[]>(checklist?.tasks.map((task) => task.name) ?? [""]);
+  const [tasks, setTasks] = useState<Checklist["tasks"]>(checklist?.tasks ?? []);
 
   useEffect(() => {
     async function _checkClipboardContent() {
@@ -24,7 +24,7 @@ export function CreateChecklistForm(props: {
           title: "Imported from clipboard!",
         });
         setTitle(checklist.title);
-        setTasks(checklist.tasks.map((task) => task.name));
+        setTasks(checklist.tasks.map(({ name }) => ({ name, isCompleted: false })));
       }
     }
 
@@ -32,13 +32,9 @@ export function CreateChecklistForm(props: {
   }, []);
 
   const handleSubmit = useCallback(
-    async ({ title, ...tasks }: { title: string }) => {
-      const _tasks = Object.entries(tasks)
-        .map(([_, value]) => value)
-        .filter((value) => value !== "") as string[];
-
+    async ({ title }: { title: string }) => {
       /** Checklists without tasks should not work. */
-      if (_tasks.length === 0) {
+      if (tasks.length === 0) {
         await showToast({ title: "Please add at least one task", style: Toast.Style.Failure });
         return;
       }
@@ -46,17 +42,17 @@ export function CreateChecklistForm(props: {
       onCreate({
         id: checklist?.id ?? nanoid(),
         title,
-        tasks: _tasks.map((task) => ({ name: task, isCompleted: false })),
-        progress: 0,
-        isStarted: false,
+        tasks,
+        progress: tasks.filter((task) => task.isCompleted).length / tasks.length,
+        isStarted: checklist?.isStarted ?? false,
       });
       pop();
     },
-    [onCreate, pop]
+    [onCreate, pop, tasks, checklist]
   );
 
   function addTask() {
-    setTasks((previous) => [...previous, ""]);
+    setTasks((previous) => [...previous, { name: "", isCompleted: false }]);
   }
 
   function removeTask() {
@@ -66,7 +62,7 @@ export function CreateChecklistForm(props: {
 
   function handleTasksChange(value: string, index: number) {
     const nextTasks = tasks.map((_task, _index) => {
-      if (_index === index) return value;
+      if (_index === index) return { name: value, isCompleted: false };
       else return _task;
     });
 
@@ -99,7 +95,7 @@ export function CreateChecklistForm(props: {
           id={index.toString()}
           title={`Task ${index + 1}`}
           placeholder="Task"
-          value={task}
+          value={task.name}
           onChange={(value) => handleTasksChange(value, index)}
         />
       ))}

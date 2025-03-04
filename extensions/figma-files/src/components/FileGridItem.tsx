@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Application, Grid, Icon } from "@raycast/api";
+import { Action, ActionPanel, type Application, Grid, Icon } from "@raycast/api";
 import type { File } from "../types";
 import DevelopmentActionSection from "./DevelopmentActionSection";
-import { OpenProjectFileAction } from "./OpenProjectFileAction";
-import { OpenPageSubmenuAction } from "./OpenPageSubmenuAction";
 import { OpenBranchSubmenuAction } from "./OpenBranchSubmenuAction";
+import { OpenPageSubmenuAction } from "./OpenPageSubmenuAction";
+import { OpenProjectFileAction } from "./OpenProjectFileAction";
 import { StarFileAction } from "./StarFileAction";
 
 export default function FileGridItem(props: {
@@ -28,6 +28,7 @@ export default function FileGridItem(props: {
     <Grid.Item
       id={fileIdentifier}
       title={file.name}
+      subtitle={getRelativeTime(Date.parse(file.last_modified))}
       keywords={[searchkeywords ?? ""]}
       content={{ tooltip: file.name, value: file.thumbnail_url ?? "Missing thumbnail" }}
       accessory={file.branches && accessory}
@@ -52,4 +53,38 @@ export default function FileGridItem(props: {
       }
     />
   );
+}
+
+function getRelativeTime(timestamp: number): string {
+  const now = Date.now();
+  const diff = now - timestamp;
+
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const months = Math.floor(days / 30);
+  const years = Math.floor(days / 365);
+
+  if (seconds < 60) {
+    return "Edited just now";
+  }
+
+  if (minutes < 60) {
+    return `Edited ${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+  }
+
+  if (hours < 24) {
+    return `Edited ${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+  }
+
+  if (days < 30) {
+    return `Edited ${days} ${days === 1 ? "day" : "days"} ago`;
+  }
+
+  if (months < 12) {
+    return `Edited ${months} ${months === 1 ? "month" : "months"} ago`;
+  }
+
+  return `Edited ${years} ${years === 1 ? "year" : "years"} ago`;
 }

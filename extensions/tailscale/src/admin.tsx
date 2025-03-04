@@ -1,5 +1,6 @@
-import { open } from "@raycast/api";
+import { getPreferenceValues, open } from "@raycast/api";
 
 export default async function Admin() {
-  await open("https://login.tailscale.com/admin/machines");
+  const url = getPreferenceValues<Preferences.Admin>().adminConsoleURL;
+  await open(url || "https://login.tailscale.com/admin/machines");
 }

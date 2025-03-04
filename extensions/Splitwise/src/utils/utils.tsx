@@ -5,12 +5,16 @@ export function getCurrency_code(currency_code: string) {
   switch (currency_code) {
     case "USD":
       return { symbol: "$", emoji: "💵" };
+    case "HKD":
+      return { symbol: "$", emoji: "💵" };
     case "EUR":
       return { symbol: "€", emoji: "💶" };
     case "GBP":
       return { symbol: "£", emoji: "💷" };
     case "JPY":
       return { symbol: "¥", emoji: "💴" };
+    case "INR":
+      return { symbol: "₹", emoji: "💵" };
     default:
       return { symbol: currency_code, emoji: "💸" };
   }

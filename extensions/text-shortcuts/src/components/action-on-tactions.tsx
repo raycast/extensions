@@ -1,6 +1,6 @@
-import { Taction, TactionType } from "../util/shortcut";
-import React from "react";
 import { Action, ActionPanel, Icon } from "@raycast/api";
+import React from "react";
+import { Taction, TactionType } from "../util/shortcut";
 
 export function ActionOnTactions(props: {
   tactions: Taction[];

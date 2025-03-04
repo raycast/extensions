@@ -1,9 +1,24 @@
 # Kill Process Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
+- Added AI Extensions support allowing natural language interaction with the extension
+
+## [Improvements] - 2024-09-05
+
+- Adopted separate accessories for CPU and memory usage, including icons
+- Added a dropdown to the command list for sorting processes by CPU or memory usage
+- Added a section title for the command list
+- Removed the checkmark emoji from toast message to avoid redundancy with the success toast style
+- Shortened the extension description to fit the space of the Store extension
+- Improved the description of preferences for better clarity
+
 ## [Back Root Search After Process Kiled] - 2024-03-01
+
 - Added preference to go back to root search after a process is killed
 
 ## [Kill Multiple] - 2023-11-09
+
 - Added preference to kill multiple processes without reopening Raycast
 
 ## [Sort by memory and App aggregation] - 2023-06-22
@@ -21,7 +36,7 @@
 
 ## [Kill Process Improvements] - 2021-10-27
 
-- Some tweaks and adjustments behind the scenes.
+- Some tweaks and adjustments behind the scenes
 
 ## [Add Extension] - 2021-10-25
 

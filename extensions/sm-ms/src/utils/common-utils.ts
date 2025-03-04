@@ -1,10 +1,20 @@
-import { environment, open, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
+import {
+  Clipboard,
+  environment,
+  getPreferenceValues,
+  open,
+  showHUD,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { homedir } from "os";
 import fse from "fs-extra";
 import { axiosGetImageArrayBuffer } from "./axios-utils";
 import { imgExt } from "./costants";
 import path from "path";
 import { copyFileByPath } from "./applescript-utils";
+import { Preferences } from "../types/preferences";
 import Style = Toast.Style;
 
 export const isEmpty = (string: string | null | undefined) => {
@@ -39,7 +49,7 @@ export async function downloadAndCopyImage(url: string, name: string) {
   const fileName = buildFileName(
     cachePath + "/",
     imgExt.includes(parsedPath.ext) ? parsedPath.name : name,
-    imgExt.includes(parsedPath.ext) ? parsedPath.ext : ".png"
+    imgExt.includes(parsedPath.ext) ? parsedPath.ext : ".png",
   );
   const filePath = cachePath + fileName;
   fse.writeFileSync(filePath, Buffer.from(await axiosGetImageArrayBuffer(url)));
@@ -56,7 +66,7 @@ export async function downloadImage(url: string, name: string) {
     const fileName = buildFileName(
       downloadedPath,
       imgExt.includes(parsedPath.ext) ? parsedPath.name : name,
-      imgExt.includes(parsedPath.ext) ? parsedPath.ext : ".png"
+      imgExt.includes(parsedPath.ext) ? parsedPath.ext : ".png",
     );
     const filePath = `${downloadedPath}/${fileName}`;
 
@@ -108,4 +118,13 @@ export function buildFileName(path: string, name: string, extension: string) {
     }
     return name + "-" + index + extension;
   }
+}
+
+export async function copyLinkWithForm(link: string) {
+  const { linkForm } = getPreferenceValues<Preferences>();
+  let finalLink = link;
+  if (linkForm == "markdown") {
+    finalLink = `![](${link})`;
+  }
+  await Clipboard.copy(finalLink);
 }

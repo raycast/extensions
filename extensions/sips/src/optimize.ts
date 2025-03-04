@@ -11,17 +11,20 @@
 import { showToast, Toast } from "@raycast/api";
 
 import optimize from "./operations/optimizeOperation";
-import { getSelectedImages } from "./utilities/utils";
 import runOperation from "./operations/runOperation";
+import { getSelectedImages } from "./utilities/utils";
 
 export default async function Command(props: { arguments: { optimizationFactor: string } }) {
   const { optimizationFactor } = props.arguments;
 
-  let optimizationValue = 100;
+  let optimizationValue = 50;
   if (optimizationFactor != "") {
     optimizationValue = parseFloat(optimizationFactor);
     if (!optimizationValue) {
-      await showToast({ title: "Invalid optimization factor", style: Toast.Style.Failure });
+      await showToast({
+        title: "Invalid optimization factor",
+        style: Toast.Style.Failure,
+      });
       return;
     }
   }

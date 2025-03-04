@@ -1,4 +1,5 @@
 import { Color, Icon, LaunchType, getPreferenceValues, launchCommand, open } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 
 import {
   MenuBarItem,
@@ -7,7 +8,8 @@ import {
   MenuBarSection,
   getBoundedPreferenceNumber,
 } from "./components/Menu";
-import { getIssueStatus } from "./helpers/issue";
+import { SortMenuBarAction } from "./components/SortAction";
+import { ISSUE_DEFAULT_SORT_QUERY, ISSUE_SORT_TYPES_TO_QUERIES, getIssueStatus } from "./helpers/issue";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyIssues } from "./hooks/useMyIssues";
 
@@ -15,27 +17,35 @@ async function launchMyIssuesCommand(): Promise<void> {
   return launchCommand({ name: "my-issues", type: LaunchType.UserInitiated });
 }
 
-function displayTitlePreference() {
-  const prefs = getPreferenceValues();
-  const val: boolean | undefined = prefs.showtext;
-  return val == undefined ? true : val;
-}
-
 function getMaxIssuesPreference(): number {
   return getBoundedPreferenceNumber({ name: "maxitems" });
 }
 
 function MyIssuesMenu() {
-  const { data: sections, isLoading } = useMyIssues(null);
+  const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", ISSUE_DEFAULT_SORT_QUERY, {
+    cacheNamespace: "github-my-issue-menu",
+  });
+  const { showtext, showCreated, showAssigned, showMentioned, showRecentlyClosed, useUnreadIndicator } =
+    getPreferenceValues<Preferences.MyIssuesMenu>();
+  const { data: sections, isLoading } = useMyIssues({
+    repository: null,
+    sortQuery,
+    showCreated,
+    showAssigned,
+    showMentioned,
+    showRecentlyClosed,
+  });
 
-  const issuesCount = sections?.reduce((acc, section) => acc + section.issues.length, 0);
+  const issuesCount = sections?.reduce((acc, section) => acc + (section.issues ?? []).length, 0);
 
   return (
     <MenuBarRoot
-      title={displayTitlePreference() ? `${issuesCount}` : undefined}
-      icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
+      title={showtext ? `${issuesCount}` : undefined}
+      icon={{
+        source: `issue-open${useUnreadIndicator && issuesCount > 0 ? "-unread" : ""}.svg`,
+        tintColor: Color.PrimaryText,
+      }}
       isLoading={isLoading}
-      tooltip="GitHub My Issues"
     >
       {sections?.map((section) => {
         return (
@@ -67,10 +77,11 @@ function MyIssuesMenu() {
       <MenuBarSection>
         <MenuBarItem
           title="Open My Issues"
-          icon={Icon.Terminal}
+          icon={Icon.AppWindowList}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={() => launchMyIssuesCommand()}
         />
+        <SortMenuBarAction {...{ sortQuery, setSortQuery, data: ISSUE_SORT_TYPES_TO_QUERIES }} />
         <MenuBarItemConfigureCommand />
       </MenuBarSection>
     </MenuBarRoot>

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "uploadthing",
+  "title": "UploadThing",
+  "description": "Upload files in a single click",
+  "icon": "icon.png",
+  "author": "juliusmarminge",
+  "contributors": [
+    "xmok"
+  ],
+  "owner": "pingdotgg",
+  "access": "public",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "upload-files",
+      "title": "Upload Files",
+      "description": "Select files to upload to your UploadThing app",
+      "mode": "view"
+    },
+    {
+      "name": "upload-from-clipboard",
+      "title": "Upload from Clipboard",
+      "description": "Upload files from your clipboard to your UploadThing app",
+      "mode": "view"
+    },
+    {
+      "name": "list-files",
+      "title": "List Files",
+      "description": "List files in your UploadThing app",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "description": "Your UploadThing Token",
+      "type": "password",
+      "required": true,
+      "title": "Token",
+      "placeholder": "eyJhc...."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.1",
+    "@tanstack/react-query": "^5.28.4",
+    "@uploadthing/mime-types": "0.3.0",
+    "@uploadthing/shared": "7.0.2",
+    "filesize": "^10.1.6",
+    "undici": "^6.19.8",
+    "uploadthing": "^7.4.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.11.30",
+    "@types/react": "^18.3.3",
+    "eslint": "8.57.0",
+    "prettier": "3.2.5",
+    "typescript": "5.4.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@raycast"
+    ]
+  }
+}

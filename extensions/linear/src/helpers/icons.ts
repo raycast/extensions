@@ -17,7 +17,7 @@ export function getIcon({ icon, color, fallbackIcon }: GetIconParams) {
   if (emojiRegex.test(icon)) {
     const emoji = emojis.get(icon);
     // if there's no corresponding emoji, the same emoji code is returned
-    return emoji === icon ? fallbackIcon : emoji;
+    return emoji ?? fallbackIcon;
   }
 
   // Linear can add new icons from time to time so some icons may not be in the file system

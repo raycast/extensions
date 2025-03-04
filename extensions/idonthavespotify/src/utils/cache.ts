@@ -1,15 +1,15 @@
 import { Cache } from "@raycast/api";
 
-import { CacheData, SpotifyContent } from "../@types/global";
+import { CacheData, SearchResult } from "../@types/global";
 
 const cache = new Cache();
 
 const LAST_SEARCH_KEY = "lastSearch";
 
-export const cacheLastSearch = (spotifyLink: string, spotifyContent: SpotifyContent) => {
+export const cacheLastSearch = (link: string, searchResult: SearchResult) => {
   const data = JSON.stringify({
-    spotifyLink,
-    spotifyContent,
+    link,
+    searchResult,
   });
 
   cache.set(LAST_SEARCH_KEY, data);
@@ -18,11 +18,13 @@ export const cacheLastSearch = (spotifyLink: string, spotifyContent: SpotifyCont
 export const getLastSearch = (): CacheData | undefined => {
   const lastSearch = cache.get(LAST_SEARCH_KEY);
 
-  if (lastSearch) {
-    const data = JSON.parse(lastSearch);
-
-    if (data.spotifyLink && Object.keys(data.spotifyContent ?? {}).length > 0) {
-      return data;
-    }
+  if (!lastSearch) {
+    return;
   }
+
+  return JSON.parse(lastSearch);
+};
+
+export const cleanLastSearch = () => {
+  cache.remove(LAST_SEARCH_KEY);
 };

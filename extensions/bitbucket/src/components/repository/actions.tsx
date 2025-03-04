@@ -8,7 +8,7 @@ export function ShowPipelinesActions(props: { repo: any }): JSX.Element {
       title="Show pipelines"
       target={<PipelinesList repo={props.repo} pageNumber={1} />}
       icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
-      shortcut={{ modifiers: ["cmd"], key: "p" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
     />
   );
 }

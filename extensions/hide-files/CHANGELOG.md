@@ -1,5 +1,14 @@
 # Hide Files Changelog
 
+## [Toggle Widgets Visibility] - 2024-06-07
+
+- Toggle Desktop Visibility command adds setting to allow hiding desktop widgets
+
+## [Refactor Extension] - 2024-05-27
+
+- Refactoring extensions to simplify commands
+- Now you can hide or show files with just one command
+
 ## [Update UI] - 2022-10-21
 
 - Update empty view icon

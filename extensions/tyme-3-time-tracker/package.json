@@ -3,8 +3,11 @@
   "name": "tyme-3-time-tracker",
   "title": "Tyme 3 Time Tracker",
   "description": "Interact with Tyme 3 to track your time",
-  "icon": "command-icon.png",
+  "icon": "extension_icon.png",
   "author": "melkstam",
+  "contributors": [
+    "medienbaecker"
+  ],
   "categories": [
     "Productivity",
     "Applications"
@@ -22,8 +25,18 @@
       "name": "stop-task-tracking",
       "title": "Stop Task",
       "subtitle": "Tyme 3 Time Tracker",
-      "description": "This command will let you stop tracking the current task in Tyme",
+      "description": "This command will let you stop tracking the current task in Tyme.",
       "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "stopRunningTimers",
+      "type": "checkbox",
+      "label": "Single Timer Mode",
+      "description": "Automatically stop any running timers when starting a new task.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {

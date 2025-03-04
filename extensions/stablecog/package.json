@@ -61,12 +61,20 @@
   "preferences": [
     {
       "title": "Model",
-      "default": "Kandinsky 2.2",
+      "default": "FLUX.1",
       "type": "dropdown",
       "description": "The AI image model to use for creating images.",
       "name": "model",
       "required": false,
       "data": [
+        {
+          "title": "FLUX.1",
+          "value": "FLUX.1"
+        },
+        {
+          "title": "Stable Diffusion 3",
+          "value": "Stable Diffusion 3"
+        },
         {
           "title": "Kandinsky 2.2",
           "value": "Kandinsky 2.2"
@@ -135,8 +143,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.2",
-    "@raycast/utils": "^1.9.1",
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.16.1",
     "file-type": "^18.5.0",
     "form-data-encoder": "^3.0.0",
     "formdata-node": "^5.0.1",
@@ -146,18 +154,19 @@
     "run-applescript": "^6.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "pull": "npx @raycast/api@latest pull-contributions"
   }
 }

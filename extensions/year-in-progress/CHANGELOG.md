@@ -1,5 +1,14 @@
 # Year in Progress Changelog
 
+## [Bugfix] - 2025-01-02
+
+- Fix typos in "Week starts date" settings dropdown
+- Change type `any` to `Day` exported from date-fns
+
+## [Improvement] - 2024-04-25
+
+- Added feature (Show|Hide) in Command Subtitle
+
 ## [Improvement] - 2023-10-18
 
 - Added Copy to Clipboard action in the listview

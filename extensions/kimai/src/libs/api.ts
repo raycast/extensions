@@ -47,15 +47,16 @@ const activitySchema = z.object({
 });
 
 const fetch = async (apiPath: string, init?: RequestInit | undefined) => {
-  const { domain, email, password, protocol: _protocol } = getPreferences();
+  const { domain, email, password, protocol: _protocol, token } = getPreferences();
   const protocol = _protocol || "https";
 
   const response = await nodeFetch(`${protocol}://${domain}/api/${apiPath}`, {
     ...(init || {}),
     headers: {
       "Content-Type": "application/json",
-      "X-AUTH-USER": email,
-      "X-AUTH-TOKEN": password,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(!token && email ? { "X-AUTH-USER": email } : {}),
+      ...(!token && password ? { "X-AUTH-TOKEN": password } : {}),
       ...(init?.headers || {}),
     },
   });

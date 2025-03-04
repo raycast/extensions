@@ -5,7 +5,6 @@ import {
   FilterLogEventsCommand,
   LogStream,
 } from "@aws-sdk/client-cloudwatch-logs";
-import { AWS_URL_BASE } from "../constants";
 import { LogStartTimes } from "../interfaces";
 import { isReadyToFetch } from "../util";
 

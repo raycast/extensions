@@ -35,16 +35,25 @@ export type CreateUserRequest = {
 export type DeleteUserRequest = {
   userName: string;
 };
+export type ModifyUserRequest = {
+  userName: string;
+  newUserName?: string;
+  newPassword?: string;
+  enableSearchIndexing?: boolean;
+  enablePasswordReset?: boolean;
+  requireTwoFactorAuthentication?: boolean;
+};
 export type CreateRoutingRequest = {
   domainName: string;
   prefix: boolean;
   matchUser: string;
   targetAddresses: string[];
+  catchall: boolean;
 };
 type DeleteRoutingRequest = {
   routingRuleId: number;
 };
-type AddDomainRequest = {
+export type AddDomainRequest = {
   domainName: string;
 };
 type ListDomainsRequest = {
@@ -72,6 +81,7 @@ export type DeleteAppPasswordRequest = {
 export type RequestBody =
   | CreateUserRequest
   | DeleteUserRequest
+  | ModifyUserRequest
   | CreateRoutingRequest
   | DeleteRoutingRequest
   | AddDomainRequest
@@ -90,6 +100,7 @@ type SuccessResponse = {
     code?: string;
     credit?: string;
     appPassword?: string;
+    users?: string[];
   };
 };
 export type ErrorResponse = {

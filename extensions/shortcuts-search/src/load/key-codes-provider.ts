@@ -20,7 +20,7 @@ export default function useKeyCodes(): UseKeyCodesResult {
     cacheKey,
     async () => {
       console.log("Fetching key codes");
-      const res = await fetch("https://shortcuts.solomk.in/data/key-codes.json");
+      const res = await fetch("https://hotkys.com/data/key-codes.json");
       const json: IncomingKeyCodes = await res.json();
       return json;
     },

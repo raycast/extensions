@@ -1,19 +1,15 @@
-import { useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
 
 import { getTeams } from "../api/getTeams";
 
-export default function useTeams() {
-  const { data: teams, error, isLoading } = useCachedPromise(getTeams);
-
-  const teamsWithCycles = useMemo(() => teams?.filter((team) => !!team.activeCycle), [teams]);
-  const teamsWithProjects = useMemo(() => teams?.filter((team) => team.projects.nodes.length > 0), [teams]);
+export default function useTeams(query: string = "") {
+  const { data, error, isLoading } = useCachedPromise(getTeams, [query]);
 
   return {
-    teams,
+    teams: data?.teams,
+    org: data?.organization,
     teamsError: error,
-    isLoadingTeams: (!teams && !error) || isLoading,
-    teamsWithCycles,
-    teamsWithProjects,
+    isLoadingTeams: (!data && !error) || isLoading,
+    supportsTeamTypeahead: query.trim().length > 0 || data?.hasMoreTeams,
   };
 }

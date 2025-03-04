@@ -1,7 +1,6 @@
 import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { GlobalPreferences } from "../models/global-preferences";
 
 export type Inbox = {
   id: number;
@@ -9,6 +8,18 @@ export type Inbox = {
   status: string;
   emails_count: number;
   emails_unread_count: number;
+  domain: string;
+  pop3_domain: string;
+  email_domain: string;
+  smtp_ports: number[];
+  pop3_ports: number[];
+  api_domain: string;
+  permissions: {
+    can_read: boolean;
+    can_update: boolean;
+    can_destroy: boolean;
+    can_leave: boolean;
+  };
 };
 
 export type Email = {
@@ -22,36 +33,65 @@ export type Email = {
   txt_path: string;
   raw_path: string;
   to_email: string;
+  blacklists_report_info:
+    | {
+        result: "success";
+        domain: string;
+        ip: string;
+        report: Array<{
+          name: string;
+          url: string;
+          in_black_list: boolean;
+        }>;
+      }
+    | {
+        result: "error";
+      };
+  human_size: string;
+};
+
+const MAILTRAP_PAGE_SIZE = 30;
+const { apiKey, accountId } = getPreferenceValues<Preferences>();
+const headers = {
+  "Api-Token": apiKey,
+  "Content-Type": "application/json",
 };
 
 export function getInboxes() {
-  const globalPreferences = getPreferenceValues<GlobalPreferences>();
-
-  return useFetch<Inbox[]>(`https://mailtrap.io/api/accounts/${globalPreferences.accountId}/inboxes`, {
-    headers: [["Api-Token", globalPreferences.apiKey]],
+  return useFetch(`https://mailtrap.io/api/accounts/${accountId}/inboxes`, {
+    headers,
+    mapResult(result: Inbox[]) {
+      return {
+        data: result,
+      };
+    },
+    initialData: [],
   });
 }
 
 export function getEmails(inboxId: number) {
-  const globalPreferences = getPreferenceValues<GlobalPreferences>();
-
-  return useFetch<Email[]>(
-    `https://mailtrap.io/api/accounts/${globalPreferences.accountId}}/inboxes/${inboxId}/messages`,
+  return useFetch(
+    (options) =>
+      `https://mailtrap.io/api/accounts/${accountId}/inboxes/${inboxId}/messages?` +
+      new URLSearchParams({ last_id: options.lastItem?.id.toString() }).toString(),
     {
-      headers: [["Api-Token", globalPreferences.apiKey]],
+      headers,
+      mapResult(result?: Email[]) {
+        const data = result ?? [];
+        return {
+          data,
+          hasMore: data.length === MAILTRAP_PAGE_SIZE,
+        };
+      },
+      initialData: [],
     }
   );
 }
 
 export function markAsRead(inboxId: number, emailId: number) {
-  const globalPreferences = getPreferenceValues<GlobalPreferences>();
-
-  fetch(`https://mailtrap.io/api/accounts/${globalPreferences.accountId}}/inboxes/${inboxId}}/messages/${emailId}`, {
+  fetch(`https://mailtrap.io/api/accounts/${accountId}/inboxes/${inboxId}/messages/${emailId}`, {
     method: "PATCH",
-    headers: [
-      ["Api-Token", globalPreferences.apiKey],
-      ["Content-Type", "application/json"],
-    ],
+    headers,
     body: JSON.stringify({
       message: {
         is_read: true,

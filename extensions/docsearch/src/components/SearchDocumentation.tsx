@@ -17,17 +17,19 @@ export function SearchDocumentation(props: { id: DocID; quickSearch?: string }) 
 
   let isLoading = false;
   let searchResults: Array<any> = [];
-  let showDetailList: Array<boolean> = [];
 
   if (currentAPI.type === "algolia") {
     const res = useAlgolia(searchText, currentAPI);
     isLoading = res.isLoading;
-    searchResults = res.searchResults.map((item, index) => ({
-      ...item,
-      title: getTitleForAlgolis(item),
-      id: `${index}`,
-    }));
-    showDetailList = searchResults.map((item) => item.content != null || item.subtitle != null);
+    searchResults = res.searchResults.map((item, index) => {
+      item.title = getTitleForAlgolis(item);
+
+      return {
+        ...item,
+        content: generateContent(item),
+        id: `${index}`,
+      };
+    });
   } else if (currentAPI.type === "meilisearch") {
     const res = useMeilisearch(searchText, currentAPI);
     isLoading = res.isLoading;
@@ -36,7 +38,6 @@ export function SearchDocumentation(props: { id: DocID; quickSearch?: string }) 
       title: getTitleForMeilisearch(item),
       id: `${index}`,
     }));
-    showDetailList = searchResults.map((item) => item.content != null || item.subtitle != null);
   }
 
   return (
@@ -44,7 +45,7 @@ export function SearchDocumentation(props: { id: DocID; quickSearch?: string }) 
       throttle={true}
       navigationTitle={DocID[props.id] || "No Title"}
       isLoading={isLoading || searchResults === undefined}
-      isShowingDetail={showDetailList[currentIdx]}
+      isShowingDetail={searchResults?.[currentIdx]?.content != undefined}
       onSearchTextChange={setSearchText}
       searchText={searchText}
       onSelectionChange={(id) => {
@@ -65,27 +66,29 @@ export function SearchDocumentation(props: { id: DocID; quickSearch?: string }) 
         </List.Dropdown>
       }
     >
-      {searchResults?.map((result) => (
-        <List.Item
-          icon={result.content == null && result.subtitle == null ? Icon.Hashtag : Icon.Paragraph}
-          key={result.objectID}
-          id={result.id}
-          title={result.title}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser
-                url={result.url.indexOf("%") !== -1 ? result.url : encodeURI(result.url)}
-                title="Open in Browser"
-              />
-              <Action.CopyToClipboard
-                title="Copy URL"
-                content={result.url.indexOf("%") !== -1 ? decodeURI(result.url) : result.url}
-              />
-            </ActionPanel>
-          }
-          detail={<List.Item.Detail markdown={showDetailList[currentIdx] ? generateContent(result) : ""} />}
-        />
-      ))}
+      {searchResults?.map((result) => {
+        return (
+          <List.Item
+            icon={result.content == null && result.subtitle == null ? Icon.Hashtag : Icon.Paragraph}
+            key={result.objectID}
+            id={result.id}
+            title={result.title}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  url={result.url?.indexOf("%") !== -1 ? result.url : encodeURI(result.url)}
+                  title="Open in Browser"
+                />
+                <Action.CopyToClipboard
+                  title="Copy URL"
+                  content={result.url?.indexOf("%") !== -1 ? decodeURI(result.url) : result.url}
+                />
+              </ActionPanel>
+            }
+            detail={<List.Item.Detail markdown={result.content} />}
+          />
+        );
+      })}
     </List>
   );
 }

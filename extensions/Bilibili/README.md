@@ -14,8 +14,6 @@
 - Push for subscription updates (Notifications)
 - Cmd + Enter to view the corresponding video AI summary
 - Browse recommended personal videos (Recommend Videos)
-- Browse popular videos (Popular Videos)
-- Weekly popular (Weekly Popular Series)
 
 ### Preferences
 

@@ -1,4 +1,4 @@
-import { Action, Icon, LocalStorage, confirmAlert, showToast } from "@raycast/api";
+import { Action, Icon, confirmAlert, showToast } from "@raycast/api";
 import { installExamples } from "../../lib/defaults";
 
 /**
@@ -10,7 +10,7 @@ import { installExamples } from "../../lib/defaults";
  * @returns An action component.
  */
 export const InstallExamplesAction = (props: {
-  setExamplesInstalled: React.Dispatch<React.SetStateAction<LocalStorage.Value | undefined>>;
+  setExamplesInstalled: React.Dispatch<React.SetStateAction<boolean>>;
   revalidatePins?: () => Promise<void>;
   revalidateGroups: () => Promise<void>;
   kind: "pins" | "groups";

@@ -1,24 +1,37 @@
-import { Action, ActionPanel, Color, Icon, List, LocalStorage } from "@raycast/api";
-import React, { useState } from "react";
-import { getAllDomains, getDefaultDomain } from "./hooks/hooks";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import React, { useMemo, useState } from "react";
 import ShortenLink from "./shorten-link";
 import { isEmpty } from "./utils/common-utils";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 import { ActionGoShortIo } from "./components/action-go-short-io";
 import { ListEmptyView } from "./components/list-empty-view";
-import { LocalStorageKey } from "./utils/constants";
+import { useDomains } from "./hooks/useDomains";
+import { useDefaultDomain } from "./hooks/useDefaultDomain";
+import { Domain } from "./types/types";
 
 export default function ShortenLinkWithDomain() {
-  const [refreshDomain, setRefreshDomain] = useState<string>("");
+  const [refreshDomain, setRefreshDomain] = useState<Domain | undefined>(undefined);
 
-  const { defaultDomain, domainLoading } = getDefaultDomain(refreshDomain);
-  const { domains, loading } = getAllDomains();
+  const { data: defaultDomainData, isLoading: domainLoading } = useDefaultDomain(refreshDomain);
+  const { data: domainsData, isLoading: loading } = useDomains();
+
+  const domains = useMemo(() => {
+    return domainsData || [];
+  }, [domainsData]);
+
+  const defaultDomain = useMemo(() => {
+    if (defaultDomainData) {
+      return defaultDomainData.hostname;
+    } else {
+      return "";
+    }
+  }, [defaultDomainData]);
 
   return (
     <List
       isLoading={loading && domainLoading}
       isShowingDetail={domains.length !== 0 && true}
-      searchBarPlaceholder={"Search domains, ☆ is default domain of  𝐒𝐡𝐨𝐫𝐭𝐞𝐧 𝐋𝐢𝐧𝐤 and 𝐒𝐞𝐚𝐫𝐜𝐡 𝐋𝐢𝐧𝐤𝐬 command"}
+      searchBarPlaceholder={"Search domains"}
     >
       <ListEmptyView
         title={"No Domain"}
@@ -78,17 +91,12 @@ export default function ShortenLinkWithDomain() {
             }
             actions={
               <ActionPanel>
-                <Action.Push
-                  title={"Shorten Link"}
-                  icon={Icon.Link}
-                  target={<ShortenLink paraDomain={value.hostname} />}
-                />
+                <Action.Push title={"Shorten Link"} icon={Icon.Link} target={<ShortenLink defaultDomain={value} />} />
                 <Action
                   icon={Icon.Star}
                   title={"Set Default Domain"}
                   onAction={async () => {
-                    await LocalStorage.setItem(LocalStorageKey.DEFAULT_DOMAIN, JSON.stringify(value));
-                    setRefreshDomain(value.hostname);
+                    setRefreshDomain(value);
                   }}
                 />
                 <ActionGoShortIo />

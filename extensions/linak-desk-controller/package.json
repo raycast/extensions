@@ -40,6 +40,14 @@
       "title": "Location of python bin",
       "description": "Run 'which python' in the terminal to find out.",
       "placeholder": "/usr/bin/python"
+    },
+    {
+      "name": "server",
+      "type": "checkbox",
+      "required": false,
+      "title": "Server mode",
+      "label": "Forward commands to custom server",
+      "description": "The server must be running on 127.0.0.1:9123."
     }
   ],
   "license": "MIT",

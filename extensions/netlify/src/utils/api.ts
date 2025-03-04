@@ -1,13 +1,15 @@
 import axios, { AxiosInstance } from 'axios';
 
-import { getPreferences } from './helpers';
 import {
   AlgoliaHit,
   AuditLog,
   Committer,
+  CreateDNSRecord,
+  DNSRecord,
   Deploy,
   Domain,
   DomainSearch,
+  EnvVar,
   Member,
   Reviewer,
   Role,
@@ -15,10 +17,13 @@ import {
   Team,
   User,
 } from './interfaces';
-
-const ALGOLIA_APP_ID = '4RTNPM1QF9';
-const ALGOLIA_PUBLIC_API_KEY = '260466eb2466a36278b2fdbcc56ad7ba';
-const ALGOLIA_INDEX_NAME = 'docs-manual';
+import {
+  ALGOLIA_APP_ID,
+  ALGOLIA_INDEX_NAME,
+  ALGOLIA_PUBLIC_API_KEY,
+  API_TOKEN,
+} from './constants';
+import { parseLinkHeader } from '@web3-storage/parse-link-header';
 
 class Api {
   algolia: AxiosInstance;
@@ -58,9 +63,39 @@ class Api {
     return data;
   }
 
+  async getEnvVars(site: string): Promise<EnvVar[]> {
+    const { data } = await this.netlify.get<EnvVar[]>(`/sites/${site}/env`);
+    return data;
+  }
+
   async getDomains(team?: string): Promise<Domain[]> {
     const params = team ? `?account_slug=${team}` : '';
     const { data } = await this.netlify.get<Domain[]>(`/dns_zones${params}`);
+    return data;
+  }
+
+  async getDNSRecords(zoneId: string): Promise<DNSRecord[]> {
+    const { data } = await this.netlify.get<DNSRecord[]>(
+      `/dns_zones/${zoneId}/dns_records`,
+    );
+    return data;
+  }
+
+  async createDNSRecord(
+    zoneId: string,
+    body: CreateDNSRecord,
+  ): Promise<DNSRecord> {
+    const { data } = await this.netlify.post(
+      `/dns_zones/${zoneId}/dns_records`,
+      body,
+    );
+    return data;
+  }
+
+  async deleteDNSRecord(zoneId: string, recordId: string) {
+    const { data } = await this.netlify.delete(
+      `/dns_zones/${zoneId}/dns_records/${recordId}`,
+    );
     return data;
   }
 
@@ -110,20 +145,26 @@ class Api {
     return data;
   }
 
-  async getSites(query: string, team?: string): Promise<Site[]> {
+  async getSites(
+    query: string,
+    team?: string,
+    page = 1,
+  ): Promise<{ data: Site[]; hasMore: boolean }> {
     const params = [
       `name=${query}`,
       `filter=all`,
       `sort_by=updated_at`,
-      `page=1`,
-      `per_page=30`,
+      `page=${page}`,
+      `per_page=100`,
       `include_favorites=true`,
     ];
     const path = [team && `/${team}`, `/sites?${params.join('&')}`]
       .filter(Boolean)
       .join('');
-    const { data } = await this.netlify.get<Site[]>(path);
-    return data;
+    const { data, headers } = await this.netlify.get<Site[]>(path);
+    const parsed = parseLinkHeader(headers.link);
+    const hasMore = !!parsed?.next;
+    return { data, hasMore };
   }
 
   async getTeams(): Promise<Team[]> {
@@ -160,7 +201,6 @@ class Api {
   }
 }
 
-const { token } = getPreferences();
-const api = new Api(token);
+const api = new Api(API_TOKEN);
 
 export default api;

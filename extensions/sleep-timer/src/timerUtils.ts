@@ -50,7 +50,7 @@ function getTimer() {
     timer.secondsSet = parseInt(timeLeft);
     timer.timeLeft = Math.max(
       0,
-      Math.round(timer.secondsSet - (new Date().getTime() - new Date(timeStarted).getTime()) / 1000)
+      Math.round(timer.secondsSet - (new Date().getTime() - new Date(timeStarted).getTime()) / 1000),
     );
   }
 

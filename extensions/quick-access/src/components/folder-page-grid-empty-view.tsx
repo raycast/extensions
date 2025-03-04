@@ -1,12 +1,13 @@
 import { Action, ActionPanel, Icon, Grid } from "@raycast/api";
-import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
+import React from "react";
+import { ActionConfigureCommand } from "./action-configure-command";
 
 export function FolderPageGridEmptyView(props: { path: string; pop: () => void }) {
   const { path, pop } = props;
   return (
     <Grid.EmptyView
-      icon={{ source: { light: "empty-view-icon.png", dark: "empty-view-icon@dark.png" } }}
-      title={"No folder"}
+      icon={Icon.Finder}
+      title={"No Files"}
       actions={
         <ActionPanel>
           <Action.Open title="Open" target={path} />
@@ -18,7 +19,7 @@ export function FolderPageGridEmptyView(props: { path: string; pop: () => void }
             shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
             onAction={pop}
           />
-          <ActionOpenCommandPreferences />
+          <ActionConfigureCommand />
         </ActionPanel>
       }
     />

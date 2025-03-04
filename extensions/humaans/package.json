@@ -5,6 +5,8 @@
   "description": "Interact with the Humaans platform",
   "icon": "humaans.png",
   "author": "farisaziz12",
+  "owner": "humaans",
+  "access": "public",
   "contributors": [
     "tom_humaans"
   ],

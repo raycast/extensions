@@ -1,45 +1,52 @@
-import { Form, ActionPanel, Action, showToast, Detail, useNavigation, Toast, Color, Icon } from "@raycast/api";
+import { ActionPanel, Action, Detail, Color, Icon, LaunchProps } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import axios from "axios";
 
-type Values = {
-  text: string;
-};
-
-export default function Command() {
-  const { push } = useNavigation();
-  const [text, setText] = useState("");
-
-  const handleSubmit = async (value: Values) => {
-    let submitAction: (() => void) | undefined;
-    if (!text) {
-      submitAction = () =>
-        showToast({ title: "Empty field", message: "Missing email address", style: Toast.Style.Failure });
-    } else {
-      const ret = await checkEmailByQuery(value.text);
-      submitAction = () => push(<Details {...ret} />);
-    }
-    submitAction?.();
+type Result = {
+  bounce: boolean;
+  email: string;
+  reachable: string;
+  disposable: boolean;
+  role_account: boolean;
+  free: boolean;
+  has_mx_records: boolean;
+  syntax: {
+    username: string;
+    domain: string;
+    valid: boolean;
   };
+};
+type EmailResponse = {
+  data: [Result];
+};
+export default function Command(props: LaunchProps<{ arguments: Arguments.EmailVerifier }>) {
+  const emailVerifierApiURL = "https://websites.automizely.com/v1/public/email-verify";
 
-  return (
-    <Form
-      actions={
-        text && (
-          <ActionPanel>
-            {<Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Envelope} title="Check Email" />}
-          </ActionPanel>
-        )
-      }
-    >
-      <Form.TextArea
-        id="text"
-        title="Email address"
-        placeholder="Enter Email To Verify"
-        value={text}
-        onChange={setText}
-      />
-    </Form>
+  const { email } = props.arguments;
+  const { isLoading, data, error } = useFetch(emailVerifierApiURL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      emails: [email],
+    }),
+    mapResult(result: EmailResponse) {
+      return {
+        data: result.data[0],
+      };
+    },
+    failureToastOptions: {
+      title: `❌ Verify email address failed`,
+    },
+  });
+  return !data ? (
+    <Detail
+      isLoading={isLoading}
+      markdown={isLoading ? "Loading..." : error ? `## ERROR \n\n Something went wrong` : ""}
+    />
+  ) : (
+    <Details {...data} />
   );
 }
 
@@ -97,48 +104,12 @@ const Details: React.FC<Result> = (r) => {
             target="https://github.com/AfterShip/email-verifier"
             text="Aftership/email-verifier"
           />
+          <Detail.Metadata.Link title="Send Email" text={r.email} target={`mailto:${r.email}`} />
         </Detail.Metadata>
       }
     />
   );
 };
-
-const emailVerifierApiURL = "https://websites.automizely.com/v1/public/email-verify";
-
-type EmailResponse = {
-  data: [Result];
-};
-
-type Result = {
-  bounce: boolean;
-  email: string;
-  reachable: string;
-  disposable: boolean;
-  role_account: boolean;
-  free: boolean;
-  has_mx_records: boolean;
-  syntax: {
-    username: string;
-    domain: string;
-    valid: boolean;
-  };
-};
-
-async function checkEmailByQuery(email: string): Promise<Result> {
-  try {
-    const resp = await axios.post<EmailResponse>(emailVerifierApiURL, {
-      emails: [email],
-    });
-    return resp.data.data[0];
-  } catch (err) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: `❌ Verify email address failed`,
-      message: String(err),
-    });
-    return Promise.resolve({} as Result);
-  }
-}
 
 function answer(a: boolean) {
   if (a) {

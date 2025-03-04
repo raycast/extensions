@@ -5,6 +5,10 @@
   "description": "Efficiently search Next.js documentation",
   "icon": "command-icon.png",
   "author": "PrasadChinwal",
+  "contributors": [
+    "xmok",
+    "danieldeichfuss"
+  ],
   "categories": [
     "Productivity",
     "Documentation",
@@ -21,25 +25,25 @@
   ],
   "dependencies": {
     "@octokit/core": "^3.6.0",
-    "@raycast/api": "^1.32.0"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "@types/yaml-front-matter": "^4.1.0",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react": "^18.2.0",
+    "typescript": "^5.2.2",
     "yaml-front-matter": "^4.1.1"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

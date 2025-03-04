@@ -9,7 +9,7 @@ import {
   confirmAlert,
   showToast,
 } from '@raycast/api';
-import { usePromise } from '@raycast/utils';
+import { getFavicon, usePromise } from '@raycast/utils';
 import { useState } from 'react';
 
 import { OpenOnNetlify } from './components/actions';
@@ -18,6 +18,7 @@ import api from './utils/api';
 import { formatDate, getDomainUrl, handleNetworkError } from './utils/helpers';
 import { useTeams } from './utils/hooks';
 import { DomainSearch } from './utils/interfaces';
+import ManageDNSRecords from './components/dns/manage-dns-records';
 
 export default function Command() {
   const [query, setQuery] = useState<string>('');
@@ -87,7 +88,9 @@ export default function Command() {
         {registeredDomains.map((domain) => (
           <List.Item
             key={domain.name}
-            icon={Icon.Globe}
+            icon={getFavicon(`https://${domain.name}`, {
+              fallback: Icon.Globe,
+            })}
             title={domain.name}
             subtitle={domain.account_name}
             keywords={domain.account_slug.split('-')}
@@ -132,6 +135,11 @@ export default function Command() {
                 <OpenOnNetlify
                   url={getDomainUrl(domain.account_slug, domain.name)}
                 />
+                <Action.Push
+                  title="Manage DNS Records"
+                  icon={Icon.Text}
+                  target={<ManageDNSRecords domain={domain} />}
+                />
               </ActionPanel>
             }
           />
@@ -148,8 +156,8 @@ export default function Command() {
                 domain.available
                   ? 'Available'
                   : domain.owned_by_account
-                  ? 'Registered by Team'
-                  : 'Not Available'
+                    ? 'Registered by Team'
+                    : 'Not Available'
               }
               accessories={
                 [

@@ -1,5 +1,14 @@
 # Android Debug Bridge (Adb) Changelog
 
+## [Add restart ADB command] - 2024-05-01
+- Add `restart adb` command, disabled by default
+
+## [Add change animation scale command] - 2024-05-01
+- Add `change animation scale` command, disabled by default
+
+## [Get the current activity] - 2024-04-17
+- Get the current activity name and put it in your clipboard
+
 ## [Add preference for Android Sdk] - 2024-02-23
 - Add preference to set Android Sdk path
 

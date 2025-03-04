@@ -1,0 +1,193 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ilovepdf",
+  "title": "iLovePDF",
+  "description": "Set of commands to interact with iLovePDF",
+  "icon": "command-icon.png",
+  "author": "mohamedk1",
+  "contributors": [
+    "ridemountainpig"
+  ],
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "image-to-pdf",
+      "title": "Image to PDF",
+      "subtitle": "iLovePDF",
+      "description": "Converts an image to pdf using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "compress-pdf",
+      "title": "Compress PDF",
+      "subtitle": "iLovePDF",
+      "description": "Compresses pdf using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "pdf-to-image",
+      "title": "PDF to Image",
+      "subtitle": "iLovePDF",
+      "description": "Converts a PDF to Image using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "merge-pdf",
+      "title": "Merge PDF",
+      "subtitle": "iLovePDF",
+      "description": "Merge Multiple PDFs using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "word-to-pdf",
+      "title": "Word to PDF",
+      "subtitle": "iLovePDF",
+      "description": "Converts Word File to PDF using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "extract-text",
+      "title": "Extract Text from PDF",
+      "subtitle": "iLovePDF",
+      "description": "Extracts Text from PDF using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "split-pdf",
+      "title": "Split PDF",
+      "subtitle": "iLovePDF",
+      "description": "Split a PDF file using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "html-to-pdf",
+      "title": "HTML to PDF",
+      "subtitle": "iLovePDF",
+      "description": "Converts an HTML page to PDF using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "repair-pdf",
+      "title": "Repair PDF",
+      "subtitle": "iLovePDF",
+      "description": "Tries to repair a PDF using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "rotate-pdf",
+      "title": "Rotate PDF",
+      "subtitle": "iLovePDF",
+      "description": "Rotate a PDF using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "protect-pdf",
+      "title": "Protect PDF",
+      "subtitle": "iLovePDF",
+      "description": "Protects a PDF with a password using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "add-page-number",
+      "title": "Add Page Number",
+      "subtitle": "iLovePDF",
+      "description": "Add page number to PDF using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "add-watermark-to-pdf",
+      "title": "Add Watermark to PDF",
+      "subtitle": "iLovePDF",
+      "description": "Adds watermark to PDF using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "unlock-pdf",
+      "title": "Unlock PDF",
+      "subtitle": "iLovePDF",
+      "description": "Unlocks a PDF using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "validate-pdfa",
+      "title": "Validate PDF/A",
+      "subtitle": "iLovePDF",
+      "description": "Validates a PDF/A with using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "pdf-to-pdfa",
+      "title": "PDF to PDF/A",
+      "subtitle": "iLovePDF",
+      "description": "Converts a PDF to PDF/A format using iLovePDF API.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "APIPublicKey",
+      "title": "API Public Key",
+      "description": "Get the API keys at https://developer.ilovepdf.com/",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "APISecretKey",
+      "title": "API Secret Key",
+      "description": "Get the API keys at https://developer.ilovepdf.com/",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "OpenNow",
+      "title": "Open the PDF Immediately After Conversion",
+      "description": "Open the PDF file after conversion",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Open PDF immediately"
+    },
+    {
+      "name": "AskBeforeDownload",
+      "title": "Ask Where to Save File Before Download",
+      "description": "Ask where to save each file before download",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Ask before download"
+    },
+    {
+      "name": "SelectFileInFinder",
+      "title": "Select files in Finder",
+      "description": "Select files in Finder",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Select file in Finder"
+    }
+  ],
+  "dependencies": {
+    "@ilovepdf/ilovepdf-nodejs": "^0.2.5",
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.15.0",
+    "magic-bytes.js": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

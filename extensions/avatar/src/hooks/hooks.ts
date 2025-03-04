@@ -12,13 +12,13 @@ export const createAvatarURL = (avatarOptions: AvatarOptions) => {
     setLoading(true);
     const _options = options(avatarOptions);
     const encodeSeed = encodeURI(avatarOptions.seed);
-    const pngURL = AVATAR_URL + "/" + avatarOptions.style + "/" + encodeSeed + ".png" + _options;
-    const svgURL = AVATAR_URL + "/" + avatarOptions.style + "/" + encodeSeed + ".svg" + _options;
+    const pngURL = AVATAR_URL + avatarOptions.style + "/png?seed=" + encodeSeed + _options;
+    const svgURL = AVATAR_URL + avatarOptions.style + "/svg?seed=" + encodeSeed + _options;
     const multiSVGURL = MULTI_AVATAR_URL + "/" + avatarOptions.seed + ".svg";
     const multiPNGURL = MULTI_AVATAR_URL + "/" + avatarOptions.seed + ".png";
     const multiavatarSVGCode = multiavatar(avatarOptions.seed);
     const markdownImage = `<img src="data:image/svg+xml;base64,${Buffer.from(multiavatarSVGCode, "utf-8").toString(
-      "base64"
+      "base64",
     )}" height="190" alt="${avatarOptions.seed}" />`;
     setDiceBearAvatarInfo({ svgCode: "", markdownImage: "", png: pngURL, svg: svgURL });
     setMultiAvatarInfo({
@@ -51,6 +51,6 @@ export const options = (avatarOptions: AvatarOptions) => {
     avatarOptions.translateY === avatarInit.translateY ? "" : `translateY=${avatarOptions.translateY}&`;
   const flip = avatarOptions.flip === avatarInit.flip ? "" : `flip=${avatarOptions.flip}`;
 
-  const tempOptions = "?" + backgroundColor + radius + scale + rotate + translateX + translateY + flip;
+  const tempOptions = "&" + backgroundColor + radius + scale + rotate + translateX + translateY + flip;
   return tempOptions.length === 1 ? "" : tempOptions;
 };

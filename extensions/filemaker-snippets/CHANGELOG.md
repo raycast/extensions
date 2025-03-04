@@ -6,6 +6,14 @@
 - Fix a bug where the snippet text was not being saved when editing the XML of a snippet
 - Update FileMaker icons to the latest version
 
+## [Fixes] - 2024-04-05
+
+- Fix encoding for launching favorite or recent files that contain special characters
+
+## [Fixes] - 2024-03-28
+
+- Fix deeplinks for hosted snippets. Fetch dependency was not being loaded correctly.
+
 ## [Fixes] - 2024-03-20
 
 - Fix snippet creation from clipboard

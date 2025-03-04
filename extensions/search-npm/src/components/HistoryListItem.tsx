@@ -31,7 +31,7 @@ export const HistoryListItem = ({
             icon={Icon.MagnifyingGlass}
           />
           <Action
-            title="Remove From History"
+            title="Remove from History"
             onAction={async () => {
               const history = await removeItemFromHistory(item)
               setHistory(history)
@@ -40,7 +40,7 @@ export const HistoryListItem = ({
             style={Action.Style.Destructive}
           />
           <Action
-            title="Clear All Items From History"
+            title="Clear All Items from History"
             shortcut={{ modifiers: ['cmd'], key: 'backspace' }}
             onAction={async () => {
               await removeAllItemsFromHistory()

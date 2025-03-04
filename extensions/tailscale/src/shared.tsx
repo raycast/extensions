@@ -22,6 +22,8 @@ export interface Device {
 export class InvalidPathError extends Error {}
 export class NotRunningError extends Error {}
 export class NotConnectedError extends Error {}
+export class ENOBUFSError extends Error {}
+export class MaxBufferNaNError extends Error {}
 
 export type StatusDevice = {
   Active: boolean;
@@ -58,13 +60,76 @@ export type StatusResponse = {
   >;
 };
 
-export function getStatus() {
-  const resp = tailscale(`status --json`);
+/**
+ * NetcheckResponse are the fields returned by `tailscale netcheck --format json`.
+ * These are mentioned to not be stable and may change in the future. Doubtful, but possible.
+ */
+export type NetcheckResponse = {
+  UDP: boolean;
+  IPv4: boolean;
+  GlobalV4: string;
+  IPv6: boolean;
+  GlobalV6: string;
+  MappingVariesByDestIP: boolean;
+  UPnP: boolean;
+  PMP: boolean;
+  PCP: boolean;
+  PreferredDERP: number;
+  RegionLatency: Record<string, number>;
+  RegionV4Latency: Record<string, number>;
+  RegionV6Latency: Record<string, number>;
+};
+
+export type DerpRegion = {
+  RegionId: number;
+  RegionCode: string;
+  RegionName: string;
+  Latitude: number;
+  Longitude: number;
+  Nodes: DerpNode[];
+};
+
+type DerpNode = {
+  Name: string;
+  RegionID: number;
+  HostName: string;
+  IPv4: string;
+  IPv6: string;
+  CanPort80: boolean;
+};
+
+export type Derp = {
+  id: string;
+  code: string;
+  name: string;
+  latency: string | undefined;
+  latencies: {
+    v4: string | undefined;
+    v6: string | undefined;
+  };
+  nodes: DerpNode[];
+};
+
+export function getStatus(peers = true) {
+  const resp = tailscale(`status --json --peers=${peers}`);
   const data = JSON.parse(resp) as StatusResponse;
   if (!data || !data.Self.Online) {
     throw new NotConnectedError();
   }
   return data;
+}
+
+export function getNetcheck() {
+  const resp = tailscale("netcheck --format json");
+  return JSON.parse(resp);
+}
+
+/**
+ * This funtion relies on a debug command, so it may not be stable on the returned value.
+ */
+export function getDerpMap() {
+  const resp = tailscale("debug netmap");
+  return JSON.parse(resp).DERPMap.Regions as DerpRegion[];
 }
 
 export function getDevices(status: StatusResponse) {
@@ -136,21 +201,34 @@ const tailscalePath: string =
     ? prefs.tailscalePath
     : "/Applications/Tailscale.app/Contents/MacOS/Tailscale";
 
+const execMaxBuffersBytes: number =
+  prefs.tailscaleExecMaxBuffersMB && (prefs.tailscaleExecMaxBuffersMB as number)
+    ? prefs.tailscaleExecMaxBuffersMB * 1024 * 1024
+    : 10 * 1024 * 1024; // 10 megabytes
+
 /**
  * tailscale runs a command against the Tailscale CLI.
  */
 export function tailscale(parameters: string): string {
   try {
-    return execSync(`${tailscalePath} ${parameters}`).toString().trim();
+    return execSync(`${tailscalePath} ${parameters}`, { maxBuffer: execMaxBuffersBytes }).toString().trim();
   } catch (err) {
     if (err instanceof Error) {
       if (err.message.includes("No such file or directory")) {
         throw new InvalidPathError();
-      }
-      if (err.message.includes("is Tailscale running?")) {
+      } else if (err.message.includes("is Tailscale running?")) {
         throw new NotRunningError();
+      } else if (err.message.includes("spawnSync /bin/sh ENOBUFS")) {
+        throw new ENOBUFSError();
+      } else if (
+        err.message.includes(
+          'The value of "options.maxBuffer" is out of range. It must be a positive number. Received NaN',
+        )
+      ) {
+        throw new MaxBufferNaNError();
       }
     }
+    console.log(`throwing error: ${err}`);
     throw err;
   }
 }
@@ -176,9 +254,24 @@ export function getErrorDetails(err: unknown, fallbackMessage: string): ErrorDet
       title: "Not connected to a tailnet",
       description: "Tailscale is running, but you’re not connected to a tailnet.\nLog in and try again.",
     };
+  } else if (err instanceof ENOBUFSError) {
+    return {
+      title: "Response larger than buffer size",
+      description: "Increase `Max buffers ...` in the extension configuration.",
+    };
+  } else if (err instanceof MaxBufferNaNError) {
+    return {
+      title: "Invalid `Max buffers ...` configuration",
+      description: "Set `Max buffers ...` to a number in the extension configuration.",
+    };
   }
+  console.log(`Unhandled error: ${err}`);
   return {
     title: "Something went wrong",
     description: fallbackMessage,
   };
+}
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

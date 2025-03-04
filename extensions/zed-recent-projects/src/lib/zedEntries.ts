@@ -2,10 +2,10 @@ import fs from "fs";
 import { homedir } from "os";
 import { useSQL } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
-import { getZedDbName, type ZedBuild } from "./zed";
+import { getZedDbName } from "./zed";
 
-const preferences: Record<string, string> = getPreferenceValues();
-const zedBuild: ZedBuild = preferences.build as ZedBuild;
+const preferences = getPreferenceValues<Preferences>();
+const zedBuild = preferences.build;
 
 export interface ZedEntry {
   uri: string;
@@ -19,13 +19,14 @@ function getPath() {
 }
 
 interface Workspace {
-  workspace_location: string;
+  local_paths: string;
   timestamp: number;
 }
 
 interface ZedRecentWorkspaces {
   entries: ZedEntries;
   isLoading?: boolean;
+  error?: Error;
 }
 
 export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
@@ -37,16 +38,16 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
     };
   }
 
-  const { data, isLoading } = useSQL<Workspace>(path, "SELECT workspace_location, timestamp FROM workspaces");
+  const { data, isLoading, error } = useSQL<Workspace>(path, "SELECT local_paths, timestamp FROM workspaces");
 
   return {
     entries: data
       ? data
-          .filter((d) => !!d.workspace_location)
+          .filter((d) => !!d.local_paths)
           .map<ZedEntry>((d) => {
-            const pathStart = d.workspace_location.indexOf("/");
+            const pathStart = d.local_paths.indexOf("/");
             return {
-              uri: "file://" + d.workspace_location.substring(pathStart),
+              uri: "file://" + d.local_paths.substring(pathStart).replace(/\/$/, ""),
               lastOpened: new Date(d.timestamp).getTime(),
             };
           })
@@ -54,6 +55,10 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
             if (!d.uri) {
               return acc;
             }
+
+            const existing = acc[d.uri];
+            if (existing && existing.lastOpened > d.lastOpened) return acc;
+
             return {
               ...acc,
               [d.uri]: d,
@@ -61,5 +66,6 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
           }, {})
       : {},
     isLoading,
+    error,
   };
 }

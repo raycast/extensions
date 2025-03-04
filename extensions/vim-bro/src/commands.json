@@ -198,7 +198,6 @@
       }
     ]
   },
-
   {
     "key": "insert",
     "commands": [
@@ -272,7 +271,6 @@
       }
     ]
   },
-
   {
     "key": "Insert mode - inserting/appending text",
     "commands": [
@@ -445,6 +443,14 @@
       {
         "kbd": "U",
         "text": "change marked text to uppercase"
+      },
+      {
+        "kbd": "Ctrl + a",
+        "text": "increments the number under the cursor"
+      },
+      {
+        "kbd": "Ctrl + x",
+        "text": "decrements the number under the cursor"
       }
     ]
   },
@@ -525,7 +531,6 @@
       }
     ]
   },
-
   {
     "key": "Indent text",
     "commands": [
@@ -571,7 +576,6 @@
       }
     ]
   },
-
   {
     "key": "Exiting",
     "commands": [
@@ -601,7 +605,6 @@
       }
     ]
   },
-
   {
     "key": "Search and replace",
     "commands": [
@@ -639,7 +642,6 @@
       }
     ]
   },
-
   {
     "key": "Tabs",
     "commands": [
@@ -674,6 +676,111 @@
       {
         "kbd": ":tabo[nly]",
         "text": "close all tabs except for the current one"
+      }
+    ]
+  },
+  {
+    "key": "Working with multiple files",
+    "commands": [
+      {
+        "kbd": ":e[dit] file",
+        "text": "edit a file in a new buffer"
+      },
+      {
+        "kbd": ":bn[ext]",
+        "text": "go to the next buffer"
+      },
+      {
+        "kbd": ":bp[revious]",
+        "text": "go to the previous buffer"
+      },
+      {
+        "kbd": ":bd[elete]",
+        "text": "delete a buffer (close a file)"
+      },
+      {
+        "kbd": ":b[uffer]#",
+        "text": "go to a buffer by index #"
+      },
+      {
+        "kbd": ":b[uffer] file",
+        "text": "go to a buffer by file"
+      },
+      {
+        "kbd": ":ls or :buffers",
+        "text": "list all open buffers"
+      },
+      {
+        "kbd": ":sp[lit] file",
+        "text": "open a file in a new buffer and split window"
+      },
+      {
+        "kbd": ":vs[plit] file",
+        "text": "open a file in a new buffer and vertically split window"
+      },
+      {
+        "kbd": ":vert[ical] ba[ll]",
+        "text": "edit all buffers as vertical windows"
+      },
+      {
+        "kbd": ":tab ba[ll]",
+        "text": "edit all buffers as tabs"
+      },
+      {
+        "kbd": "Ctrl + ws",
+        "text": "split window"
+      },
+      {
+        "kbd": "Ctrl + wv",
+        "text": "split window vertically"
+      },
+      {
+        "kbd": "Ctrl + ww",
+        "text": "switch windows"
+      },
+      {
+        "kbd": "Ctrl + wq",
+        "text": "quit a window"
+      },
+      {
+        "kbd": "Ctrl + wx",
+        "text": "exchange current window with next one"
+      },
+      {
+        "kbd": "Ctrl + w=",
+        "text": "make all windows equal height & width"
+      },
+      {
+        "kbd": "Ctrl + wh",
+        "text": "move cursor to the left window (vertical split)"
+      },
+      {
+        "kbd": "Ctrl + wl",
+        "text": "move cursor to the right window (vertical split)"
+      },
+      {
+        "kbd": "Ctrl + wj",
+        "text": "move cursor to the window below (horizontal split)"
+      },
+      {
+        "kbd": "Ctrl + wk",
+        "text": "move cursor to the window above (horizontal split)"
+      },
+      {
+        "kbd": "Ctrl + wH",
+        "text": "make current window full height at far left (leftmost vertical window)"
+      },
+      {
+        "kbd": "Ctrl + wL",
+        "text": "make current window full height at far right (rightmost vertical window)"
+      },
+      {
+        "kbd": "Ctrl + wJ",
+        "text": "make current window full width at the very bottom (bottommost horizontal window)"
+      },
+      {
+        "kbd": "Ctrl + wK",
+        "text": "make current window full width at the very top (topmost horizontal window)"
       }
     ]
   }

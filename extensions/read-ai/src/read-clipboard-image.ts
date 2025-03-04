@@ -5,15 +5,7 @@ import { TextToSpeechProcessor } from "./processors/text-to-speech-processor";
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const processor = new ImageToTextProcessor(preferences.apiKey);
-  const textToSpeechProcessor = new TextToSpeechProcessor(
-    preferences.apiKey,
-    preferences.defaultVoice,
-    preferences.temperature,
-    preferences.gptModel,
-    preferences.subtitlesToggle,
-    preferences.outputLanguage,
-    preferences.readingStyle,
-  );
+  const textToSpeechProcessor = new TextToSpeechProcessor(preferences);
 
   const imageUrl = await Clipboard.readText();
   const maxTokens = 600; // Max tokens for GPT-4 Vision Default is 300

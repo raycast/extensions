@@ -8,7 +8,9 @@
   "contributors": [
     "LenoxFro",
     "otatoPotato",
-    "shelken"
+    "shelken",
+    "emiara",
+    "ViGeng"
   ],
   "license": "MIT",
   "preferences": [
@@ -35,7 +37,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Decide which Terminal Application you want to use",
-      "description": "If iTerm or Warp is available, you can use them instead of Terminal.",
+      "description": "If iTerm, Warp, Alacritty, or Hyper is available, you can use them instead of Terminal.",
       "data": [
         {
           "title": "Terminal",
@@ -48,6 +50,14 @@
         {
           "title": "Warp",
           "value": "Warp"
+        },
+        {
+          "title": "Alacritty",
+          "value": "Alacritty"
+        },
+        {
+          "title": "Hyper",
+          "value": "Hyper"
         }
       ],
       "default": "Terminal"

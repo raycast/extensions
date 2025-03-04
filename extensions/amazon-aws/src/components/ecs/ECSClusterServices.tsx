@@ -2,8 +2,9 @@ import { ECSClient, Service, UpdateServiceCommand } from "@aws-sdk/client-ecs";
 import { Action, ActionPanel, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchServices, getServiceUrl } from "../../actions";
-import { getActionOpenInBrowser, getExportResponse, getFilterPlaceholder } from "../../util";
+import { getFilterPlaceholder } from "../../util";
 import ECSClusterServiceTasks from "./ECSClusterServiceTasks";
+import { AwsAction } from "../common/action";
 
 function ECSClusterServices({ clusterArn }: { clusterArn: string }) {
   const { data: services, isLoading } = useCachedPromise(fetchServices, [clusterArn], { keepPreviousData: true });
@@ -13,7 +14,6 @@ function ECSClusterServices({ clusterArn }: { clusterArn: string }) {
       {services ? (
         services.map((service) => (
           <List.Item
-            id={service.serviceArn}
             key={service.serviceArn}
             title={service.serviceName || ""}
             icon={Icon.Box}
@@ -42,8 +42,9 @@ function ECSClusterServices({ clusterArn }: { clusterArn: string }) {
                         service.networkConfiguration?.awsvpcConfiguration?.assignPublicIp === "ENABLED"
                           ? "Public"
                           : "Private"
-                      } | Subnets: ${service.networkConfiguration?.awsvpcConfiguration?.subnets?.length} | SG: ${service
-                        .networkConfiguration?.awsvpcConfiguration?.securityGroups?.length}`}
+                      } | Subnets: ${service.networkConfiguration?.awsvpcConfiguration?.subnets?.length} | SG: ${
+                        service.networkConfiguration?.awsvpcConfiguration?.securityGroups?.length
+                      }`}
                     />
                     <List.Item.Detail.Metadata.Label title="Creation Date" text={service.createdAt?.toLocaleString()} />
                     <List.Item.Detail.Metadata.Label
@@ -61,10 +62,10 @@ function ECSClusterServices({ clusterArn }: { clusterArn: string }) {
                 <Action.Push
                   title={"View Tasks"}
                   icon={Icon.Eye}
-                  target={<ECSClusterServiceTasks service={service}></ECSClusterServiceTasks>}
+                  target={<ECSClusterServiceTasks service={service} />}
                 />
                 <Action icon={Icon.Repeat} title="Force New Deployment" onAction={() => forceNewDeployment(service)} />
-                {getActionOpenInBrowser(getServiceUrl(service))}
+                <AwsAction.Console url={getServiceUrl(service)} />
                 {getActionCopySection(service)}
               </ActionPanel>
             }
@@ -112,7 +113,7 @@ function forceNewDeployment(service: Service) {
 function getActionCopySection(service: Service) {
   return (
     <ActionPanel.Section title={"Copy"}>
-      {getExportResponse(service)}
+      <AwsAction.ExportResponse response={service} />
       <Action.CopyToClipboard
         title="Copy Service ARN"
         content={service.serviceArn || ""}

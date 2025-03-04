@@ -1,4 +1,6 @@
-import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, captureException, Form, popToRoot, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+
 import { createTask, startTask } from "./lib/tim";
 
 type FormData = {
@@ -8,7 +10,7 @@ type FormData = {
 
 export default function Command() {
   const handleSubmit = async (values: FormData) => {
-    const toast = await showToast({
+    await showToast({
       title: "Creating task",
       message: values.title,
       style: Toast.Style.Animated,
@@ -19,13 +21,15 @@ export default function Command() {
       if (values.startTask) {
         await startTask(id);
       }
-      toast.title = "Task created";
-      toast.style = Toast.Style.Success;
-      popToRoot();
+
+      await showToast({
+        title: `Task "${values.title}" created`,
+        message: values.startTask ? "Task started" : undefined,
+      });
+      await popToRoot({ clearSearchBar: true });
     } catch (error) {
-      toast.title = "Error";
-      toast.message = `Could not create ${values.title}`;
-      toast.style = Toast.Style.Failure;
+      captureException(error);
+      await showFailureToast(error, { title: `Could not create ${values.title}` });
     }
   };
 

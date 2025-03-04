@@ -16,16 +16,19 @@ async function lockVaultCommand() {
 
     const bitwarden = await new Bitwarden(toast).initialize();
 
-    await bitwarden.withSession(token).lock(VAULT_LOCK_MESSAGES.MANUAL);
+    await bitwarden.withSession(token).lock({ reason: VAULT_LOCK_MESSAGES.MANUAL });
+  } catch (error) {
+    await showToast(Toast.Style.Failure, "Failed to lock vault");
+  }
+
+  try {
     await SessionStorage.clearSession();
 
     toast.style = Toast.Style.Success;
     toast.title = "Vault successfully locked";
     toast.message = undefined;
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Failed to lock vault";
-    toast.message = undefined;
+    await showToast(Toast.Style.Failure, "Failed to lock vault");
   }
 }
 

@@ -88,7 +88,16 @@
       "subtitle": "Mastodon",
       "description": "Menu Bar notifications",
       "mode": "menu-bar",
-      "interval": "5m"
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "openNotificationWith",
+          "type": "appPicker",
+          "required": false,
+          "title": "Open notification with",
+          "description": "Choose the app to open the notification with, default to your default browser"
+        }
+      ]
     }
   ],
   "preferences": [

@@ -1,6 +1,7 @@
 import { ActionPanel, Form, Action, useNavigation } from "@raycast/api";
-import { Workspace, Tag, updateTag, createTag } from "../api";
-import { withToast, Verb } from "../helpers/withToast";
+
+import { Workspace, Tag, updateTag, createTag } from "@/api";
+import { withToast, Verb } from "@/helpers/withToast";
 
 type TagFormProps =
   | {

@@ -16,7 +16,8 @@ When a collection selected, you will be brought to a page where you can enter yo
 
 ![Search Collection](metadata/pdfsearch-3.png)
 
-## Roadmap
+## Outline Search
 
-- [ ] Improve search speed.
-- [ ] Use ContextualEmbeddings to perform similarity search.
+The View Outline command allows you to open a selected pdf file and view/filter the different sections of the selected PDF file.
+
+![Outline Search](metadata/pdfsearch-4.png)

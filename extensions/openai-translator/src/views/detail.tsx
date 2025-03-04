@@ -8,6 +8,7 @@ const PROVIDER_LABEL: Record<string, string> = {
   raycast: "Raycast AI",
   azure: "Azure",
   palm2: "PaLM 2",
+  gemini: "Gemini",
 };
 
 export interface DetailViewProps {
@@ -35,7 +36,7 @@ export const DetailView = (props: DetailViewProps) => {
             <Detail.Metadata.Label title="To" text={`${langMap.get(to)}`} />
             <Detail.Metadata.Label title="Mode" text={capitalize(mode)} />
             {created_at && <Detail.Metadata.Label title="Created At" text={`${created_at}`} />}
-            {provider && <Detail.Metadata.Label title="Provider" text={`${PROVIDER_LABEL[provider]}`} />}
+            {provider && <Detail.Metadata.Label title="Provider" text={`${PROVIDER_LABEL[provider] || provider}`} />}
           </Detail.Metadata>
         ) : null
       }

@@ -1,16 +1,16 @@
-import { useEffect } from "react";
 import { useCachedPromise } from "@raycast/utils";
+import { fetch } from "cross-fetch";
 import { decode } from "iconv-lite";
 import { nanoid } from "nanoid";
-import { fetch } from "cross-fetch";
-import {
-  Suggestion,
-  SearchConfigs,
-  GoogleSuggestionParser,
-  EcosiaSuggestionParser,
-  KagiSuggestionParser,
-} from "./types";
+import { useEffect } from "react";
 import { searchArcPreferences } from "./preferences";
+import {
+  EcosiaSuggestionParser,
+  GoogleSuggestionParser,
+  KagiSuggestionParser,
+  SearchConfigs,
+  Suggestion,
+} from "./types";
 
 const config: SearchConfigs = {
   google: {
@@ -136,7 +136,7 @@ export function useSuggestions(searchText: string) {
       return [...getDefaultSuggestions(searchText), ...parsed];
     },
     [],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   useEffect(() => {

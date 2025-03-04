@@ -1,28 +1,20 @@
-import { useEffect, useState } from "react";
-import { Team } from "./types";
-import { getTeams } from "./api";
-import CompetitionDropdown from "./components/competition_dropdown";
 import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
-import ClubDetails from "./components/club";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
+import { getTeams } from "./api";
+import ClubProfile from "./components/club";
+import CompetitionDropdown from "./components/competition_dropdown";
 
 export default function Club() {
-  const [clubs, setClubs] = useState<Team[]>();
   const [competition, setCompetition] = useState<string>("");
 
-  useEffect(() => {
-    if (competition) {
-      setClubs(undefined);
-      getTeams(competition).then((data) => {
-        setClubs(data);
-      });
-    }
-  }, [competition]);
+  const { data: clubs, isLoading } = usePromise(getTeams, [competition]);
 
   return (
     <Grid
       throttle
-      isLoading={!clubs}
-      searchBarAccessory={<CompetitionDropdown type="grid" selected={competition} onSelect={setCompetition} />}
+      isLoading={isLoading}
+      searchBarAccessory={<CompetitionDropdown selected={competition} onSelect={setCompetition} />}
     >
       {clubs?.map((club) => {
         return (
@@ -33,7 +25,7 @@ export default function Club() {
             content={club.shield.url}
             actions={
               <ActionPanel>
-                <Action.Push title="Club Profile" icon={Icon.Sidebar} target={<ClubDetails {...club} />} />
+                <Action.Push title="Club Profile" icon={Icon.Sidebar} target={<ClubProfile {...club} />} />
               </ActionPanel>
             }
           />

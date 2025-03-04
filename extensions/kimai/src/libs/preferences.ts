@@ -2,8 +2,9 @@ import { getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
   domain: string;
-  password: string;
-  email: string;
+  password?: string;
+  email?: string;
+  token?: string;
   protocol?: "https" | "http";
   duration: string;
 }

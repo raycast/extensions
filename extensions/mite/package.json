@@ -5,6 +5,9 @@
   "description": "Interact with your mite account via Raycast",
   "icon": "mite.png",
   "author": "paolo_ricciuti",
+  "contributors": [
+    "ramsay"
+  ],
   "categories": [
     "Applications",
     "Productivity"
@@ -70,7 +73,7 @@
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.3.2",
     "typescript": "^5.2.2"
   },
   "scripts": {

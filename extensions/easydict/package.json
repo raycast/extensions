@@ -2,11 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "easydict",
   "title": "Easy Dictionary",
-  "description": "Easily look up words or translate text, support 48+ languages, support Linguee and Youdao dictionary, support OpenAI ChatGPT, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation.",
+  "description": "Easily look up words or translate text, support 48+ languages, support Linguee and Youdao dictionary, support OpenAI, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation.",
   "icon": "Eudic.png",
   "author": "isfeng",
   "license": "MIT",
-  "contributors": [],
+  "contributors": [
+    "ViGeng"
+  ],
   "commands": [
     {
       "name": "easydict",
@@ -50,12 +52,12 @@
     "baidu",
     "tencent",
     "eudic",
-    "chatgpt"
+    "openai"
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
+    "@raycast/api": "^1.68.0",
     "@vitalets/google-translate-api": "^9.1.0",
-    "axios": "^1.6.0",
+    "axios": "^1.7.4",
     "cheerio": "^1.0.0-rc.12",
     "crypto-js": "^4.2.0",
     "eventsource": "^2.0.2",
@@ -513,6 +515,29 @@
       ]
     },
     {
+      "title": "Bing Host",
+      "name": "bingHost",
+      "type": "dropdown",
+      "label": "Bing Host",
+      "required": false,
+      "description": "Bing Host Type",
+      "default": "",
+      "data": [
+        {
+          "title": "Auto",
+          "value": ""
+        },
+        {
+          "title": "cn.bing.com",
+          "value": "cn.bing.com"
+        },
+        {
+          "title": "www.bing.com",
+          "value": "www.bing.com"
+        }
+      ]
+    },
+    {
       "title": "Switch Boxes",
       "name": "enableAutomaticQuerySelectedText",
       "type": "checkbox",
@@ -538,14 +563,6 @@
       "default": true
     },
     {
-      "name": "enableBaiduLanguageDetect",
-      "type": "checkbox",
-      "label": "Enable Baidu Language Detect",
-      "required": false,
-      "description": "⚠️ If turn off it, the language detection will be slower, even cause timeout.",
-      "default": true
-    },
-    {
       "name": "enableAutomaticPlayWordAudio",
       "type": "checkbox",
       "label": "Play Word Pronunciation Automatically",
@@ -568,6 +585,15 @@
       "required": false,
       "description": "⚠️ Note that it should only be enabled if needed, as it can slow down requests.",
       "default": false
+    },
+    {
+      "title": "Langauge Detection",
+      "name": "enableBaiduLanguageDetect",
+      "type": "checkbox",
+      "label": "Enable Baidu Language Detect",
+      "required": false,
+      "description": "Turn on/off Baidu Language Detect.",
+      "default": true
     },
     {
       "title": "Apple System Features",
@@ -669,7 +695,7 @@
       "default": false
     },
     {
-      "title": "Display Order",
+      "title": "Service List Order",
       "name": "servicesOrder",
       "type": "textfield",
       "required": false,
@@ -680,25 +706,43 @@
     {
       "title": "OpenAI API Key",
       "name": "openAIAPIKey",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your OpenAI API Key",
       "default": ""
     },
     {
-      "title": "OpenAI API URL",
+      "title": "OpenAI Endpoint",
       "name": "openAIAPIURL",
       "type": "textfield",
       "required": false,
-      "description": "Your OpenAI API URL",
-      "default": "https://api.openai.com/v1/chat/completions"
+      "description": "Custom OpenAI API URL",
+      "default": "https://api.openai.com/v1/chat/completions",
+      "placeholder": "https://api.openai.com/v1/chat/completions"
+    },
+    {
+      "title": "OpenAI Model",
+      "name": "openAIModel",
+      "type": "textfield",
+      "required": false,
+      "description": "OpenAI Model",
+      "default": "gpt-4o-mini"
     },
     {
       "title": "DeepL Auth Key",
       "name": "deepLAuthKey",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your DeepL Auth Key",
+      "default": ""
+    },
+    {
+      "title": "DeepL API URL",
+      "name": "deepLEndpoint",
+      "type": "textfield",
+      "required": false,
+      "description": "Custom DeepL API URL",
+      "placeholder": "https://api-free.deepl.com/v2/translate",
       "default": ""
     },
     {
@@ -712,7 +756,7 @@
     {
       "title": "Baidu App Secret",
       "name": "baiduAppSecret",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your Baidu App Secret",
       "default": ""
@@ -728,7 +772,7 @@
     {
       "title": "Tencent SecretKey",
       "name": "tencentSecretKey",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your Tencent SecretKey",
       "default": ""
@@ -744,31 +788,15 @@
     {
       "title": "Volcano Access Key Secret",
       "name": "volcanoAccessKeySecret",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your Volcano Access Key Secret",
       "default": ""
     },
     {
-      "title": "Youdao App ID",
-      "name": "youdaoAppId",
-      "type": "textfield",
-      "required": false,
-      "description": "Your Youdao App ID",
-      "default": ""
-    },
-    {
-      "title": "Youdao App Secret",
-      "name": "youdaoAppSecret",
-      "type": "textfield",
-      "required": false,
-      "description": "Your Youdao App Secret",
-      "default": ""
-    },
-    {
       "title": "Caiyun Token",
       "name": "caiyunToken",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your Caiyun Token",
       "default": ""

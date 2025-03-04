@@ -1,3 +1,10 @@
+# Read AI Changelog
+
+## [Added Speed And DirectRead Preferences] - 2024-04-30
+
+- Allows adjustment of voice speed from 0.25 to 4.0.
+- Supports DirectRead boolean flag to bypass OpenAI script generation.
+
 ## [Added Read Image Feature] - 2023-01-29
 
 We have introduced a new feature called "Read Image" to our application. This feature allows users to extract text from selected images. Here's how it works:

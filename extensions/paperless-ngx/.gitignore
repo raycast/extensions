@@ -8,3 +8,5 @@
 
 .env
 raycast-env.d.ts
+
+/.idea/

@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, launchCommand, LaunchType, Keyboard } from "@raycast/api";
 import { format } from "date-fns";
 
 import { NotificationResult } from "./api/getNotifications";
@@ -8,11 +8,11 @@ import { deleteNotification as linearDeleteNotification } from "./api/deleteNoti
 import useNotifications from "./hooks/useNotifications";
 import usePriorities from "./hooks/usePriorities";
 import useMe from "./hooks/useMe";
-import useUsers from "./hooks/useUsers";
 
 import { getErrorMessage } from "./helpers/errors";
 import { getNotificationIcon, getNotificationTitle, getNotificationURL } from "./helpers/notifications";
 import { getUserIcon } from "./helpers/users";
+import { getBotIcon } from "./helpers/bots";
 
 import View from "./components/View";
 import IssueDetail from "./components/IssueDetail";
@@ -30,7 +30,6 @@ function Notifications() {
 
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
-  const { users, isLoadingUsers } = useUsers();
 
   const inboxUrl = `https://linear.app/${urlKey}/inbox`;
 
@@ -165,7 +164,7 @@ function Notifications() {
   }
 
   return (
-    <List isLoading={isLoadingNotifications || isLoadingPriorities || isLoadingMe || isLoadingUsers}>
+    <List isLoading={isLoadingNotifications || isLoadingPriorities || isLoadingMe}>
       <List.EmptyView title="Inbox" description="You don't have any notifications." />
 
       {sections.map(({ title, notifications }) => {
@@ -177,9 +176,13 @@ function Notifications() {
             {notifications.map((notification) => {
               const createdAt = new Date(notification.createdAt);
 
-              const displayName = notification.actor ? notification.actor.displayName : "Linear";
+              const displayName = notification.actor
+                ? notification.actor.displayName
+                : notification.botActor
+                  ? notification.botActor.name
+                  : "Linear";
 
-              const keywords = [displayName];
+              const keywords = [displayName || "Linear"];
 
               if (notification.issue) {
                 keywords.push(...notification.issue.identifier.split("-"));
@@ -193,10 +196,17 @@ function Notifications() {
                   title={`${getNotificationTitle(notification)} by ${displayName}`}
                   key={notification.id}
                   keywords={keywords}
-                  icon={notification.actor ? getUserIcon(notification.actor) : "linear.png"}
+                  icon={
+                    notification.actor
+                      ? getUserIcon(notification.actor)
+                      : notification.botActor
+                        ? getBotIcon(notification.botActor)
+                        : "linear-app-icon.png"
+                  }
                   {...(notification.issue
                     ? { subtitle: `${notification.issue?.identifier} ${notification.issue?.title}` }
                     : {})}
+                  {...(notification.project ? { subtitle: `${notification.project.name}` } : {})}
                   accessories={[
                     {
                       date: createdAt,
@@ -218,9 +228,7 @@ function Notifications() {
                         {notification.issue ? (
                           <Action.Push
                             title="Open Issue in Raycast"
-                            target={
-                              <IssueDetail issue={notification.issue} priorities={priorities} users={users} me={me} />
-                            }
+                            target={<IssueDetail issue={notification.issue} priorities={priorities} me={me} />}
                             icon={Icon.RaycastLogoNeg}
                             shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                           />
@@ -234,7 +242,7 @@ function Notifications() {
                           title="Delete Notification"
                           icon={Icon.Trash}
                           style={Action.Style.Destructive}
-                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
                           onAction={() => deleteNotification(notification)}
                         />
                       </ActionPanel.Section>

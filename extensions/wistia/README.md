@@ -39,6 +39,13 @@ Raycast extension to search through your Wistia Medias and Projects.
 
 ## Getting your API Token
 
+(❕ TIP: go to https://docs.wistia.com/docs/making-api-requests#getting-started for the latest instructions)
+
 Before you can search through your Wistia projects and medias, you need to provide your Wistia API key.
 
-Sign into your Wistia account and in the nav bar go to `Account` > `Settings`. Now in the side navigation go to `Advanced` > `API Access`. Here you find a list of your available API Tokens. Copy the one you want and provide it on setup.
+1. Sign into your Wistia account
+2. In the nav bar go to `Account` > `Settings` (https://account.wistia.com/account/)
+3. In the side navigation go to `API Access` (https://account.wistia.com/account/api)
+4. Click on `New token`
+5. Enter a name of your choice e.g. "Raycast Token" and tick `Read all data`
+6. Copy the tokn and provide it on setup.

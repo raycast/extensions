@@ -78,14 +78,14 @@ function MetadataUrls({ project }: { project: Project }) {
 
     return (
         <React.Fragment>
-            {Object.entries(project.config.urls).map(([key, value]) => {
+            {Object.entries(project.config.urls).map(([key, value], i) => {
                 if (!value) {
                     return null
                 }
 
                 return (
                     <Detail.Metadata.Link
-                        key={key}
+                        key={key + i}
                         title=""
                         target={value}
                         text={key}
@@ -99,10 +99,10 @@ function MetadataUrls({ project }: { project: Project }) {
 function MetadataGitRemotes({ project }: { project: Project }) {
     return (
         <React.Fragment>
-            {project.gitRemotes.map((remote) => {
+            {project.gitRemotes.map((remote, i) => {
                 return (
                     <Detail.Metadata.Link
-                        key={remote.name}
+                        key={remote.name + i}
                         title=""
                         target={remote.url}
                         text={`${remote.hostDisplayName} (${remote.name})`}

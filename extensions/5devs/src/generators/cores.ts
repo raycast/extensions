@@ -1,0 +1,18 @@
+export const cores = [
+  "Amarelo",
+  "Azul",
+  "Branco",
+  "Cinza",
+  "Dourado",
+  "Laranja",
+  "Marrom",
+  "Prata",
+  "Preto",
+  "Rosa",
+  "Roxo",
+  "Verde",
+  "Vermelho",
+  "Vinho",
+  "Bege",
+  "Bordo",
+];

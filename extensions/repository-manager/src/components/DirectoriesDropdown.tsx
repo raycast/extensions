@@ -32,12 +32,21 @@ export function DirectoriesDropdown({ directories }: DirectoriesDropdownProps) {
                     value="all"
                     icon={Icon.HardDrive}
                 />
+                <List.Dropdown.Item
+                    key="favorites"
+                    title="Favorites"
+                    value="favorites"
+                    icon={{
+                        source: Icon.Star,
+                        tintColor: Color.Yellow,
+                    }}
+                />
             </List.Dropdown.Section>
             <List.Dropdown.Section>
-                {directories.map((dir: Directory) => {
+                {directories.map((dir: Directory, i) => {
                     return (
                         <List.Dropdown.Item
-                            key={dir.name}
+                            key={dir.name + i}
                             title={dir.name}
                             value={dir.name}
                             icon={dir.icon}

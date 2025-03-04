@@ -24,11 +24,15 @@ export async function getPrivilegesClient() {
   if (!privilegesApp) {
     return null;
   }
-  const cliPath = join(privilegesApp.path, "Contents", "Resources", "PrivilegesCLI");
-  if (!existsSync(cliPath)) {
-    return null;
+  const v2CliPath = join(privilegesApp.path, "Contents", "MacOS", "PrivilegesCLI");
+  if (!existsSync(v2CliPath)) {
+    const v1CliPath = join(privilegesApp.path, "Contents", "Resources", "PrivilegesCLI");
+    if (!existsSync(v1CliPath)) {
+      return null;
+    }
+    return new PrivilegesClient(v1CliPath);
   }
-  return new PrivilegesClient(cliPath);
+  return new PrivilegesClient(v2CliPath);
 }
 
 class PrivilegesClient {

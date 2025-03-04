@@ -5,6 +5,9 @@
   "icon": "extension_icon.png",
   "description": "Copy & Paste Tabler Icons",
   "author": "zavbala",
+  "contributors": [
+    "bensomething"
+  ],
   "categories": [
     "Web",
     "Design Tools",

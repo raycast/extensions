@@ -5,6 +5,9 @@
   "description": "This extension allows you to quickly make a screenshot of the entire page of the site and save it to your desktop just by writing the address of the site.",
   "icon": "command-icon.png",
   "author": "Coun1er",
+  "contributors": [
+    "j3lte"
+  ],
   "categories": [
     "Web",
     "Developer Tools",
@@ -16,29 +19,39 @@
       "name": "screenshot-full-page",
       "title": "Capture Fullpage Screenshot of Website",
       "description": "This extension allows you to quickly make a screenshot of the entire page of the site and save it to your desktop just by writing the address of the site.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "type": "directory",
+          "title": "Output Directory",
+          "description": "The directory where the screenshot will be saved. Default is the desktop.",
+          "required": false,
+          "name": "outputDirectory",
+          "placeholder": "~/Desktop"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.2",
-    "playwright": "^1.22.2",
-    "url": "^0.11.0"
+    "@raycast/api": "^1.76.0",
+    "playwright": "^1.44.1",
+    "url": "^0.11.3"
   },
   "devDependencies": {
-    "@playwright/test": "^1.22.2",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@playwright/test": "^1.44.1",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.2",
+    "@types/react": "18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.1",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx -y @raycast/api@latest publish",
+    "postinstall": "npx -y playwright install --with-deps chromium"
   }
 }

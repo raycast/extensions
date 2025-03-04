@@ -18,8 +18,14 @@ export async function downloadLatex(exportType: ExportType, searchText: string) 
   // adjusts width and height of svg
   // saves image to downloadDir
   // returns path to image
+  const preferences = getPreferenceValues<QuickLatexPreferences>();
   const latex = searchText == "" ? "LaTeX" : searchText;
-  const url = BASE_URL + exportType + ".image?" + encodeURIComponent("\\dpi{512}") + encodeURIComponent(latex);
+  const url =
+    BASE_URL +
+    exportType +
+    ".image?" +
+    encodeURIComponent(`\\dpi{512}\\bg{${preferences.background}}`) +
+    encodeURIComponent(latex);
   const path = DOWNLOAD_DIR + `/img.${exportType}`;
   const res = await fetch(url);
   if (!res.ok) {

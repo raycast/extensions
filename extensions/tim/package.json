@@ -13,13 +13,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "openTaskManager",
-      "title": "Open Task Manager",
-      "subtitle": "Tim",
-      "description": "Open task manager window.",
-      "mode": "no-view"
-    },
-    {
       "name": "toggleTimer",
       "title": "Toggle Timer",
       "subtitle": "Tim",
@@ -32,13 +25,6 @@
       "subtitle": "Tim",
       "description": "Create a new task.",
       "mode": "view"
-    },
-    {
-      "name": "openNavigator",
-      "title": "Open Navigator",
-      "subtitle": "Tim",
-      "description": "Open Navigator menu.",
-      "mode": "no-view"
     },
     {
       "name": "openActiveRecord",
@@ -59,6 +45,13 @@
       "title": "Tasks",
       "subtitle": "Tim",
       "description": "Show all tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "dailyOverview",
+      "title": "Daily Overview",
+      "subtitle": "Tim",
+      "description": "Show task grouped by day",
       "mode": "view"
     },
     {
@@ -795,21 +788,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "@raycast/utils": "^1.4.16",
-    "dayjs": "^1.11.7",
-    "parse-ms": "^3.0.0",
-    "run-applescript": "^6.1.0"
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.18.0",
+    "dayjs": "^1.11.13",
+    "parse-ms": "^4.0.0"
   },
   "devDependencies": {
-    "@types/prettier": "^2.7.2",
-    "@typescript-eslint/eslint-plugin": "^5.51.0",
-    "@typescript-eslint/parser": "^5.51.0",
-    "eslint": "^8.34.0",
-    "eslint-config-prettier": "^8.6.0",
-    "prettier": "^2.8.4",
-    "react-devtools": "^4.27.2",
-    "typescript": "^4.9.5"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "react-devtools": "^5.2.0",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

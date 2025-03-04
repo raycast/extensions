@@ -22,6 +22,7 @@ export type FormValues = {
   startDate: Date;
   endDate: Date;
   showInMenubar: boolean;
+  showAsCommand: boolean;
 };
 
 export default function AddOrEditProgress(props: AddOrEditProgressProps) {
@@ -35,6 +36,7 @@ export default function AddOrEditProgress(props: AddOrEditProgressProps) {
           startDate: new Date(props.progress.startDate),
           endDate: new Date(props.progress.endDate),
           showInMenubar: props.progress.menubar.shown ?? false,
+          showAsCommand: props.progress.showAsCommand ?? false,
         }
       : {
           title: undefined,
@@ -42,6 +44,7 @@ export default function AddOrEditProgress(props: AddOrEditProgressProps) {
           startDate: new Date(),
           endDate: new Date(),
           showInMenubar: false,
+          showAsCommand: false,
         }
   );
   const [error, setError] = useState<FormError>({
@@ -160,6 +163,15 @@ export default function AddOrEditProgress(props: AddOrEditProgressProps) {
         value={formValue.showInMenubar}
         onChange={(value) => {
           setFormValue({ ...formValue, showInMenubar: value });
+        }}
+      />
+      <Form.Checkbox
+        id="showAsCommand"
+        title="Show in Command Subtitle"
+        label="Yes"
+        value={formValue.showAsCommand}
+        onChange={(value) => {
+          setFormValue({ ...formValue, showAsCommand: value });
         }}
       />
     </Form>

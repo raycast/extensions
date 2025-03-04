@@ -240,6 +240,7 @@ export const languageItemList: LanguageItem[] = [
     volcanoLangCode: "ar",
     bingLangCode: "ar",
     appleLangCode: "ar_AE",
+    deepLSourceId: "AR",
     francLangCode: "arb",
     aliyunLangCode: "ar",
     tencentLangCode: "ar",

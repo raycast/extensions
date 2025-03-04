@@ -1,4 +1,4 @@
-import { List, ActionPanel, PushAction, Icon } from "@raycast/api";
+import { List, ActionPanel, Icon, Action } from "@raycast/api";
 import { Project, Task } from "../types";
 import { TaskList } from "../views";
 
@@ -19,7 +19,8 @@ export function ProjectListItem({
       icon={Icon.Document}
       actions={
         <ActionPanel>
-          <PushAction
+          <Action.Push
+            icon={Icon.Eye}
             title="Select Project"
             target={<TaskList refreshRecords={refreshRecords} timeRecords={timeRecords} projectId={project.id} />}
           />

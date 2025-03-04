@@ -10,16 +10,19 @@ import {
   Image,
   confirmAlert,
   Alert,
+  Keyboard,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { StoriesList } from "./stories";
 import AddFeedForm from "./subscription-form";
+import RenameFeedForm from "./rename-form";
 
 export interface Feed {
   url: string;
   title: string;
   link?: string;
   icon: Image.ImageLike;
+  originalTitle?: string;
 }
 
 function FeedsList() {
@@ -83,12 +86,13 @@ function FeedsList() {
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                 />
                 <Action
+                  style={Action.Style.Destructive}
                   title="Remove Feed"
                   onAction={async () => {
                     confirmAlert({
                       title: "Delete Feed?",
                       message: `Warning: This operation cannot be undone.`,
-                      icon: Icon.Trash,
+                      icon: { source: Icon.Trash, tintColor: Color.Red },
                       primaryAction: {
                         title: "Delete",
                         onAction: () => removeFeed(index),
@@ -99,12 +103,18 @@ function FeedsList() {
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                 />
+                <Action.Push
+                  icon={Icon.Pencil}
+                  title="Rename Feed"
+                  target={<RenameFeedForm feed={item} feeds={feeds} onRename={revalidate} />}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
+                />
               </ActionPanel.Section>
               {feeds.length > 1 && (
                 <ActionPanel.Section>
                   {index != 0 && (
                     <Action
-                      title="Move Up in List"
+                      title="Move up in List"
                       onAction={() => moveFeed(index, -1)}
                       icon={{ source: Icon.ChevronUp }}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}

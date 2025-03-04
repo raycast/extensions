@@ -1,7 +1,7 @@
-import { json2ts } from "json-ts";
+import { json2ts, JsonTsOptions } from "json-ts";
 
-const jsonToTs = (input: string) => {
-  return json2ts(input);
+const jsonToTs = (input: string, options?: JsonTsOptions) => {
+  return json2ts(input, options);
 };
 
 export default jsonToTs;

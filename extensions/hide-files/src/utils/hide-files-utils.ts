@@ -1,15 +1,11 @@
-import { FileSystemItem, LocalStorage, showHUD } from "@raycast/api";
-import {
-  checkDuplicatePath,
-  fetchSelectedFileSystemItem,
-  getLocalStorage,
-  isDirectoryOrFile,
-  isEmpty,
-} from "./common-utils";
+import { captureException, getSelectedFinderItems, LocalStorage, showHUD } from "@raycast/api";
+import { checkDuplicatePath, getFilesInDirectory, getLocalStorage, isDirectoryOrFile, isEmpty } from "./common-utils";
 import { DirectoryInfo } from "./directory-info";
 import { parse } from "path";
 import { spawn } from "child_process";
 import { LocalStorageKey } from "./constants";
+import { spawnSync } from "node:child_process";
+import fse from "fs-extra";
 
 export const putFileOnHidePanel = async (fileSystemItems: string[]) => {
   try {
@@ -43,36 +39,6 @@ export const putFileOnHidePanel = async (fileSystemItems: string[]) => {
   }
 };
 
-/**
- *
- * @param path If there are multiple paths, please separate them with spaces
- */
-export const showHiddenFiles = (path: string) => {
-  spawn("chflags", ["nohidden", path], { shell: true });
-};
-
-export const getSelectedHiddenFiles = async () => {
-  let hiddenFiles = "";
-  let fileSystemItems: FileSystemItem[] = [];
-  try {
-    fileSystemItems = await fetchSelectedFileSystemItem();
-    if (fileSystemItems.length === 0) {
-      await showHUD("No files selected");
-      return { fileSystemItems: fileSystemItems, hiddenFiles: hiddenFiles };
-    }
-    fileSystemItems.forEach((value) => {
-      const parsedPath = parse(value.path);
-      hiddenFiles =
-        hiddenFiles + " " + parsedPath.dir.replaceAll(" ", `" "`) + "/" + parsedPath.base.replaceAll(" ", `" "`);
-    });
-    return { fileSystemItems: fileSystemItems, hiddenFiles: hiddenFiles };
-  } catch (e) {
-    console.error(String(e));
-    await showHUD(String(e));
-    return { fileSystemItems: fileSystemItems, hiddenFiles: hiddenFiles };
-  }
-};
-
 export const removeFilesFromPanel = async (directory: string) => {
   //remove files from hide panel
   const _localstorage = await getLocalStorage(LocalStorageKey.LOCAL_HIDE_DIRECTORY);
@@ -83,7 +49,7 @@ export const removeFilesFromPanel = async (directory: string) => {
 
   const parseDirectoryPath = parse(directory);
   const newLocalDirectory = localDirectory.filter(
-    (item) => parse(item.path).dir !== parseDirectoryPath.dir + "/" + parseDirectoryPath.base
+    (item) => parse(item.path).dir !== parseDirectoryPath.dir + "/" + parseDirectoryPath.base,
   );
   await LocalStorage.setItem(LocalStorageKey.LOCAL_HIDE_DIRECTORY, JSON.stringify(newLocalDirectory));
 };
@@ -105,4 +71,132 @@ export const removeFilesFromPanelBySelected = async (directory: string[]) => {
     });
   });
   await LocalStorage.setItem(LocalStorageKey.LOCAL_HIDE_DIRECTORY, JSON.stringify(newLocalDirectory));
+};
+
+/**
+ *
+ * @param path If there are multiple paths, please separate them with spaces
+ */
+export const showHiddenFiles = (path: string) => {
+  spawn("chflags", ["nohidden", path], { shell: true });
+};
+
+// Judging by the hidden attribute of the first file
+export const isFileHidden = (path: string) => {
+  const firstPath = Array.isArray(path) ? path[0] : path;
+  const spawnRet = spawnSync("ls", ["-lOd", firstPath]);
+  const flag = spawnRet.stdout.toString().split(RegExp("\\s+"))[4];
+  return flag !== "-";
+};
+
+export const hasHiddenFiles = (path: string | string[]) => {
+  const firstPath = Array.isArray(path) ? path[0] : path;
+  const files = fse.readdirSync(firstPath).filter((value) => !value.startsWith("."));
+  if (files.length === 0) {
+    return undefined;
+  }
+  return isFileHidden(firstPath.endsWith("/") ? firstPath + files[0] : `${firstPath}/${files[0]}`);
+};
+
+export const hideFilesInFolder = async (path: string) => {
+  try {
+    const pathStr = path.endsWith("/") ? path : `${path}/`;
+    const isHidden = hasHiddenFiles(pathStr);
+    const { name } = parse(pathStr);
+    if (typeof isHidden === "undefined") {
+      await showHUD(`📂 No files in ${name}`);
+      return undefined;
+    }
+
+    if (isHidden) {
+      await showHUD(`🐵 Unhiding files in ${name}`);
+      spawn("chflags", ["nohidden", `${pathStr.replaceAll(" ", `" "`)}*`], { shell: true });
+      //remove files from hide panel
+      await removeFilesFromPanel(pathStr);
+    } else {
+      await showHUD(`🙈 Hiding files in ${name}`);
+      spawn("chflags", ["hidden", `${pathStr.replaceAll(" ", `" "`)}*`], { shell: true });
+      //add files to hide panel
+      const fileSystemItems = getFilesInDirectory(pathStr);
+      await putFileOnHidePanel(fileSystemItems);
+    }
+    return isHidden;
+  } catch (e) {
+    captureException(e);
+    await showHUD(`🚨 ${String(e)}`);
+    console.error(String(e));
+    return undefined;
+  }
+};
+
+export const hideFilesSelected = async () => {
+  try {
+    const fileSystemItems = await getSelectedFinderItems();
+    if (fileSystemItems.length === 0) {
+      await showHUD("📂 No files selected");
+      return;
+    }
+    const isHidden = isFileHidden(fileSystemItems[0].path);
+
+    let hiddenFilesStr = "";
+    fileSystemItems.forEach((value) => {
+      const parsedPath = parse(value.path);
+      hiddenFilesStr =
+        hiddenFilesStr + " " + parsedPath.dir.replaceAll(" ", `" "`) + "/" + parsedPath.base.replaceAll(" ", `" "`);
+    });
+
+    if (isHidden) {
+      await showHUD(`🐵 Unhiding selected files`);
+      spawn("chflags", ["nohidden", `${hiddenFilesStr}`], { shell: true });
+
+      //add files to hide panel
+      const _fileSystemItems = fileSystemItems.map((value) => {
+        return value.path;
+      });
+      await removeFilesFromPanelBySelected(_fileSystemItems);
+    } else {
+      await showHUD(`🙈 Hiding selected files`);
+      spawn("chflags", ["hidden", hiddenFilesStr], { shell: true });
+
+      //add files to hide panel
+      const _fileSystemItems = fileSystemItems.map((value) => {
+        return value.path;
+      });
+      await putFileOnHidePanel(_fileSystemItems);
+    }
+  } catch (e) {
+    captureException(e);
+    await showHUD(`🚨 ${String(e)}`);
+    console.error(String(e));
+  }
+};
+
+function isOverSonoma() {
+  const { stdout } = spawnSync("sw_vers", ["-productVersion"], { encoding: "utf-8" });
+  const macVersion = parseInt(stdout.trim().split(".")[0]);
+  return macVersion >= 14;
+}
+export const isWidgetVisible = () => {
+  if (isOverSonoma()) {
+    const { stdout } = spawnSync("defaults", ["read", "com.apple.WindowManager", "StandardHideWidgets"], {
+      encoding: "utf-8",
+    });
+    return stdout.trim() === "0";
+  } else {
+    return undefined;
+  }
+};
+
+export enum Visibility {
+  INVISIBLE = "true",
+  VISIBLE = "false",
+}
+export const toggleWidgetsVisibility = (visibility: Visibility) => {
+  try {
+    if (isOverSonoma()) {
+      spawnSync("defaults", ["write", "com.apple.WindowManager", "StandardHideWidgets", "-bool", visibility]);
+    }
+  } catch (e) {
+    console.error(String(e));
+  }
 };

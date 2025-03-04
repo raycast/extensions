@@ -7,23 +7,22 @@ import { buildBingImageURL, getPictureName } from "../utils/bing-wallpaper-utils
 import { ActionsOnlineBingWallpaper } from "./actions-online-bing-wallpaper";
 import fileUrl from "file-url";
 import { ActionsDownloadedBingWallpaper } from "./actions-downloaded-bing-wallpaper";
-import { Preferences } from "../types/preferences";
+import { includeDownloadedWallpapers, layout } from "../types/preferences";
 
 export function WallpaperListLayout(props: {
-  preferences: Preferences;
   isLoading: boolean;
   bingWallpaperHD: BingImage[];
   downloadedBingWallpapers: DownloadedBingImage[];
 }) {
   const [tag, setTag] = useState<string>("");
-  const { preferences, isLoading, bingWallpaperHD, downloadedBingWallpapers } = props;
+  const { isLoading, bingWallpaperHD, downloadedBingWallpapers } = props;
   return (
     <List
       isShowingDetail={bingWallpaperHD.length !== 0 && !isLoading}
       isLoading={isLoading}
       searchBarPlaceholder={"Search wallpapers"}
       searchBarAccessory={
-        preferences.includeDownloadedWallpapers ? (
+        includeDownloadedWallpapers ? (
           <List.Dropdown onChange={setTag} tooltip={"Wallpaper type"} storeValue={true}>
             {wallpaperTags.map((value, index) => {
               return <List.Dropdown.Item key={index + "_" + value[0]} title={value[1]} value={value[1]} />;
@@ -32,7 +31,7 @@ export function WallpaperListLayout(props: {
         ) : null
       }
     >
-      <ListEmptyView layout={preferences.layout} />
+      <ListEmptyView layout={layout} />
       {(tag === WallpaperTag.ALL || tag === WallpaperTag.ONLINE || tag === "") && (
         <List.Section title={"Online Wallpapers"}>
           {bingWallpaperHD.map((bingImage, index) => {
@@ -58,7 +57,6 @@ ${bingImage.copyright}`}
                     bingImage={bingImage}
                     downloadedImages={downloadedBingWallpapers}
                     onlineImages={bingWallpaperHD}
-                    downloadSize={preferences.downloadSize}
                   />
                 }
               />
@@ -66,7 +64,7 @@ ${bingImage.copyright}`}
           })}
         </List.Section>
       )}
-      {preferences.includeDownloadedWallpapers && (tag === WallpaperTag.ALL || tag === WallpaperTag.DOWNLOADED) && (
+      {includeDownloadedWallpapers && (tag === WallpaperTag.ALL || tag === WallpaperTag.DOWNLOADED) && (
         <List.Section title={"Downloaded Wallpapers"}>
           {downloadedBingWallpapers?.map((bingImage, index) => {
             return (

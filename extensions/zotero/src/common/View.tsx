@@ -196,16 +196,20 @@ export const View = ({
   const [urls, onOpen] = useVisitedUrls();
   const [collection, setCollection] = useState<string>("All");
   const preferences: Preferences = getPreferenceValues();
+  const [searchText, setSearchText] = useState<string>("");
   return (
     <List
       isShowingDetail={queryResults[0].length > 0}
       isLoading={isLoading}
-      onSearchTextChange={onSearchTextChange}
+      onSearchTextChange={(text) => {
+        setSearchText(text);
+        onSearchTextChange?.(text);
+      }}
       throttle={throttle}
       searchBarPlaceholder="Search Zotero..."
       searchBarAccessory={<CollectionDropdown onSelection={setCollection} collections={collections} />}
     >
-      {queryResults[0].length < 1 ? (
+      {searchText.length === 0 ? (
         <List.EmptyView icon={{ source: "no-view.png" }} title="Type something to search Zotero Database!" />
       ) : (
         sectionNames.map((sectionName, sectionIndex) => (

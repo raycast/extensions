@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Form, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
 import { LinkdingAccountForm, LinkdingAccountMap } from "./types/linkding-types";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getPersistedLinkdingAccounts, setPersistedLinkdingAccounts } from "./service/user-account-service";
 import { validateUrl } from "./util/bookmark-util";
 import { LinkdingShortcut } from "./types/linkding-shortcuts";
+import { useForm } from "@raycast/utils";
 
 export default function ManageAccounts() {
   const [linkdingAccountMap, setLinkdingAccountMap] = useState<LinkdingAccountMap>({});
@@ -23,6 +24,7 @@ export default function ManageAccounts() {
   }, [setLinkdingAccountMap, searchText]);
 
   function deleteAccount(name: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { [name]: removed, ...filteredMapEntries } = linkdingAccountMap;
     updateLinkdingAccountMap(filteredMapEntries);
   }
@@ -58,7 +60,7 @@ export default function ManageAccounts() {
       throttle
       actions={
         <ActionPanel title="Manage Accounts">
-          <Action title="Create New Account" onAction={() => showCreateEditAccount()} />
+          <Action icon={Icon.Plus} title="Create New Account" onAction={() => showCreateEditAccount()} />
         </ActionPanel>
       }
     >
@@ -76,12 +78,18 @@ export default function ManageAccounts() {
               subtitle={linkdingAccount.serverUrl}
               actions={
                 <ActionPanel title="Manage Accounts">
-                  <Action title="Create Account" onAction={() => showCreateEditAccount()} />
-                  <Action title="Edit Account" onAction={() => showCreateEditAccount({ name, ...linkdingAccount })} />
+                  <Action icon={Icon.Plus} title="Create Account" onAction={() => showCreateEditAccount()} />
                   <Action
+                    icon={Icon.Pencil}
+                    title="Edit Account"
+                    onAction={() => showCreateEditAccount({ name, ...linkdingAccount })}
+                  />
+                  <Action
+                    icon={Icon.Trash}
                     title="Delete Account"
                     shortcut={LinkdingShortcut.DELETE_SHORTCUT}
                     onAction={() => deleteAccount(name)}
+                    style={Action.Style.Destructive}
                   />
                 </ActionPanel>
               }
@@ -104,106 +112,63 @@ function CreateEditAccount({
 }) {
   const { pop } = useNavigation();
 
-  const [accountNameError, setAccountNameError] = useState<string | undefined>();
-  const [serverUrlError, setServerUrlError] = useState<string | undefined>();
-  const [apiKeyError, setApiKeyError] = useState<string | undefined>();
-
-  function submitForm(formValues: LinkdingAccountForm): void {
-    onSubmit({
-      name: formValues.name?.trim() ?? initialValue?.name,
-      apiKey: formValues.apiKey.trim(),
-      serverUrl: formValues.serverUrl.trim(),
-      ignoreSSL: formValues.ignoreSSL,
-    });
-    pop();
-  }
-
-  function validateAccountname(value?: string) {
-    if (value) {
-      if (Object.keys(linkdingAccountMap).includes(value)) {
-        setAccountNameError("Name already used");
-      }
-    } else {
-      setAccountNameError("Name is required");
-    }
-  }
-
-  function dropAccountNameError() {
-    setAccountNameError(undefined);
-  }
-
-  function validateServerUrl(value?: string) {
-    if (value) {
-      if (!validateUrl(value)) {
-        setServerUrlError("Server URL must be a valide url");
-      }
-    } else {
-      setServerUrlError("Server URL is required");
-    }
-  }
-
-  function dropServerUrlError() {
-    setServerUrlError(undefined);
-  }
-
-  function validateApiKey(value?: string) {
-    if (!value) {
-      setApiKeyError("API Key is required");
-    }
-  }
-
-  function dropApiKeyError() {
-    setApiKeyError(undefined);
-  }
+  const { handleSubmit, itemProps } = useForm<LinkdingAccountForm>({
+    onSubmit(values) {
+      const url = new URL(values.serverUrl).toString();
+      const serverUrl = url.endsWith("/") ? url.slice(0, -1) : url;
+      onSubmit({
+        name: values.name?.trim() ?? initialValue?.name,
+        apiKey: values.apiKey.trim(),
+        serverUrl,
+        ignoreSSL: values.ignoreSSL,
+      });
+      pop();
+    },
+    initialValues: initialValue,
+    validation: {
+      name(value) {
+        if (initialValue?.name) return undefined;
+        if (!value) return "Name is required";
+        if (Object.keys(linkdingAccountMap).includes(value)) return "Name already used";
+      },
+      serverUrl(value) {
+        if (!value) return "Server URL is required";
+        if (!validateUrl(value)) return "Server URL must be a valid url";
+      },
+      apiKey(value) {
+        if (!value) return "API Key is required";
+      },
+    },
+  });
 
   return (
     <Form
       navigationTitle={initialValue ? `Edit Linkding "${initialValue.name}" Account` : "Create new Linkding Account"}
       actions={
         <ActionPanel title="Manage Accounts">
-          <Action.SubmitForm
-            title={initialValue ? "Edit Account" : "Create Account"}
-            onSubmit={(values: LinkdingAccountForm) => submitForm(values)}
-          />
+          <Action.SubmitForm title={initialValue ? "Edit Account" : "Create Account"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       {initialValue?.name ? (
-        <Form.Description title="Accountname" text="Accountname cant be changed" />
+        <Form.Description title="Account Name" text="Account Name can't be changed" />
       ) : (
-        <Form.TextField
-          defaultValue={initialValue?.name}
-          id="name"
-          error={accountNameError}
-          onBlur={(event) => validateAccountname(event.target.value)}
-          onChange={dropAccountNameError}
-          title="Account Name"
-          placeholder="A Name for the Account"
-        />
+        <Form.TextField title="Account Name" placeholder="A Name for the Account" {...itemProps.name} />
       )}
       <Form.TextField
-        defaultValue={initialValue?.serverUrl}
-        id="serverUrl"
-        error={serverUrlError}
-        onBlur={(event) => validateServerUrl(event.target.value)}
-        onChange={dropServerUrlError}
         title="Linkding Server URL"
         placeholder="URL from the Linkding instance"
+        {...itemProps.serverUrl}
       />
       <Form.PasswordField
-        defaultValue={initialValue?.apiKey}
-        id="apiKey"
-        error={apiKeyError}
-        onBlur={(event) => validateApiKey(event.target.value)}
-        onChange={dropApiKeyError}
         title="Linkding API Key"
         placeholder="API Key from from the Linkding instance"
+        {...itemProps.apiKey}
       />
       <Form.Checkbox
-        defaultValue={initialValue?.ignoreSSL}
-        id="ignoreSSL"
         title="Ignore Server SSL"
         label="Ignore SSL Certificate from Linkding Server"
+        {...itemProps.ignoreSSL}
       />
     </Form>
   );

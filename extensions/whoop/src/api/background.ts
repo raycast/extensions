@@ -1,21 +1,13 @@
+import { setWhoopClient, getWhoopClient } from "../helpers/withWhoopClient";
 import * as api from "../helpers/whoop.api";
-import { authorize } from "../api/oauth";
-import nodeFetch from "node-fetch";
 import { getErrorMessage } from "../helpers/errors";
 import { CollectionFunctionParams } from "../helpers/types";
 
-async function setupAPI() {
-  const accessToken = await authorize();
-  api.defaults.headers = {
-    Authorization: `Bearer ${accessToken}`,
-  };
-  api.defaults.fetch = nodeFetch as unknown as typeof api.defaults.fetch;
-}
-
 export async function getCycleCollection(params?: CollectionFunctionParams): Promise<api.PaginatedCycleResponse> {
   try {
-    await setupAPI();
-    const response = await api.getCycleCollection(params);
+    await setWhoopClient();
+    const { whoopClient } = getWhoopClient();
+    const response = await whoopClient.getCycleCollection(params);
     if (response.status !== 200) {
       throw new Error(`HTTP Error: ${response.status}`);
     }
@@ -29,8 +21,9 @@ export async function getCycleCollection(params?: CollectionFunctionParams): Pro
 
 export async function getRecoveryCollection(params?: CollectionFunctionParams): Promise<api.PaginatedRecoveryResponse> {
   try {
-    await setupAPI();
-    const response = await api.getRecoveryCollection(params);
+    await setWhoopClient();
+    const { whoopClient } = getWhoopClient();
+    const response = await whoopClient.getRecoveryCollection(params);
     if (response.status !== 200) {
       throw new Error(`HTTP Error: ${response.status}`);
     }
@@ -44,8 +37,9 @@ export async function getRecoveryCollection(params?: CollectionFunctionParams): 
 
 export async function getSleepCollection(params?: CollectionFunctionParams): Promise<api.PaginatedSleepResponse> {
   try {
-    await setupAPI();
-    const response = await api.getSleepCollection(params);
+    await setWhoopClient();
+    const { whoopClient } = getWhoopClient();
+    const response = await whoopClient.getSleepCollection(params);
     if (response.status !== 200) {
       throw new Error(`HTTP Error: ${response.status}`);
     }

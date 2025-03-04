@@ -1,34 +1,16 @@
-import { useEffect, useState } from "react";
-import { ErrorResponse, GetDatabasesResponse, SuccessResponse } from "../../types";
-import { deleteDatabase, getDatabases } from "../../utils/api";
+import { SuccessResponse } from "../../types";
+import { deleteDatabase } from "../../utils/api";
 import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import ErrorComponent from "../ErrorComponent";
 import CreateDatabaseComponent from "./CreateDatabaseComponent";
+import { useGetDatabases } from "../../utils/hooks";
+import { RESELLER_USERNAME } from "../../utils/constants";
 
 type GetDatabasesComponentProps = {
   userToImpersonate?: string;
 };
 export default function GetDatabasesComponent({ userToImpersonate = "" }: GetDatabasesComponentProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [databases, setDatabases] = useState<string[]>();
-  const [error, setError] = useState<ErrorResponse>();
-
-  async function getFromApi() {
-    setIsLoading(true);
-    const response = await getDatabases(userToImpersonate);
-
-    if (response.error === "0") {
-      const data = response as GetDatabasesResponse;
-      const { list = [] } = data;
-      setDatabases(list);
-      await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} Databases`);
-    } else if (response.error === "1") setError(response as ErrorResponse);
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-    getFromApi();
-  }, []);
+  const { isLoading, data: databases = [], error, revalidate } = useGetDatabases(userToImpersonate);
 
   async function confirmAndDeleteDatabase(database: string) {
     if (
@@ -43,7 +25,7 @@ export default function GetDatabasesComponent({ userToImpersonate = "" }: GetDat
       if (response.error === "0") {
         const data = response as SuccessResponse;
         await showToast(Toast.Style.Success, data.text, data.details);
-        await getFromApi();
+        revalidate();
       }
     }
   }
@@ -51,27 +33,32 @@ export default function GetDatabasesComponent({ userToImpersonate = "" }: GetDat
   return error ? (
     <ErrorComponent errorResponse={error} />
   ) : (
-    <List isLoading={isLoading}>
-      {databases &&
-        databases.map((database) => (
+    <List isLoading={isLoading} searchBarPlaceholder="Search database">
+      <List.Section title={userToImpersonate || RESELLER_USERNAME} subtitle={`${databases.length} databases`}>
+        {databases.map((db) => (
           <List.Item
-            key={database}
-            title={database}
+            key={db.database}
+            title={db.database}
+            subtitle={`${db.sizeBytes.toString()} bytes`}
             icon={Icon.Coin}
+            accessories={[
+              { tag: db.userCount.toString(), icon: Icon.TwoPeople },
+              { tag: db.tableCount.toString(), icon: Icon.AppWindowList },
+            ]}
             actions={
               <ActionPanel>
                 <Action
                   title="Delete Database"
                   icon={Icon.DeleteDocument}
                   style={Action.Style.Destructive}
-                  onAction={() => confirmAndDeleteDatabase(database)}
+                  onAction={() => confirmAndDeleteDatabase(db.database)}
                 />
                 <ActionPanel.Section>
                   <Action.Push
                     title="Create Database"
                     icon={Icon.Plus}
                     target={
-                      <CreateDatabaseComponent onDatabaseCreated={getFromApi} userToImpersonate={userToImpersonate} />
+                      <CreateDatabaseComponent onDatabaseCreated={revalidate} userToImpersonate={userToImpersonate} />
                     }
                   />
                 </ActionPanel.Section>
@@ -79,6 +66,7 @@ export default function GetDatabasesComponent({ userToImpersonate = "" }: GetDat
             }
           />
         ))}
+      </List.Section>
       {!isLoading && (
         <List.Section title="Actions">
           <List.Item
@@ -90,7 +78,7 @@ export default function GetDatabasesComponent({ userToImpersonate = "" }: GetDat
                   title="Create Database"
                   icon={Icon.Plus}
                   target={
-                    <CreateDatabaseComponent onDatabaseCreated={getFromApi} userToImpersonate={userToImpersonate} />
+                    <CreateDatabaseComponent onDatabaseCreated={revalidate} userToImpersonate={userToImpersonate} />
                   }
                 />
               </ActionPanel>

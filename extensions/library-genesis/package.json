@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "yz3440",
   "contributors": [
-    "j3lte"
+    "j3lte",
+    "xmok"
   ],
   "categories": [
     "Web"
@@ -66,7 +67,7 @@
       "description": "Force query from the specified mirror.",
       "type": "textfield",
       "default": "",
-      "placeholder": "https://libgen.rs",
+      "placeholder": "https://libgen.is",
       "required": false
     },
     {
@@ -166,8 +167,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.67.1",
-    "@raycast/utils": "^1.12.4",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.0",
     "cheerio": "^1.0.0-rc.12",
     "fs-extra": "^11.2.0",
     "node-fetch": "^3.3.2",
@@ -178,7 +179,7 @@
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "20.11.19",
-    "@types/react": "18.2.55",
+    "@types/react": "^18.3.3",
     "eslint": "^8.56.0",
     "prettier": "^3.2.5"
   },

@@ -5,6 +5,9 @@
   "description": "Gives Current Time in all formats",
   "icon": "command-icon.png",
   "author": "heerthees",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "license": "MIT",
   "commands": [
     {

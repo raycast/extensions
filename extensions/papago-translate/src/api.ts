@@ -10,9 +10,9 @@ interface I_preferences {
   korEngMode: boolean;
 }
 
-const PAPAGO_TRANSLATE_API_URL = "https://openapi.naver.com/v1/papago/n2mt";
+const PAPAGO_TRANSLATE_API_URL = "https://naveropenapi.apigw.ntruss.com/nmt/v1/translation";
 
-const PAPAGO_DETECT_API_URL = "https://openapi.naver.com/v1/papago/detectLangs";
+const PAPAGO_DETECT_API_URL = "https://naveropenapi.apigw.ntruss.com/langs/v1/dect";
 
 const { sourceLanguage, targetLanguage, korEngMode } = getPreferenceValues<I_preferences>();
 

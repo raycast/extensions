@@ -7,8 +7,15 @@ import { State, Issue } from "./interfaces";
 import _ from "lodash";
 import { loadCache, saveCache } from "./cache";
 
+interface Preferences {
+  instance: string;
+  token: string;
+  query: string;
+  maxIssues: number;
+}
+
 export default function Command() {
-  const prefs = getPreferenceValues<Preferences.Browse>();
+  const prefs = getPreferenceValues<Preferences>();
 
   const [state, setState] = useState<State>({ isLoading: true, items: [], project: null, yt: null });
 

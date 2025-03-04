@@ -1,16 +1,14 @@
 import "cross-fetch/polyfill";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { Form, ActionPanel, Action, Clipboard, getSelectedText, LaunchProps } from "@raycast/api";
-import { LightningAddress, Invoice } from "@getalby/lightning-tools";
+import { Action, ActionPanel, Clipboard, Form, getSelectedText, LaunchProps } from "@raycast/api";
+import { Invoice, LightningAddress } from "@getalby/lightning-tools";
 
-import ConnectionError from "./ConnectionError";
-import PayInvoice from "./PayInvoice";
-import PayToLightingAddress from "./PayLightningAddress";
-import { connectWallet } from "./wallet";
-
-const LN_ADDRESS_REGEX =
-  /^((?:[^<>()[\]\\.,;:\s@"]+(?:\.[^<>()[\]\\.,;:\s@"]+)*)|(?:".+"))@((?:\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(?:(?:[a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+import ConnectionError from "./components/ConnectionError";
+import PayInvoice from "./components/PayInvoice";
+import PayToLightingAddress from "./components/PayToLightningAddress";
+import { connectWallet } from "./utils/wallet";
+import { LN_ADDRESS_REGEX } from "./constants";
 
 export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) {
   const [lightningAddress, setLightningAddress] = useState("");
@@ -58,7 +56,8 @@ export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) 
         console.error(e);
       }
     }
-    if (text && (text.toLowerCase().startsWith("lnbc1") || text.match(LN_ADDRESS_REGEX))) {
+    //invoice doesn't always start with "lnbc1" as 1 is only bech32 separator and invoice can contain amount.
+    if (text && (text.toLowerCase().startsWith("lnbc") || text.match(LN_ADDRESS_REGEX))) {
       setInput(text);
     }
   };
@@ -67,7 +66,7 @@ export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) 
     if (!input) {
       return;
     }
-    if (input?.toLowerCase().startsWith("lnbc1")) {
+    if (input?.toLowerCase().startsWith("lnbc")) {
       const invoice = new Invoice({ pr: input });
       setInvoice(invoice.paymentRequest);
       return;

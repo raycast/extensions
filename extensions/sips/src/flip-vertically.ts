@@ -9,14 +9,14 @@
  */
 
 import flip from "./operations/flipOperation";
+import runOperation from "./operations/runOperation";
 import { Direction } from "./utilities/enums";
 import { getSelectedImages } from "./utilities/utils";
-import runOperation from "./operations/runOperation";
 
 export default async function Command() {
   const selectedImages = await getSelectedImages();
   await runOperation({
-    operation: () => flip(selectedImages, Direction.HORIZONTAL),
+    operation: () => flip(selectedImages, Direction.VERTICAL),
     selectedImages,
     inProgressMessage: "Flipping in progress...",
     successMessage: "Flipped",

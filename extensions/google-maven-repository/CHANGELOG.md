@@ -1,6 +1,11 @@
 # Google Maven Repository Changelog
 
-## [Optimize extension] - {PR_MERGE_DATE}
+## [Show update date] - 2024-06-14
+
+- Show update date in the search results
+- Fix the problem of using hotkeys to invoke commands
+
+## [Optimize extension] - 2022-09-30
 
 - Optimize Show Google Maven Repository command loading speed
 

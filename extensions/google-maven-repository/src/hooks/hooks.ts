@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { ArtifactTag, fetchArtifacts } from "../utils/google-maven-utils";
-import { artifactModel } from "../model/packages-model";
+import { artifactModel } from "../types/packages-model";
 import { Cache, showToast, Toast } from "@raycast/api";
 import fetch, { AbortError } from "node-fetch";
 import { allPackagesURL, CacheKey } from "../utils/constans";
-import { MavenModel } from "../model/maven-model";
+import { MavenModel } from "../types/maven-model";
 import Style = Toast.Style;
 import { isEmpty } from "../utils/common-utils";
 

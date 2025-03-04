@@ -1,13 +1,23 @@
 import { ActionPanel, List, Action, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import * as fs from "fs";
+import { homedir } from "os";
+import path from "path";
+
+const jsonLocalFilePath = path.join(homedir(), "Downloads", "raycast_key_value.json");
 
 export default function Command() {
   const prefs = getPreferenceValues<ExtensionPreferences>();
 
+  // If jsonLocalFilePath exists in the local file system, use it
+  let jsonFilePath = prefs.jsonFilePath;
+  if (fs.existsSync(jsonLocalFilePath)) {
+    jsonFilePath = jsonLocalFilePath;
+  }
+
   const { isLoading, data } = useCachedPromise(
     async () => {
-      return JSON.parse(fs.readFileSync(prefs.jsonFilePath, "utf8"));
+      return JSON.parse(fs.readFileSync(jsonFilePath, "utf8"));
     },
     [],
     { initialData: [] }

@@ -1,14 +1,15 @@
-import { Application, getApplications, Grid, getPreferenceValues, LaunchProps } from "@raycast/api";
-import FileGridItem from "./components/FileGridItem";
-import { ErrorView } from "./components/ErrorView";
-import { useVisitedFiles } from "./hooks/useVisitedFiles";
-import { resolveAllFiles } from "./components/fetchFigmaData";
+import { type Application, Grid, type LaunchProps, getApplications, getPreferenceValues } from "@raycast/api";
+import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { useCachedPromise } from "@raycast/utils";
+import { resolveAllFiles } from "./api";
+import { ErrorView } from "./components/ErrorView";
+import FileGridItem from "./components/FileGridItem";
+import { useVisitedFiles } from "./hooks/useVisitedFiles";
+import { figma } from "./oauth";
+import { loadStarredFiles } from "./starFiles";
 import type { TeamFiles } from "./types";
-import { loadStarredFiles } from "./components/starFiles";
 
-export default function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { query: string } }>>) {
+function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { query: string } }>>) {
   const { data, isLoading, error } = useCachedPromise(
     async () => {
       const results = await resolveAllFiles();
@@ -185,3 +186,5 @@ export default function Command({ launchContext }: Readonly<LaunchProps<{ launch
     </Grid>
   );
 }
+
+export default withAccessToken(figma)(Command);

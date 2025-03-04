@@ -1,9 +1,9 @@
 import { Action, ActionPanel, closeMainWindow, Icon, List, open, openExtensionPreferences } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { useState } from "react";
-import { useCompanies } from "./hooks/useCompanies";
-import { useAccountInfo } from "./hooks/useAccountInfo";
-import { Company } from "./types/company";
+import { useCompanies } from "@/hooks/useCompanies";
+import { useAccountInfo } from "@/hooks/useAccountInfo";
+import type { Company } from "@/types/company";
 
 const formatTimestamp = (timestamp?: string): string => (timestamp ? new Date(timestamp).toLocaleString() : "");
 

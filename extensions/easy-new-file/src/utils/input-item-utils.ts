@@ -2,14 +2,42 @@ import { Clipboard, getSelectedText } from "@raycast/api";
 import { isEmpty } from "./common-utils";
 
 export const fetchItemInputSelectedFirst = async () => {
-  return getSelectedText()
-    .then(async (text) => (!isEmpty(text) ? text : await getClipboardText()))
-    .catch(async () => await getClipboardText())
-    .then((item) => (!isEmpty(item) ? item : ""))
-    .catch(() => "" as string);
+  try {
+    const selectedText = await getSelectedText();
+    if (!isEmpty(selectedText)) {
+      return selectedText;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
+  try {
+    const clipboardText = await Clipboard.readText();
+    if (clipboardText) {
+      return clipboardText;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return "";
 };
 
-const getClipboardText = async () => {
-  const content = await Clipboard.readText();
-  return typeof content == "undefined" ? "" : content;
+export const fetchItemInputClipboardFirst = async () => {
+  try {
+    const clipboardText_ = await Clipboard.readText();
+    if (clipboardText_ && !isEmpty(clipboardText_)) {
+      return clipboardText_;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
+  let selectedText: string;
+  try {
+    selectedText = await getSelectedText();
+    return selectedText;
+  } catch (e) {
+    console.error(e);
+  }
+  return "";
 };

@@ -1,0 +1,143 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yafw",
+  "title": "YAFW",
+  "description": "Yet Another FFMPEG Wrapper. Compress videos easily from Raycast. Zero config. From your clipboard, or the Finder.",
+  "icon": "command-icon.png",
+  "author": "pablopunk",
+  "contributors": [
+    "mlz11",
+    "tonypinkevych"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Compress Video",
+      "description": "Quickly compress any video",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Open History",
+      "description": "See videos you've recently compressed",
+      "mode": "view"
+    },
+    {
+      "name": "convert",
+      "title": "Convert To",
+      "description": "This command encodes the file in the selected folder.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "format",
+          "placeholder": "Format",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "MP4",
+              "value": "mp4"
+            },
+            {
+              "title": "WEBM",
+              "value": "webm"
+            },
+            {
+              "title": "GIF",
+              "value": "gif"
+            }
+          ],
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "optimize",
+      "title": "Optimize",
+      "description": "The command allows you to optimize the selected video according to the selected template. There are 3 templates available: lighter weight, optimal and best quality. Under the hood, these settings affect the bitrate. GIFs are not currently supported for optimization.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "preset",
+          "placeholder": "Preset",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Best quality",
+              "value": "best-quality"
+            },
+            {
+              "title": "Optimal",
+              "value": "optimal"
+            },
+            {
+              "title": "Smallest size",
+              "value": "smallest-size"
+            }
+          ],
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "resize",
+      "title": "Resize",
+      "description": "Specify width or height. If one of them is not specified, the other will be calculated automatically to maintain the aspect ratio of the original.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "width",
+          "placeholder": "Width",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "height",
+          "placeholder": "Height",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "stabilize",
+      "title": "Stabilize",
+      "description": "The command allows to stabilize video",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.71.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "prettier-plugin-organize-imports": "^3.2.4",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "ffmpeg_path",
+      "type": "textfield",
+      "required": false,
+      "title": "ffmpeg path",
+      "description": "You need to install it manually (`brew install ffmpeg`).",
+      "default": "/opt/homebrew/bin/ffmpeg",
+      "placeholder": "/opt/homebrew/bin/ffmpeg"
+    }
+  ]
+}

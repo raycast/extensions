@@ -5,6 +5,9 @@
   "description": "Create, read, and update data in your omg.lol account.",
   "icon": "omg.lol.png",
   "author": "danpalmer",
+  "contributors": [
+    "rknightuk"
+  ],
   "categories": [
     "Communication",
     "Fun",
@@ -51,6 +54,22 @@
       "description": "View PURLs in your omg.lol account.",
       "mode": "view",
       "icon": "purl.png"
+    },
+    {
+      "name": "create-status",
+      "title": "Create a New Status",
+      "description": "Create a new status with an emoji and status",
+      "subtitle": "omg.lol",
+      "mode": "view",
+      "icon": "status.png"
+    },
+    {
+      "name": "view-statuses",
+      "title": "View Statuses",
+      "description": "View statuses in your omg.lol account",
+      "subtitle": "omg.lol",
+      "mode": "view",
+      "icon": "status.png"
     }
   ],
   "preferences": [
@@ -65,7 +84,8 @@
   "dependencies": {
     "@raycast/api": "^1.64.4",
     "@raycast/utils": "^1.10.1",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "unicode-emoji": "^2.5.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

@@ -13,7 +13,7 @@ on:
 
 jobs:
   merge:
-    runs-on: macos-latest
+    runs-on: macos-14
     name: Merge PR
     env:
       GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
@@ -65,8 +65,16 @@ jobs:
           if [ $count -gt 0 ]; then
             brew update
             brew install imageoptim
-            brew install imageoptim-cli
-            imageoptim "${images_array[@]}"
+            npm install -g imageoptim-cli
+            batch_size=30
+            batch_number=1
+            total_batches=$(( (count + batch_size - 1) / batch_size ))
+            for ((i = 0; i < count; i += batch_size)); do
+                batch=("${images_array[@]:i:batch_size}")
+                echo "Processing batch: $batch_number / $total_batches"
+                imageoptim "${batch[@]}"
+                ((batch_number++))
+            done
           fi
       - name: Commit changes
         id: commit_changes

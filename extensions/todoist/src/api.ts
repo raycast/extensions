@@ -11,7 +11,7 @@ import { Dispatch, SetStateAction } from "react";
 
 import { getTodoistApi, getTodoistRestApi } from "./helpers/withTodoistApi";
 
-let sync_token = "*";
+export let sync_token = "*";
 
 type HandleErrorArgs = {
   error: unknown;
@@ -208,12 +208,18 @@ export async function deleteProject(id: string, { data, setData }: CachedDataPar
   }
 }
 
-export type DueDate = {
+export type Date = {
   date: string;
   timezone: string | null;
   string: string;
   lang: "en" | "da" | "pl" | "zh" | "ko" | "de" | "pt" | "ja" | "it" | "fr" | "sv" | "ru" | "es" | "nl";
   is_recurring: boolean;
+};
+
+export type Deadline = {
+  date: string;
+  timezone: string | null;
+  lang: "en" | "da" | "pl" | "zh" | "ko" | "de" | "pt" | "ja" | "it" | "fr" | "sv" | "ru" | "es" | "nl";
 };
 
 export type Task = {
@@ -222,7 +228,8 @@ export type Task = {
   project_id: string;
   content: string;
   description: string;
-  due: DueDate | null;
+  due: Date | null;
+  deadline: Deadline | null;
   priority: number;
   parent_id: string | null;
   child_order: number;
@@ -254,13 +261,14 @@ export async function quickAddTask(args: QuickAddTaskArgs) {
   return data;
 }
 
-type DateOrString = { date: string; string?: undefined } | { date?: undefined; string: string };
+export type DateOrString = { date: string; string?: undefined } | { date?: undefined; string: string };
 
 export type AddTaskArgs = {
   content: string;
   description?: string;
   project_id?: string;
   due?: DateOrString;
+  deadline?: DateOrString;
   duration?: {
     unit: "minute" | "day";
     amount: number;
@@ -312,6 +320,7 @@ export type UpdateTaskArgs = {
   content?: string;
   description?: string;
   due?: DateOrString;
+  deadline?: DateOrString;
   priority?: number;
   collapsed?: boolean;
   labels?: string[];
@@ -438,7 +447,7 @@ export type Reminder = {
   notify_uid: string;
   item_id: string;
   type: "relative" | "absolute" | "location";
-  due?: DueDate;
+  due?: Date;
   mm_offset?: number;
   name?: string;
   loc_lat?: string;
@@ -758,6 +767,8 @@ export type User = {
   full_name: string;
   id: string;
   is_premium: boolean;
+  time_format: number;
+  premium_status: "not_premium" | "current_personal_plan" | "active_business_account" | "teams_business_account";
 };
 
 export type Event = {
@@ -817,4 +828,20 @@ export async function uploadFile(filePath: string) {
 
   const { data } = await todoistApi.post<File>("/uploads/add", formData);
   return data;
+}
+
+export async function getTask(id: string): Promise<Task> {
+  const todoistApi = getTodoistApi();
+  const { data } = await todoistApi.get<{ item: Task }>("/items/get", {
+    params: { item_id: id },
+  });
+  return data.item;
+}
+
+export async function getProject(id: string): Promise<Project> {
+  const todoistApi = getTodoistApi();
+  const { data } = await todoistApi.get<{ project: Project }>("/projects/get", {
+    params: { project_id: id },
+  });
+  return data.project;
 }

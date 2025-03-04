@@ -6,8 +6,9 @@
 name: Close stale issues and PRs
 
 on:
-  schedule:
-    - cron: "*/60 * * * *"
+  workflow_dispatch:
+  repository_dispatch:
+    types: [trigger-stale-workflow]
   pull_request_target:
     paths:
       - "extensions/**"
@@ -43,11 +44,11 @@ jobs:
           close-pr-message: "This issue has been automatically closed due to inactivity.\n\nFeel free to comment in the thread when you're ready to continue working on it 🙂\n\nYou can also catch us in [Slack](https://www.raycast.com/community) if you want to discuss this."
           exempt-pr-labels: "api, documentation, dev tools, app, status: blocked by API, rename, Dont close"
           stale-pr-label: "status: stalled"
-          days-before-pr-stale: 14
-          days-before-pr-close: 7
+          days-before-pr-stale: 21
+          days-before-pr-close: 14
 
           # Limiting
-          operations-per-run: 200
+          operations-per-run: 400
 
           # Debug
           #debug-only: true

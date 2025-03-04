@@ -15,6 +15,6 @@ export function useToken() {
         setTokenLoading(false);
       }
     })();
-  }, []);
+  });
   return { token, isTokenLoading };
 }

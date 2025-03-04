@@ -8,6 +8,10 @@ import { extractTopicAndDateFromInputText } from "./utils/extractTopicAndDateFro
 import { deleteExistingReminder } from "./handlers/deleteExistingReminder";
 import { copyExistingReminder } from "./handlers/copyExistingReminder";
 import { showError } from "./utils/showError";
+import { Frequency } from "./types/frequency";
+import { setRecurrenceForReminder } from "./handlers/setRecurrenceForReminder";
+import { hasFrequencyPredicate, hasNoFrequencyPredicate } from "./utils/arrayPredicates";
+import { ListActionPanel } from "./components/listActionPanel";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -55,6 +59,19 @@ export default function Command() {
     }
   };
 
+  const onSetRecurrenceForReminderAction = async (reminderId: string, frequency: Frequency) => {
+    try {
+      await setRecurrenceForReminder({
+        reminderId,
+        frequency,
+        existingReminders: reminders,
+        setReminders,
+      });
+    } catch (e) {
+      await showError("Couldn't set recurrence for reminder");
+    }
+  };
+
   return (
     <List
       searchText={searchText}
@@ -75,34 +92,48 @@ export default function Command() {
           icon="no_bell.png"
         />
       ) : (
-        <List.Section title="Existing reminders" subtitle="you can delete existing reminders">
-          {reminders.map((reminder) => (
-            <List.Item
-              key={reminder.id}
-              title={reminder.topic}
-              subtitle={`set to ${reminder.date.toLocaleString()}`}
-              icon="bell.png"
-              actions={
-                <ActionPanel>
-                  {searchText.length > 0 && (
-                    <Action title="Set Reminder" icon={Icon.AlarmRinging} onAction={onSetReminderAction} />
-                  )}
-                  <Action
-                    title="Copy to Clipboard"
-                    icon={Icon.CopyClipboard}
-                    onAction={() => onCopyReminderTopicAction(reminder.topic)}
+        <>
+          <List.Section title="Recurrent reminders">
+            {reminders.filter(hasFrequencyPredicate).map((reminder) => (
+              <List.Item
+                key={reminder.id}
+                title={reminder.topic}
+                subtitle={`set to ${reminder.date.toLocaleString()} ${reminder.frequency ? `(happening ${reminder.frequency})` : ""}`}
+                icon="repeat.png"
+                actions={
+                  <ListActionPanel
+                    searchText={searchText}
+                    reminder={reminder}
+                    onSetReminderAction={onSetReminderAction}
+                    onSetRecurrenceForReminderAction={onSetRecurrenceForReminderAction}
+                    onCopyReminderTopicAction={onCopyReminderTopicAction}
+                    onDeleteReminderAction={onDeleteReminderAction}
                   />
-                  <Action
-                    title="Delete Reminder"
-                    style={Action.Style.Destructive}
-                    icon={Icon.Trash}
-                    onAction={() => onDeleteReminderAction(reminder.id)}
+                }
+              />
+            ))}
+          </List.Section>
+          <List.Section title="Other reminders">
+            {reminders.filter(hasNoFrequencyPredicate).map((reminder) => (
+              <List.Item
+                key={reminder.id}
+                title={reminder.topic}
+                subtitle={`set to ${reminder.date.toLocaleString()}`}
+                icon="bell.png"
+                actions={
+                  <ListActionPanel
+                    searchText={searchText}
+                    reminder={reminder}
+                    onSetReminderAction={onSetReminderAction}
+                    onSetRecurrenceForReminderAction={onSetRecurrenceForReminderAction}
+                    onCopyReminderTopicAction={onCopyReminderTopicAction}
+                    onDeleteReminderAction={onDeleteReminderAction}
                   />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
+                }
+              />
+            ))}
+          </List.Section>
+        </>
       )}
     </List>
   );

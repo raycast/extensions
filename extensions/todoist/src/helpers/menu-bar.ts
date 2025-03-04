@@ -1,7 +1,9 @@
 import { LaunchType, launchCommand } from "@raycast/api";
 
 export function refreshMenuBarCommand() {
-  return launchCommand({ name: "menu-bar", type: LaunchType.Background, context: { fromCommand: true } });
+  return launchCommand({ name: "menu-bar", type: LaunchType.Background, context: { fromCommand: true } }).catch(() => {
+    /* do nothing */
+  });
 }
 
 export const truncateMiddle = (fullStr: string, strLen: number, separator = "…") => {

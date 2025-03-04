@@ -1,4 +1,4 @@
-import { getUserTeamByGameweek } from "./../api/index";
+import { getUserTeamByGameweek } from "../api";
 import { useEffect, useState } from "react";
 import { Cache } from "@raycast/api";
 

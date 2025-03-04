@@ -1,14 +1,13 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
 
-import { Task, getFilterTasks } from "../../src/api";
+import { getFilterTasks } from "../../src/api";
 import { filterSort } from "../helpers/filters";
 import { QuickLinkView, ViewMode } from "../home";
 import useCachedData from "../hooks/useCachedData";
 import useViewTasks from "../hooks/useViewTasks";
 
-import CreateViewAction from "./CreateViewAction";
+import CreateViewActions from "./CreateViewActions";
 import TaskListSections from "./TaskListSections";
 
 type FilterTasksProps = { name: string; quickLinkView?: QuickLinkView };
@@ -18,20 +17,16 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   const filters = cachedData?.filters;
   const filter = filters?.find((filter: { name: string }) => filter.name === name);
   const query = filter?.query || "";
-  const [tasks, setTasks] = useState<Task[]>([]);
 
-  const getFilterTasksCached = async (query: string) => {
-    const filterTasks = await getFilterTasks(query);
-    return filterTasks;
-  };
+  const { data } = useCachedPromise(
+    async (search) => {
+      const filterTasks = await getFilterTasks(search);
+      return filterSort(filterTasks);
+    },
+    [query],
+  );
 
-  const { isLoading, data } = useCachedPromise(getFilterTasksCached, [query]);
-
-  useEffect(() => {
-    if (data) {
-      setTasks(filterSort(data));
-    }
-  }, [data]);
+  const tasks = data ?? [];
 
   const { sections, viewProps } = useViewTasks(`todoist.filter${name}`, { tasks });
 
@@ -49,7 +44,11 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
               shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
             />
 
-            {quickLinkView ? <CreateViewAction {...quickLinkView} /> : null}
+            {quickLinkView ? (
+              <ActionPanel.Section>
+                <CreateViewActions {...quickLinkView} />
+              </ActionPanel.Section>
+            ) : null}
           </ActionPanel>
         }
       />
@@ -58,7 +57,6 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
 
   return (
     <TaskListSections
-      isLoading={isLoading}
       mode={ViewMode.project}
       sections={viewProps.groupBy?.value === "default" ? [{ name, tasks: tasks }] : sections}
       viewProps={viewProps}

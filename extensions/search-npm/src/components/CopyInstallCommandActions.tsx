@@ -2,10 +2,6 @@ import type { Keyboard } from '@raycast/api'
 import { getPreferenceValues, Action } from '@raycast/api'
 
 type Registries = 'yarn' | 'npm' | 'pnpm'
-interface Preferences {
-  defaultCopyAction: Registries
-  secondaryCopyAction: Registries
-}
 
 interface RegistryItem {
   name: string
@@ -46,7 +42,7 @@ export const CopyInstallCommandActions = ({
   packageName,
 }: CopyInstallCommandActionsProps) => {
   const { defaultCopyAction, secondaryCopyAction }: Preferences =
-    getPreferenceValues()
+    getPreferenceValues<ExtensionPreferences>()
 
   const copyActions = registries
     .sort((a) => {

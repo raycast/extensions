@@ -125,7 +125,7 @@
   { "name": "App Switcher", "id": "BTTPredefinedActionAppSwitcher", "type": 46, "icon": "AppWindowGrid" },
   { "name": "Next Monitor", "id": "BTTPredefinedActionNextMonitor", "type": 47, "icon": "Monitor" },
   { "name": "Max Next Monitor", "id": "BTTPredefinedActionMaxNextMonitor", "type": 48, "icon": "Monitor" },
-  { "name": "Launch App", "id": "BTTPredefinedActionLaunchApp", "type": 49 },
+  { "name": "Launch App", "id": "BTTPredefinedActionLaunchApp", "type": 49, "param": "BTTLaunchPath" },
   { "name": "Hide All Windows", "id": "BTTPredefinedActionHideAllWindows", "type": 50, "icon": "EyeDisabled" },
   { "name": "Page Forward", "id": "BTTPredefinedActionPageForward", "type": 51, "icon": "ArrowRight" },
   { "name": "Page Backward", "id": "BTTPredefinedActionPageBackward", "type": 52, "icon": "ArrowLeft" },

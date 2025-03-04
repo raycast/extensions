@@ -1,25 +1,32 @@
-import { ChildProcess, exec, ExecException } from "child_process";
+import { type ChildProcess, exec, type ExecException } from "node:child_process";
 import { env } from "../config";
 import { showHUD, showToast, Toast } from "@raycast/api";
 import { openTerminal } from "./terminalUtils";
-
+import fs from "node:fs";
 export function getAllSession(
-  callback: (error: ExecException | null, stdout: string, stderr: string) => void
+  callback: (error: ExecException | null, stdout: string, stderr: string) => void,
 ): ChildProcess {
   return exec(`tmux list-sessions | awk '{print $1}' | sed 's/://'`, { env }, callback);
 }
 
+export function directoryExists(directory: string): boolean {
+  return fs.existsSync(directory);
+}
+
 export function createNewSession(
   sessionName: string,
-  callback: (error: ExecException | null, stdout: string, stderr: string) => void
+  sessionDirectory: string,
+  callback: (error: ExecException | null, stdout: string, stderr: string) => void,
 ): ChildProcess {
-  return exec(`tmux new-session -d -s ${sessionName}`, { env }, callback);
+  const spaceEscapedSessionDirectory = sessionDirectory.replace(" ", "\\ ");
+
+  return exec(`tmux new-session -d -s ${sessionName} -c ${spaceEscapedSessionDirectory}`, { env }, callback);
 }
 
 export function renameSession(
   oldSessionName: string,
   newSessionName: string,
-  callback: (error: ExecException | null, stdout: string, stderr: string) => void
+  callback: (error: ExecException | null, stdout: string, stderr: string) => void,
 ): ChildProcess {
   return exec(`tmux rename-session -t ${oldSessionName} ${newSessionName}`, { env }, callback);
 }

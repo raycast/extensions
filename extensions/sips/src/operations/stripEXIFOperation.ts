@@ -5,19 +5,22 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-05 23:35:48
- * Last modified  : 2024-01-28 05:10:25
  */
 
 import { execSync } from "child_process";
 
+import { environment, getPreferenceValues } from "@raycast/api";
+
+import { ExifToolLocation, ImageResultHandling } from "../utilities/enums";
 import {
+  cleanup,
+  execSIPSCommandOnAVIF,
   execSIPSCommandOnSVG,
   execSIPSCommandOnWebP,
+  expandTilde,
   getDestinationPaths,
   moveImageResultsToFinalDestination,
 } from "../utilities/utils";
-import { ExifToolLocation } from "../utilities/enums";
-import { environment } from "@raycast/api";
 
 /**
  * Strips EXIF data from the given images.
@@ -27,34 +30,46 @@ import { environment } from "@raycast/api";
  * @returns A promise that resolves when the operation is complete.
  */
 export default async function stripEXIF(sourcePaths: string[], exifToolLocation: ExifToolLocation) {
-  const newPaths = getDestinationPaths(sourcePaths);
+  const preferences = getPreferenceValues<Preferences>();
+  const expandedPaths = sourcePaths.map((path) => expandTilde(path));
+  const newPaths = await getDestinationPaths(expandedPaths);
   const resultPaths: string[] = [];
 
   const exifCommand =
-    exifToolLocation === ExifToolLocation.ON_PATH
-      ? "exiftool"
-      : `"${environment.supportPath}/Image-ExifTool-12.74/exiftool"`;
+    exifToolLocation === ExifToolLocation.ON_PATH ? "exiftool" : `"${environment.supportPath}/exiftool/exiftool"`;
 
   // Make sure ExifTool is executable
   if (exifToolLocation === ExifToolLocation.SUPPORT_DIR) {
-    execSync(`chmod +x "${environment.supportPath}/Image-ExifTool-12.74/exiftool"`);
+    execSync(`chmod +x "${environment.supportPath}/exiftool/exiftool"`);
   }
 
-  for (const imagePath of sourcePaths) {
+  for (const imagePath of expandedPaths) {
     if (imagePath.toLowerCase().endsWith(".webp")) {
       // Convert to PNG, remove EXIF, then restore to WebP
       resultPaths.push(await execSIPSCommandOnWebP(`${exifCommand} -all= "${imagePath}"`, imagePath));
     } else if (imagePath.toLowerCase().endsWith(".svg")) {
       // Convert to PNG, remove EXIF, then restore to SVG
       resultPaths.push(await execSIPSCommandOnSVG(`${exifCommand} -all= "${imagePath}"`, imagePath));
+    } else if (imagePath.toLowerCase().endsWith(".avif")) {
+      // Convert to PNG, remove EXIF, then restore to AVIF
+      resultPaths.push(
+        await execSIPSCommandOnAVIF(`${exifCommand} -all= "${imagePath}" -overwrite_original`, imagePath),
+      );
     } else {
       // Image is not a special format, so just strip EXIF data
-      const newPath = newPaths[sourcePaths.indexOf(imagePath)];
+      const newPath = newPaths[expandedPaths.indexOf(imagePath)];
       resultPaths.push(newPath);
 
-      execSync(`${exifCommand} -all= -o "${newPath}" "${imagePath}"`);
+      if (preferences.imageResultHandling === ImageResultHandling.ReplaceOriginal) {
+        // Replace the original image with the stripped version
+        execSync(`${exifCommand} -all= "${imagePath}" -overwrite_original`);
+      } else {
+        execSync(`${exifCommand} -all= -o "${newPath}" "${imagePath}"`);
+      }
     }
   }
 
   await moveImageResultsToFinalDestination(resultPaths);
+  await cleanup();
+  return resultPaths;
 }

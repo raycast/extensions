@@ -1,9 +1,6 @@
 import {
-  openExtensionPreferences,
   showToast,
-  Detail,
   Toast,
-  getPreferenceValues,
   List,
   Action,
   ActionPanel,
@@ -11,170 +8,39 @@ import {
   Icon,
   launchCommand,
   LaunchType,
+  useNavigation,
 } from "@raycast/api";
 
-import fetch from "node-fetch";
-import { useEffect, useState } from "react";
-import { fetchAccont, domainIcon } from "./utils";
+import { useState } from "react";
+import { domainIcon } from "./utils";
+import { Alias, Domain, DomainLog } from "./types";
+import { showFailureToast, useCachedState } from "@raycast/utils";
+import ErrorComponent from "./components/ErrorComponent";
+import { useImprovMX, useImprovMXPaginated } from "./hooks";
+import { DOMAIN_LOG_EVENT_STATUS_COLORS } from "./constants";
 
-interface Preferences {
-  api_token: string;
-}
+export default function ManageDomainsAndAliases() {
+  const { isLoading, error, data: domains, pagination } = useImprovMXPaginated<Domain, "domains">("domains");
 
-interface Alias {
-  forward: string;
-  alias: string;
-  id: number;
-}
-
-interface Domain {
-  display: string;
-  banned?: boolean;
-  active?: boolean;
-  aliases: Alias[];
-}
-
-interface Alias {
-  forward: string;
-  alias: string;
-  id: number;
-}
-
-interface State {
-  domains?: Domain[];
-  error?: string;
-  forwardingEmail?: string;
-  isRequireUpgrade: boolean;
-  aliasView: boolean;
-  aliases: Alias[];
-  selectedDomain: string;
-  isDomainsLoading: boolean;
-}
-
-export default function CreateMaskedEmail() {
-  const [state, setState] = useState<State>({
-      domains: undefined,
-      error: "",
-      forwardingEmail: "",
-      isRequireUpgrade: false,
-      aliasView: false,
-      aliases: [],
-      selectedDomain: "",
-      isDomainsLoading: true,
-    }),
-    API_TOKEN = getPreferenceValues<Preferences>().api_token,
-    API_URL = "https://api.improvmx.com/v3/";
-
-  const auth = Buffer.from("api:" + API_TOKEN).toString("base64");
-
-  useEffect(() => {
-    async function getDomains() {
-      state.isDomainsLoading = true;
-
-      try {
-        const apiResponse = await fetch(API_URL + "domains?=", {
-          headers: {
-            Authorization: "Basic " + auth,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!apiResponse.ok) {
-          if (apiResponse.status === 401) {
-            setState((prevState) => {
-              return { ...prevState, error: "Invalid API Token" };
-            });
-
-            return;
-          }
-        }
-
-        const response = (await apiResponse.json()) as unknown;
-        const domains = response as { domains: Array<Domain> };
-
-        setState((prevState) => {
-          return { ...prevState, domains: domains.domains, error: "", isDomainsLoading: false };
-        });
-      } catch (error) {
-        (state.error =
-          "There was an error with your request. Make sure you are connected to the internet. Please check that your API Token is correct and up-to-date. You can find your API Token in your [Improvmx Dashboard](https://improvmx.com/dashboard). If you need help, please contact support@improvmx.com"),
-          (state.isDomainsLoading = false);
-        await showToast(Toast.Style.Failure, "ImprovMX Error", "Failed to fetch domains. Please try again later.");
-        return;
-      }
-    }
-
-    async function forwardingEmailFn() {
-      const email = await fetchAccont(auth, API_URL);
-      setState({ ...state, forwardingEmail: email });
-      setState((prevState) => {
-        return { ...prevState, forwardingEmail: email };
-      });
-    }
-
-    getDomains();
-    forwardingEmailFn();
-  }, []);
-
-  const showError = async () => {
-    if (state.error) {
-      await showToast(Toast.Style.Failure, "ImprovMX Error", state.error);
-    }
-  };
-
+  const { push } = useNavigation();
   const showAliases = async (domain: Domain) => {
-    if (domain.banned || domain.active == false) {
-      showToast(Toast.Style.Failure, "Domain not configured properly. Please configure your DNS settings");
+    if (domain.banned || !domain.active) {
+      showFailureToast("Domain not configured properly. Please configure your DNS settings", {
+        title: "ImprovMX Error",
+      });
       return;
     }
-
-    setState((prevState) => {
-      return { ...prevState, aliasView: true, selectedDomain: domain.display };
-    });
-
-    try {
-      const apiResponse = await fetch(API_URL + "domains/" + domain.display + "/aliases/", {
-        headers: {
-          Authorization: "Basic " + auth,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!apiResponse.ok) {
-        setState((prevState) => {
-          return { ...prevState, error: "Failed to fetch aliases. Please try again later." };
-        });
-        return;
-      }
-
-      const response = (await apiResponse.json()) as unknown;
-      const aliases = response as { aliases: Array<Alias> };
-
-      setState((prevState) => {
-        return { ...prevState, aliases: aliases.aliases, error: "" };
-      });
-    } catch (error) {
-      console.log(error);
-    }
+    push(<ViewAliases domain={domain.display} />);
   };
 
-  showError();
-
-  return state.error ? (
-    <Detail
-      markdown={state.error}
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        </ActionPanel>
-      }
-    />
-  ) : !state.aliasView ? (
-    <List isLoading={state.isDomainsLoading === true} searchBarPlaceholder="Search for domain...">
+  return error ? (
+    <ErrorComponent error={error} />
+  ) : (
+    <List isLoading={isLoading} searchBarPlaceholder="Search for domain..." pagination={pagination}>
       <List.Section title="Active Domains">
-        {state.domains
-          ?.filter((domain) => domain.active)
-          .map((domain: Domain) => (
+        {domains
+          .filter((domain) => domain.active)
+          .map((domain) => (
             <List.Item
               key={domain.display}
               title={domain.display}
@@ -182,19 +48,49 @@ export default function CreateMaskedEmail() {
               accessories={[{ text: { value: domain.aliases.length.toString() + " aliases" } }]}
               actions={
                 <ActionPanel>
-                  <Action title="Show Aliases" onAction={() => showAliases(domain)} />
+                  <Action title="Show Aliases" icon={Icon.Envelope} onAction={() => showAliases(domain)} />
+                  <Action.Push
+                    title="View Domain Logs"
+                    icon={Icon.Paragraph}
+                    target={<ViewDomainLogs domain={domain.display} />}
+                  />
                 </ActionPanel>
               }
             />
           ))}
-        {state.domains && (
+      </List.Section>
+      <List.Section title="Inactive Domains">
+        {domains
+          ?.filter((domain) => !domain.active)
+          .map((domain) => (
+            <List.Item
+              key={domain.display}
+              title={domain.display}
+              icon={domainIcon(domain)}
+              accessories={[{ text: { value: domain.aliases.length.toString() + " aliases" } }]}
+              actions={
+                <ActionPanel>
+                  <Action title="Show Aliases" icon={Icon.Envelope} onAction={() => showAliases(domain)} />
+                  <Action.Push
+                    title="View Domain Logs"
+                    icon={Icon.Paragraph}
+                    target={<ViewDomainLogs domain={domain.display} />}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+      </List.Section>
+      {!isLoading && (
+        <List.Section title="Actions">
           <List.Item
             title="Add New Domain"
             icon={{ source: Icon.Plus }}
             actions={
               <ActionPanel>
                 <Action
-                  title="Add new domain"
+                  title="Add New Domain"
+                  icon={Icon.Plus}
                   onAction={async () => {
                     await launchCommand({ name: "add-domain", type: LaunchType.UserInitiated });
                   }}
@@ -202,40 +98,41 @@ export default function CreateMaskedEmail() {
               </ActionPanel>
             }
           />
-        )}
-      </List.Section>
-      <List.Section title="Inactive Domains">
-        {state.domains
-          ?.filter((domain) => !domain.active)
-          .map((domain: Domain) => (
-            <List.Item
-              key={domain.display}
-              title={domain.display}
-              icon={domainIcon(domain)}
-              accessories={[{ text: { value: domain.aliases.length.toString() + " aliases" } }]}
-              actions={
-                <ActionPanel>
-                  <Action title="Show Aliases" onAction={() => showAliases(domain)} />
-                </ActionPanel>
-              }
-            />
-          ))}
-      </List.Section>
+        </List.Section>
+      )}
     </List>
+  );
+}
+
+type ViewAliasesProps = {
+  domain: string;
+};
+function ViewAliases({ domain }: ViewAliasesProps) {
+  const {
+    isLoading,
+    data: aliases,
+    error,
+    pagination,
+  } = useImprovMXPaginated<Alias, "aliases">(`domains/${domain}/aliases`);
+
+  return error ? (
+    <ErrorComponent error={error} />
   ) : (
-    <List isLoading={state.aliases.length === 0} searchBarPlaceholder="Search for alias...">
-      <List.Section title="Aliases">
-        {state.aliases?.map((alias: Alias) => (
+    <List isLoading={isLoading} searchBarPlaceholder="Search for alias..." pagination={pagination}>
+      <List.Section title={`${domain} Aliases`}>
+        {aliases.map((alias) => (
           <List.Item
             key={alias.alias}
-            title={alias.alias + "@" + state.selectedDomain}
-            accessories={[{ text: { value: alias.forward } }]}
+            title={alias.alias + "@" + domain}
+            subtitle={`-> ${alias.forward}`}
+            accessories={[{ date: new Date(alias.created) }]}
             actions={
               <ActionPanel>
                 <Action
-                  title="Copy alias"
+                  title="Copy Alias"
+                  icon={Icon.CopyClipboard}
                   onAction={async () => {
-                    await Clipboard.copy(alias.alias + "@" + state.selectedDomain);
+                    await Clipboard.copy(alias.alias + "@" + domain);
                     await showToast(Toast.Style.Success, "Copied", "Alias copied to clipboard");
                   }}
                 />
@@ -243,49 +140,135 @@ export default function CreateMaskedEmail() {
             }
           />
         ))}
-        {state.aliases.length !== 0 && (
-          <>
-            <List.Item
-              title="Create New Alias"
-              icon={{ source: Icon.Plus }}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Create new alias"
-                    onAction={async () => {
-                      await launchCommand({
-                        name: "create-alias",
-                        type: LaunchType.UserInitiated,
-                        arguments: {
-                          domain: state.selectedDomain,
-                        },
-                      });
-                    }}
-                  />
-                </ActionPanel>
-              }
-            />
-            <List.Item
-              title="Create Masked Email Address"
-              icon={{ source: Icon.Plus }}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Create masked email address"
-                    onAction={async () => {
-                      await launchCommand({
-                        name: "create-masked-email-address",
-                        type: LaunchType.UserInitiated,
-                        arguments: { domain: state.selectedDomain },
-                      });
-                    }}
-                  />
-                </ActionPanel>
-              }
-            />
-          </>
-        )}
       </List.Section>
+      {!isLoading && (
+        <List.Section title="Actions">
+          <List.Item
+            title="Create New Alias"
+            icon={Icon.Plus}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Create New Alias"
+                  icon={Icon.Plus}
+                  onAction={async () => {
+                    await launchCommand({
+                      name: "create-alias",
+                      type: LaunchType.UserInitiated,
+                      arguments: {
+                        domain,
+                      },
+                    });
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+          <List.Item
+            title="Create Masked Email Address"
+            icon={Icon.PlusCircle}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Create Masked Email Address"
+                  icon={Icon.PlusCircle}
+                  onAction={async () => {
+                    await launchCommand({
+                      name: "create-masked-email-address",
+                      type: LaunchType.UserInitiated,
+                      arguments: { domain },
+                    });
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+    </List>
+  );
+}
+
+type ViewDomainLogsProps = {
+  domain: string;
+};
+function ViewDomainLogs({ domain }: ViewDomainLogsProps) {
+  const [isShowingDetail, setIsShowingDetail] = useCachedState("toggle-log-details", false);
+  const { isLoading, data } = useImprovMX<{ logs: DomainLog[] }>(`domains/${domain}/logs`);
+  const [status, setStatus] = useState("");
+
+  return (
+    <List
+      navigationTitle={`Domain / ${domain} / Logs`}
+      isLoading={isLoading}
+      isShowingDetail={isShowingDetail}
+      searchBarPlaceholder="Search log"
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter by Status" onChange={setStatus}>
+          <List.Dropdown.Item icon={Icon.Dot} title="All" value="" />
+          <List.Dropdown.Section>
+            {Object.entries(DOMAIN_LOG_EVENT_STATUS_COLORS).map(([status, color]) => (
+              <List.Dropdown.Item
+                key={status}
+                icon={{ source: Icon.Dot, tintColor: color }}
+                title={status}
+                value={status}
+              />
+            ))}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
+    >
+      {data?.logs.map((log) => (
+        <List.Section key={log.id} title={log.subject}>
+          {log.events
+            .filter((log) => status === "" || log.status === status)
+            .map((event) => (
+              <List.Item
+                key={event.id}
+                title={event.status}
+                keywords={[log.subject]}
+                icon={{ source: Icon.Dot, tintColor: DOMAIN_LOG_EVENT_STATUS_COLORS[event.status] }}
+                subtitle={event.message}
+                accessories={[{ date: new Date(event.created) }]}
+                detail={
+                  <List.Item.Detail
+                    metadata={
+                      <List.Item.Detail.Metadata>
+                        <List.Item.Detail.Metadata.Label title="ID" text={event.id} />
+                        <List.Item.Detail.Metadata.Label title="Code" text={event.code.toString()} />
+                        <List.Item.Detail.Metadata.Label title="Created" text={new Date(event.created).toString()} />
+                        <List.Item.Detail.Metadata.Label title="Local" text={event.local} />
+                        <List.Item.Detail.Metadata.Label title="Message" text={event.message} />
+                        <List.Item.Detail.Metadata.Label
+                          title="Recipient"
+                          text={`${event.recipient.name}<${event.recipient.email}>`}
+                        />
+                        <List.Item.Detail.Metadata.Label title="Server" text={event.server} />
+                        <List.Item.Detail.Metadata.TagList title="Status">
+                          <List.Item.Detail.Metadata.TagList.Item
+                            text={event.status}
+                            color={DOMAIN_LOG_EVENT_STATUS_COLORS[event.status]}
+                          />
+                        </List.Item.Detail.Metadata.TagList>
+                      </List.Item.Detail.Metadata>
+                    }
+                  />
+                }
+                actions={
+                  <ActionPanel>
+                    <Action
+                      icon={Icon.AppWindowSidebarLeft}
+                      title="Toggle Details"
+                      onAction={() => setIsShowingDetail((prev) => !prev)}
+                    />
+                    <Action.OpenInBrowser icon={Icon.Download} title="Download Log" url={log.url} />
+                  </ActionPanel>
+                }
+              />
+            ))}
+        </List.Section>
+      ))}
     </List>
   );
 }

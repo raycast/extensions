@@ -5,14 +5,15 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-05 23:35:48
- * Last modified  : 2023-07-06 14:51:59
  */
 
 import { execSync } from "child_process";
 
 import {
+  execSIPSCommandOnAVIF,
   execSIPSCommandOnSVG,
   execSIPSCommandOnWebP,
+  expandTilde,
   getDestinationPaths,
   moveImageResultsToFinalDestination,
 } from "../utilities/utils";
@@ -26,10 +27,11 @@ import {
  * @returns A promise that resolves when the operation is complete.
  */
 export default async function pad(sourcePaths: string[], padding: number, color: string) {
-  const newPaths = getDestinationPaths(sourcePaths);
+  const expandedPaths = sourcePaths.map((path) => expandTilde(path));
+  const newPaths = await getDestinationPaths(expandedPaths);
   const resultPaths: string[] = [];
 
-  for (const imagePath of sourcePaths) {
+  for (const imagePath of expandedPaths) {
     const dimensions = execSync(`sips -g pixelWidth -g pixelHeight "${imagePath}"`)
       .toString()
       .split(/(: |\n)/g);
@@ -41,29 +43,38 @@ export default async function pad(sourcePaths: string[], padding: number, color:
       resultPaths.push(
         await execSIPSCommandOnWebP(
           `sips --padToHeightWidth ${oldHeight + padding} ${oldWidth + padding} --padColor ${color}`,
-          imagePath
-        )
+          imagePath,
+        ),
       );
     } else if (imagePath.toLowerCase().endsWith(".svg")) {
       // Convert to PNG, apply padding, then restore to SVG
       resultPaths.push(
         await execSIPSCommandOnSVG(
           `sips --padToHeightWidth ${oldHeight + padding} ${oldWidth + padding} --padColor ${color}`,
-          imagePath
-        )
+          imagePath,
+        ),
+      );
+    } else if (imagePath.toLowerCase().endsWith(".avif")) {
+      // Convert to PNG, apply padding, then restore to AVIF
+      resultPaths.push(
+        await execSIPSCommandOnAVIF(
+          `sips --padToHeightWidth ${oldHeight + padding} ${oldWidth + padding} --padColor ${color}`,
+          imagePath,
+        ),
       );
     } else {
       // Image is not a special format, so pad using SIPS
-      const newPath = newPaths[sourcePaths.indexOf(imagePath)];
+      const newPath = newPaths[expandedPaths.indexOf(imagePath)];
       resultPaths.push(newPath);
 
       execSync(
         `sips --padToHeightWidth ${oldHeight + padding} ${
           oldWidth + padding
-        } --padColor ${color} -o "${newPath}" "${imagePath}"`
+        } --padColor ${color} -o "${newPath}" "${imagePath}"`,
       );
     }
   }
 
   await moveImageResultsToFinalDestination(resultPaths);
+  return resultPaths;
 }

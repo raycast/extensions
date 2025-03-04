@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
-import { handleDelete, htmlToMarkdown, isLoggedIn, timeAgo, withToast } from "./libs/utils";
+import { htmlToMarkdown, isLoggedIn, timeAgo, withToast, removeAccount, handleAction } from "./libs/utils";
 import { createAccount, deleteAccount, getAccount, getMails, deleteMail, getMessage } from "./libs/api";
-import { Action, ActionPanel, Color, Detail, Icon, List, popToRoot, environment } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List, popToRoot, environment, showHUD } from "@raycast/api";
 import { useAccount } from "./hooks/useAccount";
-import { Mail } from "./types";
 
 enum View {
   Loading,
@@ -76,17 +75,55 @@ function Mail(): JSX.Element {
           icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard title="Copy Address" content={Account?.email ?? ""} />
-              <Action
-                title="Delete Account"
-                icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                onAction={() =>
-                  handleDelete(
-                    () => deleteAccount(),
-                    () => popToRoot(),
-                    "account",
-                  )
-                }
+              <ActionPanel.Section title="Copy">
+                <Action.CopyToClipboard
+                  title="Copy Email"
+                  content={Account?.email ?? ""}
+                  icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Password"
+                  content={Account?.password ?? ""}
+                  icon={{ source: Icon.Key, tintColor: Color.Purple }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="Account">
+                <Action
+                  title="Delete Account"
+                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                  onAction={() =>
+                    handleAction(
+                      () => deleteAccount(),
+                      () => popToRoot(),
+                      `Deleting Account...`,
+                      `Account deleted`,
+                      `Account could not be deleted`,
+                    )
+                  }
+                />
+                <Action
+                  title="Logout"
+                  icon={{ source: Icon.Lock, tintColor: Color.Red }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                  onAction={() =>
+                    handleAction(
+                      () => removeAccount(),
+                      () => popToRoot(),
+                      `Logging out...`,
+                      `Logout successful`,
+                      `Logout failed`,
+                    )
+                  }
+                />
+              </ActionPanel.Section>
+              <Action.OpenInBrowser
+                title="Open in Browser"
+                url="https://mail.tm/"
+                icon={{ source: Icon.Globe, tintColor: Color.Blue }}
+                onOpen={() => showHUD("Login to view your account")}
               />
             </ActionPanel>
           }
@@ -112,17 +149,23 @@ function Mail(): JSX.Element {
             ]}
             actions={
               <ActionPanel>
-                <Action.ToggleQuickLook title="Quick Look" />
-                <Action.Push icon={Icon.Message} title="View Message" target={<Message messageId={mail.id} />} />
+                <Action.ToggleQuickLook title="Quick Look" icon={{ source: Icon.Eye, tintColor: Color.Blue }} />
+                <Action.Push
+                  title="View Message"
+                  target={<Message messageId={mail.id} />}
+                  icon={{ source: Icon.Message, tintColor: Color.Blue }}
+                />
                 <Action
                   title="Delete Message"
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   onAction={() =>
-                    handleDelete(
+                    handleAction(
                       () => deleteMail(mail.id),
-                      () => setRefreshKey(refreshKey + 1),
-                      "message",
+                      () => setRefreshKey((prev) => prev + 1),
+                      `Deleting Message...`,
+                      `Message deleted`,
+                      `Message could not be deleted`,
                     )
                   }
                 />
@@ -156,7 +199,11 @@ function Message({ messageId }: { messageId: string }): JSX.Element {
       isLoading={isloading}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" url={path} />
+          <Action.OpenInBrowser
+            title="Open in Browser"
+            url={path}
+            icon={{ source: Icon.Globe, tintColor: Color.Blue }}
+          />
         </ActionPanel>
       }
     />

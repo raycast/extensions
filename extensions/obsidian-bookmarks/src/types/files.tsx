@@ -7,7 +7,7 @@ export function isFrontMatter(v: unknown): v is FrontMatter {
   return (
     typeof frontMatter.source === "string" &&
     typeof frontMatter.title === "string" &&
-    typeof frontMatter.saved === "string" &&
+    // typeof frontMatter.saved === "string" &&
     typeof frontMatter.read === "boolean" &&
     (frontMatter.publisher == null || typeof frontMatter.publisher === "string") &&
     isStringArray(frontMatter.tags)
@@ -23,6 +23,7 @@ export function isFile(v: unknown): v is File {
     (file.frontmatter == null || typeof file.frontmatter === "string") &&
     typeof file.fileName === "string" &&
     typeof file.fullPath === "string" &&
+    typeof file.mtime === "number" && // mtime is a timestamp number
     isFrontMatter(file.attributes)
   );
 }
@@ -44,6 +45,7 @@ export interface FrontMatter {
 export interface File extends Omit<FrontMatterResult<FrontMatter>, "body" | "bodyBegin"> {
   fileName: string;
   fullPath: string;
+  mtime: number; // Unix timestamp in milliseconds
   body?: string;
   bodyBegin?: number;
 }

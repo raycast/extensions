@@ -13,7 +13,7 @@ import {
   selectTab,
 } from "./arc";
 import { Space, Tab } from "./types";
-import { getSpaceTitle, showFailureToast, isTab } from "./utils";
+import { getSpaceTitle, isTab, showFailureToast } from "./utils";
 
 function OpenInArcAction(props: { tabOrUrl: Tab | string }) {
   async function handleAction() {
@@ -109,9 +109,7 @@ function OpenInSpaceAction(props: { url: string }) {
       shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
       onOpen={() => setOpen(true)}
     >
-      {data?.map((space) => (
-        <Action key={space.id} title={getSpaceTitle(space)} onAction={() => openSpace(space)} />
-      ))}
+      {data?.map((space) => <Action key={space.id} title={getSpaceTitle(space)} onAction={() => openSpace(space)} />)}
     </ActionPanel.Submenu>
   );
 }

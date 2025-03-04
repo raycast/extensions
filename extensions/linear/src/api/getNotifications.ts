@@ -1,4 +1,4 @@
-import { Organization, Comment, User, IssueNotification, ProjectUpdate, Project } from "@linear/sdk";
+import { Organization, Comment, User, IssueNotification, ProjectUpdate, Project, ActorBot } from "@linear/sdk";
 import { IssueFragment, IssueResult } from "./getIssues";
 import { getLinearClient } from "../api/linearClient";
 
@@ -14,7 +14,9 @@ export type NotificationResult = Pick<
 } & {
   projectUpdate?: Pick<ProjectUpdate, "url">;
 } & {
-  project?: Pick<Project, "url">;
+  project?: Pick<Project, "url" | "name">;
+} & {
+  botActor?: Pick<ActorBot, "name">;
 };
 
 export type OrganizationResult = Pick<Organization, "urlKey">;
@@ -38,6 +40,9 @@ export async function getNotifications() {
               displayName
               avatarUrl
             }
+            botActor {
+              name
+            }
             ... on IssueNotification {
               reactionEmoji
               comment {
@@ -51,6 +56,7 @@ export async function getNotifications() {
             ... on ProjectNotification {
               project {
                 url
+                name
               }
               projectUpdate {
                 url

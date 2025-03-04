@@ -5,19 +5,11 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-dd 00:32:49
- * Last modified  : 2023-07-dd 00:32:49
  */
 
-import fs from "fs";
-import os from "os";
-import path from "path";
-
-import { getPreferenceValues } from "@raycast/api";
-
+import { applyBasicFilter } from "../utilities/filters";
 import { Filter } from "../utilities/types";
-import { moveImageResultsToFinalDestination } from "../utilities/utils";
-import { ExtensionPreferences } from "../utilities/preferences";
-import { ImageResultHandling } from "../utilities/enums";
+import { expandTilde, getDestinationPaths, moveImageResultsToFinalDestination } from "../utilities/utils";
 
 /**
  * Applies the specified filter to images, storing the results according to the user's preferences.
@@ -27,43 +19,16 @@ import { ImageResultHandling } from "../utilities/enums";
  * @returns A promise that resolves when the operation is complete.
  */
 export default async function applyFilter(sourcePaths: string[], filter: Filter) {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-
   const resultPaths = [];
-  for (const imageFilePath of sourcePaths) {
-    let newPath = path.join(
-      path.dirname(imageFilePath),
-      path.basename(imageFilePath, path.extname(imageFilePath)) + (imageFilePath.endsWith(".pdf") ? ".pdf" : ".png")
-    );
-
-    if (preferences.imageResultHandling == ImageResultHandling.SaveToDownloads) {
-      newPath = path.join(os.homedir(), "Downloads", path.basename(newPath));
-    } else if (preferences.imageResultHandling == ImageResultHandling.SaveToDesktop) {
-      newPath = path.join(os.homedir(), "Desktop", path.basename(newPath));
-    } else if (
-      preferences.imageResultHandling == ImageResultHandling.CopyToClipboard ||
-      preferences.imageResultHandling == ImageResultHandling.OpenInPreview
-    ) {
-      newPath = path.join(os.tmpdir(), path.basename(newPath));
-    }
-
-    // Ensure that the file name is unique, unless the user wants to replace the original
-    if (
-      preferences.imageResultHandling != ImageResultHandling.ReplaceOriginal &&
-      os.tmpdir() != path.dirname(newPath)
-    ) {
-      let iter = 2;
-      while (fs.existsSync(newPath) && os.tmpdir() != path.dirname(newPath)) {
-        newPath = path.join(
-          path.dirname(newPath),
-          path.basename(newPath, path.extname(newPath)) + ` ${iter}` + path.extname(newPath)
-        );
-        iter++;
-      }
-    }
-    await filter.applyMethod(imageFilePath, newPath, filter.CIFilterName);
+  const expandedPaths = sourcePaths.map((path) => expandTilde(path));
+  for (const imageFilePath of expandedPaths) {
+    const newPath = (
+      await getDestinationPaths([imageFilePath], false, imageFilePath.endsWith(".pdf") ? "pdf" : "png")
+    )[0];
+    await applyBasicFilter(imageFilePath, newPath, filter);
     resultPaths.push(newPath);
   }
 
   await moveImageResultsToFinalDestination(resultPaths);
+  return resultPaths;
 }

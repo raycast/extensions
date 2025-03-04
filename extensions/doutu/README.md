@@ -24,3 +24,7 @@
 <img src="metadata/doutu-2.png">
 <img src="metadata/doutu-3.png">
 <img src="metadata/doutu-4.png">
+
+## Portal
+
+- [Raycast DouTu](https://github.com/raycast/extensions/tree/main/extensions/doutu)

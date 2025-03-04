@@ -1,4 +1,12 @@
-# Perplexity API
+<p align="center">
+ <img width=100 src="assets/perplexity.png">
+ </p>
+
+ <h1 align="center">Perplexity API</h1>
+
+ <h3 align="center">
+ Interact with Perplexity's API right from your command bar
+ </h3>
 
 Perplexity API offers a wide range of AI models such as Mistral, Meta's Llama and their own models.
 With this powerful extension, you can boost your productivity using advanced AI models without having to leave your Raycast interface.

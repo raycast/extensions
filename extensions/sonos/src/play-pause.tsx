@@ -1,4 +1,4 @@
-import { LaunchProps, LaunchType, updateCommandMetadata } from "@raycast/api";
+import { LaunchProps, LaunchType, Toast, showToast, updateCommandMetadata } from "@raycast/api";
 import { SonosDevice } from "@svrooij/sonos/lib";
 import { SonosState } from "@svrooij/sonos/lib/models/sonos-state";
 import { formatPlayingState, getActiveCoordinator, getLatestState } from "./core/sonos";
@@ -6,15 +6,18 @@ import { handleCommandError, tryLaunchCommand } from "./core/utils";
 
 export default async function Command({ launchType }: LaunchProps) {
   const userInitiated = launchType === LaunchType.UserInitiated;
-  let state: SonosState | null;
+  let state: SonosState | null = null;
   let coordinator: SonosDevice | undefined;
 
   try {
     state = await getLatestState();
     coordinator = await getActiveCoordinator();
   } catch (error) {
-    await handleCommandError(error);
-    return;
+    const caught = await handleCommandError(error);
+
+    if (caught || !userInitiated) {
+      return;
+    }
   }
 
   if (!coordinator && userInitiated) {
@@ -25,7 +28,16 @@ export default async function Command({ launchType }: LaunchProps) {
     });
   } else {
     if (coordinator && userInitiated) {
-      await coordinator.TogglePlayback();
+      try {
+        await coordinator.TogglePlayback();
+      } catch (error) {
+        await showToast({
+          title: "Can't toggle playback in the current state",
+          style: Toast.Style.Failure,
+        });
+
+        return;
+      }
     }
 
     const title = await formatPlayingState(state);

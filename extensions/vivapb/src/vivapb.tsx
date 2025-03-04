@@ -15,7 +15,6 @@ async function openVivaldiIncognito() {
     await exec(' open -na "Vivaldi" --args -incognito "https://www.duckduckgo.com"');
   } catch (error) {
     console.error(`Error: Not working`);
-
     showOpenVivaldiErrorToast();
   }
 }

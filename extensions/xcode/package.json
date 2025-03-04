@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode",
   "title": "Xcode",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, search the Apple Developer Documentation and quickly clear Xcode cache files.",
   "icon": "icon.png",
   "author": "SvenTiigi",
@@ -10,7 +10,8 @@
     "qeude",
     "oliep",
     "kiliankoe",
-    "3llomi"
+    "3llomi",
+    "ridemountainpig"
   ],
   "categories": [
     "Developer Tools",
@@ -235,13 +236,6 @@
       "mode": "view"
     },
     {
-      "name": "clear-derived-data.command",
-      "title": "Clear Derived Data",
-      "subtitle": "Xcode",
-      "description": "Removes the ~/Library/Developer/Xcode/DerivedData directory.",
-      "mode": "no-view"
-    },
-    {
       "name": "open-url-in-simulator.command",
       "title": "Open URL in Simulator",
       "subtitle": "Xcode",
@@ -257,10 +251,24 @@
       ]
     },
     {
+      "name": "clear-derived-data.command",
+      "title": "Clear Derived Data",
+      "subtitle": "Xcode",
+      "description": "Removes the ~/Library/Developer/Xcode/DerivedData directory.",
+      "mode": "no-view"
+    },
+    {
       "name": "clear-swift-package-manager-cache.command",
       "title": "Clear Swift Package Manager Cache",
       "subtitle": "Xcode",
-      "description": "Removes the ~/Library/Caches/org.swift.swiftpm/repositories directory.",
+      "description": "Removes the ~/Library/Caches/org.swift.swiftpm directory.",
+      "mode": "no-view"
+    },
+    {
+      "name": "clear-swift-ui-previews-cache.command",
+      "title": "Clear SwiftUI Previews Cache",
+      "subtitle": "Xcode",
+      "description": "Removes the ~/Library/Developer/Xcode/UserData/Previews directory.",
       "mode": "no-view"
     },
     {

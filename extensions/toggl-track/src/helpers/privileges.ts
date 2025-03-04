@@ -1,4 +1,4 @@
-import type { Workspace } from "../api";
+import type { Workspace } from "@/api";
 
 export const canModifyTagsIn = (workspace: Workspace) =>
   !workspace.only_admins_may_create_tags || workspace.role == "admin" || workspace.role == "projectlead";

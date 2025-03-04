@@ -1,14 +1,14 @@
-import { Endpoints } from "@octokit/types";
+import { RestEndpointMethodTypes } from "@octokit/rest";
 import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
 import RepositoriesDropdown from "./components/RepositoryDropdown";
-import { WorkflowRunListItem } from "./components/WorkflowRunListItem";
+import { WorkflowRun, WorkflowRunListItem } from "./components/WorkflowRunListItem";
 import { withGitHubClient } from "./helpers/withGithubClient";
 
-export type WorkflowRunsResponse = Endpoints["GET /repos/{owner}/{repo}/actions/runs"]["response"];
+export type WorkflowRunsResponse = RestEndpointMethodTypes["actions"]["listWorkflowRunsForRepo"]["response"];
 
 function WorkflowRuns() {
   const { octokit } = getGitHubClient();
@@ -21,7 +21,7 @@ function WorkflowRuns() {
   } = useCachedPromise(
     (repository) => {
       const [owner, repo] = repository.split("/");
-      return octokit.rest.actions.listWorkflowRunsForRepo({ owner, repo });
+      return octokit.actions.listWorkflowRunsForRepo({ owner, repo });
     },
     [selectedRepository],
     { execute: !!selectedRepository },
@@ -38,7 +38,7 @@ function WorkflowRuns() {
       }
     >
       {workflowRuns && workflowRuns.length > 0
-        ? workflowRuns.map((workflowRun) => {
+        ? workflowRuns.map((workflowRun: WorkflowRun) => {
             return (
               <WorkflowRunListItem
                 key={workflowRun.id}

@@ -1,55 +1,38 @@
-import { List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import Jimp from "jimp";
+import { showToast, Toast } from "@raycast/api";
+import { useEffect, useReducer } from "react";
 
-import { ChannelSchedule, TVSchedule } from "./modules/tv/domain/tvSchedule";
-import ChannelDetails from "./components/ChannelDetails";
+import { toLocalizedTvSchedule, TvScheduleDto } from "./modules/tv/domain/tvScheduleDto";
 import { tvScheduleRepository } from "./modules/tv/repositories/tvScheduleRepository";
-import { isEmpty, isNull } from "./utils/objectUtils";
-import ErrorMessage from "./components/ErrorMessage";
+import { ERROR_MESSAGE, ErrorMessage } from "./components/ErrorMessage";
+import { ChannelList } from "./components/ChannelList";
+import { generateIcon } from "./utils/iconUtils";
 
-const ICONS_DIRECTORY = "/tmp/raycast/spanish-tv-guide/icons";
-export const ERROR_MESSAGE = "Error fetching TV guide";
+export type State = {
+  tvSchedule: TvScheduleDto;
+  selectedChannel?: string;
+  error?: Error;
+};
+
+const initialState: State = { tvSchedule: [] };
+const reducer = (state: State, newState: Partial<State>) => ({ ...state, ...newState });
 
 const Command = () => {
-  const [tvSchedule, setTvSchedule] = useState<TVSchedule>([]);
-  const [isShowingDetail, setIsShowingDetail] = useState(false);
-  const [iconsLoaded, setIconsLoaded] = useState(false);
-  const [error, setError] = useState<Error | undefined>();
-  const [selectedChannel, setSelectedChannel] = useState<string | undefined>();
+  const [state, setState] = useReducer(reducer, initialState);
 
-  useEffect(() => void tvScheduleRepository.getAll().then(setTvSchedule).catch(setError), []);
-  useEffect(() => void generateIcons(tvSchedule).then(() => setIconsLoaded(true)), [tvSchedule]);
-  useEffect(() => error && void showToast({ style: Toast.Style.Failure, title: ERROR_MESSAGE }), [error]);
-
-  const selectChannel = (channel: string | null) => {
-    const channelSelected = !isNull(channel);
-    if (channelSelected) setSelectedChannel(channel);
-    setIsShowingDetail(channelSelected);
+  const initialize = async () => {
+    return tvScheduleRepository
+      .getAll()
+      .then((tvSchedule) => toLocalizedTvSchedule(tvSchedule))
+      .then((tvSchedule) => cacheIcons(tvSchedule).then(() => setState({ tvSchedule })))
+      .catch((error) => setState({ error }));
   };
 
-  if (error) return <ErrorMessage />;
+  useEffect(() => void initialize(), []);
+  useEffect(() => state.error && void showToast({ style: Toast.Style.Failure, title: ERROR_MESSAGE }), [state.error]);
 
-  return (
-    <List
-      isLoading={isEmpty(tvSchedule) || !iconsLoaded}
-      selectedItemId={selectedChannel}
-      isShowingDetail={isShowingDetail}
-      onSelectionChange={selectChannel}
-    >
-      {tvSchedule.map(renderChannel)}
-    </List>
-  );
+  return state.error ? <ErrorMessage /> : <ChannelList state={state} setState={setState} />;
 };
 
-const renderChannel = ({ icon, name, schedule }: ChannelSchedule) => {
-  const detail = <ChannelDetails name={name} schedule={schedule} icon={icon} />;
-  return <List.Item key={name} title={name} detail={detail} icon={iconPath(icon)} />;
-};
-
-const generateIcons = (tvSchedule: TVSchedule) => Promise.all(tvSchedule.map(({ icon }) => generateIcon(icon)));
-const generateIcon = (icon: string) => Jimp.read(icon).then((image) => image.contain(256, 256).write(iconPath(icon)));
-const iconPath = (icon: string) => `${ICONS_DIRECTORY}/${iconName(icon)}`;
-const iconName = (icon: string) => icon.substring(icon.lastIndexOf("/") + 1);
+const cacheIcons = (tvSchedule: TvScheduleDto) => Promise.all(tvSchedule.map(({ icon }) => generateIcon(icon)));
 
 export default Command;

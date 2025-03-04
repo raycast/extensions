@@ -41,7 +41,7 @@ function NotePreviewAction({ note }: { note: Note }) {
 }
 
 export default function NoteActions({ isNotePreview, note }: { isNotePreview: boolean; note: Note }) {
-  const { focusCursorAtEnd } = getPreferenceValues();
+  const { focusCursorAtEnd } = getPreferenceValues<Preferences>();
   const edit = focusCursorAtEnd ? "yes" : "no";
   return (
     <ActionPanel>

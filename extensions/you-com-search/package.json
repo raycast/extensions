@@ -1,0 +1,40 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "you-com-search",
+  "title": "You.com Search",
+  "description": "Search You.com directly from Raycast",
+  "icon": "you2.png",
+  "author": "salman_mian",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Ask You.com",
+      "description": "Search You.com with your query",
+      "mode": "view",
+      "arguments": []
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.71.3",
+    "@raycast/utils": "^1.14.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

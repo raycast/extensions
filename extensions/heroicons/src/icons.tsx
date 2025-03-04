@@ -1,5 +1,4 @@
 import {
-  environment,
   Cache,
   showHUD,
   Grid,
@@ -13,11 +12,10 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { writeFileSync } from "fs";
-import { join } from "path";
-import Heroicons from "./heroicons";
-import got from "got";
 import title from "title";
+import fetch from "node-fetch";
+
+import Heroicons from "./heroicons";
 
 interface Preferences {
   primaryAction: string;
@@ -45,9 +43,10 @@ export default function IconsCommand() {
         title="Paste JSX"
         key={`pastejsx-${icon}`}
         onAction={() => {
-          got(Heroicons[variant](icon))
+          fetch(Heroicons[variant](icon))
+            .then((res) => res.text())
             .then((res) => {
-              Clipboard.paste(transformToJsx(res.body));
+              Clipboard.paste(transformToJsx(res));
               showHUD(`✏️ Pasted "${icon}" (${variant}) to your frontmost application.`);
             })
             .catch(() => {
@@ -62,9 +61,10 @@ export default function IconsCommand() {
         title="Paste SVG"
         key={`pastesvg-${icon}`}
         onAction={() => {
-          got(Heroicons[variant](icon))
+          fetch(Heroicons[variant](icon))
+            .then((res) => res.text())
             .then((res) => {
-              Clipboard.paste(res.body);
+              Clipboard.paste(res);
               showHUD(`✏️ Pasted "${icon}" (${variant}) to your frontmost application.`);
             })
             .catch(() => {
@@ -113,9 +113,10 @@ export default function IconsCommand() {
         title="Copy JSX"
         key={`copyjsx-${icon}`}
         onAction={() => {
-          got(Heroicons[variant](icon))
+          fetch(Heroicons[variant](icon))
+            .then((res) => res.text())
             .then((res) => {
-              Clipboard.copy(transformToJsx(res.body));
+              Clipboard.copy(transformToJsx(res));
               showHUD(`📋 Copied "${icon}" (${variant}) to your clipboard.`);
             })
             .catch(() => {
@@ -130,9 +131,10 @@ export default function IconsCommand() {
         title="Copy SVG"
         key={`copysvg-${icon}`}
         onAction={() => {
-          got(Heroicons[variant](icon))
+          fetch(Heroicons[variant](icon))
+            .then((res) => res.text())
             .then((res) => {
-              Clipboard.copy(res.body);
+              Clipboard.copy(res);
               showHUD(`📋 Copied "${icon}" (${variant}) to your clipboard.`);
             })
             .catch(() => {
@@ -188,13 +190,16 @@ export default function IconsCommand() {
       });
     }
     if (iconNames) {
-      Promise.all([got(Heroicons.icons())])
+      Promise.all([fetch(Heroicons.icons()).then((res) => res.text())])
         .then(([iconsRes]) => {
-          setIconNames(iconsRes.body.split("\n").map((x) => x.replace(".svg", "")));
+          setIconNames(iconsRes.split("\n").map((x) => x.replace(".svg", "")));
           cache.set("heroicons-icons", iconNames.join(","));
         })
         .catch(() => {
           showHUD("❌ An error occured. Try again later.");
+        })
+        .finally(() => {
+          setLoading(false);
         });
     } else {
       setLoading(false);

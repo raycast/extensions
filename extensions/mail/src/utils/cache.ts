@@ -1,6 +1,7 @@
-import { Cache as RaycastCache, getPreferenceValues } from "@raycast/api";
+import { Cache as RaycastCache } from "@raycast/api";
 
-import { Account, Message, Preferences } from "../types";
+import { Account, Message } from "../types";
+import { messageLimit } from "./common";
 
 export enum ExpirationTime {
   Minute = 60 * 1000,
@@ -8,9 +9,6 @@ export enum ExpirationTime {
   Day = 24 * Hour,
   Week = 7 * Day,
 }
-
-const preferences: Preferences = getPreferenceValues();
-const messageLimit = preferences.messageLimit ? parseInt(preferences.messageLimit) : 10;
 
 const isCacheExpired = (time: number, limit = ExpirationTime.Day): boolean => {
   return Date.now() - time > limit;

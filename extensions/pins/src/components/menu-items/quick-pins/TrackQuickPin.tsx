@@ -53,20 +53,12 @@ export default function TrackQuickPin(props: TrackQuickPinProps) {
           trackScript = getTVTrackScript(track.name, track.artist, track.album);
         }
 
-        await createNewPin(
-          `Play Track '${track.name}'`,
-          `{{as:${trackScript}}}`,
-          app.path,
-          targetGroup?.name || "None",
-          "None",
-          undefined,
-          undefined,
-          false,
-          undefined,
-          undefined,
-          [],
-          "",
-        );
+        await createNewPin({
+          name: `Play Track '${track.name}'`,
+          url: `{{as:${trackScript}}}`,
+          icon: app.path,
+          group: targetGroup?.name || "None",
+        });
       }}
     />
   );

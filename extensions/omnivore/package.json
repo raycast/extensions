@@ -31,6 +31,12 @@
           "placeholder": "URL",
           "type": "text",
           "required": true
+        },
+        {
+          "name": "labels",
+          "placeholder": "labels",
+          "type": "text",
+          "required": false
         }
       ]
     }

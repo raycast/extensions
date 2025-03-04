@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, Icon, showToast, Toast, open, closeMainWindow } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, open } from "@raycast/api";
 import { getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import { lookup } from "mime-types";
@@ -12,35 +12,32 @@ interface Preferences {
   RemoveOriginal: boolean;
 }
 
+interface FileResult {
+  dir?: string;
+  filename: string;
+  url?: string;
+  size?: number;
+}
+
 const { APIKey, OpenNow, RemoveOriginal } = getPreferenceValues<Preferences>();
 
 export default function Command() {
   const [file, setFile] = useState<Array<string>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  let successFileCount = 0;
 
-  const uploadFile = async (file: Array<string>) => {
+  const uploadFile = async (file: string) => {
     setIsLoading(true);
-    if (!file.length) {
-      await showToast(Toast.Style.Failure, "No file selected", "Please select an file to upload");
-      setIsLoading(false);
-      return;
-    }
-
-    if (file.length > 1) {
-      await showToast(Toast.Style.Failure, "Multiple files selected", "Please select only one file");
-      setIsLoading(false);
-      return;
-    }
 
     // file path
-    const path: string = file[0];
+    const path: string = file;
 
     // get file name
     const fileName: string | undefined = path.split("/").pop();
 
     // check if file name is valid
     if (!fileName) {
-      await showToast(Toast.Style.Failure, "Invalid File", "Please select a valid file");
+      await showToast(Toast.Style.Failure, `Invalid File: ${fileName}`, "Please select a valid file");
       setIsLoading(false);
       return;
     }
@@ -58,7 +55,7 @@ export default function Command() {
       await showToast(
         Toast.Style.Failure,
         "Invalid File Type",
-        "Please select an word or powerpoint file (.doc, .docx, .ppt, .pptx)"
+        "Please select an word or powerpoint file (.doc, .docx, .ppt, .pptx)",
       );
       setIsLoading(false);
       return;
@@ -95,7 +92,7 @@ export default function Command() {
     const toast = await showToast(Toast.Style.Animated, "Processing", "Creating Job...");
 
     // create job
-    let job: any;
+    let job;
     try {
       job = await cloudConvert.jobs.create({
         tasks: {
@@ -127,8 +124,7 @@ export default function Command() {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Error";
-      toast.message = "Fail to create job";
-      console.log(error);
+      toast.message = `Fail to create job: ${fileName}`;
       setIsLoading(false);
       return;
     }
@@ -142,19 +138,19 @@ export default function Command() {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Error";
-      toast.message = "Fail to upload file";
+      toast.message = `Fail to upload file: ${fileName}`;
       setIsLoading(false);
       return;
     }
 
     const storedFileName: string = path.split(".").slice(0, -1).join(".") + ".pdf";
-    toast.message = "Converting File...";
+    toast.message = `Converting File: ${fileName}`;
     try {
       job = await cloudConvert.jobs.wait(job.id); // Wait for job completion
-      toast.message = "Downloading File...";
-      const file: any = cloudConvert.jobs.getExportUrls(job)[0];
+      toast.message = `Downloading File: ${fileName}`;
+      const file: FileResult = cloudConvert.jobs.getExportUrls(job)[0];
       const writeStream = fs.createWriteStream(storedFileName);
-      https.get(file.url, function (response) {
+      https.get(file.url as string, function (response) {
         response.pipe(writeStream);
       });
 
@@ -165,7 +161,7 @@ export default function Command() {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Error";
-      toast.message = "Fail to convert file";
+      toast.message = `Fail to convert file: ${fileName}`;
       setIsLoading(false);
       return;
     }
@@ -184,14 +180,17 @@ export default function Command() {
       }
     }
 
-    setIsLoading(false);
-
-    toast.style = Toast.Style.Success;
-    toast.title = "Success";
-    toast.message = "File converted successfully";
+    successFileCount++;
+    if (successFileCount === file.length) {
+      toast.style = Toast.Style.Success;
+      toast.title = "Success";
+      toast.message = `All files converted successfully`;
+      setIsLoading(false);
+    } else {
+      toast.message = ` [${successFileCount}/${file.length}] ${fileName} converted successfully`;
+    }
 
     if (OpenNow) {
-      await closeMainWindow();
       open(storedFileName);
     } else {
       toast.primaryAction = {
@@ -208,19 +207,24 @@ export default function Command() {
       enableDrafts
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" onSubmit={({ file }) => uploadFile(file)} icon={Icon.Upload} />
+          <Action.SubmitForm
+            title="Submit"
+            onSubmit={async (values: { files: string[] }) => {
+              const files = values.files.filter((file: string) => fs.existsSync(file) && fs.lstatSync(file).isFile());
+              await Promise.all(files.map((file) => uploadFile(file)));
+            }}
+          />
         </ActionPanel>
       }
       isLoading={isLoading}
     >
       <Form.FilePicker
-        id="file"
+        id="files"
         value={file}
         onChange={setFile}
         title="File"
         autoFocus
-        info="Select a word or ppt file to upload"
-        allowMultipleSelection={false}
+        info="Select word or ppt files to upload"
       />
     </Form>
   );

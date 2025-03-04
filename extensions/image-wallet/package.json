@@ -9,6 +9,9 @@
     "Media",
     "Fun"
   ],
+  "keywords": [
+    "gif"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -41,6 +44,14 @@
       "type": "checkbox",
       "required": true,
       "default": true
+    },
+    {
+      "name": "suppressReadErrors",
+      "label": "Suppress Read Errors",
+      "description": "Hide the warning when a file or directory could not be read.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {

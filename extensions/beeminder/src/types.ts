@@ -1,6 +1,9 @@
 export interface Preferences {
   beeminderApiToken: string;
   beeminderUsername: string;
+  colorProgression: string;
+  showDaysAboveLine: boolean;
+  sortByDaysAboveLine: boolean;
 }
 
 export interface DataPointFormValues {

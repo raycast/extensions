@@ -26,7 +26,7 @@ export const projectStatuses: ProjectStateType[] = [
 ];
 
 export const projectStatusIcon: Record<string, IconAsset> = {
-  [ProjectStateType.backlog]: { light: "light/backlog.svg", dark: "dark/backlog.svg" },
+  [ProjectStateType.backlog]: { light: "light/project-backlog.svg", dark: "dark/project-backlog.svg" },
   [ProjectStateType.planned]: { light: "light/project-planned.svg", dark: "dark/project-planned.svg" },
   [ProjectStateType.started]: { light: "light/project-started.svg", dark: "dark/project-started.svg" },
   [ProjectStateType.paused]: { light: "light/project-paused.svg", dark: "dark/project-paused.svg" },

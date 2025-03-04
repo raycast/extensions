@@ -1,7 +1,4 @@
-import { exec } from "child_process";
-import { promisify } from "util";
-
-const execp = promisify(exec);
+import { execp } from "../utils";
 
 const UNITS = {
   year: 24 * 60 * 60 * 365,
@@ -14,7 +11,7 @@ const UNITS = {
 
 export const getTopCpuProcess = async (count: number): Promise<string[][]> => {
   const output = await execp("/bin/ps -Aceo pcpu,comm -r");
-  const processList: string[] = output.stdout
+  const processList: string[] = output
     .trim()
     .split("\n")
     .slice(1, count + 1);
@@ -23,6 +20,7 @@ export const getTopCpuProcess = async (count: number): Promise<string[][]> => {
   processList.forEach((value) => {
     let temp: string[] = value.trim().split(" ");
     temp = [temp[0], temp.slice(1).join(" ")];
+
     modProcessList.push(temp);
   });
 

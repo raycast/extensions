@@ -5,46 +5,45 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 14:53:25
- * Last modified  : 2023-07-06 15:47:53
+ * Last modified  : 2024-06-26 21:37:46
  */
 
-import { Action, ActionPanel, getPreferenceValues, Icon, List, openCommandPreferences } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  LaunchProps,
+  List,
+  openCommandPreferences,
+} from "@raycast/api";
+import { useEffect } from "react";
 
-import convert from "./operations/convertOperation";
-import { getSelectedImages } from "./utilities/utils";
-import { ConvertPreferences, ExtensionPreferences } from "./utilities/preferences";
+import SettingsActionPanelSection from "./components/SettingsActionPanelSection";
+import convert, { imageFormats } from "./operations/convertOperation";
 import runOperation from "./operations/runOperation";
+import { getSelectedImages } from "./utilities/utils";
 
-/**
- * All supported image formats for conversion.
- */
-const FORMATS = [
-  "ASTC",
-  "BMP",
-  "DDS",
-  "EXR",
-  "GIF",
-  "HEIC",
-  "HEICS",
-  "ICNS",
-  "ICO",
-  "JPEG",
-  "JP2",
-  "KTX",
-  "PBM",
-  "PDF",
-  "PNG",
-  "PSD",
-  "PVR",
-  "TGA",
-  "TIFF",
-  "WEBP",
-  "SVG",
-];
+export default function Command(props: LaunchProps) {
+  const preferences = getPreferenceValues<Preferences.Convert>();
+  const enabledFormats = imageFormats.filter((format) => preferences[`show${format}`]);
 
-export default function Command() {
-  const preferences = getPreferenceValues<ConvertPreferences & ExtensionPreferences>();
-  const enabledFormats = FORMATS.filter((format) => preferences[`show${format}`]);
+  useEffect(() => {
+    if (props.launchContext && "convertTo" in props.launchContext) {
+      const { convertTo } = props.launchContext;
+      if (convertTo) {
+        Promise.resolve(getSelectedImages()).then(async (selectedImages) => {
+          await runOperation({
+            operation: () => convert(selectedImages, convertTo),
+            selectedImages,
+            inProgressMessage: "Conversion in progress...",
+            successMessage: "Converted",
+            failureMessage: "Failed to convert",
+          });
+        });
+      }
+    }
+  }, [props.launchContext]);
 
   return (
     <List searchBarPlaceholder="Search image transformations...">
@@ -71,6 +70,7 @@ export default function Command() {
               <ActionPanel>
                 <Action
                   title={`Convert to ${format}`}
+                  icon={Icon.Switch}
                   onAction={async () => {
                     const selectedImages = await getSelectedImages();
                     await runOperation({
@@ -82,6 +82,14 @@ export default function Command() {
                     });
                   }}
                 />
+                <Action.CreateQuicklink
+                  title="Create Quicklink"
+                  quicklink={{
+                    name: `Convert to ${format}`,
+                    link: `raycast://extensions/HelloImSteven/sips/convert?context=${encodeURIComponent(JSON.stringify({ convertTo: format }))}`,
+                  }}
+                />
+                <SettingsActionPanelSection />
               </ActionPanel>
             }
           />

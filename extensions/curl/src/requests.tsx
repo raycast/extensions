@@ -140,6 +140,9 @@ export default function Requests() {
             accessories={[
               { text: "Copy cURL", icon: Icon.CopyClipboard },
               { tag: { color: methodColor, value: value.method } },
+              ...(value.method != "GET" && value.method != "DELETE"
+                ? [{ tag: "Body", tooltip: value.data ? JSON.stringify(value.data) : "" }]
+                : []),
             ]}
             subtitle={value?.meta?.description ? value?.meta?.description : ""}
             actions={

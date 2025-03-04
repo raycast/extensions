@@ -9,7 +9,7 @@ function VaultManagementActions() {
 
   const handleLockVault = async () => {
     const toast = await showToast(Toast.Style.Animated, "Locking Vault...", "Please wait");
-    await bitwarden.lock(VAULT_LOCK_MESSAGES.MANUAL);
+    await bitwarden.lock({ reason: VAULT_LOCK_MESSAGES.MANUAL });
     await toast.hide();
   };
 

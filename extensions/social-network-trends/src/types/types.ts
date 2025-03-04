@@ -9,3 +9,8 @@ export interface Trend {
   url: string;
   hot?: string;
 }
+
+export interface SocialTrend {
+  title: string;
+  data: Trend[];
+}

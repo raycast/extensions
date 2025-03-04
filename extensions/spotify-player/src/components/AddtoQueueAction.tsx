@@ -14,6 +14,7 @@ export function AddToQueueAction({ uri, title }: AddToQueueActionProps) {
     <Action
       icon={Icon.Plus}
       title="Add To Queue"
+      shortcut={{ modifiers: ["opt"], key: "q" }}
       onAction={async () => {
         try {
           await addToQueue({ uri });

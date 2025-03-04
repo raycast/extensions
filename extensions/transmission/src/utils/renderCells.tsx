@@ -115,13 +115,13 @@ export async function renderPieces({
           colIndex={colIndex}
           rowIndex={rowIndex}
         />
-      ))
+      )),
     )
     .flat();
 
   return renderToString(
     <svg viewBox={`0 0 ${width} ${width}`} xmlns="http://www.w3.org/2000/svg">
       {cellsMarkup}
-    </svg>
+    </svg>,
   );
 }

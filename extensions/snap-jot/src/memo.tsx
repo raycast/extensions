@@ -37,13 +37,19 @@ export default function Command(props: LaunchProps<{ draftValues: Memo }>) {
   function saveMemo(values: Memo) {
     try {
       const filePath = path.join(directory, formatDateTime(new Date(), format));
-      const memo = formatDateTime(new Date(), timestamp, timeFormat === "12") + values.memo + "\n";
+      const memo = formatDateTime(new Date(), timestamp, timeFormat === "12") + values.memo;
       let memoContent = memo;
       // if file is not exist, create file and write memo.
       if (!fs.existsSync(filePath)) {
         // if template is empyt, content is empty.
         const templateContent = !template ? "" : fs.readFileSync(template, "utf8");
         memoContent = replaceDatePlaceholders(new Date(), templateContent) + "\n" + memo;
+      } else {
+        // if file exists, check if it ends with a newline and add one if not
+        const existingContent = fs.readFileSync(filePath, "utf8");
+        if (!existingContent.endsWith("\n")) {
+          fs.appendFileSync(filePath, "\n");
+        }
       }
       fs.appendFileSync(filePath, memoContent);
       const successOptions: Toast.Options = {

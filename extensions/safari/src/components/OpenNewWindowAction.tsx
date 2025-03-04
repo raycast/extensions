@@ -1,23 +1,28 @@
 import { Action, Icon, closeMainWindow } from "@raycast/api";
-import { executeJxa, safariAppIdentifier } from "../utils";
+import { runAppleScript } from "@raycast/utils";
+import { safariAppIdentifier } from "../utils";
 
-const openInNewWindow = async (url: string) =>
-  executeJxa(`
-      const safari = Application("${safariAppIdentifier}");
-      const doc = safari.Document().make();
-      doc.url = "${url}"
-      safari.activate()
-  `);
+async function openInNewWindow(url: string) {
+  const script = `
+    tell application "${safariAppIdentifier}"
+      set doc to make new document
+      set URL of doc to "${url}"
+      activate
+    end tell
+  `;
 
-const OpenNewWindowAction = (props: { url: string }) => (
-  <Action
-    title="Open In New Window"
-    icon={Icon.AppWindow}
-    onAction={async () => {
-      await closeMainWindow();
-      await openInNewWindow(props.url);
-    }}
-  />
-);
+  await runAppleScript(script);
+}
 
-export default OpenNewWindowAction;
+export default function OpenNewWindowAction(props: { url: string }) {
+  return (
+    <Action
+      title="Open in New Window"
+      icon={Icon.AppWindow}
+      onAction={async () => {
+        await closeMainWindow();
+        await openInNewWindow(props.url);
+      }}
+    />
+  );
+}

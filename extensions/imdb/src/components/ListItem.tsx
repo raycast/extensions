@@ -1,8 +1,5 @@
-import { ActionPanel, Action, List, Icon } from '@raycast/api';
-import ItemDetail from './ItemDetail';
-import { Color } from '@raycast/api';
+import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
-import { mapTypeToTitle, processSeasons } from '../utils';
 import {
   DetailedItem,
   getDetailsEndpoint,
@@ -10,8 +7,10 @@ import {
 } from '../data/fetchDetails';
 import { BaseItem } from '../data/fetchList';
 import { usePreferences } from '../hooks/usePreferences';
-import ActionViewDetails from './actions/ActionViewDetails';
+import { mapTypeToTitle, processSeasons } from '../utils';
 import ActionOpenInBrowserIMDb from './actions/ActionOpenInBrowserIMDb';
+import ActionOpenParentalGuide from './actions/ActionOpenParentalGuide';
+import ActionViewDetails from './actions/ActionViewDetails';
 
 interface ListItemProps {
   item: BaseItem;
@@ -41,10 +40,12 @@ export const ListItem = ({ item: { imdbID }, showType }: ListItemProps) => {
             <>
               <ActionViewDetails item={data} />
               <ActionOpenInBrowserIMDb imdbID={imdbID} />
+              <ActionOpenParentalGuide imdbID={imdbID} />
             </>
           ) : (
             <>
               <ActionOpenInBrowserIMDb imdbID={imdbID} />
+              <ActionOpenParentalGuide imdbID={imdbID} />
               <ActionViewDetails item={data} />
             </>
           )}

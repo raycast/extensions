@@ -37,7 +37,8 @@ export default function Command() {
           subtitle={item.subtitle}
           actions={
             <ActionPanel>
-              <Action title={`Select ${item.title}`} onAction={() => handleAction(item.registry)} />
+              <Action title={`Select ${item.title}`} icon={Icon.Check} onAction={() => handleAction(item.registry)} />
+              <Action.CopyToClipboard content={item.registry}></Action.CopyToClipboard>
             </ActionPanel>
           }
         />

@@ -2,12 +2,20 @@ import { getApplications, showToast, Toast, open, popToRoot, showHUD } from "@ra
 
 async function isSessionInstalled() {
   const applications = await getApplications();
-  return applications.some(({ bundleId }) =>
-    bundleId
-      ? ["com.philipyoungg.session-setapp", "com.philipyoungg.session", "com.philipyoungg.session-direct"].includes(
-          bundleId
-        )
-      : false
+  let userApplications: typeof applications = [];
+
+  try {
+    userApplications = await getApplications("~/Applications");
+  } catch (error) {
+    // If there's an error getting user applications, we'll just continue with an empty array
+    // console.error("Error getting user applications:", error);
+  }
+
+  const bundleIds = ["com.philipyoungg.session-setapp", "com.philipyoungg.session", "com.philipyoungg.session-direct"];
+
+  return (
+    applications.some(({ bundleId }) => bundleId && bundleIds.includes(bundleId)) ||
+    userApplications.some(({ bundleId }) => bundleId && bundleIds.includes(bundleId))
   );
 }
 

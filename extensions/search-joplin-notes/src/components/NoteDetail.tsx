@@ -1,15 +1,20 @@
 import { Detail, Action, ActionPanel } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { useNoteDetailFetch } from "./../utils/hooks";
 
-export const NoteDetail = ({ content }: { content: string }) => {
-  const [{ path }] = useCachedState("path", { cached: false, path: "/Applications/Joplin.app" });
+type Props = { id: string };
+
+export const NoteDetail = (props: Props) => {
+  const { id } = props;
+  const { isLoading, data } = useNoteDetailFetch(id);
+  const url = `joplin://x-callback-url/openNote?id=${id}`;
 
   return (
     <Detail
-      markdown={content}
+      markdown={data?.body}
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.Open title="Open Note" target={path} />
+          <Action.OpenInBrowser url={url} title="Open Note" />
         </ActionPanel>
       }
     />

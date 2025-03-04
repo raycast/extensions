@@ -1,20 +1,30 @@
 import { List } from "@raycast/api";
-import { withAccessToken } from "@raycast/utils";
+import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 
 import { PageListItem } from "./components";
-import { useRecentPages, useSearchPages, useUsers } from "./hooks";
+import { useRecentPages, useUsers } from "./hooks";
+import { search } from "./utils/notion";
 import { notionService } from "./utils/notion/oauth";
 
 function Search() {
   const { data: recentPages, setRecentPage, removeRecentPage } = useRecentPages();
   const [searchText, setSearchText] = useState<string>("");
-  const { data: searchPages, isLoading, mutate } = useSearchPages(searchText);
+
+  const { data, isLoading, pagination, mutate } = useCachedPromise(
+    (searchText: string) =>
+      async ({ cursor }) => {
+        const { pages, hasMore, nextCursor } = await search(searchText, cursor);
+        return { data: pages, hasMore, cursor: nextCursor };
+      },
+    [searchText],
+  );
+
   const { data: users } = useUsers();
 
   const sections = [
     { title: "Recent", pages: recentPages ?? [] },
-    { title: "Search", pages: searchPages?.filter((p) => !recentPages?.some((q) => p.id == q.id)) ?? [] },
+    { title: "Search", pages: data?.filter((p) => !recentPages?.some((q) => p.id == q.id)) ?? [] },
   ];
 
   return (
@@ -23,6 +33,7 @@ function Search() {
       searchBarPlaceholder="Search pages"
       onSearchTextChange={setSearchText}
       throttle
+      pagination={pagination}
       filtering
     >
       {sections.map((section) => {

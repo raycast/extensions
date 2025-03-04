@@ -1,41 +1,53 @@
 import React from "react";
-import { Clipboard, Icon, MenuBarExtra, open, showHUD, showInFinder, trash } from "@raycast/api";
+import { Application, Clipboard, Icon, MenuBarExtra, open, showHUD, showInFinder } from "@raycast/api";
 import { copyFileByPath } from "../utils/applescript-utils";
 import { DirectoryWithFileInfo, FileInfo } from "../types/types";
 
-export function MenuBarActionsOnFile(props: { primaryAction: string; fileValue: FileInfo }) {
-  const { primaryAction, fileValue } = props;
+export function MenuBarActionsOnFile(props: {
+  frontmostApp: Application | undefined;
+  primaryAction: string;
+  fileValue: FileInfo;
+}) {
+  const { frontmostApp, primaryAction, fileValue } = props;
   return (
     <>
       <MenuBarExtra.Item
-        icon={primaryAction === "Copy" ? Icon.CopyClipboard : Icon.Finder}
-        title={primaryAction === "Copy" ? "Copy" : "Open"}
+        icon={
+          primaryAction === "Copy" ? Icon.CopyClipboard : frontmostApp ? { fileIcon: frontmostApp.path } : Icon.Desktop
+        }
+        title={primaryAction === "Copy" ? "Copy" : "Paste"}
         onAction={async () => {
           if (primaryAction === "Copy") {
             await showHUD(`${fileValue.name} is copied to clipboard`);
             await copyFileByPath(fileValue.path);
           } else {
-            await open(fileValue.path);
+            await Clipboard.paste({ file: fileValue.path });
           }
         }}
       />
       <MenuBarExtra.Item
-        icon={primaryAction === "Open" ? Icon.CopyClipboard : Icon.Finder}
-        title={primaryAction === "Open" ? "Copy" : "Open"}
+        icon={
+          primaryAction === "Copy"
+            ? frontmostApp
+              ? { fileIcon: frontmostApp.path }
+              : Icon.Desktop
+            : Icon.CopyClipboard
+        }
+        title={primaryAction === "Copy" ? "Paste" : "Copy"}
         onAction={async () => {
-          if (primaryAction === "Open") {
+          if (primaryAction === "Copy") {
+            await Clipboard.paste({ file: fileValue.path });
+          } else {
             await showHUD(`${fileValue.name} is copied to clipboard`);
             await copyFileByPath(fileValue.path);
-          } else {
-            await open(fileValue.path);
           }
         }}
       />
       <MenuBarExtra.Item
-        icon={Icon.AppWindow}
-        title={"Paste"}
+        icon={Icon.Finder}
+        title={"Open"}
         onAction={async () => {
-          await Clipboard.paste({ file: fileValue.path });
+          await open(fileValue.path);
         }}
       />
       <MenuBarExtra.Item
@@ -43,15 +55,6 @@ export function MenuBarActionsOnFile(props: { primaryAction: string; fileValue: 
         title={"Show"}
         onAction={async () => {
           await showInFinder(fileValue.path);
-        }}
-      />
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item
-        icon={Icon.Trash}
-        title={"Delete"}
-        onAction={async () => {
-          await showHUD(`${fileValue.name} is removed to trash`);
-          await trash(fileValue.path);
         }}
       />
     </>

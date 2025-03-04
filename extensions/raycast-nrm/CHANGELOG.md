@@ -1,5 +1,9 @@
 # NRM Changelog
 
+## Enhancement - 2024-02-01
+- Support copying the npm registry addresses to clipboard.
+- Optimizing the action style.
+
 ## [Enhancement] - 2023-11-21
 - Support customizing and modifying gist sources.
 

@@ -1,9 +1,6 @@
 import si from "systeminformation";
 import { DiskInterface } from "../Interfaces";
-import { promisify } from "util";
-import { exec } from "child_process";
-
-const execp = promisify(exec);
+import { execp } from "../utils";
 
 export async function calculateDiskStorage() {
   const disks = await si.fsSize();
@@ -27,7 +24,7 @@ export async function calculateDiskStorage() {
 
 export async function getSerialNumber() {
   const output = await execp("/usr/sbin/system_profiler SPHardwareDataType");
-  const dataMatch = output.stdout.match(/Serial Number \(system\): (.+)/);
+  const dataMatch = output.match(/Serial Number \(system\): (.+)/);
 
   return dataMatch ? dataMatch[1] : null;
 }

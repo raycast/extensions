@@ -40,8 +40,10 @@ const GeneratePasswordActionPanel = (props: GeneratePasswordActionPanelProps) =>
       <Action
         title="Regenerate Password"
         icon={Icon.ArrowClockwise}
-        onAction={regeneratePassword}
         shortcut={{ key: "backspace", modifiers: ["cmd"] }}
+        /* avoid passing a reference to onAction because, for some reason, a string
+        is passed to it, even though the type says otherwise 🤔 */
+        onAction={() => regeneratePassword()}
       />
       <ActionPanel.Section title="Debugging & Bug Reporting">
         <CopyRuntimeErrorLog />

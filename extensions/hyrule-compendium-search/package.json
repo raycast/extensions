@@ -13,7 +13,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "getEntry",
       "title": "Get Entry",
       "subtitle": "Hyrule Compendium Search",
       "icon": "command-icon.png",
@@ -27,10 +27,18 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "broadSearch",
+      "title": "Search Entries",
+      "subtitle": "Search Hyrule Compendium Broadly",
+      "description": "Do a broader search by seeing all results for your search in a grid",
+      "mode": "view",
+      "icon": "command-icon.png"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.63.0",
+    "@raycast/api": "^1.72.0",
     "@raycast/utils": "^1.10.1",
     "fuse.js": "^7.0.0"
   },

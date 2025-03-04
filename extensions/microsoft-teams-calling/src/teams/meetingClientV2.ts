@@ -142,7 +142,10 @@ export class MeetingClientV2 implements MeetingClient {
       console.debug("Refresh token message. Updating local storage.");
       setToken(msg.tokenRefresh);
     } else if (this.isResponseMessage(msg)) {
-      this.lastCommandFinished = true;
+      if (msg.requestId === 0) {
+        // only for responses to our requests
+        this.lastCommandFinished = true;
+      }
     } else {
       forAllDeferred((deferred) => deferred.reject(msg));
     }

@@ -20,7 +20,7 @@ export default async function ExportPinsCommand() {
   const jsonData = await getPinsJSON();
   try {
     if (preferences.exportFormat == "csv") {
-      const d1 = Papa.unparse(jsonData.pins, { columns: PinKeys });
+      const d1 = Papa.unparse(jsonData.pins, { columns: [...PinKeys] });
       const d2 = Papa.unparse(jsonData.groups, { columns: GroupKeys });
       data = `${d1}\n\n\n${d2}`;
     } else if (preferences.exportFormat == "json") {

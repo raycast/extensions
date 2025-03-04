@@ -2,16 +2,17 @@ import { Detail, launchCommand, LaunchType, closeMainWindow, popToRoot, List, Ic
 import { ActionPanel, Action } from "@raycast/api";
 import { OAuthService, getAccessToken, useFetch, withAccessToken } from "@raycast/utils";
 import { exec } from "child_process";
-import { getCurrentInterval, isPaused, preferences } from "../lib/intervals";
-import { FocusText, ShortBreakText, LongBreakText } from "../lib/constants";
-import { GiphyResponse, Interval } from "../lib/types";
+import { getCurrentInterval, isPaused, preferences } from "./lib/intervals";
+import { FocusText, ShortBreakText, LongBreakText } from "./lib/constants";
+import { GiphyResponse, Interval } from "./lib/types";
 import {
   getNextSlackIntervalExecutor,
   slackContinueInterval,
   slackCreateInterval,
   slackPauseInterval,
   slackResetInterval,
-} from "../lib/slack/slackIntervals";
+  slackRestartInterval,
+} from "./lib/slack/slackIntervals";
 
 const createAction = (action: () => Promise<void> | Promise<Interval | undefined>) => async () => {
   await action();
@@ -66,6 +67,15 @@ const ActionsList = () => {
               </ActionPanel>
             }
           />
+          <List.Item
+            title="Restart Current"
+            icon={Icon.Repeat}
+            actions={
+              <ActionPanel>
+                <Action onAction={createAction(async () => slackRestartInterval(token))} title={"Restart Current"} />
+              </ActionPanel>
+            }
+          />
         </>
       ) : (
         <>
@@ -116,7 +126,7 @@ const EndOfInterval = () => {
   let usingGiphy = false;
 
   if (preferences.enableConfetti) {
-    exec("open raycast://extensions/raycast/raycast/confetti", function (err, stdout, stderr) {
+    exec("open raycast://extensions/raycast/raycast/confetti", function (err) {
       if (err) {
         // handle error
         console.error(err);
@@ -134,7 +144,7 @@ const EndOfInterval = () => {
       `https://api.giphy.com/v1/gifs/random?api_key=${preferences.giphyAPIKey}&tag=${preferences.giphyTag}&rating=${preferences.giphyRating}`,
       {
         keepPreviousData: true,
-      }
+      },
     );
     if (!isLoading && data) {
       const giphyResponse = data as GiphyResponse;

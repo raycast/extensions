@@ -1,15 +1,14 @@
-import { showToast, ToastStyle } from "@raycast/api";
-import { contents, update } from "./util/clipboard";
+import { Clipboard } from "@raycast/api";
+import { update } from "./util";
 import { decode, isValid } from "js-base64";
+
 export default async () => {
   try {
-    const clipboard = await contents();
-    if (!isValid(clipboard)) throw "not a valid base64 string";
+    const { text: clipboard } = await Clipboard.read();
+    if (!isValid(clipboard)) throw "Not a valid base64 string";
     const decoded = decode(clipboard);
-    await update(decoded);
-  } catch (e) {
-    if (typeof e === "string") {
-      await showToast(ToastStyle.Failure, "Decode failed", e);
-    }
+    await update({ contents: decoded });
+  } catch (error) {
+    await update({ error });
   }
 };

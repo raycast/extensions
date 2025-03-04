@@ -1,30 +1,64 @@
-import { Color, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
-import wifi, { WiFiNetwork } from "node-wifi";
-import Style = Toast.Style;
-import { Dispatch, SetStateAction } from "react";
+import { showHUD } from "@raycast/api";
 import { getCachedEnv } from "./shell-utils";
 import { execSync } from "child_process";
-import { showQualityNumber, showWifiName } from "../types/preferences";
+import os from "os";
 
-export const connectWifi = async (ssid: string, password: string, setRefresh: Dispatch<SetStateAction<number>>) => {
-  const toast = await showToast(Style.Animated, "Connecting...");
-  wifi.connect(
-    {
-      ssid: ssid,
-      password: password,
-    },
-    async () => {
-      setRefresh(Date.now());
-      const curWifi = await wifi.getCurrentConnections();
-      if (curWifi[0].ssid === ssid) {
-        await showHUD(`🛜 Connected to ${ssid} successfully`);
-        await toast.hide();
-        await popToRoot();
-      } else {
-        await showToast(Style.Failure, "Failure to connect");
-      }
-    },
-  );
+export const getCurWifiInfo = async () => {
+  try {
+    const execEnv = await getCachedEnv();
+    const out = execSync(
+      `networksetup -listnetworkserviceorder | sed -n '/Wi-Fi/s|.*Device: \\(.*\\)).*|\\1|p'`,
+      execEnv,
+    );
+    const device = String(out).trim();
+    const out2 = execSync(`networksetup -getairportnetwork ${device}`, execEnv);
+    const network = String(out2).trim();
+    if (network.includes("off")) {
+      return [];
+    } else {
+      const out3 = execSync(`networksetup -getinfo Wi-Fi`, execEnv);
+      const lines = String(out3).trim().split("\n");
+      return lines
+        .slice(1)
+        .map((line) => {
+          const index = line.indexOf(":");
+          if (index === -1) return null;
+
+          const key = line.substring(0, index).trim();
+          const value = line.substring(index + 1).trim();
+
+          if (value === "") return null;
+
+          return { key, value };
+        })
+        .filter((item) => item !== null);
+    }
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+};
+
+export const getCurWifiName = async () => {
+  try {
+    const execEnv = await getCachedEnv();
+    const out = execSync(
+      `networksetup -listnetworkserviceorder | sed -n '/Wi-Fi/s|.*Device: \\(.*\\)).*|\\1|p'`,
+      execEnv,
+    );
+    const device = String(out).trim();
+    const out2 = execSync(`networksetup -getairportnetwork ${device}`, execEnv);
+    const network = String(out2).trim();
+    if (network.includes("off")) {
+      return "";
+    } else {
+      const index = network.indexOf(": ");
+      if (index === -1) return "";
+      return network.substring(index + 2);
+    }
+  } catch (e) {
+    return "";
+  }
 };
 
 export const getCurWifiStatus = async () => {
@@ -37,13 +71,9 @@ export const getCurWifiStatus = async () => {
     const device = String(out).trim();
     const out2 = execSync(`networksetup -getairportnetwork ${device}`, execEnv);
     const network = String(out2).trim();
-    if (network.includes("off")) {
-      return false;
-    } else {
-      return true;
-    }
+    return !network.includes("off");
   } catch (e) {
-    return true;
+    return false;
   }
 };
 
@@ -70,33 +100,21 @@ export const toggleWifi = async () => {
   }
 };
 
-export const uniqueWifiNetWork = (arr: WiFiNetwork[]) => {
-  if (arr.length <= 1) {
-    return arr;
-  }
-  const res = new Map();
-  return arr.filter((item) => !res.has(item.ssid) && res.set(item.ssid, 1));
-};
-
-export const getSignalIcon = (quality: number | undefined) => {
-  if (quality === undefined) {
-    return Icon.WifiDisabled;
-  }
-  return quality < 40 ? Icon.Signal1 : quality < 70 ? Icon.Signal2 : quality < 90 ? Icon.Signal3 : Icon.FullSignal;
-};
-
-export const getSignalIconColor = (quality: number | undefined) => {
-  if (quality === undefined) {
-    return undefined;
-  }
-  return quality < 40 ? Color.Red : quality < 70 ? Color.Orange : Color.Green;
-};
-
-export const getSignalTitle = (curWifi: WiFiNetwork | undefined) => {
-  if (curWifi === undefined) {
-    return "";
-  }
-  const wifiName = showWifiName ? curWifi?.ssid + "" : "";
-  const qualityNumber = showQualityNumber ? curWifi?.quality + "" : "";
-  return wifiName + " " + qualityNumber;
-};
+export async function getIPV4Address() {
+  return new Promise<string>((resolve, reject) => {
+    const interfaces = os.networkInterfaces();
+    for (const devName in interfaces) {
+      const iface = interfaces[devName];
+      if (typeof iface !== "undefined") {
+        for (let i = 0; i < iface.length; i++) {
+          const alias = iface[i];
+          if (alias.family === "IPv4" && alias.address !== "127.0.0.1" && !alias.internal) {
+            resolve(alias.address);
+            break;
+          }
+        }
+      }
+    }
+    reject("");
+  });
+}

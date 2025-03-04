@@ -14,7 +14,7 @@ export function PreferenceActions() {
       <Action
         icon={Icon.Gear}
         title={"Configure Extension"}
-        shortcut={{ modifiers: ["ctrl", "cmd"], key: "," }}
+        shortcut={{ modifiers: ["opt", "cmd"], key: "," }}
         onAction={() => {
           openExtensionPreferences().then();
         }}

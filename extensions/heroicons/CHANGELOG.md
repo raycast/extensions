@@ -1,5 +1,11 @@
 # Heroicons Changelog
 
+## [v.1.2.2] - 2024-04-09
+
+- Fixed an issue with search crashing due to a list not being able to load (url changed)
+- Updated dependencies
+- Replace Got with `node-fetch`
+
 ## [v.1.2.1] - 2023-10-31
 
 - Removed tags as some change on Tailwind's website made the tag file no longer available. This change is a hot-fix to make the extension work again, hopefully, if needed, the developer responsible for it will make a proper fix.

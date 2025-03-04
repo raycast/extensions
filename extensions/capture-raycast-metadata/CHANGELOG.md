@@ -1,5 +1,9 @@
 # Capture Raycast Metadata Changelog
 
+## [Update Raycast API] - 2024-07-11
+
+- Update Raycast API version to 1.78.1
+
 ## [Update Raycast API] - 2022-12-05
 
 - Update Raycast API version to 1.44.0

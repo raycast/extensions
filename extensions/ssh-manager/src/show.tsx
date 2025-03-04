@@ -1,14 +1,15 @@
-import { List, ActionPanel, showHUD, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, List, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
-import { ISSHConnection } from "./types";
 import { getConnections, saveConnections } from "./storage.api";
+import { ISSHConnection } from "./types";
 
 interface Preferences {
   terminal: string;
   openin: string;
   onlyname: boolean;
 }
+
 const preferences = getPreferenceValues<Preferences>();
 export const terminal = preferences["terminal"];
 export const openIn = preferences["openin"];
@@ -44,16 +45,16 @@ async function runTerminal(item: ISSHConnection) {
   const scriptWarp = `
       -- For the latest version:
       -- https://github.com/DavidMChan/custom-alfred-warp-scripts
-      
+
       -- Set this property to true to always open in a new window
       property open_in_new_window : ${openIn == "newWindow"}
-      
+
       -- Set this property to true to always open in a new tab
       property open_in_new_tab : ${openIn == "newTab"}
-      
+
       -- Don't change this :)
       property opened_new_window : false
-      
+
       -- Handlers
       on new_window()
           tell application "System Events" to tell process "Warp"
@@ -62,22 +63,22 @@ async function runTerminal(item: ISSHConnection) {
           end tell
           delay 0.5
       end new_window
-      
+
       on new_tab()
           tell application "System Events" to tell process "Warp"
               click menu item "New Tab" of menu "File" of menu bar 1
               set frontmost to true
           end tell
       end new_tab
-      
+
       on call_forward()
           tell application "Warp" to activate
       end call_forward
-      
+
       on is_running()
           application "Warp" is running
       end is_running
-      
+
       on has_windows()
           if not is_running() then return false
           tell application "System Events"
@@ -85,14 +86,14 @@ async function runTerminal(item: ISSHConnection) {
           end tell
           true
       end has_windows
-      
+
       on send_text(custom_text)
           tell application "System Events"
               keystroke custom_text
           end tell
       end send_text
-      
-      
+
+
       -- Main
       if not is_running() then
           call_forward()
@@ -101,7 +102,7 @@ async function runTerminal(item: ISSHConnection) {
           call_forward()
           set opened_new_window to false
       end if
-  
+
       if has_windows() then
           if open_in_new_window and not opened_new_window then
               new_window()
@@ -111,25 +112,25 @@ async function runTerminal(item: ISSHConnection) {
       else
           new_window()
       end if
-  
-  
+
+
       -- Make sure a window exists before we continue, or the write may fail
       repeat until has_windows()
           delay 0.5
       end repeat
       delay 0.5
-  
+
       send_text("${command}")
       call_forward()
   `;
   const scriptTerminal = `
     tell application "Terminal"
-      do script ""  
+      do script ""
       activate
       set position of front window to {1, 1}
       set shell to do script "${command}" in window 1
     end tell
-    
+
     tell application "System Events" to tell process "Terminal"
         set frontmost to true
         windows where title contains "bash"
@@ -138,38 +139,38 @@ async function runTerminal(item: ISSHConnection) {
   `;
   const scriptIterm = `
     -- Set this property to true to open in a new window instead of a new tab
-    property open_in_new_window : ${openIn == "newWindow"}
-    
+      property open_in_new_window : ${openIn == "newWindow"}
+
     on new_window()
     	tell application "iTerm" to create window with default profile
     end new_window
-    
+
     on new_tab()
     	tell application "iTerm" to tell the first window to create tab with default profile
     end new_tab
-    
+
     on call_forward()
     	tell application "iTerm" to activate
     end call_forward
-    
+
     on is_running()
     	application "iTerm" is running
     end is_running
-    
+
     on is_processing()
     	tell application "iTerm" to tell the first window to tell current session to get is processing
     end is_processing
-    
+
     on has_windows()
     	if not is_running() then return false
     	if windows of application "iTerm" is {} then return false
     	true
     end has_windows
-    
+
     on send_text(custom_text)
     	tell application "iTerm" to tell the first window to tell current session to write text custom_text
     end send_text
-    
+
     -- Main
     if has_windows() then
       if open_in_new_window then
@@ -186,14 +187,181 @@ async function runTerminal(item: ISSHConnection) {
     		call_forward()
     	end if
     end if
-    
+
     -- Make sure a window exists before we continue, or the write may fail
     repeat until has_windows()
     	delay 0.01
     end repeat
-    
+
     send_text("${command}")
     call_forward()
+  `;
+
+  const scriptAlacritty = `
+  -- Set this property to true to always open in a new window
+  property open_in_new_window : ${openIn == "newWindow"}
+
+  -- Set this property to true to always open in a new tab
+  property open_in_new_tab : ${openIn == "newTab"}
+
+  -- Don't change this :)
+  property opened_new_window : false
+
+  -- Handlers
+  on new_window()
+      tell application "Alacritty"
+          activate
+          delay 0.5
+          tell application "System Events" to tell process "Alacritty"
+              keystroke "n" using {command down}
+          end tell
+      end tell
+      delay 0.5
+  end new_window
+
+  on new_tab()
+      tell application "Alacritty"
+          activate
+          tell application "System Events" to tell process "Alacritty"
+              keystroke "t" using {command down}
+          end tell
+      end tell
+      delay 0.5
+  end new_tab
+
+  on call_forward()
+      tell application "Alacritty" to activate
+      tell application "Alacritty" to reopen
+  end call_forward
+
+  on is_running()
+      application "Alacritty" is running
+  end is_running
+
+  on has_windows()
+      if not is_running() then return false
+      tell application "System Events"
+          if windows of process "Alacritty" is {} then return false
+      end tell
+      true
+  end has_windows
+
+  on send_text(custom_text)
+      tell application "System Events" to tell process "Alacritty"
+          keystroke custom_text
+      end tell
+  end send_text
+
+
+  -- Main
+  if not is_running() then
+      call_forward()
+      set opened_new_window to true
+  else
+      call_forward()
+      set opened_new_window to false
+  end if
+
+  if not has_windows() then
+    tell application "Alacritty" to reopen
+    delay 0.2
+    tell application "Alacritty" to activate
+  end if
+
+  if open_in_new_window and not opened_new_window then
+      new_window()
+  else if open_in_new_tab and not opened_new_window then
+      new_tab()
+  end if
+
+
+  -- Make sure a window exists before we continue, or the write may fail
+  repeat until has_windows()
+      delay 0.5
+  end repeat
+  delay 0.5
+  send_text("${command}
+") -- Enter at the end of string
+  call_forward()
+  `;
+
+  const scriptHyper = `
+  -- Set this property to true to open in a new window instead of a new tab
+  property open_in_new_window : ${openIn == "newWindow"}
+
+  on new_window()
+      tell application "System Events" 
+          launch application "Hyper"
+      end tell
+  end new_window
+
+  on new_tab()
+      tell application "System Events"
+          -- Check if Hyper is already running
+          set isRunning to (exists process "Hyper")
+
+          if isRunning then
+              -- If Hyper is running, bring it to the front and open a new tab
+              tell application "Hyper" to activate
+              tell application "System Events" to keystroke "t" using command down
+          else
+              -- If Hyper isn't running, launch it
+              launch application "Hyper"
+          end if
+      end tell
+  end new_tab
+
+  on call_forward()
+      tell application "Hyper" to activate
+  end call_forward
+
+  on is_running()
+      application "Hyper" is running
+  end is_running
+
+  -- Hyper doesn't have a direct equivalent to 'is processing', so we'll assume it's ready if it's running
+  on is_processing()
+      is_running()
+  end is_processing
+
+  on has_windows()
+      if not is_running() then return false
+      -- Hyper always has at least one window, so we'll just check if it's running
+      true
+  end has_windows
+
+  on send_text(custom_text)
+      tell application "System Events"
+          keystroke custom_text & return
+      end tell
+  end send_text
+
+  -- Main
+  if has_windows() then
+      if open_in_new_window then
+          new_window()
+      else
+          new_tab()
+      end if
+  else
+      -- If Hyper is not running and we tell it to create a new window, we get two
+      -- One from opening the application, and the other from the command
+      if is_running() then
+          new_window()
+      else
+          call_forward()
+      end if
+  end if 
+
+
+  -- Give Hyper some time to load 
+  repeat until has_windows()
+      delay 0.5
+  end repeat
+  delay 0.5
+
+  send_text("${command}")
+  call_forward()
   `;
 
   if (terminal == "iTerm") {
@@ -210,11 +378,42 @@ async function runTerminal(item: ISSHConnection) {
       await runAppleScript(scriptTerminal);
       console.log(error);
     }
+  } else if (terminal == "Alacritty") {
+    try {
+      await closeMainWindow(); // neccessary when alacritty already in fullscreen
+      await runAppleScript(scriptAlacritty);
+    } catch (error) {
+      await runAppleScript(scriptTerminal);
+      console.log(error);
+    }
+  } else if (terminal == "Hyper") {
+    try {
+      await runAppleScript(scriptHyper);
+    } catch (error) {
+      await runAppleScript(scriptTerminal);
+      console.log(error);
+    }
   } else {
     await runAppleScript(scriptTerminal);
   }
 
-  await showHUD("Success ✅");
+  await showHUD(`✅ Connection [${item.name}] opened with [${terminal}].`);
+}
+
+function getConnectionString(item: ISSHConnection) {
+  if (onlyName) {
+    return item.name;
+  }
+
+  const parts = [];
+  if (item.sshKey) parts.push(`-i ${item.sshKey}`);
+  if (item.port) parts.push(`-p ${item.port}`);
+  if (item.command) parts.push(`"${item.command}"`);
+
+  const address = item.user ? `${item.user}@${item.address}` : item.address;
+  parts.unshift("ssh", address);
+
+  return parts.filter(Boolean).join(" ");
 }
 
 export default function Command() {
@@ -238,6 +437,7 @@ export default function Command() {
 
     await saveConnections(items);
     setConnectionsList(items);
+    await showHUD(`🗑 Connection [${item.name}] removed!`);
   }
 
   return (
@@ -245,7 +445,7 @@ export default function Command() {
       {connectionsList.map((item) => {
         return (
           <List.Item
-            actions={<Action item={item} onItemRemove={removeItem} />}
+            actions={<GetAction item={item} onItemRemove={removeItem} />}
             id={item.id}
             key={item.name}
             title={item.name}
@@ -257,30 +457,40 @@ export default function Command() {
   );
 }
 
-function Action({
+function GetAction({
   item,
   onItemRemove,
 }: {
   item: ISSHConnection;
   onItemRemove: (item: ISSHConnection) => Promise<void>;
 }) {
+  const itemString = getConnectionString(item);
   return (
-    <>
-      <ActionPanel>
-        <ActionPanel.Item
-          title="Connect"
-          onAction={async () => {
-            await runTerminal(item);
-          }}
+    <ActionPanel>
+      <ActionPanel.Section title="Operations">
+        <Action icon={Icon.Terminal} title="Open Connection" onAction={() => runTerminal(item)} />
+        <Action.CopyToClipboard
+          title="Copy Connection String"
+          content={itemString}
+          shortcut={{ modifiers: ["cmd"], key: "c" }}
         />
-        <ActionPanel.Item
-          title="Remove"
-          onAction={async () => {
-            await onItemRemove(item);
-          }}
+        <Action.Paste
+          icon={Icon.Text}
+          title="Paste Connection String"
+          content={itemString}
+          shortcut={{ modifiers: ["cmd"], key: "v" }}
+          onPaste={() => showHUD(`📝 Pasting conn. [${item.name}] to active app`)}
         />
-      </ActionPanel>
-    </>
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Danger zone">
+        <Action
+          title="Remove Connection"
+          icon={Icon.Trash}
+          onAction={() => onItemRemove(item)}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        />
+      </ActionPanel.Section>
+    </ActionPanel>
   );
 }
 

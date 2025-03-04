@@ -9,7 +9,13 @@
     "GastroGeek",
     "pernielsentikaer",
     "LunaticMuch",
-    "hmarr"
+    "hmarr",
+    "harsh_khandelwal",
+    "lukas-runge"
+  ],
+  "keywords": [
+    "guid",
+    "GUID"
   ],
   "license": "MIT",
   "commands": [
@@ -70,6 +76,17 @@
           "placeholder": "1",
           "required": false
         }
+      ],
+      "preferences": [
+        {
+          "name": "base32Encoding",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "Options",
+          "label": "Base32 Encoding",
+          "description": "Should letters be Base32 encoded?"
+        }
       ]
     },
     {
@@ -85,6 +102,46 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "generateTypeID",
+      "title": "Generate TypeIDs",
+      "description": "Copy generated TypeIDs to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "prefix",
+          "placeholder": "Prefix",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "type": "text",
+          "placeholder": "1",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "parseTypeID",
+      "title": "Parse TypeIDs",
+      "description": "Parse TypeID and copy resulting UUID to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "typeID",
+          "type": "text",
+          "placeholder": "prefix_1234567890",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "viewHistory",
+      "title": "View History",
+      "description": "View the UUID history",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -117,19 +174,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.55.0",
-    "ulidx": "^2.0.0",
-    "uuid": "^9.0.0",
-    "uuidv7": "^0.6.3"
+    "@raycast/api": "^1.90.0",
+    "typeid-js": "^1.2.0",
+    "ulidx": "^2.4.1",
+    "uuid": "^11.0.5"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^20.4.2",
-    "@types/uuid": "^9.0.2",
-    "eslint": "^8.45.0",
-    "eslint-plugin-import": "^2.27.5",
-    "react-devtools": "^4.28.0",
-    "typescript": "^5.1.6"
+    "@types/uuid": "^10.0.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

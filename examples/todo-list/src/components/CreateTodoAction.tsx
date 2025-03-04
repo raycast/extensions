@@ -1,8 +1,7 @@
 import { Action, Icon } from "@raycast/api";
-import { Todo } from "../types";
-import CreateTodoForm from "./CreateTodoForm";
+import { CreateTodoForm } from "./CreateTodoForm";
 
-function CreateTodoAction(props: { defaultTitle?: string; onCreate: (title: string) => void }) {
+export function CreateTodoAction(props: { defaultTitle?: string; onCreate: (title: string) => void }) {
   return (
     <Action.Push
       icon={Icon.Pencil}
@@ -12,5 +11,3 @@ function CreateTodoAction(props: { defaultTitle?: string; onCreate: (title: stri
     />
   );
 }
-
-export default CreateTodoAction;

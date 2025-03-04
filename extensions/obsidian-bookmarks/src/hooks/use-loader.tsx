@@ -13,7 +13,7 @@ export default function useLoadable<T>(loader: () => Promisable<T>): Loadable<T>
     };
 
     fetch();
-  });
+  }, []);
 
   return state;
 }

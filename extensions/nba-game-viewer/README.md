@@ -1,3 +1,3 @@
-# NBA Game Viewer
+# NBA and WNBA Game Viewer
 
-View upcoming NBA games
+View upcoming NBA and WNBA games

@@ -5,6 +5,7 @@ import {
   Color,
   Form,
   Icon,
+  Keyboard,
   List,
   Toast,
   closeMainWindow,
@@ -14,98 +15,60 @@ import {
   useNavigation,
 } from "@raycast/api";
 
-import { useEffect, useState } from "react";
-
 import { Space, CreatOrUpdateSpaceOptions, SpaceFormValues } from "./types";
 import * as utils from "./utils";
+import { FormValidation, useForm, useLocalStorage } from "@raycast/utils";
 
 const ConfigureSpace = (props: { space: Space; onSpaceConfigured: (space: Space) => void }) => {
-  const [keyCodeError, setKeyCodeError] = useState<string | undefined>();
-
-  const validateSpace = async (spaceFormValues: SpaceFormValues, space: Space) => {
-    const { keyCode } = spaceFormValues;
-
-    if (!keyCode.length) {
-      setKeyCodeError("KeyCode required");
-      return;
-    }
-
-    const modifiers = Object.keys(spaceFormValues).filter(
-      (value) => !!value.match(/down/gi) && spaceFormValues[value] === true
-    );
-
-    if (!modifiers.length) {
-      showToast({
-        title: "NameSpaces",
-        message: "Modifier(s) required",
-        style: Toast.Style.Failure,
+  const { itemProps, handleSubmit } = useForm<SpaceFormValues>({
+    onSubmit(spaceFormValues) {
+      // emit
+      props.onSpaceConfigured({
+        ...props.space,
+        name: spaceFormValues.name,
+        keyCode: spaceFormValues.keyCode,
+        modifiers: spaceFormValues.modifiers,
+        color: spaceFormValues.color,
+        icon: spaceFormValues.icon,
+        confetti: spaceFormValues.confetti,
       });
-
-      return;
-    }
-
-    // emit
-    props.onSpaceConfigured({
-      ...space,
-      name: spaceFormValues.name,
-      keyCode: spaceFormValues.keyCode,
-      modifiers,
-      color: spaceFormValues.color,
-      icon: spaceFormValues.icon,
-      confetti: spaceFormValues.confetti,
-    });
-  };
+    },
+    initialValues: props.space,
+    validation: {
+      keyCode: FormValidation.Required,
+      modifiers: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Space"
-            icon={Icon.SaveDocument}
-            onSubmit={(spaceFormValues: SpaceFormValues) => validateSpace(spaceFormValues, props.space)}
-          />
+          <Action.SubmitForm title="Save Space" icon={Icon.SaveDocument} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title="Name" defaultValue={props.space.name} />
+      <Form.TextField title="Name" placeholder="My New Space" {...itemProps.name} />
       <Form.Separator />
       <Form.Description text="Navigate to Keyboard Shortcuts => Mission Control to see/configure the current shortcut keys assigned to your Spaces." />
       <Form.TextField
-        id="keyCode"
         title="KeyCode"
-        defaultValue={props.space.keyCode}
-        error={keyCodeError}
-        onChange={(value) => {
-          if (value?.length == 0) {
-            setKeyCodeError("KeyCode required");
-          } else {
-            setKeyCodeError(undefined);
-          }
-        }}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setKeyCodeError("KeyCode required");
-          } else {
-            setKeyCodeError(undefined);
-          }
-        }}
+        placeholder="18"
         info={"This is the macOS system 'KeyCode'. E.g. 18 for numerical key 1."}
+        {...itemProps.keyCode}
       />
-      <Form.Description title="" text="Modifiers: Select the modifier keys associated with this Space's shortcut." />
-      <Form.Checkbox id="shift down" label="Shift (⇧)" defaultValue={props.space.modifiers.includes("shift down")} />
-      <Form.Checkbox
-        id="control down"
-        label="Control (⌃)"
-        defaultValue={props.space.modifiers.includes("control down")}
-      />
-      <Form.Checkbox id="option down" label="Option (⌥)" defaultValue={props.space.modifiers.includes("option down")} />
-      <Form.Checkbox
-        id="command down"
-        label="Command (⌘)"
-        defaultValue={props.space.modifiers.includes("command down")}
-      />
-      <Form.Dropdown id="icon" title="Icon" defaultValue={props.space.icon}>
+      <Form.TagPicker
+        title="Modifiers"
+        placeholder="Command (⌘)"
+        info="Select the modifier keys associated with this Space's shortcut."
+        {...itemProps.modifiers}
+      >
+        <Form.TagPicker.Item title="Shift (⇧)" value="shift down" />
+        <Form.TagPicker.Item title="Control (⌃)" value="control down" />
+        <Form.TagPicker.Item title="Option (⌥)" value="option down" />
+        <Form.TagPicker.Item title="Command (⌘)" value="command down" />
+      </Form.TagPicker>
+      <Form.Dropdown title="Icon" {...itemProps.icon}>
         {Object.keys(utils.iconMap).map((icon) => {
           return (
             <Form.Dropdown.Item
@@ -117,7 +80,7 @@ const ConfigureSpace = (props: { space: Space; onSpaceConfigured: (space: Space)
           );
         })}
       </Form.Dropdown>
-      <Form.Dropdown id="color" title="Color" defaultValue={props.space.color}>
+      <Form.Dropdown title="Color" {...itemProps.color}>
         {Object.keys(utils.colors).map((color) => (
           <Form.Dropdown.Item
             key={color}
@@ -127,40 +90,15 @@ const ConfigureSpace = (props: { space: Space; onSpaceConfigured: (space: Space)
           />
         ))}
       </Form.Dropdown>
-      <Form.Checkbox id="confetti" label="Enable Confetti" defaultValue={props.space.confetti} />
+      <Form.Checkbox label="Enable Confetti" {...itemProps.confetti} />
     </Form>
   );
 };
 
 export default function Command() {
-  const [hasCheckedPreferences, setHasCheckedPreferences] = useState<boolean>(false);
-
-  const [spaces, setSpaces] = useState<Space[]>([]);
+  const { isLoading, value = { spaces: [] }, setValue } = useLocalStorage<{ spaces: Space[] }>("namespaces");
 
   const { pop } = useNavigation();
-
-  useEffect(() => {
-    (async () => {
-      const { spaces } = await utils.namespacesPreferences.load();
-
-      const hasValidPreferences = spaces && spaces.length;
-
-      if (hasValidPreferences) {
-        setSpaces(spaces);
-      }
-
-      // next tick
-      setTimeout(() => {
-        setHasCheckedPreferences(true);
-      }, 0);
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      await utils.namespacesPreferences.save({ spaces });
-    })();
-  }, [spaces]);
 
   const switchToSpace = async (space: Space) => {
     if (!space.configured) {
@@ -182,13 +120,13 @@ export default function Command() {
 
   const createOrUpdateConfiguredSpace = (space: Space, opts?: CreatOrUpdateSpaceOptions) => {
     if (opts?.create) {
-      setSpaces((spaces) => [...spaces, { ...space, configured: true }]);
+      setValue({ spaces: [...value.spaces, { ...space, configured: true }] });
     } else {
-      const updateSpaces = spaces.map<Space>((existingSpace) => {
+      const updateSpaces = value.spaces.map<Space>((existingSpace) => {
         return existingSpace.id === space.id ? { ...space, configured: true } : existingSpace;
       });
 
-      setSpaces(updateSpaces);
+      setValue({ spaces: updateSpaces });
     }
 
     pop();
@@ -198,12 +136,12 @@ export default function Command() {
     confirmAlert({
       title: "Delete Space?",
       message: "Once you delete this Space, it cannot be undone",
-      icon: Icon.Trash,
+      icon: { source: Icon.Trash, tintColor: Color.Red },
       primaryAction: {
         title: "Delete",
         style: Alert.ActionStyle.Destructive,
         onAction() {
-          setSpaces(spaces.filter((existingSpace) => existingSpace.id !== space.id));
+          setValue({ spaces: value.spaces.filter((existingSpace) => existingSpace.id !== space.id) });
 
           showToast({
             title: "NameSpaces",
@@ -220,7 +158,7 @@ export default function Command() {
       <Action.Push
         title="Create Space"
         icon={Icon.Plus}
-        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        shortcut={Keyboard.Shortcut.Common.New}
         target={
           <ConfigureSpace
             space={utils.generateConfigurableSpace()}
@@ -231,11 +169,21 @@ export default function Command() {
     );
   };
 
-  return !hasCheckedPreferences ? (
-    <Form></Form>
-  ) : (
-    <List searchBarPlaceholder="Search Spaces..." actions={<ActionPanel>{CreateSpaceAction()}</ActionPanel>}>
-      {spaces.map((space) => (
+  const moveSpace = async (index: number, direction: "up" | "down") => {
+    const from = index;
+    const to = direction === "up" ? index - 1 : index + 1;
+    const updatedSpaces = value.spaces;
+    [updatedSpaces[from], updatedSpaces[to]] = [updatedSpaces[to], updatedSpaces[from]];
+    setValue({ spaces: updatedSpaces });
+  };
+
+  return (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search Spaces..."
+      actions={<ActionPanel>{CreateSpaceAction()}</ActionPanel>}
+    >
+      {value.spaces.map((space, spaceIndex) => (
         <List.Item
           key={space.id}
           title={space.name}
@@ -253,7 +201,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Section title="NameSpaces">
-                <Action title="Switch To Space" icon={Icon.Switch} onAction={() => switchToSpace(space)} />
+                <Action title="Switch to Space" icon={Icon.Switch} onAction={() => switchToSpace(space)} />
                 <Action.Push
                   title="Configure Space"
                   icon={Icon.Cog}
@@ -262,13 +210,34 @@ export default function Command() {
                     <ConfigureSpace space={space} onSpaceConfigured={(space) => createOrUpdateConfiguredSpace(space)} />
                   }
                 />
+                {value.spaces.length > 1 && (
+                  <>
+                    {spaceIndex !== 0 && (
+                      <Action
+                        icon={Icon.ArrowUp}
+                        title="Move Space Up"
+                        shortcut={Keyboard.Shortcut.Common.MoveUp}
+                        onAction={() => moveSpace(spaceIndex, "up")}
+                      />
+                    )}
+                    {spaceIndex !== value.spaces.length - 1 && (
+                      <Action
+                        icon={Icon.ArrowDown}
+                        title="Move Space Down"
+                        shortcut={Keyboard.Shortcut.Common.MoveDown}
+                        onAction={() => moveSpace(spaceIndex, "down")}
+                      />
+                    )}
+                  </>
+                )}
               </ActionPanel.Section>
               <ActionPanel.Section>
                 {CreateSpaceAction()}
                 <Action
                   title="Delete Space"
-                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                  shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                  icon={Icon.Trash}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  style={Action.Style.Destructive}
                   onAction={() => maybeDeleteSpace(space)}
                 />
               </ActionPanel.Section>

@@ -1,5 +1,19 @@
 # Converter Changelog
 
+## [Refactor and Bug Fixes] - 2024-09-09
+
+- Fix bug with pasting values in base converter.
+- Refactor code by creating custom hooks for input handling.
+- Add hex code conversion.
+- Remove `priorityDetection` and `autoDetect` settings.
+- Add `autoPaste` and `asciiCommaSeparated` settings.
+
+## [Refactor Code] - 2024-08-06
+
+- Refactor code to improve performance and readability.
+- Support big number conversion.
+- Update extension icon.
+
 ## [Add Byte Converter] - 2023-05-11
 
 - Add a Byte converter to convert among bits, bytes, kbs, mbs, gbs, etc.

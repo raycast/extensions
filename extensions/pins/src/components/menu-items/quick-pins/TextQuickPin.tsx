@@ -24,20 +24,12 @@ export default function TextQuickPin() {
       shortcut={KEYBOARD_SHORTCUT.PIN_SELECTED_TEXT}
       onAction={async () => {
         const text = await getSelectedText();
-        await createNewPin(
-          text.substring(0, 50).trim(),
-          text,
-          "text-16",
-          targetGroup?.name || "None",
-          "None",
-          undefined,
-          undefined,
-          true,
-          undefined,
-          undefined,
-          [],
-          "",
-        );
+        await createNewPin({
+          name: text.substring(0, 50).trim(),
+          url: text,
+          icon: "text-16",
+          group: targetGroup?.name || "None",
+        });
       }}
     />
   );

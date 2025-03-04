@@ -18,3 +18,6 @@ export const OPTIONAL_OWNERSHIP_DNS_RECORDS = [
   { type: "CNAME", host: "purelymail3._domainkey", value: "key3.dkimroot.purelymail.com." },
   { type: "CNAME", host: "_dmarc", value: "dmarcroot.purelymail.com." },
 ];
+
+export const DOMAIN_REGEX = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i;
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

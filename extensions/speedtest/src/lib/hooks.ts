@@ -1,24 +1,16 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ensureCLI } from "./cli";
-import { Result, ResultProgress, runSpeedTest } from "./speedtest";
+import { SpeedtestResultDefaultValue, runSpeedTest } from "./speedtest";
+import { ResultProgress, SpeedtestResult } from "./speedtest.types";
 
 export function useSpeedtest(): {
-  result: Result;
-  error: string | undefined;
+  result: SpeedtestResult;
+  error?: string;
   isLoading: boolean;
   resultProgress: ResultProgress;
   revalidate: () => void;
 } {
-  const [result, setResult] = useState<Result>({
-    isp: undefined,
-    location: undefined,
-    serverName: undefined,
-    download: undefined,
-    upload: undefined,
-    ping: undefined,
-    url: undefined,
-    error: undefined,
-  });
+  const [result, setResult] = useState<SpeedtestResult>({ ...SpeedtestResultDefaultValue });
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [date, setDate] = useState<Date>();
@@ -37,12 +29,12 @@ export function useSpeedtest(): {
       try {
         await ensureCLI();
         runSpeedTest(
-          (r: Result) => {
+          (r: SpeedtestResult) => {
             if (!cancel) {
-              setResult({ ...r });
+              setResult((sr) => ({ ...sr, ...r }));
             }
           },
-          (r: Result) => {
+          (r: SpeedtestResult) => {
             if (!cancel) {
               setResult({ ...r });
               setIsLoading(false);
@@ -74,3 +66,10 @@ export function useSpeedtest(): {
   }, [date]);
   return { result, error, isLoading, resultProgress, revalidate };
 }
+
+export const useDetailedView = (): [boolean, () => void, () => void] => {
+  const [isDetailedViewEnabled, setIsDetailedViewEnabled] = useState(false);
+  const showDetails = () => setIsDetailedViewEnabled(true);
+  const hideDetails = () => setIsDetailedViewEnabled(false);
+  return [isDetailedViewEnabled, showDetails, hideDetails];
+};

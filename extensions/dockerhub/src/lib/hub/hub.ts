@@ -12,7 +12,7 @@ import {
   ExtensionsResponse,
   ExtensionMetadata,
   SearchParams,
-  FilterType as FilterTypeEnum,
+  SourceType,
 } from "./types";
 import { formatDate, formatSize, generateRepoURL } from "./utils";
 import { ListAccessTokensResponse, AccessToken } from "./types";
@@ -25,7 +25,7 @@ const userURL = "/v2/user/";
 const extensionsURL = "/v2/extensions";
 const accessTokensURL = "/v2/access-tokens";
 
-const searchURL = "https://hub.docker.com/api/content/v1/products/search";
+const searchURL = "https://hub.docker.com/api/search/v3/catalog/search";
 export const TwoFactorDetailMessage = "Require secondary authentication on MFA enabled account";
 
 export class Hub {
@@ -163,22 +163,18 @@ export class Hub {
   async search(params: SearchParams, signal?: AbortSignal): Promise<SearchResponse> {
     const resp = await this.#client.get(searchURL, {
       params,
-      headers: {
-        "Search-Version": "v3",
-      },
       signal,
     });
     const res = resp.data as SearchResponse;
-    if (!res.summaries) {
+    if (!res.results) {
       return res;
     }
-    res.summaries = res.summaries?.map((summary) => {
-      if (summary.filter_type === FilterTypeEnum.OFFICIAL) {
+    res.results = res.results?.map((summary) => {
+      if (summary.source === SourceType.STORE) {
         summary.url = `https://hub.docker.com/_/${summary.slug}`;
       } else {
         summary.url = `https://hub.docker.com/r/${summary.slug}`;
       }
-      summary.from = summary.filter_type.replace("_", " ").toUpperCase();
       return summary;
     });
     return res;

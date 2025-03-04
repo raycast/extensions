@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { DefaultTimerPreset } from "../types";
-import { readDefaultPresetVisibles, toggleDefaultPresetVisibility } from "../timerUtils";
+import { DefaultTimerPreset } from "../backend/types";
+import { readDefaultPresetVisibles, toggleDefaultPresetVisibility } from "../backend/timerBackend";
 
 export default function useDefaultPresetVisibles() {
   const defaultPresets: DefaultTimerPreset[] = [

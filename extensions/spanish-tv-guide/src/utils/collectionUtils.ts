@@ -1,5 +1,5 @@
 import { Maybe } from "monet";
-import { last, findLast } from "lodash";
+import { findLast } from "lodash";
 import { equals, find as scan, indexOf, insert, without } from "ramda";
 
 const replace = <T>(item: T) => {
@@ -15,4 +15,4 @@ const replace = <T>(item: T) => {
   };
 };
 
-export { findLast, last, replace };
+export { findLast, replace };
