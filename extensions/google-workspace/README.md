@@ -1,12 +1,9 @@
 # Google Workspace
 
-Access Google Drive files.
+Access your Google Drive files effortlessly.
 
-Features:
-
-- 🏠 List all folders and files
-- 🔍 Search files
-- ⭐ Browse starred files
-- ⭐ Starred files in Menu Bar
-- 📝 Create doc/form/presentation/spreadsheet with fast command
-- 🔗 Quickly open Google Drive home in browser
+-  🏠 List all files and folders
+-  🔍 Search for files
+-  ⭐ Browse starred files and access them from the menu bar
+-  📝 Create documents, forms, presentations, and spreadsheets using fast commands
+-  🔗 Quickly Open Google Drive home in your browser
