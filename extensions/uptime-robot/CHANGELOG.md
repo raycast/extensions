@@ -1,6 +1,6 @@
 # UptimeRobot Changelog
 
-## [Delete Monitor + Open in Browser] - {PR_MERGE_DATE}
+## [Delete Monitor + Open in Browser] - 2025-03-04
 
 - New `Action` to Delete Monitor (optimistically)
 - New `Action` to "Open in Dashboard"
