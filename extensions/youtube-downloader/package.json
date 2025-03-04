@@ -121,8 +121,40 @@
       "required": false
     }
   ],
+  "ai": {
+    "instructions": "After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it.",
+    "evals": [
+      {
+        "input": "@youtube-downloader download the video from https://www.youtube.com/watch?v=ykaj0pS4A1A",
+        "mocks": {
+          "download-video": {
+            "downloadedPath": "/Users/path/to/video.mp4",
+            "duration": 51,
+            "fileName": "video.mp4",
+            "title": "Raycast Focus: Enter Flow State"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": "https://www.youtube.com/watch?v=ykaj0pS4A1A"
+              },
+              "name": "download-video"
+            }
+          },
+          {
+            "includes": "/Users/path/to/video.mp4"
+          },
+          {
+            "includes": "Raycast Focus: Enter Flow State"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.92.1",
+    "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.18.1",
     "date-fns": "^4.1.0",
     "execa": "^9.5.2",
