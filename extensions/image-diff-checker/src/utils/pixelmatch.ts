@@ -8,17 +8,22 @@ export const compare = async (
   const actualImage = await Jimp.read(actual);
   const expectedImage = await Jimp.read(expected);
 
-  const { width, height } = actualImage;
+  const actualWidth = actualImage.bitmap.width;
+  const actualHeight = actualImage.bitmap.height;
+  const expectedWidth = expectedImage.bitmap.width;
+  const expectedHeight = expectedImage.bitmap.height;
 
-  if (expectedImage.bitmap.width !== width || expectedImage.bitmap.height !== height) {
-    expectedImage.resize({ w: width, h: height });
+  if (actualWidth !== expectedWidth || actualHeight !== expectedHeight) {
+    throw new Error(
+      `Image sizes don't match. Actual: ${actualWidth}x${actualHeight}, Expected: ${expectedWidth}x${expectedHeight}`,
+    );
   }
 
   const actualBuffer = actualImage.bitmap.data;
   const expectedBuffer = expectedImage.bitmap.data;
   const diffBuffer = Buffer.alloc(actualBuffer.length);
 
-  pixelmatch(actualBuffer, expectedBuffer, diffBuffer, width, height, { threshold: 0.2 });
+  pixelmatch(actualBuffer, expectedBuffer, diffBuffer, actualWidth, actualHeight, { threshold: 0.2 });
 
-  return { diffBuffer, width, height };
+  return { diffBuffer, width: actualWidth, height: actualHeight };
 };
