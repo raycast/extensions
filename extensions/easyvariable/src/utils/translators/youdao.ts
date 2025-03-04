@@ -28,7 +28,7 @@ export const youdaoTranslate = async (text: string): Promise<string[]> => {
     .get()
     .filter((text) => text.length > 0);
 
-  // 如果 trans-ce 没有结果，尝试从 trans-content 获取
+  // If trans-ce has no results, try getting from trans-content
   if (translations.length === 0) {
     translations = $(".trans-content")
       .map((_, el) => $(el).text().trim())

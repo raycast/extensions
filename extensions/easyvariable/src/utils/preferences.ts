@@ -15,6 +15,7 @@ export interface Preferences {
   enableDeepseekTranslate: boolean;
   deepseekApiKey: string;
   enableYoudaoTranslate: boolean;
+  enableRaycastTranslate: boolean;
 }
 
-export const preferences = getPreferenceValues<Preferences>();
+export const preferences = getPreferenceValues<ExtensionPreferences>();

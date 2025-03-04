@@ -6,6 +6,7 @@ import { deepseekTranslate } from "../utils/translators/deepseek";
 import { glmTranslate } from "../utils/translators/glm";
 import { tencentTranslate } from "../utils/translators/tencent";
 import { youdaoTranslate } from "../utils/translators/youdao";
+import { raycastTranslate } from "../utils/translators/raycast";
 
 import debounce from "lodash/debounce";
 
@@ -23,7 +24,7 @@ export function TranslateList({ queryText }: TranslateListProps) {
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
   const [youdaoResults, setYoudaoResults] = useState<string[]>([]);
 
-  // 修改 handleTranslate 方法
+  // Format translated text
   const formatTranslatedText = (text: string) => {
     return text
       .split(/\s+/)
@@ -42,6 +43,7 @@ export function TranslateList({ queryText }: TranslateListProps) {
       deepseek: true,
       glm: true,
       tencent: true,
+      raycast: true,
       youdao: true,
     });
 
@@ -51,6 +53,7 @@ export function TranslateList({ queryText }: TranslateListProps) {
       deepseek: deepseekTranslate,
       glm: glmTranslate,
       tencent: tencentTranslate,
+      raycast: raycastTranslate, // 新增
       youdao: async (text: string) => {
         const translations = await youdaoTranslate(text);
         setYoudaoResults(translations.map(formatTranslatedText));
@@ -58,7 +61,7 @@ export function TranslateList({ queryText }: TranslateListProps) {
       },
     };
 
-    // 并行处理所有翻译服务
+    // Process regular translation results
     Object.entries(services).forEach(async ([key, translator]) => {
       try {
         const translated = await translator(text);
@@ -99,13 +102,14 @@ export function TranslateList({ queryText }: TranslateListProps) {
       deepseek: "Deepseek",
       glm: "GLM",
       tencent: "Tencent",
+      raycast: "Raycast AI",
       youdao: "Youdao",
     };
 
-    // 收集所有翻译结果
+    // Collect all translation results
     const translationMap = new Map<string, string[]>();
 
-    // 处理普通翻译结果
+    // Process regular translation results
     Object.entries(services).forEach(([key, title]) => {
       if (key !== "youdao" && results[key]) {
         const result = results[key];
@@ -117,7 +121,7 @@ export function TranslateList({ queryText }: TranslateListProps) {
       }
     });
 
-    // 处理有道翻译结果
+    // Process Youdao translation results
     if (youdaoResults.length > 0) {
       youdaoResults.forEach((result, index) => {
         if (!translationMap.has(result)) {
@@ -128,7 +132,7 @@ export function TranslateList({ queryText }: TranslateListProps) {
       });
     }
 
-    // 按来源数量排序并渲染结果
+    // Sort by source count and render results
     Array.from(translationMap.entries())
       .sort(([, sourcesA], [, sourcesB]) => sourcesB.length - sourcesA.length)
       .forEach(([result, sources]) => {
@@ -148,7 +152,7 @@ export function TranslateList({ queryText }: TranslateListProps) {
         );
       });
 
-    // 最后添加错误结果
+    // Add error results at the end
     Object.entries(services).forEach(([key, title]) => {
       if (errors[key]) {
         items.push(<List.Item key={`error-${key}`} icon={Icon.ExclamationMark} title={errors[key]} subtitle={title} />);

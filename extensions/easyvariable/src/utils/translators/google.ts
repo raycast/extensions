@@ -17,7 +17,7 @@ export const googleTranslate = async (text: string): Promise<string> => {
   try {
     const proxyAgent = preferences?.httpProxy?.trim() ? new HttpsProxyAgent(preferences.httpProxy) : undefined;
 
-    // 尝试使用网页版翻译,@vitalets/google-translate-api会ban请求较多的IP
+    // Try using web version translation, @vitalets/google-translate-api will ban IPs with too many requests
     const url = `https://translate.google.com/m?sl=auto&tl=en&hl=en&q=${encodeURIComponent(text)}`;
 
     const response = await axios.get(url, {
@@ -26,7 +26,8 @@ export const googleTranslate = async (text: string): Promise<string> => {
       },
       timeout: 10000,
       httpsAgent: proxyAgent,
-      proxy: false, // 禁用 axios 默认代理
+      // Disable axios default proxy
+      proxy: false,
     });
 
     const $ = cheerio.load(response.data);
@@ -34,7 +35,7 @@ export const googleTranslate = async (text: string): Promise<string> => {
 
     return translation;
   } catch (error) {
-    // 如果网页版失败，回退到 API 版本
+    // Fallback to @vitalets/google-translate-api
     const { text: translated } = await translate(text, {
       fetchOptions: {
         agent: preferences?.httpProxy?.trim() ? new HttpsProxyAgent(preferences.httpProxy) : undefined,

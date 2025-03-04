@@ -13,6 +13,7 @@ EasyVariable is a Raycast extension that helps developers quickly generate stand
 
 - Multiple translation engines support
   - Youdao Translate (Enabled by default, no configuration needed)
+  - Raycast Pro AI
   - Google Translate (Proxy required in certain regions)
   - OpenAI (Custom API supported)
   - Tencent Translate
