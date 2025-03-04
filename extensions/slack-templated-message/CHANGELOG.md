@@ -1,5 +1,5 @@
 # Slack Templated Message Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-03-04
 
 Initial Version
