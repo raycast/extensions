@@ -135,9 +135,63 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "get-tasks",
+      "title": "Get Tasks",
+      "description": "Get tasks in smart list"
+    },
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Add task to TickTick"
+    },
+    {
+      "name": "get-lists",
+      "title": "Get Lists",
+      "description": "Get Lists in TickTick"
+    }
+  ],
+  "ai": {
+    "instructions": "",
+    "evals": [
+      {
+        "input": "@ticktick get tasks in today",
+        "mocks": {
+          "get-tasks": []
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-tasks",
+              "arguments": {
+                "smartProjectId": "today"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ticktick get tasks in next 7 days",
+        "mocks": {
+          "get-tasks": []
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-tasks",
+              "arguments": {
+                "smartProjectId": "next7Days"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.36.0",
-    "@raycast/utils": "^1.8.0",
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.19.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.44",
