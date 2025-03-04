@@ -14,7 +14,7 @@
     {
       "type": "checkbox",
       "title": "Switch Translate",
-      "description": "use Google Translate,may need proxy",
+      "description": "use Google Translate, may need proxy",
       "required": false,
       "name": "enableGoogleTranslate",
       "default": false,
