@@ -1,5 +1,4 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
 import Fuse, { FuseOptionKey } from "fuse.js";
 import _ from "lodash";
 import osascript from "osascript-tag";
