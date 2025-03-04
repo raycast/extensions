@@ -4,7 +4,7 @@ import { GitHubContent, Item } from "./types";
 
 // Constants
 export const CACHE_KEY = "ccfddl-conference-data";
-export const CACHE_TTL = 1000 * 60 * 60 * 24 * 7; // 24 hours * 7 days
+cache.set(CACHE_KEY, JSON.stringify(allItems), { expiresIn: CACHE_TTL });
 export const cache = new Cache();
 
 // Modified to take a manual refresh parameter and callbacks
