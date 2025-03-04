@@ -68,7 +68,8 @@ export function deliveryStatus(packages?: Package[]): { value: string; color?: C
 
   let accessoryText = "En route";
   if (closestPackage?.deliveryDate) {
-    accessoryText = calculateDayDifference(closestPackage.deliveryDate).toString() + " days until delivery";
+    const now = new Date();
+    accessoryText = calculateDayDifference(closestPackage.deliveryDate, now).toString() + " days until delivery";
   }
 
   let accessoryColor = undefined;
@@ -114,10 +115,10 @@ export function getPackageWithEarliestDeliveryDate(packages: Package[]): Package
   });
 }
 
-export function calculateDayDifference(deliveryDate: Date): number {
+export function calculateDayDifference(deliveryDate: Date, comparisonDate: Date): number {
   const millisecondsInDay = 1000 * 60 * 60 * 24;
 
-  const millisecondsDifference = deliveryDate.getTime() - new Date().getTime();
+  const millisecondsDifference = deliveryDate.getTime() - comparisonDate.getTime();
   let dayDifference = Math.ceil(millisecondsDifference / millisecondsInDay);
 
   if (dayDifference < 0) {

@@ -176,7 +176,7 @@ async function refreshTracking(
           [delivery.id]: {
             packages: refreshedPackages,
             lastUpdated: now,
-          }
+          },
         };
       });
     } catch (error) {
@@ -286,8 +286,9 @@ function sortTracking(tracks: Delivery[], packages: PackageMap): Delivery[] {
       return 0;
     }
 
+    const now = new Date();
     const dayDifferenceDifference =
-      calculateDayDifference(aEarliestDeliveryDate!) - calculateDayDifference(bEarliestDeliveryDate!);
+      calculateDayDifference(aEarliestDeliveryDate!, now) - calculateDayDifference(bEarliestDeliveryDate!, now);
     if (dayDifferenceDifference === 0) {
       // both tracks tie for earliest delivery
 
