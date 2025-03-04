@@ -13,6 +13,7 @@ This extension allows you to control your display using [BetterDisplay](https://
 - Change display resolution
 - Change display brightness
 - Change display contrast
+- Interact with your displays using Raycast AI (Raycast Pro required)
 
 ## Disclaimer
 
