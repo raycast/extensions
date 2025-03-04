@@ -4,7 +4,7 @@ import { listLinks } from "./api/list-links";
 import { isApplicationInstalled, showMustBeInstalledToast } from "./utils/isApplicationInstalled";
 import { openLink } from "./utils/url-scheme";
 
-export default function Command() {
+export default function ListUnread() {
   const {
     data: isInstalled,
     isLoading: isInstalledLoading,

@@ -7,10 +7,7 @@ async function getURLFromClipboard() {
   const possibleUrl = await Clipboard.readText();
 
   if (!possibleUrl) {
-    await showToast({
-      title: "Your clipboard is empty.",
-      style: Toast.Style.Failure,
-    });
+    await showFailureToast("Your clipboard is empty.");
     return null;
   }
 
@@ -18,14 +15,11 @@ async function getURLFromClipboard() {
     new URL(possibleUrl);
     return encodeURI(possibleUrl);
   } catch {
-    await showToast({
-      title: "Your clipboard does not contain a valid URL",
-      style: Toast.Style.Failure,
-    });
+    await showFailureToast("Your clipboard does not contain a valid URL");
     return null;
   }
 }
-export default async function command() {
+export default async function saveLinkFromClipboard() {
   try {
     const isInstalled = await isApplicationInstalled();
 

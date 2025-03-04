@@ -1,7 +1,8 @@
 import { executeScript } from "../utils/applescript";
 
 export async function saveLink(url: string) {
-  await executeScript(`
+  return await executeScript(
+    `
 const goodlinks = Application("GoodLinks");
 goodlinks.make({
   new: "link",
@@ -9,7 +10,6 @@ goodlinks.make({
     url: "${url}",
   },
 });
-
-return null
-        `);
+`,
+  );
 }
