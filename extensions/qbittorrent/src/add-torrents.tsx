@@ -41,12 +41,21 @@ export default function AddTorrents() {
 
   const loginAndInitPreferences = async () => {
     setLoading(true);
-    await qbit.login();
-    const preferences = await qbit.getPreferences();
-    const categories = await qbit.getCategories();
-    setPreferences(preferences);
-    setCategories(Object.keys(categories));
-    setLoading(false);
+    try {
+      await qbit.login();
+      const preferences = await qbit.getPreferences();
+      const categories = await qbit.getCategories();
+      setPreferences(preferences);
+      setCategories(Object.keys(categories));
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to connect to qBittorrent",
+        message: "Please check your Web UI settings and make sure qBittorrent is running.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

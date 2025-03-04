@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "qbitorrent",
-  "title": "QBitorrent",
-  "description": "a qBitorrent client",
+  "title": "qBittorrent",
+  "description": "Manage your qBittorrent client directly from Raycast. Control downloads, add torrents, and monitor progress without leaving your workflow.",
   "icon": "qbittorrent.png",
   "author": "pernielsentikaer",
   "contributors": [
@@ -17,46 +17,46 @@
       "name": "torrents",
       "title": "List Torrents",
       "subtitle": "qBittorrent",
-      "description": "list qBitorrent torrents",
+      "description": "View and manage your active torrents. Monitor download progress, speeds, and control individual torrents.",
       "mode": "view"
     },
     {
       "name": "add-torrents",
       "title": "Add Torrents",
       "subtitle": "qBittorrent",
-      "description": "add qBitorrent torrents",
+      "description": "Add new torrents via magnet links or torrent files. Configure download options and categories.",
       "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "address",
-      "title": "address",
-      "description": "qBitorrent webui address",
-      "placeholder": "http://example.com:8080",
+      "title": "Web UI Address",
+      "description": "The address where your qBittorrent Web UI is running",
+      "placeholder": "http://localhost:8080",
       "type": "textfield",
       "required": true
     },
     {
       "name": "username",
-      "title": "username",
-      "description": "qBitorrent webui username",
+      "title": "Username",
+      "description": "Your qBittorrent Web UI username",
       "placeholder": "admin",
       "type": "textfield",
       "required": true
     },
     {
       "name": "password",
-      "title": "password",
-      "description": "qBitorrent webui password",
+      "title": "Password",
+      "description": "Your qBittorrent Web UI password",
       "type": "password",
       "placeholder": "adminadmin",
       "required": true
     },
     {
       "name": "timeout",
-      "title": "Refresh timeout in seconds",
-      "description": "Refresh timeout in seconds, 0 to disable",
+      "title": "Auto-refresh Interval",
+      "description": "How often to refresh the torrent list (in seconds). Set to 0 to disable auto-refresh.",
       "type": "textfield",
       "placeholder": "0",
       "default": "0",
