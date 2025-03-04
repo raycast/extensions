@@ -23,7 +23,9 @@
       "title": "Search the Web",
       "keywords": [
         "search",
-        "bang"
+        "unduck",
+        "duckduckgo",
+        "bangs"
       ],
       "subtitle": "Search the Web using DuckDuckGo Bangs",
       "description": "Search the Web using any of the available search engines. Powered by DuckDuckGo Bangs",
@@ -42,7 +44,12 @@
       "title": "Browse Search Engines",
       "subtitle": "Browse and select your default search engine",
       "description": "View all available search engines and set your default search engine to use with the search command.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "unduck",
+        "duckduckgo",
+        "bangs"
+      ]
     }
   ],
   "dependencies": {
