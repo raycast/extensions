@@ -383,7 +383,7 @@
         {
           "name": "ollamaModel",
           "title": "Ollama Model",
-          "description": "Choose the Ollama model to use. Defaults to `llama2`.",
+          "description": "Choose the Ollama model to use. Defaults to `llama3`.",
           "type": "textfield",
           "required": false
         },
