@@ -24,15 +24,18 @@ export const openaiTranslate = async (text: string): Promise<string> => {
       httpAgent: preferences?.httpProxy ? new HttpsProxyAgent(preferences.httpProxy) : undefined,
     },
   });
+  try {
+    const response = await model.invoke([
+      new SystemMessage(
+        "You are a translator. Translate the text to English. You can use common abbreviations and technical terms (e.g., LLM for Large Language Model, API for Application Programming Interface). Only return the translated text without explanation or punctuation.",
+      ),
+      new HumanMessage(text),
+    ]);
 
-  const response = await model.invoke([
-    new SystemMessage(
-      "You are a translator. Translate the text to English. You can use common abbreviations and technical terms (e.g., LLM for Large Language Model, API for Application Programming Interface). Only return the translated text without explanation or punctuation.",
-    ),
-    new HumanMessage(text),
-  ]);
-
-  const translated = response.content as string;
-  translated.trim();
-  return translated.replace(/[.,#!$%&*;:{}=\-_`~()"']/g, "");
+    const translated = response.content as string;
+    translated.trim();
+    return translated.replace(/[.,#!$%&*;:{}=\-_`~()"']/g, "");
+  } catch (error) {
+    throw new Error(`OpenAI API translation failed: ${(error as Error).message}`);
+  }
 };

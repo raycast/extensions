@@ -31,6 +31,10 @@ export const tencentTranslate = async (text: string): Promise<string> => {
     Target: "en",
     ProjectId: 0,
   };
-  const result = await client.TextTranslate(params);
-  return result.TargetText ?? "";
+  try {
+    const result = await client.TextTranslate(params);
+    return result.TargetText ?? "";
+  } catch (error) {
+    throw new Error(`Tencent translation failed: ${(error as Error).message}`);
+  }
 };

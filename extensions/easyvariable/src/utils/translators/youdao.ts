@@ -22,27 +22,27 @@ export const youdaoTranslate = async (text: string): Promise<string[]> => {
       proxy: false,
       timeout: 10000,
     });
-  } catch (error) {
-    throw new Error(`Failed to fetch translation: ${error.message}`);
-  }
 
-  const $ = cheerio.load(response.data);
-  let translations = $(".trans-ce a")
-    .map((_, el) => $(el).text().trim())
-    .get()
-    .filter((text) => text.length > 0);
-
-  // If trans-ce has no results, try getting from trans-content
-  if (translations.length === 0) {
-    translations = $(".trans-content")
+    const $ = cheerio.load(response.data);
+    let translations = $(".trans-ce a")
       .map((_, el) => $(el).text().trim())
       .get()
       .filter((text) => text.length > 0);
-  }
 
-  if (translations.length === 0) {
-    throw new Error("No translation found");
-  }
+    // If trans-ce has no results, try getting from trans-content
+    if (translations.length === 0) {
+      translations = $(".trans-content")
+        .map((_, el) => $(el).text().trim())
+        .get()
+        .filter((text) => text.length > 0);
+    }
 
-  return translations;
+    if (translations.length === 0) {
+      throw new Error("No translation found");
+    }
+
+    return translations;
+  } catch (error) {
+    throw new Error(`Failed to fetch translation: ${(error as Error).message}`);
+  }
 };
