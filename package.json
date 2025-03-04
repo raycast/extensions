@@ -18,6 +18,13 @@
       "mode": "view"
     },
     {
+      "name": "list-tasks",
+      "title": "List Tasks",
+      "subtitle": "View and search Motion tasks",
+      "description": "Browse, search, and filter your Motion tasks by name, label, and project",
+      "mode": "view"
+    },
+    {
       "name": "edit-task",
       "title": "Edit Task",
       "subtitle": "Edit existing Motion tasks",
@@ -33,9 +40,9 @@
     },
     {
       "name": "debug-workspaces",
-      "title": "Debug Workspaces",
-      "subtitle": "Diagnose Motion API connection issues",
-      "description": "Test connection to Motion API and diagnose any issues with workspaces and tasks",
+      "title": "Workspace Details",
+      "subtitle": "View Motion workspace information",
+      "description": "View detailed information about your Motion workspaces and connections",
       "mode": "view"
     }
   ],
