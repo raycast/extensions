@@ -37,7 +37,12 @@ async function loadTemplatesFromFile(): Promise<SlackTemplate[]> {
   try {
     await ensureStorageDirectory();
     const data = await fs.readFile(templatesFilePath, "utf-8");
-    return JSON.parse(data);
+    try {
+      return JSON.parse(data);
+    } catch (parseError) {
+      console.error("Failed to parse templates JSON:", parseError);
+      throw new Error("Invalid template file format");
+    }
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       return [];
@@ -142,6 +147,7 @@ export async function writeTemplatesToFile(filePath: string, templates: SlackTem
       title: "Failed to write to file",
       message: error instanceof Error ? error.message : "Unknown error",
     });
+    throw error;
   }
 }
 

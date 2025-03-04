@@ -53,12 +53,18 @@ export const slack = OAuthService.slack({
  */
 export async function replaceTemplateVariables(message: string, client: WebClient): Promise<string> {
   const now = new Date();
-  const userInfo = await client.auth.test();
+  let userName = "unknown";
+  try {
+    const userInfo = await client.auth.test();
+    userName = userInfo.user || "unknown";
+  } catch (error) {
+    console.error("Failed to get user info:", error);
+  }
 
   const variables: { [key: string]: string } = {
     date: now.toISOString().split("T")[0],
     time: now.toTimeString().slice(0, 5),
-    user: userInfo.user || "unknown",
+    user: userName,
   };
 
   return message.replace(/\{([^}]+)\}/g, (match, key) => {

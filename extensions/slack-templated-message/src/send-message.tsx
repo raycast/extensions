@@ -104,6 +104,8 @@ function Command() {
     try {
       const loadedTemplates = await loadTemplates();
       setTemplates(loadedTemplates);
+    } catch (error) {
+      await showFailureToast(error instanceof Error ? error.message : "Failed to load templates");
     } finally {
       setIsLoading(false);
     }
