@@ -1,6 +1,6 @@
 # Summarize YouTube Video Changelog
 
-## [New Features] - 2025-03-03
+## [New Features] - {PR_MERGE_DATE}
 
 - 🤖 created separate command for Ollama
 
