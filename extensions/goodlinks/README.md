@@ -1,6 +1,6 @@
 # GoodLinks
 
-> [!IMPORTANT] > [GoodLinks](https://goodlinks.app) must be installed.
+**[GoodLinks](https://goodlinks.app) must be installed.**
 
 ## Commands
 
