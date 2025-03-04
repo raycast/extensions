@@ -19,7 +19,17 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
 import { execa, ExecaError } from "execa";
-import { DownloadOptions, isValidHHMM, isValidUrl, parseHHMM, preferences } from "./utils.js";
+import {
+  DownloadOptions,
+  getFormats,
+  getFormatTitle,
+  getFormatValue,
+  isValidHHMM,
+  isValidUrl,
+  parseHHMM,
+  preferences,
+} from "./utils.js";
+import { Video } from "./types.js";
 
 export default function DownloadVideo() {
   const [error, setError] = useState(0);
@@ -30,21 +40,12 @@ export default function DownloadVideo() {
       url: "",
     },
     onSubmit: async (values) => {
-      const options = ["-P", preferences.downloadPath];
+      const options: Array<string | string[]> = ["-P", preferences.downloadPath];
+      const [downloadFormat, recodeFormat] = values.format.split("#");
 
       options.push("--ffmpeg-location", preferences.ffmpegPath);
-      options.push("-f", "bv*[ext=mp4][vcodec^=avc]+ba[ext=m4a]/b[ext=mp4]");
-
-      // if (!values.startTime && values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*0:00-${values.endTime}`);
-      // } else if (values.startTime && !values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*${values.startTime}-*`);
-      // } else if (values.startTime && values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*${values.startTime}-${values.endTime}`);
-      // }
+      options.push("--format", downloadFormat);
+      options.push("--recode-video", recodeFormat);
 
       const toast = await showToast({
         title: "Downloading Video",
@@ -55,7 +56,7 @@ export default function DownloadVideo() {
       options.push("--progress");
       options.push("--print", "after_move:filepath");
 
-      const process = spawn(preferences.ytdlPath, [...options, values.url]);
+      const process = spawn(preferences.ytdlPath, [...options.flat(), values.url]);
 
       let filePath = "";
 
@@ -157,22 +158,11 @@ export default function DownloadVideo() {
 
       const result = await execa(
         preferences.ytdlPath,
-        [preferences.forceIpv4 ? "--force-ipv4" : "", "-j", url].filter((x) => Boolean(x)),
+        [preferences.forceIpv4 ? "--force-ipv4" : "", "--dump-json", "--format-sort=resolution,ext,tbr", url].filter(
+          (x) => Boolean(x),
+        ),
       );
-      return JSON.parse(result.stdout) as {
-        title: string;
-        duration: number;
-        live_status: string;
-        formats: {
-          format_id: string;
-          vcodec: string;
-          acodec: string;
-          video_ext: string;
-          protocol: string;
-          filesize_approx: number;
-          resolution: string;
-        }[];
-      };
+      return JSON.parse(result.stdout) as Video;
     },
     [values.url],
     {
@@ -246,6 +236,8 @@ export default function DownloadVideo() {
     return null;
   }, [error]);
 
+  const formats = useMemo(() => getFormats(video), [video]);
+
   if (missingExecutable) {
     return <NotInstalled executable={missingExecutable} onRefresh={() => setError(error + 1)} />;
   }
@@ -274,25 +266,27 @@ export default function DownloadVideo() {
     >
       <Form.Description title="Title" text={video?.title ?? "Video not found"} />
       <Form.TextField
+        {...itemProps.url}
         autoFocus
         title="URL"
-        placeholder="https://www.youtube.com/watch?v=xRMPKQweySE"
-        {...itemProps.url}
+        placeholder="https://www.youtube.com/watch?v=ykaj0pS4A1A"
       />
       {warning && <Form.Description text={warning} />}
-      {/*<Form.Separator />*/}
-      {/*<Form.TextField*/}
-      {/*  info="Optional. Specify when the output video should start. Follow the format HH:MM:SS or MM:SS."*/}
-      {/*  title="Start Time"*/}
-      {/*  placeholder="00:00"*/}
-      {/*  {...itemProps.startTime}*/}
-      {/*/>*/}
-      {/*<Form.TextField*/}
-      {/*  info="Optional. Specify when the output video should end. Follow the format HH:MM:SS or MM:SS."*/}
-      {/*  title="End Time"*/}
-      {/*  placeholder={video ? formatHHMM(video.duration) : "00:00"}*/}
-      {/*  {...itemProps.endTime}*/}
-      {/*/>*/}
+      {video && (
+        <Form.Dropdown {...itemProps.format} title="Format">
+          {Object.entries(formats).map(([category, formats]) => (
+            <Form.Dropdown.Section title={category} key={category}>
+              {formats.map((format) => (
+                <Form.Dropdown.Item
+                  key={format.format_id}
+                  value={getFormatValue(format)}
+                  title={getFormatTitle(format)}
+                />
+              ))}
+            </Form.Dropdown.Section>
+          ))}
+        </Form.Dropdown>
+      )}
     </Form>
   );
 }

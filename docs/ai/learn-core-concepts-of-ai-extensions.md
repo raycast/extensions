@@ -93,7 +93,7 @@ type Input = {
   name: string;
 };
 
-export const confirmation: Tool.Confirmation<Input> = async (input) => {
+export const confirmation: Tool.Confirmation<Input> = (input) => {
   return {
     message: `Are you sure you want to greet ${input.name}?`,
   };
@@ -118,7 +118,7 @@ Sometimes you want to provide additional instructions to the AI that are not spe
 ```json
 {
   "ai": {
-    "instructions": "When you don't know the user's first name, ask for it."
+    "instructions": ["When you don't know the user's first name, ask for it."]
   }
 }
 ```

@@ -1,5 +1,9 @@
 # Can I PHP? Changelog
 
+## Bugfixes - 2025-03-02
+
+Ensures fetched data is always mapable. 
+
 ## [Added support for PHP 8.4 & more] - 2025-02-28
 
 This release introduces support for PHP 8.4 in the function list and adds a new preference allowing you to customize **the PHP versions most relevant to your workflow.**

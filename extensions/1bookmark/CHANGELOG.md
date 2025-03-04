@@ -1,5 +1,11 @@
 # 1bookmark Changelog
 
+## [Space Detail View and Official Domain] - 2025-03-04
+
+- 0.5.0
+- 📱 Space detail view is now available.
+- 🌐 Service's official domain `1bookmark.net` is now used.
+
 ## [Improve Code Quality and Fixed Some Bugs] - 2025-02-28
 
 - 0.4.2
