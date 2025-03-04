@@ -16,13 +16,20 @@ interface AIResponse {
   response: string;
 }
 
-const CHAIN = "mantle";
+type Chain = "mode" | "mantle" | "base";
+
+const AVAILABLE_CHAINS: { value: Chain; title: string }[] = [
+  { value: "mode", title: "Mode" },
+  { value: "mantle", title: "Mantle" },
+  { value: "base", title: "Base" },
+];
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<AIResponse | null>(null);
   const [command, setCommand] = useState("");
+  const [selectedChain, setSelectedChain] = useState<Chain>("mode");
 
   // Loading animation frames
   const loadingFrames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
@@ -48,8 +55,8 @@ export default function Command() {
       console.log("🎯 Endpoint:", url);
       console.log("📦 Payload:", {
         prompt: values.command,
-        chain: CHAIN,
-        privateKeyProvided: !!preferences.privateKey, // logs true/false without exposing the actual key
+        chain: selectedChain,
+        privateKeyProvided: !!preferences.privateKey,
       });
       console.log("==================");
 
@@ -62,7 +69,7 @@ export default function Command() {
         },
         body: JSON.stringify({
           prompt: values.command,
-          chain: CHAIN,
+          chain: selectedChain,
           privateKey: preferences.privateKey,
         }),
       });
@@ -133,6 +140,16 @@ export default function Command() {
       }
     >
       <Form.Description text="Enter your command below (Private Key)" />
+      <Form.Dropdown
+        id="chain"
+        title="Chain"
+        value={selectedChain}
+        onChange={(value) => setSelectedChain(value as Chain)}
+      >
+        {AVAILABLE_CHAINS.map((chain) => (
+          <Form.Dropdown.Item key={chain.value} value={chain.value} title={chain.title} />
+        ))}
+      </Form.Dropdown>
       <Form.TextArea
         id="command"
         title="Command"
