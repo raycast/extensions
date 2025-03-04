@@ -1,4 +1,4 @@
-import { type LaunchProps } from "@raycast/api";
+import { List, type LaunchProps } from "@raycast/api";
 import nodeFetch from "node-fetch";
 import { useState } from "react";
 import { useOpenAIFollowUpQuestion } from "./components/openai/hooks/useOpenAIFollowUpQuestion";
@@ -45,7 +45,8 @@ export default function SummarizeVideoWithOpenAI(
     question,
   });
 
-  if (!videoData || !transcript) return null;
+  if (!videoData || !transcript) return <List isLoading={true} />;
+
   const { thumbnail, title } = videoData;
 
   const markdown = summary

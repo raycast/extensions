@@ -1,4 +1,4 @@
-import { type LaunchProps } from "@raycast/api";
+import { List, type LaunchProps } from "@raycast/api";
 import nodeFetch from "node-fetch";
 import { useState } from "react";
 import { useAnthropicFollowUpQuestion } from "./components/anthropic/hooks/useAnthropicFollowUpQuestion";
@@ -44,7 +44,8 @@ export default function SummarizeVideoWithAnthropic(
     question,
   });
 
-  if (!videoData || !transcript) return null;
+  if (!videoData || !transcript) return <List isLoading={true} />;
+
   const { thumbnail, title } = videoData;
 
   const markdown = summary

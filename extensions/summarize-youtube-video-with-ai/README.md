@@ -78,7 +78,7 @@ Choose the Ollama endpoint you want to use. (default: `http://localhost:11434/v1
 
 ### Ollama Model
 
-Choose one of the models you have installed on your local machine. (default: `llama3`).
+Choose one of the models from Ollama's [model catalog](https://ollama.com/search). (default: `llama3.2:latest`).
 
 ### Language
 

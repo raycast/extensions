@@ -1,4 +1,4 @@
-import { type LaunchProps } from "@raycast/api";
+import { List, type LaunchProps } from "@raycast/api";
 import nodeFetch from "node-fetch";
 import { useState } from "react";
 import { useRaycastFollowUpQuestion } from "./components/raycast/hooks/useRaycastFollowUpQuestion";
@@ -42,7 +42,8 @@ export default function SummarizeVideoWithRaycast(
     question,
   });
 
-  if (!videoData || !transcript) return null;
+  if (!videoData || !transcript) return <List isLoading={true} />;
+
   const { thumbnail, title } = videoData;
 
   const markdown = summary
