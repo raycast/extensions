@@ -7,12 +7,12 @@ const elementDetails: { [key: string]: { name: string; symbol: string; atomic_ma
   elementsData.elements.reduce(
     (
       acc: { [key: string]: { name: string; symbol: string; atomic_mass: number } },
-      element: { symbol: string; name: string; atomic_mass: number }
+      element: { symbol: string; name: string; atomic_mass: number },
     ) => {
       acc[element.symbol] = { name: element.name, symbol: element.symbol, atomic_mass: element.atomic_mass };
       return acc;
     },
-    {}
+    {},
   );
 
 // Remove naming helpers:
@@ -33,7 +33,7 @@ async function getAINameForCompound(compound: string): Promise<string> {
       {
         creativity: "low",
         model: "gpt-3.5-turbo",
-      }
+      },
     );
   } catch (error) {
     showToast(ToastStyle.Failure, "AI Error", String(error));
