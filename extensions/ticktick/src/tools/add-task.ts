@@ -16,7 +16,7 @@ export default async function (input: Input) {
   await initGlobalProjectInfo();
   const defaultProjectId = await LocalStorage.getItem<string>("defaultAddList");
   const projectId = getProjects().find((project) => project.name === inputProjectName)?.id || defaultProjectId || "";
-  const projectName = getProjects().find((project) => project.id === projectId) || "Inbox";
+  const projectName = getProjects().find((project) => project.id === projectId)?.name || "Inbox";
 
   await addTask({
     projectId,
