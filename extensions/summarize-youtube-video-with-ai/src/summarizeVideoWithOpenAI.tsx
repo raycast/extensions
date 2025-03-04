@@ -30,9 +30,10 @@ export default function SummarizeVideoWithOpenAI(
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
   const [videoURL, setVideoURL] = useState<string | null | undefined>(props.arguments.video);
 
-  useGetVideoUrl({ input: props.arguments.video || props.launchContext?.video, setVideoURL }).then((url) =>
-    setVideoURL(url),
-  );
+  useGetVideoUrl({
+    input: props.arguments.video || props.launchContext?.video,
+    setVideoURL,
+  });
 
   const { videoData, transcript } = useVideoData(videoURL);
   const { questions, setQuestions, question, setQuestion, handleAdditionalQuestion } = useQuestions(summary);
