@@ -1,6 +1,6 @@
 # Package Tracker Changelog
 
-## [0.2.0] - 2025-02-15
+## [0.2.0] - {PR_MERGE_DATE}
 
 - Added debug
 - Updated dependencies
