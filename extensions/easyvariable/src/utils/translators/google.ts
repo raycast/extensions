@@ -31,8 +31,8 @@ export const googleTranslate = async (text: string): Promise<string> => {
     });
 
     const $ = cheerio.load(response.data);
-    const translation = $(".result-container").text().trim();
-
+    const resultContainer = $(".result-container");
+    const translation = resultContainer.length ? resultContainer.text().trim() : "";
     return translation;
   } catch (error) {
     // Fallback to @vitalets/google-translate-api

@@ -4,7 +4,7 @@ import { preferences } from "../preferences";
 export const raycastTranslate = async (text: string): Promise<string> => {
   if (!text.trim()) return "";
 
-  if (!preferences?.enableRaycastTranslate) {
+  if (!preferences.enableRaycastTranslate) {
     return "";
   }
 

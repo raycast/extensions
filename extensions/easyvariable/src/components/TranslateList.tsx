@@ -53,7 +53,7 @@ export function TranslateList({ queryText }: TranslateListProps) {
       deepseek: deepseekTranslate,
       glm: glmTranslate,
       tencent: tencentTranslate,
-      raycast: raycastTranslate, // 新增
+      raycast: raycastTranslate,
       youdao: async (text: string) => {
         const translations = await youdaoTranslate(text);
         setYoudaoResults(translations.map(formatTranslatedText));
