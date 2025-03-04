@@ -1,9 +1,5 @@
 import { useState } from "react";
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
-import { useQuery } from "@apollo/client";
-import { ApolloProvider } from "@apollo/client";
-import { apolloClient } from "./lib/apollo";
-import { PROFILE_SUGGESTIONS } from "./lib/fetchProfileSuggestions";
 import { PUBLICATIONS } from "./lib/fetchPublications";
 import { MediaSet, Post, ProfileData, PublicationMainFocus } from "./types";
 import { useFetch } from "@raycast/utils";
@@ -93,13 +89,13 @@ const { data: profileSuggestions, isLoading: profileSuggestionsLoading } = useFe
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Show profile"
+                  title="Show Profile"
                   icon={Icon.Sidebar}
                   target={
                     <Profile {...result} />
                   }
                 />
-                <Action.OpenInBrowser url={`https://lenster.xyz/u/${result.handle}`} />
+                <Action.OpenInBrowser url={`https://lenster.xyz/u/${result.handle.localName}`} />
               </ActionPanel>
             }
           />
@@ -109,11 +105,31 @@ const { data: profileSuggestions, isLoading: profileSuggestionsLoading } = useFe
   );
 }
 
-function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) {
-  const { data: publications } = useQuery(PUBLICATIONS, { variables: { profileId } });
+function Profile({ profileId, metadata, handle, stats }: ProfileData) {
+  const bio = metadata?.bio;
+  const picture = metadata?.picture;
 
-  const posts = publications?.publications.items || [];
-  const avatar = normalizeUrl(picture?.original?.url);
+  const { data: posts, isLoading } = useFetch("https://api-v2.lens.dev/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      query: PUBLICATIONS,
+      variables: {
+        profileId
+      }
+    }),
+    mapResult(result: { data: { publications: {items: Post[]} } } ) {
+      return {
+        data: result.data.publications.items
+      }
+    },
+    initialData: [],
+    // execute: !!searchTerm
+  })
+
+  const avatar = normalizeUrl(picture?.raw?.uri);
 
   const getPostUrl = (post: Post) => {
     switch (post.metadata.mainContentFocus) {
@@ -125,15 +141,16 @@ function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) 
   };
 
   return (
-    (<List isShowingDetail filtering={false} searchBarPlaceholder={handle}>
+    (<List isShowingDetail isLoading={isLoading} filtering={false} searchBarPlaceholder={handle.fullHandle}>
       <List.Section title="Profile">
         <List.Item
-          title={handle}
+          title={handle.fullHandle}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={`https://lenster.xyz/u/${handle}`} />
+              <Action.OpenInBrowser url={`https://lenster.xyz/u/${handle.localName}`} />
+              {/* eslint-disable-next-line @raycast/prefer-title-case */}
               <Action.CopyToClipboard title="Copy Profile ID" content={profileId} />
-              <Action.CopyToClipboard title="Copy Lens Handle" content={handle} />
+              <Action.CopyToClipboard title="Copy Lens Handle" content={handle.localName} />
             </ActionPanel>
           }
           detail={
@@ -142,8 +159,8 @@ function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) 
               metadata={
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="ID" text={profileId} />
-                  <List.Item.Detail.Metadata.Label title="Name" text={name} />
-                  <List.Item.Detail.Metadata.Label title="Bio" text={bio} />
+                  <List.Item.Detail.Metadata.Label title="Name" text={handle.localName} />
+                  <List.Item.Detail.Metadata.Label title="Bio" text={bio || ""} />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label title="Stats" />
                   <List.Item.Detail.Metadata.Label title="Following" text={String(stats.totalFollowing)} />
@@ -151,7 +168,7 @@ function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) 
                   <List.Item.Detail.Metadata.Label title="Posts" text={String(stats.totalPosts)} />
                   <List.Item.Detail.Metadata.Label title="Comments" text={String(stats.totalComments)} />
                   <List.Item.Detail.Metadata.Label title="Mirrors" text={String(stats.totalMirrors)} />
-                  <List.Item.Detail.Metadata.Label title="Collects" text={String(stats.totalCollects)} />
+                  {/* <List.Item.Detail.Metadata.Label title="Collects" text={String(stats.totalCollects)} /> */}
                 </List.Item.Detail.Metadata>
               }
             />
@@ -169,7 +186,8 @@ function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) 
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser url={getPostUrl(post)} />
-                    <Action.OpenInBrowser title="Arweave Metadata" url={post.profile.metadata} />
+                    {/* <Action.OpenInBrowser title="Arweave Metadata" url={post.profile.metadata} /> */}
+                    {/* eslint-disable-next-line @raycast/prefer-title-case */}
                     <Action.CopyToClipboard title="Copy Post ID" content={post.id} />
                   </ActionPanel>
                 }
@@ -212,13 +230,13 @@ Posted on: ${String(new Date(post.createdAt).toDateString())}
   );
 }
 
-export const normalizeUrl = (url: string): string | undefined => {
+export const normalizeUrl = (url?: string): string | undefined => {
   if (!url) return undefined;
   const parsed = new URL(url);
 
   if (parsed.host === "ipfs.infura.io") parsed.host = "lens.infura-ipfs.io";
   if (parsed.protocol == "ipfs:") {
-    return `https://lens.infura-ipfs.io/ipfs/${parsed.hostname != "" ? parsed.hostname : parsed.pathname.slice(2)}`;
+    return `https://gw.ipfs-lens.dev/ipfs/${parsed.hostname != "" ? parsed.hostname : parsed.pathname.slice(2)}`;
   }
 
   return parsed.toString();

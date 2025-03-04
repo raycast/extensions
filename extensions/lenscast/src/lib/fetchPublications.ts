@@ -2,7 +2,7 @@ import gql from "graphql-tag";
 
 export const PUBLICATIONS = gql`
   query Publications($profileId: ProfileId!) {
-    publications(request: { profileId: $profileId, publicationTypes: [POST], limit: 10 }) {
+    publications(request: { where: { from: [$profileId], publicationTypes: [POST] }, limit: [Ten] }) {
       items {
         __typename
         ... on Post {
