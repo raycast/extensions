@@ -14,13 +14,17 @@ export const youdaoTranslate = async (text: string): Promise<string[]> => {
 
   const url = `https://www.youdao.com/result?word=${encodeURIComponent(text)}&lang=en`;
 
-  const response = await axios.get(url, {
-    headers: {
-      "User-Agent": USER_AGENT,
-    },
-    proxy: false,
-    timeout: 10000,
-  });
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "User-Agent": USER_AGENT,
+      },
+      proxy: false,
+      timeout: 10000,
+    });
+  } catch (error) {
+    throw new Error(`Failed to fetch translation: ${error.message}`);
+  }
 
   const $ = cheerio.load(response.data);
   let translations = $(".trans-ce a")
