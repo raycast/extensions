@@ -26,7 +26,7 @@ export default function Command() {
           {...fields.expected}
         />
         <Form.Separator />
-        <Form.Dropdown title="Threshold" defaultValue="0.2" {...fields.threshold}>
+        <Form.Dropdown title="Threshold" {...fields.threshold}>
           <Form.Dropdown.Item value="0" title="0" />
           <Form.Dropdown.Item value="0.1" title="0.1" />
           <Form.Dropdown.Item value="0.2" title="0.2" />
