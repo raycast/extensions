@@ -1,6 +1,6 @@
 # 1bookmark Changelog
 
-## [Sign In UX Improvement] - {PR_MERGE_DATE}
+## [Sign In UX Improvement] - 2025-03-04
 
 - 0.5.1
 - 📱 Sign in UX improvement. We no longer clear tokens when there is a simple network error.
