@@ -171,11 +171,13 @@ async function refreshTracking(
       const refreshedPackages = await carrier.updateTracking(delivery);
 
       setPackages((packagesMap) => {
-        packagesMap[delivery.id] = {
-          packages: refreshedPackages,
-          lastUpdated: now,
+        return {
+          ...packagesMap,
+          [delivery.id]: {
+            packages: refreshedPackages,
+            lastUpdated: now,
+          }
         };
-        return packagesMap;
       });
     } catch (error) {
       await showToast({
