@@ -3,6 +3,7 @@ import { useState } from "react";
 import { compare } from "../../utils/pixelmatch";
 import { fileValidation } from "./file-validation";
 import { Jimp } from "jimp";
+import { showToast, Toast } from "@raycast/api";
 
 interface ImagesFormValues {
   actual: string[];
@@ -12,23 +13,33 @@ interface ImagesFormValues {
 export const useImagesForm = () => {
   const [markdown, setMarkdown] = useState<string>("");
 
-  const createMarkdown = async (
-    diffImageSource: Promise<{
-      diffBuffer: Buffer;
-      width: number;
-      height: number;
-    }>,
-  ) => {
-    const { width, height, diffBuffer } = await diffImageSource;
-    const diffJimpImage = await new Jimp({ data: diffBuffer, width, height });
+  const createMarkdown = async (diffImageSource: { diffBuffer: Buffer; width: number; height: number }) => {
+    const { width, height, diffBuffer } = diffImageSource;
+    const diffJimpImage = new Jimp({ data: diffBuffer, width, height });
     const base64Image = await diffJimpImage.getBase64("image/png");
     setMarkdown(`![](${base64Image})`);
   };
 
+  const createDiffImage = async (values: { actual: string[]; expected: string[] }) => {
+    const diffImageSource = await compare(values.actual[0], values.expected[0]);
+    createMarkdown(diffImageSource);
+  };
+
   const { handleSubmit, itemProps } = useForm<ImagesFormValues>({
-    onSubmit(values) {
-      const diffImageSource = compare(values.actual[0], values.expected[0]);
-      createMarkdown(diffImageSource);
+    onSubmit: async (values) => {
+      try {
+        await createDiffImage(values);
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Success🎉",
+        });
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Oops! Something went wrong",
+          message: error instanceof Error ? error.message : "An error occurred while creating the diff image.",
+        });
+      }
     },
     validation: {
       actual: fileValidation,
