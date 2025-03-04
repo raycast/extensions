@@ -163,8 +163,8 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
           {calendarData?.data.conferenceProperties?.allowedConferenceSolutionTypes?.map((type) => (
             <Form.Dropdown.Item
               key={type}
-              icon={getConferceSolutionIcon(type)}
-              title={getConferceSolutionTitle(type)}
+              icon={getConferenceSolutionIcon(type)}
+              title={getConferenceSolutionTitle(type)}
               value={type}
             />
           ))}
