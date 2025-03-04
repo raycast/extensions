@@ -32,7 +32,7 @@ import Onboard from "./components/onboarding/Onboard";
 import { isThreadViewPost, PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import { ViewImage } from "@atproto/api/dist/client/types/app/bsky/embed/images";
 import { showDangerToast } from "./utils/common";
-import { useCachedState } from "@raycast/utils";
+import { showFailureToast, useCachedState } from "@raycast/utils";
 import useStartATSession from "./hooks/useStartATSession";
 import { AppBskyEmbedImages } from "@atproto/api";
 
@@ -85,7 +85,12 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
       if (sessionStarted) {
         fetchNotifications(true);
 
-        const notificationCount = await getUnreadNotificationCount();
+        let notificationCount = 0;
+        try {
+          notificationCount = await getUnreadNotificationCount();
+        } catch (error) {
+          // await showFailureToast(error, {title: "Unknown Error"})
+        }
         let notificationMessage = "";
         if (notificationCount > 1) {
           notificationMessage = `${notificationCount} ${NewNotifications}`;
