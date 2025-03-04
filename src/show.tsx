@@ -580,6 +580,7 @@ function GetAction({
 }
 
 function getSubtitle(item: ISSHConnection) {
-  return `${item.user ? item.user + "@" : ""}${item.address}${item.port ? " Port: " + item.port : ""}${item.sshKey ? " SSH Key: " + item.sshKey : ""
-    } ${item.command ? ' Command: "' + item.command + '"' : ""} `;
+  return `${item.user ? item.user + "@" : ""}${item.address}${item.port ? " Port: " + item.port : ""}${
+    item.sshKey ? " SSH Key: " + item.sshKey : ""
+  } ${item.command ? ' Command: "' + item.command + '"' : ""} `;
 }
