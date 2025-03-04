@@ -41,6 +41,11 @@
       "name": "download-video",
       "title": "Download Video",
       "description": "Downloads a video from a given URL"
+    },
+    {
+      "name": "extract-transcript",
+      "title": "Extract Video Transcript",
+      "description": "Extracts the transcript/subtitles from a video URL as Markdown"
     }
   ],
   "preferences": [
@@ -150,12 +155,33 @@
             "includes": "Raycast Focus: Enter Flow State"
           }
         ]
+      },
+      {
+        "input": "@youtube-downloader what did they say about elon musk in https://www.youtube.com/watch?v=T_5zHExXN7o",
+        "mocks": {
+          "extract-transcript": {
+            "language": "en",
+            "title": "Nvidia Earnings are the Super Bowl of Business | Prof G Markets",
+            "transcript": "...",
+            "url": "https://www.youtube.com/watch?v=T_5zHExXN7o"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": "https://www.youtube.com/watch?v=T_5zHExXN7o"
+              },
+              "name": "extract-transcript"
+            }
+          }
+        ]
       }
     ]
   },
   "dependencies": {
     "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/utils": "^1.19.0",
     "date-fns": "^4.1.0",
     "execa": "^9.5.2",
     "is-url-superb": "^6.1.0",
