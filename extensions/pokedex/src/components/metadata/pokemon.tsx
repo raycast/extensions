@@ -3,7 +3,7 @@ import uniqBy from "lodash.uniqby";
 import { PokemonV2Pokemon } from "../../types";
 import { typeColor } from "../../utils";
 
-export default function MetadataPokemon(props: {
+export default function PokemonMetadata(props: {
   type?: string;
   pokemon: PokemonV2Pokemon;
 }) {

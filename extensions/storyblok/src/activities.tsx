@@ -4,14 +4,11 @@ import { ActivityData } from "./utils/types";
 import { dateIcon } from "./utils/helpers";
 
 interface activityData {
-  isLoading: boolean;
-  data: {
-    activities: ActivityData[];
-  };
+  activities: ActivityData[];
 }
 
 export default function Activities(props: { spaceId: number }) {
-  const data = sbData(`spaces/${props.spaceId}/activities/`) as activityData;
+  const data = sbData<activityData>(`spaces/${props.spaceId}/activities/`);
   if (data.isLoading) {
     return <Detail markdown={`Loading Activities for space ${props.spaceId}...`} />;
   } else if (data.isLoading === false && !data.data) {
@@ -23,7 +20,7 @@ export default function Activities(props: { spaceId: number }) {
   } else {
     return (
       <List isLoading={data.isLoading}>
-        {data.data.activities.map((item: ActivityData) => (
+        {data.data?.activities.map((item: ActivityData) => (
           <List.Item
             key={item.activity.id}
             title={item.trackable.name}

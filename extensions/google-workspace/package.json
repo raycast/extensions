@@ -11,12 +11,23 @@
     "mathieudutour",
     "marcmagn1",
     "meganpearson",
-    "jbjanot"
+    "jbjanot",
+    "ridemountainpig"
   ],
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "displayFilePath",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "Display the file path in the search results. ⚠️ This may slow down your search results.",
+      "label": "Display file path in search results"
+    }
+  ],
   "commands": [
     {
       "name": "create-google-document",
@@ -93,9 +104,195 @@
       "interval": "15m"
     }
   ],
+  "tools": [
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "description": "Search files in your Google Drive"
+    },
+    {
+      "name": "create-document",
+      "title": "Create Document",
+      "description": "Creates a new Google document (docs, forms, spreadsheets, presentation)"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@google-workspace Create new presentation called Q2 2025",
+        "mocks": {
+          "create-document": "Successfully called \"create-document\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "title": "Q2 2025",
+                "type": "presentation"
+              },
+              "name": "create-document"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@google-workspace Find me my latest screen recording",
+        "mocks": {
+          "search-files": {
+            "files": [
+              {
+                "originalFilename": "screen-recording.mov",
+                "modifiedTime": "2024-10-21T11:56:28.016Z",
+                "mimeType": "video/quicktime",
+                "quotaBytesUsed": "80702640",
+                "sharedWithMeTime": "2024-10-24T07:54:23.059Z",
+                "explicitlyTrashed": false,
+                "trashed": false,
+                "hasThumbnail": true,
+                "videoMediaMetadata": {
+                  "width": 3344,
+                  "durationMillis": "31499",
+                  "height": 1644
+                },
+                "name": "screen-recording.mov",
+                "version": "14",
+                "size": "80702640",
+                "shared": true,
+                "webViewLink": "https://drive.google.com/file/d/recording-id/view?usp=drivesdk",
+                "id": "recording-id",
+                "createdTime": "2024-10-21T11:56:19.623Z",
+                "starred": false,
+                "spaces": [
+                  "drive"
+                ],
+                "capabilities": {
+                  "canTrash": false
+                },
+                "fileExtension": "mov",
+                "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/video/quicktime",
+                "viewersCanCopyContent": true,
+                "lastModifyingUser": {
+                  "emailAddress": "hinglematt@gmail.com",
+                  "displayName": "hinglematt"
+                },
+                "fullFileExtension": "mov",
+                "webContentLink": "https://drive.google.com/uc?id=some-id&export=download",
+                "thumbnailLink": "https://lh3.googleusercontent.com/drive-storage/another-id=s220",
+                "viewedByMeTime": "2024-10-24T07:54:23.059Z"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-files",
+              "arguments": {
+                "query": {
+                  "includes": "recording"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@google-workspace Get me the shared documents from last week",
+        "mocks": {
+          "search-files": {
+            "files": [
+              {
+                "name": "Project Planning.docx",
+                "mimeType": "application/vnd.google-apps.document",
+                "createdTime": "2024-03-10T14:30:00.000Z",
+                "shared": true,
+                "webViewLink": "https://docs.google.com/document/d/doc-id/edit",
+                "lastModifyingUser": {
+                  "emailAddress": "colleague@company.com",
+                  "displayName": "Team Member"
+                }
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-files",
+              "arguments": {
+                "query": {
+                  "includes": "shared"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@google-workspace New doc \"Weekly Review\"",
+        "mocks": {
+          "create-document": "Successfully called \"create-document\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "title": "Weekly Review",
+                "type": "document"
+              },
+              "name": "create-document"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@google-workspace Which presentations were created by Sarah?",
+        "mocks": {
+          "search-files": {
+            "files": [
+              {
+                "name": "Q1 Marketing Strategy.slides",
+                "mimeType": "application/vnd.google-apps.presentation",
+                "modifiedTime": "2024-03-15T09:30:00.000Z",
+                "webViewLink": "https://docs.google.com/presentation/d/pres-id-1/edit",
+                "lastModifyingUser": {
+                  "emailAddress": "sarah@company.com",
+                  "displayName": "Sarah Johnson",
+                  "photoLink": "https://lh3.googleusercontent.com/a/photo-1"
+                }
+              },
+              {
+                "name": "Brand Guidelines 2024.slides",
+                "mimeType": "application/vnd.google-apps.presentation",
+                "modifiedTime": "2024-03-10T14:45:00.000Z",
+                "webViewLink": "https://docs.google.com/presentation/d/pres-id-2/edit",
+                "lastModifyingUser": {
+                  "emailAddress": "sarah@company.com",
+                  "displayName": "Sarah Johnson",
+                  "photoLink": "https://lh3.googleusercontent.com/a/photo-1"
+                }
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-files",
+              "arguments": {
+                "query": {
+                  "includes": "sarah"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.62.0",
-    "@raycast/utils": "^1.16.2",
+    "@raycast/utils": "^1.18.1",
     "date-fns": "^2.30.0",
     "jwt-decode": "^3.1.2",
     "node-fetch": "^3.3.2"

@@ -53,13 +53,14 @@ export interface MemoInfoResponse {
   pinned: boolean;
   displayTs: number;
   resources: ResourceObj[];
-}
-
-export type TagResponse = {
-  tagAmounts: {
-    [tag: string]: number;
+  property: {
+    tags: string[];
+    hasLink: boolean;
+    hasTaskList: boolean;
+    hasCode: boolean;
+    hasIncompleteTasks: boolean;
   };
-};
+}
 
 export interface MeResponse {
   id: number;

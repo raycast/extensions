@@ -9,6 +9,16 @@ interface Author {
   avatar: string;
 }
 
+interface Video {
+  title: string;
+  description: string;
+  url: string;
+  author: {
+    name: string;
+    image: string;
+  };
+}
+
 interface CursorRule {
   tags: string[];
   title: string;
@@ -19,6 +29,13 @@ interface CursorRule {
   // count of how many times the cursor rule has been copied on cursor.directory
   // null if not available
   count: number | null;
+  isLocal: boolean;
+}
+
+interface Project {
+  name: string;
+  path: string;
+  lastModifiedTime: number;
 }
 
 type AllCursorRulesResponse = {
@@ -31,4 +48,13 @@ type PopularCursorRulesResponse = {
 
 type APIResponse = AllCursorRulesResponse | PopularCursorRulesResponse;
 
-export type { CursorRule, Author, Section, AllCursorRulesResponse, PopularCursorRulesResponse, APIResponse };
+export type {
+  Project,
+  CursorRule,
+  Author,
+  Section,
+  AllCursorRulesResponse,
+  PopularCursorRulesResponse,
+  APIResponse,
+  Video,
+};

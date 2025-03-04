@@ -1,5 +1,9 @@
 # NextDNS Changelog
 
+## [Fix] - 2024-12-14
+
+- Fixed the current status, the device name can be undefined when not using an Apple Configuration Profile. 
+
 ## [Enhancements] - 2024-09-03
 
 - Added pagination for `Search Logs`

@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/raycast/extensions-swift-tools",
       "state" : {
-        "revision" : "1ab332a3020344adfee82773d848b7308ccdeea5",
-        "version" : "1.0.3"
+        "revision" : "6e4c03232a3d713bc88940664a44e6bde6194900",
+        "version" : "1.0.5"
       }
     },
     {

@@ -1,8 +1,8 @@
-import { List, ActionPanel, showHUD, getPreferenceValues, closeMainWindow } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, List, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
-import { ISSHConnection } from "./types";
 import { getConnections, saveConnections } from "./storage.api";
+import { ISSHConnection } from "./types";
 
 interface Preferences {
   terminal: string;
@@ -139,7 +139,7 @@ async function runTerminal(item: ISSHConnection) {
   `;
   const scriptIterm = `
     -- Set this property to true to open in a new window instead of a new tab
-    property open_in_new_window : ${openIn == "newWindow"}
+      property open_in_new_window : ${openIn == "newWindow"}
 
     on new_window()
     	tell application "iTerm" to create window with default profile
@@ -285,6 +285,85 @@ async function runTerminal(item: ISSHConnection) {
   call_forward()
   `;
 
+  const scriptHyper = `
+  -- Set this property to true to open in a new window instead of a new tab
+  property open_in_new_window : ${openIn == "newWindow"}
+
+  on new_window()
+      tell application "System Events" 
+          launch application "Hyper"
+      end tell
+  end new_window
+
+  on new_tab()
+      tell application "System Events"
+          -- Check if Hyper is already running
+          set isRunning to (exists process "Hyper")
+
+          if isRunning then
+              -- If Hyper is running, bring it to the front and open a new tab
+              tell application "Hyper" to activate
+              tell application "System Events" to keystroke "t" using command down
+          else
+              -- If Hyper isn't running, launch it
+              launch application "Hyper"
+          end if
+      end tell
+  end new_tab
+
+  on call_forward()
+      tell application "Hyper" to activate
+  end call_forward
+
+  on is_running()
+      application "Hyper" is running
+  end is_running
+
+  -- Hyper doesn't have a direct equivalent to 'is processing', so we'll assume it's ready if it's running
+  on is_processing()
+      is_running()
+  end is_processing
+
+  on has_windows()
+      if not is_running() then return false
+      -- Hyper always has at least one window, so we'll just check if it's running
+      true
+  end has_windows
+
+  on send_text(custom_text)
+      tell application "System Events"
+          keystroke custom_text & return
+      end tell
+  end send_text
+
+  -- Main
+  if has_windows() then
+      if open_in_new_window then
+          new_window()
+      else
+          new_tab()
+      end if
+  else
+      -- If Hyper is not running and we tell it to create a new window, we get two
+      -- One from opening the application, and the other from the command
+      if is_running() then
+          new_window()
+      else
+          call_forward()
+      end if
+  end if 
+
+
+  -- Give Hyper some time to load 
+  repeat until has_windows()
+      delay 0.5
+  end repeat
+  delay 0.5
+
+  send_text("${command}")
+  call_forward()
+  `;
+
   if (terminal == "iTerm") {
     try {
       await runAppleScript(scriptIterm);
@@ -307,11 +386,34 @@ async function runTerminal(item: ISSHConnection) {
       await runAppleScript(scriptTerminal);
       console.log(error);
     }
+  } else if (terminal == "Hyper") {
+    try {
+      await runAppleScript(scriptHyper);
+    } catch (error) {
+      await runAppleScript(scriptTerminal);
+      console.log(error);
+    }
   } else {
     await runAppleScript(scriptTerminal);
   }
 
-  await showHUD("Success ✅");
+  await showHUD(`✅ Connection [${item.name}] opened with [${terminal}].`);
+}
+
+function getConnectionString(item: ISSHConnection) {
+  if (onlyName) {
+    return item.name;
+  }
+
+  const parts = [];
+  if (item.sshKey) parts.push(`-i ${item.sshKey}`);
+  if (item.port) parts.push(`-p ${item.port}`);
+  if (item.command) parts.push(`"${item.command}"`);
+
+  const address = item.user ? `${item.user}@${item.address}` : item.address;
+  parts.unshift("ssh", address);
+
+  return parts.filter(Boolean).join(" ");
 }
 
 export default function Command() {
@@ -335,6 +437,7 @@ export default function Command() {
 
     await saveConnections(items);
     setConnectionsList(items);
+    await showHUD(`🗑 Connection [${item.name}] removed!`);
   }
 
   return (
@@ -342,7 +445,7 @@ export default function Command() {
       {connectionsList.map((item) => {
         return (
           <List.Item
-            actions={<Action item={item} onItemRemove={removeItem} />}
+            actions={<GetAction item={item} onItemRemove={removeItem} />}
             id={item.id}
             key={item.name}
             title={item.name}
@@ -354,30 +457,40 @@ export default function Command() {
   );
 }
 
-function Action({
+function GetAction({
   item,
   onItemRemove,
 }: {
   item: ISSHConnection;
   onItemRemove: (item: ISSHConnection) => Promise<void>;
 }) {
+  const itemString = getConnectionString(item);
   return (
-    <>
-      <ActionPanel>
-        <ActionPanel.Item
-          title="Connect"
-          onAction={async () => {
-            await runTerminal(item);
-          }}
+    <ActionPanel>
+      <ActionPanel.Section title="Operations">
+        <Action icon={Icon.Terminal} title="Open Connection" onAction={() => runTerminal(item)} />
+        <Action.CopyToClipboard
+          title="Copy Connection String"
+          content={itemString}
+          shortcut={{ modifiers: ["cmd"], key: "c" }}
         />
-        <ActionPanel.Item
-          title="Remove"
-          onAction={async () => {
-            await onItemRemove(item);
-          }}
+        <Action.Paste
+          icon={Icon.Text}
+          title="Paste Connection String"
+          content={itemString}
+          shortcut={{ modifiers: ["cmd"], key: "v" }}
+          onPaste={() => showHUD(`📝 Pasting conn. [${item.name}] to active app`)}
         />
-      </ActionPanel>
-    </>
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Danger zone">
+        <Action
+          title="Remove Connection"
+          icon={Icon.Trash}
+          onAction={() => onItemRemove(item)}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        />
+      </ActionPanel.Section>
+    </ActionPanel>
   );
 }
 

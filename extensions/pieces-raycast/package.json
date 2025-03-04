@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "version": "0.0.0",
+  "version": "0.2.0",
   "name": "pieces-raycast",
   "title": "Pieces for Raycast",
   "description": "Pieces for Developers Raycast Extension",
@@ -22,16 +22,16 @@
     },
     {
       "name": "signin",
-      "title": "Sign into Pieces",
+      "title": "Sign In to Pieces",
       "mode": "no-view",
-      "description": "Sign into Pieces",
+      "description": "Sign in to Pieces",
       "icon": "piecesVector.png"
     },
     {
       "name": "signout",
-      "title": "Signout of Pieces",
+      "title": "Sign Out of Pieces",
       "mode": "no-view",
-      "description": "Signout of Pieces",
+      "description": "Sign out of Pieces",
       "icon": "piecesVector.png"
     },
     {
@@ -71,18 +71,18 @@
       "icon": "piecesVector.png"
     },
     {
-      "name": "search-snippets",
-      "title": "Search Saved Snippets",
-      "description": "Search for a Piece that is saved in your snippet database",
+      "name": "search-materials",
+      "title": "Search Saved Materials",
+      "description": "Search for a saved material in your Pieces Drive",
       "mode": "view",
       "icon": "piecesVector.png"
     }
   ],
   "preferences": [
     {
-      "name": "snippetEnrichmentLevels",
-      "description": "Choose how much metadata should be automatically added to snippets when you save them.",
-      "title": "Snippet Enrichment Levels",
+      "name": "material-enrichment-levels",
+      "description": "Choose how much metadata should be automatically added to materials when you save them.",
+      "title": "Material Enrichment Levels",
       "type": "dropdown",
       "data": [
         {

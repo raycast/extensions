@@ -90,7 +90,7 @@ function CachePurgeHistory(props: SiteProps) {
               />
               <Action
                 icon={Icon.Trash}
-                title="Remove from history"
+                title="Remove From History"
                 shortcut={{ modifiers: ['cmd'], key: 'd' }}
                 onAction={() => {
                   const items = state.items.filter(

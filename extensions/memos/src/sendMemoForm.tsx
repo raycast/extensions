@@ -1,7 +1,7 @@
 import { Form, Detail, ActionPanel, Action, showToast, Toast, open, popToRoot } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MemoInfoResponse, PostFileResponse, PostMemoParams } from "./types";
-import { getOriginUrl, getRequestUrl, getTags, postFile, postMemoResources, sendMemo } from "./api";
+import { getOriginUrl, getRecentTags, getRequestUrl, postFile, postMemoResources, sendMemo } from "./api";
 import { VISIBILITY } from "./constant";
 
 interface FormData {
@@ -12,11 +12,22 @@ interface FormData {
 }
 
 export default function SendMemoFormCommand(): JSX.Element {
-  const { isLoading, data: existTags } = getTags();
   const [nameError, setNameError] = useState<string>();
   const [files, setFiles] = useState<string[]>([]);
   const [createdMarkdown, setCreatedMarkdown] = useState<string>();
   const [createdUrl, setCreatedUrl] = useState<string>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [recentTags, setRecentTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    getRecentTags()
+      .then((tags) => {
+        setRecentTags(tags);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   function dropNameErrorIfNeeded() {
     if (nameError && nameError.length > 0) {
@@ -152,12 +163,10 @@ export default function SendMemoFormCommand(): JSX.Element {
 
       <Form.FilePicker id="files" value={files} onChange={setFiles} />
 
-      <Form.TagPicker id="tags" title="Exist Tags">
-        {Object.keys(existTags?.tagAmounts)
-          ?.filter((tag) => !!existTags?.tagAmounts[tag])
-          ?.map((tag) => {
-            return <Form.TagPicker.Item key={tag} value={tag} title={tag} />;
-          })}
+      <Form.TagPicker id="tags" title="Recent Tags">
+        {recentTags.map((tag) => {
+          return <Form.TagPicker.Item key={tag} value={tag} title={tag} />;
+        })}
       </Form.TagPicker>
 
       <Form.Dropdown id="visibility" title="Limit" defaultValue="PRIVATE">

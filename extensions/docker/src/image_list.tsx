@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from '@raycast/api';
 import { useDocker } from './docker';
 import { useDockerode } from './docker/dockerode';
 import { formatBytes, imageTitle } from './docker/image';
@@ -38,8 +38,9 @@ export default function ImageList() {
               />
               <Action
                 title="Remove Image"
-                icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                shortcut={{ modifiers: ['cmd', 'shift'], key: 'x' }}
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 onAction={withToast({
                   action: () => removeImage(image),
                   onSuccess: () => `Image ${imageTitle(image)} removed`,

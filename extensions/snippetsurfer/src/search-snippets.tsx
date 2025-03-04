@@ -1,4 +1,4 @@
-import { Icon, List, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { Icon, List, showToast, Toast, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
 
 import { useEffect, useState } from "react";
 import type { Snippet, State } from "./types";
@@ -125,11 +125,12 @@ export default function Command() {
     showToast(options);
   }
 
+  const loadSnippetsView = state.filteredSnippets && state.filteredSnippets.length != 0;
   return (
     <List
       searchBarPlaceholder="Type to search snippets"
       isLoading={state.isLoading}
-      isShowingDetail
+      isShowingDetail={loadSnippetsView}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter on folder"
@@ -146,7 +147,7 @@ export default function Command() {
               })}
             </List.Dropdown.Section>
           )}
-          {state.tags && state.tags.length != 1 && (
+          {state.tags && state.tags.length != 0 && (
             <List.Dropdown.Section title="Tags">
               {state.tags.map((i) => {
                 return <List.Dropdown.Item title={i} value={`tag:${i}`} key={i} />;
@@ -156,14 +157,33 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {state.filteredSnippets &&
+      {!loadSnippetsView && (
+        <List.EmptyView
+          icon={Icon.Snippets}
+          title="No Snippets."
+          description="Why not create a few?
+
+            Visit https://www.raycast.com/astronight/snippetsurfer for examples."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Reload Snippets"
+                icon={Icon.RotateAntiClockwise}
+                onAction={fetchData}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
+      {loadSnippetsView &&
         state.filteredSnippets?.map((i) => {
           return (
             <List.Item
               id={i.id}
               key={i.id}
               title={i.name}
-              accessories={[{ icon: Icon.Folder, text: i.folder }]}
+              accessories={[{ icon: Icon.Folder, text: i.folder && i.folder !== "." ? i.folder : "" }]}
               keywords={[i.folder, ...i.content.content.split(" ").concat(i.content.rawMetadata.split(" "))]}
               icon={Icon.Document}
               detail={<SnippetContent snippet={i} />}

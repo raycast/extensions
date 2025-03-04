@@ -1,6 +1,6 @@
-# Say - Spoken Content
+# Say - Text to Speech
 
-This extension uses the macOS built-in [Spoken Content](https://www.youtube.com/watch?v=yiZzm24uSsE) feature to say the text you provide. No network connection is needed.
+This extension uses the macOS built-in TTS ([Spoken Content](https://www.youtube.com/watch?v=yiZzm24uSsE)) feature to say the text you provide. No network connection is needed.
 
 [![raycast-cross-extension-badge]][raycast-cross-extension-link]
 
@@ -68,6 +68,15 @@ launchCommand({
     },
   },
 });
+```
+
+### Use Deeplinks
+
+```shell
+arguments=$(jq -rR @uri <<< '{"content":"Hello from Deeplinks!"}')
+launchContext=$(jq -rR @uri <<< '{"sayOptions":{"voice":"Cello"}}')
+deeplink="raycast://extensions/litomore/say/typeToSay?launchType=background&arguments=$arguments&launchContext=$launchContext"
+open $deeplink
 ```
 
 ### Use `mac-say`

@@ -7,9 +7,12 @@
   "author": "farisaziz12",
   "contributors": [
     "ahoereth",
-    "xmok"
+    "xmok",
+    "teisenhower"
   ],
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -25,6 +28,42 @@
       "subtitle": "Everhour",
       "description": "List your recent tasks from the last seven days",
       "mode": "view"
+    },
+    {
+      "name": "currentTimer",
+      "title": "Current Timer",
+      "subtitle": "Everhour",
+      "description": "View, Start, Stop the current timer",
+      "mode": "no-view",
+      "interval": "10s",
+      "arguments": [
+        {
+          "name": "quickAction",
+          "required": false,
+          "type": "dropdown",
+          "placeholder": "Quick Action",
+          "data": [
+            {
+              "title": "No action",
+              "value": ""
+            },
+            {
+              "title": "Start if stopped",
+              "value": "start"
+            },
+            {
+              "title": "Stop if started",
+              "value": "stop"
+            }
+          ]
+        },
+        {
+          "name": "comment",
+          "type": "text",
+          "required": false,
+          "placeholder": "Timer Comment"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -39,6 +78,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0",
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {

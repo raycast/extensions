@@ -32,7 +32,7 @@ export default function main() {
       isLoading={isLoading}
       searchBarPlaceholder="Search documentation"
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter" onChange={setType}>
+        <List.Dropdown tooltip="Filter" onChange={setType} storeValue={true}>
           <List.Dropdown.Item icon="command-icon.png" title="All" value="" />
           <List.Dropdown.Section>
             <List.Dropdown.Item

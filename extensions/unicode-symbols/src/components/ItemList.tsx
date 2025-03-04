@@ -21,13 +21,13 @@ export const ItemList = memo(() => {
         <List.Section key={`${section.sectionTitle}-${section.items.length}`} title={section.sectionTitle}>
           {section.items.map((item) => {
             const accessories = [];
-            if (item.aliases?.length) {
-              accessories.push({ icon: "⌨️", text: `${item.aliases.join(", ")}` });
+            if (item.a?.length) {
+              accessories.push({ icon: "⌨️", text: `${item.a.join(", ")}` });
             }
 
             return (
               <List.Item
-                key={`${item.code}-${item.name}`}
+                key={`${item.c}-${item.n}`}
                 title={getFilteredValue(item, section)}
                 subtitle={getFilteredSubtitle(item, section)}
                 accessories={accessories}

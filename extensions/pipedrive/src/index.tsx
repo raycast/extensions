@@ -1,7 +1,6 @@
 import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
-import { URLSearchParams } from "node:url";
 
 interface Preferences {
   domain: string;
@@ -9,7 +8,7 @@ interface Preferences {
   limit: string;
 }
 
-export default function Command() {
+export default function PipedriveSearch() {
   const { state, search } = useSearch();
   const [filterValue, setFilterValue] = useState<string>("");
 
@@ -22,6 +21,12 @@ export default function Command() {
     return state.results.filter((result) => result.type === filterValue);
   }, [state.results, filterValue]);
 
+  const emojiMap: { [key: string]: string } = {
+    deal: "💰 ",
+    person: "🅿️ ",
+    organization: "🅾️ ",
+  };
+
   return (
     <List
       isLoading={state.isLoading}
@@ -29,75 +34,89 @@ export default function Command() {
       searchBarPlaceholder="Search by name of deal, person or organization..."
       searchBarAccessory={
         <List.Dropdown tooltip="Filter results by type" onChange={handleFilterChange} filtering={true}>
-          <List.Dropdown.Item title="All" value="" />
-          <List.Dropdown.Item title="Deals" value="deal" />
-          <List.Dropdown.Item title="People" value="person" />
-          <List.Dropdown.Item title="Organizations" value="organization" />
+          <List.Dropdown.Item title="🔎  All" value="" />
+          <List.Dropdown.Item title="💰  Deals" value="deal" />
+          <List.Dropdown.Item title="🅿️  People" value="person" />
+          <List.Dropdown.Item title="🅾️  Organizations" value="organization" />
         </List.Dropdown>
       }
       throttle
     >
       <List.Section title="Results" subtitle={`${filteredResults.length} `}>
         {filteredResults.map((searchResult) => (
-          <SearchListItem key={searchResult.id} searchResult={searchResult} />
+          <SearchListItem
+            key={`${searchResult.type}${searchResult.id}`}
+            searchResult={searchResult}
+            emojiMap={emojiMap}
+          />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+function SearchListItem({
+  searchResult,
+  emojiMap,
+}: {
+  searchResult: SearchResult;
+  emojiMap: { [key: string]: string };
+}) {
   const preferences: Preferences = getPreferenceValues();
   const itemUrl = `https://${preferences.domain}/${searchResult.type}/${searchResult.id}`;
-  //const resultType = `${searchResult.type}`;
-  const subtitle = `${searchResult.subtitle}`;
-  const accessoryTitleValue = `${searchResult.accessoryTitle}`;
+  const subtitle = searchResult.subtitle;
+  const accessoryTitle = searchResult.accessoryTitle;
+  const emoji = emojiMap[searchResult.type] || "";
 
   return (
     <List.Item
-      title={searchResult.title}
+      title={`${emoji} ${searchResult.title}`}
       subtitle={subtitle}
-      accessories={[{ text: accessoryTitleValue }]}
+      accessories={[{ text: accessoryTitle }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={itemUrl} />
             {searchResult.name && ( // Conditionally render if person exists
               <Action.CopyToClipboard
-                title="Copy Person Name"
-                content={searchResult.name as string}
+                title="Copy Name"
+                content={searchResult.name}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
             )}
             {searchResult.email && ( // Conditionally render if person email exists
               <Action.CopyToClipboard
-                title="Copy Person Email"
-                content={searchResult.email as string}
+                title="Copy Email"
+                content={searchResult.email}
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
               />
             )}
             {searchResult.phone && ( // Conditionally render if person phone exists
               <Action.CopyToClipboard
-                title="Copy Person Phone"
-                content={searchResult.phone as string}
+                title="Copy Phone"
+                content={searchResult.phone}
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
               />
             )}
-            {searchResult.ccEmail && ( // Conditionally render if person ccEmail exists
-              <Action.CopyToClipboard title="Copy Deal Email" content={searchResult.ccEmail as string} />
-            )}
-            {searchResult.ccEmail && ( // Conditionally render if organization exists on a deal
+            {searchResult.organization && ( // Conditionally render if organization exists for deal or person
               <Action.CopyToClipboard
-                title="Copy Deal Org Name"
-                content={accessoryTitleValue as string}
+                title="Copy Organization"
+                content={searchResult.organization}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
               />
             )}
-            {searchResult.subtitle === "org" && ( // Conditionally render if an organization
+            {searchResult.ccEmail && ( // Conditionally render if deal exists
               <Action.CopyToClipboard
-                title="Copy Org Name"
+                title="Copy Deal Name"
                 content={searchResult.title as string}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+              />
+            )}
+            {searchResult.subtitle === "org" && ( // Conditionally render if organization exists
+              <Action.CopyToClipboard
+                title="Copy Organization Name"
+                content={searchResult.title as string}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
             )}
           </ActionPanel.Section>
@@ -108,7 +127,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
 }
 
 function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
+  const [state, setState] = useState<SearchState>({ results: [], isLoading: false });
   const cancelRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -119,19 +138,22 @@ function useSearch() {
   }, []);
 
   async function search(searchText: string) {
-    cancelRef.current?.abort();
-    cancelRef.current = new AbortController();
+    if (cancelRef.current) {
+      cancelRef.current.abort();
+    }
 
     if (searchText.length < 2) {
       setState({ results: [], isLoading: false });
       return;
     }
 
+    cancelRef.current = new AbortController();
+    setState((prevState) => ({
+      ...prevState,
+      isLoading: true,
+    }));
+
     try {
-      setState((prevState) => ({
-        ...prevState,
-        isLoading: true,
-      }));
       const results = await performSearch(searchText, cancelRef.current.signal);
       setState((prevState) => ({
         ...prevState,
@@ -148,92 +170,93 @@ function useSearch() {
   }
 
   return {
-    state: state,
-    search: search,
+    state,
+    search,
   };
 }
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
   const { apiToken, domain, limit } = getPreferenceValues();
 
-  const params = new URLSearchParams();
-  params.append("api_token", apiToken);
-  params.append("include_fields", "deal.cc_email");
-  params.append("item_types", "deal,person,organization");
-  params.append("term", searchText);
-  params.append("limit", limit);
+  const searchUrl = new URL(`https://${domain}/api/v2/itemSearch`);
+  searchUrl.searchParams.set("api_token", apiToken);
+  searchUrl.searchParams.set("include_fields", "deal.cc_email");
+  searchUrl.searchParams.set("item_types", "deal,person,organization");
+  searchUrl.searchParams.set("term", searchText);
+  searchUrl.searchParams.set("limit", limit);
 
-  const url = `https://${domain}/api/v1/itemSearch?${params.toString()}`;
-
-  const response = await fetch(url, { method: "get", signal });
+  const response = await fetch(searchUrl.toString(), { method: "get", signal });
 
   if (!response.ok) {
     throw new Error(response.statusText);
   }
 
-  const json = await response.json();
-  const jsonData = json as { data: { items: any[] } }; // eslint-disable-line @typescript-eslint/no-explicit-any
-  const jsonResults = jsonData.data?.items;
+  const { data } = (await response.json()) as { data: { items: any[] } }; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const items = data?.items || [];
 
-  return jsonResults.map(
-    (
-      jsonResult: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-    ) => {
-      const results = jsonResult.item;
-      const resultsOrganization = results.organization?.name || "";
+  return items.map(
+    ({
+      item: {
+        id,
+        type,
+        title,
+        organization,
+        status,
+        cc_email: ccEmail,
+        name,
+        primary_email: primaryEmail,
+        stages,
+        phones,
+      },
+    }) => {
+      const organizationName = organization?.name || "";
 
-      switch (results.type) {
+      const common = {
+        id,
+        title,
+        type,
+        organization: organizationName,
+        status,
+        ccEmail,
+      };
+
+      switch (type) {
         case "deal": {
-          const resultsStage = Array.isArray(results.stages) ? results.stages[0] : "";
           return {
-            id: results.id,
-            title: results.title,
-            subtitle: `${results.status} ${results.type}`,
-            accessoryTitle: resultsOrganization,
-            type: results.type,
-            stage: resultsStage.name,
-            organization: resultsOrganization,
-            status: results.status,
-            ccEmail: results.cc_email,
+            ...common,
+            subtitle: `${status} ${type}`,
+            accessoryTitle: organizationName,
+            stage: stages?.[0]?.name || "",
           };
         }
         case "person": {
-          const primaryEmail = typeof results.primary_email === "string" ? results.primary_email : "";
-          const resultsPhone = Array.isArray(results.phones) ? results.phones : [];
-          const primaryPhone = typeof resultsPhone[0] === "string" ? resultsPhone[0] : "";
+          const email = primaryEmail || "";
+          const phone = phones?.[0] || "";
           return {
-            id: results.id,
-            title: results.name,
-            subtitle: `${primaryEmail} ${primaryPhone}`,
-            accessoryTitle: resultsOrganization,
-            type: results.type,
-            name: results.name,
-            organization: resultsOrganization,
-            email: primaryEmail,
-            phone: primaryPhone,
-            status: results.status,
+            ...common,
+            title: name,
+            subtitle: `${email} ${phone}`,
+            accessoryTitle: organizationName,
+            name,
+            email,
+            phone,
           };
         }
         case "organization": {
           return {
-            id: results.id,
-            title: results.name,
+            ...common,
+            title: name,
             subtitle: "org",
             accessoryTitle: "",
-            type: results.type,
           };
         }
-        default:
+        default: {
           return {
-            id: results.id,
-            title: results.title,
-            type: results.type,
-            organization: resultsOrganization,
-            status: results.status,
-            ccEmail: results.cc_email,
+            ...common,
             email: "no-email",
             phone: "no-phone",
           };
+        }
       }
     },
   );

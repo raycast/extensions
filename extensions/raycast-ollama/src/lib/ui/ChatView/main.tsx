@@ -131,7 +131,7 @@ export function ChatView(): JSX.Element {
             <Action.CopyToClipboard
               title="Copy Answer"
               content={props.message.messages[1].content as string}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
           )}
           {props.message && <Action.CopyToClipboard title="Copy Conversation" content={ClipboardConversation(Chat)} />}

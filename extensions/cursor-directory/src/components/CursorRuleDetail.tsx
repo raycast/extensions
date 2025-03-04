@@ -1,7 +1,11 @@
 import { CursorRule } from "../types";
-import { Action, ActionPanel, Detail, Image, Icon, openExtensionPreferences, showHUD, Clipboard } from "@raycast/api";
+import { Action, ActionPanel, Detail, Image, Icon } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { isImageUrl, processContent } from "../utils";
+import { CopyRuleAction } from "./actions/CopyRuleAction";
+import { OpenPrefAction } from "./actions/OpenPrefAction";
+import { ExportAndEditAction } from "./actions/ExportAndEditAction";
+import { ContributeAction } from "./actions/ContributeAction";
 
 interface Props {
   cursorRule: CursorRule;
@@ -39,7 +43,7 @@ export const CursorRuleDetail = ({ cursorRule, popularOnly }: Props) => {
               <Detail.Metadata.TagList.Item key={tag} text={tag} />
             ))}
           </Detail.Metadata.TagList>
-          {cursorRule.libs.length > 0 && (
+          {cursorRule.libs && cursorRule.libs.length > 0 && (
             <Detail.Metadata.TagList title="Libraries">
               {cursorRule.libs.map((lib) => (
                 <Detail.Metadata.TagList.Item key={lib} text={lib} />
@@ -51,33 +55,31 @@ export const CursorRuleDetail = ({ cursorRule, popularOnly }: Props) => {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Actions">
-            <Action
-              title="Copy Cursor Rule"
-              icon={Icon.Clipboard}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-              onAction={async () => {
-                await Clipboard.copy(cursorRule.content);
-                await showHUD("Copied to clipboard, paste it into .cursorrules file");
-              }}
-            />
-            <Action.OpenInBrowser
-              // eslint-disable-next-line @raycast/prefer-title-case
-              title="Open in cursor.directory"
-              icon={Icon.Link}
-              url={`https://cursor.directory/${cursorRule.slug}`}
-            />
-            {cursorRule.author.url && (
+            <CopyRuleAction cursorRule={cursorRule} />
+            <ExportAndEditAction cursorRule={cursorRule} />
+            {cursorRule.isLocal && <ContributeAction />}
+            {!cursorRule.isLocal && (
+              <Action.OpenInBrowser
+                // eslint-disable-next-line @raycast/prefer-title-case
+                title="Open in cursor.directory"
+                icon={Icon.Link}
+                url={`https://cursor.directory/${cursorRule.slug}`}
+              />
+            )}
+            {cursorRule.author.url && !cursorRule.isLocal && (
               <Action.OpenInBrowser title="Open Author URL" icon={Icon.Person} url={cursorRule.author.url} />
             )}
-            <Action.CopyToClipboard
-              title="Share Cursor Rule"
-              icon={Icon.Hashtag}
-              content={`https://cursor.directory/${cursorRule.slug}`}
-              shortcut={{ modifiers: ["cmd"], key: "y" }}
-            />
+            {!cursorRule.isLocal && (
+              <Action.CopyToClipboard
+                title="Share Cursor Rule"
+                icon={Icon.Hashtag}
+                content={`https://cursor.directory/${cursorRule.slug}`}
+                shortcut={{ modifiers: ["cmd"], key: "y" }}
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Settings">
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <OpenPrefAction />
           </ActionPanel.Section>
         </ActionPanel>
       }

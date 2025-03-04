@@ -2,11 +2,13 @@ import {
   Action,
   ActionPanel,
   Alert,
+  captureException,
   Color,
   confirmAlert,
   Detail,
   Icon,
   Keyboard,
+  open,
   showToast,
   Toast,
   useNavigation,
@@ -116,6 +118,20 @@ export default function LaunchAgentDetails({
     }
   };
 
+  const handleOpenFile = async () => {
+    const app = "code";
+
+    try {
+      await open(selectedFile, "code");
+    } catch (e: unknown) {
+      captureException(e);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Could not open file in ${app}.`,
+      });
+    }
+  };
+
   useEffect(() => {
     updateIsFileLoaded();
   }, [selectedFile]);
@@ -130,7 +146,7 @@ export default function LaunchAgentDetails({
             title={isFileLoaded ? "Unload" : "Load"}
             onAction={loadOrUnloadFile}
           />
-          <Action icon={Icon.Folder} title="Open" onAction={() => execSync(`code ${selectedFile}`)} />
+          <Action icon={Icon.Folder} title="Open with Visual Studio Code" onAction={handleOpenFile} />
           <Action
             title="Remove"
             icon={Icon.Trash}

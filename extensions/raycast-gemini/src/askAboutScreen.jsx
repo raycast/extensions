@@ -2,9 +2,10 @@ import { environment, closeMainWindow, launchCommand, LaunchType } from "@raycas
 import util from "util";
 import { exec } from "child_process";
 import fs from "fs";
-import jimp from "jimp";
+import { getPreferenceValues } from "@raycast/api";
 
 export default async function AskAboutScreenContent(props) {
+  const { prompt } = getPreferenceValues();
   await closeMainWindow();
 
   const execPromise = util.promisify(exec);
@@ -19,6 +20,7 @@ export default async function AskAboutScreenContent(props) {
     context: {
       buffer: [fs.readFileSync(`${environment.assetsPath}/desktopScreenshot.png`)],
       args: props.arguments,
+      context: prompt,
     },
   });
 }

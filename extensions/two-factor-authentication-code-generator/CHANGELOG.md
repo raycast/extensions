@@ -1,5 +1,10 @@
 # Changelog
 
+## [Update] - 2024-11-12
+
+### Added
+- Storing last time the 2FA code was used, so it's the first option when you see the list next time. 
+
 ## [Update] - 2024-08-05
 
 ### Added

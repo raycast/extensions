@@ -1,5 +1,11 @@
 import { Icon } from "@raycast/api";
-import { RESELLER_API_TOKEN, RESELLER_PASSWORD, RESELLER_USERNAME, TITLES_FOR_KEYS } from "./constants";
+import {
+  DIRECTADMIN_URL,
+  RESELLER_API_TOKEN,
+  RESELLER_PASSWORD,
+  RESELLER_USERNAME,
+  TITLES_FOR_KEYS,
+} from "./constants";
 
 function splitAndTitleCase(text: string) {
   const words = text.split("_");
@@ -41,4 +47,13 @@ export function generateApiToken(userToImpersonate = "") {
   return userToImpersonate === ""
     ? RESELLER_API_TOKEN
     : btoa(`${RESELLER_USERNAME}|${userToImpersonate}:${RESELLER_PASSWORD}`);
+}
+
+export function isInvalidUrl() {
+  try {
+    new URL(DIRECTADMIN_URL);
+    return false;
+  } catch (error) {
+    return true;
+  }
 }

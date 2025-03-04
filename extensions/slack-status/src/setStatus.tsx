@@ -17,19 +17,30 @@ import { getTitleForDuration } from "./durations";
 import { getEmojiForCode } from "./emojis";
 import { usePresets } from "./presets";
 import { CommandLinkParams } from "./types";
-import { useSlack, useSlackProfile } from "./slack";
-import { getStatusIcon, getStatusSubtitle, getStatusTitle, setStatusToPreset } from "./utils";
+import { useSlack, useSlackProfileAndDndInfo } from "./slack";
+import {
+  getStatusIcon,
+  getStatusSubtitle,
+  getStatusTitle,
+  getStatusPausedNotifications,
+  setStatusToPreset,
+} from "./utils";
 
 const preferences: Preferences = getPreferenceValues();
 
-const slack = OAuthService.slack({
-  scope: "emoji:read users.profile:write users.profile:read",
+const slackAuth = OAuthService.slack({
+  scope: "emoji:read users.profile:write users.profile:read dnd:write dnd:read",
   personalAccessToken: preferences.accessToken,
 });
 
+function accessories(isPaused: boolean) {
+  return isPaused ? [{ icon: Icon.BellDisabled, tooltip: "Notifications Paused" }] : [];
+}
+
 function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
   const [searchText, setSearchText] = useState<string>();
-  const { isLoading, data, mutate } = useSlackProfile();
+  const { isLoading, data, mutate } = useSlackProfileAndDndInfo(slackAuth);
+  const { profile, dnd } = data || {};
   const [presets, setPresets] = usePresets();
   const slack = useSlack();
 
@@ -64,12 +75,13 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
       <List.Section title="Current Status">
         <List.Item
           key="current-status"
-          icon={getStatusIcon(data)}
-          title={getStatusTitle(data)}
-          subtitle={getStatusSubtitle(data)}
+          icon={getStatusIcon(profile)}
+          title={getStatusTitle(profile)}
+          subtitle={getStatusSubtitle(profile)}
+          accessories={accessories(!!getStatusPausedNotifications(dnd))}
           actions={
             <ActionPanel>
-              {data?.status_text ? <ClearStatusAction mutate={mutate} /> : <SetCustomStatusAction mutate={mutate} />}
+              {profile?.status_text ? <ClearStatusAction mutate={mutate} /> : <SetCustomStatusAction mutate={mutate} />}
               <CreateStatusPresetAction onCreate={(newPreset) => setPresets([...presets, newPreset])} />
             </ActionPanel>
           }
@@ -82,6 +94,7 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
             icon={getEmojiForCode(preset.emojiCode)}
             title={preset.title}
             subtitle={getTitleForDuration(preset.defaultDuration)}
+            accessories={accessories(preset.pauseNotifications)}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
@@ -113,4 +126,4 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
   );
 }
 
-export default withAccessToken(slack)(StatusList);
+export default withAccessToken(slackAuth)(StatusList);

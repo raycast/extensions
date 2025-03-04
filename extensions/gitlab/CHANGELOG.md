@@ -1,5 +1,13 @@
 # GitLab Changelog
 
+## [Fix] - 2024-12-17
+
+- Fix "Ignore SSL Errors" setting not working on some features
+
+## [Add Issues Assignment Filter] - 2024-10-16
+
+- Add "Assigned to Me" filter to "Search Issues"
+
 ## [Add Projects Membership Filter] - 2024-09-03
 
 - Add project membership dropdown filter to "Search Projects"

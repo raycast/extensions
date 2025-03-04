@@ -10,6 +10,7 @@ After installing this extension, go to its settings and select a *Primary Snippe
 
 After selecting the folder, you can create your snippets by creating one or more Markdown or YAML files, each containing a collection of snippets.
 
+Please note: SnippetSurfer does not support creating snippets directly in Raycast. Use your preferred editor to create snippets instead.
 ### Features
 
 - Raycast extension for quick navigation of text excerpts and code snippets.

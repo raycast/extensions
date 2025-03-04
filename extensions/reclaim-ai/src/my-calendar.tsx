@@ -1,13 +1,16 @@
+import "./initSentry";
+
 import { List } from "@raycast/api";
 import { addDays, differenceInHours, endOfDay, isAfter, isBefore, isWithinInterval, startOfDay } from "date-fns";
 import { useMemo, useState } from "react";
 import { MyCalendarEventListSection } from "./components/MyCalendarEventListSection";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
 import { useEvents } from "./hooks/useEvent";
 import { Event } from "./types/event";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
 
-export default function Command() {
+function Command() {
   const [searchText, setSearchText] = useState("");
   const now = new Date();
 
@@ -93,3 +96,5 @@ export default function Command() {
     </List>
   );
 }
+
+export default withRAIErrorBoundary(Command);

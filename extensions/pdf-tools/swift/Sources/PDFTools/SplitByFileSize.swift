@@ -17,7 +17,6 @@ func splitByFileSize(
   let pdfDocument = PDFDocument(url: pdfURL)!
 
   let maxSizeBytes = Int64(maxSizeMB * 1_000_000)
-  let outputDirectory = pdfURL.deletingLastPathComponent()
   let outline = pdfDocument.outlineRoot
 
   var pageSizes = calculatePageSizesConcurrently(for: pdfDocument)
@@ -29,10 +28,9 @@ func splitByFileSize(
 
   while stop <= pdfDocument.pageCount {
     let chunkSize = pageSizes[start ..< stop].reduce(0, +)
-    let outputURL = outputDirectory
-      .appendingPathComponent(
-        "\(pdfURL.deletingPathExtension().lastPathComponent) [\(actualSuffix) \(currentPart)].pdf"
-      )
+    let outputURL = pdfURL.deletingLastPathComponent().appendingPathComponent(
+      "\(pdfURL.deletingPathExtension().lastPathComponent) [\(actualSuffix) \(currentPart)].pdf"
+    )
 
     if chunkSize < maxSizeBytes {
       if stop != pdfDocument.pageCount {

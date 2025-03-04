@@ -30,6 +30,11 @@ const rules: Rule[] = [
     url: "youtube.com",
     allowParams: ["v", "search_query"],
   },
+  {
+    name: "Instagram Reel",
+    url: "instagram.com/reel",
+    allowParams: [],
+  },
 ];
 
 export { rules };

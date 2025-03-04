@@ -8,6 +8,7 @@
   "author": "mblode",
   "contributors": [
     "bascomb",
+    "Whitespace",
     "ridemountainpig"
   ],
   "license": "MIT",
@@ -47,6 +48,7 @@
     "sherlockjs": "^1.4.2"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
     "@types/lodash.groupby": "^4.6.6",
     "@types/lodash.map": "^4.6.13",
     "@types/node": "~16.10.0",

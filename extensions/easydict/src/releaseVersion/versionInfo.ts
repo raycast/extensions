@@ -26,9 +26,9 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.9.3";
-  buildNumber = 29;
-  versionDate = "2024-09-13";
+  version = "2.10.1";
+  buildNumber = 30;
+  versionDate = "2025-01-12";
   isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
@@ -37,13 +37,15 @@ export class Easydict {
 
 ### 🐞 修复
 
-- 修复了 Bing 语种识别 API 失败，导致查询过程卡住问题。https://github.com/raycast/extensions/issues/14357
+- 更新有道翻译 API，修复翻译失败的问题。
+- 限制 Bing 重试次数为 3，避免过多重试。
 
 ---
 
 ### 🐞 Fixed
 
-- Fixed Bing language detection API failed, which caused the query process to hang. https://github.com/raycast/extensions/issues/14357
+- Update Youdao translation API, fixed the problem that the translation failed. https://github.com/tisfeng/Raycast-Easydict/pull/65
+- Limit Bing retry count to 3, avoid too many retries. https://github.com/raycast/extensions/issues/16307
 `;
   getRepoUrl() {
     return `${githubUrl}/${Easydict.author}/${Easydict.repo}`;

@@ -1,5 +1,9 @@
 # SnippetSurfer Changelog
 
+## [Enhancements] - 2024-09-21
+- Improve UI for empty folders.
+- Improve UI for root folders.
+
 ## [Enhancements] - 2024-09-12
 - Update README
 

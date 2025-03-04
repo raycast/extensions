@@ -1,8 +1,7 @@
 import React from "react";
 import { Icon, List, useNavigation } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 import { LanguageCodeSet } from "../types";
-import { usePreferencesLanguageSet, useSelectedLanguagesSet } from "../hooks";
+import { useAllLanguageSets, usePreferencesLanguageSet, useSelectedLanguagesSet } from "../hooks";
 import { LanguagesManagerList } from "./LanguagesManagerList";
 import { formatLanguageSet } from "../utils";
 
@@ -10,7 +9,8 @@ export function LanguageManagerListDropdown() {
   const navigation = useNavigation();
   const preferencesLanguageSet = usePreferencesLanguageSet();
   const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
-  const [languages] = useCachedState<LanguageCodeSet[]>("languages", []);
+  const [languages] = useAllLanguageSets();
+
   return (
     <List.Dropdown
       value={JSON.stringify(selectedLanguageSet)}
@@ -31,7 +31,7 @@ export function LanguageManagerListDropdown() {
       />
       {languages.map((langSet) => (
         <List.Dropdown.Item
-          key={`${langSet.langFrom} ${langSet.langTo}`}
+          key={`${langSet.langFrom} ${langSet.langTo.toString()}`}
           title={formatLanguageSet(langSet)}
           value={JSON.stringify(langSet)}
         />

@@ -3,6 +3,7 @@ import { getFavicon } from "@raycast/utils";
 import { EstimatedCall, Feature, QuayLineFavorites } from "../types";
 import { getDomainName } from "../utils";
 import { addFavoriteLines, removeFavoriteLine } from "../storage";
+import { WebPlannerConfig, getWebPlannerConfig } from "../preferences";
 
 type ActionsProps = {
   ec: EstimatedCall;
@@ -23,6 +24,7 @@ export function Actions({
 }: ActionsProps) {
   const urlString = ec.serviceJourney.line.authority?.url;
   const url = urlString ? new URL(urlString) : null;
+  const webPlannerConfig = getWebPlannerConfig();
 
   return (
     <ActionPanel>
@@ -58,9 +60,9 @@ export function Actions({
       )}
       {venue.properties.id && (
         <Action.OpenInBrowser
-          url={getTravelPlannerUrl(ec)}
-          title="Open Trip in Reis Travel Search"
-          icon={getFavicon("https://reisnordland.no", { mask: Image.Mask.RoundedRectangle })}
+          url={getTravelPlannerUrl(ec, webPlannerConfig)}
+          title={`Open Trip in ${webPlannerConfig.name}`}
+          icon={getFavicon(webPlannerConfig.url, { mask: Image.Mask.RoundedRectangle })}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
         />
       )}
@@ -85,8 +87,8 @@ function formatLineName(ec: EstimatedCall) {
     return ec.serviceJourney.line.description ?? ec.destinationDisplay?.frontText;
   }
 }
-function getTravelPlannerUrl(ec: EstimatedCall) {
-  const base = "https://reise.reisnordland.no/departures/details";
+function getTravelPlannerUrl(ec: EstimatedCall, webPlannerConfig: WebPlannerConfig) {
+  const base = `${webPlannerConfig.url}/departures/details`;
   const date = new Date(ec.date);
   const dateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 

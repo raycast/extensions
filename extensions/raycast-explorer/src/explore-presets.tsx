@@ -96,7 +96,6 @@ export default function ExplorePresets() {
                             ) : null}
                           </>
                         )}
-
                         {preset.author ? (
                           <List.Item.Detail.Metadata.Label
                             title="Author"

@@ -1,15 +1,37 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { address } from "ip";
-import { useState } from "react";
+import { networkInterfaces } from "os";
+import { useState, useEffect } from "react";
 
 import LookUp from "./lookup";
 import Torrent from "./torrent";
 import { headers } from "./util";
 
+function getLocalIPs() {
+  const nets = networkInterfaces();
+  const results = [];
+
+  for (const name of Object.keys(nets)) {
+    const net = nets[name];
+    if (net) {
+      for (const netInfo of net) {
+        if (netInfo.family === "IPv4" && !netInfo.internal) {
+          results.push(netInfo.address);
+        }
+      }
+    }
+  }
+
+  return results;
+}
+
 export default function Command() {
   const { pop } = useNavigation();
-  const [localIp] = useState(() => address("public", "ipv4").toString());
+  const [localIps, setLocalIps] = useState<string[]>([]);
+
+  useEffect(() => {
+    setLocalIps(getLocalIPs());
+  }, []);
 
   const { isLoading, data, error, revalidate } = useFetch<string>("https://api64.ipify.org", {
     headers,
@@ -18,14 +40,15 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      <List.Item
-        icon={Icon.Desktop}
-        title={localIp}
-        actions={
-          !!localIp && (
+      {localIps.map((ip, index) => (
+        <List.Item
+          key={index}
+          icon={Icon.Desktop}
+          title={ip}
+          actions={
             <ActionPanel>
               <Action.CopyToClipboard
-                content={localIp}
+                content={ip}
                 onCopy={() => {
                   pop();
                 }}
@@ -37,14 +60,14 @@ export default function Command() {
                 shortcut={{ key: "r", modifiers: ["cmd"] }}
               />
             </ActionPanel>
-          )
-        }
-        accessories={[
-          {
-            text: "Local IP address",
-          },
-        ]}
-      />
+          }
+          accessories={[
+            {
+              text: `Local IP address ${index + 1}`,
+            },
+          ]}
+        />
+      ))}
       <List.Item
         subtitle={!data && isLoading ? "Loading..." : error ? "Failed to load" : undefined}
         icon={Icon.Globe}

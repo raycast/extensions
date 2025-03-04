@@ -35,9 +35,23 @@ export type TaskStopTimerResp = {
   taskTime: { task: { name: string } };
 };
 
+type User = {
+  id: number;
+  email: string;
+  name: string;
+  headline: string;
+  capacity: number;
+};
 export type CurrentTimerResp = {
   status: string;
-  task: { id: string };
+  duration: number;
+  user: User;
+  startedAt: string;
+  userDate: string;
+  comment?: string;
+  task?: {
+    id: string;
+  };
 };
 
 export type ErrorResponse = {

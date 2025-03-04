@@ -13,12 +13,18 @@ export * from "./user";
 export type NotionObject = UnwrapArray<UnwrapPromise<ReturnType<Client["search"]>>["results"]>;
 
 // prettier-ignore
-export const writablePropertyTypes = ["title", "number", "rich_text", "url", "email", "phone_number", "date", "checkbox", "select", "multi_select", "formula", "people", "relation", "status"] as const
-export type WritablePropertyTypes = (typeof writablePropertyTypes)[number];
-export function isWritableProperty<T extends { type: PageProperty["type"] }>(
+const readablePropertyTypes = ["title", "number", "rich_text", "url", "email", "phone_number", "date", "checkbox", "select", "multi_select", "formula", "people", "relation", "status"] as const
+export type ReadablePropertyType = (typeof readablePropertyTypes)[number];
+export function isReadableProperty<T extends { type: PageProperty["type"] }>(
   property: T,
-): property is Extract<T, { type: WritablePropertyTypes }> {
-  return (writablePropertyTypes as readonly string[]).includes(property.type);
+): property is Extract<T, { type: ReadablePropertyType }> {
+  return (readablePropertyTypes as readonly string[]).includes(property.type);
+}
+export function isType<P extends DatabaseProperty | PageProperty, T extends PageProperty["type"]>(
+  property: DatabaseProperty | PageProperty,
+  ...types: T[]
+): property is Extract<P, { type: T }> {
+  return types.includes(property.type as T);
 }
 
 export function notionColorToTintColor(notionColor: string | undefined): Color.ColorLike {

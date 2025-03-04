@@ -1,5 +1,49 @@
 # Todoist Changelog
 
+## [Removal of Deadline Feature for Non-Premium Users] - 2025-02-28
+
+The deadline field has been removed from the task creation process for users without a premium subscription.
+
+## [Close Window When Creating a Task] - 2025-02-28
+
+Added an option to close the window immediately after creating a task with the `Create Task` command.
+
+## [AI Extension Improvements] - 2025-02-27
+
+Improve the AI Extension to only retrieve relevant tasks, comments, projects, and sections from the REST API to avoid bloating the AI with too much data.
+
+## [Add Schedule Task Deadline Actions] - 2025-02-26
+
+It's now possible to adjust a task's deadline from the actions menu and the menubar. You can use the following shortcut from a task list item: `⌥` + `⇧` + `D`.
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Add Next Task as Title in Menu Bar] - 2025-02-20
+
+Added option to display the next upcoming task in the menu bar title when no task is selected. This can be enabled in preferences.
+
+## [Fix Default Sorting] - 2025-02-20
+
+Change the default sorting to align with the task order in Todoist.
+
+## [Add time format preference from Todoist preferences] - 2025-02-17
+
+- Raycast now pulls your preferred time format preference from the Todoist user account's settings and then uses that when displaying time
+
+## [Add Complete Task Shortcut Preferences] - 2025-01-31
+
+- Adjusting shortcuts for the following task actions:
+  - Complete Task - Now `⌘` + `Enter` (previously `shift` + `⌘` + `E`)
+  - Open Task in Todoist - Now `⌘` + `O` (previously `⌘` + `Enter`)
+
+## [Add Support for Task Deadlines] - 2025-01-31
+
+It's now possible to specify a deadline when using the `Create Task` command. Deadlines are displayed in the task list and task details views.
+
+## [Quick Add Task Improvement] - 2024-12-02
+
+Added a pop to the root and cleared the search bar after creating a task for the `close window immediately` preference.
+
 ## [Menu Bar Command Fixes] - 2024-08-05
 
 Changed Menu bar icon color contrast issue with certain wallpapers in light mode.

@@ -1,11 +1,11 @@
 import axios from "axios";
-import { TIMEZONE_BASE_URL } from "../utils/costants";
+import { API_ALL_TIMEZONE } from "../utils/costants";
 import { useCachedPromise } from "@raycast/utils";
 
 const getAllTimezones = async () => {
   const axiosResponse = await axios({
     method: "GET",
-    url: TIMEZONE_BASE_URL,
+    url: API_ALL_TIMEZONE,
   });
   return axiosResponse.data as string[];
 };

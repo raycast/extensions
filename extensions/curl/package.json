@@ -7,7 +7,8 @@
   "author": "jonathangiardino",
   "contributors": [
     "pernielsentikaer",
-    "bkeys818"
+    "bkeys818",
+    "ridemountainpig"
   ],
   "categories": [
     "Productivity",
@@ -30,6 +31,94 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "make-http-request",
+      "title": "Make HTTP Request",
+      "description": "Make curl HTTP Request"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@curl fetch https://www.raycast.com/api",
+        "mocks": {
+          "make-http-request": {
+            "stdout": "{}"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "command": [
+                  {
+                    "includes": "https://www.raycast.com/api"
+                  },
+                  {
+                    "includes": "curl"
+                  },
+                  {
+                    "includes": "--verbose"
+                  },
+                  {
+                    "not": {
+                      "includes": "post"
+                    }
+                  }
+                ]
+              },
+              "name": "make-http-request"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@curl make post request to localhost:3000/api/sign_in with json user=test and password=123123123",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "make-http-request",
+              "arguments": {
+                "command": [
+                  {
+                    "includes": "POST"
+                  },
+                  {
+                    "includes": "http://localhost:3000/api/sign_in"
+                  },
+                  {
+                    "includes": "Content-Type: application/json"
+                  },
+                  {
+                    "or": [
+                      {
+                        "includes": "-d "
+                      },
+                      {
+                        "includes": "--data "
+                      }
+                    ]
+                  },
+                  {
+                    "includes": "\"user\":\"test\""
+                  },
+                  {
+                    "includes": "\"password\":\"123123123\""
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "make-http-request": {
+            "stdout": "{}"
+          }
+        }
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.55.2",
     "@raycast/utils": "^1.9.0",

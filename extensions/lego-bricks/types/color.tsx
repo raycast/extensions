@@ -7,5 +7,6 @@ type LegoColor = {
 
 export type LegoColorsResponse = {
   count: number;
-  results: LegoColor;
+  next: string | null;
+  results: LegoColor[];
 };

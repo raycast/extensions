@@ -12,6 +12,7 @@ export interface Story {
   };
   url: string;
   publication: {
+    title: string;
     url: string;
   };
 }

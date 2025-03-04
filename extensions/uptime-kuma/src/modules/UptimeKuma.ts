@@ -4,9 +4,16 @@
 import { io, Socket } from "socket.io-client";
 import { EventEmitter } from "events";
 
+export enum MonitorStatus {
+  DOWN,
+  UP,
+  PENDING,
+  MAINTENANCE,
+}
+
 export interface Heartbeat {
   monitorID: string;
-  status: number;
+  status: MonitorStatus;
   time: string;
   ping: number;
   msg: string;

@@ -22,7 +22,7 @@ type ProjectProps = {
   project: ProjectResult;
   priorities: IssuePriorityValue[] | undefined;
   me: User | undefined;
-  mutateProjects: MutatePromise<ProjectResult[] | undefined>;
+  mutateProjects: MutatePromise<ProjectResult[], ProjectResult[]>;
 };
 
 export default function Project({ project, priorities, me, mutateProjects }: ProjectProps) {

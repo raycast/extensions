@@ -78,6 +78,12 @@ export class Device {
         onAction={() => Clipboard.copy(JSON.stringify(this.rawDeviceData))}
         icon={Icon.ComputerChip}
       />,
+      <Action
+        title={`Copy Device Name`}
+        key="copy-device-name"
+        onAction={() => Clipboard.copy(this.name)}
+        icon={Icon.Pencil}
+      />,
       ...additionalActions,
     ];
   }

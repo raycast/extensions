@@ -34,7 +34,7 @@ export default function QuickTranslate(): ReactElement {
             <QuickTranslateListItem
               key={targetLanguage}
               debouncedText={debouncedText}
-              languageSet={{ langFrom: sourceLanguage, langTo: targetLanguage }}
+              languageSet={{ langFrom: sourceLanguage, langTo: [targetLanguage] }}
               isShowingDetail={isShowingDetail}
               setIsShowingDetail={setIsShowingDetail}
               setIsLoading={(isLoading) => setIsLoading(targetLanguage, isLoading)}

@@ -30,15 +30,18 @@ export default function Command() {
       filtering={false}
       onSearchTextChange={(text) => {
         const number: number = Number.parseInt(text);
-        if (number != null && number >= 0 && number < 9) {
-          open(directories.get(number - 1)!);
+        if (number != null && number > 0 && number < 9) {
+          const path = directories.get(number - 1);
+          if (path) {
+            open(path);
+          }
         }
       }}
     >
       {Array.from(directories, ([key, value]) => (
         <Grid.Item
           key={key.valueOf()}
-          title={`| ${key} | ${value.substring(value.lastIndexOf("/") + 1, value.length)}`}
+          title={`| ${key + 1} | ${value.substring(value.lastIndexOf("/") + 1, value.length)}`}
           content={{ fileIcon: value }}
           actions={
             <ActionPanel>

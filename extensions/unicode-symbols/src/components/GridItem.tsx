@@ -4,6 +4,7 @@ import { memo } from "react";
 import { Color, Grid, Icon } from "@raycast/api";
 
 import { CharacterActionPanel } from "@/components/CharacterActionPanel";
+import { useListContext } from "@/context/ListContext";
 import type { Character } from "@/types";
 import { getSquareSVGString, numberToHex, upperCaseFirst } from "@/utils/string";
 
@@ -12,16 +13,20 @@ type Props = {
 };
 
 export const GridItem = memo(({ item }: Props) => {
+  const { findHtmlEntity } = useListContext();
+  const html = findHtmlEntity(item.c);
+
   const [light, dark] = [
-    `data:image/svg+xml;base64,${encode(getSquareSVGString(item.value))}`,
-    `data:image/svg+xml;base64,${encode(getSquareSVGString(item.value, true))}`,
+    `data:image/svg+xml;base64,${encode(getSquareSVGString(item.v))}`,
+    `data:image/svg+xml;base64,${encode(getSquareSVGString(item.v, true))}`,
   ];
 
   const gridItemTooltip: string = [
-    `Name: ${upperCaseFirst(item.name)}`,
-    `Dec: ${item.code}`,
-    `Hex: ${numberToHex(item.code)}`,
-    item.aliases?.length ? `Aliases: "${item.aliases.map(upperCaseFirst).join(", ")}"` : "",
+    `Name: ${upperCaseFirst(item.n)}`,
+    `Dec: ${item.c}`,
+    `Hex: ${numberToHex(item.c)}`,
+    html ? `HTML Entity: ${html}` : "",
+    item.a?.length ? `Aliases: "${item.a.map(upperCaseFirst).join(", ")}"` : "",
     ...(item.isExtra ? [" ", "> Note: This character is actually in a different Character Set"] : [""]),
   ]
     .filter((s) => s.length > 0)
@@ -29,8 +34,8 @@ export const GridItem = memo(({ item }: Props) => {
 
   return (
     <Grid.Item
-      key={item.name}
-      title={upperCaseFirst(item.name)}
+      key={item.n}
+      title={upperCaseFirst(item.n)}
       accessory={{
         tooltip: gridItemTooltip,
         icon: {

@@ -29,7 +29,7 @@ export interface IConfig {
   requireModel: boolean;
   defaultModel: IModel | undefined;
   supportCustomModel: boolean;
-  listModels(apikey: string | undefined): Promise<IModel[]>;
+  listModels(apikey: string | undefined, entrypoint: string | undefined): Promise<IModel[]>;
 
   defaultEntrypoint: string;
   supportCustomEntrypoint: boolean;

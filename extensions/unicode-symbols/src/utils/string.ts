@@ -1,4 +1,4 @@
-import type { Character, CharacterSet } from "@/types";
+import type { Character, CharacterSection } from "@/types";
 
 /**
  * Utility to uppercase only the first character of a given string
@@ -44,15 +44,15 @@ export const getSquareSVGString = (value: string, dark = false) => {
 
 // Raycast is breaking on certain character sets in List Mode, so we filter the value and subtitle
 
-export const getFilteredValue = (item: Character, section: CharacterSet): string => {
+export const getFilteredValue = (item: Character, section: CharacterSection): string => {
   if (section.sectionTitle === "Ancient Symbols") {
     return "?";
   }
-  return item.value;
+  return item.v;
 };
 
-export const getFilteredSubtitle = (item: Character, section: CharacterSet): string => {
-  const subTitle = upperCaseFirst(item.name);
+export const getFilteredSubtitle = (item: Character, section: CharacterSection): string => {
+  const subTitle = upperCaseFirst(item.n);
   if (section.sectionTitle === "Ancient Symbols") {
     return `${subTitle} (see in Grid Mode)`;
   }

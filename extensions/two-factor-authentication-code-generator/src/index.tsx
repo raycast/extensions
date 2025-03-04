@@ -1,3 +1,4 @@
+import type { App } from "./util/hooks";
 import {
   Action,
   ActionPanel,
@@ -13,12 +14,18 @@ import {
   Alert,
 } from "@raycast/api";
 import { decode } from "hi-base32";
-import { Algorithm, Digits, Options, parseOtpUrl } from "./util/totp";
+import { Algorithm, Digits, Options, parse, parseOtpUrl } from "./util/totp";
 import { useApps } from "./util/hooks";
 
 export default function AppsView() {
   const { apps, updateApps } = useApps();
   const { defaultAction } = getPreferenceValues();
+
+  const updateLastTimeUsed = async (a: App) => {
+    const item = await LocalStorage.getItem(a.name);
+    const updated = { ...parse(item as string), lastTimeUsed: new Date().getTime() };
+    await LocalStorage.setItem(a.name, JSON.stringify(updated));
+  };
 
   return (
     <List
@@ -66,13 +73,13 @@ export default function AppsView() {
               <ActionPanel.Section>
                 {defaultAction == "copy" ? (
                   <>
-                    <Action.CopyToClipboard content={a.code} title="Copy Code" />
-                    <Action.Paste content={a.code} title="Paste Code" />
+                    <Action.CopyToClipboard content={a.code} title="Copy Code" onCopy={() => updateLastTimeUsed(a)} />
+                    <Action.Paste content={a.code} title="Paste Code" onPaste={() => updateLastTimeUsed(a)} />
                   </>
                 ) : (
                   <>
-                    <Action.Paste content={a.code} title="Paste Code" />
-                    <Action.CopyToClipboard content={a.code} title="Copy Code" />
+                    <Action.Paste content={a.code} title="Paste Code" onPaste={() => updateLastTimeUsed(a)} />
+                    <Action.CopyToClipboard content={a.code} title="Copy Code" onCopy={() => updateLastTimeUsed(a)} />
                   </>
                 )}
               </ActionPanel.Section>
@@ -157,7 +164,10 @@ function AddForm() {
 
     const options: Options = { digits: values.digits, period: values.period, algorithm: values.algorithm };
 
-    await LocalStorage.setItem(values.name, JSON.stringify({ secret: values.secret, options: options }));
+    await LocalStorage.setItem(
+      values.name,
+      JSON.stringify({ secret: values.secret, options: options, lastTimeUsed: new Date().getTime() })
+    );
 
     push(<AppsView />);
   };

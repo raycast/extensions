@@ -30,8 +30,11 @@ export default function Command() {
       filtering={false}
       onSearchTextChange={(text) => {
         const number: number = Number.parseInt(text);
-        if (number != null && number >= 0 && number < 9) {
-          open(files.get(number - 1)!);
+        if (number != null && number > 0 && number < 9) {
+          const path = files.get(number - 1);
+          if (path) {
+            open(path);
+          }
         }
       }}
     >

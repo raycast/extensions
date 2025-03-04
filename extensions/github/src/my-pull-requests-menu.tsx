@@ -38,8 +38,15 @@ function getPullRequestStatusIcon(pr: PullRequestFieldsFragment): Icon | string 
 }
 
 function MyPullRequestsMenu() {
-  const { showtext, includeAssigned, includeMentioned, includeReviewed, includeReviewRequests, includeRecentlyClosed } =
-    getPreferenceValues<Preferences.MyPullRequestsMenu>();
+  const {
+    showtext,
+    includeAssigned,
+    includeMentioned,
+    includeReviewed,
+    includeReviewRequests,
+    includeRecentlyClosed,
+    useUnreadIndicator,
+  } = getPreferenceValues<Preferences.MyPullRequestsMenu>();
   const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", PR_DEFAULT_SORT_QUERY, {
     cacheNamespace: "github-my-pr-menu",
   });
@@ -58,7 +65,10 @@ function MyPullRequestsMenu() {
   return (
     <MenuBarRoot
       title={showtext ? `${prCount}` : undefined}
-      icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
+      icon={{
+        source: `pull-request-open${useUnreadIndicator && prCount > 0 ? "-unread" : ""}.svg`,
+        tintColor: Color.PrimaryText,
+      }}
       isLoading={isLoading}
     >
       {sections?.map((section) => {

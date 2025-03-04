@@ -13,11 +13,18 @@
     "lusit",
     "literallyjustroy",
     "mheidinger",
-    "mikybars",
-    "luarmr"
+    "luarmr",
+    "horumy",
+    "santiago_perez",
+    "silv",
+    "EyLuismi",
+    "pernielsentikaer",
+    "BehnH",
+    "jokeychen"
   ],
   "pastContributors": [
-    "igor9silva"
+    "igor9silva",
+    "mikybars"
   ],
   "owner": "raycast",
   "access": "public",
@@ -31,7 +38,17 @@
       "title": "Create Issue",
       "subtitle": "Jira",
       "description": "Create and assign new issues.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "copyURLtoClipboard",
+          "description": "If checked, copies the newly created issue URL to the clipboard.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Copy created issue URL to clipboard"
+        }
+      ]
     },
     {
       "name": "open-issues",
@@ -132,11 +149,400 @@
       "description": "API Token",
       "type": "password",
       "required": false
+    },
+    {
+      "name": "open_in",
+      "type": "appPicker",
+      "title": "Open Issues in",
+      "required": false,
+      "description": "Select the browser or application to open Issues with."
+    },
+    {
+      "name": "branch_name",
+      "title": "Git Branch Name",
+      "description": "The format for copying Git branch names.\nAvailable keys: {issueKey} {issueSummary} {issueSummaryShort} {issueType} {projectKey}",
+      "type": "textfield",
+      "required": false,
+      "default": "{issueKey}-{issueSummary}",
+      "placeholder": "{issueKey}-{issueSummary}"
     }
   ],
+  "tools": [
+    {
+      "name": "create-issue",
+      "title": "Create Issue",
+      "description": "Creates a Jira issue"
+    },
+    {
+      "name": "get-users",
+      "title": "Get Users",
+      "description": "Gets Jira users"
+    },
+    {
+      "name": "get-projects",
+      "title": "Get Projects",
+      "description": "Gets Jira projects"
+    },
+    {
+      "name": "get-labels",
+      "title": "Get Labels",
+      "description": "Gets Jira labels"
+    },
+    {
+      "name": "get-issue-types",
+      "title": "Get Issue Types",
+      "description": "Gets Jira issue types"
+    },
+    {
+      "name": "get-teams",
+      "title": "Get Teams",
+      "description": "Get all teams in Jira"
+    },
+    {
+      "name": "search-issues",
+      "title": "Search Issues",
+      "description": "Search through Jira issues"
+    },
+    {
+      "name": "get-myself",
+      "title": "Get Myself",
+      "description": "Get the currently authenticated Jira user"
+    },
+    {
+      "name": "assign-issue",
+      "title": "Assign Issue",
+      "description": "Assign a Jira issue to a user or unassign it"
+    },
+    {
+      "name": "update-issue",
+      "title": "Update Issue",
+      "description": "Update a Jira issue's fields and properties"
+    },
+    {
+      "name": "get-issue",
+      "title": "Get Issue",
+      "description": "Get detailed information about a Jira issue"
+    }
+  ],
+  "ai": {
+    "instructions": "- Always format object titles and names as markdown links using the object's URL. Example: Instead of saying \"Issue **Implement user profile page** has been created', say \"Issue [Implement user profile page](https://linear.app/company/issue/ISS-2) has been created\"\\n- Do not use names or titles as IDs in the system. Use the actual ID of the object\\n- When there is no exact match of issue titles with the provided name, analyze the input and titles of existing objects and use such objects only if the meaning is the same. Do not use objects that are not related to the input\\n- Do not set any fields when creating issues if the user didn't specify any. For example, if the user didn't specify a due date, do not set it.",
+    "evals": [
+      {
+        "input": "@jira Create issue 'Implement user profile page'",
+        "mocks": {
+          "get-issue-types": [
+            {
+              "id": "10001",
+              "subtask": false,
+              "hierarchyLevel": 0,
+              "name": "Task"
+            },
+            {
+              "id": "10002",
+              "subtask": false,
+              "hierarchyLevel": 1,
+              "name": "Epic"
+            },
+            {
+              "id": "10003",
+              "subtask": true,
+              "hierarchyLevel": -1,
+              "name": "Sub-task"
+            }
+          ],
+          "create-issue": {
+            "id": "10163",
+            "key": "MOB-163",
+            "url": "https://raycast-test.atlassian.net/browse/MOB-163"
+          },
+          "get-projects": [
+            {
+              "id": "10000",
+              "key": "MOB",
+              "name": "Mobile"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-projects"
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "projectId": "10000"
+              },
+              "name": "get-issue-types"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "create-issue",
+              "arguments": {
+                "issueTypeId": "10001",
+                "projectId": "10000"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Tells that issue was created"
+          },
+          {
+            "meetsCriteria": "Includes markdown link to created issue"
+          }
+        ]
+      },
+      {
+        "input": "@jira What are my issues?",
+        "mocks": {
+          "search-issues": [
+            {
+              "id": "10016",
+              "key": "MOB-3",
+              "fields": {
+                "summary": "Crash on Launch",
+                "updated": "2025-01-24T13:13:01.691+0100",
+                "issuetype": {
+                  "id": "10006",
+                  "subtask": false,
+                  "hierarchyLevel": 0,
+                  "name": "Bug"
+                },
+                "status": {
+                  "name": "À faire",
+                  "id": "10003"
+                },
+                "subtasks": [],
+                "assignee": {
+                  "displayName": "John Doe",
+                  "accountId": "63693a796bbefce0aca34069"
+                },
+                "project": {
+                  "id": "10001",
+                  "key": "MOB",
+                  "name": "Mobile"
+                },
+                "priority": {
+                  "id": "3",
+                  "name": "Medium"
+                }
+              }
+            },
+            {
+              "id": "10017",
+              "key": "EXT-2",
+              "fields": {
+                "summary": "Fix LLM model in AI extensions",
+                "updated": "2025-01-24T11:35:24.908+0100",
+                "issuetype": {
+                  "id": "10001",
+                  "subtask": false,
+                  "hierarchyLevel": 0,
+                  "name": "Task"
+                },
+                "subtasks": [],
+                "assignee": {
+                  "displayName": "John Doe",
+                  "accountId": "63693a796bbefce0aca34069"
+                },
+                "project": {
+                  "id": "10001",
+                  "key": "EXT",
+                  "name": "AI Extensions"
+                }
+              }
+            },
+            {
+              "id": "10029",
+              "key": "MOB-7",
+              "fields": {
+                "summary": "Fix website bug",
+                "updated": "2025-01-24T11:19:24.846+0100",
+                "issuetype": {
+                  "id": "10006",
+                  "subtask": false,
+                  "hierarchyLevel": 0,
+                  "name": "Bug"
+                },
+                "status": {
+                  "name": "À faire",
+                  "id": "10003"
+                },
+                "subtasks": [],
+                "assignee": {
+                  "displayName": "John Doe",
+                  "accountId": "63693a796bbefce0aca34069"
+                },
+                "project": {
+                  "id": "10001",
+                  "key": "MOB",
+                  "name": "Mobile"
+                },
+                "priority": {
+                  "id": "3",
+                  "name": "High"
+                }
+              }
+            }
+          ],
+          "get-myself": {
+            "emailAddress": "john.doe@gmail.com",
+            "accountId": "63693a796bbefce0aca34069",
+            "displayName": "John Doe"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-myself"
+          },
+          {
+            "callsTool": {
+              "name": "search-issues",
+              "arguments": {
+                "jql": {
+                  "includes": "63693a796bbefce0aca34069"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Includes markdown links to issues"
+          },
+          {
+            "meetsCriteria": "Includes details about the issues"
+          }
+        ]
+      },
+      {
+        "input": "@jira Assign me issue AI-7",
+        "mocks": {
+          "get-myself": {
+            "emailAddress": "john.doe@gmail.com",
+            "accountId": "63693a796bbefce0aca34069",
+            "displayName": "John Doe"
+          },
+          "get-issue": {
+            "id": "10006",
+            "key": "AI-7",
+            "fields": {
+              "summary": "Fix website bug in AI Extensions"
+            }
+          },
+          "assign-issue": null
+        },
+        "expected": [
+          {
+            "callsTool": "get-myself"
+          },
+          {
+            "callsTool": {
+              "name": "assign-issue",
+              "arguments": {
+                "issueIdOrKey": "AI-7",
+                "assigneeId": "63693a796bbefce0aca34069"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@jira Which issues were completed by Thomas last week?",
+        "mocks": {
+          "get-myself": {
+            "accountId": "63693a796bbefce0aca340769",
+            "displayName": "John"
+          },
+          "get-users": [
+            {
+              "accountId": "63693a796bbefce0aca340769",
+              "displayName": "John"
+            },
+            {
+              "accountId": "63693a796bbefce0aca34070",
+              "displayName": "Thomas"
+            }
+          ],
+          "search-issues": [
+            {
+              "id": "10020",
+              "key": "MOB-5",
+              "fields": {
+                "summary": "Implement push notifications",
+                "updated": "2025-01-17T15:30:00.000+0100",
+                "issuetype": {
+                  "id": "10001",
+                  "subtask": false,
+                  "hierarchyLevel": 0,
+                  "name": "Task"
+                },
+                "status": {
+                  "name": "Done",
+                  "id": "10004"
+                },
+                "assignee": {
+                  "displayName": "Thomas",
+                  "accountId": "63693a796bbefce0aca34070"
+                },
+                "project": {
+                  "id": "10001",
+                  "key": "MOB",
+                  "name": "Mobile"
+                }
+              }
+            },
+            {
+              "id": "10021",
+              "key": "EXT-4",
+              "fields": {
+                "summary": "Fix authentication flow",
+                "updated": "2025-01-18T10:45:00.000+0100",
+                "issuetype": {
+                  "id": "10006",
+                  "subtask": false,
+                  "hierarchyLevel": 0,
+                  "name": "Bug"
+                },
+                "status": {
+                  "name": "Done",
+                  "id": "10004"
+                },
+                "assignee": {
+                  "displayName": "Thomas",
+                  "accountId": "63693a796bbefce0aca34070"
+                },
+                "project": {
+                  "id": "10002",
+                  "key": "EXT",
+                  "name": "Extensions"
+                }
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-issues",
+              "arguments": {
+                "jql": {
+                  "includes": "63693a796bbefce0aca34070"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Includes markdown links to issues"
+          },
+          {
+            "meetsCriteria": "Lists completed issues from last week"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.64.3",
-    "@raycast/utils": "^1.16.2",
+    "@raycast/utils": "^1.18.1",
     "date-fns": "^2.30.0",
     "filesize": "^10.1.0",
     "form-data": "^4.0.0",

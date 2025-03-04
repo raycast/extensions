@@ -15,4 +15,4 @@ To be able to use this extension you need to get an API key from Rebrickable. Yo
 
 
 ## TODO:
-- [ ] Implement pagination for all endpoints
+- [x] Implement pagination for all endpoints

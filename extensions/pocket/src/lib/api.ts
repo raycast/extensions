@@ -1,7 +1,43 @@
 import got from "got";
 import { range, uniq } from "lodash";
+import { z } from "zod";
 
 const consumerKey = "109214-0976fe3d1062bae6c61267f";
+
+const BookmarkSchema = z
+  .object({
+    item_id: z.string(),
+    resolved_title: z.string(),
+    resolved_url: z.string(),
+    given_title: z.string(),
+    given_url: z.string(),
+    status: z.enum(["0", "1", "2"]),
+    is_article: z.enum(["0", "1"]),
+    has_video: z.enum(["0", "1", "2"]),
+    has_image: z.enum(["0", "1", "2"]),
+    favorite: z.enum(["0", "1"]),
+    tags: z.record(z.unknown()).optional(),
+    authors: z.record(z.object({ name: z.string().optional() })).optional(),
+    time_added: z.string(),
+    top_image_url: z.string().url().optional(),
+    image: z.object({ src: z.string() }).optional(),
+  })
+  .transform((rawBookmark) => ({
+    id: rawBookmark.item_id,
+    title: rawBookmark.given_title || rawBookmark.resolved_title,
+    originalUrl: rawBookmark.given_url || rawBookmark.resolved_url,
+    pocketUrl: `https://getpocket.com/read/${rawBookmark.item_id}`,
+    archived: rawBookmark.status === "1",
+    type: rawBookmark.has_image === "2" ? "image" : rawBookmark.is_article === "0" ? "video" : "article",
+    favorite: rawBookmark.favorite === "1",
+    tags: rawBookmark.tags ? Object.keys(rawBookmark.tags) : [],
+    author: rawBookmark.authors ? Object.values(rawBookmark.authors)[0]?.name : "",
+    updatedAt: new Date(parseInt(`${rawBookmark.time_added}000`)),
+    image: rawBookmark.top_image_url || rawBookmark.image?.src,
+  }));
+
+type RawBookmark = z.input<typeof BookmarkSchema>;
+export type Bookmark = z.output<typeof BookmarkSchema>;
 
 export class PocketClient {
   private readonly accessToken?: string;
@@ -85,8 +121,8 @@ export class PocketClient {
           search,
         },
       })
-      .json<FetchBookmarksResponse>();
-    const bookmarks: Array<Bookmark> = Object.values(result.list).map(formatBookmark);
+      .json<{ list: Record<string, RawBookmark> }>();
+    const bookmarks = z.array(BookmarkSchema).parse(Object.values(result.list));
     return bookmarks.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
   }
 
@@ -142,19 +178,6 @@ export class PocketClient {
   }
 }
 
-export interface Bookmark {
-  id: string;
-  title: string;
-  originalUrl: string;
-  pocketUrl: string;
-  type: "article" | "video" | "image";
-  archived: boolean;
-  favorite: boolean;
-  tags: Array<string>;
-  author?: string;
-  updatedAt: Date;
-}
-
 export enum ReadState {
   All = "all",
   Unread = "unread",
@@ -165,22 +188,6 @@ export enum ContentType {
   Video = "video",
   Article = "article",
   Image = "image",
-}
-
-interface RawBookmark {
-  item_id: string;
-  resolved_title: string;
-  resolved_url: string;
-  given_title: string;
-  given_url: string;
-  status: "0" | "1" | "2";
-  is_article: "0" | "1";
-  has_video: "0" | "1" | "2";
-  has_image: "0" | "1" | "2";
-  favorite: "0" | "1";
-  tags?: Record<string, unknown>;
-  authors?: Record<string, { name?: string }>;
-  time_added: string;
 }
 
 interface SendActionRequest {
@@ -199,27 +206,8 @@ interface FetchBookmarksRequest {
   contentType?: string;
 }
 
-interface FetchBookmarksResponse {
-  list: Record<string, RawBookmark>;
-}
-
 interface CreateBookmarkRequest {
   title?: string;
   tags?: string[];
   url: string;
-}
-
-function formatBookmark(bookmark: RawBookmark): Bookmark {
-  return {
-    id: bookmark.item_id,
-    title: bookmark.given_title || bookmark.resolved_title,
-    originalUrl: bookmark.resolved_url || bookmark.given_url,
-    pocketUrl: `https://getpocket.com/read/${bookmark.item_id}`,
-    archived: bookmark.status === "1",
-    type: bookmark.has_image === "2" ? "image" : bookmark.is_article === "0" ? "video" : "article",
-    favorite: bookmark.favorite === "1",
-    tags: bookmark.tags ? Object.keys(bookmark.tags) : [],
-    author: bookmark.authors ? Object.values(bookmark.authors)[0]?.name : "",
-    updatedAt: new Date(parseInt(`${bookmark.time_added}000`)),
-  };
 }

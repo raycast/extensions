@@ -28,17 +28,24 @@ const fetchSchedule = async (league: string) => {
         id: game.id,
         name: game.name,
         shortName: game.shortName,
-        date: new Date(game.date).toLocaleTimeString("en-US", { timeStyle: "short" }),
+        date: new Date(game.date).toLocaleTimeString(undefined, { timeStyle: "short" }),
+        venue: game.competitions[0].venue,
+        tickets: game.competitions[0].tickets,
         competitors: game.competitions[0].competitors
           .map(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (competitor: any): Competitor => ({
+              id: competitor.id,
               displayName: competitor.team.displayName,
               abbreviation: competitor.team.abbreviation,
               shortName: competitor.team.shortDisplayName,
               logo: competitor.team.logo,
+              color: competitor.team.color,
+              alternateColor: competitor.team.alternateColor,
               home: competitor.homeAway,
               score: competitor.score,
+              linescores: competitor.linescores,
+              records: competitor.records ?? [],
             }),
           )
           .sort((a: Competitor) => (a.home === "home" ? -1 : 1)),

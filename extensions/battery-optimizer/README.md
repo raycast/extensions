@@ -11,6 +11,7 @@ The purpose of limiting the battery's max charge is to prolong battery health an
  - `Reset Battery Optimizer` command allow charging to continue to 100%.
  - `Get Battery Threshold` command will check the current battery charging limit.
    ![battery-optimizer-1.png](media/battery-optimizer-1.png)
+ - `Battery Optimizer Menu Bar` show the current battery charging threshold and enable/disable the Battery Optimizer in the menu bar.
 
 ## Preferences
  - Configure whether battery optimization settings persist through extension's preferences screen.

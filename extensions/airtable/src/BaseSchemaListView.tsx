@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { AirtableBaseMetadata, Field, Table, View } from "./types";
 import * as api from "./metadata-api";
 import { Fragment } from "react";
+import { AirtableBaseRecordsList } from "./BaseRecordsList";
 
 export function AirtableBaseSchemaTableListView(props: { baseMetadata: AirtableBaseMetadata }) {
   const { baseMetadata } = props;
@@ -82,6 +83,12 @@ function AirtableTableListItem(props: { baseMetadata: AirtableBaseMetadata; tabl
               <AirtableBaseSchemaFieldsList baseMetadata={baseMetadata} tableId={table.id} fields={table.fields} />
             }
             shortcut={{ modifiers: ["cmd"], key: "f" }}
+          />
+          <Action.Push
+            title="Continue to Records"
+            icon={Icon.List}
+            target={<AirtableBaseRecordsList baseId={baseMetadata.id} tableId={table.id} fields={table.fields} />}
+            shortcut={{ modifiers: ["cmd"], key: "v" }}
           />
           <Action.CopyToClipboard title={`Copy Table ID (${table.id})`} content={table.id} />
         </ActionPanel>

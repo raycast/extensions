@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { setInterval } from "timers";
@@ -15,6 +15,7 @@ export default () => {
   );
 
   useEffect(() => {
+    if (machines.error) return;
     const interval = setInterval(() => machines.revalidate(), 3000);
     return () => clearInterval(interval);
   });
@@ -25,6 +26,21 @@ export default () => {
       searchText={searchText}
       onSearchTextChange={setSearchText}
     >
+      {!machines.error && !machines.data?.length && (
+        <List.EmptyView
+          title="Get started with machines"
+          description="Compute on Paperspace -- Powerful management"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                icon={Icon.MemoryChip}
+                title="Create a Machine"
+                url="https://console.paperspace.com/machines/create"
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {machines.data &&
         machines.data.map((machine) => (
           <List.Item

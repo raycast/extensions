@@ -17,45 +17,16 @@ import {
   List,
   openCommandPreferences,
 } from "@raycast/api";
-
-import convert from "./operations/convertOperation";
-import { getSelectedImages } from "./utilities/utils";
-import { ConvertPreferences, ExtensionPreferences } from "./utilities/preferences";
-import runOperation from "./operations/runOperation";
 import { useEffect } from "react";
-import SettingsActionPanelSection from "./components/SettingsActionPanelSection";
 
-/**
- * All supported image formats for conversion.
- */
-const FORMATS = [
-  "ASTC",
-  "AVIF",
-  "BMP",
-  "DDS",
-  "EXR",
-  "GIF",
-  "HEIC",
-  "HEICS",
-  "ICNS",
-  "ICO",
-  "JPEG",
-  "JP2",
-  "KTX",
-  "PBM",
-  "PDF",
-  "PNG",
-  "PSD",
-  "PVR",
-  "TGA",
-  "TIFF",
-  "WEBP",
-  "SVG",
-];
+import SettingsActionPanelSection from "./components/SettingsActionPanelSection";
+import convert, { imageFormats } from "./operations/convertOperation";
+import runOperation from "./operations/runOperation";
+import { getSelectedImages } from "./utilities/utils";
 
 export default function Command(props: LaunchProps) {
-  const preferences = getPreferenceValues<ConvertPreferences & ExtensionPreferences>();
-  const enabledFormats = FORMATS.filter((format) => preferences[`show${format}`]);
+  const preferences = getPreferenceValues<Preferences.Convert>();
+  const enabledFormats = imageFormats.filter((format) => preferences[`show${format}`]);
 
   useEffect(() => {
     if (props.launchContext && "convertTo" in props.launchContext) {
@@ -112,7 +83,7 @@ export default function Command(props: LaunchProps) {
                   }}
                 />
                 <Action.CreateQuicklink
-                  title="Create QuickLink"
+                  title="Create Quicklink"
                   quicklink={{
                     name: `Convert to ${format}`,
                     link: `raycast://extensions/HelloImSteven/sips/convert?context=${encodeURIComponent(JSON.stringify({ convertTo: format }))}`,

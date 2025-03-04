@@ -1,8 +1,9 @@
 import { spawnSync } from "child_process";
-import { closeMainWindow, showHUD } from "@raycast/api";
+import { closeMainWindow, showHUD, showToast, Toast } from "@raycast/api";
 
 export default async () => {
   await closeMainWindow();
+  await showToast({ title: "Toggling scroll to open", style: Toast.Style.Animated });
   const out = spawnSync("defaults read com.apple.dock scroll-to-open", { shell: true });
   const isTurnOn = String(out.output[1]).trim();
 

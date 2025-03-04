@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import useNameSilo from "./lib/hooks/useNameSilo";
-import { ArrOrObjOrNull, DNSRecord, Domain, type DomainInfo } from "./lib/types";
+import { Domain, type DomainInfo } from "./lib/types";
 import { getFavicon } from "@raycast/utils";
 import { NAMESILO_LINKS } from "./lib/constants";
-import { parseAsArray } from "./lib/utils/parseAsArray";
+import NameServers from "./lib/components/name-servers";
+import DNSRecords from "./lib/components/dns-records";
 
 export default function Domains() {
   const { isLoading, data } = useNameSilo<{ domains: Domain[] | { domain: Domain } }>("listDomains");
@@ -40,6 +41,11 @@ export default function Domains() {
                     icon={Icon.Paragraph}
                     title="View DNS Records"
                     target={<DNSRecords domain={domain.domain} />}
+                  />
+                  <Action.Push
+                    icon={Icon.List}
+                    title="View NameServers"
+                    target={<NameServers domain={domain.domain} />}
                   />
                 </ActionPanel>
               }
@@ -101,32 +107,5 @@ Contact IDs
         )
       }
     />
-  );
-}
-
-function DNSRecords({ domain }: { domain: string }) {
-  type DNSRecordsResponse = { resource_record: ArrOrObjOrNull<DNSRecord> };
-  const { isLoading, data } = useNameSilo<DNSRecordsResponse>("dnsListRecords", {
-    domain,
-  });
-  const records = parseAsArray(data?.resource_record);
-
-  return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search record">
-      <List.Section title={`Domains / ${domain} / DNS Records`}>
-        {records.map((record) => (
-          <List.Item
-            key={record.record_id}
-            title={record.host}
-            subtitle={record.record_id}
-            accessories={[
-              { tag: record.type },
-              { text: `TTL: ${record.ttl}` },
-              { text: `distance: ${record.distance}` },
-            ]}
-          />
-        ))}
-      </List.Section>
-    </List>
   );
 }

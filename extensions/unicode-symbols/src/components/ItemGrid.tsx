@@ -27,10 +27,10 @@ export const ItemGrid = memo(() => {
         >
           {section.items.map((item) => {
             const accessories = [];
-            if (item.aliases?.length) {
-              accessories.push({ icon: "⌨️", text: `${item.aliases.join(", ")}` });
+            if (item.a?.length) {
+              accessories.push({ icon: "⌨️", text: `${item.a.join(", ")}` });
             }
-            return <GridItem item={item} key={`${section.sectionTitle}-${item.code}-${item.name}`} />;
+            return <GridItem item={item} key={`${section.sectionTitle}-${item.c}-${item.n}`} />;
           })}
         </Grid.Section>
       ))}

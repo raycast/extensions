@@ -1,5 +1,17 @@
-import { ActionPanel, Action, Color, List, showHUD, showToast, Toast, Icon, Clipboard, open } from "@raycast/api";
-import { useState } from "react";
+import {
+  ActionPanel,
+  Action,
+  Color,
+  List,
+  showHUD,
+  showToast,
+  Toast,
+  Icon,
+  Clipboard,
+  open,
+  LocalStorage,
+} from "@raycast/api";
+import { useState, useEffect } from "react";
 
 interface Option {
   key: string;
@@ -122,6 +134,12 @@ const OPTIONS: Option[] = [
 
   // Site options
   { key: "blockxmlrpc", title: "Block XML-RPC", description: "Block access to xmlrpc.php", group: "Site" },
+  {
+    key: "dev-pool",
+    title: "Enable Sandbox Access",
+    description: "Connect directly to your WP.com sandbox",
+    group: "Site",
+  },
   { key: "content", title: "Add Content", description: "Add pre-generated content to the site", group: "Site" },
   {
     key: "subdir_multisite",
@@ -140,6 +158,38 @@ const OPTIONS: Option[] = [
 
 export default function Command() {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [defaultOptions, setDefaultOptions] = useState<string[]>([]);
+
+  useEffect(() => {
+    loadDefaultOptions();
+  }, []);
+
+  async function loadDefaultOptions() {
+    const savedDefaults = await LocalStorage.getItem<string>("defaultOptions");
+    if (savedDefaults) {
+      const parsedDefaults = JSON.parse(savedDefaults);
+      setDefaultOptions(parsedDefaults);
+      setSelectedOptions(parsedDefaults);
+    }
+  }
+
+  async function saveDefaultOptions() {
+    await LocalStorage.setItem("defaultOptions", JSON.stringify(selectedOptions));
+    setDefaultOptions(selectedOptions);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Default options saved",
+    });
+  }
+
+  async function resetDefaultOptions() {
+    await LocalStorage.removeItem("defaultOptions");
+    setSelectedOptions(defaultOptions);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Default options reset",
+    });
+  }
 
   function toggleOption(key: string) {
     setSelectedOptions((current) => (current.includes(key) ? current.filter((k) => k !== key) : [...current, key]));
@@ -223,6 +273,36 @@ export default function Command() {
           ))}
         </List.Section>
       ))}
+
+      <List.Section key="meta" title="Extension options">
+        <List.Item
+          title="Save Current Options as Default"
+          icon={{ source: Icon.Star }}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Save as Default"
+                onAction={saveDefaultOptions}
+                shortcut={{ modifiers: ["cmd"], key: "s" }}
+              />
+            </ActionPanel>
+          }
+        />
+
+        <List.Item
+          title="Reset Default Options"
+          icon={{ source: Icon.ArrowCounterClockwise }}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Reset Default Options"
+                onAction={resetDefaultOptions}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
     </List>
   );
 }

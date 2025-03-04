@@ -23,9 +23,9 @@ export default async function Command() {
     title: "Starting",
   });
 
-  const cmd = `${preferences.binaryPath} start ${preferences.preset} ${preferences.protocol}`;
+  const cmd = `${preferences.binaryPath} timer start ${preferences.preset} ${preferences.protocol}`;
   console.debug(`cmd: ${cmd}`);
-  const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
+  const { stderr } = await Exec.run(cmd, {});
   if (stderr) {
     console.log(stderr);
 

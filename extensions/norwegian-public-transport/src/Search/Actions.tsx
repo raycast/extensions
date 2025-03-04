@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, Image, Keyboard } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { Feature } from "../types";
+import { getWebPlannerConfig } from "../preferences";
 
 type ActionsProps = {
   venue: Feature;
@@ -10,6 +11,7 @@ type ActionsProps = {
 };
 
 export function Actions({ venue, isFavorite, onAction, onSave }: ActionsProps) {
+  const webPlannerConfig = getWebPlannerConfig();
   return (
     <ActionPanel>
       <Action title="View Departures" icon={Icon.ArrowRight} onAction={onAction} />
@@ -25,14 +27,15 @@ export function Actions({ venue, isFavorite, onAction, onSave }: ActionsProps) {
       />
       {venue.properties.id && (
         <Action.OpenInBrowser
-          url={`https://reise.reisnordland.no/departures/${venue.properties.id}`}
-          title="Open Stop in Reis Travel Search"
-          icon={getFavicon("https://reisnordland.no", { mask: Image.Mask.RoundedRectangle })}
+          url={`${webPlannerConfig.url}/departures/${venue.properties.id}`}
+          title={`Open Stop in ${webPlannerConfig.name}`}
+          icon={getFavicon(webPlannerConfig.url, { mask: Image.Mask.RoundedRectangle })}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
         />
       )}
       <Action.OpenInBrowser
         url={getSkjermenUrl(venue)}
+        // eslint-disable-next-line @raycast/prefer-title-case
         title="Open Stop in skjer.men"
         icon={getFavicon("https://skjer.men", {
           mask: Image.Mask.RoundedRectangle,

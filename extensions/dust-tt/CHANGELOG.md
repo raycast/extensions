@@ -1,5 +1,38 @@
 # Dust.tt Changelog
 
+## [fixes] - 2024-12-11
+
+- Upgrade dust-tt/client to allow more flexibility in the api response.
+
+## [fixes] - 2024-11-21
+
+- Use the proper oauth audience and add scopes to limit api access.
+
+## [Feature] - 2024-11-09
+
+- Add support for Oauth connexion flow.
+- Add Command to Select Workspace (oauth only)
+- Add Command for Claude-3
+- Use official Dust Client (removed custom implementation)
+- Support dust favorite assistants feature (oauth only, removed the localStorage implementation)
+- Fix icons for referenced documents
+- Fix labels for assistant scopes
+- Update wording to match Dust (especially agent -> assistant).
+- Improve UX (thinking animation, abort fetching when exiting view...)
+
+## [Feature] - 2024-10-01
+
+- allow user to specify custom API URL
+
+## [Feature] - 2024-09-24
+
+- ask user to provide email address during the setup
+- specify email address and username in API calls to provide accurate usage statistics
+
+## [chore] - 2024-09-23
+
+- transfer extension ownership to the Dust team
+
 ## [bug fixes] - 2024-07-22
 
 - use `agent_message_success` event as stop condition

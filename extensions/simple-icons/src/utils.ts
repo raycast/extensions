@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createWriteStream } from "node:fs";
 import { access, constants, copyFile, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pipeline as streamPipeline } from "node:stream/promises";
 import {
+  AI,
   Cache,
   Clipboard,
   Toast,
@@ -15,12 +16,26 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
-import { execa } from "execa";
+import { useAI } from "@raycast/utils";
+import { Searcher } from "fast-fuzzy";
 import got, { Progress } from "got";
-import { titleToSlug } from "simple-icons/sdk";
-import { JsDelivrNpmResponse, IconData, IconJson, LaunchContext } from "./types.js";
+import spawn from "nano-spawn";
+import { getIconSlug } from "simple-icons/sdk";
+import { IconData, JsDelivrNpmResponse, LaunchContext, Release } from "./types.js";
 
 const cache = new Cache();
+
+export const fontUnicodeStart = 0xea01;
+
+export const {
+  defaultDetailAction = "OpenWith",
+  defaultLoadSvgAction = "WithBrandColor",
+  displaySimpleIconsFontFeatures,
+  enableAiSearch,
+  githubToken,
+} = getPreferenceValues<ExtensionPreferences>();
+
+export const hasAccessToAi = environment.canAccess(AI);
 
 export const buildDeeplinkParameters = (launchContext?: LaunchContext) => {
   if (!launchContext) return "";
@@ -30,8 +45,7 @@ export const buildDeeplinkParameters = (launchContext?: LaunchContext) => {
 export const downloadAssetPack = async (version: string) => {
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "",
-    message: "Downloading asset pack",
+    title: "Downloading asset pack",
   });
   return new Promise<void>((resolve) => {
     const readStream = got.stream(`https://codeload.github.com/simple-icons/simple-icons/zip/refs/tags/${version}`);
@@ -42,7 +56,7 @@ export const downloadAssetPack = async (version: string) => {
     });
     readStream.on("downloadProgress", (progress: Progress) => {
       if (progress.percent === 1) return;
-      toast.message = `Downloading asset pack (${(progress.percent * 100).toFixed(0)}%)`;
+      toast.title = `Downloading asset pack (${(progress.percent * 100).toFixed(0)}%)`;
     });
   });
 };
@@ -50,12 +64,11 @@ export const downloadAssetPack = async (version: string) => {
 export const extractAssetPack = async (version: string) => {
   await showToast({
     style: Toast.Style.Animated,
-    title: "",
-    message: "Extracting asset pack",
+    title: "Extracting asset pack",
   });
   const zipPath = join(environment.supportPath, `pack-${version}.zip`);
   const destination = join(environment.assetsPath, `pack`);
-  await execa("unzip", ["-o", zipPath, "-d", destination]);
+  await spawn("unzip", ["-o", zipPath, "-d", destination]);
 };
 
 export const cacheAssetPack = async (version: string) => {
@@ -75,9 +88,13 @@ export const cacheAssetPack = async (version: string) => {
 };
 
 export const loadCachedJson = async (version: string) => {
+  const [major] = version.split(".");
+  const isNewFormat = Number(major) >= 14;
   const jsonPath = join(environment.assetsPath, "pack", `simple-icons-${version}`, "_data", "simple-icons.json");
   const jsonFile = await readFile(jsonPath, "utf8");
-  return JSON.parse(jsonFile) as IconJson;
+  const json = JSON.parse(jsonFile);
+  const icons = isNewFormat ? (json as IconData[]) : (json.icons as IconData[]);
+  return icons.map((icon, i) => ({ ...icon, code: fontUnicodeStart + i }));
 };
 
 export const loadCachedVersion = () => {
@@ -87,16 +104,26 @@ export const loadCachedVersion = () => {
 export const loadLatestVersion = async () => {
   await showToast({
     style: Toast.Style.Animated,
-    title: "",
-    message: "Checking latest version",
+    title: "Checking latest version",
   });
   const json = await got.get("https://data.jsdelivr.com/v1/packages/npm/simple-icons").json<JsDelivrNpmResponse>();
   return json.tags.latest;
 };
 
+export const loadRecentReleases = async () =>
+  got
+    .get("https://api.github.com/repos/simple-icons/simple-icons/releases", {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: githubToken ? `Bearer ${githubToken}` : undefined,
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    })
+    .json<Release[]>();
+
 export const useVersion = ({ launchContext }: { launchContext?: LaunchContext }) => {
   const cachedVersion = loadCachedVersion();
-  const [version, setVerion] = useState(cachedVersion);
+  const [version, setVersion] = useState(cachedVersion);
   useEffect(() => {
     loadLatestVersion().then(async (latestVersion) => {
       if (cachedVersion !== latestVersion) {
@@ -110,7 +137,7 @@ export const useVersion = ({ launchContext }: { launchContext?: LaunchContext })
             open("raycast://extensions/litomore/simple-icons/index" + buildDeeplinkParameters(launchContext));
           }
         } else {
-          setVerion(latestVersion);
+          setVersion(latestVersion);
         }
       }
     });
@@ -119,7 +146,6 @@ export const useVersion = ({ launchContext }: { launchContext?: LaunchContext })
 };
 
 export const loadSvg = async ({ version, icon, slug }: { version: string; icon: IconData; slug: string }) => {
-  const { defaultLoadSvgAction = "WithBrandColor" } = getPreferenceValues<ExtensionPreferences>();
   const svgPath = join(environment.assetsPath, "pack", `simple-icons-${version}`, "icons", `${slug}.svg`);
   let svg = await readFile(svgPath, "utf8");
   const withBrandColor = defaultLoadSvgAction === "WithBrandColor";
@@ -127,17 +153,17 @@ export const loadSvg = async ({ version, icon, slug }: { version: string; icon: 
   return { svg, path: svgPath, withBrandColor };
 };
 
-export const copySvg = async ({ version, icon }: { version: string; icon: IconData }) => {
+export const copySvg = async ({ version, icon, pathOnly }: { version: string; icon: IconData; pathOnly?: boolean }) => {
   const toast = await showToast({
     style: Toast.Style.Success,
-    title: "",
-    message: "Fetching icon...",
+    title: "Fetching icon...",
   });
-  const { svg } = await loadSvg({
+  let { svg } = await loadSvg({
     version,
     icon,
-    slug: icon.slug || titleToSlug(icon.title),
+    slug: getIconSlug(icon),
   });
+  if (pathOnly) svg = svg.replace(/^.+ d="([^"]+)".+$/, "$1");
   toast.style = Toast.Style.Success;
   Clipboard.copy(svg);
   await showHUD("Copied to Clipboard");
@@ -189,4 +215,39 @@ export const getAliases = (icon: IconData) => {
   const dup = icon.aliases?.dup?.map((d) => [d.title, ...Object.values(d.loc ?? {})]).flat() ?? [];
   const loc = Object.values(icon.aliases?.loc ?? {});
   return [...new Set([...aka, ...dup, ...loc])];
+};
+
+export const getKeywords = (icon: IconData) =>
+  [
+    icon.title,
+    icon.slug,
+    icon.aliases?.aka,
+    icon.aliases?.dup?.map((duplicate) => duplicate.title),
+    Object.values(icon.aliases?.loc ?? {}),
+  ]
+    .flat()
+    .filter(Boolean) as string[];
+
+export const useSearch = ({ icons }: { icons: IconData[] }) => {
+  const [searchString, setSearchString] = useState("");
+  const $searchString = searchString.trim().toLowerCase();
+  const searcher = useMemo(() => new Searcher(icons, { keySelector: getKeywords }), [icons]);
+
+  const filteredIcons = $searchString
+    ? enableAiSearch && hasAccessToAi
+      ? icons.filter((icon) => getKeywords(icon).some((text) => text.toLowerCase().includes($searchString)))
+      : searcher.search($searchString)
+    : icons;
+
+  const searchPrompt = [
+    `Here is the full icon data JSON for brand icons in array below:`,
+    JSON.stringify(icons.map((icon) => ({ title: icon.title, slug: icon.slug, hex: icon.hex, source: icon.source }))),
+    "The 'title' means the company or project names, 'source' means the icon resource URL or company website, 'hex' means the icon color in hex code.",
+    `Please search from the data with the search keyword "${$searchString}". And return at least one icon slug in the format below:`,
+    "(icon slugs only, split with comma, up to 500 items, no markdown format, don't change data structure, no addition text, no spaces, do not return non-exist slugs)",
+  ].join("\n");
+  const execute = enableAiSearch && Boolean(searchString) && hasAccessToAi && filteredIcons.length === 0;
+  const { data, isLoading: aiIsLoading } = useAI(searchPrompt, { execute, model: AI.Model["OpenAI_GPT4o-mini"] });
+  const searchResult = execute ? icons.filter((icon) => data.split(",").includes(icon.slug)) : filteredIcons;
+  return { aiIsLoading, searchResult, setSearchString };
 };

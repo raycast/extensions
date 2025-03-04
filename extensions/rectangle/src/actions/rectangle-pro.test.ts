@@ -84,6 +84,10 @@ test("all rectangle actions are supported when using rectangle pro", () => {
   // these actions are known to be unsupported by rectangle pro
   const knownMissingActions = new Set(["specified", "tile-all", "reverse-all"]);
 
+  // cascade app differs between rectangle / rectangle pro; the "cascade-active-app" action is expected
+  // to be unsupported by rectangle pro as the equivalent supported action would be "cascade-app"
+  knownMissingActions.add("cascade-active-app");
+
   const detectedMissingActions = new Set<string>();
 
   const proActions = new Set<string>(actions);

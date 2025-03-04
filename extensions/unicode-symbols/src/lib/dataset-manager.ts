@@ -3,11 +3,10 @@ import Fuse from "fuse.js";
 
 import { environment } from "@raycast/api";
 
+import { dataSetName, searchResultLimit } from "@/lib/preferences";
 import type { Character, Dataset } from "@/types";
 
-import { searchResultLimit } from "./preferences";
-
-const dataset = JSON.parse(fs.readFileSync(`${environment.assetsPath}/dataset.json`, "utf-8")) as Dataset;
+const dataset = JSON.parse(fs.readFileSync(`${environment.assetsPath}/${dataSetName}.json`, "utf-8")) as Dataset;
 
 // We use Fuse.js (https://fusejs.io/) to speed-up the unicode characters search.
 
@@ -31,12 +30,12 @@ function getExactChar(query: string): Character | null {
   const hex = parseInt(query, 16);
 
   if (!isNaN(dec)) {
-    const character = dataset.characters.find((char) => char.code === dec);
+    const character = dataset.characters.find((char) => char.c === dec);
     if (character) {
       return character;
     }
   } else if (!isNaN(hex)) {
-    const character = dataset.characters.find((char) => char.code === hex);
+    const character = dataset.characters.find((char) => char.c === hex);
     if (character) {
       return character;
     }
@@ -48,19 +47,19 @@ function getExactChar(query: string): Character | null {
     query.startsWith("0x")
   ) {
     const hex = parseInt(query.substring(2), 16);
-    const character = dataset.characters.find((char) => char.code === hex);
+    const character = dataset.characters.find((char) => char.c === hex);
     return character || null;
   }
 
   if (query.length === 1) {
     const charCode = query.charCodeAt(0);
-    const character = dataset.characters.find((char) => char.code === charCode);
+    const character = dataset.characters.find((char) => char.c === charCode);
     if (character) {
       return character;
     }
   }
 
-  const character = dataset.characters.find((char) => char.value === query);
+  const character = dataset.characters.find((char) => char.v === query);
   if (character) {
     return character;
   }
@@ -77,8 +76,8 @@ export function getFilteredDataset(query: string | null, filter: string | null):
   const allCharacters = selectedBlock
     ? dataset.characters.filter(
         (character) =>
-          (selectedBlock.startCode <= character.code && selectedBlock.endCode >= character.code) ||
-          selectedBlock.extra?.includes(character.code),
+          (selectedBlock.startCode <= character.c && selectedBlock.endCode >= character.c) ||
+          selectedBlock.extra?.includes(character.c),
       )
     : dataset.characters;
 
@@ -100,7 +99,8 @@ export function getFilteredDataset(query: string | null, filter: string | null):
   const fuseSearchPattern = splitQuery.map((item) => `'${item}`).join(" ") || "";
 
   const fuse = new Fuse(allCharacters, {
-    keys: ["name", "aliases", "old_name"],
+    // keys: ["name", "aliases", "old_name"],
+    keys: ["n", "s", "o"],
     useExtendedSearch: true,
     includeScore: true,
   });
@@ -111,7 +111,7 @@ export function getFilteredDataset(query: string | null, filter: string | null):
   if (splitQuery.length === 1) {
     const char = getExactChar(splitQuery[0]);
     if (char) {
-      const findItemIndex = characters.findIndex((c) => c.code === char.code);
+      const findItemIndex = characters.findIndex((c) => c.c === char.c);
       if (findItemIndex > -1) {
         // remove the item at findItemIndex from characters
         characters.splice(findItemIndex, 1);

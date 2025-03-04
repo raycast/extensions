@@ -1,5 +1,9 @@
 # Raycast Wallpaper Changelog
 
+## [Remove error dialog] - 2024-09-30
+
+- Remove error dialog that pops up not as expected
+
 ## [Auto Switch Wallpaper command] - 2024-06-12
 
 - Preference for refresh intervals mirroring Apple wallpaper shuffle intervals

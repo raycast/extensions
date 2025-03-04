@@ -1,4 +1,3 @@
-import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { ActionPanel, Detail, Action, Icon, Image, Color } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { format, formatDistanceToNow } from "date-fns";
@@ -124,64 +123,53 @@ export function PageDetail({ page, setRecentPage, users }: PageDetailProps) {
 
 function getMetadata(
   title: string,
-  value: PageProperty | (FormulaPropertyItemObjectResponse["formula"] & { id: string }),
+  property: PageProperty | (Extract<PageProperty, { type: "formula" }>["value"] & { id: string }),
   users?: User[],
 ): JSX.Element | null {
-  switch (value.type) {
-    case "boolean":
-      return (
-        <Detail.Metadata.Label
-          key={value.id}
-          title={title}
-          icon={value.boolean ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
-          text={value.boolean ? "Checked" : "Unchecked"}
-        />
-      );
+  if (property.value === null) return null;
+  switch (property.type) {
     case "checkbox":
       return (
         <Detail.Metadata.Label
-          key={value.id}
+          key={property.id}
           title={title}
-          icon={value.checkbox ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
-          text={value.checkbox ? "Checked" : "Unchecked"}
+          icon={property.value ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
+          text={property.value ? "Checked" : "Unchecked"}
         />
       );
     case "date": {
-      if (!value.date) return null;
-
-      const startDate = new Date(value.date.start);
-      const endDate = value.date.end ? new Date(value.date.end) : undefined;
-
-      let displayedDate = format(startDate, "MMMM dd yyyy");
-
-      if (endDate) {
-        displayedDate += ` → ${format(endDate, "MMMM d, yyyy")}`;
-      }
-
-      return <Detail.Metadata.Label key={value.id} title={title} icon={Icon.Calendar} text={displayedDate} />;
+      if (!property.value) return null;
+      let displayedDate = format(property.value.start, "MMMM dd yyyy");
+      if (property.value.end) displayedDate += ` → ${format(new Date(property.value.end), "MMMM d, yyyy")}`;
+      return <Detail.Metadata.Label key={property.id} title={title} icon={Icon.Calendar} text={displayedDate} />;
     }
     case "email":
-      return value.email ? (
-        <Detail.Metadata.Link key={value.id} title={title} text={value.email} target={`mailto:${value.email}`} />
-      ) : null;
+      return (
+        <Detail.Metadata.Link
+          key={property.id}
+          title={title}
+          text={property.value}
+          target={`mailto:${property.value}`}
+        />
+      );
     case "formula":
-      return value.formula ? getMetadata(title, { id: value.id, ...value.formula }, users) : null;
+      return getMetadata(title, { ...property.value, id: property.id }, users);
     case "multi_select":
-      return value.multi_select.length > 0 ? (
-        <Detail.Metadata.TagList key={value.id} title={title}>
-          {value.multi_select.map((option) => {
+      return property.value.length > 0 ? (
+        <Detail.Metadata.TagList key={property.id} title={title}>
+          {property.value.map((option) => {
             return <Detail.Metadata.TagList.Item key={option.id} text={option.name} color={option.color} />;
           })}
         </Detail.Metadata.TagList>
       ) : (
-        <Detail.Metadata.Label key={value.id} title={title} text="None" />
+        <Detail.Metadata.Label key={property.id} title={title} text="None" />
       );
     case "number":
-      return value.number ? <Detail.Metadata.Label key={value.id} title={title} text={String(value.number)} /> : null;
+      return <Detail.Metadata.Label key={property.id} title={title} text={String(property.value)} />;
     case "people":
-      return value.people.length > 0 ? (
-        <Detail.Metadata.TagList key={value.id} title={title}>
-          {value.people.map((person) => {
+      return property.value.length > 0 ? (
+        <Detail.Metadata.TagList key={property.id} title={title}>
+          {property.value.map((person) => {
             const user = users?.find((u) => u.id === person.id);
             return user ? (
               <Detail.Metadata.TagList.Item
@@ -193,39 +181,29 @@ function getMetadata(
           })}
         </Detail.Metadata.TagList>
       ) : (
-        <Detail.Metadata.Label key={value.id} title={title} text="None" />
+        <Detail.Metadata.Label key={property.id} title={title} text="None" />
       );
     case "phone_number":
-      return value.phone_number ? (
-        <Detail.Metadata.Link
-          key={value.id}
-          title={title}
-          text={value.phone_number}
-          target={`tel:${value.phone_number}`}
-        />
-      ) : null;
+      return (
+        <Detail.Metadata.Link key={property.id} title={title} text={property.value} target={`tel:${property.value}`} />
+      );
     case "rich_text":
-      return value.rich_text.length > 0 ? (
-        <Detail.Metadata.Label key={value.id} title={title} text={value.rich_text[0]?.plain_text} />
+    case "title":
+      return property.value.length > 0 ? (
+        <Detail.Metadata.Label key={property.id} title={title} text={property.value[0]?.plain_text} />
       ) : null;
     case "select":
-      return value.select ? (
-        <Detail.Metadata.TagList key={value.id} title={title}>
-          <Detail.Metadata.TagList.Item color={notionColorToTintColor(value.select.color)} text={value.select.name} />
-        </Detail.Metadata.TagList>
-      ) : null;
     case "status":
-      return value.status ? (
-        <Detail.Metadata.TagList key={value.id} title={title}>
-          <Detail.Metadata.TagList.Item color={notionColorToTintColor(value.status.color)} text={value.status.name} />
+      return (
+        <Detail.Metadata.TagList key={property.id} title={title}>
+          <Detail.Metadata.TagList.Item
+            color={notionColorToTintColor(property.value.color)}
+            text={property.value.name}
+          />
         </Detail.Metadata.TagList>
-      ) : null;
-    case "title":
-      return value.title.length > 0 ? (
-        <Detail.Metadata.Label key={value.id} title={title} text={value.title[0]?.plain_text} />
-      ) : null;
+      );
     case "url":
-      return value.url ? <Detail.Metadata.Link key={value.id} title={title} text={title} target={value.url} /> : null;
+      return <Detail.Metadata.Link key={property.id} title={title} text={title} target={property.value} />;
     default:
       return null;
   }

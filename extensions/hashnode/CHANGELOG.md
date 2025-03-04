@@ -1,5 +1,11 @@
 # Hashnode Changelog
 
+## [Pagination 🚀 + More] - 2024-10-16
+
+- Empty View if no Articles Published
+- Pagination allows you to doom scroll
+- Toggle a `Details` View with Post Brief and Publication Name
+
 ## [Migrate API + Cache + Modernize] - 2024-09-03
 
 - fix: extension not working as it was using deprecated API
