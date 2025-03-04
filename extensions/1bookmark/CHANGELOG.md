@@ -1,6 +1,6 @@
 # 1bookmark Changelog
 
-## [Space Detail View and Official Domain] - {PR_MERGE_DATE}
+## [Space Detail View and Official Domain] - 2025-03-04
 
 - 0.5.0
 - 📱 Space detail view is now available.
