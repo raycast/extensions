@@ -10,6 +10,8 @@ type Values = {
   status: "TODO" | "IN_PROGRESS" | "DONE";
   label: string;
   projectId: string;
+  duration: string;
+  customDuration: string;
 };
 
 // Define the task payload type to match what we're creating
@@ -21,6 +23,7 @@ type TaskPayload = {
   status: "TODO" | "IN_PROGRESS" | "DONE";
   label?: string;
   projectId?: string;
+  duration?: number | "NONE" | "REMINDER";
   autoScheduled?: {
     startDate?: string;
     deadlineType?: "HARD" | "SOFT" | "NONE";
@@ -40,9 +43,16 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(true);
+  const [showCustomDuration, setShowCustomDuration] = useState(false);
+  const [selectedDuration, setSelectedDuration] = useState("30");
 
   // Set default values
   const tomorrow = getTomorrow();
+
+  // Update showCustomDuration when selectedDuration changes
+  useEffect(() => {
+    setShowCustomDuration(selectedDuration === "custom");
+  }, [selectedDuration]);
 
   // Fetch projects when component mounts
   useEffect(() => {
@@ -65,6 +75,11 @@ export default function Command() {
 
     fetchProjects();
   }, []);
+
+  // Handle duration dropdown changes
+  function handleDurationChange(newValue: string) {
+    setSelectedDuration(newValue);
+  }
 
   async function handleSubmit(values: Values) {
     setIsLoading(true);
@@ -89,6 +104,32 @@ export default function Command() {
       // Only add projectId if it has a value
       if (values.projectId) {
         taskPayload.projectId = values.projectId;
+      }
+
+      // Handle duration based on selection
+      if (values.duration === "reminder") {
+        taskPayload.duration = "REMINDER";
+      } else if (values.duration === "none") {
+        taskPayload.duration = "NONE";
+      } else if (values.duration === "15") {
+        taskPayload.duration = 15;
+      } else if (values.duration === "30") {
+        taskPayload.duration = 30;
+      } else if (values.duration === "60") {
+        taskPayload.duration = 60;
+      } else if (values.duration === "custom" && values.customDuration) {
+        const customDuration = parseInt(values.customDuration, 10);
+        if (!isNaN(customDuration) && customDuration > 0) {
+          taskPayload.duration = customDuration;
+        } else {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Invalid duration",
+            message: "Duration must be a positive number",
+          });
+          setIsLoading(false);
+          return;
+        }
       }
 
       // Create the task with the prepared payload
@@ -144,6 +185,28 @@ export default function Command() {
         <Form.Dropdown.Item value="IN_PROGRESS" title="In Progress" />
         <Form.Dropdown.Item value="DONE" title="Done" />
       </Form.Dropdown>
+
+      <Form.Dropdown 
+        id="duration" 
+        title="Duration" 
+        defaultValue="30"
+        onChange={handleDurationChange}
+      >
+        <Form.Dropdown.Item value="reminder" title="Reminder (No time block)" />
+        <Form.Dropdown.Item value="15" title="15 mins" />
+        <Form.Dropdown.Item value="30" title="30 mins" />
+        <Form.Dropdown.Item value="60" title="60 mins" />
+        <Form.Dropdown.Item value="custom" title="Other..." />
+      </Form.Dropdown>
+
+      {showCustomDuration && (
+        <Form.TextField
+          id="customDuration"
+          title="Custom Duration (minutes)"
+          placeholder="Enter duration in minutes"
+          info="Enter a positive number of minutes"
+        />
+      )}
 
       <Form.Dropdown id="label" title="Label">
         <Form.Dropdown.Item value="" title="None" />

@@ -18,6 +18,7 @@ interface MotionTask {
   status?: "TODO" | "IN_PROGRESS" | "DONE";
   label?: string;
   projectId?: string;
+  duration?: number | "NONE" | "REMINDER";
   autoScheduled?: {
     startDate?: string;
     deadlineType?: "HARD" | "SOFT" | "NONE";
@@ -130,6 +131,7 @@ export const getMotionApiClient = () => {
       status?: "TODO" | "IN_PROGRESS" | "DONE";
       label?: string;
       projectId?: string;
+      duration?: number | "NONE" | "REMINDER";
     }): Promise<MotionTask> {
       console.log("[DEBUG] Creating task with input:", JSON.stringify(taskInput, null, 2));
 
@@ -149,6 +151,7 @@ export const getMotionApiClient = () => {
         status: taskData.status,
         workspaceId: correctWorkspaceId, // Use the correct ID
         projectId: taskData.projectId,
+        duration: taskData.duration, // Add duration field
         // Add auto-scheduling by default
         autoScheduled: {
           deadlineType: "SOFT", // Use SOFT deadline by default
