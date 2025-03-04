@@ -9,15 +9,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "list-documents",
-      "title": "List Firestore Documents",
-      "description": "List documents from a Firestore collection",
-      "mode": "view"
-    },
-    {
-      "name": "filter-documents",
-      "title": "Filter Firestore Documents",
-      "description": "Filter documents based on field values",
+      "name": "firestore-documents",
+      "title": "Manage Firestore Documents",
+      "description": "List and filter documents from Firestore collections",
       "mode": "view"
     },
     {
