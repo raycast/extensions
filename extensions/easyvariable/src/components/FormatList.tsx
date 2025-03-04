@@ -42,7 +42,13 @@ export function FormatList({ text }: FormatListProps) {
                   title="Paste"
                   icon={Icon.TextInput}
                   shortcut={{ key: String(index + 1) as Keyboard.KeyEquivalent, modifiers: ["cmd"] }}
-                  onAction={async () => await Clipboard.paste(format.format(text))}
+                  onAction={async () => {
+                    try {
+                      await Clipboard.paste(format.format(text));
+                    } catch (error) {
+                      await showFailureToast("Failed to paste", error);
+                    }
+                  }}
                 />
                 <Action
                   title="Copy to Clipboard"
