@@ -171,7 +171,7 @@ export default function History() {
     try {
       return getHistory();
     } catch (error) {
-      console.error('Failed to load history:', error);
+      console.error("Failed to load history:", error);
       return [];
     }
   });
