@@ -108,7 +108,7 @@ export default function TrackDeliveriesCommand() {
                   icon={Icon.Trash}
                   shortcut={Keyboard.Shortcut.Common.Remove}
                   style={Action.Style.Destructive}
-                  onAction={() => deleteTracking(delivery.id, deliveries, setDeliveries)}
+                  onAction={() => deleteTracking(delivery.id, deliveries, setDeliveries, setPackages)}
                 />
                 <TrackNewDeliveryAction deliveries={deliveries} setDeliveries={setDeliveries} isLoading={isLoading} />
                 <Action
@@ -191,18 +191,19 @@ async function refreshTracking(
 
 async function deleteTracking(
   id: string,
-  tracking: Delivery[] | undefined,
-  setTracking: (value: Delivery[]) => Promise<void>,
+  deliveries: Delivery[] | undefined,
+  setDeliveries: (value: Delivery[]) => Promise<void>,
+  setPackages: (value: ((prevState: PackageMap) => PackageMap) | PackageMap) => void,
 ) {
-  if (!tracking) {
+  if (!deliveries) {
     return;
   }
 
-  const nameOfTrackToDelete = tracking.find((track) => track.id === id)?.name ?? "Unknown";
+  const nameOfDeliveryToDelete = deliveries.find((delivery) => delivery.id === id)?.name ?? "Unknown";
 
   const options: Alert.Options = {
     title: "Delete Delivery",
-    message: `Are you sure you want to delete ${nameOfTrackToDelete}?`,
+    message: `Are you sure you want to delete ${nameOfDeliveryToDelete}?`,
     icon: Icon.Trash,
     primaryAction: {
       title: "Delete",
@@ -215,13 +216,17 @@ async function deleteTracking(
     return;
   }
 
-  const reducedTracking = tracking.filter((track) => track.id !== id);
-  await setTracking(reducedTracking);
+  const reducedDeliveries = deliveries.filter((delivery) => delivery.id !== id);
+  await setDeliveries(reducedDeliveries);
+  setPackages((packages) => {
+    delete packages[id];
+    return packages;
+  });
 
   await showToast({
     style: Toast.Style.Success,
     title: "Deleted Delivery",
-    message: nameOfTrackToDelete,
+    message: nameOfDeliveryToDelete,
   });
 }
 
