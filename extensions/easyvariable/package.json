@@ -22,6 +22,14 @@
     },
     {
       "type": "checkbox",
+      "description": "Use Raycast Pro AI for translation",
+      "required": false,
+      "name": "enableRaycastTranslate",
+      "default": false,
+      "label": "Raycast AI"
+    },
+    {
+      "type": "checkbox",
       "description": "Enable Youdao Web Translate",
       "required": false,
       "name": "enableYoudaoTranslate",
