@@ -36,6 +36,13 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "download-video",
+      "title": "Download Video",
+      "description": "Downloads a video from a given URL"
+    }
+  ],
   "preferences": [
     {
       "name": "downloadPath",
