@@ -32,7 +32,7 @@ import Onboard from "./components/onboarding/Onboard";
 import { isThreadViewPost, PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import { ViewImage } from "@atproto/api/dist/client/types/app/bsky/embed/images";
 import { showDangerToast } from "./utils/common";
-import { showFailureToast, useCachedState } from "@raycast/utils";
+import { useCachedState } from "@raycast/utils";
 import useStartATSession from "./hooks/useStartATSession";
 import { AppBskyEmbedImages } from "@atproto/api";
 
@@ -89,7 +89,11 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
         try {
           notificationCount = await getUnreadNotificationCount();
         } catch (error) {
-          // await showFailureToast(error, {title: "Unknown Error"})
+          // This try...catch is to account for following case:
+          // When user runs extension and session is expiring or expired, ERROR on next line is thrown
+          // `initialRes.body?.cancel is not a function`
+          
+          // We swallow the exceptioo
         }
         let notificationMessage = "";
         if (notificationCount > 1) {
@@ -229,7 +233,7 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
     />
   ) : (
     <List
-      isLoading={notifications.length === 0}
+      isLoading={!notificationsLoaded}
       isShowingDetail={showDetails}
       onSelectionChange={onSelectionChange}
       navigationTitle={notificationsLoaded ? notificationText : ViewNotificationsNavigationTitle}
