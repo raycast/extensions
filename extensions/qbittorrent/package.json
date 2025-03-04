@@ -4,9 +4,12 @@
   "title": "QBitorrent",
   "description": "a qBitorrent client",
   "icon": "qbittorrent.png",
-  "author": "J3n5en",
+  "author": "pernielsentikaer",
   "contributors": [
     "timmevandermeer"
+  ],
+  "pastContributors": [
+    "J3n5en"
   ],
   "license": "MIT",
   "commands": [
