@@ -1,5 +1,5 @@
 import { expect, test, describe } from "vitest";
-import { fileValidation } from "./file-validation";
+import { fileValidation } from "./index";
 
 const ERRORS = {
   fileType: "Invalid file type.",

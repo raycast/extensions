@@ -4,10 +4,12 @@ import { compare } from "../../utils/pixelmatch";
 import { fileValidation } from "./file-validation";
 import { Jimp } from "jimp";
 import { showToast, Toast } from "@raycast/api";
+import { thresholdValidation } from "./threshold-validation";
 
 interface ImagesFormValues {
   actual: string[];
   expected: string[];
+  threshold: string;
 }
 
 export const useImagesForm = () => {
@@ -20,8 +22,8 @@ export const useImagesForm = () => {
     setMarkdown(`![](${base64Image})`);
   };
 
-  const createDiffImage = async (values: { actual: string[]; expected: string[] }) => {
-    const diffImageSource = await compare(values.actual[0], values.expected[0]);
+  const createDiffImage = async (values: { actual: string[]; expected: string[]; threshold: string }) => {
+    const diffImageSource = await compare(values.actual[0], values.expected[0], values.threshold);
     createMarkdown(diffImageSource);
   };
 
@@ -44,6 +46,7 @@ export const useImagesForm = () => {
     validation: {
       actual: fileValidation,
       expected: fileValidation,
+      threshold: thresholdValidation,
     },
   });
 
