@@ -9,10 +9,10 @@ type Input = {
 
 /**
  * This command allows you to get the status of a the PIP (Picture in Picture)
- * feature of adisplay you have a tagID for.
+ * feature of a display you have a tagID for.
  * The status can be either "on" or "off".
  */
-export default function tool(input: Input) {
-  const status = fetchPipStatus(input.tagID);
+export default async function getPipStatus(input: Input) {
+  const status = await fetchPipStatus(input.tagID);
   return status;
 }

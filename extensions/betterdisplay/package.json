@@ -32,62 +32,62 @@
     {
       "name": "get-display-status",
       "title": "Get Display Status",
-      "description": "Get the status of a display using it's tagID"
+      "description": "Get the status of a display using its tagID"
     },
     {
       "name": "toggle-display-status",
       "title": "Toggle Display Status",
-      "description": "Change the status of a display using it's tagID"
+      "description": "Change the status of a display using its tagID"
     },
     {
       "name": "increase-brightness",
       "title": "Increase Brightness",
-      "description": "Increase the brightness of a display using it's tagID"
+      "description": "Increase the brightness of a display using its tagID"
     },
     {
       "name": "decrease-brightness",
       "title": "Decrease Brightness",
-      "description": "Decrease the brightness of a display using it's tagID"
+      "description": "Decrease the brightness of a display using its tagID"
     },
     {
       "name": "set-brightness",
-      "title": "Set Brigthness",
-      "description": "Set the brightness of a display using it's tagID and a numeric value between 0 and 1"
+      "title": "Set Brightness",
+      "description": "Set the brightness of a display using its tagID and a numeric value between 0 and 1"
     },
     {
       "name": "increase-contrast",
       "title": "Increase Contrast",
-      "description": "Increase the contrast of a display using it's tagID"
+      "description": "Increase the contrast of a display using its tagID"
     },
     {
       "name": "decrease-contrast",
       "title": "Decrease Contrast",
-      "description": "Decrease the contrast of a display using it's tagID"
+      "description": "Decrease the contrast of a display using its tagID"
     },
     {
       "name": "set-contrast",
       "title": "Set Contrast",
-      "description": "Set the contrast of a display using it's tagID and a numeric value between 0 and 1"
+      "description": "Set the contrast of a display using its tagID and a numeric value between 0 and 1"
     },
     {
       "name": "get-resolutions",
       "title": "Get Resolutions",
-      "description": "Get a list of all resolutions supported by a display using it's tagID"
+      "description": "Get a list of all resolutions supported by a display using its tagID"
     },
     {
       "name": "set-resolution",
       "title": "Set Resolution",
-      "description": "Set the resolution"
+      "description": "Set the resolution of a display using its tagID and resolution index"
     },
     {
       "name": "get-pip-status",
       "title": "Get PIP Status",
-      "description": "Get the PIP (Picture in Picture) status for a display using it's tagID"
+      "description": "Get the PIP (Picture in Picture) status for a display using its tagID"
     },
     {
       "name": "toggle-pip-status",
       "title": "Toggle the PIP Status",
-      "description": "Change the PIP (Picture in Picture) status for a display using it's tagID"
+      "description": "Change the PIP (Picture in Picture) status for a display using its tagID"
     }
       ],
   "preferences": [
@@ -160,6 +160,7 @@
         "input" : "@betterdisplay What is the current resolution of my display?",
         "mocks" : {
           "get-displays" : "{\n  \"UUID\" : \"37D8832A-2D66-02CA-B9F7-8F30A301B230\",\n  \"alphanumericSerial\" : \"\",\n  \"deviceType\" : \"Display\",\n  \"displayID\" : \"1\",\n  \"model\" : \"41042\",\n  \"name\" : \"Écran intégré\",\n  \"originalName\" : \"Color LCD\",\n  \"productName\" : \"Color LCD\",\n  \"registryLocation\" : \"IOService:\\/AppleARMPE\\/arm-io@10F00000\\/AppleT811xIO\\/disp0@30000000\\/AppleCLCD2\",\n  \"serial\" : \"4251086178\",\n  \"tagID\" : \"3\",\n  \"vendor\" : \"1552\",\n  \"weekOfManufacture\" : \"0\",\n  \"yearOfManufacture\" : \"0\"\n},{\n  \"UUID\" : \"UNKNOWN\",\n  \"deviceType\" : \"VirtualScreen\",\n  \"displayID\" : \"0\",\n  \"model\" : \"51448\",\n  \"name\" : \"Virtuel 16:9\",\n  \"originalName\" : \"Virtuel 16:9\",\n  \"productName\" : \"Virtuel 16:9\",\n  \"serial\" : \"461953693\",\n  \"tagID\" : \"29\",\n  \"vendor\" : \"2198\"\n},{\n  \"UUID\" : \"UNKNOWN\",\n  \"deviceType\" : \"VirtualScreen\",\n  \"displayID\" : \"0\",\n  \"model\" : \"18063\",\n  \"name\" : \"Virtuel 16:10\",\n  \"originalName\" : \"Virtuel 16:10\",\n  \"productName\" : \"Virtuel 16:10\",\n  \"serial\" : \"1821401327\",\n  \"tagID\" : \"64\",\n  \"vendor\" : \"2198\"\n}\n",
+          "get-display-status": "on",
           "get-resolutions" : "0 - 960x600 HiDPI 60Hz 10bpc \n1 - 1024x640 HiDPI 60Hz 10bpc \n2 - 1024x666 HiDPI 60Hz 10bpc \n3 - 1280x800 HiDPI 60Hz 10bpc \n4 - 1280x832 HiDPI 60Hz 10bpc Native \n5 - 1470x918 HiDPI 60Hz 10bpc \n6 - 1470x956 HiDPI 60Hz 10bpc Default \n7 - 1710x1068 HiDPI 60Hz 10bpc \n8 - 1710x1112 HiDPI 60Hz 10bpc Current \n9 - 1920x1200 60Hz 10bpc \n10 - 2048x1280 60Hz 10bpc \n11 - 2048x1332 60Hz 10bpc \n12 - 2560x1600 60Hz 10bpc \n13 - 2560x1664 60Hz 10bpc Native"
         },
         "expected" : [

@@ -20,13 +20,17 @@ type Input = {
  * If the command returns 'false' inform the user that the display does
  * not support brightness changes.
  */
-export default function tool(input: Input) {
-  if (!availabilityBrightness(input.tagID)) {
+export default async function toolIncreaseBrightness(input: Input) {
+  if (!(await availabilityBrightness(input.tagID))) {
     return false;
   }
 
   const increment =
     typeof input.increment === "number" && input.increment >= 0 && input.increment <= 1 ? input.increment : undefined;
 
-  return increaseBrightness(input.tagID, increment);
+  try {
+    return await increaseBrightness(input.tagID, increment);
+  } catch (error) {
+    return false;
+  }
 }

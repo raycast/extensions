@@ -7,7 +7,7 @@ import { fetchDisplays } from "../commands";
  * which is a VirtualScreen using the `deviceType` property.
  * Present the options in the form of a markdown table.
  */
-export default function getDisplays() {
-  const displays = fetchDisplays();
+export default async function getDisplays() {
+  const displays = await fetchDisplays();
   return displays;
 }

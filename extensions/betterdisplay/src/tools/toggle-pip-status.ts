@@ -8,11 +8,11 @@ type Input = {
 };
 
 /**
- * This command allows you to toggle (change fron on to off or vice versa) the PIP status.
+ * This command allows you to toggle (change from on to off or vice versa) the PIP status.
  * Do not attempt to toggle the PIP status if the display is not turned on.
  * Instead inform the user that the command is not available.
  */
-export default function tool(input: Input) {
-  const status = togglePIP(input.tagID);
+export default async function toolTogglePIP(input: Input) {
+  const status = await togglePIP(input.tagID);
   return status;
 }

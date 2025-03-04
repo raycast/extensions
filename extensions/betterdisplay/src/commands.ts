@@ -112,9 +112,18 @@ export async function increaseBrightness(tagID: string, brightnessIncrement?: nu
   const getCmd = `${cmdPath} get -tagID=${tagID} -feature=brightness`;
   const currStr = await runCommand(getCmd, `Error getting current brightness for tagID ${tagID}`);
   const currentValue = parseFloat(currStr);
+  if (isNaN(currentValue)) {
+    console.error(`Failed to set brightness for tagID ${tagID}, the current value is not a number`);
+    return "";
+  }
   const newValue = Math.min(1, currentValue + brightnessIncrement);
   const setCmd = `${cmdPath} set -tagID=${tagID} -feature=brightness -value=${newValue}`;
-  return runCommand(setCmd, `Error setting brightness for tagID ${tagID}`);
+  try {
+    return runCommand(setCmd, `Error setting brightness for tagID ${tagID}`);
+  } catch (error) {
+    console.error(`Failed to set brightness for tagID ${tagID}`, error);
+    return "";
+  }
 }
 
 export async function decreaseBrightness(tagID: string, brightnessIncrement?: number): Promise<string> {
@@ -127,13 +136,17 @@ export async function decreaseBrightness(tagID: string, brightnessIncrement?: nu
   const currentValue = parseFloat(currStr);
   const newValue = Math.max(0, currentValue - brightnessIncrement);
   const setCmd = `${cmdPath} set -tagID=${tagID} -feature=brightness -value=${newValue}`;
-  return runCommand(setCmd, `Error setting brightness for tagID ${tagID}`);
+  try {
+    return runCommand(setCmd, `Error setting brightness for tagID ${tagID}`);
+  } catch (error) {
+    return "";
+  }
 }
 
 export async function setContrast(tagID: string, contrastIntensity?: number): Promise<string> {
   try {
     const setCmd = `${cmdPath} set -tagID=${tagID} -feature=contrast -value=${contrastIntensity}`;
-    return runCommand(setCmd, `Error setting brightness for tagID ${tagID}`);
+    return runCommand(setCmd, `Error setting contrast for tagID ${tagID}`);
   } catch (error) {
     console.error(`Failed to set contrast for tagID ${tagID}`, error);
     return "";
@@ -150,7 +163,11 @@ export async function increaseContrast(tagID: string, contrastIncrement?: number
   const currentValue = parseFloat(currStr);
   const newValue = Math.min(0.9, currentValue + contrastIncrement);
   const setCmd = `${cmdPath} set -tagID=${tagID} -feature=contrast -value=${newValue}`;
-  return runCommand(setCmd, `Error setting contrast for tagID ${tagID}`);
+  try {
+    return runCommand(setCmd, `Error setting contrast for tagID ${tagID}`);
+  } catch (error) {
+    return "";
+  }
 }
 
 export async function decreaseContrast(tagID: string, contrastIncrement?: number): Promise<string> {
@@ -163,7 +180,11 @@ export async function decreaseContrast(tagID: string, contrastIncrement?: number
   const currentValue = parseFloat(currStr);
   const newValue = Math.max(-0.9, currentValue - contrastIncrement);
   const setCmd = `${cmdPath} set -tagID=${tagID} -feature=contrast -value=${newValue}`;
-  return runCommand(setCmd, `Error setting contrast for tagID ${tagID}`);
+  try {
+    return runCommand(setCmd, `Error setting contrast for tagID ${tagID}`);
+  } catch (error) {
+    return "";
+  }
 }
 
 export async function fetchDisplays(): Promise<string> {
@@ -195,14 +216,19 @@ export async function fetchDisplayResolution(tagID: string): Promise<string> {
     return stdout.trim();
   } catch (error) {
     console.error(`Failed to fetch display resolution for tagID ${tagID}`, error);
-    return "N/A";
+    return "";
   }
 }
 
 export async function fetchMainDisplay(): Promise<Display | null> {
   try {
     const { stdout } = await execPromise(`${cmdPath} get -identifiers -displayWithMainStatus`);
-    return JSON.parse(stdout.trim());
+    try {
+      return JSON.parse(stdout.trim());
+    } catch (parseError) {
+      console.error("Failed to parse display data as JSON", parseError);
+      return null;
+    }
   } catch (error) {
     console.error("Failed to fetch main display", error);
     return null;

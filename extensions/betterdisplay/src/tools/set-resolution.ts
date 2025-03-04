@@ -9,11 +9,6 @@ type Input = {
   tagID: string;
 
   /**
-   * The resolution info retrieved with the get-resolutions tool.
-   */
-  resolutionData: string;
-
-  /**
    * The resolution ID to set.
    */
   resolutionID: string;
@@ -29,6 +24,6 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const option = options.find((option) => option.modeNumber === input.resolutionID);
 
   return {
-    message: `Are you sure you want to set the resolution to ${option?.resolution}?`,
+    message: `Are you sure you want to set the resolution to ${option?.resolution ?? "unknown resolution"}?`,
   };
 };

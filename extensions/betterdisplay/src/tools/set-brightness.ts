@@ -19,12 +19,12 @@ type Input = {
  * If the command returns 'false' inform the user that the display does
  * not support brightness changes.
  */
-export default function tool(input: Input) {
+export default async function toolSetBrightness(input: Input) {
   if (!availabilityBrightness(input.tagID)) {
     return false;
   }
 
   const intensity = Math.max(0, Math.min(Number(input.intensity), 1));
 
-  return setBrightness(input.tagID, intensity);
+  return await setBrightness(input.tagID, intensity);
 }

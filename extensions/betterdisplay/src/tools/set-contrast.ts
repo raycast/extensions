@@ -21,12 +21,12 @@ type Input = {
  * If the command returns 'false' inform the user that the display does
  * not support contrast changes.
  */
-export default function tool(input: Input) {
+export default async function toolSetContrast(input: Input) {
   if (!availabilityContrast(input.tagID)) {
     return false;
   }
 
   const intensity = Math.max(-0.9, Math.min(Number(input.intensity), 0.9));
 
-  return setContrast(input.tagID, intensity);
+  return await setContrast(input.tagID, intensity);
 }

@@ -20,13 +20,17 @@ type Input = {
  * If the command returns 'false' inform the user that the display does
  * not support contrast changes.
  */
-export default function tool(input: Input) {
-  if (!availabilityContrast(input.tagID)) {
+export default async function toolIncreaseContrast(input: Input) {
+  if (!(await availabilityContrast(input.tagID))) {
     return false;
   }
 
   const increment =
     typeof input.increment === "number" && input.increment >= 0 && input.increment <= 1 ? input.increment : undefined;
 
-  return increaseContrast(input.tagID, increment);
+  try {
+    return await increaseContrast(input.tagID, increment);
+  } catch (error) {
+    return false;
+  }
 }

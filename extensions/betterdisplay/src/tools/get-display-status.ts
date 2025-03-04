@@ -11,7 +11,7 @@ type Input = {
  * This command allows you to get the status of a display you have a tagID for.
  * The status can be either "on" or "off".
  */
-export default function tool(input: Input) {
-  const status = fetchDisplayStatus(input.tagID);
+export default async function getDisplayStatus(input: Input) {
+  const status = await fetchDisplayStatus(input.tagID);
   return status;
 }

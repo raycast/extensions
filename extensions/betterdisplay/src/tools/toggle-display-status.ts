@@ -8,11 +8,11 @@ type Input = {
 };
 
 /**
- * This command allows you to toggle (change fron on to off or vice versa) the display status.
+ * This command allows you to toggle (change from on to off or vice versa) the display status.
  * Do not attempt to toggle the display status if there is only one physical display, that command
  * will fail. Instead inform the user that the command is not available.
  */
-export default function tool(input: Input) {
-  const status = toggleDisplay(input.tagID);
+export default async function toolToggleDisplay(input: Input) {
+  const status = await toggleDisplay(input.tagID);
   return status;
 }
