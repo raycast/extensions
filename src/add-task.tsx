@@ -186,12 +186,7 @@ export default function Command() {
         <Form.Dropdown.Item value="DONE" title="Done" />
       </Form.Dropdown>
 
-      <Form.Dropdown 
-        id="duration" 
-        title="Duration" 
-        defaultValue="30"
-        onChange={handleDurationChange}
-      >
+      <Form.Dropdown id="duration" title="Duration" defaultValue="30" onChange={handleDurationChange}>
         <Form.Dropdown.Item value="reminder" title="Reminder (No time block)" />
         <Form.Dropdown.Item value="15" title="15 mins" />
         <Form.Dropdown.Item value="30" title="30 mins" />
