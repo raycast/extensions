@@ -4,7 +4,7 @@ import { GitHubContent, Item } from "./types";
 
 // Constants
 export const CACHE_KEY = "ccfddl-conference-data";
-cache.set(CACHE_KEY, JSON.stringify(allItems), { expiresIn: CACHE_TTL });
+export const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
 export const cache = new Cache();
 
 // Modified to take a manual refresh parameter and callbacks
@@ -81,7 +81,7 @@ export async function fetchFromGitHub(
       }
     });
 
-    // Store in cache with expiration
+    // Store in cache
     cache.set(CACHE_KEY, JSON.stringify(allItems));
 
     console.log(`Loaded ${allItems.length} conferences from GitHub and cached`);
