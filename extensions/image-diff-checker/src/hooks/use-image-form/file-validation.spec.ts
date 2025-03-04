@@ -34,4 +34,8 @@ describe("required", () => {
   test("should return required error for empty array", () => {
     expect(fileValidation([])).toBe(ERRORS.required);
   });
+
+  test("should return required error for undefined", () => {
+    expect(fileValidation(undefined)).toBe(ERRORS.required);
+  });
 });
