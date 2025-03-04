@@ -13,8 +13,9 @@ import {
 } from "@raycast/api";
 import { FormValidation, getFavicon, showFailureToast, useForm } from "@raycast/utils";
 import { ConferenceProviderActions, useConferenceProviders } from "./conferencing";
-import { useGoogleAPIs, withGoogleAPIs } from "./google";
+import { useCalendar, useGoogleAPIs, withGoogleAPIs } from "./google";
 import { addSignature, roundUpTime } from "./utils";
+import { calendar_v3 } from "@googleapis/calendar";
 
 type FormValues = {
   title: string;
@@ -30,6 +31,7 @@ const preferences: Preferences.CreateEvent = getPreferenceValues();
 function Command(props: LaunchProps<{ launchContext: FormValues }>) {
   const { calendar } = useGoogleAPIs();
   const [conferencingProviders] = useConferenceProviders();
+  const { data: calendarData, isLoading } = useCalendar("primary");
   const { focus, handleSubmit, itemProps, reset } = useForm<FormValues>({
     initialValues: {
       title: props.launchContext?.title ?? "",
@@ -46,7 +48,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
       await showToast({ style: Toast.Style.Animated, title: "Creating event" });
 
       const startDate = values.startDate ?? new Date();
-      const requestBody = {
+      const requestBody: calendar_v3.Schema$Event = {
         summary: values.title,
         description: addSignature(values.description),
         start: {
@@ -56,11 +58,29 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
           dateTime: new Date(startDate.getTime() + parseInt(values.duration) * 60 * 1000).toISOString(),
         },
         attendees: values.attendees ? values.attendees.split(",").map((email) => ({ email })) : undefined,
-        location: values.conferencingProvider,
+        location:
+          values.conferencingProvider === "none" || values.conferencingProvider === "hangoutsMeet"
+            ? undefined
+            : values.conferencingProvider,
+        conferenceData:
+          values.conferencingProvider === "hangoutsMeet"
+            ? {
+                createRequest: {
+                  conferenceSolutionKey: {
+                    type: "hangoutsMeet",
+                  },
+                  requestId: values.conferencingProvider,
+                },
+              }
+            : undefined,
       };
 
       try {
-        const event = await calendar.events.insert({ calendarId: "primary", requestBody });
+        const event = await calendar.events.insert({
+          calendarId: "primary",
+          requestBody,
+          conferenceDataVersion: values.conferencingProvider === "hangoutsMeet" ? 1 : undefined,
+        });
 
         focus("title");
         reset();
@@ -103,6 +123,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Calendar} title="Create Event" onSubmit={handleSubmit} />
@@ -137,20 +158,50 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         info={conferencingProviders.length === 0 ? 'Press "⌘ + N" to create a conference provider' : undefined}
         {...itemProps.conferencingProvider}
       >
-        {conferencingProviders.map((provider) => (
-          <Form.Dropdown.Item
-            key={`${provider.name}-${provider.link}`}
-            icon={getFavicon(provider.link)}
-            title={provider.name}
-            value={provider.link}
-          />
-        ))}
+        <Form.Dropdown.Section>
+          <Form.Dropdown.Item icon={Icon.CircleDisabled} title="None" value="none" />
+          {calendarData?.data.conferenceProperties?.allowedConferenceSolutionTypes?.map((type) => (
+            <Form.Dropdown.Item
+              key={type}
+              icon={getConferenceSolutionIcon(type)}
+              title={getConferenceSolutionTitle(type)}
+              value={type}
+            />
+          ))}
+        </Form.Dropdown.Section>
+        <Form.Dropdown.Section title="Custom">
+          {conferencingProviders.map((provider) => (
+            <Form.Dropdown.Item
+              key={`${provider.name}-${provider.link}`}
+              icon={getFavicon(provider.link)}
+              title={provider.name}
+              value={provider.link}
+            />
+          ))}
+        </Form.Dropdown.Section>
       </Form.Dropdown>
       <Form.TextArea title="Description" placeholder="Event description..." {...itemProps.description} />
     </Form>
   );
 }
 
+function getConferenceSolutionTitle(type: string) {
+  switch (type) {
+    case "hangoutsMeet":
+      return "Google Meet";
+    default:
+      return type;
+  }
+}
+
+function getConferenceSolutionIcon(type: string) {
+  switch (type) {
+    case "hangoutsMeet":
+      return "meet.png";
+    default:
+      return Icon.Circle;
+  }
+}
 export async function launchCreateEventCommand(context?: FormValues) {
   await launchCommand({ name: "create-event", type: LaunchType.UserInitiated, context });
 }

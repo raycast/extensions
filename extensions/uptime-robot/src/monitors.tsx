@@ -9,12 +9,26 @@ import {
   MONITOR_INTERVALS,
   MONITOR_TYPES,
 } from "./config";
-import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Form,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { ErrorResponse, Monitor, NewMonitor } from "./types";
 import { useEffect, useState } from "react";
 import useUptimeRobot from "./lib/hooks/use-uptime-robot";
 import unixToDate from "./lib/utils/unix-to-date";
 import { hasDayPassed } from "./lib/utils/has-day-passed";
+import { deleteMonitor } from "./lib/api";
 
 type Pagination = {
   offset: number;
@@ -38,6 +52,7 @@ export default function Monitors() {
     isLoading,
     pagination,
     data: monitors,
+    mutate,
   } = useFetch(
     (options) =>
       API_URL +
@@ -80,6 +95,39 @@ export default function Monitors() {
     else setExecute(false);
   }, [isLoadingLocal]);
 
+  async function confirmAndDeleteMonitor(monitor: Monitor) {
+    const options: Alert.Options = {
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+      title: "Are you sure?",
+      message: `Do you really want to delete ${monitor.friendly_name}? This can't be undone.`,
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+      },
+    };
+    if (await confirmAlert(options)) {
+      const toast = await showToast(Toast.Style.Animated, "Deleting monitor", monitor.friendly_name);
+      try {
+        await mutate(deleteMonitor(monitor.id), {
+          optimisticUpdate(data) {
+            return data.filter((m) => m.id !== monitor.id);
+          },
+          shouldRevalidateAfter: false,
+        });
+        await setMonitors({
+          monitors: monitors.filter((m) => m.id !== monitor.id),
+          updated_at: new Date(),
+        });
+        toast.style = Toast.Style.Success;
+        toast.title = "Deleted monitor";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.message = `${error}`;
+        toast.title = "Could not delete";
+      }
+    }
+  }
+
   return (
     <List isLoading={isLoading} pagination={pagination}>
       {(value?.monitors ?? monitors).map((monitor) => (
@@ -88,8 +136,11 @@ export default function Monitors() {
           title={monitor.friendly_name}
           icon={MONITOR_ICONS[monitor.status]}
           accessories={[
-            { icon: Icon.Redo },
-            { text: `${monitor.interval / 60} min` },
+            {
+              icon: Icon.Redo,
+              text: `${MONITOR_INTERVALS[monitor.interval]}`,
+              tooltip: `Checked every ${MONITOR_INTERVALS[monitor.interval]}`,
+            },
             { date: unixToDate(monitor.create_datetime) },
           ]}
           actions={
@@ -99,6 +150,19 @@ export default function Monitors() {
                 icon={Icon.Plus}
                 title="Add New Monitor"
                 target={<AddNewMonitor onMonitorAdded={() => setExecute((prev) => !prev)} />}
+              />
+              <Action.OpenInBrowser
+                icon="up.png"
+                title="Open in Dashboard"
+                url={`https://dashboard.uptimerobot.com/monitors/${monitor.id}`}
+                shortcut={Keyboard.Shortcut.Common.Open}
+              />
+              <Action
+                icon={Icon.Trash}
+                title="Delete Monitor"
+                onAction={() => confirmAndDeleteMonitor(monitor)}
+                style={Action.Style.Destructive}
+                shortcut={Keyboard.Shortcut.Common.Remove}
               />
             </ActionPanel>
           }
