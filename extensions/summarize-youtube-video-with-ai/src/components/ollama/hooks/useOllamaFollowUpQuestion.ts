@@ -1,6 +1,7 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import OpenAI from "openai";
 import { useEffect } from "react";
+import { OLLAMA_MODEL } from "../../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
 import { Question } from "../../../hooks/useQuestions";
 import { OllamaPreferences } from "../../../summarizeVideoWithOllama";
@@ -15,13 +16,15 @@ type FollowUpQuestionParams = {
 };
 
 export function useOllamaFollowUpQuestion({ setQuestions, setQuestion, transcript, question }: FollowUpQuestionParams) {
+  const preferences = getPreferenceValues() as OllamaPreferences;
+  const { ollamaEndpoint, ollamaModel, creativity } = preferences;
+
   useEffect(() => {
+    const abortController = new AbortController();
+
     const handleAdditionalQuestion = async () => {
       if (!question || !transcript) return;
       const qID = generateQuestionId();
-
-      const preferences = getPreferenceValues() as OllamaPreferences;
-      const { ollamaEndpoint, ollamaModel } = preferences;
 
       const toast = await showToast({
         style: Toast.Style.Animated,
@@ -43,32 +46,42 @@ export function useOllamaFollowUpQuestion({ setQuestions, setQuestion, transcrip
         ...prevQuestions,
       ]);
 
-      try {
-        const stream = openai.chat.completions.create({
-          model: ollamaModel || "llama2",
+      const answer = openai.beta.chat.completions.stream(
+        {
+          model: ollamaModel || OLLAMA_MODEL,
           messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
           stream: true,
-        });
+          creativity: parseInt(creativity),
+        },
+        { signal: abortController.signal },
+      );
 
-        for await (const chunk of await stream) {
-          const delta = chunk.choices[0]?.delta?.content || "";
-          if (delta) {
-            toast.show();
-            setQuestions((prevQuestions) =>
-              prevQuestions.map((q) => (q.id === qID ? { ...q, answer: q.answer + delta } : q)),
-            );
-          }
-        }
+      answer.on("content", (delta) => {
+        toast.show();
+        setQuestions((prevQuestions) =>
+          prevQuestions.map((q) => (q.id === qID ? { ...q, answer: q.answer + delta } : q)),
+        );
+      });
 
+      answer.finalChatCompletion().then(() => {
         toast.hide();
         setQuestion("");
-      } catch (error) {
+      });
+
+      if (abortController.signal.aborted) return;
+
+      answer.on("error", (error) => {
+        if (abortController.signal.aborted) return;
         toast.style = Toast.Style.Failure;
         toast.title = ALERT.title;
-        toast.message = error instanceof Error ? error.message : "An unknown error occurred";
-      }
+        toast.message = error.message;
+      });
     };
 
     handleAdditionalQuestion();
+
+    return () => {
+      abortController.abort();
+    };
   }, [question, transcript]);
 }

@@ -13,6 +13,7 @@ type GetOllamaSummaryProps = {
 };
 
 export const useOllamaSummary = ({ transcript, setSummaryIsLoading, setSummary }: GetOllamaSummaryProps) => {
+  const abortController = new AbortController();
   const preferences = getPreferenceValues() as OllamaPreferences;
   const { creativity, language, ollamaEndpoint, ollamaModel } = preferences;
 
@@ -34,39 +35,41 @@ export const useOllamaSummary = ({ transcript, setSummaryIsLoading, setSummary }
       message: SUMMARIZING_VIDEO.message,
     });
 
-    const stream = openai.chat.completions.create({
+    const stream = openai.beta.chat.completions.stream({
       model: ollamaModel || OLLAMA_MODEL,
       temperature: parseFloat(creativity),
       messages: [{ role: "user", content: aiInstructions }],
       stream: true,
     });
 
-    let content = "";
-
-    stream
-      .then(async (response) => {
-        for await (const chunk of response) {
-          const delta = chunk.choices[0]?.delta?.content || "";
-          if (delta) {
-            content += delta;
-            setSummary(content);
-          }
-        }
-
-        setSummaryIsLoading(false);
-        showToast({
-          style: Toast.Style.Success,
-          title: SUCCESS_SUMMARIZING_VIDEO.title,
-          message: SUCCESS_SUMMARIZING_VIDEO.message,
-        });
-      })
-      .catch((error) => {
-        setSummaryIsLoading(false);
-        showToast({
-          style: Toast.Style.Failure,
-          title: ALERT.title,
-          message: error.message,
-        });
+    stream.on("content", (delta) => {
+      setSummary((result) => {
+        if (result === undefined) return delta || undefined;
+        return result + delta || result;
       });
+    });
+
+    stream.finalChatCompletion().then(() => {
+      setSummaryIsLoading(false);
+      showToast({
+        style: Toast.Style.Success,
+        title: SUCCESS_SUMMARIZING_VIDEO.title,
+        message: SUCCESS_SUMMARIZING_VIDEO.message,
+      });
+    });
+
+    stream.on("error", (error) => {
+      if (abortController.signal.aborted) return;
+      setSummaryIsLoading(false);
+      showToast({
+        style: Toast.Style.Failure,
+        title: ALERT.title,
+        message: error.message,
+      });
+    });
+
+    return () => {
+      abortController.abort();
+    };
   }, [transcript]);
 };
