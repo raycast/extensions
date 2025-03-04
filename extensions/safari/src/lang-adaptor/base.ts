@@ -1,4 +1,4 @@
-import { LRUCache } from "lru-cache";
+import { Cache } from "@raycast/api";
 
 export interface LanguageHandler {
   name: string;
@@ -18,34 +18,30 @@ interface SerializeConfig {
 }
 
 export class LanguageAdaptor {
-  private langCache = new Map<string, LRUCache<string, string>>();
+  private langCache = new Cache();
   private langHandlers = new Map<string, LanguageHandler>();
 
   private formatStringWithLang(id: string, userInput: string, target: string, lang: string): string {
-    const cache = this.langCache.get(lang)!;
-    if (cache.has(id)) {
+    const key = this.getCacheKey(lang, id);
+    if (this.langCache.has(key)) {
       if (process.env.NODE_ENV === "development") {
-        console.log("cache hit", id);
+        console.log("cache hit", key);
       }
-      return cache.get(id)!;
+      return this.langCache.get(key)!;
     }
 
     const handler = this.langHandlers.get(lang);
     if (handler && handler.check(target, userInput)) {
       const formatted = handler.serialize(target);
-      cache.set(id, formatted);
+      this.langCache.set(key, formatted);
       return formatted;
     }
 
     return target;
   }
 
-  // delete for safety
-  private removeCache(lang: string) {
-    if (this.langCache.has(lang)) {
-      this.langCache.get(lang)?.clear();
-      this.langCache.delete(lang);
-    }
+  private getCacheKey(lang: string, id: string) {
+    return `langAdaptor#${lang}_${id}`;
   }
 
   registerLang(lang: string, handler: LanguageHandler) {
@@ -53,10 +49,10 @@ export class LanguageAdaptor {
       return;
     }
 
-    this.removeCache(lang);
+    const _start = performance.now();
+    this.langCache.clear();
     this.langHandlers.set(lang, handler);
-    this.langCache.set(lang, new LRUCache<string, string>({ max: 1000 }));
-    console.log(`language adaptor for ${handler.name} installed`);
+    console.log(`language adaptor for ${handler.name} installed, cost ${performance.now() - _start}ms`);
   }
 
   formatString(userInput: string, target: string, config: SerializeConfig) {

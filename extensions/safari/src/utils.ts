@@ -6,8 +6,9 @@ import { URL } from "url";
 import { langAdaptor } from "./lang-adaptor";
 import { HistoryItem, LooseTab } from "./types";
 import { runAppleScript } from "@raycast/utils";
+import { PinyinHandler } from "./lang-adaptor/pinyin";
 
-export const { safariAppIdentifier }: Preferences = getPreferenceValues();
+export const { safariAppIdentifier, enablePinyin } = getPreferenceValues();
 
 export const executeJxa = async (script: string) => {
   try {
@@ -69,20 +70,21 @@ export const getTitle = (tab: LooseTab) => _.truncate(tab.title, { length: 75 })
 
 export const plural = (count: number, string: string) => `${count} ${string}${count > 1 ? "s" : ""}`;
 
-function installLangHandlers() {
-  const enablePinyin = getPreferenceValues<Preferences>().enablePinyin;
-  if (enablePinyin) {
-    import("./lang-adaptor/pinyin").then((pinyinModule) => {
-      const pinyinHandler = new pinyinModule.PinyinHandler();
-      langAdaptor.registerLang(pinyinHandler.name, pinyinHandler);
-    });
-  }
+function installPinyinHandler() {
+  const pinyinHandler = new PinyinHandler();
+  langAdaptor.registerLang(pinyinHandler.name, pinyinHandler);
 }
 
 export const search = function (collection: LooseTab[], keys: Array<FuseOptionKey<object>>, searchText: string) {
-  installLangHandlers();
+  const _startTime = performance.now();
+  if (enablePinyin) {
+    installPinyinHandler();
+  }
 
   if (!searchText) {
+    if (process.env.NODE_ENV === "development") {
+      console.log("total cost", performance.now() - _startTime);
+    }
     return collection;
   }
 
@@ -103,8 +105,8 @@ export const search = function (collection: LooseTab[], keys: Array<FuseOptionKe
     console.log("searchText", searchText);
     console.log(`format cost ${_formatCost}ms`);
     console.log(`search cost ${_searchCost}ms`);
-    // console.log('formatted collection', formattedCollection);
     console.log("result size", result.length);
+    console.log("total cost", performance.now() - _startTime);
   }
   return result;
 };

@@ -161,6 +161,15 @@
       "label": "Enable Pinyin search for Chinese characters",
       "description": "When enabled, allows searching Chinese characters using pinyin romanization",
       "default": false
+    },
+    {
+      "name": "parseBookmarksWithGo",
+      "type": "checkbox",
+      "required": false,
+      "title": "Advanced Bookmarks Parser",
+      "label": "Enable advanced bookmarks parser",
+      "description": "If you met issue like \"object size is too large\", you can try this option to solve it.",
+      "default": false
     }
   ],
   "tools": [
@@ -327,10 +336,10 @@
     "@raycast/api": "^1.91.0",
     "@raycast/utils": "^1.18.1",
     "ahooks": "^3.8.1",
+    "axios": "^1.8.1",
     "bplist-creator": "^0.1.1",
     "fuse.js": "^7.0.0",
     "lodash": "^4.17.21",
-    "lru-cache": "^11.0.2",
     "osascript-tag": "^0.1.2",
     "pinyin": "^4.0.0-alpha.2",
     "simple-plist": "^1.4.0"
@@ -343,13 +352,19 @@
     "@types/react": "^18.3.5",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vitest": "^3.0.7"
   },
   "scripts": {
-    "build": "ray build --skip-types -e dist -o dist",
+    "build:go_parser": "cd src/go && npm run build",
+    "copy:go_parser": "cp src/tools/bookmarks-parser dist/tools/bookmarks-parser",
+    "build": "ray build --skip-types -e dist -o dist && npm run build:go_parser && npm run copy:go_parser",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "benchmark": "vitest bench"
   }
 }

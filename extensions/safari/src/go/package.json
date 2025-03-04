@@ -1,0 +1,23 @@
+{
+  "name": "safari-bookmarks-parser",
+  "version": "1.0.0",
+  "description": "A tool for parsing Safari bookmarks and converting them to JSON for Raycast",
+  "main": "../bookmarks-example.js",
+  "type": "module",
+  "scripts": {
+    "build": "chmod +x build.sh && ./build.sh",
+    "start": "node ../bookmarks-example.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "safari",
+    "bookmarks",
+    "parser",
+    "go",
+    "nodejs",
+    "raycast",
+    "macos"
+  ],
+  "author": "",
+  "license": "MIT"
+} 

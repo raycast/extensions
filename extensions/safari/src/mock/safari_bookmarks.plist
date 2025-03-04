@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Children</key>
+    <array>
+        <dict>
+            <key>Title</key>
+            <string>Favorites</string>
+            <key>Children</key>
+            <array>
+                <dict>
+                    <key>URIDictionary</key>
+                    <dict>
+                        <key>title</key>
+                        <string>GitHub</string>
+                    </dict>
+                    <key>URLString</key>
+                    <string>https://github.com</string>
+                </dict>
+                <dict>
+                    <key>URIDictionary</key>
+                    <dict>
+                        <key>title</key>
+                        <string>Stack Overflow</string>
+                    </dict>
+                    <key>URLString</key>
+                    <string>https://stackoverflow.com</string>
+                </dict>
+            </array>
+        </dict>
+        <dict>
+            <key>Title</key>
+            <string>Work Bookmarks</string>
+            <key>Children</key>
+            <array>
+                <dict>
+                    <key>URIDictionary</key>
+                    <dict>
+                        <key>title</key>
+                        <string>Jira</string>
+                    </dict>
+                    <key>URLString</key>
+                    <string>https://jira.company.com</string>
+                </dict>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist> 

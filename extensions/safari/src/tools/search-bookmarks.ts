@@ -1,4 +1,5 @@
-import { extractReadingListBookmarks, PLIST_PATH, readPlist } from "../hooks/useBookmarks";
+import { extractReadingListBookmarks, readPlist } from "../hooks/useBookmarks";
+import { PLIST_PATH } from "../constants";
 import { BookmarkPListResult, GeneralBookmark } from "../types";
 import { search } from "../utils";
 

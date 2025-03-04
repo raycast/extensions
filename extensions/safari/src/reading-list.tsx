@@ -38,6 +38,7 @@ export default function Command() {
           bookmarks,
           [
             { name: "title", weight: 3 },
+            { name: "title_formatted", weight: 2 },
             { name: "url", weight: 1 },
             { name: "description", weight: 0.5 },
           ],
