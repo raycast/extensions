@@ -13,8 +13,7 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search",
-      "subtitle": "CCF Conferences",
+      "title": "Search CCF Conferences",
       "description": "CCF Conference search",
       "mode": "view"
     }
