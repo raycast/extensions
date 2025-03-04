@@ -5,7 +5,7 @@
 - Optimize interaction experience
 - Support Raycast Pro AI
 
-## [Initial Version] - 2025-02-11
+## [Initial Version] - {PR_MERGE_DATE}
 - Support Youdao dictionary
 - Support Google translate
 - Support OpenAI API
