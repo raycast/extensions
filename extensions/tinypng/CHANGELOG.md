@@ -2,7 +2,7 @@
 
 ## [Updated dependency] - 2025-03-04
 
-- Updated `vitest` version to `>=2.1.9`
+- Updated `vitest` version to `^2.1.9`
 
 ## [Minor improvements] - 2024-09-20
 
