@@ -22,13 +22,11 @@
     "@raycast/api": "^1.92.1",
     "@raycast/utils": "^1.17.0",
     "jimp": "^1.6.0",
-    "pixelmatch": "^7.1.0",
-    "pngjs": "^7.0.0"
+    "pixelmatch": "^7.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/pngjs": "^6.0.5",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
