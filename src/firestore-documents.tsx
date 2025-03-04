@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Detail, Form, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, List, showToast, Toast, useNavigation, Clipboard } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { isServiceAccountConfigured } from "./utils/firebase";
+import { isServiceAccountConfigured, getServiceAccount } from "./utils/firebase";
 import { getCollections, getDocuments, queryDocuments } from "./api/firestore";
 import { JsonViewer } from "./components/JsonViewer";
 import * as admin from "firebase-admin";
@@ -60,6 +60,7 @@ function DocumentsForm() {
   const [fieldName, setFieldName] = useState<string>("");
   const [operator, setOperator] = useState<string>("==");
   const [fieldValue, setFieldValue] = useState<string>("");
+  const [highlightFields, setHighlightFields] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
   const { push } = useNavigation();
@@ -129,6 +130,12 @@ function DocumentsForm() {
       return;
     }
 
+    // Process highlight fields
+    let highlightFieldsArray: string[] = [];
+    if (highlightFields.trim()) {
+      highlightFieldsArray = highlightFields.split(',').map(field => field.trim()).filter(Boolean);
+    }
+
     if (isFiltering) {
       if (!fieldName.trim()) {
         setError("Field name is required for filtering");
@@ -169,6 +176,7 @@ function DocumentsForm() {
             fieldName={fieldName}
             operator={operator as admin.firestore.WhereFilterOp}
             fieldValue={parsedValue}
+            highlightFields={highlightFieldsArray}
           />
         );
       } catch (error) {
@@ -178,7 +186,7 @@ function DocumentsForm() {
     } else {
       // List all documents
       try {
-        push(<DocumentList collectionName={collectionName} />);
+        push(<DocumentList collectionName={collectionName} highlightFields={highlightFieldsArray} />);
       } catch (error) {
         setError("An unexpected error occurred. Please try again.");
         console.error("Error navigating to document list:", error);
@@ -252,6 +260,15 @@ function DocumentsForm() {
         onChange={setIsFiltering}
       />
 
+      <Form.TextField
+        id="highlightFields"
+        title="Highlight Fields"
+        placeholder="Enter field names to highlight (comma-separated)"
+        value={highlightFields}
+        onChange={setHighlightFields}
+        info="Fields to highlight in the document list. Separate multiple fields with commas."
+      />
+
       {isFiltering && (
         <>
           <Form.TextField
@@ -287,15 +304,31 @@ function DocumentsForm() {
 
 interface DocumentListProps {
   collectionName: string;
+  highlightFields: string[];
 }
 
-function DocumentList({ collectionName }: DocumentListProps) {
+function DocumentList({ collectionName, highlightFields }: DocumentListProps) {
   const [documents, setDocuments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
+  const [projectId, setProjectId] = useState<string>("");
   const { push } = useNavigation();
 
   useEffect(() => {
+    // Load project ID from service account
+    async function loadProjectId() {
+      try {
+        const serviceAccount = await getServiceAccount();
+        if (serviceAccount && serviceAccount.project_id) {
+          setProjectId(serviceAccount.project_id);
+        }
+      } catch (error) {
+        console.error("Error loading project ID:", error);
+      }
+    }
+
+    loadProjectId();
+    
     let isMounted = true;
     let retryCount = 0;
     const maxRetries = 2;
@@ -338,12 +371,38 @@ function DocumentList({ collectionName }: DocumentListProps) {
     };
   }, [collectionName]);
 
+  // Function to create keywords from document fields for search
+  const getKeywords = (doc: any): string[] => {
+    const keywords: string[] = [doc.id]; // Start with document ID
+    
+    // Add highlighted field values to keywords
+    highlightFields.forEach(field => {
+      if (doc[field] !== undefined) {
+        const value = formatFieldValue(doc[field]);
+        keywords.push(value);
+        keywords.push(`${field}:${value}`);
+      }
+    });
+    
+    return keywords;
+  };
+
+  // Function to generate Firestore URL for a document
+  const getFirestoreUrl = (docId: string): string => {
+    // Encode collection name and document ID for URL
+    const encodedCollection = collectionName.replace(/\//g, '~2F');
+    const encodedDocId = docId.replace(/\//g, '~2F');
+    
+    return `https://console.firebase.google.com/project/${projectId}/firestore/databases/-default-/data/~2F${encodedCollection}~2F${encodedDocId}`;
+  };
+
   if (error) {
     return (
       <List
         isLoading={isLoading}
         searchBarPlaceholder={`Search documents in ${collectionName}...`}
         filtering={true}
+        navigationTitle={`${collectionName} - Error`}
         actions={
           <ActionPanel>
             <Action
@@ -387,10 +446,11 @@ function DocumentList({ collectionName }: DocumentListProps) {
         isLoading={isLoading}
         searchBarPlaceholder={`Search documents in ${collectionName}...`}
         filtering={true}
+        navigationTitle={`${collectionName} (0 documents)`}
       >
         <List.EmptyView
           title="No Documents Found"
-          description={`No documents found in the collection '${collectionName}'`}
+          description={`No documents found in the collection '${collectionName}'. Try creating a document in Firebase Console.`}
           icon="📄"
         />
       </List>
@@ -402,26 +462,54 @@ function DocumentList({ collectionName }: DocumentListProps) {
       isLoading={isLoading}
       searchBarPlaceholder={`Search documents in ${collectionName}...`}
       filtering={true}
+      navigationTitle={`${collectionName} (${documents.length} documents)`}
     >
-      {documents.map((doc) => {
-        const timestampInfo = extractTimestampInfo(doc);
-        return (
+      {/* Add a header row to show field names */}
+      {documents.length > 0 && highlightFields.length > 0 && (
+        <List.Section title="Fields">
           <List.Item
-            key={`${doc.id}-${collectionName}`}
-            title={doc.id}
-            subtitle={`${Object.keys(doc).length - 1} fields`}
-            accessories={timestampInfo ? [{ text: timestampInfo }] : undefined}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="View Document"
-                  onAction={() => push(<DocumentDetail document={doc} collectionName={collectionName} />)}
-                />
-              </ActionPanel>
-            }
+            title="ID"
+            subtitle={highlightFields.join(' | ')}
           />
-        );
-      })}
+        </List.Section>
+      )}
+
+      <List.Section title={`${documents.length} documents in ${collectionName}`}>
+        {documents.map((doc) => {
+          // Create a formatted string with just field values separated by |
+          const fieldValues = highlightFields.map(field => {
+            const value = doc[field];
+            return formatFieldValue(value);
+          }).join(' | ');
+          
+          return (
+            <List.Item
+              key={`${doc.id}-${collectionName}`}
+              title={doc.id}
+              subtitle={fieldValues}
+              keywords={getKeywords(doc)}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="View Document"
+                    onAction={() => push(<DocumentDetail document={doc} collectionName={collectionName} />)}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Document ID"
+                    content={doc.id}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Firestore URL"
+                    content={getFirestoreUrl(doc.id)}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
     </List>
   );
 }
@@ -431,6 +519,7 @@ interface FilteredDocumentListProps {
   fieldName: string;
   operator: admin.firestore.WhereFilterOp;
   fieldValue: any;
+  highlightFields: string[];
 }
 
 function FilteredDocumentList({
@@ -438,13 +527,29 @@ function FilteredDocumentList({
   fieldName,
   operator,
   fieldValue,
+  highlightFields,
 }: FilteredDocumentListProps) {
   const [documents, setDocuments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
+  const [projectId, setProjectId] = useState<string>("");
   const { push } = useNavigation();
 
   useEffect(() => {
+    // Load project ID from service account
+    async function loadProjectId() {
+      try {
+        const serviceAccount = await getServiceAccount();
+        if (serviceAccount && serviceAccount.project_id) {
+          setProjectId(serviceAccount.project_id);
+        }
+      } catch (error) {
+        console.error("Error loading project ID:", error);
+      }
+    }
+
+    loadProjectId();
+    
     let isMounted = true;
     let retryCount = 0;
     const maxRetries = 2;
@@ -491,12 +596,38 @@ function FilteredDocumentList({
   let formattedValue = typeof fieldValue === "object" ? JSON.stringify(fieldValue) : String(fieldValue);
   const filterDescription = `${fieldName} ${operator} ${formattedValue}`;
 
+  // Function to create keywords from document fields for search
+  const getKeywords = (doc: any): string[] => {
+    const keywords: string[] = [doc.id]; // Start with document ID
+    
+    // Add highlighted field values to keywords
+    highlightFields.forEach(field => {
+      if (doc[field] !== undefined) {
+        const value = formatFieldValue(doc[field]);
+        keywords.push(value);
+        keywords.push(`${field}:${value}`);
+      }
+    });
+    
+    return keywords;
+  };
+
+  // Function to generate Firestore URL for a document
+  const getFirestoreUrl = (docId: string): string => {
+    // Encode collection name and document ID for URL
+    const encodedCollection = collectionName.replace(/\//g, '~2F');
+    const encodedDocId = docId.replace(/\//g, '~2F');
+    
+    return `https://console.firebase.google.com/project/${projectId}/firestore/databases/-default-/data/~2F${encodedCollection}~2F${encodedDocId}`;
+  };
+
   if (error) {
     return (
       <List
         isLoading={isLoading}
         searchBarPlaceholder={`Search filtered documents in ${collectionName}...`}
         filtering={true}
+        navigationTitle={`${collectionName} - Error`}
         actions={
           <ActionPanel>
             <Action
@@ -540,10 +671,11 @@ function FilteredDocumentList({
         isLoading={isLoading}
         searchBarPlaceholder={`Search filtered documents in ${collectionName}...`}
         filtering={true}
+        navigationTitle={`${collectionName} (0 documents)`}
       >
         <List.EmptyView
-          title="No Documents Found"
-          description={`No documents found matching the filter criteria`}
+          title="No Documents Match Filter"
+          description={`No documents found matching the filter criteria: ${filterDescription}`}
           icon="🔍"
         />
       </List>
@@ -555,21 +687,47 @@ function FilteredDocumentList({
       isLoading={isLoading}
       searchBarPlaceholder={`Search filtered documents in ${collectionName}...`}
       filtering={true}
+      navigationTitle={`${collectionName} (${documents.length} documents)`}
     >
-      <List.Section title={`Filter: ${filterDescription}`}>
+      {/* Add a header row to show field names */}
+      {documents.length > 0 && highlightFields.length > 0 && (
+        <List.Section title="Fields">
+          <List.Item
+            title="ID"
+            subtitle={highlightFields.join(' | ')}
+          />
+        </List.Section>
+      )}
+
+      <List.Section title={`${documents.length} documents matching filter: ${filterDescription}`}>
         {documents.map((doc) => {
-          const timestampInfo = extractTimestampInfo(doc);
+          // Create a formatted string with just field values separated by |
+          const fieldValues = highlightFields.map(field => {
+            const value = doc[field];
+            return formatFieldValue(value);
+          }).join(' | ');
+          
           return (
             <List.Item
               key={`${doc.id}-${collectionName}-${fieldName}`}
               title={doc.id}
-              subtitle={`${Object.keys(doc).length - 1} fields`}
-              accessories={timestampInfo ? [{ text: timestampInfo }] : undefined}
+              subtitle={fieldValues}
+              keywords={getKeywords(doc)}
               actions={
                 <ActionPanel>
                   <Action
                     title="View Document"
                     onAction={() => push(<DocumentDetail document={doc} collectionName={collectionName} />)}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Document ID"
+                    content={doc.id}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Firestore URL"
+                    content={getFirestoreUrl(doc.id)}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                 </ActionPanel>
               }
@@ -611,29 +769,40 @@ function SetupServiceAccountView() {
 }
 
 /**
- * Extracts timestamp information from a document for display in the list
+ * Formats a field value for display
  */
-function extractTimestampInfo(doc: any): string | null {
-  // Common timestamp field names
-  const timestampFields = ['createdAt', 'created_at', 'updatedAt', 'updated_at', 'timestamp', 'date', 'time'];
+function formatFieldValue(value: any): string {
+  if (value === undefined) {
+    return "N/A";
+  }
   
-  for (const field of timestampFields) {
-    if (doc[field]) {
-      const value = doc[field];
-      
-      // Check if it's a Firestore Timestamp
-      if (value && typeof value === 'object') {
-        if (value._seconds !== undefined && value._nanoseconds !== undefined) {
-          const date = new Date(value._seconds * 1000 + value._nanoseconds / 1000000);
-          return `${field}: ${date.toLocaleString()}`;
-        }
-        
-        if (value instanceof admin.firestore.Timestamp) {
-          return `${field}: ${value.toDate().toLocaleString()}`;
-        }
+  if (value === null) {
+    return "null";
+  }
+  
+  if (typeof value === "object") {
+    // Handle timestamps
+    if (value._seconds !== undefined && value._nanoseconds !== undefined) {
+      const date = new Date(value._seconds * 1000 + value._nanoseconds / 1000000);
+      return date.toLocaleString();
+    }
+    
+    if (value instanceof admin.firestore.Timestamp) {
+      return value.toDate().toLocaleString();
+    }
+    
+    // For other objects, convert to string representation
+    try {
+      const str = JSON.stringify(value);
+      // Truncate if too long
+      if (str.length > 50) {
+        return str.substring(0, 47) + "...";
       }
+      return str;
+    } catch (e) {
+      return "[Object]";
     }
   }
   
-  return null;
+  return String(value);
 } 
