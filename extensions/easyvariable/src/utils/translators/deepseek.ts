@@ -26,6 +26,5 @@ export const deepseekTranslate = async (text: string): Promise<string> => {
   ]);
 
   const translated = response.content as string;
-  translated = translated.trim();
-  return translated.replace(/[.,#!$%&*;:{}=\-_`~()"']/g, "");
+  return translated.trim().replace(/[.,#!$%&*;:{}=\-_`~()"']/g, "");
 };
