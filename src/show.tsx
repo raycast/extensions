@@ -472,13 +472,9 @@ call_forward()
       console.log(error);
     }
   } else if (terminal == "Ghostty") {
-    console.log("Ghostty is valid setting")
     try {
-      console.log("ghostty applescript is ran")
-      const result = await runAppleScript(scriptGhostty);
-      console.log(result);
+      await runAppleScript(scriptGhostty);
     } catch (error) {
-      console.log("backup applescript is ran")
       await runAppleScript(scriptTerminal);
       console.log(error);
     }
