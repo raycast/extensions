@@ -1,7 +1,6 @@
 # GoodLinks
 
-> [!IMPORTANT]
-> [GoodLinks](https://goodlinks.app) must be installed.
+> [!IMPORTANT] > [GoodLinks](https://goodlinks.app) must be installed.
 
 ## Commands
 
@@ -14,5 +13,5 @@
 - Save the URL in the clipboard
 
 ### Open random link
-- Let GoodLinks select a random link and open it
+
 - Let GoodLinks select a random link and open it
