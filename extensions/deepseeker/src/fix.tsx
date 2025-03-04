@@ -6,5 +6,5 @@ const model_override = getPreferenceValues().model_fix;
 const toast_title = "Fixing...";
 
 export default function fix() {
-  return ResultView(prompt, model_override, toast_title);
+  return ResultView(prompt, model_override, toast_title, true);
 }

@@ -1,3 +1,6 @@
+import { spawn } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 import {
   Action,
   ActionPanel,
@@ -8,41 +11,41 @@ import {
   getSelectedText,
   Icon,
   open,
+  openExtensionPreferences,
   showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
-import { DownloadOptions, isValidHHMM, isYouTubeURL, parseHHMM, preferences } from "./utils";
-import fs from "fs";
-import { execSync, spawn } from "node:child_process";
-import { execa } from "execa";
-import path from "path";
+import { execa, ExecaError } from "execa";
+import {
+  DownloadOptions,
+  getFormats,
+  getFormatTitle,
+  getFormatValue,
+  isValidHHMM,
+  isValidUrl,
+  parseHHMM,
+  preferences,
+} from "./utils.js";
+import { Video } from "./types.js";
 
 export default function DownloadVideo() {
   const [error, setError] = useState(0);
+  const [warning, setWarning] = useState("");
 
   const { handleSubmit, values, itemProps, setValue, setValidationError } = useForm<DownloadOptions>({
     initialValues: {
       url: "",
     },
     onSubmit: async (values) => {
-      const options = ["-P", preferences.downloadPath];
+      const options: Array<string | string[]> = ["-P", preferences.downloadPath];
+      const [downloadFormat, recodeFormat] = values.format.split("#");
 
       options.push("--ffmpeg-location", preferences.ffmpegPath);
-      options.push("-f", "bv*[ext=mp4][vcodec^=avc]+ba[ext=m4a]/b[ext=mp4]");
-
-      // if (!values.startTime && values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*0:00-${values.endTime}`);
-      // } else if (values.startTime && !values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*${values.startTime}-*`);
-      // } else if (values.startTime && values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*${values.startTime}-${values.endTime}`);
-      // }
+      options.push("--format", downloadFormat);
+      options.push("--recode-video", recodeFormat);
 
       const toast = await showToast({
         title: "Downloading Video",
@@ -53,7 +56,7 @@ export default function DownloadVideo() {
       options.push("--progress");
       options.push("--print", "after_move:filepath");
 
-      const process = spawn("/opt/homebrew/bin/yt-dlp", [...options, values.url]);
+      const process = spawn(preferences.ytdlPath, [...options.flat(), values.url]);
 
       let filePath = "";
 
@@ -80,8 +83,14 @@ export default function DownloadVideo() {
         const line = data.toString();
         console.error(line);
 
-        toast.title = "Download Failed";
-        toast.style = Toast.Style.Failure;
+        if (line.startsWith("WARNING:")) {
+          setWarning(line);
+        }
+
+        if (line.startsWith("ERROR:")) {
+          toast.title = "Download Failed";
+          toast.style = Toast.Style.Failure;
+        }
         toast.message = line;
       });
 
@@ -118,8 +127,8 @@ export default function DownloadVideo() {
         if (!value) {
           return "URL is required";
         }
-        if (!isYouTubeURL(value)) {
-          return "Invalid YouTube URL";
+        if (!isValidUrl(value)) {
+          return "Invalid URL";
         }
       },
       startTime: (value) => {
@@ -143,37 +152,39 @@ export default function DownloadVideo() {
   });
 
   const { data: video, isLoading } = usePromise(
-    async (url) => {
+    async (url: string) => {
       if (!url) return;
+      if (!isValidUrl(url)) return;
 
-      const result = await execa("/opt/homebrew/bin/yt-dlp", ["-j", url]);
-
-      return JSON.parse(result.stdout) as {
-        title: string;
-        duration: number;
-        live_status: string;
-        formats: {
-          format_id: string;
-          vcodec: string;
-          acodec: string;
-          video_ext: string;
-          protocol: string;
-          filesize_approx: number;
-          resolution: string;
-        }[];
-      };
+      const result = await execa(
+        preferences.ytdlPath,
+        [preferences.forceIpv4 ? "--force-ipv4" : "", "--dump-json", "--format-sort=resolution,ext,tbr", url].filter(
+          (x) => Boolean(x),
+        ),
+      );
+      return JSON.parse(result.stdout) as Video;
     },
     [values.url],
     {
-      onError() {
-        setValidationError("url", "Invalid YouTube URL");
+      onError(error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Video not found with the provided URL",
+          message: error.message,
+          primaryAction: {
+            title: "Copy to Clipboard",
+            onAction: () => {
+              Clipboard.copy(error.message);
+            },
+          },
+        });
       },
     },
   );
 
   useEffect(() => {
     if (video) {
-      if (video.live_status !== "not_live") {
+      if (video.live_status !== "not_live" && video.live_status !== undefined) {
         setValidationError("url", "Live streams are not supported");
       }
     }
@@ -181,14 +192,34 @@ export default function DownloadVideo() {
 
   useEffect(() => {
     (async () => {
-      const clipboardText = await Clipboard.readText();
-      if (clipboardText && isYouTubeURL(clipboardText)) setValue("url", clipboardText);
+      if (preferences.autoLoadUrlFromClipboard) {
+        const clipboardText = await Clipboard.readText();
+        if (clipboardText && isValidUrl(clipboardText)) {
+          setValue("url", clipboardText);
+          return;
+        }
+      }
 
-      const selectedText = await getSelectedText();
-      if (selectedText && isYouTubeURL(selectedText)) setValue("url", selectedText);
+      if (preferences.autoLoadUrlFromSelectedText) {
+        try {
+          const selectedText = await getSelectedText();
+          if (selectedText && isValidUrl(selectedText)) {
+            setValue("url", selectedText);
+            return;
+          }
+        } catch {
+          // Suppress the error if Raycast didn't find any selected text
+        }
+      }
 
-      const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
-      if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
+      if (preferences.enableBrowserExtensionSupport) {
+        try {
+          const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
+          if (tabUrl && isValidUrl(tabUrl)) setValue("url", tabUrl);
+        } catch {
+          // Suppress the error if Raycast didn't find browser extension
+        }
+      }
     })();
   }, []);
 
@@ -205,6 +236,8 @@ export default function DownloadVideo() {
     return null;
   }, [error]);
 
+  const formats = useMemo(() => getFormats(video), [video]);
+
   if (missingExecutable) {
     return <NotInstalled executable={missingExecutable} onRefresh={() => setError(error + 1)} />;
   }
@@ -218,32 +251,42 @@ export default function DownloadVideo() {
             icon={Icon.Download}
             title="Download Video"
             onSubmit={(values) => {
+              setWarning("");
               handleSubmit({ ...values, copyToClipboard: false } as DownloadOptions);
             }}
           />
         </ActionPanel>
       }
+      searchBarAccessory={
+        <Form.LinkAccessory
+          text="Supported Sites"
+          target="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md"
+        />
+      }
     >
       <Form.Description title="Title" text={video?.title ?? "Video not found"} />
       <Form.TextField
+        {...itemProps.url}
         autoFocus
         title="URL"
-        placeholder="https://www.youtube.com/watch?v=xRMPKQweySE"
-        {...itemProps.url}
+        placeholder="https://www.youtube.com/watch?v=ykaj0pS4A1A"
       />
-      {/*<Form.Separator />*/}
-      {/*<Form.TextField*/}
-      {/*  info="Optional. Specify when the output video should start. Follow the format HH:MM:SS or MM:SS."*/}
-      {/*  title="Start Time"*/}
-      {/*  placeholder="00:00"*/}
-      {/*  {...itemProps.startTime}*/}
-      {/*/>*/}
-      {/*<Form.TextField*/}
-      {/*  info="Optional. Specify when the output video should end. Follow the format HH:MM:SS or MM:SS."*/}
-      {/*  title="End Time"*/}
-      {/*  placeholder={video ? formatHHMM(video.duration) : "00:00"}*/}
-      {/*  {...itemProps.endTime}*/}
-      {/*/>*/}
+      {warning && <Form.Description text={warning} />}
+      {video && (
+        <Form.Dropdown {...itemProps.format} title="Format">
+          {Object.entries(formats).map(([category, formats]) => (
+            <Form.Dropdown.Section title={category} key={category}>
+              {formats.map((format) => (
+                <Form.Dropdown.Item
+                  key={format.format_id}
+                  value={getFormatValue(format)}
+                  title={getFormatTitle(format)}
+                />
+              ))}
+            </Form.Dropdown.Section>
+          ))}
+        </Form.Dropdown>
+      )}
     </Form>
   );
 }
@@ -258,6 +301,8 @@ This extension depends on a command-line utilty that is not detected on your sys
 
 If you have homebrew installed, simply press **⏎** to have this extension install it for you. Since \`${executable}\` is a heavy library, 
 **it can take up 2 minutes to install**.
+
+**Please do not close Raycast while the installation is in progress.**
 
 To install homebrew, visit [this link](https://brew.sh)
   `}
@@ -278,21 +323,48 @@ function AutoInstall({ onRefresh }: { onRefresh: () => void }) {
             if (isLoading) return;
 
             setIsLoading(true);
-
-            const toast = await showToast({ style: Toast.Style.Animated, title: "Installing ffmpeg..." });
-            await toast.show();
+            const installationToast = new Toast({ style: Toast.Style.Animated, title: "Installing..." });
+            await installationToast.show();
 
             try {
-              execSync(`zsh -l -c 'brew install ffmpeg'`);
-              await toast.hide();
+              await execa(preferences.homebrewPath, ["install", "yt-dlp", "ffmpeg"]);
+              await installationToast.hide();
               onRefresh();
-            } catch (e) {
-              await toast.hide();
-              console.error(e);
+            } catch (error) {
+              installationToast.hide();
+              console.error(error);
+              const isCommonError = error instanceof Error;
+              const isExecaError = error instanceof ExecaError;
+              const isENOENT = isExecaError && error.code === "ENOENT";
+
               await showToast({
                 style: Toast.Style.Failure,
-                title: "Error installing",
-                message: "An unknown error occured while trying to install",
+                title: isCommonError ? (isENOENT ? "Cannot find Homebrew" : error.name) : "Installation Failed",
+                message: isCommonError
+                  ? isENOENT
+                    ? "Please make sure your `brew` PATH is configured correctly in extension preferences. If you don't have Homebrew installed, you can download it from https://brew.sh."
+                    : error.message
+                  : "An unknown error occured while trying to install",
+                primaryAction: {
+                  title: isENOENT ? "Open Extension Preferences" : "Copy to Clipboard",
+                  onAction: () => {
+                    if (isENOENT) {
+                      openExtensionPreferences();
+                    } else {
+                      Clipboard.copy(
+                        isCommonError ? error.message : "An unknown error occurred while trying to install",
+                      );
+                    }
+                  },
+                },
+                secondaryAction: isENOENT
+                  ? {
+                      title: "Open Installation Guide in Browser",
+                      onAction: () => {
+                        open("https://brew.sh");
+                      },
+                    }
+                  : undefined,
               });
             }
             setIsLoading(false);

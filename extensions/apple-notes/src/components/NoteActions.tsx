@@ -19,9 +19,9 @@ import { NodeHtmlMarkdown } from "node-html-markdown";
 import { useState } from "react";
 
 import { NoteTitle } from "..";
-import { deleteNoteById, restoreNoteById, openNoteSeparately, getNotePlainText, getNoteBody } from "../api";
+import { deleteNoteById, restoreNoteById, openNoteSeparately, getNotePlainText, getNoteBody } from "../api/applescript";
 import { fileIcon, getOpenNoteURL } from "../helpers";
-import { NoteItem, useNotes } from "../useNotes";
+import { NoteItem, useNotes } from "../hooks/useNotes";
 
 import AddTextForm from "./AddTextForm";
 import NoteDetail from "./NoteDetail";

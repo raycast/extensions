@@ -18,9 +18,8 @@ function getBaseURL() {
 }
 
 const OpenIssue = ({ issueKey }: { issueKey: string }) => <IssueDetail issueKey={issueKey} />;
-const AuthorizedOpenIssue = withJiraCredentials(OpenIssue);
 
-export default function OpenFromClipboard() {
+function OpenFromClipboard() {
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -58,5 +57,6 @@ export default function OpenFromClipboard() {
     return <Detail isLoading />;
   }
 
-  return <AuthorizedOpenIssue issueKey={issueKey} />;
+  return <OpenIssue issueKey={issueKey} />;
 }
+export default withJiraCredentials(OpenFromClipboard);

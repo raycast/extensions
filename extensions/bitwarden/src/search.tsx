@@ -10,6 +10,7 @@ import { SessionProvider } from "~/context/session";
 import { useVaultContext, VaultProvider } from "~/context/vault";
 import { Folder, Item } from "~/types/vault";
 import { VaultLoadingFallback } from "~/components/searchVault/VaultLoadingFallback";
+import { useVaultSearch } from "./utils/search";
 
 const SearchVaultCommand = () => (
   <RootErrorBoundary>
@@ -29,14 +30,16 @@ const SearchVaultCommand = () => (
 
 function SearchVaultComponent() {
   const { items, folders, isLoading, isEmpty } = useVaultContext();
-  const { favoriteItems, nonFavoriteItems } = useSeparateFavoriteItems(items);
+  const { setSearchText, filteredItems } = useVaultSearch(items);
+  const { favoriteItems, nonFavoriteItems } = useSeparateFavoriteItems(filteredItems);
 
   return (
     <List
       searchBarPlaceholder="Search vault"
-      filtering={{ keepSectionOrder: true }}
+      filtering={false}
       isLoading={isLoading}
       searchBarAccessory={<ListFolderDropdown />}
+      onSearchTextChange={setSearchText}
     >
       {favoriteItems.length > 0 ? (
         <>

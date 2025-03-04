@@ -1,12 +1,27 @@
-import { ActionPanel, Icon, List, Action, Form, Keyboard, useNavigation } from "@raycast/api";
+import {
+  ActionPanel,
+  Icon,
+  List,
+  Action,
+  Form,
+  Keyboard,
+  useNavigation,
+  Alert,
+  Color,
+  confirmAlert,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { parseResponse, useGetLinks } from "./hooks";
 import { getFavicon, showFailureToast, useFetch, useForm } from "@raycast/utils";
 import { useState } from "react";
 import { API_HEADERS, API_URL } from "./config";
+import { BrandedLink } from "./interfaces";
+import fetch from "node-fetch";
 
 export default function Rebrandly() {
   const [filter, setFilter] = useState("");
-  const { isLoading, data: links, pagination, revalidate } = useGetLinks();
+  const { isLoading, data: links, pagination, revalidate, mutate } = useGetLinks();
   const filteredLinks = !filter
     ? links
     : links.filter((link) => {
@@ -14,6 +29,42 @@ export default function Rebrandly() {
         if (filter === "notStarred") return !link.favourite;
         return link;
       });
+
+  async function confirmAndDelete(link: BrandedLink) {
+    const options: Alert.Options = {
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+      title: `Delete '${link.title}'?`,
+      message: link.shortUrl,
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+      },
+    };
+
+    if (await confirmAlert(options)) {
+      const toast = await showToast(Toast.Style.Animated, "Deleting link", link.title);
+      try {
+        await mutate(
+          fetch(API_URL + `links/${link.id}`, {
+            method: "DELETE",
+            headers: API_HEADERS,
+          }).then((res) => parseResponse(res)),
+          {
+            optimisticUpdate(data) {
+              return data.filter((l) => l.id !== link.id);
+            },
+            shouldRevalidateAfter: false,
+          }
+        );
+        toast.style = Toast.Style.Success;
+        toast.title = "Deleted link";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = `${error}`;
+      }
+    }
+  }
+
   return (
     <List
       isLoading={isLoading}
@@ -46,6 +97,13 @@ export default function Rebrandly() {
                     title="Create New Link"
                     target={<CreateNewLink onCreate={revalidate} />}
                     shortcut={Keyboard.Shortcut.Common.New}
+                  />
+                  <Action
+                    icon={Icon.Trash}
+                    title="Delete Link"
+                    onAction={() => confirmAndDelete(link)}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    style={Action.Style.Destructive}
                   />
                 </ActionPanel>
               }

@@ -13,6 +13,7 @@
     "Developer Tools"
   ],
   "keywords": [
+    "AI",
     "DeepSeek",
     "DeepSeek V3",
     "DeepSeek R1",
@@ -212,7 +213,7 @@
           "name": "lookup",
           "label": "Lookup Mode (Beta)",
           "title": "Lookup Mode (Beta)",
-          "description": "Enable lookup mode to get the meaning of the selected single word",
+          "description": "Enable lookup mode to get the meaning of the selected single word like a dictionary",
           "type": "checkbox",
           "required": false,
           "default": false
@@ -460,6 +461,72 @@
       ]
     },
     {
+      "name": "ask_on",
+      "title": "Ask on Selected",
+      "description": "Ask LLM on selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Enter your question",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "prompt_ask_on",
+          "title": "System Prompt",
+          "description": "The prompt prefix for the ASK ON command",
+          "type": "textfield",
+          "required": false,
+          "default": "Answer the following question regarding the provided text concisely: \n\n"
+        },
+        {
+          "name": "model_ask_on",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "DeepSeek-V3",
+              "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "customa",
       "title": "Custom Action A",
       "description": "Ask LLM Model based on a custom prompt",
@@ -577,8 +644,8 @@
     },
     {
       "name": "execute",
-      "title": "Execute",
-      "description": "Execute the prompt and replace it with its output",
+      "title": "Execute Selected Prompt",
+      "description": "Execute the selected prompt and replace it with its output",
       "mode": "no-view",
       "preferences": [
         {
@@ -667,12 +734,16 @@
       "type": "dropdown",
       "data": [
         {
-          "title": "DeepSeek-V3",
+          "title": "deepseek-chat",
           "value": "deepseek-chat"
         },
         {
-          "title": "DeepSeek-R1",
+          "title": "deepseek-reasoner",
           "value": "deepseek-reasoner"
+        },
+        {
+          "title": "deepseek-r1",
+          "value": "deepseek-r1"
         },
         {
           "title": "GPT-4o",
@@ -715,12 +786,10 @@
       "title": "LLM Model"
     },
     {
-      "name": "sidenote",
-      "title": "SideNote Integration",
-      "description": "Enable SideNote integration (requires SideNote). Allows you to send the results to SideNote as a new note.",
-      "label": "Enabled",
-      "type": "checkbox",
-      "default": false,
+      "name": "custom_model",
+      "title": "Custom Model Name",
+      "description": "Custom model name for your API endpoint if it's not listed in the dropdown, this will override the global model",
+      "type": "textfield",
       "required": false
     }
   ],

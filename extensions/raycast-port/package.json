@@ -26,6 +26,12 @@
       "title": "AI.ask",
       "description": "Port for the Raycast AI.ask.",
       "mode": "no-view"
+    },
+    {
+      "name": "browser-extension",
+      "title": "BrowserExtension",
+      "description": "Port for the Raycast BrowserExtension.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -45,7 +51,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^22.13.0",
+    "@types/node": "^22.13.1",
     "@types/react": "^18.3.18",
     "eslint": "^8.57.1",
     "prettier": "^3.4.2",

@@ -23,6 +23,7 @@ You can also easily find the right extension for you project, get the command to
 - Fill in your project configuration (Quarkus version, build tool, groupId, artifact name, java version)
 
   ![image](assets/config.png)
+- [Optional] open the preferences and configure it to match what you want.
 - Select dependencies
 
   ![image](assets/dependencies.png)
@@ -33,8 +34,14 @@ You can also easily find the right extension for you project, get the command to
 
 After selecting "Create Quarkus Project", you can open the preferences option via the action menu.
 ![image](assets/code-quarkus-preferences-action.png)
-In the preferences you are able to select the directory where the generated project will be downloaded.
+In the preferences you are able to configure the behaviour of the extension
 ![image](assets/code-quarkus-preferences-window.png)
+You can configure the following things:
+- The download directory: Where the downloaded file will be located
+- Unzip automatically the archive: If you want for the downloaded file to be automatically unzipped
+- Show downloaded file in the finder: Automatically open the finder where the file has been downloaded
+- Open the project in my IDE: If you want to automatically open the project in your favorite IDE. To do so you need to enable auto unzip and select your IDE
+- Selected IDE: the IDE to use to open the project
 
 ### Find a Quarkus Extension
 - Open Raycast

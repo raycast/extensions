@@ -1,5 +1,17 @@
 import { Icon, Color, Image } from "@raycast/api";
-import { Record, OrionRecord, ChromeRecord, ArcRecord } from "./record";
+import {
+  Record,
+  OrionRecord,
+  ChromeRecord,
+  ArcRecord,
+  SafariRecord,
+  FirefoxRecord,
+  ZenRecord,
+  BraveRecord,
+  VivaldiRecord,
+  OperaRecord,
+  EdgeRecord,
+} from "./record";
 
 class Result {
   key: string;
@@ -27,9 +39,9 @@ class Result {
 }
 
 export class Adapter<T extends Record> {
-  adapt(record: T): Result {
+  adapt(record: T, i: number): Result {
     return new Result(
-      this.getKey(record),
+      this.getKey(i),
       this.getTitle(record),
       this.getSubtitle(record),
       this.getIcon(),
@@ -38,11 +50,13 @@ export class Adapter<T extends Record> {
     );
   }
 
-  getKey(record: T): string {
-    return record.id.toString();
+  getKey(i: number): string {
+    return i.toString();
   }
 
   getTitle(record: T): string {
+    if (record.title == null || record.title == undefined) return "";
+
     return record.title;
   }
 
@@ -64,8 +78,8 @@ export class Adapter<T extends Record> {
 }
 
 class AdapterTopVisited<T extends Record> extends Adapter<T> {
-  getKey(record: T): string {
-    return `${record.id}_tv`;
+  getKey(i: number): string {
+    return `${i}_tv`;
   }
 
   getIcon(): { value: Image.ImageLike | null | undefined; tooltip: string } {
@@ -82,23 +96,60 @@ class AdapterRecents<T extends Record> extends Adapter<T> {
     return { value: Icon.RotateAntiClockwise, tooltip: "Recents" };
   }
 
-  getKey(record: T): string {
-    return `${record.id}_r`;
+  getKey(i: number): string {
+    return `${i}_r`;
   }
 
   getAccessories(record: T): object[] {
-    return [{ tag: { value: record.lastVisitTime.toString(), color: Color.Magenta }, tooltip: "Last visited" }];
+    return [{ tag: { value: this.getVisitTime(record), color: Color.Magenta }, tooltip: "Last visited" }];
+  }
+
+  getVisitTime(record: T): string {
+    return record.id.toString();
   }
 }
 
 export class OrionAdapterTopVisited extends AdapterTopVisited<OrionRecord> {}
-
-export class OrionAdapterRecents extends AdapterRecents<OrionRecord> {}
-
-export class ChromeAdapterRecents extends AdapterRecents<ChromeRecord> {}
-
 export class ChromeAdapterTopVisited extends AdapterTopVisited<ChromeRecord> {}
 
+export class SafariAdapterTopVisited extends AdapterTopVisited<SafariRecord> {}
 export class ArcAdapterTopVisited extends AdapterTopVisited<ArcRecord> {}
+export class BraveAdapterTopVisited extends AdapterTopVisited<BraveRecord> {}
+export class VivaldiAdapterTopVisited extends AdapterTopVisited<VivaldiRecord> {}
+export class OperaAdapterTopVisited extends AdapterTopVisited<OperaRecord> {}
+export class EdgeAdapterTopVisited extends AdapterTopVisited<EdgeRecord> {}
 
-export class ArcAdapterRecents extends AdapterRecents<ArcRecord> {}
+export class FirefoxAdapterTopVisited extends AdapterTopVisited<FirefoxRecord> {}
+export class ZenAdapterTopVisited extends AdapterTopVisited<ZenRecord> {}
+
+export class OrionAdapterRecents extends AdapterRecents<OrionRecord> {
+  getVisitTime(record: OrionRecord): string {
+    return record.lastVisitTime.toString();
+  }
+}
+
+export class ChromeAdapterRecents<T extends ChromeRecord> extends AdapterRecents<T> {
+  getVisitTime(record: T): string {
+    return record.lastVisitTime.toString();
+  }
+}
+
+export class ArcAdapterRecents extends ChromeAdapterRecents<ArcRecord> {}
+export class BraveAdapterRecents extends ChromeAdapterRecents<BraveRecord> {}
+export class VivaldiAdapterRecents extends ChromeAdapterRecents<VivaldiRecord> {}
+export class OperaAdapterRecents extends ChromeAdapterRecents<OperaRecord> {}
+export class EdgeAdapterRecents extends ChromeAdapterRecents<EdgeRecord> {}
+
+export class SafariAdapterRecents extends AdapterRecents<SafariRecord> {
+  getVisitTime(record: SafariRecord): string {
+    return record.visitTime;
+  }
+}
+
+export class FirefoxAdapterRecents<T extends FirefoxRecord> extends AdapterRecents<T> {
+  getVisitTime(record: FirefoxRecord): string {
+    return record.lastVisitDate;
+  }
+}
+
+export class ZenAdapterRecents extends FirefoxAdapterRecents<ZenRecord> {}

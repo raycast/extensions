@@ -1,5 +1,10 @@
 # Changelog
 
+## [Branding updates and workspaces](https://github.com/raycast/extensions/pull/16793) - 2025-02-03
+
+- **search**: We've updated colors throughout the extension to match Sourcegraph's refreshed branding.
+- **doc**: [Sourcegraph workspaces](https://workspaces.sourcegraph.com) are a new, easy way to get started with using Sourcegraph for Raycast to search your private code - we've added a few links throughout the extension and our setup docs.
+
 ## [New logo](https://github.com/raycast/extensions/pull/16697) - 2025-01-29
 
 - **all**: Sourcegraph got a new logo! All extension and command icons have been updated.

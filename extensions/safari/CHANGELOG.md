@@ -1,5 +1,35 @@
 # Safari Changelog
 
+## [Update] - 2025-03-01
+
+### New Tab Management Tools
+
+- Added new AI tools for Safari tab management:
+  - `get-all-tabs`: View all open tabs across all Safari windows
+  - `get-tab-contents`: Retrieve text or HTML content from specific tabs
+  - `close-tab`: Close specific tabs or the currently active tab
+  - `get-focused-tab`: Get information about the currently active tab
+
+## [Chore: Moved contributor to past contributors list] - 2025-02-27
+
+## [Update] - 2025-02-21
+
+AI Tools to;
+
+- Search Bookmarks
+- Search History
+- Search Reading List
+- Add to Reading List
+- Open (in Safari)
+
+## [Update] - 2025-02-14
+
+- Added a preference to enable pinyin search for Chinese characters.
+
+## [Update] - 2025-02-12
+
+- Add an action to set the color of a bookmark tag.
+
 ## [Chore: Moved contributor to past contributors list] - 2025-01-15
 
 ## [Update] - 2025-01-12

@@ -25,7 +25,7 @@ export default function SetRating() {
   useEffect(() => {
     pipe(
       music.currentTrack.getCurrentTrack(),
-      handleTaskEitherError((error) => error, setTrack)
+      handleTaskEitherError((error) => error, setTrack),
     )();
   }, []);
 
@@ -52,7 +52,7 @@ function Actions({ value }: { value: number }) {
       TE.map(() => {
         showHUD("Rated " + "⭐".repeat(value));
         closeMainWindow();
-      })
+      }),
     )();
 
     pop();
