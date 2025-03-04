@@ -5,4 +5,4 @@
 * Add Fullscreen Text command
 * Add Fullscreen Clipboard command
 * Add Fullscreen Selection command
-* * Add a tool to support AI extensions
+* Add a tool to support AI extensions
