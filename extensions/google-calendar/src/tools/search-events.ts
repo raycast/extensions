@@ -4,9 +4,14 @@ type Input = {
   /**
    * Free text search terms to find events
    *
-   * @example "team meeting" or "lunch with John"
+   * @example When user asks "find my 1:1 with Beth", use query "beth" to find meetings where Beth is an attendee
+   * @example When user asks "show my team meetings", use query "team" to find relevant meetings
    *
    * @remarks
+   * - Focus on key identifying terms rather than guessing exact meeting titles
+   * - For 1:1s or meetings with specific people, search for the person's name only
+   * - For topic-based searches, use key topic words (e.g. "standup", "planning", "review")
+   *
    * Searches across these calendar event fields:
    * - summary/title
    * - description
