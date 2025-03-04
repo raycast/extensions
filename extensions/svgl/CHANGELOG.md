@@ -1,6 +1,12 @@
 # svgl Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [✨ AI Enhancements] - {PR_MERGE_DATE}
+
+AI Tools to:
+- Get SVG Logo
+- Get SVG Component
+
+## [Update] - 2025-02-21
 
 - Updated the SVG logo request form.  
 - Added the action `Visit SVG Brand Website` to open the SVG brand website in the browser.
