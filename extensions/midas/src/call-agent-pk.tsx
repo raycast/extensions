@@ -1,11 +1,22 @@
-import { Form, ActionPanel, Action, showToast, Toast, Icon, getPreferenceValues, Detail } from "@raycast/api";
-import { useState, useEffect } from "react";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  Icon,
+  getPreferenceValues,
+  Detail,
+  LocalStorage,
+} from "@raycast/api";
+import { useState, useEffect, useRef } from "react";
 import fetch from "node-fetch";
 import { config } from "./config";
 
 interface Preferences {
   authCode: string;
   privateKey: string;
+  lastSelectedChain?: Chain;
 }
 
 type Values = {
@@ -24,12 +35,61 @@ const AVAILABLE_CHAINS: { value: Chain; title: string }[] = [
   { value: "base", title: "Base" },
 ];
 
+// At the top of the file, outside the component
+let globalChain: Chain = "mode";
+
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<AIResponse | null>(null);
   const [command, setCommand] = useState("");
-  const [selectedChain, setSelectedChain] = useState<Chain>("mode");
+  const [selectedChain, setSelectedChain] = useState<Chain>(globalChain);
+  const isInitialMount = useRef(true);
+
+  // Load saved chain on mount
+  useEffect(() => {
+    let isSubscribed = true;
+    console.log("🔍 Loading saved chain...");
+
+    LocalStorage.getItem<Chain>("lastSelectedChain").then((savedChain) => {
+      if (!isSubscribed) return;
+
+      console.log("📥 Saved chain from storage:", savedChain);
+      if (savedChain) {
+        console.log("✅ Setting chain to:", savedChain);
+        globalChain = savedChain;
+        setSelectedChain(savedChain);
+      }
+      isInitialMount.current = false;
+    });
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, []);
+
+  // Save chain when it changes, but only after initial mount
+  useEffect(() => {
+    if (isInitialMount.current) return;
+
+    let isSubscribed = true;
+    console.log("💾 Saving chain to storage:", selectedChain);
+
+    LocalStorage.setItem("lastSelectedChain", selectedChain)
+      .then(() => {
+        if (!isSubscribed) return;
+        console.log("✅ Chain saved successfully");
+        globalChain = selectedChain;
+      })
+      .catch((error) => {
+        if (!isSubscribed) return;
+        console.error("❌ Error saving chain:", error);
+      });
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [selectedChain]);
 
   // Loading animation frames
   const loadingFrames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
