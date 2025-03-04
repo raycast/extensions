@@ -35,7 +35,7 @@ function isViewLoading(stage: HarmonyStage): boolean {
     HarmonyStage.STARTING_ACTIVITY,
     HarmonyStage.STOPPING_ACTIVITY,
     HarmonyStage.EXECUTING_COMMAND,
-    HarmonyStage.REFRESHING
+    HarmonyStage.REFRESHING,
   ];
   return loadingStages.includes(stage);
 }
