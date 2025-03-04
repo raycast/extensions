@@ -18,6 +18,8 @@ export interface HistoryItem {
   id: string;
   timestamp: number;
   prompt: string;
+  user_input?: string;
+  selected_text?: string;
   response: string;
   model: string;
   promptTokens: number;
@@ -28,6 +30,7 @@ export interface HistoryItem {
 // Cache instance for history
 const historyCache = new Cache();
 const HISTORY_KEY = "deepseeker_history";
+let selectedText = "";
 
 // Function to save history
 export function saveToHistory(item: HistoryItem): void {
@@ -70,7 +73,6 @@ export default function ResultView(
     const now = new Date();
     let duration = 0;
     const toast = await showToast(Toast.Style.Animated, toast_title);
-    let selectedText = "";
 
     if (use_selected_text) {
       try {
@@ -179,7 +181,9 @@ export default function ResultView(
       const historyItem: HistoryItem = {
         id: Date.now().toString(),
         timestamp: Date.now(),
-        prompt: user_input || prompt,
+        prompt: prompt,
+        user_input: user_input,
+        selected_text: selectedText,
         response: response,
         model: model,
         promptTokens: prompt_token_count,

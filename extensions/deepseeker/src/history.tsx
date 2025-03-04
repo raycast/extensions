@@ -8,13 +8,34 @@ function HistoryDetail({ item }: { item: HistoryItem }) {
     return new Date(timestamp).toLocaleString();
   };
 
+  // Combine all prompt information for display
+  let promptDetails = "";
+
+  // Add system prompt if it exists
+  if (item.prompt && item.prompt.trim()) {
+    promptDetails += "## System Prompt\n\n" + item.prompt + "\n\n";
+  }
+
+  // Add user input if it exists
+  if (item.user_input && item.user_input.trim()) {
+    promptDetails += "## User Input\n\n" + item.user_input + "\n\n";
+  }
+
+  // Add selected text if it exists
+  if (item.selected_text && item.selected_text.trim()) {
+    promptDetails += "## Selected Text\n\n" + item.selected_text + "\n\n";
+  }
+
+  // Always add the response
+  promptDetails += "## Response\n\n" + item.response;
+
   const metadata = (
     <Detail.Metadata>
       <Detail.Metadata.Label title="Date" text={formatDate(item.timestamp)} />
       <Detail.Metadata.Label title="Model" text={item.model} />
+      <Detail.Metadata.Separator />
       <Detail.Metadata.Label title="Prompt Tokens" text={item.promptTokens.toString()} />
       <Detail.Metadata.Label title="Response Tokens" text={item.responseTokens.toString()} />
-      <Detail.Metadata.Separator />
       <Detail.Metadata.Label title="Total Tokens" text={(item.promptTokens + item.responseTokens).toString()} />
       <Detail.Metadata.Label title="Cost" text={`${item.cost.toFixed(4)} cents`} />
     </Detail.Metadata>
@@ -22,11 +43,12 @@ function HistoryDetail({ item }: { item: HistoryItem }) {
 
   return (
     <Detail
-      markdown={item.response}
+      markdown={promptDetails}
       metadata={metadata}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Response" content={item.response} />
+          <Action.CopyToClipboard title="Copy Complete Session" content={promptDetails} />
           <Action.Paste title="Paste Response" content={item.response} />
           <Action
             title="Send to SideNote"
@@ -53,14 +75,31 @@ function HistoryListItem({
     return new Date(timestamp).toLocaleString();
   };
 
-  const formatPrompt = (prompt: string) => {
-    return prompt.length > 50 ? `${prompt.substring(0, 50)}...` : prompt;
+  // Generate a title based on available data
+  const getTitle = () => {
+    // Use user input as title if available
+    if (item.user_input && item.user_input.trim()) {
+      return item.user_input.length > 50 ? item.user_input.substring(0, 50) + "..." : item.user_input;
+    }
+
+    // Otherwise use first line of response
+    if (item.response) {
+      const firstLine = item.response.split("\n")[0].trim();
+      if (firstLine) {
+        // Remove markdown headers if present
+        const cleanTitle = firstLine.replace(/^#+\s+/, "");
+        return cleanTitle.length > 50 ? cleanTitle.substring(0, 50) + "..." : cleanTitle;
+      }
+      return item.response.length > 50 ? item.response.substring(0, 50) + "..." : item.response;
+    }
+
+    return "Query from " + formatDate(item.timestamp);
   };
 
   return (
     <List.Item
       key={item.id}
-      title={formatPrompt(item.prompt)}
+      title={getTitle()}
       subtitle={item.model}
       accessories={[{ text: formatDate(item.timestamp) }]}
       actions={
@@ -84,7 +123,33 @@ function HistoryListItem({
               <List.Item.Detail.Metadata.Label title="Date" text={formatDate(item.timestamp)} />
               <List.Item.Detail.Metadata.Label title="Model" text={item.model} />
               <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label title="Prompt" text={item.prompt} />
+
+              {/* Show system prompt if available */}
+              {item.prompt && item.prompt.trim() && (
+                <List.Item.Detail.Metadata.Label
+                  title="System Prompt"
+                  text={item.prompt.length > 100 ? item.prompt.substring(0, 100) + "..." : item.prompt}
+                />
+              )}
+
+              {/* Show user input if available */}
+              {item.user_input && item.user_input.trim() && (
+                <List.Item.Detail.Metadata.Label
+                  title="User Input"
+                  text={item.user_input.length > 100 ? item.user_input.substring(0, 100) + "..." : item.user_input}
+                />
+              )}
+
+              {/* Show selected text if available */}
+              {item.selected_text && item.selected_text.trim() && (
+                <List.Item.Detail.Metadata.Label
+                  title="Selected Text"
+                  text={
+                    item.selected_text.length > 100 ? item.selected_text.substring(0, 100) + "..." : item.selected_text
+                  }
+                />
+              )}
+
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label title="Prompt Tokens" text={item.promptTokens.toString()} />
               <List.Item.Detail.Metadata.Label title="Response Tokens" text={item.responseTokens.toString()} />
