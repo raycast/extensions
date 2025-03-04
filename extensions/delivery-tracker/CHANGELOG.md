@@ -1,6 +1,6 @@
 # Delivery Tracker Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-03-04
 
 Tracks deliveries, packages, and parcels.
 
