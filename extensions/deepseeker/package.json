@@ -691,6 +691,12 @@
           ]
         }
       ]
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "description": "View your DeepSeeker usage history",
+      "mode": "view"
     }
   ],
   "dependencies": {

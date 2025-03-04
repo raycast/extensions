@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Cache,
   Detail,
   getPreferenceValues,
   getSelectedText,
@@ -11,6 +12,43 @@ import {
 import { useEffect, useState } from "react";
 import { global_model, openai } from "./api";
 import { countToken, estimatePrice, sentToSideNote } from "./util";
+
+// Define history item type
+export interface HistoryItem {
+  id: string;
+  timestamp: number;
+  prompt: string;
+  response: string;
+  model: string;
+  promptTokens: number;
+  responseTokens: number;
+  cost: number;
+}
+
+// Cache instance for history
+const historyCache = new Cache();
+const HISTORY_KEY = "deepseeker_history";
+
+// Function to save history
+export function saveToHistory(item: HistoryItem): void {
+  const history: HistoryItem[] = getHistory();
+  history.unshift(item);
+
+  // Limit history to 100 items to prevent excessive storage
+  const limitedHistory = history.slice(0, 100);
+  historyCache.set(HISTORY_KEY, JSON.stringify(limitedHistory));
+}
+
+// Function to get history
+export function getHistory(): HistoryItem[] {
+  const data = historyCache.get(HISTORY_KEY);
+  if (!data) return [];
+  try {
+    return JSON.parse(data) as HistoryItem[];
+  } catch (e) {
+    return [];
+  }
+}
 
 export default function ResultView(
   prompt: string,
@@ -133,9 +171,22 @@ export default function ResultView(
   }, []);
 
   useEffect(() => {
-    if (loading == false) {
+    if (loading == false && response && !response.startsWith("⚠️")) {
       setCumulativeTokens(cumulative_tokens + prompt_token_count + response_token_count);
       setCumulativeCost(cumulative_cost + estimatePrice(prompt_token_count, response_token_count, model));
+
+      // Save to history
+      const historyItem: HistoryItem = {
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+        prompt: user_input || prompt,
+        response: response,
+        model: model,
+        promptTokens: prompt_token_count,
+        responseTokens: response_token_count,
+        cost: estimatePrice(prompt_token_count, response_token_count, model),
+      };
+      saveToHistory(historyItem);
     }
   }, [loading]);
 
