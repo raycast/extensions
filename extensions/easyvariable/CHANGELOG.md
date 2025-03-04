@@ -1,7 +1,7 @@
 # EasyVariable Changelog
 
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-03-04
 - Optimize interaction experience
 - Support Raycast Pro AI
 - Support Youdao dictionary
