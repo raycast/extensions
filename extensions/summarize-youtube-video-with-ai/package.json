@@ -48,7 +48,7 @@
               "title": "Raycast AI"
             }
           ],
-          "required": true
+          "required": false
         },
         {
           "name": "creativity",
