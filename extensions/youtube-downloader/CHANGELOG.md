@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Features] - {PR_MERGE_DATE}
+## [Features] - 2025-03-04
 
 - Add support for downloading all possible formats
 - Use a short & good video for placeholder
