@@ -4,7 +4,6 @@ import path from "node:path";
 import {
   Action,
   ActionPanel,
-  BrowserExtension,
   Clipboard,
   Detail,
   Form,
@@ -19,7 +18,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
 import { execa, ExecaError } from "execa";
-import { DownloadOptions, isValidHHMM, isValidUrl, parseHHMM, preferences } from "./utils.js";
+import { DownloadOptions, getActiveBrowserURL, isValidHHMM, isValidUrl, parseHHMM, preferences } from "./utils.js";
 
 export default function DownloadVideo() {
   const [error, setError] = useState(0);
@@ -222,10 +221,10 @@ export default function DownloadVideo() {
         }
       }
 
-      if (preferences.enableBrowserExtensionSupport) {
+      if (preferences.autoLoadUrlFromBrowserActiveTab) {
         try {
-          const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
-          if (tabUrl && isValidUrl(tabUrl)) setValue("url", tabUrl);
+          const activeUrl = await getActiveBrowserURL();
+          if (isValidUrl(activeUrl)) setValue("url", activeUrl);
         } catch {
           // Suppress the error if Raycast didn't find browser extension
         }

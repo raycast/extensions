@@ -1,5 +1,9 @@
 # Video Downloader Changelog
 
+## [Remove unnecessary dependency] - [PR_MERGE_DATE]
+
+- Remove Raycast browser-extension dependency from the extension to get the active tab URL
+
 ## [Improvements & Fixes] - 2025-02-21
 
 - Use `execa` instead of `nano-spawn` for advanced usages
