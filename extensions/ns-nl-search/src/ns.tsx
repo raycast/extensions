@@ -47,7 +47,7 @@ export default function Command() {
         isLoading={fromStationsIsLoading}
       >
         {(fromStations || { payload: [] }).payload.map((station) => {
-          return <Form.Dropdown.Item key={station.UICCode} value={station.UICCode} title={station.namen!.lang} />;
+          return <Form.Dropdown.Item key={station.UICCode} value={station.UICCode} title={station.namen?.lang || station.UICCode} />;
         })}
       </Form.Dropdown>
 
