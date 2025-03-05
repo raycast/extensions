@@ -63,6 +63,7 @@ function DocumentsForm() {
   const [highlightFields, setHighlightFields] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
+  const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const { push } = useNavigation();
 
   const operators: { value: admin.firestore.WhereFilterOp; label: string }[] = [
@@ -85,6 +86,7 @@ function DocumentsForm() {
     
     async function fetchCollections() {
       try {
+        setIsInitializing(true);
         const fetchedCollections = await getCollections();
         if (isMounted) {
           setCollections(fetchedCollections);
@@ -113,6 +115,7 @@ function DocumentsForm() {
       } finally {
         if (isMounted) {
           setIsLoading(false);
+          setIsInitializing(false);
         }
       }
     }
@@ -248,8 +251,8 @@ function DocumentsForm() {
         </Form.Dropdown>
       ) : (
         <Form.Description
-          title="No Collections Found"
-          text={error || "No collections found in your Firestore database. Please create a collection first."}
+          title={isInitializing ? "Firebase Initializing..." : "No Collections Found"}
+          text={error || (isInitializing ? "Please wait while Firebase is being initialized..." : "No collections found in your Firestore database. Please create a collection first.")}
         />
       )}
 
@@ -396,6 +399,45 @@ function DocumentList({ collectionName, highlightFields }: DocumentListProps) {
     return `https://console.firebase.google.com/project/${projectId}/firestore/databases/-default-/data/~2F${encodedCollection}~2F${encodedDocId}`;
   };
 
+  // Function to export all documents to JSON
+  const exportDocumentsToJson = async () => {
+    try {
+      // Ensure documents have id field
+      const docsWithId = documents.map(doc => {
+        // Create a copy of the document to avoid modifying the original
+        const docCopy = { ...doc };
+        
+        // If the document doesn't already have an id field in its data (not the Firestore ID)
+        if (!docCopy.hasOwnProperty('id')) {
+          docCopy.id = doc.id;
+        }
+        
+        return docCopy;
+      });
+      
+      // Create JSON string
+      const jsonData = JSON.stringify(docsWithId, null, 2);
+      
+      // Copy JSON to clipboard
+      await Clipboard.copy(jsonData);
+      
+      // Show success toast
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Documents Exported",
+        message: "JSON data copied to clipboard",
+      });
+      
+    } catch (error) {
+      console.error("Error exporting documents:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Export Failed",
+        message: "Failed to export documents to JSON",
+      });
+    }
+  };
+
   if (error) {
     return (
       <List
@@ -474,7 +516,10 @@ function DocumentList({ collectionName, highlightFields }: DocumentListProps) {
         </List.Section>
       )}
 
-      <List.Section title={`${documents.length} documents in ${collectionName}`}>
+      <List.Section 
+        title={`${documents.length} documents in ${collectionName}`}
+        subtitle={documents.length > 0 ? "⌘E to export all documents" : undefined}
+      >
         {documents.map((doc) => {
           // Create a formatted string with just field values separated by |
           const fieldValues = highlightFields.map(field => {
@@ -503,6 +548,11 @@ function DocumentList({ collectionName, highlightFields }: DocumentListProps) {
                     title="Copy Firestore URL"
                     content={getFirestoreUrl(doc.id)}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  />
+                  <Action
+                    title="Export All Documents to JSON"
+                    onAction={exportDocumentsToJson}
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
                   />
                 </ActionPanel>
               }
@@ -621,6 +671,45 @@ function FilteredDocumentList({
     return `https://console.firebase.google.com/project/${projectId}/firestore/databases/-default-/data/~2F${encodedCollection}~2F${encodedDocId}`;
   };
 
+  // Function to export all documents to JSON
+  const exportDocumentsToJson = async () => {
+    try {
+      // Ensure documents have id field
+      const docsWithId = documents.map(doc => {
+        // Create a copy of the document to avoid modifying the original
+        const docCopy = { ...doc };
+        
+        // If the document doesn't already have an id field in its data (not the Firestore ID)
+        if (!docCopy.hasOwnProperty('id')) {
+          docCopy.id = doc.id;
+        }
+        
+        return docCopy;
+      });
+      
+      // Create JSON string
+      const jsonData = JSON.stringify(docsWithId, null, 2);
+      
+      // Copy JSON to clipboard
+      await Clipboard.copy(jsonData);
+      
+      // Show success toast
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Documents Exported",
+        message: "JSON data copied to clipboard",
+      });
+      
+    } catch (error) {
+      console.error("Error exporting documents:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Export Failed",
+        message: "Failed to export documents to JSON",
+      });
+    }
+  };
+
   if (error) {
     return (
       <List
@@ -699,7 +788,10 @@ function FilteredDocumentList({
         </List.Section>
       )}
 
-      <List.Section title={`${documents.length} documents matching filter: ${filterDescription}`}>
+      <List.Section 
+        title={`${documents.length} documents matching filter: ${filterDescription}`}
+        subtitle={documents.length > 0 ? "⌘E to export all documents" : undefined}
+      >
         {documents.map((doc) => {
           // Create a formatted string with just field values separated by |
           const fieldValues = highlightFields.map(field => {
@@ -728,6 +820,11 @@ function FilteredDocumentList({
                     title="Copy Firestore URL"
                     content={getFirestoreUrl(doc.id)}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  />
+                  <Action
+                    title="Export All Documents to JSON"
+                    onAction={exportDocumentsToJson}
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
                   />
                 </ActionPanel>
               }
