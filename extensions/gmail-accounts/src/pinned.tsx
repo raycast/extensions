@@ -37,7 +37,7 @@ function getAllowedMovements(pinnedAccounts: string[], account: Account): Pinned
   return movements;
 }
 
-type PinnedMovement = "up" | "right" | "down" | "left";
+type PinnedMovement = "up" | "down";
 
 export type PinMethods = {
   pin: (account: Account) => void;
