@@ -13,8 +13,6 @@ export default async function extractTranscript(url: string, language: string = 
     throw new Error("ffmpeg is not installed");
   }
 
-  console.log(url);
-
   // First get video info to get the title
   const videoInfo = await execa(
     preferences.ytdlPath,
