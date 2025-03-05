@@ -5,18 +5,15 @@ export function formatRepositories(repositories: GitHubRepository[]): string {
     return "## Top Repositories\n\nNo repositories found.";
   }
 
-  const repoList = repositories
+  const tableHeader = "| Repository | Description | Stats | Updated |\n| --- | --- | --- | --- |";
+
+  const tableRows = repositories
     .map((repo) => {
       const updatedDate = new Date(repo.updated_at).toLocaleDateString();
-      return `
-### [${repo.name}](${repo.html_url})
-
-${repo.description || "No description provided"}
-
-⭐ ${repo.stargazers_count} | 🍴 ${repo.forks_count} | ${repo.language || "No language specified"} | Updated: ${updatedDate}
-`;
+      const stats = `⭐ ${repo.stargazers_count} • 🍴 ${repo.forks_count} • ${repo.language || "N/A"}`;
+      return `| [${repo.name}](${repo.html_url}) | ${repo.description || "No description"} | ${stats} | ${updatedDate} |`;
     })
     .join("\n");
 
-  return `## Top Repositories\n\n${repoList}`;
+  return `## Top Repositories\n\n${tableHeader}\n${tableRows}`;
 }
