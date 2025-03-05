@@ -9,4 +9,4 @@ Access your Google Drive files effortlessly.
 
 ## Roadmap
 
-- [ ] 🏠 Search for & browse Google Drive files
+- [ ] 🏠 Grid view for `Search Google Drive Files`
