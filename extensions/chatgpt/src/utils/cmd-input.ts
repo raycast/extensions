@@ -24,7 +24,16 @@ export async function fetchContent(source: "clipboard" | "selectedText" | "brows
     try {
       content = await BrowserExtension.getContent({ format: "markdown" });
     } catch (err) {
-      error = getErrorMessage(err, "Could not connect to the Browser Extension. Make sure a Browser Tab is focused.");
+      const defaultMsg =
+        "Could not connect to the Browser Extension. Make sure a Browser Tab is focused and the Raycast browser extension is installed.";
+      error = getErrorMessage(err, defaultMsg);
+      if (error.startsWith("Could not connect to the Browser Extension.")) {
+        // Replace the default message with a more detailed message.
+        error = defaultMsg;
+      } else if (error.startsWith("Could not get the content of the tab")) {
+        error =
+          "Could not get the content of the tab. Please check that the Raycast browser extension is installed and enabled. If everything is correct, try reopening the web browser.";
+      }
     }
   }
 

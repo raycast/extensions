@@ -7,7 +7,8 @@
   "author": "pernielsentikaer",
   "contributors": [
     "mathieudutour",
-    "thomaslombart"
+    "thomaslombart",
+    "CreazioN"
   ],
   "keywords": [
     "menubar message",
@@ -44,13 +45,75 @@
       "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "set-one-thing",
+      "title": "Set One Thing",
+      "description": "Set a thing to display in your Menu Bar."
+    },
+    {
+      "name": "remove-one-thing",
+      "title": "Remove One Thing",
+      "description": "Clear the thing displayed in your Menu Bar."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "mocks": {
+          "set-one-thing": "One thing set"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "text": {
+                  "includes": "biscuit!"
+                }
+              },
+              "name": "set-one-thing"
+            }
+          }
+        ],
+        "input": "@one-thing set text to Eat a biscuit!"
+      },
+      {
+        "input": "@one-thing remove",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "remove-one-thing",
+              "arguments": {}
+            }
+          }
+        ],
+        "mocks": {
+          "remove-one-thing": "One thing cleared"
+        }
+      },
+      {
+        "input": "@one-thing clear menu bar",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "remove-one-thing",
+              "arguments": {}
+            }
+          }
+        ],
+        "mocks": {
+          "remove-one-thing": "One thing cleared"
+        }
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.68.0"
+    "@raycast/api": "^1.79.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
     "react": "^18.2.0",

@@ -35,6 +35,7 @@ import { formatTitle } from "./helpers/formatTitle";
 import { getErrorMessage } from "./helpers/getError";
 
 import { useSpotifyAppData } from "./hooks/useSpotifyAppData";
+import { seek } from "./api/seek";
 
 function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const { hideArtistName, maxTextLength, iconType } = getPreferenceValues<Preferences.NowPlayingMenuBar>();
@@ -190,6 +191,39 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     const showName = show.name;
     title = formatTitle({ name, artistName: showName, hideArtistName, maxTextLength });
     coverImageUrl = show.images.slice(-1)[0]?.url || "";
+
+    menuItems = (
+      <>
+        <MenuBarExtra.Item
+          icon={Icon.RotateClockwise}
+          title="Skip 15 seconds"
+          onAction={async () => {
+            try {
+              const currentPositionSeconds = (currentlyPlayingData?.progress_ms || 0) / 1000;
+              await seek(currentPositionSeconds + 15);
+              await currentlyPlayingRevalidate();
+            } catch (err) {
+              const error = getErrorMessage(err);
+              showHUD(error);
+            }
+          }}
+        />
+        <MenuBarExtra.Item
+          icon={Icon.RotateAntiClockwise}
+          title="Back 15 seconds"
+          onAction={async () => {
+            try {
+              const currentPositionSeconds = (currentlyPlayingData?.progress_ms || 0) / 1000;
+              await seek(currentPositionSeconds - 15);
+              await currentlyPlayingRevalidate();
+            } catch (err) {
+              const error = getErrorMessage(err);
+              showHUD(error);
+            }
+          }}
+        />
+      </>
+    );
   }
 
   return (
