@@ -335,27 +335,95 @@ interface DocumentListProps {
 }
 
 function DocumentList({ collectionName, limit }: DocumentListProps) {
-  const [documents, setDocuments] = useState<admin.firestore.DocumentData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | undefined>();
-  const [projectId, setProjectId] = useState<string>("");
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [projectId, setProjectId] = useState<string | null>(null);
   const [highlightFields, setHighlightFields] = useState<string>("");
   const { push, pop } = useNavigation();
-
-  // Fetch documents when component mounts or when collection/limit changes
+  
+  // Create a searchable version of documents with all fields flattened for search
+  const [searchableDocuments, setSearchableDocuments] = useState<any[]>([]);
+  
   useEffect(() => {
     loadProjectId();
     fetchDocuments();
-  }, [collectionName, limit]);
-
-  // Force re-render when highlightFields changes
+  }, [collectionName]);
+  
+  // Update searchable documents whenever documents or highlight fields change
   useEffect(() => {
-    console.log("Highlight fields updated:", highlightFields);
-    // Log the first document structure to understand its format
-    if (documents.length > 0) {
-      console.log("First document structure:", JSON.stringify(documents[0], null, 2));
-    }
-  }, [highlightFields, documents]);
+    prepareSearchableDocuments();
+  }, [documents, highlightFields]);
+  
+  // Prepare searchable version of documents
+  const prepareSearchableDocuments = () => {
+    console.log("Preparing searchable documents with highlight fields:", highlightFields);
+    
+    const searchable = documents.map(doc => {
+      // Start with the basic document
+      const searchableDoc = { ...doc };
+      
+      // Add a searchText property that contains all searchable content
+      let searchContent = doc.id; // Always include ID
+      
+      // Add highlighted fields with higher priority (repeat them multiple times)
+      if (doc.data && highlightFields && highlightFields.trim() !== "") {
+        const fieldArray = highlightFields.split(',').map(f => f.trim()).filter(f => f !== "");
+        console.log(`Processing highlighted fields for doc ${doc.id}:`, fieldArray);
+        
+        for (const field of fieldArray) {
+          if (doc.data[field] !== undefined) {
+            const value = doc.data[field];
+            if (value !== null) {
+              let stringValue = "";
+              if (typeof value === 'object') {
+                try {
+                  stringValue = JSON.stringify(value);
+                } catch (e) {
+                  stringValue = String(value);
+                }
+              } else {
+                stringValue = String(value);
+              }
+              
+              // Add the field value multiple times to increase its weight in search
+              searchContent += ` ${stringValue} ${stringValue} ${stringValue}`;
+              // Also add with field name for context
+              searchContent += ` ${field}:${stringValue}`;
+              
+              console.log(`Added highlighted field ${field} with value "${stringValue}" to searchContent`);
+            }
+          }
+        }
+      }
+      
+      // Then add all other fields
+      if (doc.data) {
+        for (const [key, value] of Object.entries(doc.data)) {
+          if (value !== null && value !== undefined) {
+            let stringValue = "";
+            if (typeof value === 'object') {
+              try {
+                stringValue = JSON.stringify(value);
+              } catch (e) {
+                stringValue = String(value);
+              }
+            } else {
+              stringValue = String(value);
+            }
+            
+            searchContent += ` ${key} ${stringValue}`;
+          }
+        }
+      }
+      
+      searchableDoc.searchText = searchContent.toLowerCase();
+      console.log(`Search text for doc ${doc.id}:`, searchableDoc.searchText);
+      return searchableDoc;
+    });
+    
+    setSearchableDocuments(searchable);
+  };
 
   async function loadProjectId() {
     try {
@@ -370,7 +438,7 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
 
   async function fetchDocuments() {
     setIsLoading(true);
-    setError(undefined);
+    setError(null);
     try {
       const docs = await getDocuments(collectionName, limit);
       console.log("Fetched documents:", docs);
@@ -394,33 +462,6 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
       setIsLoading(false);
     }
   }
-
-  const getKeywords = (doc: any): string[] => {
-    const keywords: string[] = [];
-    
-    // Add document ID as a keyword
-    if (doc && doc.id) {
-      keywords.push(doc.id);
-    }
-    
-    // Add highlighted field values as keywords
-    if (doc && doc.data && highlightFields) {
-      const fieldArray = highlightFields.split(',');
-      for (const field of fieldArray) {
-        const trimmedField = field.trim();
-        if (trimmedField && doc.data[trimmedField] !== undefined) {
-          const value = doc.data[trimmedField];
-          if (typeof value === 'object' && value !== null) {
-            keywords.push(JSON.stringify(value));
-          } else if (value !== null) {
-            keywords.push(String(value));
-          }
-        }
-      }
-    }
-    
-    return keywords;
-  };
 
   const getFirestoreUrl = (docId: string): string => {
     if (!projectId) return "";
@@ -477,8 +518,9 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search documents..."
+      searchBarPlaceholder="Search documents by ID or field values..."
       navigationTitle={`Documents in ${collectionName}`}
+      filtering={true}
       actions={
         <ActionPanel>
           <Action title="Refresh" onAction={fetchDocuments} />
@@ -527,7 +569,7 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
       </List.Section>
 
       <List.Section title="Documents" subtitle={documents.length > 0 ? `${documents.length} documents` : undefined}>
-        {documents.map((doc) => {
+        {searchableDocuments.map((doc) => {
           // Create a subtitle with highlighted field values
           let subtitle = "";
           
@@ -551,11 +593,20 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
             subtitle = fieldValues.join(' | ');
           }
 
+          const keywords = [
+            doc.id,
+            subtitle, // Include the subtitle which contains highlighted field values
+            doc.searchText // Include the full searchText for comprehensive search
+          ].filter(Boolean);
+          
+          console.log(`Document ${doc.id} keywords:`, keywords);
+
           return (
             <List.Item
               key={doc.id}
               title={doc.id}
               subtitle={subtitle}
+              keywords={keywords}
               actions={
                 <ActionPanel>
                   <Action
@@ -608,27 +659,95 @@ function FilteredDocumentList({
   fieldValue,
   limit,
 }: FilteredDocumentListProps) {
-  const [documents, setDocuments] = useState<admin.firestore.DocumentData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | undefined>();
-  const [projectId, setProjectId] = useState<string>("");
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [projectId, setProjectId] = useState<string | null>(null);
   const [highlightFields, setHighlightFields] = useState<string>("");
   const { push, pop } = useNavigation();
-
-  // Fetch documents when component mounts or when filter criteria changes
+  
+  // Create a searchable version of documents with all fields flattened for search
+  const [searchableDocuments, setSearchableDocuments] = useState<any[]>([]);
+  
   useEffect(() => {
     loadProjectId();
     fetchDocuments();
-  }, [collectionName, fieldName, operator, fieldValue, limit]);
-
-  // Force re-render when highlightFields changes
+  }, [collectionName, fieldName, operator, fieldValue]);
+  
+  // Update searchable documents whenever documents or highlight fields change
   useEffect(() => {
-    console.log("Highlight fields updated:", highlightFields);
-    // Log the first document structure to understand its format
-    if (documents.length > 0) {
-      console.log("First document structure:", JSON.stringify(documents[0], null, 2));
-    }
-  }, [highlightFields, documents]);
+    prepareSearchableDocuments();
+  }, [documents, highlightFields]);
+  
+  // Prepare searchable version of documents
+  const prepareSearchableDocuments = () => {
+    console.log("Preparing searchable documents with highlight fields:", highlightFields);
+    
+    const searchable = documents.map(doc => {
+      // Start with the basic document
+      const searchableDoc = { ...doc };
+      
+      // Add a searchText property that contains all searchable content
+      let searchContent = doc.id; // Always include ID
+      
+      // Add highlighted fields with higher priority (repeat them multiple times)
+      if (doc.data && highlightFields && highlightFields.trim() !== "") {
+        const fieldArray = highlightFields.split(',').map(f => f.trim()).filter(f => f !== "");
+        console.log(`Processing highlighted fields for doc ${doc.id}:`, fieldArray);
+        
+        for (const field of fieldArray) {
+          if (doc.data[field] !== undefined) {
+            const value = doc.data[field];
+            if (value !== null) {
+              let stringValue = "";
+              if (typeof value === 'object') {
+                try {
+                  stringValue = JSON.stringify(value);
+                } catch (e) {
+                  stringValue = String(value);
+                }
+              } else {
+                stringValue = String(value);
+              }
+              
+              // Add the field value multiple times to increase its weight in search
+              searchContent += ` ${stringValue} ${stringValue} ${stringValue}`;
+              // Also add with field name for context
+              searchContent += ` ${field}:${stringValue}`;
+              
+              console.log(`Added highlighted field ${field} with value "${stringValue}" to searchContent`);
+            }
+          }
+        }
+      }
+      
+      // Then add all other fields
+      if (doc.data) {
+        for (const [key, value] of Object.entries(doc.data)) {
+          if (value !== null && value !== undefined) {
+            let stringValue = "";
+            if (typeof value === 'object') {
+              try {
+                stringValue = JSON.stringify(value);
+              } catch (e) {
+                stringValue = String(value);
+              }
+            } else {
+              stringValue = String(value);
+            }
+            
+            searchContent += ` ${key} ${stringValue}`;
+          }
+        }
+      }
+      
+      searchableDoc.searchText = searchContent.toLowerCase();
+      console.log(`Search text for doc ${doc.id}:`, searchableDoc.searchText);
+      return searchableDoc;
+    });
+    
+    setSearchableDocuments(searchable);
+  };
 
   async function loadProjectId() {
     try {
@@ -643,26 +762,14 @@ function FilteredDocumentList({
 
   async function fetchDocuments() {
     setIsLoading(true);
-    setError(undefined);
+    setError(null);
     try {
       const docs = await queryDocuments(collectionName, fieldName, operator, fieldValue, limit);
-      console.log("Fetched filtered documents:", docs);
-      if (docs.length > 0) {
-        console.log("First document structure:", JSON.stringify(docs[0], null, 2));
-        console.log("Document keys:", Object.keys(docs[0]));
-        if (docs[0].data) {
-          console.log("Document data keys:", Object.keys(docs[0].data));
-        }
-      }
+      console.log("Fetched documents:", docs);
       setDocuments(docs);
     } catch (error) {
       console.error("Error fetching documents:", error);
-      setError(`Failed to fetch documents: ${error instanceof Error ? error.message : String(error)}`);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Fetch Documents",
-        message: "An error occurred while fetching documents",
-      });
+      setError(String(error));
     } finally {
       setIsLoading(false);
     }
@@ -671,33 +778,6 @@ function FilteredDocumentList({
   // Format the field value for display
   const formattedValue = typeof fieldValue === 'object' ? JSON.stringify(fieldValue) : String(fieldValue);
   const filterDescription = `${fieldName} ${operator} ${formattedValue}`;
-
-  const getKeywords = (doc: any): string[] => {
-    const keywords: string[] = [];
-    
-    // Add document ID as a keyword
-    if (doc && doc.id) {
-      keywords.push(doc.id);
-    }
-    
-    // Add highlighted field values as keywords
-    if (doc && doc.data && highlightFields) {
-      const fieldArray = highlightFields.split(',');
-      for (const field of fieldArray) {
-        const trimmedField = field.trim();
-        if (trimmedField && doc.data[trimmedField] !== undefined) {
-          const value = doc.data[trimmedField];
-          if (typeof value === 'object' && value !== null) {
-            keywords.push(JSON.stringify(value));
-          } else if (value !== null) {
-            keywords.push(String(value));
-          }
-        }
-      }
-    }
-    
-    return keywords;
-  };
 
   const getFirestoreUrl = (docId: string): string => {
     if (!projectId) return "";
@@ -754,8 +834,9 @@ function FilteredDocumentList({
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search documents..."
+      searchBarPlaceholder="Search documents by ID or field values..."
       navigationTitle={`Filtered Documents in ${collectionName}`}
+      filtering={true}
       actions={
         <ActionPanel>
           <Action title="Refresh" onAction={fetchDocuments} />
@@ -804,7 +885,7 @@ function FilteredDocumentList({
       </List.Section>
 
       <List.Section title="Documents" subtitle={`${documents.length} documents matching ${filterDescription}`}>
-        {documents.map((doc) => {
+        {searchableDocuments.map((doc) => {
           // Create a subtitle with highlighted field values
           let subtitle = "";
           
@@ -828,11 +909,20 @@ function FilteredDocumentList({
             subtitle = fieldValues.join(' | ');
           }
 
+          const keywords = [
+            doc.id,
+            subtitle, // Include the subtitle which contains highlighted field values
+            doc.searchText // Include the full searchText for comprehensive search
+          ].filter(Boolean);
+          
+          console.log(`Document ${doc.id} keywords:`, keywords);
+
           return (
             <List.Item
               key={doc.id}
               title={doc.id}
               subtitle={subtitle}
+              keywords={keywords}
               actions={
                 <ActionPanel>
                   <Action
