@@ -15,7 +15,12 @@ export function formatUserProfile(user: GitHubUser): string {
     created_at,
   } = user;
 
-  const createdDate = new Date(created_at).toLocaleDateString();
+  // Format the date consistently using date-fns
+  const createdDate = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date(created_at));
   const blogLink = blog ? `[${blog}](${blog.startsWith("http") ? blog : `https://${blog}`})` : "Not specified";
   const twitterInfo = twitter_username
     ? `[@${twitter_username}](https://twitter.com/${twitter_username})`
@@ -28,7 +33,7 @@ ${bio || "No bio provided"}
 
 | **Basic Information** | **Value** | **Stats** | **Value** |
 | --- | --- | --- | --- |
-| 👨‍💼 Company | ${company || "Not specified"} | 👥 Followers | ${followers} |
+| 🏢 Company | ${company || "Not specified"} | 👥 Followers | ${followers} |
 | 📍 Location | ${location || "Not specified"} | 👤 Following | ${following} |
 | 🔗 Website | ${blogLink} | 📚 Repositories | ${public_repos} |
 | 🐦 Twitter | ${twitterInfo} | 📅 Joined | ${createdDate} |

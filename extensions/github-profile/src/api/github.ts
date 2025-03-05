@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import axios from "axios";
 
 interface Preferences {
@@ -66,14 +67,7 @@ export const fetchUserProfile = async (username: string): Promise<GitHubUser> =>
     const response = await axios.get(`https://api.github.com/users/${username}`, { headers });
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 403) {
-      const rateLimitMessage = "GitHub API rate limit exceeded. ";
-      const authMessage = preferences.githubToken
-        ? "Please check your token's validity."
-        : "Please add a GitHub personal access token in extension preferences to increase the rate limit.";
-
-      throw new Error(rateLimitMessage + authMessage);
-    }
+    showFailureToast("Failed to fetch GitHub profile");
     throw error;
   }
 };
@@ -143,8 +137,7 @@ export const fetchContributionData = async (username: string): Promise<Contribut
         },
       },
     );
-
-    const calendarData = response.data.data.user.contributionsCollection.contributionCalendar;
+    const calendarData = response.data?.data?.user?.contributionsCollection?.contributionCalendar;
 
     // Transform the data to match our interface
     const weeks = calendarData.weeks.map(
@@ -167,8 +160,8 @@ export const fetchContributionData = async (username: string): Promise<Contribut
     };
   } catch (error) {
     console.error("Error fetching contribution data:", error);
-    // Fall back to mock data if API call fails
-    return generateMockContributionData();
+    // do nothing, return empty data
+    return { contributionCalendar: { totalContributions: 0, weeks: [] } };
   }
 };
 
