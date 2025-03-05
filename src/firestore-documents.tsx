@@ -542,8 +542,8 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
       <List.Section title="Highlight Fields" subtitle={documents.length > 0 ? `${documents.length} documents` : undefined}>
         <List.Item
           title="Highlight Fields"
-          subtitle="Comma-separated list of fields to highlight"
-          accessories={[{ text: highlightFields || "None" }]}
+          subtitle={highlightFields || "No fields selected"}
+          accessories={[{ text: "Edit" }]}
           actions={
             <ActionPanel>
               <Action
@@ -588,27 +588,20 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
             const fieldNames = highlightFields.split(',').map(f => f.trim()).filter(f => f !== "");
             const fieldValues = [];
             
-            console.log(`Document ${doc.id} - Looking for fields:`, fieldNames);
-            
             for (const fieldName of fieldNames) {
               // Try to access the field directly from the document
               if (doc[fieldName] !== undefined) {
                 const value = formatFieldValue(doc[fieldName]);
-                fieldValues.push(`${fieldName}: ${value}`);
-                console.log(`Found field ${fieldName} directly on document:`, doc[fieldName]);
+                fieldValues.push(value);
               } 
               // Also try to access it from doc.data if it exists
               else if (doc.data && doc.data[fieldName] !== undefined) {
                 const value = formatFieldValue(doc.data[fieldName]);
-                fieldValues.push(`${fieldName}: ${value}`);
-                console.log(`Found field ${fieldName} in doc.data:`, doc.data[fieldName]);
-              } else {
-                console.log(`Field ${fieldName} not found in document ${doc.id}`);
+                fieldValues.push(value);
               }
             }
             
             subtitle = fieldValues.join(' | ');
-            console.log(`Document ${doc.id} subtitle:`, subtitle);
           }
 
           return (
@@ -616,14 +609,6 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
               key={doc.id}
               title={doc.id}
               subtitle={subtitle}
-              accessories={[
-                { 
-                  text: doc.data ? `${Object.keys(doc.data).length} fields` : 
-                        (Object.keys(doc).length - 1) + " fields", // -1 for the id field
-                  tooltip: "Number of fields"
-                }
-              ]}
-              keywords={getKeywords(doc)}
               actions={
                 <ActionPanel>
                   <Action
@@ -834,8 +819,8 @@ function FilteredDocumentList({
       <List.Section title="Highlight Fields" subtitle={documents.length > 0 ? `${documents.length} documents` : undefined}>
         <List.Item
           title="Highlight Fields"
-          subtitle="Comma-separated list of fields to highlight"
-          accessories={[{ text: highlightFields || "None" }]}
+          subtitle={highlightFields || "No fields selected"}
+          accessories={[{ text: "Edit" }]}
           actions={
             <ActionPanel>
               <Action
@@ -880,27 +865,20 @@ function FilteredDocumentList({
             const fieldNames = highlightFields.split(',').map(f => f.trim()).filter(f => f !== "");
             const fieldValues = [];
             
-            console.log(`Document ${doc.id} - Looking for fields:`, fieldNames);
-            
             for (const fieldName of fieldNames) {
               // Try to access the field directly from the document
               if (doc[fieldName] !== undefined) {
                 const value = formatFieldValue(doc[fieldName]);
-                fieldValues.push(`${fieldName}: ${value}`);
-                console.log(`Found field ${fieldName} directly on document:`, doc[fieldName]);
+                fieldValues.push(value);
               } 
               // Also try to access it from doc.data if it exists
               else if (doc.data && doc.data[fieldName] !== undefined) {
                 const value = formatFieldValue(doc.data[fieldName]);
-                fieldValues.push(`${fieldName}: ${value}`);
-                console.log(`Found field ${fieldName} in doc.data:`, doc.data[fieldName]);
-              } else {
-                console.log(`Field ${fieldName} not found in document ${doc.id}`);
+                fieldValues.push(value);
               }
             }
             
             subtitle = fieldValues.join(' | ');
-            console.log(`Document ${doc.id} subtitle:`, subtitle);
           }
 
           return (
@@ -908,13 +886,6 @@ function FilteredDocumentList({
               key={doc.id}
               title={doc.id}
               subtitle={subtitle}
-              accessories={[
-                { 
-                  text: doc.data ? `${Object.keys(doc.data).length} fields` : 
-                        (Object.keys(doc).length - 1) + " fields", // -1 for the id field
-                  tooltip: "Number of fields"
-                }
-              ]}
               actions={
                 <ActionPanel>
                   <Action
