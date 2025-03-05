@@ -9,7 +9,8 @@
   "author": "xmok",
   "contributors": [
     "alexs",
-    "peduarte"
+    "peduarte",
+    "pernielsentikaer"
   ],
   "categories": [
     "Communication",
@@ -132,19 +133,72 @@
   "ai": {
     "evals": [
       {
-        "input": "Remind laura@acme.app to check us in at the hotel"
+        "input": "@resend Remind laura@acme.app to check us in at the hotel"
       },
       {
-        "input": "Add bruno@acme.app to my General audience"
+        "input": "@resend Add bruno@acme.app to my General audience",
+        "mocks": {
+          "create-contact": {
+            "data": {
+              "id": "bca7c383-3ada-49eb-8b8b-7d598017203e",
+              "object": "contact"
+            },
+            "error": null
+          },
+          "list-audiences": {
+            "data": {
+              "data": [
+                {
+                  "created_at": "2024-11-27 15:11:12.377216+00",
+                  "id": "44479043-4b94-49a0-aa57-dc73532a0a5a",
+                  "name": "Monthly Newsletter"
+                },
+                {
+                  "created_at": "2024-11-27 14:49:27.73494+00",
+                  "id": "f662d68f-c2fd-4945-9577-ff2b31247a50",
+                  "name": "Test List"
+                },
+                {
+                  "created_at": "2023-11-07 15:51:03.473326+00",
+                  "id": "65d0862b-6213-4c59-8421-1e04e7683bfa",
+                  "name": "General"
+                }
+              ],
+              "object": "list"
+            },
+            "error": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "list-audiences"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "audienceId": "65d0862b-6213-4c59-8421-1e04e7683bfa",
+                "audienceName": "General",
+                "email": "bruno@acme.app",
+                "firstName": "Bruno",
+                "lastName": "Unknown"
+              },
+              "name": "create-contact"
+            }
+          }
+        ]
       },
       {
-        "input": "Email Bruno with the selected file in @finder"
+        "input": "@resend Email Bruno with the selected file in @finder"
       }
     ]
   },
   "dependencies": {
     "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.18.0",
+    "cross-fetch": "^4.1.0",
     "node-fetch": "^3.3.1",
     "resend": "^4.1.2"
   },

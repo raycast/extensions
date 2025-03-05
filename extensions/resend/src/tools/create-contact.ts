@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import { API_KEY } from "../utils/constants";
 import { Tool } from "@raycast/api";
+import "cross-fetch/polyfill";
 
 const resend = new Resend(API_KEY);
 

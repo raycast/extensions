@@ -3,6 +3,7 @@ import { API_KEY } from "../utils/constants";
 import { Tool, getPreferenceValues } from "@raycast/api";
 import fs from "fs";
 import path from "path";
+import "cross-fetch/polyfill";
 
 const resend = new Resend(API_KEY);
 
