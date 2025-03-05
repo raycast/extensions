@@ -39,7 +39,7 @@ This extension accesses Chrome cookies to retrieve your Google account informati
 - Does not send your data to any external servers except Google's own services
 - Stores a cache of your accounts and pinned preferences locally
 
-The extension needs these permissions to show you which accounts you're logged into. If you have security concerns, you can review the source code to see exactly how your data is handled.
+The extension needs these permissions to show you which accounts you're logged into. If you have security concerns, you can review the [source code](https://github.com/raycast/extensions/tree/main/extensions/gmail-accounts) to see exactly how your data is handled.
 
 ## Requirements
 
