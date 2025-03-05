@@ -4,7 +4,7 @@ import path from "path";
 import { Video } from "./types.js";
 import { preferences } from "./utils.js";
 
-export default async function extractTranscript(url: string, language?: string = "en") {
+export default async function extractTranscript(url: string, language: string = "en") {
   // Validate yt-dlp exists
   if (!fs.existsSync(preferences.ytdlPath)) {
     throw new Error("yt-dlp is not installed");
@@ -12,6 +12,8 @@ export default async function extractTranscript(url: string, language?: string =
   if (!fs.existsSync(preferences.ffmpegPath)) {
     throw new Error("ffmpeg is not installed");
   }
+
+  console.log(url);
 
   // First get video info to get the title
   const videoInfo = await execa(
