@@ -33,6 +33,10 @@ export class PackageTrackAPI {
           .catch((error) => console.error("Error deleting track:", error));
 
         return trackValue;
+      })
+      .catch((error) => {
+        console.error("API request failed:", error);
+        throw error;
       });
   }
 
