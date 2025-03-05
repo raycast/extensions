@@ -1,6 +1,6 @@
 # Raycast Port Changelog
 
-## [New Feature] - {PR_MERGE_DATE}
+## [New Feature] - 2025-03-05
 
 - Add port for Window Management API
 - Fix typos in the API documentation
