@@ -35,7 +35,7 @@ export type GetDomainsResponse = {
 };
 export type AddDomainRequest = {
   name: string;
-  region?: "us-east-1" | "eu-west-1" | "sa-east-1";
+  region?: "us-east-1" | "eu-west-1" | "sa-east-1" | "ap-northeast-1";
 };
 export type AddDomainRequestForm = {
   name: string;
