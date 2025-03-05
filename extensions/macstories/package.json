@@ -12,8 +12,7 @@
   "commands": [
     {
       "name": "browse-articles",
-      "title": "Browse Articles",
-      "subtitle": "List the latest articles from MacStories",
+      "title": "Browse MacStories Articles",
       "description": "List the latest articles from MacStories",
       "mode": "view"
     }
