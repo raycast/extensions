@@ -1,4 +1,5 @@
 import { getSelectedText, open, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function openSelectedLink() {
   try {
