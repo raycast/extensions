@@ -58,17 +58,6 @@ export default function DownloadVideo() {
       options.push("--format", downloadFormat);
       options.push("--recode-video", recodeFormat);
 
-      // if (!values.startTime && values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*0:00-${values.endTime}`);
-      // } else if (values.startTime && !values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*${values.startTime}-*`);
-      // } else if (values.startTime && values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*${values.startTime}-${values.endTime}`);
-      // }
-
       const toast = await showToast({
         title: "Downloading Video",
         style: Toast.Style.Animated,
