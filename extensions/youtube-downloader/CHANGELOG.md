@@ -1,5 +1,12 @@
 # Video Downloader Changelog
 
+## [Features] - 2025-03-05
+
+Enhanced extension with AI. You can now download videos and extract transcripts by @-mentioning the extension in Raycast AI.
+
+- Add a new tool for downloading videos
+- Add a new tool for extracting transcripts
+
 ## [Features] - 2025-03-04
 
 - Add support for downloading all possible formats
