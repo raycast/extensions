@@ -346,6 +346,10 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
   const [searchText, setSearchText] = useState<string>("");
   const [filteredDocuments, setFilteredDocuments] = useState<any[]>([]);
   
+  // For sorting functionality
+  const [sortField, setSortField] = useState<string>("id");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  
   useEffect(() => {
     loadProjectId();
     fetchDocuments();
@@ -356,11 +360,21 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
     filterDocuments();
   }, [searchText, documents, highlightFields]);
   
+  // Sort documents whenever sort field, sort order, or filtered documents change
+  useEffect(() => {
+    // Only sort if we're not in the middle of filtering
+    // This prevents overriding the filtered results
+    if (!searchText || searchText.trim() === "") {
+      sortDocuments();
+    }
+  }, [sortField, sortOrder, documents]);
+  
   // Custom document filtering function
   const filterDocuments = () => {
-    // If no search text, show all documents
+    // If no search text, show all documents and sort them
     if (!searchText || searchText.trim() === "") {
-      setFilteredDocuments(documents);
+      // Don't set filtered documents directly, let the sort function handle it
+      sortDocuments();
       return;
     }
     
@@ -433,7 +447,41 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
     });
     
     console.log(`Filtered ${documents.length} documents to ${filtered.length} matches`);
-    setFilteredDocuments(filtered);
+    
+    // Sort the filtered documents
+    const sorted = sortDocumentArray(filtered);
+    setFilteredDocuments(sorted);
+  };
+  
+  // Sort documents based on selected field and order
+  const sortDocuments = () => {
+    if (!documents.length) return;
+    
+    console.log(`Sorting by ${sortField} in ${sortOrder} order`);
+    
+    const sorted = sortDocumentArray(documents);
+    setFilteredDocuments(sorted);
+  };
+  
+  // Helper function to sort an array of documents
+  const sortDocumentArray = (docs: any[]) => {
+    return [...docs].sort((a, b) => {
+      let valueA = sortField === "id" ? a.id : a[sortField];
+      let valueB = sortField === "id" ? b.id : b[sortField];
+      
+      // Handle undefined or null values
+      if (valueA === undefined || valueA === null) valueA = "";
+      if (valueB === undefined || valueB === null) valueB = "";
+      
+      // Convert to strings for comparison if not already
+      if (typeof valueA !== "string") valueA = String(valueA);
+      if (typeof valueB !== "string") valueB = String(valueB);
+      
+      // Case insensitive comparison
+      const comparison = valueA.toLowerCase().localeCompare(valueB.toLowerCase());
+      
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
   };
 
   async function loadProjectId() {
@@ -585,6 +633,67 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
         />
       </List.Section>
 
+      <List.Section title="Sorting">
+        <List.Item
+          title="Sort Options"
+          subtitle={`Sort by ${sortField} (${sortOrder === 'asc' ? 'Ascending' : 'Descending'})`}
+          accessories={[{ text: "Edit" }]}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Set Sort Options"
+                onAction={() => {
+                  // Get highlighted fields for dropdown options
+                  const highlightFieldsArray = highlightFields 
+                    ? highlightFields.split(',').map(f => f.trim()).filter(Boolean) 
+                    : [];
+                  
+                  // Always include document ID
+                  const sortFieldOptions = ["id", ...highlightFieldsArray];
+                  
+                  push(
+                    <Form
+                      actions={
+                        <ActionPanel>
+                          <Action.SubmitForm
+                            title="Save"
+                            onSubmit={(values) => {
+                              console.log("Setting sort options:", values);
+                              setSortField(values.sortField);
+                              setSortOrder(values.sortOrder);
+                              pop();
+                            }}
+                          />
+                        </ActionPanel>
+                      }
+                    >
+                      <Form.Dropdown
+                        id="sortField"
+                        title="Sort Field"
+                        defaultValue={sortField}
+                      >
+                        {sortFieldOptions.map(field => (
+                          <Form.Dropdown.Item key={field} value={field} title={field} />
+                        ))}
+                      </Form.Dropdown>
+                      
+                      <Form.Dropdown
+                        id="sortOrder"
+                        title="Sort By"
+                        defaultValue={sortOrder}
+                      >
+                        <Form.Dropdown.Item value="asc" title="Ascending" />
+                        <Form.Dropdown.Item value="desc" title="Descending" />
+                      </Form.Dropdown>
+                    </Form>
+                  );
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
+
       <List.Section title="Documents" subtitle={documents.length > 0 ? `${filteredDocuments.length} of ${documents.length} documents` : undefined}>
         {filteredDocuments.map((doc) => {
           // Create a subtitle with highlighted field values
@@ -678,6 +787,10 @@ function FilteredDocumentList({
   const [searchText, setSearchText] = useState<string>("");
   const [filteredDocuments, setFilteredDocuments] = useState<any[]>([]);
   
+  // For sorting functionality
+  const [sortField, setSortField] = useState<string>("id");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  
   useEffect(() => {
     loadProjectId();
     fetchDocuments();
@@ -688,11 +801,21 @@ function FilteredDocumentList({
     filterDocuments();
   }, [searchText, documents, highlightFields]);
   
+  // Sort documents whenever sort field, sort order, or filtered documents change
+  useEffect(() => {
+    // Only sort if we're not in the middle of filtering
+    // This prevents overriding the filtered results
+    if (!searchText || searchText.trim() === "") {
+      sortDocuments();
+    }
+  }, [sortField, sortOrder, documents]);
+  
   // Custom document filtering function
   const filterDocuments = () => {
-    // If no search text, show all documents
+    // If no search text, show all documents and sort them
     if (!searchText || searchText.trim() === "") {
-      setFilteredDocuments(documents);
+      // Don't set filtered documents directly, let the sort function handle it
+      sortDocuments();
       return;
     }
     
@@ -765,7 +888,41 @@ function FilteredDocumentList({
     });
     
     console.log(`Filtered ${documents.length} documents to ${filtered.length} matches`);
-    setFilteredDocuments(filtered);
+    
+    // Sort the filtered documents
+    const sorted = sortDocumentArray(filtered);
+    setFilteredDocuments(sorted);
+  };
+  
+  // Sort documents based on selected field and order
+  const sortDocuments = () => {
+    if (!documents.length) return;
+    
+    console.log(`Sorting by ${sortField} in ${sortOrder} order`);
+    
+    const sorted = sortDocumentArray(documents);
+    setFilteredDocuments(sorted);
+  };
+  
+  // Helper function to sort an array of documents
+  const sortDocumentArray = (docs: any[]) => {
+    return [...docs].sort((a, b) => {
+      let valueA = sortField === "id" ? a.id : a[sortField];
+      let valueB = sortField === "id" ? b.id : b[sortField];
+      
+      // Handle undefined or null values
+      if (valueA === undefined || valueA === null) valueA = "";
+      if (valueB === undefined || valueB === null) valueB = "";
+      
+      // Convert to strings for comparison if not already
+      if (typeof valueA !== "string") valueA = String(valueA);
+      if (typeof valueB !== "string") valueB = String(valueB);
+      
+      // Case insensitive comparison
+      const comparison = valueA.toLowerCase().localeCompare(valueB.toLowerCase());
+      
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
   };
 
   async function loadProjectId() {
@@ -905,6 +1062,67 @@ function FilteredDocumentList({
         />
       </List.Section>
 
+      <List.Section title="Sorting">
+        <List.Item
+          title="Sort Options"
+          subtitle={`Sort by ${sortField} (${sortOrder === 'asc' ? 'Ascending' : 'Descending'})`}
+          accessories={[{ text: "Edit" }]}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Set Sort Options"
+                onAction={() => {
+                  // Get highlighted fields for dropdown options
+                  const highlightFieldsArray = highlightFields 
+                    ? highlightFields.split(',').map(f => f.trim()).filter(Boolean) 
+                    : [];
+                  
+                  // Always include document ID
+                  const sortFieldOptions = ["id", ...highlightFieldsArray];
+                  
+                  push(
+                    <Form
+                      actions={
+                        <ActionPanel>
+                          <Action.SubmitForm
+                            title="Save"
+                            onSubmit={(values) => {
+                              console.log("Setting sort options:", values);
+                              setSortField(values.sortField);
+                              setSortOrder(values.sortOrder);
+                              pop();
+                            }}
+                          />
+                        </ActionPanel>
+                      }
+                    >
+                      <Form.Dropdown
+                        id="sortField"
+                        title="Sort Field"
+                        defaultValue={sortField}
+                      >
+                        {sortFieldOptions.map(field => (
+                          <Form.Dropdown.Item key={field} value={field} title={field} />
+                        ))}
+                      </Form.Dropdown>
+                      
+                      <Form.Dropdown
+                        id="sortOrder"
+                        title="Sort By"
+                        defaultValue={sortOrder}
+                      >
+                        <Form.Dropdown.Item value="asc" title="Ascending" />
+                        <Form.Dropdown.Item value="desc" title="Descending" />
+                      </Form.Dropdown>
+                    </Form>
+                  );
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
+
       <List.Section title="Documents" subtitle={`${filteredDocuments.length} of ${documents.length} documents matching ${filterDescription}`}>
         {filteredDocuments.map((doc) => {
           // Create a subtitle with highlighted field values
@@ -912,24 +1130,18 @@ function FilteredDocumentList({
           
           if (highlightFields && highlightFields.trim() !== "") {
             const fieldNames = highlightFields.split(',').map(f => f.trim()).filter(f => f !== "");
-            const fieldValues = [];
+            const highlightedValues = fieldNames
+              .map(field => {
+                if (doc[field] !== undefined) {
+                  return `${field}: ${formatFieldValue(doc[field])}`;
+                }
+                return null;
+              })
+              .filter(Boolean);
             
-            for (const fieldName of fieldNames) {
-              // Try to access the field directly from the document
-              if (doc[fieldName] !== undefined) {
-                const value = formatFieldValue(doc[fieldName]);
-                fieldValues.push(value);
-              } 
-              // Also try to access it from doc.data if it exists
-              else if (doc.data && doc.data[fieldName] !== undefined) {
-                const value = formatFieldValue(doc.data[fieldName]);
-                fieldValues.push(value);
-              }
-            }
-            
-            subtitle = fieldValues.join(' | ');
+            subtitle = highlightedValues.join(' | ');
           }
-
+          
           return (
             <List.Item
               key={doc.id}
@@ -939,26 +1151,21 @@ function FilteredDocumentList({
                 <ActionPanel>
                   <Action
                     title="View Document"
-                    onAction={() => push(<DocumentDetail document={doc} collectionName={collectionName} />)}
+                    onAction={() => {
+                      push(<DocumentDetail document={doc} collectionName={collectionName} />);
+                    }}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open in Firebase Console"
+                    url={getFirestoreUrl(doc.id)}
                   />
                   <Action
                     title="Copy Document ID"
-                    onAction={() => {
-                      Clipboard.copy(doc.id);
-                      showToast({
+                    onAction={async () => {
+                      await Clipboard.copy(doc.id);
+                      await showToast({
                         style: Toast.Style.Success,
                         title: "Document ID Copied",
-                      });
-                    }}
-                  />
-                  <Action
-                    title="Copy Firestore URL"
-                    onAction={() => {
-                      const url = getFirestoreUrl(doc.id);
-                      Clipboard.copy(url);
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: "Firestore URL Copied",
                       });
                     }}
                   />
