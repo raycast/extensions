@@ -3,7 +3,6 @@ import { getFormatValue, getFormats, ytdlPath, ffmpegPath, ffprobePath, download
 import fs from "node:fs";
 import path from "node:path";
 import { Video } from "../types.js";
-import { preferences } from "@raycast/api";
 
 type Input = {
   /**
