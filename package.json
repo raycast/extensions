@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "firestore-documents",
-      "title": "Manage Firestore Documents",
+      "title": "Firestore Manage",
       "description": "List and filter documents from Firestore collections",
       "mode": "view"
     }
