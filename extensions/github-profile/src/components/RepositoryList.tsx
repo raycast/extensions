@@ -5,15 +5,30 @@ export function formatRepositories(repositories: GitHubRepository[]): string {
     return "## Top Repositories\n\nNo repositories found.";
   }
 
-  const tableHeader = "| Repository | Description | Stats | Updated |\n| --- | --- | --- | --- |";
+  // Calculate how many columns we want (e.g., 3 columns)
+  const columns = 3;
+  const tableHeader =
+    "| " +
+    Array(columns).fill("Repository").join(" | ") +
+    " |\n" +
+    "| " +
+    Array(columns).fill("---").join(" | ") +
+    " |";
 
-  const tableRows = repositories
-    .map((repo) => {
-      const updatedDate = new Date(repo.updated_at).toLocaleDateString();
-      const stats = `⭐ ${repo.stargazers_count} • 🍴 ${repo.forks_count} • ${repo.language || "N/A"}`;
-      return `| [${repo.name}](${repo.html_url}) | ${repo.description || "No description"} | ${stats} | ${updatedDate} |`;
-    })
-    .join("\n");
+  // Create rows with 3 repositories per row
+  let tableRows = "";
+  for (let i = 0; i < repositories.length; i += columns) {
+    const rowCells = [];
+    for (let j = 0; j < columns; j++) {
+      const repo = repositories[i + j];
+      if (repo) {
+        rowCells.push(`[${repo.name}](${repo.html_url})`);
+      } else {
+        rowCells.push(""); // Empty cell if no more repositories
+      }
+    }
+    tableRows += "| " + rowCells.join(" | ") + " |\n";
+  }
 
   return `## Top Repositories\n\n${tableHeader}\n${tableRows}`;
 }

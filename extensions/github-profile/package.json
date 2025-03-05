@@ -43,8 +43,11 @@
     "date-fns": "^2.30.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "~18.16.0",
     "@types/react": "^18.0.9",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
     "typescript": "^4.9.5"
   },
   "scripts": {

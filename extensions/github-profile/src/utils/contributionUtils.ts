@@ -1,7 +1,4 @@
-import { environment } from "@raycast/api";
 import { format } from "date-fns";
-import fs from "fs";
-import path from "path";
 import { ContributionDay } from "../api/github";
 
 /**
@@ -29,7 +26,10 @@ export function generateContributionSVG(weeks: Array<{ contributionDays: Contrib
       // Add month label if it's the first day of month
       if (!months.has(month)) {
         months.set(month, format(date, "MMM"));
-        svg += `<text x="${i * (cellSize + cellMargin)}" y="10" font-family="Arial" font-size="10">${format(date, "MMM")}</text>`;
+        svg += `<text x="${i * (cellSize + cellMargin)}" y="10" font-family="Arial" font-size="10">${format(
+          date,
+          "MMM",
+        )}</text>`;
       }
     }
   });
@@ -42,21 +42,14 @@ export function generateContributionSVG(weeks: Array<{ contributionDays: Contrib
       const x = weekIndex * (cellSize + cellMargin) + cellMargin;
       const y = dayIndex * (cellSize + cellMargin) + headerHeight;
 
-      svg += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" fill="${levelColors[day.level]}" rx="2" ry="2"><title>${day.count} contribution(s) on ${day.date}</title></rect>`;
+      svg += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" fill="${
+        levelColors[day.level]
+      }" rx="2" ry="2"><title>${day.count} contribution(s) on ${day.date}</title></rect>`;
     }
   }
 
   svg += "</svg>";
 
-  // Create a cached SVG file
-  const cacheDir = path.join(environment.assetsPath, "cache");
-  if (!fs.existsSync(cacheDir)) {
-    fs.mkdirSync(cacheDir, { recursive: true });
-  }
-
-  const svgPath = path.join(cacheDir, "contribution_heatmap.svg");
-  fs.writeFileSync(svgPath, svg);
-
-  // Return the file URL
-  return `file://${svgPath}`;
+  // Return the SVG as a data URI
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
