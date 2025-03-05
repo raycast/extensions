@@ -34,7 +34,7 @@ export function useStationSearch(q: string) {
  *
  * @param {string} from - The starting location of the trip.
  * @param {string} to - The destination of the trip.
- * @param {Date} date - The date of the trip.
+ * @param {string} date - The date of the trip.
  * @param {boolean} arrival - Determines if the trip is for arrival or departure.
  * @return {Promise<StationsV2Response>} A Promise that resolves to the response containing the trips.
  */
