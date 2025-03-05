@@ -1,6 +1,6 @@
 # Search Router Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-03-05
 
 - Implemented DuckDuckGo !Bangs search functionality directly in Raycast
 - Added support for searching specific websites using bang shortcuts (e.g., `!g`, `!w`, `!t3`)
