@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Detail, Form, List, showToast, Toast, useNavigation, Clipboard } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, List, showToast, Toast, useNavigation, Clipboard, confirmAlert } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { isServiceAccountConfigured, getServiceAccount } from "./utils/firebase";
+import { isServiceAccountConfigured, getServiceAccount, resetServiceAccount } from "./utils/firebase";
 import { getCollections, getDocuments, queryDocuments, getDocument } from "./api/firestore";
 import { JsonViewer } from "./components/JsonViewer";
 import * as admin from "firebase-admin";
@@ -35,19 +35,7 @@ export default function Command() {
   }
 
   if (!isConfigured) {
-    return (
-      <Detail
-        markdown="# Firebase Service Account Not Configured\n\nYou need to set up your Firebase service account before you can use this extension.\n\nClick the 'Set Up Service Account' button below to configure your Firebase service account."
-        actions={
-          <ActionPanel>
-            <Action
-              title="Set Up Service Account"
-              onAction={() => push(<SetupServiceAccountView />)}
-            />
-          </ActionPanel>
-        }
-      />
-    );
+    return <SetupServiceAccountView onComplete={() => setIsConfigured(true)} />;
   }
 
   return <DocumentsForm />;
@@ -65,7 +53,7 @@ function DocumentsForm() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
-  const { push } = useNavigation();
+  const { push, pop } = useNavigation();
 
   const operators: { value: admin.firestore.WhereFilterOp; label: string }[] = [
     { value: "==", label: "Equal to (==)" },
@@ -127,6 +115,36 @@ function DocumentsForm() {
       isMounted = false;
     };
   }, []);
+
+  async function handleResetServiceAccount() {
+    const confirmed = await confirmAlert({
+      title: "Reset Service Account",
+      message: "Are you sure you want to reset your Firebase service account configuration? You will need to set it up again.",
+      primaryAction: {
+        title: "Reset",
+      },
+    });
+
+    if (confirmed) {
+      try {
+        await resetServiceAccount();
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Service Account Reset",
+          message: "Your Firebase service account configuration has been reset.",
+        });
+        // Redirect to setup page
+        pop();
+      } catch (error) {
+        console.error("Error resetting service account:", error);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Reset Failed",
+          message: "Failed to reset service account configuration.",
+        });
+      }
+    }
+  }
 
   async function handleSubmit() {
     if (!collectionName) {
@@ -240,6 +258,11 @@ function DocumentsForm() {
           <Action.SubmitForm 
             title={documentId.trim() ? "Fetch Document" : (isFiltering ? "Filter Documents" : "List Documents")} 
             onSubmit={handleSubmit} 
+          />
+          <Action
+            title="Reset Service Account"
+            onAction={handleResetServiceAccount}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
           />
           {error && (
             <Action
@@ -891,23 +914,92 @@ function DocumentDetail({ document, collectionName }: DocumentDetailProps) {
   return <JsonViewer data={document} title={`Document in ${collectionName}`} />;
 }
 
-function SetupServiceAccountView() {
-  const { pop } = useNavigation();
-  
-  // Import the setup component dynamically to avoid circular dependencies
-  const SetupServiceAccount = require("./setup-service-account").default;
-  
-  return (
-    <SetupServiceAccount
-      onComplete={() => {
-        pop();
-        showToast({
-          style: Toast.Style.Success,
-          title: "Service Account Configured",
-          message: "You can now use the Firebase Firestore Manager.",
+function SetupServiceAccountView({ onComplete }: { onComplete: () => void }) {
+  const [serviceAccountJson, setServiceAccountJson] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | undefined>();
+
+  async function handleSubmit() {
+    if (!serviceAccountJson.trim()) {
+      setError("Service account JSON is required");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(undefined);
+
+    try {
+      // Import the saveServiceAccount function
+      const { saveServiceAccount } = require("./utils/firebase");
+      
+      const success = await saveServiceAccount(serviceAccountJson);
+      
+      if (!success) {
+        setError("Invalid service account JSON. Please check the format and try again.");
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Service Account",
+          message: "The provided service account JSON is invalid.",
         });
-      }}
-    />
+        setIsLoading(false);
+        return;
+      }
+      
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Service Account Configured",
+        message: "Your Firebase service account has been configured successfully.",
+      });
+      
+      onComplete();
+    } catch (error) {
+      console.error("Error saving service account:", error);
+      setError(`Failed to save service account: ${error instanceof Error ? error.message : String(error)}`);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Configuration Failed",
+        message: "Failed to configure service account.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Save Service Account" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+      isLoading={isLoading}
+    >
+      <Form.Description
+        title="Firebase Service Account Setup"
+        text="To use this extension, you need to provide your Firebase service account credentials. You can generate a new private key from the Firebase Console."
+      />
+      
+      <Form.TextArea
+        id="serviceAccountJson"
+        title="Service Account JSON"
+        placeholder="Paste your Firebase service account JSON here"
+        value={serviceAccountJson}
+        onChange={setServiceAccountJson}
+        error={error}
+        info="You can generate a new private key from the Firebase Console > Project Settings > Service Accounts > Generate New Private Key"
+      />
+      
+      <Form.Description
+        title="How to Get Service Account JSON"
+        text={`
+1. Go to the Firebase Console (https://console.firebase.google.com/)
+2. Select your project
+3. Go to Project Settings > Service Accounts
+4. Click "Generate New Private Key"
+5. Copy the contents of the downloaded JSON file and paste it here
+        `}
+      />
+    </Form>
   );
 }
 

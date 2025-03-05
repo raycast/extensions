@@ -13,18 +13,6 @@
       "title": "Manage Firestore Documents",
       "description": "List and filter documents from Firestore collections",
       "mode": "view"
-    },
-    {
-      "name": "setup-service-account",
-      "title": "Setup Firebase Service Account",
-      "description": "Configure your Firebase service account for the extension",
-      "mode": "view"
-    },
-    {
-      "name": "reset-service-account",
-      "title": "Reset Firebase Service Account",
-      "description": "Reset your Firebase service account configuration",
-      "mode": "no-view"
     }
   ],
   "dependencies": {
