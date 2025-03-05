@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, Icon, useNavigation } from "@raycast/api";
-import { metroSites } from "../fetchers/mertroSites";
+import { metroSites } from "../fetchers/metroSites";
 import { useSites } from "../fetchers/sites";
 import { useState } from "react";
 import Site from "./Site";
@@ -34,14 +34,14 @@ export default function FindSite() {
             <List.Item
               key={item.id}
               title={item.name}
-              accessories={[{ icon: Icon.HeartDisabled }]}
+              accessories={[{ icon: Icon.Heart }]}
               actions={
                 <ActionPanel>
                   <Action.Push title="Select" target={<Site site={item} />} />
                   <Action
                     title="Unfavorite"
                     icon={Icon.HeartDisabled}
-                    onAction={() => setFavorites(favorites?.filter((id) => id != item.id) ?? [])}
+                    onAction={() => setFavorites(favorites?.filter((id) => id !== item.id) ?? [])}
                   />
                 </ActionPanel>
               }
@@ -55,7 +55,7 @@ export default function FindSite() {
           <List.Item
             key={item.id}
             title={item.name}
-            accessories={[{ icon: Icon.Heart }]}
+            accessories={[{ icon: Icon.HeartDisabled }]}
             actions={
               <ActionPanel>
                 <Action title="Select" onAction={() => push(<Site site={item} />)} />

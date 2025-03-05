@@ -1,4 +1,4 @@
-import { useBus, useFerry, useMetro, useShip, useTram } from "../fetchers/depatures";
+import { useBus, useFerry, useMetro, useShip, useTram } from "../fetchers/departures";
 import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
 import { TransportMode } from "../types/TransportMode";
 import { Site as SiteType } from "../types/Site";
@@ -58,11 +58,15 @@ const Site = ({ site }: { site: SiteType }) => {
   ].sort((a, b) => moment(a.expected).diff(moment(b.expected)));
 
   const revalidate = () => {
-    revalidateMetro();
-    revalidateFerry();
-    revalidateShip();
-    revalidateTram();
-    revalidateBus();
+    try {
+      revalidateMetro();
+      revalidateFerry();
+      revalidateShip();
+      revalidateTram();
+      revalidateBus();
+    } catch (err) {
+      console.error("Failed to revalidate", revalidate);
+    }
   };
 
   return (

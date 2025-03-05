@@ -19,7 +19,7 @@ export type Departure = {
     type: string;
   };
   stop_point: {
-    id: numebr;
+    id: number;
     name: string;
     designation: string;
   };
@@ -29,5 +29,5 @@ export type Departure = {
     transport_mode: TransportMode;
     group_of_lines: string;
   };
-  deviations: [];
+  deviations: unkown[];
 };

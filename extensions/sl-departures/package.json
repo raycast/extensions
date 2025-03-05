@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sl-departures",
-  "title": "SL - Departures",
+  "title": "SL Departures",
   "description": "List departures of public transport in Stockholm",
   "icon": "sl.png",
   "author": "ericostholmm",
