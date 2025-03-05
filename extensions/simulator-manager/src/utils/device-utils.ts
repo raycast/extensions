@@ -1,22 +1,25 @@
 import { Color, Icon } from "@raycast/api";
-import { Device } from "../types";
+import { Device, DeviceType } from "../types";
 
 // Function to determine device type from name
-export function getDeviceType(name: string): string {
-  // iOS devices
-  if (name.includes("iPhone")) return "iPhone";
-  if (name.includes("iPad")) return "iPad";
-  if (name.includes("Apple TV")) return "Apple TV";
-  if (name.includes("Apple Watch")) return "Apple Watch";
-  if (name.includes("HomePod")) return "HomePod";
-  if (name.includes("iPod")) return "iPod";
-  if (name.includes("Mac")) return "Mac";
+export function getDeviceType(name: string): DeviceType {
+  // Convert name to lowercase once for all comparisons
+  const lowerName = name.toLowerCase();
+
+  // iOS devices - usando verificações case-insensitive
+  if (lowerName.includes("iphone")) return "iPhone";
+  if (lowerName.includes("ipad")) return "iPad";
+  if (lowerName.includes("apple tv")) return "Apple TV";
+  if (lowerName.includes("apple watch")) return "Apple Watch";
+  if (lowerName.includes("homepod")) return "HomePod";
+  if (lowerName.includes("ipod")) return "iPod";
+  if (lowerName.includes("mac")) return "Mac";
 
   // Android devices
-  if (name.includes("Pixel") || name.includes("pixel")) return "Android Phone";
-  if (name.includes("Tablet") || name.includes("tablet")) return "Android Tablet";
-  if (name.includes("TV") || name.includes("tv")) return "Android TV";
-  if (name.includes("Wear") || name.includes("wear")) return "Android Wear";
+  if (lowerName.includes("pixel")) return "Android Phone";
+  if (lowerName.includes("tablet")) return "Android Tablet";
+  if (lowerName.includes("tv")) return "Android TV";
+  if (lowerName.includes("wear")) return "Android Wear";
 
   return "Other";
 }
@@ -91,7 +94,8 @@ export function getDeviceTypeIcon(deviceType: string) {
 export function filterDevices(devices: Device[], searchText: string, selectedCategory: string): Device[] {
   return devices.filter((device) => {
     const matchesSearch = device.name.toLowerCase().includes(searchText.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || device.category === selectedCategory;
+    const matchesCategory =
+      selectedCategory.toLowerCase() === "all" || device.category.toLowerCase() === selectedCategory.toLowerCase();
     return matchesSearch && matchesCategory;
   });
 }

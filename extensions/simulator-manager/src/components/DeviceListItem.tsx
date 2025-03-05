@@ -1,4 +1,5 @@
 import { ActionPanel, Action, List, Icon, openExtensionPreferences } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { Device } from "../types";
 import { getDeviceTypeIcon, getStatusIcon, getStatusLabel, getStatusColor } from "../utils/device-utils";
 import {
@@ -59,7 +60,7 @@ export function DeviceListItem({ device, onRefresh }: DeviceListItemProps) {
                       await executeSimulatorCommand("boot", device.id, "Simulator booted successfully");
                       onRefresh();
                     } catch (error) {
-                      console.error(error);
+                      showFailureToast(error);
                     }
                   }}
                 />
@@ -73,7 +74,7 @@ export function DeviceListItem({ device, onRefresh }: DeviceListItemProps) {
                       await executeSimulatorCommand("shutdown", device.id, "Simulator shut down successfully");
                       onRefresh();
                     } catch (error) {
-                      console.error(error);
+                      showFailureToast(error);
                     }
                   }}
                 />
@@ -81,8 +82,13 @@ export function DeviceListItem({ device, onRefresh }: DeviceListItemProps) {
               <Action
                 title="Open Simulator"
                 icon={Icon.Eye}
-                onAction={() => {
-                  openSimulator(device.id);
+                onAction={async () => {
+                  try {
+                    await openSimulator(device.id);
+                    onRefresh();
+                  } catch (error) {
+                    showFailureToast(error);
+                  }
                 }}
               />
             </>
@@ -100,7 +106,7 @@ export function DeviceListItem({ device, onRefresh }: DeviceListItemProps) {
                       await startAndroidEmulator(device.id);
                       onRefresh();
                     } catch (error) {
-                      console.error(error);
+                      showFailureToast(error);
                     }
                   }}
                 />
@@ -114,7 +120,7 @@ export function DeviceListItem({ device, onRefresh }: DeviceListItemProps) {
                       await stopAndroidEmulator(device.id);
                       onRefresh();
                     } catch (error) {
-                      console.error(error);
+                      showFailureToast(error);
                     }
                   }}
                 />
@@ -127,13 +133,6 @@ export function DeviceListItem({ device, onRefresh }: DeviceListItemProps) {
                   onRefresh();
                 }}
               />
-
-              <Action
-                title="Configure Android Sdk Path"
-                icon={Icon.Gear}
-                onAction={() => openExtensionPreferences()}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-              />
             </>
           )}
 
@@ -144,6 +143,7 @@ export function DeviceListItem({ device, onRefresh }: DeviceListItemProps) {
             onAction={onRefresh}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
+          <Action.CopyToClipboard title="Copy Device Id" content={device.id} />
 
           {/* Settings Action */}
           <Action
@@ -152,7 +152,6 @@ export function DeviceListItem({ device, onRefresh }: DeviceListItemProps) {
             onAction={() => openExtensionPreferences()}
             shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
           />
-          <Action.CopyToClipboard title="Copy Device Id" content={device.id} />
         </ActionPanel>
       }
     />

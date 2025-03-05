@@ -22,6 +22,7 @@
   "commands": [
     {
       "title": "Simulator Manager",
+      "subtitle": "Boot, Shutdown & Manage",
       "name": "simulator-manager",
       "description": "Manage iOS simulators and Android emulators",
       "mode": "view",
