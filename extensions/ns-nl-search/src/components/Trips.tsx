@@ -19,7 +19,7 @@ export function Trips(props: TripsProps) {
   const { isLoading, data } = useTripSearch(props.fromStation, props.toStation, props.date, props.searchArrival);
 
   return (
-    <List isLoading={isLoading} navigationTitle="Search a trips">
+    <List isLoading={isLoading} navigationTitle="Search Trips">
       {((data === undefined ? { payload: [] } : data).trips || []).map(renderTripRow)}
     </List>
   );
