@@ -1,5 +1,5 @@
 import { useBus, useFerry, useMetro, useShip, useTram } from "../fetchers/departures";
-import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
+import { List, Icon, Color, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { TransportMode } from "../types/TransportMode";
 import { Site as SiteType } from "../types/Site";
 import moment from "moment";
@@ -65,6 +65,11 @@ const Site = ({ site }: { site: SiteType }) => {
       revalidateTram();
       revalidateBus();
     } catch (err) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "Failed to fetch data",
+      });
       console.error("Failed to revalidate", revalidate);
     }
   };
