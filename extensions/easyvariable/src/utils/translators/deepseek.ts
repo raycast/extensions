@@ -1,6 +1,8 @@
 import { ChatDeepSeek } from "@langchain/deepseek";
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
-import { preferences } from "../preferences";
+import { getPreferenceValues } from "@raycast/api";
+
+const preferences = getPreferenceValues<ExtensionPreferences>();
 
 export const deepseekTranslate = async (text: string): Promise<string> => {
   if (!text.trim()) return "";
