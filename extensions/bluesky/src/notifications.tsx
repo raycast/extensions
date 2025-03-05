@@ -29,7 +29,7 @@ import HomeAction from "./components/actions/HomeAction";
 import NavigationDropdown from "./components/nav/NavigationDropdown";
 import { Notification } from "./types/types";
 import Onboard from "./components/onboarding/Onboard";
-import { isThreadViewPost, PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
+import { isThreadViewPost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import { ViewImage } from "@atproto/api/dist/client/types/app/bsky/embed/images";
 import { showDangerToast } from "./utils/common";
 import { useCachedState } from "@raycast/utils";
@@ -92,7 +92,7 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
           // This try...catch is to account for following case:
           // When user runs extension and session is expiring or expired, ERROR on next line is thrown
           // `initialRes.body?.cancel is not a function`
-          // We swallow the exceptioo
+          // We swallow the exception as it is not helpful to the user
         }
         let notificationMessage = "";
         if (notificationCount > 1) {
@@ -152,7 +152,7 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
         }
 
         let imageEmbeds: string[] = [];
-        const post = responseData.thread.post as PostView;
+        const post = responseData.thread.post;
 
         if (AppBskyEmbedImages.isView(post.embed)) {
           imageEmbeds = post.embed.images.map((item: ViewImage) => item.thumb);

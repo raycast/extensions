@@ -12,7 +12,7 @@ import { BlueskyProfileUrlBase, PostEndHorizontalLine } from "./constants";
 import { Notification as BskyNotification } from "@atproto/api/dist/client/types/app/bsky/notification/listNotifications";
 import { Notification } from "../types/types";
 import { NotificationReasonMapping } from "../config/notificationReasonMapping";
-import { isBlockedPost, isPostView, isReasonRepost, PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
+import { isBlockedPost, isPostView, isReasonRepost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import { ViewRecord } from "@atproto/api/dist/client/types/app/bsky/embed/record";
 import { getMarkdownText } from "../libs/atp";
 import { getPostUrl } from "./common";
@@ -193,7 +193,7 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
         }
         if (isPostView(item.reply?.parent)) {
           let imageEmbeds: string[] = [];
-          const parent = item.reply.parent as PostView;
+          const parent = item.reply.parent;
           if (AppBskyEmbedImages.isView(parent.embed)) {
             imageEmbeds = parent.embed.images.map((item) => item.thumb);
           }
@@ -246,6 +246,7 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
             did: item.post.author.did,
             handle: item.post.author.handle,
             blockedUri:
+              // This is done for legacy reasons. "blocking" does not exist on ViewerState but we have assumed it is so we don't break anything - might remove in future
               item.post.viewer && (item.post.viewer as AppBskyFeedDefs.ViewerState & { blocking?: string }).blocking
                 ? ((item.post.viewer as AppBskyFeedDefs.ViewerState & { blocking?: string }).blocking as string)
                 : "",
