@@ -2,23 +2,20 @@ import { execa } from "execa";
 import fs from "node:fs";
 import path from "path";
 import { Video } from "./types.js";
-import { preferences } from "./utils.js";
+import { downloadPath, ffmpegPath, forceIpv4, ytdlPath } from "./utils.js";
 import SRTParser from "srt-parser-2";
 
 export default async function extractTranscript(url: string, language: string = "en") {
   // Validate yt-dlp exists
-  if (!fs.existsSync(preferences.ytdlPath)) {
+  if (!fs.existsSync(ytdlPath)) {
     throw new Error("yt-dlp is not installed");
   }
-  if (!fs.existsSync(preferences.ffmpegPath)) {
+  if (!fs.existsSync(ffmpegPath)) {
     throw new Error("ffmpeg is not installed");
   }
 
   // First get video info to get the title
-  const videoInfo = await execa(
-    preferences.ytdlPath,
-    [preferences.forceIpv4 ? "--force-ipv4" : "", "--dump-json", url].filter(Boolean),
-  );
+  const videoInfo = await execa(ytdlPath, [forceIpv4 ? "--force-ipv4" : "", "--dump-json", url].filter(Boolean));
 
   const video = JSON.parse(videoInfo.stdout) as Video;
 
@@ -28,14 +25,14 @@ export default async function extractTranscript(url: string, language: string = 
   }
 
   // Create a temporary directory for subtitle download
-  const tmpDir = path.join(preferences.downloadPath, ".tmp-subtitles");
+  const tmpDir = path.join(downloadPath, ".tmp-subtitles");
   if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir, { recursive: true });
   }
 
   try {
     // Download subtitles using yt-dlp
-    const subtitleResult = await execa(preferences.ytdlPath, [
+    const subtitleResult = await execa(ytdlPath, [
       "--write-sub", // Write subtitle file
       "--write-auto-sub", // Write automatically generated subtitles
       "--skip-download", // Don't download the video
@@ -44,7 +41,7 @@ export default async function extractTranscript(url: string, language: string = 
       "--convert-subs", // Convert subtitles to srt format
       "srt",
       "--ffmpeg-location",
-      preferences.ffmpegPath,
+      ffmpegPath,
       "-o", // Output template
       path.join(tmpDir, "%(id)s.%(ext)s"),
       url,

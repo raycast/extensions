@@ -1,8 +1,9 @@
 import { execa } from "execa";
-import { getFormatValue, getFormats, preferences } from "../utils.js";
+import { getFormatValue, getFormats, ytdlPath, ffmpegPath, ffprobePath, downloadPath, forceIpv4 } from "../utils.js";
 import fs from "node:fs";
 import path from "node:path";
 import { Video } from "../types.js";
+import { preferences } from "@raycast/api";
 
 type Input = {
   /**
@@ -13,21 +14,21 @@ type Input = {
 
 export default async function tool(input: Input) {
   // Validate executables exist
-  if (!fs.existsSync(preferences.ytdlPath)) {
+  if (!fs.existsSync(ytdlPath)) {
     throw new Error("yt-dlp is not installed");
   }
-  if (!fs.existsSync(preferences.ffmpegPath)) {
+  if (!fs.existsSync(ffmpegPath)) {
     throw new Error("ffmpeg is not installed");
   }
-  if (!fs.existsSync(preferences.ffprobePath)) {
+  if (!fs.existsSync(ffprobePath)) {
     throw new Error("ffprobe is not installed");
   }
 
   // Get video info and available formats
   const videoInfo = await execa(
-    preferences.ytdlPath,
-    [preferences.forceIpv4 ? "--force-ipv4" : "", "--dump-json", "--format-sort=resolution,ext,tbr", input.url].filter(
-      (x) => Boolean(x),
+    ytdlPath,
+    [forceIpv4 ? "--force-ipv4" : "", "--dump-json", "--format-sort=resolution,ext,tbr", input.url].filter((x) =>
+      Boolean(x),
     ),
   );
 
@@ -39,7 +40,7 @@ export default async function tool(input: Input) {
   }
 
   // Set up download options
-  const options: string[] = ["-P", preferences.downloadPath];
+  const options: string[] = ["-P", downloadPath];
 
   // Getet the best video+audio format
   const formats = getFormats(video);
@@ -47,7 +48,7 @@ export default async function tool(input: Input) {
   if (bestFormat) {
     const formatValue = getFormatValue(bestFormat);
     const [downloadFormat, recodeFormat] = formatValue.split("#");
-    options.push("--ffmpeg-location", preferences.ffmpegPath);
+    options.push("--ffmpeg-location", ffmpegPath);
     options.push("--format", downloadFormat);
     options.push("--recode-video", recodeFormat);
   }
@@ -55,7 +56,7 @@ export default async function tool(input: Input) {
   options.push("--print", "after_move:filepath");
 
   // Execute download
-  const result = await execa(preferences.ytdlPath, [...options, input.url]);
+  const result = await execa(ytdlPath, [...options, input.url]);
 
   if (result.failed) {
     throw new Error(`Failed to download video: ${result.stderr}`);
