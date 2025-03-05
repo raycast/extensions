@@ -41,7 +41,7 @@ export default async function tool(input: Input) {
   // Set up download options
   const options: string[] = ["-P", preferences.downloadPath];
 
-  // Getet the best video+audio format
+  // Get the best video+audio format
   const formats = getFormats(video);
   const bestFormat = formats["Video"][0]; // First format in Video category is best quality
   if (bestFormat) {
