@@ -20,6 +20,17 @@ export default async function extractTranscript(url: string, language: string = 
     [preferences.forceIpv4 ? "--force-ipv4" : "", "--dump-json", url].filter(Boolean),
   );
 
+  if (!videoInfo.stdout) {
+    throw new Error("Failed to get video info");
+  }
+
+  let video: Video;
+  try {
+    video = JSON.parse(videoInfo.stdout) as Video;
+  } catch (error) {
+    throw new Error("Failed to parse video info");
+  }
+
   const video = JSON.parse(videoInfo.stdout) as Video;
 
   // Check if it's a live stream
