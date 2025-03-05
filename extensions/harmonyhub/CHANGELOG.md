@@ -1,4 +1,4 @@
-# Changelog
+# Harmony Changelog
 
 All notable changes to the Harmony Control extension will be documented in this file.
 
