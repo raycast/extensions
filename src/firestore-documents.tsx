@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Form, List, showToast, Toast, useNavigation, Clipboard, confirmAlert } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { isServiceAccountConfigured, getServiceAccount, resetServiceAccount } from "./utils/firebase";
 import { getCollections, getDocuments, queryDocuments, getDocument } from "./api/firestore";
 import { JsonViewer } from "./components/JsonViewer";
@@ -54,14 +54,15 @@ function DocumentsForm() {
   const [error, setError] = useState<string | undefined>();
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const { push, pop } = useNavigation();
+  const collectionDropdownRef = useRef<Form.Dropdown>(null);
 
   const operators: { value: admin.firestore.WhereFilterOp; label: string }[] = [
-    { value: "==", label: "Equal to (==)" },
-    { value: ">", label: "Greater than (>)" },
+    { value: "==", label: "Equals (==)" },
+    { value: "!=", label: "Not equals (!=)" },
     { value: "<", label: "Less than (<)" },
-    { value: ">=", label: "Greater than or equal to (>=)" },
     { value: "<=", label: "Less than or equal to (<=)" },
-    { value: "!=", label: "Not equal to (!=)" },
+    { value: ">", label: "Greater than (>)" },
+    { value: ">=", label: "Greater than or equal to (>=)" },
     { value: "array-contains", label: "Array contains" },
     { value: "array-contains-any", label: "Array contains any" },
     { value: "in", label: "In" },
@@ -69,52 +70,39 @@ function DocumentsForm() {
   ];
 
   useEffect(() => {
-    let isMounted = true;
-    let retryCount = 0;
-    const maxRetries = 3;
-    
-    async function fetchCollections() {
-      try {
-        setIsInitializing(true);
-        const fetchedCollections = await getCollections();
-        if (isMounted) {
-          setCollections(fetchedCollections);
-          if (fetchedCollections.length > 0) {
-            setCollectionName(fetchedCollections[0]);
-          }
-          setError(undefined);
-        }
-      } catch (error) {
-        console.error("Error fetching collections:", error);
-        if (isMounted) {
-          if (retryCount < maxRetries) {
-            retryCount++;
-            // Wait a bit longer between retries
-            setTimeout(fetchCollections, 1000 * retryCount);
-            return;
-          }
-          
-          setError("Failed to fetch collections. Please try again.");
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to Fetch Collections",
-            message: "Error fetching Firestore collections",
-          });
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-          setIsInitializing(false);
-        }
-      }
-    }
-
     fetchCollections();
-    
-    return () => {
-      isMounted = false;
-    };
   }, []);
+
+  // Focus on collection dropdown search field once collections are loaded
+  useEffect(() => {
+    if (collections.length > 0 && isInitializing) {
+      setIsInitializing(false);
+      // Use setTimeout to ensure the dropdown is fully rendered
+      setTimeout(() => {
+        if (collectionDropdownRef.current) {
+          collectionDropdownRef.current.focus();
+        }
+      }, 100);
+    }
+  }, [collections, isInitializing]);
+
+  async function fetchCollections() {
+    setIsLoading(true);
+    try {
+      const fetchedCollections = await getCollections();
+      setCollections(fetchedCollections);
+    } catch (error) {
+      console.error("Error fetching collections:", error);
+      setError("Failed to fetch collections. Please try again.");
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Fetch Collections",
+        message: "An error occurred while fetching collections",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   async function handleResetServiceAccount() {
     const confirmed = await confirmAlert({
@@ -263,67 +251,26 @@ function DocumentsForm() {
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm 
-            title={documentId.trim() ? "Fetch Document" : (isFiltering ? "Filter Documents" : "List Documents")} 
-            onSubmit={handleSubmit} 
-          />
-          <Action
-            title="Reset Service Account"
-            onAction={handleResetServiceAccount}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-          />
-          {error && (
-            <Action
-              title="Retry Fetching Collections"
-              onAction={() => {
-                setIsLoading(true);
-                setError(undefined);
-                getCollections()
-                  .then((fetchedCollections) => {
-                    setCollections(fetchedCollections);
-                    if (fetchedCollections.length > 0) {
-                      setCollectionName(fetchedCollections[0]);
-                    }
-                  })
-                  .catch((error) => {
-                    console.error("Error fetching collections:", error);
-                    setError("Failed to fetch collections. Please try again.");
-                    showToast({
-                      style: Toast.Style.Failure,
-                      title: "Failed to Fetch Collections",
-                      message: "Error fetching Firestore collections",
-                    });
-                  })
-                  .finally(() => {
-                    setIsLoading(false);
-                  });
-              }}
-            />
-          )}
+          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+          <Action title="Reset Service Account" onAction={handleResetServiceAccount} />
         </ActionPanel>
       }
-      isLoading={isLoading}
     >
-      {collections.length > 0 ? (
-        <Form.Dropdown
-          id="collectionName"
-          title="Collection Name"
-          value={collectionName}
-          onChange={setCollectionName}
-          error={error}
-        >
-          {collections.map((collection) => (
-            <Form.Dropdown.Item key={collection} value={collection} title={collection} />
-          ))}
-        </Form.Dropdown>
-      ) : (
-        <Form.Description
-          title={isInitializing ? "Firebase Initializing..." : "No Collections Found"}
-          text={error || (isInitializing ? "Please wait while Firebase is being initialized..." : "No collections found in your Firestore database. Please create a collection first.")}
-        />
-      )}
+      <Form.Dropdown
+        id="collection"
+        title="Collection"
+        placeholder="Select a collection"
+        value={collectionName}
+        onChange={setCollectionName}
+        ref={collectionDropdownRef}
+      >
+        {collections.map((collection) => (
+          <Form.Dropdown.Item key={collection} value={collection} title={collection} />
+        ))}
+      </Form.Dropdown>
 
       <Form.TextField
         id="documentId"
