@@ -1,4 +1,4 @@
-# Harmony Raycast Extension
+# Harmony Extension
 
 Control your Logitech Harmony Hub directly from Raycast. This extension allows you to manage your devices, execute commands, and control activities without leaving your keyboard.
 
