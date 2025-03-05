@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, Detail } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Detail, closeMainWindow } from "@raycast/api";
 import { runAppleScript, useSQL } from "@raycast/utils";
 import { homedir } from "os";
 import { resolve } from "path";
@@ -55,6 +55,8 @@ async function searchInAntinote(note: Note) {
       end tell
     end tell
   `);
+
+  await closeMainWindow({clearRootSearch: true});
 }
 
 export default function Command() {

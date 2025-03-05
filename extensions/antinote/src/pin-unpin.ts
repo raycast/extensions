@@ -1,4 +1,4 @@
-import { showHUD } from "@raycast/api";
+import { closeMainWindow, showHUD } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 export default async function main() {
@@ -20,4 +20,5 @@ export default async function main() {
 `);
 
   showHUD(result == "pinned" ? "Pinned to top" : "Unpinned from top");
+  await closeMainWindow({clearRootSearch: true});
 }
