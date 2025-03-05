@@ -148,13 +148,17 @@ export const fetchContributionData = async (): Promise<ContributionsCollection> 
     const calendarData = response.data.data.user.contributionsCollection.contributionCalendar;
 
     // Transform the data to match our interface
-    const weeks = calendarData.weeks.map((week: any) => ({
-      contributionDays: week.contributionDays.map((day: any) => ({
-        date: day.date,
-        count: day.contributionCount,
-        level: contributionLevelFromColor(day.color),
-      })),
-    }));
+    const weeks = calendarData.weeks.map(
+      (week: { contributionDays: Array<{ date: string; contributionCount: number; color: string }> }) => ({
+        contributionDays: week.contributionDays.map(
+          (day: { date: string; contributionCount: number; color: string }) => ({
+            date: day.date,
+            count: day.contributionCount,
+            level: contributionLevelFromColor(day.color),
+          }),
+        ),
+      }),
+    );
 
     return {
       contributionCalendar: {
