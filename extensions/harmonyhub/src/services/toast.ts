@@ -76,7 +76,7 @@ export class ToastManager {
 
   /**
    * Show a warning toast.
-   * Displays a warning message with optional details using showFailureToast.
+   * Displays a warning message with optional details using a neutral style.
    * @param title - Toast title
    * @param message - Optional toast message
    */
@@ -85,7 +85,11 @@ export class ToastManager {
       info(`Warning: ${title}${message ? ` - ${message}` : ""}`);
     }
 
-    await showFailureToast({ title, message });
+    await showToast({
+      style: Toast.Style.Animated,
+      title,
+      message,
+    });
   }
 
   /**
@@ -109,22 +113,19 @@ export class ToastManager {
   /**
    * Show a progress toast
    * @param title - Toast title
-   * @param message - Optional toast message
    * @param progress - Progress value between 0 and 1
    */
-  static async progress(title: string, message?: string, progress?: number): Promise<void> {
+  static async progress(title: string, progress?: number): Promise<void> {
     if (ToastManager.config.logToasts) {
       info(
-        `Progress: ${title}${message ? ` - ${message}` : ""}${
-          progress !== undefined ? ` (${Math.round(progress * 100)}%)` : ""
-        }`
+        `Progress: ${title}${progress !== undefined ? ` (${Math.round(progress * 100)}%)` : ""}`
       );
     }
 
     await showToast({
       style: Toast.Style.Animated,
       title,
-      message: message ? (progress !== undefined ? `${message} (${Math.round(progress * 100)}%)` : message) : undefined,
+      message: progress !== undefined ? `${Math.round(progress * 100)}%` : undefined
     });
   }
 }

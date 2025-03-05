@@ -20,7 +20,6 @@ interface ActivitiesViewProps {
   onActivitySelect: (_activity: HarmonyActivity) => void;
   /** Optional callback to go back */
   onBack?: () => void;
-  renderItem?: (_activity: HarmonyActivity) => React.ReactNode;
 }
 
 /**

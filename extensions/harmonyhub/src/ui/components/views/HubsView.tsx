@@ -57,7 +57,7 @@ function HubsViewImpl({ onHubSelect, onBack }: HubsViewProps): JSX.Element {
         state={loadingState}
         icon={Icon.MagnifyingGlass}
         description="Searching for Harmony Hubs on your network..."
-        onCancel={clearCache}
+        onCancel={refresh}
       />
     );
   }

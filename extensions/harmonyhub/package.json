@@ -15,6 +15,7 @@
     {
       "name": "control",
       "title": "Control Harmony Hub",
+      "subtitle": "Harmony Control",
       "description": "Control your Harmony Hub devices and activities",
       "mode": "view"
     }

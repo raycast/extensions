@@ -105,11 +105,17 @@ export class ErrorHandler {
     }
 
     const message = error instanceof Error ? error.message : String(error);
-    return new HarmonyError(
+    const harmonyError = new HarmonyError(
       message,
       category || ErrorHandler.config.defaultCategory,
       error instanceof Error ? error : undefined
     );
+
+    if (error instanceof Error) {
+      harmonyError.stack = error.stack;
+    }
+
+    return harmonyError;
   }
 
   /**
