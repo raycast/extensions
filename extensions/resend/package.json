@@ -4,6 +4,8 @@
   "title": "Resend",
   "description": "Manage API Keys and Domains, and Send Emails using Resend",
   "icon": "resend.png",
+  "access": "public",
+  "owner": "resend",
   "author": "xmok",
   "contributors": [
     "alexs",
