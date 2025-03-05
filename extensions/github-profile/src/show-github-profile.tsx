@@ -12,7 +12,11 @@ interface Preferences {
 export default function Command() {
   const { username } = getPreferenceValues<Preferences>();
 
-  const { data: profile, isLoading: isProfileLoading, error: profileError } = useCachedPromise(fetchUserProfile);
+  const {
+    data: profile,
+    isLoading: isProfileLoading,
+    error: profileError,
+  } = useCachedPromise(() => fetchUserProfile(username));
 
   const { data: repositories, isLoading: isReposLoading, error: reposError } = useCachedPromise(fetchUserRepositories);
 
@@ -20,7 +24,7 @@ export default function Command() {
     data: contributions,
     isLoading: isContributionsLoading,
     error: contributionsError,
-  } = useCachedPromise(fetchContributionData);
+  } = useCachedPromise(() => fetchContributionData(username));
 
   const isLoading = isProfileLoading || isReposLoading || isContributionsLoading;
   const error = profileError || reposError || contributionsError;

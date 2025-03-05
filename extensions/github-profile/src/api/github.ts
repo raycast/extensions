@@ -54,8 +54,7 @@ const getUsername = (): string => {
   return preferences.username;
 };
 
-export const fetchUserProfile = async (): Promise<GitHubUser> => {
-  const username = getUsername();
+export const fetchUserProfile = async (username: string): Promise<GitHubUser> => {
   const preferences = getPreferenceValues<Preferences>();
   const headers: Record<string, string> = {};
 
@@ -106,8 +105,7 @@ export const fetchUserRepositories = async (): Promise<GitHubRepository[]> => {
   }
 };
 
-export const fetchContributionData = async (): Promise<ContributionsCollection> => {
-  const username = getUsername();
+export const fetchContributionData = async (username: string): Promise<ContributionsCollection> => {
   const preferences = getPreferenceValues<Preferences>();
 
   if (!preferences.githubToken) {
