@@ -17,6 +17,6 @@ export default async function main() {
 
     await closeMainWindow({ clearRootSearch: true });
   } catch (error) {
-    await showFailureToast("Failed to create new note", error);
+    await showFailureToast(error, { title: "Failed to search in Antinote" });
   }
 }

@@ -59,7 +59,7 @@ async function searchInAntinote(note: Note) {
 
     await closeMainWindow({ clearRootSearch: true });
   } catch (error) {
-    await showFailureToast("Failed to search in Antinote", error);
+    await showFailureToast(error, { title: "Failed to search in Antinote" });
   }
 }
 
@@ -71,7 +71,7 @@ export default function Command() {
   }
 
   if (isLoading) {
-    return <Detail markdown="Loading..." />;
+    return <List isLoading={true} />;
   }
 
   if (!isLoading && !notes) {

@@ -23,6 +23,6 @@ export default async function main() {
     showHUD(result == "pinned" ? "Pinned to top" : "Unpinned from top");
     await closeMainWindow({ clearRootSearch: true });
   } catch (error) {
-    await showFailureToast("Failed to pin/.unpin Antinote", error);
+    await showFailureToast(error, { title: "Failed to search in Antinote" });
   }
 }
