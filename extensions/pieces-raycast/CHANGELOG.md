@@ -1,5 +1,10 @@
 # Pieces for Raycast Changelog
 
+## [0.3.0] - 2025-02-27
+
+- Fixes website link color contrast in search results
+- Notifies user to update Raycast permissions if unable to select text in frontmost app
+
 ## [0.2.0] - 2025-02-03
 
 - Renames commands according to new branding guidelines
