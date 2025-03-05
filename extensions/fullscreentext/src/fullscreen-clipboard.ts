@@ -1,4 +1,4 @@
-import { Clipboard, showToast, Toast } from "@raycast/api";
+import { Clipboard, closeMainWindow, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { fullScreen } from "swift:../swift/fullscreen";
 
@@ -19,5 +19,6 @@ export default async function Command() {
     return;
   }
 
+  closeMainWindow({ clearRootSearch: true });
   await fullScreen(text);
 }
