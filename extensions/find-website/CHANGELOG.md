@@ -1,6 +1,6 @@
 # Find Website Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-03-05
 
 - Added the script to check whether the browser is installed to avoid errors.
 
