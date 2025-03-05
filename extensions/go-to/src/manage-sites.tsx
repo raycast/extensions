@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Form, List, showToast, Toast, LocalStorage, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 
 interface Preferences {
@@ -22,7 +23,7 @@ async function getSites(): Promise<Site[]> {
 
     return Object.entries(siteMap).map(([name, url]) => ({ name, url: url as string }));
   } catch (error) {
-    showToast({ style: Toast.Style.Failure, title: "Invalid site mappings format" });
+    showFailureToast("Failed to add site");
     return [];
   }
 }
@@ -116,6 +117,7 @@ export default function Command() {
 
   return (
     <List
+      isLoading={sites.length === 0}
       actions={
         <ActionPanel>
           <Action title="Add New Site" onAction={() => setIsAddingNew(true)} />

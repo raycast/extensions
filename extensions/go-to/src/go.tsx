@@ -1,15 +1,21 @@
-import { open, showHUD, getPreferenceValues } from "@raycast/api";
+import { open, showHUD, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 interface Preferences {
   siteMappings: string;
 }
 
-function getSiteMap(): Record<string, string> {
-  const { siteMappings } = getPreferenceValues<Preferences>();
+async function getSiteMap(): Promise<Record<string, string>> {
   try {
-    return JSON.parse(siteMappings);
+    const { siteMappings: preferenceSites } = getPreferenceValues<Preferences>();
+    const preferenceMap = JSON.parse(preferenceSites || "{}");
+
+    const localSiteMappings = await LocalStorage.getItem<string>("siteMappings");
+    const localMap = JSON.parse(localSiteMappings || "{}");
+
+    return { ...preferenceMap, ...localMap };
   } catch (error) {
-    showHUD("Invalid site mappings format");
+    showFailureToast("Invalid site mappings format");
     return {};
   }
 }
@@ -24,11 +30,11 @@ function getInitials(str: string): string {
   return words.map((word) => word[0]?.toLowerCase()).join("");
 }
 
-function findBestMatch(input: string): string | null {
+async function findBestMatch(input: string): Promise<string | null> {
   const searchTerm = input.toLowerCase();
   let bestMatch: string | null = null;
   let bestScore = 0;
-  const siteMap = getSiteMap();
+  const siteMap = await getSiteMap();
 
   for (const site of Object.keys(siteMap)) {
     const siteLower = site.toLowerCase();
@@ -44,7 +50,6 @@ function findBestMatch(input: string): string | null {
         bestScore = score;
         bestMatch = site;
       }
-      continue;
     }
 
     if (siteLower.includes(searchTerm)) {
@@ -59,7 +64,7 @@ function findBestMatch(input: string): string | null {
   return bestMatch;
 }
 
-export default function Command(props: { arguments: { site?: string } }) {
+export default async function Command(props: { arguments: { site?: string } }) {
   const { site } = props.arguments;
 
   if (!site) {
@@ -67,11 +72,15 @@ export default function Command(props: { arguments: { site?: string } }) {
     return null;
   }
 
-  const matchedSite = findBestMatch(site);
+  const matchedSite = await findBestMatch(site);
   if (matchedSite) {
-    const siteMap = getSiteMap();
-    open(siteMap[matchedSite]);
-    showHUD(`Opening ${matchedSite}`);
+    const siteMap = await getSiteMap();
+    try {
+      await open(siteMap[matchedSite]);
+      showHUD(`Opening ${matchedSite}`);
+    } catch (error) {
+      showHUD("Failed to open site");
+    }
     return null;
   }
 

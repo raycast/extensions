@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "go-to",
-  "title": "go to",
-  "description": "can go to specific site",
+  "title": "Go To",
+  "description": "Quickly navigate to your favorite websites using customizable shortcuts",
   "icon": "extension-icon.png",
   "author": "noxhsxrk",
   "categories": [
@@ -14,7 +14,16 @@
       "name": "go",
       "title": "Go to Site",
       "description": "Quickly navigate to configured sites",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "site",
+          "type": "text",
+          "required": true,
+          "description": "The name of the site to navigate to",
+          "placeholder": "Enter site name"
+        }
+      ]
     },
     {
       "name": "manage-sites",
