@@ -11,10 +11,11 @@
 ### 🚀 True P2P File Sharing
 
 Share files directly between devices with no intermediary servers. Your data never leaves the direct connection between sender and receiver.
-![Direct Transfer](image.png)
-![User Interface](metadata/image3.png)
-![Session Management](metadata/screenshot2.png)
-![File Transfer](metadata/screenshot1.png)
+![Direct Transfer](metadata/image.png)
+![alt-img](metadata/screenshot-1.png)
+![alt-img](metadata/screenshot-2.png)
+![alt-img](metadata/screenshot-3.png)
+![alt-img](metadata/screenshot-4.png)
 
 ### 🔒 Secure by Design
 
@@ -55,27 +56,6 @@ Unlike traditional file sharing services:
 - No accounts or logins required
 - No third-party servers involved
 
-## Getting Started
-
-### Installation
-This extension is currently not available on the Raycast Extension store, but installation from source is extremely simple.
-
-You need to have nodejs installed to install it locally:
-
-1. Download the source code from the latest release, or clone the repository:
-   ```
-   git clone git@github.com:nazifishrak/sendme-extension.git
-   ```
-
-2. Navigate to the directory where it is downloaded, and open a Terminal window at the downloaded folder.
-
-3. Install dependencies and run the extension:
-   ```
-   npm install
-   npm run dev
-   ```
-
-4. The extension and its full set of commands should then show up in your Raycast app.
 
 ### Troubleshooting
 The extension looks for homebrew to install sendme. If homebrew isn't found, it tries to install in another way. But if you get an error saying sendme isn't installed, please run these commands:
