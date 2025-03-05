@@ -1,6 +1,6 @@
 # .new
 
-## [Update API] - {PR_MERGE_DATE}
+## [Update API] - 2025-03-05
 
 - Update Favicon API
 
