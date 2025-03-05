@@ -2,7 +2,8 @@ import { getPreferenceValues } from "@raycast/api";
 
 export const RESEND_URL = "https://resend.com/";
 export const API_URL = "https://api.resend.com/";
-const API_KEY = getPreferenceValues<Preferences>().api_key;
+
+export const API_KEY = getPreferenceValues<ExtensionPreferences>().api_key;
 
 export const API_HEADERS = {
   Authorization: `Bearer ${API_KEY}`,
