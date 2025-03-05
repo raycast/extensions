@@ -48,7 +48,6 @@ function DocumentsForm() {
   const [fieldName, setFieldName] = useState<string>("");
   const [operator, setOperator] = useState<string>("==");
   const [fieldValue, setFieldValue] = useState<string>("");
-  const [highlightFields, setHighlightFields] = useState<string>("");
   const [documentId, setDocumentId] = useState<string>("");
   const [documentLimit, setDocumentLimit] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -188,12 +187,6 @@ function DocumentsForm() {
       return;
     }
 
-    // Process highlight fields
-    let highlightFieldsArray: string[] = [];
-    if (highlightFields.trim()) {
-      highlightFieldsArray = highlightFields.split(',').map(field => field.trim()).filter(Boolean);
-    }
-
     // Parse document limit
     let limit: number | undefined = undefined;
     if (documentLimit.trim()) {
@@ -250,7 +243,6 @@ function DocumentsForm() {
             fieldName={fieldName}
             operator={operator as admin.firestore.WhereFilterOp}
             fieldValue={parsedValue}
-            highlightFields={highlightFieldsArray}
             limit={limit}
           />
         );
@@ -261,7 +253,7 @@ function DocumentsForm() {
     } else {
       // List all documents
       try {
-        push(<DocumentList collectionName={collectionName} highlightFields={highlightFieldsArray} limit={limit} />);
+        push(<DocumentList collectionName={collectionName} limit={limit} />);
       } catch (error) {
         setError("An unexpected error occurred. Please try again.");
         console.error("Error navigating to document list:", error);
@@ -350,15 +342,6 @@ function DocumentsForm() {
         onChange={setDocumentLimit}
       />
 
-      <Form.TextField
-        id="highlightFields"
-        title="Highlight Fields"
-        placeholder="Enter comma-separated field names to highlight"
-        value={highlightFields}
-        onChange={setHighlightFields}
-        info="Comma-separated list of field names to highlight in the document list"
-      />
-
       <Form.Checkbox
         id="isFiltering"
         label="Filter Documents"
@@ -401,232 +384,245 @@ function DocumentsForm() {
 
 interface DocumentListProps {
   collectionName: string;
-  highlightFields: string[];
   limit?: number;
 }
 
-function DocumentList({ collectionName, highlightFields, limit }: DocumentListProps) {
-  const [documents, setDocuments] = useState<any[]>([]);
+function DocumentList({ collectionName, limit }: DocumentListProps) {
+  const [documents, setDocuments] = useState<admin.firestore.DocumentData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
   const [projectId, setProjectId] = useState<string>("");
-  const { push } = useNavigation();
+  const [highlightFields, setHighlightFields] = useState<string>("");
+  const { push, pop } = useNavigation();
 
+  // Fetch documents when component mounts or when collection/limit changes
   useEffect(() => {
-    // Load project ID from service account
-    async function loadProjectId() {
-      try {
-        const serviceAccount = await getServiceAccount();
-        if (serviceAccount && serviceAccount.project_id) {
-          setProjectId(serviceAccount.project_id);
-        }
-      } catch (error) {
-        console.error("Error loading project ID:", error);
-      }
-    }
-
     loadProjectId();
-    
-    let isMounted = true;
-    let retryCount = 0;
-    const maxRetries = 2;
-    
-    async function fetchDocuments() {
-      try {
-        const docs = await getDocuments(collectionName, limit);
-        if (isMounted) {
-          setDocuments(docs);
-          setError(undefined);
-        }
-      } catch (error) {
-        console.error("Error fetching documents:", error);
-        if (isMounted) {
-          if (retryCount < maxRetries) {
-            retryCount++;
-            // Wait a bit longer between retries
-            setTimeout(fetchDocuments, 1000 * retryCount);
-            return;
-          }
-          
-          setError("Failed to fetch documents. Please try again.");
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to Fetch Documents",
-            message: `Error fetching documents from ${collectionName}`,
-          });
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
     fetchDocuments();
-    
-    return () => {
-      isMounted = false;
-    };
   }, [collectionName, limit]);
 
-  // Function to create keywords from document fields for search
-  const getKeywords = (doc: any): string[] => {
-    const keywords: string[] = [doc.id]; // Start with document ID
-    
-    // Add highlighted field values to keywords
-    highlightFields.forEach(field => {
-      if (doc[field] !== undefined) {
-        const value = formatFieldValue(doc[field]);
-        keywords.push(value);
-        keywords.push(`${field}:${value}`);
+  // Force re-render when highlightFields changes
+  useEffect(() => {
+    console.log("Highlight fields updated:", highlightFields);
+    // Log the first document structure to understand its format
+    if (documents.length > 0) {
+      console.log("First document structure:", JSON.stringify(documents[0], null, 2));
+    }
+  }, [highlightFields, documents]);
+
+  async function loadProjectId() {
+    try {
+      const serviceAccount = await getServiceAccount();
+      if (serviceAccount) {
+        setProjectId(serviceAccount.project_id);
       }
-    });
+    } catch (error) {
+      console.error("Error loading project ID:", error);
+    }
+  }
+
+  async function fetchDocuments() {
+    setIsLoading(true);
+    setError(undefined);
+    try {
+      const docs = await getDocuments(collectionName, limit);
+      console.log("Fetched documents:", docs);
+      if (docs.length > 0) {
+        console.log("First document structure:", JSON.stringify(docs[0], null, 2));
+        console.log("Document keys:", Object.keys(docs[0]));
+        if (docs[0].data) {
+          console.log("Document data keys:", Object.keys(docs[0].data));
+        }
+      }
+      setDocuments(docs);
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      setError(`Failed to fetch documents: ${error instanceof Error ? error.message : String(error)}`);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Fetch Documents",
+        message: "An error occurred while fetching documents",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const getKeywords = (doc: any): string[] => {
+    const keywords: string[] = [];
+    
+    // Add document ID as a keyword
+    if (doc && doc.id) {
+      keywords.push(doc.id);
+    }
+    
+    // Add highlighted field values as keywords
+    if (doc && doc.data && highlightFields) {
+      const fieldArray = highlightFields.split(',');
+      for (const field of fieldArray) {
+        const trimmedField = field.trim();
+        if (trimmedField && doc.data[trimmedField] !== undefined) {
+          const value = doc.data[trimmedField];
+          if (typeof value === 'object' && value !== null) {
+            keywords.push(JSON.stringify(value));
+          } else if (value !== null) {
+            keywords.push(String(value));
+          }
+        }
+      }
+    }
     
     return keywords;
   };
 
-  // Function to generate Firestore URL for a document
   const getFirestoreUrl = (docId: string): string => {
-    // Encode collection name and document ID for URL
-    const encodedCollection = collectionName.replace(/\//g, '~2F');
-    const encodedDocId = docId.replace(/\//g, '~2F');
-    
-    return `https://console.firebase.google.com/project/${projectId}/firestore/databases/-default-/data/~2F${encodedCollection}~2F${encodedDocId}`;
+    if (!projectId) return "";
+    return `https://console.firebase.google.com/project/${projectId}/firestore/data/${collectionName}/${docId}`;
   };
 
-  // Function to export all documents to JSON
   const exportDocumentsToJson = async () => {
-    try {
-      // Ensure documents have id field
-      const docsWithId = documents.map(doc => {
-        // Create a copy of the document to avoid modifying the original
-        const docCopy = { ...doc };
-        
-        // If the document doesn't already have an id field in its data (not the Firestore ID)
-        if (!docCopy.hasOwnProperty('id')) {
-          docCopy.id = doc.id;
-        }
-        
-        return docCopy;
+    if (documents.length === 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No Documents to Export",
       });
-      
-      // Create JSON string
-      const jsonData = JSON.stringify(docsWithId, null, 2);
-      
-      // Copy JSON to clipboard
+      return;
+    }
+
+    try {
+      // Format the documents as a JSON string
+      const jsonData = JSON.stringify(documents.map(doc => ({
+        id: doc.id,
+        ...doc.data
+      })), null, 2);
+
+      // Copy to clipboard
       await Clipboard.copy(jsonData);
       
-      // Show success toast
       await showToast({
         style: Toast.Style.Success,
-        title: "Documents Exported",
-        message: "JSON data copied to clipboard",
+        title: "Documents Exported to Clipboard",
+        message: `${documents.length} documents copied as JSON`,
       });
-      
     } catch (error) {
       console.error("Error exporting documents:", error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Export Failed",
-        message: "Failed to export documents to JSON",
+        message: String(error),
       });
     }
   };
 
   if (error) {
     return (
-      <List
-        isLoading={isLoading}
-        searchBarPlaceholder={`Search documents in ${collectionName}...`}
-        filtering={true}
-        navigationTitle={`${collectionName} - Error`}
+      <Detail
+        markdown={`# Error\n\n${error}`}
         actions={
           <ActionPanel>
-            <Action
-              title="Retry"
-              onAction={() => {
-                setIsLoading(true);
-                setError(undefined);
-                getDocuments(collectionName, limit)
-                  .then((docs) => {
-                    setDocuments(docs);
-                  })
-                  .catch((error) => {
-                    console.error("Error fetching documents:", error);
-                    setError("Failed to fetch documents. Please try again.");
-                    showToast({
-                      style: Toast.Style.Failure,
-                      title: "Failed to Fetch Documents",
-                      message: `Error fetching documents from ${collectionName}`,
-                    });
-                  })
-                  .finally(() => {
-                    setIsLoading(false);
-                  });
-              }}
-            />
+            <Action title="Retry" onAction={fetchDocuments} />
           </ActionPanel>
         }
-      >
-        <List.EmptyView
-          title="Error Fetching Documents"
-          description={error}
-          icon="⚠️"
-        />
-      </List>
-    );
-  }
-
-  if (documents.length === 0) {
-    return (
-      <List
-        isLoading={isLoading}
-        searchBarPlaceholder={`Search documents in ${collectionName}...`}
-        filtering={true}
-        navigationTitle={`${collectionName} (0 documents)`}
-      >
-        <List.EmptyView
-          title="No Documents Found"
-          description={`No documents found in the collection '${collectionName}'. Try creating a document in Firebase Console.`}
-          icon="📄"
-        />
-      </List>
+      />
     );
   }
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={`Search documents in ${collectionName}...`}
-      filtering={true}
-      navigationTitle={`${collectionName} (${documents.length} documents)`}
+      searchBarPlaceholder="Search documents..."
+      navigationTitle={`Documents in ${collectionName}`}
+      actions={
+        <ActionPanel>
+          <Action title="Refresh" onAction={fetchDocuments} />
+          <Action title="Export to JSON" onAction={exportDocumentsToJson} />
+        </ActionPanel>
+      }
     >
-      {/* Add a header row to show field names */}
-      {documents.length > 0 && highlightFields.length > 0 && (
-        <List.Section title="Fields">
-          <List.Item
-            title="ID"
-            subtitle={highlightFields.join(' | ')}
-          />
-        </List.Section>
-      )}
+      <List.Section title="Highlight Fields" subtitle={documents.length > 0 ? `${documents.length} documents` : undefined}>
+        <List.Item
+          title="Highlight Fields"
+          subtitle="Comma-separated list of fields to highlight"
+          accessories={[{ text: highlightFields || "None" }]}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Set Highlight Fields"
+                onAction={() => {
+                  push(
+                    <Form
+                      actions={
+                        <ActionPanel>
+                          <Action.SubmitForm
+                            title="Save"
+                            onSubmit={(values) => {
+                              console.log("Setting highlight fields to:", values.highlightFields);
+                              setHighlightFields(values.highlightFields);
+                              pop();
+                            }}
+                          />
+                        </ActionPanel>
+                      }
+                    >
+                      <Form.TextField
+                        id="highlightFields"
+                        title="Highlight Fields"
+                        placeholder="Enter comma-separated field names to highlight"
+                        defaultValue={highlightFields}
+                      />
+                    </Form>
+                  );
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
 
-      <List.Section 
-        title={`${documents.length} documents in ${collectionName}`}
-        subtitle={documents.length > 0 ? "⌘E to export all documents" : undefined}
-      >
+      <List.Section title="Documents" subtitle={documents.length > 0 ? `${documents.length} documents` : undefined}>
         {documents.map((doc) => {
-          // Create a formatted string with just field values separated by |
-          const fieldValues = highlightFields.map(field => {
-            const value = doc[field];
-            return formatFieldValue(value);
-          }).join(' | ');
+          // Create a subtitle with highlighted field values
+          let subtitle = "";
           
+          if (highlightFields && highlightFields.trim() !== "") {
+            const fieldNames = highlightFields.split(',').map(f => f.trim()).filter(f => f !== "");
+            const fieldValues = [];
+            
+            console.log(`Document ${doc.id} - Looking for fields:`, fieldNames);
+            
+            for (const fieldName of fieldNames) {
+              // Try to access the field directly from the document
+              if (doc[fieldName] !== undefined) {
+                const value = formatFieldValue(doc[fieldName]);
+                fieldValues.push(`${fieldName}: ${value}`);
+                console.log(`Found field ${fieldName} directly on document:`, doc[fieldName]);
+              } 
+              // Also try to access it from doc.data if it exists
+              else if (doc.data && doc.data[fieldName] !== undefined) {
+                const value = formatFieldValue(doc.data[fieldName]);
+                fieldValues.push(`${fieldName}: ${value}`);
+                console.log(`Found field ${fieldName} in doc.data:`, doc.data[fieldName]);
+              } else {
+                console.log(`Field ${fieldName} not found in document ${doc.id}`);
+              }
+            }
+            
+            subtitle = fieldValues.join(' | ');
+            console.log(`Document ${doc.id} subtitle:`, subtitle);
+          }
+
           return (
             <List.Item
-              key={`${doc.id}-${collectionName}`}
+              key={doc.id}
               title={doc.id}
-              subtitle={fieldValues}
+              subtitle={subtitle}
+              accessories={[
+                { 
+                  text: doc.data ? `${Object.keys(doc.data).length} fields` : 
+                        (Object.keys(doc).length - 1) + " fields", // -1 for the id field
+                  tooltip: "Number of fields"
+                }
+              ]}
               keywords={getKeywords(doc)}
               actions={
                 <ActionPanel>
@@ -634,20 +630,26 @@ function DocumentList({ collectionName, highlightFields, limit }: DocumentListPr
                     title="View Document"
                     onAction={() => push(<DocumentDetail document={doc} collectionName={collectionName} />)}
                   />
-                  <Action.CopyToClipboard
+                  <Action
                     title="Copy Document ID"
-                    content={doc.id}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Firestore URL"
-                    content={getFirestoreUrl(doc.id)}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    onAction={() => {
+                      Clipboard.copy(doc.id);
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: "Document ID Copied",
+                      });
+                    }}
                   />
                   <Action
-                    title="Export All Documents to JSON"
-                    onAction={exportDocumentsToJson}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    title="Copy Firestore URL"
+                    onAction={() => {
+                      const url = getFirestoreUrl(doc.id);
+                      Clipboard.copy(url);
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: "Firestore URL Copied",
+                      });
+                    }}
                   />
                 </ActionPanel>
               }
@@ -664,7 +666,6 @@ interface FilteredDocumentListProps {
   fieldName: string;
   operator: admin.firestore.WhereFilterOp;
   fieldValue: any;
-  highlightFields: string[];
   limit?: number;
 }
 
@@ -673,255 +674,273 @@ function FilteredDocumentList({
   fieldName,
   operator,
   fieldValue,
-  highlightFields,
   limit,
 }: FilteredDocumentListProps) {
-  const [documents, setDocuments] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<admin.firestore.DocumentData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
   const [projectId, setProjectId] = useState<string>("");
-  const { push } = useNavigation();
+  const [highlightFields, setHighlightFields] = useState<string>("");
+  const { push, pop } = useNavigation();
 
+  // Fetch documents when component mounts or when filter criteria changes
   useEffect(() => {
-    // Load project ID from service account
-    async function loadProjectId() {
-      try {
-        const serviceAccount = await getServiceAccount();
-        if (serviceAccount && serviceAccount.project_id) {
-          setProjectId(serviceAccount.project_id);
-        }
-      } catch (error) {
-        console.error("Error loading project ID:", error);
-      }
-    }
-
     loadProjectId();
-    
-    let isMounted = true;
-    let retryCount = 0;
-    const maxRetries = 2;
-    
-    async function fetchDocuments() {
-      try {
-        const docs = await queryDocuments(collectionName, fieldName, operator, fieldValue, limit);
-        if (isMounted) {
-          setDocuments(docs);
-          setError(undefined);
-        }
-      } catch (error) {
-        console.error("Error fetching filtered documents:", error);
-        if (isMounted) {
-          if (retryCount < maxRetries) {
-            retryCount++;
-            // Wait a bit longer between retries
-            setTimeout(fetchDocuments, 1000 * retryCount);
-            return;
-          }
-          
-          setError("Failed to fetch documents. Please try again.");
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to Fetch Documents",
-            message: `Error fetching documents from ${collectionName}`,
-          });
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
     fetchDocuments();
-    
-    return () => {
-      isMounted = false;
-    };
   }, [collectionName, fieldName, operator, fieldValue, limit]);
 
-  // Format the filter criteria for display
-  let formattedValue = typeof fieldValue === "object" ? JSON.stringify(fieldValue) : String(fieldValue);
+  // Force re-render when highlightFields changes
+  useEffect(() => {
+    console.log("Highlight fields updated:", highlightFields);
+    // Log the first document structure to understand its format
+    if (documents.length > 0) {
+      console.log("First document structure:", JSON.stringify(documents[0], null, 2));
+    }
+  }, [highlightFields, documents]);
+
+  async function loadProjectId() {
+    try {
+      const serviceAccount = await getServiceAccount();
+      if (serviceAccount) {
+        setProjectId(serviceAccount.project_id);
+      }
+    } catch (error) {
+      console.error("Error loading project ID:", error);
+    }
+  }
+
+  async function fetchDocuments() {
+    setIsLoading(true);
+    setError(undefined);
+    try {
+      const docs = await queryDocuments(collectionName, fieldName, operator, fieldValue, limit);
+      console.log("Fetched filtered documents:", docs);
+      if (docs.length > 0) {
+        console.log("First document structure:", JSON.stringify(docs[0], null, 2));
+        console.log("Document keys:", Object.keys(docs[0]));
+        if (docs[0].data) {
+          console.log("Document data keys:", Object.keys(docs[0].data));
+        }
+      }
+      setDocuments(docs);
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      setError(`Failed to fetch documents: ${error instanceof Error ? error.message : String(error)}`);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Fetch Documents",
+        message: "An error occurred while fetching documents",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // Format the field value for display
+  const formattedValue = typeof fieldValue === 'object' ? JSON.stringify(fieldValue) : String(fieldValue);
   const filterDescription = `${fieldName} ${operator} ${formattedValue}`;
 
-  // Function to create keywords from document fields for search
   const getKeywords = (doc: any): string[] => {
-    const keywords: string[] = [doc.id]; // Start with document ID
+    const keywords: string[] = [];
     
-    // Add highlighted field values to keywords
-    highlightFields.forEach(field => {
-      if (doc[field] !== undefined) {
-        const value = formatFieldValue(doc[field]);
-        keywords.push(value);
-        keywords.push(`${field}:${value}`);
+    // Add document ID as a keyword
+    if (doc && doc.id) {
+      keywords.push(doc.id);
+    }
+    
+    // Add highlighted field values as keywords
+    if (doc && doc.data && highlightFields) {
+      const fieldArray = highlightFields.split(',');
+      for (const field of fieldArray) {
+        const trimmedField = field.trim();
+        if (trimmedField && doc.data[trimmedField] !== undefined) {
+          const value = doc.data[trimmedField];
+          if (typeof value === 'object' && value !== null) {
+            keywords.push(JSON.stringify(value));
+          } else if (value !== null) {
+            keywords.push(String(value));
+          }
+        }
       }
-    });
+    }
     
     return keywords;
   };
 
-  // Function to generate Firestore URL for a document
   const getFirestoreUrl = (docId: string): string => {
-    // Encode collection name and document ID for URL
-    const encodedCollection = collectionName.replace(/\//g, '~2F');
-    const encodedDocId = docId.replace(/\//g, '~2F');
-    
-    return `https://console.firebase.google.com/project/${projectId}/firestore/databases/-default-/data/~2F${encodedCollection}~2F${encodedDocId}`;
+    if (!projectId) return "";
+    return `https://console.firebase.google.com/project/${projectId}/firestore/data/${collectionName}/${docId}`;
   };
 
-  // Function to export all documents to JSON
   const exportDocumentsToJson = async () => {
-    try {
-      // Ensure documents have id field
-      const docsWithId = documents.map(doc => {
-        // Create a copy of the document to avoid modifying the original
-        const docCopy = { ...doc };
-        
-        // If the document doesn't already have an id field in its data (not the Firestore ID)
-        if (!docCopy.hasOwnProperty('id')) {
-          docCopy.id = doc.id;
-        }
-        
-        return docCopy;
+    if (documents.length === 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No Documents to Export",
       });
-      
-      // Create JSON string
-      const jsonData = JSON.stringify(docsWithId, null, 2);
-      
-      // Copy JSON to clipboard
+      return;
+    }
+
+    try {
+      // Format the documents as a JSON string
+      const jsonData = JSON.stringify(documents.map(doc => ({
+        id: doc.id,
+        ...doc.data
+      })), null, 2);
+
+      // Copy to clipboard
       await Clipboard.copy(jsonData);
       
-      // Show success toast
       await showToast({
         style: Toast.Style.Success,
-        title: "Documents Exported",
-        message: "JSON data copied to clipboard",
+        title: "Documents Exported to Clipboard",
+        message: `${documents.length} documents copied as JSON`,
       });
-      
     } catch (error) {
       console.error("Error exporting documents:", error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Export Failed",
-        message: "Failed to export documents to JSON",
+        message: String(error),
       });
     }
   };
 
   if (error) {
     return (
-      <List
-        isLoading={isLoading}
-        searchBarPlaceholder={`Search filtered documents in ${collectionName}...`}
-        filtering={true}
-        navigationTitle={`${collectionName} - Error`}
+      <Detail
+        markdown={`# Error\n\n${error}`}
         actions={
           <ActionPanel>
-            <Action
-              title="Retry"
-              onAction={() => {
-                setIsLoading(true);
-                setError(undefined);
-                queryDocuments(collectionName, fieldName, operator, fieldValue, limit)
-                  .then((docs) => {
-                    setDocuments(docs);
-                  })
-                  .catch((error) => {
-                    console.error("Error fetching filtered documents:", error);
-                    setError("Failed to fetch documents. Please try again.");
-                    showToast({
-                      style: Toast.Style.Failure,
-                      title: "Failed to Fetch Documents",
-                      message: `Error fetching documents from ${collectionName}`,
-                    });
-                  })
-                  .finally(() => {
-                    setIsLoading(false);
-                  });
-              }}
-            />
+            <Action title="Retry" onAction={fetchDocuments} />
           </ActionPanel>
         }
-      >
-        <List.EmptyView
-          title="Error Fetching Documents"
-          description={error}
-          icon="⚠️"
-        />
-      </List>
-    );
-  }
-
-  if (documents.length === 0) {
-    return (
-      <List
-        isLoading={isLoading}
-        searchBarPlaceholder={`Search filtered documents in ${collectionName}...`}
-        filtering={true}
-        navigationTitle={`${collectionName} (0 documents)`}
-      >
-        <List.EmptyView
-          title="No Documents Match Filter"
-          description={`No documents found matching the filter criteria: ${filterDescription}`}
-          icon="🔍"
-        />
-      </List>
+      />
     );
   }
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={`Search filtered documents in ${collectionName}...`}
-      filtering={true}
-      navigationTitle={`${collectionName} (${documents.length} documents)`}
+      searchBarPlaceholder="Search documents..."
+      navigationTitle={`Filtered Documents in ${collectionName}`}
+      actions={
+        <ActionPanel>
+          <Action title="Refresh" onAction={fetchDocuments} />
+          <Action title="Export to JSON" onAction={exportDocumentsToJson} />
+        </ActionPanel>
+      }
     >
-      {/* Add a header row to show field names */}
-      {documents.length > 0 && highlightFields.length > 0 && (
-        <List.Section title="Fields">
-          <List.Item
-            title="ID"
-            subtitle={highlightFields.join(' | ')}
-          />
-        </List.Section>
-      )}
+      <List.Section title="Highlight Fields" subtitle={documents.length > 0 ? `${documents.length} documents` : undefined}>
+        <List.Item
+          title="Highlight Fields"
+          subtitle="Comma-separated list of fields to highlight"
+          accessories={[{ text: highlightFields || "None" }]}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Set Highlight Fields"
+                onAction={() => {
+                  push(
+                    <Form
+                      actions={
+                        <ActionPanel>
+                          <Action.SubmitForm
+                            title="Save"
+                            onSubmit={(values) => {
+                              console.log("Setting highlight fields to:", values.highlightFields);
+                              setHighlightFields(values.highlightFields);
+                              pop();
+                            }}
+                          />
+                        </ActionPanel>
+                      }
+                    >
+                      <Form.TextField
+                        id="highlightFields"
+                        title="Highlight Fields"
+                        placeholder="Enter comma-separated field names to highlight"
+                        defaultValue={highlightFields}
+                      />
+                    </Form>
+                  );
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
 
-      <List.Section 
-        title={`${documents.length} documents matching filter: ${filterDescription}`}
-        subtitle={documents.length > 0 ? "⌘E to export all documents" : undefined}
-      >
+      <List.Section title="Documents" subtitle={`${documents.length} documents matching ${filterDescription}`}>
         {documents.map((doc) => {
-          // Create a formatted string with just field values separated by |
-          const fieldValues = highlightFields.map(field => {
-            const value = doc[field];
-            return formatFieldValue(value);
-          }).join(' | ');
+          // Create a subtitle with highlighted field values
+          let subtitle = "";
           
+          if (highlightFields && highlightFields.trim() !== "") {
+            const fieldNames = highlightFields.split(',').map(f => f.trim()).filter(f => f !== "");
+            const fieldValues = [];
+            
+            console.log(`Document ${doc.id} - Looking for fields:`, fieldNames);
+            
+            for (const fieldName of fieldNames) {
+              // Try to access the field directly from the document
+              if (doc[fieldName] !== undefined) {
+                const value = formatFieldValue(doc[fieldName]);
+                fieldValues.push(`${fieldName}: ${value}`);
+                console.log(`Found field ${fieldName} directly on document:`, doc[fieldName]);
+              } 
+              // Also try to access it from doc.data if it exists
+              else if (doc.data && doc.data[fieldName] !== undefined) {
+                const value = formatFieldValue(doc.data[fieldName]);
+                fieldValues.push(`${fieldName}: ${value}`);
+                console.log(`Found field ${fieldName} in doc.data:`, doc.data[fieldName]);
+              } else {
+                console.log(`Field ${fieldName} not found in document ${doc.id}`);
+              }
+            }
+            
+            subtitle = fieldValues.join(' | ');
+            console.log(`Document ${doc.id} subtitle:`, subtitle);
+          }
+
           return (
             <List.Item
-              key={`${doc.id}-${collectionName}-${fieldName}`}
+              key={doc.id}
               title={doc.id}
-              subtitle={fieldValues}
-              keywords={getKeywords(doc)}
+              subtitle={subtitle}
+              accessories={[
+                { 
+                  text: doc.data ? `${Object.keys(doc.data).length} fields` : 
+                        (Object.keys(doc).length - 1) + " fields", // -1 for the id field
+                  tooltip: "Number of fields"
+                }
+              ]}
               actions={
                 <ActionPanel>
                   <Action
                     title="View Document"
                     onAction={() => push(<DocumentDetail document={doc} collectionName={collectionName} />)}
                   />
-                  <Action.CopyToClipboard
+                  <Action
                     title="Copy Document ID"
-                    content={doc.id}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Firestore URL"
-                    content={getFirestoreUrl(doc.id)}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    onAction={() => {
+                      Clipboard.copy(doc.id);
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: "Document ID Copied",
+                      });
+                    }}
                   />
                   <Action
-                    title="Export All Documents to JSON"
-                    onAction={exportDocumentsToJson}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    title="Copy Firestore URL"
+                    onAction={() => {
+                      const url = getFirestoreUrl(doc.id);
+                      Clipboard.copy(url);
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: "Firestore URL Copied",
+                      });
+                    }}
                   />
                 </ActionPanel>
               }
