@@ -18,6 +18,6 @@ export default async function openSelectedLink() {
     await open(url);
     await showHUD(`Opened: ${url}`);
   } catch (error) {
-    await showHUD(`Error: ${String(error)}`);
+    await showFailureToast(String(error));
   }
 }
