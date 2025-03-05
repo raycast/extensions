@@ -30,14 +30,21 @@ export async function getCollections(): Promise<string[]> {
 /**
  * Fetches all documents from a collection
  */
-export async function getDocuments(collectionName: string): Promise<admin.firestore.DocumentData[]> {
+export async function getDocuments(collectionName: string, limit?: number): Promise<admin.firestore.DocumentData[]> {
   const firestore = await getFirestore();
   if (!firestore) {
     throw new Error("Firestore is not initialized. Please set up your service account.");
   }
 
   try {
-    const snapshot = await firestore.collection(collectionName).get();
+    let query: admin.firestore.Query = firestore.collection(collectionName);
+    
+    // Apply limit if provided
+    if (limit !== undefined && limit > 0) {
+      query = query.limit(limit);
+    }
+    
+    const snapshot = await query.get();
     return snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -82,7 +89,8 @@ export async function queryDocuments(
   collectionName: string,
   field: string,
   operator: admin.firestore.WhereFilterOp,
-  value: any
+  value: any,
+  limit?: number
 ): Promise<admin.firestore.DocumentData[]> {
   const firestore = await getFirestore();
   if (!firestore) {
@@ -90,7 +98,14 @@ export async function queryDocuments(
   }
 
   try {
-    const snapshot = await firestore.collection(collectionName).where(field, operator, value).get();
+    let query: admin.firestore.Query = firestore.collection(collectionName).where(field, operator, value);
+    
+    // Apply limit if provided
+    if (limit !== undefined && limit > 0) {
+      query = query.limit(limit);
+    }
+    
+    const snapshot = await query.get();
     return snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),

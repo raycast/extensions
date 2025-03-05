@@ -50,6 +50,7 @@ function DocumentsForm() {
   const [fieldValue, setFieldValue] = useState<string>("");
   const [highlightFields, setHighlightFields] = useState<string>("");
   const [documentId, setDocumentId] = useState<string>("");
+  const [documentLimit, setDocumentLimit] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
@@ -169,7 +170,7 @@ function DocumentsForm() {
           setIsLoading(false);
           return;
         }
-        
+
         // Document found, navigate to document detail view
         push(<DocumentDetail document={doc} collectionName={collectionName} />);
         setError(undefined);
@@ -191,6 +192,22 @@ function DocumentsForm() {
     let highlightFieldsArray: string[] = [];
     if (highlightFields.trim()) {
       highlightFieldsArray = highlightFields.split(',').map(field => field.trim()).filter(Boolean);
+    }
+
+    // Parse document limit
+    let limit: number | undefined = undefined;
+    if (documentLimit.trim()) {
+      const parsedLimit = parseInt(documentLimit.trim(), 10);
+      if (!isNaN(parsedLimit) && parsedLimit > 0) {
+        limit = parsedLimit;
+      } else if (documentLimit.trim() !== "") {
+        setError("Document limit must be a positive number");
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Limit must be a positive number",
+        });
+        return;
+      }
     }
 
     if (isFiltering) {
@@ -234,6 +251,7 @@ function DocumentsForm() {
             operator={operator as admin.firestore.WhereFilterOp}
             fieldValue={parsedValue}
             highlightFields={highlightFieldsArray}
+            limit={limit}
           />
         );
       } catch (error) {
@@ -243,7 +261,7 @@ function DocumentsForm() {
     } else {
       // List all documents
       try {
-        push(<DocumentList collectionName={collectionName} highlightFields={highlightFieldsArray} />);
+        push(<DocumentList collectionName={collectionName} highlightFields={highlightFieldsArray} limit={limit} />);
       } catch (error) {
         setError("An unexpected error occurred. Please try again.");
         console.error("Error navigating to document list:", error);
@@ -324,21 +342,28 @@ function DocumentsForm() {
         info="If provided, will fetch this specific document from the selected collection"
       />
 
-      <Form.Checkbox
-        id="isFiltering"
-        label="Filter Documents"
-        value={isFiltering}
-        onChange={setIsFiltering}
-        info="Enable to filter documents by field value"
+      <Form.TextField
+        id="documentLimit"
+        title="Document Limit"
+        placeholder="Leave empty to fetch all documents"
+        value={documentLimit}
+        onChange={setDocumentLimit}
       />
 
       <Form.TextField
         id="highlightFields"
         title="Highlight Fields"
-        placeholder="Enter field names to highlight (comma-separated)"
+        placeholder="Enter comma-separated field names to highlight"
         value={highlightFields}
         onChange={setHighlightFields}
-        info="Fields to highlight in the document list. Separate multiple fields with commas."
+        info="Comma-separated list of field names to highlight in the document list"
+      />
+
+      <Form.Checkbox
+        id="isFiltering"
+        label="Filter Documents"
+        value={isFiltering}
+        onChange={setIsFiltering}
       />
 
       {isFiltering && (
@@ -377,9 +402,10 @@ function DocumentsForm() {
 interface DocumentListProps {
   collectionName: string;
   highlightFields: string[];
+  limit?: number;
 }
 
-function DocumentList({ collectionName, highlightFields }: DocumentListProps) {
+function DocumentList({ collectionName, highlightFields, limit }: DocumentListProps) {
   const [documents, setDocuments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
@@ -407,7 +433,7 @@ function DocumentList({ collectionName, highlightFields }: DocumentListProps) {
     
     async function fetchDocuments() {
       try {
-        const docs = await getDocuments(collectionName);
+        const docs = await getDocuments(collectionName, limit);
         if (isMounted) {
           setDocuments(docs);
           setError(undefined);
@@ -441,7 +467,7 @@ function DocumentList({ collectionName, highlightFields }: DocumentListProps) {
     return () => {
       isMounted = false;
     };
-  }, [collectionName]);
+  }, [collectionName, limit]);
 
   // Function to create keywords from document fields for search
   const getKeywords = (doc: any): string[] => {
@@ -521,7 +547,7 @@ function DocumentList({ collectionName, highlightFields }: DocumentListProps) {
               onAction={() => {
                 setIsLoading(true);
                 setError(undefined);
-                getDocuments(collectionName)
+                getDocuments(collectionName, limit)
                   .then((docs) => {
                     setDocuments(docs);
                   })
@@ -639,6 +665,7 @@ interface FilteredDocumentListProps {
   operator: admin.firestore.WhereFilterOp;
   fieldValue: any;
   highlightFields: string[];
+  limit?: number;
 }
 
 function FilteredDocumentList({
@@ -647,6 +674,7 @@ function FilteredDocumentList({
   operator,
   fieldValue,
   highlightFields,
+  limit,
 }: FilteredDocumentListProps) {
   const [documents, setDocuments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -675,7 +703,7 @@ function FilteredDocumentList({
     
     async function fetchDocuments() {
       try {
-        const docs = await queryDocuments(collectionName, fieldName, operator, fieldValue);
+        const docs = await queryDocuments(collectionName, fieldName, operator, fieldValue, limit);
         if (isMounted) {
           setDocuments(docs);
           setError(undefined);
@@ -709,7 +737,7 @@ function FilteredDocumentList({
     return () => {
       isMounted = false;
     };
-  }, [collectionName, fieldName, operator, fieldValue]);
+  }, [collectionName, fieldName, operator, fieldValue, limit]);
 
   // Format the filter criteria for display
   let formattedValue = typeof fieldValue === "object" ? JSON.stringify(fieldValue) : String(fieldValue);
@@ -793,7 +821,7 @@ function FilteredDocumentList({
               onAction={() => {
                 setIsLoading(true);
                 setError(undefined);
-                queryDocuments(collectionName, fieldName, operator, fieldValue)
+                queryDocuments(collectionName, fieldName, operator, fieldValue, limit)
                   .then((docs) => {
                     setDocuments(docs);
                   })
