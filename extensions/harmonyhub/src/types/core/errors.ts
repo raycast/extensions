@@ -176,7 +176,7 @@ export class HarmonyError extends Error {
     code?: string,
     details?: ErrorDetails,
     severity: ErrorSeverity = ErrorSeverity.ERROR,
-    recoveryStrategies?: ErrorRecoveryStrategy[]
+    recoveryStrategies?: ErrorRecoveryStrategy[],
   ) {
     super(message);
     this.name = "HarmonyError";
@@ -226,7 +226,7 @@ export class HarmonyError extends Error {
     if (this.retryContext) {
       details.push(
         `Retry Attempts: ${this.retryContext.attempts}/${this.retryContext.maxAttempts}`,
-        `Last Attempt: ${new Date(this.retryContext.lastAttemptTimestamp).toISOString()}`
+        `Last Attempt: ${new Date(this.retryContext.lastAttemptTimestamp).toISOString()}`,
       );
     }
 

@@ -75,7 +75,7 @@ export function validateHubConfig(hub: Partial<HarmonyHub>): asserts hub is Harm
       undefined,
       undefined,
       false,
-      "INVALID_HUB_ID"
+      "INVALID_HUB_ID",
     );
   }
 
@@ -86,7 +86,7 @@ export function validateHubConfig(hub: Partial<HarmonyHub>): asserts hub is Harm
       undefined,
       undefined,
       false,
-      "INVALID_HUB_NAME"
+      "INVALID_HUB_NAME",
     );
   }
 
@@ -97,7 +97,7 @@ export function validateHubConfig(hub: Partial<HarmonyHub>): asserts hub is Harm
       undefined,
       undefined,
       false,
-      "INVALID_HUB_IP"
+      "INVALID_HUB_IP",
     );
   }
 
@@ -108,7 +108,7 @@ export function validateHubConfig(hub: Partial<HarmonyHub>): asserts hub is Harm
       undefined,
       undefined,
       false,
-      "INVALID_HUB_PORT"
+      "INVALID_HUB_PORT",
     );
   }
 
@@ -129,7 +129,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
       undefined,
       undefined,
       false,
-      "INVALID_DEVICE_ID"
+      "INVALID_DEVICE_ID",
     );
   }
 
@@ -140,7 +140,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
       undefined,
       undefined,
       false,
-      "INVALID_DEVICE_NAME"
+      "INVALID_DEVICE_NAME",
     );
   }
 
@@ -151,7 +151,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
       undefined,
       undefined,
       false,
-      "INVALID_DEVICE_TYPE"
+      "INVALID_DEVICE_TYPE",
     );
   }
 
@@ -162,7 +162,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
       undefined,
       undefined,
       false,
-      "INVALID_COMMANDS_ARRAY"
+      "INVALID_COMMANDS_ARRAY",
     );
   }
 
@@ -174,7 +174,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
         undefined,
         undefined,
         false,
-        "INVALID_COMMAND_ID"
+        "INVALID_COMMAND_ID",
       );
     }
 
@@ -185,7 +185,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
         undefined,
         undefined,
         false,
-        "INVALID_COMMAND_NAME"
+        "INVALID_COMMAND_NAME",
       );
     }
 
@@ -196,7 +196,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
         undefined,
         undefined,
         false,
-        "INVALID_COMMAND_DEVICE_ID"
+        "INVALID_COMMAND_DEVICE_ID",
       );
     }
 
@@ -207,7 +207,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
         undefined,
         undefined,
         false,
-        "INVALID_COMMAND_GROUP"
+        "INVALID_COMMAND_GROUP",
       );
     }
   });
@@ -229,7 +229,7 @@ export function validateActivity(activity: Partial<HarmonyActivity>): asserts ac
       undefined,
       undefined,
       false,
-      "INVALID_ACTIVITY_ID"
+      "INVALID_ACTIVITY_ID",
     );
   }
 
@@ -240,7 +240,7 @@ export function validateActivity(activity: Partial<HarmonyActivity>): asserts ac
       undefined,
       undefined,
       false,
-      "INVALID_ACTIVITY_NAME"
+      "INVALID_ACTIVITY_NAME",
     );
   }
 
@@ -251,7 +251,7 @@ export function validateActivity(activity: Partial<HarmonyActivity>): asserts ac
       undefined,
       undefined,
       false,
-      "INVALID_ACTIVITY_TYPE"
+      "INVALID_ACTIVITY_TYPE",
     );
   }
 
@@ -262,7 +262,7 @@ export function validateActivity(activity: Partial<HarmonyActivity>): asserts ac
       undefined,
       undefined,
       false,
-      "INVALID_ACTIVITY_STATUS"
+      "INVALID_ACTIVITY_STATUS",
     );
   }
 
@@ -283,7 +283,7 @@ export function validateCommand(command: Partial<HarmonyCommand>): asserts comma
       undefined,
       undefined,
       false,
-      "INVALID_COMMAND_ID"
+      "INVALID_COMMAND_ID",
     );
   }
 
@@ -294,7 +294,7 @@ export function validateCommand(command: Partial<HarmonyCommand>): asserts comma
       undefined,
       undefined,
       false,
-      "INVALID_COMMAND_NAME"
+      "INVALID_COMMAND_NAME",
     );
   }
 
@@ -305,7 +305,7 @@ export function validateCommand(command: Partial<HarmonyCommand>): asserts comma
       undefined,
       undefined,
       false,
-      "INVALID_COMMAND_LABEL"
+      "INVALID_COMMAND_LABEL",
     );
   }
 
@@ -316,7 +316,7 @@ export function validateCommand(command: Partial<HarmonyCommand>): asserts comma
       undefined,
       undefined,
       false,
-      "INVALID_COMMAND_DEVICE_ID"
+      "INVALID_COMMAND_DEVICE_ID",
     );
   }
 
@@ -327,7 +327,7 @@ export function validateCommand(command: Partial<HarmonyCommand>): asserts comma
       undefined,
       undefined,
       false,
-      "INVALID_COMMAND_GROUP"
+      "INVALID_COMMAND_GROUP",
     );
   }
 
@@ -346,7 +346,7 @@ export function validateNumericPreference(
   value: unknown,
   min: number,
   max: number,
-  name: string
+  name: string,
 ): asserts value is number {
   if (typeof value !== "number" || isNaN(value)) {
     throw new HarmonyError(
@@ -356,7 +356,7 @@ export function validateNumericPreference(
       undefined,
       false,
       "INVALID_NUMERIC_PREFERENCE",
-      { type: typeof value }
+      { type: typeof value },
     );
   }
 
@@ -368,7 +368,7 @@ export function validateNumericPreference(
       undefined,
       false,
       "NUMERIC_PREFERENCE_OUT_OF_RANGE",
-      { min, max }
+      { min, max },
     );
   }
 
@@ -385,7 +385,7 @@ export function validateNumericPreference(
 export function validateStringPreference(
   value: unknown,
   allowedValues: readonly string[],
-  name: string
+  name: string,
 ): asserts value is string {
   if (typeof value !== "string") {
     throw new HarmonyError(
@@ -395,7 +395,7 @@ export function validateStringPreference(
       undefined,
       false,
       "INVALID_STRING_PREFERENCE",
-      { type: typeof value }
+      { type: typeof value },
     );
   }
 
@@ -407,7 +407,7 @@ export function validateStringPreference(
       undefined,
       false,
       "STRING_PREFERENCE_NOT_ALLOWED",
-      { allowedValues }
+      { allowedValues },
     );
   }
 
@@ -429,7 +429,7 @@ export function validateBooleanPreference(value: unknown, name: string): asserts
       undefined,
       false,
       "INVALID_BOOLEAN_PREFERENCE",
-      { type: typeof value }
+      { type: typeof value },
     );
   }
 

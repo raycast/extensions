@@ -173,7 +173,7 @@ export const useViewStore = create<ViewStore>()(
 
       setSelectedDevice: (device: HarmonyDevice | null) => set(() => ({ selectedDevice: device })),
     };
-  })
+  }),
 );
 
 // Selectors

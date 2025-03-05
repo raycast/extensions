@@ -78,7 +78,7 @@ function ActivitiesViewImpl({ onActivitySelect, onBack }: ActivitiesViewProps): 
         }
       />
     ),
-    [onActivitySelect, refresh, clearCache, onBack]
+    [onActivitySelect, refresh, clearCache, onBack],
   );
 
   return (

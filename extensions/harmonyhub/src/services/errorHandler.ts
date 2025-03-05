@@ -108,7 +108,7 @@ export class ErrorHandler {
     const harmonyError = new HarmonyError(
       message,
       category || ErrorHandler.config.defaultCategory,
-      error instanceof Error ? error : undefined
+      error instanceof Error ? error : undefined,
     );
 
     if (error instanceof Error) {
@@ -174,7 +174,7 @@ export class ErrorHandler {
   static async handleAsyncWithCategory<T>(
     operation: () => Promise<T>,
     category: ErrorCategory,
-    context?: string
+    context?: string,
   ): Promise<T> {
     try {
       return await operation();

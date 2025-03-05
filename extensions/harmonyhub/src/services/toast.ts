@@ -117,15 +117,13 @@ export class ToastManager {
    */
   static async progress(title: string, progress?: number): Promise<void> {
     if (ToastManager.config.logToasts) {
-      info(
-        `Progress: ${title}${progress !== undefined ? ` (${Math.round(progress * 100)}%)` : ""}`
-      );
+      info(`Progress: ${title}${progress !== undefined ? ` (${Math.round(progress * 100)}%)` : ""}`);
     }
 
     await showToast({
       style: Toast.Style.Animated,
       title,
-      message: progress !== undefined ? `${Math.round(progress * 100)}%` : undefined
+      message: progress !== undefined ? `${Math.round(progress * 100)}%` : undefined,
     });
   }
 }

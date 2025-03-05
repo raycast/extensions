@@ -94,7 +94,7 @@ export function LoadingView({ state, icon, description, onCancel, onRetry }: Loa
         "",
         "```",
         `[${"=".repeat(Math.floor(state.progress * 20))}${" ".repeat(20 - Math.floor(state.progress * 20))}]`,
-        "```"
+        "```",
       );
     }
 

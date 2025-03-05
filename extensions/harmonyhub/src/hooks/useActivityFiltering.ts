@@ -57,7 +57,7 @@ export function useActivityFiltering(): ActivityFilteringResult {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
-        (activity) => activity.name.toLowerCase().includes(query) || activity.type.toLowerCase().includes(query)
+        (activity) => activity.name.toLowerCase().includes(query) || activity.type.toLowerCase().includes(query),
       );
     }
 

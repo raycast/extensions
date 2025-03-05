@@ -239,7 +239,7 @@ function useHarmonyState(): HarmonyContextState {
         const harmonyError = new HarmonyError(
           "Failed to connect to hub",
           ErrorCategory.HUB_COMMUNICATION,
-          err instanceof Error ? err : undefined
+          err instanceof Error ? err : undefined,
         );
         setError(harmonyError);
         setLoadingState(HarmonyStage.ERROR, harmonyError.message, 1);
@@ -248,7 +248,7 @@ function useHarmonyState(): HarmonyContextState {
         });
       }
     },
-    [state, setLoadingState, setError, isCacheValid, updateCache]
+    [state, setLoadingState, setError, isCacheValid, updateCache],
   );
 
   // Discover hubs
@@ -294,7 +294,7 @@ function useHarmonyState(): HarmonyContextState {
           : new HarmonyError(
               "Failed to discover hubs",
               ErrorCategory.HUB_COMMUNICATION,
-              err instanceof Error ? err : undefined
+              err instanceof Error ? err : undefined,
             );
       setError(harmonyError);
       setLoadingState(HarmonyStage.ERROR, harmonyError.message, 1);
@@ -324,7 +324,7 @@ function useHarmonyState(): HarmonyContextState {
         const harmonyError = new HarmonyError(
           "Failed to disconnect from hub",
           ErrorCategory.HUB_COMMUNICATION,
-          err instanceof Error ? err : undefined
+          err instanceof Error ? err : undefined,
         );
         error("Hub disconnection failed", {
           error: harmonyError.getDetailedMessage(),
@@ -349,14 +349,14 @@ function useHarmonyState(): HarmonyContextState {
         const error = new HarmonyError(
           "Failed to execute command",
           ErrorCategory.COMMAND_EXECUTION,
-          err instanceof Error ? err : undefined
+          err instanceof Error ? err : undefined,
         );
         setError(error);
         setLoadingState(HarmonyStage.ERROR, error.message, 1);
         throw error;
       }
     },
-    [state.client, setLoadingState, setError]
+    [state.client, setLoadingState, setError],
   );
 
   // Start activity
@@ -374,14 +374,14 @@ function useHarmonyState(): HarmonyContextState {
         const error = new HarmonyError(
           "Failed to start activity",
           ErrorCategory.ACTIVITY_START,
-          err instanceof Error ? err : undefined
+          err instanceof Error ? err : undefined,
         );
         setError(error);
         setLoadingState(HarmonyStage.ERROR, error.message, 1);
         throw error;
       }
     },
-    [state.client, setLoadingState, setError]
+    [state.client, setLoadingState, setError],
   );
 
   // Stop activity
@@ -398,7 +398,7 @@ function useHarmonyState(): HarmonyContextState {
       const error = new HarmonyError(
         "Failed to stop activity",
         ErrorCategory.ACTIVITY_STOP,
-        err instanceof Error ? err : undefined
+        err instanceof Error ? err : undefined,
       );
       setError(error);
       setLoadingState(HarmonyStage.ERROR, error.message, 1);

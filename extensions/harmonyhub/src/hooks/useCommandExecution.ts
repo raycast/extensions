@@ -101,14 +101,14 @@ export function useCommandExecution(): CommandExecutionResult {
         const harmonyError = new HarmonyError(
           `Failed to execute ${command.label}`,
           ErrorCategory.COMMAND_EXECUTION,
-          error instanceof Error ? error : undefined
+          error instanceof Error ? error : undefined,
         );
 
         setState((prev) => ({ ...prev, isExecuting: false, error: harmonyError }));
         ToastManager.error(`Failed to execute ${command.label}`, harmonyError.message);
       }
     },
-    [executeCommand, holdTime, autoRetry, maxRetries]
+    [executeCommand, holdTime, autoRetry, maxRetries],
   );
 
   /**

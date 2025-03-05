@@ -90,7 +90,7 @@ function DevicesViewImpl({ onDeviceSelect, onBack }: DevicesViewProps): JSX.Elem
         }
       />
     ),
-    [onDeviceSelect, refresh, clearCache, onBack]
+    [onDeviceSelect, refresh, clearCache, onBack],
   );
 
   return (

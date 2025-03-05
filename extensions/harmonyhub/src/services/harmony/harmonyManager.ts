@@ -87,7 +87,7 @@ export class HarmonyManager {
       throw new HarmonyError(
         "Invalid hub data received",
         ErrorCategory.VALIDATION,
-        new Error(`Missing required fields: ${JSON.stringify(data)}`)
+        new Error(`Missing required fields: ${JSON.stringify(data)}`),
       );
     }
 
@@ -288,7 +288,7 @@ export class HarmonyManager {
       throw new HarmonyError(
         "Failed to start hub discovery",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : undefined
+        err instanceof Error ? err : undefined,
       );
     } finally {
       this.isDiscovering = false;

@@ -219,7 +219,7 @@ export class HarmonyClient {
       const harmonyError = new HarmonyError(
         "Failed to connect to hub",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : undefined
+        err instanceof Error ? err : undefined,
       );
       error("Connection failed", { error: harmonyError.getDetailedMessage() });
       throw harmonyError;
@@ -259,7 +259,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to get devices",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : undefined
+        err instanceof Error ? err : undefined,
       );
     }
   }
@@ -298,7 +298,7 @@ export class HarmonyClient {
               label: fn.label || fn.name,
               deviceId: device.id,
               group: fn.action?.command || "IRCommand",
-            }))
+            })),
           ),
         } as HarmonyDevice;
 
@@ -324,7 +324,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to get devices from hub",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : new Error(String(err))
+        err instanceof Error ? err : new Error(String(err)),
       );
     }
   }
@@ -364,7 +364,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to get activities",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : undefined
+        err instanceof Error ? err : undefined,
       );
     }
   }
@@ -419,7 +419,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to get current activity",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : new Error(String(err))
+        err instanceof Error ? err : new Error(String(err)),
       );
     }
   }
@@ -458,7 +458,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         `Failed to start activity ${activityId}`,
         ErrorCategory.COMMAND_EXECUTION,
-        err instanceof Error ? err : undefined
+        err instanceof Error ? err : undefined,
       );
     }
   }
@@ -502,7 +502,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to stop activity",
         ErrorCategory.COMMAND_EXECUTION,
-        err instanceof Error ? err : undefined
+        err instanceof Error ? err : undefined,
       );
     }
   }
@@ -626,7 +626,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         `Failed to execute command ${command.name}`,
         ErrorCategory.COMMAND_EXECUTION,
-        err instanceof Error ? err : undefined
+        err instanceof Error ? err : undefined,
       );
     }
   }
@@ -650,7 +650,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to disconnect from hub",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : new Error(String(err))
+        err instanceof Error ? err : new Error(String(err)),
       );
     }
   }
