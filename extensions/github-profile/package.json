@@ -13,6 +13,7 @@
   "commands": [
     {
       "name": "show-github-profile",
+      "subtitle": "GitHub Profile",
       "title": "Show GitHub Profile",
       "description": "Show user's GitHub profile and contribution activity",
       "mode": "view"
@@ -22,7 +23,7 @@
     {
       "name": "username",
       "title": "GitHub Username",
-      "description": "Your (or not necessarily your) GitHub username.",
+      "description": "The GitHub username to display the profile for",
       "type": "textfield",
       "required": true,
       "placeholder": "username"
