@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "path";
 import { Video } from "./types.js";
 import { preferences } from "./utils.js";
+import SRTParser from "srt-parser-2";
 
 export default async function extractTranscript(url: string, language: string = "en") {
   // Validate yt-dlp exists
@@ -65,16 +66,14 @@ export default async function extractTranscript(url: string, language: string = 
     const subtitleContent = fs.readFileSync(path.join(tmpDir, subtitleFile), "utf-8");
 
     // Convert SRT to markdown
-    const markdown = convertSrtToMarkdown(subtitleContent, video.title);
+    const transcript = cleanUpSrt(subtitleContent);
 
     // Clean up
     fs.rmSync(tmpDir, { recursive: true, force: true });
 
     return {
-      transcript: markdown,
+      transcript,
       title: video.title,
-      url: url,
-      language: language,
     };
   } catch (error) {
     // Clean up on error
@@ -83,52 +82,44 @@ export default async function extractTranscript(url: string, language: string = 
   }
 }
 
-function convertSrtToMarkdown(srtContent: string, videoTitle: string): string {
-  // Split into subtitle blocks
-  const blocks = srtContent.trim().split(/\n\n+/);
+function cleanUpSrt(srtContent: string): string {
+  const parser = new SRTParser();
+  const subtitles = parser.fromSrt(srtContent);
 
-  // Start with the title
-  let markdown = `# ${videoTitle}\n\n`;
+  let cleanedText = "";
+  let previousText = "";
 
-  // Track timestamps for sections
-  let currentMinute = -1;
+  for (const subtitle of subtitles) {
+    const currentText = subtitle.text.trim();
 
-  for (const block of blocks) {
-    const lines = block.split("\n");
-    if (lines.length < 3) continue;
+    // Skip empty subtitles
+    if (!currentText) continue;
 
-    // Parse timestamp for section headers
-    const timestamp = lines[1].split(" --> ")[0];
-    const minutes = Math.floor(parseTimestamp(timestamp) / 60);
+    // Skip if this subtitle is exactly the same as the previous one
+    if (currentText === previousText) continue;
 
-    // Add minute markers as section headers
-    if (minutes !== currentMinute) {
-      currentMinute = minutes;
-      markdown += `\n## ${minutes}:00\n\n`;
+    // If current text contains the previous text, just add the new part
+    if (currentText.includes(previousText) && previousText !== "") {
+      const newPart = currentText.substring(previousText.length).trim();
+      if (newPart) {
+        cleanedText += " " + newPart;
+      }
+    }
+    // If this is completely new text
+    else if (!previousText.includes(currentText)) {
+      if (cleanedText) cleanedText += " ";
+      cleanedText += currentText;
     }
 
-    // Get the text content (everything after timestamp line)
-    const text = lines.slice(2).join(" ");
-
-    // Clean up text
-    const cleanText = text
-      .replace(/<[^>]+>/g, "") // Remove HTML tags
-      .replace(/\{[^}]+\}/g, "") // Remove curly brace formatting
-      .replace(/\[.*?\]/g, "") // Remove square bracket content
-      .replace(/\([^)]*\)/g, "") // Remove parentheses content
-      .replace(/♪/g, "") // Remove music symbols
-      .replace(/\s+/g, " ") // Normalize whitespace
-      .trim();
-
-    if (cleanText) {
-      markdown += cleanText + "\n\n";
-    }
+    previousText = currentText;
   }
 
-  return markdown.trim();
-}
-
-function parseTimestamp(timestamp: string): number {
-  const [hours, minutes, seconds] = timestamp.split(":").map(Number);
-  return hours * 3600 + minutes * 60 + Math.floor(seconds);
+  return cleanedText
+    .replace(/\s+/g, " ") // Normalize whitespace
+    .replace(/<[^>]+>/g, "") // Remove HTML tags
+    .replace(/\{[^}]+\}/g, "") // Remove curly brace formatting
+    .replace(/\[.*?\]/g, "") // Remove square bracket content
+    .replace(/\([^)]*\)/g, "") // Remove parentheses content
+    .replace(/♪/g, "") // Remove music symbols
+    .trim();
 }
