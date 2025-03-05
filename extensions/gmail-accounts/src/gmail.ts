@@ -69,10 +69,10 @@ function parseAccounts(input: GetAccountsReqResult): Account[] {
       throw new Error("Invalid account avatar");
     }
 
-    const isLoggedIn = account[9] === 1;
-    if (typeof isLoggedIn !== "boolean") {
+    if (typeof account[9] !== "number") {
       throw new Error("Invalid account isLoggedIn");
     }
+    const isLoggedIn = account[9] === 1;
 
     return {
       id,

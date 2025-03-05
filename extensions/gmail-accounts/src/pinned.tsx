@@ -12,6 +12,8 @@ export function usePinnedAccounts() {
     moveUp: (account: Account) =>
       setPinnedAccounts((prev) => {
         const i = prev.indexOf(account.email);
+        if (i === -1 || i === 0) return prev;
+
         const newArray = [...prev];
         [newArray[i - 1], newArray[i]] = [newArray[i], newArray[i - 1]];
         return newArray;
@@ -19,6 +21,8 @@ export function usePinnedAccounts() {
     moveDown: (account: Account) =>
       setPinnedAccounts((prev) => {
         const i = prev.indexOf(account.email);
+        if (i === -1 || i === prev.length - 1) return prev;
+
         const newArray = [...prev];
         [newArray[i], newArray[i + 1]] = [newArray[i + 1], newArray[i]];
         return newArray;
