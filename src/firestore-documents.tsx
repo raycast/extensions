@@ -342,87 +342,98 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
   const [highlightFields, setHighlightFields] = useState<string>("");
   const { push, pop } = useNavigation();
   
-  // Create a searchable version of documents with all fields flattened for search
-  const [searchableDocuments, setSearchableDocuments] = useState<any[]>([]);
+  // For custom search implementation
+  const [searchText, setSearchText] = useState<string>("");
+  const [filteredDocuments, setFilteredDocuments] = useState<any[]>([]);
   
   useEffect(() => {
     loadProjectId();
     fetchDocuments();
   }, [collectionName]);
   
-  // Update searchable documents whenever documents or highlight fields change
+  // Filter documents whenever search text or documents change
   useEffect(() => {
-    prepareSearchableDocuments();
-  }, [documents, highlightFields]);
+    filterDocuments();
+  }, [searchText, documents, highlightFields]);
   
-  // Prepare searchable version of documents
-  const prepareSearchableDocuments = () => {
-    console.log("Preparing searchable documents with highlight fields:", highlightFields);
+  // Custom document filtering function
+  const filterDocuments = () => {
+    // If no search text, show all documents
+    if (!searchText || searchText.trim() === "") {
+      setFilteredDocuments(documents);
+      return;
+    }
     
-    const searchable = documents.map(doc => {
-      // Start with the basic document
-      const searchableDoc = { ...doc };
+    const searchLower = searchText.toLowerCase().trim();
+    console.log(`Filtering with search text: "${searchLower}"`);
+    console.log(`Total documents to search: ${documents.length}`);
+    
+    // Get highlighted fields array
+    const highlightFieldsArray = highlightFields 
+      ? highlightFields.split(',').map(f => f.trim()).filter(Boolean) 
+      : [];
+    
+    console.log("Highlight fields:", highlightFieldsArray);
+    
+    // Filter documents
+    const filtered = documents.filter(doc => {
+      console.log(`\nChecking document ${doc.id}:`);
       
-      // Add a searchText property that contains all searchable content
-      let searchContent = doc.id; // Always include ID
+      // Document data is directly on the document object, not in a 'data' property
+      const docData = { ...doc };
+      delete docData.id; // Remove id from data object to avoid duplication
       
-      // Add highlighted fields with higher priority (repeat them multiple times)
-      if (doc.data && highlightFields && highlightFields.trim() !== "") {
-        const fieldArray = highlightFields.split(',').map(f => f.trim()).filter(f => f !== "");
-        console.log(`Processing highlighted fields for doc ${doc.id}:`, fieldArray);
+      console.log(`Document data keys:`, Object.keys(docData));
+      
+      // Check document ID
+      if (doc.id.toLowerCase().includes(searchLower)) {
+        console.log(`✅ Document ${doc.id} matches by ID`);
+        return true;
+      }
+      
+      // First check highlighted fields
+      for (const field of highlightFieldsArray) {
+        if (doc[field] !== undefined) {
+          const value = doc[field];
+          if (value === null) continue;
+          
+          const stringValue = typeof value === 'object' 
+            ? JSON.stringify(value).toLowerCase() 
+            : String(value).toLowerCase();
+          
+          console.log(`Checking highlighted field "${field}" with value "${stringValue}"`);
+          
+          if (stringValue.includes(searchLower)) {
+            console.log(`✅ Document ${doc.id} matches by highlighted field "${field}" with value "${stringValue}"`);
+            return true;
+          }
+        } else {
+          console.log(`Highlighted field "${field}" not found in document ${doc.id}`);
+        }
+      }
+      
+      // Then check all other fields
+      for (const [key, value] of Object.entries(docData)) {
+        if (value === null || value === undefined) continue;
         
-        for (const field of fieldArray) {
-          if (doc.data[field] !== undefined) {
-            const value = doc.data[field];
-            if (value !== null) {
-              let stringValue = "";
-              if (typeof value === 'object') {
-                try {
-                  stringValue = JSON.stringify(value);
-                } catch (e) {
-                  stringValue = String(value);
-                }
-              } else {
-                stringValue = String(value);
-              }
-              
-              // Add the field value multiple times to increase its weight in search
-              searchContent += ` ${stringValue} ${stringValue} ${stringValue}`;
-              // Also add with field name for context
-              searchContent += ` ${field}:${stringValue}`;
-              
-              console.log(`Added highlighted field ${field} with value "${stringValue}" to searchContent`);
-            }
-          }
+        const stringValue = typeof value === 'object' 
+          ? JSON.stringify(value).toLowerCase() 
+          : String(value).toLowerCase();
+        
+        console.log(`Checking field "${key}" with value "${stringValue}"`);
+        
+        if (stringValue.includes(searchLower)) {
+          console.log(`✅ Document ${doc.id} matches by field "${key}" with value "${stringValue}"`);
+          return true;
         }
       }
       
-      // Then add all other fields
-      if (doc.data) {
-        for (const [key, value] of Object.entries(doc.data)) {
-          if (value !== null && value !== undefined) {
-            let stringValue = "";
-            if (typeof value === 'object') {
-              try {
-                stringValue = JSON.stringify(value);
-              } catch (e) {
-                stringValue = String(value);
-              }
-            } else {
-              stringValue = String(value);
-            }
-            
-            searchContent += ` ${key} ${stringValue}`;
-          }
-        }
-      }
-      
-      searchableDoc.searchText = searchContent.toLowerCase();
-      console.log(`Search text for doc ${doc.id}:`, searchableDoc.searchText);
-      return searchableDoc;
+      console.log(`❌ Document ${doc.id} does not match search criteria`);
+      return false;
     });
     
-    setSearchableDocuments(searchable);
+    console.log(`Filtered ${documents.length} documents to ${filtered.length} matches`);
+    setFilteredDocuments(filtered);
   };
 
   async function loadProjectId() {
@@ -442,17 +453,22 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
     try {
       const docs = await getDocuments(collectionName, limit);
       console.log("Fetched documents:", docs);
+      
+      // Log detailed structure of the first document
       if (docs.length > 0) {
         console.log("First document structure:", JSON.stringify(docs[0], null, 2));
         console.log("Document keys:", Object.keys(docs[0]));
         if (docs[0].data) {
           console.log("Document data keys:", Object.keys(docs[0].data));
+          console.log("Document data values:", Object.values(docs[0].data));
         }
       }
+      
       setDocuments(docs);
+      setFilteredDocuments(docs);
     } catch (error) {
       console.error("Error fetching documents:", error);
-      setError(`Failed to fetch documents: ${error instanceof Error ? error.message : String(error)}`);
+      setError(String(error));
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to Fetch Documents",
@@ -520,7 +536,8 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
       isLoading={isLoading}
       searchBarPlaceholder="Search documents by ID or field values..."
       navigationTitle={`Documents in ${collectionName}`}
-      filtering={true}
+      onSearchTextChange={setSearchText}
+      filtering={false}
       actions={
         <ActionPanel>
           <Action title="Refresh" onAction={fetchDocuments} />
@@ -568,8 +585,8 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
         />
       </List.Section>
 
-      <List.Section title="Documents" subtitle={documents.length > 0 ? `${documents.length} documents` : undefined}>
-        {searchableDocuments.map((doc) => {
+      <List.Section title="Documents" subtitle={documents.length > 0 ? `${filteredDocuments.length} of ${documents.length} documents` : undefined}>
+        {filteredDocuments.map((doc) => {
           // Create a subtitle with highlighted field values
           let subtitle = "";
           
@@ -593,20 +610,11 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
             subtitle = fieldValues.join(' | ');
           }
 
-          const keywords = [
-            doc.id,
-            subtitle, // Include the subtitle which contains highlighted field values
-            doc.searchText // Include the full searchText for comprehensive search
-          ].filter(Boolean);
-          
-          console.log(`Document ${doc.id} keywords:`, keywords);
-
           return (
             <List.Item
               key={doc.id}
               title={doc.id}
               subtitle={subtitle}
-              keywords={keywords}
               actions={
                 <ActionPanel>
                   <Action
@@ -666,87 +674,98 @@ function FilteredDocumentList({
   const [highlightFields, setHighlightFields] = useState<string>("");
   const { push, pop } = useNavigation();
   
-  // Create a searchable version of documents with all fields flattened for search
-  const [searchableDocuments, setSearchableDocuments] = useState<any[]>([]);
+  // For custom search implementation
+  const [searchText, setSearchText] = useState<string>("");
+  const [filteredDocuments, setFilteredDocuments] = useState<any[]>([]);
   
   useEffect(() => {
     loadProjectId();
     fetchDocuments();
   }, [collectionName, fieldName, operator, fieldValue]);
   
-  // Update searchable documents whenever documents or highlight fields change
+  // Filter documents whenever search text or documents change
   useEffect(() => {
-    prepareSearchableDocuments();
-  }, [documents, highlightFields]);
+    filterDocuments();
+  }, [searchText, documents, highlightFields]);
   
-  // Prepare searchable version of documents
-  const prepareSearchableDocuments = () => {
-    console.log("Preparing searchable documents with highlight fields:", highlightFields);
+  // Custom document filtering function
+  const filterDocuments = () => {
+    // If no search text, show all documents
+    if (!searchText || searchText.trim() === "") {
+      setFilteredDocuments(documents);
+      return;
+    }
     
-    const searchable = documents.map(doc => {
-      // Start with the basic document
-      const searchableDoc = { ...doc };
+    const searchLower = searchText.toLowerCase().trim();
+    console.log(`Filtering with search text: "${searchLower}"`);
+    console.log(`Total documents to search: ${documents.length}`);
+    
+    // Get highlighted fields array
+    const highlightFieldsArray = highlightFields 
+      ? highlightFields.split(',').map(f => f.trim()).filter(Boolean) 
+      : [];
+    
+    console.log("Highlight fields:", highlightFieldsArray);
+    
+    // Filter documents
+    const filtered = documents.filter(doc => {
+      console.log(`\nChecking document ${doc.id}:`);
       
-      // Add a searchText property that contains all searchable content
-      let searchContent = doc.id; // Always include ID
+      // Document data is directly on the document object, not in a 'data' property
+      const docData = { ...doc };
+      delete docData.id; // Remove id from data object to avoid duplication
       
-      // Add highlighted fields with higher priority (repeat them multiple times)
-      if (doc.data && highlightFields && highlightFields.trim() !== "") {
-        const fieldArray = highlightFields.split(',').map(f => f.trim()).filter(f => f !== "");
-        console.log(`Processing highlighted fields for doc ${doc.id}:`, fieldArray);
+      console.log(`Document data keys:`, Object.keys(docData));
+      
+      // Check document ID
+      if (doc.id.toLowerCase().includes(searchLower)) {
+        console.log(`✅ Document ${doc.id} matches by ID`);
+        return true;
+      }
+      
+      // First check highlighted fields
+      for (const field of highlightFieldsArray) {
+        if (doc[field] !== undefined) {
+          const value = doc[field];
+          if (value === null) continue;
+          
+          const stringValue = typeof value === 'object' 
+            ? JSON.stringify(value).toLowerCase() 
+            : String(value).toLowerCase();
+          
+          console.log(`Checking highlighted field "${field}" with value "${stringValue}"`);
+          
+          if (stringValue.includes(searchLower)) {
+            console.log(`✅ Document ${doc.id} matches by highlighted field "${field}" with value "${stringValue}"`);
+            return true;
+          }
+        } else {
+          console.log(`Highlighted field "${field}" not found in document ${doc.id}`);
+        }
+      }
+      
+      // Then check all other fields
+      for (const [key, value] of Object.entries(docData)) {
+        if (value === null || value === undefined) continue;
         
-        for (const field of fieldArray) {
-          if (doc.data[field] !== undefined) {
-            const value = doc.data[field];
-            if (value !== null) {
-              let stringValue = "";
-              if (typeof value === 'object') {
-                try {
-                  stringValue = JSON.stringify(value);
-                } catch (e) {
-                  stringValue = String(value);
-                }
-              } else {
-                stringValue = String(value);
-              }
-              
-              // Add the field value multiple times to increase its weight in search
-              searchContent += ` ${stringValue} ${stringValue} ${stringValue}`;
-              // Also add with field name for context
-              searchContent += ` ${field}:${stringValue}`;
-              
-              console.log(`Added highlighted field ${field} with value "${stringValue}" to searchContent`);
-            }
-          }
+        const stringValue = typeof value === 'object' 
+          ? JSON.stringify(value).toLowerCase() 
+          : String(value).toLowerCase();
+        
+        console.log(`Checking field "${key}" with value "${stringValue}"`);
+        
+        if (stringValue.includes(searchLower)) {
+          console.log(`✅ Document ${doc.id} matches by field "${key}" with value "${stringValue}"`);
+          return true;
         }
       }
       
-      // Then add all other fields
-      if (doc.data) {
-        for (const [key, value] of Object.entries(doc.data)) {
-          if (value !== null && value !== undefined) {
-            let stringValue = "";
-            if (typeof value === 'object') {
-              try {
-                stringValue = JSON.stringify(value);
-              } catch (e) {
-                stringValue = String(value);
-              }
-            } else {
-              stringValue = String(value);
-            }
-            
-            searchContent += ` ${key} ${stringValue}`;
-          }
-        }
-      }
-      
-      searchableDoc.searchText = searchContent.toLowerCase();
-      console.log(`Search text for doc ${doc.id}:`, searchableDoc.searchText);
-      return searchableDoc;
+      console.log(`❌ Document ${doc.id} does not match search criteria`);
+      return false;
     });
     
-    setSearchableDocuments(searchable);
+    console.log(`Filtered ${documents.length} documents to ${filtered.length} matches`);
+    setFilteredDocuments(filtered);
   };
 
   async function loadProjectId() {
@@ -767,6 +786,7 @@ function FilteredDocumentList({
       const docs = await queryDocuments(collectionName, fieldName, operator, fieldValue, limit);
       console.log("Fetched documents:", docs);
       setDocuments(docs);
+      setFilteredDocuments(docs);
     } catch (error) {
       console.error("Error fetching documents:", error);
       setError(String(error));
@@ -836,7 +856,8 @@ function FilteredDocumentList({
       isLoading={isLoading}
       searchBarPlaceholder="Search documents by ID or field values..."
       navigationTitle={`Filtered Documents in ${collectionName}`}
-      filtering={true}
+      onSearchTextChange={setSearchText}
+      filtering={false}
       actions={
         <ActionPanel>
           <Action title="Refresh" onAction={fetchDocuments} />
@@ -884,8 +905,8 @@ function FilteredDocumentList({
         />
       </List.Section>
 
-      <List.Section title="Documents" subtitle={`${documents.length} documents matching ${filterDescription}`}>
-        {searchableDocuments.map((doc) => {
+      <List.Section title="Documents" subtitle={`${filteredDocuments.length} of ${documents.length} documents matching ${filterDescription}`}>
+        {filteredDocuments.map((doc) => {
           // Create a subtitle with highlighted field values
           let subtitle = "";
           
@@ -909,20 +930,11 @@ function FilteredDocumentList({
             subtitle = fieldValues.join(' | ');
           }
 
-          const keywords = [
-            doc.id,
-            subtitle, // Include the subtitle which contains highlighted field values
-            doc.searchText // Include the full searchText for comprehensive search
-          ].filter(Boolean);
-          
-          console.log(`Document ${doc.id} keywords:`, keywords);
-
           return (
             <List.Item
               key={doc.id}
               title={doc.id}
               subtitle={subtitle}
-              keywords={keywords}
               actions={
                 <ActionPanel>
                   <Action
