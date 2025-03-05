@@ -112,13 +112,6 @@
       "mode": "view"
     },
     {
-      "name": "list-google-drive-files",
-      "title": "List Google Drive Files",
-      "description": "List all files in your Google Drive.",
-      "icon": "google-drive.png",
-      "mode": "view"
-    },
-    {
       "name": "starred-google-drive-files-menubar",
       "title": "Starred Google Drive Files",
       "description": "List of your starred Google Drive files in the Menu Bar.",

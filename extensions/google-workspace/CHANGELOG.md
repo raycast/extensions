@@ -2,7 +2,6 @@
 
 ## [Add list home and open home quicklink] - {PR_MERGE_DATE}
 
-- 🏠 Add `List Google Drive Files` command to browse all your files and folders in Raycast
 - 🔗 Quickly open the Google drive home page in browser
 - 🔧 Minor fix action conflicts
 
