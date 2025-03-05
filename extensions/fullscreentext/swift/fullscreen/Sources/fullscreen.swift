@@ -1,8 +1,5 @@
-#!/usr/bin/env swift
-
 import Cocoa
-
-// MARK: - Main Entry Point
+import RaycastSwiftMacros
 
 class LargeTypeApp {
     let text: String
@@ -144,14 +141,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-// MARK: - Command-line Argument Handling
-
-let args = CommandLine.arguments
-guard args.count > 1 else {
-    print("Usage: \(args[0]) <text to display>")
-    exit(1)
+@raycast func fullScreen(text: String) {
+    let app = LargeTypeApp(text: text)
+    app.run()
 }
-
-let textToDisplay = args.dropFirst().joined(separator: " ")
-let app = LargeTypeApp(text: textToDisplay)
-app.run()

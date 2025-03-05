@@ -1,6 +1,6 @@
 import { Clipboard, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { fullScreen } from "./utils";
+import { fullScreen } from "swift:../swift/fullscreen";
 
 export default async function Command() {
   let text;

@@ -1,4 +1,4 @@
-import { fullScreen } from "../utils";
+import { fullScreen } from "swift:../../swift/fullscreen";
 
 type Input = {
   /**
