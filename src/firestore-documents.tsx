@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Form, List, showToast, Toast, useNavigation, Clipboard } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { isServiceAccountConfigured, getServiceAccount } from "./utils/firebase";
-import { getCollections, getDocuments, queryDocuments } from "./api/firestore";
+import { getCollections, getDocuments, queryDocuments, getDocument } from "./api/firestore";
 import { JsonViewer } from "./components/JsonViewer";
 import * as admin from "firebase-admin";
 
@@ -61,6 +61,7 @@ function DocumentsForm() {
   const [operator, setOperator] = useState<string>("==");
   const [fieldValue, setFieldValue] = useState<string>("");
   const [highlightFields, setHighlightFields] = useState<string>("");
+  const [documentId, setDocumentId] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
@@ -133,6 +134,41 @@ function DocumentsForm() {
       return;
     }
 
+    // If document ID is provided, fetch that specific document
+    if (documentId.trim()) {
+      try {
+        setIsLoading(true);
+        
+        const doc = await getDocument(collectionName, documentId.trim());
+        
+        if (!doc) {
+          setError(`Document with ID "${documentId}" not found in collection "${collectionName}"`);
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Document Not Found",
+            message: `Document with ID "${documentId}" not found in collection "${collectionName}"`,
+          });
+          setIsLoading(false);
+          return;
+        }
+        
+        // Document found, navigate to document detail view
+        push(<DocumentDetail document={doc} collectionName={collectionName} />);
+        setError(undefined);
+      } catch (error) {
+        console.error("Error fetching document:", error);
+        setError(`Failed to fetch document: ${error instanceof Error ? error.message : String(error)}`);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to Fetch Document",
+          message: "An error occurred while fetching the document",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     // Process highlight fields
     let highlightFieldsArray: string[] = [];
     if (highlightFields.trim()) {
@@ -202,7 +238,7 @@ function DocumentsForm() {
       actions={
         <ActionPanel>
           <Action.SubmitForm 
-            title={isFiltering ? "Filter Documents" : "List Documents"} 
+            title={documentId.trim() ? "Fetch Document" : (isFiltering ? "Filter Documents" : "List Documents")} 
             onSubmit={handleSubmit} 
           />
           {error && (
@@ -256,11 +292,21 @@ function DocumentsForm() {
         />
       )}
 
+      <Form.TextField
+        id="documentId"
+        title="Document ID (Optional)"
+        placeholder="Enter document ID to fetch a specific document"
+        value={documentId}
+        onChange={setDocumentId}
+        info="If provided, will fetch this specific document from the selected collection"
+      />
+
       <Form.Checkbox
         id="isFiltering"
         label="Filter Documents"
         value={isFiltering}
         onChange={setIsFiltering}
+        info="Enable to filter documents by field value"
       />
 
       <Form.TextField
