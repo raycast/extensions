@@ -233,7 +233,7 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
     />
   ) : (
     <List
-      isLoading={!notificationsLoaded}
+      isLoading={notifications.length === 0}
       isShowingDetail={showDetails}
       onSelectionChange={onSelectionChange}
       navigationTitle={notificationsLoaded ? notificationText : ViewNotificationsNavigationTitle}
