@@ -34,7 +34,7 @@ A Raycast extension that allows you to quickly access your Gmail accounts in Chr
 
 This extension accesses Chrome cookies to retrieve your Google account information. It:
 
-- Uses the [chrome-cookie-decrypt](https://github.com/lacherogwu?tab=repositories&type=source) package to read cookies from Chrome
+- Uses the [chrome-cookie-decrypt](https://github.com/lacherogwu/chrome-cookie-decrypt) package to read cookies from Chrome
 - Only accesses cookies from Google domains
 - Does not send your data to any external servers except Google's own services
 - Stores a cache of your accounts and pinned preferences locally
