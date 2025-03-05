@@ -1,5 +1,7 @@
-import { Detail, ActionPanel, Action } from "@raycast/api";
+import { Detail, ActionPanel, Action, Clipboard } from "@raycast/api";
 import * as admin from "firebase-admin";
+import { getServiceAccount } from "../utils/firebase";
+import { useEffect, useState } from "react";
 
 interface JsonViewerProps {
   data: any;
@@ -7,9 +9,42 @@ interface JsonViewerProps {
 }
 
 export function JsonViewer({ data, title }: JsonViewerProps) {
+  const [projectId, setProjectId] = useState<string>("");
+  
+  useEffect(() => {
+    // Load project ID from service account
+    async function loadProjectId() {
+      try {
+        const serviceAccount = await getServiceAccount();
+        if (serviceAccount && serviceAccount.project_id) {
+          setProjectId(serviceAccount.project_id);
+        }
+      } catch (error) {
+        console.error("Error loading project ID:", error);
+      }
+    }
+
+    loadProjectId();
+  }, []);
+  
   // Process the data to convert Firestore timestamps to readable dates
   const processedData = processFirestoreData(data);
   const jsonString = JSON.stringify(processedData, null, 2);
+  
+  // Extract collection name from title (assuming format "Document in collection_name")
+  const collectionMatch = title.match(/Document in (.+)/);
+  const collectionName = collectionMatch ? collectionMatch[1] : "";
+  
+  // Function to generate Firestore URL for a document
+  const getFirestoreUrl = (): string => {
+    if (!projectId || !collectionName || !data.id) return "";
+    
+    // Encode collection name and document ID for URL
+    const encodedCollection = collectionName.replace(/\//g, '~2F');
+    const encodedDocId = data.id.replace(/\//g, '~2F');
+    
+    return `https://console.firebase.google.com/project/${projectId}/firestore/databases/-default-/data/~2F${encodedCollection}~2F${encodedDocId}`;
+  };
 
   const markdown = `# ${title}
 
@@ -29,6 +64,20 @@ ${jsonString}
             content={jsonString}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
+          {data.id && (
+            <Action.CopyToClipboard
+              title="Copy Document ID"
+              content={data.id}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+            />
+          )}
+          {data.id && projectId && collectionName && (
+            <Action.CopyToClipboard
+              title="Copy Firestore URL"
+              content={getFirestoreUrl()}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+          )}
         </ActionPanel>
       }
     />
