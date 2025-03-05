@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { useTripSearch } from "../api/client";
 import { ArrivalOrDeparture, Trip } from "../api/types";
 import Accessory = List.Item.Accessory;
@@ -53,7 +53,7 @@ function renderTripRow(trip: Trip) {
   const products: string[] = [];
   const accessories: Accessory[] = [];
 
-  trip.legs.forEach((l, idx, arr) => {
+  trip.legs.forEach((l) => {
     if (l.product !== undefined) {
       products.push(l.product.shortCategoryName!);
     }
