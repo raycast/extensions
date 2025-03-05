@@ -6,19 +6,18 @@ import {
   ActionPanel,
   BrowserExtension,
   Clipboard,
-  Detail,
   Form,
-  getSelectedText,
   Icon,
+  getPreferenceValues,
+  getSelectedText,
   open,
-  openExtensionPreferences,
   showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
-import { execa, ExecaError } from "execa";
+import { execa } from "execa";
 import {
   DownloadOptions,
   getFormats,
@@ -27,9 +26,21 @@ import {
   isValidHHMM,
   isValidUrl,
   parseHHMM,
-  preferences,
 } from "./utils.js";
 import { Video } from "./types.js";
+import Installer from "./views/installer.js";
+import Updater from "./views/updater.js";
+
+const {
+  downloadPath,
+  ytdlPath,
+  ffmpegPath,
+  ffprobePath,
+  autoLoadUrlFromClipboard,
+  autoLoadUrlFromSelectedText,
+  enableBrowserExtensionSupport,
+  forceIpv4,
+} = getPreferenceValues<ExtensionPreferences>();
 
 export default function DownloadVideo() {
   const [error, setError] = useState(0);
@@ -40,10 +51,10 @@ export default function DownloadVideo() {
       url: "",
     },
     onSubmit: async (values) => {
-      const options: Array<string | string[]> = ["-P", preferences.downloadPath];
+      const options = ["-P", downloadPath];
       const [downloadFormat, recodeFormat] = values.format.split("#");
 
-      options.push("--ffmpeg-location", preferences.ffmpegPath);
+      options.push("--ffmpeg-location", ffmpegPath);
       options.push("--format", downloadFormat);
       options.push("--recode-video", recodeFormat);
 
@@ -56,7 +67,7 @@ export default function DownloadVideo() {
       options.push("--progress");
       options.push("--print", "after_move:filepath");
 
-      const process = spawn(preferences.ytdlPath, [...options.flat(), values.url]);
+      const process = spawn(ytdlPath, [...options, values.url]);
 
       let filePath = "";
 
@@ -157,9 +168,9 @@ export default function DownloadVideo() {
       if (!isValidUrl(url)) return;
 
       const result = await execa(
-        preferences.ytdlPath,
-        [preferences.forceIpv4 ? "--force-ipv4" : "", "--dump-json", "--format-sort=resolution,ext,tbr", url].filter(
-          (x) => Boolean(x),
+        ytdlPath,
+        [forceIpv4 ? "--force-ipv4" : "", "--dump-json", "--format-sort=resolution,ext,tbr", url].filter((x) =>
+          Boolean(x),
         ),
       );
       return JSON.parse(result.stdout) as Video;
@@ -192,7 +203,7 @@ export default function DownloadVideo() {
 
   useEffect(() => {
     (async () => {
-      if (preferences.autoLoadUrlFromClipboard) {
+      if (autoLoadUrlFromClipboard) {
         const clipboardText = await Clipboard.readText();
         if (clipboardText && isValidUrl(clipboardText)) {
           setValue("url", clipboardText);
@@ -200,7 +211,7 @@ export default function DownloadVideo() {
         }
       }
 
-      if (preferences.autoLoadUrlFromSelectedText) {
+      if (autoLoadUrlFromSelectedText) {
         try {
           const selectedText = await getSelectedText();
           if (selectedText && isValidUrl(selectedText)) {
@@ -212,7 +223,7 @@ export default function DownloadVideo() {
         }
       }
 
-      if (preferences.enableBrowserExtensionSupport) {
+      if (enableBrowserExtensionSupport) {
         try {
           const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
           if (tabUrl && isValidUrl(tabUrl)) setValue("url", tabUrl);
@@ -224,13 +235,13 @@ export default function DownloadVideo() {
   }, []);
 
   const missingExecutable = useMemo(() => {
-    if (!fs.existsSync(preferences.ytdlPath)) {
+    if (!fs.existsSync(ytdlPath)) {
       return "yt-dlp";
     }
-    if (!fs.existsSync(preferences.ffmpegPath)) {
+    if (!fs.existsSync(ffmpegPath)) {
       return "ffmpeg";
     }
-    if (!fs.existsSync(preferences.ffprobePath)) {
+    if (!fs.existsSync(ffprobePath)) {
       return "ffprobe";
     }
     return null;
@@ -239,7 +250,7 @@ export default function DownloadVideo() {
   const formats = useMemo(() => getFormats(video), [video]);
 
   if (missingExecutable) {
-    return <NotInstalled executable={missingExecutable} onRefresh={() => setError(error + 1)} />;
+    return <Installer executable={missingExecutable} onRefresh={() => setError(error + 1)} />;
   }
 
   return (
@@ -247,14 +258,19 @@ export default function DownloadVideo() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            icon={Icon.Download}
-            title="Download Video"
-            onSubmit={(values) => {
-              setWarning("");
-              handleSubmit({ ...values, copyToClipboard: false } as DownloadOptions);
-            }}
-          />
+          <ActionPanel.Section>
+            <Action.SubmitForm
+              icon={Icon.Download}
+              title="Download Video"
+              onSubmit={(values) => {
+                setWarning("");
+                handleSubmit({ ...values, copyToClipboard: false } as DownloadOptions);
+              }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.Push icon={Icon.Hammer} title="Update Libraries" target={<Updater />} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       searchBarAccessory={
@@ -288,89 +304,5 @@ export default function DownloadVideo() {
         </Form.Dropdown>
       )}
     </Form>
-  );
-}
-
-function NotInstalled({ executable, onRefresh }: { executable: string; onRefresh: () => void }) {
-  return (
-    <Detail
-      actions={<AutoInstall onRefresh={onRefresh} />}
-      markdown={`
-# 🚨 Error: \`${executable}\` is not installed
-This extension depends on a command-line utilty that is not detected on your system. You must install it continue.
-
-If you have homebrew installed, simply press **⏎** to have this extension install it for you. Since \`${executable}\` is a heavy library, 
-**it can take up 2 minutes to install**.
-
-**Please do not close Raycast while the installation is in progress.**
-
-To install homebrew, visit [this link](https://brew.sh)
-  `}
-    />
-  );
-}
-
-function AutoInstall({ onRefresh }: { onRefresh: () => void }) {
-  const [isLoading, setIsLoading] = useState(false);
-
-  return (
-    <ActionPanel>
-      {!isLoading && (
-        <Action
-          title="Install with Homebrew"
-          icon={Icon.Download}
-          onAction={async () => {
-            if (isLoading) return;
-
-            setIsLoading(true);
-            const installationToast = new Toast({ style: Toast.Style.Animated, title: "Installing..." });
-            await installationToast.show();
-
-            try {
-              await execa(preferences.homebrewPath, ["install", "yt-dlp", "ffmpeg"]);
-              await installationToast.hide();
-              onRefresh();
-            } catch (error) {
-              installationToast.hide();
-              console.error(error);
-              const isCommonError = error instanceof Error;
-              const isExecaError = error instanceof ExecaError;
-              const isENOENT = isExecaError && error.code === "ENOENT";
-
-              await showToast({
-                style: Toast.Style.Failure,
-                title: isCommonError ? (isENOENT ? "Cannot find Homebrew" : error.name) : "Installation Failed",
-                message: isCommonError
-                  ? isENOENT
-                    ? "Please make sure your `brew` PATH is configured correctly in extension preferences. If you don't have Homebrew installed, you can download it from https://brew.sh."
-                    : error.message
-                  : "An unknown error occured while trying to install",
-                primaryAction: {
-                  title: isENOENT ? "Open Extension Preferences" : "Copy to Clipboard",
-                  onAction: () => {
-                    if (isENOENT) {
-                      openExtensionPreferences();
-                    } else {
-                      Clipboard.copy(
-                        isCommonError ? error.message : "An unknown error occurred while trying to install",
-                      );
-                    }
-                  },
-                },
-                secondaryAction: isENOENT
-                  ? {
-                      title: "Open Installation Guide in Browser",
-                      onAction: () => {
-                        open("https://brew.sh");
-                      },
-                    }
-                  : undefined,
-              });
-            }
-            setIsLoading(false);
-          }}
-        />
-      )}
-    </ActionPanel>
   );
 }
