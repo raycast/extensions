@@ -45,7 +45,12 @@ ${ContributionHeatmap({ weeks: contributions.contributionCalendar.weeks })}
 `;
     const repositoriesSection = formatRepositories(repositories);
 
-    return `# GitHub Profile: ${profile.login}\n${contributionHeatmapSection}\n${userProfileSection}\n${repositoriesSection}`;
+    // Use the dynamically fetched user ID from the profile
+    const userId = profile.id;
+    console.log(`User ID: ${userId}`);
+    const ossInsights = `[![Dashboard stats of @${username}](https://next.ossinsight.io/widgets/official/compose-user-dashboard-stats/thumbnail.png?user_id=${userId}&image_size=auto&color_scheme=light)](https://next.ossinsight.io/widgets/official/compose-user-dashboard-stats?user_id=${userId})`;
+
+    return `# GitHub Profile: ${profile.login}\n${contributionHeatmapSection}\n${userProfileSection}\n${ossInsights}\n${repositoriesSection}`;
   };
 
   return (
