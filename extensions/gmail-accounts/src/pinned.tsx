@@ -12,14 +12,16 @@ export function usePinnedAccounts() {
     moveUp: (account: Account) =>
       setPinnedAccounts((prev) => {
         const i = prev.indexOf(account.email);
-        prev.splice(i - 1, 2, prev[i], prev[i - 1]);
-        return prev;
+        const newArray = [...prev];
+        [newArray[i - 1], newArray[i]] = [newArray[i], newArray[i - 1]];
+        return newArray;
       }),
     moveDown: (account: Account) =>
       setPinnedAccounts((prev) => {
         const i = prev.indexOf(account.email);
-        prev.splice(i, 2, prev[i + 1], prev[i]);
-        return prev;
+        const newArray = [...prev];
+        [newArray[i], newArray[i + 1]] = [newArray[i + 1], newArray[i]];
+        return newArray;
       }),
     getAllowedMovements: (account: Account) => getAllowedMovements(pinnedAccounts, account),
   };

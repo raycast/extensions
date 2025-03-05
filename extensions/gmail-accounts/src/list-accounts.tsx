@@ -1,25 +1,33 @@
 import { Action, ActionPanel, closeMainWindow, Color, Icon, Image, List, showToast } from "@raycast/api";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getAccounts, type Account } from "./gmail";
-import { useCachedState } from "@raycast/utils";
+import { showFailureToast, useCachedState } from "@raycast/utils";
 import { usePinnedAccounts, type PinMethods } from "./pinned";
 import { execSync } from "node:child_process";
 
 export default function Command() {
   const [accounts, setAccounts] = useCachedState<Account[]>("accounts", []);
+  const [loading, setLoading] = useState(true);
   const { pinnedAccounts, ...pinnedMethods } = usePinnedAccounts();
 
   useEffect(() => {
-    syncAccounts();
-    async function syncAccounts() {
-      setAccounts(await getAccounts());
-    }
+    setLoading(true);
+    getAccounts()
+      .then((accounts) => {
+        setAccounts(accounts);
+      })
+      .catch(async (err) => {
+        await showFailureToast(err, { title: "Failed to load accounts" });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   return !isChromeInstalled() ? (
     <ErrorView />
   ) : (
-    <List>
+    <List isLoading={accounts.length === 0 && loading}>
       <List.Section title="Pinned Accounts">
         {accounts
           .filter((account) => pinnedAccounts.includes(account.email))
@@ -42,6 +50,15 @@ export default function Command() {
 
 function ListItem(props: { account: Account; pinned?: boolean } & PinMethods) {
   const { account } = props;
+
+  async function handleOpenInChromeAction() {
+    try {
+      openInChrome(`https://mail.google.com/mail/u/${account.id}/#inbox`);
+      await closeMainWindow();
+    } catch (err) {
+      await showFailureToast(err, { title: "Failed to open account in Chrome" });
+    }
+  }
   return (
     <List.Item
       title={account.email}
@@ -66,13 +83,7 @@ function ListItem(props: { account: Account; pinned?: boolean } & PinMethods) {
         <ActionPanel>
           {account.isLoggedIn && (
             <>
-              <Action
-                title="Open in Chrome"
-                onAction={async () => {
-                  openInChrome(`https://mail.google.com/mail/u/${account.id}/#inbox`);
-                  await closeMainWindow();
-                }}
-              />
+              <Action title="Open in Chrome" onAction={handleOpenInChromeAction} />
               <Action.CopyToClipboard
                 title="Copy URL"
                 content={`https://mail.google.com/mail/u/${account.id}/#inbox`}

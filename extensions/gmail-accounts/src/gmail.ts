@@ -27,6 +27,9 @@ async function getAccountsReq() {
       },
     },
   );
+  if (!response.ok) {
+    throw new Error(`Failed to fetch accounts: ${response.statusText}`);
+  }
 
   return response.json() as unknown as GetAccountsReqResult | [];
 }
@@ -41,13 +44,44 @@ export async function getAccounts(): Promise<Account[]> {
 }
 
 function parseAccounts(input: GetAccountsReqResult): Account[] {
-  return input[1].map((account) => ({
-    id: account[7],
-    fullname: account[2],
-    email: account[3],
-    avatar: account[4],
-    isLoggedIn: account[9] === 1,
-  }));
+  if (!Array.isArray(input[1])) {
+    throw new Error("Invalid accounts array");
+  }
+
+  return input[1].map((account) => {
+    const id = account[7];
+    if (typeof id !== "number") {
+      throw new Error("Invalid account id");
+    }
+
+    const fullname = account[2];
+    if (typeof fullname !== "string") {
+      throw new Error("Invalid account fullname");
+    }
+
+    const email = account[3];
+    if (!email || typeof email !== "string") {
+      throw new Error("Invalid account email");
+    }
+
+    const avatar = account[4];
+    if (!avatar || typeof avatar !== "string") {
+      throw new Error("Invalid account avatar");
+    }
+
+    const isLoggedIn = account[9] === 1;
+    if (typeof isLoggedIn !== "boolean") {
+      throw new Error("Invalid account isLoggedIn");
+    }
+
+    return {
+      id,
+      fullname,
+      email,
+      avatar,
+      isLoggedIn,
+    };
+  });
 }
 
 export type Account = {
