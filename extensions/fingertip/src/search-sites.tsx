@@ -113,6 +113,36 @@ export default function Command() {
                   icon={Icon.Cog}
                 />
                 <Action.OpenInBrowser url={`https://fingertip.com/${site.slug}`} title="Open Site" icon={Icon.Link} />
+                <Action.OpenInBrowser
+                  url={`https://fingertip.com/sites/${site.slug}/calendar`}
+                  title="Scheduling"
+                  icon={Icon.Calendar}
+                />
+                <Action.OpenInBrowser
+                  url={`https://fingertip.com/sites/${site.slug}/contacts`}
+                  title="Contacts"
+                  icon={Icon.TwoPeople}
+                />
+                <Action.OpenInBrowser
+                  url={`https://fingertip.com/sites/${site.slug}/invoicing`}
+                  title="Invoicing"
+                  icon={Icon.Coins}
+                />
+                <Action.OpenInBrowser
+                  url={`https://fingertip.com/sites/${site.slug}/forms`}
+                  title="Forms"
+                  icon={Icon.Clipboard}
+                />
+                <Action.OpenInBrowser
+                  url={`https://fingertip.com/sites/${site.slug}/products`}
+                  title="Products"
+                  icon={Icon.Cart}
+                />
+                <Action.OpenInBrowser
+                  url={`https://fingertip.com/sites/${site.slug}/blog`}
+                  title="Blog"
+                  icon={Icon.Pencil}
+                />
                 <Action.CopyToClipboard content={`https://fingertip.com/${site.slug}`} title="Copy Site URL" />
               </ActionPanel>
             }
