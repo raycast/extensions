@@ -1,6 +1,6 @@
 # EasyVariable Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-03-05
 
 - Reformat project profile files with Prettier
 - Use `password` field for API keys and secrets
