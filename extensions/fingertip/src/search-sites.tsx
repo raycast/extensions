@@ -13,25 +13,10 @@ import {
 } from "@raycast/api";
 import { sentenceCase } from "change-case";
 import { useFetch } from "@raycast/utils";
+import { Fingertip } from "fingertip/client";
 
 interface Preferences {
   apiKey: string;
-}
-
-interface Site {
-  id: string;
-  name: string;
-  slug: string;
-  status: string;
-  updatedAt: string;
-}
-
-interface SitesResponse {
-  items: Site[];
-  pageInfo: {
-    hasNextPage: boolean;
-    endCursor: string;
-  };
 }
 
 export default function Command() {
@@ -57,7 +42,7 @@ export default function Command() {
           message: error.message || "Unknown error occurred",
         });
       },
-      mapResult(result: SitesResponse) {
+      mapResult(result: Fingertip.API.V1.Sites.SiteListResponsesMyCursorPage) {
         const {
           items,
           pageInfo: { endCursor, hasNextPage },
