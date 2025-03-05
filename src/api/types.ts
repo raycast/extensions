@@ -1,240 +1,237 @@
-
-
+/* eslint-disable */
 
 /**
  *
  * @export
  */
 export const COLLECTION_FORMATS = {
-    csv: ",",
-    ssv: " ",
-    tsv: "\t",
-    pipes: "|",
+  csv: ",",
+  ssv: " ",
+  tsv: "\t",
+  pipes: "|",
 };
 
 /**
- * 
+ *
  * @export
  * @interface InlineResponse400
  */
 export interface InlineResponse400 {
-    /**
-     * 
-     * @type {string}
-     * @memberof InlineResponse400
-     */
-    message?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof InlineResponse400
+   */
+  message?: string;
 }
 
 /**
- * 
+ *
  * @export
  * @interface NearbyMeLocationId
  */
 export interface NearbyMeLocationId {
-    /**
-     * 
-     * @type {string}
-     * @memberof NearbyMeLocationId
-     */
-    value: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof NearbyMeLocationId
-     */
-    type: string;
+  /**
+   *
+   * @type {string}
+   * @memberof NearbyMeLocationId
+   */
+  value: string;
+  /**
+   *
+   * @type {string}
+   * @memberof NearbyMeLocationId
+   */
+  type: string;
 }
 
 /**
- * 
+ *
  * @export
  * @interface Station
  */
 export interface Station {
-    /**
-     * 
-     * @type {string}
-     * @memberof Station
-     */
-    UICCode: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Station
-     */
-    stationType: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Station
-     */
-    EVACode?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Station
-     */
-    cdCode?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Station
-     */
-    code?: string;
-    /**
-     * 
-     * @type {Array<Track>}
-     * @memberof Station
-     */
-    sporen: Array<Track>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof Station
-     */
-    synoniemen: Array<string>;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Station
-     */
-    heeftFaciliteiten: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Station
-     */
-    heeftVertrektijden: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Station
-     */
-    heeftReisassistentie: boolean;
-    /**
-     * 
-     * @type {StationsNamen}
-     * @memberof Station
-     */
-    namen?: StationsNamen;
-    /**
-     * 
-     * @type {string}
-     * @memberof Station
-     */
-    land?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Station
-     */
-    lat?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Station
-     */
-    lng?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Station
-     */
-    radius?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Station
-     */
-    naderenRadius?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Station
-     */
-    distance?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Station
-     */
-    ingangsDatum?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Station
-     */
-    eindDatum?: string;
-    /**
-     * 
-     * @type {NearbyMeLocationId}
-     * @memberof Station
-     */
-    nearbyMeLocationId?: NearbyMeLocationId;
+  /**
+   *
+   * @type {string}
+   * @memberof Station
+   */
+  UICCode: string;
+  /**
+   *
+   * @type {string}
+   * @memberof Station
+   */
+  stationType: string;
+  /**
+   *
+   * @type {string}
+   * @memberof Station
+   */
+  EVACode?: string;
+  /**
+   *
+   * @type {number}
+   * @memberof Station
+   */
+  cdCode?: number;
+  /**
+   *
+   * @type {string}
+   * @memberof Station
+   */
+  code?: string;
+  /**
+   *
+   * @type {Array<Track>}
+   * @memberof Station
+   */
+  sporen: Array<Track>;
+  /**
+   *
+   * @type {Array<string>}
+   * @memberof Station
+   */
+  synoniemen: Array<string>;
+  /**
+   *
+   * @type {boolean}
+   * @memberof Station
+   */
+  heeftFaciliteiten: boolean;
+  /**
+   *
+   * @type {boolean}
+   * @memberof Station
+   */
+  heeftVertrektijden: boolean;
+  /**
+   *
+   * @type {boolean}
+   * @memberof Station
+   */
+  heeftReisassistentie: boolean;
+  /**
+   *
+   * @type {StationsNamen}
+   * @memberof Station
+   */
+  namen?: StationsNamen;
+  /**
+   *
+   * @type {string}
+   * @memberof Station
+   */
+  land?: string;
+  /**
+   *
+   * @type {number}
+   * @memberof Station
+   */
+  lat?: number;
+  /**
+   *
+   * @type {number}
+   * @memberof Station
+   */
+  lng?: number;
+  /**
+   *
+   * @type {number}
+   * @memberof Station
+   */
+  radius?: number;
+  /**
+   *
+   * @type {number}
+   * @memberof Station
+   */
+  naderenRadius?: number;
+  /**
+   *
+   * @type {number}
+   * @memberof Station
+   */
+  distance?: number;
+  /**
+   *
+   * @type {string}
+   * @memberof Station
+   */
+  ingangsDatum?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof Station
+   */
+  eindDatum?: string;
+  /**
+   *
+   * @type {NearbyMeLocationId}
+   * @memberof Station
+   */
+  nearbyMeLocationId?: NearbyMeLocationId;
 }
 
-
 /**
- * 
+ *
  * @export
  * @interface StationsNamen
  */
 export interface StationsNamen {
-    /**
-     * 
-     * @type {string}
-     * @memberof StationsNamen
-     */
-    lang: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof StationsNamen
-     */
-    middel: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof StationsNamen
-     */
-    kort: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof StationsNamen
-     */
-    festive?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof StationsNamen
+   */
+  lang: string;
+  /**
+   *
+   * @type {string}
+   * @memberof StationsNamen
+   */
+  middel: string;
+  /**
+   *
+   * @type {string}
+   * @memberof StationsNamen
+   */
+  kort: string;
+  /**
+   *
+   * @type {string}
+   * @memberof StationsNamen
+   */
+  festive?: string;
 }
 
 /**
- * 
+ *
  * @export
  * @interface StationsV2Response
  */
 export interface StationsV2Response {
-    /**
-     * 
-     * @type {Array<Station>}
-     * @memberof StationsV2Response
-     */
-    payload: Array<Station>;
+  /**
+   *
+   * @type {Array<Station>}
+   * @memberof StationsV2Response
+   */
+  payload: Array<Station>;
 }
 
 /**
- * 
+ *
  * @export
  * @interface Track
  */
 export interface Track {
-    /**
-     * 
-     * @type {string}
-     * @memberof Track
-     */
-    spoorNummer: string;
+  /**
+   *
+   * @type {string}
+   * @memberof Track
+   */
+  spoorNummer: string;
 }
-
 
 /// <reference path="./custom.d.ts" />
 // tslint:disable
@@ -250,12 +247,7 @@ export interface Track {
  * Do not edit the file manually.
  */
 
-
-const BASE_PATH = "https://gateway.apiportal.ns.nl/reisinformatie-api".replace(
-  /\/+$/,
-  "",
-);
-
+const BASE_PATH = "https://gateway.apiportal.ns.nl/reisinformatie-api".replace(/\/+$/, "");
 
 /**
  *
@@ -4231,12 +4223,8 @@ export namespace TripSalesFare {
     BUSINESSCARDTRAJECTVRIJJAAR = <any>"BUSINESS_CARD_TRAJECT_VRIJ_JAAR",
     ETICKETENKELEREIS = <any>"ETICKET_ENKELE_REIS",
     ETICKETRETOUR = <any>"ETICKET_RETOUR",
-    ETICKETJOINTJOURNEYDISCOUNTRETOUR = <any>(
-      "ETICKET_JOINT_JOURNEY_DISCOUNT_RETOUR"
-    ),
-    ETICKETJOINTJOURNEYDISCOUNTENKELEREIS = <any>(
-      "ETICKET_JOINT_JOURNEY_DISCOUNT_ENKELE_REIS"
-    ),
+    ETICKETJOINTJOURNEYDISCOUNTRETOUR = <any>"ETICKET_JOINT_JOURNEY_DISCOUNT_RETOUR",
+    ETICKETJOINTJOURNEYDISCOUNTENKELEREIS = <any>"ETICKET_JOINT_JOURNEY_DISCOUNT_ENKELE_REIS",
     EARLYBOOKINGDISCOUNTENKELEREIS = <any>"EARLY_BOOKING_DISCOUNT_ENKELE_REIS",
     EARLYBOOKINGDISCOUNTRETOUR = <any>"EARLY_BOOKING_DISCOUNT_RETOUR",
     GROUPOFFPEAK = <any>"GROUP_OFF_PEAK",

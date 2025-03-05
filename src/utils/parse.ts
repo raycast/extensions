@@ -1,4 +1,4 @@
-export type Search = { from: string, to: string };
+export type Search = { from: string; to: string };
 
 /**
  * Parses a query to extract "from" and "to" parameters.
@@ -16,7 +16,7 @@ export function parseQuery(query: string): Search | null {
   if (match) {
     return {
       from: match[1],
-      to: match[2]
+      to: match[2],
     };
   } else {
     return null; // Return null if the pattern doesn't match

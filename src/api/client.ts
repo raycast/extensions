@@ -16,14 +16,17 @@ const BASE_URL = "https://gateway.apiportal.ns.nl";
  */
 export function useStationSearch(q: string) {
   const limit = getPreferenceValues()[PREF_SEARCH_RESULT_LIMIT];
-  return useFetch<StationsV2Response>(`${BASE_URL}/nsapp-stations/v2?includeNonPlannableStations=false&limit=${limit}&q=${q}`, {
-    method: "GET",
-    headers: {
-      "Cache-Control": "no-cache",
-      "Ocp-Apim-Subscription-Key": getPreferenceValues()[PREF_NS_API_KEY]
+  return useFetch<StationsV2Response>(
+    `${BASE_URL}/nsapp-stations/v2?includeNonPlannableStations=false&limit=${limit}&q=${q}`,
+    {
+      method: "GET",
+      headers: {
+        "Cache-Control": "no-cache",
+        "Ocp-Apim-Subscription-Key": getPreferenceValues()[PREF_NS_API_KEY],
+      },
+      keepPreviousData: true,
     },
-    keepPreviousData: true
-  });
+  );
 }
 
 /**
@@ -46,7 +49,7 @@ export function useTripSearch(from: string, to: string, date: string, arrival: b
     method: "GET",
     headers: {
       "Cache-Control": "no-cache",
-      "Ocp-Apim-Subscription-Key": getPreferenceValues()[PREF_NS_API_KEY]
-    }
+      "Ocp-Apim-Subscription-Key": getPreferenceValues()[PREF_NS_API_KEY],
+    },
   });
 }
