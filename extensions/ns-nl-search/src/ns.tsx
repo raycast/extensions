@@ -34,7 +34,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Search a Trips" onSubmit={searchTrips} />
+          <Action.SubmitForm title="Search Trips" onSubmit={searchTrips} />
         </ActionPanel>
       }
     >
