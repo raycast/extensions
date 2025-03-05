@@ -43,8 +43,10 @@ export default async function tool(input: Input) {
 
   // Get the best video+audio format
   const formats = getFormats(video);
-  const bestFormat = formats["Video"][0]; // First format in Video category is best quality
-  if (bestFormat) {
+  const bestFormat = formats["Video"]?.[0]; // First format in Video category is best quality
+  if (!bestFormat) {
+    throw new Error("No suitable video formats found");
+  }
     const formatValue = getFormatValue(bestFormat);
     const [downloadFormat, recodeFormat] = formatValue.split("#");
     options.push("--ffmpeg-location", preferences.ffmpegPath);
