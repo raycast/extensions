@@ -1,6 +1,6 @@
 # Resend Changelog
 
-## [Add AI Tools] - 2025-02-28
+## [Add AI Tools] - 2025-03-05
 
 This release turns this extension into an [AI Extension](https://youtu.be/sHIlFKKaq0A).
 
