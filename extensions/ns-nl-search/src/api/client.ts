@@ -17,7 +17,7 @@ const BASE_URL = "https://gateway.apiportal.ns.nl";
 export function useStationSearch(q: string) {
   const limit = getPreferenceValues()[PREF_SEARCH_RESULT_LIMIT];
   return useFetch<StationsV2Response>(
-    `${BASE_URL}/nsapp-stations/v2?includeNonPlannableStations=false&limit=${limit}&q=${q}`,
+    `${BASE_URL}/nsapp-stations/v2?includeNonPlannableStations=false&limit=${limit}&q=${encodeURIComponent(q)}`,
     {
       method: "GET",
       headers: {
