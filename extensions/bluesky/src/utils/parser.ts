@@ -1,9 +1,13 @@
 import { Account, BskyRecord, Post, PostReason } from "../types/types";
-import { $Typed, AppBskyActorDefs, AppBskyEmbedImages, AppBskyEmbedRecord, AppBskyFeedDefs, AppBskyFeedPost } from "@atproto/api";
 import {
-  BlueskyProfileUrlBase,
-  PostEndHorizontalLine,
-} from "./constants";
+  $Typed,
+  AppBskyActorDefs,
+  AppBskyEmbedImages,
+  AppBskyEmbedRecord,
+  AppBskyFeedDefs,
+  AppBskyFeedPost,
+} from "@atproto/api";
+import { BlueskyProfileUrlBase, PostEndHorizontalLine } from "./constants";
 
 import { Notification as BskyNotification } from "@atproto/api/dist/client/types/app/bsky/notification/listNotifications";
 import { Notification } from "../types/types";
@@ -168,16 +172,21 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
         let imageEmbeds: string[] = [];
 
         if (AppBskyEmbedImages.isView(item.post.embed)) {
-          imageEmbeds = item.post.embed.images.map(item => item.thumb);
+          imageEmbeds = item.post.embed.images.map((item) => item.thumb);
         }
 
         let markdownView = "";
 
-        if (item.reply && isPostView(item.reply.root) && isPostView(item.reply.parent) && item.reply.root.uri !== item.reply.parent.uri) {
+        if (
+          item.reply &&
+          isPostView(item.reply.root) &&
+          isPostView(item.reply.parent) &&
+          item.reply.root.uri !== item.reply.parent.uri
+        ) {
           let imageEmbeds: string[] = [];
-          const {root} = item.reply;
+          const { root } = item.reply;
           if (AppBskyEmbedImages.isView(root.embed)) {
-            imageEmbeds = root.embed.images.map(item => item.thumb);
+            imageEmbeds = root.embed.images.map((item) => item.thumb);
           }
 
           markdownView = markdownView + (await getPostMarkdownView(root, imageEmbeds));
@@ -186,7 +195,7 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
           let imageEmbeds: string[] = [];
           const parent = item.reply.parent as PostView;
           if (AppBskyEmbedImages.isView(parent.embed)) {
-            imageEmbeds = parent.embed.images.map(item => item.thumb);
+            imageEmbeds = parent.embed.images.map((item) => item.thumb);
           }
 
           markdownView = markdownView + (await getPostMarkdownView(parent, imageEmbeds));
@@ -207,7 +216,7 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
           if (embeddedPostRecord.embeds && embeddedPostRecord.embeds?.length > 0) {
             const embed = embeddedPostRecord.embeds[0];
             if (AppBskyEmbedImages.isView(embed)) {
-              embeddedPostImages = embed.images.map(item => item.thumb);
+              embeddedPostImages = embed.images.map((item) => item.thumb);
             }
           }
 
@@ -224,7 +233,7 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
           const displayName = repostAuthor.displayName || "";
           repostMarkdown = getRepostMarkdown(displayName, repostAuthor.handle);
         }
-        
+
         return {
           uri: item.post.uri,
           cid: item.post.cid,
@@ -236,7 +245,10 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
           createdByUser: {
             did: item.post.author.did,
             handle: item.post.author.handle,
-            blockedUri: item.post.viewer && item.post.viewer.blocking ? (item.post.viewer.blocking as string) : "",
+            blockedUri:
+              item.post.viewer && (item.post.viewer as AppBskyFeedDefs.ViewerState & { blocking?: string }).blocking
+                ? ((item.post.viewer as AppBskyFeedDefs.ViewerState & { blocking?: string }).blocking as string)
+                : "",
             displayName: item.post.author.displayName ? item.post.author.displayName : "",
             avatarUrl: item.post.author.avatar ? item.post.author.avatar : "",
           },

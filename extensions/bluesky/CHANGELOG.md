@@ -3,7 +3,7 @@
 ## [Maintenance Release] - {PR_MERGE_DATE}
 
 - in `Notifications`, fix `initialRes.body?.cancel` error (related: [Issue #14814 comment](https://github.com/raycast/extensions/issues/14814#issuecomment-2396432584)) 
-- chore: update `@atproto/api` so we have better TS typing (ref: [@atproto/api v0.14.0 release notes](https://docs.bsky.app/blog))
+- chore: update `@atproto/api` so we have better TS typing (ref: [@atproto/api v0.14.0 release notes](https://docs.bsky.app/blog/api-v0-14-0-release-notes))
 
 ## [Updated Logo] - 2025-01-10
 

@@ -92,7 +92,6 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
           // This try...catch is to account for following case:
           // When user runs extension and session is expiring or expired, ERROR on next line is thrown
           // `initialRes.body?.cancel is not a function`
-          
           // We swallow the exceptioo
         }
         let notificationMessage = "";
@@ -158,7 +157,7 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
         if (AppBskyEmbedImages.isView(post.embed)) {
           imageEmbeds = post.embed.images.map((item: ViewImage) => item.thumb);
         }
-        
+
         setDetailsText(await getPostMarkdownView(post, imageEmbeds));
         showSuccessToast(ViewingNotification);
 
