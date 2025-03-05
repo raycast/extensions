@@ -1,25 +1,27 @@
 import { List, type LaunchProps } from "@raycast/api";
 import nodeFetch from "node-fetch";
 import { useState } from "react";
-import { useRaycastFollowUpQuestion } from "./components/raycast/hooks/useRaycastFollowUpQuestion";
-import { useRaycastSummary } from "./components/raycast/hooks/useRaycastSummary";
+import { useOllamaFollowUpQuestion } from "./components/ollama/hooks/useOllamaFollowUpQuestion";
+import { useOllamaSummary } from "./components/ollama/hooks/useOllamaSummary";
 import SummaryDetails from "./components/summary/SummaryDetails";
 import { useGetVideoUrl } from "./hooks/useGetVideoUrl";
 import { useQuestions } from "./hooks/useQuestions";
 import { useVideoData } from "./hooks/useVideoData";
 (globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never;
 
-interface SummarizeVideoWithRaycastProps {
+interface SummarizeVideoWithOllamaProps {
   video: string | undefined | null;
 }
-export type RaycastPreferences = {
+export type OllamaPreferences = {
   creativity: "0" | "0.5" | "1" | "1.5" | "2";
+  ollamaEndpoint: string;
   language: string;
+  ollamaModel: string;
 };
 
-export default function SummarizeVideoWithRaycast(
+export default function SummarizeVideoWithOllama(
   props: LaunchProps<{
-    arguments: SummarizeVideoWithRaycastProps;
+    arguments: SummarizeVideoWithOllamaProps;
     launchContext?: { video: string };
   }>,
 ) {
@@ -35,8 +37,8 @@ export default function SummarizeVideoWithRaycast(
   const { videoData, transcript } = useVideoData(videoURL);
   const { questions, setQuestions, question, setQuestion, handleAdditionalQuestion } = useQuestions(summary);
 
-  useRaycastSummary({ transcript, setSummaryIsLoading, setSummary });
-  useRaycastFollowUpQuestion({
+  useOllamaSummary({ transcript, setSummaryIsLoading, setSummary });
+  useOllamaFollowUpQuestion({
     setQuestions,
     setQuestion,
     transcript,

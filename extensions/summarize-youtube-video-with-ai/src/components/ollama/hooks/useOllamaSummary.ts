@@ -1,47 +1,33 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import OpenAI from "openai";
 import React, { useEffect } from "react";
-import { ANTHROPIC_MODEL } from "../../../const/defaults";
+import { OLLAMA_MODEL } from "../../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
-
-import { AnthropicPreferences } from "../../../summarizeVideoWithAnthropic";
+import { OllamaPreferences } from "../../../summarizeVideoWithOllama";
 import { getAiInstructionSnippet } from "../../../utils/getAiInstructionSnippets";
 
-type GetAnthropicSummaryProps = {
+type GetOllamaSummaryProps = {
   transcript?: string;
   setSummaryIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
-export const useAnthropicSummary = async ({
-  transcript,
-  setSummaryIsLoading,
-  setSummary,
-}: GetAnthropicSummaryProps) => {
+export const useOllamaSummary = ({ transcript, setSummaryIsLoading, setSummary }: GetOllamaSummaryProps) => {
   const abortController = new AbortController();
-  const preferences = getPreferenceValues() as AnthropicPreferences;
-  const { anthropicApiToken, language, anthropicModel, creativity } = preferences;
-
-  if (anthropicApiToken === "") {
-    showToast({
-      title: ALERT.title,
-      message:
-        "Anthropic Developer Account is required for this extension to work. You need to add your API key in preferences.",
-      style: Toast.Style.Failure,
-    });
-    return;
-  }
+  const preferences = getPreferenceValues() as OllamaPreferences;
+  const { creativity, language, ollamaEndpoint, ollamaModel } = preferences;
 
   useEffect(() => {
     if (!transcript) return;
 
-    const anthropic = new Anthropic({
-      apiKey: anthropicApiToken,
+    const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
+
+    const openai = new OpenAI({
+      baseURL: ollamaEndpoint,
+      apiKey: "ollama", // required but unused by Ollama
     });
 
     setSummaryIsLoading(true);
-
-    const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
 
     showToast({
       style: Toast.Style.Animated,
@@ -49,25 +35,21 @@ export const useAnthropicSummary = async ({
       message: SUMMARIZING_VIDEO.message,
     });
 
-    const stream = anthropic.messages.stream(
-      {
-        model: anthropicModel || ANTHROPIC_MODEL,
-        max_tokens: 8192,
-        stream: true,
-        messages: [{ role: "user", content: aiInstructions }],
-        temperature: parseInt(creativity),
-      },
-      { signal: abortController.signal },
-    );
+    const stream = openai.beta.chat.completions.stream({
+      model: ollamaModel || OLLAMA_MODEL,
+      temperature: parseFloat(creativity),
+      messages: [{ role: "user", content: aiInstructions }],
+      stream: true,
+    });
 
-    stream.on("text", (delta) => {
+    stream.on("content", (delta) => {
       setSummary((result) => {
         if (result === undefined) return delta || undefined;
         return result + delta || result;
       });
     });
 
-    stream.finalMessage().then(() => {
+    stream.finalChatCompletion().then(() => {
       setSummaryIsLoading(false);
       showToast({
         style: Toast.Style.Success,

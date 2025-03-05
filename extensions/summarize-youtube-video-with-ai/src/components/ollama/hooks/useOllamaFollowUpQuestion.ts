@@ -1,10 +1,10 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import OpenAI from "openai";
 import { useEffect } from "react";
-import { ANTHROPIC_MODEL } from "../../../const/defaults";
+import { OLLAMA_MODEL } from "../../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
 import { Question } from "../../../hooks/useQuestions";
-import { AnthropicPreferences } from "../../../summarizeVideoWithAnthropic";
+import { OllamaPreferences } from "../../../summarizeVideoWithOllama";
 import { generateQuestionId } from "../../../utils/generateQuestionId";
 import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
@@ -15,24 +15,16 @@ type FollowUpQuestionParams = {
   question: string;
 };
 
-export function useAnthropicFollowUpQuestion({
-  setQuestions,
-  setQuestion,
-  transcript,
-  question,
-}: FollowUpQuestionParams) {
-  const abortController = new AbortController();
-  const preferences = getPreferenceValues() as AnthropicPreferences;
-  const { anthropicApiToken, anthropicModel, creativity } = preferences;
+export function useOllamaFollowUpQuestion({ setQuestions, setQuestion, transcript, question }: FollowUpQuestionParams) {
+  const preferences = getPreferenceValues() as OllamaPreferences;
+  const { ollamaEndpoint, ollamaModel, creativity } = preferences;
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const handleAdditionalQuestion = async () => {
       if (!question || !transcript) return;
       const qID = generateQuestionId();
-
-      const anthropic = new Anthropic({
-        apiKey: anthropicApiToken,
-      });
 
       const toast = await showToast({
         style: Toast.Style.Animated,
@@ -40,34 +32,38 @@ export function useAnthropicFollowUpQuestion({
         message: FINDING_ANSWER.message,
       });
 
+      const openai = new OpenAI({
+        baseURL: ollamaEndpoint,
+        apiKey: "ollama", // required but unused by Ollama
+      });
+
       setQuestions((prevQuestions) => [
         {
           id: qID,
-          question: "Initial Summary of the video",
+          question,
           answer: "",
         },
         ...prevQuestions,
       ]);
 
-      const answer = anthropic.messages.stream(
+      const answer = openai.beta.chat.completions.stream(
         {
-          model: anthropicModel || ANTHROPIC_MODEL,
-          max_tokens: 8192,
-          stream: true,
+          model: ollamaModel || OLLAMA_MODEL,
           messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
-          temperature: parseInt(creativity),
+          stream: true,
+          creativity: parseInt(creativity),
         },
         { signal: abortController.signal },
       );
 
-      answer.on("text", (delta) => {
+      answer.on("content", (delta) => {
         toast.show();
         setQuestions((prevQuestions) =>
-          prevQuestions.map((q) => (q.id === qID ? { ...q, answer: (q.answer || "") + delta } : q)),
+          prevQuestions.map((q) => (q.id === qID ? { ...q, answer: q.answer + delta } : q)),
         );
       });
 
-      answer.finalMessage().then(() => {
+      answer.finalChatCompletion().then(() => {
         toast.hide();
         setQuestion("");
       });
@@ -78,7 +74,7 @@ export function useAnthropicFollowUpQuestion({
         if (abortController.signal.aborted) return;
         toast.style = Toast.Style.Failure;
         toast.title = ALERT.title;
-        toast.message = error instanceof Error ? error.message : "Unknown error occurred";
+        toast.message = error.message;
       });
     };
 
