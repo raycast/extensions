@@ -185,7 +185,8 @@
     "date-fns": "^4.1.0",
     "execa": "^9.5.2",
     "is-url-superb": "^6.1.0",
-    "pretty-bytes": "^6.1.1"
+    "pretty-bytes": "^6.1.1",
+    "srt-parser-2": "^1.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.11",
