@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "language-detector",
+  "title": "Language Detector",
+  "type": "module",
+  "description": "Detect languages through Raycast AI or third-party language detectors.",
+  "icon": "language-detector-icon.png",
+  "author": "litomore",
+  "categories": [
+    "Fun",
+    "Media",
+    "Other",
+    "Productivity",
+    "System"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "selectedTextToDetect",
+      "title": "Selected Text to Detect",
+      "description": "Detect the language of the selected text.",
+      "mode": "no-view"
+    },
+    {
+      "name": "textToDetect",
+      "title": "Text to Detect",
+      "description": "Detect the language of the text.",
+      "mode": "view"
+    },
+    {
+      "name": "typeToDetect",
+      "title": "Type to Detect",
+      "description": "Detect the language of the text.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "content",
+          "placeholder": "Type to Detect",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "detector",
+      "title": "Detector",
+      "description": "Choose the language detector.",
+      "type": "dropdown",
+      "required": false,
+      "default": "ai",
+      "data": [
+        {
+          "title": "Raycast AI",
+          "value": "ai"
+        },
+        {
+          "title": "npm:languagedetect",
+          "value": "languagedetect"
+        },
+        {
+          "title": "npm:tinyld",
+          "value": "tinyld"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.18.1",
+    "mac-say": "^0.3.1",
+    "raycast-cross-extension": "^0.2.3",
+    "raycast-language-detector": "^0.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.5",
+    "@types/react": "^18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.2",
+    "typescript": "^5.7.3"
+  }
+}
