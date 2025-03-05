@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-03-05
 
 - Add support to manage installed Homebrew libraries
 - Add support for checking if libraries outdated
