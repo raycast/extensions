@@ -30,7 +30,7 @@
       "default": "7",
       "type": "textfield",
       "title": "Search Result Limit",
-      "description": "How many result will shown in search",
+      "description": "How many results will be shown in search",
       "required": true
     }
   ],

@@ -11,7 +11,7 @@ export function parseQuery(query: string): Search | null {
   const regex = /from:([^\s]+(?: [^\s]+)*)\s+to:([^\s]+(?: [^\s]+)*)/;
 
   // Execute the regex on the input query
-  const match = query.match(regex);
+  const match = query.trim().match(regex);
 
   if (match) {
     return {

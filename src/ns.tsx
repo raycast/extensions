@@ -34,7 +34,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Search a Trips" onSubmit={searchTrips} />
+          <Action.SubmitForm title="Search Trips" onSubmit={searchTrips} />
         </ActionPanel>
       }
     >
@@ -47,7 +47,13 @@ export default function Command() {
         isLoading={fromStationsIsLoading}
       >
         {(fromStations || { payload: [] }).payload.map((station) => {
-          return <Form.Dropdown.Item key={station.UICCode} value={station.UICCode} title={station.namen!.lang} />;
+          return (
+            <Form.Dropdown.Item
+              key={station.UICCode}
+              value={station.UICCode}
+              title={station.namen?.lang || station.UICCode}
+            />
+          );
         })}
       </Form.Dropdown>
 
@@ -60,7 +66,11 @@ export default function Command() {
         isLoading={toStationsIsLoading}
       >
         {(toStations || { payload: [] }).payload.map((station) => (
-          <Form.Dropdown.Item key={station.UICCode} value={station.UICCode} title={station.namen!.lang} />
+          <Form.Dropdown.Item
+            key={station.UICCode}
+            value={station.UICCode}
+            title={station.namen?.lang || station.UICCode}
+          />
         ))}
       </Form.Dropdown>
 

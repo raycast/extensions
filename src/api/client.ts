@@ -17,7 +17,7 @@ const BASE_URL = "https://gateway.apiportal.ns.nl";
 export function useStationSearch(q: string) {
   const limit = getPreferenceValues()[PREF_SEARCH_RESULT_LIMIT];
   return useFetch<StationsV2Response>(
-    `${BASE_URL}/nsapp-stations/v2?includeNonPlannableStations=false&limit=${limit}&q=${q}`,
+    `${BASE_URL}/nsapp-stations/v2?includeNonPlannableStations=false&limit=${limit}&q=${encodeURIComponent(q)}`,
     {
       method: "GET",
       headers: {
@@ -34,9 +34,9 @@ export function useStationSearch(q: string) {
  *
  * @param {string} from - The starting location of the trip.
  * @param {string} to - The destination of the trip.
- * @param {Date} date - The date of the trip.
+ * @param {string} date - The date of the trip.
  * @param {boolean} arrival - Determines if the trip is for arrival or departure.
- * @return {Promise<StationsV2Response>} A Promise that resolves to the response containing the trips.
+ * @return {Promise<TravelAdvice>} A Promise that resolves to the response containing the trips.
  */
 export function useTripSearch(from: string, to: string, date: string, arrival: boolean) {
   const params = new URLSearchParams();
