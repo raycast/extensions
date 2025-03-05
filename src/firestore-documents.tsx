@@ -593,7 +593,7 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
         </ActionPanel>
       }
     >
-      <List.Section title="Highlight Fields" subtitle={documents.length > 0 ? `${documents.length} documents` : undefined}>
+      <List.Section subtitle={documents.length > 0 ? `${documents.length} documents` : undefined}>
         <List.Item
           title="Highlight Fields"
           subtitle={highlightFields || "No fields selected"}
@@ -633,7 +633,7 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
         />
       </List.Section>
 
-      <List.Section title="Sorting">
+      <List.Section>
         <List.Item
           title="Sort Options"
           subtitle={`Sort by ${sortField} (${sortOrder === 'asc' ? 'Ascending' : 'Descending'})`}
@@ -1022,7 +1022,7 @@ function FilteredDocumentList({
         </ActionPanel>
       }
     >
-      <List.Section title="Highlight Fields" subtitle={documents.length > 0 ? `${documents.length} documents` : undefined}>
+      <List.Section subtitle={documents.length > 0 ? `${documents.length} documents` : undefined}>
         <List.Item
           title="Highlight Fields"
           subtitle={highlightFields || "No fields selected"}
@@ -1062,7 +1062,7 @@ function FilteredDocumentList({
         />
       </List.Section>
 
-      <List.Section title="Sorting">
+      <List.Section>
         <List.Item
           title="Sort Options"
           subtitle={`Sort by ${sortField} (${sortOrder === 'asc' ? 'Ascending' : 'Descending'})`}
