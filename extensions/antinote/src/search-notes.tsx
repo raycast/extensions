@@ -95,7 +95,6 @@ export default function Command() {
           icon={item.icon}
           title={item.title}
           subtitle={item.subtitle}
-          accessories={[]}
           actions={
             <ActionPanel>
               <Action

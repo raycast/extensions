@@ -20,9 +20,9 @@ export default async function main() {
       end tell
     `);
 
-    showHUD(result == "pinned" ? "Pinned to top" : "Unpinned from top");
+    await showHUD(result == "pinned" ? "Pinned to top" : "Unpinned from top");
     await closeMainWindow({ clearRootSearch: true });
   } catch (error) {
-    await showFailureToast(error, { title: "Failed to search in Antinote" });
+    await showFailureToast(error, { title: "Failed to pin / unpin Antinote window" });
   }
 }
