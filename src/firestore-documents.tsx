@@ -473,12 +473,40 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
       if (valueA === undefined || valueA === null) valueA = "";
       if (valueB === undefined || valueB === null) valueB = "";
       
-      // Convert to strings for comparison if not already
-      if (typeof valueA !== "string") valueA = String(valueA);
-      if (typeof valueB !== "string") valueB = String(valueB);
+      // Determine the type of values and compare accordingly
+      const typeA = typeof valueA;
+      const typeB = typeof valueB;
+      
+      // If both values are numbers, compare them numerically
+      if (typeA === 'number' && typeB === 'number') {
+        return sortOrder === "asc" ? valueA - valueB : valueB - valueA;
+      }
+      
+      // If both values are dates, compare them as dates
+      const isDateA = valueA instanceof Date || (typeof valueA === 'string' && !isNaN(Date.parse(valueA)));
+      const isDateB = valueB instanceof Date || (typeof valueB === 'string' && !isNaN(Date.parse(valueB)));
+      
+      if (isDateA && isDateB) {
+        const dateA = valueA instanceof Date ? valueA : new Date(valueA);
+        const dateB = valueB instanceof Date ? valueB : new Date(valueB);
+        return sortOrder === "asc" ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
+      }
+      
+      // If both values are booleans, compare them as booleans
+      if (typeA === 'boolean' && typeB === 'boolean') {
+        if (sortOrder === "asc") {
+          return valueA === valueB ? 0 : valueA ? 1 : -1;
+        } else {
+          return valueA === valueB ? 0 : valueA ? -1 : 1;
+        }
+      }
+      
+      // For mixed types or strings, convert to strings and compare
+      const stringA = String(valueA).toLowerCase();
+      const stringB = String(valueB).toLowerCase();
       
       // Case insensitive comparison
-      const comparison = valueA.toLowerCase().localeCompare(valueB.toLowerCase());
+      const comparison = stringA.localeCompare(stringB);
       
       return sortOrder === "asc" ? comparison : -comparison;
     });
@@ -914,12 +942,40 @@ function FilteredDocumentList({
       if (valueA === undefined || valueA === null) valueA = "";
       if (valueB === undefined || valueB === null) valueB = "";
       
-      // Convert to strings for comparison if not already
-      if (typeof valueA !== "string") valueA = String(valueA);
-      if (typeof valueB !== "string") valueB = String(valueB);
+      // Determine the type of values and compare accordingly
+      const typeA = typeof valueA;
+      const typeB = typeof valueB;
+      
+      // If both values are numbers, compare them numerically
+      if (typeA === 'number' && typeB === 'number') {
+        return sortOrder === "asc" ? valueA - valueB : valueB - valueA;
+      }
+      
+      // If both values are dates, compare them as dates
+      const isDateA = valueA instanceof Date || (typeof valueA === 'string' && !isNaN(Date.parse(valueA)));
+      const isDateB = valueB instanceof Date || (typeof valueB === 'string' && !isNaN(Date.parse(valueB)));
+      
+      if (isDateA && isDateB) {
+        const dateA = valueA instanceof Date ? valueA : new Date(valueA);
+        const dateB = valueB instanceof Date ? valueB : new Date(valueB);
+        return sortOrder === "asc" ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
+      }
+      
+      // If both values are booleans, compare them as booleans
+      if (typeA === 'boolean' && typeB === 'boolean') {
+        if (sortOrder === "asc") {
+          return valueA === valueB ? 0 : valueA ? 1 : -1;
+        } else {
+          return valueA === valueB ? 0 : valueA ? -1 : 1;
+        }
+      }
+      
+      // For mixed types or strings, convert to strings and compare
+      const stringA = String(valueA).toLowerCase();
+      const stringB = String(valueB).toLowerCase();
       
       // Case insensitive comparison
-      const comparison = valueA.toLowerCase().localeCompare(valueB.toLowerCase());
+      const comparison = stringA.localeCompare(stringB);
       
       return sortOrder === "asc" ? comparison : -comparison;
     });
