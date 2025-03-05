@@ -12,3 +12,9 @@ The overlay can be closed with a mouse click or when you press the ESC key.
   * Display selected text fullscreen
 * Fullscreen Clipboard
   * Display clipboard text fullscreen
+
+## Screenshots
+
+![fullscreen-1.png](./metadata/fullscreen-1.png)
+
+![fullscreen-2.png](./media/fullscreen-2.png)
