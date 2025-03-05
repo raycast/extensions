@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -28,9 +28,13 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const client = new Fingertip({
-    apiKey: preferences.apiKey,
-  });
+  const client = useMemo(
+    () =>
+      new Fingertip({
+        apiKey: preferences.apiKey,
+      }),
+    [preferences.apiKey],
+  );
 
   // Check if API key is set
   if (!preferences.apiKey) {
@@ -69,25 +73,29 @@ export default function Command() {
         ],
       });
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Site Created",
-        message: `Successfully created site: ${values.name}`,
-      });
-
-      open(`https://fingertip.com/sites/${response.site.slug}/pages`);
+      try {
+        await open(`https://fingertip.com/sites/${response.site.slug}/pages`);
+      } catch (openError) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to Open Site",
+          message: "Site was created but couldn't be opened in browser",
+        });
+      }
     } catch (err) {
       if (err instanceof Fingertip.APIError) {
-        console.log(err.status); // 400
-        console.log(err.name); // BadRequestError
-        console.log(err.headers); // {server: 'nginx', ...}
-
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to Create Site",
           message: err instanceof Error ? err.message : "Unknown error occurred",
         });
       } else {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Site Created",
+          message: `Successfully created site: ${values.name}`,
+        });
+
         throw err;
       }
     } finally {

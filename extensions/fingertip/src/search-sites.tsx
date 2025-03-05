@@ -47,9 +47,13 @@ export default function Command() {
   }, [allSites]);
 
   // Initialize Fingertip client
-  const client = new Fingertip({
-    apiKey: preferences.apiKey,
-  });
+  const client = useMemo(
+    () =>
+      new Fingertip({
+        apiKey: preferences.apiKey,
+      }),
+    [preferences.apiKey],
+  );
 
   // Function to fetch sites using the Fingertip client
   const fetchSites = useCallback(async () => {
@@ -86,12 +90,6 @@ export default function Command() {
       console.error("Error fetching sites:", error);
       setError(error instanceof Error ? error.message : "Unknown error occurred");
 
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load sites",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
-
       if (error instanceof Fingertip.APIError && error.status === 401) {
         showToast({
           style: Toast.Style.Failure,
@@ -99,12 +97,18 @@ export default function Command() {
           message: "Please check your API key in preferences",
         });
         setShowSettings(true);
+      } else {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load sites",
+          message: error instanceof Error ? error.message : "Unknown error occurred",
+        });
       }
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [client, cursor, preferences.apiKey]);
+  }, [cursor, preferences.apiKey]);
 
   // Initial fetch
   useEffect(() => {
