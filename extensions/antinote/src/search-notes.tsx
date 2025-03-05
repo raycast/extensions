@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Icon, List, Detail, closeMainWindow } from "@raycast/api";
-import { runAppleScript, useSQL } from "@raycast/utils";
+import { runAppleScript, showFailureToast, useSQL } from "@raycast/utils";
 import { homedir } from "os";
 import { resolve } from "path";
 
@@ -39,24 +39,28 @@ async function searchInAntinote(note: Note) {
   }
   const query = splitted.join(" ").slice(0, 50);
 
-  await runAppleScript(`
-    tell application "Antinote"
-      activate
-      tell application "System Events"
-        tell application process "Antinote"
-          click menu item "search all notes" of menu "file" of menu bar 1
-          if (count of static text of group 1 of window 1) > 0 and value of static text 1 of group 1 of window 1 is "Search all notes" then
-          else
-            delay 0.7
+  try {
+    await runAppleScript(`
+      tell application "Antinote"
+        activate
+        tell application "System Events"
+          tell application process "Antinote"
             click menu item "search all notes" of menu "file" of menu bar 1
-          end if
-          set value of text field 1 of group 1 of window 1 to "${query}"
+            if (count of static text of group 1 of window 1) > 0 and value of static text 1 of group 1 of window 1 is "Search all notes" then
+            else
+              delay 0.7
+              click menu item "search all notes" of menu "file" of menu bar 1
+            end if
+            set value of text field 1 of group 1 of window 1 to "${query}"
+          end tell
         end tell
       end tell
-    end tell
-  `);
+    `);
 
-  await closeMainWindow({clearRootSearch: true});
+    await closeMainWindow({ clearRootSearch: true });
+  } catch (error) {
+    await showFailureToast("Failed to search in Antinote", error);
+  }
 }
 
 export default function Command() {
@@ -74,12 +78,12 @@ export default function Command() {
     return <Detail markdown="No notes found." />;
   }
 
-  const ITEMS = Array.from(Array(notes!.length).keys()).map((key) => {
+  const ITEMS = notes!.map((note, key) => {
     return {
       id: key,
       icon: Icon.Paragraph,
-      title: getTitle(notes![key].content),
-      subtitle: getSanitizedContent(notes![key].content),
+      title: getTitle(note.content),
+      subtitle: getSanitizedContent(note.content),
     };
   });
 
@@ -95,7 +99,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title="Select in Antinote"
+                title="Find in Antinote"
                 onAction={async () => {
                   searchInAntinote(notes![item.id]);
                 }}
