@@ -22,10 +22,7 @@ import path from "path";
 import ErrorComponent from "./components/ErrorComponent";
 
 // Get preferences for sender information
-const preferences = getPreferenceValues<{
-  sender_name: string;
-  sender_email: string;
-}>();
+const preferences = getPreferenceValues<ExtensionPreferences>();
 
 // Create default sender string from preferences
 const defaultSender = `${preferences.sender_name} <${preferences.sender_email}>`;
