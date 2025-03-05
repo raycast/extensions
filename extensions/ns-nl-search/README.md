@@ -8,4 +8,4 @@ Met de Raycast-extensie voor Nederlandse Spoorwegen kunt u eenvoudig treinschema
 With the Raycast extension for Nederlandse Spoorwegen, you can easily find train schedules, routes, and real-time updates for the Dutch railway system. This extension simplifies the process of planning your journey by providing quick access to essential information directly from your Raycast interface. Whether you're commuting or traveling, stay informed with the latest train updates and ensure a smooth trip with just a few clicks.
 
 ## Get NS API Key
-To use that extension, you should get NS API key from their [portal](https://www.ns.nl/en/travel-information/ns-api)
+To use that extension, you should get an NS API key from their [portal](https://www.ns.nl/en/travel-information/ns-api)
