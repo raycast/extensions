@@ -1,7 +1,8 @@
-import { Detail, ActionPanel, Action, Clipboard } from "@raycast/api";
+import { Detail, ActionPanel, Action, Clipboard, confirmAlert, showToast, Toast, useNavigation } from "@raycast/api";
 import * as admin from "firebase-admin";
 import { getServiceAccount } from "../utils/firebase";
 import { useEffect, useState } from "react";
+import { deleteDocument } from "../api/firestore";
 
 interface JsonViewerProps {
   data: any;
@@ -10,6 +11,8 @@ interface JsonViewerProps {
 
 export function JsonViewer({ data, title }: JsonViewerProps) {
   const [projectId, setProjectId] = useState<string>("");
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const { pop } = useNavigation();
   
   useEffect(() => {
     // Load project ID from service account
@@ -46,6 +49,52 @@ export function JsonViewer({ data, title }: JsonViewerProps) {
     return `https://console.firebase.google.com/project/${projectId}/firestore/databases/-default-/data/~2F${encodedCollection}~2F${encodedDocId}`;
   };
 
+  // Function to handle document deletion
+  const handleDeleteDocument = async () => {
+    if (!collectionName || !data.id) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Cannot Delete Document",
+        message: "Missing collection name or document ID",
+      });
+      return;
+    }
+
+    // Ask for confirmation before deleting
+    const confirmed = await confirmAlert({
+      title: "Delete Document",
+      message: `Are you sure you want to delete the document "${data.id}" from collection "${collectionName}"? This action cannot be undone.`,
+      primaryAction: {
+        title: "Delete",
+      },
+    });
+
+    if (confirmed) {
+      try {
+        setIsDeleting(true);
+        await deleteDocument(collectionName, data.id);
+        
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Document Deleted",
+          message: `Document "${data.id}" has been deleted from collection "${collectionName}"`,
+        });
+        
+        // Go back to the previous screen
+        pop();
+      } catch (error) {
+        console.error("Error deleting document:", error);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Deletion Failed",
+          message: `Failed to delete document: ${error instanceof Error ? error.message : String(error)}`,
+        });
+      } finally {
+        setIsDeleting(false);
+      }
+    }
+  };
+
   const markdown = `# ${title}
 
 \`\`\`json
@@ -57,6 +106,7 @@ ${jsonString}
     <Detail
       markdown={markdown}
       navigationTitle={title}
+      isLoading={isDeleting}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard
@@ -76,6 +126,13 @@ ${jsonString}
               title="Copy Firestore URL"
               content={getFirestoreUrl()}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+          )}
+          {data.id && collectionName && (
+            <Action
+              title="Delete Document"
+              onAction={handleDeleteDocument}
+              shortcut={{ modifiers: ["cmd"], key: "delete" }}
             />
           )}
         </ActionPanel>
