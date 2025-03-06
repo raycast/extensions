@@ -10,7 +10,8 @@
     "pernielsentikaer",
     "lokot0k",
     "mitchwu",
-    "a-laughlin"
+    "a-laughlin",
+    "krsntn"
   ],
   "pastContributors": [
     "marcjulian"
@@ -92,6 +93,35 @@
       "description": "Set a countdown for 90 minutes.",
       "mode": "no-view",
       "disabledByDefault": true
+    },
+    {
+      "name": "startTimer",
+      "title": "Start Timer",
+      "description": "Set a countdown for a custom amount of time.",
+      "mode": "no-view",
+      "keywords": [
+        "new"
+      ],
+      "arguments": [
+        {
+          "name": "hours",
+          "placeholder": "hours",
+          "required": false,
+          "type": "text"
+        },
+        {
+          "name": "minutes",
+          "placeholder": "minutes",
+          "required": false,
+          "type": "text"
+        },
+        {
+          "name": "seconds",
+          "placeholder": "seconds",
+          "required": false,
+          "type": "text"
+        }
+      ]
     },
     {
       "name": "startCustomTimer",
@@ -502,3 +532,4 @@
     ]
   }
 }
+

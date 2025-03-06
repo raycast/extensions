@@ -1,5 +1,9 @@
 # Timers Changelog
 
+## [Enhancement] {PR_MERGE_DATE}
+
+- Added a quick start timer
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Chore] - 2025-01-14
