@@ -115,7 +115,6 @@
     "async-mutex": "^0.3.2",
     "cross-fetch": "^4.1.0",
     "graphql": "^15.0.0",
-    "node-fetch": "^3.3.2",
     "qs": "^6.11.0",
     "use-async-effect": "^2.2.6"
   },
