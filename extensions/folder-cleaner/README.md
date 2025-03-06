@@ -8,12 +8,13 @@
 ![Demo 2](metadata/folder-cleaner-2.png)
 ![Demo 3](metadata/folder-cleaner-3.png)
 ![Demo 4](metadata/folder-cleaner-4.png)
+![Demo 5](metadata/folder-cleaner-5.png)
 
 ## Main features
 
 ### Choose Folder to Clean
 
-You can choose what folder the extension will clean. This is usefull especially for the Downloads folder.
+You can choose what folder the extension will clean. This is useful especially for the Downloads folder.
 
 ### Setup File Locations
 

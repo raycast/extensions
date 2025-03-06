@@ -9,14 +9,19 @@ type DeleteFolderProps = {
 };
 
 export const DeleteFolder = async ({ folderId, existingFolders, setFolders }: DeleteFolderProps) => {
-  const foundFolder = existingFolders.find((f) => f.id === folderId);
-  if (!foundFolder) {
-    throw new Error("Unable to find folder to delete");
+  try {
+    const foundFolder = existingFolders.find((f) => f.id === folderId);
+    if (!foundFolder) {
+      await showToast(Toast.Style.Failure, "Folder not Deleted", "Unable to find folder to delete");
+      return;
+    }
+
+    await LocalStorage.removeItem(foundFolder.id);
+    const newFolderList = existingFolders.filter((f) => f.id !== foundFolder.id);
+    setFolders(newFolderList);
+
+    await showToast(Toast.Style.Success, "Folder Deleted");
+  } catch (error) {
+    await showToast(Toast.Style.Failure, "Folder not Deleted", "Something went wrong");
   }
-
-  const newFolderList = existingFolders.filter((f) => f.id !== foundFolder.id);
-  setFolders(newFolderList);
-
-  await LocalStorage.removeItem(foundFolder.id);
-  await showToast(Toast.Style.Success, "Folder Deleted");
 };

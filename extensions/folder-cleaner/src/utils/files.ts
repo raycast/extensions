@@ -1,5 +1,7 @@
+import { captureException } from "@raycast/api";
 import { existsSync, lstatSync, renameSync, rmSync } from "node:fs";
 import { join } from "node:path";
+import { buildException } from "./buildException";
 
 type isFileArgs = {
   filename: string;
@@ -7,8 +9,12 @@ type isFileArgs = {
 };
 
 export const isFile = ({ filename, folderPath }: isFileArgs) => {
-  const filePath = join(folderPath, filename);
-  return lstatSync(filePath).isFile();
+  try {
+    const filePath = join(folderPath, filename);
+    return lstatSync(filePath).isFile();
+  } catch {
+    return false;
+  }
 };
 
 type moveOrDeleteArgs = {
@@ -18,11 +24,15 @@ type moveOrDeleteArgs = {
 };
 
 export const moveOrDelete = ({ file, currentPath, folderPath }: moveOrDeleteArgs) => {
-  const newPath = join(folderPath, file);
+  try {
+    const newPath = join(folderPath, file);
 
-  if (!existsSync(newPath)) {
-    renameSync(currentPath, newPath);
-  } else {
-    rmSync(currentPath);
+    if (!existsSync(newPath)) {
+      renameSync(currentPath, newPath);
+    } else {
+      rmSync(currentPath);
+    }
+  } catch (error) {
+    captureException(buildException(error as Error, "Failed to move file", { file, currentPath, folderPath }));
   }
 };

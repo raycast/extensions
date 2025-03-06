@@ -3,7 +3,7 @@ import { availableExtensions } from "../utils/availableExtensions";
 
 export type FormValues = {
   folderId: string;
-  folderPath: string[];
+  folderPath: string;
   extensions: string[];
 };
 
@@ -11,7 +11,7 @@ type FolderFormProps = {
   submitText: string;
   defaultFolderId?: string;
   defaultFolderPath?: string[];
-  defaultFolderExtenstions?: string[];
+  defaultFolderExtensions?: string[];
   handleSubmit: (values: FormValues) => void;
 };
 
@@ -20,7 +20,7 @@ export const FolderForm = ({
   handleSubmit,
   defaultFolderId = "",
   defaultFolderPath = [],
-  defaultFolderExtenstions = [],
+  defaultFolderExtensions = [],
 }: FolderFormProps) => {
   return (
     <Form
@@ -30,7 +30,12 @@ export const FolderForm = ({
         </ActionPanel>
       }
     >
-      <Form.TextField id="folderId" title="Folder Identifier" defaultValue={defaultFolderId} />
+      <Form.TextField
+        id="folderId"
+        title="Folder Identifier"
+        defaultValue={defaultFolderId}
+        placeholder="e.g. Documents"
+      />
       <Form.FilePicker
         id="folderPath"
         title="Folder Path"
@@ -39,7 +44,7 @@ export const FolderForm = ({
         canChooseDirectories
         canChooseFiles={false}
       />
-      <Form.TagPicker id="extensions" title="Extensions" defaultValue={defaultFolderExtenstions}>
+      <Form.TagPicker id="extensions" title="Extensions" defaultValue={defaultFolderExtensions}>
         {availableExtensions.map((extension) => (
           <Form.TagPicker.Item key={extension.value} value={extension.value} title={extension.title} />
         ))}

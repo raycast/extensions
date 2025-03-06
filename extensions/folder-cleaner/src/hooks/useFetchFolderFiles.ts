@@ -31,7 +31,7 @@ export const useFetchFolderFiles = (folderToClean: string) => {
     };
 
     void fetchFolderFiles();
-  }, []);
+  }, [folderToClean]);
 
   return {
     folderFiles,

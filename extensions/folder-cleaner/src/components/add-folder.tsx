@@ -50,7 +50,7 @@ const FolderFormSwitcher = (props: FolderFormSwitcherProps) => {
           submitText="Edit Folder"
           defaultFolderId={folder.id}
           defaultFolderPath={[folder.path]}
-          defaultFolderExtenstions={folder.extensions}
+          defaultFolderExtensions={folder.extensions}
           handleSubmit={handleSubmit}
         />
       );
