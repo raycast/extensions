@@ -1,4 +1,5 @@
 import { showToast, Toast, getSelectedFinderItems } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
 import { checkZipicInstallation } from "./utils/checkInstall";
 
@@ -11,7 +12,7 @@ export default async function main() {
   let filePaths: string[];
 
   try {
-    // 获取选中的文件
+    // Get selected files
     filePaths = (await getSelectedFinderItems()).map((f) => f.path);
     if (filePaths.length === 0) {
       await showToast({
@@ -21,15 +22,12 @@ export default async function main() {
       return;
     }
 
-    // 构建 URL 参数，只包含文件路径
     let urlParams = "";
 
-    // 添加所有文件路径作为 url 参数
     filePaths.forEach((path) => {
       urlParams += `url=${encodeURIComponent(path)}&`;
     });
 
-    // 移除最后一个 & 符号
     if (urlParams.endsWith("&")) {
       urlParams = urlParams.slice(0, -1);
     }
@@ -44,10 +42,6 @@ export default async function main() {
 
     exec(`open "${url}"`);
   } catch (e) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Error",
-      message: e instanceof Error ? e.message : "Could not get the selected Finder items",
-    });
+    await showFailureToast(e instanceof Error ? e.message : "Could not get the selected Finder items");
   }
 }
