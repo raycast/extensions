@@ -1,6 +1,6 @@
 # Zipic Changelog
 
-## [New Additions] - 2025-02-27
+## [New Additions] - {PR_MERGE_DATE}
 
 - Add Support for AI Extension
 - Add Support for compressing images with options
