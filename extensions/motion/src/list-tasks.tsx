@@ -67,11 +67,7 @@ export default function Command() {
       filterTasks(sortedTasks);
     } catch (error) {
       console.error("Error loading tasks:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load tasks",
-        message: String(error),
-      });
+      await showFailureToast("Failed to load tasks", String(error));
     } finally {
       setIsLoading(false);
     }
