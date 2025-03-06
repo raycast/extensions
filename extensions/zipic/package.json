@@ -345,6 +345,7 @@
   },
   "dependencies": {
     "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.1",
     "open": "^10.1.0",
     "uuid": "^11.1.0"
   },
@@ -359,7 +360,6 @@
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "^20.12.12",
     "@types/react": "^18.3.3",
-    "@types/tar": "^6.1.13",
     "eslint": "^8.57.0",
     "prettier": "3.3.3",
     "typescript": "^5.4.5"
