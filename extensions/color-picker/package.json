@@ -147,7 +147,7 @@
           "name": "format",
           "type": "dropdown",
           "placeholder": "Convert Format",
-          "required": true,
+          "required": false,
           "data": [
             {
               "title": "HEX - #FF6363",
