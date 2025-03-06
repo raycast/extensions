@@ -76,7 +76,7 @@ Working with LLMs can be tricky. Here are some best practices to make the most o
 
 1. Use Confirmations to keep the human in the loop. You can use them dynamically based on the user's input. For example, you might ask for confirmation if moving a file would overwrite an existing file but not if it would create a new file.
 2. Write Evals for common use-cases to test your AI Extension and provide users with suggested prompts.
-3. Inlcude information in your tool's input on how to format parameters like IDs or dates. For example, you might mention that a date should be provided in ISO 8601 format.
+3. Include information in your tool's input on how to format parameters like IDs or dates. For example, you might mention that a date should be provided in ISO 8601 format.
 4. Include information in your tool's input on how to get the required parameters. For example, you want to teach AI how to get a team ID that is required to create a new issue.
 
 
@@ -188,7 +188,7 @@ type Input = {
   name: string;
 };
 
-export const confirmation: Tool.Confirmation<Input> = (input) => {
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
   return {
     message: `Are you sure you want to greet ${input.name}?`,
   };
@@ -213,7 +213,7 @@ Sometimes you want to provide additional instructions to the AI that are not spe
 ```json
 {
   "ai": {
-    "instructions": ["When you don't know the user's first name, ask for it."]
+    "instructions": "When you don't know the user's first name, ask for it."
   }
 }
 ```
@@ -9495,11 +9495,11 @@ Now click the code button and copy the HTTPS path from the dropdown
 
 **BRANCH**
 
-You can see the branch on the above image, in this example it's `notion-quicklinks`
+You can see the branch on the above image (in this example it’s `notion-quicklinks`)
 
 **EXTENSION_NAME**
 
-Click the `Files Changed` tab and see which directy files is changed in, in this example it's `notion`
+Click the `Files Changed` tab to see in which directory files have been changed (in this example it’s `notion`)
 
 ```
 BRANCH="ext/soundboard"
