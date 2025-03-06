@@ -68,7 +68,7 @@ export const safeNumberArg = async (
 
 export const showError = async (msg: string) => {
   await closeMainWindow();
-  await showToast(Toast.Style.Failure, msg);
+  await showFailureToast(msg);
 };
 
 export const produceOutput = async (content: string) => {
