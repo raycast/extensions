@@ -188,18 +188,25 @@ export async function deleteMyMindCard(slug: string): Promise<void> {
     cookie: `_cid=${cid}; _jwt=${jwt}`,
   };
 
-  const response = await fetch(`https://access.mymind.com/objects/${slug}`, {
-    method: "DELETE",
-    headers: myHeaders,
-    redirect: "manual",
-  });
+  try {
+    const response = await fetch(`https://access.mymind.com/objects/${slug}`, {
+      method: "DELETE",
+      headers: myHeaders,
+      redirect: "manual",
+    });
 
-  if (!response.ok) {
-    // Handle specific HTTP status codes
-    if (response.status === 401 || response.status === 403 || response.status === 302) {
+    if (!response.ok) {
+      // Handle specific HTTP status codes
+      if (response.status === 401 || response.status === 403 || response.status === 302) {
+        throw new Error("Unauthorized: Your authentication token may have expired");
+      }
+      throw new Error(`Failed to delete card: ${response.statusText}`);
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("maximum redirect")) {
       throw new Error("Unauthorized: Your authentication token may have expired");
     }
-    throw new Error(`Failed to delete card: ${response.statusText}`);
+    throw error;
   }
 }
 
