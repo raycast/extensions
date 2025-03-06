@@ -1,5 +1,4 @@
-import { Form, ActionPanel, Action, popToRoot } from "@raycast/api";
-import { showFailureToast, showSuccessToast } from "@raycast/utils";
+import { Form, ActionPanel, Action, popToRoot, showToast, Toast } from "@raycast/api";
 import React, { useState } from "react";
 import { addOTPConfig } from "../utils/storage";
 import { parseOTPAuthURL } from "../utils/parser";
@@ -41,20 +40,32 @@ export default function Command() {
       const config = parseOTPAuthURL(otpUrl);
 
       if (!config) {
-        showFailureToast("Invalid OTP data");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: "Invalid OTP data",
+        });
         return;
       }
 
       // Save the configuration
       await addOTPConfig(config);
 
-      showSuccessToast("OTP code added successfully");
+      showToast({
+        style: Toast.Style.Success,
+        title: "Success",
+        message: "OTP code added successfully",
+      });
 
       // Return to main view
       popToRoot();
     } catch (error) {
       console.error("Error adding OTP code:", error);
-      showFailureToast("An error occurred while adding the OTP code");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "An error occurred while adding the OTP code",
+      });
     } finally {
       setIsLoading(false);
     }

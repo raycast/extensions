@@ -1,5 +1,4 @@
-import { Form, ActionPanel, Action, popToRoot } from "@raycast/api";
-import { showFailureToast, showSuccessToast } from "@raycast/utils";
+import { Form, ActionPanel, Action, popToRoot, showToast, Toast } from "@raycast/api";
 import React, { useState } from "react";
 import fs from "fs/promises";
 import path from "path";
@@ -15,7 +14,11 @@ export default function Command() {
       setIsLoading(true);
 
       if (!filePath) {
-        showFailureToast("Please select a JSON file");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: "Please select a JSON file",
+        });
         return;
       }
 
@@ -26,7 +29,11 @@ export default function Command() {
       const otpConfigs = parseOTPFromJSON(content);
 
       if (otpConfigs.length === 0) {
-        showFailureToast("No valid OTP codes found in the file");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: "No valid OTP codes found in the file",
+        });
         return;
       }
 
@@ -39,13 +46,21 @@ export default function Command() {
       // Save updated configurations
       await saveOTPConfigs(updatedConfigs);
 
-      showSuccessToast(`Imported ${otpConfigs.length} OTP codes`);
+      showToast({
+        style: Toast.Style.Success,
+        title: "Success",
+        message: `Imported ${otpConfigs.length} OTP codes`,
+      });
 
       // Return to main view
       popToRoot();
     } catch (error) {
       console.error("Error importing OTP codes:", error);
-      showFailureToast("An error occurred while importing OTP codes");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "An error occurred while importing OTP codes",
+      });
     } finally {
       setIsLoading(false);
     }
