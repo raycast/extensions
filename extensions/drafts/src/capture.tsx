@@ -2,7 +2,7 @@ import { LaunchProps, PopToRootType, showHUD } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 export default async function main(props: LaunchProps<{ arguments: Arguments.Capture }>) {
-  let draft_content: string = props.arguments.content ?? props.fallbackText ?? ""
+  const draft_content: string = props.arguments.content ?? props.fallbackText ?? ""
 
   const res = await runAppleScript(
     `
