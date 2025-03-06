@@ -297,3 +297,134 @@ export async function trashTodo(accountId: string, projectId: number, todoId: nu
   // API returns 204 No Content
   return;
 }
+
+interface ScheduleMeetingParams {
+  summary: string;
+  description?: string;
+  starts_at: string; // ISO 8601 format
+  ends_at: string; // ISO 8601 format
+  all_day?: boolean;
+  notify?: boolean;
+  participant_ids?: number[];
+}
+
+export async function scheduleMeeting(
+  accountId: string,
+  projectId: number,
+  scheduleId: number,
+  params: ScheduleMeetingParams,
+) {
+  try {
+    const url = `https://3.basecampapi.com/${accountId}/buckets/${projectId}/schedules/${scheduleId}/entries.json`;
+    console.log("Scheduling meeting with URL:", url);
+    console.log("Meeting params:", JSON.stringify(params, null, 2));
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: await getHeaders(),
+      body: JSON.stringify({
+        ...params,
+        description: params.description ? markdownToHtml(params.description) : undefined,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Schedule meeting error:", response.status, response.statusText);
+      const errorText = await response.text();
+      console.error("Error details:", errorText);
+      throw new Error(`Failed to schedule meeting: ${response.statusText} (${response.status})`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Error in scheduleMeeting:", error);
+    throw error; // Re-throw the error to be handled by the caller
+  }
+}
+
+export async function fetchSchedules(accountId: string, projectId: number) {
+  const { token } = getAccessToken();
+
+  try {
+    // First, get the project details to find the tools
+    const projectUrl = `https://3.basecampapi.com/${accountId}/projects/${projectId}.json`;
+
+    const projectResponse = await fetch(projectUrl, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!projectResponse.ok) {
+      throw new Error(`Failed to fetch project details: HTTP error ${projectResponse.status}`);
+    }
+
+    const project = (await projectResponse.json()) as BasecampProject;
+
+    // Find the schedule tool in the dock
+    const scheduleTool = project.dock.find((tool) => tool.name === "schedule");
+
+    if (!scheduleTool) {
+      console.log(
+        "Schedule tool not found in project dock:",
+        project.dock.map((tool) => tool.name),
+      );
+      return []; // Return empty array instead of throwing error
+    }
+
+    // Check if the schedule tool is enabled (active)
+    if (!scheduleTool.enabled) {
+      console.log("Schedule tool is disabled for this project");
+      return []; // Return empty array for disabled schedules
+    }
+
+    // Extract the schedule ID from the URL
+    // The URL format is typically like: https://3.basecampapi.com/{account_id}/buckets/{project_id}/schedules/{schedule_id}.json
+    const scheduleIdMatch = scheduleTool.url.match(/\/schedules\/(\d+)\.json$/);
+    if (!scheduleIdMatch) {
+      console.error("Could not determine schedule ID from URL:", scheduleTool.url);
+      return []; // Return empty array instead of throwing error
+    }
+
+    const scheduleId = scheduleIdMatch[1];
+
+    // Now get the schedule details
+    const scheduleUrl = `https://3.basecampapi.com/${accountId}/buckets/${projectId}/schedules/${scheduleId}.json`;
+
+    const response = await fetch(scheduleUrl, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch schedule: HTTP error ${response.status}`);
+      return []; // Return empty array instead of throwing error
+    }
+
+    const schedule = (await response.json()) as {
+      id: number;
+      title: string;
+      url: string;
+      app_url: string;
+      status?: string;
+    };
+
+    // Only return the schedule if it's active
+    // Basecamp doesn't have a direct "active" flag for schedules,
+    // but we've already checked if the tool is enabled in the project
+    return [
+      {
+        id: parseInt(scheduleId),
+        title: schedule.title || "Project Schedule",
+        url: schedule.url,
+        app_url: schedule.app_url,
+      },
+    ];
+  } catch (error) {
+    console.error("Error in fetchSchedules:", error);
+    return []; // Return empty array on any error
+  }
+}

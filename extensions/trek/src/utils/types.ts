@@ -205,7 +205,19 @@ export interface BasecampPerson {
   can_manage_projects: boolean;
   can_manage_people: boolean;
 }
+
 interface Company {
   id: number;
   name: string;
+}
+
+export interface Schedule {
+  id: number;
+  title: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  url: string;
+  app_url: string;
+  bucket: TodoBucket;
 }

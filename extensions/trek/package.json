@@ -2,11 +2,6 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "trek",
   "title": "Trek",
-  "keywords": [
-    "base",
-    "camp",
-    "basecamp"
-  ],
   "description": "View Basecamp Projects and Manage Todos",
   "icon": "extension-icon.png",
   "author": "opti21",
@@ -34,6 +29,13 @@
       "title": "Create Todo",
       "subtitle": "Basecamp",
       "description": "Create a todo in default todo list. You can set this by going to the 'View All Basecamps' command, locating the todo list you want to use, and clicking the 'Set Default Todo List' button.",
+      "mode": "view"
+    },
+    {
+      "name": "schedule-meeting",
+      "title": "Schedule Meeting",
+      "subtitle": "Basecamp",
+      "description": "Schedule a meeting in a Basecamp project",
       "mode": "view"
     }
   ],
