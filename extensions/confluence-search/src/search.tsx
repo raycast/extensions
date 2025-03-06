@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import "./util/fetchPolyfill";
+import "cross-fetch/polyfill";
 
 import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";

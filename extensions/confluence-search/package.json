@@ -113,6 +113,7 @@
     "apollo-link-rest": "^0.9.0",
     "apollo3-cache-persist": "^0.14.0",
     "async-mutex": "^0.3.2",
+    "cross-fetch": "^4.1.0",
     "graphql": "^15.0.0",
     "node-fetch": "^3.3.2",
     "qs": "^6.11.0",

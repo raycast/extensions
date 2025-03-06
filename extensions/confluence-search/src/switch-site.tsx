@@ -1,4 +1,4 @@
-import "./util/fetchPolyfill";
+import "cross-fetch/polyfill";
 import { ActionPanel, Action, Detail, Icon, List, useNavigation } from "@raycast/api";
 import { setActiveSite } from "./api/site";
 import { fetchSites } from "./api/atlassian";
