@@ -188,7 +188,7 @@ const buildSchemes: Record<string, string> = {
   Positron: "positron",
   Windsurf: "windsurf",
   Trae: "trae",
-  "Trae CN": "Trae CN",
+  "Trae CN": "trae-cn",
 };
 
 export function getBuildScheme(): string {
