@@ -1,4 +1,4 @@
-# Motion Raycast Extension
+# Motion Extension
 
 A Raycast extension for interacting with the [Motion](https://www.usemotion.com/) task management platform directly from your desktop.
 
