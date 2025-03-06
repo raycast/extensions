@@ -7,4 +7,4 @@
 - Add Support for compressing images with preset
 - Add Support for managing compression presets
 
-## [Initial Version] - 2024-01-27
+## [Initial Version] - {PR_MERGE_DATE}
