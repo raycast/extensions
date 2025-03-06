@@ -97,10 +97,6 @@ function ListItem(props: { account: Account; pinned?: boolean; shouldShowProfile
           {account.isLoggedIn && (
             <>
               <Action title="Open in Chrome" onAction={handleOpenInChromeAction} />
-              <Action.CopyToClipboard
-                title="Copy URL"
-                content={`https://mail.google.com/mail/u/${account.id}/#inbox`}
-              />
             </>
           )}
           <PinActionSection {...props} />
