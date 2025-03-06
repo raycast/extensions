@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard } from "@raycast/api";
 import { Effect } from "effect";
 import { effectView, useEffectFn } from "../lib/Runtime.js";
 import Mux from "@mux/mux-node";
@@ -110,7 +110,7 @@ export default effectView(
           style={Action.Style.Destructive}
           title="Delete Asset"
           onAction={handleDeleteAsset}
-          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+          shortcut={Keyboard.Shortcut.Common.Remove}
         />
       </>
     );
