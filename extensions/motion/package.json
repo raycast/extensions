@@ -45,6 +45,7 @@
     {
       "name": "debug-workspaces",
       "title": "Workspace Details",
+      "subtitle": "Motion",
       "subtitle": "View Motion workspace information",
       "description": "View detailed information about your Motion workspaces and connections",
       "mode": "view"
