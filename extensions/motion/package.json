@@ -37,6 +37,7 @@
     {
       "name": "delete-task",
       "title": "Delete Task",
+      "subtitle": "Motion",
       "subtitle": "Delete task from Motion",
       "description": "Select and delete tasks from your Motion account",
       "mode": "view"
