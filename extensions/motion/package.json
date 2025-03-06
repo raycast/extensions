@@ -13,6 +13,7 @@
     {
       "name": "add-task",
       "title": "Add Task",
+      "subtitle": "Motion",
       "subtitle": "Add task to Motion",
       "description": "Add a task to Motion, including priority, deadline, etc.",
       "mode": "view"
