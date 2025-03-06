@@ -114,7 +114,7 @@
     "apollo3-cache-persist": "^0.14.0",
     "async-mutex": "^0.3.2",
     "graphql": "^15.0.0",
-    "node-fetch": "^3.2.10",
+    "node-fetch": "^3.3.2",
     "qs": "^6.11.0",
     "use-async-effect": "^2.2.6"
   },
