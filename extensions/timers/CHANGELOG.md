@@ -1,6 +1,6 @@
 # Timers Changelog
 
-## [Enhancement] {PR_MERGE_DATE}
+## [Enhancement] - {PR_MERGE_DATE}
 
 - Added a quick start timer
 
