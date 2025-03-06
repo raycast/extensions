@@ -13,7 +13,6 @@ import { exec } from "child_process";
 import { useState, useEffect } from "react";
 import { checkZipicInstallation } from "./utils/checkInstall";
 
-// 定义压缩选项接口
 interface CompressionOptions {
   level: string;
   format: string;
@@ -27,7 +26,6 @@ interface CompressionOptions {
   specified: boolean;
 }
 
-// 定义表单值接口
 interface FormValues {
   level: string;
   format: string;
@@ -47,10 +45,8 @@ export default function Command() {
   const [filePaths, setFilePaths] = useState<string[]>([]);
   const [isInstalled, setIsInstalled] = useState(false);
 
-  // 获取默认偏好设置
   const preferences = getPreferenceValues<CompressionOptions>();
 
-  // 初始化表单值，确保 level 是字符串且为有效值
   const [formValues, setFormValues] = useState<FormValues>({
     level: preferences.level ? String(parseInt(preferences.level.toString())) : "3",
     format: preferences.format || "original",
@@ -64,7 +60,6 @@ export default function Command() {
     specified: preferences.specified || false,
   });
 
-  // 检查 Zipic 是否已安装并获取选中的文件
   useEffect(() => {
     async function initialize() {
       const zipicInstalled = await checkZipicInstallation();
@@ -103,7 +98,6 @@ export default function Command() {
     initialize();
   }, []);
 
-  // 处理表单提交
   async function handleSubmit(values: FormValues) {
     if (filePaths.length === 0) {
       await showToast({
@@ -114,15 +108,12 @@ export default function Command() {
     }
 
     try {
-      // 构建 URL 参数
       let urlParams = "";
 
-      // 添加所有文件路径作为 url 参数
       filePaths.forEach((path) => {
         urlParams += `url=${encodeURIComponent(path)}&`;
       });
 
-      // 添加压缩选项
       if (values.level && values.level !== "0") {
         urlParams += `level=${values.level}&`;
       }
@@ -134,7 +125,6 @@ export default function Command() {
       if (values.location) {
         urlParams += `location=${values.location}&`;
 
-        // 只有当 location 为 custom 且 specified 为 false 时，才添加 directory 参数
         if (values.location === "custom") {
           if (values.specified) {
             urlParams += `specified=true&`;
@@ -144,12 +134,12 @@ export default function Command() {
         }
       }
 
-      if (values.width && parseInt(values.width) > 0) {
-        urlParams += `width=${values.width}&`;
+      if (values.width && !isNaN(parseInt(values.width)) && parseInt(values.width) > 0) {
+        urlParams += `width=${parseInt(values.width)}&`;
       }
 
-      if (values.height && parseInt(values.height) > 0) {
-        urlParams += `height=${values.height}&`;
+      if (values.height && !isNaN(parseInt(values.height)) && parseInt(values.height) > 0) {
+        urlParams += `height=${parseInt(values.height)}&`;
       }
 
       if (values.addSuffix) {
@@ -163,7 +153,6 @@ export default function Command() {
         urlParams += `addSubfolder=${values.addSubfolder}&`;
       }
 
-      // 移除最后一个 & 符号
       if (urlParams.endsWith("&")) {
         urlParams = urlParams.slice(0, -1);
       }
@@ -241,7 +230,6 @@ export default function Command() {
           setFormValues({
             ...formValues,
             location: newValue,
-            // 如果切换到 original，重置 specified 和 directory
             ...(newValue === "original" ? { specified: false, directory: "" } : {}),
           });
         }}
