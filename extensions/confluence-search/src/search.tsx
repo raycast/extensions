@@ -40,11 +40,7 @@ export default function Command() {
   const titleText = state.isRecentResults ? "Recently Viewed" : "Search Results";
 
   const spacesDropdown = (
-    <List.Dropdown
-      tooltip="Filter results"
-      storeValue={true}
-      onChange={setSpaceFilter}
-    >
+    <List.Dropdown tooltip="Filter results" storeValue={true} onChange={setSpaceFilter}>
       <List.Dropdown.Item key="all" title="All spaces" value="" />
       <List.Dropdown.Section title="Favourite Spaces">
         {spaces?.results?.map((space: any) => (
@@ -94,22 +90,26 @@ function GlobalSearchActionPanel({ searchState }: { searchState: SearchState }) 
   );
 }
 
-function useSearch(site?: Site, searchText="", spaceFilter="") {
-  const { isLoading, data = [] } = usePromise(async (site, searchText, spaceFilter) => {
-    if (!site) return [];
-    const results = await performSearch(site, searchText, spaceFilter);
-    return results;
-  }, [site, searchText, spaceFilter], {
-    failureToastOptions: {
-      title: "Could not perform search"
+function useSearch(site?: Site, searchText = "", spaceFilter = "") {
+  const { isLoading, data = [] } = usePromise(
+    async (site, searchText, spaceFilter) => {
+      if (!site) return [];
+      const results = await performSearch(site, searchText, spaceFilter);
+      return results;
+    },
+    [site, searchText, spaceFilter],
+    {
+      failureToastOptions: {
+        title: "Could not perform search",
+      },
     }
-  })
+  );
 
   const state: SearchState = {
     results: data,
     isLoading,
     isRecentResults: !searchText,
-    browserSearchUrl: !site ? undefined : generateBrowserUrl(site, searchText, spaceFilter)
+    browserSearchUrl: !site ? undefined : generateBrowserUrl(site, searchText, spaceFilter),
   };
   return state;
 }

@@ -14,23 +14,25 @@ export default function People() {
   const site = useAuthorizeSite();
   const [searchText, setSearchText] = useState("");
   const [typeFilter, setTypeFilter] = useState(DEFAULT_TYPE_FILTER);
-  const { isLoading, data = [] } = usePromise(async (site, searchText, typeFilter) => {
-    if (!site) return [];
-    const results = await performSearch(site, searchText, typeFilter);
-    return results;
-  }, [site, searchText, typeFilter], {
-    failureToastOptions: {
-      title: "Could not perform search"
+  const { isLoading, data = [] } = usePromise(
+    async (site, searchText, typeFilter) => {
+      if (!site) return [];
+      const results = await performSearch(site, searchText, typeFilter);
+      return results;
+    },
+    [site, searchText, typeFilter],
+    {
+      failureToastOptions: {
+        title: "Could not perform search",
+      },
     }
-  })
+  );
 
-  const titleText = (!isLoading && !!searchText) ? "Search Results" : typeFilter == DEFAULT_TYPE_FILTER ? "People" : "Apps";
+  const titleText =
+    !isLoading && !!searchText ? "Search Results" : typeFilter == DEFAULT_TYPE_FILTER ? "People" : "Apps";
 
   const typeDropdown = (
-    <List.Dropdown
-      tooltip="Filter results"
-      onChange={setTypeFilter}
-    >
+    <List.Dropdown tooltip="Filter results" onChange={setTypeFilter}>
       <List.Dropdown.Item key="altassian" title="People" value={DEFAULT_TYPE_FILTER} icon={Icon.Person} />
       <List.Dropdown.Item key="app" title="Apps" value="app" icon={Icon.Terminal} />
     </List.Dropdown>
@@ -88,11 +90,7 @@ function mapToSearchResult(item: any, links: any, site: Site) {
   };
 }
 
-async function performSearch(
-  site: Site,
-  searchText: string,
-  typeFilter: string,
-): Promise<SearchResult[]> {
+async function performSearch(site: Site, searchText: string, typeFilter: string): Promise<SearchResult[]> {
   const searchResults = (await fetchUsers(site, searchText)) as any;
 
   return searchResults.results
