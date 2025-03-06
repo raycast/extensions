@@ -59,7 +59,7 @@
       "type": "password",
       "required": true,
       "title": "CID",
-      "description": "Your MyMind CID value. Go to arian.gg/blog/setup for instructions."
+      "description": "Your MyMind CID value. Go to https://arian.gg/blog/setup for instructions."
     },
     {
       "name": "authenticityToken",
