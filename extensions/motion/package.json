@@ -65,7 +65,7 @@
       "description": "Your Motion Workspace ID",
       "type": "textfield",
       "required": true,
-      "default": "J2-2vXH85SltZ52ieplcF"
+      "required": true
     }
   ],
   "tools": [
