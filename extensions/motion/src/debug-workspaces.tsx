@@ -126,11 +126,7 @@ export default function Command() {
       console.error("Debug error:", e);
       setError(`Failed to load debug information: ${String(e)}`);
 
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Debug Error",
-        message: String(e),
-      });
+      await showFailureToast("Debug Error", String(e));
     } finally {
       setIsLoading(false);
     }
