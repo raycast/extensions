@@ -31,6 +31,10 @@ export class WebRTCStreamService {
     this.projectId = projectId;
   }
 
+  private getFullDeviceId(deviceId: string): string {
+    return deviceId.includes("enterprises/") ? deviceId : `${this.projectId}/devices/${deviceId}`;
+  }
+
   public static getInstance(projectId: string): WebRTCStreamService {
     if (!WebRTCStreamService.instance) {
       WebRTCStreamService.instance = new WebRTCStreamService(projectId);
@@ -66,9 +70,7 @@ export class WebRTCStreamService {
           this.logStreamEvent("Generating WebRTC stream", { deviceId });
 
           const headers = await this.getHeaders();
-
-          // Ensure deviceId has the full path format
-          const fullDeviceId = deviceId.includes("enterprises/") ? deviceId : `${this.projectId}/devices/${deviceId}`;
+          const fullDeviceId = this.getFullDeviceId(deviceId);
 
           const response = await fetch(`${NEST_API_ENDPOINT}/${fullDeviceId}:executeCommand`, {
             method: "POST",
@@ -116,7 +118,7 @@ export class WebRTCStreamService {
             JSON.stringify({
               mediaSessionId: data.results.mediaSessionId,
               expiresAt: data.results.expiresAt,
-            })
+            }),
           );
 
           return {
@@ -134,7 +136,7 @@ export class WebRTCStreamService {
         maxRetries: 3,
         baseDelay: 2000,
         maxDelay: 10000,
-      }
+      },
     );
   }
 
@@ -188,7 +190,7 @@ export class WebRTCStreamService {
       this.logStreamEvent("Extending stream session", { deviceId, mediaSessionId });
 
       const headers = await this.getHeaders();
-      const fullDeviceId = deviceId.includes("enterprises/") ? deviceId : `${this.projectId}/devices/${deviceId}`;
+      const fullDeviceId = this.getFullDeviceId(deviceId);
 
       const response = await fetch(`${NEST_API_ENDPOINT}/${fullDeviceId}:executeCommand`, {
         method: "POST",
@@ -203,6 +205,16 @@ export class WebRTCStreamService {
 
       if (!response.ok) {
         const errorData = (await response.json().catch(() => ({}))) as { error?: { message?: string } };
+        this.logStreamError(new Error(`Stream extension failed: ${response.statusText}`), {
+          status: response.status,
+          error: errorData,
+          deviceId: fullDeviceId,
+          mediaSessionId,
+        });
+
+        if (response.status === 429) {
+          throw new Error(`Rate limited: ${errorData.error?.message || "Too many requests"}`);
+        }
         throw new Error(`Failed to extend stream: ${errorData.error?.message || response.statusText}`);
       }
 
@@ -223,7 +235,7 @@ export class WebRTCStreamService {
         JSON.stringify({
           mediaSessionId,
           expiresAt: data.results?.expiresAt,
-        })
+        }),
       );
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));

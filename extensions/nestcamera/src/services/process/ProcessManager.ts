@@ -67,9 +67,9 @@ export class ProcessManager {
    */
   private async executeCommand(
     command: string,
-    args: string[]
+    args: string[],
   ): Promise<{ code: number | null; stdout: string; stderr: string }> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const process = spawn(command, args);
       let stdout = "";
       let stderr = "";
@@ -87,8 +87,7 @@ export class ProcessManager {
       });
 
       process.on("error", (error) => {
-        stderr += error.toString();
-        resolve({ code: 1, stdout, stderr });
+        reject(new Error(`Failed to execute command ${command}: ${error.message}`));
       });
     });
   }
@@ -104,7 +103,9 @@ export class ProcessManager {
       return code === 0 && stdout.trim() !== "";
     } catch (error) {
       console.error(`Error checking if ${processName} is running:`, error);
-      return false;
+      throw new Error(
+        `Failed to check if ${processName} is running: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -139,13 +140,17 @@ export class ProcessManager {
       }
     }
 
-    console.error("FFplay not found in any common locations");
-    return null;
+    throw new Error("FFplay not found in any common locations. Please install FFmpeg using Homebrew.");
   }
 
   private async isFFplayInstalled(): Promise<boolean> {
-    const ffplayPath = await this.findFFplayPath();
-    return ffplayPath !== null;
+    try {
+      const ffplayPath = await this.findFFplayPath();
+      return ffplayPath !== null;
+    } catch (error) {
+      console.error("Error checking FFplay installation:", error);
+      return false;
+    }
   }
 
   /**
@@ -158,7 +163,7 @@ export class ProcessManager {
   public async startRtspStream(
     deviceId: string,
     rtspUrl: string,
-    cameraName: string = "Nest Camera"
+    cameraName: string = "Nest Camera",
   ): Promise<StreamProcess> {
     // Kill any existing process for this device
     await this.stopStream(deviceId);

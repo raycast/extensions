@@ -73,3 +73,6 @@ coverage/
 .DS_Store
 *.pem
 .vercel
+
+# Private individual user cursor rules
+.cursor/rules/_*.mdc

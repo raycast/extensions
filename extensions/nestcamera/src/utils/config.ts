@@ -16,7 +16,7 @@ export class ConfigurationError extends Error {
 export function validateConfig(config: Preferences): void {
   if (!config.projectId) {
     throw new ConfigurationError(
-      "Project ID is required. Get it from the Device Access Console: https://console.nest.google.com/device-access"
+      "Project ID is required. Get it from the Device Access Console: https://console.nest.google.com/device-access",
     );
   }
 
@@ -40,10 +40,6 @@ export function getConfig(): Preferences {
   const clientId = preferences.clientId as string;
   const clientSecret = preferences.clientSecret as string;
   const projectId = preferences.projectId as string;
-
-  if (!clientId || !clientSecret || !projectId) {
-    throw new ConfigurationError("Please set your Google Nest credentials in the extension preferences");
-  }
 
   console.log("Config loaded:", {
     clientId: clientId.substring(0, 8) + "...",

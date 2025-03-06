@@ -26,7 +26,7 @@ const defaultRetryConfig: RetryConfig = {
 
 async function retryWithExponentialBackoff<T>(
   operation: () => Promise<T>,
-  config: RetryConfig = defaultRetryConfig
+  config: RetryConfig = defaultRetryConfig,
 ): Promise<T> {
   let lastError: Error | null = null;
   let retryCount = 0;
@@ -173,7 +173,7 @@ export class NestDeviceService {
         maxRetries: 5,
         baseDelay: 30000, // Start with 30 seconds
         maxDelay: 300000, // Max 5 minutes
-      }
+      },
     );
   }
 
@@ -258,7 +258,7 @@ export class NestDeviceService {
     if (data.assignee) {
       // Try to extract a more user-friendly room name
       const parentInfo = data.parentRelations?.find(
-        (rel: NestParentRelation) => rel.displayName && rel.displayName !== info.customName
+        (rel: NestParentRelation) => rel.displayName && rel.displayName !== info.customName,
       );
       if (parentInfo && parentInfo.displayName) {
         roomHint = parentInfo.displayName;

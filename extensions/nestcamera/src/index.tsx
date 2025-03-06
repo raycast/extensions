@@ -111,7 +111,7 @@ export default function Command() {
 
   // Filter cameras based on streaming support
   const filteredCameras = cameras.filter(
-    (camera) => camera.traits.streamingSupport === "RTSP" || camera.traits.streamingSupport === "WEB_RTC"
+    (camera) => camera.traits.streamingSupport === "RTSP" || camera.traits.streamingSupport === "WEB_RTC",
   );
 
   // If not authenticated, show sign in view

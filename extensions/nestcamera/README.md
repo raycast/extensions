@@ -90,7 +90,6 @@ If you encounter any issues with the extension, please ensure these prerequisite
 2. Search for "Nest Camera"
 3. Select a camera to view:
    - Enter to open the stream with FFplay
-   - ⌘+Enter for fullscreen mode
    - ⌥+Enter to set as favorite
 
 ### Setting Up Quick Access
@@ -159,7 +158,7 @@ While we've optimized the FFplay parameters for the best viewing experience, the
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/nest-raycast-extension.git
+   git clone https://github.com/chadwalters/nestcamera.git
    ```
 
 2. Install dependencies:

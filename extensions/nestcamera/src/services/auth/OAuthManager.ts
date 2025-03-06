@@ -149,7 +149,7 @@ export class OAuthManager {
   private async fetchTokens(
     authCode: string,
     codeVerifier: string,
-    authRequest: OAuth.AuthorizationRequest
+    authRequest: OAuth.AuthorizationRequest,
   ): Promise<OAuth2Token> {
     try {
       console.log("Fetching tokens with authorization code...");
@@ -175,7 +175,7 @@ export class OAuthManager {
           error: errorData,
         });
         throw new Error(
-          `Failed to fetch tokens: ${response.status} ${response.statusText}\n${JSON.stringify(errorData, null, 2)}`
+          `Failed to fetch tokens: ${response.status} ${response.statusText}\n${JSON.stringify(errorData, null, 2)}`,
         );
       }
 
@@ -231,7 +231,7 @@ export class OAuthManager {
       const newToken = this.createTokenWithExpiry(
         data.access_token,
         data.refresh_token || token.refreshToken,
-        data.expires_in
+        data.expires_in,
       );
 
       await this.client.setTokens(newToken);
