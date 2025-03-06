@@ -1,7 +1,7 @@
 import { List, showToast, Toast, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
 import { fetchMyMindCards } from "./utils";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { getFavicon } from "@raycast/utils";
 import { CardActions } from "./components/CardAction";
 
@@ -33,7 +33,10 @@ export default function Command() {
           return {};
         }
 
-        showFailureToast("Failed to fetch cards", String(error));
+        showFailureToast({
+          title: "Failed to fetch cards",
+          message: String(error),
+        });
         return {};
       }
     },
@@ -48,7 +51,7 @@ export default function Command() {
     ([, card]) =>
       card.title?.toLowerCase().includes(searchText.toLowerCase()) ||
       card.description?.toLowerCase().includes(searchText.toLowerCase()) ||
-      card.tags?.some((tag) => tag.content.toLowerCase().includes(searchText.toLowerCase())),
+      card.tags?.some((tag) => tag.name.toLowerCase().includes(searchText.toLowerCase())),
   );
 
   return (

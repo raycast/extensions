@@ -78,7 +78,7 @@ ${proseToMarkdown(card.note.prose.content)}`
                     {card.tags && card.tags.length > 0 && (
                       <Detail.Metadata.TagList title="Tags">
                         {card.tags.map((tag) => (
-                          <Detail.Metadata.TagList.Item key={tag.content} text={tag.content} color={"#eed535"} />
+                          <Detail.Metadata.TagList.Item key={tag.name} text={tag.name} color={"#eed535"} />
                         ))}
                       </Detail.Metadata.TagList>
                     )}

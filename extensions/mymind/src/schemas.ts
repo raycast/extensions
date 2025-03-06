@@ -9,8 +9,9 @@ const PreferencesSchema = z.object({
 
 // Basic building blocks
 const TagSchema = z.object({
-  type: z.string(),
-  content: z.string(),
+  id: z.string(),
+  name: z.string(),
+  flags: z.number().optional(),
 });
 
 const SourceSchema = z.object({
@@ -23,7 +24,7 @@ const ProseContentSchema = z
     type: z.string(),
     content: z.array(z.any()).optional(),
     text: z.string().optional(),
-    attrs: z.record(z.unknown()).optional(),
+    attrs: z.record(z.any()).optional(),
     marks: z.array(z.object({ type: z.string() })).optional(),
   })
   .or(
@@ -92,6 +93,7 @@ const CardSchema = z.object({
   description: z.string().optional(),
   source: SourceSchema.optional(),
   tags: z.array(TagSchema).optional(),
+  flags: z.number().optional(),
   modified: z.string(),
   bumped: z.string(),
   created: z.string(),
