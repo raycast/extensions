@@ -13,7 +13,6 @@ export default function Command() {
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
   const [defaultPresetId, setDefaultPresetId] = useState<string | null>(null);
 
-  // 检查 Zipic 是否已安装并获取选中的文件和预设
   useEffect(() => {
     async function initialize() {
       const zipicInstalled = await checkZipicInstallation();
@@ -21,7 +20,6 @@ export default function Command() {
 
       if (zipicInstalled) {
         try {
-          // 获取选中的文件
           const selectedItems = await getSelectedFinderItems();
           const paths = selectedItems.map((item) => item.path);
 
@@ -37,18 +35,15 @@ export default function Command() {
 
           setFilePaths(paths);
 
-          // 获取预设和默认预设ID
           const loadedPresets = await getPresets();
           const defaultId = await getDefaultPresetId();
 
           setPresets(loadedPresets);
           setDefaultPresetId(defaultId);
 
-          // 如果有默认预设，则选中它
           if (defaultId && loadedPresets.some((p) => p.id === defaultId)) {
             setSelectedPresetId(defaultId);
           } else if (loadedPresets.length > 0) {
-            // 如果没有默认预设或默认预设不在列表中，选择第一个预设
             setSelectedPresetId(loadedPresets[0].id);
           }
 
