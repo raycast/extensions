@@ -9,7 +9,7 @@ Manage and add your thoughts to mymind
 
 ## FAQ
 
-### How to get the tokens needed to setup the extention?
+### How to get the tokens needed to setup the extension?
 
 I created a step by step guide since getting the tokens is a bit of an involved process since my mind doesn't have an official api.
 
