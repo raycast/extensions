@@ -66,7 +66,7 @@
       "type": "password",
       "required": true,
       "title": "Authenticity Token",
-      "description": "Your MyMind Authenticity Token value. Go to arian.gg/blog/setup for instructions."
+      "description": "Your MyMind Authenticity Token value. Go to https://arian.gg/blog/setup for instructions."
     }
   ]
 }
