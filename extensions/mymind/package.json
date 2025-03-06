@@ -52,7 +52,7 @@
       "type": "password",
       "required": true,
       "title": "JWT Token",
-      "description": "Your MyMind JWT token value. Go to arian.gg/blog/setup for instructions."
+      "description": "Your MyMind JWT token value. Go to https://arian.gg/blog/setup for instructions."
     },
     {
       "name": "cid",
