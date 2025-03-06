@@ -29,6 +29,7 @@
     {
       "name": "edit-task",
       "title": "Edit Task",
+      "subtitle": "Motion",
       "subtitle": "Edit existing Motion tasks",
       "description": "View and edit your existing tasks in Motion",
       "mode": "view"
