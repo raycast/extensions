@@ -33,7 +33,7 @@ export default function People() {
 
   const typeDropdown = (
     <List.Dropdown tooltip="Filter results" onChange={setTypeFilter}>
-      <List.Dropdown.Item key="altassian" title="People" value={DEFAULT_TYPE_FILTER} icon={Icon.Person} />
+      <List.Dropdown.Item key="atlassian" title="People" value={DEFAULT_TYPE_FILTER} icon={Icon.Person} />
       <List.Dropdown.Item key="app" title="Apps" value="app" icon={Icon.Terminal} />
     </List.Dropdown>
   );

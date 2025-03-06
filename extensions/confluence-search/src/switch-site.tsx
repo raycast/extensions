@@ -8,11 +8,19 @@ import { usePromise } from "@raycast/utils";
 export default function Command() {
   const { pop } = useNavigation();
 
-  const { isLoading, data: sites = [] } = usePromise(async () => {
-    await authorizeSite(false);
-    const sites = await fetchSites();
-    return sites;
-  });
+  const { isLoading, data: sites = [] } = usePromise(
+    async () => {
+      await authorizeSite(false);
+      const sites = await fetchSites();
+      return sites;
+    },
+    [],
+    {
+      failureToastOptions: {
+        title: "Could not load sites",
+      },
+    }
+  );
 
   if (isLoading) {
     return <Detail isLoading={isLoading} />;
