@@ -1,9 +1,10 @@
 import { Clipboard, getSelectedText, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 import { getFormattedColor } from "./utils";
+import { ColorFormatType } from "./types";
 
-async function getConvertedColor(text: string) {
+async function getConvertedColor(text: string, format: ColorFormatType) {
   try {
-    const convertedColor = getFormattedColor(text);
+    const convertedColor = getFormattedColor(text, format);
     return convertedColor;
   } catch (error) {
     await showToast({
@@ -16,7 +17,7 @@ async function getConvertedColor(text: string) {
 
 export default async function ConvertColor(props: LaunchProps) {
   if (props.arguments.text) {
-    const convertedColor = await getConvertedColor(props.arguments.text);
+    const convertedColor = await getConvertedColor(props.arguments.text, props.arguments.format);
     if (convertedColor) {
       await Clipboard.copy(convertedColor);
       await showHUD("Copied color to clipboard");
@@ -24,7 +25,7 @@ export default async function ConvertColor(props: LaunchProps) {
   } else {
     try {
       const selectedText = await getSelectedText();
-      const convertedColor = await getConvertedColor(selectedText);
+      const convertedColor = await getConvertedColor(selectedText, props.arguments.format);
       if (convertedColor) {
         await Clipboard.paste(convertedColor);
       }
