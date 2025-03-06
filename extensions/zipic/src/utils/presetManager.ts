@@ -30,7 +30,7 @@ export async function getPresets(): Promise<Preset[]> {
   try {
     return JSON.parse(presetsJson);
   } catch (error) {
-    console.error("Failed to parse presets:", error);
+    showFailureToast("Failed to parse presets", { error });
     return [];
   }
 }
