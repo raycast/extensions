@@ -1,4 +1,4 @@
-# Motion Raycast Extension
+# Motion
 
 A Raycast extension for interacting with the [Motion](https://www.usemotion.com/) task management platform directly from your desktop.
 
@@ -7,7 +7,8 @@ A Raycast extension for interacting with the [Motion](https://www.usemotion.com/
 - **Add Task**: Quickly create new tasks with title, description, due date, priority, project, and label
 - **Edit Task**: View and edit your existing tasks, including updating priorities, deadlines, and project assignments
 - **Delete Task**: Easily delete tasks from your Motion account
-- **List Workspaces**: View your Motion workspaces and get workspace IDs necessary for task creation
+- **Workspace Details**: View your Motion workspaces and get workspace IDs necessary for task creation
+- **List Tasks**: Browse, search, and filter your Motion tasks by name, label, and project
 - **Ask Motion**: Use AI to ask questions about your tasks, deadlines, and schedule
 
 ## Installation
@@ -16,7 +17,7 @@ A Raycast extension for interacting with the [Motion](https://www.usemotion.com/
 1. Install the extension from the Raycast store.
 2. Set up your Motion API credentials:
    - Get your API key from Motion's developer settings
-   - Use the "List Workspaces" command to find your workspace ID
+   - Use the "Workspace Details" command to find your workspace ID
    - Add these to the extension preferences in Raycast
 
 ### Option 2: Development Setup
@@ -28,7 +29,7 @@ A Raycast extension for interacting with the [Motion](https://www.usemotion.com/
 ## Configuration
 
 1. Get your Motion API key from the Motion platform's developer settings
-2. Find your workspace ID using the "List Workspaces" command in the extension
+2. Find your workspace ID using the "Workspace Details" command in the extension
 3. Configure the extension with your API key and workspace ID in Raycast preferences
 
 ## Usage
@@ -49,7 +50,7 @@ A Raycast extension for interacting with the [Motion](https://www.usemotion.com/
 - Select a task from the list and confirm deletion
 
 ### Viewing Workspaces
-- Use the "List Workspaces" command to view all available Motion workspaces
+- Use the "Workspace Details" command to view all available Motion workspaces
 - This is useful for finding your workspace ID for configuration
 
 ## Development

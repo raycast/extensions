@@ -103,24 +103,19 @@ const logResponse = async (response: Response) => {
 export const getMotionApiClient = () => {
   const preferences = getPreferenceValues<Preferences>();
 
-  // Now we know X-API-Key works, simplify the authentication
+  // Set up API authentication with the provided API key
   const headers = {
     "Content-Type": "application/json",
     "X-API-Key": preferences.apiKey,
   };
 
-  // IMPORTANT: Override with the correct workspace ID regardless of preferences
-  // The lowercase 'l' is important and often confused with capital 'I'
-  const correctWorkspaceId = "J2-2vXH85SltZ52ieplcF"; // Using the proven correct ID
-
-  // Log the workspace IDs for debugging
-  console.log("[DEBUG] Preference workspace ID:", preferences.workspaceId);
-  console.log("[DEBUG] Using corrected workspace ID:", correctWorkspaceId);
+  // Log the workspace ID for debugging
+  console.log("[DEBUG] Using workspace ID:", preferences.workspaceId);
 
   return {
     // Get the workspace ID (for use in components)
     getWorkspaceId(): string {
-      return correctWorkspaceId;
+      return preferences.workspaceId;
     },
 
     async createTask(taskInput: {
@@ -149,7 +144,7 @@ export const getMotionApiClient = () => {
         dueDate: taskData.dueDate?.toISOString(),
         priority: taskData.priority,
         status: taskData.status,
-        workspaceId: correctWorkspaceId, // Use the correct ID
+        workspaceId: preferences.workspaceId,
         projectId: taskData.projectId,
         duration: taskData.duration, // Add duration field
         // Add auto-scheduling by default
@@ -181,7 +176,7 @@ export const getMotionApiClient = () => {
     },
 
     async getProjects(): Promise<Project[]> {
-      const url = `${BASE_URL}/projects?workspaceId=${correctWorkspaceId}`;
+      const url = `${BASE_URL}/projects?workspaceId=${preferences.workspaceId}`;
       logRequest("GET", url, headers);
 
       try {
@@ -229,7 +224,7 @@ export const getMotionApiClient = () => {
     async getTasks(): Promise<MotionTask[]> {
       // The workspace-based URL approach is not working (404 error)
       // Let's try using the base tasks endpoint with a query parameter instead
-      const url = `${BASE_URL}/tasks?workspaceId=${correctWorkspaceId}`;
+      const url = `${BASE_URL}/tasks?workspaceId=${preferences.workspaceId}`;
       logRequest("GET", url, headers);
 
       try {
@@ -294,7 +289,7 @@ export const getMotionApiClient = () => {
     },
 
     async getTaskById(id: string): Promise<MotionTask> {
-      const url = `${BASE_URL}/tasks/${id}?workspaceId=${correctWorkspaceId}`;
+      const url = `${BASE_URL}/tasks/${id}?workspaceId=${preferences.workspaceId}`;
       logRequest("GET", url, headers);
 
       const response = await fetch(url, {
@@ -501,7 +496,7 @@ export const getMotionApiClient = () => {
     },
 
     async deleteTask(id: string): Promise<void> {
-      const url = `${BASE_URL}/tasks/${id}?workspaceId=${correctWorkspaceId}`;
+      const url = `${BASE_URL}/tasks/${id}?workspaceId=${preferences.workspaceId}`;
       logRequest("DELETE", url, headers);
 
       const response = await fetch(url, {

@@ -59,8 +59,7 @@
       "title": "Motion Workspace ID",
       "description": "Your Motion Workspace ID",
       "type": "textfield",
-      "required": true,
-      "default": "J2-2vXH85SltZ52ieplcF"
+      "required": true
     }
   ],
   "tools": [
@@ -79,7 +78,24 @@
     }
   ],
   "ai": {
-    "instructions": "You are a helpful AI assistant for Motion, a task and productivity tool. Your role is to help users understand their tasks, deadlines, and schedules in Motion. Be conversational, concise, and friendly. When users ask about tasks, answer based on the information provided to you about their Motion tasks. Remember the context of the conversation when they ask follow-up questions. If you don't know something or the information is not provided, be honest about it."
+    "instructions": "You are a helpful AI assistant for Motion, a task and productivity tool. Your role is to help users understand their tasks, deadlines, and schedules in Motion. Be conversational, concise, and friendly. When users ask about tasks, answer based on the information provided to you about their Motion tasks. Remember the context of the conversation when they ask follow-up questions. If you don't know something or the information is not provided, be honest about it.",
+    "evals": {
+      "version": "1.0.0",
+      "task_examples": [
+        {
+          "request": "What tasks do I have due today?",
+          "response": "I'll check your Motion tasks for today.\n\nBased on your Motion data, you have the following tasks due today:\n- Complete project proposal (High priority)\n- Review marketing material (Medium priority)\n- Schedule team meeting (Low priority)\n\nWould you like me to provide more details about any of these tasks?"
+        },
+        {
+          "request": "How many high priority tasks do I have?",
+          "response": "Let me check your high priority tasks in Motion.\n\nYou currently have 3 high priority tasks:\n- Complete project proposal (Due today)\n- Client presentation preparation (Due tomorrow)\n- Quarterly report (Due next Monday)\n\nIs there anything specific you'd like to know about these tasks?"
+        },
+        {
+          "request": "What's on my schedule for tomorrow?",
+          "response": "Looking at your Motion schedule for tomorrow, you have:\n\n- Client meeting at 10:00 AM (1 hour)\n- Team standup at 2:00 PM (30 minutes)\n- Time block for Client presentation preparation (High priority task, 2 hours)\n\nYou also have these tasks due tomorrow:\n- Client presentation preparation (High priority)\n- Send weekly report (Medium priority)\n\nWould you like me to provide more details or help you adjust your schedule?"
+        }
+      ]
+    }
   },
   "dependencies": {
     "@raycast/api": "^1.93.0",
