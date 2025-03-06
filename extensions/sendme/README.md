@@ -11,7 +11,7 @@
 ### 🚀 True P2P File Sharing
 
 Share files directly between devices with no intermediary servers. Your data never leaves the direct connection between sender and receiver.
-![Direct Transfer](metadata/image.png)
+![Direct Transfer](media/image.png)
 ![alt-img](metadata/screenshot-1.png)
 ![alt-img](metadata/screenshot-2.png)
 ![alt-img](metadata/screenshot-3.png)
