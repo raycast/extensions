@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sonarr",
+  "title": "Sonarr",
+  "description": "View your Sonarr upcoming shows.",
+  "icon": "command-icon.png",
+  "author": "Aayush9029",
+  "contributors": [
+    "j3lte"
+  ],
+  "categories": [
+    "Media",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "View Upcoming Shows",
+      "subtitle": "Sonarr",
+      "description": "All upcoming shows dates",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "host",
+      "title": "Host",
+      "required": true,
+      "description": "Hostname of the Sonarr server",
+      "type": "textfield",
+      "default": "localhost"
+    },
+    {
+      "name": "port",
+      "title": "Port",
+      "required": true,
+      "description": "The port of the Sonarr server",
+      "type": "textfield",
+      "default": "8989"
+    },
+    {
+      "name": "base",
+      "title": "URL Base (Optional)",
+      "required": false,
+      "description": "The URL Base of the Sonarr server",
+      "type": "textfield",
+      "default": ""
+    },
+    {
+      "name": "http",
+      "title": "Connection Type",
+      "required": true,
+      "description": "Change the connection type for the Sonarr server",
+      "type": "dropdown",
+      "default": "http",
+      "data": [
+        {
+          "value": "http",
+          "title": "HTTP"
+        },
+        {
+          "value": "https",
+          "title": "HTTPS"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "required": true,
+      "description": "The API key of the Sonarr server",
+      "type": "textfield",
+      "default": ""
+    },
+    {
+      "name": "futureDays",
+      "title": "Future Days",
+      "required": false,
+      "description": "The number of days from now to show upcoming shows for",
+      "type": "dropdown",
+      "default": "14",
+      "data": [
+        {
+          "value": "7",
+          "title": "Next week"
+        },
+        {
+          "value": "14",
+          "title": "Next 2 weeks"
+        },
+        {
+          "value": "30",
+          "title": "Next month"
+        },
+        {
+          "value": "180",
+          "title": "Next 3 months"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.14.1",
+    "date-fns": "^3.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

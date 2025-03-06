@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Node 16",
+  "include": [
+    "src/**/*",
+    "lib/**/*"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "es2021"
+    ],
+    "module": "commonjs",
+    "target": "es2021",
+    "strict": false,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true
+  }
+}

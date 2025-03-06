@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bluesky",
+  "title": "Bluesky",
+  "description": "Browse through your Bluesky timeline. Create new posts, find people, and view your notifications.",
+  "icon": "bsky-logo-1.png",
+  "author": "dharamkapila",
+  "categories": [
+    "Communication",
+    "Web"
+  ],
+  "contributors": [
+    "peduarte",
+    "xmok"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "type": "textfield",
+      "title": "Bluesky Service URL",
+      "description": "Service URL",
+      "default": "https://bsky.social",
+      "placeholder": "https://bsky.social",
+      "name": "service",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "title": "Bluesky Email or Handle",
+      "description": "Your Bluesky email or handle",
+      "name": "accountId",
+      "placeholder": "bsky.app",
+      "required": true
+    },
+    {
+      "type": "password",
+      "title": "App Password",
+      "description": "Your App Password",
+      "name": "password",
+      "placeholder": "xxxx-xxxx-xxxx-xxxx",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "menu-bar-notifications",
+      "title": "Menu Bar Notifications",
+      "description": "A menu bar item to show your recent notifications.",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "home",
+      "title": "Home",
+      "description": "Your Bluesky Home",
+      "mode": "view"
+    },
+    {
+      "name": "timeline",
+      "title": "Timeline",
+      "description": "View your Bluesky timeline. Click on a post to see more details.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "description": "Search for people and entities on Bluesky.",
+      "disabledByDefault": true,
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "searchTerm",
+          "placeholder": "person or entity",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "new-post",
+      "title": "New Post",
+      "description": "Create a new public post on Bluesky.",
+      "mode": "view"
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "description": "View your recent notifications.",
+      "mode": "view"
+    },
+    {
+      "name": "recent-posts",
+      "title": "Recent Posts",
+      "description": "View your recent posts on Bluesky. Click on a post to see more details.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "handle",
+          "placeholder": "@handle",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@atproto/api": "^0.14.7",
+    "@atproto/uri": "^0.1.1",
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.18.1",
+    "cross-fetch": "^3.1.5",
+    "use-debounce": "^9.0.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "react": "^18.3.1",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

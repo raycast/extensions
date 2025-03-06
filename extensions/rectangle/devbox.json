@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.10.6/.schema/devbox.schema.json",
+  "packages": [
+    "nodejs@22",
+    "python@latest",
+    "python312Packages.pip@latest",
+    "python312Packages.pillow@latest",
+    "python312Packages.ipykernel@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "echo 'Welcome to devbox!' > /dev/null"
+    ],
+    "scripts": {
+      "generateIcons": [
+        "python src/icons/generateIcons.py"
+      ]
+    }
+  }
+}

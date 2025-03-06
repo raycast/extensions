@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "asana",
+  "title": "Asana",
+  "description": "Create, access, and modify tasks.",
+  "icon": "asana.png",
+  "author": "thomaslombart",
+  "contributors": [
+    "Spacedolphin",
+    "tuzemec"
+  ],
+  "owner": "raycast",
+  "access": "public",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Create and assign new tasks.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showStartDate",
+          "type": "checkbox",
+          "label": "Show the \"Start Date\" field",
+          "description": "When enabled, the \"Start Date\" field will be shown in the \"Create Task\" command.",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "my-tasks",
+      "title": "My Tasks",
+      "description": "List of your tasks.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showCompletedTasks",
+          "type": "checkbox",
+          "label": "Show completed tasks",
+          "description": "When enabled, the completed tasks will show up in the task list",
+          "required": false,
+          "default": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.4",
+    "@raycast/utils": "^1.12.3",
+    "axios": "^0.27.2",
+    "date-fns": "^2.29.1",
+    "lodash": "^4.17.21",
+    "node-html-markdown": "^1.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/lodash": "^4.14.182",
+    "@types/node": "^18.8.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

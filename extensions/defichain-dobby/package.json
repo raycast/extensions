@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "defichain-dobby",
+  "title": "Defichain Dobby",
+  "description": "Show your current Defichain vaults, setup in https://defichain-dobby.com/",
+  "icon": "command-icon.png",
+  "author": "adrian-schnell",
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "dobby",
+      "title": "Show Vaults",
+      "subtitle": "Defichain Dobby",
+      "description": "Show current vault details",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "dobbyApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Dobby User Key",
+      "description": "Your Dobby User Key. You can find this once you setup Dobby at https://defichain-dobby.com/#/settings",
+      "placeholder": "Enter your Dobby User Key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.32.1",
+    "axios": "^0.26.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "2.6.2",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

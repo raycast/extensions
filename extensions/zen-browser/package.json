@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zen-browser",
+  "title": "Zen Browser",
+  "description": "Search and open tabs from bookmarks and history in Zen Browser.",
+  "icon": "zen-logo.png",
+  "author": "Keyruu",
+  "contributors": [
+    "theherk",
+    "walker-tx"
+  ],
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Zen Browser",
+      "description": "Open a new Zen Browser tab.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "searchEngine",
+          "type": "dropdown",
+          "required": false,
+          "title": "Search Engine",
+          "description": "Search Engine for query (default: Google).",
+          "default": "Google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "Google"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "DuckDuckGo"
+            },
+            {
+              "title": "Bing",
+              "value": "Bing"
+            },
+            {
+              "title": "Baidu",
+              "value": "Baidu"
+            },
+            {
+              "title": "Brave",
+              "value": "Brave"
+            },
+            {
+              "title": "Qwant",
+              "value": "Qwant"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Zen Browser",
+      "description": "Search browser history.",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Zen Browser",
+      "description": "Search browser bookmarks.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "profileDirectorySuffix",
+      "title": "Profile Directory Suffix",
+      "default": "Default (alpha)",
+      "description": "The Zen profile directory suffix, check it with `ls ~/Library/Application Support/zen/Profiles`",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "limitResults",
+      "type": "textfield",
+      "required": false,
+      "title": "Limit Results",
+      "description": "The amount of results that are queried from the browser database.",
+      "default": "50"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.4.13",
+    "run-applescript": "6.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/sql.js": "1.4.4",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

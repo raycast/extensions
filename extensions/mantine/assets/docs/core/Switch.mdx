@@ -1,0 +1,58 @@
+---
+group: "mantine-core"
+package: "@mantine/core"
+title: Switch
+order: 1
+slug: /core/switch/
+category: "inputs"
+description: "Capture boolean input from user"
+props: ["Switch"]
+import: "import { Switch } from '@mantine/core';"
+source: "mantine-core/src/components/Switch/Switch.tsx"
+docs: "core/Switch.mdx"
+styles: ["Switch"]
+---
+
+import { SwitchDemos } from "@mantine/demos";
+
+## Usage
+
+<Demo data={SwitchDemos.configurator} />
+
+## Controlled
+
+```tsx
+import { useState } from "react";
+import { Switch } from "@mantine/core";
+
+function Demo() {
+  const [checked, setChecked] = useState(false);
+  return <Switch checked={checked} onChange={(event) => setChecked(event.currentTarget.checked)} />;
+}
+```
+
+## Inner Labels
+
+<Demo data={SwitchDemos.labels} />
+
+## Get input ref
+
+```tsx
+import { useRef } from "react";
+import { Switch } from "@mantine/core";
+
+function Demo() {
+  const ref = useRef<HTMLInputElement>();
+  return <Switch ref={ref} />;
+}
+```
+
+## Accessibility
+
+Switch is a regular input with checkbox type. Provide `aria-label` if Switch is used without `label`:
+
+```tsx
+<Switch /> // -> not ok, input is not labeled
+<Switch label="I agree to everything" /> // -> ok, input and label is connected
+<Switch aria-label="I agree to everything" /> // -> ok, label is not visible but will be announced by screen reader
+```

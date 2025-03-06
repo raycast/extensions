@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "diskutil",
+  "title": "Disk Utility",
+  "description": "Create, list and delete Apple File System (APFS) disk volumes",
+  "icon": "command-icon.png",
+  "author": "stelo",
+  "contributors": [
+    "srikirank"
+  ],
+  "categories": [
+    "Developer Tools",
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-volume",
+      "title": "Create Volume",
+      "description": "Creates APFS volumes. For encrypted volumes, it generates a secure passphrase, creates the volume, and stores the passphrase in the system keychain so that the volume can be automatically decrypted and mounted on boot.",
+      "mode": "view"
+    },
+    {
+      "name": "show-volumes",
+      "title": "Show Volumes",
+      "description": "Show the disk volumes present on the system.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.5",
+    "plist": "^3.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/plist": "^3.0.5",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

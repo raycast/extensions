@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "remove-background",
+  "title": "Remove Background",
+  "description": "Removes the background from an image with remove.bg",
+  "icon": "command-icon.png",
+  "author": "maantje",
+  "contributors": [
+    "FezVrasta"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Remove Background From Image",
+      "subtitle": "remove.bg",
+      "description": "Remove the background from an image",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "apiKey",
+          "required": true,
+          "title": "API key",
+          "type": "password",
+          "description": "You can find your API key on the remove.bg Dashboard."
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.30.3",
+    "raycast-toolkit": "^1.0.2",
+    "remove.bg": "^1.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

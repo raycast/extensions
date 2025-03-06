@@ -1,0 +1,394 @@
+{
+    "1": [
+        "GL_SYNC_FLUSH_COMMANDS_BIT_APPLE",
+        "GL_MAP_READ_BIT_EXT",
+        "GL_VERTEX_SHADER_BIT_EXT"
+    ],
+    "2": [
+        "GL_MAP_WRITE_BIT_EXT",
+        "GL_FRAGMENT_SHADER_BIT_EXT"
+    ],
+    "4": [
+        "GL_MAP_INVALIDATE_RANGE_BIT_EXT"
+    ],
+    "8": [
+        "GL_MAP_INVALIDATE_BUFFER_BIT_EXT"
+    ],
+    "16": [
+        "GL_MAP_FLUSH_EXPLICIT_BIT_EXT"
+    ],
+    "32": [
+        "GL_MAP_UNSYNCHRONIZED_BIT_EXT"
+    ],
+    "3378": [
+        "GL_MAX_CLIP_DISTANCES_APPLE"
+    ],
+    "6144": [
+        "GL_COLOR_EXT"
+    ],
+    "6145": [
+        "GL_DEPTH_EXT"
+    ],
+    "6146": [
+        "GL_STENCIL_EXT"
+    ],
+    "6403": [
+        "GL_RED_EXT"
+    ],
+    "12288": [
+        "GL_CLIP_DISTANCE0_APPLE"
+    ],
+    "12289": [
+        "GL_CLIP_DISTANCE1_APPLE"
+    ],
+    "12290": [
+        "GL_CLIP_DISTANCE2_APPLE"
+    ],
+    "12291": [
+        "GL_CLIP_DISTANCE3_APPLE"
+    ],
+    "12292": [
+        "GL_CLIP_DISTANCE4_APPLE"
+    ],
+    "12293": [
+        "GL_CLIP_DISTANCE5_APPLE"
+    ],
+    "12294": [
+        "GL_CLIP_DISTANCE6_APPLE"
+    ],
+    "12295": [
+        "GL_CLIP_DISTANCE7_APPLE"
+    ],
+    "32775": [
+        "GL_MIN_EXT"
+    ],
+    "32776": [
+        "GL_MAX_EXT"
+    ],
+    "32828": [
+        "GL_ALPHA8_EXT"
+    ],
+    "32832": [
+        "GL_LUMINANCE8_EXT"
+    ],
+    "32837": [
+        "GL_LUMINANCE8_ALPHA8_EXT"
+    ],
+    "32849": [
+        "GL_RGB8_OES"
+    ],
+    "32856": [
+        "GL_RGBA8_OES"
+    ],
+    "32993": [
+        "GL_BGRA_EXT",
+        "GL_BGRA",
+        "GL_BGRA_IMG"
+    ],
+    "33085": [
+        "GL_TEXTURE_MAX_LEVEL_APPLE"
+    ],
+    "33190": [
+        "GL_DEPTH_COMPONENT24_OES"
+    ],
+    "33191": [
+        "GL_DEPTH_COMPONENT32_OES"
+    ],
+    "33296": [
+        "GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING_EXT"
+    ],
+    "33297": [
+        "GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE_EXT"
+    ],
+    "33319": [
+        "GL_RG_EXT"
+    ],
+    "33321": [
+        "GL_R8_EXT"
+    ],
+    "33323": [
+        "GL_RG8_EXT"
+    ],
+    "33325": [
+        "GL_R16F_EXT"
+    ],
+    "33326": [
+        "GL_R32F_EXT"
+    ],
+    "33327": [
+        "GL_RG16F_EXT"
+    ],
+    "33328": [
+        "GL_RG32F_EXT"
+    ],
+    "33368": [
+        "GL_PROGRAM_SEPARABLE_EXT"
+    ],
+    "33369": [
+        "GL_ACTIVE_PROGRAM_EXT"
+    ],
+    "33370": [
+        "GL_PROGRAM_PIPELINE_BINDING_EXT"
+    ],
+    "33637": [
+        "GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT",
+        "GL_UNSIGNED_SHORT_4_4_4_4_REV",
+        "GL_UNSIGNED_SHORT_4_4_4_4_REV_IMG"
+    ],
+    "33638": [
+        "GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT",
+        "GL_UNSIGNED_SHORT_1_5_5_5_REV"
+    ],
+    "34041": [
+        "GL_DEPTH_STENCIL_OES"
+    ],
+    "34042": [
+        "GL_UNSIGNED_INT_24_8_OES"
+    ],
+    "34046": [
+        "GL_TEXTURE_MAX_ANISOTROPY_EXT"
+    ],
+    "34047": [
+        "GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT"
+    ],
+    "34229": [
+        "GL_VERTEX_ARRAY_BINDING_OES"
+    ],
+    "34234": [
+        "GL_UNSIGNED_SHORT_8_8_APPLE"
+    ],
+    "34235": [
+        "GL_UNSIGNED_SHORT_8_8_REV_APPLE"
+    ],
+    "34836": [
+        "GL_RGBA32F_EXT"
+    ],
+    "34837": [
+        "GL_RGB32F_EXT"
+    ],
+    "34838": [
+        "GL_ALPHA32F_EXT"
+    ],
+    "34840": [
+        "GL_LUMINANCE32F_EXT"
+    ],
+    "34841": [
+        "GL_LUMINANCE_ALPHA32F_EXT"
+    ],
+    "34842": [
+        "GL_RGBA16F_EXT"
+    ],
+    "34843": [
+        "GL_RGB16F_EXT"
+    ],
+    "34844": [
+        "GL_ALPHA16F_EXT"
+    ],
+    "34846": [
+        "GL_LUMINANCE16F_EXT"
+    ],
+    "34847": [
+        "GL_LUMINANCE_ALPHA16F_EXT"
+    ],
+    "34892": [
+        "GL_TEXTURE_COMPARE_MODE_EXT"
+    ],
+    "34893": [
+        "GL_TEXTURE_COMPARE_FUNC_EXT"
+    ],
+    "34894": [
+        "GL_COMPARE_REF_TO_TEXTURE_EXT"
+    ],
+    "34917": [
+        "GL_CURRENT_QUERY_EXT"
+    ],
+    "34918": [
+        "GL_QUERY_RESULT_EXT"
+    ],
+    "34919": [
+        "GL_QUERY_RESULT_AVAILABLE_EXT"
+    ],
+    "35001": [
+        "GL_WRITE_ONLY_OES"
+    ],
+    "35003": [
+        "GL_BUFFER_ACCESS_OES"
+    ],
+    "35004": [
+        "GL_BUFFER_MAPPED_OES"
+    ],
+    "35005": [
+        "GL_BUFFER_MAP_POINTER_OES"
+    ],
+    "35056": [
+        "GL_DEPTH24_STENCIL8_OES"
+    ],
+    "35070": [
+        "GL_VERTEX_ATTRIB_ARRAY_DIVISOR_EXT"
+    ],
+    "35359": [
+        "GL_RGB_422_APPLE"
+    ],
+    "35407": [
+        "GL_PROGRAM_PIPELINE_OBJECT_EXT"
+    ],
+    "35409": [
+        "GL_RGB_RAW_422_APPLE"
+    ],
+    "35410": [
+        "GL_FRAGMENT_SHADER_DISCARDS_SAMPLES_EXT"
+    ],
+    "35411": [
+        "GL_SYNC_OBJECT_APPLE"
+    ],
+    "35412": [
+        "GL_COMPRESSED_SRGB_PVRTC_2BPPV1_EXT"
+    ],
+    "35413": [
+        "GL_COMPRESSED_SRGB_PVRTC_4BPPV1_EXT"
+    ],
+    "35414": [
+        "GL_COMPRESSED_SRGB_ALPHA_PVRTC_2BPPV1_EXT"
+    ],
+    "35415": [
+        "GL_COMPRESSED_SRGB_ALPHA_PVRTC_4BPPV1_EXT"
+    ],
+    "35648": [
+        "GL_PROGRAM_OBJECT_EXT"
+    ],
+    "35656": [
+        "GL_SHADER_OBJECT_EXT"
+    ],
+    "35682": [
+        "GL_SAMPLER_2D_SHADOW_EXT"
+    ],
+    "35723": [
+        "GL_FRAGMENT_SHADER_DERIVATIVE_HINT_OES"
+    ],
+    "35840": [
+        "GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG"
+    ],
+    "35841": [
+        "GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG"
+    ],
+    "35842": [
+        "GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG"
+    ],
+    "35843": [
+        "GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG"
+    ],
+    "35863": [
+        "GL_UNSIGNED_NORMALIZED_EXT"
+    ],
+    "35887": [
+        "GL_ANY_SAMPLES_PASSED_EXT"
+    ],
+    "35898": [
+        "GL_R11F_G11F_B10F_APPLE"
+    ],
+    "35899": [
+        "GL_UNSIGNED_INT_10F_11F_11F_REV_APPLE"
+    ],
+    "35901": [
+        "GL_RGB9_E5_APPLE"
+    ],
+    "35902": [
+        "GL_UNSIGNED_INT_5_9_9_9_REV_APPLE"
+    ],
+    "35904": [
+        "GL_SRGB_EXT"
+    ],
+    "35906": [
+        "GL_SRGB_ALPHA_EXT"
+    ],
+    "35907": [
+        "GL_SRGB8_ALPHA8_EXT"
+    ],
+    "36006": [
+        "GL_DRAW_FRAMEBUFFER_BINDING_APPLE"
+    ],
+    "36008": [
+        "GL_READ_FRAMEBUFFER_APPLE"
+    ],
+    "36009": [
+        "GL_DRAW_FRAMEBUFFER_APPLE"
+    ],
+    "36010": [
+        "GL_READ_FRAMEBUFFER_BINDING_APPLE"
+    ],
+    "36011": [
+        "GL_RENDERBUFFER_SAMPLES_APPLE"
+    ],
+    "36182": [
+        "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_APPLE"
+    ],
+    "36183": [
+        "GL_MAX_SAMPLES_APPLE"
+    ],
+    "36193": [
+        "GL_HALF_FLOAT_OES"
+    ],
+    "36202": [
+        "GL_ANY_SAMPLES_PASSED_CONSERVATIVE_EXT"
+    ],
+    "37137": [
+        "GL_MAX_SERVER_WAIT_TIMEOUT_APPLE"
+    ],
+    "37138": [
+        "GL_OBJECT_TYPE_APPLE"
+    ],
+    "37139": [
+        "GL_SYNC_CONDITION_APPLE"
+    ],
+    "37140": [
+        "GL_SYNC_STATUS_APPLE"
+    ],
+    "37141": [
+        "GL_SYNC_FLAGS_APPLE"
+    ],
+    "37142": [
+        "GL_SYNC_FENCE_APPLE"
+    ],
+    "37143": [
+        "GL_SYNC_GPU_COMMANDS_COMPLETE_APPLE"
+    ],
+    "37144": [
+        "GL_UNSIGNALED_APPLE"
+    ],
+    "37145": [
+        "GL_SIGNALED_APPLE"
+    ],
+    "37146": [
+        "GL_ALREADY_SIGNALED_APPLE"
+    ],
+    "37147": [
+        "GL_TIMEOUT_EXPIRED_APPLE"
+    ],
+    "37148": [
+        "GL_CONDITION_SATISFIED_APPLE"
+    ],
+    "37149": [
+        "GL_WAIT_FAILED_APPLE"
+    ],
+    "37167": [
+        "GL_TEXTURE_IMMUTABLE_FORMAT_EXT"
+    ],
+    "37201": [
+        "GL_BUFFER_OBJECT_EXT"
+    ],
+    "37203": [
+        "GL_QUERY_OBJECT_EXT"
+    ],
+    "37204": [
+        "GL_VERTEX_ARRAY_OBJECT_EXT"
+    ],
+    "37793": [
+        "GL_BGRA8_EXT"
+    ],
+    "18446744073709552000": [
+        "GL_TIMEOUT_IGNORED_APPLE"
+    ],
+    "4294967295": [
+        "GL_ALL_SHADER_BITS_EXT"
+    ]
+}

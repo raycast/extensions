@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "package-tracker",
+  "title": "Parcel Tracker - 17track",
+  "description": "A Raycast extension that allows you to track your packages using 17track's REST API.  All supported agencies are those of 17track.",
+  "icon": "icon.png",
+  "author": "cojmeister",
+  "version": "0.2.0",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "trackParcel",
+      "title": "Track Parcel",
+      "subtitle": "17track",
+      "description": "Returns a package's last location - event",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "packageNumber",
+          "placeholder": "e.g. \"RR123465789CN\"",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.7.9"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "17Track API Token",
+      "description": "Your 17track API Key - get one at 17Track.com",
+      "type": "password",
+      "default": "",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

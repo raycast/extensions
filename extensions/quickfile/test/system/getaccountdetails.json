@@ -1,0 +1,46 @@
+{
+  "System_GetAccountDetails": {
+    "Header": {
+      "MessageType": "Response",
+      "SubmissionNumber": "ce7b7add-ced4-458d-9d50-49fbe1c87a8d"
+    },
+    "Body": {
+      "AccountDetails": {
+        "AccountNumber": "6131400001",
+        "CompanyName": "Trinity Housing Ltd",
+        "CompanyNumber": "",
+        "ClientDomain": "trinityhousing",
+        "BusinessType": "02",
+        "CountryIso": "GB",
+        "BaseCurrency": "GBP",
+        "Tel": "07738664178",
+        "Web": "",
+        "VatRegNumber": "14545334",
+        "YearEndDate": "2018-03-31T00:00:00",
+        "DailyDataTransferLimit": 262144000,
+        "Address": "219 Kensington High Street<br/>Kensington<br/>London<br/>W8 6BD<br/>United Kingdom<br/>",
+        "TeamMembers": {
+          "TeamMember": [
+            {
+              "FirstName": "John",
+              "Surname": "Smith",
+              "IsDefaultLogin": true,
+              "LastLogin": "2017-06-07T13:18:32"
+            },
+            {
+              "FirstName": "Sarah",
+              "Surname": "Hollingsworth",
+              "IsDefaultLogin": false
+            }
+          ]
+        },
+        "BackupSchedule": {
+          "StartDate": "2018-02-27",
+          "Frequency": "Monthly",
+          "BackupType": "Email",
+          "EmailAddress": "example@test.com"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "migadu",
+  "title": "Migadu",
+  "description": "Mailboxes, Identities, Aliases, Rewrites in Migadu",
+  "icon": "migadu.png",
+  "author": "xmok",
+  "contributors": [
+    "LBBO"
+  ],
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "username",
+      "title": "Username",
+      "placeholder": "migadu@example.com",
+      "description": "Username is the email address of the Migadu account",
+      "required": true,
+      "type": "textfield"
+    },
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "placeholder": "f9NGE...vCfA",
+      "description": "API Key from Migadu account",
+      "required": true,
+      "type": "password"
+    },
+    {
+      "name": "domains",
+      "title": "Domains",
+      "placeholder": "example.com,example.org",
+      "description": "Comma-separated list of domains you want to use",
+      "required": true,
+      "type": "textfield"
+    }
+  ],
+  "commands": [
+    {
+      "name": "mailboxes-and-identities",
+      "title": "Mailboxes & Identities",
+      "subtitle": "Migadu",
+      "description": "View, Create, Update or Delete Mailboxes and Identities in your Migadu Account",
+      "mode": "view"
+    },
+    {
+      "name": "aliases",
+      "title": "Aliases",
+      "subtitle": "Migadu",
+      "description": "View, Create, Update or Delete Aliases in your Migadu Account",
+      "mode": "view"
+    },
+    {
+      "name": "rewrites",
+      "title": "Rewrites",
+      "subtitle": "Migadu",
+      "description": "View, Create, Update or Delete Rewrites in your Migadu Account",
+      "mode": "view"
+    },
+    {
+      "name": "create-copy-anonymous-identity",
+      "title": "Create Anonymous Identity (Custom Hide My Email)",
+      "description": "Creates an anonymous identity for a selected mailbox and copies the email address to your clipboard. This can be used as an equivalent to Apple's Hide My Email.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.16.3",
+    "node-fetch": "^3.3.1",
+    "unique-names-generator": "^4.7.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "checklist",
+  "title": "Checklist",
+  "description": "Create and work on checklists.",
+  "icon": "extension_icon.png",
+  "author": "zeekrey",
+  "categories": [
+    "Productivity",
+    "Documentation"
+  ],
+  "keywords": [
+    "checklist",
+    "todo",
+    "task",
+    "list"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-checklists",
+      "title": "Checklists",
+      "subtitle": "Work on checklists",
+      "description": "Work on checklists",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.0",
+    "@raycast/utils": "^1.5.2",
+    "nanoid": "^4.0.1",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

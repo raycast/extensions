@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "youtube-companion",
+  "title": "YouTube Companion",
+  "description": "Collection of scripts to improve YouTube browsing experience",
+  "icon": "command-icon.png",
+  "author": "sasivarnan",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "play-without-playlist",
+      "title": "Play Without Playlist",
+      "subtitle": "YouTube",
+      "description": "Open YouTube video from a playlist without the playlist",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-with-youtube",
+      "title": "Search",
+      "subtitle": "YouTube",
+      "description": "Search YouTube with clipboard content",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-subscriptions",
+      "title": "Open Subscriptions",
+      "subtitle": "YouTube",
+      "description": "Open YouTube Subscriptions page",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.33.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

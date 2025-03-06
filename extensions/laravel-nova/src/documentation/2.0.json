@@ -1,0 +1,126 @@
+{
+  "Getting Started": [
+    {
+      "title": "Installation",
+      "url": "https://nova.laravel.com/docs/2.0/installation.html"
+    }
+  ],
+  "Resources": [
+    {
+      "title": "The Basics",
+      "url": "https://nova.laravel.com/docs/2.0/resources/"
+    },
+    {
+      "title": "Fields",
+      "url": "https://nova.laravel.com/docs/2.0/resources/fields.html"
+    },
+    {
+      "title": "Date Fields",
+      "url": "https://nova.laravel.com/docs/2.0/resources/date-fields.html"
+    },
+    {
+      "title": "File Fields",
+      "url": "https://nova.laravel.com/docs/2.0/resources/file-fields.html"
+    },
+    {
+      "title": "Relationships",
+      "url": "https://nova.laravel.com/docs/2.0/resources/relationships.html"
+    },
+    {
+      "title": "Validation",
+      "url": "https://nova.laravel.com/docs/2.0/resources/validation.html"
+    },
+    {
+      "title": "Authorization",
+      "url": "https://nova.laravel.com/docs/2.0/resources/authorization.html"
+    }
+  ],
+  "Search": [
+    {
+      "title": "Global Search",
+      "url": "https://nova.laravel.com/docs/2.0/search/global-search.html"
+    },
+    {
+      "title": "Scout Integration",
+      "url": "https://nova.laravel.com/docs/2.0/search/scout-integration.html"
+    }
+  ],
+  "Filters": [
+    {
+      "title": "Defining Filters",
+      "url": "https://nova.laravel.com/docs/2.0/filters/defining-filters.html"
+    },
+    {
+      "title": "Registering Filters",
+      "url": "https://nova.laravel.com/docs/2.0/filters/registering-filters.html"
+    }
+  ],
+  "Lenses": [
+    {
+      "title": "Defining Lenses",
+      "url": "https://nova.laravel.com/docs/2.0/filters/defining-lenses.html"
+    },
+    {
+      "title": "Registering Lenses",
+      "url": "https://nova.laravel.com/docs/2.0/filters/registering-lenses.html"
+    }
+  ],
+  "Actions": [
+    {
+      "title": "Defining Actions",
+      "url": "https://nova.laravel.com/docs/2.0/filters/defining-actions.html"
+    },
+    {
+      "title": "Registering Actions",
+      "url": "https://nova.laravel.com/docs/2.0/filters/registering-actions.html"
+    }
+  ],
+  "Metrics": [
+    {
+      "title": "Defining Metrics",
+      "url": "https://nova.laravel.com/docs/2.0/filters/defining-metrics.html"
+    },
+    {
+      "title": "Registering Metrics",
+      "url": "https://nova.laravel.com/docs/2.0/filters/registering-metrics.html"
+    }
+  ],
+  "Customization": [
+    {
+      "title": "Localization",
+      "url": "https://nova.laravel.com/docs/2.0/customization/localization.html"
+    },
+    {
+      "title": "Dashboards",
+      "url": "https://nova.laravel.com/docs/2.0/customization/dashboards.html"
+    },
+    {
+      "title": "Tools",
+      "url": "https://nova.laravel.com/docs/2.0/customization/tools.html"
+    },
+    {
+      "title": "Resource Tools",
+      "url": "https://nova.laravel.com/docs/2.0/customization/resource-tools.html"
+    },
+    {
+      "title": "Cards",
+      "url": "https://nova.laravel.com/docs/2.0/customization/cards.html"
+    },
+    {
+      "title": "Fields",
+      "url": "https://nova.laravel.com/docs/2.0/customization/fields.html"
+    },
+    {
+      "title": "CSS / Javascript",
+      "url": "https://nova.laravel.com/docs/2.0/customization/frontend.html"
+    },
+    {
+      "title": "Filters",
+      "url": "https://nova.laravel.com/docs/2.0/customization/filters.html"
+    },
+    {
+      "title": "Themes",
+      "url": "https://nova.laravel.com/docs/2.0/customization/themes.html"
+    }
+  ]
+}

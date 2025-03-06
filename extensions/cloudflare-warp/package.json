@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cloudflare-warp",
+  "title": "Cloudflare WARP",
+  "description": "Manage Cloudflare WARP",
+  "icon": "command-icon.png",
+  "author": "anandubajith",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "connect",
+      "title": "WARP Connect",
+      "subtitle": "Cloudflare Warp",
+      "description": "Disconnect from Cloudflare Warp",
+      "mode": "no-view"
+    },
+    {
+      "name": "disconnect",
+      "title": "WARP Disconnect",
+      "subtitle": "Cloudflare Warp",
+      "description": "Disconnect from Cloudflare Warp",
+      "mode": "no-view"
+    },
+    {
+      "name": "switch-virtual-network",
+      "title": "WARP Switch Virtual Network",
+      "subtitle": "Cloudflare Warp",
+      "description": "Switches between available virtual networks",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "wrapCliPath",
+      "type": "textfield",
+      "required": false,
+      "default": "/Applications/Cloudflare WARP.app/Contents/Resources/warp-cli",
+      "title": "wrap-cli executable path",
+      "description": "Set this if your wrap-cli executable is in a non-standard location"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

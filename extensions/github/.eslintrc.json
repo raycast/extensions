@@ -1,0 +1,24 @@
+{
+  "root": true,
+  "plugins": [
+    "import"
+  ],
+  "extends": [
+    "@raycast"
+  ],
+  "rules": {
+    "import/order": [
+      "error",
+      {
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc"
+        }
+      }
+    ]
+  },
+  "ignorePatterns": [
+    "*.graphql",
+    "**/generated/**"
+  ]
+}

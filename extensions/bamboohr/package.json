@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bamboohr",
+  "title": "BambooHR",
+  "description": "Get employee information from Bamboo HR. See who is out today, look up employee details, and manage your PTO from Raycast.",
+  "icon": "command-icon.png",
+  "author": "Rob",
+  "categories": [
+    "Communication", "Web" 
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "outToday",
+      "title": "Who's Out Today?",
+      "subtitle": "BambooHR",
+      "description": "Get a list of who is out today from BambooHR",
+      "mode": "view",
+      "interval": "1h"
+    },
+    {
+      "name": "index",
+      "title": "Employee Directory",
+      "subtitle": "BambooHR",
+      "description": "Look up the details of employees that work at your company",
+      "mode": "view"
+    },
+    {
+      "name": "ptoCalculator",
+      "title": "PTO Calculator",
+      "subtitle": "BambooHR",
+      "description": "Calculate how much PTO you have left for the year",
+      "mode": "view",
+      "interval": "1h"
+    },
+    {
+      "name": "upcomingPto",
+      "title": "Upcoming PTO",
+      "subtitle": "BambooHR",
+      "description": "Get PTO requests and statuses for you and your team",
+      "mode": "view",
+      "interval": "1h"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "bamboo_api_key",
+      "title": "BambooHR API Key",
+      "description": "Your BambooHR API key. You can find this in your BambooHR account under \"API Keys\".",
+      "type": "password",
+      "placeholder": "Enter your API key from BambooHR",
+      "required": true,
+      "defaultValue": ""
+    },
+    {
+      "name": "bamboo_subdomain",
+      "title": "BambooHR Subdomain",
+      "description": "Your BambooHR subdomain. This is the part of your BambooHR URL before bamboohr.com. For example, if your BambooHR URL is https://company-name.bamboohr.com, your subdomain is \"company-name\".",
+      "placeholder": "company-name",
+      "type": "textfield",
+      "required": true,
+      "defaultValue": ""
+    },
+    {
+      "name": "bamboo_user_id",
+      "title": "BambooHR User ID",
+      "description": "Your user ID in Bamboo. Used to filter out your own information from the directory.",
+      "placeholder": "1234",
+      "type": "textfield",
+      "required": false,
+      "defaultValue": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.63.0",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

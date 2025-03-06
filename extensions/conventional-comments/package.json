@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "conventional-comments",
+  "title": "Conventional Comments",
+  "description": "Paste conventional comment into your foremost application",
+  "icon": "icon.png",
+  "author": "krzysztofzuraw",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "comment",
+      "title": "Insert Conventional Comment",
+      "description": "Easily insert conventional comments into the frontmost application.",
+      "mode": "view"
+    },
+    {
+      "name": "commit",
+      "title": "Insert Conventional Commit",
+      "description": "Easily insert conventional commit into the frontmost application.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@jeromefitz/conventional-gitmoji": "^1.0.0",
+    "@raycast/api": "^1.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "tsc": "tsc --project . --noEmit",
+    "lint": "eslint --fix --quiet --ext .ts,.tsx,.es,.jsx src/"
+  }
+}

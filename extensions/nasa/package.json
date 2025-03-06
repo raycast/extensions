@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nasa",
+  "title": "NASA",
+  "description": "View the Astronomy Picture of the Day, latest news, astronauts, spacecrafts, and upcoming launches from NASA and other space agencies.",
+  "icon": "nasa_logo.png",
+  "author": "mSarheed",
+  "categories": [
+    "Data",
+    "Media",
+    "News",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "apod",
+      "title": "Show Astronomy Picture of the Day",
+      "description": "Show the Astronomy Picture of the Day from NASA",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "apiKey",
+          "type": "password",
+          "required": true,
+          "title": "NASA API Key",
+          "description": "Get your free API key from https://api.nasa.gov",
+          "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      ]
+    },
+    {
+      "name": "news",
+      "title": "Show NASA News",
+      "description": "Show the latest news from NASA",
+      "mode": "view"
+    },
+    {
+      "name": "astronauts",
+      "title": "Show Astronauts in Space",
+      "description": "Show the astronauts currently in space",
+      "mode": "view"
+    },
+    {
+      "name": "spacecrafts",
+      "title": "Show Spacecrafts in Space",
+      "description": "Show the spacecrafts currently in space",
+      "mode": "view"
+    },
+    {
+      "name": "launches",
+      "title": "Show Upcoming Launches",
+      "description": "Show the upcoming launches",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.17.0",
+    "country-emoji": "^1.5.6",
+    "node-html-markdown": "^1.3.0",
+    "rss-parser": "^3.13.0",
+    "timeago.js": "^4.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/emoji-flags": "^1.3.3",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,3219 @@
+{
+  "instructions": "In order to add items, first get lists and their meta data. When adding items to a list use the 'name' fields of the items in the catalog in the language of the list. If there is no matching item in the catalog, also check in the custom catalog items of the list. Try to match the style of the catalog items. When some requested items are already on the list, let the user know but still suggest adding the remaining items to the list. Use the default list if nothing else is specified.",
+  "evals": [
+    {
+      "input": "@bring add spaghetti carbonara ingredients to my list",
+      "mocks": {
+        "add-items": "Successfully called \"add-items\"",
+        "get-lists": {
+          "catalogs": [
+            {
+              "catalog": {
+                "sections": [
+                  {
+                    "items": [
+                      {
+                        "itemId": "Ananas",
+                        "name": "Pineapple"
+                      },
+                      {
+                        "itemId": "Aprikosen",
+                        "name": "Apricot"
+                      },
+                      {
+                        "itemId": "Artischocken",
+                        "name": "Artichokes"
+                      },
+                      {
+                        "itemId": "Aubergine",
+                        "name": "Eggplant"
+                      },
+                      {
+                        "itemId": "Avocado",
+                        "name": "Avocado"
+                      },
+                      {
+                        "itemId": "Bananen",
+                        "name": "Bananas"
+                      },
+                      {
+                        "itemId": "Basilikum",
+                        "name": "Basil"
+                      },
+                      {
+                        "itemId": "Beeren",
+                        "name": "Berries"
+                      },
+                      {
+                        "itemId": "Birnen",
+                        "name": "Pears"
+                      },
+                      {
+                        "itemId": "Blumenkohl",
+                        "name": "Cauliflower"
+                      },
+                      {
+                        "itemId": "Brokkoli",
+                        "name": "Broccoli"
+                      },
+                      {
+                        "itemId": "Brombeeren",
+                        "name": "Blackberries"
+                      },
+                      {
+                        "itemId": "Cherrytomaten",
+                        "name": "Cherry tomatoes"
+                      },
+                      {
+                        "itemId": "Datteln",
+                        "name": "Dates"
+                      },
+                      {
+                        "itemId": "Erbsen",
+                        "name": "Peas"
+                      },
+                      {
+                        "itemId": "Erdbeeren",
+                        "name": "Strawberries"
+                      },
+                      {
+                        "itemId": "Feigen",
+                        "name": "Figs"
+                      },
+                      {
+                        "itemId": "Fenchel",
+                        "name": "Fennel"
+                      },
+                      {
+                        "itemId": "Früchte",
+                        "name": "Fruit"
+                      },
+                      {
+                        "itemId": "Frühlingszwiebeln",
+                        "name": "Scallions"
+                      },
+                      {
+                        "itemId": "Gemüse",
+                        "name": "Vegetables"
+                      },
+                      {
+                        "itemId": "Grapefruit",
+                        "name": "Grapefruit"
+                      },
+                      {
+                        "itemId": "Gurke",
+                        "name": "Cucumber"
+                      },
+                      {
+                        "itemId": "Heidelbeeren",
+                        "name": "Blueberries"
+                      },
+                      {
+                        "itemId": "Himbeeren",
+                        "name": "Raspberries"
+                      },
+                      {
+                        "itemId": "Ingwer",
+                        "name": "Ginger"
+                      },
+                      {
+                        "itemId": "Karotten",
+                        "name": "Carrots"
+                      },
+                      {
+                        "itemId": "Kartoffeln",
+                        "name": "Potatoes"
+                      },
+                      {
+                        "itemId": "Kirschen",
+                        "name": "Cherries"
+                      },
+                      {
+                        "itemId": "Kiwi",
+                        "name": "Kiwis"
+                      },
+                      {
+                        "itemId": "Knoblauch",
+                        "name": "Garlic"
+                      },
+                      {
+                        "itemId": "Kohl",
+                        "name": "Cabbage"
+                      },
+                      {
+                        "itemId": "Koriander",
+                        "name": "Cilantro"
+                      },
+                      {
+                        "itemId": "Kräuter",
+                        "name": "Herbs"
+                      },
+                      {
+                        "itemId": "Kürbis",
+                        "name": "Squash"
+                      },
+                      {
+                        "itemId": "Lattich",
+                        "name": "Lettuce"
+                      },
+                      {
+                        "itemId": "Lauch",
+                        "name": "Leek"
+                      },
+                      {
+                        "itemId": "Limette",
+                        "name": "Lime"
+                      },
+                      {
+                        "itemId": "Mais",
+                        "name": "Sweet corn"
+                      },
+                      {
+                        "itemId": "Mandarinen",
+                        "name": "Mandarins"
+                      },
+                      {
+                        "itemId": "Mango",
+                        "name": "Mango"
+                      },
+                      {
+                        "itemId": "Melone",
+                        "name": "Melon"
+                      },
+                      {
+                        "itemId": "Moosberen",
+                        "name": "Cranberries"
+                      },
+                      {
+                        "itemId": "Nektarine",
+                        "name": "Nectarine"
+                      },
+                      {
+                        "itemId": "Oliven",
+                        "name": "Olives"
+                      },
+                      {
+                        "itemId": "Orange",
+                        "name": "Orange"
+                      },
+                      {
+                        "itemId": "Passionsfrucht",
+                        "name": "Passion fruit"
+                      },
+                      {
+                        "itemId": "Peperoncini",
+                        "name": "Chillies"
+                      },
+                      {
+                        "itemId": "Peperoni",
+                        "name": "Bell pepper"
+                      },
+                      {
+                        "itemId": "Petersilie",
+                        "name": "Parsley"
+                      },
+                      {
+                        "itemId": "Pfefferminze",
+                        "name": "Mint"
+                      },
+                      {
+                        "itemId": "Pfirsich",
+                        "name": "Peach"
+                      },
+                      {
+                        "itemId": "Pflaumen",
+                        "name": "Prunes"
+                      },
+                      {
+                        "itemId": "Pilze",
+                        "name": "Mushrooms"
+                      },
+                      {
+                        "itemId": "Radieschen",
+                        "name": "Radish"
+                      },
+                      {
+                        "itemId": "Rhabarber",
+                        "name": "Rhubarb"
+                      },
+                      {
+                        "itemId": "Rote Bete",
+                        "name": "Beets"
+                      },
+                      {
+                        "itemId": "Rucola",
+                        "name": "Arugula"
+                      },
+                      {
+                        "itemId": "Salat",
+                        "name": "Salad"
+                      },
+                      {
+                        "itemId": "Salbei",
+                        "name": "Sage"
+                      },
+                      {
+                        "itemId": "Schnittlauch",
+                        "name": "Chives"
+                      },
+                      {
+                        "itemId": "Sellerie",
+                        "name": "Celery"
+                      },
+                      {
+                        "itemId": "Spargel",
+                        "name": "Asparagus"
+                      },
+                      {
+                        "itemId": "Spinat",
+                        "name": "Spinach"
+                      },
+                      {
+                        "itemId": "Thymian",
+                        "name": "Thyme"
+                      },
+                      {
+                        "itemId": "Tomaten",
+                        "name": "Tomatoes"
+                      },
+                      {
+                        "itemId": "Trauben",
+                        "name": "Grapes"
+                      },
+                      {
+                        "itemId": "Wassermelone",
+                        "name": "Watermelon"
+                      },
+                      {
+                        "itemId": "Zitrone",
+                        "name": "Lemon"
+                      },
+                      {
+                        "itemId": "Zucchetti",
+                        "name": "Zucchini"
+                      },
+                      {
+                        "itemId": "Zwiebeln",
+                        "name": "Onions"
+                      },
+                      {
+                        "itemId": "getrocknete Tomaten",
+                        "name": "Sun-dried tomatoes"
+                      },
+                      {
+                        "itemId": "Äpfel",
+                        "name": "Apples"
+                      },
+                      {
+                        "itemId": "Süsskartoffeln",
+                        "name": "Sweet Potatoes"
+                      }
+                    ],
+                    "name": "Fruits & Vegetables",
+                    "sectionId": "Früchte & Gemüse"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Bagels",
+                        "name": "Bagels"
+                      },
+                      {
+                        "itemId": "Baguette",
+                        "name": "Baguette"
+                      },
+                      {
+                        "itemId": "Blätterteig",
+                        "name": "Puff pastry"
+                      },
+                      {
+                        "itemId": "Brot",
+                        "name": "Bread"
+                      },
+                      {
+                        "itemId": "Brot geschnitten",
+                        "name": "Sliced bread"
+                      },
+                      {
+                        "itemId": "Brötchen",
+                        "name": "Buns"
+                      },
+                      {
+                        "itemId": "Donuts",
+                        "name": "Donuts"
+                      },
+                      {
+                        "itemId": "Gipfeli",
+                        "name": "Croissant"
+                      },
+                      {
+                        "itemId": "Knäckebrot",
+                        "name": "Crispbread"
+                      },
+                      {
+                        "itemId": "Muffins",
+                        "name": "Muffins"
+                      },
+                      {
+                        "itemId": "Pancakes",
+                        "name": "Pancakes mix"
+                      },
+                      {
+                        "itemId": "Pastete",
+                        "name": "Pie"
+                      },
+                      {
+                        "itemId": "Pizzateig",
+                        "name": "Pizza dough"
+                      },
+                      {
+                        "itemId": "Scones",
+                        "name": "Scones"
+                      },
+                      {
+                        "itemId": "Semmel",
+                        "name": "Rolls"
+                      },
+                      {
+                        "itemId": "Toast",
+                        "name": "Toast"
+                      },
+                      {
+                        "itemId": "Tortillas",
+                        "name": "Tortillas"
+                      },
+                      {
+                        "itemId": "Waffeln",
+                        "name": "Waffles"
+                      },
+                      {
+                        "itemId": "Kürbiskuchen",
+                        "name": "Pumpkin Pie"
+                      },
+                      {
+                        "itemId": "Dinner Rolls",
+                        "name": "Dinner Rolls"
+                      }
+                    ],
+                    "name": "Bread & Pastries",
+                    "sectionId": "Brot & Gebäck"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Blauschimmelkäse",
+                        "name": "Blue cheese"
+                      },
+                      {
+                        "itemId": "Butter",
+                        "name": "Butter"
+                      },
+                      {
+                        "itemId": "Cheddar",
+                        "name": "Cheddar"
+                      },
+                      {
+                        "itemId": "Creme fraiche",
+                        "name": "Creme fraiche"
+                      },
+                      {
+                        "itemId": "Eier",
+                        "name": "Eggs"
+                      },
+                      {
+                        "itemId": "Feta",
+                        "name": "Feta"
+                      },
+                      {
+                        "itemId": "Frischkäse",
+                        "name": "Cream cheese"
+                      },
+                      {
+                        "itemId": "Gorgonzola",
+                        "name": "Gorgonzola"
+                      },
+                      {
+                        "itemId": "Hüttenkäse",
+                        "name": "Cottage cheese"
+                      },
+                      {
+                        "itemId": "Joghurt",
+                        "name": "Yogurt"
+                      },
+                      {
+                        "itemId": "Käse",
+                        "name": "Cheese"
+                      },
+                      {
+                        "itemId": "Margarine",
+                        "name": "Margarine"
+                      },
+                      {
+                        "itemId": "Mascarpone",
+                        "name": "Mascarpone"
+                      },
+                      {
+                        "itemId": "Milch",
+                        "name": "Milk"
+                      },
+                      {
+                        "itemId": "Mozzarella",
+                        "name": "Mozzarella"
+                      },
+                      {
+                        "itemId": "Parmesan",
+                        "name": "Parmesan"
+                      },
+                      {
+                        "itemId": "Quark",
+                        "name": "Quark"
+                      },
+                      {
+                        "itemId": "Rahm",
+                        "name": "Cream"
+                      },
+                      {
+                        "itemId": "Reibkäse",
+                        "name": "Grated cheese"
+                      },
+                      {
+                        "itemId": "Ricotta",
+                        "name": "Ricotta"
+                      },
+                      {
+                        "itemId": "Sauerrahm",
+                        "name": "Sour cream"
+                      },
+                      {
+                        "itemId": "Soya Milch",
+                        "name": "Soy Milk"
+                      }
+                    ],
+                    "name": "Milk & Cheese",
+                    "sectionId": "Milch & Käse"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Aufschnitt",
+                        "name": "Cold cuts"
+                      },
+                      {
+                        "itemId": "Austern",
+                        "name": "Oysters"
+                      },
+                      {
+                        "itemId": "Bratwurst",
+                        "name": "Bratwurst"
+                      },
+                      {
+                        "itemId": "Fisch",
+                        "name": "Fish"
+                      },
+                      {
+                        "itemId": "Fleisch",
+                        "name": "Meat"
+                      },
+                      {
+                        "itemId": "Garnelen",
+                        "name": "Shrimp"
+                      },
+                      {
+                        "itemId": "Hackfleisch",
+                        "name": "Ground meat"
+                      },
+                      {
+                        "itemId": "Hot Dog",
+                        "name": "Hot Dog"
+                      },
+                      {
+                        "itemId": "Hummer",
+                        "name": "Lobster"
+                      },
+                      {
+                        "itemId": "Kalbfleisch",
+                        "name": "Veal"
+                      },
+                      {
+                        "itemId": "Lachs",
+                        "name": "Salmon"
+                      },
+                      {
+                        "itemId": "Lamm",
+                        "name": "Lamb"
+                      },
+                      {
+                        "itemId": "Muscheln",
+                        "name": "Mussels"
+                      },
+                      {
+                        "itemId": "Poulet",
+                        "name": "Chicken"
+                      },
+                      {
+                        "itemId": "Pouletbrüstli",
+                        "name": "Chicken breast"
+                      },
+                      {
+                        "itemId": "Putenbrust",
+                        "name": "Turkey breast"
+                      },
+                      {
+                        "itemId": "Rindfleisch",
+                        "name": "Beef"
+                      },
+                      {
+                        "itemId": "Rindsgeschnetzeltes",
+                        "name": "Sliced beef"
+                      },
+                      {
+                        "itemId": "Rohschinken",
+                        "name": "Prosciutto"
+                      },
+                      {
+                        "itemId": "Salami",
+                        "name": "Salami"
+                      },
+                      {
+                        "itemId": "Sardellen",
+                        "name": "Anchovies"
+                      },
+                      {
+                        "itemId": "Schinken",
+                        "name": "Ham"
+                      },
+                      {
+                        "itemId": "Schweinefleisch",
+                        "name": "Pork"
+                      },
+                      {
+                        "itemId": "Speck",
+                        "name": "Bacon"
+                      },
+                      {
+                        "itemId": "Steak",
+                        "name": "Steak"
+                      },
+                      {
+                        "itemId": "Thunfisch",
+                        "name": "Tuna"
+                      },
+                      {
+                        "itemId": "Truthahn",
+                        "name": "Turkey"
+                      },
+                      {
+                        "itemId": "Wurst",
+                        "name": "Sausage"
+                      },
+                      {
+                        "itemId": "Würste",
+                        "name": "Sausages"
+                      }
+                    ],
+                    "name": "Meat & Fish",
+                    "sectionId": "Fleisch & Fisch"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Ahornsirup",
+                        "name": "Maple syrup"
+                      },
+                      {
+                        "itemId": "Apfelmus",
+                        "name": "Apple sauce"
+                      },
+                      {
+                        "itemId": "BBQ Sauce",
+                        "name": "BBQ sauce"
+                      },
+                      {
+                        "itemId": "Backpulver",
+                        "name": "Baking powder"
+                      },
+                      {
+                        "itemId": "Balsamico",
+                        "name": "Balsamic vinegar"
+                      },
+                      {
+                        "itemId": "Baumnüsse",
+                        "name": "Walnuts"
+                      },
+                      {
+                        "itemId": "Bicarbonate Soda",
+                        "name": "Baking soda"
+                      },
+                      {
+                        "itemId": "Bohnen",
+                        "name": "Beans"
+                      },
+                      {
+                        "itemId": "Bouillon",
+                        "name": "Stock"
+                      },
+                      {
+                        "itemId": "Bratensauce",
+                        "name": "Gravy"
+                      },
+                      {
+                        "itemId": "Chutney",
+                        "name": "Chutney"
+                      },
+                      {
+                        "itemId": "Dip",
+                        "name": "Dip"
+                      },
+                      {
+                        "itemId": "Erdnussbutter",
+                        "name": "Peanut butter"
+                      },
+                      {
+                        "itemId": "Essig",
+                        "name": "Vinegar"
+                      },
+                      {
+                        "itemId": "Haselnüsse",
+                        "name": "Hazelnuts"
+                      },
+                      {
+                        "itemId": "Hefe",
+                        "name": "Yeast"
+                      },
+                      {
+                        "itemId": "Ketchup",
+                        "name": "Ketchup"
+                      },
+                      {
+                        "itemId": "Kokosmilch",
+                        "name": "Coconut milk"
+                      },
+                      {
+                        "itemId": "Linsen",
+                        "name": "Lentils"
+                      },
+                      {
+                        "itemId": "Mandeln",
+                        "name": "Almonds"
+                      },
+                      {
+                        "itemId": "Mayonnaise",
+                        "name": "Mayonnaise"
+                      },
+                      {
+                        "itemId": "Nüsse",
+                        "name": "Nuts"
+                      },
+                      {
+                        "itemId": "Olivenöl",
+                        "name": "Olive oil"
+                      },
+                      {
+                        "itemId": "Oregano",
+                        "name": "Oregano"
+                      },
+                      {
+                        "itemId": "Paniermehl",
+                        "name": "Breadcrumbs"
+                      },
+                      {
+                        "itemId": "Paprikapulver",
+                        "name": "Paprika"
+                      },
+                      {
+                        "itemId": "Pasta Sauce",
+                        "name": "Pasta sauce"
+                      },
+                      {
+                        "itemId": "Pelati",
+                        "name": "Canned tomatoes"
+                      },
+                      {
+                        "itemId": "Pfefferkörner",
+                        "name": "Peppercorns"
+                      },
+                      {
+                        "itemId": "Pfeffer",
+                        "name": "Black Pepper"
+                      },
+                      {
+                        "itemId": "Pinienkerne",
+                        "name": "Pine nuts"
+                      },
+                      {
+                        "itemId": "Puderzucker",
+                        "name": "Icing sugar"
+                      },
+                      {
+                        "itemId": "Rosmarin",
+                        "name": "Rosemary"
+                      },
+                      {
+                        "itemId": "Salatsauce",
+                        "name": "Salad dressing"
+                      },
+                      {
+                        "itemId": "Salz",
+                        "name": "Salt"
+                      },
+                      {
+                        "itemId": "Scharfe Sauce",
+                        "name": "Hot sauce"
+                      },
+                      {
+                        "itemId": "Senf",
+                        "name": "Mustard"
+                      },
+                      {
+                        "itemId": "Soyasauce",
+                        "name": "Soy sauce"
+                      },
+                      {
+                        "itemId": "Speisestärke",
+                        "name": "Cornflour"
+                      },
+                      {
+                        "itemId": "Tomatenmark",
+                        "name": "Tomato purée"
+                      },
+                      {
+                        "itemId": "Tomatensauce",
+                        "name": "Tomato sauce"
+                      },
+                      {
+                        "itemId": "Vanillezucker",
+                        "name": "Vanilla"
+                      },
+                      {
+                        "itemId": "Zimt",
+                        "name": "Cinnamon"
+                      },
+                      {
+                        "itemId": "Zucker",
+                        "name": "Sugar"
+                      },
+                      {
+                        "itemId": "Öl",
+                        "name": "Oil"
+                      },
+                      {
+                        "itemId": "Preiselbeer Sauce",
+                        "name": "Cranberry Sauce"
+                      },
+                      {
+                        "itemId": "Kartoffelstock",
+                        "name": "Mashed Potatoes"
+                      },
+                      {
+                        "itemId": "Cornbread Stuffing",
+                        "name": "Cornbread Stuffing"
+                      }
+                    ],
+                    "name": "Ingredients & Spices",
+                    "sectionId": "Zutaten & Gewürze"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Baked Beans",
+                        "name": "Baked Beans"
+                      },
+                      {
+                        "itemId": "Burritos",
+                        "name": "Burritos"
+                      },
+                      {
+                        "itemId": "Chicken Wings",
+                        "name": "Chicken Wings"
+                      },
+                      {
+                        "itemId": "Chinese To Go",
+                        "name": "Chinese food"
+                      },
+                      {
+                        "itemId": "Fischstäbli",
+                        "name": "Fish sticks"
+                      },
+                      {
+                        "itemId": "Gemüse gefroren",
+                        "name": "Frozen vegetables"
+                      },
+                      {
+                        "itemId": "Glacé",
+                        "name": "Ice cream"
+                      },
+                      {
+                        "itemId": "Indian To Go",
+                        "name": "Indian food"
+                      },
+                      {
+                        "itemId": "Italian To Go",
+                        "name": "Italian food"
+                      },
+                      {
+                        "itemId": "Knödel",
+                        "name": "Dumplings"
+                      },
+                      {
+                        "itemId": "Lasagne",
+                        "name": "Lasagna"
+                      },
+                      {
+                        "itemId": "Mexican To Go",
+                        "name": "Mexican food"
+                      },
+                      {
+                        "itemId": "Pizza",
+                        "name": "Pizza"
+                      },
+                      {
+                        "itemId": "Pommes Frites",
+                        "name": "French fries"
+                      },
+                      {
+                        "itemId": "Suppe",
+                        "name": "Soup"
+                      },
+                      {
+                        "itemId": "TV-Dinner",
+                        "name": "TV dinner"
+                      },
+                      {
+                        "itemId": "Thai To Go",
+                        "name": "Thai food"
+                      }
+                    ],
+                    "name": "Frozen & Convenience",
+                    "sectionId": "Fertig- & Tiefkühlprodukte"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Basmatireis",
+                        "name": "Basmati rice"
+                      },
+                      {
+                        "itemId": "Corn Flakes",
+                        "name": "Corn flakes"
+                      },
+                      {
+                        "itemId": "Couscous",
+                        "name": "Couscous"
+                      },
+                      {
+                        "itemId": "Frühstückszerealien",
+                        "name": "Cereal"
+                      },
+                      {
+                        "itemId": "Griess",
+                        "name": "Semolina"
+                      },
+                      {
+                        "itemId": "Haferflocken",
+                        "name": "Oatmeal"
+                      },
+                      {
+                        "itemId": "Kichererbsen",
+                        "name": "Chickpeas"
+                      },
+                      {
+                        "itemId": "Mehl",
+                        "name": "Flour"
+                      },
+                      {
+                        "itemId": "Müesli",
+                        "name": "Muesli"
+                      },
+                      {
+                        "itemId": "Nudeln",
+                        "name": "Pasta"
+                      },
+                      {
+                        "itemId": "Pasta",
+                        "name": "Noodles"
+                      },
+                      {
+                        "itemId": "Penne",
+                        "name": "Penne"
+                      },
+                      {
+                        "itemId": "Reis",
+                        "name": "Rice"
+                      },
+                      {
+                        "itemId": "Risottoreis",
+                        "name": "Risotto rice"
+                      },
+                      {
+                        "itemId": "Spaghetti",
+                        "name": "Spaghetti"
+                      },
+                      {
+                        "itemId": "Tofu",
+                        "name": "Tofu"
+                      },
+                      {
+                        "itemId": "Wildreis",
+                        "name": "Wild rice"
+                      }
+                    ],
+                    "name": "Grain Products",
+                    "sectionId": "Getreideprodukte"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Brezeln",
+                        "name": "Pretzels"
+                      },
+                      {
+                        "itemId": "Bring!",
+                        "name": "Bring!"
+                      },
+                      {
+                        "itemId": "Dessert",
+                        "name": "Dessert"
+                      },
+                      {
+                        "itemId": "Dörrobst",
+                        "name": "Dried fruit"
+                      },
+                      {
+                        "itemId": "Erdnüsse",
+                        "name": "Peanuts"
+                      },
+                      {
+                        "itemId": "Gelee",
+                        "name": "Jello"
+                      },
+                      {
+                        "itemId": "Getreideriegel",
+                        "name": "Cereal bar"
+                      },
+                      {
+                        "itemId": "Guetzli",
+                        "name": "Christmas cookies"
+                      },
+                      {
+                        "itemId": "Honig",
+                        "name": "Honey"
+                      },
+                      {
+                        "itemId": "Kaugummi",
+                        "name": "Chewing gum"
+                      },
+                      {
+                        "itemId": "Kekse",
+                        "name": "Cookies"
+                      },
+                      {
+                        "itemId": "Konfitüre",
+                        "name": "Jam"
+                      },
+                      {
+                        "itemId": "Kräcker",
+                        "name": "Crackers"
+                      },
+                      {
+                        "itemId": "Kuchen",
+                        "name": "Cake"
+                      },
+                      {
+                        "itemId": "Lebkuchen",
+                        "name": "Gingerbread"
+                      },
+                      {
+                        "itemId": "Marshmallows",
+                        "name": "Marshmallows"
+                      },
+                      {
+                        "itemId": "Nougatcreme",
+                        "name": "Nougat cream"
+                      },
+                      {
+                        "itemId": "Pommes Chips",
+                        "name": "Chips"
+                      },
+                      {
+                        "itemId": "Pop Corn",
+                        "name": "Pop corn"
+                      },
+                      {
+                        "itemId": "Schokolade",
+                        "name": "Chocolate"
+                      },
+                      {
+                        "itemId": "Snacks",
+                        "name": "Snacks"
+                      },
+                      {
+                        "itemId": "Süssigkeiten",
+                        "name": "Candy"
+                      },
+                      {
+                        "itemId": "Tortilla Chips",
+                        "name": "Tortilla Chips"
+                      },
+                      {
+                        "itemId": "Vielen Dank",
+                        "name": "Thank you"
+                      }
+                    ],
+                    "name": "Snacks & Sweets",
+                    "sectionId": "Snacks & Süsswaren"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Apfelsaft",
+                        "name": "Apple juice"
+                      },
+                      {
+                        "itemId": "Bier",
+                        "name": "Beer"
+                      },
+                      {
+                        "itemId": "Champagner",
+                        "name": "Champagne"
+                      },
+                      {
+                        "itemId": "Cidre",
+                        "name": "Cider"
+                      },
+                      {
+                        "itemId": "Cola",
+                        "name": "Cola"
+                      },
+                      {
+                        "itemId": "Cola Light",
+                        "name": "Diet Cola"
+                      },
+                      {
+                        "itemId": "Eistee",
+                        "name": "Iced tea"
+                      },
+                      {
+                        "itemId": "Energy Drink",
+                        "name": "Energy drink"
+                      },
+                      {
+                        "itemId": "Fruchtsaft",
+                        "name": "Fruit juice"
+                      },
+                      {
+                        "itemId": "Getränke",
+                        "name": "Beverages"
+                      },
+                      {
+                        "itemId": "Gin",
+                        "name": "Gin"
+                      },
+                      {
+                        "itemId": "Ginger Ale",
+                        "name": "Ginger Ale"
+                      },
+                      {
+                        "itemId": "Kaffee",
+                        "name": "Coffee"
+                      },
+                      {
+                        "itemId": "Kaffeebohnen",
+                        "name": "Coffee beans"
+                      },
+                      {
+                        "itemId": "Kaffeepads",
+                        "name": "Coffee pads"
+                      },
+                      {
+                        "itemId": "Kaffeekapseln",
+                        "name": "Coffee capsules"
+                      },
+                      {
+                        "itemId": "Kakao",
+                        "name": "Hot chocolate"
+                      },
+                      {
+                        "itemId": "Light Limonade",
+                        "name": "Diet soda"
+                      },
+                      {
+                        "itemId": "Limonade",
+                        "name": "Soda"
+                      },
+                      {
+                        "itemId": "Mineralwasser",
+                        "name": "Bottled water"
+                      },
+                      {
+                        "itemId": "Orangensaft",
+                        "name": "Orange juice"
+                      },
+                      {
+                        "itemId": "Prosecco",
+                        "name": "Prosecco"
+                      },
+                      {
+                        "itemId": "Rotwein",
+                        "name": "Red wine"
+                      },
+                      {
+                        "itemId": "Rum",
+                        "name": "Rum"
+                      },
+                      {
+                        "itemId": "Schnaps",
+                        "name": "Spirits"
+                      },
+                      {
+                        "itemId": "Smoothie",
+                        "name": "Smoothie"
+                      },
+                      {
+                        "itemId": "Sportgetränk",
+                        "name": "Sports drink"
+                      },
+                      {
+                        "itemId": "Tee",
+                        "name": "Tea"
+                      },
+                      {
+                        "itemId": "Tonic Water",
+                        "name": "Tonic Water"
+                      },
+                      {
+                        "itemId": "Vodka",
+                        "name": "Vodka"
+                      },
+                      {
+                        "itemId": "Wasser",
+                        "name": "Water"
+                      },
+                      {
+                        "itemId": "Weisswein",
+                        "name": "White wine"
+                      },
+                      {
+                        "itemId": "Wermuth",
+                        "name": "Sweet Vermouth"
+                      },
+                      {
+                        "itemId": "Whisky",
+                        "name": "Whiskey"
+                      },
+                      {
+                        "itemId": "Zigaretten",
+                        "name": "Cigarettes"
+                      }
+                    ],
+                    "name": "Beverages",
+                    "sectionId": "Getränke & Tabak"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Abfallsäcke",
+                        "name": "Garbage bags"
+                      },
+                      {
+                        "itemId": "Abwaschmittel",
+                        "name": "Dishwashing liquid"
+                      },
+                      {
+                        "itemId": "Alufolie",
+                        "name": "Aluminum foil"
+                      },
+                      {
+                        "itemId": "Babynahrung",
+                        "name": "Baby food"
+                      },
+                      {
+                        "itemId": "Backpapier",
+                        "name": "Parchment paper"
+                      },
+                      {
+                        "itemId": "Badreiniger",
+                        "name": "Bathroom cleaner"
+                      },
+                      {
+                        "itemId": "Batterien",
+                        "name": "Batteries"
+                      },
+                      {
+                        "itemId": "Blumen",
+                        "name": "Flowers"
+                      },
+                      {
+                        "itemId": "Frischhaltefolie",
+                        "name": "Plastic wrap"
+                      },
+                      {
+                        "itemId": "Geschenk",
+                        "name": "Gift"
+                      },
+                      {
+                        "itemId": "Geschenkpapier",
+                        "name": "Wrapping paper"
+                      },
+                      {
+                        "itemId": "Geschirrsalz",
+                        "name": "Dishwasher salt"
+                      },
+                      {
+                        "itemId": "Geschirrtabs",
+                        "name": "Dishwasher tabs"
+                      },
+                      {
+                        "itemId": "Glasreiniger",
+                        "name": "Glass cleaner"
+                      },
+                      {
+                        "itemId": "Glühbirne",
+                        "name": "Light bulb"
+                      },
+                      {
+                        "itemId": "Haushaltspapier",
+                        "name": "Paper towels"
+                      },
+                      {
+                        "itemId": "Kerzen",
+                        "name": "Candles"
+                      },
+                      {
+                        "itemId": "Putzmittel",
+                        "name": "Cleaning supplies"
+                      },
+                      {
+                        "itemId": "Schwamm",
+                        "name": "Sponge"
+                      },
+                      {
+                        "itemId": "Servietten",
+                        "name": "Napkins"
+                      },
+                      {
+                        "itemId": "WC-Reiniger",
+                        "name": "Toilet cleaner"
+                      },
+                      {
+                        "itemId": "Waschmittel",
+                        "name": "Laundry detergent"
+                      },
+                      {
+                        "itemId": "Weichspüler",
+                        "name": "Fabric softener"
+                      }
+                    ],
+                    "name": "Household",
+                    "sectionId": "Haushalt & Gesundheit"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Binden",
+                        "name": "Pads"
+                      },
+                      {
+                        "itemId": "Bodylotion",
+                        "name": "Body lotion"
+                      },
+                      {
+                        "itemId": "Conditioner",
+                        "name": "Conditioner"
+                      },
+                      {
+                        "itemId": "Deo",
+                        "name": "Deodorant"
+                      },
+                      {
+                        "itemId": "Duschmittel",
+                        "name": "Shower gel"
+                      },
+                      {
+                        "itemId": "Feuchttücher",
+                        "name": "Wet wipes"
+                      },
+                      {
+                        "itemId": "Gesichtscreme",
+                        "name": "Face cream"
+                      },
+                      {
+                        "itemId": "Haargel",
+                        "name": "Hair gel"
+                      },
+                      {
+                        "itemId": "Haarspray",
+                        "name": "Hair spray"
+                      },
+                      {
+                        "itemId": "Handcreme",
+                        "name": "Hand cream"
+                      },
+                      {
+                        "itemId": "Insektenschutzmittel",
+                        "name": "Insect Repellent"
+                      },
+                      {
+                        "itemId": "Kondome",
+                        "name": "Condoms"
+                      },
+                      {
+                        "itemId": "Kosmetiktücher",
+                        "name": "Facial tissues"
+                      },
+                      {
+                        "itemId": "Linsenmittel",
+                        "name": "Contact lens solution"
+                      },
+                      {
+                        "itemId": "Lippenpomade",
+                        "name": "Lip balm"
+                      },
+                      {
+                        "itemId": "Makeup Entferner",
+                        "name": "Makeup remover"
+                      },
+                      {
+                        "itemId": "Mundspülung",
+                        "name": "Mouthwash"
+                      },
+                      {
+                        "itemId": "Nagellack",
+                        "name": "Nail polish"
+                      },
+                      {
+                        "itemId": "Nagellackentferner",
+                        "name": "Nail polish remover"
+                      },
+                      {
+                        "itemId": "Pflaster",
+                        "name": "Bandaids"
+                      },
+                      {
+                        "itemId": "Rasierer",
+                        "name": "Razor"
+                      },
+                      {
+                        "itemId": "Rasierklingen",
+                        "name": "Razor blades"
+                      },
+                      {
+                        "itemId": "Rasierschaum",
+                        "name": "Shaving cream"
+                      },
+                      {
+                        "itemId": "Schmerzmittel",
+                        "name": "Pain reliever"
+                      },
+                      {
+                        "itemId": "Seife",
+                        "name": "Soap"
+                      },
+                      {
+                        "itemId": "Shampoo",
+                        "name": "Shampoo"
+                      },
+                      {
+                        "itemId": "Sonnencreme",
+                        "name": "Sunblock"
+                      },
+                      {
+                        "itemId": "Tampons",
+                        "name": "Tampons"
+                      },
+                      {
+                        "itemId": "Taschentücher",
+                        "name": "Tissues"
+                      },
+                      {
+                        "itemId": "Vitamine",
+                        "name": "Vitamins"
+                      },
+                      {
+                        "itemId": "WC-Papier",
+                        "name": "Toilet paper"
+                      },
+                      {
+                        "itemId": "Watterondellen",
+                        "name": "Cotton pads"
+                      },
+                      {
+                        "itemId": "Wattestäbchen",
+                        "name": "Cotton swabs"
+                      },
+                      {
+                        "itemId": "Windeln",
+                        "name": "Diapers"
+                      },
+                      {
+                        "itemId": "Zahnbürsten",
+                        "name": "Toothbrush"
+                      },
+                      {
+                        "itemId": "Zahnpasta",
+                        "name": "Toothpaste"
+                      },
+                      {
+                        "itemId": "Zahnseide",
+                        "name": "Dental floss"
+                      }
+                    ],
+                    "name": "Care & Health",
+                    "sectionId": "Pflege & Gesundheit"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Fischfutter",
+                        "name": "Fish food"
+                      },
+                      {
+                        "itemId": "Hundefutter",
+                        "name": "Dog food"
+                      },
+                      {
+                        "itemId": "Hundesnack",
+                        "name": "Dog treats"
+                      },
+                      {
+                        "itemId": "Katzenfutter",
+                        "name": "Cat food"
+                      },
+                      {
+                        "itemId": "Katzensnack",
+                        "name": "Cat treats"
+                      },
+                      {
+                        "itemId": "Katzenstreu",
+                        "name": "Cat litter"
+                      },
+                      {
+                        "itemId": "Vogelfutter",
+                        "name": "Bird food"
+                      }
+                    ],
+                    "name": "Pet Supplies",
+                    "sectionId": "Tierbedarf"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Blumenerde",
+                        "name": "Potting soil"
+                      },
+                      {
+                        "itemId": "Grill",
+                        "name": "Grill"
+                      },
+                      {
+                        "itemId": "Sonnenschirm",
+                        "name": "Parasol"
+                      },
+                      {
+                        "itemId": "Dünger",
+                        "name": "Fertilizer"
+                      },
+                      {
+                        "itemId": "Töpfe",
+                        "name": "Pots"
+                      },
+                      {
+                        "itemId": "Gartenwerkzeug",
+                        "name": "Garden tool"
+                      },
+                      {
+                        "itemId": "Samen",
+                        "name": "Seeds"
+                      },
+                      {
+                        "itemId": "Propangas",
+                        "name": "Propane"
+                      },
+                      {
+                        "itemId": "Holzkohle",
+                        "name": "Charcoal"
+                      },
+                      {
+                        "itemId": "Nägel",
+                        "name": "Nails"
+                      },
+                      {
+                        "itemId": "Schrauben",
+                        "name": "Bolts"
+                      },
+                      {
+                        "itemId": "Pinsel",
+                        "name": "Brush"
+                      },
+                      {
+                        "itemId": "Giesskanne",
+                        "name": "Watering can"
+                      },
+                      {
+                        "itemId": "Pflanzen",
+                        "name": "Plants"
+                      },
+                      {
+                        "itemId": "Rasenmäher",
+                        "name": "Lawnmower"
+                      }
+                    ],
+                    "name": "Home & Garden",
+                    "sectionId": "Baumarkt & Garten"
+                  }
+                ]
+              },
+              "language": "en-US"
+            }
+          ],
+          "listInfosWithItems": [
+            {
+              "itemsToPurchase": [],
+              "language": "en-US",
+              "list": {
+                "listUuid": "6c84fb90-12c4-11e1-840d-7b25c5ee775a",
+                "name": "Shopping",
+                "theme": "ch.publisheria.bring.theme.home"
+              }
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "arguments": {},
+            "name": "get-lists"
+          }
+        },
+        {
+          "callsTool": {
+            "name": "add-items",
+            "arguments": {
+              "list.listUuid": "6c84fb90-12c4-11e1-840d-7b25c5ee775a",
+              "list.name": "Shopping",
+              "items": [
+                {
+                  "includes": "Spaghetti"
+                },
+                {
+                  "includes": "Eggs"
+                },
+                {
+                  "includes": "Parmesan"
+                },
+                {
+                  "includes": "Bacon"
+                },
+                {
+                  "includes": "Black Pepper"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@bring What do I need to buy to make a Negroni? Let's add it to the list.",
+      "mocks": {
+        "add-items": "Successfully called \"add-items\"",
+        "get-lists": {
+          "catalogs": [
+            {
+              "catalog": {
+                "sections": [
+                  {
+                    "items": [
+                      {
+                        "itemId": "Ananas",
+                        "name": "Pineapple"
+                      },
+                      {
+                        "itemId": "Aprikosen",
+                        "name": "Apricot"
+                      },
+                      {
+                        "itemId": "Artischocken",
+                        "name": "Artichokes"
+                      },
+                      {
+                        "itemId": "Aubergine",
+                        "name": "Eggplant"
+                      },
+                      {
+                        "itemId": "Avocado",
+                        "name": "Avocado"
+                      },
+                      {
+                        "itemId": "Bananen",
+                        "name": "Bananas"
+                      },
+                      {
+                        "itemId": "Basilikum",
+                        "name": "Basil"
+                      },
+                      {
+                        "itemId": "Beeren",
+                        "name": "Berries"
+                      },
+                      {
+                        "itemId": "Birnen",
+                        "name": "Pears"
+                      },
+                      {
+                        "itemId": "Blumenkohl",
+                        "name": "Cauliflower"
+                      },
+                      {
+                        "itemId": "Brokkoli",
+                        "name": "Broccoli"
+                      },
+                      {
+                        "itemId": "Brombeeren",
+                        "name": "Blackberries"
+                      },
+                      {
+                        "itemId": "Cherrytomaten",
+                        "name": "Cherry tomatoes"
+                      },
+                      {
+                        "itemId": "Datteln",
+                        "name": "Dates"
+                      },
+                      {
+                        "itemId": "Erbsen",
+                        "name": "Peas"
+                      },
+                      {
+                        "itemId": "Erdbeeren",
+                        "name": "Strawberries"
+                      },
+                      {
+                        "itemId": "Feigen",
+                        "name": "Figs"
+                      },
+                      {
+                        "itemId": "Fenchel",
+                        "name": "Fennel"
+                      },
+                      {
+                        "itemId": "Früchte",
+                        "name": "Fruit"
+                      },
+                      {
+                        "itemId": "Frühlingszwiebeln",
+                        "name": "Scallions"
+                      },
+                      {
+                        "itemId": "Gemüse",
+                        "name": "Vegetables"
+                      },
+                      {
+                        "itemId": "Grapefruit",
+                        "name": "Grapefruit"
+                      },
+                      {
+                        "itemId": "Gurke",
+                        "name": "Cucumber"
+                      },
+                      {
+                        "itemId": "Heidelbeeren",
+                        "name": "Blueberries"
+                      },
+                      {
+                        "itemId": "Himbeeren",
+                        "name": "Raspberries"
+                      },
+                      {
+                        "itemId": "Ingwer",
+                        "name": "Ginger"
+                      },
+                      {
+                        "itemId": "Karotten",
+                        "name": "Carrots"
+                      },
+                      {
+                        "itemId": "Kartoffeln",
+                        "name": "Potatoes"
+                      },
+                      {
+                        "itemId": "Kirschen",
+                        "name": "Cherries"
+                      },
+                      {
+                        "itemId": "Kiwi",
+                        "name": "Kiwis"
+                      },
+                      {
+                        "itemId": "Knoblauch",
+                        "name": "Garlic"
+                      },
+                      {
+                        "itemId": "Kohl",
+                        "name": "Cabbage"
+                      },
+                      {
+                        "itemId": "Koriander",
+                        "name": "Cilantro"
+                      },
+                      {
+                        "itemId": "Kräuter",
+                        "name": "Herbs"
+                      },
+                      {
+                        "itemId": "Kürbis",
+                        "name": "Squash"
+                      },
+                      {
+                        "itemId": "Lattich",
+                        "name": "Lettuce"
+                      },
+                      {
+                        "itemId": "Lauch",
+                        "name": "Leek"
+                      },
+                      {
+                        "itemId": "Limette",
+                        "name": "Lime"
+                      },
+                      {
+                        "itemId": "Mais",
+                        "name": "Sweet corn"
+                      },
+                      {
+                        "itemId": "Mandarinen",
+                        "name": "Mandarins"
+                      },
+                      {
+                        "itemId": "Mango",
+                        "name": "Mango"
+                      },
+                      {
+                        "itemId": "Melone",
+                        "name": "Melon"
+                      },
+                      {
+                        "itemId": "Moosberen",
+                        "name": "Cranberries"
+                      },
+                      {
+                        "itemId": "Nektarine",
+                        "name": "Nectarine"
+                      },
+                      {
+                        "itemId": "Oliven",
+                        "name": "Olives"
+                      },
+                      {
+                        "itemId": "Orange",
+                        "name": "Orange"
+                      },
+                      {
+                        "itemId": "Passionsfrucht",
+                        "name": "Passion fruit"
+                      },
+                      {
+                        "itemId": "Peperoncini",
+                        "name": "Chillies"
+                      },
+                      {
+                        "itemId": "Peperoni",
+                        "name": "Bell pepper"
+                      },
+                      {
+                        "itemId": "Petersilie",
+                        "name": "Parsley"
+                      },
+                      {
+                        "itemId": "Pfefferminze",
+                        "name": "Mint"
+                      },
+                      {
+                        "itemId": "Pfirsich",
+                        "name": "Peach"
+                      },
+                      {
+                        "itemId": "Pflaumen",
+                        "name": "Prunes"
+                      },
+                      {
+                        "itemId": "Pilze",
+                        "name": "Mushrooms"
+                      },
+                      {
+                        "itemId": "Radieschen",
+                        "name": "Radish"
+                      },
+                      {
+                        "itemId": "Rhabarber",
+                        "name": "Rhubarb"
+                      },
+                      {
+                        "itemId": "Rote Bete",
+                        "name": "Beets"
+                      },
+                      {
+                        "itemId": "Rucola",
+                        "name": "Arugula"
+                      },
+                      {
+                        "itemId": "Salat",
+                        "name": "Salad"
+                      },
+                      {
+                        "itemId": "Salbei",
+                        "name": "Sage"
+                      },
+                      {
+                        "itemId": "Schnittlauch",
+                        "name": "Chives"
+                      },
+                      {
+                        "itemId": "Sellerie",
+                        "name": "Celery"
+                      },
+                      {
+                        "itemId": "Spargel",
+                        "name": "Asparagus"
+                      },
+                      {
+                        "itemId": "Spinat",
+                        "name": "Spinach"
+                      },
+                      {
+                        "itemId": "Thymian",
+                        "name": "Thyme"
+                      },
+                      {
+                        "itemId": "Tomaten",
+                        "name": "Tomatoes"
+                      },
+                      {
+                        "itemId": "Trauben",
+                        "name": "Grapes"
+                      },
+                      {
+                        "itemId": "Wassermelone",
+                        "name": "Watermelon"
+                      },
+                      {
+                        "itemId": "Zitrone",
+                        "name": "Lemon"
+                      },
+                      {
+                        "itemId": "Zucchetti",
+                        "name": "Zucchini"
+                      },
+                      {
+                        "itemId": "Zwiebeln",
+                        "name": "Onions"
+                      },
+                      {
+                        "itemId": "getrocknete Tomaten",
+                        "name": "Sun-dried tomatoes"
+                      },
+                      {
+                        "itemId": "Äpfel",
+                        "name": "Apples"
+                      },
+                      {
+                        "itemId": "Süsskartoffeln",
+                        "name": "Sweet Potatoes"
+                      }
+                    ],
+                    "name": "Fruits & Vegetables",
+                    "sectionId": "Früchte & Gemüse"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Bagels",
+                        "name": "Bagels"
+                      },
+                      {
+                        "itemId": "Baguette",
+                        "name": "Baguette"
+                      },
+                      {
+                        "itemId": "Blätterteig",
+                        "name": "Puff pastry"
+                      },
+                      {
+                        "itemId": "Brot",
+                        "name": "Bread"
+                      },
+                      {
+                        "itemId": "Brot geschnitten",
+                        "name": "Sliced bread"
+                      },
+                      {
+                        "itemId": "Brötchen",
+                        "name": "Buns"
+                      },
+                      {
+                        "itemId": "Donuts",
+                        "name": "Donuts"
+                      },
+                      {
+                        "itemId": "Gipfeli",
+                        "name": "Croissant"
+                      },
+                      {
+                        "itemId": "Knäckebrot",
+                        "name": "Crispbread"
+                      },
+                      {
+                        "itemId": "Muffins",
+                        "name": "Muffins"
+                      },
+                      {
+                        "itemId": "Pancakes",
+                        "name": "Pancakes mix"
+                      },
+                      {
+                        "itemId": "Pastete",
+                        "name": "Pie"
+                      },
+                      {
+                        "itemId": "Pizzateig",
+                        "name": "Pizza dough"
+                      },
+                      {
+                        "itemId": "Scones",
+                        "name": "Scones"
+                      },
+                      {
+                        "itemId": "Semmel",
+                        "name": "Rolls"
+                      },
+                      {
+                        "itemId": "Toast",
+                        "name": "Toast"
+                      },
+                      {
+                        "itemId": "Tortillas",
+                        "name": "Tortillas"
+                      },
+                      {
+                        "itemId": "Waffeln",
+                        "name": "Waffles"
+                      },
+                      {
+                        "itemId": "Kürbiskuchen",
+                        "name": "Pumpkin Pie"
+                      },
+                      {
+                        "itemId": "Dinner Rolls",
+                        "name": "Dinner Rolls"
+                      }
+                    ],
+                    "name": "Bread & Pastries",
+                    "sectionId": "Brot & Gebäck"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Blauschimmelkäse",
+                        "name": "Blue cheese"
+                      },
+                      {
+                        "itemId": "Butter",
+                        "name": "Butter"
+                      },
+                      {
+                        "itemId": "Cheddar",
+                        "name": "Cheddar"
+                      },
+                      {
+                        "itemId": "Creme fraiche",
+                        "name": "Creme fraiche"
+                      },
+                      {
+                        "itemId": "Eier",
+                        "name": "Eggs"
+                      },
+                      {
+                        "itemId": "Feta",
+                        "name": "Feta"
+                      },
+                      {
+                        "itemId": "Frischkäse",
+                        "name": "Cream cheese"
+                      },
+                      {
+                        "itemId": "Gorgonzola",
+                        "name": "Gorgonzola"
+                      },
+                      {
+                        "itemId": "Hüttenkäse",
+                        "name": "Cottage cheese"
+                      },
+                      {
+                        "itemId": "Joghurt",
+                        "name": "Yogurt"
+                      },
+                      {
+                        "itemId": "Käse",
+                        "name": "Cheese"
+                      },
+                      {
+                        "itemId": "Margarine",
+                        "name": "Margarine"
+                      },
+                      {
+                        "itemId": "Mascarpone",
+                        "name": "Mascarpone"
+                      },
+                      {
+                        "itemId": "Milch",
+                        "name": "Milk"
+                      },
+                      {
+                        "itemId": "Mozzarella",
+                        "name": "Mozzarella"
+                      },
+                      {
+                        "itemId": "Parmesan",
+                        "name": "Parmesan"
+                      },
+                      {
+                        "itemId": "Quark",
+                        "name": "Quark"
+                      },
+                      {
+                        "itemId": "Rahm",
+                        "name": "Cream"
+                      },
+                      {
+                        "itemId": "Reibkäse",
+                        "name": "Grated cheese"
+                      },
+                      {
+                        "itemId": "Ricotta",
+                        "name": "Ricotta"
+                      },
+                      {
+                        "itemId": "Sauerrahm",
+                        "name": "Sour cream"
+                      },
+                      {
+                        "itemId": "Soya Milch",
+                        "name": "Soy Milk"
+                      }
+                    ],
+                    "name": "Milk & Cheese",
+                    "sectionId": "Milch & Käse"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Aufschnitt",
+                        "name": "Cold cuts"
+                      },
+                      {
+                        "itemId": "Austern",
+                        "name": "Oysters"
+                      },
+                      {
+                        "itemId": "Bratwurst",
+                        "name": "Bratwurst"
+                      },
+                      {
+                        "itemId": "Fisch",
+                        "name": "Fish"
+                      },
+                      {
+                        "itemId": "Fleisch",
+                        "name": "Meat"
+                      },
+                      {
+                        "itemId": "Garnelen",
+                        "name": "Shrimp"
+                      },
+                      {
+                        "itemId": "Hackfleisch",
+                        "name": "Ground meat"
+                      },
+                      {
+                        "itemId": "Hot Dog",
+                        "name": "Hot Dog"
+                      },
+                      {
+                        "itemId": "Hummer",
+                        "name": "Lobster"
+                      },
+                      {
+                        "itemId": "Kalbfleisch",
+                        "name": "Veal"
+                      },
+                      {
+                        "itemId": "Lachs",
+                        "name": "Salmon"
+                      },
+                      {
+                        "itemId": "Lamm",
+                        "name": "Lamb"
+                      },
+                      {
+                        "itemId": "Muscheln",
+                        "name": "Mussels"
+                      },
+                      {
+                        "itemId": "Poulet",
+                        "name": "Chicken"
+                      },
+                      {
+                        "itemId": "Pouletbrüstli",
+                        "name": "Chicken breast"
+                      },
+                      {
+                        "itemId": "Putenbrust",
+                        "name": "Turkey breast"
+                      },
+                      {
+                        "itemId": "Rindfleisch",
+                        "name": "Beef"
+                      },
+                      {
+                        "itemId": "Rindsgeschnetzeltes",
+                        "name": "Sliced beef"
+                      },
+                      {
+                        "itemId": "Rohschinken",
+                        "name": "Prosciutto"
+                      },
+                      {
+                        "itemId": "Salami",
+                        "name": "Salami"
+                      },
+                      {
+                        "itemId": "Sardellen",
+                        "name": "Anchovies"
+                      },
+                      {
+                        "itemId": "Schinken",
+                        "name": "Ham"
+                      },
+                      {
+                        "itemId": "Schweinefleisch",
+                        "name": "Pork"
+                      },
+                      {
+                        "itemId": "Speck",
+                        "name": "Bacon"
+                      },
+                      {
+                        "itemId": "Steak",
+                        "name": "Steak"
+                      },
+                      {
+                        "itemId": "Thunfisch",
+                        "name": "Tuna"
+                      },
+                      {
+                        "itemId": "Truthahn",
+                        "name": "Turkey"
+                      },
+                      {
+                        "itemId": "Wurst",
+                        "name": "Sausage"
+                      },
+                      {
+                        "itemId": "Würste",
+                        "name": "Sausages"
+                      }
+                    ],
+                    "name": "Meat & Fish",
+                    "sectionId": "Fleisch & Fisch"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Ahornsirup",
+                        "name": "Maple syrup"
+                      },
+                      {
+                        "itemId": "Apfelmus",
+                        "name": "Apple sauce"
+                      },
+                      {
+                        "itemId": "BBQ Sauce",
+                        "name": "BBQ sauce"
+                      },
+                      {
+                        "itemId": "Backpulver",
+                        "name": "Baking powder"
+                      },
+                      {
+                        "itemId": "Balsamico",
+                        "name": "Balsamic vinegar"
+                      },
+                      {
+                        "itemId": "Baumnüsse",
+                        "name": "Walnuts"
+                      },
+                      {
+                        "itemId": "Bicarbonate Soda",
+                        "name": "Baking soda"
+                      },
+                      {
+                        "itemId": "Bohnen",
+                        "name": "Beans"
+                      },
+                      {
+                        "itemId": "Bouillon",
+                        "name": "Stock"
+                      },
+                      {
+                        "itemId": "Bratensauce",
+                        "name": "Gravy"
+                      },
+                      {
+                        "itemId": "Chutney",
+                        "name": "Chutney"
+                      },
+                      {
+                        "itemId": "Dip",
+                        "name": "Dip"
+                      },
+                      {
+                        "itemId": "Erdnussbutter",
+                        "name": "Peanut butter"
+                      },
+                      {
+                        "itemId": "Essig",
+                        "name": "Vinegar"
+                      },
+                      {
+                        "itemId": "Haselnüsse",
+                        "name": "Hazelnuts"
+                      },
+                      {
+                        "itemId": "Hefe",
+                        "name": "Yeast"
+                      },
+                      {
+                        "itemId": "Ketchup",
+                        "name": "Ketchup"
+                      },
+                      {
+                        "itemId": "Kokosmilch",
+                        "name": "Coconut milk"
+                      },
+                      {
+                        "itemId": "Linsen",
+                        "name": "Lentils"
+                      },
+                      {
+                        "itemId": "Mandeln",
+                        "name": "Almonds"
+                      },
+                      {
+                        "itemId": "Mayonnaise",
+                        "name": "Mayonnaise"
+                      },
+                      {
+                        "itemId": "Nüsse",
+                        "name": "Nuts"
+                      },
+                      {
+                        "itemId": "Olivenöl",
+                        "name": "Olive oil"
+                      },
+                      {
+                        "itemId": "Oregano",
+                        "name": "Oregano"
+                      },
+                      {
+                        "itemId": "Paniermehl",
+                        "name": "Breadcrumbs"
+                      },
+                      {
+                        "itemId": "Paprikapulver",
+                        "name": "Paprika"
+                      },
+                      {
+                        "itemId": "Pasta Sauce",
+                        "name": "Pasta sauce"
+                      },
+                      {
+                        "itemId": "Pelati",
+                        "name": "Canned tomatoes"
+                      },
+                      {
+                        "itemId": "Pfefferkörner",
+                        "name": "Peppercorns"
+                      },
+                      {
+                        "itemId": "Pfeffer",
+                        "name": "Black Pepper"
+                      },
+                      {
+                        "itemId": "Pinienkerne",
+                        "name": "Pine nuts"
+                      },
+                      {
+                        "itemId": "Puderzucker",
+                        "name": "Icing sugar"
+                      },
+                      {
+                        "itemId": "Rosmarin",
+                        "name": "Rosemary"
+                      },
+                      {
+                        "itemId": "Salatsauce",
+                        "name": "Salad dressing"
+                      },
+                      {
+                        "itemId": "Salz",
+                        "name": "Salt"
+                      },
+                      {
+                        "itemId": "Scharfe Sauce",
+                        "name": "Hot sauce"
+                      },
+                      {
+                        "itemId": "Senf",
+                        "name": "Mustard"
+                      },
+                      {
+                        "itemId": "Soyasauce",
+                        "name": "Soy sauce"
+                      },
+                      {
+                        "itemId": "Speisestärke",
+                        "name": "Cornflour"
+                      },
+                      {
+                        "itemId": "Tomatenmark",
+                        "name": "Tomato purée"
+                      },
+                      {
+                        "itemId": "Tomatensauce",
+                        "name": "Tomato sauce"
+                      },
+                      {
+                        "itemId": "Vanillezucker",
+                        "name": "Vanilla"
+                      },
+                      {
+                        "itemId": "Zimt",
+                        "name": "Cinnamon"
+                      },
+                      {
+                        "itemId": "Zucker",
+                        "name": "Sugar"
+                      },
+                      {
+                        "itemId": "Öl",
+                        "name": "Oil"
+                      },
+                      {
+                        "itemId": "Preiselbeer Sauce",
+                        "name": "Cranberry Sauce"
+                      },
+                      {
+                        "itemId": "Kartoffelstock",
+                        "name": "Mashed Potatoes"
+                      },
+                      {
+                        "itemId": "Cornbread Stuffing",
+                        "name": "Cornbread Stuffing"
+                      }
+                    ],
+                    "name": "Ingredients & Spices",
+                    "sectionId": "Zutaten & Gewürze"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Baked Beans",
+                        "name": "Baked Beans"
+                      },
+                      {
+                        "itemId": "Burritos",
+                        "name": "Burritos"
+                      },
+                      {
+                        "itemId": "Chicken Wings",
+                        "name": "Chicken Wings"
+                      },
+                      {
+                        "itemId": "Chinese To Go",
+                        "name": "Chinese food"
+                      },
+                      {
+                        "itemId": "Fischstäbli",
+                        "name": "Fish sticks"
+                      },
+                      {
+                        "itemId": "Gemüse gefroren",
+                        "name": "Frozen vegetables"
+                      },
+                      {
+                        "itemId": "Glacé",
+                        "name": "Ice cream"
+                      },
+                      {
+                        "itemId": "Indian To Go",
+                        "name": "Indian food"
+                      },
+                      {
+                        "itemId": "Italian To Go",
+                        "name": "Italian food"
+                      },
+                      {
+                        "itemId": "Knödel",
+                        "name": "Dumplings"
+                      },
+                      {
+                        "itemId": "Lasagne",
+                        "name": "Lasagna"
+                      },
+                      {
+                        "itemId": "Mexican To Go",
+                        "name": "Mexican food"
+                      },
+                      {
+                        "itemId": "Pizza",
+                        "name": "Pizza"
+                      },
+                      {
+                        "itemId": "Pommes Frites",
+                        "name": "French fries"
+                      },
+                      {
+                        "itemId": "Suppe",
+                        "name": "Soup"
+                      },
+                      {
+                        "itemId": "TV-Dinner",
+                        "name": "TV dinner"
+                      },
+                      {
+                        "itemId": "Thai To Go",
+                        "name": "Thai food"
+                      }
+                    ],
+                    "name": "Frozen & Convenience",
+                    "sectionId": "Fertig- & Tiefkühlprodukte"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Basmatireis",
+                        "name": "Basmati rice"
+                      },
+                      {
+                        "itemId": "Corn Flakes",
+                        "name": "Corn flakes"
+                      },
+                      {
+                        "itemId": "Couscous",
+                        "name": "Couscous"
+                      },
+                      {
+                        "itemId": "Frühstückszerealien",
+                        "name": "Cereal"
+                      },
+                      {
+                        "itemId": "Griess",
+                        "name": "Semolina"
+                      },
+                      {
+                        "itemId": "Haferflocken",
+                        "name": "Oatmeal"
+                      },
+                      {
+                        "itemId": "Kichererbsen",
+                        "name": "Chickpeas"
+                      },
+                      {
+                        "itemId": "Mehl",
+                        "name": "Flour"
+                      },
+                      {
+                        "itemId": "Müesli",
+                        "name": "Muesli"
+                      },
+                      {
+                        "itemId": "Nudeln",
+                        "name": "Pasta"
+                      },
+                      {
+                        "itemId": "Pasta",
+                        "name": "Noodles"
+                      },
+                      {
+                        "itemId": "Penne",
+                        "name": "Penne"
+                      },
+                      {
+                        "itemId": "Reis",
+                        "name": "Rice"
+                      },
+                      {
+                        "itemId": "Risottoreis",
+                        "name": "Risotto rice"
+                      },
+                      {
+                        "itemId": "Spaghetti",
+                        "name": "Spaghetti"
+                      },
+                      {
+                        "itemId": "Tofu",
+                        "name": "Tofu"
+                      },
+                      {
+                        "itemId": "Wildreis",
+                        "name": "Wild rice"
+                      }
+                    ],
+                    "name": "Grain Products",
+                    "sectionId": "Getreideprodukte"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Brezeln",
+                        "name": "Pretzels"
+                      },
+                      {
+                        "itemId": "Bring!",
+                        "name": "Bring!"
+                      },
+                      {
+                        "itemId": "Dessert",
+                        "name": "Dessert"
+                      },
+                      {
+                        "itemId": "Dörrobst",
+                        "name": "Dried fruit"
+                      },
+                      {
+                        "itemId": "Erdnüsse",
+                        "name": "Peanuts"
+                      },
+                      {
+                        "itemId": "Gelee",
+                        "name": "Jello"
+                      },
+                      {
+                        "itemId": "Getreideriegel",
+                        "name": "Cereal bar"
+                      },
+                      {
+                        "itemId": "Guetzli",
+                        "name": "Christmas cookies"
+                      },
+                      {
+                        "itemId": "Honig",
+                        "name": "Honey"
+                      },
+                      {
+                        "itemId": "Kaugummi",
+                        "name": "Chewing gum"
+                      },
+                      {
+                        "itemId": "Kekse",
+                        "name": "Cookies"
+                      },
+                      {
+                        "itemId": "Konfitüre",
+                        "name": "Jam"
+                      },
+                      {
+                        "itemId": "Kräcker",
+                        "name": "Crackers"
+                      },
+                      {
+                        "itemId": "Kuchen",
+                        "name": "Cake"
+                      },
+                      {
+                        "itemId": "Lebkuchen",
+                        "name": "Gingerbread"
+                      },
+                      {
+                        "itemId": "Marshmallows",
+                        "name": "Marshmallows"
+                      },
+                      {
+                        "itemId": "Nougatcreme",
+                        "name": "Nougat cream"
+                      },
+                      {
+                        "itemId": "Pommes Chips",
+                        "name": "Chips"
+                      },
+                      {
+                        "itemId": "Pop Corn",
+                        "name": "Pop corn"
+                      },
+                      {
+                        "itemId": "Schokolade",
+                        "name": "Chocolate"
+                      },
+                      {
+                        "itemId": "Snacks",
+                        "name": "Snacks"
+                      },
+                      {
+                        "itemId": "Süssigkeiten",
+                        "name": "Candy"
+                      },
+                      {
+                        "itemId": "Tortilla Chips",
+                        "name": "Tortilla Chips"
+                      },
+                      {
+                        "itemId": "Vielen Dank",
+                        "name": "Thank you"
+                      }
+                    ],
+                    "name": "Snacks & Sweets",
+                    "sectionId": "Snacks & Süsswaren"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Apfelsaft",
+                        "name": "Apple juice"
+                      },
+                      {
+                        "itemId": "Bier",
+                        "name": "Beer"
+                      },
+                      {
+                        "itemId": "Champagner",
+                        "name": "Champagne"
+                      },
+                      {
+                        "itemId": "Cidre",
+                        "name": "Cider"
+                      },
+                      {
+                        "itemId": "Cola",
+                        "name": "Cola"
+                      },
+                      {
+                        "itemId": "Cola Light",
+                        "name": "Diet Cola"
+                      },
+                      {
+                        "itemId": "Eistee",
+                        "name": "Iced tea"
+                      },
+                      {
+                        "itemId": "Energy Drink",
+                        "name": "Energy drink"
+                      },
+                      {
+                        "itemId": "Fruchtsaft",
+                        "name": "Fruit juice"
+                      },
+                      {
+                        "itemId": "Getränke",
+                        "name": "Beverages"
+                      },
+                      {
+                        "itemId": "Gin",
+                        "name": "Gin"
+                      },
+                      {
+                        "itemId": "Ginger Ale",
+                        "name": "Ginger Ale"
+                      },
+                      {
+                        "itemId": "Kaffee",
+                        "name": "Coffee"
+                      },
+                      {
+                        "itemId": "Kaffeebohnen",
+                        "name": "Coffee beans"
+                      },
+                      {
+                        "itemId": "Kaffeepads",
+                        "name": "Coffee pads"
+                      },
+                      {
+                        "itemId": "Kaffeekapseln",
+                        "name": "Coffee capsules"
+                      },
+                      {
+                        "itemId": "Kakao",
+                        "name": "Hot chocolate"
+                      },
+                      {
+                        "itemId": "Light Limonade",
+                        "name": "Diet soda"
+                      },
+                      {
+                        "itemId": "Limonade",
+                        "name": "Soda"
+                      },
+                      {
+                        "itemId": "Mineralwasser",
+                        "name": "Bottled water"
+                      },
+                      {
+                        "itemId": "Orangensaft",
+                        "name": "Orange juice"
+                      },
+                      {
+                        "itemId": "Prosecco",
+                        "name": "Prosecco"
+                      },
+                      {
+                        "itemId": "Rotwein",
+                        "name": "Red wine"
+                      },
+                      {
+                        "itemId": "Rum",
+                        "name": "Rum"
+                      },
+                      {
+                        "itemId": "Schnaps",
+                        "name": "Spirits"
+                      },
+                      {
+                        "itemId": "Smoothie",
+                        "name": "Smoothie"
+                      },
+                      {
+                        "itemId": "Sportgetränk",
+                        "name": "Sports drink"
+                      },
+                      {
+                        "itemId": "Tee",
+                        "name": "Tea"
+                      },
+                      {
+                        "itemId": "Tonic Water",
+                        "name": "Tonic Water"
+                      },
+                      {
+                        "itemId": "Vodka",
+                        "name": "Vodka"
+                      },
+                      {
+                        "itemId": "Wasser",
+                        "name": "Water"
+                      },
+                      {
+                        "itemId": "Weisswein",
+                        "name": "White wine"
+                      },
+                      {
+                        "itemId": "Whisky",
+                        "name": "Whiskey"
+                      },
+                      {
+                        "itemId": "Zigaretten",
+                        "name": "Cigarettes"
+                      }
+                    ],
+                    "name": "Beverages",
+                    "sectionId": "Getränke & Tabak"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Abfallsäcke",
+                        "name": "Garbage bags"
+                      },
+                      {
+                        "itemId": "Abwaschmittel",
+                        "name": "Dishwashing liquid"
+                      },
+                      {
+                        "itemId": "Alufolie",
+                        "name": "Aluminum foil"
+                      },
+                      {
+                        "itemId": "Babynahrung",
+                        "name": "Baby food"
+                      },
+                      {
+                        "itemId": "Backpapier",
+                        "name": "Parchment paper"
+                      },
+                      {
+                        "itemId": "Badreiniger",
+                        "name": "Bathroom cleaner"
+                      },
+                      {
+                        "itemId": "Batterien",
+                        "name": "Batteries"
+                      },
+                      {
+                        "itemId": "Blumen",
+                        "name": "Flowers"
+                      },
+                      {
+                        "itemId": "Frischhaltefolie",
+                        "name": "Plastic wrap"
+                      },
+                      {
+                        "itemId": "Geschenk",
+                        "name": "Gift"
+                      },
+                      {
+                        "itemId": "Geschenkpapier",
+                        "name": "Wrapping paper"
+                      },
+                      {
+                        "itemId": "Geschirrsalz",
+                        "name": "Dishwasher salt"
+                      },
+                      {
+                        "itemId": "Geschirrtabs",
+                        "name": "Dishwasher tabs"
+                      },
+                      {
+                        "itemId": "Glasreiniger",
+                        "name": "Glass cleaner"
+                      },
+                      {
+                        "itemId": "Glühbirne",
+                        "name": "Light bulb"
+                      },
+                      {
+                        "itemId": "Haushaltspapier",
+                        "name": "Paper towels"
+                      },
+                      {
+                        "itemId": "Kerzen",
+                        "name": "Candles"
+                      },
+                      {
+                        "itemId": "Putzmittel",
+                        "name": "Cleaning supplies"
+                      },
+                      {
+                        "itemId": "Schwamm",
+                        "name": "Sponge"
+                      },
+                      {
+                        "itemId": "Servietten",
+                        "name": "Napkins"
+                      },
+                      {
+                        "itemId": "WC-Reiniger",
+                        "name": "Toilet cleaner"
+                      },
+                      {
+                        "itemId": "Waschmittel",
+                        "name": "Laundry detergent"
+                      },
+                      {
+                        "itemId": "Weichspüler",
+                        "name": "Fabric softener"
+                      }
+                    ],
+                    "name": "Household",
+                    "sectionId": "Haushalt & Gesundheit"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Binden",
+                        "name": "Pads"
+                      },
+                      {
+                        "itemId": "Bodylotion",
+                        "name": "Body lotion"
+                      },
+                      {
+                        "itemId": "Conditioner",
+                        "name": "Conditioner"
+                      },
+                      {
+                        "itemId": "Deo",
+                        "name": "Deodorant"
+                      },
+                      {
+                        "itemId": "Duschmittel",
+                        "name": "Shower gel"
+                      },
+                      {
+                        "itemId": "Feuchttücher",
+                        "name": "Wet wipes"
+                      },
+                      {
+                        "itemId": "Gesichtscreme",
+                        "name": "Face cream"
+                      },
+                      {
+                        "itemId": "Haargel",
+                        "name": "Hair gel"
+                      },
+                      {
+                        "itemId": "Haarspray",
+                        "name": "Hair spray"
+                      },
+                      {
+                        "itemId": "Handcreme",
+                        "name": "Hand cream"
+                      },
+                      {
+                        "itemId": "Insektenschutzmittel",
+                        "name": "Insect Repellent"
+                      },
+                      {
+                        "itemId": "Kondome",
+                        "name": "Condoms"
+                      },
+                      {
+                        "itemId": "Kosmetiktücher",
+                        "name": "Facial tissues"
+                      },
+                      {
+                        "itemId": "Linsenmittel",
+                        "name": "Contact lens solution"
+                      },
+                      {
+                        "itemId": "Lippenpomade",
+                        "name": "Lip balm"
+                      },
+                      {
+                        "itemId": "Makeup Entferner",
+                        "name": "Makeup remover"
+                      },
+                      {
+                        "itemId": "Mundspülung",
+                        "name": "Mouthwash"
+                      },
+                      {
+                        "itemId": "Nagellack",
+                        "name": "Nail polish"
+                      },
+                      {
+                        "itemId": "Nagellackentferner",
+                        "name": "Nail polish remover"
+                      },
+                      {
+                        "itemId": "Pflaster",
+                        "name": "Bandaids"
+                      },
+                      {
+                        "itemId": "Rasierer",
+                        "name": "Razor"
+                      },
+                      {
+                        "itemId": "Rasierklingen",
+                        "name": "Razor blades"
+                      },
+                      {
+                        "itemId": "Rasierschaum",
+                        "name": "Shaving cream"
+                      },
+                      {
+                        "itemId": "Schmerzmittel",
+                        "name": "Pain reliever"
+                      },
+                      {
+                        "itemId": "Seife",
+                        "name": "Soap"
+                      },
+                      {
+                        "itemId": "Shampoo",
+                        "name": "Shampoo"
+                      },
+                      {
+                        "itemId": "Sonnencreme",
+                        "name": "Sunblock"
+                      },
+                      {
+                        "itemId": "Tampons",
+                        "name": "Tampons"
+                      },
+                      {
+                        "itemId": "Taschentücher",
+                        "name": "Tissues"
+                      },
+                      {
+                        "itemId": "Vitamine",
+                        "name": "Vitamins"
+                      },
+                      {
+                        "itemId": "WC-Papier",
+                        "name": "Toilet paper"
+                      },
+                      {
+                        "itemId": "Watterondellen",
+                        "name": "Cotton pads"
+                      },
+                      {
+                        "itemId": "Wattestäbchen",
+                        "name": "Cotton swabs"
+                      },
+                      {
+                        "itemId": "Windeln",
+                        "name": "Diapers"
+                      },
+                      {
+                        "itemId": "Zahnbürsten",
+                        "name": "Toothbrush"
+                      },
+                      {
+                        "itemId": "Zahnpasta",
+                        "name": "Toothpaste"
+                      },
+                      {
+                        "itemId": "Zahnseide",
+                        "name": "Dental floss"
+                      }
+                    ],
+                    "name": "Care & Health",
+                    "sectionId": "Pflege & Gesundheit"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Fischfutter",
+                        "name": "Fish food"
+                      },
+                      {
+                        "itemId": "Hundefutter",
+                        "name": "Dog food"
+                      },
+                      {
+                        "itemId": "Hundesnack",
+                        "name": "Dog treats"
+                      },
+                      {
+                        "itemId": "Katzenfutter",
+                        "name": "Cat food"
+                      },
+                      {
+                        "itemId": "Katzensnack",
+                        "name": "Cat treats"
+                      },
+                      {
+                        "itemId": "Katzenstreu",
+                        "name": "Cat litter"
+                      },
+                      {
+                        "itemId": "Vogelfutter",
+                        "name": "Bird food"
+                      }
+                    ],
+                    "name": "Pet Supplies",
+                    "sectionId": "Tierbedarf"
+                  },
+                  {
+                    "items": [
+                      {
+                        "itemId": "Blumenerde",
+                        "name": "Potting soil"
+                      },
+                      {
+                        "itemId": "Grill",
+                        "name": "Grill"
+                      },
+                      {
+                        "itemId": "Sonnenschirm",
+                        "name": "Parasol"
+                      },
+                      {
+                        "itemId": "Dünger",
+                        "name": "Fertilizer"
+                      },
+                      {
+                        "itemId": "Töpfe",
+                        "name": "Pots"
+                      },
+                      {
+                        "itemId": "Gartenwerkzeug",
+                        "name": "Garden tool"
+                      },
+                      {
+                        "itemId": "Samen",
+                        "name": "Seeds"
+                      },
+                      {
+                        "itemId": "Propangas",
+                        "name": "Propane"
+                      },
+                      {
+                        "itemId": "Holzkohle",
+                        "name": "Charcoal"
+                      },
+                      {
+                        "itemId": "Nägel",
+                        "name": "Nails"
+                      },
+                      {
+                        "itemId": "Schrauben",
+                        "name": "Bolts"
+                      },
+                      {
+                        "itemId": "Pinsel",
+                        "name": "Brush"
+                      },
+                      {
+                        "itemId": "Giesskanne",
+                        "name": "Watering can"
+                      },
+                      {
+                        "itemId": "Pflanzen",
+                        "name": "Plants"
+                      },
+                      {
+                        "itemId": "Rasenmäher",
+                        "name": "Lawnmower"
+                      }
+                    ],
+                    "name": "Home & Garden",
+                    "sectionId": "Baumarkt & Garten"
+                  }
+                ]
+              },
+              "language": "en-US"
+            }
+          ],
+          "listInfosWithItems": [
+            {
+              "itemsToPurchase": [],
+              "language": "en-US",
+              "list": {
+                "listUuid": "6c84fb90-12c4-11e1-840d-7b25c5ee775a",
+                "name": "Shopping",
+                "theme": "ch.publisheria.bring.theme.home"
+              }
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "arguments": {},
+            "name": "get-lists"
+          }
+        },
+        {
+          "callsTool": {
+            "name": "add-items",
+            "arguments": {
+              "list.listUuid": "6c84fb90-12c4-11e1-840d-7b25c5ee775a",
+              "list.name": "Shopping",
+              "items": [
+                {
+                  "includes": "Gin"
+                },
+                {
+                  "includes": "Campari"
+                },
+                {
+                  "includes": "Sweet Vermouth"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

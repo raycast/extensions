@@ -1,0 +1,66 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "himalaya",
+    "title": "Himalaya",
+    "description": "Manage emails through Himalaya CLI",
+    "icon": "command-icon.png",
+    "author": "jns",
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "index",
+            "title": "List Envelopes",
+            "description": "Show recent envelopes",
+            "mode": "view"
+        },
+        {
+            "name": "sync",
+            "title": "Sync Envelopes",
+            "description": "Sync envelopes",
+            "mode": "menu-bar",
+            "interval": "1m"
+        }
+    ],
+    "categories": ["Communication"],
+    "preferences": [
+        {
+            "name": "defaultFolder",
+            "description": "The default folder used for commands",
+            "required": false,
+            "type": "textfield",
+            "title": "Default Folder",
+            "placeholder": "INBOX",
+            "default": "INBOX"
+        },
+        {
+            "name": "defaultAccount",
+            "description": "The default account used for commands",
+            "required": false,
+            "type": "textfield",
+            "title": "Default Account",
+            "placeholder": "Personal",
+            "default": "Personal"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.49.2",
+        "@raycast/utils": "^1.5.2",
+        "class-transformer": "^0.5.1",
+        "reflect-metadata": "^0.1.13"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "1.0.5",
+        "@types/node": "18.8.3",
+        "@types/react": "18.0.9",
+        "eslint": "^7.32.0",
+        "prettier": "^2.5.1",
+        "typescript": "^4.4.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}

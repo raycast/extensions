@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "office2pdf",
+  "title": "Office2PDF",
+  "description": "Raycast extension to convert office files to pdf using CloudConvert api",
+  "icon": "office2pdf.png",
+  "author": "ARui",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Convert File",
+      "subtitle": "Office2PDF",
+      "description": "Convert Office to PDF using CloudConvert API,",
+      "mode": "view"
+    },
+    {
+      "name": "finder",
+      "title": "Convert Selected File",
+      "subtitle": "Office2PDF",
+      "description": "Convert the selected file to PDF using CloudConvert API",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "APIKey",
+      "title": "API Key",
+      "description": "Get the API key at https://cloudconvert.com/dashboard/api",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "OpenNow",
+      "title": "Open the PDF immediately after conversion",
+      "description": "Open the PDF file after conversion",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Open PDF immediately"
+    },
+    {
+      "name": "RemoveOriginal",
+      "title": "Delete the original file after conversion",
+      "description": "Delete the original file after conversion",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Delete the original file"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.74.1",
+    "cloudconvert": "^2.3.7",
+    "mime-types": "^2.1.35"
+  },
+  "devDependencies": {
+    "@types/mime-types": "^2.1.4",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

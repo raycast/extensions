@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spotify-beta",
+  "title": "Spotify Beta",
+  "description": "Spotify's most common features, now at your fingertips. Search for music and podcasts, browse your library, and control the playback. Glance at what's currently playing directly from the menu bar.",
+  "icon": "extension-icon.png",
+  "author": "mattisssa",
+  "contributors": [
+    "peduarte",
+    "sxn",
+    "dillionverma",
+    "andreaselia",
+    "stuart",
+    "tonka3000",
+    "dancannon"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "update",
+      "title": "Update",
+      "description": "Update to the production version of the Spotify extension.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "~18.15.10",
+    "@types/react": "^18.0.29",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@typescript-eslint/parser": "^5.56.0",
+    "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^2.8.7",
+    "react-devtools": "^4.27.4",
+    "typescript": "^5.0.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
