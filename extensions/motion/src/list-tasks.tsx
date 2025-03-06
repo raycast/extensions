@@ -244,7 +244,7 @@ export default function Command() {
       throttle
     >
       <List.Section title="Tasks" subtitle={`${filteredTasks.length} task${filteredTasks.length !== 1 ? "s" : ""}`}>
-        {filteredTasks.length === 0 ? (
+        {!isLoading && filteredTasks.length === 0 ? (
           <List.EmptyView
             title={searchText || selectedLabel || selectedProject ? "No matching tasks found" : "No tasks found"}
             description={
