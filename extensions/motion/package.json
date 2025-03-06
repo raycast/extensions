@@ -21,6 +21,7 @@
     {
       "name": "list-tasks",
       "title": "List Tasks",
+      "subtitle": "Motion",
       "subtitle": "View and search Motion tasks",
       "description": "Browse, search, and filter your Motion tasks by name, label, and project",
       "mode": "view"
