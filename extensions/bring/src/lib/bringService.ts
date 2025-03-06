@@ -1,6 +1,23 @@
+import { getPreferenceValues } from "@raycast/api";
 import { Section } from "../components/ItemsGrid";
 import { BringAPI, BringCatalog, BringCustomItem, BringList, Translations } from "./bringAPI";
 import { getIconPlaceholder, getImageUrl } from "./helpers";
+interface Preferences {
+  email: string;
+  password: string;
+}
+
+export async function getBringApi(): Promise<BringAPI> {
+  const { email, password } = getPreferenceValues<Preferences>();
+  const bringApi = new BringAPI();
+  try {
+    await bringApi.login(email, password);
+  } catch (error) {
+    console.error("Failed to login to Bring API", error);
+    throw new Error("Failed to login to Bring API. Please check your credentials.");
+  }
+  return bringApi;
+}
 
 export function getSections(bringApi: BringAPI, listUuid: string, locale: string): Promise<Section[]> {
   return Promise.all([

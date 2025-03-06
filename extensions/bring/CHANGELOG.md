@@ -1,5 +1,9 @@
 # Bring Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Added AI Tools for looking up lists and adding items
+
 ## [Enhancements] - 2024-12-11
 
 - Updated the rendering logic of grid items to show non-added items only when the user enters a search term.
