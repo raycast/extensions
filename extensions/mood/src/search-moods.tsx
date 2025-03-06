@@ -1,6 +1,7 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { MoodEntry, loadEntries, saveEntries, getMoodEmoji, getMoodTitle, formatDate } from "./lib/data";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   const [entries, setEntries] = useState<MoodEntry[]>([]);
@@ -13,11 +14,7 @@ export default function Command() {
     try {
       setEntries(await loadEntries());
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load mood entries",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Failed to load mood entries" });
     } finally {
       setIsLoading(false);
     }
@@ -60,11 +57,7 @@ export default function Command() {
           title: "Mood entry deleted",
         });
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to delete mood entry",
-          message: String(error),
-        });
+        await showFailureToast(error, { title: "Failed to delete mood entry" });
       }
     }
   }

@@ -1,8 +1,9 @@
-import { List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { List } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
 import { MoodEntry, loadEntries, Timeframe, filterEntriesByTimeframe } from "./lib/data";
 import { generateMoodDistribution } from "./lib/charts";
 import { generateSparkline } from "./lib/charts";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   const [entries, setEntries] = useState<MoodEntry[]>([]);
@@ -14,11 +15,7 @@ export default function Command() {
     try {
       setEntries(await loadEntries());
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load mood entries",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Failed to load mood entries" });
     } finally {
       setIsLoading(false);
     }
@@ -28,11 +25,11 @@ export default function Command() {
     reloadEntries();
   }, []);
 
-  const filteredEntries = filterEntriesByTimeframe(entries, timeframe);
+  const filteredEntries = useMemo(() => filterEntriesByTimeframe(entries, timeframe), [entries, timeframe]);
 
   // Generate charts
-  const sparklineSvg = generateSparkline(filteredEntries);
-  const distributionSvg = generateMoodDistribution(filteredEntries);
+  const sparklineSvg = useMemo(() => generateSparkline(filteredEntries), [filteredEntries]);
+  const distributionSvg = useMemo(() => generateMoodDistribution(filteredEntries), [filteredEntries]);
 
   const TimeframeDropdown = (
     <List.Dropdown

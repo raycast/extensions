@@ -2,6 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast, Icon, useNavigation } from
 import { useState } from "react";
 import { MoodEntry, loadEntries, saveEntries, getMoodEmoji, getMoodTitle, MOODS } from "./lib/data";
 import crypto from "crypto";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   const { pop } = useNavigation();
@@ -33,11 +34,7 @@ export default function Command() {
 
       pop();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to record mood",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Failed to record mood" });
     } finally {
       setIsSubmitting(false);
     }

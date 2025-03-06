@@ -1,6 +1,6 @@
 # Mood Tracker
 
-This Raycast extension that helps you monitor your emotional well-being by providing a simple and efficient way to record, track, and analyze your moods over time. Built to integrate seamlessly with Raycast's interface, this extension makes mood tracking a frictionless part of your daily routine.
+This Raycast extension helps you monitor your emotional well-being by providing a simple and efficient way to record, track, and analyze your moods over time. Built to integrate seamlessly with Raycast's interface, this extension makes mood tracking a frictionless part of your daily routine.
 
 After installing the extension, start by recording your mood a few times to build up some data. As you collect more entries, the charts and AI insights will become more valuable, helping you gain a deeper understanding of your emotional patterns.
 
