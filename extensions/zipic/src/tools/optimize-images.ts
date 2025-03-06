@@ -174,11 +174,7 @@ export default async function tool({
 
       // Check if path exists and is a file or directory
       try {
-        console.log(resolvedPath, "resolved path");
-
         const stats = fs.statSync(resolvedPath);
-
-        console.log(stats, "stats");
 
         // it's a directory
         if (stats.isDirectory()) {
@@ -217,9 +213,7 @@ export default async function tool({
 
     if (imagePaths.length > 0) {
       // Filter out invalid paths
-      console.log(imagePaths, "imagePaths");
       const validPaths = imagePaths.filter(isValidPath);
-      console.log(validPaths, "validPaths");
       // Process URLs - download them first
       const processedPaths = await Promise.all(
         validPaths.map(async (path) => {
@@ -319,8 +313,15 @@ export default async function tool({
 
     const url = `zipic://compress?${urlParams}`;
 
-    // Execute compression command
-    exec(`open "${url}"`);
+    try {
+      // Execute compression command
+      exec(`open "${url}"`);
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to compress images",
+      };
+    }
 
     // Predict output file paths
     const expectedPaths = filePaths
