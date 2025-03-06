@@ -14,8 +14,12 @@ export async function checkZipicInstallation(): Promise<boolean> {
       message: "Install it from: https://zipic.app",
       primaryAction: {
         title: "Go to https://zipic.app",
-        onAction: (toast) => {
-          open("https://zipic.app");
+        onAction: async (toast) => {
+          try {
+            await open("https://zipic.app");
+          } catch (error) {
+            console.error('Failed to open URL:', error);
+          }
           toast.hide();
         },
       },
