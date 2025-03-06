@@ -1,10 +1,10 @@
 import { OTPConfig } from "../types";
 import crypto from "crypto";
-// Añadimos estas importaciones para Node.js
+// Add these imports for Node.js
 import { URL, URLSearchParams } from "url";
 
 /**
- * Parsea un URL de OTP Auth en un objeto de configuración
+ * Parses an OTP Auth URL into a configuration object
  */
 export function parseOTPAuthURL(url: string): OTPConfig | null {
   try {
@@ -14,10 +14,10 @@ export function parseOTPAuthURL(url: string): OTPConfig | null {
       throw new Error("Invalid URL: must start with 'otpauth://totp/'");
     }
 
-    // Extraer el nombre del servicio de la ruta
+    // Extract the service name from the path
     const name = decodeURIComponent(otpUrl.pathname.substring(1));
 
-    // Extraer los parámetros
+    // Extract parameters
     const params = new URLSearchParams(otpUrl.search);
     const secret = params.get("secret");
 
@@ -25,10 +25,10 @@ export function parseOTPAuthURL(url: string): OTPConfig | null {
       throw new Error("Invalid URL: missing 'secret' parameter");
     }
 
-    // Extraer los demás parámetros con valores por defecto si no existen
+    // Extract other parameters with default values if they don't exist
     const algorithm = (params.get("algorithm") || "SHA1") as "SHA1" | "SHA256" | "SHA512";
     const digits = parseInt(params.get("digits") || "6", 10);
-    const period = parseInt(params.get("period") || "10", 10);
+    const period = parseInt(params.get("period") || "30", 10);
     const issuer = params.get("issuer") || undefined;
 
     return {
@@ -47,7 +47,7 @@ export function parseOTPAuthURL(url: string): OTPConfig | null {
 }
 
 /**
- * Parsea un array de URLs OTP Auth desde un JSON
+ * Parses an array of OTP Auth URLs from JSON
  */
 export function parseOTPFromJSON(jsonContent: string): OTPConfig[] {
   try {

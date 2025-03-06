@@ -1,4 +1,5 @@
-import { Form, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { showFailureToast, showSuccessToast } from "@raycast/utils";
 import React, { useState } from "react";
 import { addOTPConfig } from "../utils/storage";
 import { parseOTPAuthURL } from "../utils/parser";
@@ -20,53 +21,40 @@ export default function Command() {
       setIsLoading(true);
 
       if (!values.name) {
-        setNameError("El nombre es obligatorio");
+        setNameError("Name is required");
         return;
       }
 
       if (!values.secret) {
-        setSecretError("El secreto es obligatorio");
+        setSecretError("Secret is required");
         return;
       }
 
-      // Construir la URL OTP
+      // Build the OTP URL
       const otpUrl = `otpauth://totp/${encodeURIComponent(values.name)}?secret=${
         values.secret
       }&algorithm=${values.algorithm}&digits=${values.digits}&period=${
         values.period
       }${values.issuer ? `&issuer=${encodeURIComponent(values.issuer)}` : ""}`;
 
-      // Parsear la URL para validar
+      // Parse the URL to validate
       const config = parseOTPAuthURL(otpUrl);
 
       if (!config) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "Datos de OTP inválidos",
-        });
+        showFailureToast("Invalid OTP data");
         return;
       }
 
-      // Guardar la configuración
+      // Save the configuration
       await addOTPConfig(config);
 
-      showToast({
-        style: Toast.Style.Success,
-        title: "Éxito",
-        message: "Código OTP agregado correctamente",
-      });
+      showSuccessToast("OTP code added successfully");
 
-      // Volver a la vista principal
+      // Return to main view
       popToRoot();
     } catch (error) {
-      console.error("Error al agregar código OTP:", error);
-
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Ocurrió un error al agregar el código OTP",
-      });
+      console.error("Error adding OTP code:", error);
+      showFailureToast("An error occurred while adding the OTP code");
     } finally {
       setIsLoading(false);
     }
@@ -77,44 +65,39 @@ export default function Command() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Agregar" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Add" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="name"
-        title="Nombre"
-        placeholder="Nombre del servicio"
+        title="Name"
+        placeholder="Service name"
         error={nameError}
         onChange={() => setNameError(undefined)}
       />
       <Form.TextField
         id="issuer"
-        title="Proveedor (opcional)"
-        placeholder="Empresa o servicio emisor"
+        title="Issuer (optional)"
+        placeholder="Company or issuing service"
       />
       <Form.TextField
         id="secret"
-        title="Secreto"
-        placeholder="Clave secreta (Base32)"
+        title="Secret"
+        placeholder="Secret key (Base32)"
         error={secretError}
         onChange={() => setSecretError(undefined)}
       />
-      <Form.Dropdown id="algorithm" title="Algoritmo" defaultValue="SHA1">
+      <Form.Dropdown id="algorithm" title="Algorithm" defaultValue="SHA1">
         <Form.Dropdown.Item value="SHA1" title="SHA1" />
         <Form.Dropdown.Item value="SHA256" title="SHA256" />
         <Form.Dropdown.Item value="SHA512" title="SHA512" />
       </Form.Dropdown>
-      <Form.TextField
-        id="digits"
-        title="Dígitos"
-        placeholder="Número de dígitos"
-        defaultValue="6"
-      />
+      <Form.TextField id="digits" title="Digits" placeholder="Number of digits" defaultValue="6" />
       <Form.TextField
         id="period"
-        title="Periodo (segundos)"
-        placeholder="Duración del código"
+        title="Period (seconds)"
+        placeholder="Code duration"
         defaultValue="30"
       />
     </Form>

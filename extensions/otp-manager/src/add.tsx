@@ -104,7 +104,7 @@ export default function Command() {
         <Form.Dropdown.Item value="8" title="8 digits" />
       </Form.Dropdown>
 
-      <Form.Dropdown id="period" title="Period (seconds)" defaultValue="10">
+      <Form.Dropdown id="period" title="Period (seconds)" defaultValue="30">
         <Form.Dropdown.Item value="10" title="10 seconds" />
         <Form.Dropdown.Item value="30" title="30 seconds" />
         <Form.Dropdown.Item value="60" title="60 seconds" />

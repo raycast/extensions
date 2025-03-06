@@ -1,6 +1,18 @@
 # OTP/2FA Manager Changelog
 
-## [Fixed TypeScript Errors and Publishing Requirements] - {PR_MERGE_DATE}
+## [Improved Security and Internationalization] - 2025-03-06
+
+- Translated all Spanish UI text and comments to English (US) for better compatibility
+- Changed default period value from 10 seconds to 30 seconds to align with standard OTP implementations
+- Implemented secure Base32 decoding using the thirty-two library instead of manual implementation
+- Added metadata folder with README for store listing requirements
+- Improved error handling using showFailureToast and showSuccessToast from @raycast/utils
+- Updated example OTP configurations to use placeholder secrets and example.com email addresses
+- Changed file reading to use async fs.promises.readFile instead of synchronous readFileSync
+- Added 'dom' library to tsconfig.json for proper React support
+- Updated ESLint configuration to treat unused variables as errors instead of warnings
+
+## [Fixed TypeScript Errors and Publishing Requirements] - 2025-03-05
 
 - Added React imports to all TSX files to resolve UMD global errors
 - Fixed keyboard shortcuts in the main view for better usability
@@ -15,7 +27,7 @@
   - Enter (⏎): Inserts the OTP code into the application
   - Cmd+Enter (⌘⏎): Copies the OTP code to the clipboard
 - Improved import functionality to redirect to main view after successful import
-- Added 10 seconds as default period option for OTPs
+- Added configurable period options for OTPs
 - Enhanced user feedback with toast notifications for successful operations
 
 ## [Improved URL Parsing and Error Handling] - 2025-03-04

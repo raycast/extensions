@@ -1,28 +1,29 @@
 import * as crypto from "crypto";
 import { OTPConfig } from "../types";
+import * as base32 from "thirty-two";
 
 /**
- * Genera un código OTP basado en una configuración
+ * Generates an OTP code based on a configuration
  */
 export function generateOTP(config: OTPConfig): string {
   const { secret, algorithm, digits, period } = config;
 
-  // Decodificar el secreto en base32
+  // Decode the secret in base32
   const secretBuffer = base32ToBuffer(secret);
 
-  // Calcular el contador basado en el tiempo actual
+  // Calculate the counter based on current time
   const counter = Math.floor(Date.now() / 1000 / period);
 
-  // Crear un buffer de 8 bytes para el contador
+  // Create an 8-byte buffer for the counter
   const counterBuffer = Buffer.alloc(8);
   counterBuffer.writeBigUInt64BE(BigInt(counter), 0);
 
-  // Calcular el HMAC
+  // Calculate the HMAC
   const hmac = crypto.createHmac(algorithm, secretBuffer);
   hmac.update(counterBuffer);
   const hmacResult = hmac.digest();
 
-  // Calcular el código OTP
+  // Calculate the OTP code
   const offset = hmacResult[hmacResult.length - 1] & 0x0f;
   const binary =
     ((hmacResult[offset] & 0x7f) << 24) |
@@ -32,37 +33,23 @@ export function generateOTP(config: OTPConfig): string {
 
   const otp = binary % Math.pow(10, digits);
 
-  // Formatear el OTP con ceros a la izquierda si es necesario
+  // Format the OTP with leading zeros if necessary
   return otp.toString().padStart(digits, "0");
 }
 
 /**
- * Convierte un string base32 a un Buffer
+ * Converts a base32 string to a Buffer
  */
-function base32ToBuffer(base32: string): Buffer {
-  // Implementación de la decodificación base32
-  // Nota: Para una implementación real, considera usar una biblioteca como 'thirty-two'
-  base32 = base32.toUpperCase().replace(/=+$/, "");
+function base32ToBuffer(base32String: string): Buffer {
+  // Clean the input string by removing spaces and making it uppercase
+  const cleanedInput = base32String.replace(/\s+/g, "").toUpperCase();
 
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-  const bits = base32
-    .split("")
-    .map((char) => alphabet.indexOf(char))
-    .map((index) => index.toString(2).padStart(5, "0"))
-    .join("");
-
-  const bytes = [];
-  for (let i = 0; i < bits.length; i += 8) {
-    if (i + 8 <= bits.length) {
-      bytes.push(parseInt(bits.substring(i, i + 8), 2));
-    }
-  }
-
-  return Buffer.from(bytes);
+  // Use the thirty-two library to decode the base32 string
+  return base32.decode(cleanedInput);
 }
 
 /**
- * Calcula el tiempo restante en segundos para el cambio del código OTP
+ * Calculates the remaining time in seconds until the OTP code changes
  */
 export function getRemainingSeconds(period: number): number {
   const now = Math.floor(Date.now() / 1000);

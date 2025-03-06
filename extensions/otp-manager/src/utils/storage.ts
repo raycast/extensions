@@ -4,14 +4,14 @@ import { OTPConfig } from "../types";
 const STORAGE_KEY = "otp-configs";
 
 /**
- * Guarda las configuraciones OTP en el almacenamiento local
+ * Saves OTP configurations to local storage
  */
 export async function saveOTPConfigs(configs: OTPConfig[]): Promise<void> {
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(configs));
 }
 
 /**
- * Carga las configuraciones OTP desde el almacenamiento local
+ * Loads OTP configurations from local storage
  */
 export async function loadOTPConfigs(): Promise<OTPConfig[]> {
   const data = await LocalStorage.getItem(STORAGE_KEY);
@@ -23,13 +23,13 @@ export async function loadOTPConfigs(): Promise<OTPConfig[]> {
   try {
     return JSON.parse(data as string) as OTPConfig[];
   } catch (error) {
-    console.error("Error al cargar configuraciones OTP:", error);
+    console.error("Error loading OTP configurations:", error);
     return [];
   }
 }
 
 /**
- * Agrega una configuración OTP al almacenamiento local
+ * Adds an OTP configuration to local storage
  */
 export async function addOTPConfig(config: OTPConfig): Promise<void> {
   const configs = await loadOTPConfigs();
@@ -38,7 +38,7 @@ export async function addOTPConfig(config: OTPConfig): Promise<void> {
 }
 
 /**
- * Elimina una configuración OTP del almacenamiento local
+ * Removes an OTP configuration from local storage
  */
 export async function removeOTPConfig(id: string): Promise<void> {
   const configs = await loadOTPConfigs();

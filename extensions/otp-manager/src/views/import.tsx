@@ -1,6 +1,7 @@
-import { Form, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { showFailureToast, showSuccessToast } from "@raycast/utils";
 import React, { useState } from "react";
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 import { parseOTPFromJSON } from "../utils/parser";
 import { saveOTPConfigs, loadOTPConfigs } from "../utils/storage";
@@ -14,54 +15,37 @@ export default function Command() {
       setIsLoading(true);
 
       if (!filePath) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "Por favor selecciona un archivo JSON",
-        });
+        showFailureToast("Please select a JSON file");
         return;
       }
 
-      // Leer el archivo JSON
-      const content = fs.readFileSync(path.resolve(filePath), "utf-8");
+      // Read the JSON file
+      const content = await fs.readFile(path.resolve(filePath), "utf-8");
 
-      // Parsear los códigos OTP
+      // Parse OTP codes
       const otpConfigs = parseOTPFromJSON(content);
 
       if (otpConfigs.length === 0) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "No se encontraron códigos OTP válidos en el archivo",
-        });
+        showFailureToast("No valid OTP codes found in the file");
         return;
       }
 
-      // Cargar las configuraciones existentes
+      // Load existing configurations
       const existingConfigs = await loadOTPConfigs();
 
-      // Combinar con las nuevas configuraciones
+      // Combine with new configurations
       const updatedConfigs = [...existingConfigs, ...otpConfigs];
 
-      // Guardar las configuraciones actualizadas
+      // Save updated configurations
       await saveOTPConfigs(updatedConfigs);
 
-      showToast({
-        style: Toast.Style.Success,
-        title: "Éxito",
-        message: `Se importaron ${otpConfigs.length} códigos OTP`,
-      });
+      showSuccessToast(`Imported ${otpConfigs.length} OTP codes`);
 
-      // Volver a la vista principal
+      // Return to main view
       popToRoot();
     } catch (error) {
-      console.error("Error al importar códigos OTP:", error);
-
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Ocurrió un error al importar los códigos OTP",
-      });
+      console.error("Error importing OTP codes:", error);
+      showFailureToast("An error occurred while importing OTP codes");
     } finally {
       setIsLoading(false);
     }
@@ -72,25 +56,25 @@ export default function Command() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Importar" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Import" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.FilePicker
         id="file"
-        title="Archivo JSON"
+        title="JSON File"
         allowMultipleSelection={false}
         onChange={(files) => setFilePath(files[0])}
       />
       <Form.Description
-        title="Formato esperado"
-        text="El archivo debe contener un array de strings con URLs de OTP en formato 'otpauth://totp/...'"
+        title="Expected Format"
+        text="The file should contain an array of strings with OTP URLs in 'otpauth://totp/...' format"
       />
       <Form.Description
-        title="Ejemplo"
+        title="Example"
         text='[
-  "otpauth://totp/NombreServicio?secret=ABC123&algorithm=SHA1&digits=7&period=10",
-  "otpauth://totp/NombreServicio2?secret=XYZ890&algorithm=SHA1&digits=7&period=30&issuer=UnoDos"
+  "otpauth://totp/ServiceName?secret=ABC123&algorithm=SHA1&digits=7&period=30",
+  "otpauth://totp/ServiceName2?secret=XYZ890&algorithm=SHA1&digits=7&period=30&issuer=Provider"
 ]'
       />
     </Form>
