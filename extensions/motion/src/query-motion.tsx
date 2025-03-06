@@ -51,11 +51,7 @@ Label: ${task.label || "N/A"}
       setTasksData(formattedTasks);
     } catch (error) {
       console.error("Error loading tasks:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load tasks",
-        message: String(error),
-      });
+      await showFailureToast("Failed to load tasks", String(error));
       setTasksData("Error loading tasks data");
     } finally {
       setIsLoadingTasks(false);
