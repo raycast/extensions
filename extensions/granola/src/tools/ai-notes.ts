@@ -1,3 +1,7 @@
+import getCache from "../utils/getCache";
+const cache = getCache();
+const content = cache?.state?.documentPanels;
+
 export default async function () {
-  // Your tool code here
+  return content;
 }

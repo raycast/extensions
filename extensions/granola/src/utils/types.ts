@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 // Main response interface
 export interface GetDocumentsResponse {
   docs: Document[];
@@ -44,10 +46,32 @@ export interface Document {
   notification_config: null;
 }
 
+export type Doc = {
+  id: string;
+  title: string;
+  created_at: string;
+  creation_source: string;
+  public: boolean;
+  notes_markdown: string;
+  sharing_link_visibility: string;
+};
+
 // Notes structure
 export interface Notes {
   type: string;
   content: NoteContent[];
+}
+
+export interface NoteActionsProps {
+  doc: Doc;
+  panels: {
+    [key: string]: {
+      [key: string]: {
+        original_content: string;
+      };
+    };
+  };
+  children?: ReactNode;
 }
 
 // Note content types

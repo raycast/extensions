@@ -10,9 +10,9 @@ export default async function Command() {
       style: Toast.Style.Animated,
       title: "Opening Granola",
     });
-    
+
     await execPromise("open 'granola://new-document?creation_source=raycast'");
-    
+
     await showToast({
       style: Toast.Style.Success,
       title: "Opened new note in Granola",
