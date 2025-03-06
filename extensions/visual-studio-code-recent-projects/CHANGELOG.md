@@ -2,7 +2,7 @@
 
 ## [Update] - 2025-03-05
 
-- support for Trae CN.
+- Added support for Trae CN.
 
 ## [Update] - 2025-03-03
 
