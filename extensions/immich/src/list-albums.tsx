@@ -57,7 +57,7 @@ export default function Command() {
           keywords={[album.albumName, album.endDate.split("T")[0], album.startDate.split("T")[0]]}
           actions={
             <ActionPanel title="Actions">
-              <Action.OpenInBrowser url={`https://immich.taild1148.ts.net/albums/${album.id}`} />
+              <Action.OpenInBrowser url={`${preferences.url}/albums/${album.id}`} />
             </ActionPanel>
           }
         />
