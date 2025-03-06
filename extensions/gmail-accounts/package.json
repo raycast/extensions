@@ -26,7 +26,7 @@
   "dependencies": {
     "@raycast/api": "^1.93.1",
     "@raycast/utils": "^1.17.0",
-    "chrome-cookie-decrypt": "^0.0.7",
+    "chrome-cookie-decrypt": "^0.0.8",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
