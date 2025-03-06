@@ -1,10 +1,10 @@
 import { ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
-import TurndownService from "turndown";
 import { getPanelId } from "./utils/getPanelId";
 import getCache from "./utils/getCache";
 import { fetchGranolaData } from "./utils/fetchData";
-import Unresponsive from "./templates/unresponsive";
+import convertHtmlToMarkdown from "./utils/convertHtmltoMarkdown";
 import { GetDocumentsResponse, Doc, NoteActionsProps } from "./utils/types";
+import Unresponsive from "./templates/unresponsive";
 
 interface NoteData {
   isLoading: boolean;
@@ -17,15 +17,17 @@ const sortNotesByDate = (docs: Doc[] | undefined): Doc[] => {
   return [...docs].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 };
 
-const convertHtmlToMarkdown = (htmlContent: string): string => {
-  const turndownService = new TurndownService();
-  return turndownService.turndown(htmlContent);
-};
-
 const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
-  const canShare = doc.sharing_link_visibility === "public" && getPanelId(panels, doc.id);
-  const shareUrl = `https://notes.granola.ai/p/${getPanelId(panels, doc.id)}`;
-  const notes = panels[doc.id][getPanelId(panels, doc.id) as string].original_content;
+  // Safely get panel ID once and reuse it
+  const panelId = getPanelId(panels, doc.id);
+  const canShare = doc.sharing_link_visibility === "public" && panelId;
+  const shareUrl = panelId ? `https://notes.granola.ai/p/${panelId}` : "";
+
+  // Safely access notes content with fallbacks at each level
+  let notes = "";
+  if (panels && doc.id && panels[doc.id] && panelId && panels[doc.id][panelId]) {
+    notes = panels[doc.id][panelId].original_content || "";
+  }
 
   return (
     <>
@@ -72,7 +74,7 @@ export default function Command() {
         {sortNotesByDate(noteData?.data?.docs).map((doc) => (
           <List.Item
             key={doc.id}
-            title={doc.title}
+            title={doc.title ?? "Untitled Note"}
             accessories={[
               { date: new Date(doc.created_at) },
               { text: doc.creation_source },
@@ -85,7 +87,17 @@ export default function Command() {
                   target={
                     <Detail
                       markdown={(() => {
-                        const htmlContent = panels[doc.id][getPanelId(panels, doc.id) as string].original_content;
+                        // Get panel ID with safe fallback
+                        const panelId = getPanelId(panels, doc.id);
+
+                        // Check if doc.id exists in panels and if panelId is valid
+                        if (!panels[doc.id] || !panelId || !panels[doc.id][panelId]) {
+                          return `# ${doc.title}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\nNo content available for this note.`;
+                        }
+
+                        // Safely access the content with fallback
+                        const panelData = panels[doc.id][panelId];
+                        const htmlContent = panelData?.original_content || "";
                         const markdownContent = convertHtmlToMarkdown(htmlContent);
                         return `# ${doc.title}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\n${markdownContent}`;
                       })()}
