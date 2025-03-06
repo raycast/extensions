@@ -92,5 +92,8 @@ export const produceOutput = async (content: string) => {
       await Clipboard.copy(content);
       await showToast(Toast.Style.Success, "Pasted to active app and copied to clipboard! 📋");
       break;
+
+    default:
+      await showToast(Toast.Style.Failure, "Invalid action preference");
   }
 };
