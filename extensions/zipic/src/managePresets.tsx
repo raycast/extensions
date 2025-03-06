@@ -456,7 +456,10 @@ function EditPresetForm({ preset, onSave }: { preset?: Preset; onSave: (preset: 
         placeholder="0"
         info="Sets the desired width (0 for auto-adjust)"
         defaultValue={formValues.width}
-        onChange={(value) => setFormValues({ ...formValues, width: value })}
+        onChange={(value) => {
+          const numValue = value.replace(/[^0-9]/g, '');
+          setFormValues({ ...formValues, width: numValue });
+        }}
       />
 
       <Form.TextField
@@ -465,7 +468,10 @@ function EditPresetForm({ preset, onSave }: { preset?: Preset; onSave: (preset: 
         placeholder="0"
         info="Sets the desired height (0 for auto-adjust)"
         defaultValue={formValues.height}
-        onChange={(value) => setFormValues({ ...formValues, height: value })}
+        onChange={(value) => {
+          const numValue = value.replace(/[^0-9]/g, '');
+          setFormValues({ ...formValues, height: numValue });
+        }}
       />
 
       <Form.Checkbox
