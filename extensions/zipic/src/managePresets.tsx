@@ -10,6 +10,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -28,7 +29,6 @@ export default function ManagePresets() {
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
   const { push } = useNavigation();
 
-  // 加载预设
   useEffect(() => {
     async function loadPresets() {
       try {
@@ -38,7 +38,6 @@ export default function ManagePresets() {
         setPresets(loadedPresets);
         setDefaultPresetId(defaultId);
 
-        // 如果有预设，默认选中第一个
         if (loadedPresets.length > 0) {
           setSelectedPresetId(loadedPresets[0].id);
         }
@@ -56,7 +55,6 @@ export default function ManagePresets() {
     loadPresets();
   }, []);
 
-  // 处理删除预设
   async function handleDeletePreset(presetId: string) {
     const options: Alert.Options = {
       title: "Delete Preset",
@@ -71,11 +69,9 @@ export default function ManagePresets() {
       try {
         await deletePreset(presetId);
 
-        // 更新本地状态
         const updatedPresets = presets.filter((p) => p.id !== presetId);
         setPresets(updatedPresets);
 
-        // 如果删除的是当前选中的预设，选择另一个预设
         if (selectedPresetId === presetId) {
           if (updatedPresets.length > 0) {
             setSelectedPresetId(updatedPresets[0].id);
@@ -98,7 +94,6 @@ export default function ManagePresets() {
     }
   }
 
-  // 处理设置默认预设
   async function handleSetDefaultPreset(presetId: string | null) {
     try {
       await setDefaultPreset(presetId);
@@ -117,10 +112,8 @@ export default function ManagePresets() {
     }
   }
 
-  // 获取选中的预设
   const selectedPreset = selectedPresetId ? presets.find((p) => p.id === selectedPresetId) : null;
 
-  // 获取压缩级别描述
   function getLevelDescription(level: string): string {
     const levelMap: Record<string, string> = {
       "1": "Level 1 - Highest Quality",
@@ -133,12 +126,10 @@ export default function ManagePresets() {
     return levelMap[level] || level || "Default";
   }
 
-  // 获取格式描述
   function getFormatDescription(format: string): string {
     return format.charAt(0).toUpperCase() + format.slice(1) || "Original";
   }
 
-  // 渲染预设详情
   function renderPresetDetail() {
     if (!selectedPreset) {
       return (
@@ -308,12 +299,10 @@ export default function ManagePresets() {
   );
 }
 
-// 编辑预设表单
 function EditPresetForm({ preset, onSave }: { preset?: Preset; onSave: (preset: Preset) => void }) {
   const { pop } = useNavigation();
   const isEditing = !!preset;
 
-  // 初始化表单值
   const [formValues, setFormValues] = useState<Omit<Preset, "id">>({
     name: preset?.name || "",
     level: preset?.level || "3",
@@ -328,7 +317,6 @@ function EditPresetForm({ preset, onSave }: { preset?: Preset; onSave: (preset: 
     specified: preset?.specified || false,
   });
 
-  // 处理表单提交
   async function handleSubmit(values: Omit<Preset, "id">) {
     try {
       const newPreset: Preset = {
@@ -346,11 +334,9 @@ function EditPresetForm({ preset, onSave }: { preset?: Preset; onSave: (preset: 
 
       pop();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: isEditing ? "Failed to update preset" : "Failed to create preset",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast(
+        error instanceof Error ? error.message : isEditing ? "Failed to update preset" : "Failed to create preset",
+      );
     }
   }
 
@@ -411,7 +397,6 @@ function EditPresetForm({ preset, onSave }: { preset?: Preset; onSave: (preset: 
           setFormValues({
             ...formValues,
             location: newValue,
-            // 如果切换到 original，重置 specified 和 directory
             ...(newValue === "original" ? { specified: false, directory: "" } : {}),
           });
         }}
@@ -457,7 +442,7 @@ function EditPresetForm({ preset, onSave }: { preset?: Preset; onSave: (preset: 
         info="Sets the desired width (0 for auto-adjust)"
         defaultValue={formValues.width}
         onChange={(value) => {
-          const numValue = value.replace(/[^0-9]/g, '');
+          const numValue = value.replace(/[^0-9]/g, "");
           setFormValues({ ...formValues, width: numValue });
         }}
       />
@@ -469,7 +454,7 @@ function EditPresetForm({ preset, onSave }: { preset?: Preset; onSave: (preset: 
         info="Sets the desired height (0 for auto-adjust)"
         defaultValue={formValues.height}
         onChange={(value) => {
-          const numValue = value.replace(/[^0-9]/g, '');
+          const numValue = value.replace(/[^0-9]/g, "");
           setFormValues({ ...formValues, height: numValue });
         }}
       />
