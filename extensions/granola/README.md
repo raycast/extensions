@@ -9,7 +9,7 @@ So long as you have Granola installed and running, and you are logged in, you ca
 If you run into any issues, please verify the following:
 - You must have Granola app installed and running
 - You must be logged into the Granola app
-- Raycast must have access to your `/{homeDir}/Library/Application Support/Granola` folder
+- Raycast must have access to your `~/Library/Application Support/Granola` folder
 
 ## Granola Commands
 - `New Note` command - which starts a new note and recording immediately in Granola
