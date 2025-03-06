@@ -1,7 +1,5 @@
 import { BadRequestError } from "@mux/mux-node";
 import { Asset } from "@mux/mux-node/resources/video/assets";
-import { showFailureToast } from "@raycast/utils";
-import { Effect } from "effect";
 import Raycast from "raycast-effect";
 import { Toast } from "@raycast/api";
 
@@ -16,8 +14,9 @@ export class MuxAssetError {
 }
 
 export const HandleMuxAssetError = (e: MuxAssetError) =>
-  Effect.promise(async () => {
-    await showFailureToast(e.errors.messages?.[0] || e);
+  Raycast.Feedback.showToast({
+    title: e.errors.messages?.[0] || "An unknown error occurred.",
+    style: Toast.Style.Failure,
   });
 
 export class ToastableError {
@@ -30,8 +29,9 @@ export class ToastableError {
 }
 
 export const HandleToastableError = (e: ToastableError) =>
-  Effect.promise(async () => {
-    await showFailureToast(e.message);
+  Raycast.Feedback.showToast({
+    title: e.message,
+    style: Toast.Style.Failure,
   });
 
 export const HandleClipboardError = () =>

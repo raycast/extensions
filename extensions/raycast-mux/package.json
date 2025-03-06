@@ -16,7 +16,7 @@
     {
       "name": "get-playback-id",
       "title": "Get Playback ID",
-      "subtitle": "Convert an Asset ID to a Playback ID",
+      "subtitle": "Convert a Mux.com Asset ID to a Playback ID",
       "description": "Convert an Asset ID to a Playback ID",
       "mode": "no-view",
       "arguments": [
@@ -31,7 +31,7 @@
     {
       "name": "get-asset-id",
       "title": "Get Asset ID",
-      "subtitle": "Convert a Playback ID to an Asset ID",
+      "subtitle": "Convert a Mux.com Playback ID to an Asset ID",
       "description": "Convert a Playback ID to an Asset ID",
       "mode": "no-view",
       "arguments": [
@@ -46,12 +46,14 @@
     {
       "name": "recent-assets",
       "title": "List Recent Assets",
-      "description": "List Recent Assets",
+      "subtitle": "Mux.com",
+      "description": "List recently uploaded video assets",
       "mode": "view"
     },
     {
       "name": "inspect-asset",
       "title": "Inspect Mux Asset",
+      "subtitle": "Mux.com",
       "description": "Inspect Mux Asset",
       "mode": "view",
       "arguments": [
@@ -66,13 +68,15 @@
     {
       "name": "upload-asset",
       "title": "Upload a new Asset",
+      "subtitle": "Mux.com",
       "description": "Upload a new Asset",
       "mode": "view"
     },
     {
       "name": "recent-live-streams",
       "title": "List Recent Live Streams",
-      "description": "List Recent Live Streams",
+      "subtitle": "Mux.com",
+      "description": "List recently created video live streams",
       "mode": "view"
     }
   ],
@@ -80,28 +84,28 @@
     {
       "name": "accessTokenId",
       "title": "Mux Access Token ID",
-      "description": "Mux Access Token ID Description",
+      "description": "Your Mux Access Token ID can be found in the Mux Dashboard under Settings > Access Tokens",
       "type": "textfield",
       "required": true
     },
     {
       "name": "secretKey",
       "title": "Mux Secret Key",
-      "description": "Mux Secret Key Description",
+      "description": "Your Mux Secret Key can be found in the Mux Dashboard under Settings > Access Tokens",
       "type": "password",
       "required": true
     },
     {
       "name": "organizationId",
       "title": "Organization ID",
-      "description": "Obtain from an Asset URL",
+      "description": "Your Mux Organization ID; can be obtained from the console URL.",
       "type": "textfield",
       "required": true
     },
     {
       "name": "environmentId",
       "title": "Environment ID",
-      "description": "Obtain from an Asset URL",
+      "description": "Your Mux Environment ID; can be obtained from the console URL.",
       "type": "textfield",
       "required": true
     }
@@ -112,7 +116,6 @@
     "@mux/mux-node": "^9.0.1",
     "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.19.0",
-    "@types/lodash": "^4.17.14",
     "effect": "^3.13.2",
     "moment": "^2.30.1",
     "raycast-effect": "^0.0.2"

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, LaunchProps, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { Effect, Fiber, Queue, Schedule, Schema } from "effect";
+import { Effect, Fiber, Schema } from "effect";
 import RecentAssets from "./recent-assets.js";
 import { MuxRepo } from "./lib/MuxRepo.js";
 import Runtime, { effectView } from "./lib/Runtime.js";
@@ -36,11 +36,10 @@ export default effectView(
       onSubmit: (values) =>
         Effect.gen(function* () {
           yield* Raycast.Feedback.showToast({
-            title: "Preapring upload...",
+            title: "Preparing upload...",
             style: Toast.Style.Animated,
           });
 
-          const queue = yield* Queue.sliding<number>(1);
           const upload = yield* mux.createAsset(values);
 
           yield* Raycast.Feedback.showToast({
@@ -48,21 +47,7 @@ export default effectView(
             style: Toast.Style.Animated,
           });
 
-          const uploadFiber = yield* Effect.fork(mux.upload(values.files[0], upload, queue));
-
-          yield* Effect.fork(
-            Queue.take(queue).pipe(
-              Effect.tap(Effect.log),
-              Effect.andThen((v) =>
-                Raycast.Feedback.showToast({
-                  title: "Uploading...",
-                  message: `${v.toFixed(0)}%`,
-                  style: Toast.Style.Animated,
-                }),
-              ),
-              Effect.repeat(Schedule.fixed("0.5 seconds")),
-            ),
-          );
+          const uploadFiber = yield* Effect.fork(mux.upload(values.files[0], upload));
 
           yield* Fiber.join(uploadFiber);
 

@@ -103,11 +103,11 @@ export default effectView(
             accessories={[
               {
                 icon: {
-                  source: liveStream.status == "disabled" ? Icon.LivestreamDisabled : Icon.Livestream,
+                  source: liveStream.status === "disabled" ? Icon.LivestreamDisabled : Icon.Livestream,
                   tintColor:
-                    liveStream.status == "disabled"
+                    liveStream.status === "disabled"
                       ? Color.Red
-                      : liveStream.status == "active"
+                      : liveStream.status === "active"
                         ? Color.Green
                         : Color.SecondaryText,
                 },
@@ -164,16 +164,20 @@ export default effectView(
                 <ActionPanel.Section title="Stream Configuration">
                   {/* eslint-disable-next-line @raycast/prefer-title-case */}
                   <Action.CopyToClipboard title="Copy Live Stream ID" content={liveStream.id} />
-                  <Action.CopyToClipboard title="Copy Stream Key" content={liveStream.stream_key} />
+                  <Action.CopyToClipboard title="Copy Stream Key" content={liveStream.stream_key} concealed={true} />
                   {liveStream.srt_passphrase && (
                     <>
-                      {/* eslint-disable-next-line @raycast/prefer-title-case */}
-                      <Action.CopyToClipboard title="Copy SRT Passphrase" content={liveStream.srt_passphrase} />
+                      <Action.CopyToClipboard
+                        /* eslint-disable-next-line @raycast/prefer-title-case */
+                        title="Copy SRT Passphrase"
+                        content={liveStream.srt_passphrase}
+                        concealed={true}
+                      />
                     </>
                   )}
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Controls">
-                  {liveStream.status != "disabled" ? (
+                  {liveStream.status !== "disabled" ? (
                     <Action
                       icon={Icon.LivestreamDisabled}
                       style={Action.Style.Destructive}

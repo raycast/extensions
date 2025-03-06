@@ -13,7 +13,7 @@ export default effectCommand(
 
       const playbackId = asset.playback_ids?.find((pbid) => pbid.policy == "public");
       if (!playbackId) {
-        yield* Effect.fail(new ToastableError("No publich Playback IDs exist!"));
+        yield* Effect.fail(new ToastableError("No public Playback IDs exist!"));
         return;
       }
 

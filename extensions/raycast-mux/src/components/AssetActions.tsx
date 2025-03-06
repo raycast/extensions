@@ -1,9 +1,11 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, showToast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon } from "@raycast/api";
 import { Effect } from "effect";
-import Runtime, { effectView } from "../lib/Runtime.js";
+import { effectView, useEffectFn } from "../lib/Runtime.js";
 import Mux from "@mux/mux-node";
 import { MuxRepo } from "../lib/MuxRepo.js";
 import { Preferences } from "../lib/Preferences.js";
+import Raycast from "raycast-effect";
+import { HandleMuxAssetError } from "../lib/Errors.js";
 
 type AssetActionsProps = {
   asset: Mux.Video.Asset;
@@ -14,20 +16,19 @@ export default effectView(
   Effect.fn(function* ({ asset, onDelete }: AssetActionsProps) {
     const mux = yield* MuxRepo;
     const preferences = yield* Preferences;
-    const playbackId = asset.playback_ids?.find((pid) => pid.policy == "public");
+    const playbackId = asset.playback_ids?.find((pid) => pid.policy === "public");
     const staticRendition = asset.static_renditions?.files?.sort((a, b) => (b.width || 0) - (a.width || 0)).at(0);
 
-    const handleEnableStaticRendition = () =>
+    const handleEnableStaticRendition = useEffectFn(() =>
       mux.enableMp4(asset.id).pipe(
-        Effect.flatMap(() =>
-          Effect.promise(() =>
-            showToast({
-              title: "Static Rendition Requested",
-            }),
-          ),
+        Effect.andThen(() =>
+          Raycast.Feedback.showToast({
+            title: "Static Rendition Requested",
+          }),
         ),
-        Runtime.runPromise,
-      );
+        Effect.catchTag("MuxAssetError", HandleMuxAssetError),
+      ),
+    );
 
     const handleDeleteAsset = () =>
       confirmAlert({
@@ -37,18 +38,17 @@ export default effectView(
         primaryAction: {
           title: "Delete Forever",
           style: Alert.ActionStyle.Destructive,
-          onAction: () =>
+          onAction: useEffectFn(() =>
             mux.deleteAsset(asset.id).pipe(
-              Effect.flatMap(() =>
-                Effect.promise(() => {
-                  onDelete && onDelete();
-                  return showToast({
-                    title: "Asset Deleted",
-                  });
+              Effect.tap(() => Effect.sync(() => onDelete && onDelete())),
+              Effect.andThen(() =>
+                Raycast.Feedback.showToast({
+                  title: "Asset Deleted",
                 }),
               ),
-              Runtime.runPromise,
+              Effect.catchTag("MuxAssetError", HandleMuxAssetError),
             ),
+          ),
         },
       });
 
@@ -64,14 +64,12 @@ export default effectView(
           shortcut={{ modifiers: ["cmd"], key: "c" }}
         />
         {playbackId && (
-          <>
-            <Action.CopyToClipboard
-              /* eslint-disable-next-line @raycast/prefer-title-case */
-              title="Copy Playback ID to Clipboard"
-              content={playbackId?.id}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
-          </>
+          <Action.CopyToClipboard
+            /* eslint-disable-next-line @raycast/prefer-title-case */
+            title="Copy Playback ID to Clipboard"
+            content={playbackId?.id}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          />
         )}
         {playbackId && (
           <>

@@ -3,7 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import moment from "moment";
 import AssetDetails from "./components/AssetDetails.js";
 import AssetActions from "./components/AssetActions.js";
-import { Runtime, effectView } from "./lib/Runtime.js";
+import { effectView, useEffectFn } from "./lib/Runtime.js";
 import { Effect, Schema } from "effect";
 import { MuxRepo } from "./lib/MuxRepo.js";
 import { HandleMuxAssetError } from "./lib/Errors.js";
@@ -16,18 +16,21 @@ export default effectView(
     const mux = yield* MuxRepo;
     const { pop } = useNavigation();
 
-    const assets = useCachedPromise(
-      () => (options) =>
-        mux.getAssets(options).pipe(
-          Effect.map((resp) => ({
-            data: resp.data,
-            hasMore: resp.hasNextPage(),
-          })),
+    const assets = useCachedPromise(() =>
+      useEffectFn(
+        Effect.fn(
+          function* (options) {
+            const resp = yield* mux.getAssets(options);
+            return {
+              data: resp.data,
+              hasMore: resp.hasNextPage(),
+            };
+          },
           Effect.catchTag("MuxAssetError", (e) =>
             HandleMuxAssetError(e).pipe(Effect.as({ data: [] as Asset[], hasMore: false })),
           ),
-          Runtime.runPromise,
         ),
+      ),
     );
 
     return (

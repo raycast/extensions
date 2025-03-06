@@ -1,4 +1,4 @@
-import { Effect, Queue } from "effect";
+import { Effect } from "effect";
 import { FileSystem, HttpBody, HttpClient } from "@effect/platform";
 import { MuxService } from "./MuxService.js";
 import { MuxAssetError } from "./Errors.js";
@@ -76,24 +76,12 @@ export class MuxRepo extends Effect.Service<MuxRepo>()("MuxRepo", {
           catch: (e) => new MuxAssetError(e),
         }),
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      upload: (filepath: string, upload: Mux.Video.Upload, queue?: Queue.Queue<number>) =>
+      upload: (filepath: string, upload: Mux.Video.Upload) =>
         Effect.gen(function* () {
           const fs = yield* FileSystem.FileSystem;
           const http = yield* HttpClient.HttpClient;
 
           const fileStream = fs.stream(filepath);
-
-          // const fileStat = yield* fs.stat(filepath);
-          // const fileSize = fileStat.size.valueOf();
-          // const uploaded = yield* Ref.make(0n);
-
-          // const stream = Stream.tap(fileStream, (chunk) =>
-          //   Effect.gen(function* () {
-          //     const u = yield* Ref.updateAndGet(uploaded, (u) => u + BigInt(chunk.length));
-          //     const p = (u * 100n) / fileSize;
-          //     queue && (yield* queue.offer(Number(p)));
-          //   }),
-          // );
 
           return yield* http.put(upload.url, {
             body: HttpBody.stream(fileStream),

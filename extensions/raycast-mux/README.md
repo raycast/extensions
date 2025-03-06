@@ -1,4 +1,4 @@
-# Mux
+# Mux.com
 
 Interact with your Mux account, directly from Raycast!
 
