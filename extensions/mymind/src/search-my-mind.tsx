@@ -33,11 +33,7 @@ export default function Command() {
           return {};
         }
 
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch cards",
-          message: String(error),
-        });
+        showFailureToast("Failed to fetch cards", String(error));
         return {};
       }
     },
