@@ -3,12 +3,14 @@ import { useEffect, useState } from "react";
 import { getAccounts, type Account } from "./gmail";
 import { showFailureToast, useCachedState } from "@raycast/utils";
 import { usePinnedAccounts, type PinMethods } from "./pinned";
-import { execSync } from "node:child_process";
+import { spawn, execSync } from "node:child_process";
 
 export default function Command() {
   const [accounts, setAccounts] = useCachedState<Account[]>("accounts", []);
   const [loading, setLoading] = useState(true);
   const { pinnedAccounts, ...pinnedMethods } = usePinnedAccounts();
+
+  const shouldShowProfileTag = new Set(accounts.map((account) => account.profile.directory)).size > 1;
 
   useEffect(() => {
     setLoading(true);
@@ -30,30 +32,54 @@ export default function Command() {
     <List isLoading={accounts.length === 0 && loading}>
       <List.Section title="Pinned Accounts">
         {accounts
-          .filter((account) => pinnedAccounts.includes(account.email))
-          .toSorted((a, b) => pinnedAccounts.indexOf(a.email) - pinnedAccounts.indexOf(b.email))
+          .filter((account) => pinnedAccounts.includes(account.key))
+          .toSorted((a, b) => pinnedAccounts.indexOf(a.key) - pinnedAccounts.indexOf(b.key))
           .map((account) => (
-            <ListItem key={`pinned-${account.email}`} account={account} pinned={true} {...pinnedMethods} />
+            <ListItem
+              key={`pinned-${account.key}`}
+              account={account}
+              pinned={true}
+              {...pinnedMethods}
+              shouldShowProfileTag={shouldShowProfileTag}
+            />
           ))}
       </List.Section>
 
       <List.Section title="Accounts">
         {accounts
-          .filter((account) => !pinnedAccounts.includes(account.email))
+          .filter((account) => !pinnedAccounts.includes(account.key))
           .map((account) => (
-            <ListItem key={account.email} account={account} {...pinnedMethods} />
+            <ListItem
+              key={`${account.key}`}
+              account={account}
+              {...pinnedMethods}
+              shouldShowProfileTag={shouldShowProfileTag}
+            />
           ))}
       </List.Section>
     </List>
   );
 }
 
-function ListItem(props: { account: Account; pinned?: boolean } & PinMethods) {
+function ListItem(props: { account: Account; pinned?: boolean; shouldShowProfileTag: boolean } & PinMethods) {
   const { account } = props;
+
+  function buildAccessories(): List.Item.Accessory[] {
+    const accessories: List.Item.Accessory[] = [];
+    if (account.id === 0) {
+      accessories.push({ tag: { value: "Default", color: Color.Blue } });
+    } else if (!account.isLoggedIn) {
+      accessories.push({ tag: { value: "Signed out", color: Color.SecondaryText } });
+    }
+    if (props.shouldShowProfileTag) {
+      accessories.push({ text: account.profile.displayName });
+    }
+    return accessories;
+  }
 
   async function handleOpenInChromeAction() {
     try {
-      openInChrome(`https://mail.google.com/mail/u/${account.id}/#inbox`);
+      openInChrome(`https://mail.google.com/mail/u/${account.id}/#inbox`, account.profile.directory);
       await closeMainWindow();
     } catch (err) {
       await showFailureToast(err, { title: "Failed to open account in Chrome" });
@@ -65,20 +91,7 @@ function ListItem(props: { account: Account; pinned?: boolean } & PinMethods) {
       subtitle={account.fullname}
       icon={{ source: account.avatar, mask: Image.Mask.Circle }}
       keywords={[account.email, account.fullname]}
-      accessories={
-        account.id === 0
-          ? [{ tag: { value: "Default", color: Color.Blue } }]
-          : account.isLoggedIn
-            ? undefined
-            : [
-                {
-                  tag: {
-                    value: "Signed out",
-                    color: Color.SecondaryText,
-                  },
-                },
-              ]
-      }
+      accessories={buildAccessories()}
       actions={
         <ActionPanel>
           {account.isLoggedIn && (
@@ -150,8 +163,11 @@ function PinActionSection(props: { account: Account; pinned?: boolean } & PinMet
   );
 }
 
-function openInChrome(url: string) {
-  execSync(`open -a "Google Chrome" ${url}`);
+function openInChrome(url: string, profile: string) {
+  const chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+  const args = [`--profile-directory=${profile}`, url];
+
+  spawn(chromePath, args, { detached: true, stdio: "ignore" }).unref();
 }
 
 function ErrorView() {

@@ -1,8 +1,8 @@
 import fetch from "node-fetch";
-import { getCookies } from "chrome-cookie-decrypt";
+import { getCookies, getProfiles, type Profile } from "chrome-cookie-decrypt";
 
-async function getCookieStr() {
-  const cookies = await getCookies(".google.com");
+async function getCookieStr(profile: string): Promise<string> {
+  const cookies = await getCookies(".google.com", profile);
   const googleCookies = cookies.filter(
     (cookie) => cookie.domain === ".google.com" || cookie.domain === "accounts.google.com",
   );
@@ -10,7 +10,7 @@ async function getCookieStr() {
   return cookieStr;
 }
 
-async function getAccountsReq() {
+async function getAccountsReq(profile: string): Promise<GetAccountsReqResult | []> {
   const response = await fetch(
     "https://accounts.google.com/ListAccounts?listPages=0&authuser=0&pid=23&gpsia=1&source=ogb&atic=1&mo=1&mn=1&hl=en&ts=72",
     {
@@ -23,7 +23,7 @@ async function getAccountsReq() {
         referer: "https://ogs.google.com/",
         "user-agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
-        cookie: await getCookieStr(),
+        cookie: await getCookieStr(profile),
       },
     },
   );
@@ -35,15 +35,22 @@ async function getAccountsReq() {
 }
 
 export async function getAccounts(): Promise<Account[]> {
-  const result = await getAccountsReq();
-  if (result.length === 0) {
-    return [];
-  }
+  const profiles = await getProfiles();
 
-  return parseAccounts(result);
+  const getProfileAccounts = async (profile: Profile) => {
+    const result = await getAccountsReq(profile.directory);
+    if (result.length === 0) {
+      return [];
+    }
+    const parsedAccounts = parseAccounts(result);
+    return parsedAccounts.map((account) => ({ ...account, profile, key: `${account.email}-${profile.directory}` }));
+  };
+
+  const accounts = await Promise.all(profiles.map(getProfileAccounts));
+  return accounts.flat();
 }
 
-function parseAccounts(input: GetAccountsReqResult): Account[] {
+function parseAccounts(input: GetAccountsReqResult): Omit<Account, "profile" | "key">[] {
   if (!Array.isArray(input[1])) {
     throw new Error("Invalid accounts array");
   }
@@ -90,6 +97,8 @@ export type Account = {
   email: string;
   avatar: string;
   isLoggedIn: boolean;
+  profile: Profile;
+  key: string;
 };
 
 type GetAccountsReqResult = [

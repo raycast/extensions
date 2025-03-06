@@ -6,12 +6,11 @@ export function usePinnedAccounts() {
 
   return {
     pinnedAccounts,
-    pin: (account: Account) => setPinnedAccounts((prev) => [...prev, account.email]),
-    unpin: (account: Account) => setPinnedAccounts((prev) => prev.filter((email) => email !== account.email)),
-    unpinAll: () => setPinnedAccounts([]),
+    pin: (account: Account) => setPinnedAccounts((prev) => [...prev, account.key]),
+    unpin: (account: Account) => setPinnedAccounts((prev) => prev.filter((key) => key !== account.key)),
     moveUp: (account: Account) =>
       setPinnedAccounts((prev) => {
-        const i = prev.indexOf(account.email);
+        const i = prev.indexOf(account.key);
         if (i === -1 || i === 0) return prev;
 
         const newArray = [...prev];
@@ -20,7 +19,7 @@ export function usePinnedAccounts() {
       }),
     moveDown: (account: Account) =>
       setPinnedAccounts((prev) => {
-        const i = prev.indexOf(account.email);
+        const i = prev.indexOf(account.key);
         if (i === -1 || i === prev.length - 1) return prev;
 
         const newArray = [...prev];
@@ -32,7 +31,7 @@ export function usePinnedAccounts() {
 }
 
 function getAllowedMovements(pinnedAccounts: string[], account: Account): PinnedMovement[] {
-  const i = pinnedAccounts.indexOf(account.email);
+  const i = pinnedAccounts.indexOf(account.key);
   const movements: PinnedMovement[] = [];
   if (i > 0) {
     movements.push("up");
@@ -48,7 +47,6 @@ type PinnedMovement = "up" | "down";
 export type PinMethods = {
   pin: (account: Account) => void;
   unpin: (account: Account) => void;
-  unpinAll: () => void;
   moveUp: (account: Account) => void;
   moveDown: (account: Account) => void;
   getAllowedMovements: (account: Account) => PinnedMovement[];
