@@ -6,20 +6,22 @@ function getCache() {
   // Get the user's home directory dynamically
   const homeDirectory = os.homedir();
 
-  // Construct the path to the supabase.json file
+  // Construct the path to the local cache file
+  // This cache file is how Granola keeps your data secure
+  // It stores your content on your machine, and not on Granola's servers
   const filePath = path.join(homeDirectory, "Library", "Application Support", "Granola", "cache-v3.json");
 
   try {
-    // Read and parse the JSON file
+    // Read and parse the local JSON file
     const fileContent = fs.readFileSync(filePath, "utf8");
     const jsonData = JSON.parse(fileContent);
 
-    // Parse the cognito_tokens string as it's stored as a JSON string
+    // Parse the data as a JSON string
     const data = JSON.parse(jsonData.cache);
 
     if (!data) {
       throw new Error(
-        "Access token not found in the supabase.json file. Make sure Granola is installed, running, and that you are logged in.",
+        "Unable to find your local Granola data. Make sure Granola is installed, running, and that you are logged in to the application.",
       );
     }
 

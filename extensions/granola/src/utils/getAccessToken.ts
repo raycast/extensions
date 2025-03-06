@@ -21,7 +21,7 @@ function getAccessToken() {
 
     if (!accessToken) {
       throw new Error(
-        "Access token not found in the supabase.json file. Make sure Granola is installed, running, and that you are logged in.",
+        "Access token not found in your local Granola data. Make sure Granola is installed, running, and that you are logged in to the application.",
       );
     }
 
