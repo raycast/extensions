@@ -16,7 +16,7 @@ export default function Command() {
 
       const motionClient = getMotionApiClient();
 
-      let infoText = "# Motion Debug Information\n\n";
+      let infoText = "# Motion Workspace Information\n\n";
 
       // Test API key and workspace ID
       infoText += "## API Configuration\n";
