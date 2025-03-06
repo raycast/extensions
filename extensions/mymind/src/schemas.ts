@@ -23,7 +23,7 @@ const ProseContentSchema = z
     type: z.string(),
     content: z.array(z.any()).optional(),
     text: z.string().optional(),
-    attrs: z.record(z.any()).optional(),
+    attrs: z.record(z.unknown()).optional(),
     marks: z.array(z.object({ type: z.string() })).optional(),
   })
   .or(
