@@ -1,6 +1,6 @@
 # Linkwarden Changelog
 
-## [Refactor and improvments] - 2025-03-07
+## [Refactor and improvements] {PR_MERGE_DATE}
 
 - Refactor preferences type
 - Improve link adding UX
