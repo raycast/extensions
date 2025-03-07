@@ -64,6 +64,6 @@ export async function forceMenuBarRefresh(): Promise<void> {
     await launchCommand({ name: "menu-bar", type: LaunchType.Background });
     console.log("Menubar command relaunched");
   } catch (error) {
-    console.error("Failed to relaunch menubar command:", error);
+    showFailureToast("Failed to relaunch menubar command", error);
   }
 }
