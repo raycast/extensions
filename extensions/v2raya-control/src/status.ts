@@ -1,5 +1,6 @@
 import { closeMainWindow, showToast, Toast } from "@raycast/api";
 import { checkStatus, getToken } from "./utils";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   try {
@@ -11,9 +12,9 @@ export default async function Command() {
       style: status.running ? Toast.Style.Success : Toast.Style.Failure,
     });
   } catch (error) {
-    await showToast({
-      title: error instanceof Error ? error.message : "Unknown error occurred",
-      style: Toast.Style.Failure,
+    await showFailureToast({
+      title: "Failed to check V2rayA status",
+      message: error instanceof Error ? error.message : "Unknown error occurred",
     });
   }
 }
