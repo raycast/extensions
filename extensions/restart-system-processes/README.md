@@ -18,12 +18,10 @@ By default, the following processes can be restarted:
 
 ## Options
 ### Sudo
-Some processes require root privileges to restart. If sudo mode is enabled,  you will be asked to enter your password when you restart processes.
+Some processes require root privileges to restart. If sudo mode is enabled, you will be asked to enter your password when you restart processes.
 
 If you encounter errors when restarting processes, try enabling this option.
 
 ### Advanced Mode
 With this option enabled, all the currently-running system processes are listed. This means you can restart
 **any** ⚡ system process on your Mac!
-
-Additionally, the extension uses `launchctl stop` to restart them.
