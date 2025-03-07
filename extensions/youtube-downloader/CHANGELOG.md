@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-03-07
 
 - Avoid to run `onSubmit` while fetching video
 
