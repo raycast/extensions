@@ -120,61 +120,61 @@ ${article.summary}
                       title="All Categories"
                       onAction={() => setCategory(undefined)}
                       icon={Icon.Tag}
-                      shortcut={{ modifiers: ["cmd"], key: "0" }}
+                      shortcut={{ modifiers: ["cmd"], key: "1" }}
                     />
                     <Action
                       title="Article"
                       onAction={() => setCategory("article")}
                       icon={Icon.Document}
-                      shortcut={{ modifiers: ["cmd"], key: "1" }}
+                      shortcut={{ modifiers: ["cmd"], key: "2" }}
                     />
                     <Action
                       title="Email"
                       onAction={() => setCategory("email")}
                       icon={Icon.Envelope}
-                      shortcut={{ modifiers: ["cmd"], key: "2" }}
+                      shortcut={{ modifiers: ["cmd"], key: "3" }}
                     />
                     <Action
                       title="Rss"
                       onAction={() => setCategory("rss")}
                       icon={Icon.Wifi}
-                      shortcut={{ modifiers: ["cmd"], key: "3" }}
+                      shortcut={{ modifiers: ["cmd"], key: "4" }}
                     />
                     <Action
                       title="Highlight"
                       onAction={() => setCategory("highlight")}
                       icon={Icon.Highlight}
-                      shortcut={{ modifiers: ["cmd"], key: "4" }}
+                      shortcut={{ modifiers: ["cmd"], key: "5" }}
                     />
                     <Action
                       title="Note"
                       onAction={() => setCategory("note")}
                       icon={Icon.Pencil}
-                      shortcut={{ modifiers: ["cmd"], key: "5" }}
+                      shortcut={{ modifiers: ["cmd"], key: "6" }}
                     />
                     <Action
                       title="Pdf"
                       onAction={() => setCategory("pdf")}
                       icon={{ source: { light: "pdf-light.svg", dark: "pdf-dark.svg" } }}
-                      shortcut={{ modifiers: ["cmd"], key: "6" }}
+                      shortcut={{ modifiers: ["cmd"], key: "7" }}
                     />
                     <Action
                       title="Epub"
                       onAction={() => setCategory("epub")}
                       icon={Icon.Book}
-                      shortcut={{ modifiers: ["cmd"], key: "7" }}
+                      shortcut={{ modifiers: ["cmd"], key: "8" }}
                     />
                     <Action
                       title="Tweet"
                       onAction={() => setCategory("tweet")}
                       icon={Icon.Bird}
-                      shortcut={{ modifiers: ["cmd"], key: "8" }}
+                      shortcut={{ modifiers: ["cmd"], key: "9" }}
                     />
                     <Action
                       title="Video"
                       onAction={() => setCategory("video")}
                       icon={Icon.Video}
-                      shortcut={{ modifiers: ["cmd"], key: "9" }}
+                      shortcut={{ modifiers: ["cmd"], key: "0" }}
                     />
                   </ActionPanel.Submenu>
                 </ActionPanel>
