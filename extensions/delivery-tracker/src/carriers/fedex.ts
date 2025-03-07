@@ -116,27 +116,21 @@ async function login(apiKey: string, secretKey: string): Promise<LoginResponseBo
 
 interface FedexTrackingInfo {
   output: {
-    completeTrackResults: [
-      {
-        trackingNumber: string;
-        trackResults: [
-          {
-            trackingNumberInfo: {
-              trackingNumber: string;
-            };
-            latestStatusDetail: {
-              code: string;
-            };
-            dateAndTimes: [
-              {
-                type: string;
-                dateTime: string;
-              },
-            ];
-          },
-        ];
-      },
-    ];
+    completeTrackResults: {
+      trackingNumber: string;
+      trackResults: {
+        trackingNumberInfo: {
+          trackingNumber: string;
+        };
+        latestStatusDetail: {
+          code: string;
+        };
+        dateAndTimes: {
+            type: string;
+            dateTime: string;
+          }[];
+      }[];
+    }[];
   };
 }
 
@@ -185,7 +179,7 @@ function convertFedexTrackingToPackages(fedexTrackingInfo: FedexTrackingInfo): P
     });
 }
 
-function convertFedexDateToDate(fedexDate: [{ type: string; dateTime: string }]): Date | undefined {
+function convertFedexDateToDate(fedexDate: { type: string; dateTime: string }[]): Date | undefined {
   // has a full ISO8601 timestamp, including time and timezone
   const deliveryDate = fedexDate.find((dateAndTime) => dateAndTime.type === "ACTUAL_DELIVERY")?.dateTime;
 
