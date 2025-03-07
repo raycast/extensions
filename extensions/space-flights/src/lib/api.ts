@@ -8,7 +8,7 @@ const PROD_API_URL = "https://ll.thespacedevs.com/2.2.0";
 const DEV_API_URL = "https://lldev.thespacedevs.com/2.2.0"; // Development API with higher rate limits
 
 // Determine which API to use based on NODE_ENV
-export const isDevelopment = process.env.NODE_ENV !== "development";
+export const isDevelopment = process.env.NODE_ENV === "development";
 export const BASE_URL = isDevelopment ? DEV_API_URL : PROD_API_URL;
 
 // Export the base URLs for use in other parts of the app (for filtering)
