@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Form, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { getResourceColor, isValidCoolifyUrl } from "./lib/utils";
+import { getResourceColor, getResourceTypeEndpoint, isValidCoolifyUrl } from "./lib/utils";
 import useCoolify from "./lib/use-coolify";
 import { MessageResult, ResourceDetails } from "./lib/types";
 import InvalidUrl from "./lib/components/invalid-url";
@@ -15,16 +15,16 @@ export default function Resources() {
   const [action, setAction] = useState<{
     resourceType: string;
     uuid: string;
-    action: "stop" | "start" | "restart" | "delete";
+    action: "stop" | "start" | "restart";
   }>({
     resourceType: "",
     uuid: "",
     action: "stop",
   });
   const { isLoading: isExecuting } = useCoolify<MessageResult>(
-    `${action.resourceType}s/${action.uuid}/${action.action === "delete" ? "" : action.action}`,
+    `${action.resourceType}s/${action.uuid}/${action.action}`,
     {
-      method: action.action === "delete" ? "DELETE" : "GET",
+      method: "GET",
       execute: Boolean(action.resourceType && action.uuid),
       async onData(data) {
         await showToast(Toast.Style.Success, data.message);
@@ -67,13 +67,23 @@ export default function Resources() {
                     <Action
                       icon={{ source: Icon.Stop, tintColor: Color.Red }}
                       title="Stop"
-                      onAction={() => setAction({ resourceType: resource.type, uuid: resource.uuid, action: "stop" })}
+                      onAction={() =>
+                        setAction({
+                          resourceType: getResourceTypeEndpoint(resource.type),
+                          uuid: resource.uuid,
+                          action: "stop",
+                        })
+                      }
                     />
                     <Action
                       icon={{ source: Icon.Redo, tintColor: Color.Orange }}
                       title="Redeploy"
                       onAction={() =>
-                        setAction({ resourceType: resource.type, uuid: resource.uuid, action: "restart" })
+                        setAction({
+                          resourceType: getResourceTypeEndpoint(resource.type),
+                          uuid: resource.uuid,
+                          action: "restart",
+                        })
                       }
                     />
                   </>
@@ -82,7 +92,13 @@ export default function Resources() {
                   <Action
                     icon={{ source: Icon.Play, tintColor: Color.Yellow }}
                     title="Deploy"
-                    onAction={() => setAction({ resourceType: resource.type, uuid: resource.uuid, action: "start" })}
+                    onAction={() =>
+                      setAction({
+                        resourceType: getResourceTypeEndpoint(resource.type),
+                        uuid: resource.uuid,
+                        action: "start",
+                      })
+                    }
                   />
                 )}
                 <Action.Push
