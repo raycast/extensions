@@ -25,7 +25,12 @@ export async function loadConfig(dir: string): Promise<Config> {
   }
 
   const content = await fs.readFile(configPath, "utf8");
-  const config = JSON.parse(content) as Config;
+  let config;
+  try {
+    config = JSON.parse(content) as Config;
+  } catch (e) {
+    throw new Error(`Invalid JSON in config file: ${e.message}`);
+  }
   config.dir = dir;
   return config;
 }

@@ -8,7 +8,11 @@ export function useDirs() {
     error,
     revalidate,
   } = usePromise(async () => {
-    return JSON.parse((await LocalStorage.getItem<string>("dirs")) || "[]") as string[];
+    try {
+      return JSON.parse((await LocalStorage.getItem<string>("dirs")) || "[]") as string[];
+    } catch (e) {
+      return [];
+    }
   }, []);
 
   return {

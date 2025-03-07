@@ -32,7 +32,12 @@ export default async function () {
     return;
   }
 
-  const tabs = await BrowserExtension.getTabs();
+  try {
+    const tabs = await BrowserExtension.getTabs();
+  } catch (error) {
+    await showToast({ title: "Failed to access browser tabs", style: Toast.Style.Failure });
+    return;
+  }
   const selectedTab = tabs.find((tab) => tab.active == true);
   if (!selectedTab) {
     await showToast({ title: "No active tab", style: Toast.Style.Failure });
@@ -45,7 +50,11 @@ export default async function () {
   for (const config of configs) {
     const dir = lookupAppDir(config, url.hostname);
     if (dir) {
-      await open(dir, preferences.editor);
+      try {
+        await open(dir, preferences.editor);
+      } catch (error) {
+        await showToast({ title: "Failed to open directory", style: Toast.Style.Failure });
+      }
       return;
     }
   }

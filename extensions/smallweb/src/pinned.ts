@@ -28,8 +28,10 @@ export function usePinnedEntries(): { pinnedEntries: PinnedEntry[] } & PinMethod
         if (i === 0) {
           return previousEntries;
         }
-        previousEntries.splice(i - 1, 2, previousEntries[i], previousEntries[i - 1]);
-        return previousEntries;
+        const newEntries = [...previousEntries];
+        newEntries[i - 1] = previousEntries[i];
+        newEntries[i] = previousEntries[i - 1];
+        return newEntries;
       }),
     moveDown: (entry: PinnedEntry) =>
       setEntries((previousEntries) => {
@@ -37,8 +39,10 @@ export function usePinnedEntries(): { pinnedEntries: PinnedEntry[] } & PinMethod
         if (i === previousEntries.length - 1) {
           return previousEntries;
         }
-        previousEntries.splice(i, 2, previousEntries[i + 1], previousEntries[i]);
-        return previousEntries;
+        const newEntries = [...previousEntries];
+        newEntries[i] = previousEntries[i + 1];
+        newEntries[i + 1] = previousEntries[i];
+        return newEntries;
       }),
   };
 }
