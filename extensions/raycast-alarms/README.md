@@ -86,11 +86,6 @@ These integration tests verify:
 - Multiple alarm management
 - Alarm triggering and cleanup
 
-For running the JSON validation tests, you'll need to have `jq` installed:
-```bash
-brew install jq
-```
-
 ## Requirements
 
 - macOS 10.15+
