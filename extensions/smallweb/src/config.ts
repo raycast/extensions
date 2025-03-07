@@ -20,7 +20,6 @@ export type AppConfig = {
 
 async function findConfigPath(dir: string): Promise<string | null> {
   for (const configPath of [path.join(dir, ".smallweb", "config.jsonc"), path.join(dir, ".smallweb", "config.json")]) {
-    console.log(configPath);
     if (await fs.stat(configPath).catch(() => null)) {
       return configPath;
     }
