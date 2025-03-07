@@ -95,10 +95,11 @@
     {
       "name": "savePath",
       "title": "Save Path",
-      "description": "The directory where images will be saved (default: Downloads folder)",
+      "description": "The directory where images will be saved (must be a valid directory path)",
       "type": "textfield",
       "required": false,
-      "placeholder": "Leave empty to use Downloads folder"
+      "placeholder": "Leave empty to use Downloads folder",
+      "validate": "^$|^(/[^/]+)+/?$"
     }
   ]
 }

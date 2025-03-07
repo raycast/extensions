@@ -19,41 +19,46 @@ import { useEffect, useState, useRef } from "react";
 
 const execPromise = promisify(exec);
 
-interface Preferences {
-  outputFormat: "png" | "svg";
-  theme: "default" | "forest" | "dark" | "neutral";
-  savePath?: string;
-  generationTimeout?: string; // Added timeout preference
-}
+// Removed Preferences interface as it's auto-generated in raycast-env.d.ts
 
 // Image preview component
 function ImagePreview(props: { imagePath: string; format: string }) {
   const { imagePath, format } = props;
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
 
   const [imageContent, setImageContent] = useState<string>("");
   const [imageError, setImageError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Added loading state
 
   useEffect(() => {
-    try {
-      if (format === "svg") {
-        setImageContent(fs.readFileSync(imagePath, "utf-8"));
-      } else {
-        const imageBuffer = fs.readFileSync(imagePath);
-        setImageContent(`data:image/png;base64,${imageBuffer.toString("base64")}`);
-      }
-    } catch (error) {
-      console.error("Failed to read image:", error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      setImageError(`Unable to read image: ${errorMessage}`);
-      (async () => {
+    const loadImage = async () => {
+      try {
+        setIsLoading(true);
+        if (format === "svg") {
+          setImageContent(fs.readFileSync(imagePath, "utf-8"));
+        } else {
+          const imageBuffer = fs.readFileSync(imagePath);
+          setImageContent(`data:image/png;base64,${imageBuffer.toString("base64")}`);
+        }
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Failed to read image:", error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        setImageError(`Unable to read image: ${errorMessage}`);
+        setIsLoading(false);
         await showFailureToast({
           title: "Failed to load image",
           message: errorMessage,
         });
-      })();
-    }
+      }
+    };
+
+    loadImage();
   }, [imagePath, format]);
+
+  if (isLoading) {
+    return <Detail markdown="# Loading image..." isLoading={true} />;
+  }
 
   if (imageError) {
     return <Detail markdown={`# Image loading failed\n\n${imageError}`} />;
@@ -187,8 +192,8 @@ async function findMmdcPath(): Promise<string> {
 
   console.error("mmdc not found in any of the expected locations:", possiblePaths);
 
-  await showToast({
-    style: Toast.Style.Failure,
+  // Using showFailureToast instead of showToast with Style.Failure for consistency
+  await showFailureToast({
     title: "mermaid-cli not found",
     message: "Please install with 'npm install -g @mermaid-js/mermaid-cli'",
   });
@@ -255,11 +260,9 @@ async function getSelectedText(): Promise<string | null> {
   }
 }
 
-async function generateMermaidDiagram(
-  mermaidCode: string,
-  preferences: Preferences,
-  tempFileRef: React.MutableRefObject<string | null>,
-) {
+async function generateMermaidDiagram(mermaidCode: string, tempFileRef: React.MutableRefObject<string | null>) {
+  const preferences = getPreferenceValues();
+
   let cleanCode = mermaidCode;
   if (cleanCode.includes("```mermaid")) {
     cleanCode = cleanCode.replace(/```mermaid\n/, "").replace(/```$/, "");
@@ -337,7 +340,6 @@ async function launchCommand(
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
   const [imagePath, setImagePath] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -397,7 +399,7 @@ export default function Command() {
         title: "Generating diagram...",
       });
 
-      const outputPath = await generateMermaidDiagram(mermaidCode, preferences, tempFileRef);
+      const outputPath = await generateMermaidDiagram(mermaidCode, tempFileRef);
       setImagePath(outputPath);
 
       await showToast({
@@ -442,9 +444,24 @@ export default function Command() {
               title="Cancel"
               icon={Icon.XMarkCircle}
               onAction={() => {
+                // Clean up any temporary files before canceling
+                if (tempFileRef.current) {
+                  cleanupTempFile(tempFileRef.current);
+                  tempFileRef.current = null;
+                }
+
                 isProcessingRef.current = false;
                 setIsLoading(false);
                 setError("Operation cancelled by user.");
+
+                // Show toast to confirm cancellation
+                (async () => {
+                  await showToast({
+                    style: Toast.Style.Success,
+                    title: "Operation cancelled",
+                    message: "Temporary files have been cleaned up",
+                  });
+                })();
               }}
             />
           </ActionPanel>
@@ -478,7 +495,7 @@ export default function Command() {
   }
 
   if (imagePath) {
-    return <ImagePreview imagePath={imagePath} format={preferences.outputFormat} />;
+    return <ImagePreview imagePath={imagePath} format={getPreferenceValues().outputFormat} />;
   }
 
   // Fallback state
