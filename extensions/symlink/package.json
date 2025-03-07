@@ -16,8 +16,8 @@
 		{
 			"name": "create-symlink",
 			"title": "Create Symlink",
-			"subtitle": "Create symlinks for selected file",
-			"description": "Create symlinks for selected file",
+			"subtitle": "Create symlinks for selected files.",
+			"description": "Create symlinks for files selected in Finder.",
 			"keywords": [
 				"symlink",
 				"symbolic",

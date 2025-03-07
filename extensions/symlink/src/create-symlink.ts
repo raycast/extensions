@@ -1,23 +1,18 @@
-import { showHUD, getSelectedFinderItems, Toast, showToast } from "@raycast/api";
+import { showHUD, getSelectedFinderItems } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import fs from "fs/promises";
 import * as path from "path";
 
 export default async function main() {
-	const files = await getSelectedFinderItems().catch(() => undefined);
+	const files = await getSelectedFinderItems().catch(async (error) => {
+		await showFailureToast(error, { title: "Cannot create symlink" });
+		return undefined;
+	});
 
-	if (!files) {
-		await showToast({
-			title: "Finder is not the front most application.",
-			style: Toast.Style.Failure,
-		});
-		return;
-	}
+	if (!files) return;
 
 	if (!files.length) {
-		await showToast({
-			title: "No files selected.",
-			style: Toast.Style.Failure,
-		});
+		await showFailureToast("No files selected.", { title: "Cannot create symlink" });
 		return;
 	}
 
@@ -26,11 +21,17 @@ export default async function main() {
 		const extension = path.extname(file.path);
 		const basename = path.basename(file.path, extension);
 
-		const newName = await suggestAvailableName(directory, basename + " symlink", extension);
-		const newPath = `${directory}/${newName}`;
-
-		await fs.symlink(file.path, newPath);
-		await showHUD(`Created symlink: ${newName}`);
+		try {
+			const newName = await suggestAvailableName(directory, basename + " symlink", extension);
+			const newPath = path.join(directory, newName);
+			await fs.symlink(file.path, newPath);
+			await showHUD(`Created symlink: ${newName}`);
+		} catch (error) {
+			await showFailureToast(error, {
+				title: "Failed to create symlink",
+			});
+			return;
+		}
 	}
 }
 
@@ -50,4 +51,6 @@ async function suggestAvailableName(directoryPath: string, idealName: string, ex
 
 		suffix++;
 	}
+
+	throw new Error("Could not find an available name");
 }
