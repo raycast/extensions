@@ -1,4 +1,4 @@
-# Mermaid-to-image Changelog
+# Mermaid to Image Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 ### Added

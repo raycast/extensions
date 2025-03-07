@@ -139,6 +139,41 @@ function ImagePreview(props: { imagePath: string; format: string }) {
   );
 }
 
+async function getSelectedText(): Promise<string | null> {
+  try {
+    // Save the current clipboard content
+    const previousClipboard = await Clipboard.read();
+
+    // Simulate cmd+c to copy selected text
+    await execPromise('osascript -e \'tell application "System Events" to keystroke "c" using command down\'');
+
+    // Small delay to ensure clipboard is updated
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // Read the new clipboard content (which should be the selected text)
+    const selectedText = await Clipboard.readText();
+
+    // If nothing was selected, the clipboard content won't change
+    if (selectedText === previousClipboard.text) {
+      throw new Error("No text was selected");
+    }
+
+    // Restore previous clipboard content if needed
+    if (previousClipboard.text !== selectedText) {
+      await Clipboard.paste(previousClipboard);
+    }
+
+    return selectedText;
+  } catch (error) {
+    console.error("Failed to get selected text:", error);
+    await showFailureToast({
+      title: "Failed to get selected text",
+      message: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
 async function generateMermaidDiagram(mermaidCode: string, preferences: Preferences) {
   let cleanCode = mermaidCode;
   if (cleanCode.includes("```mermaid")) {
@@ -218,8 +253,6 @@ async function launchCommand(
     }
     throw new Error(`Failed to generate diagram: ${error instanceof Error ? error.message : String(error)}`);
   }
-
-  return outputPath;
 }
 
 export default function Command() {
@@ -229,7 +262,7 @@ export default function Command() {
   const [error, setError] = useState<string | null>(null);
   const isProcessingRef = useRef(false);
 
-  async function processClipboard() {
+  async function processMermaidCode(useSelection = false) {
     if (isProcessingRef.current) return;
     isProcessingRef.current = true;
 
@@ -237,28 +270,44 @@ export default function Command() {
       setIsLoading(true);
       setError(null);
 
-      let clipboardText;
-      try {
-        clipboardText = await Clipboard.readText();
-        if (!clipboardText) {
-          setError("Clipboard is empty.");
+      let mermaidCode;
+
+      if (useSelection) {
+        // Try to get selected text
+        mermaidCode = await getSelectedText();
+        if (!mermaidCode) {
+          setError("No text was selected.");
           setIsLoading(false);
           await showFailureToast({
             title: "Failed to generate diagram",
-            message: "Clipboard is empty. Please copy a Mermaid diagram code first.",
+            message: "No text was selected. Please select Mermaid diagram code first.",
           });
           return;
         }
-      } catch (error: unknown) {
-        console.error("Failed to read clipboard:", error);
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        setError(`Failed to read clipboard: ${errorMessage}`);
-        setIsLoading(false);
-        await showFailureToast({
-          title: "Failed to read clipboard",
-          message: errorMessage,
-        });
-        return;
+      } else {
+        // Use clipboard content
+        try {
+          mermaidCode = await Clipboard.readText();
+          if (!mermaidCode) {
+            setError("Clipboard is empty.");
+            setIsLoading(false);
+            await showFailureToast({
+              title: "Failed to generate diagram",
+              message: "Clipboard is empty. Please copy a Mermaid diagram code first.",
+            });
+            return;
+          }
+        } catch (error: unknown) {
+          console.error("Failed to read clipboard:", error);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          setError(`Failed to read clipboard: ${errorMessage}`);
+          setIsLoading(false);
+          await showFailureToast({
+            title: "Failed to read clipboard",
+            message: errorMessage,
+          });
+          return;
+        }
       }
 
       await showToast({
@@ -266,7 +315,7 @@ export default function Command() {
         title: "Generating diagram...",
       });
 
-      const outputPath = await generateMermaidDiagram(clipboardText, preferences);
+      const outputPath = await generateMermaidDiagram(mermaidCode, preferences);
       setImagePath(outputPath);
 
       await showToast({
@@ -287,7 +336,7 @@ export default function Command() {
   }
 
   useEffect(() => {
-    processClipboard();
+    processMermaidCode(false); // Default to using clipboard content
   }, []);
 
   useEffect(() => {
@@ -304,7 +353,25 @@ export default function Command() {
   }, [imagePath]);
 
   if (isLoading) {
-    return <Detail markdown="# Generating diagram, please wait..." />;
+    return (
+      <Detail
+        markdown="# Generating diagram, please wait..."
+        isLoading={true}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Cancel"
+              icon={Icon.XMarkCircle}
+              onAction={() => {
+                isProcessingRef.current = false;
+                setIsLoading(false);
+                setError("Operation cancelled by user.");
+              }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   if (error) {
@@ -313,7 +380,12 @@ export default function Command() {
         markdown={`# Diagram generation failed\n\n${error}`}
         actions={
           <ActionPanel>
-            <Action title="Retry" icon={Icon.RotateClockwise} onAction={processClipboard} />
+            <Action
+              title="Generate from Clipboard"
+              icon={Icon.Clipboard}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={() => processMermaidCode(false)}
+            />
           </ActionPanel>
         }
       />
@@ -324,5 +396,20 @@ export default function Command() {
     return <ImagePreview imagePath={imagePath} format={preferences.outputFormat} />;
   }
 
-  return <Detail markdown="# Unknown error occurred" />;
+  // Fallback state
+  return (
+    <Detail
+      markdown="# Generating diagram, please wait..."
+      actions={
+        <ActionPanel>
+          <Action
+            title="Generate from Clipboard"
+            icon={Icon.Clipboard}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={() => processMermaidCode(false)}
+          />
+        </ActionPanel>
+      }
+    />
+  );
 }
