@@ -455,13 +455,11 @@ export default function Command() {
                 setError("Operation cancelled by user.");
 
                 // Show toast to confirm cancellation
-                (async () => {
-                  await showToast({
-                    style: Toast.Style.Success,
-                    title: "Operation cancelled",
-                    message: "Temporary files have been cleaned up",
-                  });
-                })();
+                showToast({
+                  style: Toast.Style.Success,
+                  title: "Operation cancelled",
+                  message: "Temporary files have been cleaned up",
+                });
               }}
             />
           </ActionPanel>

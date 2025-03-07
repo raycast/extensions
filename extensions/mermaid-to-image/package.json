@@ -90,7 +90,8 @@
       "type": "textfield",
       "required": false,
       "default": "10",
-      "placeholder": "10"
+      "placeholder": "10",
+      "validate": "^[1-9]\\d*$"
     },
     {
       "name": "savePath",
@@ -99,7 +100,7 @@
       "type": "textfield",
       "required": false,
       "placeholder": "Leave empty to use Downloads folder",
-      "validate": "^$|^(/[^/]+)+/?$"
+      "validate": "^$|^/?(/[^/]+)+/?$"
     }
   ]
 }
