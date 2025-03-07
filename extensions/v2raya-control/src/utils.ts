@@ -17,18 +17,18 @@ interface V2rayAStatus {
 export async function getToken(): Promise<string> {
   const { v2rayaHost, username, password } = getPreferenceValues<Preferences>();
   try {
-  const response = await fetch(`${v2rayaHost}/api/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
-  const data = await response.json();
+    const response = await fetch(`${v2rayaHost}/api/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await response.json();
 
-  if (data.code !== "SUCCESS" || !data.data?.token) {
-    throw new Error("Authentication failed. Check your credentials!");
-  }
+    if (data.code !== "SUCCESS" || !data.data?.token) {
+      throw new Error("Authentication failed. Check your credentials!");
+    }
 
-  return data.data.token;
+    return data.data.token;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to get auth token: ${error.message}`);
