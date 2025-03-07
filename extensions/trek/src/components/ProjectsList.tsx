@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { fetchProjects } from "../oauth/auth";
 import { DockItemsList } from "./DockItemsList";
 import { useState, useEffect } from "react";
@@ -24,7 +24,7 @@ export default function ProjectsList({ accountId, accountName }: ProjectsListPro
           hasMore: response.nextPage !== null,
         };
       } catch (error) {
-        console.error("Error fetching projects:", error);
+        showFailureToast(error, { title: "Error fetching projects" });
         return {
           data: [],
           hasMore: false,

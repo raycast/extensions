@@ -1,13 +1,12 @@
 import { Action, ActionPanel, List, Color, useNavigation, Toast, showToast, confirmAlert, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { fetchTodosFromList, markComplete, trashTodo, getProjectPeople } from "../oauth/auth";
+import { fetchTodosFromList, markComplete, trashTodo } from "../oauth/auth";
 import { htmlToMarkdown } from "../utils/markdown";
 import { TodoComments } from "./TodoComments";
 import { format } from "date-fns";
 import CreateTodoForm from "./CreateTodoForm";
 import { BasecampTodo, TodoCreator } from "../utils/types";
-import { useState, useEffect } from "react";
-import { isCacheStale, CACHE_KEYS } from "../utils/cache";
+import { useState } from "react";
 
 export default function TodosList({
   accountId,
@@ -20,8 +19,6 @@ export default function TodosList({
 }) {
   const { pop } = useNavigation();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [shouldForceRefresh, setShouldForceRefresh] = useState(false);
-  const [isCacheExpired, setIsCacheExpired] = useState(true);
 
   const fetchTodosWrapper = async (options: { page: number }) => {
     try {
@@ -46,32 +43,10 @@ export default function TodosList({
     revalidate,
   } = usePromise(fetchTodosWrapper, [{ page: 1 }]);
 
-  const fetchPeopleWrapper = async () => {
-    try {
-      return await getProjectPeople(accountId, projectId, shouldForceRefresh);
-    } catch (error) {
-      console.error("Error fetching people:", error);
-      return [];
-    }
-  };
-
-  const { isLoading: isLoadingPeople, data: people } = usePromise(fetchPeopleWrapper, []);
-
-  useEffect(() => {
-    const checkCacheStatus = async () => {
-      const isPeopleStale = await isCacheStale(CACHE_KEYS.PEOPLE(accountId, projectId));
-      setIsCacheExpired(isPeopleStale);
-    };
-
-    checkCacheStatus();
-  }, [accountId, projectId, people]);
-
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    setShouldForceRefresh(true);
     await revalidate();
     setIsRefreshing(false);
-    setShouldForceRefresh(false);
     showToast({
       style: Toast.Style.Success,
       title: "Data refreshed successfully",
@@ -107,7 +82,7 @@ export default function TodosList({
     }
   };
 
-  const isLoading = isLoadingTodos || isLoadingPeople || isRefreshing;
+  const isLoading = isLoadingTodos || isRefreshing;
 
   return (
     <List isLoading={isLoading} pagination={pagination} isShowingDetail>
@@ -264,7 +239,7 @@ export default function TodosList({
                   style={Action.Style.Destructive}
                 />
                 <Action
-                  title={isCacheExpired ? "Refresh Data (Cache Expired)" : "Refresh Data"}
+                  title={"Refresh Data"}
                   icon={Icon.ArrowClockwise}
                   onAction={handleRefresh}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}

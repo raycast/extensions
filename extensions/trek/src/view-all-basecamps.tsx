@@ -1,14 +1,12 @@
 import { Action, Icon, showToast, Toast } from "@raycast/api";
-import { useCachedPromise, withAccessToken } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, withAccessToken } from "@raycast/utils";
 import { basecamp, fetchAccounts } from "./oauth/auth";
 import { BasecampsList } from "./components/AccountsList";
-import { isCacheStale, CACHE_KEYS } from "./utils/cache";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 function Command() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [shouldForceRefresh, setShouldForceRefresh] = useState(false);
-  const [isCacheExpired, setIsCacheExpired] = useState(true);
 
   const {
     isLoading,
@@ -32,30 +30,17 @@ function Command() {
         }
       },
       onError: (error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to refresh data",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
+        showFailureToast(error, { title: "Failed to refresh data" });
         setIsRefreshing(false);
         setShouldForceRefresh(false);
       },
     },
   );
 
-  useEffect(() => {
-    const checkCacheStatus = async () => {
-      const isStale = await isCacheStale(CACHE_KEYS.ACCOUNTS);
-      setIsCacheExpired(isStale);
-    };
-
-    checkCacheStatus();
-  }, [accounts]);
-
   const handleRefresh = async () => {
     setIsRefreshing(true);
     setShouldForceRefresh(true);
-    await revalidate();
+    revalidate();
   };
 
   if (error) {
@@ -68,7 +53,7 @@ function Command() {
       isLoading={isLoading || isRefreshing}
       actions={
         <Action
-          title={isCacheExpired ? "Refresh Data (Cache Expired)" : "Refresh Data"}
+          title={"Refresh Data"}
           icon={Icon.ArrowClockwise}
           onAction={handleRefresh}
           shortcut={{ modifiers: ["cmd"], key: "r" }}

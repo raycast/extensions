@@ -47,7 +47,7 @@
     },
     {
       "name": "create-todo-default-list",
-      "title": "Create Todo (Default List)",
+      "title": "Create Todo - Default List",
       "subtitle": "Basecamp",
       "description": "Create a todo in default todo list with more details. You can set this by going to the 'View All Basecamps' command, locating the todo list you want to use, and clicking the 'Set Default Todo List' button.",
       "mode": "view"
