@@ -153,13 +153,18 @@ async function getSelectedText(): Promise<string | null> {
     // Read the new clipboard content (which should be the selected text)
     const selectedText = await Clipboard.readText();
 
+    // If selectedText is undefined, return null to match the return type
+    if (selectedText === undefined) {
+      return null;
+    }
+
     // If nothing was selected, the clipboard content won't change
     if (selectedText === previousClipboard.text) {
       throw new Error("No text was selected");
     }
 
     // Restore previous clipboard content if needed
-    if (previousClipboard.text !== selectedText) {
+    if (previousClipboard.text && previousClipboard.text !== selectedText) {
       await Clipboard.paste(previousClipboard);
     }
 
@@ -192,7 +197,7 @@ async function generateMermaidDiagram(mermaidCode: string, preferences: Preferen
 
   console.log(`Generating diagram, theme: ${preferences.theme}, format: ${preferences.outputFormat}`);
 
-  const possiblePaths = ["/usr/local/bin/mmdc", "/opt/homebrew/bin/mmdc"];
+  const possiblePaths = ["/usr/local/bin/mmdc", "/opt/homebrew/bin/mmdc", "~/.npm-global/bin/mmdc", "/usr/bin/mmdc"];
 
   let mmdcPath = "";
   for (const p of possiblePaths) {
@@ -399,7 +404,7 @@ export default function Command() {
   // Fallback state
   return (
     <Detail
-      markdown="# Generating diagram, please wait..."
+      markdown="# Ready to generate diagram\n\nCopy Mermaid diagram code to your clipboard and press the Generate button.\n\n*Note: Make sure your clipboard contains valid Mermaid syntax.*"
       actions={
         <ActionPanel>
           <Action
