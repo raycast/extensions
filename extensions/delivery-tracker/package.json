@@ -72,16 +72,17 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.11",
-    "@types/node": "20.17.17",
+    "@types/node": "20.17.23",
     "@types/react": "18.3.18",
     "eslint": "8.57.1",
-    "prettier": "3.4.2",
-    "typescript": "5.7.3",
+    "prettier": "3.5.3",
+    "typescript": "5.8.2",
     "node-fetch": "3.3.2",
-    "@raycast/migration": "1.91.0"
+    "@raycast/migration": "1.93.0"
   },
   "scripts": {
     "build": "ray build",
+    "build-dist": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
