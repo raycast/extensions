@@ -126,9 +126,9 @@ interface FedexTrackingInfo {
           code: string;
         };
         dateAndTimes: {
-            type: string;
-            dateTime: string;
-          }[];
+          type: string;
+          dateTime: string;
+        }[];
       }[];
     }[];
   };
