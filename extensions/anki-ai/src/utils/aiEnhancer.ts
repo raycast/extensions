@@ -49,9 +49,8 @@ ${flashcard.tags && flashcard.tags.length > 0 ? "Consider keeping existing tags 
       const modelId = getAIModelIdentifier(enhancementModel) || "openai-gpt-4o";
 
       // Make the AI call
-      // @ts-expect-error - Model ID of type string is not directly compatible with AI.Model
       const response = await AI.ask(prompt, {
-        model: modelId,
+        model: modelId as AI.Model,
         creativity: 0.7,
       });
 
@@ -159,9 +158,8 @@ Return the evaluation in JSON format with fields "score" (number from 1 to 10) a
       const modelId = getAIModelIdentifier(evaluationModel) || "openai-gpt-4o";
 
       // Make the AI call
-      // @ts-expect-error - Model ID of type string is not directly compatible with AI.Model
       const response = await AI.ask(prompt, {
-        model: modelId,
+        model: modelId as AI.Model,
         creativity: 0.5,
       });
 
@@ -246,9 +244,8 @@ Return the questions and answers in JSON format as an array of objects with fiel
       const modelId = getAIModelIdentifier(model) || "openai-gpt-4o";
 
       // Make the AI call
-      // @ts-expect-error - Model ID of type string is not directly compatible with AI.Model, but is necessary for functionality
       const response = await AI.ask(prompt, {
-        model: modelId,
+        model: modelId as AI.Model,
         creativity: 0.8,
       });
 

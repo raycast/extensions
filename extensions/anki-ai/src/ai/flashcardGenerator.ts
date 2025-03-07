@@ -174,16 +174,19 @@ export class FlashcardGenerator {
           extra:
             "Este cartão foi gerado automaticamente porque houve um problema na geração de cartões personalizados.",
           tags: ["resumo", "automático"],
+          difficulty: "beginner",
         },
         {
           front: "Quais são os conceitos-chave mencionados neste texto?",
           back: `Alguns conceitos importantes: ${words.join(", ")}`,
           tags: ["conceitos", "automático"],
+          difficulty: "beginner",
         },
         {
           front: "Como este tópico se relaciona com outros conhecimentos?",
           back: "Este tópico pode ser relacionado a múltiplos campos de estudo e conceitos dependendo do contexto específico.",
           tags: ["conexões", "automático"],
+          difficulty: "beginner",
         },
       ];
     } else {
@@ -193,16 +196,19 @@ export class FlashcardGenerator {
           back: `The text discusses: ${shortSummary}`,
           extra: "This card was automatically generated because there was an issue generating custom cards.",
           tags: ["summary", "automatic"],
+          difficulty: "beginner",
         },
         {
           front: "What are the key concepts mentioned in this text?",
           back: `Some important concepts: ${words.join(", ")}`,
           tags: ["concepts", "automatic"],
+          difficulty: "beginner",
         },
         {
           front: "How does this topic relate to other knowledge?",
           back: "This topic can be related to multiple fields of study and concepts depending on the specific context.",
           tags: ["connections", "automatic"],
+          difficulty: "beginner",
         },
       ];
     }
@@ -325,9 +331,9 @@ IMPORTANT: Your response must be valid JSON that can be parsed directly.`;
   }
 
   /**
-   * Parse AI response using multiple strategies
+   * Extracts flashcards from AI response using various parsing strategies
    */
-  private static async parseResponse(response: string): Promise<Flashcard[]> {
+  private static async extractFlashcards(response: string, enableTags: boolean): Promise<Flashcard[]> {
     // Try different parsing strategies in order of reliability
     const strategies = [
       { name: "tryJsonParse", fn: this.tryJsonParse.bind(this) },
@@ -340,7 +346,7 @@ IMPORTANT: Your response must be valid JSON that can be parsed directly.`;
 
     for (const strategy of strategies) {
       try {
-        const result = await strategy.fn(response);
+        const result = await strategy.fn(response, enableTags ? "intermediate" : "beginner");
         if (result && Array.isArray(result) && result.length > 0) {
           return result;
         }
@@ -366,8 +372,7 @@ IMPORTANT: Your response must be valid JSON that can be parsed directly.`;
       try {
         // Try with JSON format parameter if available (Raycast AI-specific)
         rawResponse = await AI.ask(jsonFormattedPrompt, {
-          ...options,
-          format: "json", // This is a hint to the model to return valid JSON
+          model: options.model ? (options.model as AI.Model) : undefined,
           creativity: options.creativity || 0.5, // Lower creativity helps with format consistency
         });
       } catch (apiError) {
@@ -397,7 +402,7 @@ Use english for both questions and answers.
 IMPORTANT: Your response must be valid JSON that can be parsed directly.`;
 
           rawResponse = await AI.ask(simplePrompt, {
-            ...options,
+            model: options.model ? (options.model as AI.Model) : undefined,
             creativity: 0.3, // Even lower creativity for better format compliance
           });
         } catch (secondError) {
@@ -744,7 +749,7 @@ IMPORTANT: Your response must be valid JSON that can be parsed directly.`;
               front: card.front.trim(),
               back: card.back.trim(),
               extra: card.extra ? String(card.extra).trim() : "",
-              tags: Array.isArray(card.tags) ? card.tags.filter((t) => typeof t === "string").slice(0, 2) : [],
+              tags: Array.isArray(card.tags) ? card.tags.filter((t: string) => typeof t === "string") : [],
               difficulty: difficultyLevel,
             };
           }
@@ -779,8 +784,8 @@ IMPORTANT: Your response must be valid JSON that can be parsed directly.`;
         front: String(card.front).trim(),
         back: String(card.back).trim(),
         extra: card.extra ? String(card.extra).trim() : "",
-        tags: Array.isArray(card.tags) ? card.tags.filter((tag) => typeof tag === "string").slice(0, 2) : [],
-        difficulty: difficultyLevel,
+        tags: Array.isArray(card.tags) ? card.tags.filter((t: string) => typeof t === "string") : [],
+        difficulty: difficultyLevel as "beginner" | "intermediate" | "advanced",
       }));
   }
 }
