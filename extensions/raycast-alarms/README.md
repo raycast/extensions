@@ -6,7 +6,7 @@ Create system-wide alarms with rich notifications and sound alerts. Perfect for 
 
 - System-wide alarms with reliable scheduling
 - Zero external dependencies - uses only macOS built-in tools
-- Custom popup interface with stop options
+- Custom popup interface with stop option
 - Sound alerts that repeat until dismissed
 - Centralized alarm management
 - Automatic timeout after 10 minutes
@@ -65,46 +65,13 @@ Built using only native macOS technologies:
 - `afplay` for sound playback
 - Pipe-delimited text files for efficient data storage
 
-## Testing
-
-The extension includes a comprehensive test suite to ensure reliability:
-
-```bash
-# Run all tests
-./tests/run-tests.sh
-
-# Run specific test suites individually
-./tests/integration/alarms-test.sh
-./tests/integration/trigger-test.sh
-```
-
-These integration tests verify:
-- Alarm creation and storage
-- Time formatting with leading zeros
-- Alarm listing functionality
-- Alarm removal
-- Multiple alarm management
-- Alarm triggering and cleanup
-
 ## Requirements
 
 - macOS 10.15+
 - Raycast 1.40.0+
-
-## Troubleshooting
-
-If alarms don't trigger:
-
-1. Ensure your Mac isn't sleeping at the scheduled time
-2. Check notification permissions for script applications
-3. Verify the extension has necessary system permissions
 
 ## Privacy
 
 - Completely local scheduling - no external servers
 - Data stored only in `~/.raycast-alarms` directory
 - Zero external dependencies or data sharing
-
-## Credits
-
-Created by ocodista
