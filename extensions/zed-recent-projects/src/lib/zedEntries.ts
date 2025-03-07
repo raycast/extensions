@@ -22,16 +22,16 @@ function getPath() {
 
 interface BaseWorkspace {
   timestamp: number;
-  type: 'local' | 'remote';
+  type: "local" | "remote";
 }
 
 interface LocalWorkspace extends BaseWorkspace {
-  type: 'local';
+  type: "local";
   local_paths: string;
 }
 
 interface RemoteWorkspace extends BaseWorkspace {
-  type: 'remote';
+  type: "remote";
   remote_paths: string;
   host: string;
   user: string;
@@ -102,7 +102,7 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
     entries: data
       ? data.reduce<ZedEntries>((acc, workspace) => {
           let entry: ZedEntry | undefined;
-          
+
           if (workspace.type === "local") {
             entry = processLocalWorkspace(workspace);
           } else if (workspace.type === "remote") {
