@@ -28,8 +28,16 @@ const SearchListLazy: React.FC = () => {
 
   useEffect(() => {
     const loadFavorites = async () => {
-      const favorites = await getFavoriteRepositories();
-      setFavoriteRepos(favorites.map((repo) => repo.uuid));
+      try {
+        const favorites = await getFavoriteRepositories();
+        setFavoriteRepos(favorites.map((repo) => repo.uuid));
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load favorites",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
     };
     loadFavorites();
   }, []);

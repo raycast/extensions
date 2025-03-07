@@ -1,6 +1,6 @@
 # Bitbucket Changelog
 
-## [Update] - 2025-03-07
+## [Update] - {PR_MERGE_DATE}
 
 - Added the ability to favorite repositories
 
