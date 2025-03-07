@@ -1,5 +1,10 @@
 # HackMD Changelog
 
+## [Feature] - 2025-02-28
+
+- Bump @raycast/api version to latest
+- Support new AI extension capabilities
+
 ## [Enhancement] - 2022-11-24
 
 - Display the last changed date of note instead of creation date
