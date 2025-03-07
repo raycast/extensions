@@ -74,7 +74,6 @@ export default function Command() {
         showToast({
           style: Toast.Style.Success,
           title: "Contact Deleted",
-          message: response.message,
         });
         // Refresh the contact list
         fetchContacts(searchText);
