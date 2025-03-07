@@ -188,11 +188,53 @@ export function useFlashcardGenerator() {
 
   const testAnkiConnection = async () => {
     try {
-      await AnkiRepository.createRaycastFlashcardsModelIfNeeded();
+      setIsLoading(true);
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Testing connection to Anki",
+        message: "Please wait...",
+      });
+
+      // First try to create the Raycast Flashcards model if needed
+      try {
+        await AnkiRepository.createRaycastFlashcardsModelIfNeeded();
+      } catch (error) {
+        // Ignore errors here, we'll check the connection directly
+        Logger.warn("Error creating Raycast Flashcards model during connection test:", error);
+      }
+
+      // Test the connection
       const result = await AnkiRepository.testConnection();
-      return result.success;
+
+      if (result.success) {
+        showToast({
+          style: Toast.Style.Success,
+          title: "Anki connection successful",
+          message: "Connected to Anki successfully",
+        });
+
+        // Reload decks after successful connection
+        await loadDecks();
+
+        return true;
+      } else {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Anki connection failed",
+          message: result.message || "Could not connect to Anki",
+        });
+        return false;
+      }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Anki connection error",
+        message: errorMessage,
+      });
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 

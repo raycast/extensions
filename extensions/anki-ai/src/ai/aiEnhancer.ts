@@ -12,66 +12,64 @@ export class AIEnhancer {
     },
   ): Promise<Flashcard> {
     try {
-      const language = options?.language || "português";
-      const prompt = `Melhore este flashcard adicionando exemplos práticos, informações adicionais relevantes e mnemônicos para facilitar a memorização.
+      const language = options?.language || "english";
+      const prompt = `Improve this flashcard by adding practical examples, additional relevant information, and mnemonics to facilitate memorization.
       
-      Flashcard atual:
-      Frente: ${flashcard.front}
-      Verso: ${flashcard.back}
+      Current flashcard:
+      Front: ${flashcard.front}
+      Back: ${flashcard.back}
       Extra: ${flashcard.extra || ""}
-      Dificuldade: ${flashcard.difficulty || "intermediário"}
+      Difficulty: ${flashcard.difficulty || "intermediate"}
       
-      Instruções específicas:
-      1. Mantenha a pergunta (frente) original
-      2. Expanda a resposta (verso) para torná-la mais detalhada e completa, mas ainda concisa
-      3. No campo "extra", adicione:
-         - 2-3 exemplos concretos e aplicáveis
-         - Explicações adicionais que complementem o conceito principal
-         - Mnemônicos ou técnicas de memorização específicas
-         - Conexões com outros conceitos relacionados
-         - Dicas para aplicação prática do conhecimento
-      4. Mantenha o conteúdo organizado com subtítulos e formatação clara
-      5. Responda em ${language}
-      6. Mantenha a dificuldade consistente com o nível "${flashcard.difficulty || "intermediário"}"
+      Specific instructions:
+      1. Keep the original question (front)
+      2. Expand the answer (back) to make it more detailed and complete, but still concise
+      3. In the "extra" field, add:
+         - 2-3 concrete and applicable examples
+         - Additional explanations that complement the main concept
+         - Specific mnemonics or memorization techniques
+         - Connections with other related concepts
+         - Tips for practical application of the knowledge
+      4. Keep the content organized with clear headings and formatting
+      5. Answer in ${language}
+      6. Maintain consistency with the "${flashcard.difficulty || "intermediate"}" difficulty level
       
-      Retorne o JSON do flashcard melhorado no seguinte formato:
+      Return the JSON of the improved flashcard in the following format:
       {
-        "front": "A pergunta original",
-        "back": "A resposta expandida e mais detalhada",
-        "extra": "Conteúdo enriquecido com exemplos, mnemônicos e informações adicionais",
-        "difficulty": "${flashcard.difficulty || "intermediário"}"
+        "front": "The original question",
+        "back": "The expanded and more detailed answer",
+        "extra": "Enriched content with examples, mnemonics, and additional information",
+        "difficulty": "${flashcard.difficulty || "intermediate"}"
       }`;
 
-      // Determinar o modelo a ser usado
+      // Determine the model to use
       let aiModel = undefined;
       if (options?.model) {
-        // Primeiro tenta usar o mapeamento personalizado
+        // First try to use the custom mapping
         const modelId = getAIModelIdentifier(options.model);
         if (modelId) {
           try {
-            // @ts-expect-error - Modelo pode não estar no tipo AI.Model
+            // @ts-expect-error - Model may not be in the type definition
             aiModel = modelId;
-            Logger.debug(`Usando modelo AI com mapeamento personalizado: ${options.model} (${aiModel})`);
+            Logger.debug(`Using AI model with custom mapping: ${options.model} (${aiModel})`);
           } catch (err) {
-            Logger.warn(
-              `Modelo não reconhecido pelo mapeamento personalizado: ${options.model}, tentando fallback para AI.Model`,
-            );
+            Logger.warn(`Model not recognized by custom mapping: ${options.model}, trying fallback to AI.Model`);
           }
         }
 
-        // Fallback para o método antigo se o mapeamento personalizado falhar
+        // Fallback to the old method if custom mapping fails
         if (!aiModel && options.model in AI.Model) {
           aiModel = AI.Model[options.model as keyof typeof AI.Model];
-          Logger.debug(`Usando modelo AI com AI.Model: ${options.model} (${aiModel})`);
+          Logger.debug(`Using AI model with AI.Model: ${options.model} (${aiModel})`);
         }
 
         if (!aiModel) {
-          Logger.warn(`Modelo AI não reconhecido: ${options.model}, usando modelo padrão GPT-4o`);
-          // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+          Logger.warn(`AI model not recognized: ${options.model}, using default GPT-4o model`);
+          // @ts-expect-error - Default model may not exist in the type AI.Model
           aiModel = "openai-gpt-4o";
         }
       } else {
-        // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+        // @ts-expect-error - Default model may not exist in the type AI.Model
         aiModel = "openai-gpt-4o";
       }
 
@@ -82,17 +80,17 @@ export class AIEnhancer {
 
       const enhancedCard = this.parseResponse(response);
 
-      // Garantir que o flashcard original seja preservado se a IA não retornar campos válidos
+      // Ensure the original flashcard is preserved if AI doesn't return valid fields
       return {
         front: enhancedCard.front || flashcard.front,
         back: enhancedCard.back || flashcard.back,
         extra: enhancedCard.extra || flashcard.extra,
-        tags: flashcard.tags, // Preservar tags originais
-        difficulty: enhancedCard.difficulty || flashcard.difficulty || "intermediário",
+        tags: flashcard.tags, // Preserve original tags
+        difficulty: enhancedCard.difficulty || flashcard.difficulty || "intermediate",
       };
     } catch (error) {
-      Logger.error("Erro ao melhorar flashcard", error);
-      return flashcard; // Retorna o flashcard original em caso de erro
+      Logger.error("Error enhancing flashcard", error);
+      return flashcard; // Return original flashcard on error
     }
   }
 
@@ -102,46 +100,44 @@ export class AIEnhancer {
     options?: { model?: string; language?: string },
   ): Promise<string[]> {
     try {
-      const language = options?.language || "português";
-      const prompt = `Gere ${count} exemplos práticos, concretos e aplicáveis para explicar o conceito: "${concept}"
+      const language = options?.language || "english";
+      const prompt = `Generate ${count} practical, concrete, and applicable examples to explain the concept: "${concept}"
       
-      Instruções:
-      1. Os exemplos devem ser concisos (máximo 2-3 frases cada)
-      2. Devem ilustrar aplicações práticas do conceito
-      3. Devem ser diversos, cobrindo diferentes aspectos
-      4. Responda em ${language}
+      Instructions:
+      1. Examples should be concise (maximum 2-3 sentences each)
+      2. They should illustrate practical applications of the concept
+      3. They should be diverse, covering different aspects
+      4. Answer in ${language}
       
-      Retorne apenas um array JSON com os exemplos, no formato:
-      ["Exemplo 1", "Exemplo 2", "Exemplo 3"]`;
+      Return only a JSON array with the examples, in the format:
+      ["Example 1", "Example 2", "Example 3"]`;
 
-      // Determinar o modelo a ser usado
+      // Determine the model to use
       let aiModel = undefined;
       if (options?.model) {
-        // Primeiro tenta usar o mapeamento personalizado
+        // First try to use the custom mapping
         const modelId = getAIModelIdentifier(options.model);
         if (modelId) {
           try {
-            // @ts-expect-error - Modelo pode não estar no tipo AI.Model
+            // @ts-expect-error - Model may not be in the type definition
             aiModel = modelId;
           } catch (err) {
-            Logger.warn(
-              `Modelo não reconhecido pelo mapeamento personalizado: ${options.model}, tentando fallback para AI.Model`,
-            );
+            Logger.warn(`Model not recognized by custom mapping: ${options.model}, trying fallback to AI.Model`);
           }
         }
 
-        // Fallback para o método antigo se o mapeamento personalizado falhar
+        // Fallback to the old method if custom mapping fails
         if (!aiModel && options.model in AI.Model) {
           aiModel = AI.Model[options.model as keyof typeof AI.Model];
         }
 
         if (!aiModel) {
-          Logger.warn(`Modelo AI não reconhecido: ${options.model}, usando modelo padrão GPT-4o`);
-          // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+          Logger.warn(`AI model not recognized: ${options.model}, using default GPT-4o model`);
+          // @ts-expect-error - Default model may not exist in the type AI.Model
           aiModel = "openai-gpt-4o";
         }
       } else {
-        // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+        // @ts-expect-error - Default model may not exist in the type AI.Model
         aiModel = "openai-gpt-4o";
       }
 
@@ -151,19 +147,19 @@ export class AIEnhancer {
       });
 
       try {
-        // Tenta extrair um array JSON da resposta
+        // Try to extract a JSON array from the response
         const jsonMatch = response.match(/\[[\s\S]*\]/);
         if (jsonMatch) {
           return JSON.parse(jsonMatch[0]);
         }
 
-        // Se não encontrou um array JSON, tenta limpar a resposta
+        // If no JSON array found, try to clean the response
         const cleanedResponse = response.replace(/```json|```/g, "").trim();
         return JSON.parse(cleanedResponse);
       } catch (parseError) {
-        Logger.error("Erro ao processar exemplos", parseError);
+        Logger.error("Error processing examples", parseError);
 
-        // Fallback: extrai linhas que começam com números ou hífens como exemplos
+        // Fallback: extract lines that start with numbers or hyphens as examples
         const lines = response
           .split("\n")
           .filter((line) => line.trim().match(/^(\d+[.):]|[-•*])\s+.+/))
@@ -172,7 +168,7 @@ export class AIEnhancer {
         return lines.length > 0 ? lines : [];
       }
     } catch (error) {
-      Logger.error("Erro ao gerar exemplos", error);
+      Logger.error("Error generating examples", error);
       return [];
     }
   }
@@ -182,54 +178,52 @@ export class AIEnhancer {
     options?: { model?: string; language?: string },
   ): Promise<{ score: number; suggestions: string[] }> {
     try {
-      const language = options?.language || "português";
-      const prompt = `Avalie a qualidade deste flashcard e sugira melhorias específicas.
+      const language = options?.language || "english";
+      const prompt = `Evaluate the quality of this flashcard and suggest specific improvements.
       
       Flashcard:
-      Frente: ${flashcard.front}
-      Verso: ${flashcard.back}
+      Front: ${flashcard.front}
+      Back: ${flashcard.back}
       Extra: ${flashcard.extra || ""}
       
-      Retorne um JSON com:
-      - score: número de 0 a 10
-      - suggestions: array de sugestões de melhoria (em ${language})
+      Return a JSON with:
+      - score: number from 0 to 10
+      - suggestions: array of improvement suggestions (in ${language})
       
-      Avalie com base em:
-      1. Clareza da pergunta (é específica e não ambígua?)
-      2. Precisão da resposta (é correta e completa?)
-      3. Utilidade das informações extras (ajudam na compreensão?)
-      4. Atomicidade (foca em uma única ideia por cartão?)
-      5. Aplicabilidade (tem exemplos práticos?)
-      6. Memorabilidade (usa técnicas que facilitam a memorização?)`;
+      Evaluate based on:
+      1. Question clarity (is it specific and unambiguous?)
+      2. Answer accuracy (is it correct and complete?)
+      3. Extra information usefulness (does it help understanding?)
+      4. Atomicity (does it focus on a single idea per card?)
+      5. Applicability (does it have practical examples?)
+      6. Memorability (does it use techniques that facilitate memorization?)`;
 
-      // Determinar o modelo a ser usado
+      // Determine the model to use
       let aiModel = undefined;
       if (options?.model) {
-        // Primeiro tenta usar o mapeamento personalizado
+        // First try to use the custom mapping
         const modelId = getAIModelIdentifier(options.model);
         if (modelId) {
           try {
-            // @ts-expect-error - Modelo pode não estar no tipo AI.Model
+            // @ts-expect-error - Model may not be in the type definition
             aiModel = modelId;
           } catch (err) {
-            Logger.warn(
-              `Modelo não reconhecido pelo mapeamento personalizado: ${options.model}, tentando fallback para AI.Model`,
-            );
+            Logger.warn(`Model not recognized by custom mapping: ${options.model}, trying fallback to AI.Model`);
           }
         }
 
-        // Fallback para o método antigo se o mapeamento personalizado falhar
+        // Fallback to the old method if custom mapping fails
         if (!aiModel && options.model in AI.Model) {
           aiModel = AI.Model[options.model as keyof typeof AI.Model];
         }
 
         if (!aiModel) {
-          Logger.warn(`Modelo AI não reconhecido: ${options.model}, usando modelo padrão GPT-4o`);
-          // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+          Logger.warn(`AI model not recognized: ${options.model}, using default GPT-4o model`);
+          // @ts-expect-error - Default model may not exist in the type AI.Model
           aiModel = "openai-gpt-4o";
         }
       } else {
-        // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+        // @ts-expect-error - Default model may not exist in the type AI.Model
         aiModel = "openai-gpt-4o";
       }
 
@@ -239,7 +233,7 @@ export class AIEnhancer {
       });
 
       try {
-        // Tenta extrair um objeto JSON da resposta
+        // Try to extract a JSON object from the response
         const jsonMatch = response.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const result = JSON.parse(jsonMatch[0]);
@@ -249,14 +243,14 @@ export class AIEnhancer {
           };
         }
 
-        // Se não encontrou um objeto JSON, retorna valores padrão
-        return { score: 0, suggestions: [] };
+        // If no JSON object found, return default values
+        return { score: 0, suggestions: ["Could not evaluate the flashcard."] };
       } catch (parseError) {
-        Logger.error("Erro ao processar avaliação", parseError);
+        Logger.error("Error processing evaluation", parseError);
         return { score: 0, suggestions: [] };
       }
     } catch (error) {
-      Logger.error("Erro ao avaliar flashcard", error);
+      Logger.error("Error evaluating flashcard", error);
       return { score: 0, suggestions: [] };
     }
   }
@@ -267,50 +261,48 @@ export class AIEnhancer {
     options?: { model?: string; language?: string },
   ): Promise<{ question: string; answer: string }[]> {
     try {
-      const language = options?.language || "português";
-      const prompt = `Gere ${count} perguntas relacionadas ao tópico: "${topic}"
+      const language = options?.language || "english";
+      const prompt = `Generate ${count} questions related to the topic: "${topic}"
       
-      Instruções:
-      1. Cada pergunta deve explorar um aspecto diferente do tópico
-      2. As perguntas devem ser claras, específicas e não ambíguas
-      3. As respostas devem ser concisas mas completas
-      4. Inclua tanto perguntas factuais quanto conceituais
-      5. Responda em ${language}
+      Instructions:
+      1. Each question should explore a different aspect of the topic
+      2. Questions should be clear, specific, and unambiguous
+      3. Answers should be concise but complete
+      4. Include both factual and conceptual questions
+      5. Answer in ${language}
       
-      Retorne um array JSON de objetos com "question" e "answer", no formato:
+      Return a JSON array of objects with "question" and "answer", in the format:
       [
-        {"question": "Pergunta 1?", "answer": "Resposta 1"},
-        {"question": "Pergunta 2?", "answer": "Resposta 2"}
+        {"question": "Question 1?", "answer": "Answer 1"},
+        {"question": "Question 2?", "answer": "Answer 2"}
       ]`;
 
-      // Determinar o modelo a ser usado
+      // Determine the model to use
       let aiModel = undefined;
       if (options?.model) {
-        // Primeiro tenta usar o mapeamento personalizado
+        // First try to use the custom mapping
         const modelId = getAIModelIdentifier(options.model);
         if (modelId) {
           try {
-            // @ts-expect-error - Modelo pode não estar no tipo AI.Model
+            // @ts-expect-error - Model may not be in the type definition
             aiModel = modelId;
           } catch (err) {
-            Logger.warn(
-              `Modelo não reconhecido pelo mapeamento personalizado: ${options.model}, tentando fallback para AI.Model`,
-            );
+            Logger.warn(`Model not recognized by custom mapping: ${options.model}, trying fallback to AI.Model`);
           }
         }
 
-        // Fallback para o método antigo se o mapeamento personalizado falhar
+        // Fallback to the old method if custom mapping fails
         if (!aiModel && options.model in AI.Model) {
           aiModel = AI.Model[options.model as keyof typeof AI.Model];
         }
 
         if (!aiModel) {
-          Logger.warn(`Modelo AI não reconhecido: ${options.model}, usando modelo padrão GPT-4o`);
-          // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+          Logger.warn(`AI model not recognized: ${options.model}, using default GPT-4o model`);
+          // @ts-expect-error - Default model may not exist in the type AI.Model
           aiModel = "openai-gpt-4o";
         }
       } else {
-        // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+        // @ts-expect-error - Default model may not exist in the type AI.Model
         aiModel = "openai-gpt-4o";
       }
 
@@ -320,72 +312,70 @@ export class AIEnhancer {
       });
 
       try {
-        // Tenta extrair um array JSON da resposta
+        // Try to extract a JSON array from the response
         const jsonMatch = response.match(/\[[\s\S]*\]/);
         if (jsonMatch) {
           return JSON.parse(jsonMatch[0]);
         }
 
-        // Se não encontrou um array JSON, tenta limpar a resposta
+        // If no JSON array found, try to clean the response
         const cleanedResponse = response.replace(/```json|```/g, "").trim();
         return JSON.parse(cleanedResponse);
       } catch (parseError) {
-        Logger.error("Erro ao processar perguntas relacionadas", parseError);
+        Logger.error("Error processing related questions", parseError);
         return [];
       }
     } catch (error) {
-      Logger.error("Erro ao gerar perguntas relacionadas", error);
+      Logger.error("Error generating related questions", error);
       return [];
     }
   }
 
   static async suggestTags(flashcard: Flashcard, options?: { model?: string; language?: string }): Promise<string[]> {
     try {
-      const language = options?.language || "português";
-      const prompt = `Sugira tags relevantes para este flashcard:
+      const language = options?.language || "english";
+      const prompt = `Suggest relevant tags for this flashcard:
       
       Flashcard:
-      Frente: ${flashcard.front}
-      Verso: ${flashcard.back}
+      Front: ${flashcard.front}
+      Back: ${flashcard.back}
       Extra: ${flashcard.extra || ""}
       
-      Instruções:
-      1. Gere 3-5 tags relevantes baseadas no conteúdo
-      2. As tags devem ser palavras-chave ou categorias específicas
-      3. Use substantivos simples, preferencialmente no singular
-      4. Evite tags muito genéricas ou muito específicas
-      5. As tags devem estar em ${language}
+      Instructions:
+      1. Generate 3-5 relevant tags based on the content
+      2. Tags should be specific keywords or categories
+      3. Use simple nouns, preferably singular
+      4. Avoid tags that are too generic or too specific
+      5. Tags should be in ${language}
       
-      Retorne apenas um array JSON com as tags sugeridas.`;
+      Return only a JSON array with the suggested tags.`;
 
-      // Determinar o modelo a ser usado
+      // Determine the model to use
       let aiModel = undefined;
       if (options?.model) {
-        // Primeiro tenta usar o mapeamento personalizado
+        // First try to use the custom mapping
         const modelId = getAIModelIdentifier(options.model);
         if (modelId) {
           try {
-            // @ts-expect-error - Modelo pode não estar no tipo AI.Model
+            // @ts-expect-error - Model may not be in the type definition
             aiModel = modelId;
           } catch (err) {
-            Logger.warn(
-              `Modelo não reconhecido pelo mapeamento personalizado: ${options.model}, tentando fallback para AI.Model`,
-            );
+            Logger.warn(`Model not recognized by custom mapping: ${options.model}, trying fallback to AI.Model`);
           }
         }
 
-        // Fallback para o método antigo se o mapeamento personalizado falhar
+        // Fallback to the old method if custom mapping fails
         if (!aiModel && options.model in AI.Model) {
           aiModel = AI.Model[options.model as keyof typeof AI.Model];
         }
 
         if (!aiModel) {
-          Logger.warn(`Modelo AI não reconhecido: ${options.model}, usando modelo padrão GPT-4o`);
-          // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+          Logger.warn(`AI model not recognized: ${options.model}, using default GPT-4o model`);
+          // @ts-expect-error - Default model may not exist in the type AI.Model
           aiModel = "openai-gpt-4o";
         }
       } else {
-        // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+        // @ts-expect-error - Default model may not exist in the type AI.Model
         aiModel = "openai-gpt-4o";
       }
 
@@ -395,19 +385,19 @@ export class AIEnhancer {
       });
 
       try {
-        // Tenta extrair um array JSON da resposta
+        // Try to extract a JSON array from the response
         const jsonMatch = response.match(/\[[\s\S]*\]/);
         if (jsonMatch) {
           return JSON.parse(jsonMatch[0]);
         }
 
-        // Se não encontrou um array JSON, tenta limpar a resposta
+        // If no JSON array found, try to clean the response
         const cleanedResponse = response.replace(/```json|```/g, "").trim();
         return JSON.parse(cleanedResponse);
       } catch (parseError) {
-        Logger.error("Erro ao processar tags sugeridas", parseError);
+        Logger.error("Error processing suggested tags", parseError);
 
-        // Fallback: extrai palavras que parecem ser tags
+        // Fallback: extract words that look like tags
         const tagPattern = /(#\w+|\b\w+\b)/g;
         const possibleTags = response.match(tagPattern) || [];
         return possibleTags
@@ -415,37 +405,37 @@ export class AIEnhancer {
           .filter((tag) => tag.length > 2 && !/^\d+$/.test(tag));
       }
     } catch (error) {
-      Logger.error("Erro ao sugerir tags", error);
+      Logger.error("Error suggesting tags", error);
       return [];
     }
   }
 
   private static parseResponse(response: string): Flashcard {
     try {
-      // Tenta encontrar um objeto JSON na resposta
+      // Try to find a JSON object in the response
       const jsonMatch = response.match(/\{[\s\S]*\}/s);
       const jsonString = jsonMatch ? jsonMatch[0] : response;
 
-      // Limpa o texto de marcações Markdown antes de analisar
+      // Clean the text of Markdown markings before parsing
       const cleanedJson = jsonString.replace(/```json|```/g, "").trim();
 
       const result = JSON.parse(cleanedJson);
 
-      // Valida se os campos necessários estão presentes
+      // Validate if the necessary fields are present
       if (!result.front && !result.back && !result.extra) {
-        throw new Error("JSON inválido: faltam campos obrigatórios");
+        throw new Error("Invalid JSON: missing required fields");
       }
 
-      // Valida o campo de dificuldade
-      if (result.difficulty && !["iniciante", "intermediário", "avançado"].includes(result.difficulty)) {
-        result.difficulty = "intermediário"; // Valor padrão se inválido
+      // Validate the difficulty field
+      if (result.difficulty && !["beginner", "intermediate", "advanced"].includes(result.difficulty)) {
+        result.difficulty = "intermediate"; // Default value if invalid
       }
 
       return result;
     } catch (error) {
-      Logger.error("Erro ao processar resposta da IA", error);
+      Logger.error("Error processing AI response", error);
 
-      // Tenta extrair campos do texto não estruturado
+      // Try to extract fields from unstructured text
       const frontMatch = response.match(/front["\s:]+([^"]+)/i);
       const backMatch = response.match(/back["\s:]+([^"]+)/i);
       const extraMatch = response.match(/extra["\s:]+([^"]+)/i);
@@ -456,9 +446,9 @@ export class AIEnhancer {
         back: backMatch ? backMatch[1].trim() : "",
         extra: extraMatch ? extraMatch[1].trim() : "",
         difficulty:
-          difficultyMatch && ["iniciante", "intermediário", "avançado"].includes(difficultyMatch[1].trim())
-            ? (difficultyMatch[1].trim() as "iniciante" | "intermediário" | "avançado")
-            : "intermediário",
+          difficultyMatch && ["beginner", "intermediate", "advanced"].includes(difficultyMatch[1].trim())
+            ? (difficultyMatch[1].trim() as "beginner" | "intermediate" | "advanced")
+            : "intermediate",
       };
     }
   }

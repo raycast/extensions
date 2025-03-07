@@ -3,12 +3,12 @@ import { Form, ActionPanel, Action, showToast, Toast, useNavigation, Icon, Detai
 import { useFlashcardGenerator } from "./hooks/useFlashcardGenerator";
 import { FlashcardPreview } from "./components/FlashcardPreview";
 import { Flashcard } from "./ai/flashcardGenerator";
-import { ErrorHandler } from "./utils/errorHandler";
 import { AnkiRepository } from "./anki/ankiRepository";
 import { AIModelEnum } from "./constants/aiModels";
 import PreferencesCommand from "./preferences";
 
-// Form to edit a flashcard
+import { ErrorHandler } from "./utils/errorHandler";
+
 function EditFlashcardForm({ flashcard, onSave }: { flashcard: Flashcard; onSave: (updatedCard: Flashcard) => void }) {
   const { pop } = useNavigation();
   const [frontText, setFrontText] = useState(flashcard.front);
@@ -36,7 +36,7 @@ function EditFlashcardForm({ flashcard, onSave }: { flashcard: Flashcard; onSave
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save" shortcut={{ modifiers: ["cmd"], key: "enter" }} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -93,32 +93,32 @@ function ExportToAnkiForm({
   const [selectedModel, setSelectedModel] = useState("Raycast Flashcards");
   const [tagsText, setTagsText] = useState("");
   const [models, setModels] = useState<string[]>([]);
-  const [modelFields, setModelFields] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showPreview, setShowPreview] = useState(false);
   const { pop } = useNavigation();
 
   useEffect(() => {
     loadModels();
   }, []);
 
-  useEffect(() => {
-    if (selectedModel) {
-      loadModelFields(selectedModel);
-    }
-  }, [selectedModel]);
-
   const loadModels = async () => {
     try {
+      setIsLoading(true);
       const response = await AnkiRepository.modelNames();
       if (!response.error && response.result) {
-        setModels(response.result);
-        // Add "Raycast Flashcards" to the list if it doesn't exist
-        if (!response.result.includes("Raycast Flashcards")) {
+        const modelList = response.result as string[];
+        setModels(modelList);
+
+        if (!modelList.includes("Raycast Flashcards")) {
           setModels((prev) => [...prev, "Raycast Flashcards"]);
         }
-        // Use "Raycast Flashcards" as default
+
         setSelectedModel("Raycast Flashcards");
+      } else {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error loading models",
+          message: response.error || "Make sure Anki is open",
+        });
       }
     } catch (error) {
       showToast({
@@ -131,21 +131,6 @@ function ExportToAnkiForm({
     }
   };
 
-  const loadModelFields = async (modelName: string) => {
-    try {
-      const response = await AnkiRepository.modelFieldNames(modelName);
-      if (!response.error && response.result) {
-        setModelFields(response.result);
-      }
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error loading model fields",
-        message: "Make sure Anki is open",
-      });
-    }
-  };
-
   const handleSubmit = () => {
     const tags = tagsText
       .split(",")
@@ -155,105 +140,28 @@ function ExportToAnkiForm({
     pop();
   };
 
-  const previewFields = () => {
-    if (flashcards.length === 0 || modelFields.length === 0) return null;
-
-    // Get the first flashcard as an example
-    const example = flashcards[0];
-    return (
-      <Form.Description
-        text={`
-Model fields for "${selectedModel}":
-${modelFields
-  .map((field) => {
-    let value = "";
-    const fieldLower = field.toLowerCase();
-    if (
-      fieldLower.includes("front") ||
-      fieldLower.includes("question") ||
-      fieldLower.includes("frente") ||
-      fieldLower.includes("pergunta")
-    ) {
-      value = example.front;
-    } else if (
-      fieldLower.includes("back") ||
-      fieldLower.includes("answer") ||
-      fieldLower.includes("verso") ||
-      fieldLower.includes("resposta")
-    ) {
-      value = example.back;
-    } else if (fieldLower.includes("extra") || fieldLower.includes("note") || fieldLower.includes("nota")) {
-      value = example.extra || "";
-    }
-    return `${field}: ${value.substring(0, 50)}${value.length > 50 ? "..." : ""}`;
-  })
-  .join("\n")}
-      `}
-      />
-    );
-  };
-
   if (isLoading) {
-    return <Detail isLoading={true} />;
-  }
-
-  if (showPreview) {
-    return (
-      <Detail
-        navigationTitle="Flashcard Export Preview"
-        markdown={`
-# Flashcard Export Preview
-
-## Settings
-- **Deck**: ${selectedDeck}
-- **Model**: ${selectedModel}
-- **Tags**: ${tagsText || "None"}
-
-## Flashcards (${flashcards.length})
-${flashcards
-  .map(
-    (card, index) => `
-### Flashcard ${index + 1}
-
-**Front**: ${card.front}
-
-**Back**: ${card.back}
-
-${card.extra ? `**Extra**: ${card.extra}` : ""}
-${card.tags && card.tags.length > 0 ? `**Tags**: ${card.tags.join(", ")}` : ""}
----`,
-  )
-  .join("\n")}
-        `}
-        actions={
-          <ActionPanel>
-            <Action title="Back to Settings" icon={Icon.ArrowLeft} onAction={() => setShowPreview(false)} />
-            <Action
-              title="Confirm and Export"
-              icon={Icon.Download}
-              onAction={() => {
-                const tags = tagsText
-                  .split(",")
-                  .map((tag) => tag.trim())
-                  .filter((tag) => tag);
-                onExport(flashcards, selectedDeck, selectedModel, tags);
-              }}
-            />
-          </ActionPanel>
-        }
-      />
-    );
+    return <Detail isLoading={true} markdown="Loading Anki models..." />;
   }
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Export to Anki" onSubmit={handleSubmit} />
-          <Action title="Preview Flashcards" icon={Icon.Eye} onAction={() => setShowPreview(true)} />
+          <Action.SubmitForm
+            title={`Export ${flashcards.length} Flashcards to Anki`}
+            icon={Icon.Download}
+            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
+      <Form.Description
+        title="Export Settings"
+        text={`You are about to export ${flashcards.length} flashcards to Anki. Please select a deck and model.`}
+      />
+
       <Form.Dropdown id="deck" title="Deck" value={selectedDeck} onChange={setSelectedDeck}>
         {decks.map((deck) => (
           <Form.Dropdown.Item key={deck} value={deck} title={deck} />
@@ -274,30 +182,29 @@ ${card.tags && card.tags.length > 0 ? `**Tags**: ${card.tags.join(", ")}` : ""}
         onChange={setTagsText}
       />
 
-      {previewFields()}
+      <Form.Separator />
+
+      <Form.Description
+        title="Note"
+        text="The flashcards will be added to the selected deck using the selected model. Any tags you specify here will be added to all flashcards in addition to their individual tags."
+      />
     </Form>
   );
 }
 
-// Main screen for generating flashcards
 export default function GenerateFlashcardCommand() {
   const { push } = useNavigation();
   const [text, setText] = useState("");
   const [language, setLanguage] = useState("english");
-  const [isPreviewMode, setIsPreviewMode] = useState(false);
-  const [topic, setTopic] = useState("");
-  const [selectedFlashcards, setSelectedFlashcards] = useState<Set<number>>(new Set());
-  const [aiModel, setAiModel] = useState(AIModelEnum.GPT4o);
-  const [difficultyLevel, setDifficultyLevel] = useState<"beginner" | "intermediate" | "advanced">("intermediate");
   const [numCards, setNumCards] = useState<number>(5);
   const [enableTags, setEnableTags] = useState<boolean>(true);
+  const [isPreviewMode, setIsPreviewMode] = useState<boolean>(false);
+  const [selectedFlashcards, setSelectedFlashcards] = useState<Set<number>>(new Set());
+  const [aiModel, setAiModel] = useState<string>(AIModelEnum.GPT4o);
 
   const aiModels = [
-    // Raycast
     { value: AIModelEnum.RAY1, label: "Ray1" },
     { value: AIModelEnum.RAY1_MINI, label: "Ray1 Mini" },
-
-    // OpenAI
     { value: AIModelEnum.GPT3_5, label: "GPT-3.5 Turbo" },
     { value: AIModelEnum.GPT4, label: "GPT-4" },
     { value: AIModelEnum.GPT4_TURBO, label: "GPT-4 Turbo" },
@@ -306,28 +213,20 @@ export default function GenerateFlashcardCommand() {
     { value: AIModelEnum.O1, label: "OpenAI O1" },
     { value: AIModelEnum.O1_MINI, label: "OpenAI O1 Mini" },
     { value: AIModelEnum.O3_MINI, label: "OpenAI O3 Mini" },
-
-    // Claude
     { value: AIModelEnum.CLAUDE3_5_HAIKU, label: "Claude 3.5 Haiku" },
     { value: AIModelEnum.CLAUDE3_5_SONNET, label: "Claude 3.5 Sonnet" },
     { value: AIModelEnum.CLAUDE3_7_SONNET, label: "Claude 3.7 Sonnet" },
     { value: AIModelEnum.CLAUDE3_OPUS, label: "Claude 3 Opus (High complexity)" },
     { value: AIModelEnum.CLAUDE3_SONNET, label: "Claude 3 Sonnet (Balanced)" },
     { value: AIModelEnum.CLAUDE3_HAIKU, label: "Claude 3 Haiku (Faster)" },
-
-    // Perplexity
     { value: AIModelEnum.PERPLEXITY_SONAR, label: "Perplexity Sonar" },
     { value: AIModelEnum.PERPLEXITY_SONAR_PRO, label: "Perplexity Sonar Pro" },
     { value: AIModelEnum.PERPLEXITY_SONAR_REASONING, label: "Perplexity Sonar Reasoning" },
-
-    // Llama
     { value: AIModelEnum.LLAMA3_3_70B, label: "Llama 3.3 70B" },
     { value: AIModelEnum.LLAMA3_1_8B, label: "Llama 3.1 8B" },
     { value: AIModelEnum.LLAMA3_70B, label: "Llama 3 70B" },
     { value: AIModelEnum.LLAMA3_1_405B, label: "Llama 3.1 405B" },
     { value: AIModelEnum.LLAMA3_8B, label: "Llama 3 8B" },
-
-    // Mistral
     { value: AIModelEnum.MIXTRAL_8X7B, label: "Mixtral 8x7B" },
     { value: AIModelEnum.MISTRAL_NEMO, label: "Mistral Nemo" },
     { value: AIModelEnum.MISTRAL_LARGE, label: "Mistral Large" },
@@ -335,19 +234,13 @@ export default function GenerateFlashcardCommand() {
     { value: AIModelEnum.MISTRAL_MEDIUM, label: "Mistral Medium" },
     { value: AIModelEnum.MISTRAL_SMALL, label: "Mistral Small" },
     { value: AIModelEnum.CODESTRAL, label: "Codestral" },
-
-    // DeepSeek
     { value: AIModelEnum.DEEPSEEK_R1_DISTILL_LLAMA_70B, label: "DeepSeek R1 Distill Llama 70B" },
     { value: AIModelEnum.DEEPSEEK_R1, label: "DeepSeek R1" },
-
-    // Google
     { value: AIModelEnum.GEMINI_1_5_FLASH, label: "Gemini 1.5 Flash" },
     { value: AIModelEnum.GEMINI_1_5_PRO, label: "Gemini 1.5 Pro" },
     { value: AIModelEnum.GEMINI_2_0_FLASH, label: "Gemini 2.0 Flash" },
     { value: AIModelEnum.GEMINI_2_0_FLASH_THINKING, label: "Gemini 2.0 Flash Thinking" },
     { value: AIModelEnum.GEMINI_PRO, label: "Gemini Pro" },
-
-    // xAI
     { value: AIModelEnum.GROK_2, label: "Grok 2" },
   ];
 
@@ -395,13 +288,14 @@ export default function GenerateFlashcardCommand() {
         message: "This may take a few seconds",
       });
 
-      // Use the selected model directly from the AIModelEnum
       const selectedModel = aiModel;
       console.log(
         `Generating flashcards with model: ${selectedModel || "default"}, language: ${language}, difficulty: ${difficultyLevel}`,
       );
+      showToast({
+        style: Toast.Style.Animated,
+      });
 
-      // Pass the options to the flashcard generation
       const options = {
         model: selectedModel,
         difficultyLevel: difficultyLevel,
@@ -454,20 +348,51 @@ export default function GenerateFlashcardCommand() {
     if (selectedCards.length === 0) {
       showToast({
         style: Toast.Style.Failure,
-        title: "No flashcard selected",
+        title: "No flashcards selected",
         message: "Select at least one flashcard to export",
       });
       return;
     }
 
+    setIsLoading(true);
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Testing connection to Anki",
+      message: "Please wait...",
+    });
+
     testAnkiConnection().then((connected) => {
+      setIsLoading(false);
+
       if (connected) {
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Preparing to export",
+          message: `${selectedCards.length} flashcards will be exported to Anki`,
+        });
+
         push(
           <ExportToAnkiForm
             flashcards={selectedCards}
             decks={decks}
             onExport={async (flashcards, deckName, modelName, tags) => {
-              await addFlashcardsToAnki(flashcards, deckName, modelName, tags);
+              setIsLoading(true);
+              showToast({
+                style: Toast.Style.Animated,
+                title: "Exporting flashcards",
+                message: `Exporting ${flashcards.length} flashcards to "${deckName}"`,
+              });
+
+              const result = await addFlashcardsToAnki(flashcards, deckName, modelName, tags);
+
+              setIsLoading(false);
+              if (result) {
+                showToast({
+                  style: Toast.Style.Success,
+                  title: "Export successful",
+                  message: `${flashcards.length} flashcards exported to "${deckName}"`,
+                });
+              }
             }}
           />,
         );
@@ -509,8 +434,17 @@ export default function GenerateFlashcardCommand() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Generate Flashcards" onSubmit={handleGenerateFlashcards} />
-          <Action title="Test Anki Connection" icon={Icon.Link} onAction={testAnkiConnection} />
+          <Action.SubmitForm
+            title="Generate Flashcards"
+            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            onSubmit={handleGenerateFlashcards}
+          />
+          <Action
+            title="Test Anki Connection"
+            icon={Icon.Link}
+            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            onAction={testAnkiConnection}
+          />
           <Action
             title="Advanced Settings"
             icon={Icon.Gear}
@@ -541,6 +475,7 @@ export default function GenerateFlashcardCommand() {
 
       <Form.Dropdown id="language" title="Language" value={language} onChange={setLanguage}>
         <Form.Dropdown.Item value="english" title="English" />
+        <Form.Dropdown.Item value="português" title="Portuguese" />
         <Form.Dropdown.Item value="español" title="Spanish" />
       </Form.Dropdown>
 

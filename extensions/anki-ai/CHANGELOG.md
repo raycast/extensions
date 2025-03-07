@@ -5,7 +5,27 @@ All significant changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.1] - {PR_MERGE_DATE}
+## [1.2.0] - {PR_MERGE_DATE}
+
+### Added
+- Improved export workflow with clearer UI and better feedback
+- Enhanced language support for English, Portuguese, and Spanish
+- Better error handling with more informative messages
+- Added keyboard shortcuts for common actions (⌘+Enter to export flashcards)
+
+### Fixed
+- Resolved empty state flicker issue in flashcard generation
+- Fixed language inconsistencies throughout the application
+- Improved error messages to be consistently in English
+- Updated all UI text to follow Raycast's US English requirements
+- Enhanced Anki connection handling with automatic retries
+
+### Technical
+- Standardized language handling across the application
+- Improved type safety with better TypeScript annotations
+- Fixed compatibility with all AI models available in Raycast
+
+## [1.1.1] - 2025-03-10
 
 ### Fixed
 - Resolved dependency conflict between `@testing-library/react-hooks` and `@types/react`
@@ -66,6 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Note
 This is the first public version of the Anki AI extension for Raycast. We appreciate your feedback to continue improving the tool!
 
+[1.2.0]: https://github.com/your-username/anki-raycast-ai/releases/tag/v1.2.0
 [1.1.1]: https://github.com/your-username/anki-raycast-ai/releases/tag/v1.1.1
 [1.1.0]: https://github.com/your-username/anki-raycast-ai/releases/tag/v1.1.0
 [1.0.0]: https://github.com/your-username/anki-raycast-ai/releases/tag/v1.0.0

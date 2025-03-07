@@ -1,36 +1,34 @@
 import { AnkiResponse, AnkiNote } from "./ankiTypes";
 import axios from "axios";
 import { Logger } from "../utils/logger";
-import { Flashcard } from "../ai/flashcardGenerator";
 
-// URL padrão do AnkiConnect
 const ANKI_CONNECT_URL = "http://localhost:8765";
 
 export class AnkiRepository {
   /**
-   * Função de diagnóstico para verificar se o AnkiConnect está funcionando corretamente
+   * Function to test if AnkiConnect is working correctly
    */
   static async testConnection(): Promise<{ success: boolean; message: string; details?: unknown }> {
     try {
-      Logger.debug("Iniciando teste de conexão com AnkiConnect");
+      Logger.debug("Starting AnkiConnect connection test");
 
-      // Verificar primeiro se o Anki está rodando
+      // Check if Anki is running first
       const isRunning = await this.isAnkiRunning();
       if (!isRunning) {
         return {
           success: false,
-          message: "O Anki não está aberto. Por favor, abra o Anki antes de tentar exportar flashcards.",
+          message: "Anki is not open. Please open Anki before trying to export flashcards.",
           details: { ankiRunning: false },
         };
       }
 
-      // Teste direto e simples com retentativas
+      // Test directly and simply with retries
       const maxAttempts = 3;
       let lastError: Error | null = null;
 
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-          Logger.debug(`Tentativa ${attempt}/${maxAttempts} - Enviando requisição de versão para AnkiConnect...`);
+          Logger.debug(`Attempt ${attempt}/${maxAttempts} - Sending version request to AnkiConnect...`);
           const response = await axios.post(
             ANKI_CONNECT_URL,
             {
@@ -39,891 +37,500 @@ export class AnkiRepository {
             },
             {
               headers: { "Content-Type": "application/json" },
-              timeout: 15000, // Aumentado para 15 segundos
+              timeout: 15000,
             },
           );
 
-          Logger.debug(`Resposta recebida: ${JSON.stringify(response.data)}`);
+          Logger.debug(`Response received: ${JSON.stringify(response.data)}`);
           const data = response.data;
 
           if (data.error) {
-            Logger.debug(`Erro retornado pelo AnkiConnect: ${data.error}`);
+            Logger.debug(`Error returned by AnkiConnect: ${data.error}`);
             return {
               success: false,
-              message: `Erro do AnkiConnect: ${data.error}`,
+              message: `AnkiConnect error: ${data.error}`,
               details: data,
             };
           }
 
           const version = data.result as number;
-          Logger.debug(`Versão do AnkiConnect: ${version}`);
+          Logger.debug(`AnkiConnect version: ${version}`);
 
           if (version < 6) {
             return {
               success: false,
-              message: `Versão do AnkiConnect (${version}) é menor que a necessária (6). Por favor, atualize o AnkiConnect.`,
+              message: `AnkiConnect version (${version}) is lower than the required version (6). Please update AnkiConnect.`,
               details: { version },
             };
           }
 
-          // Teste adicional: verificar se conseguimos obter a lista de decks
-          // Usamos um sistema de retentativas separado para esta operação
-          Logger.debug("Tentando obter lista de decks...");
+          // Additional test: try to get the list of decks
+          // Using a separate retry system for this operation
+          Logger.debug("Trying to get list of decks...");
           let decksSuccess = false;
           let decksResponse = null;
 
           for (let decksAttempt = 1; decksAttempt <= maxAttempts; decksAttempt++) {
             try {
-              Logger.debug(`Tentativa ${decksAttempt}/${maxAttempts} de obter decks...`);
+              Logger.debug(`Attempt ${decksAttempt}/${maxAttempts} to get decks...`);
               decksResponse = await this.request<string[]>("deckNames", {}, 6, {
                 timeout: 15000,
-                retries: 0, // Não usamos retentativas internas, estamos controlando aqui
+                retries: 0,
               });
 
               if (decksResponse.error) {
-                Logger.debug(`Erro ao obter decks: ${decksResponse.error}`);
+                Logger.debug(`Error getting decks: ${decksResponse.error}`);
                 lastError = new Error(decksResponse.error);
               } else {
                 decksSuccess = true;
-                Logger.debug(`Decks obtidos com sucesso: ${decksResponse.result?.length || 0} decks`);
-                break; // Saímos do loop se tivermos sucesso
+                Logger.debug(`Decks obtained successfully: ${decksResponse.result?.length || 0} decks`);
+                break;
               }
             } catch (error) {
               lastError = error instanceof Error ? error : new Error(String(error));
-              Logger.debug(`Erro na tentativa ${decksAttempt} de obter decks: ${lastError.message}`);
+              Logger.debug(`Error on attempt ${decksAttempt} to get decks: ${lastError.message}`);
             }
 
-            // Se não for a última tentativa, aguardar antes de tentar novamente
             if (decksAttempt < maxAttempts) {
-              const waitTime = 2000; // 2 segundos
-              Logger.debug(`Aguardando ${waitTime}ms antes da próxima tentativa...`);
+              const waitTime = 2000;
+              Logger.debug(`Waiting ${waitTime}ms before next attempt...`);
               await new Promise((resolve) => setTimeout(resolve, waitTime));
             }
           }
 
           if (!decksSuccess) {
-            // Verificar se o erro está relacionado ao AnkiConnect não instalado
             if (lastError?.message.includes("ECONNREFUSED") || lastError?.message.includes("ECONNRESET")) {
               return {
                 success: false,
                 message:
-                  "Não foi possível se conectar ao AnkiConnect. Verifique se o plugin AnkiConnect está instalado no Anki e se o Anki está aberto.",
+                  "Failed to connect to AnkiConnect. Verify that the AnkiConnect plugin is installed in Anki and that Anki is open.",
                 details: {
                   ankiRunning: true,
                   version: version,
                   error: lastError?.message,
                   installationInstructions:
-                    "Para instalar o AnkiConnect:\n1. Abra o Anki\n2. Vá em Ferramentas > Add-ons > Obter Add-ons\n3. Cole o código 2055492159\n4. Reinicie o Anki após a instalação",
+                    "To install AnkiConnect:\n1. Open Anki\n2. Go to Tools > Add-ons > Get Add-ons\n3. Paste the code 2055492159\n4. Restart Anki after installation",
                 },
               };
             }
 
             return {
               success: false,
-              message: `Erro ao obter decks do Anki: ${lastError?.message || "Erro desconhecido"}. O AnkiConnect está instalado, mas há problemas de comunicação.`,
-              details: {
-                ankiRunning: true,
-                version: version,
-                error: lastError?.message,
-              },
+              message: `Error getting decks from Anki: ${lastError?.message || "Unknown error"}. Anki may not be running.`,
+              details: { error: lastError?.message },
             };
-          }
-
-          // Create Raycast Flashcards model if needed during connection test
-          try {
-            Logger.debug("Verificando/criando modelo Raycast Flashcards durante teste de conexão...");
-            const modelResponse = await this.createRaycastFlashcardsModelIfNeeded();
-            if (modelResponse.error) {
-              Logger.warn(`Aviso: Não foi possível criar o modelo Raycast Flashcards: ${modelResponse.error}`);
-              // Não falharemos o teste de conexão por isso, apenas logamos o aviso
-            } else {
-              Logger.debug("Modelo Raycast Flashcards verificado/criado com sucesso durante teste de conexão");
-            }
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            Logger.warn(`Aviso: Erro ao verificar/criar modelo Raycast Flashcards: ${errorMessage}`);
-            // Não falharemos o teste de conexão por isso, apenas logamos o aviso
           }
 
           return {
             success: true,
-            message: "Conexão com o Anki bem-sucedida e AnkiConnect funcionando corretamente.",
-            details: {
-              ankiRunning: true,
-              version: version,
-              decksCount: decksResponse?.result ? decksResponse.result.length : 0,
-            },
+            message: "Connection to Anki successful",
+            details: { version, decks: decksResponse.result },
           };
         } catch (error) {
           lastError = error instanceof Error ? error : new Error(String(error));
-          Logger.debug(`Erro na tentativa ${attempt}: ${lastError.message}`);
+          Logger.debug(`Error on attempt ${attempt}: ${lastError.message}`);
 
-          // Se não for a última tentativa, aguardar antes de tentar novamente
           if (attempt < maxAttempts) {
-            const waitTime = 2000; // 2 segundos
-            Logger.debug(`Aguardando ${waitTime}ms antes da próxima tentativa...`);
+            const waitTime = 2000 * attempt; // Exponential backoff
+            Logger.debug(`Waiting ${waitTime}ms before next attempt...`);
             await new Promise((resolve) => setTimeout(resolve, waitTime));
           }
         }
       }
 
-      // Se chegamos aqui, todas as tentativas falharam
-      const errorMessage = lastError instanceof Error ? lastError.message : String(lastError);
+      // If we get here, all attempts failed
+      const errorMessage = lastError?.message || "Unknown error";
+      Logger.error(`All connection attempts failed: ${errorMessage}`);
 
-      // Verificar se o erro está relacionado ao AnkiConnect não instalado
       if (errorMessage.includes("ECONNREFUSED") || errorMessage.includes("ECONNRESET")) {
         return {
           success: false,
           message:
-            "Não foi possível se conectar ao AnkiConnect. Verifique se o plugin AnkiConnect está instalado no Anki e se o Anki está aberto.",
+            "Failed to connect to AnkiConnect. Verify that the AnkiConnect plugin is installed in Anki and that Anki is open.",
           details: {
             error: errorMessage,
             installationInstructions:
-              "Para instalar o AnkiConnect:\n1. Abra o Anki\n2. Vá em Ferramentas > Add-ons > Obter Add-ons\n3. Cole o código 2055492159\n4. Reinicie o Anki após a instalação",
+              "To install AnkiConnect:\n1. Open Anki\n2. Go to Tools > Add-ons > Get Add-ons\n3. Paste the code 2055492159\n4. Restart Anki after installation",
           },
         };
       }
 
       return {
         success: false,
-        message: `Falha na comunicação com AnkiConnect após ${maxAttempts} tentativas: ${errorMessage}. Verifique se o Anki está aberto e o AnkiConnect está instalado.`,
+        message: `Failed to connect to Anki: ${errorMessage}`,
         details: { error: errorMessage },
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error("Erro geral no teste de conexão:", error);
+      Logger.error(`Unexpected error in testConnection: ${errorMessage}`);
 
       return {
         success: false,
-        message: `Erro no teste de conexão: ${errorMessage}`,
+        message: `Unexpected error: ${errorMessage}`,
         details: { error: errorMessage },
       };
     }
   }
 
   /**
-   * Verifica se o processo do Anki está rodando
-   * Nota: Esta é uma verificação simples e pode não ser 100% precisa
+   * Check if Anki is running
    */
   static async isAnkiRunning(): Promise<boolean> {
     try {
-      Logger.debug("Verificando se o Anki está rodando");
+      // First try a simple GET request
+      try {
+        const response = await axios.get(ANKI_CONNECT_URL, { timeout: 1000 });
+        return response.status === 200;
+      } catch (error) {
+        // If GET fails, try a POST request
+        if (error.code === "ECONNREFUSED") {
+          return false;
+        }
+      }
 
-      // Implementando sistema de retentativas
-      const maxAttempts = 3;
+      // Try a POST request as a fallback
+      try {
+        await axios.post(
+          ANKI_CONNECT_URL,
+          { action: "version", version: 6 },
+          {
+            headers: { "Content-Type": "application/json" },
+            timeout: 1000,
+          },
+        );
+        return true;
+      } catch (error) {
+        if (error.code === "ECONNREFUSED") {
+          return false;
+        }
 
-      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        try {
-          Logger.debug(`Tentativa ${attempt}/${maxAttempts} de verificar se o Anki está rodando`);
-
-          const response = await axios.post(
-            ANKI_CONNECT_URL,
-            {
-              action: "version",
-              version: 6,
-            },
-            {
-              headers: { "Content-Type": "application/json" },
-              timeout: 5000, // Timeout menor para esta verificação simples
-            },
-          );
-
-          // Se chegamos aqui, a requisição foi bem-sucedida
-          Logger.debug(`Anki está rodando: ${response.data.result !== undefined}`);
-          return response.data.result !== undefined;
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-
-          // Log mais detalhado para erros de conexão
-          if (errorMessage.includes("ECONNRESET") || errorMessage.includes("socket hang up")) {
-            Logger.debug(
-              `Erro de conexão na verificação do Anki (tentativa ${attempt}/${maxAttempts}): ${errorMessage}`,
+        // If we get ECONNRESET, Anki might be running but AnkiConnect is not responding properly
+        if (error.code === "ECONNRESET") {
+          // Try one more time with a longer timeout
+          try {
+            await axios.post(
+              ANKI_CONNECT_URL,
+              { action: "version", version: 6 },
+              {
+                headers: { "Content-Type": "application/json" },
+                timeout: 3000,
+              },
             );
-          } else {
-            Logger.debug(
-              `Erro ao verificar se Anki está rodando (tentativa ${attempt}/${maxAttempts}): ${errorMessage}`,
-            );
-          }
-
-          // Se não for a última tentativa, aguardar antes de tentar novamente
-          if (attempt < maxAttempts) {
-            const waitTime = 1000; // 1 segundo
-            Logger.debug(`Aguardando ${waitTime}ms antes da próxima tentativa...`);
-            await new Promise((resolve) => setTimeout(resolve, waitTime));
+            return true;
+          } catch (secondError) {
+            // If we still get an error, Anki might be running but AnkiConnect is not working properly
+            // We'll return true and let the testConnection method handle the details
+            return true;
           }
         }
       }
 
-      // Se chegamos aqui, todas as tentativas falharam
-      Logger.debug("Anki não está rodando (todas as tentativas falharam)");
       return false;
     } catch (error) {
-      Logger.error(
-        `Erro geral ao verificar se Anki está rodando: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      Logger.error(`Error checking if Anki is running: ${error}`);
       return false;
     }
   }
 
   /**
-   * Envia uma requisição para o AnkiConnect
+   * Send a request to AnkiConnect
    */
-  static async request<T = unknown>(
+  static async request<T>(
     action: string,
-    params: Record<string, unknown> = {},
+    params = {},
     version = 6,
-    options: { retries?: number; timeout?: number } = {},
-  ): Promise<AnkiResponse<T>> {
-    const { retries = 4, timeout = 30000 } = options; // Aumentado para 4 retentativas e 30 segundos
-
-    const payload = {
-      action,
-      version,
-      params,
-    };
-
-    Logger.ankiRequest(action, params);
-    Logger.debug(`Enviando requisição para AnkiConnect: ${action}, timeout: ${timeout}ms, retries: ${retries}`);
-
+    options?: { timeout?: number; retries?: number },
+  ): Promise<AnkiResponse> {
+    const timeout = options?.timeout || 10000;
+    const maxRetries = options?.retries !== undefined ? options.retries : 1;
     let lastError: Error | null = null;
-    let attempt = 0;
 
-    while (attempt < retries + 1) {
-      attempt++;
-      Logger.debug(`Tentativa ${attempt}/${retries + 1} para ação: ${action}`);
-
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        // Verificar se o Anki está rodando antes de fazer a requisição
-        // Isso evita tentativas desnecessárias quando o Anki não está aberto
-        if (
-          attempt === 1 ||
-          (lastError && (lastError.message.includes("ECONNRESET") || lastError.message.includes("socket hang up")))
-        ) {
-          const isRunning = await this.isAnkiRunning();
-          if (!isRunning) {
-            Logger.warn(`Anki não está rodando. Não é possível executar a ação: ${action}`);
-            return {
-              result: null,
-              error: "Anki não está rodando. Por favor, abra o Anki e tente novamente.",
-            };
-          }
+        Logger.ankiRequest(action, params);
 
-          // Se houve um ECONNRESET na tentativa anterior, esperar um pouco mais
-          // para que o servidor possa se recuperar completamente
-          if (attempt > 1 && lastError && lastError.message.includes("ECONNRESET")) {
-            const recoveryTime = 3000; // 3 segundos para recuperação do servidor
-            Logger.debug(`ECONNRESET detectado. Aguardando ${recoveryTime}ms para recuperação do servidor...`);
-            await new Promise((resolve) => setTimeout(resolve, recoveryTime));
-          }
+        const response = await axios.post(
+          ANKI_CONNECT_URL,
+          {
+            action,
+            params,
+            version,
+          },
+          {
+            headers: { "Content-Type": "application/json" },
+            timeout,
+          },
+        );
+
+        const data = response.data;
+        Logger.ankiRequest(action, params, data);
+
+        if (data.error) {
+          return { error: data.error, result: null };
         }
 
-        // Usar um timeout progressivo para dar mais tempo em tentativas subsequentes
-        const currentTimeout = attempt > 1 ? timeout * Math.min(attempt, 3) : timeout;
-
-        // Adicionar cabeçalho para tentar evitar problemas de conexão
-        const response = await axios.post(ANKI_CONNECT_URL, payload, {
-          headers: {
-            "Content-Type": "application/json",
-            Connection: "keep-alive",
-          },
-          timeout: currentTimeout,
-        });
-
-        Logger.debug(
-          `Resposta recebida para ${action}: ${JSON.stringify(response.data).substring(0, 200)}${JSON.stringify(response.data).length > 200 ? "..." : ""}`,
-        );
-        return response.data;
+        return { error: null, result: data.result as T };
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        const errorMessage = lastError.message;
+        Logger.error(`Error on attempt ${attempt + 1}/${maxRetries + 1} for action ${action}: ${lastError.message}`);
 
-        // Log mais detalhado para erros de conexão
-        if (errorMessage.includes("ECONNRESET") || errorMessage.includes("socket hang up")) {
-          Logger.error(
-            `Erro de conexão na requisição ao AnkiConnect (tentativa ${attempt}/${retries + 1}): ${errorMessage}. Este erro geralmente ocorre quando a conexão é fechada abruptamente pelo servidor.`,
-          );
-
-          // Verificar se o Anki ainda está rodando
-          const isStillRunning = await this.isAnkiRunning();
-          if (!isStillRunning) {
-            Logger.warn(`Anki parece ter sido fechado durante a operação. Ação: ${action}`);
-            return {
-              result: null,
-              error: "Anki foi fechado durante a operação. Por favor, abra o Anki e tente novamente.",
-            };
-          }
-        } else {
-          Logger.error(`Erro na requisição ao AnkiConnect (tentativa ${attempt}/${retries + 1}): ${errorMessage}`);
+        if (attempt < maxRetries) {
+          const waitTime = 1000 * Math.pow(2, attempt); // Exponential backoff
+          Logger.debug(`Waiting ${waitTime}ms before retry...`);
+          await new Promise((resolve) => setTimeout(resolve, waitTime));
         }
-
-        // Se já tentamos o número máximo de vezes, desistir
-        if (attempt >= retries + 1) {
-          break;
-        }
-
-        // Tempo de espera progressivo entre tentativas com um componente aleatório
-        // para evitar que múltiplas requisições tentem ao mesmo tempo
-        const baseWaitTime = Math.min(1000 * Math.pow(2, attempt - 1), 10000); // Aumentando o tempo base e max
-        const jitter = Math.floor(Math.random() * 1000); // Adiciona até 1000ms de variação
-        const waitTime = baseWaitTime + jitter;
-
-        Logger.debug(`Aguardando ${waitTime}ms antes da próxima tentativa...`);
-        await new Promise((resolve) => setTimeout(resolve, waitTime));
       }
     }
 
-    // Mensagem de erro mais detalhada quando todas as tentativas falham
-    const errorDetails = lastError?.message || "Erro desconhecido";
-    const errorMessage = errorDetails.includes("ECONNRESET")
-      ? "Não foi possível conectar ao Anki. Verifique se o Anki está aberto e se o AnkiConnect está instalado corretamente. Reinicie o Anki caso necessário."
-      : `Falha após ${retries + 1} tentativas: ${errorDetails}`;
+    // If we get here, all attempts failed
+    const errorMessage = lastError?.message || "Unknown error";
 
-    Logger.debug(`Todas as tentativas falharam para ação: ${action}`);
-    return {
-      result: null,
-      error: errorMessage,
-    };
-  }
-
-  /**
-   * Adiciona uma nota ao Anki
-   */
-  static async addNote(note: AnkiNote): Promise<AnkiResponse> {
-    try {
-      Logger.debug("Adicionando nota ao Anki", note);
-
-      // Validação básica dos dados antes de enviar
-      if (!note.deckName || !note.modelName || !note.fields) {
-        return { error: "Dados da nota incompletos (faltando deckName, modelName ou fields)", result: null };
-      }
-
-      // Verificar se algum campo tem conteúdo
-      const hasContent = Object.values(note.fields).some(
-        (value) => value !== undefined && value !== null && value.trim() !== "",
-      );
-
-      if (!hasContent) {
-        return { error: "Nenhum campo da nota tem conteúdo", result: null };
-      }
-
-      // Para modelo Cloze, verificar se tem campo Text
-      if (note.modelName === "Cloze" && !note.fields.Text) {
-        return { error: "Modelo Cloze requer campo Text", result: null };
-      }
-
-      // Remover campos vazios para evitar problemas no Anki
-      const cleanedFields: Record<string, string> = {};
-      for (const [key, value] of Object.entries(note.fields)) {
-        if (value !== undefined && value !== null && typeof value === "string") {
-          cleanedFields[key] = value.trim();
-        }
-      }
-      note.fields = cleanedFields;
-
-      // Limitar tamanho dos campos para evitar problemas de performance
-      const MAX_FIELD_LENGTH = 50000; // 50k caracteres
-      for (const [key, value] of Object.entries(note.fields)) {
-        if (value && value.length > MAX_FIELD_LENGTH) {
-          note.fields[key] =
-            value.substring(0, MAX_FIELD_LENGTH) + "... (conteúdo truncado devido ao tamanho excessivo)";
-        }
-      }
-
-      // Certificar que as tags são strings válidas (sem espaços)
-      if (note.tags && Array.isArray(note.tags)) {
-        note.tags = note.tags
-          .filter((tag) => typeof tag === "string" && tag.trim() !== "")
-          .map((tag) => tag.trim().replace(/\s+/g, "_"));
-      }
-
-      // Log detalhado da nota a ser enviada
-      Logger.debug("Enviando nota para o Anki com campos:", {
-        deckName: note.deckName,
-        modelName: note.modelName,
-        fieldsCount: Object.keys(note.fields).length,
-        tagsCount: note.tags?.length || 0,
-      });
-
-      // Enviar a requisição para o AnkiConnect
-      return await this.request("addNote", { note }, 6, {
-        retries: 2,
-        timeout: 20000, // Aumentar timeout para 20 segundos para lidar com decks grandes
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(`Erro ao adicionar nota ao Anki: ${errorMessage}`, error);
-
+    if (errorMessage.includes("ECONNREFUSED")) {
       return {
-        error: `Erro ao adicionar nota: ${errorMessage}`,
+        error: "Connection refused. Make sure Anki is running and AnkiConnect is installed.",
         result: null,
       };
     }
+
+    if (errorMessage.includes("ECONNRESET")) {
+      return {
+        error: "Connection reset. Anki may be running but AnkiConnect is not responding properly. Try restarting Anki.",
+        result: null,
+      };
+    }
+
+    if (errorMessage.includes("timeout")) {
+      return {
+        error: "Connection timed out. Anki may be busy or not responding. Try restarting Anki.",
+        result: null,
+      };
+    }
+
+    return {
+      error: `Failed to connect to AnkiConnect: ${errorMessage}`,
+      result: null,
+    };
   }
 
   /**
-   * Mapeia os campos do flashcard para o modelo do Anki selecionado
+   * Verifica se um campo é considerado obrigatório para o modelo
+   * Campos como Front/Frente e Back/Verso geralmente são obrigatórios
    */
-  static async mapFlashcardToModelFields(
-    flashcard: Flashcard | Record<string, string>,
-    modelName: string,
-  ): Promise<Record<string, string>> {
-    try {
-      // Obter os campos do modelo
-      const fieldsResponse = await this.modelFieldNames(modelName);
-      if (fieldsResponse.error || !fieldsResponse.result) {
-        throw new Error(`Erro ao obter campos do modelo: ${fieldsResponse.error}`);
-      }
-
-      const modelFields = fieldsResponse.result as string[];
-      Logger.debug(`Campos do modelo ${modelName}:`, modelFields);
-      const mappedFields: Record<string, string> = {};
-
-      // Mapeamento padrão para modelos comuns
-      const defaultMappings: Record<string, Record<string, string>> = {
-        Basic: {
-          Front: "front",
-          Back: "back",
-        },
-        Básico: {
-          Frente: "front",
-          Verso: "back",
-        },
-        "Basic (and reversed card)": {
-          Front: "front",
-          Back: "back",
-        },
-        "Básico (e card invertido)": {
-          Frente: "front",
-          Verso: "back",
-        },
-        "Basic (optional reversed card)": {
-          Front: "front",
-          Back: "back",
-        },
-        "Básico (card invertido opcional)": {
-          Frente: "front",
-          Verso: "back",
-        },
-        "Basic (type in the answer)": {
-          Front: "front",
-          Back: "back",
-        },
-        "Básico (digite a resposta)": {
-          Frente: "front",
-          Verso: "back",
-        },
-        Cloze: {
-          Text: "front",
-          "Back Extra": "back",
-        },
-        Omissão: {
-          Texto: "front",
-          "Verso Extra": "back",
-        },
-        "Raycast Flashcards": {
-          Front: "front",
-          Back: "back",
-          Extra: "extra",
-        },
-      };
-
-      // Tentar usar mapeamento padrão primeiro
-      const defaultMapping = defaultMappings[modelName];
-
-      // Log para debug
-      Logger.debug(`Mapeando campos para modelo ${modelName}`);
-      Logger.debug(`Campos disponíveis:`, modelFields);
-      Logger.debug(`Mapeamento padrão:`, defaultMapping);
-
-      for (const field of modelFields) {
-        // Definir fieldLower no escopo correto para cada campo
-        const fieldLower = field.toLowerCase();
-
-        if (defaultMapping && defaultMapping[field]) {
-          // Usar mapeamento padrão
-          const flashcardField = defaultMapping[field];
-
-          // Verificar se o campo existe no flashcard usando uma abordagem segura de tipos
-          if (flashcardField === "front" && "front" in flashcard) {
-            mappedFields[field] = flashcard.front || "";
-          } else if (flashcardField === "back" && "back" in flashcard) {
-            mappedFields[field] = flashcard.back || "";
-          } else if (flashcardField === "extra" && "extra" in flashcard) {
-            mappedFields[field] = (flashcard as Flashcard).extra || "";
-          } else {
-            mappedFields[field] = "";
-          }
-
-          Logger.debug(`Campo ${field} mapeado para ${flashcardField}: "${mappedFields[field]}"`);
-        } else {
-          // Tentar mapear campos automaticamente
-          if (
-            fieldLower.includes("front") ||
-            fieldLower.includes("frente") ||
-            fieldLower.includes("question") ||
-            fieldLower.includes("pergunta")
-          ) {
-            mappedFields[field] = "front" in flashcard ? flashcard.front : "";
-          } else if (
-            fieldLower.includes("back") ||
-            fieldLower.includes("verso") ||
-            fieldLower.includes("answer") ||
-            fieldLower.includes("resposta")
-          ) {
-            mappedFields[field] = "back" in flashcard ? flashcard.back : "";
-          } else if (fieldLower.includes("extra") || fieldLower.includes("note") || fieldLower.includes("nota")) {
-            mappedFields[field] = "extra" in flashcard ? (flashcard as Flashcard).extra || "" : "";
-          } else {
-            // Campo desconhecido, deixar vazio
-            mappedFields[field] = "";
-          }
-          Logger.debug(`Campo ${field} mapeado automaticamente: "${mappedFields[field]}"`);
-        }
-
-        // Garantir que o campo não está vazio se for obrigatório
-        if (mappedFields[field].trim() === "") {
-          Logger.debug(`Campo ${field} está vazio, tentando encontrar conteúdo alternativo`);
-          // Tentar usar o campo extra se front/back estiver vazio
-          if (
-            (fieldLower.includes("front") || fieldLower.includes("frente")) &&
-            "extra" in flashcard &&
-            flashcard.extra
-          ) {
-            mappedFields[field] =
-              "front" in flashcard && flashcard.front ? flashcard.front : (flashcard as Flashcard).extra || "";
-          } else if (
-            (fieldLower.includes("back") || fieldLower.includes("verso")) &&
-            "extra" in flashcard &&
-            flashcard.extra
-          ) {
-            mappedFields[field] =
-              "back" in flashcard && flashcard.back ? flashcard.back : (flashcard as Flashcard).extra || "";
-          }
-        }
-      }
-
-      // Validação final
-      const emptyFields = Object.entries(mappedFields)
-        .filter(([, value]) => !value || value.trim() === "")
-        .map(([field]) => field);
-
-      if (emptyFields.length > 0) {
-        Logger.warn(`Campos vazios encontrados: ${emptyFields.join(", ")}`);
-        throw new Error(`Os seguintes campos estão vazios: ${emptyFields.join(", ")}`);
-      }
-
-      return mappedFields;
-    } catch (error) {
-      Logger.error(`Erro ao mapear campos do flashcard: ${error}`);
-      throw error;
-    }
+  private static isRequiredField(fieldName: string): boolean {
+    const lowerField = fieldName.toLowerCase();
+    return (
+      lowerField.includes("front") ||
+      lowerField.includes("frente") ||
+      lowerField.includes("back") ||
+      lowerField.includes("verso") ||
+      lowerField.includes("text") || // Para modelos Cloze
+      lowerField.includes("texto") // Para modelos Cloze em português
+    );
   }
 
   /**
    * Adiciona flashcards ao Anki
+   *
+   * Esta função é a principal para exportação de flashcards para o Anki.
+   * Ela verifica a conexão, cria o deck se necessário, e adiciona os flashcards.
    */
   static async addFlashcards(
-    flashcards: Flashcard[] | Record<string, string>[],
+    flashcards: FlashcardData[],
     deckName: string,
-    modelName: string,
-    tags: string[] = [],
-  ): Promise<AnkiResponse> {
-    try {
-      if (!flashcards || flashcards.length === 0) {
-        return { error: "Nenhum flashcard para adicionar", result: null };
-      }
-
-      // Criar o deck se não existir
-      await this.createDeck(deckName);
-
-      // Converter flashcards para notas do Anki
-      const notes: AnkiNote[] = [];
-      const errors: string[] = [];
-
-      for (const flashcard of flashcards) {
-        try {
-          const fields = await this.mapFlashcardToModelFields(flashcard, modelName);
-
-          notes.push({
-            deckName,
-            modelName,
-            fields,
-            tags: [...tags, ...(flashcard.tags || [])],
-          });
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          errors.push(`Erro ao processar flashcard: ${errorMessage}`);
-          Logger.error(`Erro ao mapear flashcard para nota do Anki:`, {
-            error: errorMessage,
-            flashcard,
-            modelName,
-          });
-        }
-      }
-
-      if (notes.length === 0) {
-        const errorMessage =
-          errors.length > 0
-            ? `Nenhum flashcard pôde ser convertido:\n${errors.join("\n")}`
-            : "Nenhum flashcard pôde ser convertido para o formato do Anki";
-        return { error: errorMessage, result: null };
-      }
-
-      // Verificar se as notas podem ser adicionadas
-      const canAddResponse = await this.canAddNotes(notes);
-      if (canAddResponse.error) {
-        return {
-          error: `Erro ao verificar notas: ${canAddResponse.error}`,
-          result: null,
-        };
-      }
-
-      const canAdd = canAddResponse.result as boolean[];
-      const invalidNotes = canAdd.filter((can) => !can).length;
-
-      if (invalidNotes > 0) {
-        Logger.warn(`${invalidNotes} notas não podem ser adicionadas ao Anki`);
-        // Filtrar apenas as notas que podem ser adicionadas
-        notes.forEach((note, index) => {
-          if (!canAdd[index]) {
-            errors.push(`Nota ${index + 1} é inválida para o modelo "${modelName}"`);
-          }
-        });
-      }
-
-      // Adicionar as notas ao Anki
-      const addResponse = await this.addNotes(notes);
-
-      if (addResponse.error) {
-        return {
-          error: `Erro ao adicionar notas: ${addResponse.error}\n${errors.join("\n")}`,
-          result: addResponse.result,
-        };
-      }
-
-      const addedNotes = (addResponse.result as (number | null)[]).filter((id) => id !== null).length;
-      const failedNotes = notes.length - addedNotes;
-
-      if (failedNotes > 0) {
-        return {
-          error: `${failedNotes} flashcards não puderam ser adicionados.\n${errors.join("\n")}`,
-          result: addResponse.result,
-        };
-      }
-
-      return {
-        result: addResponse.result,
-        error: errors.length > 0 ? errors.join("\n") : null,
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(`Erro ao adicionar flashcards ao Anki: ${errorMessage}`);
-      return { error: errorMessage, result: null };
-    }
-  }
-
-  static async getDecks(): Promise<AnkiResponse> {
-    return this.request("deckNames");
-  }
-
-  static async createDeck(deckName: string): Promise<AnkiResponse> {
-    if (!deckName || typeof deckName !== "string" || deckName.trim() === "") {
-      return { error: "Nome do deck inválido", result: null };
-    }
-
-    return this.request("createDeck", { deck: deckName });
-  }
-
-  static async modelNames(): Promise<AnkiResponse> {
-    return this.request("modelNames");
-  }
-
-  static async modelFieldNames(modelName: string): Promise<AnkiResponse> {
-    if (!modelName || typeof modelName !== "string") {
-      return { error: "Nome do modelo inválido", result: null };
-    }
-
-    return this.request("modelFieldNames", { modelName });
-  }
-
-  static async canAddNotes(notes: AnkiNote[]): Promise<AnkiResponse> {
-    // Formatar as notas para o formato esperado pelo AnkiConnect
-    const formattedNotes = notes.map((note) => ({
-      deckName: note.deckName,
-      modelName: note.modelName,
-      fields: note.fields,
-      tags: note.tags || [],
-    }));
-
-    return this.request("canAddNotes", { notes: formattedNotes });
-  }
-
-  /**
-   * Adiciona múltiplas notas ao Anki
-   */
-  static async addNotes(notes: AnkiNote[]): Promise<AnkiResponse> {
-    try {
-      Logger.debug(`Adicionando ${notes.length} notas ao Anki`);
-
-      // Verificar se o Anki está rodando
-      const isRunning = await this.isAnkiRunning();
-      if (!isRunning) {
-        Logger.error("Anki não está rodando. Não é possível adicionar notas.");
-        return {
-          result: null,
-          error: "O Anki não está aberto. Por favor, abra o Anki antes de tentar exportar flashcards.",
-        };
-      }
-
-      // Verificar se o modelo existe antes de tentar adicionar notas
-      const modelsResponse = await this.request("modelNames", {}, 6, {
-        retries: 2,
-        timeout: 10000, // Aumentado para 10 segundos
-      });
-
-      if (modelsResponse.error) {
-        Logger.error(`Erro ao verificar modelos disponíveis: ${modelsResponse.error}`);
-        return {
-          result: null,
-          error: `Erro ao verificar modelos disponíveis: ${modelsResponse.error}`,
-        };
-      }
-
-      const models = modelsResponse.result as string[];
-
-      // Verificar se todos os modelos usados nas notas existem
-      const modelNames = new Set(notes.map((note) => note.modelName));
-      for (const modelName of modelNames) {
-        if (!models.includes(modelName)) {
-          Logger.error(`Modelo "${modelName}" não existe. Tentando criar modelo Raycast Flashcards...`);
-
-          // Se for o modelo Raycast Flashcards, tente criá-lo
-          if (modelName === "Raycast Flashcards") {
-            const createModelResponse = await this.createRaycastFlashcardsModelIfNeeded();
-            if (createModelResponse.error) {
-              Logger.error(`Falha ao criar modelo Raycast Flashcards: ${createModelResponse.error}`);
-              return {
-                result: null,
-                error: `O modelo "${modelName}" não existe e não foi possível criá-lo. Erro: ${createModelResponse.error}`,
-              };
-            }
-            Logger.debug("Modelo Raycast Flashcards criado com sucesso");
-          } else {
-            return {
-              result: null,
-              error: `O modelo "${modelName}" não existe no Anki. Por favor, crie o modelo primeiro.`,
-            };
-          }
-        }
-      }
-
-      // Adicionar um pequeno atraso para garantir que o modelo foi criado
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Adicionar as notas com mais retentativas e timeout maior
-      const response = await this.request("addNotes", { notes }, 6, {
-        retries: 3,
-        timeout: 30000, // Aumentar timeout para 30 segundos
-      });
-
-      if (response.error) {
-        Logger.error(`Erro ao adicionar notas: ${response.error}`);
-        return response;
-      }
-
-      // Verificar se todas as notas foram adicionadas
-      const addedIds = response.result as (number | null)[];
-      const addedCount = addedIds.filter((id) => id !== null).length;
-
-      Logger.debug(`${addedCount} de ${notes.length} notas adicionadas com sucesso`);
-
-      if (addedCount < notes.length) {
-        Logger.warn(`Algumas notas (${notes.length - addedCount}) não puderam ser adicionadas`);
-
-        // Tentar identificar quais notas falharam
-        const failedNotes = addedIds
-          .map((id, index) => ({ id, index }))
-          .filter((item) => item.id === null)
-          .map((item) => notes[item.index]);
-
-        if (failedNotes.length > 0) {
-          Logger.debug(
-            `Notas que falharam: ${JSON.stringify(failedNotes.map((n) => ({ deckName: n.deckName, fields: n.fields })))}`,
-          );
-        }
-      }
-
-      return response;
-    } catch (error) {
-      Logger.error("Erro ao adicionar notas:", error);
-      return {
-        result: null,
-        error: error instanceof Error ? error.message : "Erro desconhecido ao adicionar notas",
-      };
-    }
-  }
-
-  /**
-   * Verifica se o AnkiConnect está instalado e funcionando corretamente
-   */
-  static async checkAnkiConnectInstallation(): Promise<{
-    installed: boolean;
-    version?: number;
-    error?: string;
+    modelName = "Raycast Flashcards",
+    options: {
+      tags?: string[];
+      fields?: Record<string, string>;
+    } = {},
+  ): Promise<{
+    success: boolean;
+    message: string;
+    details?: unknown;
   }> {
     try {
-      Logger.debug("Verificando instalação do AnkiConnect");
+      Logger.debug(`Iniciando exportação de ${flashcards.length} flashcards para o deck "${deckName}"`);
 
-      // Verificar primeiro se o Anki está rodando
+      // 1. Verificar se o Anki está rodando
       const isRunning = await this.isAnkiRunning();
       if (!isRunning) {
+        const message = "O Anki não está aberto. Por favor, abra o Anki antes de tentar exportar flashcards.";
+        Logger.error(message);
         return {
-          installed: false,
-          error: "O Anki não está rodando. Por favor, abra o Anki antes de verificar a instalação do AnkiConnect.",
+          success: false,
+          message,
+          details: { ankiRunning: false },
         };
       }
 
-      // Tentar obter a versão do AnkiConnect
+      // 2. Criar o deck se não existir
       try {
-        const versionResponse = await this.request("version", {}, 6, {
-          retries: 1,
-          timeout: 5000,
-        });
+        Logger.debug(`Verificando deck "${deckName}"...`);
+        const decks = await this.getDecks();
 
-        if (versionResponse.error) {
-          return {
-            installed: false,
-            error: `Erro ao verificar versão do AnkiConnect: ${versionResponse.error}`,
-          };
+        if (!decks.includes(deckName)) {
+          Logger.debug(`Deck "${deckName}" não encontrado. Criando novo deck...`);
+          await this.createDeck(deckName);
+          Logger.debug(`Deck "${deckName}" criado com sucesso!`);
+        } else {
+          Logger.debug(`Deck "${deckName}" encontrado.`);
         }
-
-        const version = versionResponse.result as number;
-
-        // Verificar se a versão é compatível
-        if (version < 6) {
-          return {
-            installed: true,
-            version,
-            error: `Versão do AnkiConnect (${version}) é menor que a necessária (6). Por favor, atualize o AnkiConnect.`,
-          };
-        }
-
-        return {
-          installed: true,
-          version,
-        };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
+        Logger.error(`Erro ao verificar/criar deck: ${errorMessage}`);
         return {
-          installed: false,
-          error: `Falha ao comunicar com AnkiConnect: ${errorMessage}`,
+          success: false,
+          message: `Não foi possível criar ou verificar o deck "${deckName}". Erro: ${errorMessage}`,
+          details: { error: errorMessage },
+        };
+      }
+
+      // 3. Garantir que o modelo existe
+      try {
+        Logger.debug(`Verificando modelo "${modelName}"...`);
+        const models = await this.modelNames();
+
+        if (!models.includes(modelName)) {
+          if (modelName === "Raycast Flashcards") {
+            Logger.debug(`Modelo "${modelName}" não encontrado. Criando modelo padrão...`);
+            await this.createRaycastFlashcardsModelIfNeeded();
+            Logger.debug(`Modelo "${modelName}" criado com sucesso!`);
+          } else {
+            throw new Error(`O modelo "${modelName}" não existe no Anki.`);
+          }
+        } else {
+          Logger.debug(`Modelo "${modelName}" encontrado.`);
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        Logger.error(`Erro ao verificar/criar modelo: ${errorMessage}`);
+        return {
+          success: false,
+          message: `Não foi possível utilizar o modelo "${modelName}". Erro: ${errorMessage}`,
+          details: { error: errorMessage },
+        };
+      }
+
+      // 4. Preparar as notas para adição
+      Logger.debug("Preparando notas para adição...");
+      const notes: AnkiNote[] = [];
+      let processedCount = 0;
+
+      // Processar cada flashcard em lotes pequenos para evitar sobrecarregar a conexão
+      const batchSize = 10;
+      const totalBatches = Math.ceil(flashcards.length / batchSize);
+
+      // Processar em lotes
+      for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+        const start = batchIndex * batchSize;
+        const end = Math.min(start + batchSize, flashcards.length);
+        const batchFlashcards = flashcards.slice(start, end);
+
+        Logger.debug(`Processando lote ${batchIndex + 1}/${totalBatches} (${batchFlashcards.length} flashcards)...`);
+
+        // Processar cada flashcard do lote
+        for (const flashcard of batchFlashcards) {
+          try {
+            // Mapear os campos do flashcard para o modelo do Anki
+            const fields = await this.mapFlashcardToModelFields(flashcard, modelName, options.fields);
+
+            // Preparar tags
+            const tags = [...(options.tags || [])];
+            if (flashcard.tags && Array.isArray(flashcard.tags)) {
+              tags.push(...flashcard.tags);
+            }
+
+            // Se houver uma dificuldade definida, adicionar como tag
+            if (flashcard.difficulty) {
+              tags.push(`dificuldade:${flashcard.difficulty}`);
+            }
+
+            // Criar a nota
+            const note: AnkiNote = {
+              deckName,
+              modelName,
+              fields,
+              tags: [...new Set(tags)], // Remover duplicatas
+            };
+
+            notes.push(note);
+            processedCount++;
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            Logger.warn(`Problema ao processar flashcard #${processedCount + 1}: ${errorMessage}`);
+            // Continuamos mesmo com erro em um flashcard individual
+          }
+        }
+
+        // Pequena pausa entre lotes para não sobrecarregar o AnkiConnect
+        if (batchIndex < totalBatches - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+      }
+
+      // 5. Verificar se temos notas para adicionar
+      if (notes.length === 0) {
+        Logger.warn("Não há flashcards válidos para adicionar.");
+        return {
+          success: false,
+          message:
+            "Não foi possível processar nenhum flashcard para exportação. Verifique o formato dos seus flashcards.",
+          details: { processedCount: 0 },
+        };
+      }
+
+      // 6. Adicionar as notas ao Anki
+      Logger.debug(`Adicionando ${notes.length} notas ao Anki...`);
+      try {
+        const addedIds = await this.addNotes(notes);
+
+        // Contar quantas notas foram adicionadas com sucesso
+        const successCount = addedIds.filter((id) => id !== null).length;
+
+        // Preparar mensagem de resultado
+        if (successCount === notes.length) {
+          const message = `${successCount} flashcard${successCount !== 1 ? "s" : ""} exportado${successCount !== 1 ? "s" : ""} com sucesso para o deck "${deckName}".`;
+          Logger.debug(message);
+          return {
+            success: true,
+            message,
+            details: {
+              added: successCount,
+              total: notes.length,
+              failed: 0,
+            },
+          };
+        } else if (successCount > 0) {
+          const message = `${successCount} de ${notes.length} flashcard${notes.length !== 1 ? "s" : ""} exportado${successCount !== 1 ? "s" : ""} com sucesso para o deck "${deckName}". Alguns flashcards podem ser duplicados ou inválidos.`;
+          Logger.debug(message);
+          return {
+            success: true,
+            message,
+            details: {
+              added: successCount,
+              total: notes.length,
+              failed: notes.length - successCount,
+            },
+          };
+        } else {
+          throw new Error("Nenhum flashcard pôde ser adicionado. Verifique se os flashcards não são duplicados.");
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        Logger.error(`Erro ao adicionar notas: ${errorMessage}`);
+        return {
+          success: false,
+          message: `Erro ao exportar flashcards: ${errorMessage}`,
+          details: { error: errorMessage },
         };
       }
     } catch (error) {
+      // Capturar qualquer erro não tratado
       const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(`Erro geral na exportação de flashcards: ${errorMessage}`);
       return {
-        installed: false,
-        error: `Erro ao verificar instalação do AnkiConnect: ${errorMessage}`,
+        success: false,
+        message: `Ocorreu um erro inesperado ao exportar flashcards: ${errorMessage}`,
+        details: { error: errorMessage },
       };
     }
   }
@@ -931,8 +538,14 @@ export class AnkiRepository {
   /**
    * Obtém todas as tags existentes no Anki
    */
-  static async getTags(): Promise<AnkiResponse<string[]>> {
-    return this.request("getTags");
+  static async getTags(): Promise<string[]> {
+    try {
+      const tags = await this.request<string[]>("getTags");
+      return tags || [];
+    } catch (error) {
+      Logger.error("Erro ao obter tags do Anki:", error);
+      return [];
+    }
   }
 
   /**
@@ -1217,6 +830,166 @@ export class AnkiRepository {
         success: false,
         message: `Erro ao testar Anki com o deck: ${error instanceof Error ? error.message : String(error)}`,
         details: { error: String(error) },
+      };
+    }
+  }
+
+  /**
+   * Obtém a lista de decks disponíveis no Anki
+   */
+  static async getDecks(): Promise<string[]> {
+    try {
+      // Usar o método request para obter os decks
+      const decks = await this.request<Record<string, number>>("deckNames");
+
+      // Converter o objeto de decks para um array de strings (nomes dos decks)
+      return Object.keys(decks || {});
+    } catch (error) {
+      Logger.error("Erro ao obter decks do Anki:", error);
+      // Retornar um array vazio em caso de erro
+      return [];
+    }
+  }
+
+  /**
+   * Cria um novo deck no Anki
+   */
+  static async createDeck(deckName: string): Promise<number> {
+    try {
+      // Verificar se o deck já existe
+      const decks = await this.getDecks();
+      if (decks.includes(deckName)) {
+        Logger.debug(`Deck "${deckName}" já existe, não é necessário criar.`);
+        return 1; // Retornar um ID positivo para indicar sucesso
+      }
+
+      // Criar o deck
+      const deckId = await this.request<number>("createDeck", { deck: deckName });
+      Logger.debug(`Deck "${deckName}" criado com sucesso. ID: ${deckId}`);
+      return deckId;
+    } catch (error) {
+      Logger.error(`Erro ao criar deck "${deckName}":`, error);
+      throw new Error(
+        `Não foi possível criar o deck "${deckName}". Verifique se o Anki está aberto e o AnkiConnect instalado.`,
+      );
+    }
+  }
+
+  /**
+   * Obtém a lista de modelos disponíveis no Anki
+   */
+  static async modelNames(): Promise<string[]> {
+    try {
+      const models = await this.request<string[]>("modelNames");
+      return models || [];
+    } catch (error) {
+      Logger.error("Erro ao obter nomes dos modelos do Anki:", error);
+      return [];
+    }
+  }
+
+  /**
+   * Obtém os nomes dos campos de um modelo do Anki
+   */
+  static async modelFieldNames(modelName: string): Promise<string[]> {
+    try {
+      if (!modelName) {
+        throw new Error("Nome do modelo não especificado");
+      }
+
+      const fields = await this.request<string[]>("modelFieldNames", { modelName });
+      return fields || [];
+    } catch (error) {
+      Logger.error(`Erro ao obter campos do modelo "${modelName}":`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Verifica se as notas podem ser adicionadas ao Anki
+   */
+  static async canAddNotes(notes: AnkiNote[]): Promise<boolean[]> {
+    try {
+      if (!notes || !Array.isArray(notes) || notes.length === 0) {
+        return [];
+      }
+
+      const results = await this.request<boolean[]>("canAddNotes", { notes });
+      return results || [];
+    } catch (error) {
+      Logger.error("Erro ao verificar se as notas podem ser adicionadas:", error);
+      // Em caso de erro, assumimos que nenhuma nota pode ser adicionada
+      return notes.map(() => false);
+    }
+  }
+
+  /**
+   * Adiciona notas ao Anki
+   * Retorna um array com os IDs das notas adicionadas ou null para as que falharam
+   */
+  static async addNotes(notes: AnkiNote[]): Promise<(number | null)[]> {
+    try {
+      if (!notes || !Array.isArray(notes) || notes.length === 0) {
+        return [];
+      }
+
+      const results = await this.request<(number | null)[]>("addNotes", { notes });
+      return results || [];
+    } catch (error) {
+      Logger.error("Erro ao adicionar notas ao Anki:", error);
+      throw new Error(`Falha ao adicionar notas ao Anki: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  /**
+   * Verifica se o AnkiConnect está instalado e funcionando corretamente
+   */
+  static async checkAnkiConnectInstallation(): Promise<{
+    installed: boolean;
+    version?: number;
+    error?: string;
+  }> {
+    try {
+      Logger.debug("Verificando instalação do AnkiConnect");
+
+      // Verificar primeiro se o Anki está rodando
+      const isRunning = await this.isAnkiRunning();
+      if (!isRunning) {
+        return {
+          installed: false,
+          error: "O Anki não está rodando. Por favor, abra o Anki antes de verificar a instalação do AnkiConnect.",
+        };
+      }
+
+      // Tentar obter a versão do AnkiConnect
+      try {
+        const version = await this.request<number>("version");
+
+        // Verificar se a versão é compatível
+        if (version < 6) {
+          return {
+            installed: true,
+            version,
+            error: `Versão do AnkiConnect (${version}) é menor que a necessária (6). Por favor, atualize o AnkiConnect.`,
+          };
+        }
+
+        return {
+          installed: true,
+          version,
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return {
+          installed: false,
+          error: `Falha ao comunicar com AnkiConnect: ${errorMessage}`,
+        };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return {
+        installed: false,
+        error: `Erro ao verificar instalação do AnkiConnect: ${errorMessage}`,
       };
     }
   }

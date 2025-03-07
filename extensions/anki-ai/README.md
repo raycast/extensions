@@ -129,7 +129,9 @@ Capture of the extension settings screen.
 4. Click on "Generate Flashcards"
 5. Review the generated flashcards
 6. Select the flashcards you want to export
-7. Click on "Export to Anki"
+7. Click on "Export Selected Flashcards"
+8. Choose the deck and model for export
+9. Click "Export to Anki"
 
 ### Available Commands
 

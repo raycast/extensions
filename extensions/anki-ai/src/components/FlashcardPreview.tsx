@@ -36,46 +36,52 @@ export function FlashcardPreview({
       <List>
         <List.EmptyView
           icon={Icon.Document}
-          title="Nenhum flashcard gerado"
-          description="Gere flashcards para visualizá-los aqui"
+          title="No flashcards generated"
+          description="Generate flashcards to view them here"
         />
       </List>
     );
   }
 
+  const selectedCount = selectedFlashcards.size;
+  const totalCount = flashcards.length;
+
+  const handleExportSelectedFlashcards = () => {
+    if (onSaveToAnki) {
+      const selectedCards = flashcards.filter((_, idx) => selectedFlashcards.has(idx));
+      if (selectedCards.length === 0) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "No flashcards selected",
+          message: "Select at least one flashcard to export",
+        });
+        return;
+      }
+      onSaveToAnki(selectedCards);
+    }
+  };
+
   return (
     <List
       isShowingDetail
-      searchBarPlaceholder="Buscar flashcards..."
+      searchBarPlaceholder="Search flashcards..."
       filtering={{ keepSectionOrder: true }}
-      navigationTitle="Flashcards Gerados"
+      navigationTitle="Generated Flashcards"
       actions={
         <ActionPanel>
           <Action
-            title="Exportar Para O Anki"
+            title={`Export ${selectedCount} Selected Flashcards`}
             icon={Icon.Download}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
-            onAction={() => {
-              if (onSaveToAnki) {
-                const selectedCards = flashcards.filter((_, idx) => selectedFlashcards.has(idx));
-                if (selectedCards.length === 0) {
-                  showToast({
-                    style: Toast.Style.Failure,
-                    title: "Nenhum flashcard selecionado",
-                    message: "Selecione pelo menos um flashcard para exportar",
-                  });
-                  return;
-                }
-                onSaveToAnki(selectedCards);
-              }
-            }}
+            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            onAction={handleExportSelectedFlashcards}
           />
           <Action
-            title="Selecionar Todos"
+            title="Select All"
             icon={Icon.CheckCircle}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
             onAction={() => {
               if (onToggleSelect) {
-                // Para cada índice que não está selecionado, chama onToggleSelect
+                // For each unselected index, call onToggleSelect
                 flashcards.forEach((_, index) => {
                   if (!selectedFlashcards.has(index)) {
                     onToggleSelect(index);
@@ -85,11 +91,12 @@ export function FlashcardPreview({
             }}
           />
           <Action
-            title="Desmarcar Todos"
+            title="Deselect All"
             icon={Icon.XmarkCircle}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
             onAction={() => {
               if (onToggleSelect) {
-                // Para cada índice selecionado, chama onToggleSelect para desmarcar
+                // For each selected index, call onToggleSelect to deselect
                 [...selectedFlashcards].forEach((index) => {
                   onToggleSelect(index);
                 });
@@ -100,19 +107,19 @@ export function FlashcardPreview({
       }
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Filtrar por seleção"
+          tooltip="Filter by selection"
           value={filterMode}
           onChange={(value) => {
             setFilterMode(value as "all" | "selected" | "unselected");
           }}
         >
-          <List.Dropdown.Item title="Todos" value="all" />
-          <List.Dropdown.Item title="Selecionados" value="selected" />
-          <List.Dropdown.Item title="Não Selecionados" value="unselected" />
+          <List.Dropdown.Item title="All" value="all" />
+          <List.Dropdown.Item title="Selected" value="selected" />
+          <List.Dropdown.Item title="Unselected" value="unselected" />
         </List.Dropdown>
       }
     >
-      <List.Section title={`${flashcards.length} Flashcards (${selectedFlashcards.size} selecionados)`}>
+      <List.Section title={`${totalCount} Flashcards (${selectedCount} selected)`}>
         {filteredFlashcards.map((item) => (
           <List.Item
             key={item.index}
@@ -123,19 +130,19 @@ export function FlashcardPreview({
             title={item.card.front}
             subtitle={item.card.back.length > 60 ? item.card.back.substring(0, 60) + "..." : item.card.back}
             accessories={[
-              { text: `Cartão ${item.index + 1}/${flashcards.length}` },
-              { text: item.card.extra ? "Tem informações extras" : "", icon: item.card.extra ? Icon.Star : undefined },
+              { text: `Card ${item.index + 1}/${flashcards.length}` },
+              { text: item.card.extra ? "Has extra information" : "", icon: item.card.extra ? Icon.Star : undefined },
             ]}
             detail={
               <List.Item.Detail
                 markdown={`# ${item.card.front}
 
-## Resposta
+## Answer
 ${item.card.back}
 
 ${
   item.card.extra
-    ? `## Informações Complementares
+    ? `## Additional Information
 ${item.card.extra}`
     : ""
 }
@@ -147,90 +154,85 @@ ${item.card.tags.map((tag) => `\`${tag}\``).join(" ")}`
     : ""
 }
 
-${item.card.image ? `![Imagem](${item.card.image})` : ""}
+${item.card.image ? `![Image](${item.card.image})` : ""}
 
 ---
-**Status**: ${selectedFlashcards.has(item.index) ? "✅ Selecionado para exportação" : "⬜ Não selecionado"}`}
+**Status**: ${selectedFlashcards.has(item.index) ? "✅ Selected for export" : "⬜ Not selected"}`}
               />
             }
             actions={
               <ActionPanel>
                 <Action
-                  title={selectedFlashcards.has(item.index) ? "Desmarcar Para Exportação" : "Marcar Para Exportação"}
+                  title={selectedFlashcards.has(item.index) ? "Deselect" : "Select for Export"}
                   icon={selectedFlashcards.has(item.index) ? Icon.XmarkCircle : Icon.CheckCircle}
                   onAction={() => onToggleSelect && onToggleSelect(item.index)}
                 />
+                <Action
+                  title={`Export ${selectedCount} Selected Flashcards`}
+                  icon={Icon.Download}
+                  shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                  onAction={handleExportSelectedFlashcards}
+                />
                 {onEdit && (
-                  <Action title="Editar Flashcard" icon={Icon.Pencil} onAction={() => onEdit(item.index, item.card)} />
+                  <Action title="Edit Flashcard" icon={Icon.Pencil} onAction={() => onEdit(item.index, item.card)} />
                 )}
                 {onEdit && (
                   <Action
-                    title="Melhorar Com Ia"
+                    title="Enhance with AI"
                     icon={Icon.Wand}
                     onAction={async () => {
-                      showToast({ style: Toast.Style.Animated, title: "Melhorando flashcard..." });
+                      showToast({ style: Toast.Style.Animated, title: "Enhancing flashcard..." });
                       const enhancedCard = await AIEnhancer.enhanceFlashcard(item.card);
                       onEdit(item.index, enhancedCard);
-                      showToast({ style: Toast.Style.Success, title: "Flashcard melhorado!" });
+                      showToast({ style: Toast.Style.Success, title: "Flashcard enhanced!" });
                     }}
                   />
                 )}
                 {onEdit && (
                   <Action
-                    title="Ajustar Dificuldade"
+                    title="Adjust Difficulty"
                     icon={Icon.Gauge}
                     submenu={
                       <ActionPanel>
                         <Action
-                          title="Iniciante"
+                          title="Beginner"
                           icon={{ source: Icon.Circle, tintColor: Color.Green }}
                           onAction={() => {
-                            const updatedCard = { ...item.card, difficulty: "iniciante" as const };
+                            const updatedCard = { ...item.card, difficulty: "beginner" as const };
                             onEdit(item.index, updatedCard);
-                            showToast({ style: Toast.Style.Success, title: "Dificuldade ajustada para Iniciante" });
+                            showToast({ style: Toast.Style.Success, title: "Difficulty set to Beginner" });
                           }}
                         />
                         <Action
-                          title="Intermediário"
+                          title="Intermediate"
                           icon={{ source: Icon.Circle, tintColor: Color.Yellow }}
                           onAction={() => {
-                            const updatedCard = { ...item.card, difficulty: "intermediário" as const };
+                            const updatedCard = { ...item.card, difficulty: "intermediate" as const };
                             onEdit(item.index, updatedCard);
-                            showToast({ style: Toast.Style.Success, title: "Dificuldade ajustada para Intermediário" });
+                            showToast({ style: Toast.Style.Success, title: "Difficulty set to Intermediate" });
                           }}
                         />
                         <Action
-                          title="Avançado"
+                          title="Advanced"
                           icon={{ source: Icon.Circle, tintColor: Color.Red }}
                           onAction={() => {
-                            const updatedCard = { ...item.card, difficulty: "avançado" as const };
+                            const updatedCard = { ...item.card, difficulty: "advanced" as const };
                             onEdit(item.index, updatedCard);
-                            showToast({ style: Toast.Style.Success, title: "Dificuldade ajustada para Avançado" });
+                            showToast({ style: Toast.Style.Success, title: "Difficulty set to Advanced" });
                           }}
                         />
                       </ActionPanel>
                     }
                   />
                 )}
-                {onSaveToAnki && (
-                  <Action
-                    title="Exportar Este Flashcard"
-                    icon={Icon.Download}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-                    onAction={() => {
-                      const selectedCards = [item.card];
-                      onSaveToAnki(selectedCards);
-                    }}
-                  />
-                )}
                 {onDelete && (
                   <Action
-                    title="Excluir Flashcard"
+                    title="Delete Flashcard"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     onAction={() => {
                       onDelete(item.index);
-                      showToast({ style: Toast.Style.Success, title: "Flashcard excluído" });
+                      showToast({ style: Toast.Style.Success, title: "Flashcard deleted" });
                     }}
                   />
                 )}

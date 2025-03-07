@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AIModelEnum } from "./constants/aiModels";
 import { LocalStorage } from "@raycast/api";
 
-// Interface para as preferências da extensão
+// Interface for extension preferences
 export interface Preferences {
   defaultLanguage: string;
   defaultModel: string;
@@ -13,69 +13,69 @@ export interface Preferences {
   maxTags: number;
 }
 
-// Valores padrão para as preferências
+// Default values for preferences
 const DEFAULT_PREFERENCES: Preferences = {
-  defaultLanguage: "português",
+  defaultLanguage: "english",
   defaultModel: AIModelEnum.GPT4o,
-  defaultDifficultyLevel: "intermediário",
+  defaultDifficultyLevel: "intermediate",
   enhancementPrompt:
-    "Melhore este flashcard mantendo a ideia principal, mas tornando a pergunta mais clara e a resposta mais completa e didática. Mantenha as informações extras relevantes.",
+    "Improve this flashcard while maintaining the main idea, but making the question clearer and the answer more complete and educational. Keep the extra information relevant.",
   enhancementModel: AIModelEnum.GPT4o,
   maxTags: 2,
 };
 
-// Chave para armazenar as preferências personalizadas
+// Key for storing custom preferences
 const CUSTOM_PREFERENCES_KEY = "anki_ai_custom_preferences";
 
-// Função para obter as preferências (combinando as definidas pelo Raycast com as personalizadas)
+// Function to get preferences (combining Raycast-defined with custom ones)
 export async function getCustomPreferences(): Promise<Preferences> {
   try {
-    // Obter as preferências definidas pelo Raycast
+    // Get preferences defined by Raycast
     const raycastPrefs = getPreferenceValues<Preferences>();
 
-    // Obter as preferências personalizadas armazenadas
+    // Get stored custom preferences
     const storedPrefsString = await LocalStorage.getItem(CUSTOM_PREFERENCES_KEY);
     const storedPrefs = storedPrefsString ? JSON.parse(storedPrefsString) : {};
 
-    // Combinar as preferências, com prioridade para as personalizadas
+    // Combine preferences, with priority for custom ones
     return { ...DEFAULT_PREFERENCES, ...raycastPrefs, ...storedPrefs };
   } catch (error) {
-    console.error("Erro ao obter preferências:", error);
+    console.error("Error loading preferences:", error);
     return { ...DEFAULT_PREFERENCES, ...getPreferenceValues<Preferences>() };
   }
 }
 
-// Função para salvar preferências personalizadas
+// Function to save custom preferences
 export async function saveCustomPreferences(preferences: Partial<Preferences>): Promise<void> {
   try {
-    // Obter as preferências personalizadas atuais
+    // Get current custom preferences
     const storedPrefsString = await LocalStorage.getItem(CUSTOM_PREFERENCES_KEY);
     const currentPrefs = storedPrefsString ? JSON.parse(storedPrefsString) : {};
 
-    // Atualizar com as novas preferências
+    // Update with new preferences
     const updatedPrefs = { ...currentPrefs, ...preferences };
 
-    // Salvar as preferências atualizadas
+    // Save updated preferences
     await LocalStorage.setItem(CUSTOM_PREFERENCES_KEY, JSON.stringify(updatedPrefs));
   } catch (error) {
-    console.error("Erro ao salvar preferências:", error);
+    console.error("Error saving preferences:", error);
     throw error;
   }
 }
 
-// Componente para editar as preferências
+// Component for editing preferences
 export default function PreferencesCommand() {
   const [preferences, setPreferences] = useState<Preferences>(DEFAULT_PREFERENCES);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Carregar as preferências ao iniciar
+  // Load preferences on start
   useEffect(() => {
     const loadPreferences = async () => {
       try {
         const prefs = await getCustomPreferences();
         setPreferences(prefs);
       } catch (error) {
-        console.error("Erro ao carregar preferências:", error);
+        console.error("Error loading preferences:", error);
       } finally {
         setIsLoading(false);
       }
@@ -84,21 +84,21 @@ export default function PreferencesCommand() {
     loadPreferences();
   }, []);
 
-  // Função para salvar as alterações
+  // Function to save changes
   const handleSubmit = async (values: Preferences) => {
     try {
       await saveCustomPreferences(values);
-      showToast({ style: Toast.Style.Success, title: "Preferências salvas com sucesso" });
+      showToast({ style: Toast.Style.Success, title: "Preferences saved successfully" });
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Erro ao salvar preferências",
-        message: error instanceof Error ? error.message : "Erro desconhecido",
+        title: "Error saving preferences",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
 
-  // Lista de modelos de IA disponíveis
+  // List of available AI models
   const aiModels = [
     // Raycast
     { value: AIModelEnum.RAY1, label: "Ray1" },
@@ -108,8 +108,8 @@ export default function PreferencesCommand() {
     { value: AIModelEnum.GPT3_5, label: "GPT-3.5 Turbo" },
     { value: AIModelEnum.GPT4, label: "GPT-4" },
     { value: AIModelEnum.GPT4_TURBO, label: "GPT-4 Turbo" },
-    { value: AIModelEnum.GPT4o, label: "GPT-4o (Recomendado)" },
-    { value: AIModelEnum.GPT4o_MINI, label: "GPT-4o Mini (Mais rápido)" },
+    { value: AIModelEnum.GPT4o, label: "GPT-4o (Recommended)" },
+    { value: AIModelEnum.GPT4o_MINI, label: "GPT-4o Mini (Faster)" },
     { value: AIModelEnum.O1, label: "OpenAI O1" },
     { value: AIModelEnum.O1_MINI, label: "OpenAI O1 Mini" },
     { value: AIModelEnum.O3_MINI, label: "OpenAI O3 Mini" },
@@ -118,9 +118,9 @@ export default function PreferencesCommand() {
     { value: AIModelEnum.CLAUDE3_5_HAIKU, label: "Claude 3.5 Haiku" },
     { value: AIModelEnum.CLAUDE3_5_SONNET, label: "Claude 3.5 Sonnet" },
     { value: AIModelEnum.CLAUDE3_7_SONNET, label: "Claude 3.7 Sonnet" },
-    { value: AIModelEnum.CLAUDE3_OPUS, label: "Claude 3 Opus (Alta complexidade)" },
-    { value: AIModelEnum.CLAUDE3_SONNET, label: "Claude 3 Sonnet (Balanceado)" },
-    { value: AIModelEnum.CLAUDE3_HAIKU, label: "Claude 3 Haiku (Mais rápido)" },
+    { value: AIModelEnum.CLAUDE3_OPUS, label: "Claude 3 Opus (High complexity)" },
+    { value: AIModelEnum.CLAUDE3_SONNET, label: "Claude 3 Sonnet (Balanced)" },
+    { value: AIModelEnum.CLAUDE3_HAIKU, label: "Claude 3 Haiku (Faster)" },
   ];
 
   return (
@@ -128,18 +128,15 @@ export default function PreferencesCommand() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Salvar Preferências" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save Preferences" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Description
-        title="Configurações Gerais"
-        text="Configure as preferências padrão para a geração de flashcards"
-      />
+      <Form.Description title="General Settings" text="Configure default preferences for flashcard generation" />
 
       <Form.Dropdown
         id="defaultModel"
-        title="Modelo de IA Padrão"
+        title="Default AI Model"
         value={preferences.defaultModel}
         onChange={(value) => setPreferences({ ...preferences, defaultModel: value })}
       >
@@ -150,44 +147,41 @@ export default function PreferencesCommand() {
 
       <Form.Dropdown
         id="defaultLanguage"
-        title="Idioma Padrão"
+        title="Default Language"
         value={preferences.defaultLanguage}
         onChange={(value) => setPreferences({ ...preferences, defaultLanguage: value })}
       >
-        <Form.Dropdown.Item value="português" title="Português" />
         <Form.Dropdown.Item value="english" title="English" />
-        <Form.Dropdown.Item value="español" title="Español" />
+        <Form.Dropdown.Item value="português" title="Portuguese" />
+        <Form.Dropdown.Item value="español" title="Spanish" />
       </Form.Dropdown>
 
       <Form.Dropdown
         id="defaultDifficultyLevel"
-        title="Nível de Dificuldade Padrão"
+        title="Default Difficulty Level"
         value={preferences.defaultDifficultyLevel}
         onChange={(value) => setPreferences({ ...preferences, defaultDifficultyLevel: value })}
       >
-        <Form.Dropdown.Item value="iniciante" title="Iniciante 🟢" />
-        <Form.Dropdown.Item value="intermediário" title="Intermediário 🟡" />
-        <Form.Dropdown.Item value="avançado" title="Avançado 🔴" />
+        <Form.Dropdown.Item value="beginner" title="Beginner" />
+        <Form.Dropdown.Item value="intermediate" title="Intermediate" />
+        <Form.Dropdown.Item value="advanced" title="Advanced" />
       </Form.Dropdown>
 
       <Form.Separator />
 
-      <Form.Description
-        title="Configurações de Aprimoramento"
-        text="Configure como os flashcards são aprimorados pela IA"
-      />
+      <Form.Description title="Enhancement Settings" text="Configure how flashcards are enhanced by AI" />
 
       <Form.TextArea
         id="enhancementPrompt"
-        title="Prompt de Aprimoramento"
-        placeholder="Instruções para a IA melhorar os flashcards"
+        title="Enhancement Prompt"
+        placeholder="Instructions for AI to improve flashcards"
         value={preferences.enhancementPrompt}
         onChange={(value) => setPreferences({ ...preferences, enhancementPrompt: value })}
       />
 
       <Form.Dropdown
         id="enhancementModel"
-        title="Modelo para Aprimoramento"
+        title="Enhancement Model"
         value={preferences.enhancementModel}
         onChange={(value) => setPreferences({ ...preferences, enhancementModel: value })}
       >
@@ -198,12 +192,12 @@ export default function PreferencesCommand() {
 
       <Form.Separator />
 
-      <Form.Description title="Configurações de Tags" text="Configure como as tags são geradas e gerenciadas" />
+      <Form.Description title="Tag Settings" text="Configure how tags are generated and managed" />
 
       <Form.TextField
         id="maxTags"
-        title="Número Máximo de Tags"
-        placeholder="Número máximo de tags por flashcard"
+        title="Maximum Number of Tags"
+        placeholder="Maximum number of tags per flashcard"
         value={String(preferences.maxTags)}
         onChange={(value) => {
           const num = parseInt(value);

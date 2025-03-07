@@ -6,53 +6,53 @@ export class ErrorHandler {
     const errorMessage = error instanceof Error ? error.message : String(error);
     Logger.error(`${message}: ${errorMessage}`, error);
 
-    // Exibir toast de erro para o usuário
+    // Show error toast to the user
     showToast({
       style: Toast.Style.Failure,
-      title: "Erro",
-      message: message || "Ocorreu um erro inesperado",
+      title: "Error",
+      message: message || "An unexpected error occurred",
     });
   }
 
   static handleAnkiConnectionError() {
     const message =
-      "Não foi possível conectar ao Anki. Verifique se o Anki está aberto e se o AnkiConnect está instalado corretamente. Reinicie o Anki caso necessário.";
+      "Could not connect to Anki. Make sure Anki is open and AnkiConnect is properly installed. Restart Anki if necessary.";
     Logger.error(message);
 
     showToast({
       style: Toast.Style.Failure,
-      title: "Erro de Conexão com Anki",
+      title: "Anki Connection Error",
       message,
     });
   }
 
   static handleAIError(error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    const message = "Erro ao gerar flashcards com IA";
+    const message = "Error generating flashcards with AI";
     Logger.error(`${message}: ${errorMessage}`, error);
 
-    // Determinar uma mensagem mais específica com base no erro
-    let userMessage = "Não foi possível gerar flashcards. ";
+    // Determine a more specific message based on the error
+    let userMessage = "Could not generate flashcards. ";
 
     if (errorMessage.includes("network") || errorMessage.includes("timeout") || errorMessage.includes("connection")) {
-      userMessage += "Problema de conexão com a internet. Verifique sua conexão e tente novamente.";
+      userMessage += "Internet connection problem. Check your connection and try again.";
     } else if (errorMessage.includes("quota") || errorMessage.includes("limit") || errorMessage.includes("rate")) {
-      userMessage += "Limite de requisições atingido. Tente novamente mais tarde.";
+      userMessage += "Request limit reached. Try again later.";
     } else if (
       errorMessage.includes("authentication") ||
       errorMessage.includes("auth") ||
       errorMessage.includes("key")
     ) {
-      userMessage += "Problema de autenticação com a API. Verifique suas credenciais.";
+      userMessage += "API authentication problem. Check your credentials.";
     } else if (errorMessage.includes("parse") || errorMessage.includes("JSON")) {
-      userMessage += "Problema ao processar a resposta da IA. Tente com um texto diferente ou menor.";
+      userMessage += "Problem processing the AI response. Try with a different or shorter text.";
     } else {
-      userMessage += "Tente novamente com um texto diferente ou menor.";
+      userMessage += "Try again with a different or shorter text.";
     }
 
     showToast({
       style: Toast.Style.Failure,
-      title: "Erro na Geração de Flashcards",
+      title: "Flashcard Generation Error",
       message: userMessage,
     });
   }
