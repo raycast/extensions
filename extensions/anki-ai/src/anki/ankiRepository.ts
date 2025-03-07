@@ -268,36 +268,52 @@ export class AnkiRepository {
    * Obter nomes de modelos disponíveis no Anki
    * Com tratamentos adicionais para garantir que sempre retorne dados válidos
    */
-  static async modelNames(): Promise<string[]> {
+  static async getModelNames(): Promise<string[]> {
     try {
-      Logger.debug("Obtendo lista de modelos disponíveis no Anki");
-
-      // Verificar se o Anki está rodando
-      if (!(await this.isAnkiRunning())) {
-        Logger.warn("Não foi possível obter modelos porque o Anki não está em execução");
-        return [];
-      }
-
-      const response = await this.request<string[]>("modelNames", {}, 6, {
+      const response = await this.request<unknown>("modelNames", {}, 6, {
         timeout: 15000,
         retries: 4,
-        delay: 1000,
       });
 
       if (response.error) {
-        throw new Error(`Erro ao obter modelos: ${response.error}`);
+        Logger.error(`Erro ao obter lista de modelos: ${response.error}`);
+        return [];
       }
 
-      if (!response.result || !Array.isArray(response.result)) {
-        Logger.warn("Resposta inválida ao obter modelos. Recebido: " + typeof response.result);
+      // Verificar que o resultado é um array
+      const result = response.result;
+      if (!Array.isArray(result)) {
+        Logger.error(`Resposta inesperada ao obter modelos: ${JSON.stringify(result)}`);
         return [];
       }
 
       // Filtrar para garantir que só temos strings
-      return response.result.filter((item) => typeof item === "string") as string[];
+      return result.filter((item) => typeof item === "string") as string[];
     } catch (error) {
-      Logger.error(`Exceção ao obter modelos: ${error instanceof Error ? error.message : String(error)}`);
-      return [];
+      Logger.warn(`Erro ao obter lista de modelos, tentando novamente: ${error}`);
+
+      // Segunda tentativa com timeout maior
+      try {
+        const response = await this.request<unknown>("modelNames", {}, 6, {
+          timeout: 20000,
+          retries: 5,
+        });
+
+        if (response.error) {
+          Logger.error(`Erro ao obter lista de modelos (tentativa 2): ${response.error}`);
+          return [];
+        }
+
+        const result = response.result;
+        if (!Array.isArray(result)) {
+          return [];
+        }
+
+        return result.filter((item) => typeof item === "string") as string[];
+      } catch (secondError) {
+        Logger.error(`Exceção ao obter modelos: ${secondError}`);
+        return [];
+      }
     }
   }
 
@@ -392,7 +408,7 @@ export class AnkiRepository {
       let actualModelName = modelName;
       try {
         Logger.debug(`Verificando modelo "${modelName}"...`);
-        const models = await this.modelNames();
+        const models = await this.getModelNames();
 
         // Verificar explicitamente que models é um array válido
         if (!Array.isArray(models)) {
@@ -1137,7 +1153,7 @@ export class AnkiRepository {
       }
 
       // Verificar se o modelo já existe com timeout estendido
-      const models = await this.modelNames();
+      const models = await this.getModelNames();
       if (Array.isArray(models) && models.includes(modelName)) {
         Logger.debug(`Modelo "${modelName}" já existe.`);
         return true;

@@ -71,11 +71,13 @@ ${flashcard.tags && flashcard.tags.length > 0 ? "Consider keeping existing tags 
    */
   private static parseEnhancedFlashcard(response: string, originalFlashcard: Flashcard): Flashcard {
     try {
-      // Try to extract JSON from the response
-      const jsonMatch = response.match(/\{.*\}/s);
-      if (jsonMatch) {
+      // Extract JSON substring between first '{' and last '}'
+      const firstBrace = response.indexOf("{");
+      const lastBrace = response.lastIndexOf("}");
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        const jsonString = response.substring(firstBrace, lastBrace + 1);
         try {
-          const enhancedCard = JSON.parse(jsonMatch[0]);
+          const enhancedCard = JSON.parse(jsonString);
 
           // Ensure all necessary fields are present
           const result: Flashcard = {
@@ -178,11 +180,13 @@ Return the evaluation in JSON format with fields "score" (number from 1 to 10) a
    */
   private static parseEvaluation(response: string): FlashcardEvaluation {
     try {
-      // Try to extract JSON from the response
-      const jsonMatch = response.match(/\{.*\}/s);
-      if (jsonMatch) {
+      // Extract JSON substring between first '{' and last '}'
+      const firstBrace = response.indexOf("{");
+      const lastBrace = response.lastIndexOf("}");
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        const jsonString = response.substring(firstBrace, lastBrace + 1);
         try {
-          const evaluation = JSON.parse(jsonMatch[0]);
+          const evaluation = JSON.parse(jsonString);
           if (typeof evaluation.score === "number" && Array.isArray(evaluation.suggestions)) {
             return {
               score: evaluation.score,
