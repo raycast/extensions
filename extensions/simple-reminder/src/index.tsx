@@ -12,6 +12,7 @@ import { Frequency } from "./types/frequency";
 import { setRecurrenceForReminder } from "./handlers/setRecurrenceForReminder";
 import { hasFrequencyPredicate, hasNoFrequencyPredicate } from "./utils/arrayPredicates";
 import { ListActionPanel } from "./components/listActionPanel";
+import { setURLForReminder } from "./handlers/setURLForReminder";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -36,6 +37,19 @@ export default function Command() {
       });
     } catch (e) {
       await showError("Reminder not set", "Oops. Did you specify a time you would like to be notified?");
+    }
+  };
+
+  const onSetURLForReminderAction = async (reminderId: string, url: string) => {
+    try {
+      await setURLForReminder({
+        reminderId,
+        url,
+        existingReminders: reminders,
+        setReminders,
+      });
+    } catch (e) {
+      await showError("URL not set", "Oops. It looks like the URL you copied is not valid.");
     }
   };
 
@@ -106,6 +120,7 @@ export default function Command() {
                     reminder={reminder}
                     onSetReminderAction={onSetReminderAction}
                     onSetRecurrenceForReminderAction={onSetRecurrenceForReminderAction}
+                    onSetURLForReminderAction={onSetURLForReminderAction}
                     onCopyReminderTopicAction={onCopyReminderTopicAction}
                     onDeleteReminderAction={onDeleteReminderAction}
                   />
@@ -126,6 +141,7 @@ export default function Command() {
                     reminder={reminder}
                     onSetReminderAction={onSetReminderAction}
                     onSetRecurrenceForReminderAction={onSetRecurrenceForReminderAction}
+                    onSetURLForReminderAction={onSetURLForReminderAction}
                     onCopyReminderTopicAction={onCopyReminderTopicAction}
                     onDeleteReminderAction={onDeleteReminderAction}
                   />

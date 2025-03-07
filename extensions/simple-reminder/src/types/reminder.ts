@@ -5,4 +5,5 @@ export type Reminder = {
   topic: string;
   date: Date;
   frequency?: Frequency;
+  url?: URL;
 };

@@ -1,27 +1,32 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { Frequency } from "../types/frequency";
 import { Reminder } from "../types/reminder";
+import { isValidURL } from "../utils/isValidURL";
 import Style = Toast.Style;
 
-type SetRecurrenceForReminderProps = {
+type setURLForReminderProps = {
   reminderId: string;
-  frequency: Frequency;
+  url: string;
   existingReminders: Reminder[];
   setReminders: (reminders: Reminder[]) => void;
 };
 
-export async function setRecurrenceForReminder(props: SetRecurrenceForReminderProps) {
+export async function setURLForReminder(props: setURLForReminderProps) {
   const reminder = props.existingReminders.find((reminder) => reminder.id === props.reminderId);
   if (!reminder) {
     throw new Error("Reminder not found");
   }
-  reminder.frequency = props.frequency;
+  const url = isValidURL(props.url);
+  if (!url) {
+    throw new Error("Invalid URL");
+  }
+  reminder.url = url;
   props.setReminders([...props.existingReminders]);
+
   try {
     await LocalStorage.setItem(reminder.id, JSON.stringify(reminder));
-    await showToast(Style.Success, "Recurrence set", `Happening ${props.frequency}`);
+    await showToast(Style.Success, "URL set", `The URL will be opened when the reminder is triggered.`);
   } catch (error) {
     console.error(error);
-    await showToast(Style.Failure, "Failed to set recurrence", `The recurrence could not be set. Please try again.`);
+    await showToast(Style.Failure, "Failed to set URL", `The URL could not be set. Please try again.`);
   }
 }

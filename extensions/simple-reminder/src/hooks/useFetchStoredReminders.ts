@@ -26,7 +26,6 @@ export function useFetchStoredReminders(
           captureException(
             buildException(error as Error, "Error parsing stored reminder from local storage", {
               reminderId: key,
-              localStorage: storedRemindersObject,
             }),
           );
         }
