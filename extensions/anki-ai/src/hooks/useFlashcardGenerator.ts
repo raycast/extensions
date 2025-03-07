@@ -26,16 +26,21 @@ export function useFlashcardGenerator() {
   const loadDecks = async () => {
     try {
       setIsLoading(true);
-      const response = await AnkiRepository.getDecks();
-      if (response.error || !response.result) {
-        ErrorHandler.handleAnkiConnectionError();
+      const ankiDecks = await AnkiRepository.getDecks();
+
+      // If we got a valid array of decks, update the state
+      if (ankiDecks && ankiDecks.length > 0) {
+        setDecks(ankiDecks);
         setIsLoading(false);
-        return [];
+        return ankiDecks;
+      } else {
+        // If no decks were returned, create a default deck
+        const defaultDeck = "Default";
+        await AnkiRepository.createDeck(defaultDeck);
+        setDecks([defaultDeck]);
+        setIsLoading(false);
+        return [defaultDeck];
       }
-      const ankiDecks = response.result as string[];
-      setDecks(ankiDecks);
-      setIsLoading(false);
-      return ankiDecks;
     } catch (error) {
       ErrorHandler.handleAnkiConnectionError();
       setIsLoading(false);
@@ -107,38 +112,50 @@ export function useFlashcardGenerator() {
     try {
       setIsLoading(true);
 
-      if (modelName === "Raycast Flashcards") {
-        const createModelResponse = await AnkiRepository.createRaycastFlashcardsModelIfNeeded();
-        if (createModelResponse.error) {
-          ErrorHandler.handle(new Error(createModelResponse.error), "Error creating Raycast Flashcards model");
-          return false;
-        }
+      // Primeiro, verificar a conexão com o Anki
+      const connectionStatus = await AnkiRepository.getConnectionStatus();
 
-        const modelsResponse = await AnkiRepository.modelNames();
-        if (modelsResponse.error) {
-          ErrorHandler.handle(new Error(modelsResponse.error), "Error checking models");
-          return false;
-        }
-
-        const models = modelsResponse.result as string[];
-        if (!models.includes("Raycast Flashcards")) {
-          ErrorHandler.handle(
-            new Error("Model not found after creation attempt"),
-            "Error creating Raycast Flashcards model",
-          );
-          return false;
-        }
-
-        Logger.debug("Raycast Flashcards model verified/created successfully");
-      }
-
-      const result = await AnkiRepository.addFlashcards(selectedCards, deckName, modelName, tags);
-
-      if (result.error) {
-        ErrorHandler.handle(new Error(result.error), "Error adding flashcards to Anki");
+      if (!connectionStatus.ankiRunning || !connectionStatus.ankiConnectAvailable) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Erro de conexão com o Anki",
+          message: connectionStatus.message || "Verifique se o Anki está aberto e o AnkiConnect está instalado",
+        });
         return false;
       }
 
+      // Preparar flashcards para exportação
+      Logger.debug(
+        `Exportando ${selectedCards.length} flashcards para o deck "${deckName}" usando modelo "${modelName}"`,
+      );
+
+      // Converter flashcards do formato do Raycast para o formato aceito pelo AnkiRepository
+      const ankiFlashcards = selectedCards.map((card) => ({
+        front: card.front,
+        back: card.back,
+        extra: card.extra,
+        tags: card.tags || [],
+        mediaFiles: card.mediaFiles,
+        difficulty: card.difficulty,
+      }));
+
+      // Adicionar flashcards usando o método melhorado
+      const result = await AnkiRepository.addFlashcards(ankiFlashcards, deckName, modelName, {
+        tags: tags,
+        allowDuplicates: false,
+      });
+
+      if (!result.success) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Erro ao adicionar flashcards",
+          message: result.message,
+        });
+        Logger.error("Detalhes do erro:", result.details);
+        return false;
+      }
+
+      // Salvar os parâmetros de exportação para uso futuro
       const exportParams: FlashcardExportParameters = {
         deckName,
         modelName,
@@ -148,18 +165,25 @@ export function useFlashcardGenerator() {
       };
 
       await ParameterStorage.saveExportParameters(exportParams);
-
       await loadLastParameters();
 
       showToast({
         style: Toast.Style.Success,
-        title: "Flashcards added to Anki",
-        message: `${selectedCards.length} flashcards added to deck "${deckName}"`,
+        title: "Flashcards adicionados ao Anki",
+        message: `${selectedCards.length} flashcards adicionados ao deck "${deckName}"`,
       });
 
       return true;
     } catch (error) {
-      ErrorHandler.handle(error, "Error adding flashcards to Anki");
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      Logger.error("Erro ao adicionar flashcards ao Anki:", error);
+
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Erro ao adicionar flashcards",
+        message: errorMessage,
+      });
+
       return false;
     } finally {
       setIsLoading(false);
@@ -191,45 +215,60 @@ export function useFlashcardGenerator() {
       setIsLoading(true);
       showToast({
         style: Toast.Style.Animated,
-        title: "Testing connection to Anki",
-        message: "Please wait...",
+        title: "Testando conexão com o Anki",
+        message: "Por favor, aguarde...",
       });
 
-      // First try to create the Raycast Flashcards model if needed
-      try {
-        await AnkiRepository.createRaycastFlashcardsModelIfNeeded();
-      } catch (error) {
-        // Ignore errors here, we'll check the connection directly
-        Logger.warn("Error creating Raycast Flashcards model during connection test:", error);
-      }
+      // Utilizar o novo método de diagnóstico de conexão
+      const connectionStatus = await AnkiRepository.getConnectionStatus();
 
-      // Test the connection
-      const result = await AnkiRepository.testConnection();
-
-      if (result.success) {
+      if (connectionStatus.ankiRunning && connectionStatus.ankiConnectAvailable) {
         showToast({
           style: Toast.Style.Success,
-          title: "Anki connection successful",
-          message: "Connected to Anki successfully",
+          title: "Conexão com o Anki estabelecida",
+          message: connectionStatus.message,
         });
 
-        // Reload decks after successful connection
+        // Recarregar decks após conexão bem-sucedida
         await loadDecks();
 
         return true;
       } else {
+        // Se o Anki não está rodando, tente instruir o usuário
+        const errorMessage = connectionStatus.message;
         showToast({
           style: Toast.Style.Failure,
-          title: "Anki connection failed",
-          message: result.message || "Could not connect to Anki",
+          title: "Erro de conexão com o Anki",
+          message: errorMessage,
         });
+
+        // Se AnkiConnect está instalado mas não acessível, tente recuperar
+        if (connectionStatus.ankiRunning && !connectionStatus.ankiConnectAvailable) {
+          try {
+            // Tentar recuperar a conexão
+            const recoveryResult = await AnkiRepository.attemptConnectionRecovery();
+            if (recoveryResult.success) {
+              showToast({
+                style: Toast.Style.Success,
+                title: "Conexão recuperada",
+                message: recoveryResult.message,
+              });
+              await loadDecks();
+              return true;
+            }
+          } catch (error) {
+            // Ignore errors during recovery attempt
+          }
+        }
+
         return false;
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      Logger.error("Erro ao testar conexão com o Anki:", error);
       showToast({
         style: Toast.Style.Failure,
-        title: "Anki connection error",
+        title: "Erro ao testar conexão com o Anki",
         message: errorMessage,
       });
       return false;

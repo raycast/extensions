@@ -90,7 +90,7 @@ function ExportToAnkiForm({
   onExport: (flashcards: Flashcard[], deckName: string, modelName: string, tags: string[]) => void;
 }) {
   const [selectedDeck, setSelectedDeck] = useState(decks[0] || "");
-  const [selectedModel, setSelectedModel] = useState("Raycast Flashcards");
+  const [selectedModel, setSelectedModel] = useState("Basic");
   const [tagsText, setTagsText] = useState("");
   const [models, setModels] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -103,41 +103,114 @@ function ExportToAnkiForm({
   const loadModels = async () => {
     try {
       setIsLoading(true);
-      const response = await AnkiRepository.modelNames();
-      if (!response.error && response.result) {
-        const modelList = response.result as string[];
+      const modelList = await AnkiRepository.modelNames();
+
+      if (modelList && modelList.length > 0) {
         setModels(modelList);
 
-        if (!modelList.includes("Raycast Flashcards")) {
-          setModels((prev) => [...prev, "Raycast Flashcards"]);
+        // Definir um modelo padrão baseado na disponibilidade
+        if (modelList.includes("Raycast Flashcards")) {
+          setSelectedModel("Raycast Flashcards");
+        } else if (modelList.includes("Basic")) {
+          setSelectedModel("Basic");
+        } else if (modelList.length > 0) {
+          setSelectedModel(modelList[0]);
         }
-
-        setSelectedModel("Raycast Flashcards");
       } else {
+        // Se não conseguiu obter modelos, mostrar erro
         showToast({
           style: Toast.Style.Failure,
-          title: "Error loading models",
-          message: response.error || "Make sure Anki is open",
+          title: "Erro ao carregar modelos",
+          message: "Verifique se o Anki está aberto e tente novamente",
         });
+
+        // Usar modelos padrão como fallback
+        const fallbackModels = ["Basic", "Raycast Flashcards", "Cloze"];
+        setModels(fallbackModels);
+        setSelectedModel("Basic");
       }
     } catch (error) {
+      console.error("Erro ao carregar modelos:", error);
       showToast({
         style: Toast.Style.Failure,
-        title: "Error loading models",
-        message: "Make sure Anki is open",
+        title: "Erro ao carregar modelos",
+        message: error instanceof Error ? error.message : "Erro desconhecido",
       });
+
+      // Usar modelos padrão como fallback
+      const fallbackModels = ["Basic", "Raycast Flashcards", "Cloze"];
+      setModels(fallbackModels);
+      setSelectedModel("Basic");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSubmit = () => {
-    const tags = tagsText
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter((tag) => tag);
-    onExport(flashcards, selectedDeck, selectedModel, tags);
-    pop();
+  const handleExport = async () => {
+    if (!selectedDeck) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Deck não selecionado",
+        message: "Por favor, selecione um deck para exportar",
+      });
+      return;
+    }
+
+    if (!selectedModel) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Modelo não selecionado",
+        message: "Por favor, selecione um modelo para exportar",
+      });
+      return;
+    }
+
+    try {
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Exportando para o Anki...",
+      });
+
+      // Converter texto de tags em array
+      const tags = tagsText
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0);
+
+      // Verificar conexão com o Anki antes de exportar
+      const connectionStatus = await AnkiRepository.getConnectionStatus();
+
+      if (!connectionStatus.ankiRunning) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Anki não está em execução",
+          message: "Por favor, abra o Anki antes de exportar",
+        });
+        return;
+      }
+
+      if (!connectionStatus.ankiConnectAvailable) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "AnkiConnect não está disponível",
+          message: connectionStatus.message || "Verifique a instalação do AnkiConnect",
+        });
+        return;
+      }
+
+      // Prosseguir com a exportação
+      onExport(flashcards, selectedDeck, selectedModel, tags);
+
+      // Fechar o modal após exportação bem-sucedida
+      pop();
+    } catch (error) {
+      console.error("Erro durante exportação:", error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Erro ao exportar para o Anki",
+        message: error instanceof Error ? error.message : "Erro desconhecido",
+      });
+    }
   };
 
   if (isLoading) {
@@ -152,7 +225,7 @@ function ExportToAnkiForm({
             title={`Export ${flashcards.length} Flashcards to Anki`}
             icon={Icon.Download}
             shortcut={{ modifiers: ["cmd"], key: "enter" }}
-            onSubmit={handleSubmit}
+            onSubmit={handleExport}
           />
         </ActionPanel>
       }
@@ -193,10 +266,13 @@ function ExportToAnkiForm({
 }
 
 export default function GenerateFlashcardCommand() {
-  const { push } = useNavigation();
+  const navigation = useNavigation();
+  const { push } = navigation;
   const [text, setText] = useState("");
   const [language, setLanguage] = useState("english");
   const [numCards, setNumCards] = useState<number>(5);
+  const [difficultyLevel, setDifficultyLevel] = useState<"beginner" | "intermediate" | "advanced">("intermediate");
+  const [topic, setTopic] = useState("");
   const [enableTags, setEnableTags] = useState<boolean>(true);
   const [isPreviewMode, setIsPreviewMode] = useState<boolean>(false);
   const [selectedFlashcards, setSelectedFlashcards] = useState<Set<number>>(new Set());
@@ -294,6 +370,8 @@ export default function GenerateFlashcardCommand() {
       );
       showToast({
         style: Toast.Style.Animated,
+        title: "Processing content...",
+        message: `Using ${selectedModel} to generate flashcards`,
       });
 
       const options = {
