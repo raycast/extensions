@@ -18,10 +18,9 @@ By default, the following processes can be restarted:
 
 ## Options
 ### Sudo
-Some processes require root privileges to restart. However, this extension is unable to request you to enter your password. 
-Therefore, if some processes are not working for you, then you have to enable Touch ID authentication for `sudo` command.
+Some processes require root privileges to restart. If sudo mode is enabled,  you will be asked to enter your password when you restart processes.
 
-Simply follow the guide here: https://apple.stackexchange.com/a/466029.
+If you encounter errors when restarting processes, try enabling this option.
 
 ### Advanced Mode
 With this option enabled, all the currently-running system processes are listed. This means you can restart
