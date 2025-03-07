@@ -7,6 +7,7 @@ import { showFailureToast } from "@raycast/utils";
 const CACHE_KEY = "websites-data";
 const CACHE_TIMESTAMP_KEY = "websites-data-timestamp";
 const MAX_RETRY_DEPTH = 1; // Prevent infinite recursion
+export const DEFAULT_ACTION: ActionType = "view_llms";
 
 interface Preferences {
   githubToken?: string;
@@ -46,7 +47,7 @@ function isValidWebsite(w: unknown): w is Website {
   );
 }
 
-function isValidWebsiteData(data: WebsiteData) {
+function isValidWebsiteData(data: unknown): data is WebsiteData {
   return Array.isArray(data) && data.every(isValidWebsite);
 }
 
@@ -130,8 +131,8 @@ export async function fetchWebsitesData(forceRefresh = false, retryDepth = 0): P
     Accept: "application/vnd.github.v3.raw",
   };
 
-  if (githubToken) {
-    headers.Authorization = `token ${githubToken}`;
+  if (githubToken?.trim()) {
+    headers.Authorization = `token ${githubToken.trim()}`;
   }
 
   try {
@@ -237,6 +238,10 @@ export function formatCategoryName(category: Category): string {
         .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
   }
+}
+
+export function shouldShowViewLlmsAction(primaryAction: ActionType, hasFullTxt: boolean): boolean {
+  return primaryAction !== DEFAULT_ACTION && !(primaryAction === "view_llms_full" && !hasFullTxt);
 }
 
 export async function handleWebsiteAction(website: Website, action: ActionType): Promise<void> {

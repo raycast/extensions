@@ -7,6 +7,8 @@ import {
   getDomainWithoutProtocol,
   formatCategoryName,
   handleWebsiteAction,
+  DEFAULT_ACTION,
+  shouldShowViewLlmsAction,
 } from "./utils";
 
 interface Preferences {
@@ -30,7 +32,7 @@ function getCategoryCount(websites: Website[], category: Category): number {
 }
 
 function getPrimaryAction(website: Website, preferences: Preferences) {
-  const action = preferences.primaryAction || "view_llms";
+  const action = preferences.primaryAction || DEFAULT_ACTION;
 
   switch (action) {
     case "copy_llms":
@@ -49,7 +51,7 @@ function getPrimaryAction(website: Website, preferences: Preferences) {
           onAction={() => handleWebsiteAction(website, "view_llms_full")}
         />
       ) : (
-        <Action title="View Llms.txt" icon={Icon.Globe} onAction={() => handleWebsiteAction(website, "view_llms")} />
+        <Action title="View Llms.txt" icon={Icon.Globe} onAction={() => handleWebsiteAction(website, DEFAULT_ACTION)} />
       );
     case "copy_llms_full":
       return website.llmsFullTxtUrl ? (
@@ -67,23 +69,23 @@ function getPrimaryAction(website: Website, preferences: Preferences) {
       );
     default:
       return (
-        <Action title="View Llms.txt" icon={Icon.Globe} onAction={() => handleWebsiteAction(website, "view_llms")} />
+        <Action title="View Llms.txt" icon={Icon.Globe} onAction={() => handleWebsiteAction(website, DEFAULT_ACTION)} />
       );
   }
 }
 
 function getSecondaryActions(website: Website, preferences: Preferences) {
-  const primaryAction = preferences.primaryAction || "view_llms";
+  const primaryAction = preferences.primaryAction || DEFAULT_ACTION;
   const actions = [];
 
   // Add View llms.txt if it's not the primary action
-  if (primaryAction !== "view_llms" && !(primaryAction === "view_llms_full" && !website.llmsFullTxtUrl)) {
+  if (shouldShowViewLlmsAction(primaryAction, !!website.llmsFullTxtUrl)) {
     actions.push(
       <Action
         key="view-llms"
         title="View Llms.txt"
         icon={Icon.Globe}
-        onAction={() => handleWebsiteAction(website, "view_llms")}
+        onAction={() => handleWebsiteAction(website, DEFAULT_ACTION)}
       />,
     );
   }
@@ -151,6 +153,16 @@ function getSecondaryActions(website: Website, preferences: Preferences) {
   return actions;
 }
 
+const categories: Category[] = [
+  "ai-ml",
+  "data-analytics",
+  "developer-tools",
+  "infrastructure-cloud",
+  "integration-automation",
+  "security-identity",
+  "other",
+];
+
 export default function SearchWebsites() {
   const [isLoading, setIsLoading] = useState(true);
   const [websites, setWebsites] = useState<Website[]>([]);
@@ -175,16 +187,6 @@ export default function SearchWebsites() {
 
   const filteredWebsites =
     categoryFilter === "all" ? websites : websites.filter((website) => website.category === categoryFilter);
-
-  const categories: Category[] = [
-    "ai-ml",
-    "data-analytics",
-    "developer-tools",
-    "infrastructure-cloud",
-    "integration-automation",
-    "security-identity",
-    "other",
-  ];
 
   if (error) {
     return (

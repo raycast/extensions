@@ -7,8 +7,6 @@ export interface Website {
   category: Category;
   favicon?: string;
   url: string;
-  hasLLMsTxt?: boolean;
-  hasLLMsFullTxt?: boolean;
 }
 
 export type Category =
