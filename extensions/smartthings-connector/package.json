@@ -40,6 +40,23 @@
       "title": "Show All Devices",
       "description": "Displays a list of devices in the location",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar-home-monitor",
+      "title": "Menu Bar Home Monitor",
+      "description": "Shows current location mode in the menu bar",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "enableBackgroundRefresh",
+          "title": "Enable Background Refresh",
+          "description": "Automatically refresh the location mode every minute",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Enable background refresh"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -81,8 +98,8 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}' --fix",
+    "fix-lint": "prettier --write 'src/**/*.{ts,tsx}' && ray lint --fix",
+    "lint": "prettier --write 'src/**/*.{ts,tsx}' && eslint 'src/**/*.{ts,tsx}' --fix",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
