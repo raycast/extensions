@@ -2,6 +2,7 @@ import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/a
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { list } from "./api/list";
+import { titlecase } from "./utils/titlecase";
 import { type Document } from "./utils/document";
 import { type Category } from "./utils/category";
 import { type PaginationOptions } from "@raycast/utils/dist/types";
@@ -65,7 +66,7 @@ export default function ListDocumentsCommand() {
         </List.Dropdown>
       }
       pagination={pagination}
-      navigationTitle={`Documents in ${documentLocation.charAt(0).toUpperCase() + documentLocation.slice(1)}${category ? ` (${category.charAt(0).toUpperCase() + category.slice(1)})` : ""}`}
+      navigationTitle={`Documents in ${titlecase(documentLocation)}${category ? ` (${titlecase(category)})` : ""}`}
     >
       {data?.map((article) => {
         const markdown = `
