@@ -1,5 +1,5 @@
 import { OAuth } from "@raycast/api";
-import { getAccessToken, OAuthService } from "@raycast/utils";
+import { getAccessToken, OAuthService, showFailureToast } from "@raycast/utils";
 import fetch from "node-fetch";
 import { BasecampProject, BasecampTodo, TodoList, BasecampComment, BasecampPerson } from "../utils/types";
 import { markdownToHtml } from "../utils/markdown";
@@ -329,15 +329,16 @@ export async function scheduleMeeting(
     });
 
     if (!response.ok) {
-      console.error("Schedule meeting error:", response.status, response.statusText);
       const errorText = await response.text();
-      console.error("Error details:", errorText);
-      throw new Error(`Failed to schedule meeting: ${response.statusText} (${response.status})`);
+
+      throw new Error(`${response.status} ${response.statusText} ${errorText}`);
     }
 
     return response.json();
   } catch (error) {
-    console.error("Error in scheduleMeeting:", error);
+    await showFailureToast(error, {
+      title: "Schedule meeting error",
+    });
     throw error; // Re-throw the error to be handled by the caller
   }
 }
@@ -366,10 +367,6 @@ export async function fetchSchedules(accountId: string, projectId: number) {
     const scheduleTool = project.dock.find((tool) => tool.name === "schedule");
 
     if (!scheduleTool) {
-      console.log(
-        "Schedule tool not found in project dock:",
-        project.dock.map((tool) => tool.name),
-      );
       return []; // Return empty array instead of throwing error
     }
 

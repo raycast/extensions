@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Toast, Icon, showHUD, PopToRootType } from "@raycast/api";
-import { FormValidation, useForm, useCachedPromise, useLocalStorage } from "@raycast/utils";
+import { FormValidation, useForm, useCachedPromise, useLocalStorage, showFailureToast } from "@raycast/utils";
 import { scheduleMeeting, getProjectPeople, fetchSchedules, fetchAccounts, fetchProjects } from "../oauth/auth";
 import { showToast } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
@@ -108,10 +108,8 @@ export default function ScheduleMeetingForm() {
           popToRootType: PopToRootType.Immediate,
         });
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to Schedule Meeting",
-          message: error instanceof Error ? error.message : "An unknown error occurred",
+        showFailureToast(error, {
+          title: "Failed to schedule meeting",
         });
       }
     },
