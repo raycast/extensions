@@ -30,16 +30,32 @@ function ImagePreview(props: { imagePath: string; format: string }) {
   const { imagePath, format } = props;
   const preferences = getPreferenceValues<Preferences>();
 
-  let imageContent = "";
-  try {
-    if (format === "svg") {
-      imageContent = fs.readFileSync(imagePath, "utf-8");
-    } else {
-      const imageBuffer = fs.readFileSync(imagePath);
-      imageContent = `data:image/png;base64,${imageBuffer.toString("base64")}`;
+  const [imageContent, setImageContent] = useState<string>("");
+  const [imageError, setImageError] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      if (format === "svg") {
+        setImageContent(fs.readFileSync(imagePath, "utf-8"));
+      } else {
+        const imageBuffer = fs.readFileSync(imagePath);
+        setImageContent(`data:image/png;base64,${imageBuffer.toString("base64")}`);
+      }
+    } catch (error) {
+      console.error("Failed to read image:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setImageError(`Unable to read image: ${errorMessage}`);
+      (async () => {
+        await showFailureToast({
+          title: "Failed to load image",
+          message: errorMessage,
+        });
+      })();
     }
-  } catch (error) {
-    console.error("Failed to read image:", error);
+  }, [imagePath, format]);
+
+  if (imageError) {
+    return <Detail markdown={`# Image loading failed\n\n${imageError}`} />;
   }
 
   const markdown = format === "svg" ? `<svg>${imageContent}</svg>` : `![Mermaid Diagram](${imageContent})`;
@@ -162,6 +178,15 @@ async function generateMermaidDiagram(mermaidCode: string, preferences: Preferen
     PATH: `/usr/local/bin:/opt/homebrew/bin:${process.env.PATH}`,
   };
 
+  return await launchCommand(command, env, outputPath, tempFile);
+}
+
+async function launchCommand(
+  command: string,
+  env: NodeJS.ProcessEnv,
+  outputPath: string,
+  tempFile: string,
+): Promise<string> {
   try {
     await execPromise(command, { env, timeout: 10000 });
 
@@ -169,7 +194,7 @@ async function generateMermaidDiagram(mermaidCode: string, preferences: Preferen
       throw new Error(`Diagram generation failed: Output file not found ${outputPath}`);
     }
 
-    // 清理臨時 .mmd 檔案
+    // Clean up temporary .mmd file
     try {
       if (fs.existsSync(tempFile)) {
         fs.unlinkSync(tempFile);
@@ -178,9 +203,11 @@ async function generateMermaidDiagram(mermaidCode: string, preferences: Preferen
     } catch (cleanupError) {
       console.error("Failed to clean up temporary file:", cleanupError);
     }
+
+    return outputPath;
   } catch (error: unknown) {
     console.error("Command execution failed:", error);
-    // 清理臨時文件
+    // Clean up temporary files
     try {
       if (fs.existsSync(tempFile)) {
         fs.unlinkSync(tempFile);
@@ -216,6 +243,10 @@ export default function Command() {
         if (!clipboardText) {
           setError("Clipboard is empty.");
           setIsLoading(false);
+          await showFailureToast({
+            title: "Failed to generate diagram",
+            message: "Clipboard is empty. Please copy a Mermaid diagram code first.",
+          });
           return;
         }
       } catch (error: unknown) {

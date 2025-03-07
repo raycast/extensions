@@ -15,7 +15,7 @@
       "title": "Mermaid to Image",
       "description": "Convert Mermaid diagrams to images",
       "mode": "view",
-      "subtitle": "Convert Mermaid diagrams to images"
+      "subtitle": "Generate Diagram Images from Mermaid Markup"
     }
   ],
   "dependencies": {

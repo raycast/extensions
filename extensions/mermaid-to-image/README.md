@@ -12,9 +12,9 @@ A Raycast extension that instantly converts Mermaid diagram code from your clipb
 
 ## Installation
 
-1. Install the extension from Raycast Store
-2. Make sure you have Node.js installed on your system
-3. Install the required Mermaid CLI tool globally by running:
+1. Make sure you have Node.js installed on your system
+2. Install the required Mermaid CLI tool globally by running:
+3. Install the extension from Raycast Store
 ```
 npm install -g @mermaid-js/mermaid-cli
 ```
