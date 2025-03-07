@@ -42,3 +42,8 @@ export interface Tag {
 export interface ApiResponse<T> {
   response: T;
 }
+
+export interface LinkwardenPreferences {
+  LinkwardenUrl: string;
+  LinkwardenApiKey: string;
+}

@@ -1,8 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { ApiResponse, Collection, Tag } from "./interfaces";
+import { ApiResponse, Collection, LinkwardenPreferences, Tag } from "./interfaces";
 
-const { LinkwardenUrl, LinkwardenApiKey } = getPreferenceValues<Preferences>();
+const { LinkwardenUrl, LinkwardenApiKey } = getPreferenceValues<LinkwardenPreferences>();
 const baseUrl = `${LinkwardenUrl}/api/v1/`;
 const headers = {
   Authorization: `Bearer ${LinkwardenApiKey}`,

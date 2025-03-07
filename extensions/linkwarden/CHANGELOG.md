@@ -1,17 +1,25 @@
 # Linkwarden Changelog
 
+## [Refactor and improvments] - 2025-03-07
+
+- Refactor preferences type
+- Improve link adding UX
+
 ## [Fix URL Field fill] - 2024-09-16
+
 - Fixed the URL field not being filled when run "Add website to Linkwarden" form
 
 ## [Filter Links by Collection] - 2024-09-11
 
 ### Enhancements
+
 - Updated Titles and some fields to exactly match the Linkwarden default
 - View the Date Modified and Collection of a link
 - Filter links by collection
 - You can now choose a collection when adding a link
 
 ### Dev
+
 - Controlled validation with better error handling in `add`
 - Moved some interfaces and some `useFetch` into separate files so that in future it will be easier to pass down those hooks for mutate and repeated calls
 
