@@ -1,10 +1,10 @@
 # Raycast Alarms Extension
 
-Create system-wide alarms that work even when Raycast is closed. Perfect for meetings, breaks, or important tasks with rich notifications and sound alerts.
+Create system-wide alarms with rich notifications and sound alerts. Perfect for meetings, breaks, or important tasks.
 
 ## Features
 
-- System-wide alarms (works when Raycast is closed)
+- System-wide alarms with reliable scheduling
 - Zero external dependencies - uses only macOS built-in tools
 - Custom popup interface with stop options
 - Sound alerts that repeat until dismissed
@@ -13,7 +13,7 @@ Create system-wide alarms that work even when Raycast is closed. Perfect for mee
 
 ## How It Works
 
-This extension leverages macOS's crontab system to schedule alarms that trigger regardless of Raycast's running state. When an alarm fires:
+This extension leverages macOS's crontab system to schedule alarms. When an alarm fires:
 
 1. Your chosen sound plays on repeat
 2. A custom popup displays the alarm title

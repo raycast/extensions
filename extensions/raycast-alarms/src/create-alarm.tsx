@@ -8,7 +8,8 @@ import path from "path";
 import fs from "fs";
 
 // Sound options and paths
-const DEFAULT_RINGTONE = "/System/Library/Sounds/Sosumi.aiff";
+const DEFAULT_RINGTONE =
+  "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Radial-EncoreInfinitum.m4r";
 const SCRIPT_PATH = `${os.homedir()}/.raycast-alarms/scripts/manage-crontab.sh`;
 const LOG_PATH = `${os.homedir()}/.raycast-alarms/logs/extension.log`;
 
@@ -56,18 +57,59 @@ const getRingtonePath = (ringtoneName: string): string => {
 
 // Available ringtones
 const ringtones = [
-  { name: "Sosumi", value: "/System/Library/Sounds/Sosumi.aiff" },
-  { name: "Submarine", value: "/System/Library/Sounds/Submarine.aiff" },
-  { name: "Tink", value: "/System/Library/Sounds/Tink.aiff" },
-  { name: "Bottle", value: "/System/Library/Sounds/Bottle.aiff" },
-  { name: "Frog", value: "/System/Library/Sounds/Frog.aiff" },
-  { name: "Funk", value: "/System/Library/Sounds/Funk.aiff" },
-  { name: "Glass", value: "/System/Library/Sounds/Glass.aiff" },
-  { name: "Hero", value: "/System/Library/Sounds/Hero.aiff" },
-  { name: "Morse", value: "/System/Library/Sounds/Morse.aiff" },
-  { name: "Ping", value: "/System/Library/Sounds/Ping.aiff" },
-  { name: "Pop", value: "/System/Library/Sounds/Pop.aiff" },
-  { name: "Purr", value: "/System/Library/Sounds/Purr.aiff" },
+  {
+    name: "Radial",
+    value:
+      "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Radial-EncoreInfinitum.m4r",
+  },
+  {
+    name: "Apex",
+    value: "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Apex.m4r",
+  },
+  {
+    name: "Beacon",
+    value: "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Beacon.m4r",
+  },
+  {
+    name: "Bulletin",
+    value: "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Bulletin.m4r",
+  },
+  {
+    name: "By The Seaside",
+    value: "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/By The Seaside.m4r",
+  },
+  {
+    name: "Chimes",
+    value: "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Chimes.m4r",
+  },
+  {
+    name: "Circuit",
+    value: "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Circuit.m4r",
+  },
+  {
+    name: "Constellation",
+    value: "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Constellation.m4r",
+  },
+  {
+    name: "Cosmic",
+    value: "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Cosmic.m4r",
+  },
+  {
+    name: "Crystals",
+    value: "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Crystals.m4r",
+  },
+  {
+    name: "Hillside",
+    value: "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Hillside.m4r",
+  },
+  {
+    name: "Illuminate",
+    value: "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Illuminate.m4r",
+  },
+  {
+    name: "Night Owl",
+    value: "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Night Owl.m4r",
+  },
 ];
 
 // Track preview sound
@@ -313,7 +355,13 @@ export default function CreateAlarm() {
       }
       isLoading={isLoading}
     >
-      <Form.Description text="Schedule an alarm that will play a sound at the specified time, even if Raycast is closed." />
+      <Form.DatePicker
+        id="date"
+        title="Date & Time"
+        value={scheduledTime ?? undefined}
+        onChange={setScheduledTime}
+        min={minDate}
+      />
 
       <Form.TextField
         id="title"
@@ -321,14 +369,6 @@ export default function CreateAlarm() {
         placeholder="Enter alarm title (optional)"
         value={alarmTitle}
         onChange={setAlarmTitle}
-      />
-
-      <Form.DatePicker
-        id="date"
-        title="Date & Time"
-        value={scheduledTime ?? undefined}
-        onChange={setScheduledTime}
-        min={minDate}
       />
 
       <Form.Separator />
@@ -343,12 +383,11 @@ export default function CreateAlarm() {
 
       <Form.Separator />
 
-      <Form.Description
-        title="How it works"
-        text="This alarm uses macOS crontab to trigger at the specified time, even if Raycast isn't running. The alarm sound will play until you dismiss it or until 10 minutes have passed."
-      />
-
-      {isPreviewPlaying && <Form.Description text="Sound preview is playing..." />}
+      {isPreviewPlaying ? (
+        <Form.Description text="Sound preview is playing... (⌘S to stop)" />
+      ) : (
+        <Form.Description text="Press ⌘S to preview the sound" />
+      )}
     </Form>
   );
 }
