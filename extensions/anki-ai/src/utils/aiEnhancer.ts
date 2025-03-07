@@ -5,7 +5,7 @@ import { getAIModelIdentifier } from "../constants/aiModels";
 import { getCustomPreferences } from "../preferences";
 
 /**
- * Interface para o resultado da avaliação de um flashcard
+ * Interface for the result of a flashcard evaluation
  */
 export interface FlashcardEvaluation {
   score: number;
@@ -13,71 +13,71 @@ export interface FlashcardEvaluation {
 }
 
 /**
- * Classe utilitária para aprimorar flashcards usando IA
+ * Utility class for enhancing flashcards using AI
  */
 export class AIEnhancer {
   /**
-   * Melhora um flashcard existente usando IA
-   * @param flashcard Flashcard a ser melhorado
-   * @returns Flashcard melhorado
+   * Enhances an existing flashcard using AI
+   * @param flashcard Flashcard to be enhanced
+   * @returns Enhanced flashcard
    */
   static async enhanceFlashcard(flashcard: Flashcard): Promise<Flashcard> {
     try {
-      // Obter preferências personalizadas
+      // Get custom preferences
       const preferences = await getCustomPreferences();
       const enhancementPrompt = preferences.enhancementPrompt;
       const enhancementModel = preferences.enhancementModel;
       const maxTags = preferences.maxTags || 2;
 
-      // Construir o prompt para a IA
+      // Build the prompt for AI
       const prompt = `${enhancementPrompt}
       
-Flashcard atual:
-- Pergunta: ${flashcard.front}
-- Resposta: ${flashcard.back}
-${flashcard.extra ? `- Informações extras: ${flashcard.extra}` : ""}
-${flashcard.tags && flashcard.tags.length > 0 ? `- Tags atuais: ${flashcard.tags.join(", ")}` : ""}
+Current flashcard:
+- Question: ${flashcard.front}
+- Answer: ${flashcard.back}
+${flashcard.extra ? `- Extra information: ${flashcard.extra}` : ""}
+${flashcard.tags && flashcard.tags.length > 0 ? `- Current tags: ${flashcard.tags.join(", ")}` : ""}
 
-Retorne o flashcard melhorado no formato JSON com os campos "front", "back", "extra" e "tags".
-Mantenha o mesmo nível de dificuldade: ${flashcard.difficulty || "intermediário"}.
-Limite as tags a no máximo ${maxTags} termos relevantes.
-${flashcard.tags && flashcard.tags.length > 0 ? "Considere manter as tags existentes se forem relevantes." : ""}`;
+Return the enhanced flashcard in JSON format with fields "front", "back", "extra", and "tags".
+Maintain the same difficulty level: ${flashcard.difficulty || "intermediate"}.
+Limit tags to a maximum of ${maxTags} relevant terms.
+${flashcard.tags && flashcard.tags.length > 0 ? "Consider keeping existing tags if relevant." : ""}`;
 
-      Logger.debug(`Aprimorando flashcard com modelo: ${enhancementModel}`);
+      Logger.debug(`Enhancing flashcard with model: ${enhancementModel}`);
 
-      // Obter o identificador do modelo
+      // Get the model identifier
       const modelId = getAIModelIdentifier(enhancementModel) || "openai-gpt-4o";
 
-      // Fazer a chamada para a IA
-      // @ts-expect-error - Model ID do tipo string não é diretamente compatível com AI.Model
+      // Make the AI call
+      // @ts-expect-error - Model ID of type string is not directly compatible with AI.Model
       const response = await AI.ask(prompt, {
         model: modelId,
         creativity: 0.7,
       });
 
-      // Processar a resposta
+      // Process the response
       return this.parseEnhancedFlashcard(response, flashcard);
     } catch (error) {
-      Logger.error("Erro ao aprimorar flashcard:", error);
-      return flashcard; // Retorna o flashcard original em caso de erro
+      Logger.error("Error enhancing flashcard:", error);
+      return flashcard; // Return the original flashcard in case of error
     }
   }
 
   /**
-   * Analisa a resposta da IA para extrair o flashcard melhorado
-   * @param response Resposta da IA
-   * @param originalFlashcard Flashcard original
-   * @returns Flashcard melhorado
+   * Parses the AI response to extract the enhanced flashcard
+   * @param response AI response
+   * @param originalFlashcard Original flashcard
+   * @returns Enhanced flashcard
    */
   private static parseEnhancedFlashcard(response: string, originalFlashcard: Flashcard): Flashcard {
     try {
-      // Tentar extrair JSON da resposta
+      // Try to extract JSON from the response
       const jsonMatch = response.match(/\{.*\}/s);
       if (jsonMatch) {
         try {
           const enhancedCard = JSON.parse(jsonMatch[0]);
 
-          // Garantir que todos os campos necessários estejam presentes
+          // Ensure all necessary fields are present
           const result: Flashcard = {
             front: enhancedCard.front || originalFlashcard.front,
             back: enhancedCard.back || originalFlashcard.back,
@@ -85,13 +85,13 @@ ${flashcard.tags && flashcard.tags.length > 0 ? "Considere manter as tags existe
             difficulty: originalFlashcard.difficulty,
           };
 
-          // Processar tags, limitando ao máximo definido
+          // Process tags, limiting to the defined maximum
           if (enhancedCard.tags && Array.isArray(enhancedCard.tags)) {
-            // Obter preferências para o número máximo de tags
+            // Get preferences for the maximum number of tags
             getCustomPreferences().then((prefs) => {
               const maxTags = prefs.maxTags || 2;
 
-              // Limitar o número de tags
+              // Limit the number of tags
               result.tags = enhancedCard.tags.slice(0, maxTags);
             });
           } else {
@@ -100,19 +100,19 @@ ${flashcard.tags && flashcard.tags.length > 0 ? "Considere manter as tags existe
 
           return result;
         } catch (e) {
-          Logger.warn("Falha ao fazer parse do JSON na resposta", e);
+          Logger.warn("Failed to parse JSON in the response", e);
         }
       }
 
-      // Fallback: extrair manualmente se o JSON não for encontrado
-      Logger.warn("Usando método de fallback para extrair flashcard melhorado");
+      // Fallback: manually extract if JSON is not found
+      Logger.warn("Using fallback method to extract enhanced flashcard");
 
-      const frontMatch = response.match(/Pergunta|Front|Frente:?\s*(.+?)(?=Resposta|Back|Verso|$)/is);
-      const backMatch = response.match(/Resposta|Back|Verso:?\s*(.+?)(?=Extra|Informações|Tags|$)/is);
-      const extraMatch = response.match(/Extra|Informações:?\s*(.+?)(?=Tags|$)/is);
-      const tagsMatch = response.match(/Tags|Etiquetas:?\s*(.+?)$/is);
+      const frontMatch = response.match(/Question|Front:?\s*(.+?)(?=Answer|Back|$)/is);
+      const backMatch = response.match(/Answer|Back:?\s*(.+?)(?=Extra|Information|Tags|$)/is);
+      const extraMatch = response.match(/Extra|Information:?\s*(.+?)(?=Tags|$)/is);
+      const tagsMatch = response.match(/Tags:?\s*(.+?)$/is);
 
-      // Construir o flashcard melhorado
+      // Build the enhanced flashcard
       return {
         front: frontMatch ? frontMatch[1].trim() : originalFlashcard.front,
         back: backMatch ? backMatch[1].trim() : originalFlashcard.back,
@@ -126,59 +126,59 @@ ${flashcard.tags && flashcard.tags.length > 0 ? "Considere manter as tags existe
         difficulty: originalFlashcard.difficulty,
       };
     } catch (error) {
-      Logger.error("Erro ao processar flashcard melhorado:", error);
-      return originalFlashcard; // Retorna o flashcard original em caso de erro
+      Logger.error("Error processing enhanced flashcard:", error);
+      return originalFlashcard; // Return the original flashcard in case of error
     }
   }
 
   /**
-   * Avalia a qualidade de um flashcard
-   * @param flashcard Flashcard a ser avaliado
-   * @returns Avaliação do flashcard
+   * Evaluates the quality of a flashcard
+   * @param flashcard Flashcard to be evaluated
+   * @returns Flashcard evaluation
    */
   static async evaluateFlashcard(flashcard: Flashcard): Promise<FlashcardEvaluation> {
     try {
-      // Obter preferências personalizadas
+      // Get custom preferences
       const preferences = await getCustomPreferences();
       const evaluationModel = preferences.enhancementModel;
 
-      // Construir o prompt para a IA
-      const prompt = `Avalie a qualidade deste flashcard em uma escala de 1 a 10 e forneça sugestões de melhoria.
+      // Build the prompt for AI
+      const prompt = `Evaluate the quality of this flashcard on a scale of 1 to 10 and provide suggestions for improvement.
 
 Flashcard:
-- Pergunta: ${flashcard.front}
-- Resposta: ${flashcard.back}
-${flashcard.extra ? `- Informações extras: ${flashcard.extra}` : ""}
+- Question: ${flashcard.front}
+- Answer: ${flashcard.back}
+${flashcard.extra ? `- Extra information: ${flashcard.extra}` : ""}
 ${flashcard.tags && flashcard.tags.length > 0 ? `- Tags: ${flashcard.tags.join(", ")}` : ""}
 
-Retorne a avaliação no formato JSON com os campos "score" (número de 1 a 10) e "suggestions" (array de strings com sugestões).`;
+Return the evaluation in JSON format with fields "score" (number from 1 to 10) and "suggestions" (array of strings with suggestions).`;
 
-      // Obter o identificador do modelo
+      // Get the model identifier
       const modelId = getAIModelIdentifier(evaluationModel) || "openai-gpt-4o";
 
-      // Fazer a chamada para a IA
-      // @ts-expect-error - Model ID do tipo string não é diretamente compatível com AI.Model
+      // Make the AI call
+      // @ts-expect-error - Model ID of type string is not directly compatible with AI.Model
       const response = await AI.ask(prompt, {
         model: modelId,
         creativity: 0.5,
       });
 
-      // Processar a resposta
+      // Process the response
       return this.parseEvaluation(response);
     } catch (error) {
-      Logger.error("Erro ao avaliar flashcard:", error);
-      return { score: 5, suggestions: ["Não foi possível avaliar o flashcard."] };
+      Logger.error("Error evaluating flashcard:", error);
+      return { score: 5, suggestions: ["Unable to evaluate the flashcard."] };
     }
   }
 
   /**
-   * Analisa a resposta da IA para extrair a avaliação do flashcard
-   * @param response Resposta da IA
-   * @returns Avaliação do flashcard
+   * Parses the AI response to extract the flashcard evaluation
+   * @param response AI response
+   * @returns Flashcard evaluation
    */
   private static parseEvaluation(response: string): FlashcardEvaluation {
     try {
-      // Tentar extrair JSON da resposta
+      // Try to extract JSON from the response
       const jsonMatch = response.match(/\{.*\}/s);
       if (jsonMatch) {
         try {
@@ -190,15 +190,15 @@ Retorne a avaliação no formato JSON com os campos "score" (número de 1 a 10) 
             };
           }
         } catch (e) {
-          Logger.warn("Falha ao fazer parse do JSON na resposta de avaliação", e);
+          Logger.warn("Failed to parse JSON in the evaluation response", e);
         }
       }
 
-      // Fallback: extrair manualmente se o JSON não for encontrado
-      Logger.warn("Usando método de fallback para extrair avaliação");
+      // Fallback: manually extract if JSON is not found
+      Logger.warn("Using fallback method to extract evaluation");
 
-      const scoreMatch = response.match(/score|pontuação|nota:?\s*(\d+)/i);
-      const suggestionsMatch = response.match(/sugestões|suggestions:?\s*(.+?)$/is);
+      const scoreMatch = response.match(/score:?\s*(\d+)/i);
+      const suggestionsMatch = response.match(/suggestions:?\s*(.+?)$/is);
 
       return {
         score: scoreMatch ? parseInt(scoreMatch[1]) : 5,
@@ -207,20 +207,20 @@ Retorne a avaliação no formato JSON com os campos "score" (número de 1 a 10) 
               .split(/[\n.]/)
               .filter((s) => s.trim().length > 0)
               .map((s) => s.trim())
-          : ["Não foi possível extrair sugestões."],
+          : ["Unable to extract suggestions."],
       };
     } catch (error) {
-      Logger.error("Erro ao processar avaliação:", error);
-      return { score: 5, suggestions: ["Erro ao processar a avaliação."] };
+      Logger.error("Error processing evaluation:", error);
+      return { score: 5, suggestions: ["Error processing the evaluation."] };
     }
   }
 
   /**
-   * Gera perguntas relacionadas a um tópico
-   * @param topic Tópico para gerar perguntas
-   * @param count Número de perguntas a serem geradas
-   * @param options Opções adicionais
-   * @returns Array de perguntas e respostas
+   * Generates questions related to a topic
+   * @param topic Topic to generate questions for
+   * @param count Number of questions to be generated
+   * @param options Additional options
+   * @returns Array of questions and answers
    */
   static async generateRelatedQuestions(
     topic: string,
@@ -228,42 +228,42 @@ Retorne a avaliação no formato JSON com os campos "score" (número de 1 a 10) 
     options?: { model?: string },
   ): Promise<Array<{ question: string; answer: string }>> {
     try {
-      // Obter preferências personalizadas
+      // Get custom preferences
       const preferences = await getCustomPreferences();
       const model = options?.model || preferences.defaultModel;
 
-      // Construir o prompt para a IA
-      const prompt = `Gere ${count} perguntas e respostas relacionadas ao tópico "${topic}".
+      // Build the prompt for AI
+      const prompt = `Generate ${count} questions and answers related to the topic "${topic}".
       
-As perguntas devem ser interessantes, educativas e variadas em termos de dificuldade.
-Retorne as perguntas e respostas no formato JSON como um array de objetos com os campos "question" e "answer".`;
+The questions should be interesting, educational, and varied in terms of difficulty.
+Return the questions and answers in JSON format as an array of objects with fields "question" and "answer".`;
 
-      // Obter o identificador do modelo
+      // Get the model identifier
       const modelId = getAIModelIdentifier(model) || "openai-gpt-4o";
 
-      // Fazer a chamada para a IA
-      // @ts-expect-error - Model ID do tipo string não é diretamente compatível com AI.Model, mas é necessário para a funcionalidade
+      // Make the AI call
+      // @ts-expect-error - Model ID of type string is not directly compatible with AI.Model, but is necessary for functionality
       const response = await AI.ask(prompt, {
         model: modelId,
         creativity: 0.8,
       });
 
-      // Processar a resposta
+      // Process the response
       return this.parseRelatedQuestions(response);
     } catch (error) {
-      Logger.error("Erro ao gerar perguntas relacionadas:", error);
+      Logger.error("Error generating related questions:", error);
       return [];
     }
   }
 
   /**
-   * Analisa a resposta da IA para extrair perguntas e respostas
-   * @param response Resposta da IA
-   * @returns Array de perguntas e respostas
+   * Parses the AI response to extract questions and answers
+   * @param response AI response
+   * @returns Array of questions and answers
    */
   private static parseRelatedQuestions(response: string): Array<{ question: string; answer: string }> {
     try {
-      // Tentar extrair JSON da resposta
+      // Try to extract JSON from the response
       const jsonMatch = response.match(/\[.*\]/s);
       if (jsonMatch) {
         try {
@@ -272,12 +272,12 @@ Retorne as perguntas e respostas no formato JSON como um array de objetos com os
             return questions.filter((q) => q.question && q.answer);
           }
         } catch (e) {
-          Logger.warn("Falha ao fazer parse do JSON na resposta de perguntas relacionadas", e);
+          Logger.warn("Failed to parse JSON in the related questions response", e);
         }
       }
 
-      // Fallback: extrair manualmente se o JSON não for encontrado
-      Logger.warn("Usando método de fallback para extrair perguntas relacionadas");
+      // Fallback: manually extract if JSON is not found
+      Logger.warn("Using fallback method to extract related questions");
 
       const questions: Array<{ question: string; answer: string }> = [];
       const lines = response.split("\n");
@@ -285,12 +285,12 @@ Retorne as perguntas e respostas no formato JSON como um array de objetos com os
 
       for (const line of lines) {
         const questionMatch = line.match(/^\d+\.\s*(.+?)\?/);
-        const answerMatch = line.match(/^Resposta|^R:|^A:/i);
+        const answerMatch = line.match(/^Answer|^A:/i);
 
         if (questionMatch) {
           currentQuestion = questionMatch[1].trim() + "?";
         } else if (answerMatch && currentQuestion) {
-          const answer = line.replace(/^Resposta|^R:|^A:/i, "").trim();
+          const answer = line.replace(/^Answer|^A:/i, "").trim();
           questions.push({ question: currentQuestion, answer });
           currentQuestion = "";
         }
@@ -298,7 +298,7 @@ Retorne as perguntas e respostas no formato JSON como um array de objetos com os
 
       return questions;
     } catch (error) {
-      Logger.error("Erro ao processar perguntas relacionadas:", error);
+      Logger.error("Error processing related questions:", error);
       return [];
     }
   }

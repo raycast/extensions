@@ -5,11 +5,7 @@
       "success": true,
       "message": "Conexão com o Anki estabelecida com sucesso"
     },
-    "getDecks": [
-      "Default",
-      "Programação",
-      "Computação"
-    ]
+    "getDecks": ["Default", "Programação", "Computação"]
   },
   "expected": [
     {

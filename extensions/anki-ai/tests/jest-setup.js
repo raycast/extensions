@@ -2,7 +2,7 @@
 // Esta configuração é carregada antes dos testes
 
 // Mock do React
-jest.mock('react', () => require('./mocks/react').default);
+jest.mock("react", () => require("./mocks/react").default);
 
 // Configurar adaptadores e mocks globais
 jest.mock("@raycast/api", () => ({
@@ -17,7 +17,7 @@ jest.mock("@raycast/api", () => ({
 }));
 
 // Silenciar logs durante os testes
-jest.mock('../src/utils/logger', () => ({
+jest.mock("../src/utils/logger", () => ({
   Logger: {
     debug: jest.fn(),
     info: jest.fn(),
@@ -30,6 +30,6 @@ jest.mock('../src/utils/logger', () => ({
       INFO: 1,
       WARN: 2,
       ERROR: 3,
-    }
-  }
+    },
+  },
 }));

@@ -6,31 +6,31 @@ import { ErrorHandler } from "../utils/errorHandler";
 
 export class GeminiEnhancer {
   /**
-   * Melhora um flashcard existente adicionando exemplos e informações adicionais
+   * Enhances an existing flashcard by adding examples and additional information
    */
   static async enhanceFlashcard(flashcard: Flashcard): Promise<Flashcard> {
     try {
-      Logger.info(`Melhorando flashcard com Gemini: ${flashcard.front}`);
+      Logger.info(`Enhancing flashcard with Gemini: ${flashcard.front}`);
 
-      // Obter a chave de API
+      // Get the API key
       const apiKey = await ApiKeyManager.getGeminiApiKey();
       if (!apiKey) {
-        throw new Error("Chave de API do Gemini não configurada");
+        throw new Error("Gemini API key not configured");
       }
 
-      // Criar instância do serviço Gemini
+      // Create Gemini service instance
       const geminiService = new GeminiService(apiKey);
 
       const prompt = `
-      Melhore o seguinte flashcard adicionando exemplos práticos e informações adicionais relevantes no campo "extra".
-      O conteúdo deve ser educativo, claro e ajudar a fixar o conceito.
+      Improve the following flashcard by adding practical examples and relevant additional information in the "extra" field.
+      The content should be educational, clear, and help reinforce the concept.
       
       Flashcard:
-      Frente: ${flashcard.front}
-      Verso: ${flashcard.back}
-      ${flashcard.extra ? `Extra atual: ${flashcard.extra}` : ""}
+      Front: ${flashcard.front}
+      Back: ${flashcard.back}
+      ${flashcard.extra ? `Current Extra: ${flashcard.extra}` : ""}
       
-      Retorne apenas o texto para o campo "extra" melhorado, sem formatação adicional.
+      Return only the text for the improved "extra" field, without additional formatting.
       `;
 
       const response = await geminiService.ask(prompt);
@@ -46,27 +46,27 @@ export class GeminiEnhancer {
   }
 
   /**
-   * Gera exemplos adicionais para um conceito
+   * Generates additional examples for a concept
    */
   static async generateExamples(concept: string, count: number = 3): Promise<string[]> {
     try {
-      Logger.info(`Gerando exemplos com Gemini para: ${concept}`);
+      Logger.info(`Generating examples with Gemini for: ${concept}`);
 
-      // Obter a chave de API
+      // Get the API key
       const apiKey = await ApiKeyManager.getGeminiApiKey();
       if (!apiKey) {
-        throw new Error("Chave de API do Gemini não configurada");
+        throw new Error("Gemini API key not configured");
       }
 
-      // Criar instância do serviço Gemini
+      // Create Gemini service instance
       const geminiService = new GeminiService(apiKey);
 
       const prompt = `
-      Gere ${count} exemplos práticos e claros para ilustrar o seguinte conceito:
+      Generate ${count} practical and clear examples to illustrate the following concept:
       
       "${concept}"
       
-      Retorne apenas os exemplos, um por linha, sem numeração ou formatação adicional.
+      Return only the examples, one per line, without numbering or additional formatting.
       `;
 
       const response = await geminiService.ask(prompt);
@@ -83,40 +83,40 @@ export class GeminiEnhancer {
   }
 
   /**
-   * Avalia a qualidade de um flashcard e sugere melhorias
+   * Evaluates the quality of a flashcard and suggests improvements
    */
   static async evaluateFlashcard(flashcard: Flashcard): Promise<{ score: number; suggestions: string[] }> {
     try {
-      Logger.info(`Avaliando flashcard com Gemini: ${flashcard.front}`);
+      Logger.info(`Evaluating flashcard with Gemini: ${flashcard.front}`);
 
-      // Obter a chave de API
+      // Get the API key
       const apiKey = await ApiKeyManager.getGeminiApiKey();
       if (!apiKey) {
-        throw new Error("Chave de API do Gemini não configurada");
+        throw new Error("Gemini API key not configured");
       }
 
-      // Criar instância do serviço Gemini
+      // Create Gemini service instance
       const geminiService = new GeminiService(apiKey);
 
       const prompt = `
-      Avalie a qualidade do seguinte flashcard em uma escala de 1 a 10 e forneça até 3 sugestões específicas para melhorá-lo.
+      Evaluate the quality of the following flashcard on a scale of 1 to 10 and provide up to 3 specific suggestions to improve it.
       
       Flashcard:
-      Frente: ${flashcard.front}
-      Verso: ${flashcard.back}
+      Front: ${flashcard.front}
+      Back: ${flashcard.back}
       ${flashcard.extra ? `Extra: ${flashcard.extra}` : ""}
       
-      Retorne a resposta no formato JSON:
+      Return the response in JSON format:
       {
-        "score": número de 1 a 10,
-        "suggestions": ["sugestão 1", "sugestão 2", "sugestão 3"]
+        "score": number from 1 to 10,
+        "suggestions": ["suggestion 1", "suggestion 2", "suggestion 3"]
       }
       `;
 
       const response = await geminiService.ask(prompt);
 
       try {
-        // Tenta extrair apenas o JSON se houver texto adicional
+        // Try to extract only the JSON if there is additional text
         const jsonMatch = response.match(/\{.*\}/s);
         const jsonString = jsonMatch ? jsonMatch[0] : response;
 
@@ -126,7 +126,7 @@ export class GeminiEnhancer {
           suggestions: Array.isArray(result.suggestions) ? result.suggestions : [],
         };
       } catch (error) {
-        Logger.error("Erro ao processar avaliação do Gemini", error);
+        Logger.error("Error processing Gemini evaluation", error);
         return { score: 5, suggestions: [] };
       }
     } catch (error) {
@@ -136,34 +136,34 @@ export class GeminiEnhancer {
   }
 
   /**
-   * Gera perguntas relacionadas a um tópico para criar flashcards adicionais
+   * Generates related questions to a topic to create additional flashcards
    */
   static async generateRelatedQuestions(
     topic: string,
     count: number = 5,
   ): Promise<{ question: string; answer: string }[]> {
     try {
-      Logger.info(`Gerando perguntas relacionadas com Gemini a: ${topic}`);
+      Logger.info(`Generating related questions with Gemini for: ${topic}`);
 
-      // Obter a chave de API
+      // Get the API key
       const apiKey = await ApiKeyManager.getGeminiApiKey();
       if (!apiKey) {
-        throw new Error("Chave de API do Gemini não configurada");
+        throw new Error("Gemini API key not configured");
       }
 
-      // Criar instância do serviço Gemini
+      // Create Gemini service instance
       const geminiService = new GeminiService(apiKey);
 
       const prompt = `
-      Gere ${count} perguntas e respostas relacionadas ao seguinte tópico para criar flashcards adicionais:
+      Generate ${count} questions and answers related to the following topic to create additional flashcards:
       
       "${topic}"
       
-      Retorne a resposta no formato JSON:
+      Return the response in JSON format:
       [
         {
-          "question": "Pergunta 1",
-          "answer": "Resposta 1"
+          "question": "Question 1",
+          "answer": "Answer 1"
         },
         ...
       ]
@@ -172,14 +172,14 @@ export class GeminiEnhancer {
       const response = await geminiService.ask(prompt);
 
       try {
-        // Tenta extrair apenas o JSON se houver texto adicional
+        // Try to extract only the JSON if there is additional text
         const jsonMatch = response.match(/\[\s*\{.*\}\s*\]/s);
         const jsonString = jsonMatch ? jsonMatch[0] : response;
 
         const result = JSON.parse(jsonString);
         return Array.isArray(result) ? result : [];
       } catch (error) {
-        Logger.error("Erro ao processar perguntas relacionadas do Gemini", error);
+        Logger.error("Error processing related questions from Gemini", error);
         return [];
       }
     } catch (error) {

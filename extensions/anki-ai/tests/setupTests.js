@@ -3,7 +3,7 @@
 // o adaptador do ambiente de teste para lidar com os hooks corretamente.
 
 // Configuração do fetch-mock para testes que envolvem requisições HTTP
-require('jest-fetch-mock').enableMocks();
+require("jest-fetch-mock").enableMocks();
 
 // Silenciar logs durante os testes
 global.console = {

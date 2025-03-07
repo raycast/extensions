@@ -4,41 +4,41 @@ import { Logger } from "../utils/logger";
 
 export class AnkiService {
   /**
-   * Adiciona uma nova nota ao Anki
-   * @param note Objeto de nota a ser adicionado
-   * @returns ID da nota adicionada ou mensagem de erro
+   * Adds a new note to Anki
+   * @param note Note object to be added
+   * @returns ID of the added note or error message
    */
   static async addNote(note: AnkiNote): Promise<{ result?: number; error?: string }> {
     try {
-      Logger.debug("AnkiService.addNote chamado com nota", note);
+      Logger.debug("AnkiService.addNote called with note", note);
 
-      // Verificar se o Anki está rodando
+      // Check if Anki is running
       const isRunning = await AnkiRepository.isAnkiRunning();
       if (!isRunning) {
         return {
           error:
-            "O Anki não está rodando ou o AnkiConnect não está instalado. Por favor, abra o Anki e verifique se o AnkiConnect está instalado. Para instalar o AnkiConnect, abra o Anki, vá em Ferramentas > Complementos > Obter Complementos e digite o código 2055492159.",
+            "Anki is not running or AnkiConnect is not installed. Please open Anki and verify that AnkiConnect is installed. To install AnkiConnect, open Anki, go to Tools > Add-ons > Get Add-ons and enter the code 2055492159.",
         };
       }
 
-      // Validar a nota antes de enviar
+      // Validate the note before sending
       if (!note.deckName || !note.modelName || !note.fields) {
-        return { error: "Campos obrigatórios faltando: deckName, modelName ou fields" };
+        return { error: "Required fields missing: deckName, modelName or fields" };
       }
 
-      // Garantir que pelo menos um campo tenha conteúdo
+      // Ensure that at least one field has content
       const hasContent = Object.values(note.fields).some(
         (value) => value !== undefined && value !== null && value !== "",
       );
 
       if (!hasContent) {
-        return { error: "Pelo menos um campo deve ter conteúdo" };
+        return { error: "At least one field must have content" };
       }
 
-      // Para modelo Cloze, garantir que Text exista
+      // For Cloze model, ensure that Text exists
       if (note.modelName === "Cloze") {
         if (!note.fields.Text) {
-          // Tentar usar o Frente ou Front como Text se estiver disponível
+          // Try to use Front or Frente as Text if available
           if (note.fields.Frente) {
             note.fields.Text = note.fields.Frente;
             delete note.fields.Frente;
@@ -46,20 +46,20 @@ export class AnkiService {
             note.fields.Text = note.fields.Front;
             delete note.fields.Front;
           } else {
-            return { error: "Para o modelo Cloze, o campo Text é obrigatório" };
+            return { error: "For the Cloze model, the Text field is required" };
           }
         }
 
-        // Verificar se o texto já contém marcações de cloze
+        // Check if the text already contains cloze markers
         const hasClozeMarkers = /\{\{c\d+::.+?\}\}/i.test(note.fields.Text);
 
         if (!hasClozeMarkers) {
-          // Se não tiver marcações de cloze, tentar criar uma básica
+          // If it doesn't have cloze markers, try to create a basic one
           note.fields.Text = `{{c1::${note.fields.Text}}}`;
         }
       }
 
-      // Enviar para o AnkiRepository - com retry para erros de conexão
+      // Send to AnkiRepository - with retry for connection errors
       let response: { result?: number; error?: string } | undefined;
       let retryCount = 0;
       const maxRetries = 2;
@@ -67,19 +67,19 @@ export class AnkiService {
       while (retryCount <= maxRetries) {
         response = await AnkiRepository.addNote(note);
 
-        // Se não houve erro ou o erro não é de conexão, sair do loop
+        // If there was no error or the error is not connection-related, exit the loop
         if (
           !response?.error ||
           (!response.error.includes("ECONNRESET") &&
-            !response.error.includes("Falha na comunicação") &&
+            !response.error.includes("Communication failure") &&
             !response.error.includes("Timeout"))
         ) {
           break;
         }
 
-        // Se temos mais tentativas, aguardar e tentar novamente
+        // If we have more attempts, wait and try again
         if (retryCount < maxRetries) {
-          Logger.debug(`Erro de conexão ao adicionar nota, tentando novamente (${retryCount + 1}/${maxRetries})`);
+          Logger.debug(`Connection error when adding note, trying again (${retryCount + 1}/${maxRetries})`);
           await new Promise((resolve) => setTimeout(resolve, 2000 * Math.pow(2, retryCount)));
           retryCount++;
         } else {
@@ -87,51 +87,50 @@ export class AnkiService {
         }
       }
 
-      // Se não recebemos resposta do AnkiRepository
+      // If we didn't receive a response from AnkiRepository
       if (!response) {
         return {
-          error: "Não foi obtida resposta do AnkiConnect após várias tentativas.",
+          error: "No response received from AnkiConnect after multiple attempts.",
         };
       }
 
       if (response.error) {
-        Logger.error("Erro ao adicionar nota:", response.error);
+        Logger.error("Error adding note:", response.error);
 
-        // Fazer o erro mais amigável se for um erro de conexão
+        // Make the error more user-friendly if it's a connection error
         if (
           response.error.includes("ECONNRESET") ||
-          response.error.includes("Falha na comunicação") ||
+          response.error.includes("Communication failure") ||
           response.error.includes("Timeout")
         ) {
           return {
-            error: "Não foi possível conectar ao Anki. Verifique se o Anki está aberto e o AnkiConnect está instalado.",
+            error: "Could not connect to Anki. Verify that Anki is open and AnkiConnect is installed.",
           };
         }
 
-        // Tratar erros específicos do AnkiConnect
+        // Handle specific AnkiConnect errors
         if (response.error.includes("collection is not available")) {
           return {
             error:
-              "O Anki está aberto, mas a coleção não está disponível. Verifique se há algum diálogo aberto no Anki ou se a coleção está sendo sincronizada.",
+              "Anki is open, but the collection is not available. Check if there's any dialog open in Anki or if the collection is being synchronized.",
           };
         }
 
         if (response.error.includes("deck was not found")) {
           return {
-            error: "O deck especificado não foi encontrado. Verifique o nome do deck ou crie-o primeiro.",
+            error: "The specified deck was not found. Check the deck name or create it first.",
           };
         }
 
         if (response.error.includes("model was not found")) {
           return {
-            error: "O modelo de nota especificado não foi encontrado. Verifique o nome do modelo.",
+            error: "The specified note model was not found. Check the model name.",
           };
         }
 
         if (response.error.includes("cannot create note")) {
           return {
-            error:
-              "Não foi possível criar a nota. Verifique se todos os campos obrigatórios estão preenchidos corretamente.",
+            error: "Could not create the note. Check that all required fields are filled in correctly.",
           };
         }
 
@@ -139,178 +138,178 @@ export class AnkiService {
       }
 
       if (response.result === null || response.result === undefined) {
-        Logger.error("Resposta do AnkiConnect não contém ID da nota");
-        return { error: "Resposta do AnkiConnect não contém ID da nota" };
+        Logger.error("AnkiConnect response does not contain note ID");
+        return { error: "AnkiConnect response does not contain note ID" };
       }
 
-      Logger.debug("Nota adicionada com sucesso, ID:", response.result);
+      Logger.debug("Note added successfully, ID:", response.result);
       return { result: response.result };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error("Erro ao adicionar nota:", errorMessage);
+      Logger.error("Error adding note:", errorMessage);
 
-      // Melhorar mensagem para erros comuns
+      // Improve message for common errors
       if (
         errorMessage.includes("ECONNRESET") ||
         errorMessage.includes("ECONNREFUSED") ||
         errorMessage.includes("network error")
       ) {
         return {
-          error: "Erro de conexão com o Anki. Verifique se o Anki está aberto e o AnkiConnect está instalado.",
+          error: "Connection error with Anki. Verify that Anki is open and AnkiConnect is installed.",
         };
       }
 
-      return { error: `Erro ao adicionar nota: ${errorMessage}` };
+      return { error: `Error adding note: ${errorMessage}` };
     }
   }
 
   /**
-   * Adiciona múltiplas notas ao Anki
-   * @param notes Array de objetos de nota a serem adicionados
-   * @returns Objeto com array de IDs das notas adicionadas ou mensagem de erro
+   * Adds multiple notes to Anki
+   * @param notes Array of note objects to be added
+   * @returns Object with array of added note IDs or error message
    */
   static async addNotes(notes: AnkiNote[]): Promise<{ result: number[] | null; error: string | undefined }> {
     try {
-      // Verificar se o Anki está rodando
+      // Check if Anki is running
       const isRunning = await AnkiRepository.isAnkiRunning();
       if (!isRunning) {
-        Logger.error("Anki não está rodando");
+        Logger.error("Anki is not running");
         return {
           result: null,
           error:
-            "O Anki não está rodando ou o AnkiConnect não está instalado. Por favor, abra o Anki e verifique se o AnkiConnect está instalado. Para instalar o AnkiConnect, abra o Anki, vá em Ferramentas > Complementos > Obter Complementos e digite o código 2055492159.",
+            "Anki is not running or AnkiConnect is not installed. Please open Anki and verify that AnkiConnect is installed. To install AnkiConnect, open Anki, go to Tools > Add-ons > Get Add-ons and enter the code 2055492159.",
         };
       }
 
-      // Verificar se há notas para adicionar
+      // Check if there are notes to add
       if (!notes || notes.length === 0) {
-        Logger.error("Nenhuma nota para adicionar");
-        return { result: null, error: "Nenhuma nota para adicionar" };
+        Logger.error("No notes to add");
+        return { result: null, error: "No notes to add" };
       }
 
-      // Adicionar as notas
+      // Add the notes
       const response = await AnkiRepository.addNotes(notes);
 
       if (response.error) {
-        Logger.error(`Erro ao adicionar notas: ${response.error}`);
+        Logger.error(`Error adding notes: ${response.error}`);
         return { result: null, error: response.error };
       }
 
       return { result: response.result, error: undefined };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(`Erro ao adicionar notas: ${errorMessage}`);
+      Logger.error(`Error adding notes: ${errorMessage}`);
       return { result: null, error: errorMessage };
     }
   }
 
   /**
-   * Obtém a lista de decks disponíveis no Anki
-   * @returns Array de nomes de decks
+   * Gets the list of available decks in Anki
+   * @returns Array of deck names
    */
   static async getDecks(): Promise<string[]> {
     try {
       const response = await AnkiRepository.getDecks();
 
       if (response.error) {
-        Logger.error(`Erro ao obter decks: ${response.error}`);
+        Logger.error(`Error getting decks: ${response.error}`);
         return [];
       }
 
       if (!Array.isArray(response.result)) {
-        Logger.error("Resposta inválida ao obter decks (não é um array)");
+        Logger.error("Invalid response when getting decks (not an array)");
         return [];
       }
 
       return response.result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(`Erro ao obter decks: ${errorMessage}`);
+      Logger.error(`Error getting decks: ${errorMessage}`);
       return [];
     }
   }
 
   /**
-   * Cria um novo deck no Anki
-   * @param deckName Nome do deck a ser criado
-   * @returns true se o deck foi criado com sucesso
+   * Creates a new deck in Anki
+   * @param deckName Name of the deck to be created
+   * @returns true if the deck was created successfully
    */
   static async createDeck(deckName: string): Promise<boolean> {
     try {
       if (!deckName || deckName.trim() === "") {
-        Logger.error("Nome do deck inválido");
+        Logger.error("Invalid deck name");
         return false;
       }
 
       const response = await AnkiRepository.createDeck(deckName);
 
       if (response.error) {
-        Logger.error(`Erro ao criar deck: ${response.error}`);
+        Logger.error(`Error creating deck: ${response.error}`);
         return false;
       }
 
       return true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(`Erro ao criar deck: ${errorMessage}`);
+      Logger.error(`Error creating deck: ${errorMessage}`);
       return false;
     }
   }
 
   /**
-   * Obtém a lista de modelos disponíveis no Anki
-   * @returns Array de nomes de modelos
+   * Gets the list of available models in Anki
+   * @returns Array of model names
    */
   static async getModelNames(): Promise<string[]> {
     try {
       const response = await AnkiRepository.modelNames();
 
       if (response.error) {
-        Logger.error(`Erro ao obter modelos: ${response.error}`);
+        Logger.error(`Error getting models: ${response.error}`);
         return [];
       }
 
       if (!Array.isArray(response.result)) {
-        Logger.error("Resposta inválida ao obter modelos (não é um array)");
+        Logger.error("Invalid response when getting models (not an array)");
         return [];
       }
 
       return response.result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(`Erro ao obter modelos: ${errorMessage}`);
+      Logger.error(`Error getting models: ${errorMessage}`);
       return [];
     }
   }
 
   /**
-   * Obtém os nomes dos campos para um modelo específico
-   * @param modelName Nome do modelo
-   * @returns Array de nomes de campos
+   * Gets the field names for a specific model
+   * @param modelName Name of the model
+   * @returns Array of field names
    */
   static async getModelFieldNames(modelName: string): Promise<string[]> {
     try {
       if (!modelName || modelName.trim() === "") {
-        Logger.error("Nome do modelo inválido");
+        Logger.error("Invalid model name");
         return [];
       }
 
       const response = await AnkiRepository.modelFieldNames(modelName);
 
       if (response.error) {
-        Logger.error(`Erro ao obter campos do modelo: ${response.error}`);
+        Logger.error(`Error getting model fields: ${response.error}`);
         return [];
       }
 
       if (!Array.isArray(response.result)) {
-        Logger.error("Resposta inválida ao obter campos do modelo (não é um array)");
+        Logger.error("Invalid response when getting model fields (not an array)");
         return [];
       }
 
       return response.result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      Logger.error(`Erro ao obter campos do modelo: ${errorMessage}`);
+      Logger.error(`Error getting model fields: ${errorMessage}`);
       return [];
     }
   }

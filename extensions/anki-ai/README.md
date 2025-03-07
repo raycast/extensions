@@ -29,21 +29,25 @@ To use the Anki AI extension, you'll need:
 The Anki AI extension offers several features to make your flashcard creation process more efficient:
 
 ### AI-Powered Flashcard Generation
+
 - Transform any text into high-quality flashcards using artificial intelligence
 - Advanced algorithms identify important concepts and create relevant questions
 - Customize the number of flashcards generated for each text
 
 ### Multiple Language Support
+
 - Compatible with English, Portuguese, and Spanish
 - Interface adapted to different languages
 - Content generation respecting linguistic particularities
 
 ### Customization and Configuration
+
 - Configure specific Anki decks and models
 - Customize AI prompts according to your study needs
 - Control over the format and style of generated flashcards
 
 ### Additional Features
+
 - Automatic tag generation for better organization
 - Preview and edit flashcards before exporting
 - Enhance existing flashcards with AI suggestions
@@ -69,6 +73,7 @@ Follow these steps to install and configure the Anki AI extension:
 ### Initial Configuration
 
 After installation, configure the extension:
+
 1. Open Raycast and type "Anki AI Settings"
 2. Configure your basic preferences (language, AI model, default deck)
 3. Verify the connection with Anki using the "Test Connection" option
@@ -96,6 +101,7 @@ The Anki AI extension offers a comprehensive set of configuration options to mee
 - **Enable Tags**: When enabled, the AI will automatically generate tags for flashcards based on the content of the text. This facilitates organization and retrieval of cards in Anki.
 
 - **Custom Prompt Template**: Customize the prompt sent to the AI, allowing you to adjust the type and style of generated flashcards. Example:
+
   ```
   Generate [NUMBER] flashcards in question/answer format about the following text, focusing on the main concepts:
   [TEXT]
@@ -108,15 +114,19 @@ The Anki AI extension offers a comprehensive set of configuration options to mee
 _Note: Images will be added in a future update_
 
 ### Main Screen
+
 Here the main interface of the extension will be displayed, showing the text input field and action buttons.
 
 ### Generation Process
+
 This capture will show the flashcard generation process in progress.
 
 ### Flashcard Review
+
 Image of the review and editing screen for flashcards before exporting to Anki.
 
 ### Settings
+
 Capture of the extension settings screen.
 
 ## Usage Section
@@ -143,16 +153,19 @@ Capture of the extension settings screen.
 ### Usage Examples
 
 **Scientific Article Study**
+
 1. Copy an abstract or important section
 2. Generate flashcards focused on methodology and results
 3. Export to a specific deck for spaced repetition
 
 **Language Learning**
+
 1. Paste a text in the language you're learning
 2. Configure the template to focus on vocabulary or grammar
 3. Review and export to your language deck
 
 **Exam Review**
+
 1. Insert your class notes
 2. Adjust the maximum number of flashcards to a higher number
 3. Organize with specific tags by subject
@@ -161,19 +174,22 @@ Capture of the extension settings screen.
 
 ### Common Problems and Solutions
 
-- **Anki connection error**: 
+- **Anki connection error**:
+
   - Check if Anki is open and the AnkiConnect plugin is installed
   - Confirm that the configured port (default: 8765) matches AnkiConnect's
   - Try restarting both Anki and Raycast
   - Check if there are firewalls blocking the local connection
 
-- **No flashcards generated**: 
+- **No flashcards generated**:
+
   - Try with a longer or more specific text
   - Check if the selected AI model is available
   - Increase the minimum number of flashcards in the settings
   - Try texts with more structured or educational content
 
-- **Low quality flashcards**: 
+- **Low quality flashcards**:
+
   - Try adjusting the custom prompt template
   - Use a more advanced AI model
   - Provide texts with clearer and more defined concepts
@@ -188,6 +204,7 @@ Capture of the extension settings screen.
 ### Logs and Diagnostics
 
 If you continue to experience problems:
+
 1. Enable Debug Mode in the settings
 2. Reproduce the problem
 3. Access the logs at: `~/Library/Logs/Raycast/Extensions/anki-ai.log`

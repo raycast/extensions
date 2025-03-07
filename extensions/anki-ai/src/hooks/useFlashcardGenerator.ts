@@ -112,24 +112,22 @@ export function useFlashcardGenerator() {
     try {
       setIsLoading(true);
 
-      // Primeiro, verificar a conexão com o Anki
+      // First, check the connection with Anki
       const connectionStatus = await AnkiRepository.getConnectionStatus();
 
       if (!connectionStatus.ankiRunning || !connectionStatus.ankiConnectAvailable) {
         showToast({
           style: Toast.Style.Failure,
-          title: "Erro de conexão com o Anki",
-          message: connectionStatus.message || "Verifique se o Anki está aberto e o AnkiConnect está instalado",
+          title: "Anki connection error",
+          message: connectionStatus.message || "Check if Anki is open and AnkiConnect is installed",
         });
         return false;
       }
 
-      // Preparar flashcards para exportação
-      Logger.debug(
-        `Exportando ${selectedCards.length} flashcards para o deck "${deckName}" usando modelo "${modelName}"`,
-      );
+      // Prepare flashcards for export
+      Logger.debug(`Exporting ${selectedCards.length} flashcards to deck "${deckName}" using model "${modelName}"`);
 
-      // Converter flashcards do formato do Raycast para o formato aceito pelo AnkiRepository
+      // Convert flashcards from Raycast format to the format accepted by AnkiRepository
       const ankiFlashcards = selectedCards.map((card) => ({
         front: card.front,
         back: card.back,
@@ -139,7 +137,7 @@ export function useFlashcardGenerator() {
         difficulty: card.difficulty,
       }));
 
-      // Adicionar flashcards usando o método melhorado
+      // Add flashcards using the improved method
       const result = await AnkiRepository.addFlashcards(ankiFlashcards, deckName, modelName, {
         tags: tags,
         allowDuplicates: false,
@@ -148,14 +146,14 @@ export function useFlashcardGenerator() {
       if (!result.success) {
         showToast({
           style: Toast.Style.Failure,
-          title: "Erro ao adicionar flashcards",
+          title: "Error adding flashcards",
           message: result.message,
         });
-        Logger.error("Detalhes do erro:", result.details);
+        Logger.error("Error details:", result.details);
         return false;
       }
 
-      // Salvar os parâmetros de exportação para uso futuro
+      // Save export parameters for future use
       const exportParams: FlashcardExportParameters = {
         deckName,
         modelName,
@@ -169,18 +167,18 @@ export function useFlashcardGenerator() {
 
       showToast({
         style: Toast.Style.Success,
-        title: "Flashcards adicionados ao Anki",
-        message: `${selectedCards.length} flashcards adicionados ao deck "${deckName}"`,
+        title: "Flashcards added to Anki",
+        message: `${selectedCards.length} flashcards added to deck "${deckName}"`,
       });
 
       return true;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
-      Logger.error("Erro ao adicionar flashcards ao Anki:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      Logger.error("Error adding flashcards to Anki:", error);
 
       showToast({
         style: Toast.Style.Failure,
-        title: "Erro ao adicionar flashcards",
+        title: "Error adding flashcards",
         message: errorMessage,
       });
 
@@ -215,42 +213,42 @@ export function useFlashcardGenerator() {
       setIsLoading(true);
       showToast({
         style: Toast.Style.Animated,
-        title: "Testando conexão com o Anki",
-        message: "Por favor, aguarde...",
+        title: "Testing connection with Anki",
+        message: "Please wait...",
       });
 
-      // Utilizar o novo método de diagnóstico de conexão
+      // Use the new connection diagnostic method
       const connectionStatus = await AnkiRepository.getConnectionStatus();
 
       if (connectionStatus.ankiRunning && connectionStatus.ankiConnectAvailable) {
         showToast({
           style: Toast.Style.Success,
-          title: "Conexão com o Anki estabelecida",
+          title: "Connection with Anki established",
           message: connectionStatus.message,
         });
 
-        // Recarregar decks após conexão bem-sucedida
+        // Reload decks after successful connection
         await loadDecks();
 
         return true;
       } else {
-        // Se o Anki não está rodando, tente instruir o usuário
+        // If Anki is not running, try to instruct the user
         const errorMessage = connectionStatus.message;
         showToast({
           style: Toast.Style.Failure,
-          title: "Erro de conexão com o Anki",
+          title: "Anki connection error",
           message: errorMessage,
         });
 
-        // Se AnkiConnect está instalado mas não acessível, tente recuperar
+        // If AnkiConnect is installed but not accessible, try to recover
         if (connectionStatus.ankiRunning && !connectionStatus.ankiConnectAvailable) {
           try {
-            // Tentar recuperar a conexão
+            // Try to recover the connection
             const recoveryResult = await AnkiRepository.attemptConnectionRecovery();
             if (recoveryResult.success) {
               showToast({
                 style: Toast.Style.Success,
-                title: "Conexão recuperada",
+                title: "Connection recovered",
                 message: recoveryResult.message,
               });
               await loadDecks();
@@ -264,11 +262,11 @@ export function useFlashcardGenerator() {
         return false;
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
-      Logger.error("Erro ao testar conexão com o Anki:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      Logger.error("Error testing connection with Anki:", error);
       showToast({
         style: Toast.Style.Failure,
-        title: "Erro ao testar conexão com o Anki",
+        title: "Error testing connection with Anki",
         message: errorMessage,
       });
       return false;

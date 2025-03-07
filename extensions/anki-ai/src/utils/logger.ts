@@ -6,14 +6,14 @@ export class Logger {
     ERROR: 3,
   };
 
-  // Nível atual de log, por padrão mostra INFO e acima
+  // Current log level, by default shows INFO and above
   private static currentLogLevel = Logger.LOG_LEVELS.INFO;
 
-  // Flag para modo de depuração
+  // Debug mode flag
   private static debugMode = false;
 
   /**
-   * Define o nível de log atual
+   * Sets the current log level
    */
   static setLogLevel(level: number) {
     if (level >= 0 && level <= 3) {
@@ -22,8 +22,8 @@ export class Logger {
   }
 
   /**
-   * Ativa ou desativa o modo de depuração
-   * Quando ativado, define o nível de log para DEBUG
+   * Enables or disables debug mode
+   * When enabled, sets the log level to DEBUG
    */
   static setDebugMode(enabled: boolean) {
     this.debugMode = enabled;
@@ -35,14 +35,14 @@ export class Logger {
   }
 
   /**
-   * Verifica se o modo de depuração está ativado
+   * Checks if debug mode is enabled
    */
   static isDebugMode(): boolean {
     return this.debugMode;
   }
 
   /**
-   * Log de depuração com detalhes adicionais
+   * Debug log with additional details
    */
   static debug(message: string, data?: unknown) {
     if (this.currentLogLevel <= Logger.LOG_LEVELS.DEBUG) {
@@ -52,7 +52,7 @@ export class Logger {
   }
 
   /**
-   * Log informativo para acompanhamento normal de operações
+   * Informational log for normal operation tracking
    */
   static info(message: string, data?: unknown) {
     if (this.currentLogLevel <= Logger.LOG_LEVELS.INFO) {
@@ -62,7 +62,7 @@ export class Logger {
   }
 
   /**
-   * Log de aviso para situações importantes mas não críticas
+   * Warning log for important but non-critical situations
    */
   static warn(message: string, data?: unknown) {
     if (this.currentLogLevel <= Logger.LOG_LEVELS.WARN) {
@@ -72,7 +72,7 @@ export class Logger {
   }
 
   /**
-   * Log de erro para situações problemáticas que requerem atenção
+   * Error log for problematic situations that require attention
    */
   static error(message: string, data?: unknown) {
     if (this.currentLogLevel <= Logger.LOG_LEVELS.ERROR) {
@@ -82,21 +82,21 @@ export class Logger {
   }
 
   /**
-   * Log específico para requisições do Anki para facilitar diagnóstico
+   * Specific log for Anki requests to facilitate diagnosis
    */
   static ankiRequest(action: string, params: Record<string, unknown>, response?: unknown) {
     if (this.currentLogLevel <= Logger.LOG_LEVELS.DEBUG) {
       const timestamp = new Date().toISOString();
       if (response) {
-        console.debug(`[${timestamp}] [ANKI] ${action} - Resposta:`, response);
+        console.debug(`[${timestamp}] [ANKI] ${action} - Response:`, response);
       } else {
-        console.debug(`[${timestamp}] [ANKI] ${action} - Parâmetros:`, params);
+        console.debug(`[${timestamp}] [ANKI] ${action} - Parameters:`, params);
       }
     }
   }
 
   /**
-   * Log específico para operações de IA para facilitar diagnóstico
+   * Specific log for AI operations to facilitate diagnosis
    */
   static aiOperation(operation: string, details?: unknown) {
     if (this.currentLogLevel <= Logger.LOG_LEVELS.DEBUG) {
@@ -106,12 +106,12 @@ export class Logger {
   }
 
   /**
-   * Log específico para preferências do usuário
+   * Specific log for user preferences
    */
   static preferences(preferences: Record<string, unknown>) {
     if (this.currentLogLevel <= Logger.LOG_LEVELS.DEBUG) {
       const timestamp = new Date().toISOString();
-      console.debug(`[${timestamp}] [PREFS] Preferências carregadas:`, preferences);
+      console.debug(`[${timestamp}] [PREFS] Preferences loaded:`, preferences);
     }
   }
 }

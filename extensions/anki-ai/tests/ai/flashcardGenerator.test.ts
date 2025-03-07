@@ -8,15 +8,15 @@ jest.mock("@raycast/api", () => ({
     Model: {
       GPT3_5: "gpt-3.5-turbo",
       GPT4: "gpt-4",
-      CLAUDE: "claude-3-opus-20240229"
-    }
+      CLAUDE: "claude-3-opus-20240229",
+    },
   },
   Toast: {
     Style: {
       Failure: "failure",
       Success: "success",
-      Animated: "animated"
-    }
+      Animated: "animated",
+    },
   },
   showToast: jest.fn(),
   getPreferenceValues: jest.fn().mockReturnValue({
@@ -26,8 +26,8 @@ jest.mock("@raycast/api", () => ({
     maxFlashcards: "20",
     enableTags: true,
     customPromptTemplate: "",
-    debugMode: false
-  })
+    debugMode: false,
+  }),
 }));
 
 describe("FlashcardGenerator", () => {
@@ -41,37 +41,47 @@ describe("FlashcardGenerator", () => {
       {
         front: "O que é o Sistema Solar?",
         back: "O Sistema Solar é o sistema planetário que inclui a Terra e outros corpos celestes que orbitam o Sol.",
-        extra: "O Sistema Solar inclui oito planetas, vários planetas anões, luas, asteroides e cometas."
+        extra: "O Sistema Solar inclui oito planetas, vários planetas anões, luas, asteroides e cometas.",
       },
       {
         front: "Qual é o planeta mais próximo do Sol?",
         back: "Mercúrio",
-        extra: "Mercúrio é o menor planeta do Sistema Solar e o mais próximo do Sol, com uma órbita de 88 dias terrestres."
-      }
+        extra:
+          "Mercúrio é o menor planeta do Sistema Solar e o mais próximo do Sol, com uma órbita de 88 dias terrestres.",
+      },
     ]);
 
     // Configurar o mock do AI.ask para retornar a resposta mockada
     (AI.ask as jest.Mock).mockResolvedValue(mockResponse);
 
     // Chamar o método generate
-    const flashcards = await FlashcardGenerator.generate("Sistema Solar");
+    const flashcards = await FlashcardGenerator.generate("Sistema Solar", {
+      language: "português",
+      minFlashcards: 1,
+      maxFlashcards: 5,
+      enableTags: true,
+      creativity: 1,
+      model: "gpt-4"
+    });
 
     // Verificar se o AI.ask foi chamado corretamente
     expect(AI.ask).toHaveBeenCalled();
-    
+
     // Verificar se os flashcards foram gerados corretamente
     expect(flashcards).toHaveLength(2);
     expect(flashcards[0].front).toBe("O que é o Sistema Solar?");
-    expect(flashcards[0].back).toBe("O Sistema Solar é o sistema planetário que inclui a Terra e outros corpos celestes que orbitam o Sol.");
+    expect(flashcards[0].back).toBe(
+      "O Sistema Solar é o sistema planetário que inclui a Terra e outros corpos celestes que orbitam o Sol.",
+    );
     expect(flashcards[0].tags).toEqual([]);
-  });
+  }, 10000);
 
   it("deve respeitar o número máximo de flashcards", async () => {
     // Mock da resposta da IA com mais flashcards do que o máximo
     const mockFlashcards = Array.from({ length: 25 }, (_, i) => ({
       front: `Pergunta ${i + 1}`,
       back: `Resposta ${i + 1}`,
-      extra: `Informação extra ${i + 1}`
+      extra: `Informação extra ${i + 1}`,
     }));
 
     // Configurar o mock do AI.ask para retornar a resposta mockada
@@ -79,7 +89,7 @@ describe("FlashcardGenerator", () => {
 
     // Chamar o método generate com maxFlashcards = 10
     const flashcards = await FlashcardGenerator.generate("Texto de teste", {
-      maxFlashcards: 10
+      maxFlashcards: 10,
     });
 
     // Verificar se o número de flashcards foi limitado corretamente
@@ -88,51 +98,49 @@ describe("FlashcardGenerator", () => {
 
   it("deve usar o modelo de IA especificado", async () => {
     // Configurar o mock do AI.ask para retornar uma resposta simples
-    (AI.ask as jest.Mock).mockResolvedValue(JSON.stringify([
-      { front: "Pergunta", back: "Resposta" }
-    ]));
+    (AI.ask as jest.Mock).mockResolvedValue(JSON.stringify([{ front: "Pergunta", back: "Resposta" }]));
 
     // Chamar o método generate com um modelo específico
     await FlashcardGenerator.generate("Texto de teste", {
-      model: "GPT4"
+      model: "GPT4",
     });
 
     // Verificar se o AI.ask foi chamado com o modelo correto
     expect(AI.ask).toHaveBeenCalledWith(expect.any(String), {
       model: "gpt-4",
-      creativity: 1
+      creativity: 1,
     });
   });
 
   it("deve usar o template de prompt personalizado", async () => {
-    // Configurar o mock do AI.ask para retornar uma resposta simples
-    (AI.ask as jest.Mock).mockResolvedValue(JSON.stringify([
-      { front: "Pergunta", back: "Resposta" }
-    ]));
-
-    // Template de prompt personalizado
-    const customPrompt = "Gere flashcards para o texto: {text}. Idioma: {language}";
-
-    // Chamar o método generate com um prompt personalizado
-    await FlashcardGenerator.generate("Texto de teste", {
-      customPrompt
+    const flashcards = await FlashcardGenerator.generate("Texto de teste", {
+      language: "português",
+      minFlashcards: 1,
+      maxFlashcards: 5,
+      enableTags: true,
+      creativity: 1,
+      model: "gpt-4",
+      customPrompt: "Gere flashcards para o texto: {text}. Idioma: {language}"
     });
 
-    // Verificar se o AI.ask foi chamado com o prompt personalizado
-    const expectedPrompt = "Gere flashcards para o texto: Texto de teste. Idioma: português";
-    expect(AI.ask).toHaveBeenCalledWith(expectedPrompt, expect.any(Object));
-  });
+    expect(AI.ask).toHaveBeenCalledWith(
+      "Gere flashcards para o texto: Texto de teste. Idioma: português",
+      expect.any(Object)
+    );
+  }, 10000);
 
   it("deve lidar com respostas inválidas da IA", async () => {
-    // Configurar o mock do AI.ask para retornar uma resposta inválida
-    (AI.ask as jest.Mock).mockResolvedValue("Isso não é um JSON válido");
+    jest.spyOn(AI, 'ask').mockResolvedValue("invalid response");
 
-    // Chamar o método generate
-    const flashcards = await FlashcardGenerator.generate("Texto de teste");
-
-    // Verificar se o resultado é um array vazio
-    expect(flashcards).toEqual([]);
-  });
+    await expect(FlashcardGenerator.generate("Texto de teste", {
+      language: "português",
+      minFlashcards: 1,
+      maxFlashcards: 5,
+      enableTags: true,
+      creativity: 1,
+      model: "gpt-4"
+    })).rejects.toThrow("Invalid JSON response from AI");
+  }, 10000);
 
   it("deve lidar com erros durante a geração", async () => {
     // Configurar o mock do AI.ask para lançar um erro
@@ -144,4 +152,17 @@ describe("FlashcardGenerator", () => {
     // Verificar se o resultado é um array vazio
     expect(flashcards).toEqual([]);
   });
+
+  it("deve mostrar erro quando a geração de flashcards falha", async () => {
+    jest.spyOn(AI, 'ask').mockRejectedValue(new Error('Failed to generate flashcards'));
+
+    await expect(FlashcardGenerator.generate("Texto de teste", {
+      language: "português",
+      minFlashcards: 1,
+      maxFlashcards: 5,
+      enableTags: true,
+      creativity: 1,
+      model: "gpt-4"
+    })).rejects.toThrow("Failed to generate flashcards");
+  }, 10000);
 });

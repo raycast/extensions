@@ -1,6 +1,7 @@
 import { AnkiNote } from "./ankiTypes";
 import axios from "axios";
 import { Logger } from "../utils/logger";
+import { NetworkHelper } from "../utils/networkHelper";
 
 const ANKI_CONNECT_URL = "http://localhost:8765";
 
@@ -8,7 +9,12 @@ export class AnkiRepository {
   /**
    * Function to test if AnkiConnect is working correctly
    */
-  static async testConnection(): Promise<{ success: boolean; message: string; installed: boolean; error?: string }> {
+  static async testConnection(): Promise<{
+    success: boolean;
+    message: string;
+    installed: boolean;
+    error?: string;
+  }> {
     try {
       Logger.debug("Testing connection to Anki...");
 
@@ -25,7 +31,7 @@ export class AnkiRepository {
       }
 
       // Test the connection with a simple version check
-      const response = await this.request("version", {}, 6, {
+      const response = await this.request<{ version: number }>("version", {}, 6, {
         timeout: 5000,
         retries: 2,
       });
@@ -40,7 +46,7 @@ export class AnkiRepository {
         };
       }
 
-      Logger.debug(`Connection successful, AnkiConnect version: ${response.result}`);
+      Logger.debug(`Connection successful, AnkiConnect version: ${response.result.version}`);
       return {
         success: true,
         message: "Connected to Anki successfully",
@@ -59,163 +65,203 @@ export class AnkiRepository {
   }
 
   /**
-   * Check if Anki is running
+   * Verificar se o Anki está em execução
+   * Usa timeout reduzido e backoff para ser mais rápido
    */
   static async isAnkiRunning(): Promise<boolean> {
     try {
-      Logger.debug("Checking if Anki is running...");
+      Logger.debug("Verificando se o Anki está em execução...");
 
-      // Try a POST request with a short timeout
-      try {
-        const response = await axios.post(
-          ANKI_CONNECT_URL,
-          { action: "version", version: 6 },
-          {
-            headers: { "Content-Type": "application/json" },
-            timeout: 2000, // Increased timeout for better reliability
+      return await NetworkHelper.withRetry(
+        async () => {
+          try {
+            const response = await axios.post(
+              ANKI_CONNECT_URL,
+              { action: "version", version: 6 },
+              {
+                headers: { "Content-Type": "application/json" },
+                timeout: 5000, // Aumentado timeout para evitar socket hang up
+              },
+            );
+
+            if (response && response.status === 200) {
+              Logger.debug("Anki está em execução - resposta recebida com sucesso");
+              return true;
+            }
+
+            return false;
+          } catch (innerError) {
+            // Capturar e tratar erros específicos para fornecer mensagens mais claras
+            if (innerError instanceof Error) {
+              if (innerError.message.includes("socket hang up")) {
+                Logger.debug("Socket hang up detectado, provavelmente timeout - Anki pode estar ocupado");
+                throw new Error("Anki timeout: socket hang up");
+              }
+            }
+            throw innerError; // Re-throw outros erros para serem tratados pelo NetworkHelper
+          }
+        },
+        {
+          maxRetries: 3, // Aumentado número de tentativas
+          baseDelay: 1000,
+          timeout: 5000, // Aumentado timeout geral
+          additionalTimeoutPerRetry: 3000, // Aumentado timeout adicional por tentativa
+          shouldRetry: (error) => {
+            if (!(error instanceof Error)) return false;
+
+            // Incluir socket hang up explicitamente
+            return (
+              error.message.includes("ECONNREFUSED") ||
+              error.message.includes("ECONNRESET") ||
+              error.message.includes("timeout") ||
+              error.message.includes("ETIMEDOUT") ||
+              error.message.includes("socket hang up")
+            );
           },
-        );
-
-        // If we get a response, Anki is running
-        if (response.status === 200) {
-          Logger.debug("Anki is running - received successful response");
-          return true;
-        }
-      } catch (error) {
-        // Check specific error codes
-        if (error.code === "ECONNREFUSED") {
-          Logger.debug("Anki is not running - connection refused");
-          return false;
-        }
-
-        if (error.code === "ECONNRESET") {
-          Logger.debug("Connection reset - trying one more time with longer timeout");
-          // Try one more time with a longer timeout
-          try {
-            const response = await axios.post(
-              ANKI_CONNECT_URL,
-              { action: "version", version: 6 },
-              {
-                headers: { "Content-Type": "application/json" },
-                timeout: 5000, // Even longer timeout for second attempt
-              },
-            );
-
-            if (response.status === 200) {
-              Logger.debug("Anki is running (second attempt successful)");
-              return true;
-            }
-          } catch (secondError) {
-            Logger.debug("Second attempt failed - Anki may be having issues");
-            return false;
-          }
-        }
-
-        // For timeout errors, try one more time
-        if (error.code === "ETIMEDOUT" || error.message.includes("timeout")) {
-          Logger.debug("Connection timed out - trying one more time");
-          try {
-            const response = await axios.post(
-              ANKI_CONNECT_URL,
-              { action: "version", version: 6 },
-              {
-                headers: { "Content-Type": "application/json" },
-                timeout: 5000,
-              },
-            );
-
-            if (response.status === 200) {
-              Logger.debug("Anki is running (retry after timeout successful)");
-              return true;
-            }
-          } catch (timeoutRetryError) {
-            Logger.debug("Second timeout attempt failed - Anki may be having issues");
-            return false;
-          }
-        }
-
-        // For any other error, log it and return false
-        Logger.debug(`Anki connection check failed with error: ${error.message}`);
-        return false;
-      }
-
-      return false;
+        },
+      );
     } catch (error) {
-      Logger.error(`Unexpected error checking if Anki is running: ${error}`);
+      Logger.error(
+        "Falha ao verificar se o Anki está em execução:",
+        error instanceof Error ? error.message : String(error),
+      );
       return false;
     }
   }
 
   /**
-   * Função de requisição base para o AnkiConnect
-   * Inclui retry automático e melhor tratamento de erros de conexão
+   * Método central para fazer requisições ao AnkiConnect
+   * Implementa retentativas automáticas e tratamento de erros aprimorado
+   *
+   * @param action Nome da ação a ser executada
+   * @param params Parâmetros da ação
+   * @param version Versão da API (padrão: 6)
+   * @param options Opções adicionais de configuração
+   * @returns Resultado da ação ou erro
    */
-  private static async request<T>(
+  static async request<T>(
     action: string,
-    params = {},
-    version = 6,
+    params: object = {},
+    version: number = 6,
     options: {
       timeout?: number;
       retries?: number;
       delay?: number;
+      onError?: (error: unknown) => boolean;
     } = {},
-  ): Promise<{
-    result?: T;
-    error?: string;
-  }> {
-    const { timeout = 30000, retries = 4, delay = 1000 } = options;
-    let lastError: unknown;
+  ): Promise<{ result?: T; error?: string }> {
+    const timeout = options.timeout ?? 20000; // Aumentado timeout padrão para 20s
+    const retries = options.retries ?? 3;
+    const delay = options.delay ?? 1000;
+    const onError = options.onError;
 
-    // Tentar até o máximo de retries
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try {
-        const response = await axios.post(
-          "http://localhost:8765",
-          {
-            action,
-            version,
-            params,
-          },
-          {
-            timeout,
-            transitional: {
-              clarifyTimeoutError: true,
-            },
-            maxContentLength: Infinity,
-            maxBodyLength: Infinity,
-          },
-        );
-
-        // Verificar se a resposta é válida
-        if (response.data && typeof response.data === "object") {
-          if (response.data.error) {
-            return { error: response.data.error };
-          }
-          return { result: response.data.result };
-        }
-
-        // Se chegou aqui, a resposta não tem o formato esperado
-        return { error: "Formato de resposta inválido do AnkiConnect" };
-      } catch (error) {
-        lastError = error;
-        const errorMessage = error instanceof Error ? error.message : String(error);
-
-        // Registrar erro com mais detalhes para diagnóstico
-        Logger.error(`Error on attempt ${attempt}/${retries} for action ${action}: ${errorMessage}`);
-
-        // Verificar se devemos tentar novamente
-        if (attempt < retries) {
-          // Esperar um tempo antes de tentar novamente (com backoff exponencial)
-          const backoffDelay = delay * Math.pow(1.5, attempt - 1);
-          Logger.debug(`Retrying in ${backoffDelay}ms... (attempt ${attempt + 1}/${retries})`);
-          await new Promise((resolve) => setTimeout(resolve, backoffDelay));
+    try {
+      // Verificar se o Anki está rodando antes mesmo de tentar fazer a requisição
+      if (action !== "version") {
+        // Evitar chamada recursiva
+        const running = await this.isAnkiRunning();
+        if (!running) {
+          Logger.warn(`Anki não está em execução. Não é possível executar a ação ${action}.`);
+          return { error: "Anki não está em execução. Por favor, inicie o Anki e tente novamente." };
         }
       }
-    }
 
-    // Se chegou aqui, todas as tentativas falharam
-    const errorMessage = lastError instanceof Error ? lastError.message : String(lastError);
-    return { error: `Falha após ${retries} tentativas: ${errorMessage}` };
+      // Utilizar o NetworkHelper para fazer a requisição com retry automático
+      const result = await NetworkHelper.withRetry<{
+        result?: T;
+        error?: string;
+      }>(
+        async () => {
+          Logger.debug(`Executando ação ${action} no AnkiConnect`);
+
+          try {
+            const response = await axios.post(
+              ANKI_CONNECT_URL,
+              {
+                action,
+                version,
+                params,
+              },
+              {
+                timeout,
+                transitional: {
+                  clarifyTimeoutError: true,
+                },
+                maxContentLength: Infinity,
+                maxBodyLength: Infinity,
+              },
+            );
+
+            // Verificar se a resposta é válida
+            if (response.data && typeof response.data === "object") {
+              if (response.data.error) {
+                return { error: response.data.error };
+              }
+              return { result: response.data.result };
+            }
+
+            // Se chegou aqui, a resposta não tem o formato esperado
+            throw new Error("Formato de resposta inválido do AnkiConnect");
+          } catch (axiosError) {
+            // Tratamento especial para socket hang up
+            if (
+              axiosError instanceof Error &&
+              (axiosError.message.includes("socket hang up") || axiosError.message.includes("ECONNRESET"))
+            ) {
+              Logger.warn(`Conexão interrompida (socket hang up) ao executar ${action}. Esta é uma falha temporária.`);
+              // Aguardar um pouco mais antes de tentar novamente para dar tempo ao Anki de se recuperar
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+            }
+            throw axiosError; // Re-throw para ser tratado pelo NetworkHelper
+          }
+        },
+        {
+          maxRetries: retries,
+          baseDelay: delay,
+          timeout,
+          backoffFactor: 1.5,
+          additionalTimeoutPerRetry: 5000, // Aumenta timeout por tentativa
+          shouldRetry: (error) => {
+            // Callback específico de erro tem precedência
+            if (onError && onError(error)) {
+              return true;
+            }
+
+            // Definir quais erros devem causar retentativa
+            const errorMsg = error.message.toLowerCase();
+            const shouldRetry =
+              errorMsg.includes("timeout") ||
+              errorMsg.includes("econnrefused") ||
+              errorMsg.includes("econnreset") ||
+              errorMsg.includes("socket hang up") ||
+              errorMsg.includes("network") ||
+              errorMsg.includes("connection");
+
+            if (shouldRetry) {
+              Logger.debug(`Erro recuperável detectado ao executar ${action}: ${errorMsg}. Tentando novamente...`);
+            }
+
+            return shouldRetry;
+          },
+        },
+      );
+
+      return result;
+    } catch (error) {
+      // Registro detalhado do erro para diagnóstico
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(`Falha ao executar ação ${action} no AnkiConnect: ${errorMessage}`);
+
+      // Mensagem de erro mais amigável em português para o usuário
+      if (errorMessage.includes("socket hang up")) {
+        return {
+          error:
+            "Comunicação com o Anki foi interrompida. Por favor, verifique se o Anki está em execução e se o AnkiConnect está instalado corretamente.",
+        };
+      }
+
+      return { error: errorMessage };
+    }
   }
 
   /**
@@ -224,82 +270,35 @@ export class AnkiRepository {
    */
   static async modelNames(): Promise<string[]> {
     try {
-      Logger.debug("Solicitando lista de modelos do Anki...");
+      Logger.debug("Obtendo lista de modelos disponíveis no Anki");
 
-      // Primeiro verificar se o Anki está em execução
-      const isRunning = await this.isAnkiRunning();
-      if (!isRunning) {
+      // Verificar se o Anki está rodando
+      if (!(await this.isAnkiRunning())) {
         Logger.warn("Não foi possível obter modelos porque o Anki não está em execução");
         return [];
       }
 
-      // Tentar obter os modelos com mais timeout e retries
-      const response = await this.request<unknown>("modelNames", {}, 6, {
-        timeout: 20000, // Aumentado para 20s
-        retries: 5, // Aumentado para 5 tentativas
+      const response = await this.request<string[]>("modelNames", {}, 6, {
+        timeout: 15000,
+        retries: 4,
+        delay: 1000,
       });
 
       if (response.error) {
-        Logger.error(`Erro ao obter nomes de modelos: ${response.error}`);
-
-        // Tentar recuperar a conexão se for um erro conhecido
-        if (
-          response.error.includes("ECONNRESET") ||
-          response.error.includes("socket hang up") ||
-          response.error.includes("timeout")
-        ) {
-          Logger.debug("Tentando recuperar a conexão antes de buscar modelos novamente...");
-
-          // Pausa curta para estabilizar
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-
-          // Tentar novamente com configurações mais conservadoras
-          const retryResponse = await this.request<unknown>("modelNames", {}, 6, {
-            timeout: 30000,
-            retries: 3,
-            delay: 2000, // Atraso maior entre tentativas
-          });
-
-          if (!retryResponse.error && Array.isArray(retryResponse.result)) {
-            Logger.debug(`Modelos recuperados após nova tentativa: ${retryResponse.result.length}`);
-            return retryResponse.result.filter((item) => typeof item === "string") as string[];
-          }
-        }
-
-        // Se chegou aqui, falhou novamente ou não era um erro recuperável
-        return this.getFallbackModels();
+        throw new Error(`Erro ao obter modelos: ${response.error}`);
       }
 
-      // Verificar que o resultado é um array
-      const result = response.result;
-      if (!Array.isArray(result)) {
-        Logger.error(`Resposta inesperada ao obter modelos: ${JSON.stringify(result)}`);
-        return this.getFallbackModels();
+      if (!response.result || !Array.isArray(response.result)) {
+        Logger.warn("Resposta inválida ao obter modelos. Recebido: " + typeof response.result);
+        return [];
       }
 
       // Filtrar para garantir que só temos strings
-      const models = result.filter((item) => typeof item === "string") as string[];
-
-      // Se não houver nenhum modelo, retornar modelos padrão
-      if (models.length === 0) {
-        Logger.warn("Nenhum modelo foi retornado pelo Anki, usando modelos padrão");
-        return this.getFallbackModels();
-      }
-
-      Logger.debug(`${models.length} modelos recuperados do Anki com sucesso`);
-      return models;
+      return response.result.filter((item) => typeof item === "string") as string[];
     } catch (error) {
-      Logger.error(`Exceção ao obter nomes de modelos: ${error}`);
-      return this.getFallbackModels();
+      Logger.error(`Exceção ao obter modelos: ${error instanceof Error ? error.message : String(error)}`);
+      return [];
     }
-  }
-
-  /**
-   * Fornece uma lista mínima de modelos padrão quando não é possível obter do Anki
-   */
-  private static getFallbackModels(): string[] {
-    Logger.debug("Usando lista de modelos padrão");
-    return ["Basic", "Basic (and reversed card)", "Cloze", "Raycast Flashcards", "Raycast Basic"];
   }
 
   /**
@@ -329,197 +328,6 @@ export class AnkiRepository {
     } catch (error) {
       Logger.error(`Exceção ao obter decks: ${error}`);
       return [];
-    }
-  }
-
-  /**
-   * Verificar se o Anki está em execução
-   * Usa timeout reduzido e backoff para ser mais rápido
-   */
-  static async isAnkiRunning(): Promise<boolean> {
-    try {
-      // Tentativa com timeout reduzido para resposta rápida
-      const response = await this.request<number>("version", {}, 6, {
-        timeout: 5000,
-        retries: 2,
-        delay: 500,
-      });
-
-      return !response.error;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  /**
-   * Cria um modelo personalizado para Raycast Flashcards se não existir
-   */
-  static async createRaycastFlashcardsModelIfNeeded(): Promise<{
-    success?: boolean;
-    error?: string;
-  }> {
-    try {
-      Logger.debug("Iniciando verificação do modelo Raycast Flashcards");
-
-      // Primeiro, verificar se o Anki está rodando
-      const isRunning = await this.isAnkiRunning();
-      if (!isRunning) {
-        Logger.warn("Anki não está rodando. Não é possível criar o modelo.");
-        return {
-          error: "Anki não está rodando. Por favor, abra o Anki e tente novamente.",
-        };
-      }
-
-      // Verificar se o modelo já existe
-      const modelsResponse = await this.request<unknown>("modelNames", {}, 6, {
-        retries: 3,
-        timeout: 15000,
-      });
-
-      if (modelsResponse.error) {
-        Logger.error(`Erro ao obter lista de modelos: ${modelsResponse.error}`);
-        return { error: `Erro ao verificar modelos: ${modelsResponse.error}` };
-      }
-
-      // Garantir que models é um array
-      const models = Array.isArray(modelsResponse.result)
-        ? modelsResponse.result.filter((m) => typeof m === "string")
-        : [];
-
-      Logger.debug(`Modelos disponíveis: ${JSON.stringify(models)}`);
-
-      if (models.includes("Raycast Flashcards")) {
-        Logger.debug("Modelo 'Raycast Flashcards' já existe");
-        return { success: true };
-      }
-
-      // Criar o modelo se não existir
-      Logger.debug("Criando modelo 'Raycast Flashcards'");
-
-      // Definir o modelo
-      const modelFields = ["Front", "Back", "Extra"];
-
-      const css = `.card {
-        font-family: Arial, sans-serif;
-        font-size: 20px;
-        text-align: center;
-        color: black;
-        background-color: white;
-        padding: 20px;
-      }
-      .front {
-        font-weight: bold;
-      }
-      .back {
-        margin-top: 10px;
-      }
-      .extra {
-        font-size: 16px;
-        color: #555;
-        margin-top: 15px;
-        border-top: 1px solid #ddd;
-        padding-top: 10px;
-      }`;
-
-      // Definir os templates
-      const templates = [
-        {
-          name: "Card 1",
-          qfmt: "{{Front}}",
-          afmt: "{{FrontSide}}<hr id=answer><div class='back'>{{Back}}</div>{{#Extra}}<div class='extra'>{{Extra}}</div>{{/Extra}}",
-        },
-      ];
-
-      // Adicionar um pequeno atraso antes de criar o modelo
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Criar o modelo com mais retentativas e timeout maior
-      const createModelResponse = await this.request(
-        "createModel",
-        {
-          modelName: "Raycast Flashcards",
-          inOrderFields: modelFields,
-          css: css,
-          cardTemplates: templates,
-        },
-        6,
-        {
-          retries: 3,
-          timeout: 20000,
-        },
-      );
-
-      if (createModelResponse.error) {
-        Logger.error(`Falha ao criar modelo: ${createModelResponse.error}`);
-        throw new Error(createModelResponse.error);
-      }
-
-      Logger.debug("Modelo 'Raycast Flashcards' criado com sucesso");
-
-      // Verificar se o modelo foi realmente criado
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      return { success: true };
-    } catch (error) {
-      Logger.error("Erro ao criar modelo 'Raycast Flashcards':", error);
-      return {
-        error: error instanceof Error ? error.message : "Erro desconhecido ao criar modelo",
-      };
-    }
-  }
-
-  /**
-   * Criar modelo básico para flashcards
-   * Este é um modelo mais simples que deve funcionar em qualquer instalação do Anki
-   */
-  static async createBasicFlashcardsModel(): Promise<boolean> {
-    try {
-      const modelName = "Raycast Basic";
-
-      // Verificar se o modelo já existe
-      const models = await this.modelNames();
-      if (Array.isArray(models) && models.includes(modelName)) {
-        Logger.debug(`Modelo "${modelName}" já existe.`);
-        return true;
-      }
-
-      // Criar um modelo básico simples com apenas Frente e Verso
-      const response = await this.request<unknown>(
-        "createModel",
-        {
-          modelName,
-          inOrderFields: ["Frente", "Verso"],
-          css: `.card {
-          font-family: arial;
-          font-size: 20px;
-          text-align: center;
-          color: black;
-          background-color: white;
-        }`,
-          cardTemplates: [
-            {
-              Name: "Card 1",
-              Front: "{{Frente}}",
-              Back: "{{Frente}}<hr id=answer>{{Verso}}",
-            },
-          ],
-        },
-        6,
-        {
-          timeout: 15000,
-          retries: 3,
-        },
-      );
-
-      if (response.error) {
-        throw new Error(`Falha ao criar modelo básico: ${response.error}`);
-      }
-
-      Logger.debug(`Modelo básico "${modelName}" criado com sucesso.`);
-      return true;
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      Logger.error(`Erro ao criar modelo básico: ${errorMsg}`);
-      return false;
     }
   }
 
@@ -716,17 +524,7 @@ export class AnkiRepository {
 
       // Adicionar as notas ao Anki
       Logger.debug("Adicionando notas ao Anki...");
-      const addNotesResponse = await this.request<unknown>(
-        "addNotes",
-        {
-          notes,
-        },
-        6,
-        {
-          timeout: 30000,
-          retries: 4,
-        },
-      );
+      const addNotesResponse = await this.addNotes(notes);
 
       if (addNotesResponse.error) {
         Logger.error(`Erro ao adicionar notas: ${addNotesResponse.error}`);
@@ -959,7 +757,7 @@ export class AnkiRepository {
    * Converte flashcards no formato da aplicação para o formato do Anki
    * Mapeia os campos de forma inteligente com base no modelo
    */
-  private static async mapFlashcardToModelFields(
+  public static async mapFlashcardToModelFields(
     flashcard: FlashcardData,
     modelName: string,
     defaultFields?: Record<string, string>,
@@ -1160,5 +958,368 @@ export class AnkiRepository {
     });
 
     return fields;
+  }
+
+  /**
+   * Criar um modelo personalizado para Raycast Flashcards se não existir
+   */
+  static async createRaycastFlashcardsModelIfNeeded(): Promise<{
+    success?: boolean;
+    error?: string;
+  }> {
+    try {
+      Logger.debug("Iniciando verificação do modelo Raycast Flashcards");
+
+      // Primeiro, verificar se o Anki está rodando com timeout aumentado
+      const isRunning = await this.isAnkiRunning();
+      if (!isRunning) {
+        Logger.warn("Anki não está rodando. Não é possível criar o modelo.");
+        return {
+          error: "Anki não está rodando. Por favor, abra o Anki e tente novamente.",
+        };
+      }
+
+      // Verificar se o modelo já existe com timeout estendido
+      const modelsResponse = await this.request<unknown>("modelNames", {}, 6, {
+        retries: 4, // Aumentado número de retentativas
+        timeout: 30000, // Aumentado timeout para 30 segundos
+        delay: 2000, // Aumento no atraso entre tentativas
+        onError: (error) => {
+          Logger.warn(
+            `Erro ao obter lista de modelos, tentando novamente: ${error instanceof Error ? error.message : String(error)}`,
+          );
+          return true; // Sempre tentar novamente em caso de erro
+        },
+      });
+
+      if (modelsResponse.error) {
+        Logger.error(`Erro ao obter lista de modelos: ${modelsResponse.error}`);
+        return { error: `Erro ao verificar modelos: ${modelsResponse.error}` };
+      }
+
+      // Garantir que models é um array
+      const models = Array.isArray(modelsResponse.result)
+        ? modelsResponse.result.filter((m) => typeof m === "string")
+        : [];
+
+      Logger.debug(`Modelos disponíveis: ${JSON.stringify(models)}`);
+
+      if (models.includes("Raycast Flashcards")) {
+        Logger.debug("Modelo 'Raycast Flashcards' já existe");
+        return { success: true };
+      }
+
+      // Criar o modelo se não existir
+      Logger.debug("Criando modelo 'Raycast Flashcards'");
+
+      // Definir o modelo
+      const modelFields = ["Front", "Back", "Extra"];
+
+      const css = `.card {
+        font-family: Arial, sans-serif;
+        font-size: 20px;
+        text-align: center;
+        color: black;
+        background-color: white;
+        padding: 20px;
+      }
+      .front {
+        font-weight: bold;
+      }
+      .back {
+        margin-top: 10px;
+      }
+      .extra {
+        font-size: 16px;
+        color: #555;
+        margin-top: 15px;
+        border-top: 1px solid #ddd;
+        padding-top: 10px;
+      }`;
+
+      // Definir os templates
+      const templates = [
+        {
+          name: "Card 1",
+          qfmt: "{{Front}}",
+          afmt: "{{FrontSide}}<hr id=answer><div class='back'>{{Back}}</div>{{#Extra}}<div class='extra'>{{Extra}}</div>{{/Extra}}",
+        },
+      ];
+
+      // Adicionar um delay maior antes de criar o modelo para garantir que o Anki esteja pronto
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // Criar o modelo com mais retentativas e timeout MUITO maior
+      try {
+        Logger.debug("Enviando solicitação para criar modelo...");
+        const createModelResponse = await NetworkHelper.withRetry(
+          async () => {
+            // Usar o request com timeout ainda maior e mais retentativas
+            return await this.request(
+              "createModel",
+              {
+                modelName: "Raycast Flashcards",
+                inOrderFields: modelFields,
+                css: css,
+                cardTemplates: templates,
+              },
+              6,
+              {
+                retries: 5, // Mais retentativas
+                timeout: 60000, // Timeout de 1 minuto
+                delay: 3000, // Delay maior entre tentativas
+              },
+            );
+          },
+          {
+            maxRetries: 3,
+            baseDelay: 2000,
+            backoffFactor: 2,
+            timeout: 60000,
+            additionalTimeoutPerRetry: 30000,
+            shouldRetry: (error) => {
+              // Incluir socket hang up nos erros para retentativa
+              const errorMsg = error.message.toLowerCase();
+              return (
+                errorMsg.includes("timeout") ||
+                errorMsg.includes("socket hang up") ||
+                errorMsg.includes("econnreset") ||
+                errorMsg.includes("network error")
+              );
+            },
+          },
+        );
+
+        if (createModelResponse.error) {
+          Logger.error(`Falha ao criar modelo: ${createModelResponse.error}`);
+          throw new Error(createModelResponse.error);
+        }
+
+        Logger.debug("Modelo 'Raycast Flashcards' criado com sucesso");
+
+        // Esperar que o Anki processe a criação do modelo
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        return { success: true };
+      } catch (error) {
+        Logger.error(
+          "Erro ao criar modelo 'Raycast Flashcards':",
+          error instanceof Error ? error.message : String(error),
+        );
+        return {
+          error: error instanceof Error ? error.message : "Erro desconhecido ao criar modelo",
+        };
+      }
+    } catch (error) {
+      Logger.error(
+        "Erro ao criar modelo 'Raycast Flashcards':",
+        error instanceof Error ? error.message : String(error),
+      );
+      return {
+        error: error instanceof Error ? error.message : "Erro desconhecido ao criar modelo",
+      };
+    }
+  }
+
+  /**
+   * Criar modelo básico para flashcards
+   * Este é um modelo mais simples que deve funcionar em qualquer instalação do Anki
+   */
+  static async createBasicFlashcardsModel(): Promise<boolean> {
+    try {
+      const modelName = "Raycast Basic";
+
+      // Verificar se o Anki está rodando
+      const isRunning = await this.isAnkiRunning();
+      if (!isRunning) {
+        Logger.warn("Anki não está rodando. Não é possível criar o modelo básico.");
+        return false;
+      }
+
+      // Verificar se o modelo já existe com timeout estendido
+      const models = await this.modelNames();
+      if (Array.isArray(models) && models.includes(modelName)) {
+        Logger.debug(`Modelo "${modelName}" já existe.`);
+        return true;
+      }
+
+      // Adicionar delay para garantir que o Anki esteja pronto
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Criar um modelo básico simples com apenas Frente e Verso usando NetworkHelper
+      try {
+        Logger.debug(`Tentando criar modelo básico "${modelName}"...`);
+
+        const response = await NetworkHelper.withRetry(
+          async () => {
+            // Usar o request com timeout ainda maior e mais retentativas
+            return await this.request<unknown>(
+              "createModel",
+              {
+                modelName,
+                inOrderFields: ["Frente", "Verso"],
+                css: `.card {
+                font-family: arial;
+                font-size: 20px;
+                text-align: center;
+                color: black;
+                background-color: white;
+              }`,
+                cardTemplates: [
+                  {
+                    name: "Card 1",
+                    qfmt: "{{Frente}}",
+                    afmt: "{{FrontSide}}<hr id=answer>{{Verso}}",
+                  },
+                ],
+              },
+              6,
+              {
+                timeout: 30000,
+                retries: 4,
+                delay: 2000,
+              },
+            );
+          },
+          {
+            maxRetries: 3,
+            baseDelay: 2000,
+            backoffFactor: 2,
+            timeout: 40000,
+            additionalTimeoutPerRetry: 20000,
+            shouldRetry: (error) => {
+              // Incluir socket hang up nos erros para retentativa
+              const errorMsg = error.message.toLowerCase();
+              return (
+                errorMsg.includes("timeout") ||
+                errorMsg.includes("socket hang up") ||
+                errorMsg.includes("econnreset") ||
+                errorMsg.includes("network error")
+              );
+            },
+          },
+        );
+
+        if ("error" in response && response.error) {
+          throw new Error(`Falha ao criar modelo básico: ${response.error}`);
+        }
+
+        Logger.debug(`Modelo básico "${modelName}" criado com sucesso.`);
+
+        // Esperar que o Anki processe a criação do modelo
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        return true;
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        Logger.error(`Erro ao criar modelo básico: ${errorMsg}`);
+        throw error;
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(`Erro ao criar modelo básico: ${errorMsg}`);
+      return false;
+    }
+  }
+
+  /**
+   * Criar um novo deck no Anki
+   */
+  public static async createDeck(deckName: string): Promise<{ success: boolean; message: string; details?: unknown }> {
+    try {
+      Logger.debug(`Criando novo deck "${deckName}"...`);
+
+      // Verificar se o Anki está rodando
+      const isRunning = await this.isAnkiRunning();
+      if (!isRunning) {
+        Logger.error("Anki não está rodando. Não é possível criar o deck.");
+        return {
+          success: false,
+          message: "Anki não está rodando. Por favor, abra o Anki e tente novamente.",
+          details: { ankiRunning: false },
+        };
+      }
+
+      // Verificar se o deck já existe
+      const decks = await this.getDecks();
+      if (decks.includes(deckName)) {
+        Logger.debug(`Deck "${deckName}" já existe.`);
+        return {
+          success: true,
+          message: `Deck "${deckName}" já existe.`,
+        };
+      }
+
+      // Criar o deck
+      const response = await this.request<unknown>("createDeck", { deck: deckName }, 6, {
+        timeout: 10000,
+        retries: 3,
+      });
+
+      if (response.error) {
+        Logger.error(`Erro ao criar deck: ${response.error}`);
+        return {
+          success: false,
+          message: `Erro ao criar deck "${deckName}": ${response.error}`,
+          details: { error: response.error },
+        };
+      }
+
+      Logger.debug(`Deck "${deckName}" criado com sucesso!`);
+      return {
+        success: true,
+        message: `Deck "${deckName}" criado com sucesso.`,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(`Erro ao criar deck: ${errorMessage}`);
+      return {
+        success: false,
+        message: `Erro ao criar deck: ${errorMessage}`,
+        details: { error: errorMessage },
+      };
+    }
+  }
+
+  /**
+   * Adicionar notas ao Anki
+   */
+  public static async addNotes(notes: AnkiNote[]): Promise<{ result: number[]; error: string | null }> {
+    try {
+      const response = await this.request<number[]>("addNotes", { notes }, 6, {
+        timeout: 10000,
+        retries: 3,
+      });
+
+      if (response.error) {
+        return { result: [], error: response.error };
+      }
+
+      return { result: response.result, error: null };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { result: [], error: errorMessage };
+    }
+  }
+
+  /**
+   * Adicionar uma nota ao Anki
+   */
+  public static async addNote(note: AnkiNote): Promise<{ result: number; error: string | null }> {
+    try {
+      const response = await this.request<number[]>("addNotes", { notes: [note] }, 6, {
+        timeout: 10000,
+        retries: 3,
+      });
+
+      if (response.error) {
+        return { result: 0, error: response.error };
+      }
+
+      return { result: response.result[0], error: null };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { result: 0, error: errorMessage };
+    }
   }
 }

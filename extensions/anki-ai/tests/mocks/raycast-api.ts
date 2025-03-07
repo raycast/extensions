@@ -6,9 +6,9 @@ export const AI = {
 
 export const Toast = {
   Style: {
-    Animated: 'animated',
-    Failure: 'failure',
-    Success: 'success',
+    Animated: "animated",
+    Failure: "failure",
+    Success: "success",
   },
 };
 

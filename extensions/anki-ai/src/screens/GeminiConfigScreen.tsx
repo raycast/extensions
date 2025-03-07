@@ -15,11 +15,11 @@ export default function GeminiConfigScreen() {
           setApiKey(savedApiKey);
         }
       } catch (error) {
-        console.error("Erro ao carregar chave de API:", error);
+        console.error("Error loading API key:", error);
         showToast({
           style: Toast.Style.Failure,
-          title: "Erro ao carregar configuração",
-          message: "Não foi possível carregar a chave de API",
+          title: "Error loading configuration",
+          message: "Could not load the API key",
         });
       } finally {
         setIsLoading(false);
@@ -37,15 +37,15 @@ export default function GeminiConfigScreen() {
 
       showToast({
         style: Toast.Style.Success,
-        title: "Configuração salva",
-        message: "Chave de API do Gemini salva com sucesso",
+        title: "Configuration saved",
+        message: "Gemini API key saved successfully",
       });
     } catch (error) {
-      console.error("Erro ao salvar chave de API:", error);
+      console.error("Error saving API key:", error);
       showToast({
         style: Toast.Style.Failure,
-        title: "Erro ao salvar",
-        message: "Não foi possível salvar a chave de API",
+        title: "Error saving",
+        message: "Could not save the API key",
       });
     } finally {
       setIsLoading(false);
@@ -61,22 +61,22 @@ export default function GeminiConfigScreen() {
       if (isConnected) {
         showToast({
           style: Toast.Style.Success,
-          title: "Conexão bem-sucedida",
-          message: "A API do Gemini está funcionando corretamente",
+          title: "Connection successful",
+          message: "The Gemini API is working correctly",
         });
       } else {
         showToast({
           style: Toast.Style.Failure,
-          title: "Falha na conexão",
-          message: "Não foi possível conectar à API do Gemini",
+          title: "Connection failed",
+          message: "Could not connect to the Gemini API",
         });
       }
     } catch (error) {
-      console.error("Erro ao testar conexão:", error);
+      console.error("Error testing connection:", error);
       showToast({
         style: Toast.Style.Failure,
-        title: "Erro ao testar conexão",
-        message: "Ocorreu um erro ao testar a conexão com a API",
+        title: "Error testing connection",
+        message: "An error occurred while testing the connection to the API",
       });
     } finally {
       setIsLoading(false);
@@ -88,22 +88,22 @@ export default function GeminiConfigScreen() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} title="Salvar Configuração" />
-          <Action title="Testar Conexão" onAction={testConnection} />
+          <Action.SubmitForm onSubmit={handleSubmit} title="Save Configuration" />
+          <Action title="Test Connection" onAction={testConnection} />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="apiKey"
-        title="Chave de API do Gemini"
-        placeholder="Insira sua chave de API do Google Gemini"
+        title="Gemini API Key"
+        placeholder="Enter your Google Gemini API key"
         value={apiKey}
         onChange={setApiKey}
-        info="Você pode obter uma chave de API em https://ai.google.dev/"
+        info="You can get an API key at https://ai.google.dev/"
       />
       <Form.Description
-        title="Sobre o Google Gemini"
-        text="O Google Gemini é um modelo de linguagem avançado que pode ser usado para gerar flashcards de alta qualidade. Para usar esta funcionalidade, você precisa de uma chave de API válida do Google AI Studio."
+        title="About Google Gemini"
+        text="Google Gemini is an advanced language model that can be used to generate high-quality flashcards. To use this feature, you need a valid API key from Google AI Studio."
       />
     </Form>
   );
