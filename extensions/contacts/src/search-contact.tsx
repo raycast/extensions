@@ -1,21 +1,8 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon, open } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { searchContacts, deleteContact } from "swift:../swift";
-
-interface Contact {
-  id: string;
-  givenName: string;
-  familyName: string;
-  emails: string[];
-  phones: string[];
-}
-
-interface ErrorResponse {
-  error: boolean;
-  type: string;
-  status?: string;
-  message: string;
-}
+import { Contact, ErrorResponse } from "./types";
+import { AuthorizationView } from "./components/AuthorizationView";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -23,26 +10,42 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<ErrorResponse | null>(null);
 
-  // Function to fetch contacts
   const fetchContacts = useCallback(async (query: string) => {
     setIsLoading(true);
-    try {
-      const responseJson = await searchContacts(query);
-      const response = JSON.parse(responseJson);
+    setError(null);
 
-      // Check if response is an error
+    try {
+      const result = await searchContacts(query);
+      let response;
+
+      try {
+        response = JSON.parse(result);
+      } catch (e) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to parse contacts",
+          message: String(e),
+        });
+        setIsLoading(false);
+        return;
+      }
+
       if (response.error) {
-        setError(response as ErrorResponse);
+        setError(response);
         setData([]);
       } else {
-        // It's a successful response with contacts
+        setData(response);
         setError(null);
-        setData(response as Contact[]);
       }
     } catch (e) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to parse contacts",
+        title: "Error fetching contacts",
+        message: String(e),
+      });
+      setError({
+        error: true,
+        type: "fetch",
         message: String(e),
       });
       setData([]);
@@ -51,74 +54,52 @@ export default function Command() {
     }
   }, []);
 
-  // Initial fetch and when search text changes
   useEffect(() => {
     fetchContacts(searchText);
   }, [searchText, fetchContacts]);
 
-  // Handle contact deletion
   async function handleDeleteContact(contactID: string) {
-    showToast({
-      style: Toast.Style.Animated,
-      title: "Deleting Contact",
-    });
-
     try {
-      const responseJson = await deleteContact(contactID);
-      const response = JSON.parse(responseJson);
+      setIsLoading(true);
+      const result = await deleteContact(contactID);
+      const response = JSON.parse(result);
 
       if (response.error) {
         showToast({
           style: Toast.Style.Failure,
-          title: "Failed to Delete Contact",
+          title: "Failed to delete contact",
           message: response.message,
         });
       } else {
         showToast({
           style: Toast.Style.Success,
           title: "Contact Deleted",
+          message: response.message,
         });
-
         // Refresh the contact list
-        await fetchContacts(searchText);
+        fetchContacts(searchText);
       }
-    } catch (error) {
+    } catch (e) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Error Deleting Contact",
-        message: String(error),
+        title: "Error deleting contact",
+        message: String(e),
       });
+    } finally {
+      setIsLoading(false);
     }
-  }
-
-  // If there's an authorization error, show a special UI
-  if (error && error.type === "authorization") {
-    return (
-      <List isLoading={isLoading}>
-        <List.EmptyView
-          icon={Icon.Lock}
-          title="Contacts Access Required"
-          description={error.message}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Open System Preferences"
-                icon={Icon.Gear}
-                onAction={() => {
-                  open("x-apple.systempreferences:com.apple.preference.security?Privacy_Contacts");
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
   }
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search contacts..." throttle>
       {error ? (
-        <List.EmptyView icon={Icon.ExclamationMark} title="Error Fetching Contacts" description={error.message} />
+        error.type === "authorization" ? (
+          <AuthorizationView error={error} onRetry={() => fetchContacts(searchText)} />
+        ) : (
+          <List.EmptyView icon={Icon.ExclamationMark} title="Error Fetching Contacts" description={error.message} />
+        )
+      ) : data.length === 0 ? (
+        <List.EmptyView icon={Icon.Person} title="No Contacts Found" description="Try a different search term" />
       ) : (
         <List.Section title="Results" subtitle={data.length + ""}>
           {data.map((contact) => (
@@ -139,37 +120,73 @@ function ContactListItem({
 }) {
   const fullName = `${contact.givenName} ${contact.familyName}`.trim();
 
+  // Format email with label if available
+  let emailDisplay = "";
+  if (contact.emailsWithLabels && contact.emailsWithLabels.length > 0) {
+    const email = contact.emailsWithLabels[0];
+    emailDisplay = `${email.address} (${email.label})`;
+  } else if (contact.emails && contact.emails.length > 0) {
+    emailDisplay = contact.emails[0];
+  }
+
+  // Format phone with label if available
+  let phoneDisplay = "";
+  if (contact.phonesWithLabels && contact.phonesWithLabels.length > 0) {
+    const phone = contact.phonesWithLabels[0];
+    phoneDisplay = `${phone.number} (${phone.label})`;
+  } else if (contact.phones && contact.phones.length > 0) {
+    phoneDisplay = contact.phones[0];
+  }
+
   return (
     <List.Item
       title={fullName || "No Name"}
-      subtitle={contact.emails[0] || ""}
-      accessories={[{ text: contact.phones[0] || "" }]}
+      subtitle={emailDisplay}
+      accessories={[{ text: phoneDisplay }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action
               title="Open in Contacts"
               icon={Icon.Person}
-              onAction={() => {
-                open(`addressbook://${contact.id}`);
+              onAction={async () => {
+                try {
+                  await open(`addressbook://${contact.id}`);
+                } catch (error) {
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: "Failed to open Contacts app",
+                    message: String(error),
+                  });
+                }
               }}
             />
-            {contact.emails[0] && (
+            {(contact.emailsWithLabels && contact.emailsWithLabels.length > 0) ||
+            (contact.emails && contact.emails.length > 0) ? (
               <Action.CopyToClipboard
                 title="Copy Email"
                 icon={Icon.Envelope}
-                content={contact.emails[0]}
+                content={
+                  contact.emailsWithLabels && contact.emailsWithLabels.length > 0
+                    ? contact.emailsWithLabels[0].address
+                    : contact.emails[0]
+                }
                 shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
               />
-            )}
-            {contact.phones[0] && (
+            ) : null}
+            {(contact.phonesWithLabels && contact.phonesWithLabels.length > 0) ||
+            (contact.phones && contact.phones.length > 0) ? (
               <Action.CopyToClipboard
                 title="Copy Phone"
                 icon={Icon.Phone}
-                content={contact.phones[0]}
+                content={
+                  contact.phonesWithLabels && contact.phonesWithLabels.length > 0
+                    ? contact.phonesWithLabels[0].number
+                    : contact.phones[0]
+                }
                 shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
               />
-            )}
+            ) : null}
             <Action
               title="Delete Contact"
               icon={Icon.Trash}

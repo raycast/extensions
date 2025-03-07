@@ -1,5 +1,6 @@
 import { createContact } from "swift:../../swift";
 import { Tool } from "@raycast/api";
+import { ErrorResponse } from "../types";
 
 type ContactInput = {
   /**
@@ -52,7 +53,7 @@ export default async function createContactTool(input: ContactInput) {
     // Prepare contact data
     const contactData = {
       givenName: input.firstName || "",
-      familyName: input.lastName || "",
+      familyName: input.lastName ?? "",
       emails: input.emails || [],
       phones: input.phones || [],
     };
@@ -63,7 +64,8 @@ export default async function createContactTool(input: ContactInput) {
     const response = JSON.parse(responseJson);
 
     if (response.error) {
-      return `Error creating contact: ${response.message}`;
+      const errorResponse = response as ErrorResponse;
+      return `Error creating contact: ${errorResponse.message}`;
     }
 
     // Format success message

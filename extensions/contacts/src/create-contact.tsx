@@ -1,45 +1,12 @@
 import { Form, ActionPanel, Action, showToast, Toast, Icon, open } from "@raycast/api";
 import { useState } from "react";
 import { createContact } from "swift:../swift";
-
-interface EmailField {
-  address: string;
-  label: string;
-}
-
-interface PhoneField {
-  number: string;
-  label: string;
-}
-
-interface FormValues {
-  givenName: string;
-  familyName: string;
-  "emails[0].address": string;
-  "emails[0].label": string[];
-  "emails[1].address": string;
-  "emails[1].label": string[];
-  "phones[0].number": string;
-  "phones[0].label": string[];
-  "phones[1].number": string;
-  "phones[1].label": string[];
-}
-
-interface SuccessResponse {
-  success: boolean;
-  id: string;
-  message: string;
-}
-
-interface ErrorResponse {
-  error: boolean;
-  type: string;
-  status?: string;
-  message: string;
-}
+import { ErrorResponse, EmailField, PhoneField, FormValues, SuccessResponse } from "./types";
+import { AuthorizationView } from "./components/AuthorizationView";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<ErrorResponse | null>(null);
 
   // Email and phone label options
   const emailLabelOptions = [
@@ -61,23 +28,18 @@ export default function Command() {
     { value: "other", title: "Other" },
   ];
 
-  async function handleSubmit(values: FormValues) {
+  const handleSubmit = async (values: FormValues) => {
     setIsLoading(true);
-
-    showToast({
-      style: Toast.Style.Animated,
-      title: "Creating Contact",
-    });
+    setError(null);
 
     try {
-      // Validate form values
+      // Validate required fields
       if (!values.givenName && !values.familyName) {
         showToast({
           style: Toast.Style.Failure,
           title: "Validation Error",
           message: "Please provide at least a first name or last name",
         });
-        setIsLoading(false);
         return;
       }
 
@@ -127,20 +89,9 @@ export default function Command() {
       if (response.error) {
         // Handle error response
         const errorResponse = response as ErrorResponse;
+        setError(errorResponse);
 
-        if (errorResponse.type === "authorization") {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Permission Denied",
-            message: "Please grant access to Contacts in System Preferences",
-            primaryAction: {
-              title: "Open Settings",
-              onAction: () => {
-                open("x-apple.systempreferences:com.apple.preference.security?Privacy_Contacts");
-              },
-            },
-          });
-        } else {
+        if (errorResponse.type !== "authorization") {
           showToast({
             style: Toast.Style.Failure,
             title: "Error Creating Contact",
@@ -171,6 +122,11 @@ export default function Command() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // If there's an authorization error, show the authorization view
+  if (error && error.type === "authorization") {
+    return <AuthorizationView error={error} onRetry={() => setError(null)} />;
   }
 
   return (

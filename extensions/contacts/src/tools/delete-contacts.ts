@@ -1,5 +1,6 @@
 import { deleteContact } from "swift:../../swift";
 import { Tool } from "@raycast/api";
+import { ErrorResponse } from "../types";
 
 type DeleteInput = {
   /**
@@ -26,8 +27,8 @@ export const confirmation: Tool.Confirmation<DeleteInput> = async () => {
 export default async function deleteContactTool(input: DeleteInput) {
   try {
     // Validate input
-    if (!input.id) {
-      return "Error: Please provide a contact ID to delete.";
+    if (!input.id || input.id.trim() === "") {
+      return "Error: Please provide a valid contact ID to delete.";
     }
 
     // Call Swift function to delete contact
@@ -35,7 +36,8 @@ export default async function deleteContactTool(input: DeleteInput) {
     const response = JSON.parse(responseJson);
 
     if (response.error) {
-      return `Error deleting contact: ${response.message}`;
+      const errorResponse = response as ErrorResponse;
+      return `Error deleting contact: ${errorResponse.message}`;
     }
 
     return `Successfully deleted the contact.`;
