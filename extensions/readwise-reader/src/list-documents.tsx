@@ -99,7 +99,7 @@ ${article.summary}
               <ActionPanel title={article.title}>
                 <Action.OpenInBrowser url={article.url} title="Open Article in Readwise" />
                 <Action.OpenInBrowser url={article.source_url} title="Open Article in Source Website" />
-                <ActionPanel.Submenu title="Filter by Category">
+                <ActionPanel.Submenu title="Filter by Category…">
                   <Action
                     title="All Categories"
                     onAction={() => setCategory(undefined)}
