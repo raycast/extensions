@@ -2,7 +2,6 @@ import { getPreferenceValues, BrowserExtension, showToast, Toast, LocalStorage, 
 import { loadConfig, type Config } from "./config";
 import path from "path";
 
-
 function lookupAppDir(config: Config, hostname: string): string | null {
   for (const [app, appConfig] of Object.entries(config.apps ?? {})) {
     if (appConfig.additionalDomains?.includes(hostname)) {
@@ -27,12 +26,11 @@ function lookupAppDir(config: Config, hostname: string): string | null {
 
 const preferences = getPreferenceValues<Preferences.OpenApp>();
 export default async function () {
-  const dirs = JSON.parse(await LocalStorage.getItem<string>("dirs") || "[]") as string[];
+  const dirs = JSON.parse((await LocalStorage.getItem<string>("dirs")) || "[]") as string[];
   if (!dirs) {
     await showToast({ title: "No dirs found", style: Toast.Style.Failure });
     return;
   }
-
 
   const tabs = await BrowserExtension.getTabs();
   const selectedTab = tabs.find((tab) => tab.active == true);
@@ -54,5 +52,4 @@ export default async function () {
 
   await showToast({ title: `Active tab is not a smallweb app`, style: Toast.Style.Failure });
   return;
-
 }
