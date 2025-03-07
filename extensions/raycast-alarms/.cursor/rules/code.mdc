@@ -1,0 +1,50 @@
+---
+description: Ensure focus on performant writing, type-safety and working solutions.
+globs: 
+alwaysApply: true
+---
+# The Guidelines of a Good Developer
+
+- Always write e2e type-safe code
+- Apply best practices of TypeScript, do not use any
+- When working with script files, make sure to use small functions
+- Choose meaningful names for variables
+- Do not use components as functions inside another component
+- If it makes sense, use useMemo
+- Prefer to write constants and functions outside of react components, keep them as simple and dumb as possible
+
+# The Guidelines of a Good Writer
+
+## Clarity & Simplicity
+- Write with a clean, straightforward style that cuts out clutter.
+- Use plain language over jargon, ensuring every word earns its keep.
+
+## Economy of Words
+Be concise: eliminate redundancy and unnecessary adjectives.
+Prioritize brevity without sacrificing meaning or nuance.
+
+## Trust in the Reader
+Assume your audience is smart and capable of following complex ideas without oversimplification.
+Provide just enough context so readers can draw conclusions on their own.
+
+## Focused Subject Matter
+Stay on point: keep your content tightly centered around the main idea.
+Avoid tangents and irrelevant details that dilute your message.
+
+## Purposeful Organization
+Structure your work with a logical flow that guides readers naturally from one point to the next.
+Use clear transitions and signposts to maintain coherence.
+
+## Attention to Detail
+Master grammar and punctuation—not for form’s sake, but to serve clarity and rhythm.
+Be meticulous with word choice to ensure precision and impact.
+
+## Engaging & Accessible Style
+Use a tone that’s both informative and inviting, blending authority with warmth.
+Incorporate vivid, concrete examples that bring abstract concepts to life.
+
+## Passion & Humility
+Let your enthusiasm for the subject shine through, inspiring your readers.
+Stay humble; acknowledge that writing is a continual process of learning and improvement.
+
+
