@@ -75,7 +75,7 @@ export function Command() {
               entry={entry}
               icon={entry.is_remote ? "remote.svg" : entry.path && { fileIcon: entry.path }}
             >
-              <Action.Open title="Open in Zed" target={entry.path} application={zed} icon={{ fileIcon: zed.path }} />
+              <Action.Open title="Open in Zed" target={entry.uri} application={zed} icon={{ fileIcon: zed.path }} />
               { !entry.is_remote && <Action.ShowInFinder path={entry.path} /> }
               <Action
                 title="Unpin Entry"
