@@ -29,7 +29,12 @@ export async function updateVpnStatus(update: VpnStatusUpdate): Promise<void> {
  */
 export async function getVpnStatus(): Promise<VpnStatusUpdate | null> {
   const status = await LocalStorage.getItem<string>(VPN_STATUS_KEY);
-  return status ? JSON.parse(status) : null;
+  try {
+    return status ? JSON.parse(status) : null;
+  } catch (error) {
+    console.error('Failed to parse VPN status:', error);
+    return null;
+  }
 }
 
 /**
