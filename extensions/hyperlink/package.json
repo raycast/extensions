@@ -1,0 +1,142 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hyperlink",
+  "title": "Quickly Copy the Current Browser's Tab URL Using ⇧⌘C",
+  "version": "1.0.0",
+  "description": "Copy the current browser tab URL to your clipboard",
+  "categories": [
+    "Productivity"
+  ],
+  "icon": "hyperlink.png",
+  "author": "padrewin",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy-to-clipboard",
+      "title": "Hyperlink",
+      "description": "Copy the current browser tab URL to your clipboard.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "allowSafari",
+      "type": "checkbox",
+      "title": " Safari",
+      "label": "Enable Safari",
+      "description": "Allow this extension to work with Safari.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "allowChrome",
+      "type": "checkbox",
+      "title": "🌎 Google Chrome",
+      "label": "Enable Google Chrome",
+      "description": "Allow this extension to work with Google Chrome.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "allowFirefox",
+      "type": "checkbox",
+      "title": "🦊 Firefox",
+      "label": "Enable Firefox",
+      "description": "Allow this extension to work with Firefox.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "allowEdge",
+      "type": "checkbox",
+      "title": "📘 Microsoft Edge",
+      "label": "Enable Microsoft Edge",
+      "description": "Allow this extension to work with Microsoft Edge.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "allowBrave",
+      "type": "checkbox",
+      "title": "🦁 Brave",
+      "label": "Enable Brave",
+      "description": "Allow this extension to work with Brave Browser.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "allowVivaldi",
+      "type": "checkbox",
+      "title": "🎨 Vivaldi",
+      "label": "Enable Vivaldi",
+      "description": "Allow this extension to work with Vivaldi Browser.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "allowArc",
+      "type": "checkbox",
+      "title": "⚡ Arc Browser",
+      "label": "Enable Arc Browser",
+      "description": "⚠️ Arc Browser has built-in copy URL functionality. This may cause conflicts.",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "allowOpera",
+      "type": "checkbox",
+      "title": "🎭 Opera",
+      "label": "Enable Opera",
+      "description": "Allow this extension to work with Opera Browser.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "allowZen",
+      "type": "checkbox",
+      "title": "🧘 Zen Browser",
+      "label": "Enable Zen Browser",
+      "description": "Allow this extension to work with Zen Browser (Mozilla-based).",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "customBrowser",
+      "type": "appPicker",
+      "title": "🛠 Custom Browser",
+      "description": "If your browser is not listed, select it manually.",
+      "required": false
+    },
+    {
+      "name": "enableDebug",
+      "type": "checkbox",
+      "title": "🐛 Debug Mode",
+      "label": "Enable Debug Logs",
+      "description": "Log detailed debug information in the console.\nDon't mess with this. ⚠️",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.18.1",
+    "osascript-tag": "^0.1.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~18.11.10",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.4",
+    "globals": "^16.0.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.24.1"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
