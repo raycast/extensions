@@ -1,5 +1,9 @@
 # Video Downloader Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Avoid to run `onSubmit` while fetching video
+
 ## [Features] - 2025-03-05
 
 Enhanced extension with AI. You can now download videos and extract transcripts by @-mentioning the extension in Raycast AI.

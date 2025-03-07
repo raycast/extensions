@@ -51,6 +51,7 @@ export default function DownloadVideo() {
       url: "",
     },
     onSubmit: async (values) => {
+      if (!values.format) return;
       const options = ["-P", downloadPath];
       const [downloadFormat, recodeFormat] = values.format.split("#");
 
