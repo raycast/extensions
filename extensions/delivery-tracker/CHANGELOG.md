@@ -1,6 +1,6 @@
 # Delivery Tracker Changelog
 
-## [FedEx Delivery Date Bug Fix] - {PR_MERGE_DATE}
+## [FedEx Delivery Date Bug Fix] - 2025-03-07
 
 Fixed a bug for the delivery date from FedEx.  People living in timezones with a negative UTC offset incorrectly saw
 delivery dates a day earlier for FedEx.  This has been fixed.
