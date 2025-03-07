@@ -308,16 +308,42 @@ interface ScheduleMeetingParams {
   participant_ids?: number[];
 }
 
+interface ScheduleMeetingResponse {
+  id: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  title: string;
+  summary: string;
+  description: string;
+  starts_at: string;
+  ends_at: string;
+  all_day: boolean;
+  url: string;
+  app_url: string;
+  bucket: {
+    id: number;
+    name: string;
+    type: string;
+  };
+  creator: {
+    id: number;
+    name: string;
+  };
+  participants: Array<{
+    id: number;
+    name: string;
+  }>;
+}
+
 export async function scheduleMeeting(
   accountId: string,
   projectId: number,
   scheduleId: number,
   params: ScheduleMeetingParams,
-) {
+): Promise<ScheduleMeetingResponse> {
   try {
     const url = `https://3.basecampapi.com/${accountId}/buckets/${projectId}/schedules/${scheduleId}/entries.json`;
-    console.log("Scheduling meeting with URL:", url);
-    console.log("Meeting params:", JSON.stringify(params, null, 2));
 
     const response = await fetch(url, {
       method: "POST",
@@ -334,7 +360,7 @@ export async function scheduleMeeting(
       throw new Error(`${response.status} ${response.statusText} ${errorText}`);
     }
 
-    return response.json();
+    return response.json() as Promise<ScheduleMeetingResponse>;
   } catch (error) {
     await showFailureToast(error, {
       title: "Schedule meeting error",

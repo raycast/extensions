@@ -36,12 +36,23 @@
       "title": "Schedule Meeting",
       "subtitle": "Basecamp",
       "description": "Schedule a meeting in a Basecamp project",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "copyMeetingUrl",
+          "title": "Copy Meeting URL",
+          "description": "Automatically copy the meeting URL after creating a meeting",
+          "label": "Copy Meeting URL",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.10",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
     "date-fns": "^4.1.0",
     "node-fetch": "^3.3.2",
     "turndown": "^7.2.0"

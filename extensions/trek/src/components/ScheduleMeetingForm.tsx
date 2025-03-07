@@ -1,10 +1,25 @@
-import { Action, ActionPanel, Form, Toast, Icon, showHUD, PopToRootType } from "@raycast/api";
-import { FormValidation, useForm, useCachedPromise, useLocalStorage, showFailureToast } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Toast,
+  Icon,
+  showHUD,
+  PopToRootType,
+  Clipboard,
+  getPreferenceValues,
+} from "@raycast/api";
+import { useCachedPromise, useLocalStorage, showFailureToast } from "@raycast/utils";
 import { scheduleMeeting, getProjectPeople, fetchSchedules, fetchAccounts, fetchProjects } from "../oauth/auth";
 import { showToast } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { BasecampPerson, BasecampProject } from "../utils/types";
 import { addHours } from "date-fns";
+
+// Define the preferences interface
+interface Preferences {
+  copyMeetingUrl: boolean;
+}
 
 interface Schedule {
   id: number;
@@ -13,29 +28,37 @@ interface Schedule {
   app_url: string;
 }
 
-interface ScheduleMeetingFormValues {
+interface FormErrors {
+  accountId?: string;
+  projectId?: string;
+  summary?: string;
+  startDateTime?: string;
+  endDateTime?: string;
+  scheduleId?: string;
+}
+
+interface FormValues {
   accountId: string;
   projectId: string;
   summary: string;
   description: string;
-  startDateTime: Date | null;
-  endDateTime: Date | null;
+  startDateTime: Date;
+  endDateTime: Date;
   allDay: boolean;
   scheduleId: string;
   participantIds: string[];
   notifyParticipants: boolean;
+  url?: string;
 }
 
 export default function ScheduleMeetingForm() {
   const [projectPeople, setProjectPeople] = useState<BasecampPerson[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const summaryFieldRef = useRef<Form.TextField>(null);
-
-  // Add a ref to track initialization state
   const isInitializedRef = useRef<boolean>(false);
-
   const [isLoadingProjectPeople, setIsLoadingProjectPeople] = useState(false);
   const [isLoadingSchedules, setIsLoadingSchedules] = useState(false);
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   // Add localStorage hooks for persistent values
   const { value: savedAccountId, setValue: setSavedAccountId } = useLocalStorage<string>(
@@ -51,87 +74,129 @@ export default function ScheduleMeetingForm() {
     "",
   );
 
+  // Set default start time to now and end time to 1 hour from now
+  const now = new Date();
+  const oneHourLater = addHours(now, 1);
+
+  // Initialize form state
+  const [formValues, setFormValues] = useState<FormValues>({
+    accountId: "",
+    projectId: "",
+    startDateTime: now,
+    endDateTime: oneHourLater,
+    allDay: false,
+    participantIds: [],
+    notifyParticipants: true,
+    scheduleId: "",
+    summary: "",
+    description: "",
+  });
+
   // Create a tracking function for savedProjectId changes
   const setSavedProjectId = (newValue: string) => {
     _setSavedProjectId(newValue);
   };
 
-  // Set default start time to now and end time to 1 hour from now
-  const now = new Date();
-  const oneHourLater = addHours(now, 1);
+  const validateForm = useMemo(() => {
+    const errors: FormErrors = {};
 
-  // Initialize form with saved values
-  const { handleSubmit, itemProps, values, setValue } = useForm<ScheduleMeetingFormValues>({
-    async onSubmit(values) {
-      if (!values.accountId || !values.projectId || !values.scheduleId) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Missing Required Fields",
-          message: "Please select an account, project, and schedule",
-        });
-        return;
+    if (!formValues.accountId) {
+      errors.accountId = "Account is required";
+    }
+    if (!formValues.projectId) {
+      errors.projectId = "Project is required";
+    }
+    if (!formValues.scheduleId) {
+      errors.scheduleId = "Schedule is required";
+    }
+    if (!formValues.summary.trim()) {
+      errors.summary = "Title is required";
+    }
+    if (!formValues.startDateTime) {
+      errors.startDateTime = "Start date/time is required";
+    }
+    if (!formValues.endDateTime) {
+      errors.endDateTime = "End date/time is required";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  }, [formValues]);
+
+  const handleSubmit = useCallback(async () => {
+    if (!validateForm) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Missing Required Fields",
+        message: "Please fill in all required fields",
+      });
+      return;
+    }
+
+    if (!formValues.startDateTime || !formValues.endDateTime) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Missing Date/Time",
+        message: "Please select start and end times for the meeting",
+      });
+      return;
+    }
+
+    try {
+      // Get preferences
+      const preferences = getPreferenceValues<Preferences>();
+
+      // Format dates based on whether it's an all-day event or not
+      let startsAt, endsAt;
+
+      if (formValues.allDay) {
+        // For all-day events, use YYYY-MM-DD format
+        startsAt = formValues.startDateTime.toISOString().split("T")[0];
+        // For all-day events, the end date must be the same as the start date
+        endsAt = startsAt;
+      } else {
+        // For regular events, use ISO format
+        startsAt = formValues.startDateTime.toISOString();
+        endsAt = formValues.endDateTime.toISOString();
       }
 
-      if (!values.startDateTime || !values.endDateTime) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Missing Date/Time",
-          message: "Please select start and end times for the meeting",
-        });
-        return;
+      const response = await scheduleMeeting(
+        formValues.accountId,
+        parseInt(formValues.projectId),
+        parseInt(formValues.scheduleId),
+        {
+          summary: formValues.summary,
+          description: formValues.description,
+          starts_at: startsAt,
+          ends_at: endsAt,
+          all_day: formValues.allDay,
+          participant_ids: formValues.participantIds.map((id) => parseInt(id, 10)),
+          notify: formValues.notifyParticipants,
+        },
+      );
+
+      // Determine the success message based on whether the URL was copied
+      const successMessage =
+        preferences.copyMeetingUrl && response.app_url
+          ? "✅ Meeting scheduled successfully and URL copied to clipboard"
+          : "✅ Meeting scheduled successfully";
+
+      // Copy URL if preference is enabled
+      if (preferences.copyMeetingUrl && response.app_url) {
+        await Clipboard.copy(response.app_url);
       }
 
-      // Check if summary is empty and focus on it
-      if (!values.summary.trim()) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Missing Title",
-          message: "Please enter a title for the meeting",
-        });
-        summaryFieldRef.current?.focus();
-        return;
-      }
-
-      try {
-        await scheduleMeeting(values.accountId, parseInt(values.projectId), parseInt(values.scheduleId), {
-          summary: values.summary,
-          description: values.description,
-          starts_at: values.startDateTime.toISOString(),
-          ends_at: values.endDateTime.toISOString(),
-          all_day: values.allDay,
-          participant_ids: values.participantIds.map((id) => parseInt(id, 10)),
-          notify: values.notifyParticipants,
-        });
-
-        showHUD("✅ Meeting scheduled successfully", {
-          clearRootSearch: true,
-          popToRootType: PopToRootType.Immediate,
-        });
-      } catch (error) {
-        showFailureToast(error, {
-          title: "Failed to schedule meeting",
-        });
-      }
-    },
-    initialValues: {
-      accountId: "",
-      projectId: "",
-      startDateTime: now,
-      endDateTime: oneHourLater,
-      allDay: false,
-      participantIds: [],
-      notifyParticipants: true,
-      scheduleId: "",
-      summary: "",
-      description: "",
-    },
-    validation: {
-      accountId: FormValidation.Required,
-      projectId: FormValidation.Required,
-      summary: FormValidation.Required,
-      scheduleId: FormValidation.Required,
-    },
-  });
+      // Show success message
+      showHUD(successMessage, {
+        clearRootSearch: true,
+        popToRootType: PopToRootType.Immediate,
+      });
+    } catch (error) {
+      showFailureToast(error, {
+        title: "Failed to schedule meeting",
+      });
+    }
+  }, [formValues]);
 
   // Use cached promise for accounts
   const { data: accounts = [], isLoading: isLoadingAccounts } = useCachedPromise(fetchAccounts);
@@ -142,9 +207,9 @@ export default function ScheduleMeetingForm() {
       if (!accountId) return { data: [] };
       return fetchProjects(accountId, 1);
     },
-    [values.accountId || ""],
+    [formValues.accountId || ""],
     {
-      execute: !!values.accountId,
+      execute: !!formValues.accountId,
     },
   );
 
@@ -154,35 +219,27 @@ export default function ScheduleMeetingForm() {
   // Set saved values after data is loaded
   useEffect(() => {
     if (accounts.length > 0 && savedAccountId) {
-      // Check if the saved account ID exists in the accounts list
       const accountExists = accounts.some((account) => account.id.toString() === savedAccountId);
       if (accountExists) {
-        setValue("accountId", savedAccountId);
+        setFormValues((prev) => ({ ...prev, accountId: savedAccountId }));
       }
     } else if (accounts.length === 1) {
-      // Auto-select the only account if there's just one
-      setValue("accountId", accounts[0].id.toString());
-      setSavedAccountId(accounts[0].id.toString());
+      const accountId = accounts[0].id.toString();
+      setFormValues((prev) => ({ ...prev, accountId }));
+      setSavedAccountId(accountId);
     }
   }, [accounts, savedAccountId]);
 
   // Set saved project when projects are loaded
   useEffect(() => {
     if (projects.length > 0 && savedProjectId) {
-      // Check if the saved project ID exists in the projects list
       const projectExists = projects.some((project) => project.id.toString() === savedProjectId);
       if (projectExists) {
-        // Only set the form value, don't update the saved value
-        setValue("projectId", savedProjectId);
+        setFormValues((prev) => ({ ...prev, projectId: savedProjectId }));
       }
     } else if (projects.length === 1) {
-      // Auto-select the only project if there's just one
-
-      // Check if we need to update both the form value and saved value
       const projectId = projects[0].id.toString();
-      setValue("projectId", projectId);
-
-      // Only update the saved value if it's different
+      setFormValues((prev) => ({ ...prev, projectId }));
       if (savedProjectId !== projectId) {
         setSavedProjectId(projectId);
       }
@@ -192,8 +249,7 @@ export default function ScheduleMeetingForm() {
   // Fetch project data (people and schedules) when project is selected
   useEffect(() => {
     const loadProjectData = async () => {
-      if (!values.accountId || !values.projectId) {
-        // Clear schedules and project people when account or project is not selected
+      if (!formValues.accountId || !formValues.projectId) {
         setSchedules([]);
         setProjectPeople([]);
         return;
@@ -203,30 +259,25 @@ export default function ScheduleMeetingForm() {
       setIsLoadingSchedules(true);
       try {
         const [fetchedProjectPeople, fetchedSchedules] = await Promise.all([
-          getProjectPeople(values.accountId, parseInt(values.projectId)),
-          fetchSchedules(values.accountId, parseInt(values.projectId)),
+          getProjectPeople(formValues.accountId, parseInt(formValues.projectId)),
+          fetchSchedules(formValues.accountId, parseInt(formValues.projectId)),
         ]);
         setProjectPeople(fetchedProjectPeople);
         setSchedules(fetchedSchedules as Schedule[]);
 
-        // If there's a saved schedule ID and it exists in the fetched schedules, select it
         if (savedScheduleId && fetchedSchedules.some((schedule) => schedule.id.toString() === savedScheduleId)) {
-          setValue("scheduleId", savedScheduleId);
+          setFormValues((prev) => ({ ...prev, scheduleId: savedScheduleId }));
         } else if (fetchedSchedules.length === 1) {
-          // If there's only one schedule, select it by default
-          setValue("scheduleId", fetchedSchedules[0].id.toString());
-          setSavedScheduleId(fetchedSchedules[0].id.toString());
+          const scheduleId = fetchedSchedules[0].id.toString();
+          setFormValues((prev) => ({ ...prev, scheduleId }));
+          setSavedScheduleId(scheduleId);
         } else {
-          // Clear the schedule ID if there's no matching saved schedule
-          setValue("scheduleId", "");
+          setFormValues((prev) => ({ ...prev, scheduleId: "" }));
           setSavedScheduleId("");
         }
       } catch (error) {
-        console.error("Error fetching project data:", error);
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast(error, {
           title: "Failed to Load Project Data",
-          message: error instanceof Error ? error.message : "An unknown error occurred",
         });
       } finally {
         setIsLoadingProjectPeople(false);
@@ -235,76 +286,88 @@ export default function ScheduleMeetingForm() {
     };
 
     loadProjectData();
-  }, [values.accountId, values.projectId, savedScheduleId]);
+  }, [formValues.accountId, formValues.projectId, savedScheduleId]);
 
   // Update end time when start time changes to maintain duration
   useEffect(() => {
-    if (values.startDateTime && values.endDateTime) {
-      const currentDuration = values.endDateTime.getTime() - values.startDateTime.getTime();
-      if (currentDuration < 0) {
-        // If start time is after end time, set end time to 1 hour after start
-        setValue("endDateTime", addHours(values.startDateTime, 1));
+    if (formValues.startDateTime && formValues.endDateTime) {
+      if (formValues.allDay) {
+        // For all-day events, ensure end date is the same as start date
+        setFormValues((prev) => ({
+          ...prev,
+          endDateTime: new Date(prev.startDateTime),
+        }));
+      } else {
+        const currentDuration = formValues.endDateTime.getTime() - formValues.startDateTime.getTime();
+        if (currentDuration < 0 && formValues.startDateTime) {
+          setFormValues((prev) => ({
+            ...prev,
+            endDateTime: addHours(formValues.startDateTime, 1),
+          }));
+        }
       }
     }
-  }, [values.startDateTime]);
+  }, [formValues.startDateTime, formValues.allDay]);
+
+  // Ensure end date matches start date when allDay is toggled
+  useEffect(() => {
+    if (formValues.allDay && formValues.startDateTime) {
+      setFormValues((prev) => ({
+        ...prev,
+        endDateTime: new Date(prev.startDateTime),
+      }));
+    }
+  }, [formValues.allDay]);
 
   const isLoading = isLoadingAccounts || isLoadingProjects || isLoadingProjectPeople || isLoadingSchedules;
 
   // Focus on summary field once the form is fully loaded
   useEffect(() => {
-    const hasRequiredFields = values.accountId && values.projectId && values.scheduleId && schedules.length > 0;
+    const hasRequiredFields =
+      formValues.accountId && formValues.projectId && formValues.scheduleId && schedules.length > 0;
     if (!isLoading && hasRequiredFields) {
-      // Focus on the meeting title field when the form is fully loaded
-
-      // Mark the component as fully initialized
       isInitializedRef.current = true;
-
       setTimeout(() => {
         summaryFieldRef.current?.focus();
-      }, 300); // 300ms delay to ensure the component is fully rendered
+      }, 300);
     }
-  }, [isLoading, values.accountId, values.projectId, values.scheduleId, schedules.length]);
+  }, [isLoading, formValues.accountId, formValues.projectId, formValues.scheduleId, schedules.length]);
 
   // Reset initialization state when account changes
   useEffect(() => {
-    // Reset initialization state when account changes
     isInitializedRef.current = false;
-
-    // Cleanup function to reset initialization state when component unmounts
     return () => {
       isInitializedRef.current = false;
     };
-  }, [values.accountId]);
+  }, [formValues.accountId]);
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Schedule Meeting" onSubmit={handleSubmit} />
+          <Action title="Schedule Meeting" onAction={handleSubmit} />
         </ActionPanel>
       }
       isLoading={isLoading}
     >
       <Form.Dropdown
-        id={itemProps.accountId.id}
+        id="accountId"
         title="Account"
-        value={values.accountId}
+        value={formValues.accountId}
         onChange={(newValue: string) => {
-          // When account changes, reset project and schedule
-          if (newValue !== values.accountId) {
-            setValue("projectId", "");
-            setValue("scheduleId", "");
+          if (newValue !== formValues.accountId) {
+            setFormValues((prev) => ({
+              ...prev,
+              accountId: newValue,
+              projectId: "",
+              scheduleId: "",
+            }));
             setSavedProjectId("");
             setSavedScheduleId("");
             setSavedAccountId(newValue);
           }
-          if (itemProps.accountId.onChange) {
-            itemProps.accountId.onChange(newValue);
-          }
         }}
-        error={itemProps.accountId.error}
-        info={itemProps.accountId.info}
-        onBlur={itemProps.accountId.onBlur}
+        error={formErrors.accountId}
         autoFocus={false}
       >
         {accounts.map((account) => (
@@ -312,30 +375,25 @@ export default function ScheduleMeetingForm() {
         ))}
       </Form.Dropdown>
 
-      {values.accountId && (
+      {formValues.accountId && (
         <Form.Dropdown
-          id={itemProps.projectId.id}
+          id="projectId"
           title="Project"
-          value={values.projectId}
+          value={formValues.projectId}
           onChange={(newValue: string) => {
-            // When project changes, reset schedule
-            setValue("scheduleId", "");
+            setFormValues((prev) => ({
+              ...prev,
+              projectId: newValue,
+              scheduleId: "",
+            }));
             setSavedScheduleId("");
 
-            // Only update savedProjectId if this is a user-initiated change
-            // We can detect this by checking if the component has already been fully initialized
             const isUserChange = isInitializedRef.current && newValue !== savedProjectId;
-
             if (isUserChange) {
               setSavedProjectId(newValue);
             }
-            if (itemProps.projectId.onChange) {
-              itemProps.projectId.onChange(newValue);
-            }
           }}
-          error={itemProps.projectId.error}
-          info={itemProps.projectId.info}
-          onBlur={itemProps.projectId.onBlur}
+          error={formErrors.projectId}
           autoFocus={false}
         >
           {projects.map((project: BasecampProject) => (
@@ -349,24 +407,23 @@ export default function ScheduleMeetingForm() {
         </Form.Dropdown>
       )}
 
-      {values.accountId && values.projectId && (
+      {formValues.accountId && formValues.projectId && (
         <>
           {schedules.length > 0 ? (
             <Form.Dropdown
-              id={itemProps.scheduleId.id}
+              id="scheduleId"
               title="Schedule"
-              value={values.scheduleId}
+              value={formValues.scheduleId}
               onChange={(newValue: string) => {
-                if (newValue !== values.scheduleId) {
+                if (newValue !== formValues.scheduleId) {
+                  setFormValues((prev) => ({
+                    ...prev,
+                    scheduleId: newValue,
+                  }));
                   setSavedScheduleId(newValue);
                 }
-                if (itemProps.scheduleId.onChange) {
-                  itemProps.scheduleId.onChange(newValue);
-                }
               }}
-              error={itemProps.scheduleId.error}
-              info={itemProps.scheduleId.info}
-              onBlur={itemProps.scheduleId.onBlur}
+              error={formErrors.scheduleId}
             >
               {schedules.map((schedule) => (
                 <Form.Dropdown.Item
@@ -384,62 +441,105 @@ export default function ScheduleMeetingForm() {
             />
           )}
 
-          {/* Only show the rest of the form if schedules are available */}
           {schedules.length > 0 && (
             <>
               <Form.TextField
-                id={itemProps.summary.id}
+                id="summary"
                 title="Meeting Title"
                 placeholder="Enter meeting title..."
-                value={values.summary}
-                onChange={itemProps.summary.onChange}
-                error={itemProps.summary.error}
-                info={itemProps.summary.info}
-                onBlur={itemProps.summary.onBlur}
+                value={formValues.summary}
+                onChange={(newValue: string) => setFormValues((prev) => ({ ...prev, summary: newValue }))}
+                error={formErrors.summary}
                 ref={summaryFieldRef}
               />
 
               <Form.Checkbox
-                id={itemProps.allDay.id}
+                id="allDay"
                 label="All Day Event"
-                value={values.allDay}
-                onChange={itemProps.allDay.onChange}
+                value={formValues.allDay}
+                onChange={(checked) => {
+                  const startDate = new Date();
+                  startDate.setHours(0, 0, 0, 0);
+                  const nextDay = new Date(startDate);
+                  nextDay.setDate(nextDay.getDate() + 1);
+
+                  if (checked) {
+                    setFormValues((prev) => ({
+                      ...prev,
+                      allDay: true,
+                      startDateTime: nextDay,
+                      endDateTime: nextDay,
+                    }));
+                  } else {
+                    const now = new Date();
+                    const nextHour = new Date(now);
+                    nextHour.setHours(nextHour.getHours() + 1);
+                    nextHour.setMinutes(0, 0, 0);
+                    const twoHoursLater = addHours(nextHour, 1);
+                    setFormValues((prev) => ({
+                      ...prev,
+                      allDay: false,
+                      startDateTime: nextHour,
+                      endDateTime: twoHoursLater,
+                    }));
+                  }
+                }}
               />
 
-              {!values.allDay && (
+              {!formValues.allDay && (
                 <>
                   <Form.DatePicker
-                    id={itemProps.startDateTime.id}
+                    id="startDateTime"
                     title="Start Date & Time"
                     type={Form.DatePicker.Type.DateTime}
-                    value={values.startDateTime}
-                    onChange={itemProps.startDateTime.onChange}
+                    value={formValues.startDateTime}
+                    onChange={(newValue: Date | null) => {
+                      if (newValue) {
+                        setFormValues((prev) => ({ ...prev, startDateTime: newValue }));
+                      }
+                    }}
+                    error={formErrors.startDateTime}
                   />
                   <Form.DatePicker
-                    id={itemProps.endDateTime.id}
+                    id="endDateTime"
                     title="End Date & Time"
                     type={Form.DatePicker.Type.DateTime}
-                    value={values.endDateTime}
-                    onChange={itemProps.endDateTime.onChange}
+                    value={formValues.endDateTime}
+                    onChange={(newValue: Date | null) => {
+                      if (newValue) {
+                        setFormValues((prev) => ({ ...prev, endDateTime: newValue }));
+                      }
+                    }}
+                    error={formErrors.endDateTime}
                   />
                 </>
               )}
 
-              {values.allDay && (
+              {formValues.allDay && (
                 <Form.DatePicker
-                  id={itemProps.startDateTime.id}
+                  id="startDateTime"
                   title="Date"
                   type={Form.DatePicker.Type.Date}
-                  value={values.startDateTime}
-                  onChange={itemProps.startDateTime.onChange}
+                  value={formValues.startDateTime}
+                  onChange={(newValue: Date | null) => {
+                    if (newValue) {
+                      const nextDay = new Date(newValue);
+                      nextDay.setDate(nextDay.getDate() + 1);
+                      setFormValues((prev) => ({
+                        ...prev,
+                        startDateTime: newValue,
+                        endDateTime: nextDay,
+                      }));
+                    }
+                  }}
                 />
               )}
 
               <Form.TagPicker
-                id={itemProps.participantIds.id}
+                id="participantIds"
                 title="Participants"
-                value={values.participantIds}
-                onChange={itemProps.participantIds.onChange}
+                value={formValues.participantIds}
+                onChange={(newValue: string[]) => setFormValues((prev) => ({ ...prev, participantIds: newValue }))}
               >
                 {projectPeople.map((person) => (
                   <Form.TagPicker.Item
@@ -451,22 +551,22 @@ export default function ScheduleMeetingForm() {
                 ))}
               </Form.TagPicker>
 
-              {values.participantIds.length > 0 && (
+              {formValues.participantIds.length > 0 && (
                 <Form.Checkbox
-                  id={itemProps.notifyParticipants.id}
+                  id="notifyParticipants"
                   label="Notify participants about this meeting"
-                  value={values.notifyParticipants}
-                  onChange={itemProps.notifyParticipants.onChange}
+                  value={formValues.notifyParticipants}
+                  onChange={(checked: boolean) => setFormValues((prev) => ({ ...prev, notifyParticipants: checked }))}
                 />
               )}
 
               <Form.TextArea
-                id={itemProps.description.id}
+                id="description"
                 title="Description"
                 placeholder="Add meeting details..."
                 enableMarkdown
-                value={values.description}
-                onChange={itemProps.description.onChange}
+                value={formValues.description}
+                onChange={(newValue: string) => setFormValues((prev) => ({ ...prev, description: newValue }))}
               />
             </>
           )}
