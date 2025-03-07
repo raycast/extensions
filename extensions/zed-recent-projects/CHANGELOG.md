@@ -1,5 +1,9 @@
 # zed-recent-projects Changelog
 
+## [Add support for remote projects] - {PR_MERGE_DATE}
+
+- Added remote project support for `Search Recent Projects`.
+
 ## [Fixes] 2024-06-20
 
 - Fixed an issue that the same entry is shown multiple times in the recent projects list.
