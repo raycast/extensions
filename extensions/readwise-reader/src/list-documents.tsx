@@ -29,7 +29,7 @@ export default function ListDocumentsCommand() {
   const [documentLocation, setDocumentLocation] = useState<Document["location"]>(
     getPreferenceValues<Preference>().defaultListLocation,
   );
-  const [category, setCategory] = useState<Category | undefined>(undefined);
+  const [category, setCategory] = useState<Category | undefined>();
 
   const { isLoading, data, pagination } = usePromise(
     (location, selectedCategory) => async (options: PaginationOptions<Document[]>) => {
