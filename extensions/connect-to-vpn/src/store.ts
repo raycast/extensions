@@ -1,11 +1,11 @@
-import { LocalStorage, environment, LaunchType, launchCommand } from "@raycast/api";
+import { LocalStorage, environment, LaunchType, launchCommand } from '@raycast/api';
 
-const VPN_STATUS_KEY = "vpn-connection-status";
-const MENUBAR_REFRESH_TIMESTAMP_KEY = "vpn-menubar-refresh-timestamp";
+const VPN_STATUS_KEY = 'vpn-connection-status';
+const MENUBAR_REFRESH_TIMESTAMP_KEY = 'vpn-menubar-refresh-timestamp';
 
 export type VpnStatusUpdate = {
   serviceId: string;
-  status: "connected" | "disconnected" | "connecting" | "disconnecting" | "invalid";
+  status: 'connected' | 'disconnected' | 'connecting' | 'disconnecting' | 'invalid';
   timestamp: number;
 };
 
@@ -16,7 +16,7 @@ export async function updateVpnStatus(update: VpnStatusUpdate): Promise<void> {
   await LocalStorage.setItem(VPN_STATUS_KEY, JSON.stringify(update));
   // Always update the refresh timestamp when status changes
   await updateMenuBarRefreshTimestamp();
-
+  
   // Force menubar refresh by relaunching the menubar command
   // Only do this if we're not already in the menubar command
   if (environment.launchType !== LaunchType.Background) {
@@ -29,12 +29,7 @@ export async function updateVpnStatus(update: VpnStatusUpdate): Promise<void> {
  */
 export async function getVpnStatus(): Promise<VpnStatusUpdate | null> {
   const status = await LocalStorage.getItem<string>(VPN_STATUS_KEY);
-  try {
-    return status ? JSON.parse(status) : null;
-  } catch (error) {
-    console.error('Failed to parse VPN status:', error);
-    return null;
-  }
+  return status ? JSON.parse(status) : null;
 }
 
 /**
@@ -59,11 +54,11 @@ export async function getMenuBarRefreshTimestamp(): Promise<number> {
  */
 export async function forceMenuBarRefresh(): Promise<void> {
   try {
-    console.log("Forcing menubar refresh by relaunching command");
+    console.log('Forcing menubar refresh by relaunching command');
     // Launch the menubar command in background mode
-    await launchCommand({ name: "menu-bar", type: LaunchType.Background });
-    console.log("Menubar command relaunched");
+    await launchCommand({ name: 'menu-bar', type: LaunchType.Background });
+    console.log('Menubar command relaunched');
   } catch (error) {
-    showFailureToast("Failed to relaunch menubar command", error);
+    console.error('Failed to relaunch menubar command:', error);
   }
 }
