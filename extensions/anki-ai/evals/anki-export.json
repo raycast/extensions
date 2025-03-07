@@ -1,0 +1,29 @@
+{
+  "input": "Gerar flashcards sobre conceitos básicos de programação e exportar para o Anki",
+  "mocks": {
+    "testAnkiConnection": {
+      "success": true,
+      "message": "Conexão com o Anki estabelecida com sucesso"
+    },
+    "getDecks": [
+      "Default",
+      "Programação",
+      "Computação"
+    ]
+  },
+  "expected": [
+    {
+      "callsTool": "ai-flashcards-generator"
+    },
+    {
+      "callsFunction": "testAnkiConnection"
+    },
+    {
+      "callsFunction": "getDecks"
+    },
+    {
+      "containsFlashcards": true,
+      "minimumFlashcards": 5
+    }
+  ]
+}

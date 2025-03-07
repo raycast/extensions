@@ -1,0 +1,275 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "anki-ai",
+  "title": "Anki AI",
+  "description": "Crie flashcards no Anki com IA de forma rápida e eficiente. Transforme textos em cartões de estudo personalizados com ajuda da inteligência artificial.",
+  "icon": "icon.png",
+  "author": "sudo-psc",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
+  "commands": [
+    {
+      "name": "generateFlashcard",
+      "title": "Gerar Flashcards",
+      "subtitle": "Anki AI Flashcard Generator",
+      "description": "Gerar flashcards com IA e exportar para o Anki",
+      "mode": "view",
+      "icon": "icon.png"
+    }
+  ],
+  "tools": [
+    {
+      "name": "ai-flashcards-generator",
+      "title": "AI Flashcards Generator",
+      "description": "AI flashcards Generator for Anki",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text to generate flashcards from",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultLanguage",
+      "title": "Idioma Padrão",
+      "description": "Idioma padrão para geração de flashcards",
+      "type": "dropdown",
+      "required": true,
+      "default": "português",
+      "data": [
+        {
+          "title": "Português",
+          "value": "português"
+        },
+        {
+          "title": "English",
+          "value": "english"
+        },
+        {
+          "title": "Español",
+          "value": "español"
+        }
+      ]
+    },
+    {
+      "name": "defaultModel",
+      "title": "Modelo de IA",
+      "description": "Modelo de IA para geração de flashcards",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "title": "Padrão",
+          "value": ""
+        },
+        {
+          "title": "GPT-3.5",
+          "value": "GPT3_5"
+        },
+        {
+          "title": "GPT-4",
+          "value": "GPT4"
+        },
+        {
+          "title": "Claude",
+          "value": "CLAUDE"
+        }
+      ]
+    },
+    {
+      "name": "defaultDeck",
+      "title": "Deck Padrão",
+      "description": "Nome do deck padrão para adicionar flashcards (deixe em branco para usar o primeiro deck disponível)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Default"
+    },
+    {
+      "name": "ankiConnectPort",
+      "title": "Porta do AnkiConnect",
+      "description": "Porta para conexão com o AnkiConnect (padrão: 8765)",
+      "type": "textfield",
+      "required": false,
+      "default": "8765"
+    },
+    {
+      "name": "customPromptTemplate",
+      "title": "Template de Prompt Personalizado",
+      "description": "Template personalizado para geração de flashcards. Use {text} para o texto de entrada e {language} para o idioma.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Transforme o seguinte texto em flashcards no formato JSON com campos 'front', 'back' e 'extra'. Idioma: {language}. Texto: {text}"
+    },
+    {
+      "name": "minFlashcards",
+      "title": "Número Mínimo de Flashcards",
+      "description": "Número mínimo de flashcards a serem gerados",
+      "type": "textfield",
+      "required": false,
+      "default": "5"
+    },
+    {
+      "name": "maxFlashcards",
+      "title": "Número Máximo de Flashcards",
+      "description": "Número máximo de flashcards a serem gerados",
+      "type": "textfield",
+      "required": false,
+      "default": "20"
+    },
+    {
+      "name": "enableTags",
+      "title": "Habilitar Tags",
+      "description": "Gerar tags automaticamente para os flashcards",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Ativar geração automática de tags"
+    },
+    {
+      "name": "debugMode",
+      "title": "Modo de Depuração",
+      "description": "Habilitar logs detalhados para depuração",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Ativar modo de depuração"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "Gerar flashcards sobre o sistema solar, incluindo os planetas e suas características principais",
+        "expected": [
+          {
+            "callsTool": "ai-flashcards-generator",
+            "label": "Generate flashcards about the solar system"
+          },
+          {
+            "containsFlashcards": true,
+            "minimumFlashcards": 5
+          }
+        ]
+      },
+      {
+        "input": "Gerar flashcards para aprender vocabulário básico em espanhol sobre comidas e bebidas",
+        "expected": [
+          {
+            "callsTool": "ai-flashcards-generator",
+            "label": "Generate flashcards about basic vocabulary in Spanish for food and drinks"
+          },
+          {
+            "containsFlashcards": true,
+            "containsSpanish": true
+          }
+        ]
+      },
+      {
+        "input": "Gerar flashcards sobre conceitos básicos de programação como variáveis, funções, loops e condicionais",
+        "expected": [
+          {
+            "callsTool": "ai-flashcards-generator",
+            "label": "Generate flashcards about basic programming concepts"
+          },
+          {
+            "callsFunction": "testAnkiConnection"
+          },
+          {
+            "containsFlashcards": true,
+            "containsPortuguese": true,
+            "minimumFlashcards": 5
+          }
+        ]
+      },
+      {
+        "input": "Criar flashcards sobre a história do Brasil",
+        "expected": [
+          {
+            "callsTool": "ai-flashcards-generator",
+            "label": "Generate flashcards about Brazilian history"
+          },
+          {
+            "containsFlashcards": true,
+            "containsPortuguese": true
+          }
+        ]
+      },
+      {
+        "input": "Gere flashcards sobre os principais conceitos de marketing digital",
+        "expected": [
+          {
+            "callsTool": "ai-flashcards-generator",
+            "label": "Generate flashcards about digital marketing concepts"
+          },
+          {
+            "containsFlashcards": true,
+            "containsPortuguese": true
+          }
+        ]
+      },
+      {
+        "input": "Gerar flashcards sobre conceitos básicos de programação como variáveis, funções, loops e condicionais",
+        "expected": [
+          {
+            "callsTool": "ai-flashcards-generator",
+            "label": "Generate flashcards about basic programming concepts"
+          },
+          {
+            "callsFunction": "testAnkiConnection"
+          },
+          {
+            "containsFlashcards": true,
+            "containsPortuguese": true,
+            "minimumFlashcards": 5
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.8.1",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@testing-library/react-hooks": "^8.0.1",
+    "@types/jest": "^29.5.12",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "jest-fetch-mock": "^3.0.3",
+    "prettier": "^3.3.3",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "jest",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "screenshots": [
+    {
+      "file": "screenshot-1.png",
+      "title": "Visualização de Flashcards"
+    },
+    {
+      "file": "screenshot-2.png",
+      "title": "Geração de Flashcards"
+    }
+  ]
+}
