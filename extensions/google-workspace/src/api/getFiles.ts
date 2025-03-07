@@ -18,9 +18,6 @@ export type File = {
   name: string;
   mimeType: string;
   webViewLink: string;
-  thumbnailLink?: string;
-  hasThumbnail?: boolean;
-  iconLink?: string;
   webContentLink?: string;
   size?: string;
   modifiedTime: string;

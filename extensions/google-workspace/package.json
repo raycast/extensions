@@ -87,15 +87,7 @@
       "title": "Open Google Drive Home",
       "description": "Open Google Drive in your default browser.",
       "icon": "google-drive.png",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "title",
-          "placeholder": "Directory",
-          "type": "text",
-          "required": false
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "starred-google-drive-files",

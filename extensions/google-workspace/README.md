@@ -6,7 +6,3 @@ Access your Google Drive files effortlessly.
 -  ⭐ Browse starred files and access them from the menu bar
 -  📝 Create documents, forms, presentations, and spreadsheets using fast commands
 -  🔗 Quickly Open Google Drive home in your browser
-
-## Roadmap
-
-- [ ] 🏠 Grid view for `Search Google Drive Files`
