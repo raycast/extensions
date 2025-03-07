@@ -12,7 +12,6 @@
 - [Debug an Extension](basics/debug-an-extension.md)
 - [Install an Extension](basics/install-an-extension.md)
 - [Review an Extension in a Pull Request](basics/review-pullrequest.md)
-- [Templates and Boilerplates](basics/templates-and-boilerplates.md)
 
 ## AI
 
@@ -50,6 +49,7 @@
   - [CLI](information/developer-tools/cli.md)
   - [ESLint](information/developer-tools/eslint.md)
   - [VS Code (community tool)](information/developer-tools/vscode.md)
+  - [Templates](information/developer-tools/templates.md)
 - [Security](information/security.md)
 - [Versioning](information/versioning.md)
 

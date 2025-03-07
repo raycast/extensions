@@ -2,15 +2,15 @@
 description: Learn about the templates provided by Raycast to help kickstart your extension.
 ---
 
-# Templates and Boilerplates
+# Templates
 
-Raycast provides developers with a variety of templates to assist in kick-starting your extension development journey.
+Raycast provides a variety of templates to kickstart your extension.
 
 Raycast provides 3 types of templates:
 
-- **Commands:** These are templates for different views for commands within your extension.
-- **Tools:** Tools are a type of entry point for an extension different from a command. Learn more about Tools [here](../api-reference/tool.md).
-- **Extension Boilerplates:** These are fully built extension templates designed for use by organizations.
+- **Commands:** These are templates for [commands](../terminology.md).
+- **Tools:** These are templates for [tools](../terminology.md#tool). You can select a different one for each tool that you add to your extension.
+- **Extension Boilerplates:** These are fully built extensions designed to be tweaked by organizations for internal use.
 
 ## Commands
 
@@ -80,12 +80,12 @@ See the [API Reference](../api-reference/menu-bar-commands.md) for more informat
 
 ### Run Script
 
-Renders a simple [HUD](../api-reference/feedback/hud.md) indicating the completion of the script.
+A example of a no-view command which shows a simple [HUD](../api-reference/feedback/hud.md).
 
 ### Show List
 
 <details>
-<summary>Renders a simple list with each entry containing an icon, title, subtitle, and accessory.</summary>
+<summary>Renders a static list with each entry containing an icon, title, subtitle, and accessory.</summary>
 
 ![List Template Render](../.gitbook/assets/list-template.webp)
 {% hint style="info" %}
@@ -97,8 +97,7 @@ See the [API Reference](../api-reference/user-interface/list.md) for more inform
 ### Show Typeahead Results
 
 <details>
-<summary>Renders a searchable list of NPM packages. Returned packages updates as search.</summary>
-
+<summary>Renders a dynamic and searchable list of NPM packages. The command fetches new items as the search is updated by the user.</summary>
 ![Typeahead Results Template Render](../.gitbook/assets/typeahead-results-template.webp)
 
 </details>
@@ -106,7 +105,7 @@ See the [API Reference](../api-reference/user-interface/list.md) for more inform
 ### AI
 
 <details>
-<summary>Renders output from an AI command in a Detail view.</summary>
+<summary>Renders the output of an AI call in a Detail view.</summary>
 
 ![AI Template Render](../.gitbook/assets/ai-template.webp)
 
@@ -116,7 +115,7 @@ See the [API Reference](../api-reference/user-interface/list.md) for more inform
 
 <details>
 
-<summary>Renders a barebones Quick AI chat with your extension.</summary>
+<summary>A simple tool which asks for confirmation before executing.</summary>
 
 ![Tool with Confirmation Template Render](../.gitbook/assets/tool-with-confirmation-template.webp)
 {% hint style="info" %}
