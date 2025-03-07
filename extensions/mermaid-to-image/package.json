@@ -84,6 +84,15 @@
       ]
     },
     {
+      "name": "generationTimeout",
+      "title": "Generation Timeout",
+      "description": "Maximum time in seconds to wait for diagram generation (for complex diagrams, use higher values)",
+      "type": "textfield",
+      "required": false,
+      "default": "10",
+      "placeholder": "10"
+    },
+    {
       "name": "savePath",
       "title": "Save Path",
       "description": "The directory where images will be saved (default: Downloads folder)",

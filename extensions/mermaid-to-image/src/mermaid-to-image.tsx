@@ -23,6 +23,7 @@ interface Preferences {
   outputFormat: "png" | "svg";
   theme: "default" | "forest" | "dark" | "neutral";
   savePath?: string;
+  generationTimeout?: string; // Added timeout preference
 }
 
 // Image preview component
@@ -139,33 +140,108 @@ function ImagePreview(props: { imagePath: string; format: string }) {
   );
 }
 
+// Improved function to check for mmdc command availability
+async function findMmdcPath(): Promise<string> {
+  const possiblePaths = [
+    "/usr/local/bin/mmdc",
+    "/opt/homebrew/bin/mmdc",
+    "~/.npm-global/bin/mmdc",
+    "/usr/bin/mmdc",
+    path.join(os.homedir(), ".npm-global/bin/mmdc"),
+  ];
+
+  // First check if mmdc is in PATH
+  try {
+    const { stdout } = await execPromise("which mmdc");
+    if (stdout.trim()) {
+      console.log("Found mmdc in PATH:", stdout.trim());
+      return stdout.trim();
+    }
+  } catch (error) {
+    // Command not found in PATH, continue with checking specific locations
+    console.log("mmdc not found in PATH, checking specific locations...");
+    console.error("which mmdc error:", error instanceof Error ? error.message : String(error));
+
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Looking for mermaid-cli...",
+      message: "Not found in PATH, checking other locations",
+    });
+  }
+
+  // Check specific locations
+  for (const p of possiblePaths) {
+    const expandedPath = p.startsWith("~/") ? p.replace("~/", `${os.homedir()}/`) : p;
+    if (fs.existsSync(expandedPath)) {
+      console.log("Found mmdc at specific location:", expandedPath);
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Found mermaid-cli",
+        message: `Located at ${expandedPath}`,
+      });
+
+      return expandedPath;
+    }
+  }
+
+  console.error("mmdc not found in any of the expected locations:", possiblePaths);
+
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "mermaid-cli not found",
+    message: "Please install with 'npm install -g @mermaid-js/mermaid-cli'",
+  });
+
+  throw new Error(
+    "mermaid-cli (mmdc) command not found. Please install it with 'npm install -g @mermaid-js/mermaid-cli'",
+  );
+}
+
+// Improved function to safely clean up temporary files
+function cleanupTempFile(filePath: string | null): void {
+  if (filePath && fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+      console.log("Temporary file cleaned up:", filePath);
+    } catch (error) {
+      console.error("Failed to clean up temporary file:", error);
+    }
+  }
+}
+
 async function getSelectedText(): Promise<string | null> {
   try {
     // Save the current clipboard content
     const previousClipboard = await Clipboard.read();
+    const previousText = previousClipboard.text || "";
 
     // Simulate cmd+c to copy selected text
     await execPromise('osascript -e \'tell application "System Events" to keystroke "c" using command down\'');
 
     // Small delay to ensure clipboard is updated
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
     // Read the new clipboard content (which should be the selected text)
     const selectedText = await Clipboard.readText();
 
-    // If selectedText is undefined, return null to match the return type
-    if (selectedText === undefined) {
+    // If selectedText is undefined or empty, return null
+    if (!selectedText) {
+      // Restore previous clipboard if needed
+      if (previousText) {
+        await Clipboard.paste(previousText);
+      }
       return null;
     }
 
     // If nothing was selected, the clipboard content won't change
-    if (selectedText === previousClipboard.text) {
-      throw new Error("No text was selected");
+    if (selectedText === previousText) {
+      return null;
     }
 
     // Restore previous clipboard content if needed
-    if (previousClipboard.text && previousClipboard.text !== selectedText) {
-      await Clipboard.paste(previousClipboard);
+    if (previousText && previousText !== selectedText) {
+      await Clipboard.paste(previousText);
     }
 
     return selectedText;
@@ -179,13 +255,19 @@ async function getSelectedText(): Promise<string | null> {
   }
 }
 
-async function generateMermaidDiagram(mermaidCode: string, preferences: Preferences) {
+async function generateMermaidDiagram(
+  mermaidCode: string,
+  preferences: Preferences,
+  tempFileRef: React.MutableRefObject<string | null>,
+) {
   let cleanCode = mermaidCode;
   if (cleanCode.includes("```mermaid")) {
     cleanCode = cleanCode.replace(/```mermaid\n/, "").replace(/```$/, "");
   }
 
   const tempFile = path.join(os.tmpdir(), `diagram-${Date.now()}.mmd`);
+  tempFileRef.current = tempFile; // Store the tempFile path in the ref
+
   try {
     fs.writeFileSync(tempFile, cleanCode);
   } catch (error: unknown) {
@@ -197,19 +279,8 @@ async function generateMermaidDiagram(mermaidCode: string, preferences: Preferen
 
   console.log(`Generating diagram, theme: ${preferences.theme}, format: ${preferences.outputFormat}`);
 
-  const possiblePaths = ["/usr/local/bin/mmdc", "/opt/homebrew/bin/mmdc", "~/.npm-global/bin/mmdc", "/usr/bin/mmdc"];
-
-  let mmdcPath = "";
-  for (const p of possiblePaths) {
-    if (fs.existsSync(p)) {
-      mmdcPath = p;
-      break;
-    }
-  }
-
-  if (!mmdcPath) {
-    throw new Error("mermaid-cli (mmdc) command not found.");
-  }
+  // Check for mmdc command availability
+  const mmdcPath = await findMmdcPath();
 
   const command = `"${mmdcPath}" -i "${tempFile}" -o "${outputPath}" -t ${preferences.theme} -b transparent --scale 2`;
   const env = {
@@ -218,7 +289,11 @@ async function generateMermaidDiagram(mermaidCode: string, preferences: Preferen
     PATH: `/usr/local/bin:/opt/homebrew/bin:${process.env.PATH}`,
   };
 
-  return await launchCommand(command, env, outputPath, tempFile);
+  // Get timeout from preferences and convert to number in milliseconds
+  const timeoutStr = preferences.generationTimeout || "10";
+  const timeoutInMs = parseInt(timeoutStr, 10) * 1000;
+
+  return await launchCommand(command, env, outputPath, tempFile, tempFileRef, timeoutInMs);
 }
 
 async function launchCommand(
@@ -226,36 +301,37 @@ async function launchCommand(
   env: NodeJS.ProcessEnv,
   outputPath: string,
   tempFile: string,
+  tempFileRef: React.MutableRefObject<string | null>,
+  timeout: number,
 ): Promise<string> {
   try {
-    await execPromise(command, { env, timeout: 10000 });
+    await execPromise(command, { env, timeout });
 
     if (!fs.existsSync(outputPath)) {
+      cleanupTempFile(tempFile);
+      tempFileRef.current = null;
       throw new Error(`Diagram generation failed: Output file not found ${outputPath}`);
     }
 
     // Clean up temporary .mmd file
-    try {
-      if (fs.existsSync(tempFile)) {
-        fs.unlinkSync(tempFile);
-        console.log("Temporary file cleaned up after success:", tempFile);
-      }
-    } catch (cleanupError) {
-      console.error("Failed to clean up temporary file:", cleanupError);
-    }
+    cleanupTempFile(tempFile);
+    tempFileRef.current = null;
 
     return outputPath;
   } catch (error: unknown) {
     console.error("Command execution failed:", error);
+
     // Clean up temporary files
-    try {
-      if (fs.existsSync(tempFile)) {
-        fs.unlinkSync(tempFile);
-        console.log("Temporary file cleaned up after error:", tempFile);
-      }
-    } catch (cleanupError) {
-      console.error("Failed to clean up temporary file:", cleanupError);
+    cleanupTempFile(tempFile);
+    tempFileRef.current = null;
+
+    // Provide more specific error messages
+    if (error instanceof Error && error.message.includes("ETIMEDOUT")) {
+      throw new Error(
+        `Diagram generation timed out after ${timeout / 1000} seconds. Try increasing the timeout in preferences.`,
+      );
     }
+
     throw new Error(`Failed to generate diagram: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
@@ -266,6 +342,7 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const isProcessingRef = useRef(false);
+  const tempFileRef = useRef<string | null>(null);
 
   async function processMermaidCode(useSelection = false) {
     if (isProcessingRef.current) return;
@@ -320,7 +397,7 @@ export default function Command() {
         title: "Generating diagram...",
       });
 
-      const outputPath = await generateMermaidDiagram(mermaidCode, preferences);
+      const outputPath = await generateMermaidDiagram(mermaidCode, preferences, tempFileRef);
       setImagePath(outputPath);
 
       await showToast({
@@ -346,14 +423,11 @@ export default function Command() {
 
   useEffect(() => {
     return () => {
-      if (imagePath && fs.existsSync(imagePath)) {
-        try {
-          fs.unlinkSync(imagePath);
-          console.log("Temporary file cleaned up:", imagePath);
-        } catch (error) {
-          console.error("Failed to clean up temporary file:", error);
-        }
-      }
+      // Cleanup temporary image file
+      cleanupTempFile(imagePath);
+
+      // Cleanup temporary .mmd file
+      cleanupTempFile(tempFileRef.current);
     };
   }, [imagePath]);
 
@@ -391,6 +465,12 @@ export default function Command() {
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               onAction={() => processMermaidCode(false)}
             />
+            <Action
+              title="Generate from Selection"
+              icon={Icon.Text}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+              onAction={() => processMermaidCode(true)}
+            />
           </ActionPanel>
         }
       />
@@ -412,6 +492,12 @@ export default function Command() {
             icon={Icon.Clipboard}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
             onAction={() => processMermaidCode(false)}
+          />
+          <Action
+            title="Generate from Selection"
+            icon={Icon.Text}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            onAction={() => processMermaidCode(true)}
           />
         </ActionPanel>
       }
