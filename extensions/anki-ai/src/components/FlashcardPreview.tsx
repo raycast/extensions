@@ -1,7 +1,7 @@
-import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useState, useMemo } from "react";
 import { Flashcard } from "../ai/flashcardGenerator";
-import { AIEnhancer } from "../ai/aiEnhancer";
+import { AIEnhancer } from "../utils/aiEnhancer";
 
 interface FlashcardPreviewProps {
   flashcards: Flashcard[];
@@ -52,6 +52,25 @@ export function FlashcardPreview({
       actions={
         <ActionPanel>
           <Action
+            title="Exportar Para O Anki"
+            icon={Icon.Download}
+            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            onAction={() => {
+              if (onSaveToAnki) {
+                const selectedCards = flashcards.filter((_, idx) => selectedFlashcards.has(idx));
+                if (selectedCards.length === 0) {
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: "Nenhum flashcard selecionado",
+                    message: "Selecione pelo menos um flashcard para exportar",
+                  });
+                  return;
+                }
+                onSaveToAnki(selectedCards);
+              }
+            }}
+          />
+          <Action
             title="Selecionar Todos"
             icon={Icon.CheckCircle}
             onAction={() => {
@@ -77,25 +96,6 @@ export function FlashcardPreview({
               }
             }}
           />
-          {onSaveToAnki && (
-            <Action
-              title="Exportar Selecionados Para O Anki"
-              icon={Icon.Download}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
-              onAction={() => {
-                const selectedCards = flashcards.filter((_, idx) => selectedFlashcards.has(idx));
-                if (selectedCards.length === 0) {
-                  showToast({
-                    style: Toast.Style.Failure,
-                    title: "Nenhum flashcard selecionado",
-                    message: "Selecione pelo menos um flashcard para exportar",
-                  });
-                  return;
-                }
-                onSaveToAnki(selectedCards);
-              }}
-            />
-          )}
         </ActionPanel>
       }
       searchBarAccessory={
@@ -113,7 +113,7 @@ export function FlashcardPreview({
       }
     >
       <List.Section title={`${flashcards.length} Flashcards (${selectedFlashcards.size} selecionados)`}>
-        {filteredFlashcards.map((item, index) => (
+        {filteredFlashcards.map((item) => (
           <List.Item
             key={item.index}
             icon={{
@@ -121,50 +121,36 @@ export function FlashcardPreview({
               tintColor: selectedFlashcards.has(item.index) ? Color.Green : Color.PrimaryText,
             }}
             title={item.card.front}
-            subtitle={item.card.back}
+            subtitle={item.card.back.length > 60 ? item.card.back.substring(0, 60) + "..." : item.card.back}
             accessories={[
-              {
-                icon: selectedFlashcards.has(item.index) ? Icon.Checkmark : undefined,
-                tooltip: selectedFlashcards.has(item.index) ? "Selecionado para exportação" : "Clique para selecionar",
-              },
               { text: `Cartão ${item.index + 1}/${flashcards.length}` },
               { text: item.card.extra ? "Tem informações extras" : "", icon: item.card.extra ? Icon.Star : undefined },
             ]}
             detail={
               <List.Item.Detail
-                markdown={`## Frente\n${item.card.front}\n\n## Verso\n${item.card.back}\n\n${item.card.extra ? `## Informações Extras\n${item.card.extra}` : ""}${item.card.image ? `\n\n![Imagem](${item.card.image})` : ""}`}
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title="Status"
-                      icon={{
-                        source: selectedFlashcards.has(item.index) ? Icon.CheckCircle : Icon.Circle,
-                        tintColor: selectedFlashcards.has(item.index) ? Color.Green : Color.PrimaryText,
-                      }}
-                      text={selectedFlashcards.has(item.index) ? "Selecionado para exportação" : "Não selecionado"}
-                    />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Frente" text={item.card.front} />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Verso" text={item.card.back} />
-                    {item.card.extra && (
-                      <>
-                        <List.Item.Detail.Metadata.Separator />
-                        <List.Item.Detail.Metadata.Label title="Informações Extras" text={item.card.extra} />
-                      </>
-                    )}
-                    {item.card.tags && item.card.tags.length > 0 && (
-                      <>
-                        <List.Item.Detail.Metadata.Separator />
-                        <List.Item.Detail.Metadata.TagList title="Tags">
-                          {item.card.tags.map((tag, i) => (
-                            <List.Item.Detail.Metadata.TagList.Item key={i} text={tag} />
-                          ))}
-                        </List.Item.Detail.Metadata.TagList>
-                      </>
-                    )}
-                  </List.Item.Detail.Metadata>
-                }
+                markdown={`# ${item.card.front}
+
+## Resposta
+${item.card.back}
+
+${
+  item.card.extra
+    ? `## Informações Complementares
+${item.card.extra}`
+    : ""
+}
+
+${
+  item.card.tags && item.card.tags.length > 0
+    ? `## Tags
+${item.card.tags.map((tag) => `\`${tag}\``).join(" ")}`
+    : ""
+}
+
+${item.card.image ? `![Imagem](${item.card.image})` : ""}
+
+---
+**Status**: ${selectedFlashcards.has(item.index) ? "✅ Selecionado para exportação" : "⬜ Não selecionado"}`}
               />
             }
             actions={
@@ -191,16 +177,49 @@ export function FlashcardPreview({
                 )}
                 {onEdit && (
                   <Action
-                    title="Avaliar Qualidade"
-                    icon={Icon.Stars}
-                    onAction={async () => {
-                      showToast({ style: Toast.Style.Animated, title: "Avaliando flashcard..." });
-                      const evaluation = await AIEnhancer.evaluateFlashcard(item.card);
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: `Pontuação: ${evaluation.score}/10`,
-                        message: evaluation.suggestions.join(" | "),
-                      });
+                    title="Ajustar Dificuldade"
+                    icon={Icon.Gauge}
+                    submenu={
+                      <ActionPanel>
+                        <Action
+                          title="Iniciante"
+                          icon={{ source: Icon.Circle, tintColor: Color.Green }}
+                          onAction={() => {
+                            const updatedCard = { ...item.card, difficulty: "iniciante" as const };
+                            onEdit(item.index, updatedCard);
+                            showToast({ style: Toast.Style.Success, title: "Dificuldade ajustada para Iniciante" });
+                          }}
+                        />
+                        <Action
+                          title="Intermediário"
+                          icon={{ source: Icon.Circle, tintColor: Color.Yellow }}
+                          onAction={() => {
+                            const updatedCard = { ...item.card, difficulty: "intermediário" as const };
+                            onEdit(item.index, updatedCard);
+                            showToast({ style: Toast.Style.Success, title: "Dificuldade ajustada para Intermediário" });
+                          }}
+                        />
+                        <Action
+                          title="Avançado"
+                          icon={{ source: Icon.Circle, tintColor: Color.Red }}
+                          onAction={() => {
+                            const updatedCard = { ...item.card, difficulty: "avançado" as const };
+                            onEdit(item.index, updatedCard);
+                            showToast({ style: Toast.Style.Success, title: "Dificuldade ajustada para Avançado" });
+                          }}
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                )}
+                {onSaveToAnki && (
+                  <Action
+                    title="Exportar Este Flashcard"
+                    icon={Icon.Download}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    onAction={() => {
+                      const selectedCards = [item.card];
+                      onSaveToAnki(selectedCards);
                     }}
                   />
                 )}
@@ -209,24 +228,9 @@ export function FlashcardPreview({
                     title="Excluir Flashcard"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    onAction={() => onDelete(item.index)}
-                  />
-                )}
-                {onSaveToAnki && index === 0 && (
-                  <Action
-                    title="Exportar Selecionados Para O Anki"
-                    icon={Icon.Download}
                     onAction={() => {
-                      const selectedCards = flashcards.filter((_, idx) => selectedFlashcards.has(idx));
-                      if (selectedCards.length === 0) {
-                        showToast({
-                          style: Toast.Style.Failure,
-                          title: "Nenhum flashcard selecionado",
-                          message: "Selecione pelo menos um flashcard para exportar",
-                        });
-                        return;
-                      }
-                      onSaveToAnki(selectedCards);
+                      onDelete(item.index);
+                      showToast({ style: Toast.Style.Success, title: "Flashcard excluído" });
                     }}
                   />
                 )}

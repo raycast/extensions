@@ -16,7 +16,7 @@ export class ErrorHandler {
 
   static handleAnkiConnectionError() {
     const message =
-      "Não foi possível conectar ao Anki. Verifique se o Anki está aberto e se o AnkiConnect está instalado.";
+      "Não foi possível conectar ao Anki. Verifique se o Anki está aberto e se o AnkiConnect está instalado corretamente. Reinicie o Anki caso necessário.";
     Logger.error(message);
 
     showToast({

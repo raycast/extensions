@@ -2,192 +2,199 @@
 
 ![Anki AI Logo](./icon.png)
 
-## Introdução
+## Introduction
 
-Anki AI é uma extensão para o Raycast que permite criar flashcards para o Anki utilizando inteligência artificial. Esta ferramenta integra o poder do Anki, um dos mais populares softwares de repetição espaçada para memorização, com a interface rápida e eficiente do Raycast.
+Anki AI is a Raycast extension that allows you to create flashcards for Anki using artificial intelligence. This tool integrates the power of Anki, one of the most popular spaced repetition software for memorization, with Raycast's fast and efficient interface.
 
-Transforme textos em cartões de estudo personalizados de forma rápida e eficiente, aproveitando o poder da IA para gerar perguntas e respostas relevantes. Ideal para estudantes, profissionais e qualquer pessoa interessada em otimizar seu processo de aprendizagem através de flashcards.
-## Pré-requisitos
+Transform texts into personalized study cards quickly and efficiently, leveraging the power of AI to generate relevant questions and answers. Ideal for students, professionals, and anyone interested in optimizing their learning process through flashcards.
 
-Para utilizar a extensão Anki AI, você precisará:
+## Prerequisites
 
-- [Anki](https://apps.ankiweb.net/) instalado no seu computador
-- [AnkiConnect](https://ankiweb.net/shared/info/2055492159) plugin instalado no Anki
-- Anki deve estar aberto enquanto você usa a extensão
+To use the Anki AI extension, you'll need:
 
-### Configuração do AnkiConnect
+- [Anki](https://apps.ankiweb.net/) installed on your computer
+- [AnkiConnect](https://ankiweb.net/shared/info/2055492159) plugin installed in Anki
+- Anki must be open while you use the extension
 
-1. Abra o Anki
-2. Vá para Ferramentas > Add-ons > Obter Add-ons
-3. Cole o código `2055492159` e clique em OK
-4. Reinicie o Anki após a instalação
-5. Verifique se o AnkiConnect está funcionando corretamente acessando `http://localhost:8765` no seu navegador (deve mostrar uma mensagem relacionada ao AnkiConnect)
-## Descrição Detalhada das Funcionalidades
+### AnkiConnect Setup
 
-A extensão Anki AI oferece diversas funcionalidades para tornar seu processo de criação de flashcards mais eficiente:
+1. Open Anki
+2. Go to Tools > Add-ons > Get Add-ons
+3. Paste the code `2055492159` and click OK
+4. Restart Anki after installation
+5. Verify that AnkiConnect is working correctly by accessing `http://localhost:8765` in your browser (it should show a message related to AnkiConnect)
 
-### Geração de Flashcards com IA
-- Transforme qualquer texto em flashcards de alta qualidade usando inteligência artificial
-- Algoritmos avançados identificam conceitos importantes e criam perguntas relevantes
-- Personalize a quantidade de flashcards gerados para cada texto
+## Detailed Feature Description
 
-### Suporte a Múltiplos Idiomas
-- Compatível com Português, Inglês e Espanhol
-- Interface adaptada aos diferentes idiomas
-- Geração de conteúdo respeitando particularidades linguísticas
+The Anki AI extension offers several features to make your flashcard creation process more efficient:
 
-### Personalização e Configuração
-- Configure decks e modelos específicos do Anki
-- Personalize prompts para a IA conforme suas necessidades de estudo
-- Controle sobre o formato e estilo dos flashcards gerados
+### AI-Powered Flashcard Generation
+- Transform any text into high-quality flashcards using artificial intelligence
+- Advanced algorithms identify important concepts and create relevant questions
+- Customize the number of flashcards generated for each text
 
-### Recursos Adicionais
-- Geração automática de tags para melhor organização
-- Visualização prévia e edição de flashcards antes da exportação
-- Melhoria de flashcards existentes com sugestões da IA
-- Integração perfeita com o fluxo de trabalho do Raycast
-## Instruções de Instalação Passo a Passo
+### Multiple Language Support
+- Compatible with English, Portuguese, and Spanish
+- Interface adapted to different languages
+- Content generation respecting linguistic particularities
 
-Siga estas etapas para instalar e configurar a extensão Anki AI:
+### Customization and Configuration
+- Configure specific Anki decks and models
+- Customize AI prompts according to your study needs
+- Control over the format and style of generated flashcards
 
-1. Instale o Raycast a partir do [site oficial](https://raycast.com/)
-2. Instale o Anki a partir do [site oficial](https://apps.ankiweb.net/)
-3. Abra o Anki e instale o plugin AnkiConnect:
-   - No Anki, vá para Ferramentas > Add-ons > Obter Add-ons
-   - Cole o código `2055492159` e clique em OK
-   - Reinicie o Anki
-4. Instale a extensão Anki AI no Raycast Store:
-   - Abra o Raycast
-   - Pressione `⌘` + `,` para abrir as preferências
-   - Navegue até a aba "Extensions"
-   - Clique em "Store"
-   - Pesquise por "Anki AI" e instale
+### Additional Features
+- Automatic tag generation for better organization
+- Preview and edit flashcards before exporting
+- Enhance existing flashcards with AI suggestions
+- Seamless integration with Raycast workflow
 
-### Configuração Inicial
+## Step-by-Step Installation Instructions
 
-Após a instalação, configure a extensão:
-1. Abra o Raycast e digite "Anki AI Settings"
-2. Configure suas preferências básicas (idioma, modelo de IA, deck padrão)
-3. Verifique a conexão com o Anki usando a opção "Testar Conexão"
-## Opções de Configuração
+Follow these steps to install and configure the Anki AI extension:
 
-A extensão Anki AI oferece um conjunto abrangente de opções de configuração para atender às suas necessidades específicas.
+1. Install Raycast from the [official website](https://raycast.com/)
+2. Install Anki from the [official website](https://apps.ankiweb.net/)
+3. Open Anki and install the AnkiConnect plugin:
+   - In Anki, go to Tools > Add-ons > Get Add-ons
+   - Paste the code `2055492159` and click OK
+   - Restart Anki
+4. Install the Anki AI extension in the Raycast Store:
+   - Open Raycast
+   - Press `⌘` + `,` to open preferences
+   - Navigate to the "Extensions" tab
+   - Click on "Store"
+   - Search for "Anki AI" and install
 
-### Configurações Básicas
+### Initial Configuration
 
-- **Idioma Padrão**: Escolha entre Português, Inglês ou Espanhol para geração de flashcards. Esta configuração afeta tanto a interface quanto o idioma dos flashcards gerados.
+After installation, configure the extension:
+1. Open Raycast and type "Anki AI Settings"
+2. Configure your basic preferences (language, AI model, default deck)
+3. Verify the connection with Anki using the "Test Connection" option
 
-- **Modelo de IA**: Selecione o modelo de IA para geração de flashcards. Modelos mais avançados geralmente produzem flashcards de maior qualidade, mas podem ser mais lentos.
+## Configuration Options
 
-- **Deck Padrão**: Nome do deck padrão no Anki para exportação. Você pode especificar qualquer deck existente ou a extensão criará um novo deck se o especificado não existir.
+The Anki AI extension offers a comprehensive set of configuration options to meet your specific needs.
 
-- **Porta AnkiConnect**: Porta para conexão com o AnkiConnect (padrão: 8765). Altere apenas se você modificou a porta padrão do AnkiConnect.
+### Basic Settings
 
-### Configurações Avançadas
+- **Default Language**: Choose between English, Portuguese, or Spanish for flashcard generation. This setting affects both the interface and the language of the generated flashcards.
 
-- **Mínimo de Flashcards**: Número mínimo de flashcards a serem gerados por texto (valor recomendado: 3-5). Define o limite inferior para a geração automática.
+- **AI Model**: Select the AI model for flashcard generation. More advanced models generally produce higher quality flashcards but may be slower.
 
-- **Máximo de Flashcards**: Número máximo de flashcards a serem gerados por texto (valor recomendado: 10-20). Define o limite superior para evitar gerar flashcards em excesso.
+- **Default Deck**: Name of the default Anki deck for export. You can specify any existing deck or the extension will create a new deck if the specified one doesn't exist.
 
-- **Ativar Tags**: Quando ativado, a IA gerará tags automaticamente para os flashcards baseadas no conteúdo do texto. Isso facilita a organização e recuperação dos cartões no Anki.
+- **AnkiConnect Port**: Port for connecting to AnkiConnect (default: 8765). Only change this if you've modified the default AnkiConnect port.
 
-- **Template de Prompt Personalizado**: Personalize o prompt enviado para a IA, permitindo ajustar o tipo e estilo de flashcards gerados. Exemplo:
+### Advanced Settings
+
+- **Minimum Flashcards**: Minimum number of flashcards to be generated per text (recommended value: 3-5). Defines the lower limit for automatic generation.
+
+- **Maximum Flashcards**: Maximum number of flashcards to be generated per text (recommended value: 10-20). Defines the upper limit to avoid generating excessive flashcards.
+
+- **Enable Tags**: When enabled, the AI will automatically generate tags for flashcards based on the content of the text. This facilitates organization and retrieval of cards in Anki.
+
+- **Custom Prompt Template**: Customize the prompt sent to the AI, allowing you to adjust the type and style of generated flashcards. Example:
   ```
-  Gere [NÚMERO] flashcards no formato pergunta/resposta sobre o seguinte texto, focando nos conceitos principais:
-  [TEXTO]
+  Generate [NUMBER] flashcards in question/answer format about the following text, focusing on the main concepts:
+  [TEXT]
   ```
 
-- **Modo de Depuração**: Ativa logs detalhados para solução de problemas. Útil quando você está enfrentando problemas com a extensão.
-## Screenshots e Guias Visuais
+- **Debug Mode**: Enables detailed logs for troubleshooting. Useful when you're experiencing issues with the extension.
 
-_Note: As imagens serão adicionadas em uma atualização futura_
+## Screenshots and Visual Guides
 
-### Tela Principal
-Aqui será exibida a interface principal da extensão, mostrando o campo para inserção de texto e botões de ação.
+_Note: Images will be added in a future update_
 
-### Processo de Geração
-Esta captura mostrará o processo de geração de flashcards em andamento.
+### Main Screen
+Here the main interface of the extension will be displayed, showing the text input field and action buttons.
 
-### Revisão de Flashcards
-Imagem da tela de revisão e edição dos flashcards antes da exportação para o Anki.
+### Generation Process
+This capture will show the flashcard generation process in progress.
 
-### Configurações
-Captura da tela de configurações da extensão.
+### Flashcard Review
+Image of the review and editing screen for flashcards before exporting to Anki.
 
-## Seção de Uso
+### Settings
+Capture of the extension settings screen.
 
-### Fluxo de Trabalho Básico
+## Usage Section
 
-1. Abra o Anki no seu computador
-2. Abra o Raycast e digite "Gerar Flashcards"
-3. Cole o texto que deseja transformar em flashcards
-4. Clique em "Gerar Flashcards"
-5. Revise os flashcards gerados
-6. Selecione os flashcards que deseja exportar
-7. Clique em "Exportar para o Anki"
+### Basic Workflow
 
-### Comandos Disponíveis
+1. Open Anki on your computer
+2. Open Raycast and type "Generate Flashcards"
+3. Paste the text you want to transform into flashcards
+4. Click on "Generate Flashcards"
+5. Review the generated flashcards
+6. Select the flashcards you want to export
+7. Click on "Export to Anki"
 
-- `Gerar Flashcards`: Abre a interface principal para geração de flashcards
-- `Configurações Anki AI`: Acessa as configurações da extensão
-- `Melhorar Flashcard`: Permite melhorar um flashcard existente usando IA
-- `Histórico de Flashcards`: Visualiza flashcards gerados anteriormente
+### Available Commands
 
-### Exemplos de Uso
+- `Generate Flashcards`: Opens the main interface for flashcard generation
+- `Anki AI Settings`: Accesses the extension settings
+- `Enhance Flashcard`: Allows you to improve an existing flashcard using AI
+- `Flashcard History`: View previously generated flashcards
 
-**Estudo de Artigos Científicos**
-1. Copie um abstract ou seção importante
-2. Gere flashcards focados em metodologia e resultados
-3. Exporte para um deck específico para revisão espaçada
+### Usage Examples
 
-**Aprendizado de Idiomas**
-1. Cole um texto no idioma que está aprendendo
-2. Configure o template para focar em vocabulário ou gramática
-3. Revise e exporte para seu deck de idiomas
+**Scientific Article Study**
+1. Copy an abstract or important section
+2. Generate flashcards focused on methodology and results
+3. Export to a specific deck for spaced repetition
 
-**Revisão para Provas**
-1. Insira suas anotações de aula
-2. Ajuste o máximo de flashcards para um número maior
-3. Organize com tags específicas por assunto
-## Seção de Solução de Problemas
+**Language Learning**
+1. Paste a text in the language you're learning
+2. Configure the template to focus on vocabulary or grammar
+3. Review and export to your language deck
 
-### Problemas Comuns e Soluções
+**Exam Review**
+1. Insert your class notes
+2. Adjust the maximum number of flashcards to a higher number
+3. Organize with specific tags by subject
 
-- **Erro de conexão com o Anki**: 
-  - Verifique se o Anki está aberto e o plugin AnkiConnect está instalado
-  - Confirme que a porta configurada (padrão: 8765) corresponde à do AnkiConnect
-  - Tente reiniciar tanto o Anki quanto o Raycast
-  - Verifique se há firewalls bloqueando a conexão local
+## Troubleshooting Section
 
-- **Nenhum flashcard gerado**: 
-  - Tente com um texto mais longo ou mais específico
-  - Verifique se o modelo de IA selecionado está disponível
-  - Aumente o valor mínimo de flashcards nas configurações
-  - Experimente textos com conteúdo mais estruturado ou educacional
+### Common Problems and Solutions
 
-- **Flashcards de baixa qualidade**: 
-  - Experimente ajustar o template de prompt personalizado
-  - Utilize um modelo de IA mais avançado
-  - Forneça textos com conceitos mais claros e definidos
-  - Edite manualmente os flashcards antes de exportar
+- **Anki connection error**: 
+  - Check if Anki is open and the AnkiConnect plugin is installed
+  - Confirm that the configured port (default: 8765) matches AnkiConnect's
+  - Try restarting both Anki and Raycast
+  - Check if there are firewalls blocking the local connection
 
-- **Lentidão na geração**:
-  - Textos muito longos podem demorar mais para processar
-  - Reduza o número máximo de flashcards nas configurações
-  - Verifique sua conexão com a internet
-  - Tente um modelo de IA mais rápido (embora possivelmente menos avançado)
+- **No flashcards generated**: 
+  - Try with a longer or more specific text
+  - Check if the selected AI model is available
+  - Increase the minimum number of flashcards in the settings
+  - Try texts with more structured or educational content
 
-### Logs e Diagnóstico
+- **Low quality flashcards**: 
+  - Try adjusting the custom prompt template
+  - Use a more advanced AI model
+  - Provide texts with clearer and more defined concepts
+  - Manually edit the flashcards before exporting
 
-Se você continuar enfrentando problemas:
-1. Ative o Modo de Depuração nas configurações
-2. Reproduza o problema
-3. Acesse os logs em: `~/Library/Logs/Raycast/Extensions/anki-ai.log`
-4. Entre em contato com o suporte fornecendo esses logs
-## Contribuição
+- **Slow generation**:
+  - Very long texts may take longer to process
+  - Reduce the maximum number of flashcards in the settings
+  - Check your internet connection
+  - Try a faster AI model (although possibly less advanced)
 
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar pull requests.
+### Logs and Diagnostics
 
-## Licença
+If you continue to experience problems:
+1. Enable Debug Mode in the settings
+2. Reproduce the problem
+3. Access the logs at: `~/Library/Logs/Raycast/Extensions/anki-ai.log`
+4. Contact support providing these logs
+
+## Contribution
+
+Contributions are welcome! Feel free to open issues or submit pull requests.
+
+## License
 
 MIT

@@ -114,7 +114,7 @@ describe('useFlashcardGenerator', () => {
       { front: 'Question 2', back: 'Answer 2', extra: 'Extra info 2' },
     ];
 
-    it('deve adicionar flashcards com sucesso e retornar contagem correta', async () => {
+    it('deve adicionar flashcards com sucesso e retornar true', async () => {
       // Mock para Anki rodando
       (AnkiRepository.isAnkiRunning as jest.Mock).mockResolvedValue(true);
       
@@ -138,18 +138,14 @@ describe('useFlashcardGenerator', () => {
       
       // Sobrescrever o método para testar apenas o retorno esperado
       const originalMethod = hook.addFlashcardsToAnki;
-      hook.addFlashcardsToAnki = jest.fn().mockResolvedValue({
-        successCount: 2,
-        errorCount: 0
-      });
+      hook.addFlashcardsToAnki = jest.fn().mockResolvedValue(true);
       
       // Execute a função addFlashcardsToAnki
-      const addResult = await hook.addFlashcardsToAnki(mockFlashcards);
+      const addResult = await hook.addFlashcardsToAnki(mockFlashcards, "Test Deck", "Raycast Flashcards");
       
       // Verificamos se o resultado existe e tem as propriedades esperadas
       expect(addResult).not.toBeUndefined();
-      expect(addResult.successCount).toBe(2);
-      expect(addResult.errorCount).toBe(0);
+      expect(addResult).toBe(true);
       
       // Restaurar o método original
       hook.addFlashcardsToAnki = originalMethod;
@@ -163,13 +159,11 @@ describe('useFlashcardGenerator', () => {
       const hook = useFlashcardGenerator();
       
       // Execute a função addFlashcardsToAnki
-      const addResult = await hook.addFlashcardsToAnki(mockFlashcards);
+      const addResult = await hook.addFlashcardsToAnki(mockFlashcards, "Test Deck", "Raycast Flashcards");
       
       // Verificamos se o resultado existe e tem as propriedades esperadas
       expect(addResult).not.toBeUndefined();
-      expect(addResult.successCount).toBe(0);
-      expect(addResult.errorCount).toBe(2);
-      expect(addResult.connectionError).toBe(true);
+      expect(addResult).toBe(false);
       expect(AnkiService.addNote).not.toHaveBeenCalled();
       expect(showToast).toHaveBeenCalledWith(expect.objectContaining({
         title: expect.stringContaining('não está aberto')
@@ -190,13 +184,11 @@ describe('useFlashcardGenerator', () => {
       const hook = useFlashcardGenerator();
       
       // Execute a função addFlashcardsToAnki
-      const addResult = await hook.addFlashcardsToAnki(mockFlashcards);
+      const addResult = await hook.addFlashcardsToAnki(mockFlashcards, "Test Deck", "Raycast Flashcards");
       
       // Verificamos se o resultado existe e tem as propriedades esperadas
       expect(addResult).not.toBeUndefined();
-      expect(addResult.successCount).toBe(0);
-      expect(addResult.errorCount).toBe(2);
-      expect(addResult.connectionError).toBe(true);
+      expect(addResult).toBe(false);
       expect(AnkiService.addNote).not.toHaveBeenCalled();
       expect(showToast).toHaveBeenCalledWith(expect.objectContaining({
         title: expect.stringContaining('Problema')
@@ -223,12 +215,11 @@ describe('useFlashcardGenerator', () => {
       const hook = useFlashcardGenerator();
       
       // Execute a função addFlashcardsToAnki
-      const addResult = await hook.addFlashcardsToAnki(mockFlashcards);
+      const addResult = await hook.addFlashcardsToAnki(mockFlashcards, "Test Deck", "Raycast Flashcards");
       
       // Verificamos se o resultado existe e tem as propriedades esperadas
       expect(addResult).not.toBeUndefined();
-      expect(addResult.successCount).toBe(0);
-      expect(addResult.errorCount).toBe(2);
+      expect(addResult).toBe(false);
       expect(AnkiService.addNote).not.toHaveBeenCalled();
       expect(showToast).toHaveBeenCalledWith(expect.objectContaining({
         title: expect.stringContaining('Erro')
@@ -261,18 +252,14 @@ describe('useFlashcardGenerator', () => {
       
       // Sobrescrever o método para testar apenas o retorno esperado
       const originalMethod = hook.addFlashcardsToAnki;
-      hook.addFlashcardsToAnki = jest.fn().mockResolvedValue({
-        successCount: 1,
-        errorCount: 1
-      });
+      hook.addFlashcardsToAnki = jest.fn().mockResolvedValue(true);
       
       // Execute a função addFlashcardsToAnki
-      const addResult = await hook.addFlashcardsToAnki(mockFlashcards);
+      const addResult = await hook.addFlashcardsToAnki(mockFlashcards, "Test Deck", "Raycast Flashcards");
       
       // Verificamos se o resultado existe e tem as propriedades esperadas
       expect(addResult).not.toBeUndefined();
-      expect(addResult.successCount).toBe(1);
-      expect(addResult.errorCount).toBe(1);
+      expect(addResult).toBe(true);
       
       // Restaurar o método original
       hook.addFlashcardsToAnki = originalMethod;

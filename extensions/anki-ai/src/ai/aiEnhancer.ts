@@ -1,11 +1,15 @@
 import { AI } from "@raycast/api";
 import { Flashcard } from "./flashcardGenerator";
 import { Logger } from "../utils/logger";
+import { getAIModelIdentifier } from "../constants/aiModels";
 
 export class AIEnhancer {
   static async enhanceFlashcard(
     flashcard: Flashcard,
-    options?: { model?: string; language?: string },
+    options?: {
+      model?: string;
+      creativity?: number;
+    },
   ): Promise<Flashcard> {
     try {
       const language = options?.language || "português";
@@ -15,25 +19,65 @@ export class AIEnhancer {
       Frente: ${flashcard.front}
       Verso: ${flashcard.back}
       Extra: ${flashcard.extra || ""}
+      Dificuldade: ${flashcard.difficulty || "intermediário"}
       
       Instruções específicas:
-      1. Mantenha a pergunta (frente) e resposta principal (verso) originais
-      2. Adicione 2-3 exemplos concretos e aplicáveis
-      3. Inclua mnemônicos ou técnicas de memorização quando relevante
-      4. Adicione referências a conceitos relacionados
-      5. Mantenha o conteúdo conciso e direto
-      6. Responda em ${language}
+      1. Mantenha a pergunta (frente) original
+      2. Expanda a resposta (verso) para torná-la mais detalhada e completa, mas ainda concisa
+      3. No campo "extra", adicione:
+         - 2-3 exemplos concretos e aplicáveis
+         - Explicações adicionais que complementem o conceito principal
+         - Mnemônicos ou técnicas de memorização específicas
+         - Conexões com outros conceitos relacionados
+         - Dicas para aplicação prática do conhecimento
+      4. Mantenha o conteúdo organizado com subtítulos e formatação clara
+      5. Responda em ${language}
+      6. Mantenha a dificuldade consistente com o nível "${flashcard.difficulty || "intermediário"}"
       
       Retorne o JSON do flashcard melhorado no seguinte formato:
       {
         "front": "A pergunta original",
-        "back": "A resposta original",
-        "extra": "Conteúdo enriquecido com exemplos, mnemônicos e informações adicionais"
+        "back": "A resposta expandida e mais detalhada",
+        "extra": "Conteúdo enriquecido com exemplos, mnemônicos e informações adicionais",
+        "difficulty": "${flashcard.difficulty || "intermediário"}"
       }`;
 
+      // Determinar o modelo a ser usado
+      let aiModel = undefined;
+      if (options?.model) {
+        // Primeiro tenta usar o mapeamento personalizado
+        const modelId = getAIModelIdentifier(options.model);
+        if (modelId) {
+          try {
+            // @ts-expect-error - Modelo pode não estar no tipo AI.Model
+            aiModel = modelId;
+            Logger.debug(`Usando modelo AI com mapeamento personalizado: ${options.model} (${aiModel})`);
+          } catch (err) {
+            Logger.warn(
+              `Modelo não reconhecido pelo mapeamento personalizado: ${options.model}, tentando fallback para AI.Model`,
+            );
+          }
+        }
+
+        // Fallback para o método antigo se o mapeamento personalizado falhar
+        if (!aiModel && options.model in AI.Model) {
+          aiModel = AI.Model[options.model as keyof typeof AI.Model];
+          Logger.debug(`Usando modelo AI com AI.Model: ${options.model} (${aiModel})`);
+        }
+
+        if (!aiModel) {
+          Logger.warn(`Modelo AI não reconhecido: ${options.model}, usando modelo padrão GPT-4o`);
+          // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+          aiModel = "openai-gpt-4o";
+        }
+      } else {
+        // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+        aiModel = "openai-gpt-4o";
+      }
+
       const response = await AI.ask(prompt, {
-        model: options?.model ? AI.Model[options.model as keyof typeof AI.Model] : AI.Model.OpenAI_GPT4o,
-        creativity: 0.7,
+        model: aiModel,
+        creativity: options?.creativity || 0.7,
       });
 
       const enhancedCard = this.parseResponse(response);
@@ -44,6 +88,7 @@ export class AIEnhancer {
         back: enhancedCard.back || flashcard.back,
         extra: enhancedCard.extra || flashcard.extra,
         tags: flashcard.tags, // Preservar tags originais
+        difficulty: enhancedCard.difficulty || flashcard.difficulty || "intermediário",
       };
     } catch (error) {
       Logger.error("Erro ao melhorar flashcard", error);
@@ -69,8 +114,39 @@ export class AIEnhancer {
       Retorne apenas um array JSON com os exemplos, no formato:
       ["Exemplo 1", "Exemplo 2", "Exemplo 3"]`;
 
+      // Determinar o modelo a ser usado
+      let aiModel = undefined;
+      if (options?.model) {
+        // Primeiro tenta usar o mapeamento personalizado
+        const modelId = getAIModelIdentifier(options.model);
+        if (modelId) {
+          try {
+            // @ts-expect-error - Modelo pode não estar no tipo AI.Model
+            aiModel = modelId;
+          } catch (err) {
+            Logger.warn(
+              `Modelo não reconhecido pelo mapeamento personalizado: ${options.model}, tentando fallback para AI.Model`,
+            );
+          }
+        }
+
+        // Fallback para o método antigo se o mapeamento personalizado falhar
+        if (!aiModel && options.model in AI.Model) {
+          aiModel = AI.Model[options.model as keyof typeof AI.Model];
+        }
+
+        if (!aiModel) {
+          Logger.warn(`Modelo AI não reconhecido: ${options.model}, usando modelo padrão GPT-4o`);
+          // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+          aiModel = "openai-gpt-4o";
+        }
+      } else {
+        // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+        aiModel = "openai-gpt-4o";
+      }
+
       const response = await AI.ask(prompt, {
-        model: options?.model ? AI.Model[options.model as keyof typeof AI.Model] : AI.Model.OpenAI_GPT4o,
+        model: aiModel,
         creativity: 0.8,
       });
 
@@ -126,8 +202,39 @@ export class AIEnhancer {
       5. Aplicabilidade (tem exemplos práticos?)
       6. Memorabilidade (usa técnicas que facilitam a memorização?)`;
 
+      // Determinar o modelo a ser usado
+      let aiModel = undefined;
+      if (options?.model) {
+        // Primeiro tenta usar o mapeamento personalizado
+        const modelId = getAIModelIdentifier(options.model);
+        if (modelId) {
+          try {
+            // @ts-expect-error - Modelo pode não estar no tipo AI.Model
+            aiModel = modelId;
+          } catch (err) {
+            Logger.warn(
+              `Modelo não reconhecido pelo mapeamento personalizado: ${options.model}, tentando fallback para AI.Model`,
+            );
+          }
+        }
+
+        // Fallback para o método antigo se o mapeamento personalizado falhar
+        if (!aiModel && options.model in AI.Model) {
+          aiModel = AI.Model[options.model as keyof typeof AI.Model];
+        }
+
+        if (!aiModel) {
+          Logger.warn(`Modelo AI não reconhecido: ${options.model}, usando modelo padrão GPT-4o`);
+          // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+          aiModel = "openai-gpt-4o";
+        }
+      } else {
+        // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+        aiModel = "openai-gpt-4o";
+      }
+
       const response = await AI.ask(prompt, {
-        model: options?.model ? AI.Model[options.model as keyof typeof AI.Model] : AI.Model.OpenAI_GPT4o,
+        model: aiModel,
         creativity: 0.5,
       });
 
@@ -176,8 +283,39 @@ export class AIEnhancer {
         {"question": "Pergunta 2?", "answer": "Resposta 2"}
       ]`;
 
+      // Determinar o modelo a ser usado
+      let aiModel = undefined;
+      if (options?.model) {
+        // Primeiro tenta usar o mapeamento personalizado
+        const modelId = getAIModelIdentifier(options.model);
+        if (modelId) {
+          try {
+            // @ts-expect-error - Modelo pode não estar no tipo AI.Model
+            aiModel = modelId;
+          } catch (err) {
+            Logger.warn(
+              `Modelo não reconhecido pelo mapeamento personalizado: ${options.model}, tentando fallback para AI.Model`,
+            );
+          }
+        }
+
+        // Fallback para o método antigo se o mapeamento personalizado falhar
+        if (!aiModel && options.model in AI.Model) {
+          aiModel = AI.Model[options.model as keyof typeof AI.Model];
+        }
+
+        if (!aiModel) {
+          Logger.warn(`Modelo AI não reconhecido: ${options.model}, usando modelo padrão GPT-4o`);
+          // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+          aiModel = "openai-gpt-4o";
+        }
+      } else {
+        // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+        aiModel = "openai-gpt-4o";
+      }
+
       const response = await AI.ask(prompt, {
-        model: options?.model ? AI.Model[options.model as keyof typeof AI.Model] : AI.Model.OpenAI_GPT4o,
+        model: aiModel,
         creativity: 0.9,
       });
 
@@ -201,39 +339,6 @@ export class AIEnhancer {
     }
   }
 
-  private static parseResponse(response: string): Flashcard {
-    try {
-      // Tenta encontrar um objeto JSON na resposta
-      const jsonMatch = response.match(/\{[\s\S]*\}/s);
-      const jsonString = jsonMatch ? jsonMatch[0] : response;
-
-      // Limpa o texto de marcações Markdown antes de analisar
-      const cleanedJson = jsonString.replace(/```json|```/g, "").trim();
-
-      const result = JSON.parse(cleanedJson);
-
-      // Valida se os campos necessários estão presentes
-      if (!result.front && !result.back && !result.extra) {
-        throw new Error("JSON inválido: faltam campos obrigatórios");
-      }
-
-      return result;
-    } catch (error) {
-      Logger.error("Erro ao processar resposta da IA", error);
-
-      // Tenta extrair campos do texto não estruturado
-      const frontMatch = response.match(/front["\s:]+([^"]+)/i);
-      const backMatch = response.match(/back["\s:]+([^"]+)/i);
-      const extraMatch = response.match(/extra["\s:]+([^"]+)/i);
-
-      return {
-        front: frontMatch ? frontMatch[1].trim() : "",
-        back: backMatch ? backMatch[1].trim() : "",
-        extra: extraMatch ? extraMatch[1].trim() : "",
-      };
-    }
-  }
-
   static async suggestTags(flashcard: Flashcard, options?: { model?: string; language?: string }): Promise<string[]> {
     try {
       const language = options?.language || "português";
@@ -253,8 +358,39 @@ export class AIEnhancer {
       
       Retorne apenas um array JSON com as tags sugeridas.`;
 
+      // Determinar o modelo a ser usado
+      let aiModel = undefined;
+      if (options?.model) {
+        // Primeiro tenta usar o mapeamento personalizado
+        const modelId = getAIModelIdentifier(options.model);
+        if (modelId) {
+          try {
+            // @ts-expect-error - Modelo pode não estar no tipo AI.Model
+            aiModel = modelId;
+          } catch (err) {
+            Logger.warn(
+              `Modelo não reconhecido pelo mapeamento personalizado: ${options.model}, tentando fallback para AI.Model`,
+            );
+          }
+        }
+
+        // Fallback para o método antigo se o mapeamento personalizado falhar
+        if (!aiModel && options.model in AI.Model) {
+          aiModel = AI.Model[options.model as keyof typeof AI.Model];
+        }
+
+        if (!aiModel) {
+          Logger.warn(`Modelo AI não reconhecido: ${options.model}, usando modelo padrão GPT-4o`);
+          // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+          aiModel = "openai-gpt-4o";
+        }
+      } else {
+        // @ts-expect-error - Modelo padrão pode não existir no tipo AI.Model
+        aiModel = "openai-gpt-4o";
+      }
+
       const response = await AI.ask(prompt, {
-        model: options?.model ? AI.Model[options.model as keyof typeof AI.Model] : AI.Model.OpenAI_GPT4o,
+        model: aiModel,
         creativity: 0.3,
       });
 
@@ -281,6 +417,49 @@ export class AIEnhancer {
     } catch (error) {
       Logger.error("Erro ao sugerir tags", error);
       return [];
+    }
+  }
+
+  private static parseResponse(response: string): Flashcard {
+    try {
+      // Tenta encontrar um objeto JSON na resposta
+      const jsonMatch = response.match(/\{[\s\S]*\}/s);
+      const jsonString = jsonMatch ? jsonMatch[0] : response;
+
+      // Limpa o texto de marcações Markdown antes de analisar
+      const cleanedJson = jsonString.replace(/```json|```/g, "").trim();
+
+      const result = JSON.parse(cleanedJson);
+
+      // Valida se os campos necessários estão presentes
+      if (!result.front && !result.back && !result.extra) {
+        throw new Error("JSON inválido: faltam campos obrigatórios");
+      }
+
+      // Valida o campo de dificuldade
+      if (result.difficulty && !["iniciante", "intermediário", "avançado"].includes(result.difficulty)) {
+        result.difficulty = "intermediário"; // Valor padrão se inválido
+      }
+
+      return result;
+    } catch (error) {
+      Logger.error("Erro ao processar resposta da IA", error);
+
+      // Tenta extrair campos do texto não estruturado
+      const frontMatch = response.match(/front["\s:]+([^"]+)/i);
+      const backMatch = response.match(/back["\s:]+([^"]+)/i);
+      const extraMatch = response.match(/extra["\s:]+([^"]+)/i);
+      const difficultyMatch = response.match(/difficulty["\s:]+([^"]+)/i);
+
+      return {
+        front: frontMatch ? frontMatch[1].trim() : "",
+        back: backMatch ? backMatch[1].trim() : "",
+        extra: extraMatch ? extraMatch[1].trim() : "",
+        difficulty:
+          difficultyMatch && ["iniciante", "intermediário", "avançado"].includes(difficultyMatch[1].trim())
+            ? (difficultyMatch[1].trim() as "iniciante" | "intermediário" | "avançado")
+            : "intermediário",
+      };
     }
   }
 }

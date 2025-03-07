@@ -104,12 +104,12 @@ describe('AnkiRepository', () => {
       const spy = jest.spyOn(AnkiRepository, 'addNote');
       spy.mockResolvedValueOnce({
         result: 1234567890,
-        error: undefined
+        error: null
       });
       
       const response = await AnkiRepository.addNote(mockNote);
       
-      expect(response.error).toBeUndefined();
+      expect(response.error).toBeNull();
       expect(response.result).toBe(1234567890);
       
       // Restaurar o spy
@@ -236,12 +236,12 @@ describe('AnkiRepository', () => {
       const spy = jest.spyOn(AnkiRepository, 'addNotes');
       spy.mockResolvedValueOnce({
         result: [1234, 5678],
-        error: undefined
+        error: null
       });
       
       const response = await AnkiRepository.addNotes(mockNotes);
       
-      expect(response.error).toBeUndefined();
+      expect(response.error).toBeNull();
       expect(response.result).toEqual([1234, 5678]);
       
       // Restaurar o spy

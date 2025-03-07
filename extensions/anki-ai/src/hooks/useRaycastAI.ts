@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AI } from "@raycast/api";
 import { useAI } from "@raycast/utils";
 import { Logger } from "../utils/logger";
+import { getAIModelIdentifier } from "../constants/aiModels";
 
 interface UseRaycastAIOptions {
   model?: string;
@@ -18,8 +19,30 @@ export function useRaycastAI(prompt: string, options?: UseRaycastAIOptions) {
 
   // Determinar o modelo a ser usado
   let modelOption: AI.Model | undefined = undefined;
-  if (options?.model && options.model in AI.Model) {
-    modelOption = AI.Model[options.model as keyof typeof AI.Model];
+  if (options?.model) {
+    // Primeiro tenta usar o mapeamento personalizado
+    const modelId = getAIModelIdentifier(options.model);
+    if (modelId) {
+      try {
+        // @ts-expect-error - Ignorando erro de tipagem pois os modelos podem não estar todos na definição de tipos
+        modelOption = modelId;
+      } catch (err) {
+        Logger.warn(
+          `Modelo não reconhecido pelo mapeamento personalizado: ${options.model}, tentando fallback para AI.Model`,
+        );
+      }
+    }
+
+    // Fallback para o método antigo se o mapeamento personalizado falhar
+    if (!modelOption && options.model in AI.Model) {
+      modelOption = AI.Model[options.model as keyof typeof AI.Model];
+    }
+
+    if (modelOption) {
+      Logger.debug(`Usando modelo AI: ${options.model} (${modelOption})`);
+    } else {
+      Logger.warn(`Modelo AI não reconhecido: ${options.model}, usando modelo padrão`);
+    }
   }
 
   // Usar o hook useAI do Raycast
@@ -49,23 +72,22 @@ export function useRaycastAIJson<T>(prompt: string, options?: UseRaycastAIOption
   const [parsedData, setParsedData] = useState<T | null>(null);
   const [parseError, setParseError] = useState<Error | null>(null);
 
-  // Processar a resposta quando os dados chegarem
-  useState(() => {
-    if (data) {
-      try {
-        // Tenta extrair apenas o JSON se houver texto adicional
-        const jsonMatch = data.match(/(\{.*\}|\[.*\])/s);
-        const jsonString = jsonMatch ? jsonMatch[0] : data;
+  // Tentar fazer o parse da resposta como JSON
+  if (data && !parsedData && !parseError) {
+    try {
+      // Limpar a resposta para garantir que é um JSON válido
+      const cleanedJson = data
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
 
-        const parsed = JSON.parse(jsonString) as T;
-        setParsedData(parsed);
-        setParseError(null);
-      } catch (err) {
-        Logger.error("Erro ao processar resposta JSON da AI:", err);
-        setParseError(err instanceof Error ? err : new Error(String(err)));
-      }
+      const parsed = JSON.parse(cleanedJson) as T;
+      setParsedData(parsed);
+    } catch (err) {
+      Logger.error("Erro ao fazer parse da resposta JSON:", err);
+      setParseError(err as Error);
     }
-  }, [data]);
+  }
 
   return {
     data: parsedData,
