@@ -1,5 +1,12 @@
 # BetterTouchTool Changelog
 
+## AI Tools & Variable Commands - {PR_MERGE_DATE}
+
+- Add Raycast AI Extension tools: search-named-triggers, run-named-trigger, get-variable-value, set-variable-value, search-action, run-action
+- Rewrite of named triggers page for better performance and usability
+- Add commands to get and set variables: get-variable, set-string-variable, set-number-variable
+- Add new preferences for Most Used Count, Default Action for Named Trigger, and Default Action for Set Variable
+
 ## Error handling - 2024-04-28
 
 - Update dependencies and use `runAppleScript` function from utils
