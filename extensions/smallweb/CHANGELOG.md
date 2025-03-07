@@ -1,6 +1,6 @@
 # Smallweb Changelog
 
-## [Multiple Folders] - {PR_MERGE_DATE}
+## [Multiple Folders] - 2025-03-07
 
 - Add support for configuring multiple smallweb dirs
 - Add ability to open a smallweb folder in your preferred editor
