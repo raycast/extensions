@@ -70,10 +70,12 @@ function ListDomainDNSHosts({ domainName }: { domainName: string }) {
   return (
     <List isLoading={isLoading}>
       {hosts.map((host) => (
-        <List.Item key={host.HostId} title={host.FriendlyName} subtitle={`${host.Name} - ${host.Address}`} accessories={[
-            { tag: host.Type },
-            { icon: Icon.Clock, text: `TTL: ${host.TTL}` }
-        ]} />
+        <List.Item
+          key={host.HostId}
+          title={host.FriendlyName}
+          subtitle={`${host.Name} - ${host.Address}`}
+          accessories={[{ tag: host.Type }, { icon: Icon.Clock, text: `TTL: ${host.TTL}` }]}
+        />
       ))}
     </List>
   );
