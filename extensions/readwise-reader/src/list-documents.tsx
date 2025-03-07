@@ -65,7 +65,7 @@ export default function ListDocumentsCommand() {
         </List.Dropdown>
       }
       pagination={pagination}
-      navigationTitle={`Documents in ${documentLocation}${category ? ` (${category})` : ""}`}
+      navigationTitle={`Documents in ${documentLocation.charAt(0).toUpperCase() + documentLocation.slice(1)}${category ? ` (${category.charAt(0).toUpperCase() + category.slice(1)})` : ""}`}
     >
       {data?.map((article) => {
         const markdown = `
