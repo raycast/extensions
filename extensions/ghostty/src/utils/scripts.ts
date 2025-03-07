@@ -60,14 +60,10 @@ on getSelectedFolderPath()
 end getSelectedFolderPath
 
 set currentPath to replaceTilde(quoted form of getSelectedFolderPath())
-log "currentPath: " & (currentPath as text)
 
 tell application "System Events"
 	set isGhosttyRunning to exists (processes where name is "Ghostty")
 end tell
-
-log "isGhosttyRunning: " & (isGhosttyRunning as text)
-
 
 tell application "Ghostty"
 	if not isGhosttyRunning then
