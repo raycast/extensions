@@ -25,10 +25,38 @@
       "mode": "view"
     },
     {
+      "name": "quick-create-todo",
+      "title": "Quick Create Todo",
+      "subtitle": "Basecamp",
+      "description": "Create a todo in a default todo list. You can set this by going to the 'View All Basecamps' command, locating the todo list you want to use, and clicking the 'Set Default Todo List' button.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "todo-name",
+          "placeholder": "Describe this to-do...",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "todo-description",
+          "placeholder": "Add more details about this to-do...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-todo-default-list",
+      "title": "Create Todo (Default List)",
+      "subtitle": "Basecamp",
+      "description": "Create a todo in default todo list with more details. You can set this by going to the 'View All Basecamps' command, locating the todo list you want to use, and clicking the 'Set Default Todo List' button.",
+      "mode": "view"
+    },
+    {
       "name": "create-todo",
       "title": "Create Todo",
       "subtitle": "Basecamp",
-      "description": "Create a todo in default todo list. You can set this by going to the 'View All Basecamps' command, locating the todo list you want to use, and clicking the 'Set Default Todo List' button.",
+      "description": "Create a todo by selecting account, project, and todo list",
       "mode": "view"
     },
     {

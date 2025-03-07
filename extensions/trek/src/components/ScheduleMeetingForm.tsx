@@ -9,7 +9,7 @@ import {
   Clipboard,
   getPreferenceValues,
 } from "@raycast/api";
-import { useCachedPromise, useLocalStorage, showFailureToast } from "@raycast/utils";
+import { useCachedPromise, showFailureToast, useCachedState } from "@raycast/utils";
 import { scheduleMeeting, getProjectPeople, fetchSchedules, fetchAccounts, fetchProjects } from "../oauth/auth";
 import { showToast } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
@@ -56,23 +56,12 @@ export default function ScheduleMeetingForm() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const summaryFieldRef = useRef<Form.TextField>(null);
   const isInitializedRef = useRef<boolean>(false);
-  const [isLoadingProjectPeople, setIsLoadingProjectPeople] = useState(false);
-  const [isLoadingSchedules, setIsLoadingSchedules] = useState(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
-  // Add localStorage hooks for persistent values
-  const { value: savedAccountId, setValue: setSavedAccountId } = useLocalStorage<string>(
-    "basecamp-account-id-schedule",
-    "",
-  );
-  const { value: savedProjectId, setValue: _setSavedProjectId } = useLocalStorage<string>(
-    "basecamp-project-id-schedule",
-    "",
-  );
-  const { value: savedScheduleId, setValue: setSavedScheduleId } = useLocalStorage<string>(
-    "basecamp-schedule-id-schedule",
-    "",
-  );
+  // Use cached state for persistent values
+  const [savedAccountId, setSavedAccountId] = useCachedState<string>("basecamp-account-id-schedule", "");
+  const [savedProjectId, setSavedProjectId] = useCachedState<string>("basecamp-project-id-schedule", "");
+  const [savedScheduleId, setSavedScheduleId] = useCachedState<string>("basecamp-schedule-id-schedule", "");
 
   // Set default start time to now and end time to 1 hour from now
   const now = new Date();
@@ -80,22 +69,17 @@ export default function ScheduleMeetingForm() {
 
   // Initialize form state
   const [formValues, setFormValues] = useState<FormValues>({
-    accountId: "",
-    projectId: "",
+    accountId: savedAccountId || "",
+    projectId: savedProjectId || "",
     startDateTime: now,
     endDateTime: oneHourLater,
     allDay: false,
     participantIds: [],
     notifyParticipants: true,
-    scheduleId: "",
+    scheduleId: savedScheduleId || "",
     summary: "",
     description: "",
   });
-
-  // Create a tracking function for savedProjectId changes
-  const setSavedProjectId = (newValue: string) => {
-    _setSavedProjectId(newValue);
-  };
 
   const validateForm = useMemo(() => {
     const errors: FormErrors = {};
@@ -216,6 +200,78 @@ export default function ScheduleMeetingForm() {
   // Extract projects array from the response
   const projects: BasecampProject[] = projectsResponse?.data || [];
 
+  // Set saved project when projects are loaded
+  useEffect(() => {
+    if (projects.length > 0 && savedProjectId) {
+      const projectExists = projects.some((project) => project.id.toString() === savedProjectId);
+      if (projectExists) {
+        setFormValues((prev) => {
+          // Only update if it's different to avoid infinite loops
+          if (prev.projectId !== savedProjectId) {
+            return { ...prev, projectId: savedProjectId };
+          }
+          return prev;
+        });
+      } else {
+        // If saved project doesn't exist in the list, clear it
+        setSavedProjectId("");
+      }
+    } else if (projects.length === 1) {
+      const projectId = projects[0].id.toString();
+      setFormValues((prev) => {
+        // Only update if it's different to avoid infinite loops
+        if (prev.projectId !== projectId) {
+          return { ...prev, projectId };
+        }
+        return prev;
+      });
+      if (savedProjectId !== projectId) {
+        setSavedProjectId(projectId);
+      }
+    }
+  }, [projects, savedProjectId]);
+
+  // Use cached promise for project people
+  const { data: projectPeopleData = [], isLoading: isLoadingProjectPeople } = useCachedPromise(
+    async (accountId: string, projectId: string) => {
+      if (!accountId || !projectId) return [];
+      return getProjectPeople(accountId, parseInt(projectId));
+    },
+    [formValues.accountId || "", formValues.projectId || ""],
+    {
+      execute: !!formValues.accountId && !!formValues.projectId,
+    },
+  );
+
+  // Use cached promise for schedules
+  const { data: schedulesData = [], isLoading: isLoadingSchedules } = useCachedPromise(
+    async (accountId: string, projectId: string) => {
+      if (!accountId || !projectId) return [];
+      return fetchSchedules(accountId, parseInt(projectId));
+    },
+    [formValues.accountId || "", formValues.projectId || ""],
+    {
+      execute: !!formValues.accountId && !!formValues.projectId,
+    },
+  );
+
+  // Update project people and schedules when data is loaded
+  useEffect(() => {
+    setProjectPeople(projectPeopleData);
+    setSchedules(schedulesData as Schedule[]);
+
+    if (savedScheduleId && schedulesData.some((schedule) => schedule.id.toString() === savedScheduleId)) {
+      setFormValues((prev) => ({ ...prev, scheduleId: savedScheduleId }));
+    } else if (schedulesData.length === 1) {
+      const scheduleId = schedulesData[0].id.toString();
+      setFormValues((prev) => ({ ...prev, scheduleId }));
+      setSavedScheduleId(scheduleId);
+    } else {
+      setFormValues((prev) => ({ ...prev, scheduleId: "" }));
+      setSavedScheduleId("");
+    }
+  }, [projectPeopleData, schedulesData, savedScheduleId]);
+
   // Set saved values after data is loaded
   useEffect(() => {
     if (accounts.length > 0 && savedAccountId) {
@@ -229,64 +285,6 @@ export default function ScheduleMeetingForm() {
       setSavedAccountId(accountId);
     }
   }, [accounts, savedAccountId]);
-
-  // Set saved project when projects are loaded
-  useEffect(() => {
-    if (projects.length > 0 && savedProjectId) {
-      const projectExists = projects.some((project) => project.id.toString() === savedProjectId);
-      if (projectExists) {
-        setFormValues((prev) => ({ ...prev, projectId: savedProjectId }));
-      }
-    } else if (projects.length === 1) {
-      const projectId = projects[0].id.toString();
-      setFormValues((prev) => ({ ...prev, projectId }));
-      if (savedProjectId !== projectId) {
-        setSavedProjectId(projectId);
-      }
-    }
-  }, [projects, savedProjectId]);
-
-  // Fetch project data (people and schedules) when project is selected
-  useEffect(() => {
-    const loadProjectData = async () => {
-      if (!formValues.accountId || !formValues.projectId) {
-        setSchedules([]);
-        setProjectPeople([]);
-        return;
-      }
-
-      setIsLoadingProjectPeople(true);
-      setIsLoadingSchedules(true);
-      try {
-        const [fetchedProjectPeople, fetchedSchedules] = await Promise.all([
-          getProjectPeople(formValues.accountId, parseInt(formValues.projectId)),
-          fetchSchedules(formValues.accountId, parseInt(formValues.projectId)),
-        ]);
-        setProjectPeople(fetchedProjectPeople);
-        setSchedules(fetchedSchedules as Schedule[]);
-
-        if (savedScheduleId && fetchedSchedules.some((schedule) => schedule.id.toString() === savedScheduleId)) {
-          setFormValues((prev) => ({ ...prev, scheduleId: savedScheduleId }));
-        } else if (fetchedSchedules.length === 1) {
-          const scheduleId = fetchedSchedules[0].id.toString();
-          setFormValues((prev) => ({ ...prev, scheduleId }));
-          setSavedScheduleId(scheduleId);
-        } else {
-          setFormValues((prev) => ({ ...prev, scheduleId: "" }));
-          setSavedScheduleId("");
-        }
-      } catch (error) {
-        showFailureToast(error, {
-          title: "Failed to Load Project Data",
-        });
-      } finally {
-        setIsLoadingProjectPeople(false);
-        setIsLoadingSchedules(false);
-      }
-    };
-
-    loadProjectData();
-  }, [formValues.accountId, formValues.projectId, savedScheduleId]);
 
   // Update end time when start time changes to maintain duration
   useEffect(() => {
@@ -387,11 +385,7 @@ export default function ScheduleMeetingForm() {
               scheduleId: "",
             }));
             setSavedScheduleId("");
-
-            const isUserChange = isInitializedRef.current && newValue !== savedProjectId;
-            if (isUserChange) {
-              setSavedProjectId(newValue);
-            }
+            setSavedProjectId(newValue);
           }}
           error={formErrors.projectId}
           autoFocus={false}

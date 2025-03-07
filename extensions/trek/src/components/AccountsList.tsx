@@ -1,6 +1,7 @@
 import { List, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import ProjectsList from "./ProjectsList";
 import { useLocalStorage } from "@raycast/utils";
+import { ReactNode } from "react";
 
 interface Account {
   id: number;
@@ -10,9 +11,10 @@ interface Account {
 interface BasecampsListProps {
   accounts: Account[];
   isLoading: boolean;
+  actions?: ReactNode;
 }
 
-export function BasecampsList({ accounts, isLoading }: BasecampsListProps) {
+export function BasecampsList({ accounts, isLoading, actions }: BasecampsListProps) {
   const { value: defaultBasecampConfig, setValue, removeValue } = useLocalStorage<string>("defaultBasecampConfig", "");
 
   const setDefaultBasecamp = async (accountId: number, accountName: string) => {
@@ -53,6 +55,7 @@ export function BasecampsList({ accounts, isLoading }: BasecampsListProps) {
               />
               <Action title="Set Default Basecamp" onAction={() => setDefaultBasecamp(account.id, account.name)} />
               {defaultBasecampId && <Action title="Remove Default Basecamp" onAction={() => removeDefaultBasecamp()} />}
+              {actions}
             </ActionPanel>
           }
         />

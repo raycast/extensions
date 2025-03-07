@@ -3,6 +3,7 @@ import { getAccessToken, OAuthService, showFailureToast } from "@raycast/utils";
 import fetch from "node-fetch";
 import { BasecampProject, BasecampTodo, TodoList, BasecampComment, BasecampPerson } from "../utils/types";
 import { markdownToHtml } from "../utils/markdown";
+import { getFromCache, saveToCache, CACHE_KEYS } from "../utils/cache";
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.AppURI,
@@ -26,37 +27,17 @@ export const basecamp = new OAuthService({
   extraParameters: {
     type: "web_server",
   },
-  // onAuthorize: async () => {
-  //   const { id } = await getUser();
-  //   userId = id;
-  // },
 });
 
-// export async function getUser() {
-//   const { token } = getAccessToken();
+export async function fetchAccounts(forceRefresh = false) {
+  // Try to get from cache first if not forcing refresh
+  if (!forceRefresh) {
+    const cachedAccounts = await getFromCache<{ id: number; name: string }[]>(CACHE_KEYS.ACCOUNTS);
+    if (cachedAccounts) {
+      return cachedAccounts;
+    }
+  }
 
-//   const response = await fetch(`https://launchpad.37signals.com/authorization.json`, {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   });
-//   if (!response.ok) {
-//     if (response.status === 429) {
-//       throw new Error("Rate limit exceeded");
-//     }
-//     throw new Error("HTTP error " + response.status);
-//   }
-
-//   const json = await response.json();
-//   console.log(json);
-
-//   if ((json as Error).message) {
-//     throw new Error((json as Error).message);
-//   }
-//   return json.id;
-// }
-
-export async function fetchAccounts() {
   const { token } = getAccessToken();
 
   const response = await fetch(`https://launchpad.37signals.com/authorization.json`, {
@@ -72,6 +53,9 @@ export async function fetchAccounts() {
   }
 
   const json = (await response.json()) as { identity: { id: string }; accounts: { id: number; name: string }[] };
+
+  // Save to cache
+  await saveToCache(CACHE_KEYS.ACCOUNTS, json.accounts);
 
   return json.accounts;
 }
@@ -113,14 +97,26 @@ async function makeRequest<T>(url: string, token: string): Promise<PaginationRes
   };
 }
 
-export async function fetchProjects(accountId: string, page: number) {
-  const { token } = getAccessToken();
-  const url =
-    page === 1
-      ? `https://3.basecampapi.com/${accountId}/projects.json`
-      : `https://3.basecampapi.com/${accountId}/projects.json?page=${page}`;
+export async function fetchProjects(accountId: string, page: number, forceRefresh = false) {
+  // Try to get from cache first if page is 1 and not forcing refresh
+  if (page === 1 && !forceRefresh) {
+    const cachedProjects = await getFromCache<PaginationResponse<BasecampProject>>(CACHE_KEYS.PROJECTS(accountId));
+    if (cachedProjects) {
+      return cachedProjects;
+    }
+  }
 
-  return makeRequest<BasecampProject>(url, token);
+  const { token } = getAccessToken();
+  const url = `https://3.basecampapi.com/${accountId}/projects.json?page=${page}`;
+
+  const result = await makeRequest<BasecampProject>(url, token);
+
+  // Save to cache if it's the first page
+  if (page === 1) {
+    await saveToCache(CACHE_KEYS.PROJECTS(accountId), result);
+  }
+
+  return result;
 }
 
 export async function fetchTodoLists(accountId: string, projectId: number, todosetId: number, page: number) {
@@ -270,7 +266,19 @@ async function getHeaders() {
   };
 }
 
-export async function getProjectPeople(accountId: string, projectId: number): Promise<BasecampPerson[]> {
+export async function getProjectPeople(
+  accountId: string,
+  projectId: number,
+  forceRefresh = false,
+): Promise<BasecampPerson[]> {
+  // Try to get from cache first if not forcing refresh
+  if (!forceRefresh) {
+    const cachedPeople = await getFromCache<BasecampPerson[]>(CACHE_KEYS.PEOPLE(accountId, projectId));
+    if (cachedPeople) {
+      return cachedPeople;
+    }
+  }
+
   const response = await fetch(`https://3.basecampapi.com/${accountId}/projects/${projectId}/people.json`, {
     headers: await getHeaders(),
   });
@@ -278,7 +286,12 @@ export async function getProjectPeople(accountId: string, projectId: number): Pr
     throw new Error("HTTP error " + response.status);
   }
 
-  return (await response.json()) as BasecampPerson[];
+  const people = (await response.json()) as BasecampPerson[];
+
+  // Save to cache
+  await saveToCache(CACHE_KEYS.PEOPLE(accountId, projectId), people);
+
+  return people;
 }
 
 export async function trashTodo(accountId: string, projectId: number, todoId: number) {
@@ -398,7 +411,6 @@ export async function fetchSchedules(accountId: string, projectId: number) {
 
     // Check if the schedule tool is enabled (active)
     if (!scheduleTool.enabled) {
-      console.log("Schedule tool is disabled for this project");
       return []; // Return empty array for disabled schedules
     }
 
