@@ -21,7 +21,7 @@
     {
       "name": "ApiKey",
       "title": "API Key",
-      "description": "Password required used to access the API",
+      "description": "Password required to access the API",
       "placeholder": "56b4c87ef4fd49cb96d915c0db681944",
       "type": "password",
       "required": true
@@ -37,7 +37,7 @@
     {
       "name": "ClientIp",
       "title": "Client IP",
-      "description": "IP address of the server system receives API calls from",
+      "description": "IP address from which the system makes API calls",
       "placeholder": "192.168.1.109",
       "type": "textfield",
       "required": true

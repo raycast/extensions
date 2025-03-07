@@ -66,6 +66,9 @@ export const useListDomainDNSServers = (SLD: string, TLD: string) =>
         data,
       };
     },
+    failureToastOptions: {
+      title: "Failed to fetch domain dns servers",
+    },
   });
 
 export const useListDomainDNSHosts = (SLD: string, TLD: string) =>
@@ -78,4 +81,7 @@ export const useListDomainDNSHosts = (SLD: string, TLD: string) =>
       };
     },
     initialData: [],
+    failureToastOptions: {
+      title: "Failed to fetch domain dns hosts",
+    },
   });
