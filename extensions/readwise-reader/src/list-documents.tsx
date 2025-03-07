@@ -139,7 +139,7 @@ ${article.summary}
                   <Action
                     title="Pdf"
                     onAction={() => setCategory("pdf")}
-                    icon={{ source: { light: "pdf.svg", dark: "pdf.svg" } }}
+                    icon={{ source: { light: "pdf-light.svg", dark: "pdf-dark.svg" } }}
                     shortcut={{ modifiers: ["cmd"], key: "6" }}
                   />
                   <Action
