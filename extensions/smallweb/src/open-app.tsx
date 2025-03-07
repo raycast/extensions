@@ -11,7 +11,7 @@ function lookupAppDir(config: Config, hostname: string): string | null {
 
   const [app, ...parts] = hostname.split(".");
   const domain = parts.join(".");
-  if (config.domain == domain) {
+  if (config.domain === domain) {
     return path.join(config.dir, app);
   }
 
@@ -32,13 +32,14 @@ export default async function () {
     return;
   }
 
+  let tabs: BrowserExtension.Tab[];
   try {
-    const tabs = await BrowserExtension.getTabs();
+    tabs = await BrowserExtension.getTabs();
   } catch (error) {
     await showToast({ title: "Failed to access browser tabs", style: Toast.Style.Failure });
     return;
   }
-  const selectedTab = tabs.find((tab) => tab.active == true);
+  const selectedTab = tabs.find((tab) => tab.active);
   if (!selectedTab) {
     await showToast({ title: "No active tab", style: Toast.Style.Failure });
     return;
