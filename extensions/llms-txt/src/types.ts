@@ -23,13 +23,13 @@ export type Category =
 // The API returns an array of websites directly
 export type WebsiteData = Website[];
 
+export type ActionType = "view_llms" | "copy_llms" | "view_llms_full" | "copy_llms_full";
+
 export interface HistoryEntry {
   website: Website;
   timestamp: number;
-  action: "view_llms" | "copy_llms" | "view_llms_full" | "copy_llms_full";
+  action: ActionType;
 }
-
-export type ActionType = "view_llms" | "copy_llms" | "view_llms_full" | "copy_llms_full";
 
 export interface Preferences {
   primaryAction: ActionType;

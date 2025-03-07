@@ -2,13 +2,35 @@ import type { WebsiteData, Website, Category, ActionType } from "./types";
 import { getPreferenceValues, LocalStorage, showToast, Toast, Clipboard, open } from "@raycast/api";
 import fetch from "node-fetch";
 import { addToHistory } from "./storage";
+import { showFailureToast } from "@raycast/utils";
 
 const CACHE_KEY = "websites-data";
 const CACHE_TIMESTAMP_KEY = "websites-data-timestamp";
+const MAX_RETRY_DEPTH = 1; // Prevent infinite recursion
 
 interface Preferences {
   githubToken?: string;
   cacheDuration?: string;
+}
+
+const websites = "https://raw.githubusercontent.com/thedaviddias/llms-txt-hub/refs/heads/main/data/websites.json";
+
+// Custom error types for better error handling
+class CacheError extends Error {
+  constructor(
+    message: string,
+    public cause?: unknown,
+  ) {
+    super(message);
+    this.name = "CacheError";
+  }
+}
+
+class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ValidationError";
+  }
 }
 
 function isValidWebsite(w: unknown): w is Website {
@@ -24,33 +46,86 @@ function isValidWebsite(w: unknown): w is Website {
   );
 }
 
-function isValidWebsiteData(data: unknown): data is WebsiteData {
+function isValidWebsiteData(data: WebsiteData) {
   return Array.isArray(data) && data.every(isValidWebsite);
 }
 
-export async function fetchWebsitesData(forceRefresh = false): Promise<WebsiteData> {
+async function clearCache(): Promise<void> {
+  await Promise.all([LocalStorage.removeItem(CACHE_KEY), LocalStorage.removeItem(CACHE_TIMESTAMP_KEY)]);
+}
+
+async function validateAndParseCache(cachedData: string, timestamp: number, ttl: number): Promise<WebsiteData | null> {
+  // Validate timestamp
+  const now = Date.now();
+  if (timestamp > now) {
+    console.debug("Cache timestamp is in the future, invalidating cache");
+    await clearCache();
+    return null;
+  }
+
+  // Check freshness
+  if (now - timestamp >= ttl) {
+    console.debug("Cache has expired");
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(cachedData);
+    if (!isValidWebsiteData(parsed)) {
+      throw new ValidationError("Invalid website data structure in cache");
+    }
+    return parsed;
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      throw error;
+    }
+    throw new CacheError("Failed to parse cached data", error);
+  }
+}
+
+export async function fetchWebsitesData(forceRefresh = false, retryDepth = 0): Promise<WebsiteData> {
   const preferences = getPreferenceValues<Preferences>();
-  const CACHE_TTL = Number.parseInt(preferences.cacheDuration ?? "24", 10) * 60 * 60 * 1000; // Convert hours to milliseconds
+  const parsedDuration = Number.parseInt(preferences.cacheDuration ?? "24", 10);
+  const CACHE_TTL = Math.max(1, parsedDuration) * 60 * 60 * 1000;
 
-  // Check cache first
+  // Prevent infinite recursion
+  if (retryDepth > MAX_RETRY_DEPTH) {
+    throw new Error("Max retry depth exceeded while fetching website data");
+  }
+
+  // Check cache first unless force refresh
   if (!forceRefresh) {
-    const cachedData = await LocalStorage.getItem<string>(CACHE_KEY);
-    const cachedTimestamp = await LocalStorage.getItem<string>(CACHE_TIMESTAMP_KEY);
+    try {
+      const [cachedData, cachedTimestamp] = await Promise.all([
+        LocalStorage.getItem<string>(CACHE_KEY),
+        LocalStorage.getItem<string>(CACHE_TIMESTAMP_KEY),
+      ]);
 
-    if (cachedData && cachedTimestamp) {
-      const timestamp = Number.parseInt(cachedTimestamp, 10);
-      if (Date.now() - timestamp < CACHE_TTL) {
-        const parsed = JSON.parse(cachedData);
-        if (isValidWebsiteData(parsed)) {
-          return parsed;
+      if (cachedData && cachedTimestamp) {
+        const timestamp = Number.parseInt(cachedTimestamp, 10);
+        if (Number.isNaN(timestamp)) {
+          console.debug("Invalid timestamp in cache");
+          await clearCache();
+        } else {
+          try {
+            const parsed = await validateAndParseCache(cachedData, timestamp, CACHE_TTL);
+            if (parsed) {
+              return parsed;
+            }
+          } catch (error) {
+            console.debug(`Cache validation failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+            await clearCache();
+          }
         }
-        // If cached data is invalid, continue to fetch fresh data
       }
+    } catch (error) {
+      console.debug(`Cache access failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+      // Continue to fetch fresh data
     }
   }
 
   // Fetch fresh data
-  const { githubToken } = getPreferenceValues<Preferences>();
+  const { githubToken } = preferences;
   const headers: Record<string, string> = {
     Accept: "application/vnd.github.v3.raw",
   };
@@ -60,38 +135,60 @@ export async function fetchWebsitesData(forceRefresh = false): Promise<WebsiteDa
   }
 
   try {
-    const response = await fetch("https://raw.githubusercontent.com/thedaviddias/llms-txt-hub/main/websites.json", {
-      headers,
-    });
+    const response = await fetch(websites, { headers });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch data: HTTP ${response.status} - ${response.statusText}`);
     }
 
-    const data = await response.json();
+    let data: WebsiteData;
+
+    try {
+      data = await response.json();
+    } catch (parseError) {
+      throw new ValidationError(
+        `Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : "Unknown parsing error"}`,
+      );
+    }
 
     if (!isValidWebsiteData(data)) {
-      throw new Error("Invalid data format received from the server");
+      throw new ValidationError("Invalid data format received from the server");
     }
 
     // Update cache
-    await LocalStorage.setItem(CACHE_KEY, JSON.stringify(data));
-    await LocalStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+    await Promise.all([
+      LocalStorage.setItem(CACHE_KEY, JSON.stringify(data)),
+      LocalStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString()),
+    ]);
 
     return data;
   } catch (error) {
     // Fall back to cached data if available
-    const cachedData = await LocalStorage.getItem<string>(CACHE_KEY);
-    if (cachedData) {
-      const parsed = JSON.parse(cachedData);
-      if (isValidWebsiteData(parsed)) {
-        return parsed;
+    try {
+      const cachedData = await LocalStorage.getItem<string>(CACHE_KEY);
+      const cachedTimestamp = await LocalStorage.getItem<string>(CACHE_TIMESTAMP_KEY);
+
+      if (cachedData && cachedTimestamp) {
+        const timestamp = Number.parseInt(cachedTimestamp, 10);
+        if (!Number.isNaN(timestamp)) {
+          const parsed = JSON.parse(cachedData);
+          if (isValidWebsiteData(parsed)) {
+            console.debug("Falling back to cached data after fetch failure");
+            return parsed;
+          }
+        }
       }
+    } catch (cacheError) {
+      console.debug("Failed to read cache during fallback");
     }
 
-    throw new Error(
-      error instanceof Error ? `Failed to fetch websites data: ${error.message}` : "Failed to fetch websites data",
-    );
+    // If we get here, both fetch and cache fallback failed
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    await showFailureToast("Failed to fetch websites data", {
+      title: "Failed to fetch websites data",
+      message: errorMessage,
+    });
+    throw new Error(`Failed to fetch websites data: ${errorMessage}`);
   }
 }
 
@@ -183,10 +280,9 @@ export async function handleWebsiteAction(website: Website, action: ActionType):
     // Add to history
     await addToHistory(website, action);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast("Failed to perform action", {
       title: "Failed to perform action",
-      message: String(error),
+      message: error instanceof Error ? error.message : String(error),
     });
   }
 }

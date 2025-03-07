@@ -121,7 +121,7 @@
       "type": "textfield",
       "required": false,
       "default": "30",
-      "placeholder": "30"
+      "placeholder": "Number of Days"
     },
     {
       "name": "cacheDuration",
@@ -130,7 +130,7 @@
       "type": "textfield",
       "required": false,
       "default": "24",
-      "placeholder": "24"
+      "placeholder": "Number of Hours"
     }
   ],
   "dependencies": {

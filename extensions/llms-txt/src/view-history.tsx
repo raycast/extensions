@@ -1,8 +1,9 @@
 import { ActionPanel, Action, List, Icon, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getHistory, removeFromHistory, formatTimestamp } from "./storage";
-import type { HistoryEntry } from "./types";
+import type { HistoryEntry, ActionType } from "./types";
 import { handleWebsiteAction } from "./utils";
+import { showFailureToast } from "@raycast/utils";
 
 export default function ViewHistory() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -19,9 +20,7 @@ export default function ViewHistory() {
 
       setHistory(entries);
     } catch (error) {
-      console.error("Error loading history:", error);
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast("Failed to load history", {
         title: "Failed to load history",
         message: String(error),
       });
@@ -41,15 +40,14 @@ export default function ViewHistory() {
         title: "Removed from history",
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast("Failed to remove entry", {
         title: "Failed to remove entry",
         message: String(error),
       });
     }
   }
 
-  function getActionIcon(action: string): Icon {
+  function getActionIcon(action: ActionType): Icon {
     switch (action) {
       case "view_llms":
       case "view_llms_full":
@@ -62,7 +60,7 @@ export default function ViewHistory() {
     }
   }
 
-  function getActionTitle(action: string): string {
+  function getActionTitle(action: ActionType): string {
     switch (action) {
       case "view_llms":
         return "Viewed llms.txt";

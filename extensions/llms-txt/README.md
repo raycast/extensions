@@ -1,4 +1,4 @@
-# LLMs Txt
+# Llms Txt
 
 Discover and explore websites implementing the llms.txt standard - your gateway to understanding AI interaction policies across the web.
 
@@ -59,7 +59,7 @@ Configure the extension through Raycast preferences:
 - **Default Category Filter**: Choose which category to filter the llms.txt by default
 - **Show Description**: Show the description of the websites
 - **History Maximum Size**: Maximum number of entries to keep in history (default: 50)
-- **History Rentention Period**: How long to keep history entries (default: 30 days)
+- **History Retention Period**: How long to keep history entries (default: 30 days)
 - **Cache Duration**: How long to cache the list of websites implementing llms.txt (default: 24 hours)
 
 ## About llms.txt

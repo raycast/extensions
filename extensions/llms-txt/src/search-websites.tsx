@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
-import type { Website, Category } from "./types";
+import type { Website, Category, ActionType } from "./types";
 import {
   fetchWebsitesData,
   getCategoryIcon,
@@ -10,7 +10,7 @@ import {
 } from "./utils";
 
 interface Preferences {
-  primaryAction: "view_llms" | "copy_llms" | "view_llms_full" | "copy_llms_full";
+  primaryAction: ActionType;
   defaultCategory: Category;
   showDescriptions: boolean;
 }
@@ -215,7 +215,7 @@ export default function SearchWebsites() {
           ))}
         </List.Dropdown>
       }
-      throttle
+      throttle={true}
     >
       {filteredWebsites.map((website, index) => (
         <List.Item
