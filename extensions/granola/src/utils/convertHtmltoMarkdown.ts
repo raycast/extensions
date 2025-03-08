@@ -4,7 +4,7 @@ export default function convertHtmlToMarkdown(htmlContent: string): string {
   if (!htmlContent) {
     return "";
   }
-  
+
   try {
     const turndownService = new TurndownService();
     return turndownService.turndown(htmlContent);

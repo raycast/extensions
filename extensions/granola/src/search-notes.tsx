@@ -76,7 +76,7 @@ export default function Command() {
     return <Unresponsive />;
   }
 
-  const untitledNoteTItle = "Untitled Note"
+  const untitledNoteTItle = "Untitled Note";
 
   if (noteData?.data) {
     return (

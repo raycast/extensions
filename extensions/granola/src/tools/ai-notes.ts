@@ -13,7 +13,7 @@ type Input = {
    * - Relative dates: "today", "yesterday"
    * - Time ranges: "last week", "last month"
    * If the message contains "most recent", or anything similar, the date should be empty
-  */
+   */
   date?: string;
   /**
    * Optional content filter
@@ -78,7 +78,7 @@ export default function tool(input: Input) {
   // }
 
   // Filter notes based on criteria
-  return notes.filter(note => {
+  return notes.filter((note) => {
     // Apply title filter if provided
     if (input.title && !note.title.toLowerCase().includes(input.title.toLowerCase())) {
       return false;
@@ -90,33 +90,33 @@ export default function tool(input: Input) {
     }
 
     // Apply date filter if provided and not empty
-    if (input.date && input.date.trim() !== '') {
+    if (input.date && input.date.trim() !== "") {
       try {
         const noteDate = new Date(note.date);
-        const noteDateStr = noteDate.toISOString().split('T')[0];
+        const noteDateStr = noteDate.toISOString().split("T")[0];
 
         let targetDate: Date | null = null;
         const inputLower = input.date.toLowerCase();
 
-        if (inputLower === 'today') {
+        if (inputLower === "today") {
           targetDate = new Date();
-          return noteDateStr === targetDate.toISOString().split('T')[0];
-        } else if (inputLower === 'yesterday') {
+          return noteDateStr === targetDate.toISOString().split("T")[0];
+        } else if (inputLower === "yesterday") {
           targetDate = new Date();
           targetDate.setDate(targetDate.getDate() - 1);
-          return noteDateStr === targetDate.toISOString().split('T')[0];
-        } else if (inputLower === 'last week') {
+          return noteDateStr === targetDate.toISOString().split("T")[0];
+        } else if (inputLower === "last week") {
           const weekAgo = new Date();
           weekAgo.setDate(weekAgo.getDate() - 7);
           return noteDate >= weekAgo;
-        } else if (inputLower === 'last month') {
+        } else if (inputLower === "last month") {
           const monthAgo = new Date();
           monthAgo.setMonth(monthAgo.getMonth() - 1);
           return noteDate >= monthAgo;
         } else {
           // Try parsing as ISO date
           targetDate = new Date(input.date);
-          return noteDateStr === targetDate.toISOString().split('T')[0];
+          return noteDateStr === targetDate.toISOString().split("T")[0];
         }
       } catch (e) {
         console.warn(`Invalid date format or query: note.date=${note.date} or input.date=${input.date}`);
