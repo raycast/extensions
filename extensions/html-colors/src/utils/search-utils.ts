@@ -38,7 +38,10 @@ function mergeCategoryInformation(
 ) {
   const existing = colorMap.get(color.name);
   if (existing) {
-    existing.categories.add(color.category);
+    colorMap.set(color.name, {
+      color: existing.color,
+      categories: new Set([...existing.categories, color.category]),
+    });
   } else {
     colorMap.set(color.name, {
       color,
