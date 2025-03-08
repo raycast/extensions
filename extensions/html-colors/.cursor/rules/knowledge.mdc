@@ -1,6 +1,6 @@
 ---
 description: Knowledge base for the problem domain
-globs: 
+globs: *.ts, *.tsx, *.md
 alwaysApply: false
 ---
 # Knowledge
@@ -10,4 +10,4 @@ Explains the domain of HTML colors
 - Wikipedia: https://en.wikipedia.org/wiki/Web_colors
 - Important part: HTML color names
     - use the table in the web page as data source
-- Extension can work with both basic and extended color
+- Extension can work with both basic and extended color.

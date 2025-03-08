@@ -1,6 +1,6 @@
 ---
 description: Describes what is the purpose of the extension and how users should use it
-globs: 
+globs: *.ts, *.tsx, *.md
 alwaysApply: false
 ---
 # Purpose of the extension
