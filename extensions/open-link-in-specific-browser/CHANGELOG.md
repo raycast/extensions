@@ -1,6 +1,6 @@
 # Open Link in Specific Browser Changelog
 
-## [New Command] - {PR_MERGE_DATE}
+## [New Command] - 2025-03-08
 
 - Add new command: Open selected text in default browser
 
