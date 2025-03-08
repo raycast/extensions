@@ -106,6 +106,12 @@ function Command() {
         const copyURL = (
           <Action.CopyToClipboard title="Copy URL" content={toURL(setId, id)} />
         );
+        const copyDataURI = (
+          <Action.CopyToClipboard
+            title="Copy Data URI"
+            content={dataURIIcon}
+          />
+        );
         return (
           <Grid.Item
             content={{
@@ -128,6 +134,7 @@ function Command() {
                     {pasteName}
                     {copyName}
                     {copyURL}
+                    {copyDataURI}
                   </>
                 )}
                 {primaryAction === primaryActionEnum.copy && (
@@ -139,6 +146,7 @@ function Command() {
                     {pasteName}
                     {copyName}
                     {copyURL}
+                    {copyDataURI}
                   </>
                 )}
                 {primaryAction === primaryActionEnum.pasteName && (
@@ -150,6 +158,7 @@ function Command() {
                     {copyFile}
                     {copyName}
                     {copyURL}
+                    {copyDataURI}
                   </>
                 )}
                 {primaryAction === primaryActionEnum.pasteFile && (
@@ -161,6 +170,7 @@ function Command() {
                     {pasteName}
                     {copyName}
                     {copyURL}
+                    {copyDataURI}
                   </>
                 )}
                 {primaryAction === primaryActionEnum.copyFile && (
@@ -172,6 +182,7 @@ function Command() {
                     {pasteName}
                     {copyName}
                     {copyURL}
+                    {copyDataURI}
                   </>
                 )}
                 {primaryAction === primaryActionEnum.copyName && (
@@ -183,6 +194,7 @@ function Command() {
                     {copyFile}
                     {pasteName}
                     {copyURL}
+                    {copyDataURI}
                   </>
                 )}
                 {primaryAction === primaryActionEnum.copyURL && (
@@ -194,6 +206,19 @@ function Command() {
                     {copyFile}
                     {pasteName}
                     {copyName}
+                    {copyDataURI}
+                  </>
+                )}
+                {primaryAction === primaryActionEnum.copyDataURI && (
+                  <>
+                    {copyDataURI}
+                    {paste}
+                    {copy}
+                    {pasteFile}
+                    {copyFile}
+                    {pasteName}
+                    {copyName}
+                    {copyURL}
                   </>
                 )}
               </ActionPanel>
