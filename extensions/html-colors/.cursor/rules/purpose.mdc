@@ -22,7 +22,7 @@ alwaysApply: false
 - UI should contain select which filters the results
     - all (default) shows both basic and extended colors
     - basic color only
-    - extended color
+    - extended color only
 - there should be "actions" panel which can be invoked. this actions panel will offer several actions for the user:
     - copy hex code of the color to clipboard (default)
     - copy rgba color to clipboard
