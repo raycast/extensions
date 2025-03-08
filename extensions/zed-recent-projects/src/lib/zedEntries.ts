@@ -110,7 +110,8 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
       port
     FROM workspaces
     LEFT JOIN ssh_projects ON ssh_project_id = workspaces.ssh_project_id
-    WHERE local_paths IS NOT NULL OR paths IS NOT NULL
+    WHERE (local_paths IS NOT NULL AND paths IS NULL) 
+       OR (local_paths IS NULL AND paths IS NOT NULL)
     ORDER BY timestamp DESC
   `;
 
