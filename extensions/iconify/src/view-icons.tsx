@@ -320,6 +320,7 @@ function Command() {
                     )}
                     {primaryAction === primaryActionEnum.copyDataURI && (
                       <>
+                        {copyDataURI}
                         {paste}
                         {copy}
                         {pasteFile}
