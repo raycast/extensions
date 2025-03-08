@@ -7,7 +7,8 @@
   "author": "jarry_chung",
   "contributors": [
     "friendlyusername",
-    "alexs"
+    "alexs",
+    "mathisfoxius"
   ],
   "categories": [
     "Productivity",
@@ -39,6 +40,12 @@
       "title": "Open Ghostty Launch Configuration",
       "description": "Open Ghostty with a specific configuration",
       "mode": "view"
+    },
+    {
+      "name": "open-with-ghostty",
+      "title": "Open with Ghostty",
+      "description": "Open the currently selected Finder item with Ghostty",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
