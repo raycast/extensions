@@ -37,7 +37,7 @@ export function ColorListItemActions({
     <ActionPanel>
       <ActionPanel.Section>
         <Action title="Copy Hex to Clipboard" onAction={handleHexCopy} />
-        <Action title="Copy Rgb to Clipboard" onAction={handleRgbCopy} />
+        <Action title="Copy RGB to Clipboard" onAction={handleRgbCopy} />
         <Action title="Copy Name to Clipboard" onAction={handleNameCopy} />
       </ActionPanel.Section>
       <ActionPanel.Section>
