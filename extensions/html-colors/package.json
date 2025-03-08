@@ -12,7 +12,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/comatory/raycast.git"
+    "url": "https://github.com/raycast/extensions.git"
   },
   "commands": [
     {
