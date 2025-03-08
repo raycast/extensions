@@ -3,6 +3,7 @@ import { useState, useMemo } from "react";
 import { basicColors, extendedColors } from "./constants";
 import { ColorListItem } from "./components/color-list-item";
 import { searchColors, ColorResult } from "./utils/search-utils";
+import { showFailureToast } from "@raycast/utils";
 
 type ColorFilter = "all" | "basic" | "extended";
 
@@ -40,12 +41,19 @@ export default function Command() {
         textToCopy = color.hex;
     }
 
-    await Clipboard.copy(textToCopy);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Color copied to clipboard",
-      message: textToCopy,
-    });
+    try {
+      await Clipboard.copy(textToCopy);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Color copied to clipboard",
+        message: textToCopy,
+      });
+    } catch (err) {
+      await showFailureToast({
+        title: "Failed to copy color",
+        error: err,
+      });
+    }
   };
 
   return (
@@ -54,6 +62,8 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Name, hex, or RGB..."
       isShowingDetail={isDetailVisible}
+      /* The extension is loading data from memory, so we don't need to show a loading indicator */
+      isLoading={false}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Color Set"
