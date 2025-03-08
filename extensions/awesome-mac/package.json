@@ -3,7 +3,7 @@
   "name": "awesome-mac",
   "title": "Awesome Mac",
   "description": "Search Awesome Mac Apps",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "ViGeng",
   "categories": [
     "Applications",
@@ -16,7 +16,7 @@
       "name": "search",
       "title": "Search",
       "subtitle": "Awesome Mac Apps",
-      "description": "",
+      "description": "Search Awesome Mac Apps",
       "mode": "view"
     }
   ],
