@@ -21,9 +21,9 @@ const searchOptions = {
 
 type FuseSearchResult = { item: Color; score?: number };
 
-function filterByScore(results: FuseSearchResult[], threshold = 0.4): Color[] {
+function filterByScore(results: FuseSearchResult[], threshold: number): Color[] {
   return results
-    .filter((result) => result.score && result.score < threshold)
+    .filter((result) => result.score !== undefined && result.score < threshold)
     .sort((a, b) => (a.score || 0) - (b.score || 0))
     .map((result) => result.item);
 }
@@ -76,6 +76,6 @@ export function searchColors(colors: Color[], searchText: string): ColorResult[]
   }
 
   const searchResults = searchIndex.search(searchText);
-  const matchedColors = filterByScore(searchResults);
+  const matchedColors = filterByScore(searchResults, searchOptions.threshold);
   return deduplicateByName(matchedColors);
 }
