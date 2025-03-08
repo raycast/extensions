@@ -1,6 +1,6 @@
+import { getPreferenceValues } from "@raycast/api";
 import fs from "fs";
 import path from "path";
-import { getPreferenceValues } from "@raycast/api";
 
 const userDataDirectoryPath = () => {
   if (!process.env.HOME) {
@@ -30,6 +30,41 @@ const getProfileName = (userDirectoryPath: string) => {
   if (anyDefaultProfile) return anyDefaultProfile;
 
   return "";
+};
+
+export const getNewTabShortcut = () => {
+  const preferences = getPreferenceValues<Preferences>();
+  const key = preferences.newTabShortcut
+    .trim()
+    .charAt(preferences.newTabShortcut.length - 1)
+    .toLowerCase();
+  const finalShortcutString = `keystroke "${key}" using `;
+  const finalCommandsString = getCommands(preferences.newTabShortcut);
+
+  return finalShortcutString + finalCommandsString; // Converting the commands to an apple script string for the shortcut
+};
+
+const getCommands = (newTabShortcut: string): string => {
+  if (!newTabShortcut) return "{command down}";
+  if (newTabShortcut.includes("hyper")) return "{command down, option down, control down, shift down}";
+
+  const commandMap: Record<string, string> = {
+    cmd: "command",
+    command: "command",
+    ctrl: "control",
+    control: "control",
+    opt: "option",
+    option: "option",
+    shift: "shift",
+    alt: "option",
+    super: "command",
+  };
+
+  const finalCommands = Object.entries(commandMap)
+    .filter(([key]) => newTabShortcut.includes(key))
+    .map(([, value]) => `${value} down`);
+
+  return "{" + finalCommands.join(", ") + "}";
 };
 
 export const getHistoryDbPath = (): string => {
