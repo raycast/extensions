@@ -8,7 +8,7 @@ export default function RequestDetails({ req }: { req: Values }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [title, setTitle] = useState<string>(parsedValue?.meta?.title || "");
   const [description, setDescription] = useState<string>(parsedValue?.meta?.description || "");
-  const [jsonPathQuery, setjsonPathQuery] = useState<string>(parsedValue?.meta?.jsonPathQuery || "");
+  const [jsonPathQuery, setJsonPathQuery] = useState<string>(parsedValue?.meta?.jsonPathQuery || "");
 
   async function handleSubmit() {
     if (!title) {
@@ -70,7 +70,7 @@ export default function RequestDetails({ req }: { req: Values }) {
         title="JSONPath query for copying result"
         placeholder="Put your JSON path query here. Example: $.data[0].name"
         value={jsonPathQuery}
-        onChange={(value) => setjsonPathQuery(value)}
+        onChange={(value) => setJsonPathQuery(value)}
       />
     </Form>
   );
