@@ -20,7 +20,9 @@ export function generateColorPreviewSvg(hexColor: string, colorName: string): st
  * Categories are sorted to ensure basic colors appear before extended ones
  */
 export function getCategoryIcons(categories: ColorWithCategories["categories"]) {
-  const sortedCategories = [...categories].sort((a) => (a === "basic" ? -1 : 1));
+  const sortedCategories = [...categories].sort((a) => {
+    return a === "basic" ? -1 : 1;
+  });
   return sortedCategories.map((category) => ({
     icon: category === "basic" ? Icon.Circle : Icon.CircleEllipsis,
     tooltip: `${category.charAt(0).toUpperCase()}${category.slice(1)} Color`,
