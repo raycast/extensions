@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zoom-meeting-manager",
+  "title": "Zoom Meeting Manager",
+  "description": "Manage a list of zoom meetings which you can join using zoommtg links",
+  "icon": "zoom_icon.png",
+  "author": "gregmk",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Zoom Manager",
+      "description": "Show a list of all meetings",
+      "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Zoom Join List",
+      "subtitle": "Zoom",
+      "description": "Join zoom rooms",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableMenubar",
+      "type": "checkbox",
+      "required": false,
+      "title": "Enable Menubar",
+      "description": "Enable menubar item.",
+      "default": true,
+      "label": "Enable menubar item to quickly join meetings."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "publish2": "npx ray login && npx @raycast/api@latest publish"
+  }
+}
