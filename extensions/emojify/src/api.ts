@@ -5,6 +5,7 @@ interface Preferences {
   apiKey: string;
   baseURL?: string;
   model?: string;
+  customPrompt?: string;
 }
 
 interface EmojifyResponse {
@@ -24,9 +25,24 @@ interface PromptConfig {
 }
 
 const defaultPromptConfig: PromptConfig = {
-  systemMessage:
-    "You are a helpful assistant that adds appropriate emojis to text based on context. Add emojis that enhance the meaning, but don't overdo it. Place emojis in natural positions within the text.",
-  userMessageTemplate: "Add appropriate emojis to enhance this text: {text}. ONLY return the emojified text.",
+  systemMessage: [
+    "You are a helpful assistant that adds appropriate emojis to text based on context.",
+    "Add emojis that enhance the meaning, but don't overdo it.",
+    "Place emojis in natural positions within the text.",
+    "Here are some examples of contexts:",
+    "For formatted lists:",
+    "- Fix bugs",
+    "- Improve performance",
+    "- Add new features",
+    "=>",
+    "- 🐞 Fix bugs",
+    "- ⚡ Improve performance",
+    "- ✨ Add new features",
+    "For Greetings:",
+    "Good morning everyone -> 🌅 Good morning everyone!",
+    "Have a great weekend -> 🎉 Have a great weekend!",
+  ].join("\n"),
+  userMessageTemplate: `Add appropriate emojis to enhance this text: {text}. ONLY return the emojified text.`,
 };
 
 async function callOpenAI(
@@ -76,10 +92,19 @@ export async function emojifyText(text: string): Promise<EmojifyResponse> {
     const config: OpenAIConfig = {
       baseURL: preferences.baseURL || "https://api.openai.com",
       apiKey: preferences.apiKey,
-      model: preferences.model || "gpt-3.5-turbo",
+      model: preferences.model || "gpt-4o-mini",
     };
 
-    const emojifiedText = await callOpenAI(text, config);
+    // Create a custom prompt config if user has provided a custom prompt template
+    let promptConfig = defaultPromptConfig;
+    if (preferences.customPrompt) {
+      promptConfig = {
+        ...defaultPromptConfig,
+        userMessageTemplate: preferences.customPrompt,
+      };
+    }
+
+    const emojifiedText = await callOpenAI(text, config, promptConfig);
 
     return {
       text: emojifiedText,

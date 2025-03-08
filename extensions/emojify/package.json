@@ -41,6 +41,13 @@
       "description": "Model for the OpenAI API",
       "type": "textfield",
       "required": false
+    },
+    {
+      "name": "customPrompt",
+      "title": "Custom Prompt Template",
+      "description": "Custom prompt template for emojifying text. Use {text} as a placeholder for your input text.",
+      "type": "textfield",
+      "required": false
     }
   ],
   "dependencies": {
