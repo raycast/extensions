@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-source-mac-apps",
   "title": "Open Source Mac Apps",
-  "description": "Open Source Mac Apps",
+  "description": "Search and discover open-source applications for macOS from the comprehensive serhii-londar repository",
   "icon": "favicon.png",
   "author": "ViGeng",
   "categories": [

@@ -6,9 +6,28 @@ const URL = "https://indiegoodies.com/awesome-open-source-mac-apps";
 
 export async function fetchMacApps(): Promise<MacApp[]> {
   try {
-    const response = await fetch(URL);
-    const html = await response.text();
-    return parseMacApps(html);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+    try {
+      const response = await fetch(URL, {
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      const html = await response.text();
+      clearTimeout(timeoutId);
+
+      return parseMacApps(html);
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error("Request timed out after 10 seconds");
+      }
+      throw error;
+    }
   } catch (error) {
     console.error("Error fetching Mac apps:", error);
     throw error;

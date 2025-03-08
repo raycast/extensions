@@ -1,7 +1,7 @@
 export interface MacApp {
   name: string;
   description: string;
-  iconUrl: string;
+  iconUrl?: string;
   githubUrl: string;
   categories: string[];
 }

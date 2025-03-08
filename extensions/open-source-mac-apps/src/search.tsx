@@ -1,7 +1,7 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { fetchMacApps, getAllCategories } from "./utils";
 
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { AppItem } from "./components/AppItem";
 import { useFilteredApps } from "./hooks/useFilteredApps";
@@ -10,7 +10,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
 
-  const { data: apps, isLoading, error } = usePromise(fetchMacApps);
+  const { data: apps, isLoading, error } = useCachedPromise(fetchMacApps);
 
   // Show error toast if fetching fails
   if (error) {
@@ -53,9 +53,11 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {filteredApps.map((app) => (
-        <AppItem key={app.name} app={app} />
-      ))}
+      {filteredApps.length === 0 ? (
+        <List.EmptyView title="No apps found" description="Try adjusting your search or filters" />
+      ) : (
+        filteredApps.map((app) => <AppItem key={app.name} app={app} />)
+      )}
     </List>
   );
 }
