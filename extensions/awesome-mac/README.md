@@ -4,7 +4,7 @@ A Raycast extension that lets you search through the curated list of awesome Mac
 
 ## ✨ Features
 
-- 🔍 Search through throusands of high-quality Mac applications
+- 🔍 Search through thousands of high-quality Mac applications
 - ⚡️ Quick access to application details and download links
 - 🎯 Discover new and useful tools for your Mac workflow
 
