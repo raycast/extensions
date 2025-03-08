@@ -74,6 +74,10 @@
         {
           "title": "Copy Svg URL to Clipboard",
           "value": "copyURL"
+        },
+        {
+          "title": "Copy Data URI to Clipboard",
+          "value": "copyDataURI"
         }
       ]
     },

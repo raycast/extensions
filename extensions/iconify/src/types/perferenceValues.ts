@@ -6,6 +6,7 @@ enum primaryActionEnum {
   pasteFile = 'pasteFile',
   copyFile = 'copyFile',
   copyURL = 'copyURL',
+  copyDataURI = 'copyDataURI',
 }
 
 enum iconColorEnum {
