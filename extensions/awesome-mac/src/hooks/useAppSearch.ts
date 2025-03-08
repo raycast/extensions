@@ -12,7 +12,7 @@ function useReadmeContent() {
 export function useAppSearch() {
   const [searchResults, setSearchResults] = useState<AppItem[]>([]);
   const [searchText, setSearchText] = useState("");
-  
+
   const { data: allApps = [], isLoading, error } = useReadmeContent();
 
   // Filter apps based on search text
