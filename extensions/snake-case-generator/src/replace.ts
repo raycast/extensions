@@ -20,12 +20,6 @@ export default async function main(props: { arguments: { prefix?: string } }) {
     await showFailureToast("Failed to read clipboard", {
       title: "Failed to read clipboard",
       message: "Please try again",
-      primaryAction: {
-        title: "Try again",
-        onAction: () => {
-          main(props);
-        },
-      },
     });
     return;
   }
