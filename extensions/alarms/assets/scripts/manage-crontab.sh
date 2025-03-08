@@ -77,6 +77,13 @@ add_alarm() {
     log "Current directory: $CURRENT_DIR"
     FOUND_SCRIPT=$(find "$CURRENT_DIR" -name "trigger-alarm.sh" 2>/dev/null | head -n 1)
     log "Found script (if any): $FOUND_SCRIPT"
+    
+    if [ -z "$FOUND_SCRIPT" ]; then
+      log "ERROR: Could not find trigger-alarm.sh anywhere"
+      echo "ERROR: Could not find trigger-alarm.sh"
+      exit 1
+    fi
+    TRIGGER_SCRIPT="$FOUND_SCRIPT"
   else
     log "Trigger script found at: $TRIGGER_SCRIPT"
   fi
