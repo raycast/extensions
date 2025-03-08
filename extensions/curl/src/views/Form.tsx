@@ -6,6 +6,10 @@ import axios from "axios";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const curlString = require("curl-string");
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const {JSONPath} = require('jsonpath-plus');
+
 interface Identifiable {
   [key: string]: string | number;
 }
@@ -55,15 +59,20 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
             }),
         };
 
+
+        let cmd = "$.userIda"
+          const jsonPathQueryResult = JSONPath({wrap: false, path: cmd, json: result.response.data});
+          console.log(jsonPathQueryResult)
+
         const curl = curlString(url, curlOptions);
 
         await LocalStorage.setItem(
           method != "GET" && method != "DELETE"
             ? `${method}-${url}-${body.replace("```\n\b\b", "")}`
             : `${method}-${url}`,
-          JSON.stringify({ ...payload, meta: { title: "", description: "" } }),
+          JSON.stringify({ ...payload, meta: { title: "", description: "", responseClipboard: "" } }),
         );
-        push(<ResultView result={result as never} curl={curl} />);
+        push(<ResultView result={result as never} curl={curl} jsonPathResult={jsonPathQueryResult} />);
       })
       .catch((err) => {
         showToast({
