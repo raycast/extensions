@@ -19,7 +19,7 @@
 - Improved error handling throughout the extension
 - Fixed edge cases in alarm creation and deletion
 
-## [1.0.0] - 2025-03-01
+## [1.0.0] - {PR_MERGE_DATE}
 ### Added
 - Initial release
 - Create system-wide alarms that work even when Raycast is closed
