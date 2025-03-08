@@ -1,6 +1,6 @@
 # Trek Changelog
 
-## [Scheduling and Quick Create] - {PR_MERGE_DATE}
+## [Scheduling and Quick Create] - 2025-03-08
 
 - New "Schedule Meeting" command that allows users to schedule meetings in Basecamp projects
 - Made existing Todo command "Create Todo (Default List)"
