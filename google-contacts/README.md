@@ -7,7 +7,7 @@
     Google Contacts
   </h1>
 Manage your Google Contacts directly from Raycast with complete integration, including AI capabilities..
-
+<p>
 <p>
     <a href="">
       <img src="https://img.shields.io/badge/Raycast-Store-red.svg"
