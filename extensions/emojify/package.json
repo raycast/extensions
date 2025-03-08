@@ -20,9 +20,34 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key for emojifying text",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "baseURL",
+      "title": "Base URL",
+      "description": "Base URL for the OpenAI API",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Model for the OpenAI API",
+      "type": "textfield",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.93.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.86.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
