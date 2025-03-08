@@ -7,13 +7,24 @@ interface AppListItemProps {
   app: AppItem;
 }
 
-export const AppListItem = memo(function AppListItem({ app }: AppListItemProps) {
-  const appProperties = [
-    app.isOpenSource && { icon: { source: Icon.Terminal }, tooltip: "Open Source" },
+interface AppProperty {
+  icon: { source: Icon };
+  tooltip: string;
+}
+
+const getAppProperties = (app: AppItem): AppProperty[] => {
+  const properties: Array<AppProperty | false> = [
+    app.isOpenSource && { icon: { source: Icon.Code }, tooltip: "Open Source" },
     app.isFreeware && { icon: { source: Icon.Gift }, tooltip: "Freeware" },
     app.isAppStore && { icon: { source: Icon.AppWindow }, tooltip: "Available on App Store" },
-    app.isAwesomeList && { icon: { source: Icon.Star }, tooltip: "Awesome List" },
-  ].filter(Boolean);
+    app.isAwesomeList && { icon: { source: Icon.StarCircle }, tooltip: "Awesome List" },
+  ];
+
+  return properties.filter(Boolean) as AppProperty[];
+};
+
+export const AppListItem = memo(function AppListItem({ app }: AppListItemProps) {
+  const appProperties = getAppProperties(app);
 
   return (
     <List.Item
@@ -22,19 +33,6 @@ export const AppListItem = memo(function AppListItem({ app }: AppListItemProps) 
       subtitle={app.description}
       icon={getFavicon(app.url)}
       accessories={appProperties}
-      detail={
-        <List.Item.Detail
-          markdown={`# ${app.name}
-
-${app.description || "No description available."}
-
-## Category
-${app.category}
-
-## Links
-${app.url}`}
-        />
-      }
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Browser" url={app.url} icon={Icon.Globe} />
