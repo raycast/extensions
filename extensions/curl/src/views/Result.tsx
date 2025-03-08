@@ -16,7 +16,15 @@ type Result = {
   response: AxiosResponse;
 };
 
-export default function ResultView({ result, curl,jsonPathResult }: { result: Result; curl: string, jsonPathResult:string }) {
+export default function ResultView({
+  result,
+  curl,
+  jsonPathResult,
+}: {
+  result: Result;
+  curl: string;
+  jsonPathResult: string;
+}) {
   const markdown = "### Response\n\n" + "```json\n" + JSON.stringify(result.response.data, null, 2) + "\n\n";
 
   const jsonPathResultToClipboard = jsonPathResult ?? "";
@@ -49,7 +57,10 @@ export default function ResultView({ result, curl,jsonPathResult }: { result: Re
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy cURL" content={curl} />
-          <Action.CopyToClipboard title="Copy JSONPath result" content={jsonPathResultToClipboard} shortcut={{ modifiers: ["cmd"], key: "c" }}
+          <Action.CopyToClipboard
+            title="Copy JSONPath Result"
+            content={jsonPathResultToClipboard}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
           <Action.CopyToClipboard title="Copy Response" content={JSON.stringify(result.response.data, null, 2)} />
           <Action.CopyToClipboard

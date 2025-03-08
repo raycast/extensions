@@ -79,11 +79,13 @@ export default function Requests() {
         response = res;
 
         const jsonPathQuery = meta?.jsonPathQuery || "";
-        const jsonPathQueryResult = JSONPath({wrap: false, path: jsonPathQuery, json: response.data});
+        const jsonPathQueryResult = JSONPath({ wrap: false, path: jsonPathQuery, json: response.data });
 
-        const result = { method: payload.method, response};
+        const result = { method: payload.method, response };
 
-        push(<ResultView result={result as never} curl={generatedCurl} jsonPathResult={jsonPathQueryResult as never} />);
+        push(
+          <ResultView result={result as never} curl={generatedCurl} jsonPathResult={jsonPathQueryResult as never} />,
+        );
       })
       .catch((err) => {
         showToast({
