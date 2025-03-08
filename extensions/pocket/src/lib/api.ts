@@ -5,39 +5,50 @@ import { z } from "zod";
 const consumerKey = "109214-0976fe3d1062bae6c61267f";
 
 const BookmarkSchema = z
-  .object({
-    item_id: z.string(),
-    resolved_title: z.string(),
-    resolved_url: z.string(),
-    given_title: z.string(),
-    given_url: z.string(),
-    status: z.enum(["0", "1", "2"]),
-    is_article: z.enum(["0", "1"]),
-    has_video: z.enum(["0", "1", "2"]),
-    has_image: z.enum(["0", "1", "2"]),
-    favorite: z.enum(["0", "1"]),
-    tags: z.record(z.unknown()).optional(),
-    authors: z.record(z.object({ name: z.string().optional() })).optional(),
-    time_added: z.string(),
-    top_image_url: z.string().url().optional(),
-    image: z.object({ src: z.string() }).optional(),
-  })
-  .transform((rawBookmark) => ({
-    id: rawBookmark.item_id,
-    title: rawBookmark.given_title || rawBookmark.resolved_title,
-    originalUrl: rawBookmark.given_url || rawBookmark.resolved_url,
-    pocketUrl: `https://getpocket.com/read/${rawBookmark.item_id}`,
-    archived: rawBookmark.status === "1",
-    type: rawBookmark.has_image === "2" ? "image" : rawBookmark.is_article === "0" ? "video" : "article",
-    favorite: rawBookmark.favorite === "1",
-    tags: rawBookmark.tags ? Object.keys(rawBookmark.tags) : [],
-    author: rawBookmark.authors ? Object.values(rawBookmark.authors)[0]?.name : "",
-    updatedAt: new Date(parseInt(`${rawBookmark.time_added}000`)),
-    image: rawBookmark.top_image_url || rawBookmark.image?.src,
-  }));
+  .discriminatedUnion("status", [
+    z.object({
+      item_id: z.string(),
+      resolved_title: z.string(),
+      resolved_url: z.string(),
+      given_title: z.string(),
+      given_url: z.string(),
+      status: z.enum(["0", "1"]),
+      is_article: z.enum(["0", "1"]),
+      has_video: z.enum(["0", "1", "2"]),
+      has_image: z.enum(["0", "1", "2"]),
+      favorite: z.enum(["0", "1"]),
+      tags: z.record(z.unknown()).optional(),
+      authors: z.record(z.object({ name: z.string().optional() })).optional(),
+      time_added: z.string(),
+      top_image_url: z.string().url().optional(),
+      image: z.object({ src: z.string() }).optional(),
+    }),
+    z.object({
+      item_id: z.string(),
+      status: z.literal("2"),
+    }),
+  ])
+  .transform((rawBookmark) => {
+    if (rawBookmark.status === "2") return null;
+    return {
+      id: rawBookmark.item_id,
+      title: rawBookmark.given_title || rawBookmark.resolved_title,
+      originalUrl: rawBookmark.given_url || rawBookmark.resolved_url,
+      pocketUrl: `https://getpocket.com/read/${rawBookmark.item_id}`,
+      archived: rawBookmark.status === "1",
+      type: rawBookmark.has_image === "2" ? "image" : rawBookmark.is_article === "0" ? "video" : "article",
+      favorite: rawBookmark.favorite === "1",
+      tags: rawBookmark.tags ? Object.keys(rawBookmark.tags) : [],
+      author: rawBookmark.authors ? Object.values(rawBookmark.authors)[0]?.name : "",
+      updatedAt: new Date(parseInt(`${rawBookmark.time_added}000`)),
+      image: rawBookmark.top_image_url || rawBookmark.image?.src,
+    };
+  });
+
+const BookmarksSchema = z.object({ list: z.record(BookmarkSchema) }).transform((result) => Object.values(result.list));
 
 type RawBookmark = z.input<typeof BookmarkSchema>;
-export type Bookmark = z.output<typeof BookmarkSchema>;
+export type Bookmark = Extract<z.output<typeof BookmarkSchema>, { id: string }>;
 
 export class PocketClient {
   private readonly accessToken?: string;
@@ -122,7 +133,7 @@ export class PocketClient {
         },
       })
       .json<{ list: Record<string, RawBookmark> }>();
-    const bookmarks = z.array(BookmarkSchema).parse(Object.values(result.list));
+    const bookmarks = BookmarksSchema.parse(result).filter((item): item is Bookmark => item !== null);
     return bookmarks.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
   }
 
@@ -211,3 +222,100 @@ interface CreateBookmarkRequest {
   tags?: string[];
   url: string;
 }
+
+// ZodError: [
+//   {
+//     "code": "invalid_type",
+//     "expected": "string",
+//     "received": "undefined",
+//     "path": [
+//       40,
+//       "resolved_title"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "code": "invalid_type",
+//     "expected": "string",
+//     "received": "undefined",
+//     "path": [
+//       40,
+//       "resolved_url"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "code": "invalid_type",
+//     "expected": "string",
+//     "received": "undefined",
+//     "path": [
+//       40,
+//       "given_title"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "code": "invalid_type",
+//     "expected": "string",
+//     "received": "undefined",
+//     "path": [
+//       40,
+//       "given_url"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "expected": "'0' | '1'",
+//     "received": "undefined",
+//     "code": "invalid_type",
+//     "path": [
+//       40,
+//       "is_article"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "expected": "'0' | '1' | '2'",
+//     "received": "undefined",
+//     "code": "invalid_type",
+//     "path": [
+//       40,
+//       "has_video"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "expected": "'0' | '1' | '2'",
+//     "received": "undefined",
+//     "code": "invalid_type",
+//     "path": [
+//       40,
+//       "has_image"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "expected": "'0' | '1'",
+//     "received": "undefined",
+//     "code": "invalid_type",
+//     "path": [
+//       40,
+//       "favorite"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "code": "invalid_type",
+//     "expected": "string",
+//     "received": "undefined",
+//     "path": [
+//       40,
+//       "time_added"
+//     ],
+//     "message": "Required"
+//   }
+// ]
+//     at get error [as error] (/Users/hrishabh/.config/raycast/extensions/pocket/search.js:21662:23)
+//     at _ZodArray.parse (/Users/hrishabh/.config/raycast/extensions/pocket/search.js:21738:18)
+//     at PocketClient.getBookmarks (/Users/hrishabh/.config/raycast/extensions/pocket/search.js:25310:47)
+//     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
