@@ -3,7 +3,7 @@
   "name": "snake-case-generator",
   "title": "Generate Snake Case String",
   "description": "Useful when creating a git branch from a task title. The result will be a Snake Case String",
-  "icon": "extension_icon.png",
+  "icon": "extension-icon.png",
   "author": "ramah",
   "categories": [
     "Developer Tools"
