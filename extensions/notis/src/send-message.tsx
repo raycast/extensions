@@ -1,14 +1,6 @@
-import {
-  LaunchProps,
-  showToast,
-  Toast,
-  showHUD,
-  closeMainWindow,
-  LocalStorage,
-  launchCommand,
-  LaunchType,
-} from "@raycast/api";
+import { LaunchProps, showHUD, closeMainWindow, LocalStorage, launchCommand, LaunchType } from "@raycast/api";
 import { useEffect, useRef } from "react";
+import { showFailureToast } from "@raycast/utils";
 
 // Types
 interface Arguments {
@@ -68,11 +60,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
   useEffect(() => {
     const checkInput = async () => {
       if (!input.trim()) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "Please provide a message to send",
-        });
+        await showFailureToast("Please provide a message to send");
         return;
       }
     };
@@ -105,15 +93,15 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
           } catch (error) {
             console.error("Error launching menu-bar command:", error);
             // Handle the case where menu-bar-command is not initialized
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Menu bar not initialized",
+            await showFailureToast("Menu bar not initialized", {
               message: "Please open the Notis Menu Bar command first",
             });
           }
         } catch (error) {
           console.error("Error processing input:", error);
-          await showHUD(`There was an error processing your message. Please try again.`);
+          showFailureToast("Error Processing Message", {
+            message: "There was an error processing your message. Please try again.",
+          });
         }
       }
     };

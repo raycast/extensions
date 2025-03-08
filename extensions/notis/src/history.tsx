@@ -6,12 +6,11 @@ import {
   confirmAlert,
   LocalStorage,
   Icon,
-  open,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useEffect } from "react";
-import { useLocalStorage } from "@raycast/utils";
+import { useLocalStorage, showFailureToast } from "@raycast/utils";
 import { promises as fs } from "fs";
 import os from "os";
 import path from "path";
@@ -125,7 +124,9 @@ const downloadAndPlayAudio = async (url: string): Promise<void> => {
         await fs.unlink(m4aPath).catch((err) => console.error("Error deleting converted file:", err));
       } catch (ffmpegError) {
         console.error("ffmpeg conversion failed:", ffmpegError);
-        throw new Error("Unable to play OGG file. Try installing FFmpeg for better audio support.");
+        showFailureToast("Unable to play audio", {
+          message: "Failed to play audio. Please make sure you have FFmpeg installed.",
+        });
       }
     }
 
@@ -135,7 +136,9 @@ const downloadAndPlayAudio = async (url: string): Promise<void> => {
     console.error("Error playing audio:", error);
     console.log("Falling back to browser playback...");
     // Fallback to opening in browser if native playback fails
-    await open(url);
+    showFailureToast("Error Playing Audio", {
+      message: "Failed to play audio. Please try again.",
+    });
   }
 };
 

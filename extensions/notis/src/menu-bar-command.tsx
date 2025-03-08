@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, launchCommand, LaunchType, getPreferenceValues, LocalStorage, open } from "@raycast/api";
+import { MenuBarExtra, Icon, launchCommand, LaunchType, getPreferenceValues, LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { exec } from "child_process";
@@ -6,6 +6,7 @@ import { promises as fs } from "fs";
 import os from "os";
 import path from "path";
 import { promisify } from "util";
+import { showFailureToast } from "@raycast/utils";
 
 const execPromise = promisify(exec);
 
@@ -211,27 +212,12 @@ const isAudioFile = (url: string): boolean => {
 
 // Function to download and play OGG audio
 const downloadAndPlayAudio = async (url: string): Promise<void> => {
+  const tempDir = path.join(os.tmpdir(), "notis-audio");
+  const tempFile = path.join(tempDir, `audio-${Date.now()}.mp3`);
+
   try {
-    console.log(`Downloading OGG audio from: ${url}`);
-
-    // Get FFmpeg path from preferences
-    const preferences = getPreferenceValues<
-      Preferences & {
-        ffmpegPath?: string;
-      }
-    >();
-    const ffmpegPath = preferences.ffmpegPath?.trim() || "ffmpeg";
-    const ffplayPath = preferences.ffmpegPath?.trim()
-      ? `${preferences.ffmpegPath.trim().replace(/ffmpeg$/, "ffplay")}`
-      : "ffplay";
-
-    console.log(`Using ffmpeg path: ${ffmpegPath}`);
-    console.log(`Using ffplay path: ${ffplayPath}`);
-
-    // Create a temporary file name
-    const tmpDir = os.tmpdir();
-    const fileName = `notis-audio-${Date.now()}.ogg`;
-    const filePath = path.join(tmpDir, fileName);
+    // Create temp directory if it doesn't exist
+    await fs.mkdir(tempDir, { recursive: true });
 
     // Download the file
     const response = await fetch(url);
@@ -239,39 +225,35 @@ const downloadAndPlayAudio = async (url: string): Promise<void> => {
       throw new Error(`Failed to download audio: ${response.statusText}`);
     }
 
-    // Get file buffer and write to disk
     const buffer = await response.buffer();
-    await fs.writeFile(filePath, buffer);
+    await fs.writeFile(tempFile, buffer);
 
-    console.log(`Audio saved to: ${filePath}`);
+    // Get ffplay path from preferences or use default
+    const preferences = getPreferenceValues<Preferences>();
+    const ffmpegPath = preferences.ffmpegPath || "ffmpeg";
+    const ffplayPath = ffmpegPath.replace("ffmpeg", "ffplay");
 
-    // Try to use ffplay first (better OGG support)
+    // Try to play with ffplay first (better experience)
     try {
-      console.log("Attempting to play with ffplay...");
-      await execPromise(`${ffplayPath} -nodisp -autoexit "${filePath}"`);
+      await execPromise(`${ffplayPath} -nodisp -autoexit "${tempFile}" -loglevel quiet`);
     } catch (ffplayError) {
-      console.log("ffplay not available or failed, trying to convert with ffmpeg...");
-      try {
-        // Try to convert to m4a which macOS can play
-        const m4aPath = filePath.replace(".ogg", ".m4a");
-        await execPromise(`${ffmpegPath} -i "${filePath}" -c:a aac "${m4aPath}"`);
-        await execPromise(`afplay "${m4aPath}"`);
+      console.error("Error playing with ffplay:", ffplayError);
 
-        // Clean up the converted file
-        await fs.unlink(m4aPath).catch((err) => console.error("Error deleting converted file:", err));
+      // Fall back to afplay if ffplay fails
+      try {
+        await execPromise(`afplay "${tempFile}"`);
       } catch (ffmpegError) {
-        console.error("ffmpeg conversion failed:", ffmpegError);
-        throw new Error("Unable to play OGG file. Try installing FFmpeg for better audio support.");
+        console.error("Error playing with afplay:", ffmpegError);
+        showFailureToast("Failed to play audio", {
+          message: "Make sure you have FFmpeg installed or configure a custom path in preferences.",
+        });
       }
     }
-
-    // Clean up the temporary file
-    await fs.unlink(filePath).catch((err) => console.error("Error deleting temporary file:", err));
   } catch (error) {
-    console.error("Error playing audio:", error);
-    console.log("Falling back to browser playback...");
-    // Fallback to opening in browser if native playback fails
-    await open(url);
+    console.error("Error in audio playback:", error);
+    showFailureToast("Audio Playback Error", {
+      message: error instanceof Error ? error.message : "Unknown error occurred",
+    });
   }
 };
 
@@ -538,6 +520,9 @@ export default function Command() {
       return hasMedia;
     } catch (error) {
       console.error("Error checking for unread media:", error);
+      showFailureToast("Error Checking Media", {
+        message: error instanceof Error ? error.message : "Unknown error occurred",
+      });
       return false;
     }
   };
@@ -577,6 +562,9 @@ export default function Command() {
       await checkForUnreadMedia();
     } catch (error) {
       console.error("Error checking pending requests:", error);
+      showFailureToast("Error Checking Requests", {
+        message: error instanceof Error ? error.message : "Unknown error occurred",
+      });
       setIsProcessing(false);
     } finally {
       setIsLoading(false);
@@ -619,10 +607,16 @@ export default function Command() {
         title="View Message History"
         icon={Icon.Clock}
         onAction={async () => {
-          await launchCommand({
-            name: "history",
-            type: LaunchType.UserInitiated,
-          });
+          try {
+            await launchCommand({
+              name: "history",
+              type: LaunchType.UserInitiated,
+            });
+          } catch (error) {
+            showFailureToast("Failed to open message history", {
+              message: error instanceof Error ? error.message : "Unknown error",
+            });
+          }
         }}
       />
     </MenuBarExtra>

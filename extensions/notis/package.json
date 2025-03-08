@@ -58,7 +58,9 @@
       "type": "checkbox",
       "default": true,
       "required": false,
-      "enablesPreferences": ["ffmpegPath"]
+      "enablesPreferences": [
+        "ffmpegPath"
+      ]
     },
     {
       "name": "ffmpegPath",
