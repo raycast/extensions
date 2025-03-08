@@ -1,4 +1,5 @@
-import { List, Icon } from "@raycast/api";
+import { List, Icon} from "@raycast/api";
+import { useMemo } from "react";
 import { ColorWithCategories } from "../types";
 import { getCategoryIcons } from "../utils/color-utils";
 import { ColorListItemActions } from "./color-list-item-actions";
@@ -23,12 +24,14 @@ export function ColorListItem({
   isDetailVisible: boolean;
   onToggleDetail: () => void;
 }) {
+  const accessories = useMemo(() => getCategoryIcons(color.categories), [color.categories]);
+
   return (
     <List.Item
       title={color.name}
       subtitle={showHex ? color.hex : color.rgb}
       icon={{ source: Icon.CircleFilled, tintColor: color.hex }}
-      accessories={getCategoryIcons(color.categories)}
+      accessories={accessories}
       detail={isDetailVisible ? <ColorListItemDetail color={color} /> : undefined}
       actions={
         <ColorListItemActions
