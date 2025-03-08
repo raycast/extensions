@@ -10,6 +10,7 @@ sound_path="$3"
 seconds="$4"  # Parameter for seconds delay
 
 log() {
+  mkdir -p "$HOME/.raycast-alarms/logs"
   echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$HOME/.raycast-alarms/logs/trigger-alarm.log"
 }
 
