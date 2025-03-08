@@ -1,19 +1,22 @@
 import {
   Action,
   ActionPanel,
-  Icon,
+  closeMainWindow,
   Form,
+  getFrontmostApplication,
+  getPreferenceValues,
+  Icon,
+  PopToRootType,
+  showHUD,
   showToast,
   Toast,
-  getPreferenceValues,
-  getFrontmostApplication,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import axios, { AxiosError } from "axios";
-import { chromiumBrowserNames, getChromiumBrowserPath, getWebkitBrowserPath, webkitBrowserNames } from "./utils";
+import { useEffect, useState } from "react";
 import { useCollections, useTags } from "./hooks";
 import { ApiResponse, Collection } from "./interfaces";
+import { chromiumBrowserNames, getChromiumBrowserPath, getWebkitBrowserPath, webkitBrowserNames } from "./utils";
 
 interface FormValues {
   name: string;
@@ -52,10 +55,8 @@ const fetchLink = async (preferences: Preferences, values: FormValues, collectio
       throw new Error("Failed to post link");
     }
 
-    showToast({
-      style: Toast.Style.Success,
-      title: "Link posted successfully",
-    });
+    await showHUD("✅ Link added successfully");
+    await closeMainWindow({ popToRootType: PopToRootType.Immediate });
   } catch (error) {
     const axiosError = error as AxiosError<ApiResponse<string>>;
     if (axiosError.response) {
