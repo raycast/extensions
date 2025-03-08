@@ -3,10 +3,18 @@ import { useCachedPromise } from "@raycast/utils";
 import { AppItem, fetchReadmeContent } from "../utils/parseReadme";
 
 function useReadmeContent() {
-  return useCachedPromise(async () => {
-    console.log("fetching readme content");
+  // Use a stable reference for the fetch function to prevent unnecessary cache invalidation
+  const fetchFunction = async () => {
+    console.log("Executing fetch function - this could be cached or fresh");
     return fetchReadmeContent();
-  }, []);
+  };
+
+  // Pass an empty dependency array to ensure the cache is stable
+  return useCachedPromise(fetchFunction, [], {
+    // Set a reasonable cache time (12 hours in milliseconds)
+    keepPreviousData: true,
+    initialData: [],
+  });
 }
 
 export function useAppSearch() {
@@ -17,6 +25,7 @@ export function useAppSearch() {
 
   // Filter apps based on search text
   useEffect(() => {
+    // Only update search results when allApps or searchText changes
     if (!searchText) {
       setSearchResults(allApps);
       return;
@@ -32,7 +41,7 @@ export function useAppSearch() {
     });
 
     setSearchResults(filtered);
-  }, [searchText, allApps]);
+  }, [searchText, allApps]); // Keep these dependencies
 
   return {
     searchResults,

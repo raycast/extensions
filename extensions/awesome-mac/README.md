@@ -11,4 +11,4 @@ A Raycast extension that lets you search through the curated list of awesome Mac
 - [ ] 📂 Browse applications by categories (search bar filter)
 - [ ] 🔰 optimize the descriptions (remove the unnecessary information such as badges, etc.)
 
-> 🙏 Acknowledgements: [awesome-mac](https://github.com/serhii-londar/open-source-mac-os-apps)
+> 🙏 Acknowledgements: [awesome-mac](https://github.com/jaywcjlove/awesome-mac)
