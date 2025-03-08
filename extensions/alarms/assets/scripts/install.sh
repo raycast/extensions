@@ -39,7 +39,7 @@ echo "${BOLD}${BLUE}===============================================${NC}"
 echo "${BLUE}Building your perfect alarm system, one script at a time${NC}\n"
 
 # Find script directory
-SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 print_info "Installation source: ${BOLD}$SCRIPT_DIR${NC}"
 
 # Setup the config directory
