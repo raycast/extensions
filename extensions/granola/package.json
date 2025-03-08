@@ -15,12 +15,14 @@
     {
       "name": "search-notes",
       "title": "Search Notes",
+      "subtitle": "Search your notes in Granola",
       "description": "Search your notes in Granola",
       "mode": "view"
     },
     {
       "name": "create-note",
       "title": "Create Note",
+      "subtitle": "Create a new note in Granola",
       "description": "Create a new note in Granola",
       "mode": "no-view"
     }
@@ -32,6 +34,32 @@
       "description": "Ask AI about your notes"
     }
   ],
+  "ai": {
+    "evals": [
+      {
+        "input" : "@granola Pleases summarize my last note",
+        "mocks" : {
+          "ai-notes" : [
+            {
+              "content" : "### Meeting Context\n\n*   Testing session for Granola application’s transcription capabilities\n*   Two participants simulating back-and-forth conversation...",
+              "date" : "2025-03-06T16:15:20.057Z",
+              "title" : "Summary"
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "ai-notes"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.93.1",
     "@raycast/utils": "^1.19.1",

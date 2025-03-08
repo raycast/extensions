@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
 import { promisify } from "util";
 
@@ -19,10 +20,6 @@ export default async function Command() {
     });
   } catch (error) {
     console.error("Error opening Granola:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to open Granola",
-      message: String(error),
-    });
+    await showFailureToast({ title: "Failed to open Granola", message: String(error) });
   }
 }

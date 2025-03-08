@@ -1,4 +1,5 @@
 import { ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getPanelId } from "./utils/getPanelId";
 import getCache from "./utils/getCache";
 import { fetchGranolaData } from "./utils/fetchData";
@@ -49,13 +50,20 @@ const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
 };
 
 export default function Command() {
-  const noteData = fetchGranolaData("get-documents") as NoteData;
+  let noteData: NoteData;
+  try {
+    noteData = fetchGranolaData("get-documents") as NoteData;
+  } catch (error) {
+    showFailureToast({ title: "Failed to fetch notes", message: String(error) });
+    return <List />;
+  }
+
   const cacheData = getCache();
   const panels = cacheData?.state?.documentPanels;
 
   // if loading...
   if (!noteData?.data && noteData.isLoading === true) {
-    return <List isLoading={noteData.isLoading} />;
+    return <List isLoading={true} />;
   }
 
   // if not loading and no data
@@ -68,13 +76,15 @@ export default function Command() {
     return <Unresponsive />;
   }
 
+  const untitledNoteTItle = "Untitled Note"
+
   if (noteData?.data) {
     return (
       <List>
-        {sortNotesByDate(noteData?.data?.docs).map((doc) => (
+        {sortNotesByDate(noteData.data.docs).map((doc) => (
           <List.Item
             key={doc.id}
-            title={doc.title ?? "Untitled Note"}
+            title={doc.title ?? untitledNoteTItle}
             accessories={[
               { date: new Date(doc.created_at) },
               { text: doc.creation_source },
@@ -92,13 +102,19 @@ export default function Command() {
 
                         // Check if doc.id exists in panels and if panelId is valid
                         if (!panels[doc.id] || !panelId || !panels[doc.id][panelId]) {
-                          return `# ${doc.title}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\nNo content available for this note.`;
+                          return `# ${doc.title ?? untitledNoteTItle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\nNo content available for this note.`;
                         }
 
                         // Safely access the content with fallback
                         const panelData = panels[doc.id][panelId];
                         const htmlContent = panelData?.original_content || "";
-                        const markdownContent = convertHtmlToMarkdown(htmlContent);
+                        let markdownContent;
+                        try {
+                          markdownContent = convertHtmlToMarkdown(htmlContent);
+                        } catch (error) {
+                          console.error(`Error converting note ${doc.id} content to markdown:`, error);
+                          markdownContent = htmlContent; // Fallback to original content
+                        }
                         return `# ${doc.title}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\n${markdownContent}`;
                       })()}
                       actions={
