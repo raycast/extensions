@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spring-easings",
+  "title": "Easings",
+  "description": "A collection of spring easings.",
+  "icon": "extension-icon.png",
+  "author": "Neesh774",
+  "categories": [
+    "Developer Tools",
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-easings",
+      "title": "Search Spring Easings",
+      "description": "Browse and copy spring easing configurations for Motion.",
+      "mode": "view"
+    },
+    {
+      "name": "add-custom-easing",
+      "title": "Add Custom Easing",
+      "description": "Create your own custom spring easing with specific mass, stiffness, and damping values.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "easing-format",
+      "title": "Copy Easing Format",
+      "description": "The format to copy the easing in.",
+      "type": "dropdown",
+      "default": "motion-compact",
+      "required": false,
+      "enum": [
+        "motion-compact",
+        "motion-standard"
+      ],
+      "data": [
+        {
+          "title": "Motion (Compact)",
+          "value": "motion-compact"
+        },
+        {
+          "title": "Motion (Full)",
+          "value": "motion-standard"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "sharp": "^0.33.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
