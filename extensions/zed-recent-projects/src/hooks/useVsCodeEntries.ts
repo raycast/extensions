@@ -3,7 +3,7 @@ import { existsSync } from "fs";
 import { URL } from "url";
 import { Application } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
-import { getEntry, type Entry } from "../lib/entry";
+import { getEntryFromVSCodeEntryUri, type Entry } from "../lib/entry";
 
 export type VSCodeBuild = "Code" | "Code - Insiders" | "VSCodium";
 
@@ -49,7 +49,7 @@ export function useVsCodeEntries(bundleId: VSCodeBundleId) {
     data && data.length
       ? ((JSON.parse(data[0].entries) as VsCodeEntry[])
           .filter((i) => isFolderItem(i) || isFileItem(i))
-          .map((i) => getEntry(isFolderItem(i) ? i.folderUri : i.fileUri))
+          .map((i) => getEntryFromVSCodeEntryUri(isFolderItem(i) ? i.folderUri : i.fileUri))
           .filter((i) => !!i) as Entry[])
       : [];
 

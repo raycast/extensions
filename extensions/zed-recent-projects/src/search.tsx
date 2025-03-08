@@ -51,7 +51,7 @@ export function Command() {
   const { pinnedEntries, pinEntry, unpinEntry, moveUp, moveDown } = usePinnedEntries();
 
   const pinned = Object.values(pinnedEntries)
-    .filter((e) => exists(e.uri))
+    .filter((e) => exists(e.uri) || e.host)
     .sort((a, b) => a.order - b.order);
 
   return (
@@ -63,16 +63,20 @@ export function Command() {
       />
       <List.Section title="Pinned Projects">
         {pinned.map((e) => {
-          const entry = getEntry(e.uri);
+          const entry = getEntry(e);
 
           if (!entry) {
             return null;
           }
 
           return (
-            <EntryItem key={entry.uri} entry={entry} icon={entry.path && { fileIcon: entry.path }}>
-              <Action.Open title="Open in Zed" target={entry.path} application={zed} icon={{ fileIcon: zed.path }} />
-              <Action.ShowInFinder path={entry.path} />
+            <EntryItem
+              key={entry.uri}
+              entry={entry}
+              icon={entry.is_remote ? "remote.svg" : entry.path && { fileIcon: entry.path }}
+            >
+              <Action.Open title="Open in Zed" target={entry.uri} application={zed} icon={{ fileIcon: zed.path }} />
+              {!entry.is_remote && <Action.ShowInFinder path={entry.path} />}
               <Action
                 title="Unpin Entry"
                 icon={Icon.PinDisabled}
@@ -102,19 +106,23 @@ export function Command() {
 
       <List.Section title="Recent Projects">
         {Object.values(entries)
-          .filter((e) => !pinnedEntries[e.uri] && exists(e.uri))
+          .filter((e) => !pinnedEntries[e.uri] && (!!e.host || exists(e.uri)))
           .sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0))
           .map((e) => {
-            const entry = getEntry(e.uri);
+            const entry = getEntry(e);
 
             if (!entry) {
               return null;
             }
 
             return (
-              <EntryItem key={entry.uri} entry={entry} icon={entry.path && { fileIcon: entry.path }}>
-                <Action.Open title="Open in Zed" target={entry.path} application={zed} icon={{ fileIcon: zed.path }} />
-                <Action.ShowInFinder path={entry.path} />
+              <EntryItem
+                key={entry.uri}
+                entry={entry}
+                icon={entry.is_remote ? "remote.svg" : entry.path && { fileIcon: entry.path }}
+              >
+                <Action.Open title="Open in Zed" target={entry.uri} application={zed} icon={{ fileIcon: zed.path }} />
+                {!entry.is_remote && <Action.ShowInFinder path={entry.path} />}
                 <Action
                   title="Pin Entry"
                   icon={Icon.Pin}
