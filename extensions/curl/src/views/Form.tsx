@@ -62,7 +62,7 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
           method != "GET" && method != "DELETE"
             ? `${method}-${url}-${body.replace("```\n\b\b", "")}`
             : `${method}-${url}`,
-          JSON.stringify({ ...payload, meta: { title: "", description: "", responseClipboard: "" } }),
+          JSON.stringify({ ...payload, meta: { title: "", description: "", jsonPathQuery: "" } }),
         );
         push(<ResultView result={result as never} curl={curl} jsonPathResult={""} />);
       })
