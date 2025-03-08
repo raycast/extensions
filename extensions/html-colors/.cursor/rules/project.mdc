@@ -1,13 +1,12 @@
 ---
-description: Describes what the project is about
+description: Describes what kind of project html-colors is and what technology it uses
 globs: *.ts, *.tsx, *.md
 alwaysApply: false
 ---
 # HTML Colors
 
-- Raycast extension
-- uses `@raycast/api` for creating UI
-- uses npm package manager
+- Raycast extension written in Typescript
+- uses standard Raycast APIs, use `Development` section for most important APIs
 
 ## Development
 
