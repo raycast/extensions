@@ -1,0 +1,180 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "contacts",
+  "title": "Contacts",
+  "description": "Search and open Apple Contacts",
+  "icon": "extension-icon.png",
+  "author": "antonengelhardt",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-contact",
+      "title": "Search Contact",
+      "subtitle": "Find any Contact",
+      "description": "Search for contacts and view contact details",
+      "mode": "view"
+    },
+    {
+      "name": "create-contact",
+      "title": "Create Contact",
+      "subtitle": "Add a new contact",
+      "description": "Create a new contact in Apple Contacts",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-contacts",
+      "title": "Create Contact",
+      "description": "Create a new contact in Apple Contacts",
+      "examples": [
+        "Create a contact for John Doe",
+        "Add Jane Smith with email jane@example.com",
+        "Add a new contact for Alex Johnson with phone number 555-123-4567"
+      ]
+    },
+    {
+      "name": "search-contacts",
+      "title": "Search Contacts",
+      "description": "Search for contacts in Apple Contacts",
+      "examples": [
+        "Find contacts named John",
+        "Search for Smith in my contacts",
+        "Look up contact information for Jane"
+      ]
+    },
+    {
+      "name": "delete-contacts",
+      "title": "Delete Contact",
+      "description": "Delete a contact from Apple Contacts",
+      "examples": [
+        "Delete contact with ID ABC123",
+        "Remove the contact for John Smith"
+      ]
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@contacts Find all contacts with Smith in their name",
+        "mocks": {
+          "search-contacts": "Found 2 contact(s) matching \"Smith\":\n\n1. John Smith\n   Email: john.smith@example.com\n   Phone: +1234567890\n\n2. Jane Smith\n   Email: jane.smith@example.com\n   Phone: +0987654321\n"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-contacts",
+              "arguments": {
+                "query": {
+                  "includes": "Smith"
+                }
+              }
+            }
+          },
+          {
+            "includes": "John Smith"
+          },
+          {
+            "includes": "Jane Smith"
+          }
+        ]
+      },
+      {
+        "input": "@contacts Create a contact for John Doe with email john@example.com",
+        "mocks": {
+          "create-contacts": "Successfully created contact for John Doe.\nEmail: john@example.com"
+        },
+        "expected": [
+          {
+            "callsTool": "create-contacts"
+          },
+          {
+            "includes": "successfully created"
+          }
+        ]
+      },
+      {
+        "input": "@contacts Add a new contact for Sarah Johnson with phone number 555-123-4567",
+        "mocks": {
+          "create-contacts": "Successfully created contact for Sarah Johnson.\nPhone: 555-123-4567"
+        },
+        "expected": [
+          {
+            "callsTool": "create-contacts"
+          }
+        ]
+      },
+      {
+        "input": "@contacts Find my friend Alex",
+        "mocks": {
+          "search-contacts": "Found 1 contact(s) matching \"Alex\":\n\n1. Alex Thompson\n   Email: alex@example.com\n   Phone: +1122334455\n"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-contacts",
+              "arguments": {
+                "query": {
+                  "includes": "Alex"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@contacts Create a new contact for Emily Wilson with email emily@company.com and phone 888-555-1234",
+        "mocks": {
+          "create-contacts": "Successfully created contact for Emily Wilson.\nEmail: emily@company.com\nPhone: 888-555-1234"
+        },
+        "expected": [
+          {
+            "callsTool": "create-contacts"
+          }
+        ]
+      },
+      {
+        "input": "@contacts Delete the contact with ID ABC123",
+        "mocks": {
+          "delete-contacts": "Successfully deleted the contact."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "delete-contacts",
+              "arguments": {
+                "id": "ABC123"
+              }
+            }
+          },
+          {
+            "includes": "deleted"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "1.93.2",
+    "@raycast/utils": "1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
