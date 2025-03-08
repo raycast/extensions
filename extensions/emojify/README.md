@@ -7,7 +7,7 @@ Transform your plain text into vibrant, emoji-enhanced messages that better conv
 
 - 🎯 Contextually adds appropriate emojis to your text  
 - 🔄 Quick and seamless emoji insertion  
-- 📝 Works with any text input  
+- 📝 Works with any text input
 - 🎨 Maintains the original meaning while adding visual flair
 - 🔍 Query proper emoji with text semantics
 
