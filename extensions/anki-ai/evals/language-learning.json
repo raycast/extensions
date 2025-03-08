@@ -1,0 +1,13 @@
+{
+  "input": "Gerar flashcards para aprender vocabulário básico em espanhol sobre comidas e bebidas",
+  "expected": [
+    {
+      "callsTool": "ai-flashcards-generator"
+    },
+    {
+      "containsFlashcards": true,
+      "minimumFlashcards": 8,
+      "containsTerms": ["comida", "bebida", "restaurante", "español"]
+    }
+  ]
+}

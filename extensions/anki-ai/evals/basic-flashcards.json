@@ -1,0 +1,12 @@
+{
+  "input": "Gerar flashcards sobre o sistema solar, incluindo os planetas e suas características principais",
+  "expected": [
+    {
+      "callsTool": "ai-flashcards-generator"
+    },
+    {
+      "containsFlashcards": true,
+      "minimumFlashcards": 5
+    }
+  ]
+}
