@@ -1,3 +1,4 @@
+import { showFailureToast } from "@raycast/utils";
 import https from "https";
 
 export interface AppItem {
@@ -64,16 +65,17 @@ export async function fetchReadmeContent(): Promise<AppItem[]> {
           const name = appMatch[1];
           const url = appMatch[2];
           const description = appMatch[3] || "";
+          const descriptionLower = description.toLowerCase();
 
           const app: AppItem = {
             name,
             description: description.trim(),
             url,
             category: currentCategory,
-            isOpenSource: description.includes("[OSS Icon]"),
-            isFreeware: description.includes("[Freeware Icon]"),
-            isAppStore: description.includes("[app-store Icon]"),
-            isAwesomeList: description.includes("[awesome-list Icon]"),
+            isOpenSource: descriptionLower.includes("[oss icon]"),
+            isFreeware: descriptionLower.includes("[freeware icon]"),
+            isAppStore: descriptionLower.includes("[app-store icon]"),
+            isAwesomeList: descriptionLower.includes("[awesome-list icon]"),
           };
 
           apps.push(app);
@@ -84,6 +86,7 @@ export async function fetchReadmeContent(): Promise<AppItem[]> {
     return apps;
   } catch (error) {
     console.error("Error parsing README:", error);
+    showFailureToast("Failed to parse README", { message: "Error parsing README" });
     return [];
   }
 }
