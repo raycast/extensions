@@ -9,3 +9,14 @@ Transform your plain text into vibrant, emoji-enhanced messages that better conv
 - 🔄 Quick and seamless emoji insertion  
 - 📝 Works with any text input  
 - 🎨 Maintains the original meaning while adding visual flair
+- 🔍 Query proper emoji with text semantics
+
+## Commands
+
+### Emojify
+
+Enhances your text by adding contextually relevant emojis throughout. ✨
+
+### Emoji Selector
+
+Provides a single, most appropriate emoji that matches the semantics of your input text. 🧐.

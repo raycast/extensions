@@ -18,6 +18,21 @@
       "subtitle": "Add emojis to selected text",
       "description": "Use AI to emojify the text",
       "mode": "view"
+    },
+    {
+      "name": "emoji-selector",
+      "title": "Emoji Selector",
+      "subtitle": "Find the perfect emoji for your text",
+      "description": "Get a single emoji that matches your text semantics",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Enter text to find emoji",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [

@@ -81,6 +81,20 @@ async function callOpenAI(
   return content;
 }
 
+const emojiSelectorPromptConfig: PromptConfig = {
+  systemMessage: [
+    "You are a helpful assistant that selects the single most appropriate emoji for a given text.",
+    "Your task is to analyze the text and return ONLY ONE emoji that best represents its meaning or emotion.",
+    "Do not return any text, explanations, or multiple emojis - just the single most relevant emoji.",
+    "Examples:",
+    "'I'm so happy today!' -> 😄",
+    "'The project deadline is approaching' -> ⏰",
+    "'Just finished a marathon' -> 🏃",
+    "'Looking at the stars tonight' -> ✨",
+  ].join("\n"),
+  userMessageTemplate: `Select the single most appropriate emoji for this text: {text}. Return ONLY the emoji, nothing else.`,
+};
+
 export async function emojifyText(text: string): Promise<EmojifyResponse> {
   const preferences = getPreferenceValues<Preferences>();
 
@@ -112,6 +126,32 @@ export async function emojifyText(text: string): Promise<EmojifyResponse> {
     };
   } catch (error) {
     console.error("Error emojifying text:", error);
+    throw error;
+  }
+}
+
+export async function getEmojiForText(text: string): Promise<EmojifyResponse> {
+  const preferences = getPreferenceValues<Preferences>();
+
+  if (!preferences.apiKey) {
+    throw new Error("OpenAI API key is not set. Please set it in the extension preferences.");
+  }
+
+  try {
+    const config: OpenAIConfig = {
+      baseURL: preferences.baseURL || "https://api.openai.com",
+      apiKey: preferences.apiKey,
+      model: preferences.model || "gpt-4o-mini",
+    };
+
+    const emoji = await callOpenAI(text, config, emojiSelectorPromptConfig);
+
+    return {
+      text: emoji,
+      timestamp: Date.now(),
+    };
+  } catch (error) {
+    console.error("Error finding emoji:", error);
     throw error;
   }
 }
