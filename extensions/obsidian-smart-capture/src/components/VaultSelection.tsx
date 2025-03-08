@@ -1,9 +1,9 @@
-import { List, ActionPanel, Action } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { ShowVaultInFinderAction } from "../utils/actions";
 
 import { Vault } from "../utils/interfaces";
 
-export function VaultSelection(props: { vaults: Vault[]; target: (vault: Vault) => any }) {
+export function VaultSelection(props: { vaults: Vault[]; target: (vault: Vault) => never }) {
   const { vaults, target } = props;
   return (
     <List>
