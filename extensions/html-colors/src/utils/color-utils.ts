@@ -2,13 +2,20 @@ import { Icon } from "@raycast/api";
 import { ColorWithCategories } from "../types";
 
 /**
+ * SVG dimensions for color preview
+ */
+const SVG_WIDTH = 200;
+const SVG_HEIGHT = 150;
+const BORDER_RADIUS = 8;
+
+/**
  * Generates an SVG preview of a color as a rounded rectangle with a border
  */
 export function generateColorPreviewSvg(hexColor: string, colorName: string): string {
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="200" height="150" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
-  <rect width="200" height="150" fill="${hexColor}" rx="8" ry="8"/>
-  <rect width="200" height="150" fill="none" stroke="#ccc" stroke-width="1" rx="8" ry="8"/>
+<svg width="${SVG_WIDTH}" height="${SVG_HEIGHT}" viewBox="0 0 ${SVG_WIDTH} ${SVG_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="${SVG_WIDTH}" height="${SVG_HEIGHT}" fill="${hexColor}" rx="${BORDER_RADIUS}" ry="${BORDER_RADIUS}"/>
+  <rect width="${SVG_WIDTH}" height="${SVG_HEIGHT}" fill="none" stroke="#ccc" stroke-width="1" rx="${BORDER_RADIUS}" ry="${BORDER_RADIUS}"/>
 </svg>`;
 
   const base64Svg = Buffer.from(svg).toString("base64");
