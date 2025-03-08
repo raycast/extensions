@@ -86,7 +86,12 @@ const getScheduledAlarms = async (): Promise<AlarmInfo[]> => {
       return [];
     }
 
-    return JSON.parse(stdout);
+    try {
+      return JSON.parse(stdout);
+    } catch (error) {
+      console.error(`Error parsing alarms JSON: ${error}`);
+      return [];
+    }
   } catch (error) {
     console.error(`Error getting scheduled alarms: ${error}`);
     return [];
