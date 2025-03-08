@@ -19,9 +19,6 @@ const searchOptions = {
   minMatchCharLength: 2,
 };
 
-// Initialize Fuse instance with empty collection
-const searchIndex = new Fuse([] as Color[], searchOptions);
-
 type FuseSearchResult = { item: Color; score?: number };
 
 function filterByScore(results: FuseSearchResult[], threshold = 0.4): Color[] {
@@ -71,8 +68,8 @@ function convertToColorResult(color: Color): ColorResult {
  * Performs fuzzy search on colors using name, hex, and rgb values, with deduplication by name
  */
 export function searchColors(colors: Color[], searchText: string): ColorResult[] {
-  // Update search index with current colors
-  searchIndex.setCollection(colors);
+  // Initialize new Fuse instance with current colors
+  const searchIndex = new Fuse(colors, searchOptions);
 
   if (!searchText) {
     return colors.map(convertToColorResult);
