@@ -89,6 +89,26 @@
       "description": "Quickly open a profile on a social site"
     }
   ],
+  "ai": {
+    "evals": [
+      {
+        "name": "open_profile",
+        "description": "Open a social media profile",
+        "examples": [
+          {
+            "input": "Open raycast on GitHub",
+            "output": {
+              "tool": "open",
+              "args": {
+                "profile": "raycast",
+                "site": "github"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.80.0"
   },
