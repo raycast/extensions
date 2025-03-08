@@ -9,7 +9,7 @@
 Manage your Google Contacts directly from Raycast with complete integration, including AI capabilities..
 
 <p>
-    <a href="https://www.raycast.com/sven/microsoft-teams">
+    <a href="">
       <img src="https://img.shields.io/badge/Raycast-Store-red.svg"
         alt="Find this extension on the Raycast store"
       />
@@ -18,7 +18,7 @@ Manage your Google Contacts directly from Raycast with complete integration, inc
       src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg"
       alt="PRs welcome!"
     />
-    <a href="https://github.dev/raycast/extensions/extensions/microsoft-teams">
+    <a href="">
       <img src="https://img.shields.io/badge/Open_in-GitHub.dev-red.svg"
         alt="Open in GitHub.dev"
       />
