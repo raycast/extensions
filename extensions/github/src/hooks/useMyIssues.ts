@@ -13,6 +13,7 @@ export function useMyIssues({
   showAssigned,
   showMentioned,
   showRecentlyClosed,
+  excludedRepositories,
 }: {
   repository: string | null;
   sortQuery: string;
@@ -20,6 +21,7 @@ export function useMyIssues({
   showAssigned: boolean;
   showMentioned: boolean;
   showRecentlyClosed: boolean;
+  excludedRepositories?: string;
 }) {
   const { github } = getGitHubClient();
 
@@ -29,7 +31,11 @@ export function useMyIssues({
       const twoWeeksAgo = format(subDays(Date.now(), numberOfDays), "yyyy-MM-dd");
       const updatedFilter = `updated:>${twoWeeksAgo}`;
 
-      const repositoryFilter = repo ? `repo:${repo}` : "";
+      const repositoriesToExclude = excludedRepositories ? excludedRepositories.split(",").map((r) => r.trim()) : [];
+      let repositoryFilter = repo ? `repo:${repo}` : "";
+      if (repositoriesToExclude.length) {
+        repositoryFilter = `${repositoryFilter} ${repositoriesToExclude.map((r) => `-repo:${r}`).join(" ")}`;
+      }
 
       const results = await Promise.all(
         [
