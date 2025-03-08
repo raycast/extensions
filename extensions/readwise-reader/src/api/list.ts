@@ -1,7 +1,8 @@
 import { showToast, Toast } from "@raycast/api";
-import { Document } from "../utils/document";
-import { useDefaultHeaders } from "./headers";
 import fetch from "node-fetch";
+import { useDefaultHeaders } from "./headers";
+import { type Category } from "../utils/category";
+import { type Document } from "../utils/document";
 
 type ApiResponse = {
   count: number;
@@ -9,9 +10,10 @@ type ApiResponse = {
   results: Document[];
 };
 
-export async function list(location: Document["location"], cursor?: string): Promise<ApiResponse> {
+export async function list(location: Document["location"], category?: Category, cursor?: string): Promise<ApiResponse> {
   const readerAPI = `https://readwise.io/api/v3/list?${new URLSearchParams({
     location,
+    ...(category ? { category } : {}),
     ...(cursor ? { pageCursor: cursor } : {}),
   }).toString()}`;
 
@@ -31,7 +33,7 @@ export async function list(location: Document["location"], cursor?: string): Pro
         style: Toast.Style.Animated,
       });
       await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000)); // wait for x seconds
-      return list(location, cursor); // send new request
+      return list(location, category, cursor); // send new request
     } else {
       throw new Error("Invalid Retry-After header value");
     }
