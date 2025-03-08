@@ -133,7 +133,7 @@ export class PocketClient {
         },
       })
       .json<{ list: Record<string, RawBookmark> }>();
-    const bookmarks = BookmarksSchema.parse(result).filter((item) => item !== null);
+    const bookmarks = BookmarksSchema.parse(result).filter((item): item is Bookmark => item !== null);
     return bookmarks.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
   }
 
@@ -222,3 +222,100 @@ interface CreateBookmarkRequest {
   tags?: string[];
   url: string;
 }
+
+// ZodError: [
+//   {
+//     "code": "invalid_type",
+//     "expected": "string",
+//     "received": "undefined",
+//     "path": [
+//       40,
+//       "resolved_title"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "code": "invalid_type",
+//     "expected": "string",
+//     "received": "undefined",
+//     "path": [
+//       40,
+//       "resolved_url"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "code": "invalid_type",
+//     "expected": "string",
+//     "received": "undefined",
+//     "path": [
+//       40,
+//       "given_title"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "code": "invalid_type",
+//     "expected": "string",
+//     "received": "undefined",
+//     "path": [
+//       40,
+//       "given_url"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "expected": "'0' | '1'",
+//     "received": "undefined",
+//     "code": "invalid_type",
+//     "path": [
+//       40,
+//       "is_article"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "expected": "'0' | '1' | '2'",
+//     "received": "undefined",
+//     "code": "invalid_type",
+//     "path": [
+//       40,
+//       "has_video"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "expected": "'0' | '1' | '2'",
+//     "received": "undefined",
+//     "code": "invalid_type",
+//     "path": [
+//       40,
+//       "has_image"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "expected": "'0' | '1'",
+//     "received": "undefined",
+//     "code": "invalid_type",
+//     "path": [
+//       40,
+//       "favorite"
+//     ],
+//     "message": "Required"
+//   },
+//   {
+//     "code": "invalid_type",
+//     "expected": "string",
+//     "received": "undefined",
+//     "path": [
+//       40,
+//       "time_added"
+//     ],
+//     "message": "Required"
+//   }
+// ]
+//     at get error [as error] (/Users/hrishabh/.config/raycast/extensions/pocket/search.js:21662:23)
+//     at _ZodArray.parse (/Users/hrishabh/.config/raycast/extensions/pocket/search.js:21738:18)
+//     at PocketClient.getBookmarks (/Users/hrishabh/.config/raycast/extensions/pocket/search.js:25310:47)
+//     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
