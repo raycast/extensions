@@ -33,7 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) {
         return this.props.fallback;
       }
-      
+
       return (
         <Detail
           markdown={`## Something went wrong
