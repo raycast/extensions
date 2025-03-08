@@ -73,17 +73,7 @@ This extension is built with:
 - Raycast API
 - Fuse.js for fuzzy search
 
-To run the extension locally:
-```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-```
+For development instructions, please refer to the [Raycast Developer Docs](https://developers.raycast.com).
 
 ## License
 
