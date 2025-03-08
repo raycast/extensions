@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "react-jsx",
+    "target": "es2020",
+    "lib": ["es2020", "dom"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "noImplicitAny": false,
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "typeRoots": ["./node_modules/@types", "./src"],
+    "baseUrl": ".",
+    "paths": {
+      "@raycast/api": ["./src/types.d.ts"]
+    }
+  }
+} 
