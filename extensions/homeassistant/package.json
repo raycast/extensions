@@ -8,7 +8,8 @@
     "altrdev",
     "rspeicher",
     "amuelli",
-    "xilopaint"
+    "xilopaint",
+    "krsntn"
   ],
   "license": "MIT",
   "description": "Manage your smart home with Raycast",
@@ -20,6 +21,31 @@
       "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant entities",
       "mode": "view"
+    },
+    {
+      "name": "customentities",
+      "title": "Custom Entities",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant custom entities",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "includedEntities",
+          "description": "Comma-separated list of entities to include in the custom list, with wildcard support",
+          "type": "textfield",
+          "required": true,
+          "title": "Included Entities",
+          "placeholder": "light.*"
+        },
+        {
+          "name": "excludedEntities",
+          "description": "Comma-separated list of entities to exclude from the custom list, with wildcard support",
+          "type": "textfield",
+          "required": false,
+          "title": "Excluded Entities",
+          "placeholder": "cover.mycover1,cover.bath*"
+        }
+      ]
     },
     {
       "name": "covers",

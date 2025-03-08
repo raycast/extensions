@@ -32,10 +32,14 @@ import { useState } from "react";
 import { useStateSearch } from "./hooks";
 import { getIcon, getStateValue } from "./utils";
 
-export function StatesList(props: { domain: string; deviceClass?: string | undefined }): JSX.Element {
+export function StatesList(props: {
+  domain: string;
+  deviceClass?: string | undefined;
+  entitiesState?: State[] | undefined;
+}): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
-  const { states } = useStateSearch(searchText, props.domain, props.deviceClass, allStates);
+  const { states } = useStateSearch(searchText, props.domain, props.deviceClass, props.entitiesState ?? allStates);
 
   if (error) {
     showToast({
