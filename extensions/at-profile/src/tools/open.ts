@@ -1,5 +1,6 @@
 import { open } from "@raycast/api";
 import { getAllSites } from "../sites";
+import { showFailureToast } from "@raycast/utils";
 
 type Input = {
   /**
@@ -34,16 +35,17 @@ type Input = {
 
 const tool = async (input: Input) => {
   const { profile, site } = input;
-
   const allSites = await getAllSites();
-  const enabledSites = allSites.filter((s) => s.value === site);
-  const selectedSite = enabledSites.find((s) => s.value === site);
+  const selectedSite = allSites.find((s) => s.value === site);
   if (!selectedSite) {
-    throw new Error(`Site "${site}" not found or not enabled`);
+    showFailureToast(`Site "${site}" not found or not enabled`, { title: "Failed to find site" });
+    return;
   }
   const url = selectedSite.urlTemplate.replace("{profile}", profile);
-
-  await open(url);
+  try {
+    await open(url);
+  } catch (error) {
+    showFailureToast(`Failed to open ${site} profile: ${profile}`, { title: "Failed to open URL" });
+  }
 };
-
 export default tool;
