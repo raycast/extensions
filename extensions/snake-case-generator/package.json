@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "replace",
+      "name": "generate-snake-case",
       "title": "Generate Snake Case String",
       "subtitle": "Remove all space and replace by Snake case and prepend some gitflow prefix",
       "description": "Useful when creating a git branch from a task title. The result will be a Snake Case String",
