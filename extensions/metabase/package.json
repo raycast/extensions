@@ -26,14 +26,36 @@
       "name": "get-databases",
       "title": "Get Databases",
       "description": "Search the saved databases in Metabase"
-    }
-  ,
+    },
+    {
+      "name": "get-questions",
+      "title": "Get Questions",
+      "description": "Get the saved Metabase questions"
+    },
     {
       "name": "run-query",
       "title": "Run Query",
-      "description": "Run query against a database"
+      "description": "Run a native SQL query against a database"
+    },
+    {
+      "name": "run-question",
+      "title": "Run Question",
+      "description": "Get latest saved question results"
     }
-      ],
+  ],
+  "ai": {
+    "instructions": "When fetching data from Metabase, always retrieve the saved questions and execute them if they match the requested information. If they do not match, get the databases and run a native SQL query based on their metadata. You can retrieve both the saved questions and the databases in parallel so you can make the best decision.",
+    "evals": [
+      {
+        "input": "@metabase How many users do I have?",
+        "expected": []
+      },
+      {
+        "input": "@metabase What databases do I have connected?",
+        "expected": []
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "instanceUrl",
