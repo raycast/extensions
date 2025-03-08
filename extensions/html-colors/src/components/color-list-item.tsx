@@ -1,4 +1,4 @@
-import { List, Icon} from "@raycast/api";
+import { List, Icon } from "@raycast/api";
 import { useMemo } from "react";
 import { ColorWithCategories } from "../types";
 import { getCategoryIcons } from "../utils/color-utils";

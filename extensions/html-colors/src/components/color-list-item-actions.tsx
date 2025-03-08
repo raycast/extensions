@@ -37,6 +37,7 @@ export function ColorListItemActions({
     <ActionPanel>
       <ActionPanel.Section>
         <Action title="Copy Hex to Clipboard" onAction={handleHexCopy} />
+        {/* eslint-disable-next-line @raycast/prefer-title-case -- RGB is an abbreviation */}
         <Action title="Copy RGB to Clipboard" onAction={handleRgbCopy} />
         <Action title="Copy Name to Clipboard" onAction={handleNameCopy} />
       </ActionPanel.Section>
