@@ -13,7 +13,7 @@ export default function Command() {
       filtering={false} // We handle filtering manually
     >
       {error ? (
-        <List.EmptyView title="Error" description={error} />
+        <List.EmptyView title="Error" description={error.toString()} />
       ) : (
         searchResults.map((app, index) => <AppListItem key={index} app={app} />)
       )}

@@ -1,26 +1,19 @@
 import { useEffect, useState } from "react";
-import { AppItem, parseReadmeContent } from "../utils/parseReadme";
+import { useCachedPromise } from "@raycast/utils";
+import { AppItem, fetchReadmeContent } from "../utils/parseReadme";
+
+function useReadmeContent() {
+  return useCachedPromise(async () => {
+    console.log("fetching readme content");
+    return fetchReadmeContent();
+  }, []);
+}
 
 export function useAppSearch() {
   const [searchResults, setSearchResults] = useState<AppItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [allApps, setAllApps] = useState<AppItem[]>([]);
   const [searchText, setSearchText] = useState("");
-  const [error, setError] = useState<string | null>(null);
-
-  // Load apps from README
-  useEffect(() => {
-    try {
-      const apps = parseReadmeContent();
-      setAllApps(apps);
-      setSearchResults(apps);
-      setIsLoading(false);
-    } catch (err) {
-      setError("Failed to load apps data");
-      setIsLoading(false);
-      console.error(err);
-    }
-  }, []);
+  
+  const { data: allApps = [], isLoading, error } = useReadmeContent();
 
   // Filter apps based on search text
   useEffect(() => {

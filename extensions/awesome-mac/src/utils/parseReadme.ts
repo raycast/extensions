@@ -1,5 +1,4 @@
-import fs from "fs";
-import path from "path";
+import https from "https";
 
 export interface AppItem {
   name: string;
@@ -12,12 +11,39 @@ export interface AppItem {
   category: string;
 }
 
-export function parseReadmeContent(): AppItem[] {
+export async function fetchReadmeContent(): Promise<AppItem[]> {
   try {
-    const readmeContent = fs.readFileSync(
-      path.join("/Users/wei/source/raycast/extensions/extensions/awesome-mac/src/README.md"),
-      "utf-8",
-    );
+    const readmeContent = await new Promise<string>((resolve, reject) => {
+      const req = https.get(
+        "https://raw.githubusercontent.com/jaywcjlove/awesome-mac/master/README.md",
+        {
+          headers: {
+            Accept: "text/plain",
+            "User-Agent": "Raycast-Extension",
+          },
+        },
+        (res) => {
+          if (res.statusCode !== 200) {
+            reject(new Error(`HTTP error! Status: ${res.statusCode}`));
+            return;
+          }
+
+          let data = "";
+          res.on("data", (chunk) => {
+            data += chunk;
+          });
+          res.on("end", () => {
+            resolve(data);
+          });
+        },
+      );
+
+      req.on("error", (error) => {
+        reject(error);
+      });
+
+      req.end();
+    });
 
     const apps: AppItem[] = [];
     let currentCategory = "";
