@@ -230,7 +230,11 @@ export default function ListAlarms() {
 
   // Handle opening the create alarm command
   const handleCreateAlarm = () => {
-    open("raycast://extensions/codista/alarms/create-alarm");
+    try {
+      await launchCommand({ name: "create-alarm" });
+    } catch (error) {
+      showFailureToast("Failed to open Create Alarm", String(error));
+    }
   };
 
   return (
