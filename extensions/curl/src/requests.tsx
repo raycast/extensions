@@ -83,9 +83,7 @@ export default function Requests() {
 
         const result = { method: payload.method, response };
 
-        push(
-          <ResultView result={result as never} curl={generatedCurl} jsonPathResult={jsonPathQueryResult as never} />,
-        );
+        push(<ResultView result={result as never} curl={generatedCurl} jsonPathResult={jsonPathQueryResult} />);
       })
       .catch((err) => {
         showToast({
