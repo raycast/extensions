@@ -37,7 +37,7 @@ A Raycast extension that helps you quickly look up HTML colors by name. Perfect 
 ## Usage
 
 1. Open Raycast
-2. Type "HTML Color" to find the extension
+2. Type "Search HTML Colors" to find the extension
 3. Start typing to search for colors:
    - Use color names (e.g., "blue", "crimson")
    - Use hex codes (e.g., "#FF0000")
