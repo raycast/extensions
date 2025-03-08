@@ -67,10 +67,8 @@ const runInstallScript = async (): Promise<void> => {
     });
   } catch (error) {
     console.error("Failed to run install script:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Setup failed",
-      message: error instanceof Error ? error.message : "Unknown error",
+    await showFailureToast(error, {
+      title: "Setup failed"
     });
   }
 };
