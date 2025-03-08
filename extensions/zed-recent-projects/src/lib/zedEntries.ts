@@ -1,7 +1,7 @@
 import fs from "fs";
 import { homedir } from "os";
 import { useSQL } from "@raycast/utils";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { getZedDbName } from "./zed";
 
 const preferences = getPreferenceValues<Preferences>();
@@ -46,6 +46,14 @@ interface ZedRecentWorkspaces {
   error?: Error;
 }
 
+async function showFailureToast(error: Error, title = "Error processing workspace") {
+  await showToast({
+    style: Toast.Style.Failure,
+    title,
+    message: error.message,
+  });
+}
+
 function processLocalWorkspace(workspace: LocalWorkspace): ZedEntry {
   const pathStart = workspace.local_paths.indexOf("/");
   const path = workspace.local_paths.substring(pathStart);
@@ -56,17 +64,27 @@ function processLocalWorkspace(workspace: LocalWorkspace): ZedEntry {
   };
 }
 
-function processRemoteWorkspace(workspace: RemoteWorkspace): ZedEntry {
-  const path = JSON.parse(workspace.remote_paths)[0].replace(/^\/+/, "");
-  const uri = `ssh://${workspace.user ? workspace.user + "@" : ""}${workspace.host}${
-    workspace.port ? ":" + workspace.port : ""
-  }/${path.replace(/\/$/, "")}`;
-  return {
-    path,
-    uri,
-    lastOpened: new Date(workspace.timestamp).getTime(),
-    host: workspace.host,
-  };
+function processRemoteWorkspace(workspace: RemoteWorkspace): ZedEntry | undefined {
+  try {
+    const paths = JSON.parse(workspace.remote_paths);
+    if (!Array.isArray(paths) || paths.length === 0) {
+      throw new Error("Invalid remote paths format");
+    }
+    const path = paths[0].replace(/^\/+/, "");
+    const uri = `ssh://${workspace.user ? workspace.user + "@" : ""}${workspace.host}${
+      workspace.port ? ":" + workspace.port : ""
+    }/${path.replace(/\/$/, "")}`;
+
+    return {
+      path,
+      uri,
+      lastOpened: new Date(workspace.timestamp).getTime(),
+      host: workspace.host,
+    };
+  } catch (error) {
+    showFailureToast(error instanceof Error ? error : new Error(String(error)));
+    return undefined;
+  }
 }
 
 export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
@@ -92,8 +110,7 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
       port
     FROM workspaces
     LEFT JOIN ssh_projects ON ssh_project_id = workspaces.ssh_project_id
-    WHERE (local_paths IS NOT NULL AND paths IS NULL)
-      OR (local_paths IS NULL AND paths IS NOT NULL)
+    WHERE local_paths IS NOT NULL OR paths IS NOT NULL
     ORDER BY timestamp DESC
   `;
 
