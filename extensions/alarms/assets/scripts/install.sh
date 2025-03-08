@@ -109,7 +109,7 @@ if crontab -l 2>/dev/null | grep "RAYCAST ALARMS" >/dev/null; then
   print_info "Crontab marker already exists - preserving your existing configuration"
 else
   print_info "Adding crontab marker for alarm management"
-  (crontab -l 2>/dev/null; echo "#--- RAYCAST ALARMS ---#"; echo "#--- DO NOT EDIT THIS SECTION MANUALLY ---#") | crontab -
+  (crontab -l 2>/dev/null; echo "#--- RAYCAST ALARMS ---#"; echo "#--- DO NOT EDIT THIS SECTION MANUALLY ---#") | crontab - || { print_error "Failed to update crontab"; exit 1; }
   print_success "Crontab configured for alarm management"
 fi
 
