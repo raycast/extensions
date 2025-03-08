@@ -51,8 +51,7 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
     searchBarPlaceholder: "Search Google Maps...",
     searchText,
     onSearchTextChange: setSearchText,
-    isLoading,
-    throttle: true,
+    isLoading
   };
 
   if (!searchText) {
