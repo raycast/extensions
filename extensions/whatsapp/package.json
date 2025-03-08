@@ -6,7 +6,8 @@
   "icon": "whatsapp.png",
   "author": "vimtor",
   "contributors": [
-    "xmok"
+    "xmok",
+    "pankaj_gurbani"
   ],
   "license": "MIT",
   "commands": [
@@ -32,22 +33,122 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "add-new-whatsapp-chat",
+      "title": "Add new WhatsApp chat",
+      "description": "Adds a new WhatsApp chat."
+    },
+    {
+      "name": "add-whatsapp-group",
+      "title": "Add WhatsApp Group",
+      "description": "Adds an existing WhatsApp group."
+    },
+    {
+      "name": "open-chat",
+      "title": "Open Chat",
+      "description": "Opens a chat in WhatsApp"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@whatsapp Add John Smith with phone number +15551234567",
+        "mocks": {
+          "add-new-whatsapp-chat": "undefined"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "add-new-whatsapp-chat",
+              "arguments": {
+                "name": "John Smith",
+                "phone": "+15551234567"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Tells that John Smith has been added"
+          }
+        ]
+      },
+      {
+        "input": "@whatsapp Add WhatsApp group Raycasters with code AbcdefgHijklmnop",
+        "mocks": {
+          "add-whatsapp-group": "undefined"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "add-whatsapp-group",
+              "arguments": {
+                "name": "Raycasters",
+                "groupCode": "AbcdefgHijklmnop"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Tells that the WhatsApp group Raycasters has been added"
+          }
+        ]
+      },
+      {
+        "input": "@whatsapp Open chat with John",
+        "mocks": {
+          "open-chat": "undefined"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-chat",
+              "arguments": {
+                "name": "John"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Tells that the chat with John has been opened"
+          }
+        ]
+      },
+      {
+        "input": "@whatsapp Send a message to John: Hey John, how are you?",
+        "mocks": {
+          "open-chat": "undefined"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-chat",
+              "arguments": {
+                "name": "John",
+                "message": "Hey John, how are you?"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Tells that the message has been sent to John"
+          }
+        ]
+      }
+    ]
+  },
   "categories": [
     "Applications",
     "Communication",
     "Productivity"
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0",
     "fromnow": "^3.0.1",
     "nanoid": "^4.0.1",
     "phone": "^3.1.35"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "^20.8.10",
     "@types/react": "^18.3.3",
-    "@raycast/eslint-config": "^1.0.8",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
     "react": "^18.2.0",
