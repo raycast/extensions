@@ -7,7 +7,6 @@ export type Color = {
   rgb: string;
   category: "basic" | "extended";
   format: "hex" | "rgb" | "name";
-  categories?: ("basic" | "extended")[];
   id: string;
 };
 
