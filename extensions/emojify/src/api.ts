@@ -18,23 +18,39 @@ interface OpenAIConfig {
   model: string;
 }
 
-async function callOpenAI(prompt: string, config: OpenAIConfig): Promise<string> {
+interface PromptConfig {
+  systemMessage: string;
+  userMessageTemplate: string;
+}
+
+const defaultPromptConfig: PromptConfig = {
+  systemMessage:
+    "You are a helpful assistant that adds appropriate emojis to text based on context. Add emojis that enhance the meaning, but don't overdo it. Place emojis in natural positions within the text.",
+  userMessageTemplate: "Add appropriate emojis to enhance this text: {text}. ONLY return the emojified text.",
+};
+
+async function callOpenAI(
+  text: string,
+  config: OpenAIConfig,
+  promptConfig: PromptConfig = defaultPromptConfig,
+): Promise<string> {
   const client = new OpenAI({
     baseURL: config.baseURL,
     apiKey: config.apiKey,
   });
+
+  const userMessage = promptConfig.userMessageTemplate.replace("{text}", text);
 
   const response = await client.chat.completions.create({
     model: config.model,
     messages: [
       {
         role: "system",
-        content:
-          "You are a helpful assistant that adds appropriate emojis to text based on context. Add emojis that enhance the meaning, but don't overdo it. Place emojis in natural positions within the text. ONLY return the emojified text.",
+        content: promptConfig.systemMessage,
       },
       {
         role: "user",
-        content: `Add appropriate emojis to enhance this text: ${prompt}`,
+        content: userMessage,
       },
     ],
     temperature: 0.7,
