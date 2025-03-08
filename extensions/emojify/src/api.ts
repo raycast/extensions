@@ -12,6 +12,43 @@ interface EmojifyResponse {
   timestamp: number;
 }
 
+interface OpenAIConfig {
+  baseURL: string;
+  apiKey: string;
+  model: string;
+}
+
+async function callOpenAI(prompt: string, config: OpenAIConfig): Promise<string> {
+  const client = new OpenAI({
+    baseURL: config.baseURL,
+    apiKey: config.apiKey,
+  });
+
+  const response = await client.chat.completions.create({
+    model: config.model,
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are a helpful assistant that adds appropriate emojis to text based on context. Add emojis that enhance the meaning, but don't overdo it. Place emojis in natural positions within the text. ONLY return the emojified text.",
+      },
+      {
+        role: "user",
+        content: `Add appropriate emojis to enhance this text: ${prompt}`,
+      },
+    ],
+    temperature: 0.7,
+    max_tokens: 1000,
+  });
+
+  const content = response.choices[0].message.content?.trim();
+  if (!content) {
+    throw new Error("No content received from API");
+  }
+
+  return content;
+}
+
 export async function emojifyText(text: string): Promise<EmojifyResponse> {
   const preferences = getPreferenceValues<Preferences>();
 
@@ -20,39 +57,13 @@ export async function emojifyText(text: string): Promise<EmojifyResponse> {
   }
 
   try {
-    const baseURL = preferences.baseURL || "https://api.openai.com";
-    const model = preferences.model || "gpt-3.5-turbo";
-
-    // Initialize the OpenAI client
-    const client = new OpenAI({
-      baseURL: baseURL,
+    const config: OpenAIConfig = {
+      baseURL: preferences.baseURL || "https://api.openai.com",
       apiKey: preferences.apiKey,
-    });
+      model: preferences.model || "gpt-3.5-turbo",
+    };
 
-    // Create the chat completion request
-    const response = await client.chat.completions.create({
-      model: model,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a helpful assistant that adds appropriate emojis to text based on context. Add emojis that enhance the meaning, but don't overdo it. Place emojis in natural positions within the text. ONLY return the emojified text.",
-        },
-        {
-          role: "user",
-          content: `Add appropriate emojis to enhance this text: ${text}`,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 1000,
-    });
-
-    // Extract the emojified text from the response
-    const emojifiedText = response.choices[0].message.content?.trim() || "";
-
-    if (!emojifiedText) {
-      throw new Error("No content received from API");
-    }
+    const emojifiedText = await callOpenAI(text, config);
 
     return {
       text: emojifiedText,
