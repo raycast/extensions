@@ -5,7 +5,7 @@ alwaysApply: false
 ---
 # Purpose of the extension
 
-- this extension helps user quickly look up HTML colors by name
+- this extension helps users quickly look up HTML colors by name
 - you don't need to remember the exact name of the color, search can be fuzzy with some amount of typos
 
 ## UI
