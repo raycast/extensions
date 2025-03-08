@@ -21,6 +21,19 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-databases",
+      "title": "Get Databases",
+      "description": "Search the saved databases in Metabase"
+    }
+  ,
+    {
+      "name": "run-query",
+      "title": "Run Query",
+      "description": "Run query against a database"
+    }
+      ],
   "preferences": [
     {
       "name": "instanceUrl",
@@ -41,7 +54,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.90.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
