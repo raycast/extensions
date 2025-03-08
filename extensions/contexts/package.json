@@ -1,0 +1,215 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "contexts",
+  "title": "Contexts",
+  "description": "Contexts lets you manage and access large text repositories for AI interactions. Create, edit, and organize contextual information about companies, products, or documentation that can be referenced during AI conversations. Seamlessly handle extensive context without cluttering system instructions, allowing for more efficient and focused AI interactions.",
+  "icon": "iconic.png",
+  "author": "marcmagn1",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-new-context",
+      "title": "Create New Context",
+      "description": "Create a new text-based context that can be referenced in AI conversations. Add documentation, company information, or any relevant content that helps frame future AI interactions.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "Context name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "append-to-context",
+      "title": "Append to Context",
+      "description": "Add new text content to an existing context file. Append information while preserving all previously stored content.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text to append",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-contexts",
+      "title": "List Contexts",
+      "description": "List all available context files that can be accessed."
+    },
+    {
+      "name": "get-context",
+      "title": "Get Context",
+      "description": "Retrieve the content of a saved context file. Pass the context name to read its content."
+    },
+    {
+      "name": "append-to-context",
+      "title": "Append to Context",
+      "description": "Append new content to an existing context file."
+    },
+    {
+      "name": "create-context",
+      "title": "Create Context",
+      "description": "Create a new context file with optional initial content."
+    },
+    {
+      "name": "delete-context",
+      "title": "Delete Context",
+      "description": "Delete an existing context file."
+    },
+    {
+      "name": "rename-context",
+      "title": "Rename Context",
+      "description": "Rename an existing context file to a new name."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "ai": {
+    "instructions": "When a user asks for a specific context, always list available contexts first to find the closest match. Only attempt to get-context, append-to-context, delete-context, or rename-context after confirming the exact name from the list-contexts result. When creating a new context, check if a similar name already exists.",
+    "evals": [
+      {
+        "input": "@contexts Do I have any contexts created?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-contexts",
+              "arguments": {}
+            }
+          }
+        ],
+        "mocks": {
+          "list-contexts": []
+        }
+      },
+      {
+        "input": "@contexts What do I have in my watchlist context?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-contexts",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-context",
+              "arguments": {
+                "name": "watchlist"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "list-contexts": [
+            "watchlist"
+          ],
+          "get-context": "Silo\nPeaky Blinders"
+        }
+      },
+      {
+        "input": "@contexts create a new context named current_research",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-contexts",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "name": "create-context",
+              "arguments": {
+                "name": "current_research"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "list-contexts": [
+            "watchlist"
+          ],
+          "create-context": "Successfully created context 'current_research'"
+        }
+      },
+      {
+        "input": "@contexts add Dexter to my watchlist context",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-contexts",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "name": "append-to-context",
+              "arguments": {
+                "name": "watchlist",
+                "content": "Dexter"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "list-contexts": [
+            "watchlist"
+          ],
+          "append-to-context": "Successfully appended to context 'watchlist'"
+        }
+      },
+      {
+        "input": "@contexts rename watchlist to my_favorite_shows",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-contexts",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "name": "rename-context",
+              "arguments": {
+                "oldName": "watchlist",
+                "newName": "my_favorite_shows"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "list-contexts": [
+            "watchlist"
+          ],
+          "rename-context": "Successfully renamed context 'watchlist' to 'my_favorite_shows'"
+        }
+      }
+    ]
+  }
+}
