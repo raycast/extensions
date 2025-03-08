@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.0] - 2025-03-06
+## [1.1.0] - {PR_MERGE_DATE}
 ### Added
 - Comprehensive test suite for integration and component tests
 - New publishing checklist for Raycast Store compliance
