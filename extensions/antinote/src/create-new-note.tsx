@@ -1,17 +1,14 @@
-import { closeMainWindow } from "@raycast/api";
+import { closeMainWindow, LaunchProps } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 
-export default async function main() {
+export default async function Command(props: LaunchProps<{ arguments: { content: string } }>) {
+  console.log(props.arguments.content);
   try {
     await runAppleScript(
       `tell application "Antinote"
         activate
-        tell application "System Events"
-          tell application process "Antinote"
-            click menu item "create new note" of menu "file" of menu bar 1
-            set frontmost to true
-          end tell
-        end tell
+        delay 0.3
+        open location "antinote://x-callback-url/createNote?content=${props.arguments.content}"
       end tell`,
     );
 

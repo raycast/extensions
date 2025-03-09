@@ -1,26 +1,16 @@
-import { closeMainWindow, showHUD } from "@raycast/api";
+import { closeMainWindow } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 export default async function main() {
   try {
-    const result = await runAppleScript(`
+    await runAppleScript(`
       tell application "Antinote"
         activate
-        tell application "System Events"
-          tell application process "Antinote"
-            try
-              click menu item "pin antinote to top" of menu "window" of menu bar 1
-              return "pinned"
-            on error
-              click menu item "unpin from top" of menu "window" of menu bar 1
-              return "unpinned"
-            end try
-          end tell
-        end tell
+        delay 0.3
+        open location "antinote://x-callback-url/togglePin"
       end tell
     `);
 
-    await showHUD(result == "pinned" ? "Pinned to top" : "Unpinned from top");
     await closeMainWindow({ clearRootSearch: true });
   } catch (error) {
     await showFailureToast(error, { title: "Failed to pin / unpin Antinote window" });

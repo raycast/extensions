@@ -15,7 +15,15 @@
       "title": "Create New Note",
       "subtitle": "Antinote",
       "description": "Creates a new note",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "content",
+          "placeholder": "Content...",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "search-notes",
@@ -31,7 +39,7 @@
       "description": "Pins / unpins Antinote window",
       "mode": "no-view"
     }
-  ],
+      ],
   "dependencies": {
     "@raycast/api": "^1.93.1",
     "@raycast/utils": "^1.17.0"
