@@ -5,6 +5,41 @@
     "node": true
   },
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
-  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"]
+  "plugins": ["@typescript-eslint", "import-x", "react"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:import-x/recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended-legacy",
+    "prettier"
+  ],
+  "rules": {
+    "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+    "@typescript-eslint/consistent-type-imports": "error",
+    "arrow-body-style": ["error", "as-needed"],
+    "import-x/no-unresolved": "off",
+    "import-x/order": [
+      "error",
+      {
+        "alphabetize": {
+          "caseInsensitive": true,
+          "order": "asc"
+        },
+        "groups": [["builtin", "external"], "internal", ["parent", "sibling"], "type"],
+        "newlines-between": "always"
+      }
+    ],
+    "no-console": "warn",
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-sort-props": ["error", { "callbacksLast": true, "reservedFirst": true, "shorthandFirst": true }],
+    "react/self-closing-comp": "error",
+    "sort-imports": ["error", { "ignoreDeclarationSort": true }],
+    "sort-keys": "error"
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
 }
