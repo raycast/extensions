@@ -118,7 +118,7 @@ fi
 COMPILED_SCRIPT="$CONFIG_DIR/scripts/show-alarm-popup.scpt"
 print_step "Setting up notification system..."
 if [ ! -f "$COMPILED_SCRIPT" ]; then
-  osacompile -o "$COMPILED_SCRIPT" "$CONFIG_DIR/scripts/show-alarm-popup.applescript"
+  osacompile -o "$COMPILED_SCRIPT" "$CONFIG_DIR/scripts/show-alarm-popup.applescript" || { print_error "Failed to compile notification dialog"; exit 1; }
   print_success "Notification dialog compiled successfully"
 else
   print_info "Using existing notification dialog script"
