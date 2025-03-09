@@ -130,10 +130,7 @@ export function useDiscord() {
         await Discord.sendSoundboardSound(item, currentVoiceChannelId);
         await playSound(item.id);
       } catch (err) {
-        const title =
-          close && typeof err === "object" && err !== null && "message" in err
-            ? String(err?.message)
-            : "Failed to play sound";
+        const title = close && err instanceof Error ? err?.message : "Failed to play sound";
         await showFailureToast(err, {
           title,
         });

@@ -13,6 +13,7 @@
     {
       "name": "open-soundboard",
       "title": "Open Soundboard",
+      "subtitle": "Discord",
       "description": "Browse and play sounds from your Discord Soundboard",
       "mode": "view"
     }
