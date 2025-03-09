@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  Color,
   Icon,
   List,
   LocalStorage,
@@ -12,26 +11,18 @@ import {
   showToast,
   getPreferenceValues,
   getSelectedFinderItems,
-  Keyboard,
   showHUD,
   confirmAlert,
-  open,
 } from "@raycast/api";
 
 import { usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
-import { runAppleScript } from "run-applescript";
 import fs from "fs-extra";
 import path from "path";
 
 import { searchSpotlight } from "../common/search-spotlight";
 import { SpotlightSearchPreferences, SpotlightSearchResult } from "../common/types";
-import {
-  folderName,
-  enclosingFolderName,
-  lastUsedSort,
-  fixDoubleConcat,
-} from "../common/utils";
+import { folderName, lastUsedSort, fixDoubleConcat } from "../common/utils";
 
 // Interface for recent folders
 interface RecentFolder extends SpotlightSearchResult {
@@ -67,7 +58,7 @@ export default function Command() {
         console.error("Error loading user preferences:", error);
       }
     }
-    
+
     loadUserPreferences();
   }, []);
 
@@ -80,7 +71,7 @@ export default function Command() {
         console.error("Error saving detail preference:", error);
       }
     }
-    
+
     // Only save after initial load
     if (hasCheckedPreferences) {
       saveDetailPreference();
@@ -102,9 +93,9 @@ export default function Command() {
     async function getSelectedFinderFiles() {
       try {
         const selectedItems = await getSelectedFinderItems();
-        
+
         if (selectedItems && selectedItems.length > 0) {
-          const filePaths = selectedItems.map(item => item.path);
+          const filePaths = selectedItems.map((item) => item.path);
           setSelectedFiles(filePaths);
           setIsLoading(false);
         } else {
@@ -132,17 +123,16 @@ export default function Command() {
   // Load recent folders from storage
   async function loadRecentFolders() {
     try {
-      const storedFolders = await LocalStorage.getItem(`${environment.extensionName}-recent-folders`);
-      
+      const storedFolders = await LocalStorage.getItem<string>(`${environment.extensionName}-recent-folders`);
       if (storedFolders) {
-        const parsedFolders = JSON.parse(storedFolders as string);
+        const parsedFolders = JSON.parse(storedFolders) as Record<string, unknown>[];
         // Convert string dates back to Date objects
-        const foldersWithDates = parsedFolders.map((folder: any) => ({
+        const foldersWithDates = parsedFolders.map((folder: Record<string, unknown>) => ({
           ...folder,
-          lastUsed: new Date(folder.lastUsed),
-          kMDItemLastUsedDate: folder.kMDItemLastUsedDate ? new Date(folder.kMDItemLastUsedDate) : undefined,
-          kMDItemContentModificationDate: folder.kMDItemContentModificationDate ? new Date(folder.kMDItemContentModificationDate) : undefined,
-          kMDItemFSCreationDate: folder.kMDItemFSCreationDate ? new Date(folder.kMDItemFSCreationDate) : undefined,
+          lastUsed: new Date(folder.lastUsed as string),
+          kMDItemFSCreationDate: new Date(folder.kMDItemFSCreationDate as string),
+          kMDItemContentModificationDate: new Date(folder.kMDItemContentModificationDate as string),
+          kMDItemLastUsedDate: new Date(folder.kMDItemLastUsedDate as string),
         }));
         setRecentFolders(foldersWithDates);
       }
@@ -169,28 +159,28 @@ export default function Command() {
       console.error(`Cannot add non-existent folder to recent folders: ${folder.path}`);
       return;
     }
-    
+
     const recentFolder: RecentFolder = {
       ...folder,
       lastUsed: new Date(),
     };
 
     // Remove if already exists
-    const updatedFolders = recentFolders.filter(f => f.path !== folder.path);
-    
+    const updatedFolders = recentFolders.filter((f) => f.path !== folder.path);
+
     // Add to beginning of array
     const newRecentFolders = [recentFolder, ...updatedFolders].slice(0, maxRecentFolders);
-    
+
     setRecentFolders(newRecentFolders);
     saveRecentFolders(newRecentFolders);
   }
 
   // Remove folder from recent folders
   async function removeFromRecentFolders(folderPath: string) {
-    const updatedFolders = recentFolders.filter(f => f.path !== folderPath);
+    const updatedFolders = recentFolders.filter((f) => f.path !== folderPath);
     setRecentFolders(updatedFolders);
     await saveRecentFolders(updatedFolders);
-    
+
     await showToast({
       style: Toast.Style.Success,
       title: "Removed from Recent Folders",
@@ -245,7 +235,7 @@ export default function Command() {
   // Move files to selected folder
   async function moveFilesToFolder(destinationPath: string) {
     setIsLoading(true);
-    
+
     try {
       // Verify destination folder exists
       if (!fs.existsSync(destinationPath) || !fs.statSync(destinationPath).isDirectory()) {
@@ -254,12 +244,12 @@ export default function Command() {
 
       let successCount = 0;
       let failCount = 0;
-      
+
       for (const filePath of selectedFiles) {
         try {
           const fileName = path.basename(filePath);
           const destFilePath = path.join(destinationPath, fileName);
-          
+
           // Check if file already exists at destination
           if (fs.existsSync(destFilePath)) {
             const overwrite = await confirmAlert({
@@ -271,14 +261,14 @@ export default function Command() {
               failCount++;
               continue;
             }
-            
+
             if (filePath === destFilePath) {
               await showHUD("The source and destination file are the same");
               failCount++;
               continue;
             }
           }
-          
+
           // Move the file
           await fs.move(filePath, destFilePath, { overwrite: true });
           successCount++;
@@ -287,11 +277,11 @@ export default function Command() {
           failCount++;
         }
       }
-      
+
       // Update recent folders with this destination
-      const destinationFolder = folders.find(f => f.path === destinationPath) || 
-                               recentFolders.find(f => f.path === destinationPath);
-      
+      const destinationFolder =
+        folders.find((f) => f.path === destinationPath) || recentFolders.find((f) => f.path === destinationPath);
+
       if (destinationFolder) {
         addToRecentFolders(destinationFolder);
       } else if (destinationPath === currentPath) {
@@ -309,11 +299,11 @@ export default function Command() {
             kMDItemLastUsedDate: new Date(),
             kMDItemUseCount: 0,
           };
-          
+
           addToRecentFolders(navFolder);
         }
       }
-      
+
       // Show success/failure toast
       if (successCount > 0) {
         showToast({
@@ -321,7 +311,7 @@ export default function Command() {
           message: failCount > 0 ? `Failed to move ${failCount} file${failCount !== 1 ? "s" : ""}` : "",
           style: failCount > 0 ? Toast.Style.Failure : Toast.Style.Success,
         });
-        
+
         // Close the window after successful move
         popToRoot({ clearSearchBar: true });
         closeMainWindow({ clearRootSearch: true });
@@ -340,14 +330,14 @@ export default function Command() {
         style: Toast.Style.Failure,
       });
     }
-    
+
     setIsLoading(false);
   }
 
   // Copy files to selected folder
   async function copyFilesToFolder(destinationPath: string) {
     setIsLoading(true);
-    
+
     try {
       // Verify destination folder exists
       if (!fs.existsSync(destinationPath) || !fs.statSync(destinationPath).isDirectory()) {
@@ -356,12 +346,12 @@ export default function Command() {
 
       let successCount = 0;
       let failCount = 0;
-      
+
       for (const filePath of selectedFiles) {
         try {
           const fileName = path.basename(filePath);
           const destFilePath = path.join(destinationPath, fileName);
-          
+
           // Check if file already exists at destination
           if (fs.existsSync(destFilePath)) {
             const overwrite = await confirmAlert({
@@ -373,14 +363,14 @@ export default function Command() {
               failCount++;
               continue;
             }
-            
+
             if (filePath === destFilePath) {
               await showHUD("The source and destination file are the same");
               failCount++;
               continue;
             }
           }
-          
+
           // Copy the file
           await fs.copy(filePath, destFilePath, { overwrite: true });
           successCount++;
@@ -389,11 +379,11 @@ export default function Command() {
           failCount++;
         }
       }
-      
+
       // Update recent folders with this destination
-      const destinationFolder = folders.find(f => f.path === destinationPath) || 
-                               recentFolders.find(f => f.path === destinationPath);
-      
+      const destinationFolder =
+        folders.find((f) => f.path === destinationPath) || recentFolders.find((f) => f.path === destinationPath);
+
       if (destinationFolder) {
         addToRecentFolders(destinationFolder);
       } else if (destinationPath === currentPath) {
@@ -411,11 +401,11 @@ export default function Command() {
             kMDItemLastUsedDate: new Date(),
             kMDItemUseCount: 0,
           };
-          
+
           addToRecentFolders(navFolder);
         }
       }
-      
+
       // Show success/failure toast
       if (successCount > 0) {
         showToast({
@@ -423,7 +413,7 @@ export default function Command() {
           message: failCount > 0 ? `Failed to copy ${failCount} file${failCount !== 1 ? "s" : ""}` : "",
           style: failCount > 0 ? Toast.Style.Failure : Toast.Style.Success,
         });
-        
+
         // Close the window after successful copy
         popToRoot({ clearSearchBar: true });
         closeMainWindow({ clearRootSearch: true });
@@ -442,7 +432,7 @@ export default function Command() {
         style: Toast.Style.Failure,
       });
     }
-    
+
     setIsLoading(false);
   }
 
@@ -450,18 +440,18 @@ export default function Command() {
   function navigateToFolder(folderPath: string) {
     setCurrentPath(folderPath);
     setSearchText("");
-    
+
     // List the contents of the folder
     try {
       const contents = fs.readdirSync(folderPath);
       const folderContents: SpotlightSearchResult[] = [];
-      
+
       for (const item of contents) {
         const itemPath = path.join(folderPath, item);
-        
+
         try {
           const stats = fs.statSync(itemPath);
-          
+
           if (stats.isDirectory()) {
             folderContents.push({
               path: itemPath,
@@ -478,7 +468,7 @@ export default function Command() {
           console.error(`Error reading item ${itemPath}:`, error);
         }
       }
-      
+
       setFolders(folderContents.sort((a, b) => a.kMDItemFSName.localeCompare(b.kMDItemFSName)));
       // Select the first folder if available
       if (folderContents.length > 0) {
@@ -533,7 +523,7 @@ export default function Command() {
           ))}
         </List.Section>
       )}
-      
+
       {currentPath && (
         <List.Section title="Navigation">
           <List.Item
@@ -552,10 +542,7 @@ export default function Command() {
             icon={Icon.Folder}
             actions={
               <ActionPanel>
-                <Action
-                  title="Navigate to Folder"
-                  onAction={() => navigateToFolder(currentPath)}
-                />
+                <Action title="Navigate to Folder" onAction={() => navigateToFolder(currentPath)} />
                 <Action
                   title="Move Files Here"
                   shortcut={{ modifiers: ["cmd"], key: "return" }}
@@ -577,7 +564,7 @@ export default function Command() {
           />
         </List.Section>
       )}
-      
+
       {!searchText && recentFolders.length > 0 && (
         <List.Section title="Recent Folders">
           {recentFolders.map((folder) => (
@@ -588,10 +575,10 @@ export default function Command() {
               subtitle={folder.path}
               icon={Icon.Clock}
               accessories={[
-                { 
+                {
                   text: folder.lastUsed ? `Last used: ${folder.lastUsed.toLocaleDateString()}` : "",
                   tooltip: folder.lastUsed ? `Last used: ${folder.lastUsed.toLocaleString()}` : "",
-                }
+                },
               ]}
               detail={
                 <List.Item.Detail
@@ -624,10 +611,7 @@ export default function Command() {
               }
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Navigate to Folder"
-                    onAction={() => navigateToFolder(folder.path)}
-                  />
+                  <Action title="Navigate to Folder" onAction={() => navigateToFolder(folder.path)} />
                   <Action
                     title="Move Files Here"
                     shortcut={{ modifiers: ["cmd"], key: "return" }}
@@ -645,7 +629,7 @@ export default function Command() {
                     onAction={() => setIsShowingDetail(!isShowingDetail)}
                   />
                   <Action
-                    title="Remove this recent folder"
+                    title="Remove This Recent Folder"
                     icon={Icon.Trash}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                     onAction={() => removeFromRecentFolders(folder.path)}
@@ -656,8 +640,8 @@ export default function Command() {
           ))}
         </List.Section>
       )}
-      
-      <List.Section title={currentPath ? "Subfolders" : (searchText ? "Search Results" : "Search for a folder")}>
+
+      <List.Section title={currentPath ? "Subfolders" : searchText ? "Search Results" : "Search for a folder"}>
         {folders.map((folder) => (
           <List.Item
             key={folder.path}
@@ -666,14 +650,14 @@ export default function Command() {
             subtitle={folder.path}
             icon={Icon.Folder}
             accessories={[
-              { 
-                text: folder.kMDItemContentModificationDate 
-                  ? `Modified: ${folder.kMDItemContentModificationDate.toLocaleDateString()}` 
+              {
+                text: folder.kMDItemContentModificationDate
+                  ? `Modified: ${folder.kMDItemContentModificationDate.toLocaleDateString()}`
                   : "",
-                tooltip: folder.kMDItemContentModificationDate 
-                  ? `Modified: ${folder.kMDItemContentModificationDate.toLocaleString()}` 
+                tooltip: folder.kMDItemContentModificationDate
+                  ? `Modified: ${folder.kMDItemContentModificationDate.toLocaleString()}`
                   : "",
-              }
+              },
             ]}
             detail={
               <List.Item.Detail
@@ -706,10 +690,7 @@ export default function Command() {
             }
             actions={
               <ActionPanel>
-                <Action
-                  title="Navigate to Folder"
-                  onAction={() => navigateToFolder(folder.path)}
-                />
+                <Action title="Navigate to Folder" onAction={() => navigateToFolder(folder.path)} />
                 <Action
                   title="Move Files Here"
                   shortcut={{ modifiers: ["cmd"], key: "return" }}
@@ -739,4 +720,4 @@ export default function Command() {
       </List.Section>
     </List>
   );
-} 
+}

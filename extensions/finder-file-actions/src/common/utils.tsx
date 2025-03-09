@@ -1,21 +1,8 @@
-import fs from "fs";
-import path from "path";
-
-import {
-  Alert,
-  Icon,
-  closeMainWindow,
-  confirmAlert,
-  getPreferenceValues,
-  trash,
-  showToast,
-  popToRoot,
-} from "@raycast/api";
+import { Alert, Icon, closeMainWindow, confirmAlert, showToast, popToRoot } from "@raycast/api";
 
 import { runAppleScript } from "run-applescript";
-import * as yup from "yup";
 
-import { SpotlightSearchPreferences, SpotlightSearchResult } from "./types";
+import { SpotlightSearchResult } from "./types";
 
 const safeSearchScope = (searchScope: string | undefined) => {
   return searchScope === "" ? undefined : searchScope;

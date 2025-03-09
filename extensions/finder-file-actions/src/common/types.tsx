@@ -1,5 +1,3 @@
-import { Keyboard } from "@raycast/api";
-
 type SpotlightSearchPreferences = {
   maxResults: number;
   maxRecentFolders: string;
