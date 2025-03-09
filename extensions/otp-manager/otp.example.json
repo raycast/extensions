@@ -1,0 +1,6 @@
+[
+  "otpauth://totp/Google:user@example.com?secret=EXAMPLE_SECRET_GOOGLE123&algorithm=SHA1&digits=6&period=30&issuer=Google",
+  "otpauth://totp/GitHub:developer@example.com?secret=EXAMPLE_SECRET_GITHUB456&algorithm=SHA1&digits=6&period=30&issuer=GitHub",
+  "otpauth://totp/AWS:admin@example.com?secret=EXAMPLE_SECRET_AWS789&algorithm=SHA256&digits=6&period=30&issuer=AWS",
+  "otpauth://totp/Dropbox:user@example.com?secret=EXAMPLE_SECRET_DROPBOX012&algorithm=SHA512&digits=8&period=60&issuer=Dropbox"
+]
