@@ -5,6 +5,7 @@ export interface LinkdingBookmark {
   description?: string;
   website_title?: string;
   website_description?: string;
+  tag_names: string[];
 }
 
 export interface GetLinkdingBookmarkResponse {

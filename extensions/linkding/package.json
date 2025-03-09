@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "InteractiveNinja",
   "contributors": [
-    "xmok"
+    "xmok",
+    "jose-elias-alvarez"
   ],
   "categories": [
     "Web"
@@ -30,6 +31,33 @@
       "title": "Create Bookmark",
       "description": "Create new Bookmarks",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "New bookmarks",
+      "name": "createBookmarksAsUnread",
+      "label": "Create bookmarks as unread by default",
+      "description": "Sets the default state for the \"Mark as unread\" option when creating a new bookmark. Setting this option will make all new bookmarks default to unread. This can be overridden when creating each new bookmark.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "title": "Search bookmarks",
+      "name": "showDescription",
+      "label": "Show description",
+      "description": "Whether to show a description for each bookmark in search results.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "title": "",
+      "name": "showTags",
+      "label": "Show tags",
+      "description": "Whether to show a list of tags for each bookmark in search results.",
+      "type": "checkbox",
+      "required": false
     }
   ],
   "dependencies": {
