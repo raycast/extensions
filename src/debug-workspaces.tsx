@@ -1,5 +1,6 @@
 import { ActionPanel, Action, Detail, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { getMotionApiClient } from "./api/motion";
 
 export default function Command() {
@@ -102,36 +103,17 @@ export default function Command() {
             infoText += `- Due Date: ${task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "N/A"}\n`;
             infoText += "\n";
           });
-
-          if (tasks.length > 5) {
-            infoText += `... and ${tasks.length - 5} more task(s)\n\n`;
-          }
         } else {
-          infoText += "⚠️ No tasks found (this may be normal if you don't have any tasks)\n\n";
+          infoText += "⚠️ No tasks found\n\n";
         }
       } catch (tasksError) {
         infoText += `❌ Error fetching tasks: ${String(tasksError)}\n\n`;
       }
 
-      infoText += "## Connection Summary\n";
-      infoText +=
-        "The debug information above can help diagnose any issues with your Motion connection.\n\n";
-      infoText += "If you're seeing error messages, please check:\n";
-      infoText += "1. Your API key is correct in the extension preferences\n";
-      infoText += "2. Your workspace ID is correct (or let the extension auto-detect it)\n";
-      infoText += "3. You have an active internet connection\n";
-      infoText += "4. The Motion API service is available\n";
-
       setDebugInfo(infoText);
-    } catch (e) {
-      console.error("Debug error:", e);
-      setError(`Failed to load debug information: ${String(e)}`);
-
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Debug Error",
-        message: String(e),
-      });
+    } catch (error) {
+      setError(String(error));
+      setDebugInfo("Error loading debug information.");
     } finally {
       setIsLoading(false);
     }
@@ -141,42 +123,27 @@ export default function Command() {
     loadDebugInfo();
   }, []);
 
-  const markdown = error ? `# Error\n\n${error}` : debugInfo;
-
   return (
     <Detail
-      markdown={markdown}
       isLoading={isLoading}
+      markdown={debugInfo}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Debug Info" content={markdown} />
-          <Action
-            title="Refresh"
-            onAction={() => {
-              const motionClient = getMotionApiClient();
-              Promise.all([
-                motionClient.getWorkspaces().catch((e) => `Error: ${e}`),
-                motionClient.getTasks().catch((e) => `Error: ${e}`),
-              ])
-                .then(() => {
-                  showToast({
-                    style: Toast.Style.Success,
-                    title: "Refreshed",
-                    message: "Debug information refreshed",
-                  });
-                  // Run the debug info loader again
-                  loadDebugInfo();
-                })
-                .catch((error) => {
-                  showToast({
-                    style: Toast.Style.Failure,
-                    title: "Refresh Failed",
-                    message: String(error),
-                  });
-                  setIsLoading(false);
-                });
-            }}
-          />
+          {error && (
+            <Action.Push
+              title="Show Error Details"
+              target={
+                <Detail
+                  markdown={`**Error Details:**\n\n${error}`}
+                  actions={
+                    <ActionPanel>
+                      <Action.CopyToClipboard content={error} />
+                    </ActionPanel>
+                  }
+                />
+              }
+            />
+          )}
         </ActionPanel>
       }
     />
