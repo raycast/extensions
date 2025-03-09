@@ -10,7 +10,7 @@ const getAll = withCache(
     const response = await fetch("recipients?filter[verified]=true");
 
     if (response.status !== 200) {
-      throw new Error(`Failed to fetch domain options: ${response.status}`);
+      throw new Error(`Failed to fetch recipients: ${response.status}`);
     }
 
     const body = (await response.json()) as Paginated<Recipient>;
