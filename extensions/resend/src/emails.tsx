@@ -11,6 +11,7 @@ import {
   List,
   Toast,
   confirmAlert,
+  getPreferenceValues,
   showToast,
   useNavigation,
 } from "@raycast/api";
@@ -19,6 +20,12 @@ import { RESEND_URL } from "./utils/constants";
 import fs from "fs";
 import path from "path";
 import ErrorComponent from "./components/ErrorComponent";
+
+// Get preferences for sender information
+const preferences = getPreferenceValues<ExtensionPreferences>();
+
+// Create default sender string from preferences
+const defaultSender = `${preferences.sender_name} <${preferences.sender_email}>`;
 
 export default function Emails() {
   const { push } = useNavigation();
@@ -260,6 +267,9 @@ function EmailSend({ onEmailSent }: EmailSendProps) {
         if (!itemProps.text.value && !value) return "The item is required";
       },
     },
+    initialValues: {
+      from: defaultSender,
+    },
   });
 
   return (
@@ -284,7 +294,7 @@ function EmailSend({ onEmailSent }: EmailSendProps) {
       <Form.TextField
         title="From"
         placeholder="Your Name <sender@domain.com>"
-        info="Sender email address."
+        info="Sender email address. Default is set from your preferences."
         {...itemProps.from}
       />
       <Form.TextArea

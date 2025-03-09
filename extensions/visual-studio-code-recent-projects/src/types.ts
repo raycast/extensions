@@ -30,12 +30,14 @@ export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry |
 
 export enum VSCodeBuild {
   Code = "Code",
+  CodeInsiders = "Code - Insiders",
   Cursor = "Cursor",
-  Insiders = "Code - Insiders",
-  VSCodium = "VSCodium",
   Positron = "Positron",
-  Windsurf = "Windsurf",
   Trae = "Trae",
+  TraeCN = "Trae CN",
+  VSCodium = "VSCodium",
+  VSCodiumInsiders = "VSCodium - Insiders",
+  Windsurf = "Windsurf",
 }
 
 export type RecentEntries = {

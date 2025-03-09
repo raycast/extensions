@@ -35,7 +35,8 @@
     "codium",
     "positron",
     "windsurf",
-    "trae"
+    "trae",
+    "trae-cn"
   ],
   "license": "MIT",
   "commands": [
@@ -87,36 +88,40 @@
       "description": "Select which build of Visual Studio Code to use when searching for recent projects",
       "data": [
         {
-          "value": "Code",
-          "title": "Visual Studio Code"
+          "title": "Cursor",
+          "value": "Cursor"
         },
         {
-          "value": "Code - Insiders",
-          "title": "Visual Studio Code - Insiders"
+          "title": "Positron",
+          "value": "Positron"
         },
         {
-          "value": "VSCodium",
-          "title": "VSCodium"
+          "title": "Trae",
+          "value": "Trae"
         },
         {
-          "value": "VSCodium - Insiders",
-          "title": "VSCodium - Insiders"
+          "title": "Trae CN",
+          "value": "Trae CN"
         },
         {
-          "value": "Cursor",
-          "title": "Cursor"
+          "title": "VSCodium",
+          "value": "VSCodium"
         },
         {
-          "value": "Positron",
-          "title": "Positron"
+          "title": "VSCodium - Insiders",
+          "value": "VSCodium - Insiders"
         },
         {
-          "value": "Windsurf",
-          "title": "Windsurf"
+          "title": "Visual Studio Code",
+          "value": "Code"
         },
         {
-          "value": "Trae",
-          "title": "Trae"
+          "title": "Visual Studio Code - Insiders",
+          "value": "Code - Insiders"
+        },
+        {
+          "title": "Windsurf",
+          "value": "Windsurf"
         }
       ]
     },

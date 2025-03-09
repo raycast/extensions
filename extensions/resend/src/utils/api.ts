@@ -21,6 +21,7 @@ import {
   VerifyDomainResponse,
 } from "./types";
 import fetch from "node-fetch";
+import "cross-fetch/polyfill";
 import { API_HEADERS, API_URL } from "./constants";
 
 const headers = API_HEADERS;

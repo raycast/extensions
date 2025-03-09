@@ -1,8 +1,19 @@
 import { getPreferenceValues } from "@raycast/api";
 import { formatDuration, intervalToDuration } from "date-fns";
 import isUrlSuperb from "is-url-superb";
+import { Format, Video } from "./types.js";
 
-export const preferences = getPreferenceValues<ExtensionPreferences>();
+export const {
+  downloadPath,
+  homebrewPath,
+  ytdlPath,
+  ffmpegPath,
+  ffprobePath,
+  autoLoadUrlFromClipboard,
+  autoLoadUrlFromSelectedText,
+  enableBrowserExtensionSupport,
+  forceIpv4,
+} = getPreferenceValues<ExtensionPreferences>();
 
 export type DownloadOptions = {
   url: string;
@@ -51,3 +62,61 @@ export function isValidHHMM(input: string) {
 export function isValidUrl(url: string) {
   return isUrlSuperb(url, { lenient: true });
 }
+
+export function formatTbr(tbr: number | null) {
+  if (!tbr) return "";
+  return `${Math.floor(tbr)} kbps`;
+}
+
+export function formatFilesize(filesize?: number, filesizeApprox?: number) {
+  const size = filesize || filesizeApprox;
+  if (!size) return "";
+
+  if (size < 1024) {
+    return `${size} B`;
+  }
+  if (size < 1024 ** 2) {
+    return `${(size / 1024).toFixed(2)} KiB`;
+  }
+  if (size < 1024 ** 3) {
+    return `${(size / 1024 ** 2).toFixed(2)} MiB`;
+  }
+  return `${(size / 1024 ** 3).toFixed(2)} GiB`;
+}
+
+const hasCodec = ({ vcodec, acodec }: Format) => {
+  return {
+    hasVcodec: Boolean(vcodec) && vcodec !== "none",
+    hasAcodec: Boolean(acodec) && acodec !== "none",
+  };
+};
+
+export const getFormats = (video?: Video) => {
+  const videoKey = "Video";
+  const audioOnlyKey = "Audio Only";
+  const videoWithAudio: Format[] = [];
+  const audioOnly: Format[] = [];
+
+  if (!video) return { [videoKey]: videoWithAudio, [audioOnlyKey]: audioOnly };
+
+  for (const format of video.formats.slice().reverse()) {
+    const { hasAcodec, hasVcodec } = hasCodec(format);
+    if (hasVcodec) videoWithAudio.push(format);
+    else if (hasAcodec && !hasVcodec) audioOnly.push(format);
+    else continue;
+  }
+
+  return { [videoKey]: videoWithAudio, [audioOnlyKey]: audioOnly };
+};
+
+export const getFormatValue = (format: Format) => {
+  const { hasAcodec } = hasCodec(format);
+  const audio = hasAcodec ? "" : "+bestaudio";
+  const targetExt = `#${format.ext}`;
+  return format.format_id + audio + targetExt;
+};
+
+export const getFormatTitle = (format: Format) =>
+  [format.resolution, format.ext, formatTbr(format.tbr), formatFilesize(format.filesize)]
+    .filter((x) => Boolean(x))
+    .join(" | ");

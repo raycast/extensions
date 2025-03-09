@@ -9,9 +9,7 @@ type Input = {
   searchText: string;
 };
 
-const tool = async (input: Input) => {
+export default async function tool(input: Input) {
   const query = getHistoryQuery(input.searchText);
   return executeSQL<HistoryItem>(HISTORY_DB, query);
-};
-
-export default tool;
+}
