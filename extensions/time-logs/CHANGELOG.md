@@ -1,6 +1,6 @@
 # Time Logs Changelog
 
-## [1.0.0] - 2024-03-09
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Features
 - Complete time tracking solution with start and stop timer commands
