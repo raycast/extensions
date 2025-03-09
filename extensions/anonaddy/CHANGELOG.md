@@ -5,7 +5,7 @@
 - Added support for creating custom aliases through a form.
 - Improved alias management with list and detail views.
 
-## [Enhancements] - 2023-12-12
+## [Enhancements] - {PR_MERGE_DATE}
 
 - Updated API endpoint to `https://app.addy.io/api/v1`
 - Fixed a bug where `anonaddy.me` was used by default. Now default domain selected in Addy is used.
