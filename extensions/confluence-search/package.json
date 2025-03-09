@@ -5,6 +5,9 @@
   "description": "Quickly navigate, create and search Confluence through Raycast.",
   "icon": "command-icon.png",
   "author": "tbrown",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Productivity",
     "Documentation"
@@ -105,31 +108,31 @@
   ],
   "dependencies": {
     "@apollo/client": "^3.6.8",
-    "@raycast/api": "^1.48.5",
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.18.1",
     "apollo-link-rest": "^0.9.0",
     "apollo3-cache-persist": "^0.14.0",
     "async-mutex": "^0.3.2",
+    "cross-fetch": "^4.1.0",
     "graphql": "^15.0.0",
-    "node-fetch": "^3.2.10",
     "qs": "^6.11.0",
     "use-async-effect": "^2.2.6"
   },
   "devDependencies": {
-    "@types/node": "^18.11.18",
-    "@types/react": "^18.0.27",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.24.6",
-    "typescript": "^4.4.3"
+    "react": "^18.2.0",
+    "typescript": "^5.7.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

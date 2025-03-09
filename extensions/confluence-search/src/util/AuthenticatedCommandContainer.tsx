@@ -22,8 +22,7 @@ function AuthenticatedCommandContainer({ Command, checkScopes }: AuthenticatedCo
 }
 
 interface AuthenticatedCommandContainerProps {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  Command: Function;
+  Command: React.FC;
   checkScopes?: boolean;
 }
 
