@@ -322,11 +322,7 @@ export default function ExportLogs() {
 
       pop();
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Export failed",
-        message: String(error),
-      });
+      showFailureToast("Export failed", String(error));
     } finally {
       setIsLoading(false);
     }
