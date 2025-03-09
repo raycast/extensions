@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aave-search",
-  "title": "Aave Search",
+  "title": "Aave Contract Search",
   "description": "Quickly search and access official Aave ecosystem smart contract addresses across multiple networks",
   "icon": "icon.png",
   "author": "smbdy",
@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "aave",
-      "title": "Search Aave Ecosystem",
+      "title": "Search Smart Contracts",
+      "subtitle": "Aave Protocol",
       "description": "Quickly search and access official Aave ecosystem smart contract addresses across multiple networks",
       "mode": "view"
     }

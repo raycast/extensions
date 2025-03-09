@@ -8,21 +8,22 @@ export type ListItem = {
 };
 
 export const useAddresses = () => {
-  const { isLoading, data } = useFetch(DATA_CSV_URL);
+  const { isLoading, data, error } = useFetch<string>(DATA_CSV_URL);
 
-  const parsedData: ListItem[] = data
-    ? (data as string)
-        .split("\n")
-        .filter(Boolean)
-        .map((line: string) => {
-          const [address, fullPath, chainId] = line.split(",");
-          return {
-            value: address,
-            path: fullPath.trim().split(" "),
-            chainId: parseInt(chainId, 10),
-          };
-        })
-    : [];
+  const parsedData: ListItem[] =
+    !error && data
+      ? data
+          .split("\n")
+          .filter(Boolean)
+          .map((line: string) => {
+            const [address, fullPath, chainId] = line.split(",");
+            return {
+              value: address,
+              path: fullPath.trim().split(" "),
+              chainId: parseInt(chainId, 10),
+            };
+          })
+      : [];
 
-  return { isLoading, data: parsedData };
+  return { isLoading, data: parsedData, error };
 };

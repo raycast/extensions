@@ -4,6 +4,7 @@ import { ActionPanel, Action, List, Color } from "@raycast/api";
 import uFuzzy from "@leeoniya/ufuzzy";
 import { useMemo, useState } from "react";
 import { getChainIcon } from "./utils/getChainIcon";
+import { Icon } from "@raycast/api";
 
 const TAG_MAP: Record<string, string[]> = {
   S_TOKEN: ["stable", "debt"],
@@ -52,7 +53,7 @@ function comp(a: AddressItem, b: AddressItem) {
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const { isLoading, data: rawAddresses } = useAddresses();
+  const { isLoading, data: rawAddresses, error } = useAddresses();
 
   const addresses = useMemo(() => {
     if (!rawAddresses) return [];
@@ -82,6 +83,14 @@ export default function Command() {
 
     return order.map((r) => addresses[matches[r]]).sort(comp);
   }, [searchText, uf, addresses]);
+
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView icon={Icon.ExclamationMark} title="Error" description={`Failed to load Aave contracts`} />
+      </List>
+    );
+  }
 
   return (
     <List onSearchTextChange={setSearchText} filtering={false} isLoading={isLoading}>
