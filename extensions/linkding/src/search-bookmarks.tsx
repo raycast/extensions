@@ -12,7 +12,7 @@ import { showSuccessToast } from "./util/bookmark-util";
 export default function searchLinkding() {
   const preferences = getPreferenceValues<Preferences>();
   const [selectedLinkdingAccount, setSelectedLinkdingAccount] = useState<LinkdingAccountForm | LinkdingAccount | null>(
-    null,
+    null
   );
   const [linkdingAccountMap, setLinkdingAccountMap] = useState<LinkdingAccountMap>({});
   const [hasLinkdingAccounts, setHasLindingAccounts] = useState(false);
@@ -39,7 +39,7 @@ export default function searchLinkding() {
       return bookmarks.data.results;
     },
     [selectedLinkdingAccount, searchText],
-    { execute: !!selectedLinkdingAccount },
+    { execute: !!selectedLinkdingAccount }
   );
 
   async function deleteBookmarkCallback(bookmarkId: number) {
@@ -137,7 +137,7 @@ function SearchListItem({
       title={
         linkdingBookmark.title.length > 0
           ? linkdingBookmark.title
-          : (linkdingBookmark.website_title ?? linkdingBookmark.url)
+          : linkdingBookmark.website_title ?? linkdingBookmark.url
       }
       subtitle={subtitle}
       accessories={tags}
