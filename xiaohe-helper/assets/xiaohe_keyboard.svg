@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="590" height="170" xmlns="http://www.w3.org/2000/svg">
+
+    <!-- Define keys -->
+    <g font-family="Arial" text-anchor="middle">
+        <!-- Row 1 -->
+        <g id="q">
+            <rect class="key" x="0" y="0" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="10" y="40" fill="black">Q</text>
+            <text class="annotation" x="35" y="10" font-size="12" fill="blue">iu</text>
+        </g>
+        <g id="w">
+            <rect class="key" x="60" y="0" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="70" y="40" fill="black">W</text>
+            <text class="annotation" x="95" y="10" font-size="12" fill="blue">ei</text>
+        </g>
+        <g id="e">
+            <rect class="key" x="120" y="0" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="130" y="40" fill="black">E</text>
+            <text class="annotation" x="155" y="10" font-size="12" fill="blue">e</text>
+        </g>
+        <g id="r">
+            <rect class="key" x="180" y="0" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="190" y="40" fill="black">R</text>
+            <text class="annotation" x="215" y="10" font-size="12" fill="blue">uan</text>
+        </g>
+        <g id="t">
+            <rect class="key" x="240" y="0" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="250" y="40" fill="black">T</text>
+            <text class="annotation" x="275" y="10" font-size="12" fill="blue">ue</text>
+        </g>
+        <g id="y">
+            <rect class="key" x="300" y="0" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="310" y="40" fill="black">Y</text>
+            <text class="annotation" x="335" y="10" font-size="12" fill="blue">un</text>
+        </g>
+        <g id="u">
+            <rect class="key" x="360" y="0" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="370" y="40" fill="black">U</text>
+            <text class="annotation" x="395" y="10" font-size="12" fill="blue">sh</text>
+            <text class="annotation" x="395" y="25" font-size="12" fill="blue">u</text>
+        </g>
+        <g id="i">
+            <rect class="key" x="420" y="0" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="430" y="40" fill="black">I</text>
+            <text class="annotation" x="455" y="10" font-size="12" fill="blue">ch</text>
+            <text class="annotation" x="455" y="25" font-size="12" fill="blue">i</text>
+        </g>
+        <g id="o">
+            <rect class="key" x="480" y="0" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="490" y="40" fill="black">O</text>
+            <text class="annotation" x="515" y="10" font-size="12" fill="blue">uo</text>
+            <text class="annotation" x="515" y="25" font-size="12" fill="blue">o</text>
+        </g>
+        <g id="p">
+            <rect class="key" x="540" y="0" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="550" y="40" fill="black">P</text>
+            <text class="annotation" x="575" y="10" font-size="12" fill="blue">ie</text>
+        </g>
+
+        <!-- Row 2 -->
+        <g id="a">
+            <rect class="key" x="20" y="60" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="30" y="100" fill="black">A</text>
+            <text class="annotation" x="55" y="70" font-size="12" fill="blue">a</text>
+        </g>
+        <g id="s">
+            <rect class="key" x="80" y="60" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="90" y="100" fill="black">S</text>
+            <text class="annotation" x="115" y="70" font-size="12" fill="blue">iong</text>
+            <text class="annotation" x="115" y="85" font-size="12" fill="blue">ong</text>
+        </g>
+        <g id="d">
+            <rect class="key" x="140" y="60" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="150" y="100" fill="black">D</text>
+            <text class="annotation" x="175" y="70" font-size="12" fill="blue">ai</text>
+        </g>
+        <g id="f">
+            <rect class="key" x="200" y="60" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="210" y="100" fill="black">F</text>
+            <text class="annotation" x="235" y="70" font-size="12" fill="blue">en</text>
+        </g>
+        <g id="g">
+            <rect class="key" x="260" y="60" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="270" y="100" fill="black">G</text>
+            <text class="annotation" x="295" y="70" font-size="12" fill="blue">eng</text>
+        </g>
+        <g id="h">
+            <rect class="key" x="320" y="60" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="330" y="100" fill="black">H</text>
+            <text class="annotation" x="355" y="70" font-size="12" fill="blue">ang</text>
+        </g>
+        <g id="j">
+            <rect class="key" x="380" y="60" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="390" y="100" fill="black">J</text>
+            <text class="annotation" x="415" y="70" font-size="12" fill="blue">an</text>
+        </g>
+        <g id="k">
+            <rect class="key" x="440" y="60" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="450" y="100" fill="black">K</text>
+            <text class="annotation" x="475" y="70" font-size="12" fill="blue">ing</text>
+            <text class="annotation" x="475" y="85" font-size="12" fill="blue">uai</text>
+        </g>
+        <g id="l">
+            <rect class="key" x="500" y="60" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="510" y="100" fill="black">L</text>
+            <text class="annotation" x="535" y="70" font-size="12" fill="blue">iang</text>
+            <text class="annotation" x="535" y="85" font-size="12" fill="blue">uang</text>
+        </g>
+
+        <!-- Row 3 -->
+        <g id="z">
+            <rect class="key" x="40" y="120" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="50" y="160" fill="black">Z</text>
+            <text class="annotation" x="75" y="130" font-size="12" fill="blue">ou</text>
+        </g>
+        <g id="x">
+            <rect class="key" x="100" y="120" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="110" y="160" fill="black">X</text>
+            <text class="annotation" x="135" y="130" font-size="12" fill="blue">ia</text>
+            <text class="annotation" x="135" y="145" font-size="12" fill="blue">ua</text>
+        </g>
+        <g id="c">
+            <rect class="key" x="160" y="120" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="170" y="160" fill="black">C</text>
+            <text class="annotation" x="195" y="130" font-size="12" fill="blue">ao</text>
+        </g>
+        <g id="v">
+            <rect class="key" x="220" y="120" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="230" y="160" fill="black">V</text>
+            <text class="annotation" x="255" y="130" font-size="12" fill="blue">zh</text>
+            <text class="annotation" x="255" y="145" font-size="12" fill="blue">v</text>
+            <text class="annotation" x="255" y="160" font-size="12" fill="blue">ui</text>
+        </g>
+        <g id="b">
+            <rect class="key" x="280" y="120" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="290" y="160" fill="black">B</text>
+            <text class="annotation" x="315" y="130" font-size="12" fill="blue">in</text>
+        </g>
+        <g id="n">
+            <rect class="key" x="340" y="120" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="350" y="160" fill="black">N</text>
+            <text class="annotation" x="375" y="130" font-size="12" fill="blue">iao</text>
+        </g>
+        <g id="m">
+            <rect class="key" x="400" y="120" width="50" height="50" fill="white" stroke="gray" />
+            <text class="name" x="410" y="160" fill="black">M</text>
+            <text class="annotation" x="435" y="130" font-size="12" fill="blue">ian</text>
+        </g>
+    </g>
+</svg>
