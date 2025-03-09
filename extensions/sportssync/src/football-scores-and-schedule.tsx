@@ -1,6 +1,7 @@
-import { Detail, List, Color, Action, ActionPanel } from "@raycast/api";
+import { Detail, List, Color, Icon, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
+import getPastAndFutureDays from "./utils/getDateRange";
 
 interface Game {
   date: string;
@@ -42,10 +43,14 @@ interface DayItems {
 
 export default function scoresAndSchedule() {
   // Fetch NFL Stats
+
   const [currentLeague, displaySelectLeague] = useState("NFL Games");
+
+  const dateRange = getPastAndFutureDays(new Date());
+
   const { isLoading: nflScheduleStats, data: nflScoresAndSchedule } = useFetch<{
     events: Game[];
-  }>("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard");
+  }>(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=${dateRange}`);
 
   const nflDayItems: DayItems[] = [];
   const nflGames = nflScoresAndSchedule?.events || [];
@@ -71,22 +76,36 @@ export default function scoresAndSchedule() {
 
     let accessoryTitle = nflGameTime;
     let accessoryColor = Color.SecondaryText;
-    let accessoryToolTip;
+    let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
+    let accessoryToolTip = "Scheduled";
+
+    const startingSoonInterval = 15 * 60 * 1000;
+    const currentDate = new Date();
+    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
+
+    if (timeUntilGameStarts <= startingSoonInterval && nflGame?.status?.type?.state === "pre") {
+      accessoryColor = Color.Yellow;
+      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
+      accessoryToolTip = "Starting Soon";
+    }
 
     if (nflGame.status.type.state === "in") {
       accessoryTitle = `${nflGame.competitions[0].competitors[1].team.abbreviation} ${nflGame.competitions[0].competitors[1].score} - ${nflGame.competitions[0].competitors[0].team.abbreviation} ${nflGame.competitions[0].competitors[0].score}     Q${nflGame.status.period} ${nflGame.status.displayClock}`;
       accessoryColor = Color.Green;
+      accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
       accessoryToolTip = "In Progress";
     }
 
     if (nflGame.status.type.state === "post") {
       accessoryTitle = `${nflGame.competitions[0].competitors[1].team.abbreviation} ${nflGame.competitions[0].competitors[1].score} - ${nflGame.competitions[0].competitors[0].team.abbreviation} ${nflGame.competitions[0].competitors[0].score}`;
       accessoryColor = Color.SecondaryText;
+      accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
       accessoryToolTip = "Final";
     }
 
     if (nflGame.status.type.state === "post" && nflGame.status.type.completed === false) {
       accessoryTitle = `Postponed`;
+      accessoryIcon = { source: Icon.XMarkCircle, tintColor: Color.Orange };
       accessoryColor = Color.Orange;
     }
 
@@ -95,7 +114,10 @@ export default function scoresAndSchedule() {
         key={index}
         title={`${nflGame.name}`}
         icon={{ source: nflGame.competitions[0].competitors[1].team.logo }}
-        accessories={[{ text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip }]}
+        accessories={[
+          { text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip },
+          { icon: accessoryIcon },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Game Details on ESPN" url={`${nflGame.links[0].href}`} />
@@ -120,7 +142,7 @@ export default function scoresAndSchedule() {
   // Fetch NCAA Stats
   const { isLoading: ncaaScheduleStats, data: ncaaScoresAndSchedule } = useFetch<{
     events: Game[];
-  }>("https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard");
+  }>(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=${dateRange}`);
 
   const ncaaDayItems: DayItems[] = [];
   const ncaaGames = ncaaScoresAndSchedule?.events || [];
@@ -147,22 +169,36 @@ export default function scoresAndSchedule() {
 
     let accessoryTitle = ncaaGameTime;
     let accessoryColor = Color.SecondaryText;
-    let accessoryToolTip;
+    let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
+    let accessoryToolTip = "Scheduled";
+
+    const startingSoonInterval = 15 * 60 * 1000;
+    const currentDate = new Date();
+    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
+
+    if (timeUntilGameStarts <= startingSoonInterval && ncaaGame?.status?.type?.state === "pre") {
+      accessoryColor = Color.Yellow;
+      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
+      accessoryToolTip = "Starting Soon";
+    }
 
     if (ncaaGame.status.type.state === "in") {
       accessoryTitle = `${ncaaGame.competitions[0].competitors[1].team.abbreviation} ${ncaaGame.competitions[0].competitors[1].score} - ${ncaaGame.competitions[0].competitors[0].team.abbreviation} ${ncaaGame.competitions[0].competitors[0].score}     Q${ncaaGame.status.period} ${ncaaGame.status.displayClock}`;
       accessoryColor = Color.Green;
+      accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
       accessoryToolTip = "In Progress";
     }
 
     if (ncaaGame.status.type.state === "post") {
       accessoryTitle = `${ncaaGame.competitions[0].competitors[1].team.abbreviation} ${ncaaGame.competitions[0].competitors[1].score} - ${ncaaGame.competitions[0].competitors[0].team.abbreviation} ${ncaaGame.competitions[0].competitors[0].score}`;
       accessoryColor = Color.SecondaryText;
+      accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
       accessoryToolTip = "Final";
     }
 
     if (ncaaGame.status.type.state === "post" && ncaaGame.status.type.completed === false) {
       accessoryTitle = `Postponed`;
+      accessoryIcon = { source: Icon.XMarkCircle, tintColor: Color.Orange };
       accessoryColor = Color.Orange;
     }
 
@@ -172,7 +208,10 @@ export default function scoresAndSchedule() {
           key={index}
           title={`${ncaaGame.name}`}
           icon={{ source: ncaaGame.competitions[0].competitors[1].team.logo }}
-          accessories={[{ text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip }]}
+          accessories={[
+            { text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip },
+            { icon: accessoryIcon },
+          ]}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="View Game Details on ESPN" url={`${ncaaGame.links[0].href}`} />
