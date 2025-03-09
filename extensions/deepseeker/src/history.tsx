@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { getHistory, HistoryItem } from "./common";
-import { sentToSideNote } from "./util";
+import { sendToSideNote } from "./util";
 
 function HistoryDetail({ item }: { item: HistoryItem }) {
   const formatDate = (timestamp: number) => {
@@ -52,7 +52,7 @@ function HistoryDetail({ item }: { item: HistoryItem }) {
           <Action.Paste title="Paste Response" content={item.response} />
           <Action
             title="Send to SideNote"
-            onAction={async () => await sentToSideNote(item.response)}
+            onAction={async () => await sendToSideNote(item.response)}
             icon={Icon.Sidebar}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
