@@ -3,9 +3,9 @@ import {
   Action,
   ActionPanel,
   Form,
-  useNavigation,
   showToast,
   Toast,
+  // useNavigation,
   // LocalStorage,
   // Detail
 } from "@raycast/api";
@@ -20,7 +20,7 @@ export default function LoginView({
   onLoginSuccess: () => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
-  const { pop } = useNavigation();
+  // const { pop } = useNavigation();
 
   const handleSubmit = async (values: {
     email?: string;
@@ -53,7 +53,6 @@ export default function LoginView({
 
       // Call the success handler
       onLoginSuccess();
-      pop();
     } catch (error) {
       showFailureToast({
         title: "Login failed",
