@@ -37,7 +37,7 @@ Enjoy using DeepSeeker! 🚀
 - [x] 💸 Set token price in settings
 - [x] 🌐 Support Translate and Looking Up Words
 - [x] 🎨 Multiple models support (Deepseek, OpenAI, Gemini)
-- [x] 📜 Support Histories
+- [x] 📜 Support Histories (ATTENTION: do not rely on it for important data!)
 
 ## Bugs / TODOs / Known Issues
 
