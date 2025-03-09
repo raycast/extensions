@@ -1,14 +1,25 @@
-import { Action, ActionPanel, Icon, launchCommand, LaunchType, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  launchCommand,
+  LaunchType,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
 import { LinkdingAccount, LinkdingAccountForm, LinkdingAccountMap, LinkdingBookmark } from "./types/linkding-types";
 
-import { getPersistedLinkdingAccounts } from "./service/user-account-service";
-import { deleteBookmark, searchBookmarks } from "./service/bookmark-service";
-import { showSuccessToast } from "./util/bookmark-util";
-import { LinkdingShortcut } from "./types/linkding-shortcuts";
 import { getFavicon, usePromise } from "@raycast/utils";
+import { deleteBookmark, searchBookmarks } from "./service/bookmark-service";
+import { getPersistedLinkdingAccounts } from "./service/user-account-service";
+import { LinkdingShortcut } from "./types/linkding-shortcuts";
+import { showSuccessToast } from "./util/bookmark-util";
 
 export default function searchLinkding() {
+  const preferences = getPreferenceValues<Preferences>();
   const [selectedLinkdingAccount, setSelectedLinkdingAccount] = useState<LinkdingAccountForm | LinkdingAccount | null>(
     null
   );
@@ -86,6 +97,7 @@ export default function searchLinkding() {
               key={linkdingBookmark.id}
               linkdingBookmark={linkdingBookmark}
               deleteBookmarkCallback={deleteBookmarkCallback}
+              preferences={preferences}
             />
           ))}
         </List.Section>
@@ -115,13 +127,34 @@ export default function searchLinkding() {
 function SearchListItem({
   linkdingBookmark,
   deleteBookmarkCallback,
+  preferences,
 }: {
   linkdingBookmark: LinkdingBookmark;
   deleteBookmarkCallback: (bookmarkId: number) => void;
+  preferences: Preferences;
 }) {
   function showCopyToast() {
     showSuccessToast("Copied to Clipboard");
   }
+
+  const subtitle = useMemo(() => {
+    if (!preferences.showDescription) {
+      return "";
+    }
+    if (linkdingBookmark.description && linkdingBookmark.description.length > 0) {
+      return linkdingBookmark.description;
+    }
+    return linkdingBookmark.website_description;
+  }, [linkdingBookmark, preferences]);
+
+  const tags = useMemo(() => {
+    if (!preferences.showTags) {
+      return [];
+    }
+    return linkdingBookmark.tag_names.map((tag) => ({
+      tag: "#" + tag,
+    }));
+  }, [linkdingBookmark, preferences]);
 
   return (
     <List.Item
@@ -131,11 +164,8 @@ function SearchListItem({
           ? linkdingBookmark.title
           : linkdingBookmark.website_title ?? linkdingBookmark.url
       }
-      subtitle={
-        linkdingBookmark.description && linkdingBookmark.description.length > 0
-          ? linkdingBookmark.description
-          : linkdingBookmark.website_description
-      }
+      subtitle={subtitle}
+      accessories={tags}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

@@ -1,12 +1,13 @@
-import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
-import { LinkdingAccountMap, PostLinkdingBookmarkPayload } from "./types/linkding-types";
-import { useEffect, useState } from "react";
-import { getPersistedLinkdingAccounts } from "./service/user-account-service";
-import { validateUrl } from "./util/bookmark-util";
-import { createBookmark, getWebsiteMetadata } from "./service/bookmark-service";
+import { Action, ActionPanel, Form, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
 import { useForm } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { createBookmark, getWebsiteMetadata } from "./service/bookmark-service";
+import { getPersistedLinkdingAccounts } from "./service/user-account-service";
+import { LinkdingAccountMap, PostLinkdingBookmarkPayload } from "./types/linkding-types";
+import { validateUrl } from "./util/bookmark-util";
 
 export default function CreateBookmarks() {
+  const preferences = getPreferenceValues<Preferences>();
   const [linkdingAccountMap, setLinkdingAccountMap] = useState<LinkdingAccountMap>({});
   const [loading, setLoading] = useState<boolean>(false);
   useEffect(() => {
@@ -17,7 +18,9 @@ export default function CreateBookmarks() {
     });
   }, [setLinkdingAccountMap]);
 
-  const { handleSubmit, itemProps, setValue } = useForm<PostLinkdingBookmarkPayload & { linkdingAccountName: string }>({
+  const { handleSubmit, itemProps, setValue } = useForm<
+    PostLinkdingBookmarkPayload & { linkdingAccountName: string; tags: string }
+  >({
     async onSubmit(values) {
       const linkdingAccount = linkdingAccountMap[values.linkdingAccountName];
 
@@ -26,7 +29,7 @@ export default function CreateBookmarks() {
         ...values,
         shared: false,
         is_archived: false,
-        tag_names: [],
+        tag_names: values.tags.split(" "),
       })
         .then(() => {
           toast.title = "Bookmark created successfully";
@@ -44,6 +47,9 @@ export default function CreateBookmarks() {
         if (!validateUrl(value)) return "URL must be a valid url";
         getMetadata(value);
       },
+    },
+    initialValues: {
+      unread: preferences.createBookmarksAsUnread,
     },
   });
 
@@ -68,12 +74,20 @@ export default function CreateBookmarks() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Linkding Account" placeholder="Linkding Account" {...itemProps.linkdingAccountName}>
-        {Object.keys(linkdingAccountMap).map((name) => {
-          return <Form.Dropdown.Item key={name} title={name} value={name}></Form.Dropdown.Item>;
-        })}
-      </Form.Dropdown>
+      {Object.keys(linkdingAccountMap).length > 1 && (
+        <Form.Dropdown title="Linkding Account" placeholder="Linkding Account" {...itemProps.linkdingAccountName}>
+          {Object.keys(linkdingAccountMap).map((name) => {
+            return <Form.Dropdown.Item key={name} title={name} value={name}></Form.Dropdown.Item>;
+          })}
+        </Form.Dropdown>
+      )}
       <Form.TextField title="URL" placeholder="https://raycast.com" {...itemProps.url} />
+      <Form.TextField
+        title="Tags"
+        placeholder="tools productivity"
+        info="Enter any number of tags separated by space and without the hash (#). If a tag does not exist it will be automatically created."
+        {...itemProps.tags}
+      />
       <Form.TextField title="Title" placeholder="Raycast - Your shortcut to everything" {...itemProps.title} />
       <Form.TextArea
         title="Description"
