@@ -1,5 +1,6 @@
 import { ActionPanel, Action, List, showToast, Toast, confirmAlert } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { getMotionApiClient } from "./api/motion";
 
 interface Task {
@@ -59,11 +60,8 @@ export default function Command() {
       setFilteredTasks(sortedTasks);
     } catch (error) {
       console.error("Error loading tasks:", error);
-
-      await showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Failed to load tasks",
-        message: String(error),
       });
     } finally {
       setIsLoading(false);
@@ -73,10 +71,8 @@ export default function Command() {
   // Delete a task
   async function deleteTask(taskId?: string) {
     if (!taskId) {
-      await showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(new Error("Task ID is missing"), {
         title: "Cannot delete task",
-        message: "Task ID is missing",
       });
       return;
     }
@@ -111,11 +107,8 @@ export default function Command() {
       });
     } catch (error) {
       console.error("Error deleting task:", error);
-
-      await showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Failed to delete task",
-        message: String(error),
       });
     } finally {
       setIsLoading(false);
