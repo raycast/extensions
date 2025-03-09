@@ -1,4 +1,5 @@
 import { getMotionApiClient } from "../api/motion";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command(props: { arguments: { question: string } }) {
   try {

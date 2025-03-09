@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { List, ActionPanel, Action, Toast, showToast, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getMotionApiClient, Project } from "./api/motion";
 
 // Define task types
