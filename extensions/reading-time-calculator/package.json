@@ -30,6 +30,7 @@
     {
       "name": "clipboard-input",
       "title": "Calculate Reading Time from Clipboard",
+      "subtitle": "Reading Time Calculator",
       "description": "Calculate reading time from clipboard content",
       "mode": "view"
     }
