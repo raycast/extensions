@@ -15,8 +15,12 @@ export default class SvgService {
   }
 
   private readSvgFile(): string {
-    const content = fs.readFileSync(this.svgPath, "utf8");
-    return content.trim();
+    try {
+      const content = fs.readFileSync(this.svgPath, "utf8");
+      return content.trim();
+    } catch (error) {
+      throw new Error(`Failed to read SVG file: ${error.message}`);
+    }
   }
 
   get svgContent(): string {
