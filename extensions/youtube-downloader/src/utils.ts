@@ -1,26 +1,22 @@
+import fs from "node:fs/promises";
 import { getPreferenceValues } from "@raycast/api";
 import { formatDuration, intervalToDuration } from "date-fns";
 import isUrlSuperb from "is-url-superb";
-import { Format, Video } from "./types.js";
+import { Category, Format, Video } from "./types.js";
 
-export const {
-  downloadPath,
-  homebrewPath,
-  ytdlPath,
-  ffmpegPath,
-  ffprobePath,
-  autoLoadUrlFromClipboard,
-  autoLoadUrlFromSelectedText,
-  enableBrowserExtensionSupport,
-  forceIpv4,
-} = getPreferenceValues<ExtensionPreferences>();
+export const preferences = getPreferenceValues<ExtensionPreferences>();
 
-export type DownloadOptions = {
-  url: string;
-  format: string;
-  copyToClipboard: boolean;
-  startTime?: string;
-  endTime?: string;
+export const checkExecutables = async (): Promise<[string, boolean][]> => {
+  const { homebrewPath, ytdlPath, ffmpegPath, ffprobePath } = preferences;
+  return Promise.all(
+    Object.entries({ homebrew: homebrewPath, "yt-dlp": ytdlPath, ffmpeg: ffmpegPath, ffprobe: ffprobePath }).map(
+      async ([app, path]) =>
+        fs
+          .access(path, fs.constants.R_OK)
+          .then(() => [app, true] as [string, boolean])
+          .catch(() => [app, false] as [string, boolean]),
+    ),
+  );
 };
 
 export function formatHHMM(seconds: number) {
@@ -91,32 +87,63 @@ const hasCodec = ({ vcodec, acodec }: Format) => {
   };
 };
 
-export const getFormats = (video?: Video) => {
-  const videoKey = "Video";
-  const audioOnlyKey = "Audio Only";
+export const getFormats = (video?: Video, advanced?: boolean) => {
   const videoWithAudio: Format[] = [];
   const audioOnly: Format[] = [];
 
-  if (!video) return { [videoKey]: videoWithAudio, [audioOnlyKey]: audioOnly };
+  if (!video) return { [Category.Video]: videoWithAudio, [Category.AudioOnly]: audioOnly };
 
   for (const format of video.formats.slice().reverse()) {
     const { hasAcodec, hasVcodec } = hasCodec(format);
-    if (hasVcodec) videoWithAudio.push(format);
-    else if (hasAcodec && !hasVcodec) audioOnly.push(format);
-    else continue;
+    const hasFilesize = format.filesize || format.filesize_approx;
+    if (hasVcodec) {
+      if (!advanced && (!hasFilesize || videoWithAudio.find((f) => f.resolution === format.resolution))) continue;
+      videoWithAudio.push(format);
+    } else if (hasAcodec && !hasVcodec) {
+      if (!advanced && (!hasFilesize || audioOnly.find((f) => f.tbr === format.tbr))) continue;
+      audioOnly.push(format);
+    } else continue;
   }
 
-  return { [videoKey]: videoWithAudio, [audioOnlyKey]: audioOnly };
+  return { [Category.Video]: videoWithAudio, [Category.AudioOnly]: audioOnly };
 };
 
-export const getFormatValue = (format: Format) => {
+export const getFormatValue = (format: Format, category: string, advanced: boolean) => {
   const { hasAcodec } = hasCodec(format);
   const audio = hasAcodec ? "" : "+bestaudio";
-  const targetExt = `#${format.ext}`;
+  const targetExt = advanced ? `#${format.ext}` : category === Category.AudioOnly ? "#m4a" : "#mp4";
   return format.format_id + audio + targetExt;
 };
 
-export const getFormatTitle = (format: Format) =>
-  [format.resolution, format.ext, formatTbr(format.tbr), formatFilesize(format.filesize)]
+export const getFormatTitle = (format: Format, category: string, advanced: boolean) =>
+  [
+    category === Category.AudioOnly ? "" : format.resolution,
+    advanced ? format.ext : "",
+    advanced || category === Category.AudioOnly ? formatTbr(format.tbr) : "",
+    formatFilesize(format.filesize),
+  ]
     .filter((x) => Boolean(x))
     .join(" | ");
+
+export const secondsToTimestamp = (total: number) => {
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  const timestamp = [hours, minutes, seconds]
+    .filter((x, i) => (x === 0 && i === 0 ? false : true))
+    .map((x) => String(x).padStart(2, "0"))
+    .join(":");
+  return timestamp;
+};
+
+export const timestampToSeconds = (timestamp: string) => {
+  const [s = "0", m = "0", h = "0"] = timestamp.split(":").toReversed();
+  return parseInt(s, 10) + parseInt(m, 10) * 60 + parseInt(h, 10) * 3600;
+};
+
+export const isValidClipstamp = (clipRange?: string) => {
+  if (!clipRange) return true;
+  const [from, to] = clipRange.split("-");
+  const timestampPattern = /^(?:\d+:){0,2}\d+$/;
+  return timestampPattern.test(from) && timestampPattern.test(to);
+};

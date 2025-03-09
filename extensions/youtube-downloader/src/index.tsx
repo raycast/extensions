@@ -1,5 +1,4 @@
 import { spawn } from "node:child_process";
-import fs from "node:fs";
 import path from "node:path";
 import {
   Action,
@@ -8,26 +7,28 @@ import {
   Clipboard,
   Form,
   Icon,
-  getPreferenceValues,
+  Toast,
   getSelectedText,
   open,
   showHUD,
   showToast,
-  Toast,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { useForm, usePromise } from "@raycast/utils";
+import { useCachedState, useForm, usePromise } from "@raycast/utils";
 import { execa } from "execa";
 import {
-  DownloadOptions,
+  checkExecutables,
   getFormats,
   getFormatTitle,
   getFormatValue,
-  isValidHHMM,
+  isValidClipstamp,
   isValidUrl,
-  parseHHMM,
+  preferences,
+  secondsToTimestamp,
+  timestampToSeconds,
 } from "./utils.js";
-import { Video } from "./types.js";
+import { DownloadOptions, Video } from "./types.js";
+import Advanced from "./views/advanced.js";
 import Installer from "./views/installer.js";
 import Updater from "./views/updater.js";
 
@@ -35,16 +36,18 @@ const {
   downloadPath,
   ytdlPath,
   ffmpegPath,
-  ffprobePath,
   autoLoadUrlFromClipboard,
   autoLoadUrlFromSelectedText,
   enableBrowserExtensionSupport,
   forceIpv4,
-} = getPreferenceValues<ExtensionPreferences>();
+} = preferences;
 
 export default function DownloadVideo() {
+  const [video, setVideo] = useState<Video>();
   const [error, setError] = useState(0);
   const [warning, setWarning] = useState("");
+  const [showAdvanced, setShowAdvanced] = useCachedState("show-advanced", false);
+  const [missingExecutables, setMissingExecutables] = useState<string[]>([]);
 
   const { handleSubmit, values, itemProps, setValue, setValidationError } = useForm<DownloadOptions>({
     initialValues: {
@@ -58,6 +61,10 @@ export default function DownloadVideo() {
       options.push("--ffmpeg-location", ffmpegPath);
       options.push("--format", downloadFormat);
       options.push("--recode-video", recodeFormat);
+
+      if (showAdvanced && values.clip) {
+        options.push("--download-sections", values.clip.trim());
+      }
 
       const toast = await showToast({
         title: "Downloading Video",
@@ -143,27 +150,25 @@ export default function DownloadVideo() {
           return "Invalid URL";
         }
       },
-      startTime: (value) => {
-        if (value) {
-          if (!isValidHHMM(value)) {
-            return "Invalid time format";
-          }
+      clip: (value) => {
+        const duration = video?.duration ?? 0;
+        const errorMessage = `Invalid clip range, it should be between "${secondsToTimestamp(0)}-${secondsToTimestamp(duration)}"`;
+        if (!isValidClipstamp(value)) {
+          return errorMessage;
         }
-      },
-      endTime: (value) => {
         if (value) {
-          if (!isValidHHMM(value)) {
-            return "Invalid time format";
-          }
-          if (video && parseHHMM(value) > video?.duration) {
-            return "End time is greater than video duration";
+          const [from, to] = value.split("-");
+          const secondsFrom = from ? timestampToSeconds(from) : 0;
+          const secondsTo = to ? timestampToSeconds(to) : duration;
+          if (secondsFrom > duration || secondsTo < secondsFrom || secondsTo > duration || secondsFrom === secondsTo) {
+            return errorMessage;
           }
         }
       },
     },
   });
 
-  const { data: video, isLoading } = usePromise(
+  const { isLoading } = usePromise(
     async (url: string) => {
       if (!url) return;
       if (!isValidUrl(url)) return;
@@ -174,7 +179,8 @@ export default function DownloadVideo() {
           Boolean(x),
         ),
       );
-      return JSON.parse(result.stdout) as Video;
+
+      setVideo(JSON.parse(result.stdout) as Video);
     },
     [values.url],
     {
@@ -235,23 +241,18 @@ export default function DownloadVideo() {
     })();
   }, []);
 
-  const missingExecutable = useMemo(() => {
-    if (!fs.existsSync(ytdlPath)) {
-      return "yt-dlp";
-    }
-    if (!fs.existsSync(ffmpegPath)) {
-      return "ffmpeg";
-    }
-    if (!fs.existsSync(ffprobePath)) {
-      return "ffprobe";
-    }
-    return null;
+  useEffect(() => {
+    (async () => {
+      const executables = await checkExecutables();
+      const notInstalled = executables.filter(([, exists]) => !exists).map(([app]) => app);
+      setMissingExecutables(notInstalled);
+    })();
   }, [error]);
 
-  const formats = useMemo(() => getFormats(video), [video]);
+  const formats = useMemo(() => getFormats(video, showAdvanced), [showAdvanced, video]);
 
-  if (missingExecutable) {
-    return <Installer executable={missingExecutable} onRefresh={() => setError(error + 1)} />;
+  if (missingExecutables.length > 0) {
+    return <Installer missingExecutables={missingExecutables} onRefresh={() => setError(error + 1)} />;
   }
 
   return (
@@ -290,19 +291,22 @@ export default function DownloadVideo() {
       />
       {warning && <Form.Description text={warning} />}
       {video && (
-        <Form.Dropdown {...itemProps.format} title="Format">
-          {Object.entries(formats).map(([category, formats]) => (
-            <Form.Dropdown.Section title={category} key={category}>
-              {formats.map((format) => (
-                <Form.Dropdown.Item
-                  key={format.format_id}
-                  value={getFormatValue(format)}
-                  title={getFormatTitle(format)}
-                />
-              ))}
-            </Form.Dropdown.Section>
-          ))}
-        </Form.Dropdown>
+        <>
+          <Form.Dropdown {...itemProps.format} title="Format">
+            {Object.entries(formats).map(([category, formats]) => (
+              <Form.Dropdown.Section title={category} key={category}>
+                {formats.map((format) => (
+                  <Form.Dropdown.Item
+                    key={format.format_id}
+                    value={getFormatValue(format, category, showAdvanced)}
+                    title={getFormatTitle(format, category, showAdvanced)}
+                  />
+                ))}
+              </Form.Dropdown.Section>
+            ))}
+          </Form.Dropdown>
+          <Advanced itemProps={itemProps} show={showAdvanced} video={video} onChange={setShowAdvanced} />
+        </>
       )}
     </Form>
   );
