@@ -76,10 +76,14 @@ add_alarm() {
     CURRENT_DIR="$(pwd)"
     log "Current directory: $CURRENT_DIR"
     FOUND_SCRIPT=$(find "$CURRENT_DIR" -name "trigger-alarm.sh" 2>/dev/null | head -n 1)
-    log "Found script (if any): $FOUND_SCRIPT"
-  else
-    log "Trigger script found at: $TRIGGER_SCRIPT"
+    if [ -z "$FOUND_SCRIPT" ]; then
+      log "ERROR: Could not find trigger script anywhere"
+      echo "ERROR: Could not find trigger script anywhere"
+      exit 1
+    fi
+    TRIGGER_SCRIPT="$FOUND_SCRIPT"
   fi
+  log "Trigger script found at: $TRIGGER_SCRIPT"
   
   # Create the crontab entry
   # Format: minute hour day month weekday command
