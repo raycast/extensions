@@ -16,7 +16,7 @@
       "preferences": [
         {
           "name": "url",
-          "title": "PasteBin service URL",
+          "title": "PrivateBin service URL",
           "description": "Provide an URL of the PrivateBin instance (for example 'https://privatebin.net')",
           "type": "textfield",
           "required": true

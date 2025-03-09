@@ -9,7 +9,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import { createPaste } from "./lib/privatebin";
 import { generatePassword, isMarkdown } from "./lib/tools";
 import * as fs from "node:fs";
@@ -41,35 +41,39 @@ export default function Command() {
 
   const { handleSubmit, itemProps, setValue, values } = useForm<PasteDataForm>({
     onSubmit: async (values) => {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Encrypting data...",
-      });
+      try {
+        await showToast({
+          style: Toast.Style.Animated,
+          title: "Encrypting data...",
+        });
 
-      let filePath: string | null = values.attachment[0] ?? null;
-      if (filePath && (!fs.existsSync(filePath) || !fs.lstatSync(filePath).isFile())) {
-        filePath = null;
+        let filePath: string | null = values.attachment[0] ?? null;
+        if (filePath && (!fs.existsSync(filePath) || !fs.lstatSync(filePath).isFile())) {
+          filePath = null;
+        }
+
+        const { id, pasteKey } = await createPaste(
+          values.pasteData,
+          values.expire,
+          values.password,
+          values.burnAfterRead,
+          filePath,
+        );
+
+        let copyText = `${url.replace(/\/+$/, "")}/?${id}#${pasteKey}`;
+        if (includePassword && values.password) {
+          copyText = `${copyText}\nPassword: ${values.password}`;
+        }
+
+        await Clipboard.copy(copyText);
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Share URL copied to clipboard",
+        });
+      } catch (e) {
+        await showFailureToast(e, { title: "Could not create the Paste" });
       }
-
-      const { id, pasteKey } = await createPaste(
-        values.pasteData,
-        values.expire,
-        values.password,
-        values.burnAfterRead,
-        filePath,
-      );
-
-      let copyText = `${url.replace(/\/+$/, "")}/?${id}#${pasteKey}`;
-      if (includePassword && values.password) {
-        copyText = `${copyText}\nPassword: ${values.password}`;
-      }
-
-      await Clipboard.copy(copyText);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Share URL copied to clipboard",
-      });
 
       await popToRoot();
     },
@@ -81,13 +85,14 @@ export default function Command() {
     },
     initialValues: {
       expire: "1day",
+      format: "plaintext",
     },
   });
 
   const createAndCopyPassword = async () => {
     const password = generatePassword(8);
     setValue("password", password);
-    showToast({
+    await showToast({
       style: Toast.Style.Success,
       title: "Password created" + (includePassword ? "" : " and copied to clipboard"),
     });

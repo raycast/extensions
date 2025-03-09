@@ -40,7 +40,7 @@ export async function createPaste(
   let pasteData = { paste: pasteText };
 
   if (filePath) {
-    pasteData = { ...pasteData, ...createAttachmentData(filePath) };
+    pasteData = { ...pasteData, ...(await createAttachmentData(filePath)) };
   }
 
   const pasteKey = randomBytes(32);
@@ -96,8 +96,8 @@ export async function createPaste(
   };
 }
 
-function createAttachmentData(filePath: string) {
-  const fileBuffer = fs.readFileSync(filePath);
+async function createAttachmentData(filePath: string) {
+  const fileBuffer = await fs.promises.readFile(filePath);
   const mimeType = mime.lookup(filePath) || "application/octet-stream";
   const base64Data = fileBuffer.toString("base64");
   const dataURI = `data:${mimeType};base64,${base64Data}`;
