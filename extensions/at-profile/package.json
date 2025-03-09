@@ -93,6 +93,26 @@
     "@raycast/api": "^1.80.0",
     "@raycast/utils": "^1.19.1"
   },
+  "ai": {
+    "evals": [
+      {
+        "name": "open_profile",
+        "description": "Open a social media profile",
+        "examples": [
+          {
+            "input": "Open raycast on GitHub",
+            "output": {
+              "tool": "open",
+              "args": {
+                "profile": "raycast",
+                "site": "github"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
