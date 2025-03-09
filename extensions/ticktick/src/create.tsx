@@ -42,7 +42,6 @@ export default function TickTickCreate() {
   const [isLocalDataLoaded, setIsLocalDataLoaded] = useState(false);
   const [title, setTitle] = useState<string>("");
   const [projectId, setProjectId] = useState<string>("");
-  const [priority, setPriority] = useState<string>("");
 
   useEffect(() => {
     (async () => {
@@ -171,7 +170,7 @@ export default function TickTickCreate() {
             <Action
               onAction={() => autoFillWithAI(title)}
               icon={Icon.Wand}
-              title="Fill the form with AI"
+              title="Fill the Form with AI"
               shortcut={{ modifiers: ["cmd"], key: "f" }}
             />
           )}
