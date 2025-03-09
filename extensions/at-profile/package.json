@@ -96,17 +96,18 @@
   "ai": {
     "evals": [
       {
-        "name": "open_profile",
-        "description": "Open a social media profile",
-        "examples": [
+        "input" : "@at-profile open raycast instagram",
+        "mocks" : {
+          "open" : "Successfully called \"open\""
+        },
+        "expected" : [
           {
-            "input": "Open raycast on GitHub",
-            "output": {
-              "tool": "open",
-              "args": {
-                "profile": "raycast",
-                "site": "github"
-              }
+            "callsTool" : {
+              "arguments" : {
+                "profile" : "raycast",
+                "site" : "instagram"
+              },
+              "name" : "open"
             }
           }
         ]
