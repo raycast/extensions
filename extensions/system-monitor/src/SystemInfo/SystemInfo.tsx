@@ -12,7 +12,7 @@ export default function SystemInfo() {
       title="System Info"
       icon={Icon.Finder}
       detail={<SystemInfoDetail />}
-      actions={<Actions />}
+      actions={<Actions radioButtonNumber={4} />}
     />
   );
 }

@@ -8,6 +8,7 @@ We introduced new commands to summarize YouTube videos with AI. The one you used
 - Summarize with Raycast: \`summarizeVideoWithRaycastAI\`
 - Summarize with OpenAI: \`summarizeVideoWithOpenAI\`
 - Summarize with Anthropic: \`summarizeVideoWithAnthropic\`
+- Summarize with Ollama: \`summarizeVideoWithOllama\`
 
 You have to migrate your settings to the new commands. Open the extensions preferences and update the command accordingly. You can find your old settings in the deprecated command.
 

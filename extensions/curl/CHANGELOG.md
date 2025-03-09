@@ -1,5 +1,7 @@
 # cURL Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Bug fix] - 2024-11-28
 
 - Allow the request history to store different body requests for the same URL

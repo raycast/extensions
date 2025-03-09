@@ -1,4 +1,4 @@
-import { execSync, spawn } from "node:child_process";
+import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import {
@@ -6,10 +6,10 @@ import {
   ActionPanel,
   BrowserExtension,
   Clipboard,
-  Detail,
   Form,
-  getSelectedText,
   Icon,
+  getPreferenceValues,
+  getSelectedText,
   open,
   showHUD,
   showToast,
@@ -17,32 +17,47 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
-import nanoSpawn from "nano-spawn";
-import { DownloadOptions, isValidHHMM, isYouTubeURL, parseHHMM, preferences } from "./utils.js";
+import { execa } from "execa";
+import {
+  DownloadOptions,
+  getFormats,
+  getFormatTitle,
+  getFormatValue,
+  isValidHHMM,
+  isValidUrl,
+  parseHHMM,
+} from "./utils.js";
+import { Video } from "./types.js";
+import Installer from "./views/installer.js";
+import Updater from "./views/updater.js";
+
+const {
+  downloadPath,
+  ytdlPath,
+  ffmpegPath,
+  ffprobePath,
+  autoLoadUrlFromClipboard,
+  autoLoadUrlFromSelectedText,
+  enableBrowserExtensionSupport,
+  forceIpv4,
+} = getPreferenceValues<ExtensionPreferences>();
 
 export default function DownloadVideo() {
   const [error, setError] = useState(0);
+  const [warning, setWarning] = useState("");
 
   const { handleSubmit, values, itemProps, setValue, setValidationError } = useForm<DownloadOptions>({
     initialValues: {
       url: "",
     },
     onSubmit: async (values) => {
-      const options = ["-P", preferences.downloadPath];
+      if (!values.format) return;
+      const options = ["-P", downloadPath];
+      const [downloadFormat, recodeFormat] = values.format.split("#");
 
-      options.push("--ffmpeg-location", preferences.ffmpegPath);
-      options.push("-f", "bv*[ext=mp4][vcodec^=avc]+ba[ext=m4a]/b[ext=mp4]");
-
-      // if (!values.startTime && values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*0:00-${values.endTime}`);
-      // } else if (values.startTime && !values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*${values.startTime}-*`);
-      // } else if (values.startTime && values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*${values.startTime}-${values.endTime}`);
-      // }
+      options.push("--ffmpeg-location", ffmpegPath);
+      options.push("--format", downloadFormat);
+      options.push("--recode-video", recodeFormat);
 
       const toast = await showToast({
         title: "Downloading Video",
@@ -53,7 +68,7 @@ export default function DownloadVideo() {
       options.push("--progress");
       options.push("--print", "after_move:filepath");
 
-      const process = spawn(preferences.ytdlPath, [...options, values.url]);
+      const process = spawn(ytdlPath, [...options, values.url]);
 
       let filePath = "";
 
@@ -80,8 +95,14 @@ export default function DownloadVideo() {
         const line = data.toString();
         console.error(line);
 
-        toast.title = "Download Failed";
-        toast.style = Toast.Style.Failure;
+        if (line.startsWith("WARNING:")) {
+          setWarning(line);
+        }
+
+        if (line.startsWith("ERROR:")) {
+          toast.title = "Download Failed";
+          toast.style = Toast.Style.Failure;
+        }
         toast.message = line;
       });
 
@@ -118,7 +139,7 @@ export default function DownloadVideo() {
         if (!value) {
           return "URL is required";
         }
-        if (!isYouTubeURL(value)) {
+        if (!isValidUrl(value)) {
           return "Invalid URL";
         }
       },
@@ -143,36 +164,31 @@ export default function DownloadVideo() {
   });
 
   const { data: video, isLoading } = usePromise(
-    async (url) => {
+    async (url: string) => {
       if (!url) return;
-      if (!isYouTubeURL(url)) return;
+      if (!isValidUrl(url)) return;
 
-      const result = await nanoSpawn(
-        preferences.ytdlPath,
-        [preferences.forceIpv4 ? "--force-ipv4" : undefined, "-j", url].filter((x) => Boolean(x)),
+      const result = await execa(
+        ytdlPath,
+        [forceIpv4 ? "--force-ipv4" : "", "--dump-json", "--format-sort=resolution,ext,tbr", url].filter((x) =>
+          Boolean(x),
+        ),
       );
-      return JSON.parse(result.stdout) as {
-        title: string;
-        duration: number;
-        live_status: string;
-        formats: {
-          format_id: string;
-          vcodec: string;
-          acodec: string;
-          video_ext: string;
-          protocol: string;
-          filesize_approx: number;
-          resolution: string;
-        }[];
-      };
+      return JSON.parse(result.stdout) as Video;
     },
     [values.url],
     {
       onError(error) {
         showToast({
           style: Toast.Style.Failure,
-          title: "Failed to fetch video",
+          title: "Video not found with the provided URL",
           message: error.message,
+          primaryAction: {
+            title: "Copy to Clipboard",
+            onAction: () => {
+              Clipboard.copy(error.message);
+            },
+          },
         });
       },
     },
@@ -180,7 +196,7 @@ export default function DownloadVideo() {
 
   useEffect(() => {
     if (video) {
-      if (video.live_status !== "not_live") {
+      if (video.live_status !== "not_live" && video.live_status !== undefined) {
         setValidationError("url", "Live streams are not supported");
       }
     }
@@ -188,18 +204,18 @@ export default function DownloadVideo() {
 
   useEffect(() => {
     (async () => {
-      if (preferences.autoLoadUrlFromClipboard) {
+      if (autoLoadUrlFromClipboard) {
         const clipboardText = await Clipboard.readText();
-        if (clipboardText && isYouTubeURL(clipboardText)) {
+        if (clipboardText && isValidUrl(clipboardText)) {
           setValue("url", clipboardText);
           return;
         }
       }
 
-      if (preferences.autoLoadUrlFromSelectedText) {
+      if (autoLoadUrlFromSelectedText) {
         try {
           const selectedText = await getSelectedText();
-          if (selectedText && isYouTubeURL(selectedText)) {
+          if (selectedText && isValidUrl(selectedText)) {
             setValue("url", selectedText);
             return;
           }
@@ -208,10 +224,10 @@ export default function DownloadVideo() {
         }
       }
 
-      if (preferences.enableBrowserExtensionSupport) {
+      if (enableBrowserExtensionSupport) {
         try {
           const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
-          if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
+          if (tabUrl && isValidUrl(tabUrl)) setValue("url", tabUrl);
         } catch {
           // Suppress the error if Raycast didn't find browser extension
         }
@@ -220,20 +236,22 @@ export default function DownloadVideo() {
   }, []);
 
   const missingExecutable = useMemo(() => {
-    if (!fs.existsSync(preferences.ytdlPath)) {
+    if (!fs.existsSync(ytdlPath)) {
       return "yt-dlp";
     }
-    if (!fs.existsSync(preferences.ffmpegPath)) {
+    if (!fs.existsSync(ffmpegPath)) {
       return "ffmpeg";
     }
-    if (!fs.existsSync(preferences.ffprobePath)) {
+    if (!fs.existsSync(ffprobePath)) {
       return "ffprobe";
     }
     return null;
   }, [error]);
 
+  const formats = useMemo(() => getFormats(video), [video]);
+
   if (missingExecutable) {
-    return <NotInstalled executable={missingExecutable} onRefresh={() => setError(error + 1)} />;
+    return <Installer executable={missingExecutable} onRefresh={() => setError(error + 1)} />;
   }
 
   return (
@@ -241,93 +259,51 @@ export default function DownloadVideo() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            icon={Icon.Download}
-            title="Download Video"
-            onSubmit={(values) => {
-              handleSubmit({ ...values, copyToClipboard: false } as DownloadOptions);
-            }}
-          />
+          <ActionPanel.Section>
+            <Action.SubmitForm
+              icon={Icon.Download}
+              title="Download Video"
+              onSubmit={(values) => {
+                setWarning("");
+                handleSubmit({ ...values, copyToClipboard: false } as DownloadOptions);
+              }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.Push icon={Icon.Hammer} title="Update Libraries" target={<Updater />} />
+          </ActionPanel.Section>
         </ActionPanel>
+      }
+      searchBarAccessory={
+        <Form.LinkAccessory
+          text="Supported Sites"
+          target="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md"
+        />
       }
     >
       <Form.Description title="Title" text={video?.title ?? "Video not found"} />
       <Form.TextField
+        {...itemProps.url}
         autoFocus
         title="URL"
-        placeholder="https://www.youtube.com/watch?v=xRMPKQweySE"
-        {...itemProps.url}
+        placeholder="https://www.youtube.com/watch?v=ykaj0pS4A1A"
       />
-      {/*<Form.Separator />*/}
-      {/*<Form.TextField*/}
-      {/*  info="Optional. Specify when the output video should start. Follow the format HH:MM:SS or MM:SS."*/}
-      {/*  title="Start Time"*/}
-      {/*  placeholder="00:00"*/}
-      {/*  {...itemProps.startTime}*/}
-      {/*/>*/}
-      {/*<Form.TextField*/}
-      {/*  info="Optional. Specify when the output video should end. Follow the format HH:MM:SS or MM:SS."*/}
-      {/*  title="End Time"*/}
-      {/*  placeholder={video ? formatHHMM(video.duration) : "00:00"}*/}
-      {/*  {...itemProps.endTime}*/}
-      {/*/>*/}
-    </Form>
-  );
-}
-
-function NotInstalled({ executable, onRefresh }: { executable: string; onRefresh: () => void }) {
-  return (
-    <Detail
-      actions={<AutoInstall onRefresh={onRefresh} />}
-      markdown={`
-# 🚨 Error: \`${executable}\` is not installed
-This extension depends on a command-line utilty that is not detected on your system. You must install it continue.
-
-If you have homebrew installed, simply press **⏎** to have this extension install it for you. Since \`${executable}\` is a heavy library, 
-**it can take up 2 minutes to install**.
-
-**Please do not close Raycast while the installation is in progress.**
-
-To install homebrew, visit [this link](https://brew.sh)
-  `}
-    />
-  );
-}
-
-function AutoInstall({ onRefresh }: { onRefresh: () => void }) {
-  const [isLoading, setIsLoading] = useState(false);
-
-  return (
-    <ActionPanel>
-      {!isLoading && (
-        <Action
-          title="Install with Homebrew"
-          icon={Icon.Download}
-          onAction={async () => {
-            if (isLoading) return;
-
-            setIsLoading(true);
-
-            const toast = await showToast({ style: Toast.Style.Animated, title: "Installing ffmpeg..." });
-            await toast.show();
-
-            try {
-              execSync(`zsh -l -c 'brew install ffmpeg'`);
-              await toast.hide();
-              onRefresh();
-            } catch (e) {
-              await toast.hide();
-              console.error(e);
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "Error installing",
-                message: "An unknown error occured while trying to install",
-              });
-            }
-            setIsLoading(false);
-          }}
-        />
+      {warning && <Form.Description text={warning} />}
+      {video && (
+        <Form.Dropdown {...itemProps.format} title="Format">
+          {Object.entries(formats).map(([category, formats]) => (
+            <Form.Dropdown.Section title={category} key={category}>
+              {formats.map((format) => (
+                <Form.Dropdown.Item
+                  key={format.format_id}
+                  value={getFormatValue(format)}
+                  title={getFormatTitle(format)}
+                />
+              ))}
+            </Form.Dropdown.Section>
+          ))}
+        </Form.Dropdown>
       )}
-    </ActionPanel>
+    </Form>
   );
 }

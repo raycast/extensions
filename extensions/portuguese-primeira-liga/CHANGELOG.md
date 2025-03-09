@@ -1,5 +1,10 @@
 # Portuguese Primeira Liga Changelog
 
+## [Improvements] - 2025-03-08
+
+- Improved View Newspapers command cache logic
+- Removed `form` (Standings) and `position` (Top Scorers) data points
+
 ## [New Additions] - 2023-03-24
 
 - Added Player Detail View in View Top Scorers command

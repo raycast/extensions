@@ -7,7 +7,7 @@ import {
   GETTING_VIDEO_URL_FROM_CLIPBOARD,
 } from "../const/toast_messages";
 
-export const useGetVideoUrl = async ({
+export const useGetVideoUrl = ({
   input,
   setVideoURL,
 }: {
@@ -63,7 +63,5 @@ export const useGetVideoUrl = async ({
     };
 
     fetchData();
-  }, []);
-
-  return input;
+  }, [input]);
 };

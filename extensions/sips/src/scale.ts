@@ -10,16 +10,19 @@
 
 import { showToast, Toast } from "@raycast/api";
 
+import runOperation from "./operations/runOperation";
 import scale from "./operations/scaleOperation";
 import { getSelectedImages } from "./utilities/utils";
-import runOperation from "./operations/runOperation";
 
 export default async function Command(props: { arguments: { scaleFactor: string } }) {
   const { scaleFactor } = props.arguments;
 
   const scaleNumber = parseFloat(scaleFactor);
   if (isNaN(scaleNumber)) {
-    await showToast({ title: "Scale factor must be a number", style: Toast.Style.Failure });
+    await showToast({
+      title: "Scale factor must be a number",
+      style: Toast.Style.Failure,
+    });
     return;
   }
 

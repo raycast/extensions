@@ -85,7 +85,9 @@ export default function ProcessList() {
 
   const fileIcon = (process: Process) => {
     if (process.type === "prefPane") {
-      return { fileIcon: process.path?.replace(/(.+\.prefPane)(.+)/, "$1") ?? "" };
+      return {
+        fileIcon: process.path?.replace(/(.+\.prefPane)(.+)/, "$1") ?? "",
+      };
     }
 
     if (process.type === "app" || process.type === "aggregatedApp") {
@@ -148,7 +150,10 @@ export default function ProcessList() {
         }
         let knownRootNode = appMap.get(process.pid);
         if (knownRootNode == undefined) {
-          knownRootNode = { process: undefined, childNodes: [node] } as ProcessNode;
+          knownRootNode = {
+            process: undefined,
+            childNodes: [node],
+          } as ProcessNode;
           appMap.set(process.pid, knownRootNode);
         } else {
           if (knownRootNode.process == undefined) {
@@ -267,7 +272,10 @@ export default function ProcessList() {
                   },
                   {
                     text: prettyBytes(process.mem * 1024),
-                    icon: { source: "memorychip.svg", tintColor: Color.PrimaryText },
+                    icon: {
+                      source: "memorychip.svg",
+                      tintColor: Color.PrimaryText,
+                    },
                     tooltip: "Memory",
                   },
                 ]}
@@ -282,13 +290,13 @@ export default function ProcessList() {
                       onAction={() => fetchProcesses()}
                     />
                     <Action
-                      title={`${aggregateApps ? "Dis" : "En"}able Aggregating Apps`}
+                      title={`${aggregateApps ? "Disable" : "Enable"} Aggregating Apps`}
                       icon={Icon.AppWindow}
                       shortcut={{ key: "tab", modifiers: ["shift"] }}
                       onAction={() => {
                         setAggregateApps(!aggregateApps);
                         showToast({
-                          title: `${aggregateApps ? "Dis" : "En"}abled aggregating apps`,
+                          title: `${aggregateApps ? "Disabled" : "Enabled"} aggregating apps`,
                         });
                       }}
                     />
