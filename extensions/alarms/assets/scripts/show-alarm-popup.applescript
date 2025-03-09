@@ -15,4 +15,5 @@ on run argv
   if button returned of dialogResult is "Stop" then
     return "stop"
   end if
+  return "unknown"
 end run 
