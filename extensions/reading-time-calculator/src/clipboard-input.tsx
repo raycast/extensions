@@ -21,7 +21,7 @@ export default function Command() {
           await showHUD("No text in clipboard");
         }
       } catch (error) {
-        await showHUD("Failed to read clipboard");
+        await showFailureToast("Failed to read clipboard");
       } finally {
         setIsLoading(false);
       }
