@@ -19,8 +19,8 @@ export const useWarmupCalculator = (initialWeight?: string) => {
       // Parse input
       const parsedWeight = parseFloat(weight);
 
-      // Validate inputs
-      if (isNaN(parsedWeight) || parsedWeight < VALIDATION.WEIGHT.MIN || parsedWeight > VALIDATION.WEIGHT.MAX) {
+      // Validate inputs - updated to match other validations
+      if (isNaN(parsedWeight) || parsedWeight <= 0 || parsedWeight > VALIDATION.WEIGHT.MAX) {
         // Return empty sets for invalid input
         setSets([]);
         return;

@@ -1,4 +1,3 @@
-// utils/volume.ts
 import { VolumeResult } from "../types/volume";
 import { VOLUME_SCHEMES, TRAINING_DESCRIPTIONS } from "../constants/volume";
 import { VALIDATION } from "../constants/shared";
@@ -15,7 +14,7 @@ export const calculateVolume = (oneRepMax: number): VolumeResult[] => {
 
     return {
       goal: scheme.goal,
-      scheme: scheme,
+      scheme,
       weight,
       totalReps,
       totalVolume,

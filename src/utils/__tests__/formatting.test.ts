@@ -1,4 +1,3 @@
-// utils/__tests__/formatting.test.ts
 import { formatWeight, formatPercentage } from "../formatting";
 import { UNITS } from "../../constants/shared";
 
@@ -34,7 +33,6 @@ describe("formatWeight", () => {
   test("maintains consistent decimal places", () => {
     // Check that we always show one decimal place
     expect(formatWeight(100, "kg")).toBe("100.0 kg");
-    expect(formatWeight(100.0, "kg")).toBe("100.0 kg");
     expect(formatWeight(100.0, "kg")).toBe("100.0 kg");
   });
 

@@ -1,5 +1,4 @@
-// components/warmup/ListView.tsx
-import { List, getPreferenceValues, Action, ActionPanel, Icon } from "@raycast/api";
+import { List, getPreferenceValues, Icon } from "@raycast/api";
 import { useState } from "react";
 import { WarmupSet } from "../../types/warmup";
 import { Preferences } from "../../types/shared";
@@ -63,14 +62,6 @@ export const ListView: React.FC<ListViewProps> = ({ weight, setWeight, sets }) =
       onSearchTextChange={handleSearchTextChange}
       searchText={weight}
       isShowingDetail={showingDetail}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser
-            title="Change Arguments"
-            url="raycast://extensions/marianbreitmeyer/lift-calculator/lift-warmup"
-          />
-        </ActionPanel>
-      }
     >
       {renderContent()}
     </List>

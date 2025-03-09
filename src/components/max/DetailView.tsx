@@ -1,4 +1,3 @@
-// components/max/DetailView.tsx
 import { List } from "@raycast/api";
 import { MaxResult } from "../../types/max";
 import { formatWeight } from "../../utils/formatting";

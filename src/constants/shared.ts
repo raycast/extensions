@@ -3,7 +3,7 @@
 // Input validation ranges and patterns
 export const VALIDATION = {
   WEIGHT: {
-    MIN: 0, // Check if this should be > 0
+    MIN: 1,
     MAX: 1000,
     PATTERN: /^(\d+(?:\.\d+)?)\*(\d+)$/,
   },
@@ -33,6 +33,6 @@ export const UNITS = {
 
 // Epley formula constants
 export const EPLEY = {
-  COEFFICIENT_A: 1.0278,
-  COEFFICIENT_B: 0.0278,
+  MULTIPLIER: 1,
+  COEFFICIENT: 0.0333,
 } as const;

@@ -1,4 +1,3 @@
-// For max/ItemActions.tsx
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import { MAX_RESOURCES } from "../../constants/max";
 import { MaxResult } from "../../types/max";

@@ -28,17 +28,35 @@ export const Toast = {
   },
 };
 
+// export const List = {
+//   EmptyView: jest.fn(),
+//   Item: {
+//     Detail: {
+//       Metadata: {
+//         Label: jest.fn(),
+//         Link: jest.fn(),
+//         Separator: jest.fn(),
+//       },
+//     },
+//   },
+// };
+
 export const List = {
   EmptyView: jest.fn(),
-  Item: {
-    Detail: {
+  Item: jest.fn().mockReturnValue({
+    Detail: jest.fn().mockReturnValue({
       Metadata: {
         Label: jest.fn(),
         Link: jest.fn(),
         Separator: jest.fn(),
       },
-    },
-  },
+    }),
+  }),
+  Section: jest.fn(),
+  isShowingDetail: false,
+  onSearchTextChange: jest.fn(),
+  searchBarPlaceholder: "",
+  searchText: "",
 };
 
 export const showToast = jest.fn();

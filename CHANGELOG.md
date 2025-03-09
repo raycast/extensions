@@ -1,3 +1,3 @@
-# one-rep-max Changelog
+# Lift Calculator Changelog
 
-## [Initial Version] - 2024-03-31
+## [Initial Version] - {PR_MERGE_DATE}

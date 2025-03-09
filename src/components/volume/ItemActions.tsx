@@ -15,7 +15,7 @@ export const ItemActions: React.FC<ItemActionsProps> = ({ results, unitSystem, s
     .map((result) => {
       return (
         `${result.goal.toUpperCase()}\n` +
-        `${result.scheme.sets}×${result.scheme.reps} @ ${formatWeight(result.weight, unitSystem)}\n` +
+        `${result.scheme.sets}x${result.scheme.reps} @ ${formatWeight(result.weight, unitSystem)}\n` +
         `Rest: ${result.scheme.restMinutes} min | Volume: ${formatWeight(result.totalVolume, unitSystem)}\n`
       );
     })

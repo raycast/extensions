@@ -1,4 +1,3 @@
-// For warmup/ItemActions.tsx
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import { WarmupSet } from "../../types/warmup";
 import { formatWeight } from "../../utils/formatting";

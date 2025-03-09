@@ -64,7 +64,7 @@ describe("lift-warmup command", () => {
 
   test("maintains ascending weight progression", () => {
     const sets = calculateWarmupSets(100);
-    let previousWeight = 0;
+    let previousWeight = -1;
 
     sets.forEach((set) => {
       expect(set.weight).toBeGreaterThan(previousWeight);

@@ -8,7 +8,7 @@ export interface MaxResult {
   icon: Icon;
   percentage?: number;
   text?: string;
-  scheme?: string;
+  scheme?: "low" | "moderate" | "high";
 }
 
 export interface MaxCommandArgs {

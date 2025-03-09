@@ -1,4 +1,3 @@
-// utils/__tests__/warmup.test.ts
 import { calculateWarmupSets } from "../warmup";
 import { WARMUP_SCHEMES } from "../../constants/warmup";
 import { VALIDATION, UNITS } from "../../constants/shared";

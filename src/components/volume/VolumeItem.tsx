@@ -1,4 +1,3 @@
-// components/volume/VolumeItem.tsx
 import { List } from "@raycast/api";
 import { VolumeResult } from "../../types/volume";
 import { formatWeight } from "../../utils/formatting";
@@ -7,7 +6,7 @@ import { ItemActions } from "./ItemActions";
 
 interface VolumeItemProps {
   result: VolumeResult;
-  results: VolumeResult[]; // Added this to pass to ItemActions
+  results: VolumeResult[];
   unitSystem: "kg" | "lbs";
   setShowingDetail: React.Dispatch<React.SetStateAction<boolean>>;
 }

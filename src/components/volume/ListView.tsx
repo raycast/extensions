@@ -1,5 +1,4 @@
-// components/volume/ListView.tsx
-import { List, getPreferenceValues, Action, ActionPanel, Icon } from "@raycast/api";
+import { List, getPreferenceValues, Icon } from "@raycast/api";
 import { useState } from "react";
 import { VolumeResult } from "../../types/volume";
 import { Preferences } from "../../types/shared";
@@ -62,14 +61,7 @@ export const ListView: React.FC<ListViewProps> = ({ weight, setWeight, results }
       onSearchTextChange={handleSearchTextChange}
       searchText={weight}
       isShowingDetail={showingDetail}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser
-            title="Change Arguments"
-            url="raycast://extensions/marianbreitmeyer/lift-calculator/lift-volume"
-          />
-        </ActionPanel>
-      }
+      isLoading={results.length > 0 && weight !== ""}
     >
       {renderContent()}
     </List>

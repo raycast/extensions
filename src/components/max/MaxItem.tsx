@@ -1,4 +1,3 @@
-// components/max/MaxItem.tsx
 import { List } from "@raycast/api";
 import { MaxResult } from "../../types/max";
 import { formatWeight, formatPercentage } from "../../utils/formatting";
@@ -8,7 +7,7 @@ import { DetailView } from "./DetailView";
 interface MaxItemProps {
   result: MaxResult;
   unitSystem: "kg" | "lbs";
-  results: MaxResult[]; // Add this prop
+  results: MaxResult[];
   setShowingDetail: React.Dispatch<React.SetStateAction<boolean>>;
 }
 

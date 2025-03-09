@@ -28,7 +28,7 @@ export const useRepMaxCalculator = (initialWeight?: string, initialReps?: string
         isNaN(parsedWeight) ||
         parsedReps < VALIDATION.REPS.MIN ||
         parsedReps > VALIDATION.REPS.MAX ||
-        parsedWeight < VALIDATION.WEIGHT.MIN ||
+        parsedWeight <= 0 ||
         parsedWeight > VALIDATION.WEIGHT.MAX
       ) {
         setResults(getErrorResult());

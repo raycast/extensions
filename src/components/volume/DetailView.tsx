@@ -1,4 +1,3 @@
-// components/volume/DetailView.tsx
 import { List } from "@raycast/api";
 import { VolumeResult } from "../../types/volume";
 import { formatWeight } from "../../utils/formatting";
@@ -45,6 +44,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ result, unitSystem }) =>
         />
         <List.Item.Detail.Metadata.Link
           title="Scientific Research"
+          // Using hypertrophy research for power/endurance since we don't have specific links for those goals
           target={result.goal === "strength" ? VOLUME_RESOURCES.LINKS.STRENGTH : VOLUME_RESOURCES.LINKS.HYPERTROPHY}
           text={result.goal === "strength" ? VOLUME_RESOURCES.DOCS.STRENGTH : VOLUME_RESOURCES.DOCS.HYPERTROPHY}
         />

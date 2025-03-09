@@ -1,4 +1,3 @@
-// components/warmup/WarmupItem.tsx
 import { List, Icon } from "@raycast/api";
 import { WarmupSet } from "../../types/warmup";
 import { formatWeight } from "../../utils/formatting";
@@ -9,28 +8,19 @@ import { ItemActions } from "./ItemActions";
 interface WarmupItemProps {
   set: WarmupSet;
   unitSystem: "kg" | "lbs";
-  sets: WarmupSet[]; // Add this prop
+  sets: WarmupSet[];
   setShowingDetail: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const WarmupItem: React.FC<WarmupItemProps> = ({
-  set,
-  unitSystem,
-  sets, // Destructure the new prop
-  setShowingDetail,
-}) => {
-  const { color } = WARMUP_SCHEMES[set.setNumber - 1];
+export const WarmupItem: React.FC<WarmupItemProps> = ({ set, unitSystem, sets, setShowingDetail }) => {
+  // Add safety check for index bounds
+  const schemeIndex = Math.max(0, Math.min(set.setNumber - 1, WARMUP_SCHEMES.length - 1));
+  const { color } = WARMUP_SCHEMES[schemeIndex];
   const isWorkingSet = set.percentage === 1.0;
 
   return (
     <List.Item
-      actions={
-        <ItemActions
-          setShowingDetail={setShowingDetail}
-          sets={sets} // Pass sets to ItemActions
-          unitSystem={unitSystem}
-        />
-      }
+      actions={<ItemActions setShowingDetail={setShowingDetail} sets={sets} unitSystem={unitSystem} />}
       icon={{
         source: Icon.Weights,
         tintColor: color,

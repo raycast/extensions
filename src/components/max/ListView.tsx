@@ -1,5 +1,4 @@
-// components/max/ListView.tsx
-import { List, getPreferenceValues, Action, ActionPanel, Icon } from "@raycast/api";
+import { List, getPreferenceValues, Icon } from "@raycast/api";
 import { useState } from "react";
 import { MaxResult } from "../../types/max";
 import { Preferences } from "../../types/shared";
@@ -22,8 +21,8 @@ export const ListView: React.FC<ListViewProps> = ({ searchText, setSearchText, r
     // Update searchText
     setSearchText(text);
 
-    // Try to parse weight and reps
-    const match = text.match(/^(\d*(\.\d*)?)[x*]?(\d*)?$/);
+    // Try to parse weight and reps - use a stricter pattern that matches the UI example
+    const match = text.match(/^(\d*(\.\d*)?)[x]?(\d*)?$/);
 
     if (match) {
       // Set weight if available
@@ -49,8 +48,8 @@ export const ListView: React.FC<ListViewProps> = ({ searchText, setSearchText, r
       );
     }
 
-    // Check for a complete weight x reps pattern
-    const completeMatch = searchText.match(/^(\d+(\.\d+)?)[x*](\d+)$/);
+    // Check for a complete weight x reps pattern - use only 'x' to match UI example
+    const completeMatch = searchText.match(/^(\d+(\.\d+)?)[x](\d+)$/);
 
     // Show EmptyView if no complete match
     if (!completeMatch) {
@@ -86,20 +85,17 @@ export const ListView: React.FC<ListViewProps> = ({ searchText, setSearchText, r
     ));
   };
 
+  // Determine if we're in a loading state - true when we have a valid format and are calculating
+  const hasValidFormat = searchText.match(/^(\d+(\.\d+)?)[x](\d+)$/) !== null;
+  const isCalculating = hasValidFormat && results.length > 0;
+
   return (
     <List
       searchBarPlaceholder="Enter weight x repetitions (e.g. 70x6)"
       onSearchTextChange={handleSearchTextChange}
       searchText={searchText}
       isShowingDetail={showingDetail}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser
-            title="Change Arguments"
-            url="raycast://extensions/marianbreitmeyer/lift-calculator/lift-max"
-          />
-        </ActionPanel>
-      }
+      isLoading={isCalculating}
     >
       {renderContent()}
     </List>

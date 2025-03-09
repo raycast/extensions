@@ -1,4 +1,3 @@
-// utils/__tests__/calculations.test.ts
 import { Color } from "@raycast/api";
 import { calculateOneRepMax, generateResults, getErrorResult } from "../calculations";
 import { VALIDATION, EPLEY } from "../../constants/shared";
@@ -6,7 +5,7 @@ import { VALIDATION, EPLEY } from "../../constants/shared";
 describe("calculateOneRepMax", () => {
   test("calculates 1RM correctly for valid inputs", () => {
     // Let's calculate the expected values using the Epley formula directly
-    const calculate = (weight: number, reps: number) => weight / (EPLEY.COEFFICIENT_A - EPLEY.COEFFICIENT_B * reps);
+    const calculate = (weight: number, reps: number) => weight * (EPLEY.MULTIPLIER + EPLEY.COEFFICIENT * reps);
 
     // Test case 1: 100kg x 5 reps
     const expected1 = calculate(100, 5);
@@ -18,7 +17,7 @@ describe("calculateOneRepMax", () => {
 
     // Let's also verify some known Epley formula results
     // 100kg x 5 should be approximately 112.5kg
-    expect(calculateOneRepMax(100, 5)).toBeCloseTo(112.5, 1);
+    expect(calculateOneRepMax(100, 5)).toBeCloseTo(116.65, 1);
   });
 
   test("throws error for invalid weight", () => {

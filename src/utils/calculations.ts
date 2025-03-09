@@ -1,13 +1,9 @@
-// utils/calculations.ts
 import { Icon, Color } from "@raycast/api";
 import { MaxResult } from "../types/max";
 import { MAX_SCHEMES, SCHEME_DESCRIPTIONS } from "../constants/max";
 import { VALIDATION, EPLEY } from "../constants/shared";
 
-// utils/calculations.ts
-
 export const calculateOneRepMax = (weight: number, reps: number): number => {
-  // Change validation to be more strict - weight must be > 0
   if (weight <= 0 || weight > VALIDATION.WEIGHT.MAX) {
     throw new Error(VALIDATION.getWeightError());
   }
@@ -15,8 +11,8 @@ export const calculateOneRepMax = (weight: number, reps: number): number => {
     throw new Error(VALIDATION.getRepsError());
   }
 
-  // Epley Formula
-  return weight / (EPLEY.COEFFICIENT_A - EPLEY.COEFFICIENT_B * reps);
+  // Standard Epley Formula
+  return weight * (EPLEY.MULTIPLIER + EPLEY.COEFFICIENT * reps);
 };
 
 export const generateResults = (repMax: number): MaxResult[] => {
