@@ -40,7 +40,7 @@ export default function Command() {
           }
         }
       } catch (error) {
-        console.error("Error updating timer:", error);
+        showFailureToast("Error updating timer", error);
       } finally {
         setIsLoading(false);
       }
