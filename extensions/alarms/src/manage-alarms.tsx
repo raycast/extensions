@@ -223,8 +223,12 @@ export default function ListAlarms() {
   const getAlarmTitle = (alarm: AlarmInfo) => alarm.title || alarm.name || "Unnamed Alarm";
 
   // Handle opening the create alarm command
-  const handleCreateAlarm = () => {
-    open("raycast://extensions/codista/alarms/create-alarm");
+  const handleCreateAlarm = async () => {
+    try {
+      await open("raycast://extensions/codista/alarms/create-alarm");
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to open Create Alarm command" });
+    }
   };
 
   return (
