@@ -29,7 +29,7 @@ export default function CreateBookmarks() {
         ...values,
         shared: false,
         is_archived: false,
-        tag_names: values.tags.split(" "),
+        tag_names: values.tags.split(" ").filter(tag => tag.length > 0),
       })
         .then(() => {
           toast.title = "Bookmark created successfully";
