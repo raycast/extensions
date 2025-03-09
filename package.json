@@ -42,26 +42,22 @@
     }
   ],
   "dependencies": {
-    "-": "^0.0.1",
-    "@raycast/api": "^1.90.0",
-    "g": "^2.0.1",
-    "node": "^22.9.0",
-    "node-fetch": "^3.3.2",
-    "npm": "^11.1.0"
+    "@raycast/api": "^1.89.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
-    "@eslint/js": "^9.19.0",
-    "@types/node": "^22.13.0",
-    "@types/react": "^18.2.51",
-    "@typescript-eslint/eslint-plugin": "^8.22.0",
-    "@typescript-eslint/parser": "^8.22.0",
-    "eslint": "^9.19.0",
+    "@eslint/js": "^9.18.0",
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.48",
+    "@typescript-eslint/eslint-plugin": "^8.21.0",
+    "@typescript-eslint/parser": "^8.21.0",
+    "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "globals": "^15.14.0",
     "prettier": "^3.4.2",
-    "react": "^18.2.0",
-    "typescript": "^5.7.2"
+    "react": "^19.0.0",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build",
