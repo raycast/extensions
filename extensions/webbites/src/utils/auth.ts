@@ -209,18 +209,12 @@ export const getCurrentUser = async (): Promise<Parse.User | null> => {
       }
     }
 
-    // Manually mark the user as authenticated if needed
-    if (sessionToken) {
-      try {
-        // Set the session token if possible
-        // This is internal, but safer than _finishFetch as it's just setting one property
-        if (user._sessionToken !== undefined) {
-          user._sessionToken = sessionToken;
-        }
-      } catch (e) {
-        console.log("Could not set session token:", e);
-      }
-    }
+    // We can't directly set the session token on the user object in a type-safe way
+    // The Parse SDK doesn't expose a public API for this
+    // Instead, we'll just return the user object as is
+
+    // Note: If you need the session token later, you can retrieve it from local storage
+    // or store it as a separate property in your auth management system
 
     console.log("Reconstructed user from stored data:", userData.username);
     return user;

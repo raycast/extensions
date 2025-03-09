@@ -97,12 +97,22 @@ export const makeAuthenticatedRequest = async (
       throw new Error("No session token available");
     }
 
-    const headers = {
+    // const headers = {
+    //   "X-Parse-Application-Id": Parse.applicationId,
+    //   "X-Parse-REST-API-Key": Parse.javaScriptKey,
+    //   "X-Parse-Session-Token": sessionToken,
+    //   "Content-Type": "application/json",
+    // };
+    const headers: Record<string, string> = {
       "X-Parse-Application-Id": Parse.applicationId,
-      "X-Parse-REST-API-Key": Parse.javaScriptKey,
-      "X-Parse-Session-Token": sessionToken,
       "Content-Type": "application/json",
     };
+
+    if (Parse.javaScriptKey) {
+      headers["X-Parse-REST-API-Key"] = Parse.javaScriptKey;
+    }
+
+    headers["X-Parse-Session-Token"] = sessionToken;
 
     const url = `${Parse.serverURL}/${endpoint}`;
     const options: RequestInit = {
