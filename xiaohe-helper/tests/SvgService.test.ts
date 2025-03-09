@@ -17,8 +17,8 @@ describe("SvgService", () => {
       const nKeyGroup = new RegExp(`<g id="n">([\\s\\S]*?)</g>`);
       const iKeyGroup = new RegExp(`<g id="i">([\\s\\S]*?)</g>`);
 
-      const nGroup = updatedContent.match(nKeyGroup)?.[0] || "";
-      const iGroup = updatedContent.match(iKeyGroup)?.[0] || "";
+      const nGroup = updatedContent.match(nKeyGroup)?.[0] ?? fail('Could not find n key group');
+      const iGroup = updatedContent.match(iKeyGroup)?.[0] ?? fail('Could not find i key group');
 
       expect(nGroup).toMatch(/<rect class="key"[^>]*?fill="green"/);
       expect(nGroup).toMatch(/<text class="name"[^>]*?fill="white"[^>]*>N<\/text>/);

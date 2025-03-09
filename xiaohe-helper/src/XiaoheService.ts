@@ -64,7 +64,7 @@ export default class XiaoheService {
     return pinyin
       .toLowerCase()
       .split(" ")
-      .map((character: string | undefined) => {
+      .map((character) => {
         if (character) {
           const match = character.match(/^(zh|ch|sh|[bpmfdtnlgkhjqxrzcswy]?)(.*)$/);
           if (!match) return character;

@@ -35,7 +35,7 @@ describe("XiaoheService", () => {
       expect(XiaoheService.convert("ni h")).toBe("ni h?");
     });
 
-    it("weird test", () => {
+    it("should handle English words with partial Pinyin matches", () => {
       expect(XiaoheService.convert("long time no see")).toBe("ls t? no s?");
     });
   });

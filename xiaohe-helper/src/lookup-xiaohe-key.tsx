@@ -10,7 +10,7 @@ export default function Command() {
   const xiaohe = XiaoheService.convert(pinyin);
   const highlightKeys = XiaoheService.splitKeys(xiaohe);
 
-  const svgService = new SvgService();
+  const svgService = React.useMemo(() => new SvgService(), []);
   svgService.updateKeyColor(highlightKeys);
 
   return (
