@@ -57,8 +57,23 @@ export default function Command() {
   // Fetch projects when component mounts
   useEffect(() => {
     async function fetchProjects() {
+      let motionClient;
+
+      // First try to get the client
       try {
-        const motionClient = getMotionApiClient();
+        motionClient = getMotionApiClient();
+      } catch (error) {
+        console.error("Error initializing Motion API client:", error);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to initialize Motion client",
+          message: String(error),
+        });
+        setIsLoadingProjects(false);
+        return;
+      }
+
+      try {
         const projectsData = await motionClient.getProjects();
         setProjects(projectsData);
       } catch (error) {
@@ -84,9 +99,23 @@ export default function Command() {
   async function handleSubmit(values: Values) {
     setIsLoading(true);
 
-    try {
-      const motionClient = getMotionApiClient();
+    let motionClient;
 
+    // First try to get the client
+    try {
+      motionClient = getMotionApiClient();
+    } catch (error) {
+      console.error("Error initializing Motion API client:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to initialize Motion client",
+        message: String(error),
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    try {
       // Create a task payload with required fields
       const taskPayload: TaskPayload = {
         title: values.name,
@@ -186,7 +215,12 @@ export default function Command() {
         <Form.Dropdown.Item value="DONE" title="Done" />
       </Form.Dropdown>
 
-      <Form.Dropdown id="duration" title="Duration" defaultValue="30" onChange={handleDurationChange}>
+      <Form.Dropdown
+        id="duration"
+        title="Duration"
+        defaultValue="30"
+        onChange={handleDurationChange}
+      >
         <Form.Dropdown.Item value="reminder" title="Reminder (No time block)" />
         <Form.Dropdown.Item value="15" title="15 mins" />
         <Form.Dropdown.Item value="30" title="30 mins" />

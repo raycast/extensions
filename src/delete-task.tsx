@@ -35,7 +35,7 @@ export default function Command() {
     const filtered = tasks.filter(
       (task) =>
         task.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        (task.description && task.description.toLowerCase().includes(searchText.toLowerCase())),
+        (task.description && task.description.toLowerCase().includes(searchText.toLowerCase()))
     );
 
     setFilteredTasks(filtered);
@@ -155,7 +155,15 @@ export default function Command() {
       // Future due date
       if (diffDays < 7) {
         // Get the day name
-        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const dayNames = [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ];
         return dayNames[dueDay.getDay()];
       } else if (diffDays < 14) {
         return "Next week";
@@ -243,7 +251,11 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action title="Delete Task" onAction={() => deleteTask(task.id)} />
-                <Action title="Refresh Tasks" onAction={loadTasks} shortcut={{ modifiers: ["cmd"], key: "r" }} />
+                <Action
+                  title="Refresh Tasks"
+                  onAction={loadTasks}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
               </ActionPanel>
             }
           />

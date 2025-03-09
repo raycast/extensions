@@ -78,7 +78,12 @@ export const LABEL_PRESETS = [
 export const SCHEDULE_PRESETS = ["Later Today", "Tomorrow", "This Week", "Next Week", "Custom"];
 
 // Add debug logging to help troubleshoot API issues
-const logRequest = (method: string, url: string, headers: Record<string, string>, body?: Record<string, unknown>) => {
+const logRequest = (
+  method: string,
+  url: string,
+  headers: Record<string, string>,
+  body?: Record<string, unknown>
+) => {
   console.log(`[REQUEST] ${method} ${url}`);
   console.log("[HEADERS]", JSON.stringify(headers, null, 2));
   if (body) {
@@ -165,7 +170,9 @@ export const getMotionApiClient = () => {
 
         if (!response.ok) {
           const responseText = await logResponse(response);
-          throw new Error(`Failed to create task: ${response.statusText}${responseText ? ` - ${responseText}` : ""}`);
+          throw new Error(
+            `Failed to create task: ${response.statusText}${responseText ? ` - ${responseText}` : ""}`
+          );
         }
 
         return response.json() as Promise<MotionTask>;
@@ -187,7 +194,9 @@ export const getMotionApiClient = () => {
 
         if (!response.ok) {
           const responseText = await logResponse(response);
-          throw new Error(`Failed to get projects: ${response.statusText}${responseText ? ` - ${responseText}` : ""}`);
+          throw new Error(
+            `Failed to get projects: ${response.statusText}${responseText ? ` - ${responseText}` : ""}`
+          );
         }
 
         // Parse the response
@@ -234,7 +243,9 @@ export const getMotionApiClient = () => {
           headers,
         });
 
-        console.log(`[DEBUG] Motion API response status: ${response.status} ${response.statusText}`);
+        console.log(
+          `[DEBUG] Motion API response status: ${response.status} ${response.statusText}`
+        );
 
         if (!response.ok) {
           const responseText = await logResponse(response);
@@ -299,7 +310,9 @@ export const getMotionApiClient = () => {
 
       if (!response.ok) {
         const responseText = await logResponse(response);
-        throw new Error(`Failed to get task: ${response.statusText}${responseText ? ` - ${responseText}` : ""}`);
+        throw new Error(
+          `Failed to get task: ${response.statusText}${responseText ? ` - ${responseText}` : ""}`
+        );
       }
 
       return response.json() as Promise<MotionTask>;
@@ -339,7 +352,7 @@ export const getMotionApiClient = () => {
           }
           return acc;
         },
-        {} as Record<string, string | number | boolean | object | null>,
+        {} as Record<string, string | number | boolean | object | null>
       );
 
       // Ensure workspaceId is included in the payload
@@ -348,11 +361,11 @@ export const getMotionApiClient = () => {
       // Log exact character codes of IDs to debug encoding issues
       console.log(
         "[DEBUG] Task ID character codes:",
-        [...task.id].map((c) => c.charCodeAt(0)),
+        [...task.id].map((c) => c.charCodeAt(0))
       );
       console.log(
         "[DEBUG] Workspace ID character codes:",
-        [...workspaceId].map((c) => c.charCodeAt(0)),
+        [...workspaceId].map((c) => c.charCodeAt(0))
       );
 
       // *** IMPORTANT: The "0" and "O" characters can be confused, and there may be other encoding issues ***
@@ -428,7 +441,7 @@ export const getMotionApiClient = () => {
                 const responseText = await response.text();
                 console.error(
                   `[ERROR] Failed to update task with exact IDs. Status: ${response.status}. Response:`,
-                  responseText,
+                  responseText
                 );
                 // Continue to fallback approach
               }
@@ -439,7 +452,9 @@ export const getMotionApiClient = () => {
             console.log("[DEBUG] Tasks data is not an array, unexpected format:", typeof tasksData);
           }
         } else {
-          console.log(`[DEBUG] Failed to fetch tasks list: ${tasksResponse.status} ${tasksResponse.statusText}`);
+          console.log(
+            `[DEBUG] Failed to fetch tasks list: ${tasksResponse.status} ${tasksResponse.statusText}`
+          );
         }
       } catch (error) {
         console.error("[ERROR] Error fetching task data:", error);
@@ -480,7 +495,7 @@ export const getMotionApiClient = () => {
             const responseText = await response.text();
             console.error(
               `[ERROR] Failed to update task with URL ${url}. Status: ${response.status}. Response:`,
-              responseText,
+              responseText
             );
             lastError = new Error(`API Error (${response.status}): ${responseText}`);
           }
@@ -506,7 +521,9 @@ export const getMotionApiClient = () => {
 
       if (!response.ok) {
         const responseText = await logResponse(response);
-        throw new Error(`Failed to delete task: ${response.statusText}${responseText ? ` - ${responseText}` : ""}`);
+        throw new Error(
+          `Failed to delete task: ${response.statusText}${responseText ? ` - ${responseText}` : ""}`
+        );
       }
     },
 
@@ -537,7 +554,9 @@ export const getMotionApiClient = () => {
               "workspaces" in rawData &&
               Array.isArray(rawData.workspaces)
             ) {
-              console.log(`[DEBUG] Found standard format response with ${rawData.workspaces.length} workspaces`);
+              console.log(
+                `[DEBUG] Found standard format response with ${rawData.workspaces.length} workspaces`
+              );
               return rawData as WorkspacesResponse;
             }
 
@@ -558,7 +577,9 @@ export const getMotionApiClient = () => {
                   typeof value[0] === "object" &&
                   "id" in value[0]
                 ) {
-                  console.log(`[DEBUG] Found workspaces in '${key}' property with ${value.length} workspaces`);
+                  console.log(
+                    `[DEBUG] Found workspaces in '${key}' property with ${value.length} workspaces`
+                  );
                   return { workspaces: value } as WorkspacesResponse;
                 }
               }
@@ -566,12 +587,14 @@ export const getMotionApiClient = () => {
 
             // If we couldn't parse it in a standard way, return the raw data wrapped
             console.log(
-              "[DEBUG] Could not identify standard format, returning raw data wrapped in workspaces property",
+              "[DEBUG] Could not identify standard format, returning raw data wrapped in workspaces property"
             );
             return { workspaces: [rawData] } as WorkspacesResponse;
           } else {
             const responseText = await logResponse(response);
-            console.log(`[DEBUG] Failed with endpoint ${endpoint}: ${response.statusText} - ${responseText}`);
+            console.log(
+              `[DEBUG] Failed with endpoint ${endpoint}: ${response.statusText} - ${responseText}`
+            );
           }
         } catch (error) {
           console.error(`[DEBUG] Error with endpoint ${endpoint}:`, error);
@@ -579,7 +602,9 @@ export const getMotionApiClient = () => {
       }
 
       // Return empty workspaces array instead of throwing an error
-      console.log("[DEBUG] Failed to get workspace information from any endpoint, returning empty workspace array");
+      console.log(
+        "[DEBUG] Failed to get workspace information from any endpoint, returning empty workspace array"
+      );
       return { workspaces: [] };
     },
   };

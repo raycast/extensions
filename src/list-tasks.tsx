@@ -102,7 +102,7 @@ export default function Command() {
       filtered = filtered.filter(
         (task) =>
           task.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          (task.description && task.description.toLowerCase().includes(searchText.toLowerCase())),
+          (task.description && task.description.toLowerCase().includes(searchText.toLowerCase()))
       );
     }
 
@@ -235,7 +235,11 @@ export default function Command() {
           <List.Dropdown.Section title="By Project">
             <List.Dropdown.Item title="All Projects" value="project:all" />
             {projects.map((project) => (
-              <List.Dropdown.Item key={`project-${project.id}`} title={project.name} value={`project:${project.id}`} />
+              <List.Dropdown.Item
+                key={`project-${project.id}`}
+                title={project.name}
+                value={`project:${project.id}`}
+              />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>
@@ -243,10 +247,17 @@ export default function Command() {
       filtering={false}
       throttle
     >
-      <List.Section title="Tasks" subtitle={`${filteredTasks.length} task${filteredTasks.length !== 1 ? "s" : ""}`}>
+      <List.Section
+        title="Tasks"
+        subtitle={`${filteredTasks.length} task${filteredTasks.length !== 1 ? "s" : ""}`}
+      >
         {filteredTasks.length === 0 ? (
           <List.EmptyView
-            title={searchText || selectedLabel || selectedProject ? "No matching tasks found" : "No tasks found"}
+            title={
+              searchText || selectedLabel || selectedProject
+                ? "No matching tasks found"
+                : "No tasks found"
+            }
             description={
               searchText || selectedLabel || selectedProject
                 ? "Try a different search term or clear filters"
@@ -282,7 +293,10 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser title="Open in Motion" url={`https://app.usemotion.com/tasks/${task.id}`} />
+                  <Action.OpenInBrowser
+                    title="Open in Motion"
+                    url={`https://app.usemotion.com/tasks/${task.id}`}
+                  />
                   <Action.CopyToClipboard
                     title="Copy Task Id"
                     content={String(task.id)}

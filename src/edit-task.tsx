@@ -63,7 +63,7 @@ export default function Command() {
     const filtered = tasks.filter(
       (task) =>
         task.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        (task.description && task.description.toLowerCase().includes(searchText.toLowerCase())),
+        (task.description && task.description.toLowerCase().includes(searchText.toLowerCase()))
     );
 
     setFilteredTasks(filtered);
@@ -172,7 +172,9 @@ export default function Command() {
           <List.EmptyView
             title={searchText ? "No matching tasks found" : "No tasks found"}
             description={
-              searchText ? "Try a different search term" : "Add tasks in Motion or with the Add Task command"
+              searchText
+                ? "Try a different search term"
+                : "Add tasks in Motion or with the Add Task command"
             }
           />
         ) : (
@@ -190,7 +192,10 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action title="Edit Task" onAction={() => handleTaskSelect(task.id || "")} />
-                  <Action.CopyToClipboard title="Copy Task Details" content={JSON.stringify(task, null, 2)} />
+                  <Action.CopyToClipboard
+                    title="Copy Task Details"
+                    content={JSON.stringify(task, null, 2)}
+                  />
                 </ActionPanel>
               }
             />
@@ -223,7 +228,10 @@ export default function Command() {
     setIsLoading(true);
 
     try {
-      console.log("[DEBUG] Edit Task - handleSubmit called with values:", JSON.stringify(values, null, 2));
+      console.log(
+        "[DEBUG] Edit Task - handleSubmit called with values:",
+        JSON.stringify(values, null, 2)
+      );
       const motionClient = getMotionApiClient();
 
       if (!selectedTask) {
@@ -244,7 +252,11 @@ export default function Command() {
       }
 
       // Verify task ID is valid
-      if (!selectedTask.id || typeof selectedTask.id !== "string" || selectedTask.id.trim() === "") {
+      if (
+        !selectedTask.id ||
+        typeof selectedTask.id !== "string" ||
+        selectedTask.id.trim() === ""
+      ) {
         console.error("[ERROR] Invalid task ID:", selectedTask.id);
         throw new Error("Selected task has an invalid ID");
       }
@@ -262,7 +274,8 @@ export default function Command() {
         priority: values.priority,
         status: values.status,
         label: values.label && values.label.trim() !== "" ? values.label : undefined,
-        projectId: values.projectId && values.projectId.trim() !== "" ? values.projectId : undefined,
+        projectId:
+          values.projectId && values.projectId.trim() !== "" ? values.projectId : undefined,
         workspaceId: workspaceId,
       };
 
@@ -336,7 +349,12 @@ export default function Command() {
       }
     >
       <Form.Description text="Edit task details" />
-      <Form.TextField id="name" title="Name" placeholder="Task name" defaultValue={selectedTask.name} />
+      <Form.TextField
+        id="name"
+        title="Name"
+        placeholder="Task name"
+        defaultValue={selectedTask.name}
+      />
       <Form.TextArea
         id="description"
         title="Description"
@@ -344,9 +362,18 @@ export default function Command() {
         defaultValue={selectedTask.description || ""}
       />
 
-      <Form.DatePicker id="dueDate" title="Due Date" defaultValue={dueDateObj} type={Form.DatePicker.Type.Date} />
+      <Form.DatePicker
+        id="dueDate"
+        title="Due Date"
+        defaultValue={dueDateObj}
+        type={Form.DatePicker.Type.Date}
+      />
 
-      <Form.Dropdown id="priority" title="Priority" defaultValue={selectedTask.priority || "MEDIUM"}>
+      <Form.Dropdown
+        id="priority"
+        title="Priority"
+        defaultValue={selectedTask.priority || "MEDIUM"}
+      >
         <Form.Dropdown.Item value="LOW" title="Low" />
         <Form.Dropdown.Item value="MEDIUM" title="Medium" />
         <Form.Dropdown.Item value="HIGH" title="High" />
@@ -361,11 +388,20 @@ export default function Command() {
 
       <Form.Dropdown id="label" title="Label" defaultValue={selectedTask.label || ""}>
         <Form.Dropdown.Item value="" title="None" />
-        {["House", "Personal", "St Faith's", "Westside", "Goals", "BAU", "ACA", "Job hunt", "Boys", "Board"].map(
-          (label) => (
-            <Form.Dropdown.Item key={label} value={label} title={label} />
-          ),
-        )}
+        {[
+          "House",
+          "Personal",
+          "St Faith's",
+          "Westside",
+          "Goals",
+          "BAU",
+          "ACA",
+          "Job hunt",
+          "Boys",
+          "Board",
+        ].map((label) => (
+          <Form.Dropdown.Item key={label} value={label} title={label} />
+        ))}
       </Form.Dropdown>
 
       <Form.Dropdown id="projectId" title="Project" defaultValue={selectedTask.projectId || ""}>

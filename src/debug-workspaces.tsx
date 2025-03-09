@@ -114,7 +114,8 @@ export default function Command() {
       }
 
       infoText += "## Connection Summary\n";
-      infoText += "The debug information above can help diagnose any issues with your Motion connection.\n\n";
+      infoText +=
+        "The debug information above can help diagnose any issues with your Motion connection.\n\n";
       infoText += "If you're seeing error messages, please check:\n";
       infoText += "1. Your API key is correct in the extension preferences\n";
       infoText += "2. Your workspace ID is correct (or let the extension auto-detect it)\n";
