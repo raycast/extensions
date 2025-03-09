@@ -23,7 +23,7 @@
     "@raycast/utils": "^1.17.0",
     "audio-decode": "^2.2.2",
     "audiobuffer-to-wav": "^1.0.0",
-    "discord-token-decrypt": "^0.0.7",
+    "discord-token-decrypt": "^0.0.8",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
