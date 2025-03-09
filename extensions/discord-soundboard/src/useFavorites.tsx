@@ -67,7 +67,7 @@ export function FavoritesActionSection(props: { item: SoundboardItem; isFavorite
         onAction={async () => {
           methods.unfavorite(item);
           await showToast({
-            title: `Unavorite ${itemTitle}`,
+            title: `Unfavorite ${itemTitle}`,
           });
         }}
       />
