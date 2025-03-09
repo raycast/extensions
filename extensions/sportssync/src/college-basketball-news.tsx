@@ -1,10 +1,11 @@
-import { Detail, List, Action, ActionPanel } from "@raycast/api";
+import { Detail, List, Action, ActionPanel, Color, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
 interface Article {
   headline: string;
   published: string;
+  type: string;
   images: { url: string }[];
   links: { web: { href: string } };
 }
@@ -22,8 +23,8 @@ export default function scoresAndSchedule() {
   );
 
   const mncaaArticles = mncaaArticlesData?.articles || [];
-  const mncaaItems = mncaaArticles.map((mncaaArticle, index) => {
-    const articleDate = new Date(mncaaArticle.published).toLocaleDateString([], {
+  const mncaaItems = mncaaArticles?.map((mncaaArticle, index) => {
+    const articleDate = new Date(mncaaArticle?.published).toLocaleDateString([], {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -31,16 +32,28 @@ export default function scoresAndSchedule() {
 
     const accessoryTitle = articleDate;
     const accessoryToolTip = "Date Published";
+    let articleType = mncaaArticle?.type;
+
+    if (articleType === "HeadlineNews") {
+      articleType = "Headline";
+    }
 
     return (
       <List.Item
         key={index}
-        title={`${mncaaArticle.headline}`}
-        icon={{ source: mncaaArticle.images[0].url }}
-        accessories={[{ text: { value: `${accessoryTitle}` }, tooltip: accessoryToolTip }]}
+        title={`${mncaaArticle?.headline ?? "No Headline Found"}`}
+        icon={{ source: mncaaArticle?.images[0]?.url }}
+        accessories={[
+          { tag: { value: articleType, color: Color.Green }, icon: Icon.Megaphone },
+          { text: { value: `${accessoryTitle ?? "No Date Found"}` }, tooltip: accessoryToolTip ?? "Unknown" },
+          { icon: Icon.Calendar },
+        ]}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="View Article on ESPN" url={`${mncaaArticle.links.web.href}`} />
+            <Action.OpenInBrowser
+              title="View Article on ESPN"
+              url={`${mncaaArticle?.links?.web?.href ?? "https://www.espn.com"}`}
+            />
           </ActionPanel>
         }
       />
@@ -54,8 +67,8 @@ export default function scoresAndSchedule() {
   );
 
   const wncaaArticles = wncaaArticlesData?.articles || [];
-  const wncaaItems = wncaaArticles.map((wncaaArticle, index) => {
-    const articleDate = new Date(wncaaArticle.published).toLocaleDateString([], {
+  const wncaaItems = wncaaArticles?.map((wncaaArticle, index) => {
+    const articleDate = new Date(wncaaArticle?.published).toLocaleDateString([], {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -63,16 +76,28 @@ export default function scoresAndSchedule() {
 
     const accessoryTitle = articleDate;
     const accessoryToolTip = "Date Published";
+    let articleType = wncaaArticle?.type;
+
+    if (articleType === "HeadlineNews") {
+      articleType = "Headline";
+    }
 
     return (
       <List.Item
         key={index}
-        title={`${wncaaArticle.headline}`}
-        icon={{ source: wncaaArticle.images[0].url }}
-        accessories={[{ text: { value: `${accessoryTitle}` }, tooltip: accessoryToolTip }]}
+        title={`${wncaaArticle?.headline ?? "No Headline Found"}`}
+        icon={{ source: wncaaArticle?.images[0]?.url }}
+        accessories={[
+          { tag: { value: articleType, color: Color.Green }, icon: Icon.Megaphone },
+          { text: { value: `${accessoryTitle ?? "No Date Found"}` }, tooltip: accessoryToolTip ?? "Unknown" },
+          { icon: Icon.Calendar },
+        ]}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="View Article on ESPN" url={`${wncaaArticle.links.web.href}`} />
+            <Action.OpenInBrowser
+              title="View Article on ESPN"
+              url={`${wncaaArticle?.links?.web?.href ?? "https://www.espn.com"}`}
+            />
           </ActionPanel>
         }
       />
@@ -96,7 +121,7 @@ export default function scoresAndSchedule() {
     >
       {currentLeague === "MNCAA" && (
         <>
-          <List.Section title={`${mncaaArticles.length} Article${mncaaArticles.length !== 1 ? "s" : ""}`}>
+          <List.Section title={`${mncaaArticles?.length} Article${mncaaArticles?.length !== 1 ? "s" : ""}`}>
             {mncaaItems}
           </List.Section>
         </>
@@ -104,7 +129,7 @@ export default function scoresAndSchedule() {
 
       {currentLeague === "WNCAA" && (
         <>
-          <List.Section title={`${wncaaArticles.length} Article${wncaaArticles.length !== 1 ? "s" : ""}`}>
+          <List.Section title={`${wncaaArticles?.length} Article${wncaaArticles?.length !== 1 ? "s" : ""}`}>
             {wncaaItems}
           </List.Section>
         </>
