@@ -5,6 +5,9 @@
  * @returns Formatted string representing the reading time
  */
 export function calculateReadingTime(wordCount: number, wpm: number): string {
+  if (wordCount < 0 || wpm <= 0 || !Number.isFinite(wordCount) || !Number.isFinite(wpm)) {
+    return "0 seconds";
+  }
   if (wordCount === 0) return "0 seconds";
 
   // Calculate reading time in seconds
