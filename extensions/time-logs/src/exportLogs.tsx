@@ -67,7 +67,7 @@ export default function ExportLogs() {
 
   // Format date for display
   function formatDate(date: Date): string {
-    return date.toLocaleDateString("en-GB", {
+    return date.toLocaleDateString("en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
