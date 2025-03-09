@@ -10,8 +10,8 @@ import fs from "fs";
 // Sound options and paths
 const DEFAULT_RINGTONE =
   "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Radial-EncoreInfinitum.m4r";
-const SCRIPT_PATH = `${os.homedir()}/.raycast-alarms/scripts/manage-crontab.sh`;
-const LOG_PATH = `${os.homedir()}/.raycast-alarms/logs/extension.log`;
+const SCRIPT_PATH = path.join(os.homedir(), ".raycast-alarms", "scripts", "manage-crontab.sh");
+const LOG_PATH = path.join(os.homedir(), ".raycast-alarms", "logs", "extension.log");
 
 // Helper function to log messages to a file
 const logToFile = async (message: string) => {
