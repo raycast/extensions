@@ -192,11 +192,7 @@ export default function ListAlarms() {
         }
       } catch (error) {
         console.error("Error removing alarm:", error);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to Remove Alarm",
-          message: String(error),
-        });
+        showFailureToast(error, { title: "Failed to Remove Alarm" });
       }
     },
     [fetchAlarms]
