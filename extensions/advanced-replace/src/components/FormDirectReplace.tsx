@@ -5,6 +5,17 @@ import { EntryDirectReplace, RegexItemDirectReplace } from "../types";
 import { nanoid } from "nanoid";
 import { Fragment, PropsWithChildren, useState } from "react";
 
+function createEmptyRegexItem(): RegexItemDirectReplace {
+  return {
+    id: nanoid(),
+    regex: "",
+    replacement: "",
+    matchCaseInsensitive: false,
+    matchGlobally: true,
+    matchMultiline: true,
+  };
+}
+
 export interface FormDirectReplaceProps extends PropsWithChildren {
   initialValues: EntryDirectReplace;
   isNew?: boolean;
@@ -13,20 +24,14 @@ export interface FormDirectReplaceProps extends PropsWithChildren {
 export default function FormDirectReplace({ initialValues, isNew, children }: FormDirectReplaceProps) {
   const { pop } = useNavigation();
 
-  const emptyRegexItem: RegexItemDirectReplace = {
-    id: nanoid(),
-    regex: "",
-    replacement: "",
-    matchCaseInsensitive: false,
-    matchGlobally: true,
-    matchMultiline: true,
-  };
   const { data: replacementEntries, isLoading } = usePromise(getSavedItems);
 
-  const [regexItems, setRegexItems] = useState<RegexItemDirectReplace[]>(initialValues?.regexItems || [emptyRegexItem]);
+  const [regexItems, setRegexItems] = useState<RegexItemDirectReplace[]>(
+    initialValues?.regexItems || [createEmptyRegexItem()],
+  );
 
   function addRegexItem() {
-    setRegexItems((prev) => [...prev, emptyRegexItem]);
+    setRegexItems((prev) => [...prev, createEmptyRegexItem()]);
   }
 
   function updateRegexItem(index: number, updatedItem: RegexItemDirectReplace) {
@@ -37,7 +42,7 @@ export default function FormDirectReplace({ initialValues, isNew, children }: Fo
     initialValues,
     onSubmit(values) {
       if (isNew || !replacementEntries || replacementEntries.length < 1) {
-        replacementEntries?.push({
+        (replacementEntries ?? []).push({
           ...values,
           id: nanoid(),
           type: "directReplace",
@@ -45,6 +50,14 @@ export default function FormDirectReplace({ initialValues, isNew, children }: Fo
         });
       } else {
         const itemIndex = replacementEntries?.findIndex((e) => e.id === initialValues.id);
+        if (itemIndex === -1) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Error",
+            message: "Could not find item to update",
+          });
+          return;
+        }
         replacementEntries[itemIndex] = {
           ...values,
           id: initialValues.id,
@@ -57,7 +70,7 @@ export default function FormDirectReplace({ initialValues, isNew, children }: Fo
       showToast({
         style: Toast.Style.Success,
         title: "Success!",
-        message: `New Regex Option created: ${values.title} (${values.description})`,
+        message: `${isNew ? "New" : "Updated"} Regex Option: ${values.title} (${values.description})`,
       });
 
       pop();
@@ -69,6 +82,7 @@ export default function FormDirectReplace({ initialValues, isNew, children }: Fo
         if (invalidRegexItem) {
           return "Each Regex item requires both a replacement and a regex pattern.";
         }
+        return undefined;
       },
     },
   });

@@ -25,7 +25,7 @@ export const performDirectReplacement = async (entry: EntryDirectReplace, result
       return;
     }
 
-    let output = "";
+    let output = content;
 
     entry.regexItems.forEach((e) => {
       if (!e.regex) {
@@ -38,7 +38,7 @@ export const performDirectReplacement = async (entry: EntryDirectReplace, result
         return;
       }
 
-      output = content.replace(
+      output = output.replace(
         new RegExp(
           e.regex,
           "" + (e.matchGlobally ? "g" : "") + (e.matchCaseInsensitive ? "i" : "") + (e.matchMultiline ? "m" : ""),

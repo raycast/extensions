@@ -5,6 +5,10 @@ import { RegexItemCutPaste, EntryCutPaste } from "../types";
 import { Fragment, PropsWithChildren, useState } from "react";
 import { nanoid } from "nanoid";
 
+function createEmptyRegexItem(): RegexItemCutPaste {
+  return { regex: "", key: "", id: nanoid() };
+}
+
 export interface FormCutPasteProps extends PropsWithChildren {
   initialValues: EntryCutPaste;
   isNew?: boolean;
@@ -13,12 +17,13 @@ export interface FormCutPasteProps extends PropsWithChildren {
 export default function FormCutPaste({ initialValues, isNew, children }: FormCutPasteProps) {
   const { pop } = useNavigation();
 
-  const emptyRegexItem: RegexItemCutPaste = { regex: "", key: "", id: nanoid() };
   const { data: replacementEntries, isLoading } = usePromise(getSavedItems);
-  const [regexItems, setRegexItems] = useState<RegexItemCutPaste[]>(initialValues?.regexItems || [emptyRegexItem]);
+  const [regexItems, setRegexItems] = useState<RegexItemCutPaste[]>(
+    initialValues?.regexItems || [createEmptyRegexItem()],
+  );
 
   function addRegexItem() {
-    setRegexItems((prev) => [...prev, emptyRegexItem]);
+    setRegexItems((prev) => [...prev, createEmptyRegexItem()]);
   }
 
   function updateRegexItem(index: number, updatedItem: RegexItemCutPaste) {
@@ -29,7 +34,7 @@ export default function FormCutPaste({ initialValues, isNew, children }: FormCut
     initialValues,
     onSubmit(values) {
       if (isNew || !replacementEntries || replacementEntries.length < 1) {
-        replacementEntries?.push({
+        (replacementEntries ?? []).push({
           ...values,
           id: nanoid(),
           type: "cutPaste",
@@ -37,6 +42,14 @@ export default function FormCutPaste({ initialValues, isNew, children }: FormCut
         });
       } else {
         const itemIndex = replacementEntries?.findIndex((e) => e.id === initialValues.id);
+        if (itemIndex === -1) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Error",
+            message: "Could not find item to update",
+          });
+          return;
+        }
         replacementEntries[itemIndex] = {
           ...values,
           id: initialValues.id,
@@ -49,7 +62,7 @@ export default function FormCutPaste({ initialValues, isNew, children }: FormCut
       showToast({
         style: Toast.Style.Success,
         title: "Success!",
-        message: `New Regex Option created: ${values.title} (${values.description})`,
+        message: `${isNew ? "New" : "Updated"} Regex Option: ${values.title} (${values.description})`,
       });
 
       pop();
@@ -62,6 +75,7 @@ export default function FormCutPaste({ initialValues, isNew, children }: FormCut
         if (invalidRegexItem) {
           return "Each Regex item requires both a key and a regex pattern.";
         }
+        return undefined;
       },
     },
   });

@@ -19,12 +19,12 @@ const tagOptions: Record<Entry["type"], { value: string; color?: Color.ColorLike
 };
 
 export default function ManageOptions(props: Readonly<LaunchProps<{ draftValues: EntryCutPaste }>>) {
-  const { data: replacementEntries, revalidate } = usePromise(getSavedItems);
+  const { data: replacementEntries, revalidate, isLoading } = usePromise(getSavedItems);
 
   return (
     <List
-      isLoading={isLoading}
       navigationTitle="Regex replace options"
+      isLoading={isLoading}
       actions={
         <ActionPanel title="Manage item">
           <Action.Push
