@@ -1,18 +1,9 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  Icon,
-  launchCommand,
-  LaunchType,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { LinkdingAccount, LinkdingAccountForm, LinkdingAccountMap, LinkdingBookmark } from "./types/linkding-types";
 
 import { getFavicon, usePromise } from "@raycast/utils";
+import NoAccountsList from "./components/no-accounts-list";
 import { deleteBookmark, searchBookmarks } from "./service/bookmark-service";
 import { getPersistedLinkdingAccounts } from "./service/user-account-service";
 import { LinkdingShortcut } from "./types/linkding-shortcuts";
@@ -21,7 +12,7 @@ import { showSuccessToast } from "./util/bookmark-util";
 export default function searchLinkding() {
   const preferences = getPreferenceValues<Preferences>();
   const [selectedLinkdingAccount, setSelectedLinkdingAccount] = useState<LinkdingAccountForm | LinkdingAccount | null>(
-    null
+    null,
   );
   const [linkdingAccountMap, setLinkdingAccountMap] = useState<LinkdingAccountMap>({});
   const [hasLinkdingAccounts, setHasLindingAccounts] = useState(false);
@@ -48,7 +39,7 @@ export default function searchLinkding() {
       return bookmarks.data.results;
     },
     [selectedLinkdingAccount, searchText],
-    { execute: !!selectedLinkdingAccount }
+    { execute: !!selectedLinkdingAccount },
   );
 
   async function deleteBookmarkCallback(bookmarkId: number) {
@@ -82,46 +73,30 @@ export default function searchLinkding() {
     );
   }
 
-  if (hasLinkdingAccounts) {
-    return (
-      <List
-        isLoading={isLoading}
-        onSearchTextChange={setSearchText}
-        searchBarPlaceholder="Search through bookmarks..."
-        searchBarAccessory={<LinkdingAccountDropdown />}
-        throttle
-      >
-        <List.Section title="Results" subtitle={linkdingBookmarks?.length + ""}>
-          {linkdingBookmarks?.map((linkdingBookmark) => (
-            <SearchListItem
-              key={linkdingBookmark.id}
-              linkdingBookmark={linkdingBookmark}
-              deleteBookmarkCallback={deleteBookmarkCallback}
-              preferences={preferences}
-            />
-          ))}
-        </List.Section>
-      </List>
-    );
-  } else {
-    return (
-      <List>
-        <List.EmptyView
-          title="You don't have a Linkding Account"
-          description="Please create a linkding account before searching for bookmarks."
-          actions={
-            <ActionPanel>
-              <Action
-                icon={Icon.ArrowRight}
-                title="Go to Manage Account"
-                onAction={() => launchCommand({ name: "manage-account", type: LaunchType.UserInitiated })}
-              />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+  if (!hasLinkdingAccounts) {
+    return <NoAccountsList />;
   }
+
+  return (
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search through bookmarks..."
+      searchBarAccessory={<LinkdingAccountDropdown />}
+      throttle
+    >
+      <List.Section title="Results" subtitle={linkdingBookmarks?.length + ""}>
+        {linkdingBookmarks?.map((linkdingBookmark) => (
+          <SearchListItem
+            key={linkdingBookmark.id}
+            linkdingBookmark={linkdingBookmark}
+            deleteBookmarkCallback={deleteBookmarkCallback}
+            preferences={preferences}
+          />
+        ))}
+      </List.Section>
+    </List>
+  );
 }
 
 function SearchListItem({
@@ -162,7 +137,7 @@ function SearchListItem({
       title={
         linkdingBookmark.title.length > 0
           ? linkdingBookmark.title
-          : linkdingBookmark.website_title ?? linkdingBookmark.url
+          : (linkdingBookmark.website_title ?? linkdingBookmark.url)
       }
       subtitle={subtitle}
       accessories={tags}

@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
+import NoAccountsList from "./components/no-accounts-list";
 import { createBookmark, getWebsiteMetadata } from "./service/bookmark-service";
 import { getPersistedLinkdingAccounts } from "./service/user-account-service";
 import { LinkdingAccountMap, PostLinkdingBookmarkPayload } from "./types/linkding-types";
@@ -9,27 +10,33 @@ import { validateUrl } from "./util/bookmark-util";
 export default function CreateBookmarks() {
   const preferences = getPreferenceValues<Preferences>();
   const [linkdingAccountMap, setLinkdingAccountMap] = useState<LinkdingAccountMap>({});
-  const [loading, setLoading] = useState<boolean>(false);
+  const [numberOfAccounts, setNumberOfAccounts] = useState(0);
+  const [didGetAccounts, setDidGetAccounts] = useState(false);
   useEffect(() => {
     getPersistedLinkdingAccounts().then((linkdingMap) => {
       if (linkdingMap) {
         setLinkdingAccountMap(linkdingMap);
+        setNumberOfAccounts(Object.keys(linkdingMap).length);
       }
+      setDidGetAccounts(true);
     });
-  }, [setLinkdingAccountMap]);
+  }, [setLinkdingAccountMap, setNumberOfAccounts]);
 
   const { handleSubmit, itemProps, setValue } = useForm<
     PostLinkdingBookmarkPayload & { linkdingAccountName: string; tags: string }
   >({
     async onSubmit(values) {
-      const linkdingAccount = linkdingAccountMap[values.linkdingAccountName];
+      const linkdingAccount = linkdingAccountMap[values.linkdingAccountName] ?? Object.values(linkdingAccountMap)[0];
+      if (!linkdingAccount) {
+        throw new Error("No account");
+      }
 
       const toast = await showToast(Toast.Style.Animated, "Creating bookmark", values.title);
       createBookmark(linkdingAccount, {
         ...values,
         shared: false,
         is_archived: false,
-        tag_names: values.tags.split(" ").filter(tag => tag.length > 0),
+        tag_names: values.tags.split(" ").filter((tag) => tag.length > 0),
       })
         .then(() => {
           toast.title = "Bookmark created successfully";
@@ -53,8 +60,9 @@ export default function CreateBookmarks() {
     },
   });
 
+  const [isLoadingMetadata, setIsLoadingMetadata] = useState<boolean>(false);
   function getMetadata(url: string) {
-    setLoading(true);
+    setIsLoadingMetadata(true);
     getWebsiteMetadata(url)
       .then((metadata) => {
         if (metadata) {
@@ -62,12 +70,16 @@ export default function CreateBookmarks() {
           setValue("description", metadata.description ?? "");
         }
       })
-      .finally(() => setLoading(false));
+      .finally(() => setIsLoadingMetadata(false));
+  }
+
+  if (numberOfAccounts === 0 && didGetAccounts) {
+    return <NoAccountsList />;
   }
 
   return (
     <Form
-      isLoading={loading}
+      isLoading={isLoadingMetadata}
       actions={
         <ActionPanel title="Create Bookmark">
           <Action.SubmitForm onSubmit={handleSubmit} title="Create Bookmark" />
