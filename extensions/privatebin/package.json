@@ -11,7 +11,7 @@
     {
       "name": "create",
       "title": "Create Paste",
-      "description": "Create and Share a secret",
+      "description": "Create and Share a secret data",
       "mode": "view",
       "preferences": [
         {
@@ -24,7 +24,7 @@
         {
           "name": "includePassword",
           "title": "Include password with copied URL",
-          "description": "If enabled, Password will be included as part of copied Paste URL",
+          "description": "If enabled, password will be included as part of copied Paste URL",
           "type": "checkbox",
           "required": false,
           "label": "Include",

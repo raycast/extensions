@@ -36,7 +36,7 @@ export async function createPaste(
   pastePassword: string = "",
   burnAfterRead: boolean = false,
   filePath: string | null = null,
-): Promise<{ pasteData: object; id: string; pasteKey: string }> {
+): Promise<{ pasteData: PasteData; id: string; pasteKey: string }> {
   let pasteData = { paste: pasteText };
 
   if (filePath) {
