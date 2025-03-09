@@ -1,4 +1,6 @@
 import React from "react";
+import { useState, useEffect, useRef } from "react";
+
 import {
   ActionPanel,
   Action,
@@ -8,7 +10,8 @@ import {
   LocalStorage,
   List,
 } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
+import { showFailureToast } from "@raycast/utils";
+
 import LoginView from "./components/LoginView";
 import {
   isLoggedIn,
@@ -88,6 +91,10 @@ export default function Command() {
         console.error("Initialization error:", error);
         setIsAuthenticated(false);
         setIsLoading(false);
+        showFailureToast({
+          title: "Error initializing WebBites, try again",
+          message: (error as Error).message,
+        });
       }
     };
 
@@ -480,7 +487,7 @@ export default function Command() {
       inset={Grid.Inset.Zero}
       aspectRatio={"16/9"}
       fit={Grid.Fit.Fill}
-      isLoading={isLoading} // Only show loading on initial load, not during search
+      isLoading={isLoading || isSearching} // Only show loading on initial load, not during search
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search your WebBites..."

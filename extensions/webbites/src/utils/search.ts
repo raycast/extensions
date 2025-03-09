@@ -1,5 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { getSimpleCurrentUser } from "./userHelpers";
+import { showFailureToast } from "@raycast/utils";
 import axios from "axios"; // Use axios instead of fetch
 
 interface SearchFilters {
@@ -55,6 +56,10 @@ export const search = async (
       userId = user.id;
     } else {
       console.warn("No authenticated user found for search");
+      showFailureToast({
+        title: "No user found",
+        message: "Please login again",
+      });
     }
 
     // Get session token for authentication

@@ -1,5 +1,6 @@
 import Parse from "parse/node.js";
 import { LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 // Constants
 const SESSION_TOKEN_KEY = "webbites_session_token";
@@ -21,10 +22,10 @@ export class SimpleUser {
 
   constructor(userData: Partial<UserData>) {
     this.data = {
+      ...userData,
       objectId: userData.objectId || "",
       username: userData.username || "",
       email: userData.email || "",
-      ...userData,
     };
   }
 
@@ -62,7 +63,13 @@ export const getSimpleCurrentUser = async (): Promise<SimpleUser | null> => {
     }
 
     // Parse the user data
-    const userData = JSON.parse(userDataString);
+    let userData;
+    try {
+      userData = JSON.parse(userDataString);
+    } catch (error) {
+      console.error("Error parsing stored user data:", error);
+      return null;
+    }
 
     // Get the session token and add it to the user data
     const sessionToken = await LocalStorage.getItem<string>(SESSION_TOKEN_KEY);
@@ -106,6 +113,10 @@ export const makeAuthenticatedRequest = async (
 
     const response = await fetch(url, options);
     if (!response.ok) {
+      showFailureToast({
+        title: "Error Making Request",
+        message: `API request failed: ${response.status} ${response.statusText}`,
+      });
       throw new Error(
         `API request failed: ${response.status} ${response.statusText}`,
       );

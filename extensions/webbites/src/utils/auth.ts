@@ -1,5 +1,6 @@
 import Parse from "parse/node.js";
 import { LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 // Constants
 const PARSE_APP_ID = "J8V1hqSGBZeZ02hwvACtYzHw62SEgzuAYv6nqVgT";
@@ -71,6 +72,10 @@ export const login = async (
     return user;
   } catch (error) {
     console.error("Login error:", error);
+    showFailureToast({
+      title: "Login failed",
+      message: (error as Error).message,
+    });
     throw new Error(`Login failed: ${(error as Error).message}`);
   }
 };
@@ -121,7 +126,13 @@ export const getCurrentUser = async (): Promise<Parse.User | null> => {
     }
 
     // Parse the user data
-    const userData = JSON.parse(userDataString);
+    let userData;
+    try {
+      userData = JSON.parse(userDataString);
+    } catch (error) {
+      console.error("Error parsing stored user data:", error);
+      return null;
+    }
 
     // Get the session token
     const sessionToken = await LocalStorage.getItem<string>(SESSION_TOKEN_KEY);
@@ -155,9 +166,61 @@ export const getCurrentUser = async (): Promise<Parse.User | null> => {
 
     // If server fetch fails, create a user from stored data
     console.log("Creating user from stored data");
+
+    // Option 1: If Parse.User.fromJSON is available (newer versions of Parse)
+    try {
+      if (typeof Parse.User.fromJSON === "function") {
+        const user = Parse.User.fromJSON(userData);
+        return user;
+      }
+    } catch (e) {
+      console.log("Could not use Parse.User.fromJSON:", e);
+    }
+
+    // Option 2: Manual approach - create a new user and set attributes
     const user = new Parse.User();
+
+    // Set the id
     user.id = userData.objectId;
-    user._finishFetch(userData); // Use internal API to set data without validation
+
+    // Apply all the user attributes manually
+    // (This is what _finishFetch was doing behind the scenes)
+    const userKeys = Object.keys(userData);
+    for (const key of userKeys) {
+      // Skip special Parse keys that should not be set directly
+      if (["objectId", "createdAt", "updatedAt", "ACL"].includes(key)) {
+        continue;
+      }
+
+      try {
+        user.set(key, userData[key]);
+      } catch (e) {
+        console.log(`Could not set ${key} on user:`, e);
+      }
+    }
+
+    // If there's an ACL, try to set it
+    if (userData.ACL) {
+      try {
+        const acl = new Parse.ACL(userData.ACL);
+        user.setACL(acl);
+      } catch (e) {
+        console.log("Could not set ACL:", e);
+      }
+    }
+
+    // Manually mark the user as authenticated if needed
+    if (sessionToken) {
+      try {
+        // Set the session token if possible
+        // This is internal, but safer than _finishFetch as it's just setting one property
+        if (user._sessionToken !== undefined) {
+          user._sessionToken = sessionToken;
+        }
+      } catch (e) {
+        console.log("Could not set session token:", e);
+      }
+    }
 
     console.log("Reconstructed user from stored data:", userData.username);
     return user;
@@ -166,3 +229,65 @@ export const getCurrentUser = async (): Promise<Parse.User | null> => {
     return null;
   }
 };
+// export const getCurrentUser = async (): Promise<Parse.User | null> => {
+//   try {
+//     // Check if we have stored user data
+//     const userDataString = await LocalStorage.getItem<string>(USER_DATA_KEY);
+//     if (!userDataString) {
+//       console.log("No stored user data found");
+//       return null;
+//     }
+
+//     // Parse the user data
+//     let userData;
+//     try {
+//       userData = JSON.parse(userDataString);
+//     } catch (error) {
+//       console.error("Error parsing stored user data:", error);
+//       return null;
+//     }
+
+//     // Get the session token
+//     const sessionToken = await LocalStorage.getItem<string>(SESSION_TOKEN_KEY);
+//     if (!sessionToken) {
+//       console.log("No session token found");
+//       return null;
+//     }
+
+//     // Create a new User query to fetch the current user with the session token
+//     const query = new Parse.Query(Parse.User);
+//     query.equalTo("objectId", userData.objectId);
+
+//     // Make API request with the session token in headers
+//     const requestOptions = {
+//       sessionToken: sessionToken,
+//     };
+
+//     // Try to fetch the latest user data from server
+//     try {
+//       const user = await query.first(requestOptions);
+//       if (user) {
+//         // console.log('Retrieved user from server:', user.getUsername());
+//         return user;
+//       }
+//     } catch (error) {
+//       console.log(
+//         "Error fetching user from server, falling back to stored data:",
+//         error,
+//       );
+//     }
+
+//     // If server fetch fails, create a user from stored data
+//     console.log("Creating user from stored data");
+//     const user = new Parse.User();
+//     user.id = userData.objectId;
+//     user.fromJSON(userData); // Use internal API to set data without validation
+//     // user._finishFetch(userData); // Use internal API to set data without validation
+
+//     console.log("Reconstructed user from stored data:", userData.username);
+//     return user;
+//   } catch (error) {
+//     console.error("Error getting current user:", error);
+//     return null;
+//   }
+// };

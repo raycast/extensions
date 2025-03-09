@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -6,9 +6,12 @@ import {
   useNavigation,
   showToast,
   Toast,
-  LocalStorage,
+  // LocalStorage,
   // Detail
 } from "@raycast/api";
+
+import { showFailureToast } from "@raycast/utils";
+
 import { login } from "../utils/auth";
 
 export default function LoginView({
@@ -18,20 +21,6 @@ export default function LoginView({
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const { pop } = useNavigation();
-
-  useEffect(() => {
-    // Debug: Check existing LocalStorage
-    const checkStorage = async () => {
-      try {
-        // const items = await LocalStorage.allItems();
-        // console.log("Current LocalStorage items on login screen:", items);
-      } catch (error) {
-        console.error("Error checking LocalStorage:", error);
-      }
-    };
-
-    checkStorage();
-  }, []);
 
   const handleSubmit = async (values: {
     email?: string;
@@ -48,24 +37,12 @@ export default function LoginView({
 
     setIsLoading(true);
     try {
-      console.log(`Attempting login for user: ${values.email}`);
-
       // Perform login
       const user = await login(values.email, values.password);
-      console.log(`Login successful for user: ${user.getUsername()}`);
 
       // Verify storage after login
-      const sessionToken = await LocalStorage.getItem("webbites_session_token");
-      console.log(
-        "Session token after login:",
-        sessionToken ? "Token exists" : "No token",
-      );
-
-      const userData = await LocalStorage.getItem("webbites_user_data");
-      console.log(
-        "User data after login:",
-        userData ? "Data exists" : "No data",
-      );
+      // const sessionToken = await LocalStorage.getItem("webbites_session_token");
+      // const userData = await LocalStorage.getItem("webbites_user_data");
 
       // Show success toast
       await showToast({
@@ -78,10 +55,7 @@ export default function LoginView({
       onLoginSuccess();
       pop();
     } catch (error) {
-      console.error("Login error:", error);
-
-      await showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Login failed",
         message: (error as Error).message,
       });
@@ -97,10 +71,6 @@ export default function LoginView({
 
   return (
     <>
-      {/* { !hasBeganFlow ? 
-      
-      <Detail markdown="**Hello** _World_!" /> : */}
-
       <Form
         isLoading={isLoading}
         actions={
@@ -117,13 +87,6 @@ export default function LoginView({
                   return;
                 }
                 handleSubmit(values);
-              }}
-            />
-            <Action
-              title="Debug: Check LocalStorage"
-              onAction={async () => {
-                const items = await LocalStorage.allItems();
-                console.log("Current LocalStorage items:", items);
               }}
             />
           </ActionPanel>
