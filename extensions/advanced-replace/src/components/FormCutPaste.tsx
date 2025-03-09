@@ -1,52 +1,68 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm, FormValidation, usePromise } from "@raycast/utils";
 import { getSavedItems, setSavedItems } from "../utilities/storage";
-import { RegexItem, ReplacementOption } from "../types";
-import { Fragment, useState } from "react";
+import { RegexItemCutPaste, EntryCutPaste } from "../types";
+import { Fragment, PropsWithChildren, useState } from "react";
 import { nanoid } from "nanoid";
-export interface RegexItemFormProps {
-  initialValues: ReplacementOption;
+
+function createEmptyRegexItem(): RegexItemCutPaste {
+  return { regex: "", key: "", id: nanoid() };
+}
+
+export interface FormCutPasteProps extends PropsWithChildren {
+  initialValues: EntryCutPaste;
   isNew?: boolean;
 }
 
-export default function RegexItemForm({ initialValues, isNew }: RegexItemFormProps) {
+export default function FormCutPaste({ initialValues, isNew, children }: FormCutPasteProps) {
   const { pop } = useNavigation();
 
-  const emptyRegexItem: RegexItem = { regex: "", key: "", id: nanoid() };
-  const { data: replacementOptions, isLoading } = usePromise(getSavedItems);
-  const [regexItems, setRegexItems] = useState<RegexItem[]>(initialValues?.regexItems || [emptyRegexItem]);
+  const { data: replacementEntries, isLoading } = usePromise(getSavedItems);
+  const [regexItems, setRegexItems] = useState<RegexItemCutPaste[]>(
+    initialValues?.regexItems || [createEmptyRegexItem()],
+  );
 
-  function addReplacementItem() {
-    setRegexItems((prev) => [...prev, emptyRegexItem]);
+  function addRegexItem() {
+    setRegexItems((prev) => [...prev, createEmptyRegexItem()]);
   }
 
-  function updateRegexItem(index: number, updatedItem: RegexItem) {
+  function updateRegexItem(index: number, updatedItem: RegexItemCutPaste) {
     setRegexItems((prev) => prev.map((item, idx) => (idx === index ? updatedItem : item)));
   }
 
-  const { handleSubmit, itemProps } = useForm<ReplacementOption>({
+  const { handleSubmit, itemProps } = useForm<EntryCutPaste>({
     initialValues,
     onSubmit(values) {
-      if (isNew || !replacementOptions || replacementOptions.length < 1) {
-        replacementOptions?.push({
+      if (isNew || !replacementEntries || replacementEntries.length < 1) {
+        (replacementEntries ?? []).push({
           ...values,
           id: nanoid(),
+          type: "cutPaste",
           regexItems,
         });
       } else {
-        const itemIndex = replacementOptions?.findIndex((e) => e.id === initialValues.id);
-        replacementOptions[itemIndex] = {
+        const itemIndex = replacementEntries?.findIndex((e) => e.id === initialValues.id);
+        if (itemIndex === -1) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Error",
+            message: "Could not find item to update",
+          });
+          return;
+        }
+        replacementEntries[itemIndex] = {
           ...values,
           id: initialValues.id,
+          type: "cutPaste",
           regexItems,
         };
       }
-      setSavedItems(replacementOptions);
+      setSavedItems(replacementEntries);
 
       showToast({
         style: Toast.Style.Success,
         title: "Success!",
-        message: `New Regex Option created: ${values.title} (${values.description})`,
+        message: `${isNew ? "New" : "Updated"} Regex Option: ${values.title} (${values.description})`,
       });
 
       pop();
@@ -59,6 +75,7 @@ export default function RegexItemForm({ initialValues, isNew }: RegexItemFormPro
         if (invalidRegexItem) {
           return "Each Regex item requires both a key and a regex pattern.";
         }
+        return undefined;
       },
     },
   });
@@ -69,14 +86,11 @@ export default function RegexItemForm({ initialValues, isNew }: RegexItemFormPro
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
-          <Action
-            title="Add Replacement Item"
-            onAction={addReplacementItem}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-          />
+          <Action title="Add Replacement Item" onAction={addRegexItem} shortcut={{ modifiers: ["cmd"], key: "n" }} />
         </ActionPanel>
       }
     >
+      {children}
       <Form.TextField title="Title" placeholder="My best regex ever" {...itemProps.title} />
       <Form.TextArea
         title="Description"
@@ -87,7 +101,7 @@ export default function RegexItemForm({ initialValues, isNew }: RegexItemFormPro
 
       {regexItems.map((option, index) => (
         <Fragment key={option.id}>
-          <Form.Description text={"Item " + (index + 1)} />
+          {regexItems?.length > 1 && <Form.Description text={"Item " + (index + 1)} />}
           <Form.TextField
             id={option.id}
             title="Key"
