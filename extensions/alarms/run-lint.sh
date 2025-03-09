@@ -33,7 +33,7 @@ if echo "$OUTPUT" | grep -q "ESLint" || echo "$OUTPUT" | grep -q "Prettier"; the
 fi
 
 # Display success message if no other issues found
-if [ $LINT_EXIT_CODE -ne 0 ] && ! echo "$OUTPUT" | grep -q "validate extension icons" || echo "$OUTPUT" | grep -q "ESLint" || echo "$OUTPUT" | grep -q "Prettier"; then
+if ([ $LINT_EXIT_CODE -ne 0 ] && ! echo "$OUTPUT" | grep -q "validate extension icons") || echo "$OUTPUT" | grep -q "ESLint" || echo "$OUTPUT" | grep -q "Prettier"; then
   echo -e "${RED}⚠️  Other linting issues detected. Please review:${NC}"
   echo "$OUTPUT" | grep -v "validate extension icons"
   exit 1
