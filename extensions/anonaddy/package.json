@@ -6,8 +6,10 @@
   "icon": "icon.png",
   "author": "mormubis",
   "contributors": [
-    "http.james",
     "pernielsentikaer"
+  ],
+  "pastContributors": [
+    "http.james"
   ],
   "categories": [
     "Productivity"
