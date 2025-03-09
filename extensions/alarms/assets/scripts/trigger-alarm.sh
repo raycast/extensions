@@ -4,6 +4,12 @@
 # Usage: trigger-alarm.sh <alarm_id> <alarm_title> <sound_path> <seconds>
 
 # Set the alarm ID
+# Validate required arguments
+if [ -z "$alarm_id" ] || [ -z "$sound_path" ]; then
+  echo "Error: alarm_id and sound_path are required" >&2
+  exit 1
+fi
+
 alarm_id="$1"
 alarm_title="$2"
 sound_path="$3"
