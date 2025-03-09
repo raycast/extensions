@@ -1,6 +1,5 @@
-import { ActionPanel, Action, Detail, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Detail } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { showFailureToast } from "@raycast/utils";
 import { getMotionApiClient } from "./api/motion";
 
 export default function Command() {
