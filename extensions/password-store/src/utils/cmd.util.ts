@@ -1,5 +1,7 @@
+import { getPreferenceValues } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "node:util";
+import { Preferences } from "../interfaces";
 
 /**
  * Executes a shell command and returns the standard output.
@@ -10,9 +12,11 @@ import { promisify } from "node:util";
 export const runCmd = async (cmd: string): Promise<string> => {
   try {
     const execPromise = promisify(exec);
+    const preferences = getPreferenceValues<Preferences>();
 
     // Needed for the 'pass' command to work on M1 Mac
-    const shellPrefix = "export PATH=$PATH:/opt/homebrew/bin &&";
+    const paths = [...(preferences.ADDITIONAL_PATH?.split(":") || []), "/opt/homebrew/bin"].filter(Boolean).join(":");
+    const shellPrefix = `export PATH=$PATH:${paths} &&`;
 
     // Execute the command and wait for the result
     const { stdout } = await execPromise(`${shellPrefix} ${cmd}`, { shell: "/bin/zsh" });
