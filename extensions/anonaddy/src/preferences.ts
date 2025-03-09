@@ -1,8 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
+type Preferences = {
   apiKey: string;
-}
+};
 
 const preferences = {
   get apiKey() {
