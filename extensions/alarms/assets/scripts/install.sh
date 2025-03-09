@@ -47,9 +47,9 @@ CONFIG_DIR="$HOME/.raycast-alarms"
 print_step "Creating workspace at ${BOLD}$CONFIG_DIR${NC}"
 
 # Create required directories
-mkdir -p "$CONFIG_DIR/scripts"
-mkdir -p "$CONFIG_DIR/logs"
-mkdir -p "$CONFIG_DIR/active"
+mkdir -p "$CONFIG_DIR/scripts" || { print_error "Failed to create scripts directory"; exit 1; }
+mkdir -p "$CONFIG_DIR/logs" || { print_error "Failed to create logs directory"; exit 1; }
+mkdir -p "$CONFIG_DIR/active" || { print_error "Failed to create active directory"; exit 1; }
 print_success "Directory structure prepared"
 
 # Verify source files exist
