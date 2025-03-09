@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "katbin",
+      "name": "create-paste",
       "title": "Create Paste",
       "description": "Create pastes on https://katb.in directly!",
       "mode": "view"

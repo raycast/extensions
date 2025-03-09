@@ -1,3 +1,3 @@
-# katb.in Changelog
+# Katbin Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
