@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Detail, Form, getSelectedText, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, getSelectedText, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { emojifyText } from "./api";
 
@@ -29,22 +30,14 @@ export default function Command() {
             });
           } catch (error) {
             console.error("Error processing text:", error);
-            showToast({
-              style: Toast.Style.Failure,
-              title: "Failed to emojify text",
-              message: String(error),
-            });
+            showFailureToast(error);
           } finally {
             setIsLoading(false);
           }
         }
       } catch (error) {
         console.error("Error getting selected text:", error);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to get selected text",
-          message: String(error),
-        });
+        showFailureToast(error);
       }
     };
 
@@ -53,11 +46,7 @@ export default function Command() {
 
   const handleManualSubmit = async (values: { text: string }) => {
     if (!values.text.trim()) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "No text entered",
-        message: "Please enter some text to emojify",
-      });
+      showFailureToast("No text entered, Please enter some text to find an emoji");
       return;
     }
 
@@ -71,11 +60,7 @@ export default function Command() {
       });
     } catch (error) {
       console.error("Error processing text:", error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to emojify text",
-        message: String(error),
-      });
+      showFailureToast(error);
     } finally {
       setIsLoading(false);
     }

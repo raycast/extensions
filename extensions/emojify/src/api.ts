@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import OpenAI from "openai";
 
 interface Preferences {
@@ -152,6 +153,7 @@ export async function getEmojiForText(text: string): Promise<EmojifyResponse> {
     };
   } catch (error) {
     console.error("Error finding emoji:", error);
+    showFailureToast(error);
     throw error;
   }
 }
