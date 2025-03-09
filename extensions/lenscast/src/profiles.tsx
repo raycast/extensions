@@ -1,75 +1,40 @@
 import { useState } from "react";
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { PUBLICATIONS } from "./lib/fetchPublications";
-import { MediaSet, Post, ProfileData, PublicationMainFocus } from "./types";
+import { Post, ProfileData } from "./types";
 import { useFetch } from "@raycast/utils";
+import { PROFILE_SUGGESTIONS } from "./lib/fetchProfileSuggestions";
 
 export default function Command() {
   return <Main />;
 }
 
 function Main() {
-  const gql =
-`
-query SearchProfiles($request: ProfileSearchRequest!) {
-  searchProfiles(request: $request) {
-    items {
-      profileId: id
-      metadata {
-        bio
-        displayName
-        picture {
-          ... on ImageSet {
-            raw {
-              uri
-            }
-          }
-        }
-      }
-      handle {
-        fullHandle
-        localName
-      }
-      stats {
-        totalFollowers: followers
-        totalFollowing: following
-        totalPosts: posts
-        totalComments: comments
-        totalPublications: publications
-        totalMirrors: mirrors
-      }
-    }
-  }
-}
-`;
-
-const [searchTerm, setSearchTerm] = useState("");
-const { data: profileSuggestions, isLoading: profileSuggestionsLoading } = useFetch("https://api-v2.lens.dev/", {
+  const [searchTerm, setSearchTerm] = useState("");
+  const { data: profileSuggestions, isLoading: profileSuggestionsLoading } = useFetch("https://api-v2.lens.dev/", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      query: gql,
+      query: PROFILE_SUGGESTIONS,
       variables: {
-        request: {
-          query: searchTerm
-        }
-      }
+        query: searchTerm,
+      },
     }),
     mapResult(result: { data: { searchProfiles: { items: ProfileData[] } } }) {
       return {
-        data: result.data.searchProfiles.items
-      }
+        data: result.data.searchProfiles.items,
+      };
     },
     initialData: [],
-    execute: !!searchTerm
-  })
+    execute: !!searchTerm,
+  });
 
   let title;
   if (!searchTerm) title = "Search for a Lens Profile";
-  if (profileSuggestions.length === 0) title = "No Profiles Found";
-  if (profileSuggestionsLoading) title = "Searching for Lens Profiles...";
+  else if (profileSuggestions.length === 0) title = "No Profiles Found";
+  else if (profileSuggestionsLoading) title = "Searching for Lens Profiles...";
 
   return (
     <List
@@ -88,14 +53,8 @@ const { data: profileSuggestions, isLoading: profileSuggestionsLoading } = useFe
             icon={avatar ? { source: avatar, mask: Image.Mask.Circle, fallback: "👤" } : "👤"}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Show Profile"
-                  icon={Icon.Sidebar}
-                  target={
-                    <Profile {...result} />
-                  }
-                />
-                <Action.OpenInBrowser url={`https://lenster.xyz/u/${result.handle.localName}`} />
+                <Action.Push title="Show Profile" icon={Icon.Sidebar} target={<Profile {...result} />} />
+                <Action.OpenInBrowser url={`https://hey.xyz/u/${result.handle.localName}`} />
               </ActionPanel>
             }
           />
@@ -112,39 +71,47 @@ function Profile({ profileId, metadata, handle, stats }: ProfileData) {
   const { data: posts, isLoading } = useFetch("https://api-v2.lens.dev/", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       query: PUBLICATIONS,
       variables: {
-        profileId
-      }
+        profileId,
+      },
     }),
-    mapResult(result: { data: { publications: {items: Post[]} } } ) {
+    mapResult(result: { data: { publications: { items: Post[] } } }) {
       return {
-        data: result.data.publications.items
-      }
+        data: result.data.publications.items,
+      };
     },
     initialData: [],
     // execute: !!searchTerm
-  })
+  });
 
   const avatar = normalizeUrl(picture?.raw?.uri);
 
   const getPostUrl = (post: Post) => {
-    switch (post.metadata.mainContentFocus) {
-      case PublicationMainFocus.Video:
-        return `https://lenstube.xyz/watch/${post.id}`;
-      default:
-        return `https://lenster.xyz/posts/${post.id}`;
-    }
+    if (post.metadata.asset && "video" in post.metadata.asset) return `https://tape.xyz/watch/${post.id}`;
+    return `https://hey.xyz/posts/${post.id}`;
+  };
+
+  const getPostMedia = (post: Post) => {
+    if (!post.metadata.asset) return [];
+    const media = [post.metadata.asset, ...post.metadata.attachments];
+    return media;
+  };
+
+  const getPostArweaveLink = (link: string) => {
+    if (link.includes("https://")) return link;
+    return "https://arweave.net/" + link.replace("ar://", "");
   };
 
   return (
-    (<List isShowingDetail isLoading={isLoading} filtering={false} searchBarPlaceholder={handle.fullHandle}>
+    <List isShowingDetail isLoading={isLoading} filtering={false} searchBarPlaceholder={handle.fullHandle}>
       <List.Section title="Profile">
         <List.Item
-          title={handle.fullHandle}
+          icon={Icon.AtSymbol}
+          title={handle.localName}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`https://lenster.xyz/u/${handle.localName}`} />
@@ -175,58 +142,59 @@ function Profile({ profileId, metadata, handle, stats }: ProfileData) {
           }
         />
       </List.Section>
-      {posts.length > 0 && (
-        <List.Section title="Recent Posts">
-          {posts.map((post: Post) => {
-            const hasMedia = post.metadata?.media?.length > 0;
-            return (
-              <List.Item
-                key={post.id}
-                title={post.metadata.content?.substring(0, 50) ?? ""}
-                actions={
-                  <ActionPanel>
-                    <Action.OpenInBrowser url={getPostUrl(post)} />
-                    {/* <Action.OpenInBrowser title="Arweave Metadata" url={post.profile.metadata} /> */}
-                    {/* eslint-disable-next-line @raycast/prefer-title-case */}
-                    <Action.CopyToClipboard title="Copy Post ID" content={post.id} />
-                  </ActionPanel>
-                }
-                detail={
-                  <List.Item.Detail
-                    markdown={`
-${post.metadata.content}
+      <List.Section title="Recent Posts">
+        {posts.map((post: Post) => {
+          const media = getPostMedia(post);
+          const hasMedia = media.length;
+          return (
+            <List.Item
+              key={post.id}
+              title={post.metadata.content?.substring(0, 50) ?? ""}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={getPostUrl(post)} />
+                  {post.metadata.rawURI && (
+                    <Action.OpenInBrowser title="Arweave Metadata" url={getPostArweaveLink(post.metadata.rawURI)} />
+                  )}
+                  {/* eslint-disable-next-line @raycast/prefer-title-case */}
+                  <Action.CopyToClipboard title="Copy Post ID" content={post.id} />
+                </ActionPanel>
+              }
+              detail={
+                <List.Item.Detail
+                  markdown={`
+${post.metadata.content ?? ""}
 
 ${
   hasMedia
-    ? post.metadata.media
-        .filter((media: MediaSet) => media.original.mimeType?.includes("image"))
-        .map((media: MediaSet) => `<img src="${normalizeUrl(media.original.url)}" />`)
+    ? media
+        .filter((media) => "image" in media)
+        .map((media) => `<img src="${normalizeUrl(media.image.raw.uri)}" />`)
         .join("")
     : ""
 }
 
 ---
 
-Likes: ${post.stats.totalUpvotes}
+Likes: ${post.stats.upvotes}
 
-Comments: ${post.stats.totalAmountOfComments}
+Comments: ${post.stats.comments}
 
-Mirrors: ${post.stats.totalAmountOfMirrors}
+Mirrors: ${post.stats.mirrors}
 
-Collects: ${post.stats.totalAmountOfCollects}
+Collects: ${post.stats.bookmarks}
 
 ---
 
-Posted on: ${String(new Date(post.createdAt).toDateString())}
+Posted on: ${new Date(post.createdAt).toDateString()}
                     `}
-                  />
-                }
-              />
-            );
-          })}
-        </List.Section>
-      )}
-    </List>)
+                />
+              }
+            />
+          );
+        })}
+      </List.Section>
+    </List>
   );
 }
 
