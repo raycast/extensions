@@ -61,10 +61,7 @@ export default function StopTimer() {
       popToRoot();
     } catch (error) {
       console.error("Error stopping timer:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to stop timer",
-      });
+      await showFailureToast("Failed to stop timer");
       popToRoot();
     }
   }
