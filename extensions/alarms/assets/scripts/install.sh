@@ -85,9 +85,9 @@ print_success "All source files verified"
 # Copy scripts to config directory and make them executable
 print_step "Deploying scripts to your system..."
 
-cp "$TRIGGER_SCRIPT" "$CONFIG_DIR/scripts/"
-cp "$CRONTAB_SCRIPT" "$CONFIG_DIR/scripts/"
-cp "$APPLESCRIPT" "$CONFIG_DIR/scripts/"
+cp "$TRIGGER_SCRIPT" "$CONFIG_DIR/scripts/" || { print_error "Failed to copy trigger script"; exit 1; }
+cp "$CRONTAB_SCRIPT" "$CONFIG_DIR/scripts/" || { print_error "Failed to copy crontab script"; exit 1; }
+cp "$APPLESCRIPT" "$CONFIG_DIR/scripts/" || { print_error "Failed to copy AppleScript"; exit 1; }
 print_success "Scripts copied to destination"
 
 chmod +x "$CONFIG_DIR/scripts/trigger-alarm.sh"
