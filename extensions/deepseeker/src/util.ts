@@ -87,5 +87,9 @@ export function estimatePrice(promptTokens: number, outputTokens: number, model:
  */
 export async function runAppleScriptSilently(appleScript: string): Promise<void> {
   await closeMainWindow();
-  await runAppleScript(appleScript);
+  try {
+    await runAppleScript(appleScript);
+  } catch (error) {
+    console.error("Failed to run AppleScript:", error);
+  }
 }
