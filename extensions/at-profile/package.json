@@ -5,6 +5,9 @@
   "description": "Quickly open profiles on social platforms.",
   "icon": "at-icon.png",
   "author": "chrismessina",
+  "contributors": [
+    "pedrecal"
+  ],
   "categories": [
     "Web"
   ],
@@ -69,14 +72,47 @@
             {
               "title": "LinkedIn",
               "value": "linkedin"
+            },
+            {
+              "title": "TikTok",
+              "value": "tiktok"
             }
           ]
         }
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "open",
+      "title": "Open Profile",
+      "description": "Quickly open a profile on a social site"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.80.0"
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "ai": {
+    "evals": [
+      {
+        "input" : "@at-profile open raycast instagram",
+        "mocks" : {
+          "open" : "Successfully called \"open\""
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "profile" : "raycast",
+                "site" : "instagram"
+              },
+              "name" : "open"
+            }
+          }
+        ]
+      }
+    ]
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
