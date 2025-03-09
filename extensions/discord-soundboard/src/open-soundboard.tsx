@@ -4,17 +4,22 @@ import { groupBy } from "./utils";
 import { useCachedState } from "@raycast/utils";
 import { useFavorites, FavoritesActionSection, type FavoriteMethods } from "./useFavorites";
 import type { SoundboardItem } from "./discord";
+import { useState } from "react";
 
 export default function Command() {
   const [columns, setColumns] = useCachedState("open-soundboard-columns", 8);
   const { soundboardItems, isLoading, ...discordMethods } = useDiscord();
   const { favorites, ...favoriteMethods } = useFavorites();
+  const [searchText, setSearchText] = useState("");
 
   return (
     <Grid
       columns={columns}
       inset={Grid.Inset.Large}
       isLoading={isLoading}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      filtering={true}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Grid Item Size"
@@ -31,21 +36,23 @@ export default function Command() {
     >
       {(!isLoading || soundboardItems.length > 0) && (
         <>
-          <Grid.Section title="FAVORITES">
-            {soundboardItems
-              .filter((item) => favorites.includes(item.id))
-              .toSorted((a, b) => favorites.indexOf(a.id) - favorites.indexOf(b.id))
-              .map((item) => (
-                <SoundGirdItem
-                  key={item.id}
-                  item={item}
-                  isFavorite={true}
-                  guildName="Favorites"
-                  {...discordMethods}
-                  {...favoriteMethods}
-                />
-              ))}
-          </Grid.Section>
+          {!searchText && (
+            <Grid.Section title="FAVORITES">
+              {soundboardItems
+                .filter((item) => favorites.includes(item.id))
+                .toSorted((a, b) => favorites.indexOf(a.id) - favorites.indexOf(b.id))
+                .map((item) => (
+                  <SoundGirdItem
+                    key={item.id}
+                    item={item}
+                    isFavorite={true}
+                    guildName="Favorites"
+                    {...discordMethods}
+                    {...favoriteMethods}
+                  />
+                ))}
+            </Grid.Section>
+          )}
 
           {Object.entries(groupBy(soundboardItems, "guildName")).map(([guildName, items]) => (
             <Grid.Section key={guildName} title={guildName.toUpperCase()}>
