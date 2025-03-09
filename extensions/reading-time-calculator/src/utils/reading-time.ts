@@ -19,9 +19,9 @@ export function calculateReadingTime(wordCount: number, wpm: number): string {
     return `${Math.round(timeInSeconds)} second${Math.round(timeInSeconds) !== 1 ? "s" : ""}`;
   } else {
     // More than a minute
-    const minutes = Math.floor(timeInSeconds / 60);
-    let seconds = Math.round(timeInSeconds % 60);
     let minutes = Math.floor(timeInSeconds / 60);
+    let seconds = Math.round(timeInSeconds % 60);
+    
     if (seconds === 60) {
       seconds = 0;
       minutes++;
