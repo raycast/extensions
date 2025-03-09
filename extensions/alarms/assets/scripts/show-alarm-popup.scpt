@@ -1,5 +1,9 @@
 on run argv
   -- Parse arguments
+  if length of argv < 2 then
+    display dialog "Missing required arguments" buttons {"OK"} default button "OK"
+    return
+  end if
   set alarmId to item 1 of argv
   set alarmTitle to item 2 of argv
   
