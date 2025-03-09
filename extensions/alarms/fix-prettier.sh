@@ -8,6 +8,6 @@ echo "Fixing Prettier formatting issues..."
 TS_FILES=$(find src -type f -name "*.ts" -o -name "*.tsx")
 
 # Run Prettier directly on the files
-npx prettier --write $TS_FILES
+npx prettier --write "$TS_FILES"
 
 echo "✅ Prettier formatting completed!" 
