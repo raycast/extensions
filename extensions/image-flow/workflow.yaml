@@ -1,0 +1,45 @@
+workflows:
+  default:
+    - name: Resize And Compress Image to 1200x800
+      action: resize
+      params:
+        type: cover
+        width: 1200
+        height: 800
+
+    - name: Convert Image To AVIF
+      action: convert
+      params:
+        format: avif
+
+    - name: Overwrite Original images
+      action: overwrite
+
+    - name: Rename to `yyyy_MM_dd` format
+      action: rename
+      params:
+        # available variables: {uuid}, {timestamp}, {yyyy}, {yyyy_MM}, {yyyy_MM_dd}
+        to: "{yyyy_MM_dd}"
+
+    - name: Upload Image To S3
+      action: upload
+      params:
+        root: hello/tmp
+        bucket: gblog-images
+        cdn: https://images.godruoyi.com
+        service: s3
+
+    - name: Convert URL to Markdown format
+      action: tomarkdown
+
+    - name: Copy to clipboard
+      action: clipboard
+services:
+  s3:
+    # example to upload file to cloudflare R2 storage
+    endpoint: https://your-account-id.r2.cloudflarestorage.com
+    region: auto
+    access_key_id: id
+    secret_access_key: key
+  tinypng:
+    apiKey: x
