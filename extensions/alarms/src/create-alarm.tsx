@@ -252,13 +252,13 @@ export default function CreateAlarm() {
       await logToFile(`Using script path: ${scriptPath}`);
 
       // Check if script exists
-      try {
-        await fs.promises.access(scriptPath, fs.constants.X_OK);
-        await logToFile("Script exists and is executable");
-      } catch (error) {
-        await logToFile(`Script not found or not executable: ${scriptPath}`);
-        throw new Error(`Script not found or not executable: ${scriptPath}`);
-      }
+      await fs.promises.access(scriptPath, fs.constants.X_OK);
+      await logToFile("Script exists and is executable");
+    } catch (error) {
+      await logToFile(`Script not found or not executable: ${scriptPath}`);
+      showFailureToast("Script not found or not executable", scriptPath);
+      return;
+    }
 
       const alarmId = `raycast_alarm_${Date.now()}`;
       const soundPath = getRingtonePath(selectedRingtone);
