@@ -1,5 +1,11 @@
 # DeepSeeker - Quick Actions Changelog
 
+## [March Update - Code Refactor] - {PR_MERGE_DATE}
+
+- 📏 **Obey** case naming convention
+- ✂️ Remove redundant code
+- 📄 Update **docs** and metadata
+
 ## [New Features] - 2025-03-05
 
 - 📜 Add history command: browse and search all your interaction histories
