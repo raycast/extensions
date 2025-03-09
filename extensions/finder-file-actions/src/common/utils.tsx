@@ -1,4 +1,4 @@
-import { Alert, Icon, closeMainWindow, confirmAlert, showToast, popToRoot } from "@raycast/api";
+import { Alert, Icon, closeMainWindow, confirmAlert, showToast, popToRoot, trash } from "@raycast/api";
 
 import { runAppleScript } from "run-applescript";
 

@@ -162,6 +162,11 @@ export default function Command(props: LaunchProps) {
         // Convert string dates back to Date objects
         const foldersWithDates = parsedFolders.map((folder: Record<string, unknown>) => ({
           ...folder,
+          path: folder.path as string,
+          kMDItemFSName: folder.kMDItemFSName as string,
+          kMDItemKind: folder.kMDItemKind as string,
+          kMDItemFSSize: folder.kMDItemFSSize as number,
+          kMDItemUseCount: folder.kMDItemUseCount as number,
           lastUsed: new Date(folder.lastUsed as string),
           kMDItemFSCreationDate: folder.kMDItemFSCreationDate
             ? new Date(folder.kMDItemFSCreationDate as string)

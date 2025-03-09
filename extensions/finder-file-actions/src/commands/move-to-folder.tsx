@@ -129,11 +129,16 @@ export default function Command() {
         // Convert string dates back to Date objects
         const foldersWithDates = parsedFolders.map((folder: Record<string, unknown>) => ({
           ...folder,
+          path: folder.path as string,
+          kMDItemFSName: folder.kMDItemFSName as string,
+          kMDItemKind: folder.kMDItemKind as string,
+          kMDItemFSSize: folder.kMDItemFSSize as number,
+          kMDItemUseCount: folder.kMDItemUseCount as number,
           lastUsed: new Date(folder.lastUsed as string),
           kMDItemFSCreationDate: new Date(folder.kMDItemFSCreationDate as string),
           kMDItemContentModificationDate: new Date(folder.kMDItemContentModificationDate as string),
           kMDItemLastUsedDate: new Date(folder.kMDItemLastUsedDate as string),
-        }));
+        })) as RecentFolder[];
         setRecentFolders(foldersWithDates);
       }
       setHasCheckedPreferences(true);
