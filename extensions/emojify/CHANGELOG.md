@@ -2,7 +2,7 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-**Initial Realease**:
+**Initial Release**:
 
 - 🎯 Contextually adds appropriate emojis to your text  
 - 🔄 Quick and seamless emoji insertion  
