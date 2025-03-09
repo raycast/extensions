@@ -10,7 +10,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { global_model, openai } from "./api";
+import { globalModel, openai } from "./api";
 import { countToken, estimatePrice, sentToSideNote } from "./util";
 
 // Define history item type
@@ -67,7 +67,7 @@ export default function ResultView(
   const [loading, setLoading] = useState(true);
   const [cumulative_tokens, setCumulativeTokens] = useState(0);
   const [cumulative_cost, setCumulativeCost] = useState(0);
-  const [model, setModel] = useState(model_override == "global" ? global_model : model_override);
+  const [model, setModel] = useState(model_override == "global" ? globalModel : model_override);
 
   async function getResult() {
     const now = new Date();
