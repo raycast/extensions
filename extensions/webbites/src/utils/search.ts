@@ -72,8 +72,8 @@ export const search = async (
     // Make request with axios
     const response = await axios({
       method: "post",
-      // url: 'https://api.webbites.io/search',
-      url: "http://localhost:3003/search",
+      url: "https://api.webbites.io/search",
+      // url: "http://localhost:3003/search",
       headers: {
         "Content-Type": "application/json",
         "X-Parse-Session-Token": sessionToken,

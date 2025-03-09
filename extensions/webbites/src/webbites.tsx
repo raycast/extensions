@@ -68,6 +68,21 @@ export default function Command() {
 
       try {
         initializeParse();
+
+        // Load cached results from LocalStorage first
+        const cachedResults = await LocalStorage.getItem<string>(
+          "webbites_cached_results",
+        );
+        if (cachedResults) {
+          try {
+            const parsedResults = JSON.parse(cachedResults) as BookmarkItem[];
+            setSearchResults(parsedResults);
+            console.log("Loaded cached results:", parsedResults.length);
+          } catch (e) {
+            console.error("Error parsing cached results:", e);
+          }
+        }
+
         await checkAuthStatus();
       } catch (error) {
         console.error("Initialization error:", error);
@@ -83,7 +98,7 @@ export default function Command() {
   useEffect(() => {
     const debounceTimeout = setTimeout(() => {
       // Reset pagination when search text changes
-      setCurrentPage(1);
+      setCurrentPage(0);
       // Don't clear search results here, just start searching
       setHasMoreResults(true);
       handleSearch();
@@ -101,18 +116,6 @@ export default function Command() {
       const authenticated = await isLoggedIn();
       setIsAuthenticated(authenticated);
 
-      // if (authenticated) {
-      //   // Get user information
-      //   const currentUser = await getCurrentUser();
-      //   // Store user information if available
-      //   if (currentUser) {
-      //     setUser({
-      //       id: currentUser.id,
-      //       username: currentUser.getUsername(),
-      //       email: currentUser.getEmail()
-      //     });
-      //   }
-      // }
       return true;
     } catch (error) {
       console.error("Error checking auth status:", error);
@@ -140,6 +143,15 @@ export default function Command() {
         ) || [];
       setSearchResults(uniqueResults || []);
       setHasMoreResults(uniqueResults?.length === hitsPerPage);
+
+      // Cache the results to LocalStorage
+      if (uniqueResults.length > 0) {
+        await LocalStorage.setItem(
+          "webbites_cached_results",
+          JSON.stringify(uniqueResults),
+        );
+        console.log("Cached", uniqueResults.length, "results to LocalStorage");
+      }
     } catch (error) {
       console.log("Error during log in search:", error);
     }
@@ -159,6 +171,9 @@ export default function Command() {
       await logout();
       setIsAuthenticated(false);
       console.log("Logout complete");
+
+      // Clear cached results when logging out
+      await LocalStorage.removeItem("webbites_cached_results");
 
       // Verify LocalStorage is cleared
       const sessionToken = await LocalStorage.getItem("webbites_session_token");
@@ -300,11 +315,7 @@ export default function Command() {
         title={title}
         description={description}
         icon={{ source: "webbites-logo-medium.png" }}
-        actions={
-          <ActionPanel>
-            <Action title="Logout" onAction={handleLogout} />
-          </ActionPanel>
-        }
+        actions={getCommonActions()}
       />
     );
   };
@@ -330,11 +341,7 @@ export default function Command() {
         title={title}
         description={description}
         icon={{ source: "webbites-logo-medium.png" }}
-        actions={
-          <ActionPanel>
-            <Action title="Logout" onAction={handleLogout} />
-          </ActionPanel>
-        }
+        actions={getCommonActions()}
       />
     );
   };
@@ -353,20 +360,7 @@ export default function Command() {
             tooltip: result.title || "Bookmark",
           }}
           title={result.siteTitle || "Untitled Bookmark"}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser url={result.url} />
-              <Action.CopyToClipboard content={result.url} title="Copy URL" />
-              <Action title="Logout" onAction={handleLogout} />
-              <Action
-                title="Debug: Show LocalStorage"
-                onAction={async () => {
-                  const items = await LocalStorage.allItems();
-                  console.log("Current LocalStorage items:", items);
-                }}
-              />
-            </ActionPanel>
-          }
+          actions={getCommonActions(result)}
         />
       ));
     }
@@ -383,13 +377,7 @@ export default function Command() {
             tooltip: result.title || "Bookmark",
           }}
           title={result.siteTitle || "Untitled Bookmark"}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser url={result.url} />
-              <Action.CopyToClipboard content={result.url} title="Copy URL" />
-              <Action title="Logout" onAction={handleLogout} />
-            </ActionPanel>
-          }
+          actions={getCommonActions(result)}
         />
       ));
     }
@@ -399,24 +387,38 @@ export default function Command() {
   };
 
   // Common actions for both grid and list views
-  const getCommonActions = (result: BookmarkItem) => (
-    <ActionPanel>
-      <ActionPanel.Section>
-        <Action.OpenInBrowser url={result.url} />
-        <Action.CopyToClipboard content={result.url} title="Copy URL" />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action
-          title={
-            viewMode === "grid" ? "Switch to List View" : "Switch to Grid View"
-          }
-          icon={viewMode === "grid" ? Icon.List : Icon.AppWindowGrid3x3}
-          onAction={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-        />
-        <Action title="Logout" onAction={handleLogout} />
-      </ActionPanel.Section>
-    </ActionPanel>
-  );
+  const getCommonActions = (result?: BookmarkItem) =>
+    result ? (
+      <ActionPanel>
+        <ActionPanel.Section>
+          <Action.OpenInBrowser url={result.url} />
+          <Action.CopyToClipboard content={result.url} title="Copy URL" />
+          <Action.OpenInBrowser
+            url={`https://www.webbites.io/app?bookmarkId=${result.objectId}`}
+            icon={{ source: "webbites-extension-icon.png" }}
+            title="View on WebBites"
+          />
+        </ActionPanel.Section>
+
+        <ActionPanel.Section>
+          <Action
+            icon={{ source: Icon.Logout }}
+            title="Logout"
+            onAction={handleLogout}
+          />
+        </ActionPanel.Section>
+      </ActionPanel>
+    ) : (
+      <ActionPanel>
+        <ActionPanel.Section>
+          <Action
+            icon={{ source: Icon.Logout }}
+            title="Logout"
+            onAction={handleLogout}
+          />
+        </ActionPanel.Section>
+      </ActionPanel>
+    );
 
   // Render List view
   if (viewMode === "list") {
