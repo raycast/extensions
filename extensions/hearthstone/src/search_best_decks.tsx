@@ -1,50 +1,50 @@
-import { Action, ActionPanel, Icon, List } from '@raycast/api';
-import { usePromise } from '@raycast/utils';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { gethsguruBestDecks } from './hsguru';
-import { classIcon, ellipsize, formatNumberWithK, getLocalCardData, type Card } from './utils'; // 新增类型导入
+import { Action, ActionPanel, Icon, List } from '@raycast/api'
+import { usePromise } from '@raycast/utils'
+import axios from 'axios'
+import { useEffect, useState } from 'react'
+import { gethsguruBestDecks } from './hsguru'
+import { classIcon, ellipsize, formatNumberWithK, getLocalCardData, type Card } from './utils' // 新增类型导入
 
 // 新增类型定义
 interface CardSlot {
-  amount: number;
+  amount: number
   card: {
-    title: string;
-    mana: number;
-  };
+    title: string
+    mana: number
+  }
 }
 
 export default function Command() {
-  const [format, setFormat] = useState(1);
-  const { data: decks, isLoading: decksLoading } = usePromise(gethsguruBestDecks, [format]);
+  const [format, setFormat] = useState(1)
+  const { data: decks, isLoading: decksLoading } = usePromise(gethsguruBestDecks, [format])
 
   // 修改点：替换 any[]
-  const [cardData, setCardData] = useState<Card[]>([]);
-  const [cardsLoading, setCardsLoading] = useState(true);
+  const [cardData, setCardData] = useState<Card[]>([])
+  const [cardsLoading, setCardsLoading] = useState(true)
 
   useEffect(() => {
     const loadCardData = async () => {
       try {
-        let data = await getLocalCardData();
+        let data = await getLocalCardData()
 
         if (!data || data.length === 0) {
-          console.log('Fetching card data from API...');
-          const response = await axios.get('https://api.hearthstonejson.com/v1/latest/enUS/cards.json');
-          data = response.data;
+          console.log('Fetching card data from API...')
+          const response = await axios.get('https://api.hearthstonejson.com/v1/latest/enUS/cards.json')
+          data = response.data
         }
 
-        setCardData(data as Card[]); // 类型断言
+        setCardData(data as Card[]) // 类型断言
       } catch (error) {
-        console.error('Error loading card data:', error);
+        console.error('Error loading card data:', error)
       } finally {
-        setCardsLoading(false);
+        setCardsLoading(false)
       }
-    };
+    }
 
-    loadCardData();
-  }, []);
+    loadCardData()
+  }, [])
 
-  const isLoading = decksLoading || cardsLoading;
+  const isLoading = decksLoading || cardsLoading
 
   return (
     <List
@@ -80,15 +80,15 @@ export default function Command() {
         />
       ))}
     </List>
-  );
+  )
 }
 
 // 修改点：替换 any[] 为具体类型
 const generateMarkdownList = (title: string, cardSlots: CardSlot[], cardData: Card[]): string => {
-  let markdown = `# ${title}\n\n`;
+  let markdown = `# ${title}\n\n`
 
   cardSlots.forEach((slot) => {
-    let card = cardData.find((c) => c.name?.toLowerCase() === slot.card.title.toLowerCase());
+    let card = cardData.find((c) => c.name?.toLowerCase() === slot.card.title.toLowerCase())
 
     if (!card) {
       card = cardData.find(
@@ -97,19 +97,19 @@ const generateMarkdownList = (title: string, cardSlots: CardSlot[], cardData: Ca
           slot.card.title &&
           (c.name.toLowerCase().includes(slot.card.title.toLowerCase()) ||
             slot.card.title.toLowerCase().includes(c.name.toLowerCase())),
-      );
+      )
     }
 
     if (card?.id) {
-      const cardId = card.id;
-      const cardName = card.name || slot.card.title;
+      const cardId = card.id
+      const cardName = card.name || slot.card.title
 
-      markdown += `${slot.amount}x (${slot.card.mana})  ${cardName}\n\n`;
-      markdown += `<img src="https://art.hearthstonejson.com/v1/render/latest/enUS/256x/${cardId}.png" alt="${cardName}">\n`;
+      markdown += `${slot.amount}🃏  ${slot.card.mana}💎  ${cardName}\n\n`
+      markdown += `<img src="https://art.hearthstonejson.com/v1/render/latest/enUS/256x/${cardId}.png" alt="${cardName}">\n`
     } else {
-      markdown += `- ${slot.amount}x (${slot.card.mana})  ${slot.card.title} (Card image not found)\n\n`;
+      markdown += `- ${slot.amount}🃏  ${slot.card.mana}💎  ${slot.card.title} (Card image not found)\n\n`
     }
-  });
+  })
 
-  return markdown;
-};
+  return markdown
+}

@@ -1,58 +1,58 @@
-import { Action, ActionPanel, Icon, List } from '@raycast/api';
-import { usePromise } from '@raycast/utils';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { CardSlot, ClassName, Deck } from './domain';
-import { gethsguruBestDecks, gethsguruBestDecksByClass } from './hsguru';
-import { classIcon, ellipsize, formatNumberWithK, getLocalCardData } from './utils';
+import { Action, ActionPanel, Icon, List } from '@raycast/api'
+import { usePromise } from '@raycast/utils'
+import axios from 'axios'
+import { useEffect, useState } from 'react'
+import { CardSlot, ClassName, Deck } from './domain'
+import { gethsguruBestDecks, gethsguruBestDecksByClass } from './hsguru'
+import { classIcon, ellipsize, formatNumberWithK, getLocalCardData } from './utils'
 
 // Define card data types
 interface CardData {
-  id: string;
-  name: string;
-  cost: number;
+  id: string
+  name: string
+  cost: number
 }
 
 type DeckListProps = {
-  className?: ClassName;
-  format?: number;
-  minGames?: number;
-};
+  className?: ClassName
+  format?: number
+  minGames?: number
+}
 
 export const DeckList: React.FC<DeckListProps> = ({ className, format = 1, minGames }) => {
   const { data: decks, isLoading: decksLoading } = className
     ? usePromise(gethsguruBestDecksByClass, [className, format, minGames], {})
-    : usePromise(gethsguruBestDecks, [format], {});
+    : usePromise(gethsguruBestDecks, [format], {})
 
   // 使用本地卡牌数据而不是从API获取
-  const [cardData, setCardData] = useState<CardData[]>([]);
-  const [cardsLoading, setCardsLoading] = useState(true);
+  const [cardData, setCardData] = useState<CardData[]>([])
+  const [cardsLoading, setCardsLoading] = useState(true)
 
   useEffect(() => {
     const loadCardData = async () => {
       try {
         // 尝试获取卡牌数据
-        let data = await getLocalCardData();
+        let data = await getLocalCardData()
 
         // 如果数据为空，尝试从 API 获取
         if (!data || data.length === 0) {
-          console.log('Fetching card data from API...');
-          const response = await axios.get('https://api.hearthstonejson.com/v1/latest/enUS/cards.json');
-          data = response.data;
+          console.log('Fetching card data from API...')
+          const response = await axios.get('https://api.hearthstonejson.com/v1/latest/enUS/cards.json')
+          data = response.data
         }
 
-        setCardData(data);
+        setCardData(data)
       } catch (error) {
-        console.error('Error loading card data:', error);
+        console.error('Error loading card data:', error)
       } finally {
-        setCardsLoading(false);
+        setCardsLoading(false)
       }
-    };
+    }
 
-    loadCardData();
-  }, []);
+    loadCardData()
+  }, [])
 
-  const isLoading = decksLoading || cardsLoading;
+  const isLoading = decksLoading || cardsLoading
 
   return (
     <List isLoading={isLoading} isShowingDetail>
@@ -73,14 +73,14 @@ export const DeckList: React.FC<DeckListProps> = ({ className, format = 1, minGa
         />
       ))}
     </List>
-  );
-};
+  )
+}
 
 // 修改后的Actions组件
 interface ActionsProps {
-  title: string;
-  code: string;
-  className: ClassName; // 添加类型定义
+  title: string
+  code: string
+  className: ClassName // 添加类型定义
 }
 
 function Actions({ title, code, className }: ActionsProps) {
@@ -93,19 +93,19 @@ function Actions({ title, code, className }: ActionsProps) {
         />
       </ActionPanel.Section>
     </ActionPanel>
-  );
+  )
 }
 
 function DeckDetails({ title, slots, cardData }: { title: string; slots: CardSlot[]; cardData: CardData[] }) {
-  return <List.Item.Detail markdown={generateMarkdownList(title, slots, cardData)} />;
+  return <List.Item.Detail markdown={generateMarkdownList(title, slots, cardData)} />
 }
 
 const generateMarkdownList = (title: string, cardSlots: CardSlot[], cardData: CardData[]): string => {
-  let markdown = `# ${title}\n\n`;
+  let markdown = `# ${title}\n\n`
 
   cardSlots.forEach((slot) => {
     // 尝试多种方式匹配卡牌
-    let card = cardData.find((c) => c.name?.toLowerCase() === slot.card.title.toLowerCase());
+    let card = cardData.find((c) => c.name?.toLowerCase() === slot.card.title.toLowerCase())
 
     // 如果没有找到，尝试部分匹配
     if (!card) {
@@ -115,27 +115,27 @@ const generateMarkdownList = (title: string, cardSlots: CardSlot[], cardData: Ca
           slot.card.title &&
           (c.name.toLowerCase().includes(slot.card.title.toLowerCase()) ||
             slot.card.title.toLowerCase().includes(c.name.toLowerCase())),
-      );
+      )
     }
 
     if (card && card.id) {
-      const cardId = card.id; // 使用卡牌 ID
-      const cardName = card.name || slot.card.title;
+      const cardId = card.id // 使用卡牌 ID
+      const cardName = card.name || slot.card.title
 
-      markdown += `${slot.amount}x (${slot.card.mana})  ${cardName}\n\n`;
-      markdown += `<img src="https://art.hearthstonejson.com/v1/render/latest/enUS/256x/${cardId}.png" alt="${cardName}">\n`;
+      markdown += `${slot.amount}🃏  ${slot.card.mana}💎  ${cardName}\n\n`
+      markdown += `<img src="https://art.hearthstonejson.com/v1/render/latest/enUS/256x/${cardId}.png" alt="${cardName}">\n`
     } else {
-      markdown += `- ${slot.amount}x (${slot.card.mana})  ${slot.card.title} (Card image not found)\n\n`;
+      markdown += `- ${slot.amount}🃏  ${slot.card.mana}💎  ${slot.card.title} (Card image not found)\n\n`
     }
-  });
+  })
 
-  return markdown;
-};
+  return markdown
+}
 
 const winrate = (deck: Deck) => {
-  return { icon: Icon.LineChart, text: `${deck.winrate}%`, tooltip: 'winrate' };
-};
+  return { icon: Icon.LineChart, text: `${deck.winrate}%`, tooltip: 'winrate' }
+}
 
 const dust = (deck: Deck) => {
-  return { icon: Icon.Raindrop, text: formatNumberWithK(deck.dust), tooltip: 'dust' };
-};
+  return { icon: Icon.Raindrop, text: formatNumberWithK(deck.dust), tooltip: 'dust' }
+}
