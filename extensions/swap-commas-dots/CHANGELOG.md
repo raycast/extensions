@@ -1,5 +1,5 @@
 # Swap Commas & Dots Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-03-10
 
 Add "Swap Commas & Dots" command.
