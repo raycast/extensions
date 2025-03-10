@@ -1,6 +1,7 @@
 import { ActionPanel, Form, Action, showToast, Toast, LocalStorage, useNavigation, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import React, { useState } from "react";
-import { DifyAppType, DifyApp, DifyConversationType } from "./utils/types";
+import { DifyAppType, DifyApp, DifyConversationType, DifyResponseMode } from "./utils/types";
 
 interface FormValues {
   name: string;
@@ -131,7 +132,7 @@ export default function Command() {
         inputs: parsedInputs,
         type: (values.type as DifyAppType) || DifyAppType.ChatflowAgent, // Default to Chatflow/Agent type
         assistantName: values.assistantName.trim(), // Assistant name, can be empty
-        responseMode: values.responseMode, // Response mode
+        responseMode: values.responseMode as DifyResponseMode, // Response mode
         waitForResponse: values.waitForResponse === "true", // Wait mode
         conversationType: (values.conversationType as DifyConversationType) || DifyConversationType.Continuous, // Conversation type
         description: values.description.trim(), // LLM description,
@@ -171,8 +172,7 @@ export default function Command() {
     } catch (error) {
       // Handle error
       console.error("Error adding Dify application:", error);
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Failed to Add Dify Application",
         message: error instanceof Error ? error.message : String(error),
       });

@@ -1,5 +1,5 @@
 import { LocalStorage, AI } from "@raycast/api";
-import { DifyApp } from "../utils/types";
+import { DifyApp, DifyAppType } from "../utils/types";
 
 type Input = {
   /** The name of the Dify application to explain */
@@ -12,26 +12,48 @@ type Input = {
  * @returns The found application or null if not found
  */
 async function findDifyApp(appName: string): Promise<DifyApp | null> {
-  // Get application list from local storage
-  const appsJson = await LocalStorage.getItem<string>("dify-apps");
-  if (!appsJson) return null;
+  try {
+    // Get application list from local storage
+    const appsJson = await LocalStorage.getItem<string>("dify-apps");
+    if (!appsJson) return null;
 
-  const apps: DifyApp[] = JSON.parse(appsJson);
-  if (!apps || apps.length === 0) return null;
+    const apps: DifyApp[] = JSON.parse(appsJson);
+    if (!apps || apps.length === 0) return null;
 
-  // Find the app with exact or partial name match
-  const searchTerm = appName.toLowerCase();
+    // Find the app with exact or partial name match
+    const searchTerm = appName.toLowerCase();
 
-  // Try exact match first
-  const exactMatch = apps.find((app) => app.name.toLowerCase() === searchTerm);
-  if (exactMatch) return exactMatch;
+    // Try exact match first
+    const exactMatch = apps.find((app) => app.name.toLowerCase() === searchTerm);
+    if (exactMatch) return exactMatch;
 
-  // Try partial match
-  const partialMatch = apps.find(
-    (app) => app.name.toLowerCase().includes(searchTerm) || searchTerm.includes(app.name.toLowerCase()),
-  );
+    // Try partial match with improved logic to avoid matching unrelated apps
+    const partialMatch = apps.find((app) => {
+      // Only consider app name includes search term if search term is at least 3 characters
+      if (searchTerm.length >= 3 && app.name.toLowerCase().includes(searchTerm)) {
+        return true;
+      }
 
-  return partialMatch || null;
+      // Only consider search term includes app name if app name is at least 2 characters
+      // AND search term is at least 60% of the app name length
+      // This avoids matching very short search terms to long app names
+      const appNameLower = app.name.toLowerCase();
+      if (
+        appNameLower.length >= 2 &&
+        searchTerm.includes(appNameLower) &&
+        searchTerm.length >= appNameLower.length * 0.6
+      ) {
+        return true;
+      }
+
+      return false;
+    });
+
+    return partialMatch || null;
+  } catch (error) {
+    console.error("Error loading apps from storage:", error);
+    return null;
+  }
 }
 
 /**
@@ -57,11 +79,15 @@ async function generateAppExplanation(app: DifyApp): Promise<string> {
     I need a comprehensive explanation of a Dify application with the following details:
     ${JSON.stringify(appContext, null, 2)}
     
+    IMPORTANT: Base your explanation STRICTLY on the provided description field. Do not invent capabilities or features that are not mentioned or implied in the description.
+    
     Please provide:
-    1. A clear, concise introduction to what this application does
-    2. The main capabilities and use cases of this application
-    3. A detailed explanation of the required inputs and how to use them
-    4. Any special features or considerations when using this application
+    1. A clear, concise introduction based directly on the description
+    2. Elaborate on the capabilities mentioned in the description (do not add new capabilities)
+    3. Provide practical examples of how to use the application, based only on what's in the description
+    4. Explain the required inputs and how they relate to the functionality described
+    
+    If the description is "No description provided" or very minimal, be conservative in your explanation and clearly state that limited information is available.
     
     Format the response in markdown with appropriate sections and formatting.
     `;
@@ -86,16 +112,21 @@ async function generateAppExplanation(app: DifyApp): Promise<string> {
  * @returns Basic explanation of the application
  */
 function generateManualExplanation(app: DifyApp): string {
-  // Generate type-specific description
+  // Generate type-specific description using exact enum matching
   let typeDescription = "";
-  if (app.type.toLowerCase().includes("agent")) {
-    typeDescription = "an intelligent agent that can answer questions and perform tasks based on your inputs";
-  } else if (app.type.toLowerCase().includes("workflow")) {
-    typeDescription = "a workflow application that processes sequential operations based on your inputs";
-  } else if (app.type.toLowerCase().includes("generator")) {
-    typeDescription = "a text generation application that creates content based on your prompts";
-  } else {
-    typeDescription = "a Dify application that processes your inputs and provides relevant outputs";
+  switch (app.type) {
+    case DifyAppType.ChatflowAgent:
+      typeDescription = "an intelligent agent that can answer questions and perform tasks based on your inputs";
+      break;
+    case DifyAppType.Workflow:
+      typeDescription = "a workflow application that processes sequential operations based on your inputs";
+      break;
+    case DifyAppType.TextGenerator:
+      typeDescription = "a text generation application that creates content based on your prompts";
+      break;
+    default:
+      typeDescription = "a Dify application that processes your inputs and provides relevant outputs";
+      break;
   }
 
   // Format input requirements

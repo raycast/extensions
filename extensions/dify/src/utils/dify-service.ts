@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { DifyApp, DifyAppType, DifyConversationType } from "./types";
+import { DifyApp, DifyAppType, DifyConversationType, DifyResponseMode } from "./types";
 import fetch from "node-fetch";
 
 export interface DifyResponse {
@@ -27,8 +27,8 @@ export interface DifyRequestOptions {
   conversationId?: string;
   user?: string;
   inputs?: { [key: string]: string } | Record<string, unknown>;
-  responseMode?: string; // "blocking" / "streaming"
-  waitForResponse?: boolean; // 是否等待完整响应，默认为 true
+  responseMode?: DifyResponseMode; // Use enum instead of string to prevent invalid values
+  waitForResponse?: boolean; // Whether to wait for complete response, defaults to true
   onStreamingMessage?: (message: string, isComplete: boolean) => void; // Callback for streaming messages
   apiKey?: string; // API key for direct authentication
   endpoint?: string; // Custom endpoint URL
@@ -218,7 +218,7 @@ export async function askDify(query: string, appName?: string, options?: DifyReq
       query: finalQuery,
       user,
       inputs: options?.inputs || {},
-      response_mode: options?.responseMode || "blocking", // Use provided responseMode or default to blocking
+      response_mode: options?.responseMode || DifyResponseMode.Blocking, // Use provided responseMode or default to blocking
     };
 
     // Add conversation_id, but only pass it when it's a valid UUID and the app type is not single call
@@ -257,7 +257,7 @@ export async function askDify(query: string, appName?: string, options?: DifyReq
         query: finalQuery,
       },
       user,
-      response_mode: options?.responseMode || "blocking", // Use provided responseMode or default to blocking
+      response_mode: options?.responseMode || DifyResponseMode.Blocking, // Use provided responseMode or default to blocking
     };
   } else {
     throw new Error(`Unsupported app type: ${appType}`);
@@ -402,7 +402,7 @@ export async function askDify(query: string, appName?: string, options?: DifyReq
     let result: DifyResponse;
 
     // Check if we're in streaming mode
-    if (options?.responseMode === "streaming") {
+    if (options?.responseMode === DifyResponseMode.Streaming) {
       // For streaming mode, we need to handle SSE (Server-Sent Events) format
       // We'll collect the full answer from the stream
       let fullAnswer = "";
@@ -456,13 +456,6 @@ export async function askDify(query: string, appName?: string, options?: DifyReq
                   options.onStreamingMessage(fullAnswer, false);
                 }
 
-                // If there's a global callback function, call it too, passing the complete accumulated content
-                // @ts-expect-error - Using global callback function
-                if (global.handleStreamingMessage) {
-                  // @ts-expect-error - Calling global callback function
-                  global.handleStreamingMessage(fullAnswer, false);
-                }
-
                 // Save conversation and message IDs if not already set
                 if (!conversationId && eventData.conversation_id) {
                   conversationId = eventData.conversation_id;
@@ -482,19 +475,37 @@ export async function askDify(query: string, appName?: string, options?: DifyReq
                   messageId = eventData.id;
                 }
 
-                // Signal completion to the callback
+                // Mark that we received a message_end event
+                // We'll continue processing other events before signaling completion
+
+                // Only update the UI with the current content, but don't mark as complete
                 if (options?.onStreamingMessage) {
-                  options.onStreamingMessage(fullAnswer, true);
+                  options.onStreamingMessage(fullAnswer, false);
                 }
 
-                // If there's a global callback function, call it too
-                // @ts-expect-error - Using global callback function
-                if (global.handleStreamingMessage) {
-                  // @ts-expect-error - Calling global callback function
-                  global.handleStreamingMessage(fullAnswer, true);
-                }
+                // We now rely solely on the provided callback function
+                // This is safer than using global variables
               } else if (eventData.event === "error") {
-                throw new Error(`Stream error: ${eventData.message || "Unknown error"}`);
+                // Instead of immediately throwing, capture the error message
+                const errorMessage = `Stream error: ${eventData.message || "Unknown error"}`;
+                console.error(errorMessage);
+
+                // Set the error message as the fullAnswer so it gets returned to the user
+                fullAnswer = errorMessage;
+
+                // If we have conversation_id and message_id in the error event, capture them
+                if (eventData.conversation_id && !conversationId) {
+                  conversationId = eventData.conversation_id;
+                }
+                if (eventData.message_id && !messageId) {
+                  messageId = eventData.message_id;
+                }
+
+                // Update the UI with the error message, but don't mark as complete yet
+                // We'll signal completion after processing all events
+                if (options?.onStreamingMessage) {
+                  options.onStreamingMessage(errorMessage, false);
+                }
               }
             } catch (parseError) {
               console.error("Error parsing SSE event:", parseError, "\nEvent data:", event);
@@ -503,6 +514,18 @@ export async function askDify(query: string, appName?: string, options?: DifyReq
         }
       } catch (error) {
         console.error("Error processing stream:", error);
+
+        // Notify the callback about the error if provided
+        if (options?.onStreamingMessage) {
+          try {
+            options.onStreamingMessage(`Error: ${error instanceof Error ? error.message : String(error)}`, true);
+          } catch (callbackError) {
+            console.error("Error in streaming callback:", callbackError);
+          }
+        }
+
+        // Propagate the error instead of silently failing
+        throw new Error(`Stream processing failed: ${error instanceof Error ? error.message : String(error)}`);
       }
 
       // Print stream processing result for debugging
@@ -510,11 +533,16 @@ export async function askDify(query: string, appName?: string, options?: DifyReq
         `Stream processing result - fullAnswer: ${fullAnswer ? "received" : "empty"}, messageId: ${messageId || "not set"}`,
       );
 
+      // Now that we've processed all events, signal completion to the callback
+      if (options?.onStreamingMessage) {
+        options.onStreamingMessage(fullAnswer, true);
+      }
+
       // If no message was received but there's a message ID, still return an empty result
       if (!fullAnswer && !messageId) {
         console.log("No message content received, but continuing anyway");
-        // Don't throw an error, return an empty result instead
-        fullAnswer = "";
+        // Instead of returning an empty result, provide a helpful error message
+        fullAnswer = "Error: No response received from the AI. Please try again or check your query.";
         messageId = `msg_${Math.random().toString(36).substring(2, 10)}`;
       }
 

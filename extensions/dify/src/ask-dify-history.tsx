@@ -1,4 +1,5 @@
 import { List, ActionPanel, Action, Icon, useNavigation, confirmAlert, showToast, Toast, Alert } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
   getHistories,
@@ -17,6 +18,8 @@ export default function AskDifyHistory() {
   const [histories, setHistories] = useState<DifyHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedHistoryId, setSelectedHistoryId] = useState<string>("");
+  // Add sort order state
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -25,9 +28,14 @@ export default function AskDifyHistory() {
 
   async function loadHistories() {
     setIsLoading(true);
-    const data = await getHistories();
-    setHistories(data);
-    setIsLoading(false);
+    try {
+      const data = await getHistories();
+      setHistories(data);
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: "Failed to load histories", message: String(error) });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   async function handleClearHistories() {
@@ -63,13 +71,19 @@ export default function AskDifyHistory() {
     });
 
     if (confirmed) {
-      await deleteConversation(conversationId);
-      await loadHistories(); // Reload the histories
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Conversation Deleted",
-        message: "The conversation has been deleted",
-      });
+      try {
+        await deleteConversation(conversationId);
+        await loadHistories(); // Reload the histories
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Conversation Deleted",
+          message: "The conversation has been deleted",
+        });
+      } catch (error) {
+        showFailureToast(error, {
+          title: "Failed to delete conversation",
+        });
+      }
     }
   }
 
@@ -201,8 +215,12 @@ export default function AskDifyHistory() {
     };
   });
 
-  // Sort all conversation threads by timestamp (newest first)
-  const sortedThreads = [...conversationThreads].sort((a, b) => b.latestEntry.timestamp - a.latestEntry.timestamp);
+  // Sort all conversation threads by timestamp based on sort order
+  const sortedThreads = [...conversationThreads].sort((a, b) => {
+    return sortOrder === "newest"
+      ? b.latestEntry.timestamp - a.latestEntry.timestamp
+      : a.latestEntry.timestamp - b.latestEntry.timestamp;
+  });
 
   return (
     <List
@@ -211,6 +229,16 @@ export default function AskDifyHistory() {
       isShowingDetail
       selectedItemId={selectedHistoryId}
       onSelectionChange={(id) => setSelectedHistoryId(id || "")}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Sort Order"
+          onChange={(newValue) => setSortOrder(newValue as "newest" | "oldest")}
+          value={sortOrder}
+        >
+          <List.Dropdown.Item title="🔥 Newest First" value="newest" />
+          <List.Dropdown.Item title="🕰️ Oldest First" value="oldest" />
+        </List.Dropdown>
+      }
       actions={
         <ActionPanel>
           <Action
@@ -228,15 +256,15 @@ export default function AskDifyHistory() {
         </ActionPanel>
       }
     >
-      {sortedThreads.map((thread, index) => {
+      {sortedThreads.map((thread) => {
         const { latestEntry } = thread;
         const appName = latestEntry.used_app || "Dify";
         const appType = latestEntry.app_type ? getAppTypeText(latestEntry.app_type as DifyAppType) : "Unknown";
 
         return (
           <List.Item
-            key={index}
-            id={`${index}`}
+            key={thread.conversationId}
+            id={thread.conversationId}
             title={
               latestEntry.question.length > 60 ? latestEntry.question.substring(0, 60) + "..." : latestEntry.question
             }

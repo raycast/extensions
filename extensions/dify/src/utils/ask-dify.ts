@@ -1,6 +1,6 @@
 import { askDify } from "./dify-service";
 import { LocalStorage } from "@raycast/api";
-import { DifyApp } from "./types";
+import { DifyApp, DifyResponseMode } from "./types";
 
 // Raycast tool commands require string parameters
 export default async function Command(query: string): Promise<string> {
@@ -29,13 +29,21 @@ export default async function Command(query: string): Promise<string> {
     // Extract parameters
     const appName = params.appName;
     const content = params.query;
+
+    // Validate content parameter
+    if (!content || content.trim() === "") {
+      return JSON.stringify({
+        error: "Missing or empty query content. Please provide a valid query.",
+      });
+    }
+
     const inputs = params.inputs || {};
     // Use the provided user ID directly, ensuring it's never empty
     // This should be a consistent ID from the system username
     const user = params.user || `user_fallback_${Math.random().toString(36).substring(2, 10)}`;
     const conversationId = params.conversationId;
     // Get response mode
-    const responseMode = params.responseMode || "blocking";
+    const responseMode = params.responseMode || DifyResponseMode.Blocking;
 
     console.log(`Initial app name: ${appName || "not provided"}`);
     console.log(`Content: ${content}`);
@@ -60,12 +68,32 @@ export default async function Command(query: string): Promise<string> {
     });
 
     // Create a callback function to handle streaming messages
+    // For the tool command, we don't need a local callback as we'll use the callback ID system
     const onStreamingMessage =
-      responseMode === "streaming"
+      responseMode === DifyResponseMode.Streaming
         ? (message: string, isComplete: boolean) => {
             console.log(
               `Streaming message received (${isComplete ? "complete" : "partial"}): ${message.substring(0, 50)}${message.length > 50 ? "..." : ""}`,
             );
+
+            // If a callback ID is provided, use the EventEmitter pattern to emit the event
+            // This is handled by the main component that registered the callback
+            if (params.callbackId) {
+              // Use LocalStorage as an event bus to communicate between processes
+              // We'll store the message with a unique key that includes the callback ID
+              const eventKey = `dify_streaming_${params.callbackId}`;
+              const eventData = JSON.stringify({
+                message,
+                isComplete,
+                timestamp: Date.now(),
+              });
+
+              // Store the event data in LocalStorage
+              // This will be picked up by the event listener in the main component
+              LocalStorage.setItem(eventKey, eventData).catch((err) => {
+                console.error("Error storing streaming event:", err);
+              });
+            }
           }
         : undefined;
 
@@ -132,13 +160,16 @@ async function listApps(limit: number): Promise<string> {
 
     // Format application information - new format
     const formattedApps = limitedApps.map((app) => {
+      // Store lowercase app type in a variable to avoid multiple toLowerCase() calls
+      const appTypeLower = app.type.toLowerCase();
+
       // Generate example inputs format
-      const exampleInputs = app.type.toLowerCase().includes("agent")
+      const exampleInputs = appTypeLower.includes("agent")
         ? { query: "your question here" }
         : { message: "your message here" };
 
       // Generate simple description (English)
-      const description = app.type.toLowerCase().includes("agent")
+      const description = appTypeLower.includes("agent")
         ? "Intelligent agent application that can answer complex questions"
         : "Conversational application for natural dialogue";
 

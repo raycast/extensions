@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 /**
  * Sanitize API endpoint by removing trailing spaces and ensuring proper format
@@ -62,8 +62,8 @@ export function formatInputVariables(inputs: Record<string, unknown> | undefined
  */
 export async function handleError(error: unknown, title = "Error"): Promise<void> {
   console.error(title, error);
-  await showToast({
-    style: Toast.Style.Failure,
+  // Pass title as object property to fix type error
+  await showFailureToast({
     title,
     message: error instanceof Error ? error.message : String(error),
   });

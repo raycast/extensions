@@ -12,6 +12,7 @@ import {
   useNavigation,
   Alert,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { DifyAppType, DifyApp, DifyConversationType, getAppTypeText, getAppTypeColor } from "./utils/types";
 import AskDifyCommand from "./ask-dify";
@@ -198,10 +199,8 @@ function EditDifyAppForm(props: { app: DifyApp; onEdit: () => void }) {
       pop();
     } catch (error) {
       console.error("Error updating Dify application:", error);
-      await showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Failed to Update Dify Application",
-        message: error instanceof Error ? error.message : String(error),
       });
     }
   };
@@ -305,7 +304,7 @@ export default function Command() {
   const [apps, setApps] = useState<DifyApp[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedAppId, setSelectedAppId] = useState<string>("");
-  // 添加排序方式状态
+  // Add sort order state
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const { push } = useNavigation();
 
@@ -334,7 +333,7 @@ export default function Command() {
         await LocalStorage.setItem("dify-apps", JSON.stringify(updatedApps));
       }
 
-      // 根据排序方式对应用进行排序
+      // Sort apps based on sort order
       const sortedApps = sortAppsByOrder(updatedApps, sortOrder);
       setApps(sortedApps);
     } catch (error) {
@@ -412,10 +411,8 @@ export default function Command() {
     } catch (error) {
       // Handle error
       console.error("Error deleting all Dify applications:", error);
-      await showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Failed to Delete All Dify Applications",
-        message: error instanceof Error ? error.message : String(error),
       });
     }
   };
@@ -462,10 +459,8 @@ export default function Command() {
     } catch (error) {
       // Handle error
       console.error("Error deleting Dify application:", error);
-      await showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Failed to Delete Dify Application",
-        message: error instanceof Error ? error.message : String(error),
       });
     }
   };
@@ -560,7 +555,7 @@ ${formatInputs(app.inputs)}
                   title="Ask Application"
                   icon={Icon.Message}
                   onAction={() => {
-                    // 导航到ask-dify组件并预选当前应用
+                    // Navigate to AskDifyCommand and preselect the current app
                     push(<AskDifyCommand preselectedAppName={app.name} />);
                   }}
                   shortcut={{ modifiers: [], key: "return" }}

@@ -1,4 +1,4 @@
-import { useForm } from "@raycast/utils";
+import { useForm, showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
 
@@ -27,10 +27,8 @@ export function ConversationEditor({ initialText, onSave }: EditConversationProp
         });
         pop();
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast(error, {
           title: "Save Failed",
-          message: error instanceof Error ? error.message : "Unknown error",
         });
       } finally {
         setIsSubmitting(false);

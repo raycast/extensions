@@ -1,6 +1,15 @@
 # Dify Changelog
 
-## [1.0.1] - 2025-03-10
+## [1.0.2] - {PR_MERGE_DATE}
+
+- Enhanced type safety by replacing string literals with enum types for response modes
+- Improved error handling in streaming mode to prevent silent failures
+- Fixed premature termination issues in streaming responses
+- Added meaningful error messages instead of empty responses
+- Improved code formatting and linting across the codebase
+- Enhanced error propagation to ensure users receive proper error notifications
+
+## [1.0.1] - {PR_MERGE_DATE}
 
 - Improved input field validation to filter out invalid input names (empty or whitespace-only)
 - Enhanced AI extraction logic to work with validated input fields
@@ -8,7 +17,7 @@
 - Better error handling for network issues
 - Maintained original query integrity when processing inputs
 
-## [1.0.0] - 2025-03-09
+## [1.0.0] - {PR_MERGE_DATE}
 
 - Seamless integration with Dify AI applications
 - AI Tools integration with Raycast command system (@dify)

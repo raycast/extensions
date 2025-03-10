@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Action, ActionPanel, Form, List, Toast, showToast, LocalStorage, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { saveHistory, getHistories, DifyHistory } from "./utils/dify-service";
 import askDify from "./utils/ask-dify";
 import { DifyAppType, DifyApp, getAppTypeColor } from "./utils/types";
@@ -525,14 +526,24 @@ function ChatView(props: { formValues: FormValues; conversationId?: string; onCo
         if (props.formValues && props.formValues.input && !initialQueryProcessedRef.current) {
           // Process initial query
           initialQueryProcessedRef.current = true;
-          await handleInitialQuery();
+          try {
+            await handleInitialQuery();
+          } catch (error) {
+            // Reset the ref if there's an error so we can try again
+            initialQueryProcessedRef.current = false;
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            showFailureToast({
+              title: "Error processing initial query",
+              message: errorMessage,
+            });
+            console.error("Error in handleInitialQuery:", error);
+          }
         } else {
           // No initial query to process or already processed
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        await showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "Error loading data",
           message: errorMessage,
         });
@@ -663,6 +674,9 @@ function ChatView(props: { formValues: FormValues; conversationId?: string; onCo
             });
           };
 
+          // Generate a unique callback ID for this streaming session
+          const callbackId = `cb_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+
           // Create parameter object, but don't include callback function (as it would be serialized)
           const streamingParams = {
             query: userQuery,
@@ -670,16 +684,38 @@ function ChatView(props: { formValues: FormValues; conversationId?: string; onCo
             inputs: parsedInputs,
             user: userIdRef.current,
             responseMode: "streaming",
+            callbackId: callbackId, // Add the callback ID to the parameters
           };
 
           const jsonParams = JSON.stringify(streamingParams);
           console.log("Streaming params:", jsonParams);
 
-          // Create a function to handle streaming messages in the tool command
-          // This function will be called inside the tool command, which then calls our handleStreamingMessage
-          // We need to set a global callback function before executing the tool command
-          // @ts-expect-error - Add global callback function
-          global.handleStreamingMessage = handleStreamingMessage;
+          // Set up an event listener to handle streaming messages
+          const eventKey = `dify_streaming_${callbackId}`;
+          const checkForStreamingEvents = async () => {
+            try {
+              const eventData = await LocalStorage.getItem<string>(eventKey);
+              if (eventData) {
+                // Parse the event data
+                const { message, isComplete } = JSON.parse(eventData);
+
+                // Process the streaming message
+                handleStreamingMessage(message, isComplete);
+
+                // If the message is complete, remove the event listener
+                if (isComplete) {
+                  clearInterval(eventCheckInterval);
+                  // Clean up the event data
+                  await LocalStorage.removeItem(eventKey);
+                }
+              }
+            } catch (error) {
+              console.error("Error checking for streaming events:", error);
+            }
+          };
+
+          // Check for events every 100ms
+          const eventCheckInterval = setInterval(checkForStreamingEvents, 100);
 
           // Call askDify and pass callback function
           try {
@@ -718,14 +754,14 @@ function ChatView(props: { formValues: FormValues; conversationId?: string; onCo
               }
             }
 
-            // Clean up global callback function
-            // @ts-expect-error - Remove global callback function
-            delete global.handleStreamingMessage;
+            // Clean up the event listener
+            clearInterval(eventCheckInterval);
+            await LocalStorage.removeItem(eventKey);
           } catch (error) {
             console.error("Error in streaming API call:", error);
-            // Ensure global callback function is cleaned up
-            // @ts-expect-error - Remove global callback function
-            delete global.handleStreamingMessage;
+            // Ensure event listener is cleaned up
+            clearInterval(eventCheckInterval);
+            await LocalStorage.removeItem(eventKey);
             throw error;
           }
         } else {
@@ -845,8 +881,7 @@ function ChatView(props: { formValues: FormValues; conversationId?: string; onCo
 
       // Show error toast with detailed message
       const errorMessage = error instanceof Error ? error.message : String(error);
-      await showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Error asking Dify",
         message: errorMessage,
       });
@@ -1033,6 +1068,9 @@ function ChatView(props: { formValues: FormValues; conversationId?: string; onCo
             });
           };
 
+          // Generate a unique callback ID for this streaming session
+          const callbackId = `cb_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+
           // Create parameter object without callback function (as it would be serialized)
           const streamingParams = {
             query: processedQuery,
@@ -1041,17 +1079,39 @@ function ChatView(props: { formValues: FormValues; conversationId?: string; onCo
             user: userIdRef.current,
             conversationId: currentConversationId,
             responseMode: "streaming",
+            callbackId: callbackId, // Add the callback ID to the parameters
           };
 
           // Use modified askDify call
           const jsonParams = JSON.stringify(streamingParams);
           console.log("Streaming params for follow-up:", jsonParams);
 
-          // Create a function to handle streaming messages in the tool command
-          // This function will be called inside the tool command, which then calls our handleStreamingMessage
-          // We need to set a global callback function before executing the tool command
-          // @ts-expect-error - Add global callback function
-          global.handleStreamingMessage = handleStreamingMessage;
+          // Set up an event listener to handle streaming messages
+          const eventKey = `dify_streaming_${callbackId}`;
+          const checkForStreamingEvents = async () => {
+            try {
+              const eventData = await LocalStorage.getItem<string>(eventKey);
+              if (eventData) {
+                // Parse the event data
+                const { message, isComplete } = JSON.parse(eventData);
+
+                // Process the streaming message
+                handleStreamingMessage(message, isComplete);
+
+                // If the message is complete, remove the event listener
+                if (isComplete) {
+                  clearInterval(eventCheckInterval);
+                  // Clean up the event data
+                  await LocalStorage.removeItem(eventKey);
+                }
+              }
+            } catch (error) {
+              console.error("Error checking for streaming events:", error);
+            }
+          };
+
+          // Check for events every 100ms
+          const eventCheckInterval = setInterval(checkForStreamingEvents, 100);
 
           // Call askDify and pass callback function
           try {
@@ -1070,14 +1130,14 @@ function ChatView(props: { formValues: FormValues; conversationId?: string; onCo
               responseAppType = fullResponse.app_type || "";
             }
 
-            // Clean up global callback function
-            // @ts-expect-error - Remove global callback function
-            delete global.handleStreamingMessage;
+            // Clean up the event listener
+            clearInterval(eventCheckInterval);
+            await LocalStorage.removeItem(eventKey);
           } catch (error) {
             console.error("Error in streaming API call:", error);
-            // Ensure global callback function is cleaned up
-            // @ts-expect-error - Remove global callback function
-            delete global.handleStreamingMessage;
+            // Ensure event listener is cleaned up
+            clearInterval(eventCheckInterval);
+            await LocalStorage.removeItem(eventKey);
             throw error;
           }
         } else {
@@ -1242,7 +1302,7 @@ function ChatView(props: { formValues: FormValues; conversationId?: string; onCo
             // Update content to display error
             updatedMessages[assistantMessageIndex] = {
               ...updatedMessages[assistantMessageIndex],
-              content: `[❌ 错误: ${errorMessage}]`,
+              content: `[❌ Error: ${errorMessage}]`,
             };
 
             // Update conversation

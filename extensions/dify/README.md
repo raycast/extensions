@@ -98,11 +98,10 @@ The Dify extension provides powerful AI capabilities through Raycast's AI comman
    ```
 5. **Listen to Music and Learn Technical Terms**:
 
+   ```
    @spotify-player, first play Aimyon's Marigold, then @Dify help me interpret all the technical terminology in the current tab window. (Before this, you need to open the Raycast AI chat window, then use + to add the Add Focused Browser Tab option to get the tab content)
-
    ```
-
-   ```
+   
 6. **Extension Development**:
 
    ```

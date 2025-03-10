@@ -1,6 +1,6 @@
 import { askDify } from "../utils/dify-service";
 import { LocalStorage, AI, environment } from "@raycast/api";
-import { DifyApp, DifyConversationType } from "../utils/types";
+import { DifyApp, DifyConversationType, DifyResponseMode } from "../utils/types";
 import os from "os";
 
 // Key name for storing recent conversation IDs
@@ -20,7 +20,7 @@ type Input = {
   /** User identifier */
   user?: string;
   /** Response mode: blocking or streaming */
-  responseMode?: string;
+  responseMode?: DifyResponseMode;
   /** Wait mode: whether to wait for full response */
   waitForResponse?: boolean;
   /** Conversation ID for continuing an existing conversation */
@@ -67,7 +67,7 @@ export default async function askDifyTool(input: Input): Promise<string> {
     const systemUsername = os.userInfo().username;
     const user = input.user || `Raycast_${systemUsername}`;
 
-    const responseMode = input.responseMode || "blocking";
+    const responseMode = input.responseMode || DifyResponseMode.Blocking;
     // If wait mode is explicitly specified in the input, use that value
     // Otherwise, we'll get it from the app details later
     const inputWaitForResponse = input.waitForResponse;

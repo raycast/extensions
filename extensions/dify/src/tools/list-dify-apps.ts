@@ -409,7 +409,16 @@ export default async function listDifyAppsTool(input: Input): Promise<string> {
 
     // Get application list from local storage
     const appsJson = await LocalStorage.getItem<string>("dify-apps");
-    const apps: DifyApp[] = appsJson ? JSON.parse(appsJson) : [];
+    let apps: DifyApp[] = [];
+
+    try {
+      // Safely parse JSON with error handling
+      apps = appsJson ? JSON.parse(appsJson) : [];
+    } catch (error) {
+      console.error("Error parsing apps JSON:", error);
+      // Continue with empty apps array if parsing fails
+    }
+
     console.log(`Found ${apps.length} apps in storage`);
 
     // If no applications, return prompt message

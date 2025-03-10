@@ -11,6 +11,12 @@ export enum DifyConversationType {
   Continuous = "continuous",
 }
 
+// Define response mode enum
+export enum DifyResponseMode {
+  Blocking = "blocking",
+  Streaming = "streaming",
+}
+
 // App interface definition
 export interface DifyApp {
   name: string;
@@ -19,7 +25,7 @@ export interface DifyApp {
   inputs: Record<string, unknown>;
   type: DifyAppType;
   assistantName?: string; // Assistant name, optional
-  responseMode?: string; // Response mode: blocking or streaming, optional
+  responseMode?: DifyResponseMode; // Response mode: blocking or streaming, optional
   waitForResponse?: boolean; // Wait for response mode, true=wait for full response, false=only check API call success, optional, default: true
   conversationType?: DifyConversationType; // Conversation type: single_call or continuous, optional, default: continuous
   description?: string; // LLM description, optional
