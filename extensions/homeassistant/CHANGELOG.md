@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Update] {PR_MERGE_DATE}
+## [Update] 2025-03-10
 
 - Added Custom Entities command to allow to add specific entities to the list.
 
