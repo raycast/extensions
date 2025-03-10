@@ -1,0 +1,32 @@
+{
+  "instructions": "When a user wants to query a Dify application, first use the list-dify-apps tool to get a list of available applications and their details, then use the ask-dify tool to send the query. Do not attempt to guess application names or interface parameters, you must base them on the information returned by list-dify-apps.",
+  "evals": [
+    {
+      "input": "@dify I would like to ask about artificial intelligence knowledge",
+      "expected": [
+        {"callsTool": "list-dify-apps"},
+        {"callsTool": {"name": "ask-dify", "arguments": {"query": {"includes": "artificial intelligence"}}}}
+      ]
+    },
+    {
+      "input": "@dify Use the ChatGPT app to ask what is machine learning",
+      "expected": [
+        {"callsTool": "list-dify-apps"},
+        {"callsTool": {"name": "ask-dify", "arguments": {"appName": "ChatGPT", "query": {"includes": "machine learning"}}}}
+      ]
+    },
+    {
+      "input": "@dify List all my applications",
+      "expected": [
+        {"callsTool": "list-dify-apps"}
+      ]
+    },
+    {
+      "input": "@dify Tell me about my SlackNote application",
+      "expected": [
+        {"callsTool": "list-dify-apps"},
+        {"callsTool": "explain-dify-app"}
+      ]
+    }
+  ]
+}
