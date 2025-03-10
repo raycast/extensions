@@ -1,7 +1,7 @@
 # Custom folder Changelog
 
 ## [Feat Custom icon from custom image] - {PR_MERGE_DATE}
-- Added a new command to change the folder icon to a custom image..
+- Added a new command to change the folder icon to a custom image.
 - Added a new command to reset the folder icon to the default.
 
 
