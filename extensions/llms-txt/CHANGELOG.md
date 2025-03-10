@@ -1,5 +1,5 @@
 # Llms Txt Changelog
 
-## [Initial Version] - 2025-03-02
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial version of the extension
