@@ -23,7 +23,7 @@
       "mode": "view"
     },
     {
-      "name": "list-my-boards",
+      "name": "list-boards",
       "title": "My Boards",
       "description": "Search & Open your Miro boards in seconds",
       "mode": "view"
