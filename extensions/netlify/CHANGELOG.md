@@ -1,5 +1,9 @@
 # Changelog
 
+## [✨AI: Add Env Tools] - {PR_MERGE_DATE}
+
+- AI Tool to Get Environment Variables
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 - Add AI Tools to:
