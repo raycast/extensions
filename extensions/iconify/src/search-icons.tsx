@@ -69,7 +69,8 @@ function Command() {
         );
         const pasteFile = (
           <Action
-            title="Paste Svg File"
+            // eslint-disable-next-line @raycast/prefer-title-case
+            title="Paste SVG File"
             icon={RaycastIcon.Clipboard}
             onAction={async () => {
               await copyToClipboard(svgIcon, id);
@@ -82,7 +83,8 @@ function Command() {
         );
         const copyFile = (
           <Action
-            title="Copy Svg File"
+            // eslint-disable-next-line @raycast/prefer-title-case
+            title="Copy SVG File"
             icon={RaycastIcon.Clipboard}
             onAction={async () => {
               await copyToClipboard(svgIcon, id);
@@ -107,7 +109,8 @@ function Command() {
           <Action.CopyToClipboard title="Copy URL" content={toURL(setId, id)} />
         );
         const copyDataURI = (
-          <Action.CopyToClipboard title="Copy Data Uri" content={dataURIIcon} />
+          // eslint-disable-next-line @raycast/prefer-title-case
+          <Action.CopyToClipboard title="Copy Data URI" content={dataURIIcon} />
         );
         return (
           <Grid.Item
