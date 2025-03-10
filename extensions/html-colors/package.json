@@ -18,7 +18,6 @@
     {
       "name": "html-color",
       "title": "Search HTML Colors",
-      "subtitle": "Find colors by name, hex, or RGB",
       "description": "Quickly find HTML colors by name, hex, or RGB. Supports fuzzy search with typos and shows both basic and extended color sets.",
       "mode": "view"
     }
