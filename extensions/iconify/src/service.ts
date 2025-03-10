@@ -71,9 +71,10 @@ interface QueryResponse {
 
 class Service {
   async listSets(): Promise<Set[]> {
-    const response = await jsdelivrClient.get<Record<string, SetResponse>>(
-      '/collections.json',
-    );
+    const response =
+      await jsdelivrClient.get<Record<string, SetResponse>>(
+        '/collections.json',
+      );
     const ids = Object.keys(response.data);
     return ids
       .map((id) => {

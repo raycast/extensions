@@ -62,14 +62,14 @@ function Command() {
         const dataURIIcon = toDataURI(svgIcon);
 
         const paste = (
-          <Action.Paste title="Paste SVG String" content={svgIcon} />
+          <Action.Paste title="Paste Svg String" content={svgIcon} />
         );
         const copy = (
-          <Action.CopyToClipboard title="Copy SVG String" content={svgIcon} />
+          <Action.CopyToClipboard title="Copy Svg String" content={svgIcon} />
         );
         const pasteFile = (
           <Action
-            title="Paste SVG File"
+            title="Paste Svg File"
             icon={RaycastIcon.Clipboard}
             onAction={async () => {
               await copyToClipboard(svgIcon, id);
@@ -82,7 +82,7 @@ function Command() {
         );
         const copyFile = (
           <Action
-            title="Copy SVG File"
+            title="Copy Svg File"
             icon={RaycastIcon.Clipboard}
             onAction={async () => {
               await copyToClipboard(svgIcon, id);
@@ -107,10 +107,7 @@ function Command() {
           <Action.CopyToClipboard title="Copy URL" content={toURL(setId, id)} />
         );
         const copyDataURI = (
-          <Action.CopyToClipboard
-            title="Copy Data URI"
-            content={dataURIIcon}
-          />
+          <Action.CopyToClipboard title="Copy Data Uri" content={dataURIIcon} />
         );
         return (
           <Grid.Item
