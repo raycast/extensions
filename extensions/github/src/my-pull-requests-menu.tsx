@@ -38,21 +38,8 @@ function getPullRequestStatusIcon(pr: PullRequestFieldsFragment): Icon | string 
   }
 }
 
-interface MyPullRequestsMenuPreferences {
-  showtext: boolean;
-  useUnreadIndicator: boolean;
-  includeAssigned: boolean;
-  includeMentioned: boolean;
-  includeReviewed: boolean;
-  includeReviewRequests: boolean;
-  includeRecentlyClosed: boolean;
-  repositoryFilterEnabled: boolean;
-  repositoryFilterMode: "include" | "exclude";
-  repositoryList: string;
-}
-
 function MyPullRequestsMenu() {
-  const preferences = getPreferenceValues<MyPullRequestsMenuPreferences>();
+  const preferences = getPreferenceValues<Preferences.MyPullRequestsMenu>();
   const {
     showtext,
     includeAssigned,
@@ -61,7 +48,6 @@ function MyPullRequestsMenu() {
     includeReviewRequests,
     includeRecentlyClosed,
     useUnreadIndicator,
-    repositoryFilterEnabled,
     repositoryFilterMode,
     repositoryList,
   } = preferences;
@@ -89,7 +75,7 @@ function MyPullRequestsMenu() {
   });
 
   const sections = useMemo(() => {
-    if (!unfilteredSections || !repositoryFilterEnabled || repositoryListArray.length === 0) {
+    if (!unfilteredSections || repositoryFilterMode === "all" || repositoryListArray.length === 0) {
       return unfilteredSections;
     }
 
@@ -109,7 +95,7 @@ function MyPullRequestsMenu() {
         pullRequests: filteredPullRequests,
       };
     });
-  }, [unfilteredSections, repositoryFilterEnabled, repositoryListArray, repositoryFilterMode]);
+  }, [unfilteredSections, repositoryListArray, repositoryFilterMode]);
 
   const prCount = sections?.reduce((acc, section) => acc + (section.pullRequests ?? []).length, 0);
 

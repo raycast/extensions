@@ -27,15 +27,7 @@ import {
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
 
-interface UnreadNotificationsPreferences {
-  alwaysShow: boolean;
-  showUnreadCount: boolean;
-  repositoryFilterEnabled: boolean;
-  repositoryFilterMode: "include" | "exclude";
-  repositoryList: string;
-}
-
-const preferences = getPreferenceValues<UnreadNotificationsPreferences>();
+const preferences = getPreferenceValues<Preferences.UnreadNotifications>();
 
 function UnreadNotifications() {
   const { octokit } = getGitHubClient();
@@ -54,7 +46,7 @@ function UnreadNotifications() {
     const response = await octokit.activity.listNotificationsForAuthenticatedUser();
     let notifications = response.data;
 
-    if (preferences.repositoryFilterEnabled && repositoryListArray.length > 0) {
+    if (preferences.repositoryFilterMode !== "all" && repositoryListArray.length > 0) {
       if (preferences.repositoryFilterMode === "include") {
         notifications = notifications.filter((notification) =>
           repositoryListArray.some((repo) => repo.toLowerCase() === notification.repository.full_name.toLowerCase()),

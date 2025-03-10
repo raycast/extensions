@@ -251,24 +251,25 @@
           "required": false
         },
         {
-          "name": "repositoryFilterEnabled",
-          "type": "checkbox",
-          "required": false,
-          "default": false,
-          "label": "Filter by Repository List",
-          "title": "Repository Filtering",
-          "description": "Enable filtering notifications by repository list"
-        },
-        {
           "name": "repositoryFilterMode",
           "type": "dropdown",
           "required": false,
-          "default": "include",
+          "default": "all",
           "title": "Repository Filter Mode",
           "description": "How to filter repositories",
           "data": [
-            { "title": "Include Only Listed Repositories", "value": "include" },
-            { "title": "Exclude Listed Repositories", "value": "exclude" }
+            {
+              "title": "All Repositories",
+              "value": "all"
+            },
+            {
+              "title": "Include Only Listed Repositories",
+              "value": "include"
+            },
+            {
+              "title": "Exclude Listed Repositories",
+              "value": "exclude"
+            }
           ]
         },
         {
@@ -445,24 +446,25 @@
           "placeholder": "5"
         },
         {
-          "name": "repositoryFilterEnabled",
-          "type": "checkbox",
-          "required": false,
-          "default": false,
-          "label": "Filter by Repository List",
-          "title": "Repository Filtering",
-          "description": "Enable filtering pull requests by repository list"
-        },
-        {
           "name": "repositoryFilterMode",
           "type": "dropdown",
           "required": false,
-          "default": "include",
+          "default": "all",
           "title": "Repository Filter Mode",
           "description": "How to filter repositories",
           "data": [
-            { "title": "Include Only Listed Repositories", "value": "include" },
-            { "title": "Exclude Listed Repositories", "value": "exclude" }
+            {
+              "title": "All Repositories",
+              "value": "all"
+            },
+            {
+              "title": "Include Only Listed Repositories",
+              "value": "include"
+            },
+            {
+              "title": "Exclude Listed Repositories",
+              "value": "exclude"
+            }
           ]
         },
         {
