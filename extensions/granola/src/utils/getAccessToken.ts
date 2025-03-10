@@ -1,8 +1,8 @@
-import * as fs from "fs";
+import { promises as fs } from "fs";
 import * as path from "path";
 import * as os from "os";
 
-function getAccessToken() {
+async function getAccessToken() {
   // Get the user's home directory dynamically
   const homeDirectory = os.homedir();
 
@@ -11,7 +11,7 @@ function getAccessToken() {
 
   try {
     // Read and parse the JSON file
-    const fileContent = fs.readFileSync(filePath, "utf8");
+    const fileContent = await fs.readFile(filePath, "utf8");
     const jsonData = JSON.parse(fileContent);
 
     // Parse the cognito_tokens string as it's stored as a JSON string
@@ -28,7 +28,10 @@ function getAccessToken() {
     return accessToken;
   } catch (error) {
     console.error("Error retrieving access token:", error);
-    throw error;
+    throw new Error(
+      `Failed to get Granola access token: ${error}. Please make sure Granola is installed, running, and that you are logged in to the application.`,
+      { cause: error },
+    );
   }
 }
 

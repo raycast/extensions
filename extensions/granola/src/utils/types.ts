@@ -32,7 +32,6 @@ export interface Document {
   affinity_note_id: null;
   has_shareable_link: boolean;
   show_private_notes: boolean;
-  // attachments: any[]; // Not sure what this is used for
   hubspot_note_url: null | string;
   creation_source: string;
   subscription_plan_id: string;
@@ -124,11 +123,7 @@ export interface Creator {
   };
 }
 
-// TODO:Attendee type (expanded with real data)
 export interface Attendee {
-  // Add properties based on actual attendee data structure
-  // This is a placeholder since the example doesn't show attendee structure
   name?: string;
   email?: string;
-  // details?: any;
 }

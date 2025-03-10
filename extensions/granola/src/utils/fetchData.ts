@@ -1,16 +1,36 @@
 import { useFetch } from "@raycast/utils";
+import { useState, useEffect } from "react";
 import getAccessToken from "./getAccessToken";
+import { GetDocumentsResponse } from "./types";
 
 export function fetchGranolaData(route: string) {
+  const [accessToken, setAccessToken] = useState<string | undefined>(undefined);
+  const [error, setError] = useState<Error | undefined>(undefined);
+
+  useEffect(() => {
+    let mounted = true;
+    getAccessToken()
+      .then(token => {
+        if (mounted) setAccessToken(token);
+      })
+      .catch(err => {
+        if (mounted) setError(new Error("Failed to get access token"));
+      });
+    return () => { mounted = false; };
+  }, []);
+
   const url = `https://api.granola.ai/v2/${route}`;
-
-  const accessToken = getAccessToken();
-
-  const { isLoading, data, revalidate } = useFetch(url, {
-    headers: {
+  
+  const { isLoading, data, revalidate } = useFetch<GetDocumentsResponse>(url, {
+    headers: accessToken ? {
       Authorization: `Bearer ${accessToken}`,
-    },
+    } : undefined,
+    enabled: !!accessToken,
   });
 
-  return { isLoading, data, revalidate };
+  if (error) {
+    throw error;
+  }
+
+  return { isLoading: isLoading || !accessToken, data, revalidate };
 }
