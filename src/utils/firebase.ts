@@ -24,20 +24,16 @@ let app: admin.app.App | undefined;
 export function validateServiceAccount(serviceAccountJson: string): FirebaseServiceAccount | null {
   try {
     const serviceAccount = JSON.parse(serviceAccountJson) as FirebaseServiceAccount;
-    
+
     // Check for required fields
-    const requiredFields = [
-      "project_id",
-      "private_key",
-      "client_email",
-    ];
-    
+    const requiredFields = ["project_id", "private_key", "client_email"];
+
     for (const field of requiredFields) {
       if (!serviceAccount[field as keyof FirebaseServiceAccount]) {
         return null;
       }
     }
-    
+
     return serviceAccount;
   } catch (error) {
     return null;
@@ -53,15 +49,15 @@ export async function saveServiceAccount(serviceAccountJson: string): Promise<bo
     if (!serviceAccount) {
       return false;
     }
-    
+
     await LocalStorage.setItem(FIREBASE_SERVICE_ACCOUNT_KEY, serviceAccountJson);
-    
+
     // Reset the app instance to force reinitialization with new credentials
     if (app) {
       await app.delete();
       app = undefined;
     }
-    
+
     return true;
   } catch (error) {
     return false;
@@ -77,7 +73,7 @@ export async function getServiceAccount(): Promise<FirebaseServiceAccount | null
     if (!serviceAccountJson) {
       return null;
     }
-    
+
     return validateServiceAccount(serviceAccountJson);
   } catch (error) {
     return null;
@@ -110,12 +106,12 @@ export async function initializeFirebase(): Promise<admin.app.App | null> {
   if (app) {
     return app;
   }
-  
+
   const serviceAccount = await getServiceAccount();
   if (!serviceAccount) {
     return null;
   }
-  
+
   try {
     // Check if any Firebase app already exists
     try {
@@ -142,6 +138,6 @@ export async function getFirestore(): Promise<admin.firestore.Firestore | null> 
   if (!app) {
     return null;
   }
-  
+
   return app.firestore();
-} 
+}

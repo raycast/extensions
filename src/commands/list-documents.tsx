@@ -38,10 +38,7 @@ export default function ListDocuments() {
         markdown="# Firebase Service Account Not Configured\n\nYou need to set up your Firebase service account before you can use this extension.\n\nClick the 'Set Up Service Account' button below to configure your Firebase service account."
         actions={
           <ActionPanel>
-            <Action
-              title="Set Up Service Account"
-              onAction={() => push(<SetupServiceAccountView />)}
-            />
+            <Action title="Set up Service Account" onAction={() => push(<SetupServiceAccountView />)} />
           </ActionPanel>
         }
       />
@@ -129,17 +126,9 @@ function DocumentList({ collectionName }: DocumentListProps) {
   }, [collectionName]);
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder={`Search documents in ${collectionName}...`}
-      filtering={true}
-    >
+    <List isLoading={isLoading} searchBarPlaceholder={`Search documents in ${collectionName}...`} filtering={true}>
       {error ? (
-        <List.EmptyView
-          title="Error Fetching Documents"
-          description={error}
-          icon="⚠️"
-        />
+        <List.EmptyView title="Error Fetching Documents" description={error} icon="⚠️" />
       ) : documents.length === 0 ? (
         <List.EmptyView
           title="No Documents Found"
@@ -179,12 +168,12 @@ function DocumentDetail({ document, collectionName }: DocumentDetailProps) {
       if (key === "id") {
         return `## ID: ${value}`;
       }
-      
+
       let formattedValue = value;
       if (typeof value === "object") {
         formattedValue = "```json\n" + JSON.stringify(value, null, 2) + "\n```";
       }
-      
+
       return `### ${key}\n${formattedValue}`;
     })
     .join("\n\n");
@@ -194,14 +183,8 @@ function DocumentDetail({ document, collectionName }: DocumentDetailProps) {
       markdown={`# Document in ${collectionName}\n\n${formattedData}`}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy Document ID"
-            content={document.id}
-          />
-          <Action.CopyToClipboard
-            title="Copy Document as JSON"
-            content={JSON.stringify(document, null, 2)}
-          />
+          <Action.CopyToClipboard title="Copy Document Id" content={document.id} />
+          <Action.CopyToClipboard title="Copy Document as JSON" content={JSON.stringify(document, null, 2)} />
         </ActionPanel>
       }
     />
@@ -210,10 +193,10 @@ function DocumentDetail({ document, collectionName }: DocumentDetailProps) {
 
 function SetupServiceAccountView() {
   const { pop } = useNavigation();
-  
+
   // Import the setup component dynamically to avoid circular dependencies
   const SetupServiceAccount = require("./setup-service-account").default;
-  
+
   return (
     <SetupServiceAccount
       onComplete={() => {
@@ -226,4 +209,4 @@ function SetupServiceAccountView() {
       }}
     />
   );
-} 
+}

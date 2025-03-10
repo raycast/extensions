@@ -40,7 +40,7 @@ export default function FilterDocuments() {
         actions={
           <ActionPanel>
             <Action
-              title="Set Up Service Account"
+              title="Set up Service Account"
               onAction={() => {
                 // Import the setup component dynamically to avoid circular dependencies
                 const SetupServiceAccount = require("./setup-service-account").default;
@@ -100,7 +100,7 @@ function FilterForm() {
     try {
       // Parse the field value based on the operator
       let parsedValue: any = fieldValue;
-      
+
       // Try to parse as JSON if it looks like an array or object
       if (
         (fieldValue.startsWith("[") && fieldValue.endsWith("]")) ||
@@ -126,7 +126,7 @@ function FilterForm() {
           fieldName={fieldName}
           operator={operator as admin.firestore.WhereFilterOp}
           fieldValue={parsedValue}
-        />
+        />,
       );
     } catch (error) {
       setError("An unexpected error occurred. Please try again.");
@@ -160,12 +160,7 @@ function FilterForm() {
         value={fieldName}
         onChange={setFieldName}
       />
-      <Form.Dropdown
-        id="operator"
-        title="Comparison Operator"
-        value={operator}
-        onChange={setOperator}
-      >
+      <Form.Dropdown id="operator" title="Comparison Operator" value={operator} onChange={setOperator}>
         {operators.map((op) => (
           <Form.Dropdown.Item key={op.value} value={op.value} title={op.label} />
         ))}
@@ -189,12 +184,7 @@ interface FilteredDocumentListProps {
   fieldValue: any;
 }
 
-function FilteredDocumentList({
-  collectionName,
-  fieldName,
-  operator,
-  fieldValue,
-}: FilteredDocumentListProps) {
+function FilteredDocumentList({ collectionName, fieldName, operator, fieldValue }: FilteredDocumentListProps) {
   const [documents, setDocuments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
@@ -222,7 +212,7 @@ function FilteredDocumentList({
   }, [collectionName, fieldName, operator, fieldValue]);
 
   // Format the filter criteria for display
-  let formattedValue = typeof fieldValue === "object" ? JSON.stringify(fieldValue) : String(fieldValue);
+  const formattedValue = typeof fieldValue === "object" ? JSON.stringify(fieldValue) : String(fieldValue);
   const filterDescription = `${fieldName} ${operator} ${formattedValue}`;
 
   return (
@@ -233,11 +223,7 @@ function FilteredDocumentList({
     >
       <List.Section title={`Filter: ${filterDescription}`}>
         {error ? (
-          <List.EmptyView
-            title="Error Fetching Documents"
-            description={error}
-            icon="⚠️"
-          />
+          <List.EmptyView title="Error Fetching Documents" description={error} icon="⚠️" />
         ) : documents.length === 0 ? (
           <List.EmptyView
             title="No Documents Found"
@@ -278,12 +264,12 @@ function DocumentDetail({ document, collectionName }: DocumentDetailProps) {
       if (key === "id") {
         return `## ID: ${value}`;
       }
-      
+
       let formattedValue = value;
       if (typeof value === "object") {
         formattedValue = "```json\n" + JSON.stringify(value, null, 2) + "\n```";
       }
-      
+
       return `### ${key}\n${formattedValue}`;
     })
     .join("\n\n");
@@ -293,16 +279,10 @@ function DocumentDetail({ document, collectionName }: DocumentDetailProps) {
       markdown={`# Document in ${collectionName}\n\n${formattedData}`}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy Document ID"
-            content={document.id}
-          />
-          <Action.CopyToClipboard
-            title="Copy Document as JSON"
-            content={JSON.stringify(document, null, 2)}
-          />
+          <Action.CopyToClipboard title="Copy Document Id" content={document.id} />
+          <Action.CopyToClipboard title="Copy Document as JSON" content={JSON.stringify(document, null, 2)} />
         </ActionPanel>
       }
     />
   );
-} 
+}

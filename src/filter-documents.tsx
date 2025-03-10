@@ -41,7 +41,7 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action
-              title="Set Up Service Account"
+              title="Set up Service Account"
               onAction={() => {
                 // Import the setup component dynamically to avoid circular dependencies
                 const SetupServiceAccount = require("./setup-service-account").default;
@@ -71,7 +71,7 @@ function FilterForm() {
     let isMounted = true;
     let retryCount = 0;
     const maxRetries = 3;
-    
+
     async function fetchCollections() {
       try {
         const fetchedCollections = await getCollections();
@@ -91,7 +91,7 @@ function FilterForm() {
             setTimeout(fetchCollections, 1000 * retryCount);
             return;
           }
-          
+
           setError("Failed to fetch collections. Please try again.");
           await showToast({
             style: Toast.Style.Failure,
@@ -107,7 +107,7 @@ function FilterForm() {
     }
 
     fetchCollections();
-    
+
     return () => {
       isMounted = false;
     };
@@ -147,7 +147,7 @@ function FilterForm() {
     try {
       // Parse the field value based on the operator
       let parsedValue: any = fieldValue;
-      
+
       // Try to parse as JSON if it looks like an array or object
       if (
         (fieldValue.startsWith("[") && fieldValue.endsWith("]")) ||
@@ -173,7 +173,7 @@ function FilterForm() {
           fieldName={fieldName}
           operator={operator as admin.firestore.WhereFilterOp}
           fieldValue={parsedValue}
-        />
+        />,
       );
     } catch (error) {
       setError("An unexpected error occurred. Please try again.");
@@ -243,12 +243,7 @@ function FilterForm() {
         value={fieldName}
         onChange={setFieldName}
       />
-      <Form.Dropdown
-        id="operator"
-        title="Comparison Operator"
-        value={operator}
-        onChange={setOperator}
-      >
+      <Form.Dropdown id="operator" title="Comparison Operator" value={operator} onChange={setOperator}>
         {operators.map((op) => (
           <Form.Dropdown.Item key={op.value} value={op.value} title={op.label} />
         ))}
@@ -272,12 +267,7 @@ interface FilteredDocumentListProps {
   fieldValue: any;
 }
 
-function FilteredDocumentList({
-  collectionName,
-  fieldName,
-  operator,
-  fieldValue,
-}: FilteredDocumentListProps) {
+function FilteredDocumentList({ collectionName, fieldName, operator, fieldValue }: FilteredDocumentListProps) {
   const [documents, setDocuments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
@@ -287,7 +277,7 @@ function FilteredDocumentList({
     let isMounted = true;
     let retryCount = 0;
     const maxRetries = 2;
-    
+
     async function fetchDocuments() {
       try {
         const docs = await queryDocuments(collectionName, fieldName, operator, fieldValue);
@@ -304,7 +294,7 @@ function FilteredDocumentList({
             setTimeout(fetchDocuments, 1000 * retryCount);
             return;
           }
-          
+
           setError("Failed to fetch documents. Please try again.");
           await showToast({
             style: Toast.Style.Failure,
@@ -320,14 +310,14 @@ function FilteredDocumentList({
     }
 
     fetchDocuments();
-    
+
     return () => {
       isMounted = false;
     };
   }, [collectionName, fieldName, operator, fieldValue]);
 
   // Format the filter criteria for display
-  let formattedValue = typeof fieldValue === "object" ? JSON.stringify(fieldValue) : String(fieldValue);
+  const formattedValue = typeof fieldValue === "object" ? JSON.stringify(fieldValue) : String(fieldValue);
   const filterDescription = `${fieldName} ${operator} ${formattedValue}`;
 
   if (error) {
@@ -364,11 +354,7 @@ function FilteredDocumentList({
           </ActionPanel>
         }
       >
-        <List.EmptyView
-          title="Error Fetching Documents"
-          description={error}
-          icon="⚠️"
-        />
+        <List.EmptyView title="Error Fetching Documents" description={error} icon="⚠️" />
       </List>
     );
   }
@@ -423,4 +409,4 @@ interface DocumentDetailProps {
 
 function DocumentDetail({ document, collectionName }: DocumentDetailProps) {
   return <JsonViewer data={document} title={`Document in ${collectionName}`} />;
-} 
+}

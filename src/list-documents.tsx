@@ -39,10 +39,7 @@ export default function Command() {
         markdown="# Firebase Service Account Not Configured\n\nYou need to set up your Firebase service account before you can use this extension.\n\nClick the 'Set Up Service Account' button below to configure your Firebase service account."
         actions={
           <ActionPanel>
-            <Action
-              title="Set Up Service Account"
-              onAction={() => push(<SetupServiceAccountView />)}
-            />
+            <Action title="Set up Service Account" onAction={() => push(<SetupServiceAccountView />)} />
           </ActionPanel>
         }
       />
@@ -63,7 +60,7 @@ function CollectionForm() {
     let isMounted = true;
     let retryCount = 0;
     const maxRetries = 3;
-    
+
     async function fetchCollections() {
       try {
         const fetchedCollections = await getCollections();
@@ -83,7 +80,7 @@ function CollectionForm() {
             setTimeout(fetchCollections, 1000 * retryCount);
             return;
           }
-          
+
           setError("Failed to fetch collections. Please try again.");
           await showToast({
             style: Toast.Style.Failure,
@@ -99,7 +96,7 @@ function CollectionForm() {
     }
 
     fetchCollections();
-    
+
     return () => {
       isMounted = false;
     };
@@ -192,7 +189,7 @@ function DocumentList({ collectionName }: DocumentListProps) {
     let isMounted = true;
     let retryCount = 0;
     const maxRetries = 2;
-    
+
     async function fetchDocuments() {
       try {
         const docs = await getDocuments(collectionName);
@@ -209,7 +206,7 @@ function DocumentList({ collectionName }: DocumentListProps) {
             setTimeout(fetchDocuments, 1000 * retryCount);
             return;
           }
-          
+
           setError("Failed to fetch documents. Please try again.");
           await showToast({
             style: Toast.Style.Failure,
@@ -225,7 +222,7 @@ function DocumentList({ collectionName }: DocumentListProps) {
     }
 
     fetchDocuments();
-    
+
     return () => {
       isMounted = false;
     };
@@ -265,22 +262,14 @@ function DocumentList({ collectionName }: DocumentListProps) {
           </ActionPanel>
         }
       >
-        <List.EmptyView
-          title="Error Fetching Documents"
-          description={error}
-          icon="⚠️"
-        />
+        <List.EmptyView title="Error Fetching Documents" description={error} icon="⚠️" />
       </List>
     );
   }
 
   if (documents.length === 0) {
     return (
-      <List
-        isLoading={isLoading}
-        searchBarPlaceholder={`Search documents in ${collectionName}...`}
-        filtering={true}
-      >
+      <List isLoading={isLoading} searchBarPlaceholder={`Search documents in ${collectionName}...`} filtering={true}>
         <List.EmptyView
           title="No Documents Found"
           description={`No documents found in the collection '${collectionName}'`}
@@ -291,11 +280,7 @@ function DocumentList({ collectionName }: DocumentListProps) {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder={`Search documents in ${collectionName}...`}
-      filtering={true}
-    >
+    <List isLoading={isLoading} searchBarPlaceholder={`Search documents in ${collectionName}...`} filtering={true}>
       {documents.map((doc) => (
         <List.Item
           key={`${doc.id}-${collectionName}`}
@@ -326,10 +311,10 @@ function DocumentDetail({ document, collectionName }: DocumentDetailProps) {
 
 function SetupServiceAccountView() {
   const { pop } = useNavigation();
-  
+
   // Import the setup component dynamically to avoid circular dependencies
   const SetupServiceAccount = require("./setup-service-account").default;
-  
+
   return (
     <SetupServiceAccount
       onComplete={() => {
@@ -342,4 +327,4 @@ function SetupServiceAccountView() {
       }}
     />
   );
-} 
+}

@@ -13,7 +13,7 @@ export function JsonViewer({ data, title }: JsonViewerProps) {
   const [projectId, setProjectId] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const { pop } = useNavigation();
-  
+
   useEffect(() => {
     // Load project ID from service account
     async function loadProjectId() {
@@ -29,23 +29,23 @@ export function JsonViewer({ data, title }: JsonViewerProps) {
 
     loadProjectId();
   }, []);
-  
+
   // Process the data to convert Firestore timestamps to readable dates
   const processedData = processFirestoreData(data);
   const jsonString = JSON.stringify(processedData, null, 2);
-  
+
   // Extract collection name from title (assuming format "Document in collection_name")
   const collectionMatch = title.match(/Document in (.+)/);
   const collectionName = collectionMatch ? collectionMatch[1] : "";
-  
+
   // Function to generate Firestore URL for a document
   const getFirestoreUrl = (): string => {
     if (!projectId || !collectionName || !data.id) return "";
-    
+
     // Encode collection name and document ID for URL
-    const encodedCollection = collectionName.replace(/\//g, '~2F');
-    const encodedDocId = data.id.replace(/\//g, '~2F');
-    
+    const encodedCollection = collectionName.replace(/\//g, "~2F");
+    const encodedDocId = data.id.replace(/\//g, "~2F");
+
     return `https://console.firebase.google.com/project/${projectId}/firestore/databases/-default-/data/~2F${encodedCollection}~2F${encodedDocId}`;
   };
 
@@ -73,13 +73,13 @@ export function JsonViewer({ data, title }: JsonViewerProps) {
       try {
         setIsDeleting(true);
         await deleteDocument(collectionName, data.id);
-        
+
         await showToast({
           style: Toast.Style.Success,
           title: "Document Deleted",
           message: `Document "${data.id}" has been deleted from collection "${collectionName}"`,
         });
-        
+
         // Go back to the previous screen
         pop();
       } catch (error) {
@@ -109,14 +109,10 @@ ${jsonString}
       isLoading={isDeleting}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy JSON"
-            content={jsonString}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
+          <Action.CopyToClipboard title="Copy JSON" content={jsonString} shortcut={{ modifiers: ["cmd"], key: "c" }} />
           {data.id && (
             <Action.CopyToClipboard
-              title="Copy Document ID"
+              title="Copy Document Id"
               content={data.id}
               shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
             />
@@ -151,11 +147,11 @@ function processFirestoreData(data: any): any {
 
   // Handle arrays
   if (Array.isArray(data)) {
-    return data.map(item => processFirestoreData(item));
+    return data.map((item) => processFirestoreData(item));
   }
 
   // Handle objects
-  if (typeof data === 'object') {
+  if (typeof data === "object") {
     // Check if it's a Firestore Timestamp
     if (data._seconds !== undefined && data._nanoseconds !== undefined) {
       // Convert to JavaScript Date
@@ -180,4 +176,4 @@ function processFirestoreData(data: any): any {
 
   // Return primitive values as is
   return data;
-} 
+}

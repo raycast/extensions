@@ -5,7 +5,8 @@ export default async function ResetServiceAccount() {
   try {
     const confirmed = await confirmAlert({
       title: "Reset Firebase Service Account",
-      message: "Are you sure you want to reset your Firebase service account configuration? You will need to set it up again to use the extension.",
+      message:
+        "Are you sure you want to reset your Firebase service account configuration? You will need to set it up again to use the extension.",
       primaryAction: {
         title: "Reset",
         style: Alert.ActionStyle.Destructive,
@@ -25,11 +26,11 @@ export default async function ResetServiceAccount() {
     });
   } catch (error) {
     console.error("Error resetting service account:", error);
-    
+
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed to Reset Service Account",
       message: "An error occurred while resetting your service account configuration.",
     });
   }
-} 
+}

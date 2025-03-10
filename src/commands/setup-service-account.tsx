@@ -81,9 +81,7 @@ export default function SetupServiceAccount({ onComplete }: SetupServiceAccountP
         error={error}
         autoFocus
       />
-      <Form.Description
-        text="Your service account credentials will be stored locally and used to authenticate with Firebase. You can reset these credentials later from the extension settings."
-      />
+      <Form.Description text="Your service account credentials will be stored locally and used to authenticate with Firebase. You can reset these credentials later from the extension settings." />
     </Form>
   );
-} 
+}

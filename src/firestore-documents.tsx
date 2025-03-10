@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Detail, Form, List, showToast, Toast, useNavigation, Clipboard, confirmAlert } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Form,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+  Clipboard,
+  confirmAlert,
+} from "@raycast/api";
 import { useEffect, useState, useRef } from "react";
 import { isServiceAccountConfigured, getServiceAccount, resetServiceAccount } from "./utils/firebase";
 import { getCollections, getDocuments, queryDocuments, getDocument } from "./api/firestore";
@@ -107,7 +118,8 @@ function DocumentsForm() {
   async function handleResetServiceAccount() {
     const confirmed = await confirmAlert({
       title: "Reset Service Account",
-      message: "Are you sure you want to reset your Firebase service account configuration? You will need to set it up again.",
+      message:
+        "Are you sure you want to reset your Firebase service account configuration? You will need to set it up again.",
       primaryAction: {
         title: "Reset",
       },
@@ -144,9 +156,9 @@ function DocumentsForm() {
     if (documentId.trim()) {
       try {
         setIsLoading(true);
-        
+
         const doc = await getDocument(collectionName, documentId.trim());
-        
+
         if (!doc) {
           setError(`Document with ID "${documentId}" not found in collection "${collectionName}"`);
           await showToast({
@@ -205,7 +217,7 @@ function DocumentsForm() {
       try {
         // Parse the field value based on the operator
         let parsedValue: any = fieldValue;
-        
+
         // Try to parse as JSON if it looks like an array or object
         if (
           (fieldValue.startsWith("[") && fieldValue.endsWith("]")) ||
@@ -232,7 +244,7 @@ function DocumentsForm() {
             operator={operator as admin.firestore.WhereFilterOp}
             fieldValue={parsedValue}
             limit={limit}
-          />
+          />,
         );
       } catch (error) {
         setError("An unexpected error occurred. Please try again.");
@@ -289,12 +301,7 @@ function DocumentsForm() {
         onChange={setDocumentLimit}
       />
 
-      <Form.Checkbox
-        id="isFiltering"
-        label="Filter Documents"
-        value={isFiltering}
-        onChange={setIsFiltering}
-      />
+      <Form.Checkbox id="isFiltering" label="Filter Documents" value={isFiltering} onChange={setIsFiltering} />
 
       {isFiltering && (
         <>
@@ -305,12 +312,7 @@ function DocumentsForm() {
             value={fieldName}
             onChange={setFieldName}
           />
-          <Form.Dropdown
-            id="operator"
-            title="Comparison Operator"
-            value={operator}
-            onChange={setOperator}
-          >
+          <Form.Dropdown id="operator" title="Comparison Operator" value={operator} onChange={setOperator}>
             {operators.map((op) => (
               <Form.Dropdown.Item key={op.value} value={op.value} title={op.label} />
             ))}
@@ -341,25 +343,25 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [highlightFields, setHighlightFields] = useState<string>("");
   const { push, pop } = useNavigation();
-  
+
   // For custom search implementation
   const [searchText, setSearchText] = useState<string>("");
   const [filteredDocuments, setFilteredDocuments] = useState<any[]>([]);
-  
+
   // For sorting functionality
   const [sortField, setSortField] = useState<string>("id");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  
+
   useEffect(() => {
     loadProjectId();
     fetchDocuments();
   }, [collectionName]);
-  
+
   // Filter documents whenever search text or documents change
   useEffect(() => {
     filterDocuments();
   }, [searchText, documents, highlightFields]);
-  
+
   // Sort documents whenever sort field, sort order, or filtered documents change
   useEffect(() => {
     // Only sort if we're not in the middle of filtering
@@ -368,7 +370,7 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
       sortDocuments();
     }
   }, [sortField, sortOrder, documents]);
-  
+
   // Custom document filtering function
   const filterDocuments = () => {
     // If no search text, show all documents and sort them
@@ -377,46 +379,48 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
       sortDocuments();
       return;
     }
-    
+
     const searchLower = searchText.toLowerCase().trim();
     console.log(`Filtering with search text: "${searchLower}"`);
     console.log(`Total documents to search: ${documents.length}`);
-    
+
     // Get highlighted fields array
-    const highlightFieldsArray = highlightFields 
-      ? highlightFields.split(',').map(f => f.trim()).filter(Boolean) 
+    const highlightFieldsArray = highlightFields
+      ? highlightFields
+          .split(",")
+          .map((f) => f.trim())
+          .filter(Boolean)
       : [];
-    
+
     console.log("Highlight fields:", highlightFieldsArray);
-    
+
     // Filter documents
-    const filtered = documents.filter(doc => {
+    const filtered = documents.filter((doc) => {
       console.log(`\nChecking document ${doc.id}:`);
-      
+
       // Document data is directly on the document object, not in a 'data' property
       const docData = { ...doc };
       delete docData.id; // Remove id from data object to avoid duplication
-      
+
       console.log(`Document data keys:`, Object.keys(docData));
-      
+
       // Check document ID
       if (doc.id.toLowerCase().includes(searchLower)) {
         console.log(`✅ Document ${doc.id} matches by ID`);
         return true;
       }
-      
+
       // First check highlighted fields
       for (const field of highlightFieldsArray) {
         if (doc[field] !== undefined) {
           const value = doc[field];
           if (value === null) continue;
-          
-          const stringValue = typeof value === 'object' 
-            ? JSON.stringify(value).toLowerCase() 
-            : String(value).toLowerCase();
-          
+
+          const stringValue =
+            typeof value === "object" ? JSON.stringify(value).toLowerCase() : String(value).toLowerCase();
+
           console.log(`Checking highlighted field "${field}" with value "${stringValue}"`);
-          
+
           if (stringValue.includes(searchLower)) {
             console.log(`✅ Document ${doc.id} matches by highlighted field "${field}" with value "${stringValue}"`);
             return true;
@@ -425,89 +429,88 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
           console.log(`Highlighted field "${field}" not found in document ${doc.id}`);
         }
       }
-      
+
       // Then check all other fields
       for (const [key, value] of Object.entries(docData)) {
         if (value === null || value === undefined) continue;
-        
-        const stringValue = typeof value === 'object' 
-          ? JSON.stringify(value).toLowerCase() 
-          : String(value).toLowerCase();
-        
+
+        const stringValue =
+          typeof value === "object" ? JSON.stringify(value).toLowerCase() : String(value).toLowerCase();
+
         console.log(`Checking field "${key}" with value "${stringValue}"`);
-        
+
         if (stringValue.includes(searchLower)) {
           console.log(`✅ Document ${doc.id} matches by field "${key}" with value "${stringValue}"`);
           return true;
         }
       }
-      
+
       console.log(`❌ Document ${doc.id} does not match search criteria`);
       return false;
     });
-    
+
     console.log(`Filtered ${documents.length} documents to ${filtered.length} matches`);
-    
+
     // Sort the filtered documents
     const sorted = sortDocumentArray(filtered);
     setFilteredDocuments(sorted);
   };
-  
+
   // Sort documents based on selected field and order
   const sortDocuments = () => {
     if (!documents.length) return;
-    
+
     console.log(`Sorting by ${sortField} in ${sortOrder} order`);
-    
+
     const sorted = sortDocumentArray(documents);
     setFilteredDocuments(sorted);
   };
-  
+
   // Helper function to sort an array of documents
   const sortDocumentArray = (docs: any[]) => {
     return [...docs].sort((a, b) => {
       let valueA = sortField === "id" ? a.id : a[sortField];
       let valueB = sortField === "id" ? b.id : b[sortField];
-      
+
       // Handle undefined or null values
       if (valueA === undefined || valueA === null) valueA = "";
       if (valueB === undefined || valueB === null) valueB = "";
-      
+
       // Determine the type of values and compare accordingly
       const typeA = typeof valueA;
       const typeB = typeof valueB;
-      
+
       // If both values are numbers, compare them numerically
-      if (typeA === 'number' && typeB === 'number') {
+      if (typeA === "number" && typeB === "number") {
         return sortOrder === "asc" ? valueA - valueB : valueB - valueA;
       }
-      
+
       // If both values are dates, compare them as dates
-      const isDateA = valueA instanceof Date || (typeof valueA === 'string' && !isNaN(Date.parse(valueA)));
-      const isDateB = valueB instanceof Date || (typeof valueB === 'string' && !isNaN(Date.parse(valueB)));
-      
+      const isDateA = valueA instanceof Date || (typeof valueA === "string" && !isNaN(Date.parse(valueA)));
+      const isDateB = valueB instanceof Date || (typeof valueB === "string" && !isNaN(Date.parse(valueB)));
+
       if (isDateA && isDateB) {
         const dateA = valueA instanceof Date ? valueA : new Date(valueA);
         const dateB = valueB instanceof Date ? valueB : new Date(valueB);
         return sortOrder === "asc" ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
       }
-      
+
       // If both values are booleans, compare them as booleans
-      if (typeA === 'boolean' && typeB === 'boolean') {
+      if (typeA === "boolean" && typeB === "boolean") {
         if (sortOrder === "asc") {
           return valueA === valueB ? 0 : valueA ? 1 : -1;
         } else {
           return valueA === valueB ? 0 : valueA ? -1 : 1;
         }
       }
-      
+
       // For mixed types or strings, convert to strings and compare
       const stringA = String(valueA).toLowerCase();
       const stringB = String(valueB).toLowerCase();
-      
+
       // Case insensitive comparison
       const comparison = stringA.localeCompare(stringB);
-      
+
       return sortOrder === "asc" ? comparison : -comparison;
     });
   };
@@ -529,7 +532,7 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
     try {
       const docs = await getDocuments(collectionName, limit);
       console.log("Fetched documents:", docs);
-      
+
       // Log detailed structure of the first document
       if (docs.length > 0) {
         console.log("First document structure:", JSON.stringify(docs[0], null, 2));
@@ -539,7 +542,7 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
           console.log("Document data values:", Object.values(docs[0].data));
         }
       }
-      
+
       setDocuments(docs);
       setFilteredDocuments(docs);
     } catch (error) {
@@ -571,14 +574,18 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
 
     try {
       // Format the documents as a JSON string
-      const jsonData = JSON.stringify(documents.map(doc => ({
-        id: doc.id,
-        ...doc.data
-      })), null, 2);
+      const jsonData = JSON.stringify(
+        documents.map((doc) => ({
+          id: doc.id,
+          ...doc.data,
+        })),
+        null,
+        2,
+      );
 
       // Copy to clipboard
       await Clipboard.copy(jsonData);
-      
+
       await showToast({
         style: Toast.Style.Success,
         title: "Documents Exported to Clipboard",
@@ -652,7 +659,7 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
                         placeholder="Enter comma-separated field names to highlight"
                         defaultValue={highlightFields}
                       />
-                    </Form>
+                    </Form>,
                   );
                 }}
               />
@@ -664,7 +671,7 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
       <List.Section>
         <List.Item
           title="Sort Options"
-          subtitle={`Sort by ${sortField} (${sortOrder === 'asc' ? 'Ascending' : 'Descending'})`}
+          subtitle={`Sort by ${sortField} (${sortOrder === "asc" ? "Ascending" : "Descending"})`}
           accessories={[{ text: "Edit" }]}
           actions={
             <ActionPanel>
@@ -672,13 +679,16 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
                 title="Set Sort Options"
                 onAction={() => {
                   // Get highlighted fields for dropdown options
-                  const highlightFieldsArray = highlightFields 
-                    ? highlightFields.split(',').map(f => f.trim()).filter(Boolean) 
+                  const highlightFieldsArray = highlightFields
+                    ? highlightFields
+                        .split(",")
+                        .map((f) => f.trim())
+                        .filter(Boolean)
                     : [];
-                  
+
                   // Always include document ID
                   const sortFieldOptions = ["id", ...highlightFieldsArray];
-                  
+
                   push(
                     <Form
                       actions={
@@ -695,25 +705,17 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
                         </ActionPanel>
                       }
                     >
-                      <Form.Dropdown
-                        id="sortField"
-                        title="Sort Field"
-                        defaultValue={sortField}
-                      >
-                        {sortFieldOptions.map(field => (
+                      <Form.Dropdown id="sortField" title="Sort Field" defaultValue={sortField}>
+                        {sortFieldOptions.map((field) => (
                           <Form.Dropdown.Item key={field} value={field} title={field} />
                         ))}
                       </Form.Dropdown>
-                      
-                      <Form.Dropdown
-                        id="sortOrder"
-                        title="Sort By"
-                        defaultValue={sortOrder}
-                      >
+
+                      <Form.Dropdown id="sortOrder" title="Sort By" defaultValue={sortOrder}>
                         <Form.Dropdown.Item value="asc" title="Ascending" />
                         <Form.Dropdown.Item value="desc" title="Descending" />
                       </Form.Dropdown>
-                    </Form>
+                    </Form>,
                   );
                 }}
               />
@@ -722,29 +724,35 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
         />
       </List.Section>
 
-      <List.Section title="Documents" subtitle={documents.length > 0 ? `${filteredDocuments.length} of ${documents.length} documents` : undefined}>
+      <List.Section
+        title="Documents"
+        subtitle={documents.length > 0 ? `${filteredDocuments.length} of ${documents.length} documents` : undefined}
+      >
         {filteredDocuments.map((doc) => {
           // Create a subtitle with highlighted field values
           let subtitle = "";
-          
+
           if (highlightFields && highlightFields.trim() !== "") {
-            const fieldNames = highlightFields.split(',').map(f => f.trim()).filter(f => f !== "");
+            const fieldNames = highlightFields
+              .split(",")
+              .map((f) => f.trim())
+              .filter((f) => f !== "");
             const fieldValues = [];
-            
+
             for (const fieldName of fieldNames) {
               // Try to access the field directly from the document
               if (doc[fieldName] !== undefined) {
                 const value = formatFieldValue(doc[fieldName]);
                 fieldValues.push(value);
-              } 
+              }
               // Also try to access it from doc.data if it exists
               else if (doc.data && doc.data[fieldName] !== undefined) {
                 const value = formatFieldValue(doc.data[fieldName]);
                 fieldValues.push(value);
               }
             }
-            
-            subtitle = fieldValues.join(' | ');
+
+            subtitle = fieldValues.join(" | ");
           }
 
           return (
@@ -759,7 +767,7 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
                     onAction={() => push(<DocumentDetail document={doc} collectionName={collectionName} />)}
                   />
                   <Action
-                    title="Copy Document ID"
+                    title="Copy Document Id"
                     onAction={async () => {
                       await Clipboard.copy(doc.id);
                       await showToast({
@@ -768,10 +776,7 @@ function DocumentList({ collectionName, limit }: DocumentListProps) {
                       });
                     }}
                   />
-                  <Action.OpenInBrowser
-                    title="Open Doc in Browser"
-                    url={getFirestoreUrl(doc.id)}
-                  />
+                  <Action.OpenInBrowser title="Open Doc in Browser" url={getFirestoreUrl(doc.id)} />
                 </ActionPanel>
               }
             />
@@ -790,38 +795,32 @@ interface FilteredDocumentListProps {
   limit?: number;
 }
 
-function FilteredDocumentList({
-  collectionName,
-  fieldName,
-  operator,
-  fieldValue,
-  limit,
-}: FilteredDocumentListProps) {
+function FilteredDocumentList({ collectionName, fieldName, operator, fieldValue, limit }: FilteredDocumentListProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [documents, setDocuments] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [projectId, setProjectId] = useState<string | null>(null);
   const [highlightFields, setHighlightFields] = useState<string>("");
   const { push, pop } = useNavigation();
-  
+
   // For custom search implementation
   const [searchText, setSearchText] = useState<string>("");
   const [filteredDocuments, setFilteredDocuments] = useState<any[]>([]);
-  
+
   // For sorting functionality
   const [sortField, setSortField] = useState<string>("id");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  
+
   useEffect(() => {
     loadProjectId();
     fetchDocuments();
   }, [collectionName, fieldName, operator, fieldValue]);
-  
+
   // Filter documents whenever search text or documents change
   useEffect(() => {
     filterDocuments();
   }, [searchText, documents, highlightFields]);
-  
+
   // Sort documents whenever sort field, sort order, or filtered documents change
   useEffect(() => {
     // Only sort if we're not in the middle of filtering
@@ -830,7 +829,7 @@ function FilteredDocumentList({
       sortDocuments();
     }
   }, [sortField, sortOrder, documents]);
-  
+
   // Custom document filtering function
   const filterDocuments = () => {
     // If no search text, show all documents and sort them
@@ -839,46 +838,48 @@ function FilteredDocumentList({
       sortDocuments();
       return;
     }
-    
+
     const searchLower = searchText.toLowerCase().trim();
     console.log(`Filtering with search text: "${searchLower}"`);
     console.log(`Total documents to search: ${documents.length}`);
-    
+
     // Get highlighted fields array
-    const highlightFieldsArray = highlightFields 
-      ? highlightFields.split(',').map(f => f.trim()).filter(Boolean) 
+    const highlightFieldsArray = highlightFields
+      ? highlightFields
+          .split(",")
+          .map((f) => f.trim())
+          .filter(Boolean)
       : [];
-    
+
     console.log("Highlight fields:", highlightFieldsArray);
-    
+
     // Filter documents
-    const filtered = documents.filter(doc => {
+    const filtered = documents.filter((doc) => {
       console.log(`\nChecking document ${doc.id}:`);
-      
+
       // Document data is directly on the document object, not in a 'data' property
       const docData = { ...doc };
       delete docData.id; // Remove id from data object to avoid duplication
-      
+
       console.log(`Document data keys:`, Object.keys(docData));
-      
+
       // Check document ID
       if (doc.id.toLowerCase().includes(searchLower)) {
         console.log(`✅ Document ${doc.id} matches by ID`);
         return true;
       }
-      
+
       // First check highlighted fields
       for (const field of highlightFieldsArray) {
         if (doc[field] !== undefined) {
           const value = doc[field];
           if (value === null) continue;
-          
-          const stringValue = typeof value === 'object' 
-            ? JSON.stringify(value).toLowerCase() 
-            : String(value).toLowerCase();
-          
+
+          const stringValue =
+            typeof value === "object" ? JSON.stringify(value).toLowerCase() : String(value).toLowerCase();
+
           console.log(`Checking highlighted field "${field}" with value "${stringValue}"`);
-          
+
           if (stringValue.includes(searchLower)) {
             console.log(`✅ Document ${doc.id} matches by highlighted field "${field}" with value "${stringValue}"`);
             return true;
@@ -887,89 +888,88 @@ function FilteredDocumentList({
           console.log(`Highlighted field "${field}" not found in document ${doc.id}`);
         }
       }
-      
+
       // Then check all other fields
       for (const [key, value] of Object.entries(docData)) {
         if (value === null || value === undefined) continue;
-        
-        const stringValue = typeof value === 'object' 
-          ? JSON.stringify(value).toLowerCase() 
-          : String(value).toLowerCase();
-        
+
+        const stringValue =
+          typeof value === "object" ? JSON.stringify(value).toLowerCase() : String(value).toLowerCase();
+
         console.log(`Checking field "${key}" with value "${stringValue}"`);
-        
+
         if (stringValue.includes(searchLower)) {
           console.log(`✅ Document ${doc.id} matches by field "${key}" with value "${stringValue}"`);
           return true;
         }
       }
-      
+
       console.log(`❌ Document ${doc.id} does not match search criteria`);
       return false;
     });
-    
+
     console.log(`Filtered ${documents.length} documents to ${filtered.length} matches`);
-    
+
     // Sort the filtered documents
     const sorted = sortDocumentArray(filtered);
     setFilteredDocuments(sorted);
   };
-  
+
   // Sort documents based on selected field and order
   const sortDocuments = () => {
     if (!documents.length) return;
-    
+
     console.log(`Sorting by ${sortField} in ${sortOrder} order`);
-    
+
     const sorted = sortDocumentArray(documents);
     setFilteredDocuments(sorted);
   };
-  
+
   // Helper function to sort an array of documents
   const sortDocumentArray = (docs: any[]) => {
     return [...docs].sort((a, b) => {
       let valueA = sortField === "id" ? a.id : a[sortField];
       let valueB = sortField === "id" ? b.id : b[sortField];
-      
+
       // Handle undefined or null values
       if (valueA === undefined || valueA === null) valueA = "";
       if (valueB === undefined || valueB === null) valueB = "";
-      
+
       // Determine the type of values and compare accordingly
       const typeA = typeof valueA;
       const typeB = typeof valueB;
-      
+
       // If both values are numbers, compare them numerically
-      if (typeA === 'number' && typeB === 'number') {
+      if (typeA === "number" && typeB === "number") {
         return sortOrder === "asc" ? valueA - valueB : valueB - valueA;
       }
-      
+
       // If both values are dates, compare them as dates
-      const isDateA = valueA instanceof Date || (typeof valueA === 'string' && !isNaN(Date.parse(valueA)));
-      const isDateB = valueB instanceof Date || (typeof valueB === 'string' && !isNaN(Date.parse(valueB)));
-      
+      const isDateA = valueA instanceof Date || (typeof valueA === "string" && !isNaN(Date.parse(valueA)));
+      const isDateB = valueB instanceof Date || (typeof valueB === "string" && !isNaN(Date.parse(valueB)));
+
       if (isDateA && isDateB) {
         const dateA = valueA instanceof Date ? valueA : new Date(valueA);
         const dateB = valueB instanceof Date ? valueB : new Date(valueB);
         return sortOrder === "asc" ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
       }
-      
+
       // If both values are booleans, compare them as booleans
-      if (typeA === 'boolean' && typeB === 'boolean') {
+      if (typeA === "boolean" && typeB === "boolean") {
         if (sortOrder === "asc") {
           return valueA === valueB ? 0 : valueA ? 1 : -1;
         } else {
           return valueA === valueB ? 0 : valueA ? -1 : 1;
         }
       }
-      
+
       // For mixed types or strings, convert to strings and compare
       const stringA = String(valueA).toLowerCase();
       const stringB = String(valueB).toLowerCase();
-      
+
       // Case insensitive comparison
       const comparison = stringA.localeCompare(stringB);
-      
+
       return sortOrder === "asc" ? comparison : -comparison;
     });
   };
@@ -1002,7 +1002,7 @@ function FilteredDocumentList({
   }
 
   // Format the field value for display
-  const formattedValue = typeof fieldValue === 'object' ? JSON.stringify(fieldValue) : String(fieldValue);
+  const formattedValue = typeof fieldValue === "object" ? JSON.stringify(fieldValue) : String(fieldValue);
   const filterDescription = `${fieldName} ${operator} ${formattedValue}`;
 
   const getFirestoreUrl = (docId: string): string => {
@@ -1021,14 +1021,18 @@ function FilteredDocumentList({
 
     try {
       // Format the documents as a JSON string
-      const jsonData = JSON.stringify(documents.map(doc => ({
-        id: doc.id,
-        ...doc.data
-      })), null, 2);
+      const jsonData = JSON.stringify(
+        documents.map((doc) => ({
+          id: doc.id,
+          ...doc.data,
+        })),
+        null,
+        2,
+      );
 
       // Copy to clipboard
       await Clipboard.copy(jsonData);
-      
+
       await showToast({
         style: Toast.Style.Success,
         title: "Documents Exported to Clipboard",
@@ -1102,7 +1106,7 @@ function FilteredDocumentList({
                         placeholder="Enter comma-separated field names to highlight"
                         defaultValue={highlightFields}
                       />
-                    </Form>
+                    </Form>,
                   );
                 }}
               />
@@ -1114,7 +1118,7 @@ function FilteredDocumentList({
       <List.Section>
         <List.Item
           title="Sort Options"
-          subtitle={`Sort by ${sortField} (${sortOrder === 'asc' ? 'Ascending' : 'Descending'})`}
+          subtitle={`Sort by ${sortField} (${sortOrder === "asc" ? "Ascending" : "Descending"})`}
           accessories={[{ text: "Edit" }]}
           actions={
             <ActionPanel>
@@ -1122,13 +1126,16 @@ function FilteredDocumentList({
                 title="Set Sort Options"
                 onAction={() => {
                   // Get highlighted fields for dropdown options
-                  const highlightFieldsArray = highlightFields 
-                    ? highlightFields.split(',').map(f => f.trim()).filter(Boolean) 
+                  const highlightFieldsArray = highlightFields
+                    ? highlightFields
+                        .split(",")
+                        .map((f) => f.trim())
+                        .filter(Boolean)
                     : [];
-                  
+
                   // Always include document ID
                   const sortFieldOptions = ["id", ...highlightFieldsArray];
-                  
+
                   push(
                     <Form
                       actions={
@@ -1145,25 +1152,17 @@ function FilteredDocumentList({
                         </ActionPanel>
                       }
                     >
-                      <Form.Dropdown
-                        id="sortField"
-                        title="Sort Field"
-                        defaultValue={sortField}
-                      >
-                        {sortFieldOptions.map(field => (
+                      <Form.Dropdown id="sortField" title="Sort Field" defaultValue={sortField}>
+                        {sortFieldOptions.map((field) => (
                           <Form.Dropdown.Item key={field} value={field} title={field} />
                         ))}
                       </Form.Dropdown>
-                      
-                      <Form.Dropdown
-                        id="sortOrder"
-                        title="Sort By"
-                        defaultValue={sortOrder}
-                      >
+
+                      <Form.Dropdown id="sortOrder" title="Sort By" defaultValue={sortOrder}>
                         <Form.Dropdown.Item value="asc" title="Ascending" />
                         <Form.Dropdown.Item value="desc" title="Descending" />
                       </Form.Dropdown>
-                    </Form>
+                    </Form>,
                   );
                 }}
               />
@@ -1172,25 +1171,31 @@ function FilteredDocumentList({
         />
       </List.Section>
 
-      <List.Section title="Documents" subtitle={`${filteredDocuments.length} of ${documents.length} documents matching ${filterDescription}`}>
+      <List.Section
+        title="Documents"
+        subtitle={`${filteredDocuments.length} of ${documents.length} documents matching ${filterDescription}`}
+      >
         {filteredDocuments.map((doc) => {
           // Create a subtitle with highlighted field values
           let subtitle = "";
-          
+
           if (highlightFields && highlightFields.trim() !== "") {
-            const fieldNames = highlightFields.split(',').map(f => f.trim()).filter(f => f !== "");
+            const fieldNames = highlightFields
+              .split(",")
+              .map((f) => f.trim())
+              .filter((f) => f !== "");
             const highlightedValues = fieldNames
-              .map(field => {
+              .map((field) => {
                 if (doc[field] !== undefined) {
                   return `${field}: ${formatFieldValue(doc[field])}`;
                 }
                 return null;
               })
               .filter(Boolean);
-            
-            subtitle = highlightedValues.join(' | ');
+
+            subtitle = highlightedValues.join(" | ");
           }
-          
+
           return (
             <List.Item
               key={doc.id}
@@ -1204,12 +1209,9 @@ function FilteredDocumentList({
                       push(<DocumentDetail document={doc} collectionName={collectionName} />);
                     }}
                   />
-                  <Action.OpenInBrowser
-                    title="Open in Firebase Console"
-                    url={getFirestoreUrl(doc.id)}
-                  />
+                  <Action.OpenInBrowser title="Open in Firebase Console" url={getFirestoreUrl(doc.id)} />
                   <Action
-                    title="Copy Document ID"
+                    title="Copy Document Id"
                     onAction={async () => {
                       await Clipboard.copy(doc.id);
                       await showToast({
@@ -1254,9 +1256,9 @@ function SetupServiceAccountView({ onComplete }: { onComplete: () => void }) {
     try {
       // Import the saveServiceAccount function
       const { saveServiceAccount } = require("./utils/firebase");
-      
+
       const success = await saveServiceAccount(serviceAccountJson);
-      
+
       if (!success) {
         setError("Invalid service account JSON. Please check the format and try again.");
         await showToast({
@@ -1267,13 +1269,13 @@ function SetupServiceAccountView({ onComplete }: { onComplete: () => void }) {
         setIsLoading(false);
         return;
       }
-      
+
       await showToast({
         style: Toast.Style.Success,
         title: "Service Account Configured",
         message: "Your Firebase service account has been configured successfully.",
       });
-      
+
       onComplete();
     } catch (error) {
       console.error("Error saving service account:", error);
@@ -1301,7 +1303,7 @@ function SetupServiceAccountView({ onComplete }: { onComplete: () => void }) {
         title="Firebase Service Account Setup"
         text="To use this extension, you need to provide your Firebase service account credentials. You can generate a new private key from the Firebase Console."
       />
-      
+
       <Form.TextArea
         id="serviceAccountJson"
         title="Service Account JSON"
@@ -1311,7 +1313,7 @@ function SetupServiceAccountView({ onComplete }: { onComplete: () => void }) {
         error={error}
         info="You can generate a new private key from the Firebase Console > Project Settings > Service Accounts > Generate New Private Key"
       />
-      
+
       <Form.Description
         title="How to Get Service Account JSON"
         text={`
@@ -1333,22 +1335,22 @@ function formatFieldValue(value: any): string {
   if (value === undefined) {
     return "N/A";
   }
-  
+
   if (value === null) {
     return "null";
   }
-  
+
   if (typeof value === "object") {
     // Handle timestamps
     if (value._seconds !== undefined && value._nanoseconds !== undefined) {
       const date = new Date(value._seconds * 1000 + value._nanoseconds / 1000000);
       return date.toLocaleString();
     }
-    
+
     if (value instanceof admin.firestore.Timestamp) {
       return value.toDate().toLocaleString();
     }
-    
+
     // For other objects, convert to string representation
     try {
       const str = JSON.stringify(value);
@@ -1361,6 +1363,6 @@ function formatFieldValue(value: any): string {
       return "[Object]";
     }
   }
-  
+
   return String(value);
-} 
+}

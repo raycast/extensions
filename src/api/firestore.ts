@@ -4,7 +4,7 @@ import { getFirestore } from "../utils/firebase";
 /**
  * Helper function to add a small delay
  */
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Fetches all collection names from Firestore
@@ -12,7 +12,7 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 export async function getCollections(): Promise<string[]> {
   // Add a small delay to ensure Firebase is initialized
   await delay(500);
-  
+
   const firestore = await getFirestore();
   if (!firestore) {
     throw new Error("Firestore is not initialized. Please set up your service account.");
@@ -38,12 +38,12 @@ export async function getDocuments(collectionName: string, limit?: number): Prom
 
   try {
     let query: admin.firestore.Query = firestore.collection(collectionName);
-    
+
     // Apply limit if provided
     if (limit !== undefined && limit > 0) {
       query = query.limit(limit);
     }
-    
+
     const snapshot = await query.get();
     return snapshot.docs.map((doc) => ({
       id: doc.id,
@@ -60,7 +60,7 @@ export async function getDocuments(collectionName: string, limit?: number): Prom
  */
 export async function getDocument(
   collectionName: string,
-  documentId: string
+  documentId: string,
 ): Promise<admin.firestore.DocumentData | null> {
   const firestore = await getFirestore();
   if (!firestore) {
@@ -90,7 +90,7 @@ export async function queryDocuments(
   field: string,
   operator: admin.firestore.WhereFilterOp,
   value: any,
-  limit?: number
+  limit?: number,
 ): Promise<admin.firestore.DocumentData[]> {
   const firestore = await getFirestore();
   if (!firestore) {
@@ -99,12 +99,12 @@ export async function queryDocuments(
 
   try {
     let query: admin.firestore.Query = firestore.collection(collectionName).where(field, operator, value);
-    
+
     // Apply limit if provided
     if (limit !== undefined && limit > 0) {
       query = query.limit(limit);
     }
-    
+
     const snapshot = await query.get();
     return snapshot.docs.map((doc) => ({
       id: doc.id,
@@ -119,10 +119,7 @@ export async function queryDocuments(
 /**
  * Creates a new document in a collection
  */
-export async function createDocument(
-  collectionName: string,
-  data: Record<string, any>
-): Promise<string> {
+export async function createDocument(collectionName: string, data: Record<string, any>): Promise<string> {
   const firestore = await getFirestore();
   if (!firestore) {
     throw new Error("Firestore is not initialized. Please set up your service account.");
@@ -143,7 +140,7 @@ export async function createDocument(
 export async function updateDocument(
   collectionName: string,
   documentId: string,
-  data: Record<string, any>
+  data: Record<string, any>,
 ): Promise<void> {
   const firestore = await getFirestore();
   if (!firestore) {
@@ -173,4 +170,4 @@ export async function deleteDocument(collectionName: string, documentId: string)
     console.error(`Error deleting document ${documentId} from ${collectionName}:`, error);
     throw new Error(`Failed to delete document ${documentId} from ${collectionName}`);
   }
-} 
+}
