@@ -1,6 +1,6 @@
 # cURL Changelog
 
-## [Allow JSONPath copy] - {PR_MERGE_DATE}
+## [Allow JSONPath copy] - 2025-03-10
 
 ## [✨ AI Enhancements] - 2025-02-21
 
