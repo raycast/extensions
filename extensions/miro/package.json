@@ -6,7 +6,8 @@
   "icon": "miro-logo.png",
   "author": "felixhaeberle",
   "contributors": [
-    "mathieudutour"
+    "mathieudutour",
+    "silv"
   ],
   "categories": [
     "Productivity",
@@ -22,9 +23,15 @@
       "mode": "view"
     },
     {
-      "name": "list-boards",
+      "name": "list-my-boards",
       "title": "My Boards",
       "description": "Search & Open your Miro boards in seconds",
+      "mode": "view"
+    },
+    {
+      "name": "list-recent-boards",
+      "title": "Recent Boards",
+      "description": "Search & Open recent Miro boards in seconds",
       "mode": "view"
     }
   ],
@@ -50,6 +57,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }
