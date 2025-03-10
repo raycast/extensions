@@ -11,6 +11,7 @@
     {
       "name": "create",
       "title": "Create Paste",
+      "subtitle": "PrivateBin",
       "description": "Create and Share a secret data",
       "mode": "view",
       "preferences": [
