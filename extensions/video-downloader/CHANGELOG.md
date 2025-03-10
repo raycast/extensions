@@ -1,5 +1,9 @@
 # Video Downloader Changelog
 
+## [Chore] - 2025-03-10
+
+- Rename extension folder and handle to `video-downloader`
+
 ## [Fixes] - 2025-03-07
 
 - Avoid to run `onSubmit` while fetching video

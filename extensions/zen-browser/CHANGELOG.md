@@ -1,5 +1,11 @@
 # Zen Changelog
 
+## [Add custom new tab shortcut] - 2025-03-10
+
+- Add ability to set a custom new tab shortcut.
+- Default is `command t`.
+- Quicker url entry with copy-paste command.
+
 ## [Fix Default Profile Detection] - 2025-02-09
 
 - Made the default profile detection more resilient by expanding the profile
