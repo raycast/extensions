@@ -1,6 +1,6 @@
 # Zen Changelog
 
-## [Add custom new tab shortcut] - {PR_MERGE_DATE}
+## [Add custom new tab shortcut] - 2025-03-10
 
 - Add ability to set a custom new tab shortcut.
 - Default is `command t`.
