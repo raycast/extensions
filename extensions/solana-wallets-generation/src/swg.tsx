@@ -49,13 +49,10 @@ function WalletList({ wallets }: { wallets: string[] }) {
     <List isShowingDetail>
       <List.Item
         title="Copy All as CSV"
-        detail={
-          <List.Item.Detail
-            markdown="Copy all generated wallets as CSV to the clipboard."
-          />
-        }
+        detail={<List.Item.Detail markdown="Copy all generated wallets as CSV to the clipboard." />}
         actions={
           <ActionPanel>
+            {/* eslint-disable-next-line @raycast/prefer-title-case */}
             <Action.CopyToClipboard title="Copy All as CSV" content={csvContent} />
           </ActionPanel>
         }
@@ -73,10 +70,7 @@ function WalletList({ wallets }: { wallets: string[] }) {
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label title="Private Key" text={wallet.split(",")[0]?.trim() || wallet} />
                   {wallet.includes(",") && (
-                    <List.Item.Detail.Metadata.Label 
-                      title="Public Key" 
-                      text={wallet.split(",")[1]?.trim() || ""} 
-                    />
+                    <List.Item.Detail.Metadata.Label title="Public Key" text={wallet.split(",")[1]?.trim() || ""} />
                   )}
                 </List.Item.Detail.Metadata>
               }
@@ -85,6 +79,7 @@ function WalletList({ wallets }: { wallets: string[] }) {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard title="Copy to Clipboard" content={wallet} />
+              {/* eslint-disable-next-line @raycast/prefer-title-case */}
               <Action.CopyToClipboard title="Copy All as CSV" content={csvContent} />
             </ActionPanel>
           }
