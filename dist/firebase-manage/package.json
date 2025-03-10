@@ -3,7 +3,7 @@
   "name": "firebase-manage",
   "title": "Firebase Manage",
   "description": "Manage your Firebase Firestore database directly from Raycast",
-  "icon": "extension-icon.png",
+  "icon": "firebase-logo.png",
   "author": "bharath21",
   "owner": "doshi",
   "license": "MIT",
