@@ -1,5 +1,10 @@
 # 1bookmark Changelog
 
+## [New Command: Import Bookmarks] - {PR_MERGE_DATE}
+
+- 0.6.0
+- 📱 **Import Bookmarks** command added. It supports importing bookmarks from browsers.
+
 ## [Sign In UX Improvement] - 2025-03-04
 
 - 0.5.1

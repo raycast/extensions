@@ -1,4 +1,4 @@
-import { db } from '@repo/db';
+import { db, Prisma } from '@repo/db';
 export declare class BookmarkService {
     list(params: {
         spaceIds: string[];
@@ -76,4 +76,15 @@ export declare class BookmarkService {
         deletedAt: Date | null;
         updatedAt: Date;
     } | null>;
+    import(params: {
+        author: string;
+        tags: string[];
+        spaceId: string;
+        browserName: string;
+        bookmarks: {
+            name: string;
+            url: string;
+            description?: string;
+        }[];
+    }): Promise<Prisma.BatchPayload>;
 }
