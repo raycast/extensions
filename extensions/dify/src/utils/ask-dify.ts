@@ -28,13 +28,27 @@ export default async function Command(query: string): Promise<string> {
     // Chat request processing
     // Extract parameters
     const appName = params.appName;
-    const content = params.query;
+    // Ensure content is always defined, even if empty
+    const content = params.query || "";
 
-    // Validate content parameter
-    if (!content || content.trim() === "") {
-      return JSON.stringify({
-        error: "Missing or empty query content. Please provide a valid query.",
-      });
+    // Get app to determine its type
+    let app: DifyApp | undefined = undefined;
+    if (appName) {
+      try {
+        const appsJson = await LocalStorage.getItem<string>("dify-apps");
+        const apps: DifyApp[] = appsJson ? JSON.parse(appsJson) : [];
+        app = apps.find((a) => a.name === appName);
+      } catch (error) {
+        console.error("Error getting app:", error);
+      }
+    }
+
+    // We no longer need to validate empty queries for any app type
+    // All app types now support empty queries in the main API
+
+    // For debugging purposes, log app type if available
+    if (app?.type) {
+      console.log(`App type: ${app.type}`);
     }
 
     const inputs = params.inputs || {};
@@ -107,6 +121,7 @@ export default async function Command(query: string): Promise<string> {
         conversationId: conversationId,
         responseMode: responseMode,
         onStreamingMessage: onStreamingMessage,
+        // We no longer need to specify forceEmptyQuery, as all queries are allowed to be empty now
       });
     } catch (error) {
       console.error("Error with streaming API call:", error);

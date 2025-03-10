@@ -21,6 +21,7 @@ export interface DifyHistory {
   used_app?: string;
   app_type?: string;
   user?: string; // Add user field to store the user ID
+  inputs?: Record<string, unknown>; // Add inputs field for TextGenerator and Workflow apps
 }
 
 export interface DifyRequestOptions {
@@ -29,6 +30,7 @@ export interface DifyRequestOptions {
   inputs?: { [key: string]: string } | Record<string, unknown>;
   responseMode?: DifyResponseMode; // Use enum instead of string to prevent invalid values
   waitForResponse?: boolean; // Whether to wait for complete response, defaults to true
+  forceEmptyQuery?: boolean; // Allow empty queries for specific app types like Text Generator and Workflow
   onStreamingMessage?: (message: string, isComplete: boolean) => void; // Callback for streaming messages
   apiKey?: string; // API key for direct authentication
   endpoint?: string; // Custom endpoint URL
@@ -62,12 +64,16 @@ interface WorkflowResponse {
 }
 
 interface CompletionResponse {
-  id?: string;
-  text: string;
+  event?: string; // "message" for Text Generator
+  message_id?: string; // Unique message ID
+  mode?: string; // "completion" for Text Generator
+  answer?: string; // Complete response content
   metadata?: {
     usage?: unknown;
     retriever_resources?: unknown;
   };
+  created_at?: number; // Message creation timestamp
+  conversation_id?: string;
 }
 
 // Save history
@@ -107,17 +113,79 @@ export async function updateConversation(conversationId: string, conversationTex
   await LocalStorage.setItem("dify-history", JSON.stringify(updatedHistories));
 }
 
+// Get conversation details by ID
+export interface ConversationMessage {
+  content: string;
+  role: "user" | "assistant";
+  id: string;
+}
+
+export interface Conversation {
+  id: string;
+  appName: string;
+  appType: string;
+  assistantName?: string;
+  messages: ConversationMessage[];
+}
+
+// Retrieve a conversation by its ID
+export async function getConversation(conversationId: string): Promise<Conversation | null> {
+  try {
+    // Get all history entries
+    const histories = await getHistories();
+
+    // Find all entries with the matching conversation ID
+    const conversationEntries = histories.filter((h) => h.conversation_id === conversationId);
+
+    if (conversationEntries.length === 0) {
+      console.log(`No conversation found with ID: ${conversationId}`);
+      return null;
+    }
+
+    // Get the first entry to extract app info
+    const firstEntry = conversationEntries[0];
+
+    // Create a conversation object
+    const conversation: Conversation = {
+      id: conversationId,
+      appName: firstEntry.used_app || "Dify",
+      appType: firstEntry.app_type || DifyAppType.ChatflowAgent,
+      messages: [],
+    };
+
+    // For simplicity, we'll assume the first entry contains the user query and AI response
+    // This works for TextGenerator and Workflow which only have one round
+    conversation.messages.push({
+      content: firstEntry.question,
+      role: "user",
+      id: `${conversationId}-user`,
+    });
+
+    conversation.messages.push({
+      content: firstEntry.answer,
+      role: "assistant",
+      id: firstEntry.message_id,
+    });
+
+    return conversation;
+  } catch (error) {
+    console.error("Error retrieving conversation:", error);
+    return null;
+  }
+}
+
 // Core request function
-export async function askDify(query: string, appName?: string, options?: DifyRequestOptions): Promise<DifyResponse> {
+export async function askDify(query?: string, appName?: string, options?: DifyRequestOptions): Promise<DifyResponse> {
   console.log("askDify called with:", { query, appName, options });
 
   // If no app name is provided, try to detect it from the query
   let usedApp = appName;
-  let finalQuery = query;
+  // Ensure query is always defined, even if null or undefined
+  let finalQuery = query || "";
 
   if (!usedApp) {
     console.log("No app name provided, analyzing query to detect app...");
-    const analyzed = await analyzeUserQuery(query);
+    const analyzed = await analyzeUserQuery(finalQuery);
     usedApp = analyzed.appName || "Auto-detected app";
     console.log(`App detection result: ${usedApp}`);
 
@@ -137,18 +205,12 @@ export async function askDify(query: string, appName?: string, options?: DifyReq
 
   // If API key or endpoint not provided, load app details from storage
   if (!apiKey || !endpoint) {
-    console.log("Loading app details from storage...");
+    console.log("Loading app details for: " + usedApp);
     const appsJson = await LocalStorage.getItem<string>("dify-apps");
     const apps: DifyApp[] = appsJson ? JSON.parse(appsJson) : [];
-    console.log(`Loaded ${apps.length} apps from storage`);
 
-    // Log all available apps for debugging
-    if (apps.length > 0) {
-      console.log(
-        "Available apps:",
-        apps.map((app) => ({ name: app.name, type: app.type })),
-      );
-    } else {
+    // Only log the number of apps, not the full list
+    if (apps.length === 0) {
       console.log("No apps found in storage");
     }
 
@@ -178,6 +240,7 @@ export async function askDify(query: string, appName?: string, options?: DifyReq
       console.log(`Attempting to find app type for: ${usedApp}`);
       const appsJson = await LocalStorage.getItem<string>("dify-apps");
       const apps: DifyApp[] = appsJson ? JSON.parse(appsJson) : [];
+      // Only find the specific app we need, don't log all apps
       const appDetails = apps.find((app) => app.name === usedApp);
 
       if (appDetails) {
@@ -214,6 +277,11 @@ export async function askDify(query: string, appName?: string, options?: DifyReq
   if (appType === DifyAppType.ChatflowAgent) {
     // For chatflow/agent apps
     apiEndpoint = `${endpoint}/chat-messages`;
+
+    // For chatflow/agent apps, we now allow empty queries
+    // Just use an empty string as fallback
+    finalQuery = finalQuery || "";
+
     requestBody = {
       query: finalQuery,
       user,
@@ -243,19 +311,25 @@ export async function askDify(query: string, appName?: string, options?: DifyReq
   } else if (appType === DifyAppType.Workflow) {
     // For workflow apps
     apiEndpoint = `${endpoint}/workflows/run`;
+
+    // For Workflow apps, we don't need to validate query as they don't use it
+    // Official API documentation states Workflow only uses inputs defined by the application
     requestBody = {
-      query: finalQuery,
-      user,
+      // No query parameter for Workflow apps
       inputs: options?.inputs || {},
+      user,
+      response_mode: options?.responseMode || DifyResponseMode.Blocking,
     };
   } else if (appType === DifyAppType.TextGenerator) {
     // For text completion apps
     apiEndpoint = `${endpoint}/completion-messages`;
+
+    // Text Generator apps can accept empty queries as they rely on inputs
+    // For completeness, include query only if it's not empty
     requestBody = {
-      inputs: {
-        ...(options?.inputs || {}),
-        query: finalQuery,
-      },
+      // Always include query parameter, even if it's empty
+      query: finalQuery,
+      inputs: options?.inputs || {},
       user,
       response_mode: options?.responseMode || DifyResponseMode.Blocking, // Use provided responseMode or default to blocking
     };
@@ -451,6 +525,10 @@ export async function askDify(query: string, appName?: string, options?: DifyReq
                 const messageText = eventData.answer || "";
                 fullAnswer += messageText;
 
+                // Log the incoming chunk for debugging
+                console.log(`Streaming chunk received: "${messageText}" (${messageText.length} chars)`);
+                console.log(`Current full answer length: ${fullAnswer.length} chars`);
+
                 // Call the streaming callback if provided with the full accumulated answer
                 if (options?.onStreamingMessage) {
                   options.onStreamingMessage(fullAnswer, false);
@@ -465,26 +543,30 @@ export async function askDify(query: string, appName?: string, options?: DifyReq
                 }
               } else if (eventData.event === "message_end") {
                 // End of message, save metadata
+                console.log("Received message_end event");
+
                 if (eventData.metadata) {
                   metadata = eventData.metadata;
+                  console.log("Metadata received:", JSON.stringify(metadata));
                 }
+
                 if (!conversationId && eventData.conversation_id) {
                   conversationId = eventData.conversation_id;
+                  console.log(`Setting conversation_id from message_end: ${conversationId}`);
                 }
+
                 if (!messageId && eventData.id) {
                   messageId = eventData.id;
+                  console.log(`Setting message_id from message_end: ${messageId}`);
                 }
 
-                // Mark that we received a message_end event
                 // We'll continue processing other events before signaling completion
+                // This ensures we capture any remaining text chunks that might come after the message_end event
 
-                // Only update the UI with the current content, but don't mark as complete
+                // Update the UI with the current content, but don't mark as complete yet
                 if (options?.onStreamingMessage) {
                   options.onStreamingMessage(fullAnswer, false);
                 }
-
-                // We now rely solely on the provided callback function
-                // This is safer than using global variables
               } else if (eventData.event === "error") {
                 // Instead of immediately throwing, capture the error message
                 const errorMessage = `Stream error: ${eventData.message || "Unknown error"}`;
@@ -534,8 +616,21 @@ export async function askDify(query: string, appName?: string, options?: DifyReq
       );
 
       // Now that we've processed all events, signal completion to the callback
+      console.log(`Stream processing complete. Final answer length: ${fullAnswer.length} chars`);
+      console.log(`Final message_id: ${messageId}, conversation_id: ${conversationId}`);
+
+      // Add a small delay before marking as complete to ensure all UI updates are processed
       if (options?.onStreamingMessage) {
-        options.onStreamingMessage(fullAnswer, true);
+        // First update with the final content
+        options.onStreamingMessage(fullAnswer, false);
+
+        // Then after a short delay, mark as complete
+        setTimeout(() => {
+          // Check again that callback is still defined before using it
+          if (options?.onStreamingMessage) {
+            options.onStreamingMessage(fullAnswer, true);
+          }
+        }, 100);
       }
 
       // If no message was received but there's a message ID, still return an empty result
@@ -581,14 +676,36 @@ export async function askDify(query: string, appName?: string, options?: DifyReq
       } else {
         // TextGenerator
         const data = (await response.json()) as CompletionResponse;
+
+        // Log the complete raw response for debugging
+        console.log("Dify API response:", JSON.stringify(data, null, 2));
+
+        // Verify that we got a proper response
+        if (data.event !== "message" && !data.answer) {
+          console.warn("Unexpected response format from Dify API:", data);
+        }
+
+        // Extract the answer from the response
+        const answer = data.answer || "";
+        console.log("Answer from API:", answer);
+
+        // Use the message_id and conversation_id from the response if available
+        // Do not generate random IDs if the API provides them
+        const message_id = data.message_id || "";
+        const conversation_id = data.conversation_id || "";
+
         result = {
-          message: data.text,
-          conversation_id: `completion_${Math.random().toString(36).substring(2, 10)}`,
-          message_id: data.id || `msg_${Math.random().toString(36).substring(2, 10)}`,
+          message: answer,
+          conversation_id: conversation_id,
+          message_id: message_id,
           used_app: usedApp,
           app_type: appType ? appType.toString() : "unknown",
+          mode: data.mode || "completion",
           ...(data.metadata || {}),
         };
+
+        // Log the final result object
+        console.log("Returning result to Raycast:", result);
       }
     }
 

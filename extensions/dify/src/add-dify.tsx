@@ -99,7 +99,7 @@ export default function Command() {
         const inputText = values.inputs.trim();
         let inputFields: string[];
 
-        if (inputText.match(/[,，]/)) {
+        if (inputText && inputText.match(/[,，]/)) {
           // If commas are present, split by them
           inputFields = inputText.split(/[,，]/).map((field) => field.trim());
         } else {

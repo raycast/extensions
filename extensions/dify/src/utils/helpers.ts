@@ -26,7 +26,7 @@ export function parseInputVariables(inputText: string): Record<string, string> {
     const trimmedText = inputText.trim();
     let inputFields: string[];
 
-    if (trimmedText.match(/[,，]/)) {
+    if (trimmedText && trimmedText.match(/[,，]/)) {
       // If commas are present, split by them
       inputFields = trimmedText.split(/[,，]/).map((field) => field.trim());
     } else {

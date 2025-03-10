@@ -1,4 +1,16 @@
-import { List, ActionPanel, Action, Icon, useNavigation, confirmAlert, showToast, Toast, Alert } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  useNavigation,
+  confirmAlert,
+  showToast,
+  Toast,
+  Alert,
+  LocalStorage,
+  Detail,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
@@ -7,6 +19,8 @@ import {
   deleteConversation,
   DifyHistory,
   updateConversation,
+  getConversation,
+  Conversation,
 } from "./utils/dify-service";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -88,15 +102,112 @@ export default function AskDifyHistory() {
   }
 
   // Continue a conversation
-  function continueConversation(conversationId: string) {
-    // Navigate directly to the conversation without any toast
-    push(<Command conversationId={conversationId} />);
+  function continueConversation(thread: { latestEntry: DifyHistory; conversationId: string }) {
+    const appName = thread.latestEntry.used_app || "Dify";
+    const appType = thread.latestEntry.app_type as DifyAppType;
+
+    // Check if this is a TextGenerator or Workflow app type
+    if (appType === DifyAppType.TextGenerator || appType === DifyAppType.Workflow) {
+      // For TextGenerator and Workflow, load the conversation directly
+      // without going through the Command component to avoid double navigation
+      getConversation(thread.conversationId)
+        .then((conversation: Conversation | null) => {
+          if (!conversation || conversation.messages.length < 2) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Conversation not found",
+              message: "Could not load the conversation details",
+            });
+            return;
+          }
+
+          // Get the AI response (we don't need user message anymore)
+          const aiResponse = conversation.messages[1];
+
+          // Navigate directly to a Detail view instead of Command component
+          // This prevents the double navigation issue
+          const DetailView = (
+            <Detail
+              navigationTitle={`${appName} Response`}
+              markdown={aiResponse.content}
+              metadata={
+                <Detail.Metadata>
+                  <Detail.Metadata.Label title="App" text={appName} />
+                  <Detail.Metadata.TagList title="Type">
+                    <Detail.Metadata.TagList.Item text={getAppTypeText(appType)} color={getAppTypeColor(appType)} />
+                  </Detail.Metadata.TagList>
+                  <Detail.Metadata.Separator />
+                  {thread.latestEntry.app_type === DifyAppType.TextGenerator ? (
+                    <Detail.Metadata.TagList title="Message ID">
+                      <Detail.Metadata.TagList.Item text={thread.latestEntry.message_id} color="#FFD60A" />
+                    </Detail.Metadata.TagList>
+                  ) : (
+                    <Detail.Metadata.TagList title="Conversation ID">
+                      <Detail.Metadata.TagList.Item text={thread.conversationId} color="#FFD60A" />
+                    </Detail.Metadata.TagList>
+                  )}
+                </Detail.Metadata>
+              }
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard
+                    title="Copy Response"
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    content={aiResponse.content}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy to Clipboard"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    content={
+                      thread.latestEntry.app_type === DifyAppType.TextGenerator
+                        ? thread.latestEntry.message_id
+                        : thread.conversationId
+                    }
+                  />
+                  <Action
+                    title="New Conversation"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                    onAction={() => {
+                      // Use the same app for the new conversation
+                      push(<Command preselectedAppName={appName} />);
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+
+          // Navigate to the detail view
+          push(DetailView);
+        })
+        .catch((error: Error) => {
+          showFailureToast(error, {
+            title: "Failed to load conversation",
+          });
+        });
+    } else {
+      // For ChatflowAgent, use the original approach
+      // Store app type in local storage to be retrieved by Command component
+      LocalStorage.setItem(`app-type-${thread.conversationId}`, thread.latestEntry.app_type as string).then(() => {
+        // Navigate directly to the conversation with conversation ID and app name
+        push(<Command conversationId={thread.conversationId} preselectedAppName={appName} />);
+      });
+    }
   }
 
   // Generate markdown for a single history entry
   function getHistoryEntryMarkdown(history: DifyHistory, roundNumber: number): string {
     const appName = history.used_app || "Dify";
-    return `**#${roundNumber} User**: ${history.question}\n\n**${appName}**: ${history.answer}\n\n`;
+    const isNonConversational =
+      history.app_type === DifyAppType.TextGenerator || history.app_type === DifyAppType.Workflow;
+
+    if (isNonConversational) {
+      // For TextGenerator and Workflow, show only the AI response
+      return `${history.answer}\n\n`;
+    } else {
+      // For conversational apps, show both user and AI messages
+      return `**#${roundNumber} User**: ${history.question}\n\n**${appName}**: ${history.answer}\n\n`;
+    }
   }
 
   // Get all user questions with numbering
@@ -127,16 +238,19 @@ export default function AskDifyHistory() {
     conversationId: string;
   }): string {
     const { latestEntry, allEntries } = thread;
+    const isNonConversational =
+      latestEntry.app_type === DifyAppType.TextGenerator || latestEntry.app_type === DifyAppType.Workflow;
 
     // If the latest entry has conversation_text and it's the only entry, use it
     if (allEntries.length === 1 && latestEntry.conversation_text) {
       return latestEntry.conversation_text;
     }
 
-    // Generate header with app info
-    const appInfo = latestEntry.used_app
-      ? `## ${latestEntry.used_app} (${latestEntry.app_type ? getAppTypeText(latestEntry.app_type as DifyAppType) : "Unknown"})\n\n`
-      : "";
+    // Generate header with app info (only for conversational apps)
+    const appInfo =
+      !isNonConversational && latestEntry.used_app
+        ? `## ${latestEntry.used_app} (${latestEntry.app_type ? getAppTypeText(latestEntry.app_type as DifyAppType) : "Unknown"})\n\n`
+        : "";
 
     // Generate markdown for each entry in the conversation
     // Sort entries by timestamp ascending (oldest first) to show conversation flow
@@ -150,6 +264,9 @@ export default function AskDifyHistory() {
 
   // Check if a string contains valid JSON and format it
   function formatJsonInMarkdown(markdown: string): string {
+    // Ensure markdown is defined before trying to match
+    if (!markdown) return "";
+
     // Regular expression to find JSON objects in the text
     const jsonRegex = /\{[\s\S]*?\}/g;
     const matches = markdown.match(jsonRegex);
@@ -261,13 +378,31 @@ export default function AskDifyHistory() {
         const appName = latestEntry.used_app || "Dify";
         const appType = latestEntry.app_type ? getAppTypeText(latestEntry.app_type as DifyAppType) : "Unknown";
 
+        // For TextGenerator and Workflow, use a more compact display
+        const isNonConversational =
+          latestEntry.app_type === DifyAppType.TextGenerator || latestEntry.app_type === DifyAppType.Workflow;
+
+        // Get title based on app type
+        let itemTitle = "";
+        if (isNonConversational) {
+          // For TextGenerator, use the message_id as the title
+          // For Workflow, use the conversation_id
+          if (latestEntry.app_type === DifyAppType.TextGenerator) {
+            itemTitle = `${appName} - ${latestEntry.message_id.substring(0, 8)}...`;
+          } else {
+            itemTitle = `${appName} - ${thread.conversationId.substring(0, 8)}...`;
+          }
+        } else {
+          // Use the question as the title for conversational apps
+          itemTitle =
+            latestEntry.question.length > 60 ? latestEntry.question.substring(0, 60) + "..." : latestEntry.question;
+        }
+
         return (
           <List.Item
             key={thread.conversationId}
             id={thread.conversationId}
-            title={
-              latestEntry.question.length > 60 ? latestEntry.question.substring(0, 60) + "..." : latestEntry.question
-            }
+            title={itemTitle}
             subtitle={formatDistanceToNow(latestEntry.timestamp, {
               addSuffix: true,
               locale: enUS,
@@ -282,37 +417,71 @@ export default function AskDifyHistory() {
               },
             ]}
             detail={
-              <List.Item.Detail
-                markdown={formatJsonInMarkdown(getConversationMarkdown(thread))}
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="App" text={appName} />
-                    <List.Item.Detail.Metadata.TagList title="Type">
-                      <List.Item.Detail.Metadata.TagList.Item
-                        text={appType}
-                        color={getAppTypeColor(latestEntry.app_type as DifyAppType)}
+              latestEntry.app_type === DifyAppType.TextGenerator || latestEntry.app_type === DifyAppType.Workflow ? (
+                // For TextGenerator and Workflow, use a simplified detail view with inputs in JSON format
+                <List.Item.Detail
+                  markdown={formatJsonInMarkdown(latestEntry.answer)}
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label title="App" text={appName} />
+                      <List.Item.Detail.Metadata.TagList title="Type">
+                        <List.Item.Detail.Metadata.TagList.Item
+                          text={appType}
+                          color={getAppTypeColor(latestEntry.app_type as DifyAppType)}
+                        />
+                      </List.Item.Detail.Metadata.TagList>
+                      {latestEntry.app_type === DifyAppType.TextGenerator ? (
+                        <List.Item.Detail.Metadata.TagList title="Message ID">
+                          <List.Item.Detail.Metadata.TagList.Item text={latestEntry.message_id} color="#FFD60A" />
+                        </List.Item.Detail.Metadata.TagList>
+                      ) : (
+                        <List.Item.Detail.Metadata.TagList title="Conversation ID">
+                          <List.Item.Detail.Metadata.TagList.Item text={thread.conversationId} color="#FFD60A" />
+                        </List.Item.Detail.Metadata.TagList>
+                      )}
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              ) : (
+                // For conversational apps, use the standard detail view with all metadata
+                <List.Item.Detail
+                  markdown={formatJsonInMarkdown(getConversationMarkdown(thread))}
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label title="App" text={appName} />
+                      <List.Item.Detail.Metadata.TagList title="Type">
+                        <List.Item.Detail.Metadata.TagList.Item
+                          text={appType}
+                          color={getAppTypeColor(latestEntry.app_type as DifyAppType)}
+                        />
+                      </List.Item.Detail.Metadata.TagList>
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label title="Rounds" text={`${thread.allEntries.length}`} />
+                      <List.Item.Detail.Metadata.Label
+                        title="Last Update"
+                        text={new Date(latestEntry.timestamp).toLocaleString()}
                       />
-                    </List.Item.Detail.Metadata.TagList>
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Rounds" text={`${thread.allEntries.length}`} />
-                    <List.Item.Detail.Metadata.Label
-                      title="Last Update"
-                      text={new Date(latestEntry.timestamp).toLocaleString()}
-                    />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.TagList title="Conversation ID">
-                      <List.Item.Detail.Metadata.TagList.Item text={thread.conversationId} color="#FFD60A" />
-                    </List.Item.Detail.Metadata.TagList>
-                  </List.Item.Detail.Metadata>
-                }
-              />
+                      <List.Item.Detail.Metadata.Separator />
+                      {latestEntry.app_type === DifyAppType.TextGenerator ? (
+                        <List.Item.Detail.Metadata.TagList title="Message ID">
+                          <List.Item.Detail.Metadata.TagList.Item text={latestEntry.message_id} color="#FFD60A" />
+                        </List.Item.Detail.Metadata.TagList>
+                      ) : (
+                        <List.Item.Detail.Metadata.TagList title="Conversation ID">
+                          <List.Item.Detail.Metadata.TagList.Item text={thread.conversationId} color="#FFD60A" />
+                        </List.Item.Detail.Metadata.TagList>
+                      )}
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              )
             }
             actions={
               <ActionPanel>
                 <Action
                   title="Continue Conversation"
                   icon={Icon.Bubble}
-                  onAction={() => continueConversation(thread.conversationId)}
+                  onAction={() => continueConversation(thread)}
                 />
                 <Action
                   title="Edit Conversation"
@@ -348,8 +517,12 @@ export default function AskDifyHistory() {
                   shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
                 />
                 <Action.CopyToClipboard
-                  title="Copy Conversation Id"
-                  content={thread.conversationId}
+                  title={
+                    latestEntry.app_type === DifyAppType.TextGenerator ? "Copy Message Id" : "Copy Conversation Id"
+                  }
+                  content={
+                    latestEntry.app_type === DifyAppType.TextGenerator ? latestEntry.message_id : thread.conversationId
+                  }
                   shortcut={{ modifiers: ["opt"], key: "c" }}
                 />
                 <ActionPanel.Section title="Danger Zone">

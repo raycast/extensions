@@ -1,6 +1,6 @@
 import { askDify } from "../utils/dify-service";
 import { LocalStorage, AI, environment } from "@raycast/api";
-import { DifyApp, DifyConversationType, DifyResponseMode } from "../utils/types";
+import { DifyApp, DifyConversationType, DifyResponseMode, DifyAppType } from "../utils/types";
 import os from "os";
 
 // Key name for storing recent conversation IDs
@@ -41,14 +41,9 @@ export default async function askDifyTool(input: Input): Promise<string> {
   let shouldCreateNewConversation = false;
 
   try {
-    // Validate required parameters
-    if (!input.query || input.query.trim() === "") {
-      console.error("Empty query received");
-      return JSON.stringify({
-        error: "Query content cannot be empty. Please provide a valid query.",
-        message: "Query content cannot be empty. Please provide a valid query.",
-      });
-    }
+    // We'll validate the query based on app type after getting app details
+    // Initialize query to empty string if not provided
+    input.query = input.query || "";
 
     if (!input.appName || input.appName.trim() === "") {
       console.error("No app name provided");
@@ -99,6 +94,16 @@ export default async function askDifyTool(input: Input): Promise<string> {
     console.log(`Endpoint: ${appDetails.endpoint}`);
     console.log(`API Key: ${appDetails.apiKey ? "******" : "missing"}`);
     console.log(`Conversation Type: ${appDetails.conversationType || "default (continuous)"}`);
+
+    // Only validate empty queries for Chatflow/Agent apps
+    // Text Generator and Workflow apps can accept empty queries
+    if (appDetails.type === DifyAppType.ChatflowAgent && (!query || query === "")) {
+      console.error("Empty query received for Chatflow/Agent app");
+      return JSON.stringify({
+        error: "Missing Query. Please enter a query to ask Dify",
+        message: "Missing Query. Please enter a query to ask Dify",
+      });
+    }
 
     // Get the conversation type of the application
     const conversationType = appDetails.conversationType || DifyConversationType.Continuous;
@@ -237,7 +242,13 @@ ${inputFields.map((field) => `${field}: [extracted value]`).join("\n")}`;
     }
 
     // Use parsed inputs as final inputs, but only if the app has defined inputs
+    // For all app types, we use the same approach: extract inputs from the user query
     const mergedInputs = hasInputs ? parsedInputs : {};
+
+    // We don't add the original query to inputs anymore
+    // The query is only used to extract structured inputs via AI
+    // This applies to all app types: Chatflow, Workflow, and Text Generator
+    console.log("Using extracted inputs from user query");
 
     console.log("Final inputs:", mergedInputs);
 
