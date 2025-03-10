@@ -37,12 +37,10 @@ export default async function Command(props: {
 
     await closeMainWindow();
 
-    for (let i = 0; i < selectedItems.length; i++) {
-      const item = selectedItems[i];
-
+    for (const item of selectedItems) {
       await showToast({
         style: Toast.Style.Animated,
-        title: `Watermarking "${path.basename(item.path)}" [file ${i + 1} of ${selectedItems.length}]`,
+        title: `Watermarking "${path.basename(item.path)}"`,
       });
 
       await watermark(item.path, text, transparency, rotation, fontSize ? parseInt(fontSize) : undefined);

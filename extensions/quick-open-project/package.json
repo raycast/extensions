@@ -9,7 +9,8 @@
   "contributors": [
     "bjw-s",
     "pernielsentikaer",
-    "mattts"
+    "mattts",
+    "canac"
   ],
   "license": "MIT",
   "commands": [
@@ -69,7 +70,6 @@
     "frecency": "^1.3.2",
     "fuzzysort": "^1.1.4",
     "glob": "^7.2.0",
-    "open": "^8.4.0",
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2"
   },
