@@ -152,52 +152,92 @@ export default async function askDifyTool(input: Input): Promise<string> {
       console.log("Single call mode, not using conversation ID");
     }
 
-    // Parse input format
+    // Initialize inputs object
     const parsedInputs: { [key: string]: string } = {};
+    let hasInputs = false;
 
-    // If inputsFormat is provided, try to parse it
-    if (input.inputsFormat) {
-      // Check if it looks like JSON
-      if (input.inputsFormat.trim().startsWith("{") && input.inputsFormat.trim().endsWith("}")) {
-        try {
-          const inputsTemplate = JSON.parse(input.inputsFormat);
-          // Use template to create inputs
-          Object.keys(inputsTemplate).forEach((key) => {
-            if (
-              key.toLowerCase().includes("query") ||
-              key.toLowerCase().includes("question") ||
-              key.toLowerCase().includes("message")
-            ) {
-              parsedInputs[key] = query;
-            }
-          });
-        } catch (error) {
-          console.error("Error parsing inputsFormat:", error);
+    // Check if the app details have inputs defined
+    if (appDetails.inputs && Object.keys(appDetails.inputs).length > 0) {
+      // Filter out invalid input field names (empty or whitespace only)
+      const validInputs: { [key: string]: string } = {};
+      for (const key of Object.keys(appDetails.inputs)) {
+        if (key.trim() !== "") {
+          validInputs[key] = appDetails.inputs[key] as string;
+        } else {
+          console.log("Skipping invalid input field name (empty or whitespace only)");
         }
-      } else {
-        // Not JSON, just log it as information
-        console.log("inputsFormat is not JSON, treating as informational text:", input.inputsFormat);
       }
-    } else if (appDetails.inputs) {
-      // If the app details have input format, try to use it
-      try {
-        // Use app details input format to create inputs
-        Object.keys(appDetails.inputs).forEach((key) => {
-          if (
-            key.toLowerCase().includes("query") ||
-            key.toLowerCase().includes("question") ||
-            key.toLowerCase().includes("message")
-          ) {
-            parsedInputs[key] = query;
+
+      // Only proceed if there are valid inputs
+      if (Object.keys(validInputs).length > 0) {
+        hasInputs = true;
+        console.log("App has defined inputs:", validInputs);
+
+        // Get the required input fields from app details
+        const inputFields = Object.keys(validInputs);
+
+        // If there are input fields and AI is available, use AI to extract values
+        if (inputFields.length > 0 && environment.canAccess(AI)) {
+          console.log("Using AI to extract input values from query...");
+
+          try {
+            // Construct AI prompt to extract values
+            const aiPrompt = `You need to extract specific information from a user query to fill in required input fields for a Dify application.
+
+User query: "${query}"
+
+Required input fields:
+${inputFields.map((field) => `- ${field}`).join("\n")}
+
+For each field, provide ONLY the extracted value. If a value is not present in the query, respond with "not specified".
+Format your response exactly like this:
+${inputFields.map((field) => `${field}: [extracted value]`).join("\n")}`;
+
+            const aiResponse = await AI.ask(aiPrompt, {
+              creativity: "low",
+              model: AI.Model["OpenAI_GPT4o-mini"],
+            });
+
+            console.log("AI extraction response:", aiResponse);
+
+            // Parse AI response
+            const lines = aiResponse.split("\n").filter((line) => line.trim() !== "");
+            for (const line of lines) {
+              const match = line.match(/^([^:]+):\s*(.+)$/i);
+              if (match) {
+                const [, field, value] = match;
+                const trimmedField = field.trim();
+                const trimmedValue = value.trim();
+
+                // Only use the extracted value if it's not "not specified"
+                if (
+                  trimmedValue.toLowerCase() !== "not specified" &&
+                  inputFields.some((f) => f.toLowerCase() === trimmedField.toLowerCase())
+                ) {
+                  console.log(`AI extracted value for ${trimmedField}: ${trimmedValue}`);
+                  parsedInputs[trimmedField] = trimmedValue;
+                }
+              }
+            }
+          } catch (aiError) {
+            console.error("Error using AI to extract input values:", aiError);
+          }
+        }
+
+        // For any fields that weren't extracted by AI, use default values if they exist
+        inputFields.forEach((field) => {
+          if (!parsedInputs[field] && typeof validInputs[field] === "string" && validInputs[field] !== "") {
+            parsedInputs[field] = validInputs[field] as string;
+            console.log(`Using default value for ${field}: ${parsedInputs[field]}`);
           }
         });
-      } catch (error) {
-        console.error("Error using app inputs format:", error);
       }
+    } else {
+      console.log("App does not have defined inputs, using only query");
     }
 
-    // Use parsed inputs as final inputs
-    const mergedInputs = parsedInputs;
+    // Use parsed inputs as final inputs, but only if the app has defined inputs
+    const mergedInputs = hasInputs ? parsedInputs : {};
 
     console.log("Final inputs:", mergedInputs);
 

@@ -1,6 +1,14 @@
 # Dify Changelog
 
-## [Initial Release] - 2025-03-09
+## [1.0.1] - 2025-03-10
+
+- Improved input field validation to filter out invalid input names (empty or whitespace-only)
+- Enhanced AI extraction logic to work with validated input fields
+- Fixed syntax errors and improved code structure
+- Better error handling for network issues
+- Maintained original query integrity when processing inputs
+
+## [1.0.0] - 2025-03-09
 
 - Seamless integration with Dify AI applications
 - AI Tools integration with Raycast command system (@dify)
