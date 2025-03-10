@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-03-10
 
 - Add the color format dropdown option to the `Convert Color` command.
 
