@@ -135,7 +135,7 @@
       "name": "convert-color",
       "title": "Convert Color",
       "description": "Convert any color to a different format",
-      "mode": "no-view",
+      "mode": "view",
       "arguments": [
         {
           "name": "text",
