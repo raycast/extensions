@@ -1,5 +1,8 @@
 # D-Day Tracker for Raycast Extention
 
+<img src="https://github.com/user-attachments/assets/6eb8bf04-8e2b-4b6e-9e88-9dbfc9ae3c86" width="800" alt="dday-raycast" />
+
+
 ## Overview
 
 D-Day Tracker is a powerful Raycast extension that allows users to easily track the number of days remaining until a specified target date. With a user-friendly interface, you can add, edit, and delete D-Day items, making it perfect for managing important events, deadlines, or milestones.
@@ -14,11 +17,11 @@ D-Day Tracker is a powerful Raycast extension that allows users to easily track 
 
 ## Usage
 
-1. **Open Raycast**: Launch Raycast and search for "D-Day Countdown".
+1. **Open Raycast**: Launch Raycast and search for `D-Day Tracker`.
 2. **Add a New D-Day**:
-   - Click on "Add D-Day" to open the form.
-   - Enter the event title and select the target date using the date picker or text input.
-   - Click "Save" to add the D-Day to your list.
+   - Click on `Add D-Day` to open the form.
+   - Enter the event title and select the target date using the `date picker` or `text input`.
+   - Click `Save` to add the D-Day to your list.
 3. **View D-Day List**: The main screen displays all your saved D-Days along with the countdown to each event.
 4. **Edit or Delete a D-Day**:
    - Click on the desired D-Day to edit its details or delete it from the list.
