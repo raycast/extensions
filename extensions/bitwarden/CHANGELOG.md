@@ -1,5 +1,13 @@
 # Bitwarden Changelog
 
+## [Fix] - 2025-03-04
+
+- Fix search when vault contains SSH keys
+
+## [Feature] - 2025-02-19
+
+- Add fuzzy search for vault and include url or username in search
+
 ## [Feature] - 2025-01-02
 
 - Add button to show/hide password in unlock form

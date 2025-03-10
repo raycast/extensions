@@ -29,6 +29,7 @@ Enjoy using DeepSeeker! 🚀
 | **Translate**       | Auto translate selected text into target language as setting | ✅                  |
 | **What**            | Give a brief explanation of the selected text                | ✅                  |
 | **Why**             | Give a brief explanation of the selected declaration         | ✅                  |
+| **History**         | Browse all interaction histories                             | ❌                  |
 
 - [x] 🚀 Results Stream in real time
 - [x] ⌘ Supports custom keybinding for each action
@@ -36,6 +37,7 @@ Enjoy using DeepSeeker! 🚀
 - [x] 💸 Set token price in settings
 - [x] 🌐 Support Translate and Looking Up Words
 - [x] 🎨 Multiple models support (Deepseek, OpenAI, Gemini)
+- [x] 📜 Support Histories
 
 ## Bugs / TODOs / Known Issues
 

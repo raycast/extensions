@@ -4,6 +4,10 @@
 
 - Add the ability to include or exclude specific repositories from the results for the `My Pull Requests` and `Unread Notifications` Menu Bar commands.
 
+## [Chore] - 2025-03-10
+
+- Fix typo in setting label
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Fix base clone path] - 2025-01-19

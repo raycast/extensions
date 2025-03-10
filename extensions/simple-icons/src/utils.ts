@@ -217,17 +217,6 @@ export const getAliases = (icon: IconData) => {
   return [...new Set([...aka, ...dup, ...loc])];
 };
 
-export const aiSearch = async (icons: IconData[], searchString: string) => {
-  if (!searchString) return icons;
-  const searchPrompt = [
-    `Here is the full icon data JSON for brand icons in array below:`,
-    JSON.stringify(icons),
-    `Please search with the search keyword "${searchString}" from the JSON. And return at least one icon data item in array.`,
-    "Reply with the plain JSON text only (up to 500 items, no markdown format), no addition text.",
-  ].join("\n");
-  return AI.ask(searchPrompt).catch(() => []);
-};
-
 export const getKeywords = (icon: IconData) =>
   [
     icon.title,
@@ -252,7 +241,7 @@ export const useSearch = ({ icons }: { icons: IconData[] }) => {
 
   const searchPrompt = [
     `Here is the full icon data JSON for brand icons in array below:`,
-    JSON.stringify(icons),
+    JSON.stringify(icons.map((icon) => ({ title: icon.title, slug: icon.slug, hex: icon.hex, source: icon.source }))),
     "The 'title' means the company or project names, 'source' means the icon resource URL or company website, 'hex' means the icon color in hex code.",
     `Please search from the data with the search keyword "${$searchString}". And return at least one icon slug in the format below:`,
     "(icon slugs only, split with comma, up to 500 items, no markdown format, don't change data structure, no addition text, no spaces, do not return non-exist slugs)",

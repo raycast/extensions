@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Update README with improved manifest.yaml] - 2025-03-05
+
+## [Added new scope] - 2025-02-26
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [New "Copy Message URL" action] - 2025-02-10
