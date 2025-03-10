@@ -4,7 +4,7 @@ export type Media = {
   };
 };
 
-export type MediaSet =
+type MediaSet =
   | {
       image: Media;
     }

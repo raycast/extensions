@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { PUBLICATIONS } from "./lib/fetchPublications";
-import { Post, ProfileData } from "./types";
+import { Media, Post, ProfileData } from "./types";
 import { useFetch } from "@raycast/utils";
 import { PROFILE_SUGGESTIONS } from "./lib/fetchProfileSuggestions";
 
@@ -9,9 +9,10 @@ export default function Command() {
   return <Main />;
 }
 
+const API_URL = "https://api-v2.lens.dev/";
 function Main() {
   const [searchTerm, setSearchTerm] = useState("");
-  const { data: profileSuggestions, isLoading: profileSuggestionsLoading } = useFetch("https://api-v2.lens.dev/", {
+  const { data: profileSuggestions, isLoading: profileSuggestionsLoading } = useFetch(API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -68,7 +69,7 @@ function Profile({ profileId, metadata, handle, stats }: ProfileData) {
   const bio = metadata?.bio;
   const picture = metadata?.picture;
 
-  const { data: posts, isLoading } = useFetch("https://api-v2.lens.dev/", {
+  const { data: posts, isLoading } = useFetch(API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -114,7 +115,7 @@ function Profile({ profileId, metadata, handle, stats }: ProfileData) {
           title={handle.localName}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={`https://lenster.xyz/u/${handle.localName}`} />
+              <Action.OpenInBrowser url={`https://hey.xyz/u/${handle.localName}`} />
               {/* eslint-disable-next-line @raycast/prefer-title-case */}
               <Action.CopyToClipboard title="Copy Profile ID" content={profileId} />
               <Action.CopyToClipboard title="Copy Lens Handle" content={handle.localName} />
@@ -168,7 +169,7 @@ ${post.metadata.content ?? ""}
 ${
   hasMedia
     ? media
-        .filter((media) => "image" in media)
+        .filter((media): media is { image: Media } => "image" in media)
         .map((media) => `<img src="${normalizeUrl(media.image.raw.uri)}" />`)
         .join("")
     : ""

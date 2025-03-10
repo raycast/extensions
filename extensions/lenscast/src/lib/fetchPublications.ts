@@ -10,7 +10,7 @@ export const PUBLICATIONS = `
           stats {
             comments
             upvotes: reactions(request:  {
-               type: UPVOTE
+              type: UPVOTE
             })
             mirrors
             bookmarks
