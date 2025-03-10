@@ -90,7 +90,7 @@
           "title": "Rephrase Prompt",
           "description": "The prompt for the rephrase command",
           "type": "textfield",
-          "default": "Rephrase the text with enhanced writing but without changing the meaning: \n\n",
+          "default": "Rephrase the text with enhanced writing but without changing original meaning. ONLY return best answer without changing it's orginal format. e.g. markdown -> markdown, plain text -> plain text. : \n\n",
           "required": false
         },
         {
@@ -231,7 +231,7 @@
           "title": "Fix Prompt",
           "description": "The prompt for the fix command",
           "type": "textfield",
-          "default": "Fix typos and grammar mistakes in the text without changing the meaning, bold the changed: \n\n",
+          "default": "Fix typos and grammar mistakes in the text without changing the meaning, KEEP the original writing format. e.g., markdown -> markdown, plain text -> plain text. \n\n",
           "required": false
         },
         {
