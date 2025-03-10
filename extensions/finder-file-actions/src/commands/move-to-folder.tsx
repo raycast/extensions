@@ -123,22 +123,21 @@ export default function Command() {
   // Load recent folders from storage
   async function loadRecentFolders() {
     try {
-      const storedFolders = await LocalStorage.getItem<string>(`${environment.extensionName}-recent-folders`);
+      const storedFolders = await LocalStorage.getItem("recentFolders");
       if (storedFolders) {
-        const parsedFolders = JSON.parse(storedFolders) as Record<string, unknown>[];
+        const parsedFolders = JSON.parse(storedFolders as string);
         // Convert string dates back to Date objects
         const foldersWithDates = parsedFolders.map((folder: Record<string, unknown>) => ({
           ...folder,
-          path: folder.path as string,
-          kMDItemFSName: folder.kMDItemFSName as string,
-          kMDItemKind: folder.kMDItemKind as string,
-          kMDItemFSSize: folder.kMDItemFSSize as number,
-          kMDItemUseCount: folder.kMDItemUseCount as number,
           lastUsed: new Date(folder.lastUsed as string),
-          kMDItemFSCreationDate: new Date(folder.kMDItemFSCreationDate as string),
-          kMDItemContentModificationDate: new Date(folder.kMDItemContentModificationDate as string),
-          kMDItemLastUsedDate: new Date(folder.kMDItemLastUsedDate as string),
-        })) as RecentFolder[];
+          kMDItemLastUsedDate: folder.kMDItemLastUsedDate ? new Date(folder.kMDItemLastUsedDate as string) : undefined,
+          kMDItemContentModificationDate: folder.kMDItemContentModificationDate
+            ? new Date(folder.kMDItemContentModificationDate as string)
+            : undefined,
+          kMDItemFSCreationDate: folder.kMDItemFSCreationDate
+            ? new Date(folder.kMDItemFSCreationDate as string)
+            : undefined,
+        }));
         setRecentFolders(foldersWithDates);
       }
       setHasCheckedPreferences(true);
@@ -634,10 +633,11 @@ export default function Command() {
                     onAction={() => setIsShowingDetail(!isShowingDetail)}
                   />
                   <Action
-                    title="Remove This Recent Folder"
                     icon={Icon.Trash}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                    style={Action.Style.Destructive}
+                    title="Remove This Recent Folder"
                     onAction={() => removeFromRecentFolders(folder.path)}
+                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
                   />
                 </ActionPanel>
               }
