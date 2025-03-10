@@ -55,7 +55,7 @@ export default function Command() {
     noteData = fetchGranolaData("get-documents") as NoteData;
   } catch (error) {
     showFailureToast({ title: "Failed to fetch notes", message: String(error) });
-    return <List />;
+    return <Unresponsive />;
   }
 
   const cacheData = getCache();
@@ -80,7 +80,7 @@ export default function Command() {
 
   if (noteData?.data) {
     return (
-      <List>
+      <List isLoading={false}>
         {sortNotesByDate(noteData.data.docs).map((doc) => (
           <List.Item
             key={doc.id}
