@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [New Command] - {PR_MERGE_DATE}
+## [New Command] - 2025-03-10
 
 - 🆕 New Command: Ask About Selected Screen Area
 
