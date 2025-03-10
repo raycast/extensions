@@ -37,7 +37,6 @@ Always store your private keys securely and never share them with anyone. This t
 
 - Raycast
 - Node.js
-- Internet connection (for Solana network interaction)
 
 ## Contributing
 
