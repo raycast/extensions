@@ -8,12 +8,12 @@ import {
   showToast,
   Toast,
   Clipboard,
-} from '@raycast/api';
-import { useState } from 'react';
+} from "@raycast/api";
+import { useState } from "react";
 
-import Service, { Icon } from './service';
-import { toDataURI, toSvg, toURL, copyToClipboard } from './utils';
-import { primaryActionEnum, iconColorEnum } from './types/perferenceValues';
+import Service, { Icon } from "./service";
+import { toDataURI, toSvg, toURL, copyToClipboard } from "./utils";
+import { primaryActionEnum, iconColorEnum } from "./types/perferenceValues";
 
 const { primaryAction } = getPreferenceValues<{
   primaryAction: primaryActionEnum;
@@ -26,7 +26,7 @@ const service = new Service();
 function Command() {
   const [icons, setIcons] = useState<Icon[]>([]);
   const [isLoading, setLoading] = useState(false);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
 
   async function queryIcons(text: string) {
     setQuery(text);
@@ -38,23 +38,14 @@ function Command() {
 
   function getEmptyViewDescription(query: string, isLoading: boolean) {
     if (query.length === 0 || isLoading) {
-      return 'Type something to get started';
+      return "Type something to get started";
     }
-    return 'Try another query';
+    return "Try another query";
   }
 
   return (
-    <Grid
-      throttle
-      columns={8}
-      inset={Grid.Inset.Medium}
-      isLoading={isLoading}
-      onSearchTextChange={queryIcons}
-    >
-      <Grid.EmptyView
-        title="No results"
-        description={getEmptyViewDescription(query, isLoading)}
-      />
+    <Grid throttle columns={8} inset={Grid.Inset.Medium} isLoading={isLoading} onSearchTextChange={queryIcons}>
+      <Grid.EmptyView title="No results" description={getEmptyViewDescription(query, isLoading)} />
       {icons.map((icon) => {
         const { set, id, body, width, height } = icon;
         const { id: setId, title: setName } = set;
@@ -78,7 +69,7 @@ function Command() {
               await copyToClipboard(svgIcon, id);
               const { file } = await Clipboard.read();
               if (file) {
-                Clipboard.paste({ file: file.replace('file://', '') });
+                Clipboard.paste({ file: file.replace("file://", "") });
               }
             }}
           />
@@ -91,25 +82,16 @@ function Command() {
             onAction={async () => {
               await copyToClipboard(svgIcon, id);
               await showToast({
-                title: 'Copied to clipboard',
-                message: 'The SVG file has been copied to the clipboard.',
+                title: "Copied to clipboard",
+                message: "The SVG file has been copied to the clipboard.",
                 style: Toast.Style.Success,
               });
             }}
           />
         );
-        const pasteName = setId && (
-          <Action.Paste title="Paste Name" content={`${setId}:${id}`} />
-        );
-        const copyName = (
-          <Action.CopyToClipboard
-            title="Copy Name"
-            content={`${setId}:${id}`}
-          />
-        );
-        const copyURL = (
-          <Action.CopyToClipboard title="Copy URL" content={toURL(setId, id)} />
-        );
+        const pasteName = setId && <Action.Paste title="Paste Name" content={`${setId}:${id}`} />;
+        const copyName = <Action.CopyToClipboard title="Copy Name" content={`${setId}:${id}`} />;
+        const copyURL = <Action.CopyToClipboard title="Copy URL" content={toURL(setId, id)} />;
         const copyDataURI = (
           // eslint-disable-next-line @raycast/prefer-title-case
           <Action.CopyToClipboard title="Copy Data URI" content={dataURIIcon} />
@@ -118,7 +100,7 @@ function Command() {
           <Grid.Item
             content={{
               source: dataURIIcon,
-              tintColor: body.includes('currentColor')
+              tintColor: body.includes("currentColor")
                 ? Color.PrimaryText // Monochrome icon
                 : null,
             }}
