@@ -1,6 +1,6 @@
 # Linkwarden Changelog
 
-## [Improve UX] - {PR_MERGE_DATE}
+## [Improve UX] - 2025-03-10
 
 - Added a success toast when a link is added and pop to root
 
