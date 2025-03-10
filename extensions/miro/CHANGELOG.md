@@ -1,6 +1,6 @@
 # Miro
 
-## [Add command to show recent boards] - 2025-03-10
+## [Add command to show recent boards] - {PR_MERGE_DATE}
 
 - Add a new command to show recent boards.
 
