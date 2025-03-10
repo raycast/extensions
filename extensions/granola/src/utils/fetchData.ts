@@ -14,7 +14,7 @@ export function fetchGranolaData(route: string) {
         if (mounted) setAccessToken(token);
       })
       .catch((err) => {
-        if (mounted) setError(new Error("Failed to get access token"));
+        if (mounted) setError(new Error(`Failed to get access token, ${err}`));
       });
     return () => {
       mounted = false;
