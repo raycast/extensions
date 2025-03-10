@@ -45,15 +45,10 @@ export interface Document {
   notification_config: null;
 }
 
-export type Doc = {
-  id: string;
-  title: string;
-  created_at: string;
-  creation_source: string;
-  public: boolean;
-  notes_markdown: string;
-  sharing_link_visibility: string;
-};
+export type Doc = Pick<
+  Document,
+  "id" | "title" | "created_at" | "creation_source" | "public" | "notes_markdown" | "sharing_link_visibility"
+>;
 
 // Notes structure
 export interface Notes {
@@ -61,15 +56,21 @@ export interface Notes {
   content: NoteContent[];
 }
 
+interface PanelContent {
+  original_content: string;
+}
+
+interface PanelsByPanelId {
+  [panelId: string]: PanelContent;
+}
+
+interface PanelsByDocId {
+  [docId: string]: PanelsByPanelId;
+}
+
 export interface NoteActionsProps {
   doc: Doc;
-  panels: {
-    [key: string]: {
-      [key: string]: {
-        original_content: string;
-      };
-    };
-  };
+  panels: PanelsByDocId;
   children?: ReactNode;
 }
 

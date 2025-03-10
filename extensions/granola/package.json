@@ -37,7 +37,7 @@
   "ai": {
     "evals": [
       {
-        "input" : "@granola Pleases summarize my last note",
+        "input" : "@granola Please summarize my last note",
         "mocks" : {
           "ai-notes" : [
             {

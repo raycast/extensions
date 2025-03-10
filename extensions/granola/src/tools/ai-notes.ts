@@ -1,5 +1,6 @@
 import getCache from "../utils/getCache";
 import convertHtmlToMarkdown from "../utils/convertHtmltoMarkdown";
+import { showFailureToast } from "@raycast/utils";
 
 type Input = {
   /**
@@ -119,7 +120,7 @@ export default function tool(input: Input) {
           return noteDateStr === targetDate.toISOString().split("T")[0];
         }
       } catch (e) {
-        console.warn(`Invalid date format or query: note.date=${note.date} or input.date=${input.date}`);
+        showFailureToast(`Invalid date format or query: note.date=${note.date} or input.date=${input.date}`);
         return false;
       }
     }

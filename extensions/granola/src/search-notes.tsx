@@ -76,7 +76,7 @@ export default function Command() {
     return <Unresponsive />;
   }
 
-  const untitledNoteTItle = "Untitled Note";
+  const untitledNoteTitle = "Untitled Note";
 
   if (noteData?.data) {
     return (
@@ -84,7 +84,7 @@ export default function Command() {
         {sortNotesByDate(noteData.data.docs).map((doc) => (
           <List.Item
             key={doc.id}
-            title={doc.title ?? untitledNoteTItle}
+            title={doc.title ?? untitledNoteTitle}
             accessories={[
               { date: new Date(doc.created_at) },
               { text: doc.creation_source },
@@ -102,7 +102,7 @@ export default function Command() {
 
                         // Check if doc.id exists in panels and if panelId is valid
                         if (!panels[doc.id] || !panelId || !panels[doc.id][panelId]) {
-                          return `# ${doc.title ?? untitledNoteTItle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\nNo content available for this note.`;
+                          return `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\nNo content available for this note.`;
                         }
 
                         // Safely access the content with fallback

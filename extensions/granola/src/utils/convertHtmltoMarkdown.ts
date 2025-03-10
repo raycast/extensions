@@ -1,4 +1,5 @@
 import TurndownService from "turndown";
+import { showFailureToast } from "@raycast/utils";
 
 const turndownService = new TurndownService();
 
@@ -10,7 +11,7 @@ export default function convertHtmlToMarkdown(htmlContent: string): string {
   try {
     return turndownService.turndown(htmlContent);
   } catch (error) {
-    console.error("Error converting HTML to Markdown:", error);
+    showFailureToast({ title: "Error converting HTML to Markdown", message: String(error) });
     return htmlContent; // Fallback to original content if conversion fails
   }
 }
