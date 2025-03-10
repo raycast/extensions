@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [Update Rate Track] - {PR_MERGE_DATE}
+## [Update Rate Track] - 2025-03-10
 
 - Added the track name to the `Rate Track` command.
 
