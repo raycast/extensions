@@ -1,6 +1,6 @@
 # zed-recent-projects Changelog
 
-## [Add support for remote projects] - {PR_MERGE_DATE}
+## [Add support for remote projects] - 2025-03-10
 
 - Added remote project support for `Search Recent Projects`.
 
