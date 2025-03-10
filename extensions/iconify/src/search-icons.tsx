@@ -62,10 +62,12 @@ function Command() {
         const dataURIIcon = toDataURI(svgIcon);
 
         const paste = (
-          <Action.Paste title="Paste Svg String" content={svgIcon} />
+          // eslint-disable-next-line @raycast/prefer-title-case
+          <Action.Paste title="Paste SVG String" content={svgIcon} />
         );
         const copy = (
-          <Action.CopyToClipboard title="Copy Svg String" content={svgIcon} />
+          // eslint-disable-next-line @raycast/prefer-title-case
+          <Action.CopyToClipboard title="Copy SVG String" content={svgIcon} />
         );
         const pasteFile = (
           <Action
