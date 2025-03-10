@@ -10,21 +10,25 @@ export function fetchGranolaData(route: string) {
   useEffect(() => {
     let mounted = true;
     getAccessToken()
-      .then(token => {
+      .then((token) => {
         if (mounted) setAccessToken(token);
       })
-      .catch(err => {
+      .catch((err) => {
         if (mounted) setError(new Error("Failed to get access token"));
       });
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const url = `https://api.granola.ai/v2/${route}`;
-  
+
   const { isLoading, data, revalidate } = useFetch<GetDocumentsResponse>(url, {
-    headers: accessToken ? {
-      Authorization: `Bearer ${accessToken}`,
-    } : undefined,
+    headers: accessToken
+      ? {
+          Authorization: `Bearer ${accessToken}`,
+        }
+      : undefined,
     enabled: !!accessToken,
   });
 
