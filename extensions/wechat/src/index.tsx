@@ -40,10 +40,7 @@ export default function Command() {
     >
       <List.Section title="Contacts:" subtitle={state.items.length + ""}>
         {state.items.map((searchResult) => (
-          <SearchListItem
-            key={searchResult.title}
-            searchResult={searchResult}
-          />
+          <SearchListItem key={searchResult.arg} searchResult={searchResult} />
         ))}
       </List.Section>
     </List>
@@ -60,7 +57,11 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       title={title}
       subtitle={searchResult.subtitle}
-      accessoryTitle={searchResult.arg}
+      accessories={[
+        {
+          text: searchResult.arg
+        }
+      ]}
       icon={searchResult.icon.path}
       actions={
         <ActionPanel>
@@ -71,6 +72,12 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
               title="Copy WeChat ID"
               content={searchResult.arg}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
+            <Action.CopyToClipboard
+              icon={Icon.Clipboard}
+              title="Copy Quick Access URL"
+              content={searchResult.url}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
             <Action.OpenInBrowser
               title="Feature Request"

@@ -5,6 +5,9 @@
   "description": "A Raycast extension for WeChat to quickly search your contacts and chat",
   "icon": "wechat.png",
   "author": "raffeyang",
+  "contributors": [
+    "JokeNeverSOke"
+  ],
   "categories": [
     "Communication"
   ],
@@ -36,6 +39,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }
