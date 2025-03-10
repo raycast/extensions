@@ -2,7 +2,7 @@ import os from "os";
 
 import { List, ActionPanel, Action } from "@raycast/api";
 
-const isMacOSVenturaOrLater = parseInt(os.release().split(".")[0]) >= 22;
+const isMacOSVenturaOrLater = parseInt(os.release().split(".")[0], 10) >= 22;
 const preferencesString = isMacOSVenturaOrLater ? "Settings" : "Preferences";
 
 export default function PermissionErrorScreen() {

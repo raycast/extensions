@@ -37,10 +37,10 @@ export default function useAvailableBrowsers() {
         .filter((app) => availableBrowsers.includes(app.bundleId?.toLowerCase() as string))
         // default browser should be first, then alphabetically
         .sort((a, b) => {
-          if (a.bundleId === defaultBrowser) {
+          if (a.bundleId === defaultBrowser.toLowerCase()) {
             return -1;
           }
-          if (b.bundleId === defaultBrowser) {
+          if (b.bundleId === defaultBrowser.toLowerCase()) {
             return 1;
           }
           return a.name.localeCompare(b.name);

@@ -162,7 +162,7 @@ function Body(props: Props) {
   };
 
   const selectAllBookmarks = useCallback(() => {
-    if (!filtered) return [];
+    if (!filtered) return;
 
     setSelectedBookmarks([...filtered]);
   }, [filtered]);
@@ -171,12 +171,12 @@ function Body(props: Props) {
     setSelectedBookmarks([]);
   }, []);
 
-  const didLoaded = useRef(false);
+  const hasLoaded = useRef(false);
   useEffect(() => {
     if (!filtered) return;
-    if (didLoaded.current) return;
+    if (hasLoaded.current) return;
 
-    didLoaded.current = true;
+    hasLoaded.current = true;
     setSelectedBookmarks([...filtered]);
   }, [filtered]);
 

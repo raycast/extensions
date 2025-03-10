@@ -1,4 +1,5 @@
 import { Form, ActionPanel, Action, showToast, useNavigation, Toast, Icon, Keyboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { BrowserBookmark } from "../types";
 import { trpc } from "../utils/trpc.util";
@@ -42,11 +43,7 @@ function Body(props: Props) {
         message: `${bookmarks.length} bookmarks imported to "${spaceName}"`,
       });
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to import bookmarks",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      showFailureToast(error, { title: "Failed to import bookmarks" });
     }
   }
 

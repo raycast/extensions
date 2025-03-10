@@ -110,12 +110,12 @@ type Bookmark = {
   folder: string;
 };
 
-function getBookmarks(foldres: Folder[], bookmark: BookmarkItem): Bookmark[] {
+function getBookmarks(folders: Folder[], bookmark: BookmarkItem): Bookmark[] {
   const bookmarks = [];
 
   if (isBookmarkURL(bookmark)) {
     const bookmarkTitle = bookmark.title || bookmark.data.tab.savedTitle || "";
-    const hierarchy = foldres.find((folder) => folder.childrenIds.includes(bookmark.id))?.title ?? "";
+    const hierarchy = folders.find((folder) => folder.childrenIds.includes(bookmark.id))?.title ?? "";
 
     bookmarks.push({
       id: bookmark.id,
