@@ -16,14 +16,14 @@
   "commands": [
     {
       "name": "toggle",
-      "title": "Toggle",
+      "title": "Toggle Connection",
       "subtitle": "V2RayA Control",
       "description": "Toggle V2RayA Connection",
       "mode": "no-view"
     },
     {
       "name": "status",
-      "title": "Status",
+      "title": "Check Status",
       "subtitle": "V2RayA Control",
       "description": "Check V2RayA Status",
       "mode": "no-view"
