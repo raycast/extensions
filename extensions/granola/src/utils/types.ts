@@ -1,9 +1,15 @@
 import { ReactNode } from "react";
 
+export interface NoteData {
+  isLoading: boolean;
+  data: GetDocumentsResponse | undefined;
+  revalidate: () => void;
+}
+
 // Main response interface
 export interface GetDocumentsResponse {
-  docs: Document[];
-  deleted: string[];
+  docs?: Document[];
+  deleted?: string[];
 }
 
 // Document interface
