@@ -1,6 +1,8 @@
 # Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Improvements] - {PR_MERGE_DATE}
+
+- Add action to copy icon data URI
 
 ## [Improvements] - 2025-02-14
 
