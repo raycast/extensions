@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2025-03-10
 
 - Fix typo in setting label
 
