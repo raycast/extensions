@@ -1,4 +1,4 @@
-# Wechat Changelog
+# WeChat Changelog
 
 ## [Copy url action] - {PR_MERGE_DATE}
 
