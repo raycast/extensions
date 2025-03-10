@@ -1,20 +1,26 @@
-import { showToast, Toast } from "@raycast/api";
+import { showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
 
 export default function main() {
-  exec('open "v2raytun://connect"', (error, response) => {
-    if (error) {
+  try {
+    exec('open "v2raytun://connect"', (error, response) => {
+      if (error) {
+        showToast({
+          title: "Connection Error",
+          message: error.message,
+        });
+        return;
+      }
       showToast({
-        style: Toast.Style.Failure,
-        title: "Ошибка подключения",
-        message: error.message,
+        title: "VPN Connected",
+        message: response,
       });
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      showFailureToast("Connection Error", error);
       return;
     }
-    showToast({
-      style: Toast.Style.Success,
-      title: "VPN подключен",
-      message: response,
-    });
-  });
+  }
 }
