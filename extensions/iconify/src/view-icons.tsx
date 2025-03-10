@@ -15,7 +15,6 @@ import { createGlobalState } from 'react-hooks-global-state';
 import Service, { Icon, Set } from './service';
 import { copyToClipboard, toDataURI, toSvg, toURL } from './utils';
 import { iconColorEnum, primaryActionEnum } from './types/perferenceValues';
-import { promises } from 'dns';
 
 const { primaryAction } = getPreferenceValues<{
   primaryAction: primaryActionEnum;
@@ -214,7 +213,6 @@ function Command() {
                 title="Copy URL"
                 content={toURL(activeSetId, id)}
               />
-
             );
             const copyDataURI = (
               <Action.CopyToClipboard

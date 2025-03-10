@@ -1,5 +1,7 @@
 # Changelog
 
+## [Chore] - {PR_MERGE_DATE}
+
 ## [Improvements] - 2025-02-14
 
 - Add "Paste SVG File" to actions and primaryActions
