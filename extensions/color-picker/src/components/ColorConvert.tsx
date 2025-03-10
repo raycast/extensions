@@ -30,7 +30,7 @@ export const ColorConvertListItem = ({ text, title, subtitle, value }: ColorForm
       actions={
         <ActionPanel>
           <Action
-            title="Convert Color"
+            title="Copy Converted Color"
             onAction={async () => {
               const convertedColor = await getConvertedColor(text, value as ColorFormatType);
               if (convertedColor) {
