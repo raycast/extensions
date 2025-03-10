@@ -40,9 +40,6 @@ export default function Command() {
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // 移除这行，因为它在 summarizeWithGemini 函数中已经定义
-  // const preferences = getPreferenceValues<Preferences>();
-
   useEffect(() => {
     async function fetchHistory() {
       try {
@@ -229,23 +226,42 @@ async function getHistoryFromDb(
 
   try {
     // 复制历史记录文件到临时位置
-    execSync(`cp -c "${historyPath}" "${tempPath}" 2>/dev/null`);
+    try {
+      execSync(`cp "${historyPath}" "${tempPath}" 2>/dev/null`);
+    } catch (e) {
+      console.error(`复制 ${browserName} 历史文件失败:`, e);
+      return [];
+    }
+
+    // 检查临时文件是否存在且大小不为0
+    if (!fs.existsSync(tempPath) || fs.statSync(tempPath).size === 0) {
+      console.error(`${browserName} 历史文件复制失败或为空`);
+      return [];
+    }
 
     // 使用SQLite查询历史记录
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const todayTimestamp =
-      Math.floor((today.getTime() - new Date("1601-01-01").getTime()) / 1000) *
-      1000000;
+
+    // 修正时间戳计算 - Chrome时间戳是从1601年1月1日开始的微秒数
+    const epochDiff = 11644473600000000; // 微秒，从1601到1970的差值
+    const todayMicroseconds = today.getTime() * 1000 + epochDiff;
 
     const query = `
       SELECT url, title, last_visit_time 
       FROM urls 
-      WHERE last_visit_time > ${todayTimestamp} 
+      WHERE last_visit_time > ${todayMicroseconds}
       ORDER BY last_visit_time DESC
     `;
 
-    const result = execSync(`sqlite3 -csv "${tempPath}" "${query}"`).toString();
+    let result;
+    try {
+      result = execSync(`sqlite3 -csv "${tempPath}" "${query}"`).toString();
+      console.log(`${browserName} 查询成功，返回数据长度: ${result.length}`);
+    } catch (e) {
+      console.error(`${browserName} SQLite查询失败:`, e);
+      return [];
+    }
 
     // 解析结果
     const rows = result.trim().split("\n");
@@ -254,38 +270,65 @@ async function getHistoryFromDb(
     for (const row of rows) {
       if (!row) continue;
 
-      const [url, title, timestamp] = row
-        .split(",")
-        .map((item) => item.replace(/^"|"$/g, ""));
+      try {
+        const [url, title, timestamp] = row
+          .split(",")
+          .map((item) => item.replace(/^"|"$/g, ""));
 
-      if (url && timestamp) {
-        // 将Chrome时间戳转换为JavaScript日期
-        // Chrome时间戳是从1601年1月1日开始的微秒数
-        const microseconds = parseInt(timestamp, 10);
-        const epochTime =
-          new Date("1601-01-01").getTime() + microseconds / 1000;
-        const visitDate = new Date(epochTime);
+        if (url && timestamp) {
+          // 将Chrome时间戳转换为JavaScript日期
+          // Chrome时间戳是从1601年1月1日开始的微秒数
+          const microseconds = parseInt(timestamp, 10);
 
-        // 调整为东八区时间 (UTC+8)
-        visitDate.setHours(visitDate.getHours() + 8);
+          // 正确的转换方式：从微秒转换为毫秒，并调整基准时间差
+          const milliseconds =
+            Math.floor(microseconds / 1000) - epochDiff / 1000;
 
-        historyData.push({
-          url,
-          title: title || url,
-          visitTime: visitDate.toISOString().replace("T", " ").substring(0, 19),
-          browser: browserName,
-        });
+          // 检查时间戳是否有效
+          if (
+            isNaN(milliseconds) ||
+            milliseconds < 0 ||
+            milliseconds > 8640000000000000
+          ) {
+            console.warn(`跳过无效时间戳: ${timestamp}, URL: ${url}`);
+            continue;
+          }
+
+          const visitDate = new Date(milliseconds);
+
+          // 调整为东八区时间 (UTC+8)
+          visitDate.setHours(visitDate.getHours() + 8);
+
+          historyData.push({
+            url,
+            title: title || url,
+            visitTime: visitDate
+              .toISOString()
+              .replace("T", " ")
+              .substring(0, 19),
+            browser: browserName,
+          });
+        }
+      } catch (rowError) {
+        console.error(`处理历史记录行时出错:`, rowError, `行内容: ${row}`);
+        // 继续处理下一行，不中断整个处理过程
+        continue;
       }
     }
 
+    console.log(`成功从 ${browserName} 获取 ${historyData.length} 条历史记录`);
     return historyData;
   } catch (error) {
     console.error(`获取${browserName}历史记录失败:`, error);
-    throw error;
+    return []; // 返回空数组而不是抛出错误，以便继续处理其他浏览器
   } finally {
     // 清理临时文件
     if (fs.existsSync(tempPath)) {
-      fs.unlinkSync(tempPath);
+      try {
+        fs.unlinkSync(tempPath);
+      } catch (e) {
+        console.error(`删除临时文件 ${tempPath} 失败:`, e);
+      }
     }
   }
 }
