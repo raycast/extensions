@@ -2,8 +2,10 @@ import { execa } from "execa";
 import fs from "node:fs";
 import path from "path";
 import { Video } from "./types.js";
-import { downloadPath, ffmpegPath, forceIpv4, ytdlPath } from "./utils.js";
+import { preferences } from "./utils.js";
 import SRTParser from "srt-parser-2";
+
+const { downloadPath, ffmpegPath, forceIpv4, ytdlPath } = preferences;
 
 export default async function extractTranscript(url: string, language: string = "en") {
   // Validate yt-dlp exists

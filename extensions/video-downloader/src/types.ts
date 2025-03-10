@@ -1,3 +1,14 @@
+import { useForm } from "@raycast/utils";
+
+export type DownloadOptions = {
+  url: string;
+  format: string;
+  copyToClipboard: boolean;
+  clip?: string;
+};
+
+export type ItemProps = ReturnType<typeof useForm<DownloadOptions>>["itemProps"];
+
 export type Format = {
   format_id: string;
   vcodec: string;
@@ -17,3 +28,8 @@ export type Video = {
   live_status: string;
   formats: Format[];
 };
+
+export enum Category {
+  Video = "Video",
+  AudioOnly = "Audio Only",
+}
