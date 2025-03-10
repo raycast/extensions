@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clo-branding",
+  "title": "CLO Branding",
+  "description": "Access Chirica Law Office LLC brand colors, logos, and assets in Raycast",
+  "icon": "icon.png",
+  "author": "vladchirica",
+  "categories": [
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "repository": "https://github.com/chiricalaw/clobranding",
+  "commands": [
+    {
+      "name": "open-brand-guidelines",
+      "title": "Open Brand Guidelines",
+      "description": "Show Chirica Law Office LLC brand colors, logos, and other assets.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "title-case": "^3.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
