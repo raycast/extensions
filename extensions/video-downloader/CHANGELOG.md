@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2025-03-10
 
 - Rename extension folder and handle to `video-downloader`
 
