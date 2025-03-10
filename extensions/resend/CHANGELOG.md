@@ -1,6 +1,6 @@
 # Resend Changelog
 
-## [Added Region] - {PR_MERGE_DATE}
+## [Added Region] - 2025-03-10
 
 Added support for Tokyo region
 
