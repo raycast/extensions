@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, showToast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 
 import { Preferences } from "../types";
@@ -47,9 +47,17 @@ export function ReadingTimeForm({ initialText = "" }: { initialText?: string }) 
           <Action.Paste
             title="Paste from Clipboard"
             content={text}
-            onPaste={(newText) => {
-              setText(String(newText));
-              processText(String(newText));
+            onPaste={async (newText) => {
+              try {
+                setText(String(newText));
+                processText(String(newText));
+              } catch (error) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Failed to paste text",
+                  message: error instanceof Error ? error.message : "Unknown error occurred",
+                });
+              }
             }}
           />
           <Action

@@ -11,11 +11,24 @@ A Raycast extension that helps you calculate how long it would take to read text
 
 ## Usage
 
+The extension provides two commands:
+
+1. "Calculate Reading Time" - manually input or paste text
+2. "Calculate Reading Time from Clipboard" - instantly analyze clipboard contents
+
+For clipboard analysis:
+
 1. Copy any text you want to analyze
 2. Open Raycast
-3. Type "reading time"
+3. Type "Calculate Reading Time from Clipboard"
 4. Press Enter
-5. Paste the text
+
+For manual text input:
+
+1. Open Raycast
+2. Type "Calculate Reading Time"
+3. Press Enter
+4. Enter or paste your text
 
 The extension can:
 

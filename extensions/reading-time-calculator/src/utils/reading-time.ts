@@ -10,13 +10,14 @@ export function calculateReadingTime(wordCount: number, wpm: number): string {
   }
   if (wordCount === 0) return "0 seconds";
 
-  // Calculate reading time in seconds
-  const timeInSeconds = (wordCount / wpm) * 60;
+  // Calculate reading time in seconds - multiplication first to preserve precision
+  const timeInSeconds = (wordCount * 60) / wpm;
 
   // Format the time
   if (timeInSeconds < 60) {
     // Less than a minute
-    return `${Math.round(timeInSeconds)} second${Math.round(timeInSeconds) !== 1 ? "s" : ""}`;
+    const roundedSeconds = Math.round(timeInSeconds);
+    return `${roundedSeconds} second${roundedSeconds !== 1 ? "s" : ""}`;
   } else {
     // More than a minute
     let minutes = Math.floor(timeInSeconds / 60);
