@@ -1,3 +1,3 @@
 # Finder File Actions Changelog
 
-## [Initial Version] - 2025-03-09
+## [Initial Version] - {PR_MERGE_DATE}

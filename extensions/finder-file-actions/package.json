@@ -23,6 +23,7 @@
     {
       "name": "move-to-folder",
       "title": "Move to Folder",
+      "subtitle": "Finder File Actions",
       "description": "Move selected Finder files to a destination folder",
       "mode": "view",
       "path": "src/move-to-folder.tsx",
@@ -31,6 +32,7 @@
     {
       "name": "copy-to-folder",
       "title": "Copy to Folder",
+      "subtitle": "Finder File Actions",
       "description": "Copy selected Finder files to a destination folder",
       "mode": "view",
       "path": "src/copy-to-folder.tsx",
