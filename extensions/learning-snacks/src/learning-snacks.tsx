@@ -16,10 +16,6 @@ import { useState, useRef, useEffect } from "react";
 import { markdownTemplates } from "./markdown-templates";
 
 // Define interfaces for type safety
-interface SnackPreferences {
-  topic: string;
-}
-
 interface SnackStats {
   correctAnswers: number;
   totalAnswers: number;
@@ -200,7 +196,7 @@ export default function Snack(): JSX.Element {
 
   const fetchTopic = async (): Promise<void> => {
     // Get learning topic from preferences
-    const preferences = getPreferenceValues<SnackPreferences>();
+    const preferences = getPreferenceValues<Preferences>();
 
     // Limit topic to 150 characters and make title case
     topic.current =
