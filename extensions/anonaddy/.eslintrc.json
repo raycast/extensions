@@ -12,7 +12,8 @@
     "plugin:import-x/recommended",
     "plugin:react/recommended",
     "plugin:react-hooks/recommended-legacy",
-    "prettier"
+    "prettier",
+    "@raycast"
   ],
   "rules": {
     "@typescript-eslint/consistent-type-definitions": ["error", "type"],
