@@ -41,8 +41,8 @@ Access and play Discord soundboard sounds directly from Raycast without having t
 
 You can mark sounds as favorites for quicker access:
 
-- Favorite a sound: Select a sound and press ⌘⇧P or use the "Favorite" action
-- Unfavorite a sound: Select a favorited sound and press ⌘⇧P or use the "Unfavorite" action
+- Favorite a sound: Select a sound and press ⌘⇧F or use the "Favorite" action
+- Unfavorite a sound: Select a favorited sound and press ⌘⇧F or use the "Unfavorite" action
 - Reorder favorites:
   - Move a favorite left: ⇧⌥← (shift+option+left arrow)
   - Move a favorite right: ⇧⌥→ (shift+option+right arrow)

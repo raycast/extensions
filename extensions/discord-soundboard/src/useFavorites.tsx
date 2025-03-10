@@ -49,7 +49,7 @@ export function FavoritesActionSection(props: { item: SoundboardItem; isFavorite
       <Action
         title={`Favorite ${itemTitle}`}
         icon={Icon.Pin}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
         onAction={async () => {
           methods.favorite(item);
           await showToast({
@@ -62,7 +62,7 @@ export function FavoritesActionSection(props: { item: SoundboardItem; isFavorite
     <ActionPanel.Section>
       <Action
         title={`Unfavorite ${itemTitle}`}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
         icon={Icon.PinDisabled}
         onAction={async () => {
           methods.unfavorite(item);
