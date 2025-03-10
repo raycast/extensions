@@ -4,6 +4,8 @@ import { getDatabase, getQuestion, runQuestion } from "../lib/api";
 type Input = {
   /** The question ID to run */
   questionId: number;
+  /** Defaults to `true` unless the user specifies otherwise */
+  requiresConfirmation: boolean;
 };
 
 export default async function (input: Input) {
@@ -13,6 +15,10 @@ export default async function (input: Input) {
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  if (!input.requiresConfirmation) {
+    return true;
+  }
+
   const question = await getQuestion(input);
 
   let database;
