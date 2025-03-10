@@ -1,0 +1,91 @@
+{
+  "name": "browser-history-analyzer",
+  "title": "Browser History Analyzer",
+  "description": "Analyze your browser history with Gemini AI",
+  "icon": "command-icon.png",
+  "author": "zhangyu",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Analyze Today's Browsing History",
+      "description": "Analyze today's browsing history.",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "View Analysis History",
+      "description": "View previous browser history analysis results",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Gemini API Key",
+      "description": "Your Gemini API key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "systemPrompt",
+      "title": "System Prompt",
+      "description": "Prompt for Gemini to analyze browser history",
+      "type": "textfield",
+      "default": "分析我今天的浏览记录，总结告诉我，我在每个时间段，我在观看哪些主题的网站，了解了什么信息？最后总结我在每个任务上花了多长时间,用 markdown 格式输出",
+      "required": true
+    },
+    {
+      "name": "model",
+      "title": "Gemini Model",
+      "description": "Select Gemini model to use",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Gemini 2.0 Flash",
+          "value": "gemini-2.0-flash"
+        },
+        {
+          "title": "Gemini 2.0 Pro",
+          "value": "gemini-2.0-pro"
+        },
+        {
+          "title": "Gemini 1.5 Flash",
+          "value": "gemini-1.5-flash"
+        },
+        {
+          "title": "Gemini 1.5 Pro",
+          "value": "gemini-1.5-pro"
+        }
+      ],
+      "default": "gemini-2.0-flash",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.0",
+    "csv-stringify": "^6.4.0",
+    "node-fetch": "^2.6.9",
+    "openai": "^4.28.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@types/node": "^20.4.6",
+    "@types/node-fetch": "^2.6.4",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-react": "^7.37.4",
+    "globals": "^16.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.1.6",
+    "typescript-eslint": "^8.26.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Node
+node_modules
+*.log
+
+# Raycast
+.raycast-swift-build
+.build
+dist
+
+# Environment variables
+.env
