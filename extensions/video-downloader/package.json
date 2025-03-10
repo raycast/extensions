@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "youtube-downloader",
+  "name": "video-downloader",
   "title": "Video Downloader",
   "description": "Download videos from YouTube, Twitter, Twitch, Instagram, Bilibili and more using yt-dlp CLI",
   "type": "module",
@@ -130,7 +130,7 @@
     "instructions": "After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it.",
     "evals": [
       {
-        "input": "@youtube-downloader download the video from https://www.youtube.com/watch?v=ykaj0pS4A1A",
+        "input": "@video-downloader download the video from https://www.youtube.com/watch?v=ykaj0pS4A1A",
         "mocks": {
           "download-video": {
             "downloadedPath": "/Users/path/to/video.mp4",
@@ -157,7 +157,7 @@
         ]
       },
       {
-        "input": "@youtube-downloader what did they say about elon musk in https://www.youtube.com/watch?v=T_5zHExXN7o",
+        "input": "@video-downloader what did they say about elon musk in https://www.youtube.com/watch?v=T_5zHExXN7o",
         "mocks": {
           "extract-transcript": {
             "language": "en",
