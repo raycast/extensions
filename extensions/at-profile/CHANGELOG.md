@@ -1,6 +1,6 @@
 # @ Profile Changelog
 
-## [Add AI Tool] - {PR_MERGE_DATE}
+## [Add AI Tool] - 2025-03-10
 
 This release adds the AI functionality and TikTok as site option.
 
