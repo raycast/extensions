@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [Update Rate Track] - {PR_MERGE_DATE}
+
+- Added the track name to the `Rate Track` command.
+
 ## [New Command] - 2025-03-04
 
 - Added new "Toggle Repeat" command.
