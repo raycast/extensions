@@ -15,13 +15,13 @@ const client = new OAuth.PKCEClient({
 
 export const ynabProvider = new OAuthService({
   client,
-  clientId: 'e0J0uvj2zIU9Vp8ue8yT_o51RYx_VbGkDPG-ZW6ipa0',
+  clientId: 'Kip713bERUJALBa7Su39oMdKq654DQptcnDDjopMcWw',
   authorizeUrl:
-    'https://oauth.raycast.com/v1/authorize/yAdKt7a1JKjDi4FxKMwNAZfu_5hoB2zNNUa9MVdqdix0EzDG-9N59EXRGe9lHC1lTcHw7bP1WxWCsJFHQZlJwlsQl-JW5eyK0LmW65CtGhi5dNnQu6XGxyKWv4NkWTYPexjOo8VoNlAxzHEfsQ',
+    'https://oauth.raycast.com/v1/authorize/LkN-CsgOGEHKPLO1GiAaXNas5bfsfqAEpeLVbiRlax5viDSFpKJ3vJXuX_8BhLN84N_berv6F_uvw-MjI72Uh4Yu4t3dUYP-LOn8wlVVuXDNQ47CoerGi64kosHEEEHquYKwzsrqu3R780sklA',
   tokenUrl:
-    'https://oauth.raycast.com/v1/token/4uwwjlATwWSZH5t2kn42nUNVOhbcPlkCEFChbM5XHHxzQ09HuAEqL1EVlKlnIrvdngGZggf0dKM8MvvncUhN7Q0cyTu4WHtsMz5thFvI1z4aXD-4MMiuKnIZ-OH49IWHsDeIuv8Ql-p-',
+    'https://oauth.raycast.com/v1/token/PZQScRaArwZQUfzavGp_iiqHUIvP7d9Rw-EvYQwWIjQ98FRxTz6PkMNsKSWJJ3bNCTx_xnucAj5fTFqZIbV1AWgdTOEPYjnuiqxiamDSbmjfcLPZB7-SKY6r2MkVDwnJ0u9KwgiR-5Mq',
   refreshTokenUrl:
-    'https://oauth.raycast.com/v1/refresh-token/SkKMzlfwA2aL59UhiwLWO4hrDLPNrvN3eMnt2reSzjHFKXMPII2q9lhK0lrBbkMgnvHNLRI1aNJa2NhKltTM26S-NGhNIMWBTcfxqb1ZoKxwdIDnK8cDGol0uNHZmmARzeU9I3P8e5bX',
+    'https://oauth.raycast.com/v1/refresh-token/ajBcGDZqQ5RrRLNTXFTrR1G1KwO9iy6A_vgqMOGwj6sxu4zzoy-AmjnCvxK90BUGBPx5M1mVk8r0d_DR1_Hy-KVPnHpaM4geYXvR4CQ2ImbJwy-17FUi4zX5WR2Nq3SUN-27HQJPs0Xu',
   scope: '',
   async onAuthorize({ token }) {
     ynabClient = new ynab.API(token);
