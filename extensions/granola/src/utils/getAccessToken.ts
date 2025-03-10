@@ -18,13 +18,13 @@ async function getAccessToken() {
     let cognitoTokens;
     try {
       // If cognito_tokens is a string, parse it as JSON
-      if (typeof jsonData.cognito_tokens === 'string') {
+      if (typeof jsonData.cognito_tokens === "string") {
         cognitoTokens = JSON.parse(jsonData.cognito_tokens);
-      } else if (typeof jsonData.cognito_tokens === 'object' && jsonData.cognito_tokens !== null) {
+      } else if (typeof jsonData.cognito_tokens === "object" && jsonData.cognito_tokens !== null) {
         // If it's already an object, use it directly
         cognitoTokens = jsonData.cognito_tokens;
       } else {
-        throw new Error('cognito_tokens is neither a valid JSON string nor an object');
+        throw new Error("cognito_tokens is neither a valid JSON string nor an object");
       }
     } catch (error) {
       // Ensure error is treated as an Error object with a message property
