@@ -9,6 +9,7 @@ import { useState } from "react";
 
 export function SearchLinks() {
   const [query, setQuery] = useState<string | undefined>(undefined);
+  const [showDetails, setShowDetails] = useState<boolean>(false);
   const {
     shortLinks,
     supportsLinksTypeahead,
@@ -27,7 +28,7 @@ export function SearchLinks() {
             searchBarPlaceholder: "Search links by short link slug or destination url",
             throttle: true,
           })}
-      isShowingDetail={!isLoadingLinks && !linksError && shortLinks?.length !== 0}
+      isShowingDetail={!isLoadingLinks && !linksError && shortLinks?.length !== 0 && showDetails}
       filtering
     >
       {linksError && (
@@ -162,6 +163,12 @@ export function SearchLinks() {
                   onAction={() => deleteLink(id, mutate)}
                 />
                 <ActionPanel.Section>
+                  <Action
+                    title="Show Details"
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    onAction={() => setShowDetails(!showDetails)}
+                    icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
+                  />
                   <Action.OpenInBrowser
                     title="Go to Dub.co"
                     shortcut={Keyboard.Shortcut.Common.Open}
