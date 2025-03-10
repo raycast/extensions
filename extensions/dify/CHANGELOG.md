@@ -1,5 +1,16 @@
 # Dify Changelog
 
+## [1.0.3] - {PR_MERGE_DATE}
+
+- Improved UI interface for text generator and workflow modes
+- Enhanced detail view display for non-conversational app types
+- Fixed bug causing text generator to make duplicate API requests
+- Added debounce protection to prevent multiple submissions
+- Made inputs parameter optional for all app types
+- Resolved interface compatibility issues with text generator
+- Improved validation logic to properly handle optional inputs
+- Added ability to parse Inputs field and generate dynamic input forms
+
 ## [1.0.2] - {PR_MERGE_DATE}
 
 - Enhanced type safety by replacing string literals with enum types for response modes

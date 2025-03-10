@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dify",
   "title": "Dify",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Access, manage and interact with your Dify AI applications directly within Raycast.",
   "icon": "extension-logo.png",
   "author": "lysonober",
