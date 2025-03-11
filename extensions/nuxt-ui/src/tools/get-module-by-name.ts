@@ -1,5 +1,5 @@
 import { $fetch } from "ofetch";
-import type { Module } from "../types/modules.ts";
+import type { Module } from "../types/modules";
 
 type Input = {
   /**
@@ -22,6 +22,6 @@ type Input = {
  * @returns The module information if found
  */
 export default async function tool(input: Input) {
-  const url = `https://api.nuxt.com/modules/${input.name}`;
+  const url = `https://api.nuxt.com/modules/${encodeURIComponent(input.name)}`;
   return await $fetch<Module>(url);
 }

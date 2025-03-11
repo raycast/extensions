@@ -1,6 +1,7 @@
 import { camelCase, kebabCase } from "scule";
 import type { ComponentInfo, ComponentContext } from "../types/components";
 import { components, proComponents, proseComponents } from "./components-list";
+import { V2_URL, V3_URL } from "./search";
 
 /**
  * Cleans and normalizes a component name
@@ -37,7 +38,7 @@ export function buildDocumentationUrl(context: ComponentContext, version: string
   const { sanitizedName, hasProsePrefix, componentInfo } = context;
   const { isBase, isPro, isProse } = componentInfo;
 
-  const baseUrl = version === "v3" ? "https://ui3.nuxt.dev" : "https://ui.nuxt.com";
+  const baseUrl = version === "v3" ? V3_URL : V2_URL;
   const versionUrl = isPro && version === "v2" ? `${baseUrl}/pro` : baseUrl;
 
   if (hasProsePrefix) {

@@ -8,8 +8,8 @@ import { getExtensionPreferences, showFailureToast, handleCommandError } from ".
  */
 export default async function SearchComponentTheme(props: LaunchProps<{ arguments: Arguments.SearchComponentTheme }>) {
   try {
-    const { prefix } = getExtensionPreferences();
-    const version = props.arguments?.version || getExtensionPreferences().version;
+    const { prefix, version: defaultVersion } = getExtensionPreferences();
+    const version = props.arguments?.version || defaultVersion;
     const name = props.arguments?.componentName ?? (await getSelectedText());
 
     if (!name) {

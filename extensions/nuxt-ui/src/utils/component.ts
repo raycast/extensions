@@ -94,7 +94,7 @@ export async function openDocumentation(
 /**
  * Get the appropriate icon for a component type
  */
-export function getComponentIcon(type: string) {
+export function getComponentIcon(type: string): Icon {
   switch (type) {
     case "base":
       return Icon.Box;

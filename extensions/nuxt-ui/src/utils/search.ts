@@ -71,3 +71,6 @@ export function filterComponents(
 export function sortComponentsByName(components: ComponentItem[]): ComponentItem[] {
   return [...components].sort((a, b) => a.name.localeCompare(b.name));
 }
+
+export const V3_URL = "https://ui3.nuxt.dev";
+export const V2_URL = "https://ui.nuxt.com";
