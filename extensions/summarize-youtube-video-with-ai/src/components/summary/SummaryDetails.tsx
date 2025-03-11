@@ -4,22 +4,21 @@ import { VideoDataTypes } from "../../utils/getVideoData";
 import SummaryActions from "./SummaryActions";
 import SummaryMetadata from "./SummaryMetadata";
 interface SummaryDetailsProps {
+  onQuestionSubmit?: (question: string) => void;
   questions: Question[];
   summary: string | undefined;
   summaryIsLoading: boolean;
   transcript: string;
   videoData: VideoDataTypes;
-  onQuestionSubmit?: (question: string) => void;
 }
 
 export default function SummaryDetails({
+  questions,
   summary,
   summaryIsLoading,
   transcript,
   videoData,
-  questions,
 }: SummaryDetailsProps) {
-  if (!summary) return null;
   const { duration, ownerChannelName, ownerProfileUrl, publishDate, title, video_url, viewCount } = videoData;
 
   return (
