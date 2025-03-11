@@ -52,7 +52,8 @@ interface ChatflowResponse {
   };
 }
 
-interface WorkflowResponse {
+// Define workflow response interfaces to handle both formats
+interface WorkflowResponseData {
   id: string;
   workflow_id: string;
   status: string;
@@ -61,7 +62,22 @@ interface WorkflowResponse {
     result?: string;
     [key: string]: unknown;
   };
+  error?: string;
+  elapsed_time?: number;
+  total_tokens?: number;
+  total_steps?: number;
+  created_at?: number;
+  finished_at?: number;
 }
+
+interface WorkflowResponseWrapper {
+  workflow_run_id: string;
+  task_id: string;
+  data: WorkflowResponseData;
+}
+
+// Type to handle both possible workflow response formats
+type WorkflowResponse = WorkflowResponseData | WorkflowResponseWrapper;
 
 interface CompletionResponse {
   event?: string; // "message" for Text Generator
@@ -664,15 +680,38 @@ export async function askDify(query?: string, appName?: string, options?: DifyRe
         };
       } else if (appType === DifyAppType.Workflow) {
         const data = (await response.json()) as WorkflowResponse;
-        result = {
-          message: data.outputs?.answer || data.outputs?.result || JSON.stringify(data.outputs || {}),
-          conversation_id: `workflow_${data.id}`,
-          message_id: data.id,
-          used_app: usedApp,
-          app_type: appType ? appType.toString() : "unknown",
-          workflow_id: data.workflow_id,
-          status: data.status,
-        };
+        console.log("Dify Workflow API response:", JSON.stringify(data, null, 2));
+
+        // Check if this is the workflow_run_id and task_id wrapper format
+        if ("workflow_run_id" in data && "task_id" in data && "data" in data) {
+          // New format with data wrapper
+          result = {
+            message: JSON.stringify(data.data.outputs || {}),
+            conversation_id: `workflow_${data.workflow_run_id}`,
+            message_id: data.task_id,
+            used_app: usedApp,
+            app_type: appType ? appType.toString() : "unknown",
+            workflow_id: data.data.workflow_id,
+            status: data.data.status,
+            workflow_data: data.data,
+          };
+        } else {
+          // Original format
+          const outputData = data.outputs || {};
+          // Check if outputs contains answer or result directly
+          const answerText = data.outputs?.answer || data.outputs?.result;
+
+          result = {
+            message: answerText || JSON.stringify(outputData),
+            conversation_id: `workflow_${data.id}`,
+            message_id: data.id,
+            used_app: usedApp,
+            app_type: appType ? appType.toString() : "unknown",
+            workflow_id: data.workflow_id,
+            status: data.status,
+            workflow_data: data,
+          };
+        }
       } else {
         // TextGenerator
         const data = (await response.json()) as CompletionResponse;
