@@ -11,13 +11,13 @@
   "license": "MIT",
   "commands": [
     {
-      "title": "Hearthstone Decks",
+      "title": "Best Decks",
       "name": "search_best_decks",
       "description": "Search the best Hearthstone decks",
       "mode": "view"
     },
     {
-      "title": "Hearthstone Class",
+      "title": "Hero Class",
       "name": "search_class_decks",
       "description": "Search the best Hearthstone decks per class",
       "mode": "view"
