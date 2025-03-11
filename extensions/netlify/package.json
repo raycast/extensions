@@ -132,7 +132,7 @@
     {
       "name": "get-dns-records",
       "title": "Get DNS Records",
-      "description": "Get all the dns records for a Netlify site"
+      "description": "Get all the DNS records for a Netlify site"
     }
   ],
   "ai": {
