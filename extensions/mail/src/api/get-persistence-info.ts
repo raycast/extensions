@@ -15,6 +15,7 @@ export async function getPersistenceInfo(): Promise<PersistenceInfo> {
     const data = await readFile(PERSISTENCE_INFO_PATH, "utf8");
     return plist.parse(data) as PersistenceInfo;
   } catch (error) {
-    throw new Error(`Failed to read Mail persistence info: ${error.message}`);
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to read Mail persistence info: ${message}`);
   }
 }
