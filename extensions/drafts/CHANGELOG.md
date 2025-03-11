@@ -1,6 +1,6 @@
 # Drafts Changelog
 
-## [Add AI Extension Support to Create Draft] - 2025-03-11
+## [Add AI Extension Support to Create Draft] - {PR_MERGE_DATE}
 
 - Add tool to create Draft with AI
 

@@ -6,7 +6,7 @@ import { closeMainWindow, popToRoot, showToast, Toast } from "@raycast/api";
  */
 export async function closeMainWindowAndShowSuccessToast(text: string) {
   await closeMainWindow();
-  popToRoot({ clearSearchBar: true });
+  await popToRoot({ clearSearchBar: true });
   await showToast({
     style: Toast.Style.Success,
     title: text,

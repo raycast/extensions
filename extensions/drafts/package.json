@@ -142,7 +142,21 @@
       "description": "Create a new note in Drafts."
     }
   ],
-  "ai": {},
+  "ai": {
+    "evals": [
+      {
+        "input": "@drafts create a new note listing the following grocories: water, oranges, apples, and bananas",
+        "mocks": {
+          "create-draft": "Successfully called \"create-draft\""
+        },
+        "expected": [
+          {
+            "callsTool": "create-draft"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.93.0",
     "@raycast/utils": "1.17.0",

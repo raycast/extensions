@@ -2,6 +2,7 @@ import { Clipboard, closeMainWindow, popToRoot, PopToRootType, showHUD, showToas
 import { checkAppInstallation } from "./utils/ApplicationInstalledCheck";
 import { runAppleScript } from "@raycast/utils";
 import Style = Toast.Style;
+import { closeMainWindowAndShowSuccessToast } from "./utils/NotificationUtils";
 
 export default async () => {
   // app installation check (shows Toast if Drafts is not installed)
@@ -18,7 +19,7 @@ export default async () => {
         `,
         [clipboardText]
       );
-      await showHUD("Created Draft 👍", { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+      await closeMainWindowAndShowSuccessToast("Created Draft 👍");
     } else {
       await showToast({
         style: Style.Failure,

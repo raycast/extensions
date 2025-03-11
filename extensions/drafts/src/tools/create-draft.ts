@@ -1,5 +1,5 @@
 import { Tool } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { closeMainWindowAndShowSuccessToast } from "../utils/NotificationUtils";
 
 type Input = {
@@ -41,9 +41,10 @@ export default async function (input: Input) {
     .replace(/"/g, '\\"') // Escape double quotes
     .replace(/\n/g, "\\n"); // Escape newlines
 
-  const res = await runAppleScript(
-    `
-      on escapeString(inputStr)
+  try {
+    const res = await runAppleScript(
+      `
+    on escapeString(inputStr)
       return inputStr
     end escapeString
 
@@ -54,10 +55,14 @@ export default async function (input: Input) {
       end tell
     end run 
       `
-  );
-  await closeMainWindowAndShowSuccessToast("Created Draft 👍");
+    );
+    await closeMainWindowAndShowSuccessToast("Created Draft 👍");
 
-  return res;
+    return res;
+  } catch (error) {
+    await showFailureToast("Failed to create Draft");
+    return;
+  }
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
