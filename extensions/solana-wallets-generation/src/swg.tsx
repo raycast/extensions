@@ -58,34 +58,37 @@ function WalletList({ wallets }: { wallets: string[] }) {
           </ActionPanel>
         }
       />
-      {wallets.map((wallet, index) => (
-        <List.Item
-          key={index}
-          title={`Wallet #${index + 1}`}
-          detail={
-            <List.Item.Detail
-              markdown={`\`\`\`\n${wallet}\n\`\`\``}
-              metadata={
-                <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="Wallet" text={`#${index + 1}`} />
-                  <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="Private Key" text={wallet.split(",")[0]?.trim() || wallet} />
-                  {wallet.includes(",") && (
-                    <List.Item.Detail.Metadata.Label title="Public Key" text={wallet.split(",")[1]?.trim() || ""} />
-                  )}
-                </List.Item.Detail.Metadata>
-              }
-            />
-          }
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard title="Copy to Clipboard" content={wallet} />
-              {/* eslint-disable-next-line @raycast/prefer-title-case */}
-              <Action.CopyToClipboard title="Copy All as CSV" content={csvContent} />
-            </ActionPanel>
-          }
-        />
-      ))}
+      <List.Section title="Wallets">
+        {wallets.map((wallet, index) => (
+          <List.Item
+            key={index}
+            icon={Icon.Wallet}
+            title={`Wallet #${index + 1}`}
+            detail={
+              <List.Item.Detail
+                markdown={`\`\`\`\n${wallet}\n\`\`\``}
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Wallet" text={`#${index + 1}`} />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label title="Private Key" text={wallet.split(",")[0]?.trim() || wallet} />
+                    {wallet.includes(",") && (
+                      <List.Item.Detail.Metadata.Label title="Public Key" text={wallet.split(",")[1]?.trim() || ""} />
+                    )}
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard title="Copy to Clipboard" content={wallet} />
+                {/* eslint-disable-next-line @raycast/prefer-title-case */}
+                <Action.CopyToClipboard title="Copy All as CSV" content={csvContent} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }
