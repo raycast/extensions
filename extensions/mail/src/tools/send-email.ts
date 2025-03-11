@@ -23,6 +23,11 @@ type Input = {
    * Don't include any introduction or salutation. Just the main content.
    */
   content: string;
+
+  /**
+   * A list of absolute file paths to attach to the email.
+   */
+  attachments?: string[];
 };
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
@@ -31,14 +36,20 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     throw new Error("No accounts found");
   }
 
+  const infoItems = [
+    { name: "From", value: account.email },
+    { name: "To", value: input.to.join(", ") },
+    { name: "Subject", value: input.subject },
+    { name: "Content", value: input.content },
+  ];
+
+  if (input.attachments) {
+    infoItems.push({ name: "Attachments", value: `${input.attachments.length} file(s)` });
+  }
+
   return {
     message: "Are you sure you want to send the following email?",
-    info: [
-      { name: "From", value: account.email },
-      { name: "To", value: input.to.join(", ") },
-      { name: "Subject", value: input.subject },
-      { name: "Content", value: input.content },
-    ],
+    info: infoItems,
   };
 };
 
@@ -55,5 +66,6 @@ export default async function (input: Input) {
     bcc: [],
     subject: input.subject,
     content: input.content,
+    attachments: input.attachments,
   });
 }
