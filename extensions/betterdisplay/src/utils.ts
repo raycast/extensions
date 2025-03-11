@@ -8,7 +8,7 @@ export function getCmdPath() {
 
   const { betterdisplayApp } = getPreferenceValues<{ betterdisplayApp: Application }>();
   if (!betterdisplayApp?.path) {
-    console.error("Error getting BetterDisplay CLI path", error);
+    console.error("Error getting BetterDisplay CLI path");
 
     showFailureToast("BetterDisplay app not set", {
       title: "BetterDisplay app not set",
