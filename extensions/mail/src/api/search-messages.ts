@@ -92,6 +92,7 @@ export async function searchMessages({
     LEFT JOIN mailboxes ON messages.mailbox = mailboxes.ROWID
     ${filters.length ? `WHERE ${filters.join(" AND ")}` : ""}
     ORDER BY messages.date_sent ${order}
+    ${search ? "" : `LIMIT ${limit}`};
   `;
 
   const dbPath = await getDbPath();
