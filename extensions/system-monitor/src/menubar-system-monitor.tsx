@@ -13,7 +13,11 @@ import { getBatteryData } from "./Power/PowerUtils";
 import { formatBytes, isObjectEmpty } from "./utils";
 
 export default function Command() {
-  const { data: systemInfo, revalidate: revalidateSystem } = usePromise(async () => {
+  const {
+    data: systemInfo,
+    revalidate: revalidateSystem,
+    isLoading,
+  } = usePromise(async () => {
     const osInfo = await getOSInfo();
     const storage = await calculateDiskStorage();
     return { osInfo, storage };
@@ -92,7 +96,7 @@ export default function Command() {
   }, 1000);
 
   return (
-    <MenuBarExtra icon={{ source: "command-icon.png" }} tooltip="System Monitor">
+    <MenuBarExtra icon={{ source: "command-icon.png" }} tooltip="System Monitor" isLoading={isLoading}>
       <MenuBarExtra.Section title="System Info">
         <MenuBarExtra.Item
           title="macOS"
@@ -115,7 +119,7 @@ export default function Command() {
       <MenuBarExtra.Section title="CPU">
         <MenuBarExtra.Item
           title="CPU Usage"
-          subtitle={`${cpuUsage} %` || "Loading..."}
+          subtitle={cpuUsage ? `${cpuUsage} %` : "Loading..."}
           icon={Icon.Monitor}
           onAction={() => runAppleScript(openActivityMonitorAppleScript(1))}
         />
