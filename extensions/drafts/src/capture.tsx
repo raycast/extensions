@@ -2,7 +2,7 @@ import { LaunchProps, PopToRootType, showHUD } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 export default async function main(props: LaunchProps<{ arguments: Arguments.Capture }>) {
-  const draftContent: string = props.arguments.content ?? props.fallbackText ?? "";
+  const content: string = props.arguments.content ?? props.fallbackText ?? "";
 
   const res = await runAppleScript(
     `
@@ -12,7 +12,7 @@ on run argv
   end tell
 end run
   `,
-    [draftContent]
+    [content]
   );
 
   await showHUD("Created Draft 👍", { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
