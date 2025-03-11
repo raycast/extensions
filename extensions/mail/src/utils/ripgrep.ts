@@ -3,7 +3,7 @@ import { environment } from "@raycast/api";
 import { execa } from "execa";
 import got from "got";
 import { createWriteStream, existsSync } from "node:fs";
-import { mkdir } from "node:fs/promises";
+import { chmod, mkdir, rm } from "node:fs/promises";
 import * as os from "node:os";
 import { dirname, join } from "node:path";
 import { pipeline } from "node:stream/promises";
@@ -56,9 +56,11 @@ export const ensureCLI = async () => {
   } else {
     const target = getTarget();
     const url = `https://github.com/${REPOSITORY}/releases/download/${VERSION}/ripgrep-${VERSION}-${target}`;
-    const filePath = join(environment.supportPath, ".tmp", `ripgrep-${VERSION}-${target}`);
-    await downloadFile(url, filePath);
-    await untarGz(filePath, BIN_PATH);
+    const tempFilePath = join(environment.supportPath, ".tmp", `ripgrep-${VERSION}-${target}`);
+    await downloadFile(url, tempFilePath);
+    await untarGz(tempFilePath, BIN_PATH);
+    await chmod(rgPath, 0o755);
+    await rm(tempFilePath);
     return rgPath;
   }
 };
