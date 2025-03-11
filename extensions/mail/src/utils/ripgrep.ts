@@ -33,7 +33,8 @@ export const downloadFile = async (url: string, outFile: string) => {
     await mkdir(dirname(outFile), { recursive: true });
     await pipeline(got.stream(url), createWriteStream(outFile));
   } catch (error) {
-    throw new Error(`Failed to download "${url}"`);
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to download "${url}": ${message}`);
   }
 };
 
@@ -42,7 +43,8 @@ const untarGz = async (inFile: string, outDir: string) => {
     await mkdir(outDir, { recursive: true });
     await execa("tar", ["xf", inFile, "-C", outDir]);
   } catch (error) {
-    throw new Error(`Failed to extract "${inFile}"`);
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to extract "${inFile}": ${message}`);
   }
 };
 
