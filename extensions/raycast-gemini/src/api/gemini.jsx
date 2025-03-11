@@ -9,7 +9,6 @@ import {
   Keyboard,
   launchCommand,
   LaunchType,
-  LocalStorage,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -17,43 +16,7 @@ import fs from "fs";
 import Gemini from "gemini-ai";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
-
-// Import the history functionality
-let commandHistory = [];
-
-// Function to add to history
-const addToHistory = async (prompt, response, modelUsed) => {
-  // First load the latest history to avoid duplicates
-  const storedHistory = await LocalStorage.getItem("gemini_command_history");
-  if (storedHistory) {
-    commandHistory = JSON.parse(storedHistory);
-  }
-
-  const newEntry = {
-    id: Date.now(),
-    timestamp: new Date().toISOString(),
-    prompt,
-    response,
-    model: modelUsed,
-  };
-
-  // Check if an entry with the same prompt and response already exists
-  const isDuplicate = commandHistory.some((entry) => entry.prompt === prompt && entry.response === response);
-
-  if (!isDuplicate) {
-    commandHistory = [newEntry, ...commandHistory];
-
-    // Store in LocalStorage for persistence
-    await LocalStorage.setItem("gemini_command_history", JSON.stringify(commandHistory));
-  }
-};
-
-// Load history from LocalStorage
-LocalStorage.getItem("gemini_command_history").then((storedHistory) => {
-  if (storedHistory) {
-    commandHistory = JSON.parse(storedHistory);
-  }
-});
+import { useCommandHistory } from "./useCommandHistory";
 
 export default (props, { context = undefined, allowPaste = false, useSelected = false, buffer = [] }) => {
   const Pages = {
@@ -74,6 +37,7 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
   const [lastQuery, setLastQuery] = useState("");
   const [lastResponse, setLastResponse] = useState("");
   const [textarea, setTextarea] = useState("");
+  const { addToHistory } = useCommandHistory();
 
   const getResponse = async (query, data) => {
     setLastQuery(query);

@@ -1,31 +1,8 @@
-import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
-import { useEffect, useState } from "react";
-
-let commandHistory = [];
+import { Action, ActionPanel, Icon, List, confirmAlert } from "@raycast/api";
+import { useCommandHistory } from "./api/useCommandHistory";
 
 export default function History() {
-  const [history, setHistory] = useState([]);
-
-  useEffect(() => {
-    // Load history from LocalStorage when component mounts
-    LocalStorage.getItem("gemini_command_history").then((storedHistory) => {
-      if (storedHistory) {
-        // Ensure we're working with unique entries by using a Set with id as key
-        const historyData = JSON.parse(storedHistory);
-        // Create a Map to deduplicate entries by id
-        const uniqueEntries = new Map();
-        historyData.forEach((item) => {
-          if (!uniqueEntries.has(item.id)) {
-            uniqueEntries.set(item.id, item);
-          }
-        });
-
-        // Convert Map values back to array
-        commandHistory = Array.from(uniqueEntries.values());
-        setHistory(commandHistory);
-      }
-    });
-  }, []);
+  const { history, clearHistory } = useCommandHistory();
 
   return (
     <List isShowingDetail>
@@ -64,11 +41,11 @@ export default function History() {
               <Action
                 title="Clear History"
                 icon={Icon.Trash}
-                shortcut={{ modifiers: ["ctrl", "cmd"], key: "x" }}
+                shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
                 onAction={async () => {
-                  commandHistory = [];
-                  setHistory([]);
-                  await LocalStorage.removeItem("gemini_command_history");
+                  if (await confirmAlert({ title: "Are you sure?" })) {
+                    clearHistory();
+                  }
                 }}
               />
             </ActionPanel>
