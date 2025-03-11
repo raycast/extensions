@@ -5,6 +5,13 @@ import { PERPLEXITY_MODEL } from "../../../const/defaults";
 import { ALERT } from "../../../const/toast_messages";
 import { PerplexityPreferences } from "../../../summarizeVideoWithPerplexity";
 
+const PERPLEXITY_API_DEFAULTS = {
+  url: "https://api.perplexity.ai/chat/completions",
+  maxTokens: 8000,
+  temperature: 0.7,
+  topP: 0.9,
+};
+
 export type PerplexityStreamCallbacks = {
   onText: (text: string) => void;
   onComplete: () => void;
@@ -79,10 +86,10 @@ export const usePerplexityApi = () => {
       const {
         messages,
         model = perplexityModel || PERPLEXITY_MODEL,
-        maxTokens = 8000,
-        temperature = parseFloat(creativity || "0.7"),
-        topP = 0.9,
-        stream = false,
+        maxTokens = PERPLEXITY_API_DEFAULTS.maxTokens,
+        temperature = parseFloat(creativity || PERPLEXITY_API_DEFAULTS.temperature),
+        topP = PERPLEXITY_API_DEFAULTS.topP,
+        stream = true,
       } = options;
 
       const requestOptions = {
@@ -111,7 +118,7 @@ export const usePerplexityApi = () => {
       };
 
       try {
-        const response = await fetch("https://api.perplexity.ai/chat/completions", requestOptions);
+        const response = await fetch(PERPLEXITY_API_DEFAULTS.url, requestOptions);
 
         if (!response.ok) {
           const errorResponse = (await response.json().catch(() => ({ error: "Unknown error" }))) as ErrorResponse;
@@ -135,9 +142,9 @@ export const usePerplexityApi = () => {
       const {
         messages,
         model = perplexityModel || PERPLEXITY_MODEL,
-        maxTokens = 8000,
-        temperature = parseFloat(creativity || "0.7"),
-        topP = 0.9,
+        maxTokens = PERPLEXITY_API_DEFAULTS.maxTokens,
+        temperature = parseFloat(creativity || PERPLEXITY_API_DEFAULTS.temperature),
+        topP = PERPLEXITY_API_DEFAULTS.topP,
       } = options;
 
       let isAborted = false;
@@ -188,7 +195,7 @@ export const usePerplexityApi = () => {
           };
 
           const response = (await fetch(
-            "https://api.perplexity.ai/chat/completions",
+            PERPLEXITY_API_DEFAULTS.url,
             streamingRequestOptions,
           )) as unknown as NodeFetchResponse;
 
