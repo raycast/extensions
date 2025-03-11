@@ -48,6 +48,7 @@ function WalletList({ wallets }: { wallets: string[] }) {
   return (
     <List isShowingDetail>
       <List.Item
+        icon={Icon.CopyClipboard}
         title="Copy All as CSV"
         detail={<List.Item.Detail markdown="Copy all generated wallets as CSV to the clipboard." />}
         actions={
