@@ -40,7 +40,7 @@ export const downloadFile = async (url: string, outFile: string) => {
 const untarGz = async (inFile: string, outDir: string) => {
   try {
     await mkdir(outDir, { recursive: true });
-    await execa("tar", ["xvf", inFile, "-C", outDir]);
+    await execa("tar", ["xf", inFile, "-C", outDir]);
   } catch (error) {
     throw new Error(`Failed to extract "${inFile}"`);
   }
