@@ -69,8 +69,8 @@ export async function searchMessages({
 
   const absoluteMessagePaths: string[] = [];
 
-  const persistanceInfo = await getPersistenceInfo();
-  const version = persistanceInfo.LastUsedVersionDirectoryName;
+  const persistenceInfo = await getPersistenceInfo();
+  const version = persistenceInfo.LastUsedVersionDirectoryName;
   const basePath = resolve(homedir(), `Library/Mail/${version}`);
 
   const messageIds: number[] = [];
