@@ -49,7 +49,7 @@ The extension maintains a history of your transcriptions:
 1. Access "Transcription History" from Raycast search
 2. Browse your past recordings with details like date, duration, and word count
 3. Search for recordings from the transcribed content
-3. Select a transcription to view its full text
+4. Select a transcription to view its full text
 4. Use actions to:
    - Copy the transcription to clipboard
    - Re-transcribe with different settings (model, language, etc.)
