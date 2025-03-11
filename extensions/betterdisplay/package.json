@@ -89,7 +89,7 @@
       "title": "Toggle the PIP Status",
       "description": "Change the PIP (Picture in Picture) status for a display using its tagID"
     }
-      ],
+  ],
   "preferences": [
     {
       "name": "betterdisplayApp",
