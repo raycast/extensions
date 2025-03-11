@@ -50,5 +50,5 @@ export enum ErrorTypes {
 
 export interface AudioValidationResult {
   isValid: boolean;
-  error?: ErrorTypes | string;
+  error?: ErrorTypes;
 }

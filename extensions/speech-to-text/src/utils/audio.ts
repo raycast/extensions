@@ -64,20 +64,18 @@ export async function validateAudioFile(filePath: string): Promise<AudioValidati
       try {
         execSync(`${soxPath} --i "${filePath}"`, { stdio: "pipe" });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
         return {
           isValid: false,
-          error: `${ErrorTypes.AUDIO_FILE_INVALID_FORMAT}: ${errorMessage}`,
+          error: ErrorTypes.AUDIO_FILE_INVALID_FORMAT,
         };
       }
     }
 
     return { isValid: true };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
     return {
       isValid: false,
-      error: `${ErrorTypes.AUDIO_FILE_VALIDATION_ERROR}: ${errorMessage}`,
+      error: ErrorTypes.AUDIO_FILE_VALIDATION_ERROR,
     };
   }
 }

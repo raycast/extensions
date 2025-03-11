@@ -6,9 +6,10 @@ import {
   Clipboard,
   showToast,
   Toast,
-  open,
   getPreferenceValues,
   getSelectedText,
+  launchCommand,
+  LaunchType,
 } from "@raycast/api";
 import { useForm, showFailureToast } from "@raycast/utils";
 import { transcribeAudio } from "./utils/ai/transcription";
@@ -32,16 +33,10 @@ export default function Command() {
   const { isRecording, recordingDuration, error, startRecording, stopRecording } = useAudioRecorder();
 
   const { handleSubmit, itemProps, setValue, values } = useForm<TranscriptFormValues>({
-    onSubmit: (values) => {
-      Clipboard.copy(values.transcription);
-      showToast({
-        style: Toast.Style.Success,
-        title: "Copied to clipboard",
-      });
-    },
+    onSubmit: handleCopyToClipboard,
     initialValues: {
       transcription: "",
-      language: preferences.language ?? "",
+      language: preferences.language ?? "auto",
       model: preferences.model,
       promptText: preferences.promptText ?? "",
       userTerms: preferences.userTerms ?? "",
@@ -49,57 +44,73 @@ export default function Command() {
     },
   });
 
+  async function handleCopyToClipboard(values: TranscriptFormValues) {
+    if (!values.transcription) return;
+
+    await Clipboard.copy(values.transcription);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Copied to clipboard",
+    });
+  }
+
+  async function handleTranscription(recordingFilePath: string) {
+    try {
+      const languageTitle =
+        values.language === "auto"
+          ? "Auto-detect"
+          : (LANGUAGE_OPTIONS.find((option) => option.value === values.language)?.title ?? "Auto-detect");
+
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Transcribing...",
+        message: `Language: ${languageTitle}`,
+      });
+
+      let selection = "";
+      try {
+        selection = await getSelectedText();
+      } catch (error) {
+        console.error("Error getting selected text:", error);
+        if (values.useContext) {
+          await showFailureToast(error, {
+            title: "Context Error",
+          });
+        }
+      }
+
+      const result = await transcribeAudio(recordingFilePath, {
+        overrideLanguage: values.language,
+        overrideModel: values.model,
+        promptOptions: {
+          promptText: values.promptText,
+          userTerms: values.userTerms,
+          highlightedText: values.useContext ? selection : undefined,
+        },
+      });
+
+      setValue("transcription", result.text);
+      await handleCopyToClipboard({ ...values, transcription: result.text });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Transcription complete",
+        message: "Text copied to clipboard",
+      });
+    } catch (error) {
+      console.error("Transcription error:", error);
+      await showFailureToast(error, {
+        title: "Transcription failed",
+      });
+    }
+  }
+
   const handleStopRecording = async () => {
     const recordingFilePath = await stopRecording();
-
     if (recordingFilePath) {
-      try {
-        setIsTranscribing(true);
-
-        const languageTitle =
-          values.language === "auto"
-            ? "Auto-detect"
-            : (LANGUAGE_OPTIONS.find((option) => option.value === values.language)?.title ?? "Auto-detect");
-
-        await showToast({
-          style: Toast.Style.Animated,
-          title: "Transcribing...",
-          message: `Language: ${languageTitle}`,
-        });
-
-        let selection = "";
-        try {
-          selection = await getSelectedText();
-        } catch (error) {
-          console.error("Error getting selected text:", error);
-        }
-
-        const result = await transcribeAudio(recordingFilePath, {
-          overrideLanguage: values.language,
-          overrideModel: values.model,
-          promptOptions: {
-            promptText: values.promptText,
-            userTerms: values.userTerms,
-            highlightedText: values.useContext ? selection : undefined,
-          },
-        });
-        setValue("transcription", result.text);
-
-        await Clipboard.copy(result.text);
-
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Transcription complete",
-          message: "Text copied to clipboard",
-        });
-      } catch (error) {
-        console.error("Transcription error:", error);
-        await showFailureToast(error, {
-          title: "Transcription failed",
-        });
-      } finally {
-        setIsTranscribing(false);
-      }
+      setIsTranscribing(true);
+      await handleTranscription(recordingFilePath);
+      setIsTranscribing(false);
     }
   };
 
@@ -110,9 +121,8 @@ export default function Command() {
 
   useEffect(() => {
     if (error) {
-      void showFailureToast({
+      void showFailureToast(error, {
         title: "Error",
-        message: error,
       });
     }
   }, [error]);
@@ -166,7 +176,12 @@ export default function Command() {
 
           <Action
             title="View History"
-            onAction={() => open("raycast://extensions/facundo_prieto/speech-to-text/transcription-history")}
+            onAction={() =>
+              launchCommand({
+                name: "transcription-history",
+                type: LaunchType.UserInitiated,
+              })
+            }
             shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
           />
         </ActionPanel>

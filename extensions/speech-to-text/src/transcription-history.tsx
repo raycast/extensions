@@ -44,7 +44,8 @@ export default function TranscriptionHistory() {
         })
       : "";
 
-    return dateStr ? new Date(dateStr) : new Date();
+    if (!dateStr) throw new Error(`Invalid recording date format in filename: ${fileName}`);
+    return new Date(dateStr);
   };
 
   const loadTranscriptionFromFile = async (filePath: string): Promise<string | null> => {

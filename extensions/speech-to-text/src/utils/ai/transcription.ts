@@ -3,6 +3,21 @@ import fs from "fs-extra";
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences, TranscriptionModelId, TranscriptionResult } from "../../types";
 import { buildCompletePrompt } from "../../constants";
+import path from "path";
+
+function isTranscriptionResult(data: unknown): data is TranscriptionResult {
+  if (!data || typeof data !== "object") return false;
+
+  const result = data as Partial<TranscriptionResult>;
+  return (
+    typeof result.text === "string" &&
+    typeof result.timestamp === "string" &&
+    typeof result.audioFile === "string" &&
+    (result.language === undefined || typeof result.language === "string") &&
+    (result.prompt === undefined || typeof result.prompt === "string") &&
+    typeof result.model === "string"
+  );
+}
 
 export async function transcribeAudio(
   filePath: string,
@@ -30,68 +45,58 @@ export async function transcribeAudio(
 
     const fileBuffer = fs.createReadStream(filePath);
 
-    const model = options?.overrideModel ?? preferences.model;
+    try {
+      const model = options?.overrideModel ?? preferences.model;
 
-    const transcriptionOptions: {
-      file: fs.ReadStream;
-      model: TranscriptionModelId;
-      response_format: "verbose_json" | "json" | "text";
-      language?: string;
-      prompt?: string;
-    } = {
-      file: fileBuffer,
-      model: model,
-      response_format: "verbose_json",
-    };
+      const transcriptionOptions: {
+        file: fs.ReadStream;
+        model: TranscriptionModelId;
+        response_format: "verbose_json" | "json" | "text";
+        language?: string;
+        prompt?: string;
+      } = {
+        file: fileBuffer,
+        model: model,
+        response_format: "verbose_json",
+      };
 
-    const language = options?.overrideLanguage ?? preferences.language;
+      const language = options?.overrideLanguage ?? preferences.language;
 
-    if (language && language !== "auto") {
-      transcriptionOptions.language = language;
+      if (language && language !== "auto") {
+        transcriptionOptions.language = language;
+      }
+
+      const prompt =
+        options?.overridePrompt ??
+        buildCompletePrompt(
+          options?.promptOptions?.promptText ?? preferences.promptText,
+          options?.promptOptions?.userTerms ?? preferences.userTerms,
+          options?.promptOptions?.highlightedText,
+        );
+
+      if (prompt && prompt.trim() !== "") {
+        transcriptionOptions.prompt = prompt;
+      }
+
+      const response = await client.audio.transcriptions.create(transcriptionOptions);
+
+      const result: TranscriptionResult = {
+        text: response.text.trim(),
+        timestamp: new Date().toISOString(),
+        audioFile: filePath,
+        language: language,
+        prompt: prompt,
+        model: model,
+      };
+
+      await saveTranscription(filePath, result);
+      return result;
+    } finally {
+      fileBuffer.destroy();
     }
-
-    const prompt =
-      options?.overridePrompt ??
-      buildCompletePrompt(
-        options?.promptOptions?.promptText ?? preferences.promptText,
-        options?.promptOptions?.userTerms ?? preferences.userTerms,
-        options?.promptOptions?.highlightedText,
-      );
-
-    if (prompt && prompt.trim() !== "") {
-      transcriptionOptions.prompt = prompt;
-    }
-
-    const transcription = await client.audio.transcriptions.create(transcriptionOptions);
-
-    const result: TranscriptionResult = {
-      text: transcription.text.trim(),
-      timestamp: new Date().toISOString(),
-      audioFile: filePath,
-      language: language,
-      prompt: prompt,
-      model: model,
-    };
-
-    await saveTranscription(filePath, result);
-
-    return result;
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.message.includes("rate limit") ||
-        error.message.includes("429") ||
-        error.message.includes("too many requests"))
-    ) {
-      throw new Error("Groq API rate limit exceeded. Please try again later or reduce the length of your audio file.");
-    }
-
-    if (error instanceof Error && error.message.includes("400")) {
-      throw new Error("The API couldn't process this audio file. It might be corrupted or in an unsupported format.");
-    }
-
     console.error("Transcription error:", error);
-    throw new Error(`Failed to transcribe audio: ${error instanceof Error ? error.message : String(error)}`);
+    throw error;
   }
 }
 
@@ -99,7 +104,12 @@ export async function saveTranscription(
   audioFilePath: string,
   transcriptionData: TranscriptionResult,
 ): Promise<string> {
-  const transcriptionFilePath = audioFilePath.replace(/\.[^.]+$/, ".json");
+  const parsedPath = path.parse(audioFilePath);
+  const transcriptionFilePath = path.format({
+    dir: parsedPath.dir,
+    name: parsedPath.name,
+    ext: ".json",
+  });
 
   const dataToSave = {
     ...transcriptionData,
@@ -116,11 +126,21 @@ export async function saveTranscription(
 }
 
 export async function loadTranscription(audioFilePath: string): Promise<TranscriptionResult | null> {
-  const transcriptionFilePath = audioFilePath.replace(/\.[^.]+$/, ".json");
+  const parsedPath = path.parse(audioFilePath);
+  const transcriptionFilePath = path.format({
+    dir: parsedPath.dir,
+    name: parsedPath.name,
+    ext: ".json",
+  });
 
   try {
     if (await fs.pathExists(transcriptionFilePath)) {
-      return await fs.readJSON(transcriptionFilePath);
+      const data = await fs.readJSON(transcriptionFilePath);
+      if (!isTranscriptionResult(data)) {
+        console.error(`Invalid transcription data format in ${transcriptionFilePath}`);
+        return null;
+      }
+      return data;
     }
     return null;
   } catch (error) {

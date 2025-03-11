@@ -28,6 +28,7 @@ export function useAudioRecorder(): AudioRecorderHook {
 
   const recordingProcess = useRef<ChildProcess | null>(null);
   const durationInterval = useRef<NodeJS.Timeout | null>(null);
+  const isIntentionalStop = useRef<boolean>(false);
 
   useEffect(() => {
     const checkSox = async () => {
@@ -41,6 +42,10 @@ export function useAudioRecorder(): AudioRecorderHook {
 
     return () => {
       if (isRecording) void stopRecording();
+      if (durationInterval.current) {
+        clearInterval(durationInterval.current);
+        durationInterval.current = null;
+      }
     };
   }, []);
 
@@ -48,9 +53,8 @@ export function useAudioRecorder(): AudioRecorderHook {
     setError(null);
 
     if (isRecording) {
-      await showFailureToast({
+      await showFailureToast(ErrorTypes.ALREADY_RECORDING, {
         title: "Already Recording",
-        message: "A recording is already in progress",
       });
       return null;
     }
@@ -93,7 +97,7 @@ export function useAudioRecorder(): AudioRecorderHook {
       recordingProcess.current?.on("close", (code) => {
         console.log(`Sox process exited with code ${code}`);
 
-        if (code !== 0 && isRecording) {
+        if (code !== 0 && isRecording && !isIntentionalStop.current) {
           setError(`Recording process exited unexpectedly with code ${code}`);
 
           if (durationInterval.current) {
@@ -103,6 +107,7 @@ export function useAudioRecorder(): AudioRecorderHook {
 
           setIsRecording(false);
         }
+        isIntentionalStop.current = false;
       });
 
       setRecordingDuration(0);
@@ -140,6 +145,7 @@ export function useAudioRecorder(): AudioRecorderHook {
     console.log("Stopping recording, current path:", currentRecordingPath);
 
     try {
+      isIntentionalStop.current = true;
       recordingProcess.current.kill();
       recordingProcess.current = null;
 
@@ -156,9 +162,8 @@ export function useAudioRecorder(): AudioRecorderHook {
         const validationResult = await validateAudioFile(currentRecordingPath);
 
         if (!validationResult.isValid) {
-          await showFailureToast({
+          await showFailureToast(validationResult.error ?? ErrorTypes.INVALID_RECORDING, {
             title: "Invalid Recording",
-            message: validationResult.error ?? ErrorTypes.INVALID_RECORDING,
           });
           setError(validationResult.error ?? ErrorTypes.INVALID_RECORDING);
           return null;
@@ -173,9 +178,8 @@ export function useAudioRecorder(): AudioRecorderHook {
         console.log("Returning recording path:", currentRecordingPath);
         return currentRecordingPath;
       } else {
-        await showFailureToast({
+        await showFailureToast(ErrorTypes.NO_RECORDING_FILE, {
           title: "Recording Failed",
-          message: ErrorTypes.NO_RECORDING_FILE,
         });
         setError(ErrorTypes.NO_RECORDING_FILE);
         return null;
@@ -184,9 +188,8 @@ export function useAudioRecorder(): AudioRecorderHook {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error("Error stopping recording:", error);
 
-      await showFailureToast({
+      await showFailureToast(error, {
         title: "Failed to stop recording",
-        message: errorMessage,
       });
 
       setError(`${ErrorTypes.RECORDING_STOP_ERROR}: ${errorMessage}`);
