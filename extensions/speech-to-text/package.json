@@ -11,12 +11,14 @@
     {
       "name": "record-transcription",
       "title": "Record Transcription",
+      "subtitle": "Speech to Text",
       "description": "Record an audio and transcribe it to text",
       "mode": "view"
     },
     {
       "name": "transcription-history",
       "title": "Transcription History",
+      "subtitle": "Speech to Text",
       "description": "View and manage your transcription history",
       "mode": "view"
     }
