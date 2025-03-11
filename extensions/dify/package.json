@@ -36,7 +36,7 @@
     },
     {
       "name": "ask-dify-history",
-      "title": "View Conversations",
+      "title": "View History",
       "subtitle": "Dify",
       "description": "View and manage your conversation history with Dify applications",
       "mode": "view"

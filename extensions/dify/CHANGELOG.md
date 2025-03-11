@@ -1,5 +1,12 @@
 # Dify Changelog
 
+## [1.0.4] - {PR_MERGE_DATE}
+
+- Fixed Workflow response handling to properly parse and display outputs from both response formats
+- Renamed "View Conversations" command to "View History" for more intuitive navigation
+- Enhanced type safety by implementing proper TypeScript interfaces for Workflow responses
+- Improved error handling for different API response structures
+
 ## [1.0.3] - {PR_MERGE_DATE}
 
 - Improved UI interface for text generator and workflow modes
