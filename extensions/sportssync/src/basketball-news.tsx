@@ -42,7 +42,7 @@ export default function scoresAndSchedule() {
       <List.Item
         key={index}
         title={`${nbaArticle?.headline ?? "No Headline Found"}`}
-        icon={{ source: nbaArticle?.images[0].url }}
+        icon={{ source: nbaArticle?.images?.[0]?.url }}
         accessories={[
           { tag: { value: articleType, color: Color.Green }, icon: Icon.Megaphone },
           { text: { value: `${accessoryTitle ?? "No Date Found"}` }, tooltip: accessoryToolTip ?? "Unknown" },
@@ -94,7 +94,10 @@ export default function scoresAndSchedule() {
         ]}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="View Article on ESPN" url={`${wnbaArticle?.links?.web?.href}`} />
+            <Action.OpenInBrowser
+              title="View Article on ESPN"
+              url={`${wnbaArticle?.links?.web?.href} ? "https://www.espn.com`}
+            />
           </ActionPanel>
         }
       />

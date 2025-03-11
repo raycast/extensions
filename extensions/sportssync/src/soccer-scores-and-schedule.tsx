@@ -91,6 +91,16 @@ export default function scoresAndSchedule() {
     const half = eplGame.status.period ?? 0;
     const halfWithSuffix = getSoccerHalfWithSuffix(half);
 
+    const startingSoonInterval = 15 * 60 * 1000;
+    const currentDate = new Date();
+    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
+
+    if (timeUntilGameStarts <= startingSoonInterval && eplGame?.status?.type?.state === "pre") {
+      accessoryColor = Color.Yellow;
+      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
+      accessoryToolTip = "Starting Soon";
+    }
+
     if (eplGame.status.type.state === "in") {
       accessoryTitle = `${eplGame.competitions[0].competitors[1].team.abbreviation} ${eplGame.competitions[0].competitors[1].score} - ${eplGame.competitions[0].competitors[0].team.abbreviation} ${eplGame.competitions[0].competitors[0].score}     ${halfWithSuffix} ${eplGame.status.displayClock}`;
       accessoryColor = Color.Green;
@@ -184,6 +194,16 @@ export default function scoresAndSchedule() {
     const half = uefaGame.status.period ?? 0;
     const halfWithSuffix = getSoccerHalfWithSuffix(half);
 
+    const startingSoonInterval = 15 * 60 * 1000;
+    const currentDate = new Date();
+    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
+
+    if (timeUntilGameStarts <= startingSoonInterval && uefaGame?.status?.type?.state === "pre") {
+      accessoryColor = Color.Yellow;
+      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
+      accessoryToolTip = "Starting Soon";
+    }
+
     if (uefaGame.status.type.state === "in") {
       accessoryTitle = `${uefaGame.competitions[0].competitors[1].team.abbreviation} ${uefaGame.competitions[0].competitors[1].score} - ${uefaGame.competitions[0].competitors[0].team.abbreviation} ${uefaGame.competitions[0].competitors[0].score}     ${halfWithSuffix} ${uefaGame.status.displayClock}`;
       accessoryColor = Color.Green;
@@ -272,6 +292,16 @@ export default function scoresAndSchedule() {
       if (half === 2) return `${half}nd Half`;
       if (half === 3) return `${half}rd Half`;
       return `${half}th Half`;
+    }
+
+    const startingSoonInterval = 15 * 60 * 1000;
+    const currentDate = new Date();
+    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
+
+    if (timeUntilGameStarts <= startingSoonInterval && sllGame?.status?.type?.state === "pre") {
+      accessoryColor = Color.Yellow;
+      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
+      accessoryToolTip = "Starting Soon";
     }
 
     const half = sllGame.status.period ?? 0;
@@ -367,6 +397,16 @@ export default function scoresAndSchedule() {
       return `${half}th Half`;
     }
 
+    const startingSoonInterval = 15 * 60 * 1000;
+    const currentDate = new Date();
+    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
+
+    if (timeUntilGameStarts <= startingSoonInterval && gerGame?.status?.type?.state === "pre") {
+      accessoryColor = Color.Yellow;
+      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
+      accessoryToolTip = "Starting Soon";
+    }
+
     const half = gerGame.status.period ?? 0;
     const halfWithSuffix = getSoccerHalfWithSuffix(half);
 
@@ -458,6 +498,16 @@ export default function scoresAndSchedule() {
       if (half === 2) return `${half}nd Half`;
       if (half === 3) return `${half}rd Half`;
       return `${half}th Half`;
+    }
+
+    const startingSoonInterval = 15 * 60 * 1000;
+    const currentDate = new Date();
+    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
+
+    if (timeUntilGameStarts <= startingSoonInterval && itaGame?.status?.type?.state === "pre") {
+      accessoryColor = Color.Yellow;
+      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
+      accessoryToolTip = "Starting Soon";
     }
 
     const half = itaGame.status.period ?? 0;
