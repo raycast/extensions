@@ -95,9 +95,33 @@ const deleteMessage = (id: string, account: string, mailbox: string) => {
   setMessages(nextMessages, account, mailbox);
 };
 
+const defaultAccount = new RaycastCache();
+
+const getDefaultAccount = (): Account | undefined => {
+  const accounts = getAccounts();
+
+  if (!accounts || accounts.length === 0) {
+    return undefined;
+  }
+
+  const defaultAccountId = defaultAccount.get("default-account-id");
+
+  if (defaultAccountId) {
+    return accounts.find((account) => account.id === defaultAccountId) as Account;
+  }
+
+  return accounts[0];
+};
+
+const setDefaultAccount = (id: string) => {
+  defaultAccount.set("default-account-id", id);
+};
+
 export const Cache = Object.freeze({
   getAccounts,
   setAccounts,
+  getDefaultAccount,
+  setDefaultAccount,
   getAccount,
   invalidateAccounts,
   getMessages,

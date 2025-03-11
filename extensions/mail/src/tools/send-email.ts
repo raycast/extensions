@@ -1,0 +1,59 @@
+import type { Tool } from "@raycast/api";
+import { sendMessage } from "../scripts/messages";
+import { Cache } from "../utils/cache";
+
+type Input = {
+  /**
+   * The recipient email addresses.
+   *
+   * This must be a valid email address from the account's address book
+   * which you must get using the `list-addresses` tool.
+   */
+  to: string[];
+
+  /**
+   * The subject of the email.
+   *
+   * Always include a relevant subject, but don't include any prefixes such as "Re:".
+   */
+  subject: string;
+
+  /**
+   * The content of the message.
+   * Don't include any introduction or salutation. Just the main content.
+   */
+  content: string;
+};
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const account = Cache.getDefaultAccount();
+  if (!account) {
+    throw new Error("No accounts found");
+  }
+
+  return {
+    message: "Are you sure you want to send the following email?",
+    info: [
+      { name: "From", value: account.email },
+      { name: "To", value: input.to.join(", ") },
+      { name: "Subject", value: input.subject },
+      { name: "Content", value: input.content },
+    ],
+  };
+};
+
+export default async function (input: Input) {
+  const account = Cache.getDefaultAccount();
+  if (!account) {
+    throw new Error("No accounts found");
+  }
+
+  await sendMessage({
+    account: account.id,
+    to: input.to,
+    cc: [],
+    bcc: [],
+    subject: input.subject,
+    content: input.content,
+  });
+}
