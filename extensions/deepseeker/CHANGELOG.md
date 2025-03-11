@@ -1,5 +1,12 @@
 # DeepSeeker - Quick Actions Changelog
 
+## [March Update - Code Refactor] - 2025-03-11
+
+- 📏 **Obey** case naming convention
+- ✂️ Remove redundant code
+- 📄 Update **docs** and metadata
+- 🛠️ Prompt optimizing for convenience: `fix` and `rephrase` commands now return the same format as inputs. You can paste them directly into the editor without removing `*` or `**`. ✂️
+
 ## [New Features] - 2025-03-05
 
 - 📜 Add history command: browse and search all your interaction histories

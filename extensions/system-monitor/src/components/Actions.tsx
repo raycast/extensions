@@ -1,31 +1,15 @@
 import { ActionPanel, Action, showToast, Toast, closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { openActivityMonitorAppleScript } from "../utils";
 
 interface ActionsProps {
   radioButtonNumber: number;
 }
 
 export const Actions = ({ radioButtonNumber }: ActionsProps) => {
-  const appleScript = `
-    tell application "Activity Monitor"
-      activate
-      tell application "System Events"
-        tell process "Activity Monitor"
-          tell window 1
-            tell group 1 of toolbar 1
-              tell radio group 1
-                click radio button ${radioButtonNumber}
-              end tell
-            end tell
-          end tell
-        end tell
-      end tell
-    end tell
-  `;
-
   const handleRunAppleScript = async () => {
     try {
-      await runAppleScript(appleScript);
+      await runAppleScript(openActivityMonitorAppleScript(radioButtonNumber));
       await closeMainWindow();
     } catch (error) {
       await showToast({
