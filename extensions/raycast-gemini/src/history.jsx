@@ -5,7 +5,7 @@ let commandHistory = [];
 
 export default function History() {
   const [history, setHistory] = useState([]);
-  
+
   useEffect(() => {
     // Load history from LocalStorage when component mounts
     LocalStorage.getItem("gemini_command_history").then((storedHistory) => {
@@ -14,12 +14,12 @@ export default function History() {
         const historyData = JSON.parse(storedHistory);
         // Create a Map to deduplicate entries by id
         const uniqueEntries = new Map();
-        historyData.forEach(item => {
+        historyData.forEach((item) => {
           if (!uniqueEntries.has(item.id)) {
             uniqueEntries.set(item.id, item);
           }
         });
-        
+
         // Convert Map values back to array
         commandHistory = Array.from(uniqueEntries.values());
         setHistory(commandHistory);
@@ -37,12 +37,16 @@ export default function History() {
           accessories={[
             {
               text: item.model ? `Model: ${item.model}` : "Model: Not specified",
-              tooltip: "Model used for this query"
+              tooltip: "Model used for this query",
             },
           ]}
           detail={
             <List.Item.Detail
-              markdown={`## Prompt\n\n${item.prompt}\n\n---\n\n## Response\n\n${item.response}\n\n---\n\n**Time**: ${new Date(item.timestamp).toLocaleString()}\n**Model**: ${item.model || "Not specified"}`}
+              markdown={`## Prompt\n\n${item.prompt}\n\n---\n\n## Response\n\n${
+                item.response
+              }\n\n---\n\n**Time**: ${new Date(item.timestamp).toLocaleString()}\n**Model**: ${
+                item.model || "Not specified"
+              }`}
             />
           }
           actions={

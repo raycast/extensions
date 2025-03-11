@@ -28,23 +28,21 @@ const addToHistory = async (prompt, response, modelUsed) => {
   if (storedHistory) {
     commandHistory = JSON.parse(storedHistory);
   }
-  
+
   const newEntry = {
     id: Date.now(),
     timestamp: new Date().toISOString(),
     prompt,
     response,
-    model: modelUsed
+    model: modelUsed,
   };
-  
+
   // Check if an entry with the same prompt and response already exists
-  const isDuplicate = commandHistory.some(entry => 
-    entry.prompt === prompt && entry.response === response
-  );
-  
+  const isDuplicate = commandHistory.some((entry) => entry.prompt === prompt && entry.response === response);
+
   if (!isDuplicate) {
     commandHistory = [newEntry, ...commandHistory];
-    
+
     // Store in LocalStorage for persistence
     await LocalStorage.setItem("gemini_command_history", JSON.stringify(commandHistory));
   }
@@ -99,7 +97,7 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
       });
       setMarkdown(response);
       setLastResponse(response);
-      
+
       // Add to history with model information
       const usedModel = model === "default" ? defaultModel : model;
       await addToHistory(query, response, usedModel);
