@@ -1,5 +1,10 @@
 # Custom folder Changelog
 
+## [Feat Custom icon from custom image] - 2025-03-11
+- Added a new command to change the folder icon to a custom image.
+- Added a new command to reset the folder icon to the default.
+
+
 ## [Feat Create custom icons from emojis] - 2024-11-16
 - Added the ability to create custom icons from emojis.
 - Renamed `Output path` to `Download path`.

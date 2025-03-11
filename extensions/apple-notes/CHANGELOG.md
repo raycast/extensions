@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [Bug Fix Update] - 2025-03-06
+
+Fix for app crashing when user has not granted disk access.
+
 ## [Bug Fix Update] - 2025-02-27
 
 Fix for 'JS heap out of memory error' reported by a user in issue #17137.

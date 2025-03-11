@@ -1,5 +1,11 @@
 # 1bookmark Changelog
 
+## [Sign In UX Improvement] - 2025-03-04
+
+- 0.5.1
+- 📱 Sign in UX improvement. We no longer clear tokens when there is a simple network error.
+- 💻 The code for determining whether or not a user is signed out has been neatly organized.
+
 ## [Space Detail View and Official Domain] - 2025-03-04
 
 - 0.5.0
