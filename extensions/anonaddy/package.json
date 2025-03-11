@@ -4,12 +4,10 @@
   "title": "Addy",
   "description": "Easily generate and manage your Addy email aliases directly from your keyboard.",
   "icon": "icon.png",
-  "author": "mormubis",
+  "author": "http.james",
   "contributors": [
-    "pernielsentikaer"
-  ],
-  "pastContributors": [
-    "http.james"
+    "pernielsentikaer",
+    "mormubis"
   ],
   "categories": [
     "Productivity"
