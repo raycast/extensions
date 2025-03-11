@@ -1,21 +1,21 @@
-import { Action, ActionPanel, Grid, useNavigation } from '@raycast/api'
-import { useState } from 'react'
-import { DeckList } from './DeckList'
-import { ClassName } from './domain'
-import { classIcon, getGameModeName } from './utils'
+import { Action, ActionPanel, Grid, useNavigation } from '@raycast/api';
+import { useState } from 'react';
+import { DeckList } from './DeckList';
+import { ClassName } from './domain';
+import { classIcon, getGameModeName } from './utils';
 
 export default function Command() {
-  const [format, setFormat] = useState(1)
-  const [minGames, setMinGames] = useState<number>()
-  const { push } = useNavigation()
+  const [format, setFormat] = useState(1);
+  const [minGames, setMinGames] = useState<number>();
+  const { push } = useNavigation();
 
-  const classes = Object.values(ClassName)
+  const classes = Object.values(ClassName);
 
   const handleFormatChange = (newValue: string) => {
-    const [newFormat, newMinGames] = newValue.split('_')
-    setFormat(Number(newFormat))
-    setMinGames(newMinGames ? Number(newMinGames) : undefined)
-  }
+    const [newFormat, newMinGames] = newValue.split('_');
+    setFormat(Number(newFormat));
+    setMinGames(newMinGames ? Number(newMinGames) : undefined);
+  };
 
   return (
     <Grid
@@ -50,17 +50,9 @@ export default function Command() {
           actions={
             <ActionPanel title={className}>
               <ActionPanel.Section>
-                <Action 
-                  title={`View ${getGameModeName(format)} Decks`} 
-                  onAction={() =>
-                    push(
-                      <DeckList
-                        className={className}
-                        format={format}
-                        minGames={minGames}
-                      />
-                    )
-                  } 
+                <Action
+                  title={`View ${getGameModeName(format)} Decks`}
+                  onAction={() => push(<DeckList className={className} format={format} minGames={minGames} />)}
                 />
               </ActionPanel.Section>
             </ActionPanel>
@@ -68,5 +60,5 @@ export default function Command() {
         />
       ))}
     </Grid>
-  )
+  );
 }
