@@ -4,29 +4,20 @@ export async function cleanupPerspective() {
   console.log("Starting cleanup operation");
 
   try {
-    const result = await executeScript<string>(`
+    const result = await executeScript<boolean>(`
       try {
-        const omnifocus = Application('com.omnigroup.OmniFocus4');
+        const omnifocus = Application('OmniFocus');
         omnifocus.evaluateJavascript('cleanUp()');
-
-        return JSON.stringify({
-          success: true,
-          message: "Cleanup completed successfully"
-        });
+        return true;
       } catch (err) {
-        return JSON.stringify({
-          success: false,
-          error: "Operation failed: " + String(err)
-        });
+        return false;
       }
     `);
 
     console.log("Cleanup result:", result);
 
-    const parsedResult = JSON.parse(result);
-
-    if (!parsedResult.success) {
-      throw new Error(parsedResult.error || "Failed to clean up the perspective");
+    if (!result) {
+      throw new Error("Failed to clean up the perspective");
     }
 
     return true;

@@ -89,7 +89,9 @@ export default function PerspectivesCommand() {
         isLoading={perspectiveLoading || isLoading}
         tasks={data}
         title={viewMode.groupBy === "none" ? viewMode.perspective : `${viewMode.perspective} (${viewMode.groupBy})`}
-        onTaskUpdated={() => revalidate()}
+        onTaskUpdated={async () => {
+          await revalidate();
+        }}
         isShowingDetail={preferences.showDetailsByDefault}
         groupBy={viewMode.groupBy}
         searchBarAccessory={

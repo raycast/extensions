@@ -1,5 +1,6 @@
 import { OmniFocusTask } from "../types/task";
 import { executeScript } from "../utils/executeScript";
+import { showFailureToast } from "@raycast/utils";
 
 export async function listPerspectiveTasks(perspectiveName?: string): Promise<OmniFocusTask[]> {
   if (!perspectiveName) {
@@ -9,7 +10,6 @@ export async function listPerspectiveTasks(perspectiveName?: string): Promise<Om
 const omnifocus = Application("OmniFocus");
 const document = omnifocus.defaultDocument();
 const window = document.documentWindows[0];
-const systemEvents = Application('System Events');
 
 window.perspectiveName = "${perspectiveName}";
 
@@ -39,7 +39,7 @@ const leaves = window
       };
       return taskData;
     } catch (e) {
-      systemEvents.log('Error processing task: ' + e);
+      console.error('Error processing task:', e);
       return null;
     }
   });
@@ -52,6 +52,7 @@ return JSON.stringify(validLeaves);
   try {
     return JSON.parse(result) as OmniFocusTask[];
   } catch (e) {
+    await showFailureToast("Failed to load tasks from perspective");
     throw new Error(`Failed to parse tasks result: ${e}`);
   }
 }
