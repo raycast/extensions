@@ -1,6 +1,6 @@
 # Google Tasks Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-03-11
 - Sort completed tasks by completion date
 
 ## [Update] - 2024-11-05
