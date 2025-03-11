@@ -70,7 +70,7 @@ export default function Command() {
             tintColor: null
           }}
           title={ellipsize(deck.title, 10)}
-          subtitle={`${formatWinrate(deck.winrate)}, ${formatDust(deck.dust)}`}
+          subtitle={`[↑]${formatWinrate(deck.winrate)}  [☺]${formatDust(deck.dust)}`}
           actions={
             <ActionPanel title={deck.title}>
               <ActionPanel.Section>
@@ -140,8 +140,8 @@ function DeckDetails({
                 source: Icon.CircleFilled, 
                 tintColor: getRarityColor(rarityText)
               }}
-              title={`${slot.card.title} 💎 ${slot.card.mana}`}
-              subtitle={`🃏 ${slot.amount}`}
+              title={`${slot.card.title} [♦]  ${slot.card.mana}`}
+              subtitle={`[♠] ${slot.amount}`}
               accessories={[
                 { text: rarityText }
               ]}

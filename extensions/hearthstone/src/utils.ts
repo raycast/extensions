@@ -94,15 +94,6 @@ export const getLocalCardData = async () => {
   }
 }
 
-// 格式化数字，添加K后缀
-// export const formatNumberWithK = (number: number): string => {
-//   if (number >= 1000) {
-//     return `${(number / 1000).toFixed(1).replace(/\.0$/, '')}K`
-//   }
-
-//   return number.toString()
-// }
-
 // 获取游戏模式名称
 export const getGameModeName = (format: number): string => {
   return format === 1 ? 'Wild' : 'Standard'

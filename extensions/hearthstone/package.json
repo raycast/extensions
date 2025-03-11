@@ -11,16 +11,36 @@
   "license": "MIT",
   "commands": [
     {
-      "title": "Search Best Hearthstone Decks",
+      "title": "Hearthstone Decks",
       "name": "search_best_decks",
       "description": "Search the best Hearthstone decks",
       "mode": "view"
     },
     {
-      "title": "Search Best Hearthstone Decks Per Class",
+      "title": "Hearthstone Class",
       "name": "search_class_decks",
       "description": "Search the best Hearthstone decks per class",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultCardImageLanguage",
+      "title": "Default Card Image Language",
+      "description": "Choose the default language for card images only (UI remains in English)",
+      "type": "dropdown",
+      "required": true,
+      "default": "enUS",
+      "data": [
+        {
+          "title": "English",
+          "value": "enUS"
+        },
+        {
+          "title": "Chinese",
+          "value": "zhCN"
+        }
+      ]
     }
   ],
   "dependencies": {
