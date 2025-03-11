@@ -1,4 +1,4 @@
-import { List, Icon, Action, ActionPanel } from "@raycast/api";
+import { List, Icon, Action, ActionPanel, showToast, Toast } from "@raycast/api";
 
 import { MessageList } from "./message-list";
 import { Account, Mailbox } from "../types";
@@ -34,7 +34,14 @@ export const MailboxList = (props: MailboxListProps) => {
             <MailboxAction key={mailbox.name} account={props} mailbox={mailbox} />
           ))}
 
-          <Action title="Set as Default" icon={Icon.Star} onAction={() => Cache.setDefaultAccount(id)} />
+          <Action
+            title="Set as Default"
+            icon={Icon.Star}
+            onAction={() => {
+              Cache.setDefaultAccount(id);
+              showToast({ title: `Set ${name} as default`, style: Toast.Style.Success });
+            }}
+          />
         </ActionPanel>
       }
     />
