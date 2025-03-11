@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [New Additions] - {PR_MERGE_DATE}
+## [New Additions] - 2025-03-11
 
 - Add a new menubar feature to display system monitor information in the menubar
 
