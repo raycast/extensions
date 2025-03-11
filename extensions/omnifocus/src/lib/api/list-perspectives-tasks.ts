@@ -9,6 +9,7 @@ export async function listPerspectiveTasks(perspectiveName?: string): Promise<Om
 const omnifocus = Application("OmniFocus");
 const document = omnifocus.defaultDocument();
 const window = document.documentWindows[0];
+const systemEvents = Application('System Events');
 
 window.perspectiveName = "${perspectiveName}";
 
@@ -38,7 +39,7 @@ const leaves = window
       };
       return taskData;
     } catch (e) {
-      console.log('Error processing task:', e);
+      systemEvents.log('Error processing task: ' + e);
       return null;
     }
   });
