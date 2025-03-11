@@ -6,7 +6,7 @@
 
 - Use a global info message about security when the database is locked.
 - Update screenshot about the database being locked.
-- Use more explicite error messages when unable to exececute the `keepassxc-cli` command.
+- Use more explicit error messages when unable to execute the `keepassxc-cli` command.
 
 ### Fixed
 
