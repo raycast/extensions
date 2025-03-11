@@ -1,5 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 import { getCmdPath, runCommand } from "./utils";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execPromise = promisify(exec);
 
 const cmdPath = getCmdPath();
 
