@@ -9,7 +9,7 @@ import { nanoid } from "nanoid";
 // Define the command arguments
 export interface TrackTimeArguments {
   project?: string;
-  description: string; // This should be required
+  description: string; // Required field
 }
 
 // Define a random color function for new projects
