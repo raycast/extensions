@@ -122,7 +122,7 @@ export async function searchMessages({
     .filter(Boolean)
     .filter((path) => {
       const id = getIdFromPath(path);
-      return !messageIds[id];
+      return messageIds.includes(id);
     })
     .toSorted((a, b) => {
       const aId = getIdFromPath(a);
