@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "token-prices",
-      "title": "Token Prices",
+      "title": "Search Token Prices",
       "subtitle": "Coin Caster",
       "description": "Get the price for any crypto asset",
       "mode": "view"
