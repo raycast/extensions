@@ -359,7 +359,7 @@ export default function TranscriptionHistory() {
                     icon={Icon.Folder}
                     onAction={() => {
                       const folder = path.dirname(file.filePath);
-                      exec(`open "${folder}"`);
+                      showInFinder(folder);
                     }}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                   />
