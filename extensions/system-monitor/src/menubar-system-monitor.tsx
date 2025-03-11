@@ -19,7 +19,7 @@ export default function Command() {
     return { osInfo, storage };
   });
 
-  const { data: cupUsage, revalidate: revalidateCpu } = usePromise(() => {
+  const { data: cpuUsage, revalidate: revalidateCpu } = usePromise(() => {
     return new Promise((resolve) => {
       osCpuUsage((v) => {
         resolve(Math.round(v * 100).toString());
@@ -27,7 +27,7 @@ export default function Command() {
     });
   });
 
-  const { data: memoryUsage, revalidate: vevalidateMemory } = usePromise(async () => {
+  const { data: memoryUsage, revalidate: revalidateMemory } = usePromise(async () => {
     const memoryUsage = await getMemoryUsage();
     const memTotal = memoryUsage.memTotal;
     const memUsed = memoryUsage.memUsed;
@@ -41,7 +41,7 @@ export default function Command() {
   });
 
   const prevProcess = useRef<{ [key: string]: number[] }>({});
-  const { data: networkUsage, revalidate: vevalidateNetwork } = usePromise(async () => {
+  const { data: networkUsage, revalidate: revalidateNetwork } = usePromise(async () => {
     const currProcess = await getNetworkData();
     let upload = 0;
     let download = 0;
@@ -73,7 +73,7 @@ export default function Command() {
     };
   });
 
-  const { data: batteryData, revalidate: vevalidateBattery } = usePromise(async () => {
+  const { data: batteryData, revalidate: revalidateBattery } = usePromise(async () => {
     const batteryData = await getBatteryData();
     const isOnAC = !batteryData.isCharging && batteryData.fullyCharged;
 
@@ -86,9 +86,9 @@ export default function Command() {
   useInterval(() => {
     revalidateSystem();
     revalidateCpu();
-    vevalidateMemory();
-    vevalidateNetwork();
-    vevalidateBattery();
+    revalidateMemory();
+    revalidateNetwork();
+    revalidateBattery();
   }, 1000);
 
   return (
@@ -115,7 +115,7 @@ export default function Command() {
       <MenuBarExtra.Section title="CPU">
         <MenuBarExtra.Item
           title="CPU Usage"
-          subtitle={`${cupUsage} %` || "Loading..."}
+          subtitle={`${cpuUsage} %` || "Loading..."}
           icon={Icon.Monitor}
           onAction={() => runAppleScript(openActivityMonitorAppleScript(1))}
         />
