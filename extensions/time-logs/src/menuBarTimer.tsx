@@ -1,4 +1,5 @@
 import { MenuBarExtra, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getActiveTimer, getProjectById, stopActiveTimer } from "./storage";
 import { TimeEntry, Project } from "./models";
@@ -40,7 +41,7 @@ export default function Command() {
           }
         }
       } catch (error) {
-        showFailureToast("Error updating timer", error);
+        showFailureToast(error, { title: "Error updating timer" });
       } finally {
         setIsLoading(false);
       }
