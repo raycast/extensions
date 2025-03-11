@@ -6,7 +6,7 @@ View your Ultrahuman ring metrics in Raycast.
 
 Ultrahuman Summary – View today's health metrics including recovery score, sleep quality, movement index, heart rate, and step count.
 
-Ultrahuman Yesterday Summary – View yesterday's health metrics with the same detailed breakdown as the today's summary.
+Ultrahuman Yesterday Summary – View yesterday's health metrics with the same detailed breakdown as today's summary.
 
 Ultrahuman Sleep – Get detailed insights into your sleep metrics including sleep score, efficiency, temperature, restfulness, consistency, and more.
 
@@ -29,7 +29,7 @@ Ultrahuman Sleep – Get detailed insights into your sleep metrics including sle
    - Open the Ultrahuman app on your device
    - Navigate to the Profile tab at the bottom of the screen
    - Open the settings page (Cog icon top left)
-   - Scroll down to find 'Partner ID' and input the code you received.
+   - Scroll down to find 'Partner ID' and input the code you received
 
 4. **Add details to Raycast Extension**
    - Finally, come back to Raycast and open the Ultrahuman extension
