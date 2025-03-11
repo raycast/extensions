@@ -4,6 +4,7 @@
 
 - Add tool to create Draft with AI
 - Add keyboard shortcuts to simplify adding / removing actions and workspaces
+- Created Quicklinks to run actions in Drafts will now store the provided content in a draft
 
 ## [Add Command for Capture] - 2024-10-04
 

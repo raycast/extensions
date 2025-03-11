@@ -179,7 +179,7 @@ export default function Command() {
       return (
         <Action.CreateQuicklink
           quicklink={{
-            link: CallbackBasUrls.RUN_ACTION + "action=" + encodeURIComponent(action.actionName) + "&text={text}",
+            link: CallbackBasUrls.CREATE_DRAFT + "action=" + encodeURIComponent(action.actionName) + "&text={text}",
           }}
           icon={Icon.Link}
           title={'Create Quicklink to run Action "' + action.actionName + '"'}
@@ -188,7 +188,7 @@ export default function Command() {
     } else {
       return (
         <Action.CreateQuicklink
-          quicklink={{ link: CallbackBasUrls.RUN_ACTION + "action=" + encodeURIComponent(action.actionName) }}
+          quicklink={{ link: CallbackBasUrls.CREATE_DRAFT + "action=" + encodeURIComponent(action.actionName) }}
           icon={Icon.Link}
           title={'Create Quicklink to run Action "' + action.actionName + '"'}
         />
