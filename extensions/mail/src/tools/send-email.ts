@@ -12,6 +12,22 @@ type Input = {
   to: string[];
 
   /**
+   * The recipient email addresses to CC.
+   *
+   * This must be a valid email address from the account's address book
+   * which you must get using the `list-addresses` tool.
+   */
+  cc: string[];
+
+  /**
+   * The recipient email addresses to BCC.
+   *
+   * This must be a valid email address from the account's address book
+   * which you must get using the `list-addresses` tool.
+   */
+  bcc: string[];
+
+  /**
    * The subject of the email.
    *
    * Always include a relevant subject, but don't include any prefixes such as "Re:".
@@ -43,6 +59,14 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     { name: "Content", value: input.content },
   ];
 
+  if (input.cc) {
+    infoItems.push({ name: "CC", value: input.cc.join(", ") });
+  }
+
+  if (input.bcc) {
+    infoItems.push({ name: "BCC", value: input.bcc.join(", ") });
+  }
+
   if (input.attachments) {
     infoItems.push({ name: "Attachments", value: `${input.attachments.length} file(s)` });
   }
@@ -62,8 +86,8 @@ export default async function (input: Input) {
   await sendMessage({
     account: account.id,
     to: input.to,
-    cc: [],
-    bcc: [],
+    cc: input.cc,
+    bcc: input.bcc,
     subject: input.subject,
     content: input.content,
     attachments: input.attachments,
