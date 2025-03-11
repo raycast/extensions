@@ -12,7 +12,8 @@
     "marcmagn1",
     "meganpearson",
     "jbjanot",
-    "ridemountainpig"
+    "ridemountainpig",
+    "ViGeng"
   ],
   "categories": [
     "Productivity"
@@ -80,6 +81,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "open-google-drive-home",
+      "title": "Open Google Drive Home",
+      "description": "Open Google Drive in your default browser.",
+      "icon": "google-drive.png",
+      "mode": "no-view"
     },
     {
       "name": "starred-google-drive-files",

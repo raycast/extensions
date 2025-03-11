@@ -1,5 +1,10 @@
 # Safari Changelog
 
+## [Update] - 2025-03-05
+
+- Added a fuzzy search option that can be enabled/disabled via preferences
+- Improved search to match terms anywhere within bookmarks and other items
+
 ## [Update] - 2025-03-01
 
 ### New Tab Management Tools

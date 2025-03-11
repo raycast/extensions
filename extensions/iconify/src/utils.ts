@@ -1,14 +1,9 @@
-import { Clipboard } from '@raycast/api';
-import { runAppleScript } from 'run-applescript';
-import { existsSync } from 'fs';
-import os from 'os';
+import { Clipboard } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+import { existsSync } from "fs";
+import os from "os";
 
-function toSvg(
-  path: string,
-  width: number,
-  height: number,
-  color: string,
-): string {
+function toSvg(path: string, width: number, height: number, color: string): string {
   //  replace all currentColor pattern with the provided color
   path = path.replace(/currentColor/g, color);
 
@@ -37,9 +32,7 @@ async function copyToClipboard(svgString: string, id: string) {
       `);
   }
   const selectedPath = fileTempDirectory;
-  const fixedPathName = selectedPath.endsWith('/')
-    ? `${selectedPath}${id}.svg`
-    : `${selectedPath}/${id}.svg`;
+  const fixedPathName = selectedPath.endsWith("/") ? `${selectedPath}${id}.svg` : `${selectedPath}/${id}.svg`;
 
   const actualPath = fixedPathName;
 

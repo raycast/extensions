@@ -116,27 +116,21 @@ async function login(apiKey: string, secretKey: string): Promise<LoginResponseBo
 
 interface FedexTrackingInfo {
   output: {
-    completeTrackResults: [
-      {
-        trackingNumber: string;
-        trackResults: [
-          {
-            trackingNumberInfo: {
-              trackingNumber: string;
-            };
-            latestStatusDetail: {
-              code: string;
-            };
-            dateAndTimes: [
-              {
-                type: string;
-                dateTime: string;
-              },
-            ];
-          },
-        ];
-      },
-    ];
+    completeTrackResults: {
+      trackingNumber: string;
+      trackResults: {
+        trackingNumberInfo: {
+          trackingNumber: string;
+        };
+        latestStatusDetail: {
+          code: string;
+        };
+        dateAndTimes: {
+          type: string;
+          dateTime: string;
+        }[];
+      }[];
+    }[];
   };
 }
 
@@ -177,29 +171,40 @@ function convertFedexTrackingToPackages(fedexTrackingInfo: FedexTrackingInfo): P
   return fedexTrackingInfo.output.completeTrackResults
     .flatMap((results) => results.trackResults)
     .map((aPackage) => {
-      const deliveryDate = aPackage.dateAndTimes.find(
-        (dateAndTime) => dateAndTime.type === "ACTUAL_DELIVERY",
-      )?.dateTime;
-      const estimatedDeliveryDate = aPackage.dateAndTimes.find(
-        (dateAndTime) => dateAndTime.type === "ESTIMATED_DELIVERY",
-      )?.dateTime;
-      const appointmentDeliveryDate = aPackage.dateAndTimes.find(
-        (dateAndTime) => dateAndTime.type === "APPOINTMENT_DELIVERY",
-      )?.dateTime;
-
       return {
         delivered: aPackage.latestStatusDetail.code === "DL",
-        deliveryDate: convertFedexDateToDate(deliveryDate || estimatedDeliveryDate || appointmentDeliveryDate),
+        deliveryDate: convertFedexDateToDate(aPackage.dateAndTimes),
         activity: [],
       };
     });
 }
 
-function convertFedexDateToDate(fedexDate: string | undefined): Date | undefined {
-  if (!fedexDate) {
-    return undefined;
+function convertFedexDateToDate(fedexDate: { type: string; dateTime: string }[]): Date | undefined {
+  // has a full ISO8601 timestamp, including time and timezone
+  const deliveryDate = fedexDate.find((dateAndTime) => dateAndTime.type === "ACTUAL_DELIVERY")?.dateTime;
+
+  if (deliveryDate) {
+    return new Date(deliveryDate);
   }
 
-  // fedexDate is an ISO date formatted string
-  return new Date(fedexDate);
+  // ISO8601 timestamp, but does NOT have an accurate time and timezone; set to midnight UTC
+  const estimatedDeliveryDate = fedexDate.find((dateAndTime) => dateAndTime.type === "ESTIMATED_DELIVERY")?.dateTime;
+
+  if (estimatedDeliveryDate) {
+    // use the current timezone of the computer running Raycast
+    const [year, month, day] = estimatedDeliveryDate.split("T")[0].split("-").map(Number);
+
+    return new Date(year, month - 1, day); // month is 0 indexed; set at the current timezone
+  }
+
+  // ISO8601 timestamp
+  const appointmentDeliveryDate = fedexDate.find(
+    (dateAndTime) => dateAndTime.type === "APPOINTMENT_DELIVERY",
+  )?.dateTime;
+
+  if (appointmentDeliveryDate) {
+    return new Date(appointmentDeliveryDate);
+  }
+
+  return undefined;
 }

@@ -4,7 +4,10 @@
   "title": "Easy Variable",
   "description": "Convert Any Language Text into an English Variable Name",
   "icon": "extension-icon.png",
-  "author": "chs",
+  "author": "keleus",
+  "contributors": [
+    "litomore"
+  ],
   "categories": [
     "Developer Tools",
     "Data"
@@ -14,7 +17,7 @@
     {
       "type": "checkbox",
       "title": "Switch Translate",
-      "description": "use Google Translate, may need proxy",
+      "description": "Use Google Translate, may need proxy",
       "required": false,
       "name": "enableGoogleTranslate",
       "default": false,
@@ -78,7 +81,7 @@
       "default": ""
     },
     {
-      "type": "textfield",
+      "type": "password",
       "title": "GLM API Key",
       "name": "glmApiKey",
       "default": "",
@@ -86,7 +89,7 @@
       "description": "API Key for ZhipuAI Platform"
     },
     {
-      "type": "textfield",
+      "type": "password",
       "title": "OpenAI API Key",
       "name": "openaiApiKey",
       "default": "",
@@ -110,7 +113,7 @@
       "description": "OpenAI API Base URL"
     },
     {
-      "type": "textfield",
+      "type": "password",
       "title": "Deepseek API Key",
       "name": "deepseekApiKey",
       "default": "",
@@ -118,7 +121,7 @@
       "description": "API Key for Deepseek Platform"
     },
     {
-      "type": "textfield",
+      "type": "password",
       "title": "Tencent SecretId",
       "name": "tencentSecretId",
       "default": "",
@@ -126,7 +129,7 @@
       "description": "Tencent SecretId"
     },
     {
-      "type": "textfield",
+      "type": "password",
       "title": "Tencent SecretKey",
       "name": "tencentSecretKey",
       "default": "",
@@ -139,7 +142,7 @@
       "name": "named",
       "title": "Named Variable",
       "subtitle": "Easy Variable",
-      "description": "Generate CONSTANT case variable name",
+      "description": "Generate variable name according to the input text",
       "mode": "view",
       "arguments": [
         {
@@ -184,10 +187,5 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
   }
 }

@@ -109,27 +109,21 @@ async function login(clientId: string, clientSecret: string): Promise<LoginRespo
 
 interface UpsTrackingInfo {
   trackResponse: {
-    shipment: [
-      {
-        inquiryNumber: string;
-        package: [
-          {
-            trackingNumber: string;
-            deliveryDate: [
-              {
-                type: string;
-                date: string;
-              },
-            ];
-            activity: [object];
-            currentStatus: {
-              description: string;
-              code: string;
-            };
-          },
-        ];
-      },
-    ];
+    shipment: {
+      inquiryNumber: string;
+      package: {
+        trackingNumber: string;
+        deliveryDate: {
+          type: string;
+          date: string;
+        }[];
+        activity: object[];
+        currentStatus: {
+          description: string;
+          code: string;
+        };
+      }[];
+    }[];
   };
 }
 

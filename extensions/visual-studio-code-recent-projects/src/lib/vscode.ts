@@ -71,6 +71,7 @@ const cliPaths: Record<string, string> = {
   Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
   Positron: "/Applications/Positron.app/Contents/Resources/app/bin/code",
   Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
+  "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/bin/marscode",
   VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
   "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app/bin/codium-insiders",
   Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
@@ -187,6 +188,7 @@ const buildSchemes: Record<string, string> = {
   Positron: "positron",
   Windsurf: "windsurf",
   Trae: "trae",
+  "Trae CN": "trae-cn",
 };
 
 export function getBuildScheme(): string {

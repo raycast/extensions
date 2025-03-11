@@ -1,5 +1,6 @@
 import { Color, Icon, LaunchType, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
+import { useMemo } from "react";
 
 import {
   MenuBarItem,
@@ -38,6 +39,7 @@ function getPullRequestStatusIcon(pr: PullRequestFieldsFragment): Icon | string 
 }
 
 function MyPullRequestsMenu() {
+  const preferences = getPreferenceValues<Preferences.MyPullRequestsMenu>();
   const {
     showtext,
     includeAssigned,
@@ -46,11 +48,23 @@ function MyPullRequestsMenu() {
     includeReviewRequests,
     includeRecentlyClosed,
     useUnreadIndicator,
-  } = getPreferenceValues<Preferences.MyPullRequestsMenu>();
+    repositoryFilterMode,
+    repositoryList,
+  } = preferences;
+
+  const repositoryListArray = useMemo(() => {
+    if (!repositoryList) return [];
+    return repositoryList
+      .split(",")
+      .map((repo) => repo.trim())
+      .filter((repo) => repo.length > 0);
+  }, [repositoryList]);
+
   const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", PR_DEFAULT_SORT_QUERY, {
     cacheNamespace: "github-my-pr-menu",
   });
-  const { data: sections, isLoading } = useMyPullRequests({
+
+  const { data: unfilteredSections, isLoading } = useMyPullRequests({
     repository: null,
     sortQuery,
     includeAssigned,
@@ -59,6 +73,29 @@ function MyPullRequestsMenu() {
     includeReviewRequests,
     includeReviewed,
   });
+
+  const sections = useMemo(() => {
+    if (!unfilteredSections || repositoryFilterMode === "all" || repositoryListArray.length === 0) {
+      return unfilteredSections;
+    }
+
+    return unfilteredSections.map((section) => {
+      const filteredPullRequests = section.pullRequests?.filter((pr) => {
+        if (!pr) return false;
+
+        const repoFullName = pr.repository.nameWithOwner;
+
+        const isInList = repositoryListArray.some((repo) => repo.toLowerCase() === repoFullName.toLowerCase());
+
+        return repositoryFilterMode === "include" ? isInList : !isInList;
+      });
+
+      return {
+        ...section,
+        pullRequests: filteredPullRequests,
+      };
+    });
+  }, [unfilteredSections, repositoryListArray, repositoryFilterMode]);
 
   const prCount = sections?.reduce((acc, section) => acc + (section.pullRequests ?? []).length, 0);
 

@@ -6,7 +6,7 @@ import { URL } from "url";
 import { langAdaptor } from "./lang-adaptor";
 import { HistoryItem, LooseTab } from "./types";
 
-export const { safariAppIdentifier }: Preferences = getPreferenceValues();
+export const { safariAppIdentifier, enableFuzzySearch }: Preferences = getPreferenceValues();
 
 export const executeJxa = async (script: string) => {
   try {
@@ -95,7 +95,13 @@ export const search = function (collection: LooseTab[], keys: Array<FuseOptionKe
   const _formatCost = performance.now() - _formatPerf;
 
   const _searchPerf = performance.now();
-  const result = new Fuse(formattedCollection, { keys, threshold: 0.35 }).search(searchText).map((x) => x.item);
+  const result = new Fuse(formattedCollection, {
+    keys,
+    threshold: enableFuzzySearch ? 0.35 : 0,
+    ignoreLocation: true,
+  })
+    .search(searchText)
+    .map((x) => x.item);
   const _searchCost = performance.now() - _searchPerf;
 
   if (process.env.NODE_ENV === "development") {
