@@ -2,6 +2,7 @@ import { homedir } from "os";
 import { join } from "path";
 import { open, Database } from "sqlite";
 import sqlite3 from "sqlite3";
+import { ZoteroItem, ZoteroCollection } from "./types/zoteroItems";
 
 // Define the missing types
 export interface ZoteroCreator {
@@ -9,46 +10,6 @@ export interface ZoteroCreator {
   lastName?: string;
   name?: string;
   creatorType: string;
-}
-
-export interface ZoteroItem {
-  key: string;
-  version: number;
-  data: {
-    key: string;
-    itemType: string;
-    title: string;
-    creators: Array<{
-      firstName?: string;
-      lastName?: string;
-      name?: string;
-      creatorType: string;
-    }>;
-    date?: string;
-    publicationTitle?: string;
-  };
-  meta: {
-    createdByUser: boolean;
-    numChildren: number;
-  };
-  links: Record<string, string>;
-}
-
-export interface ZoteroCollection {
-  key: string;
-  version: number;
-  data: {
-    key: string;
-    name: string;
-    parentCollection: string | boolean;
-    [key: string]: string | boolean;
-  };
-  meta: {
-    [key: string]: unknown;
-  };
-  links: {
-    [key: string]: string;
-  };
 }
 
 interface DatabaseItem {
@@ -136,6 +97,12 @@ class ZoteroLocalDatabase implements LocalZoteroDatabase {
       return items.map((item: DatabaseItem) => ({
         key: item.key,
         version: 0,
+        library: {
+          type: "user",
+          id: 0,
+          name: "My Library",
+          links: {},
+        },
         data: {
           key: item.key,
           itemType: item.itemType,
@@ -233,6 +200,12 @@ class ZoteroLocalDatabase implements LocalZoteroDatabase {
       return items.map((item: DatabaseItem) => ({
         key: item.key,
         version: 0,
+        library: {
+          type: "user",
+          id: 0,
+          name: "My Library",
+          links: {},
+        },
         data: {
           key: item.key,
           itemType: item.itemType,

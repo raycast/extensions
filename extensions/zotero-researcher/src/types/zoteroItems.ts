@@ -12,9 +12,9 @@ export interface ZoteroItem {
     type: string;
     id: number;
     name: string;
-    links: Record<string, { href: string }>;
+    links: Record<string, string>;
   };
-  links: Record<string, { href: string }>;
+  links: Record<string, string>;
   meta: {
     creatorSummary?: string;
     parsedDate?: string;
@@ -251,4 +251,16 @@ export interface ZoteroWebpage extends ZoteroItemBase {
   language?: string;
   rights?: string;
   extra?: string;
+}
+
+export interface ZoteroCollection {
+  key: string;
+  version: number;
+  data: {
+    key: string;
+    name: string;
+    parentCollection: string | boolean;
+  };
+  meta: Record<string, unknown>;
+  links: Record<string, string>;
 }

@@ -180,117 +180,115 @@ export class ZoteroService {
    * Authenticate with the Zotero API using the provided API key
    * @returns A promise that resolves when authentication is successful
    */
-  public async authenticate(): Promise<boolean> {
-    // If authentication is already in progress, return the existing promise
+  public authenticate(): Promise<boolean> {
     if (this.authPromise) {
       return this.authPromise;
     }
 
-    // Wrap the authentication logic in a promise
     this.authPromise = new Promise((resolve, reject) => {
-      try {
-        if (!this.userId) {
-          console.log(`[${this.instanceId}] No user ID provided`);
-          reject(new ZoteroAuthenticationError("User ID is required"));
-          return;
-        }
-
-        console.log(`[${this.instanceId}] Attempting to authenticate with user ID: ${this.userId}`);
-        const url = `${ZOTERO_API_BASE_URL}/users/${this.userId}/items/top?limit=1&key=${this.apiKey}`;
-
-        const response = await fetchWithNode(url, {
-          method: "GET",
-          headers: {
-            "Zotero-API-Version": "3",
-            "Content-Type": "application/json",
-          },
-        });
-
-        console.log(`[${this.instanceId}] Authentication response status: ${response.status}`);
-        const responseText = await response.text();
-
-        if (!response.ok) {
-          console.log(`[${this.instanceId}] Authentication failed with status ${response.status}`);
-          this.isAuthenticated = false;
-
-          if (response.status === 401) {
-            reject(
-              new ZoteroAuthenticationError(
-                `Authentication failed: Invalid API key. Please verify your API key in preferences.`,
-              ),
-            );
-          }
-
-          if (response.status === 403) {
-            reject(
-              new ZoteroAuthenticationError(
-                `Authentication failed: Insufficient permissions. Make sure "Allow library access" is enabled for your API key.`,
-              ),
-            );
-          }
-
-          if (response.status === 404) {
-            reject(
-              new ZoteroAuthenticationError(
-                `Authentication failed: User ID ${this.userId} not found. Please verify your user ID in preferences.`,
-              ),
-            );
-          }
-
-          reject(
-            new ZoteroApiError(
-              `Authentication failed (${response.status}): ${response.statusText}\nResponse: ${responseText}`,
-            ),
-          );
-        }
-
-        // Try to parse the response to ensure it's valid JSON
+      const doAuthentication = async () => {
         try {
-          const data = JSON.parse(responseText);
-          console.log(`[${this.instanceId}] Successfully parsed response`);
-
-          if (!Array.isArray(data) || data.length === 0) {
-            console.log(`[${this.instanceId}] Response not a non-empty array`);
-            reject(new Error("Expected non-empty array response"));
+          if (!this.userId) {
+            console.log(`[${this.instanceId}] No user ID provided`);
+            reject(new ZoteroAuthenticationError("User ID is required"));
+            return;
           }
 
-          // Verify the response contains the expected user ID
-          const firstItem = data[0];
-          if (!firstItem.library || firstItem.library.id !== parseInt(this.userId)) {
-            console.log(`[${this.instanceId}] User ID mismatch in response`);
-            reject(new Error("Response user ID does not match"));
+          console.log(
+            `[${this.instanceId}] Attempting to authenticate with user ID: ${this.userId}`,
+          );
+          const url = `${ZOTERO_API_BASE_URL}/users/${this.userId}/items/top?limit=1&key=${this.apiKey}`;
+
+          const response = await fetchWithNode(url, {
+            method: "GET",
+            headers: {
+              "Zotero-API-Version": "3",
+              "Content-Type": "application/json",
+            },
+          });
+
+          console.log(`[${this.instanceId}] Authentication response status: ${response.status}`);
+          const responseText = await response.text();
+
+          if (!response.ok) {
+            console.log(
+              `[${this.instanceId}] Authentication failed with status ${response.status}`,
+            );
+            this.isAuthenticated = false;
+
+            if (response.status === 401) {
+              throw new ZoteroAuthenticationError(
+                `Authentication failed: Invalid API key. Please verify your API key in preferences.`,
+              );
+            }
+
+            if (response.status === 403) {
+              throw new ZoteroAuthenticationError(
+                `Authentication failed: Insufficient permissions. Make sure "Allow library access" is enabled for your API key.`,
+              );
+            }
+
+            if (response.status === 404) {
+              throw new ZoteroAuthenticationError(
+                `Authentication failed: User ID ${this.userId} not found. Please verify your user ID in preferences.`,
+              );
+            }
+
+            throw new ZoteroApiError(
+              `Authentication failed (${response.status}): ${response.statusText}\nResponse: ${responseText}`,
+            );
           }
+
+          // Try to parse the response to ensure it's valid JSON
+          try {
+            const data = JSON.parse(responseText);
+            console.log(`[${this.instanceId}] Successfully parsed response`);
+
+            if (!Array.isArray(data) || data.length === 0) {
+              console.log(`[${this.instanceId}] Response not a non-empty array`);
+              throw new Error("Expected non-empty array response");
+            }
+
+            // Verify the response contains the expected user ID
+            const firstItem = data[0];
+            if (!firstItem.library || firstItem.library.id !== parseInt(this.userId)) {
+              console.log(`[${this.instanceId}] User ID mismatch in response`);
+              throw new Error("Response user ID does not match");
+            }
+          } catch (error: unknown) {
+            console.log(
+              `[${this.instanceId}] Error parsing response: ${error instanceof Error ? error.message : "Unknown error"}`,
+            );
+            this.isAuthenticated = false;
+            throw new ZoteroApiError(
+              `Invalid response from Zotero API: ${error instanceof Error ? error.message : "Unknown error"}`,
+            );
+          }
+
+          this.isAuthenticated = true;
+          console.log(`[${this.instanceId}] Authentication successful!`);
+          resolve(true);
         } catch (error: unknown) {
           console.log(
-            `[${this.instanceId}] Error parsing response: ${error instanceof Error ? error.message : "Unknown error"}`,
+            `[${this.instanceId}] Authentication error: ${error instanceof Error ? error.message : "Unknown error"}`,
           );
           this.isAuthenticated = false;
-          reject(
-            new ZoteroApiError(
-              `Invalid response from Zotero API: ${error instanceof Error ? error.message : "Unknown error"}`,
-            ),
-          );
+          if (error instanceof ZoteroApiError) {
+            reject(error);
+          } else {
+            reject(
+              new ZoteroApiError(
+                `Authentication failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+              ),
+            );
+          }
+        } finally {
+          this.authPromise = null;
         }
+      };
 
-        this.isAuthenticated = true;
-        console.log(`[${this.instanceId}] Authentication successful!`);
-        resolve(true);
-      } catch (error: unknown) {
-        console.log(
-          `[${this.instanceId}] Authentication error: ${error instanceof Error ? error.message : "Unknown error"}`,
-        );
-        this.isAuthenticated = false;
-        if (error instanceof ZoteroApiError) {
-          reject(error);
-        }
-        reject(
-          new ZoteroApiError(
-            `Authentication failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-          ),
-        );
-      } finally {
-        this.authPromise = null;
-      }
+      // Start the authentication process
+      doAuthentication();
     });
 
     return this.authPromise;
@@ -542,7 +540,9 @@ export class ZoteroService {
         transformed.data = [];
       }
 
-      console.log(`Transformed response has ${transformed.data.length} items in data array`);
+      // Ensure transformed.data is properly typed
+      const transformedData = transformed.data as unknown[];
+      console.log(`Transformed response has ${transformedData.length} items in data array`);
 
       return transformed as T;
     } catch (error) {
@@ -562,10 +562,8 @@ export class ZoteroService {
     };
     if (!linkHeader) return links;
 
-    // Split parts by comma
     const parts = linkHeader.split(",");
     for (const part of parts) {
-      // Split into section and direction
       const section = part.split(";");
       if (section.length < 2) continue;
 
@@ -575,7 +573,10 @@ export class ZoteroService {
       if (urlMatch && relMatch) {
         const url = urlMatch[1];
         const rel = relMatch[1];
-        links[rel as keyof ZoteroApiLinks] = { href: url };
+        links[rel as keyof ZoteroApiLinks] = {
+          href: url,
+          type: "application/json",
+        };
       }
     }
     return links;
@@ -656,27 +657,10 @@ export class ZoteroService {
   }
 }
 
-// Replace line ~18 with a proper type instead of 'any'
 export type ZoteroResponse<T> = {
   status: number;
   data: T;
   headers?: Record<string, string>;
 };
 
-// Fix async Promise executor (line ~171)
-return new Promise((resolve, reject) => {
-  const fetchAsync = async () => {
-    try {
-      // Async code here
-      const result = await someAsyncOperation();
-      resolve(result);
-    } catch (error) {
-      reject(error);
-    }
-  };
-
-  fetchAsync();
-});
-
-// Replace line ~435 with a proper type instead of 'any'
 export type ZoteroDataType = ZoteroItem | ZoteroCollection | unknown;

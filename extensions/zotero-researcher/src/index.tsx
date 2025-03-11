@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import Zotero, { ZoteroItem } from "./utils/Zotero";
+import Zotero from "./utils/Zotero";
 import CitationList from "./components/CitationList";
+import { ZoteroItem } from "./types";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<ZoteroItem[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -16,7 +17,7 @@ export default function Command() {
         setItems(fetchedItems);
         setError(null);
       } catch (error) {
-        setError(error instanceof Error ? error.message : String(error));
+        setError(error instanceof Error ? error : new Error(String(error)));
       } finally {
         setIsLoading(false);
       }

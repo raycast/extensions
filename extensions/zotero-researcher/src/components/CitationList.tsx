@@ -1,11 +1,11 @@
 import { List, ActionPanel, Action, Icon, Toast, showToast, Clipboard, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { ZoteroItem } from "../background";
+import { ZoteroItem } from "../types";
 
-interface CitationListProps {
+export interface CitationListProps {
   items?: ZoteroItem[];
   isLoading?: boolean;
-  error?: string | null;
+  error?: Error | null;
 }
 
 export default function CitationList({
@@ -17,7 +17,7 @@ export default function CitationList({
     isLoading: boolean;
     searchText: string;
     items: ZoteroItem[];
-    error: string | null;
+    error: Error | null;
   }>({
     isLoading: isLoading,
     searchText: "",
@@ -111,7 +111,7 @@ export default function CitationList({
         <List.EmptyView
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
           title="Error loading citations"
-          description={state.error}
+          description={state.error.message}
         />
       ) : filteredItems.length === 0 ? (
         <List.EmptyView
@@ -183,7 +183,7 @@ function getItemTypeIcon(itemType?: string): Icon {
     case "journalarticle":
       return Icon.Document;
     case "conferencepaper":
-      return Icon.Note;
+      return Icon.Document;
     case "thesis":
       return Icon.Star;
     case "webpage":

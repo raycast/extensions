@@ -3,6 +3,7 @@ import { join } from "path";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { existsSync } from "fs";
+import { ZoteroItem } from "../types";
 
 const execFileAsync = promisify(execFile);
 
@@ -11,29 +12,6 @@ export interface ZoteroCreator {
   lastName?: string;
   name?: string;
   creatorType: string;
-}
-
-export interface ZoteroItem {
-  key: string;
-  version: number;
-  data: {
-    key: string;
-    itemType: string;
-    title: string;
-    creators: Array<{
-      firstName?: string;
-      lastName?: string;
-      name?: string;
-      creatorType: string;
-    }>;
-    date?: string;
-    publicationTitle?: string;
-  };
-  meta: {
-    createdByUser: boolean;
-    numChildren: number;
-  };
-  links: Record<string, string | unknown>;
 }
 
 export interface ZoteroCollection {
@@ -342,6 +320,12 @@ export default class Zotero {
     return {
       key: item.key,
       version: 0,
+      library: {
+        type: "user",
+        id: 0,
+        name: "My Library",
+        links: {},
+      },
       data: {
         key: item.key,
         itemType: item.itemType,
@@ -352,11 +336,9 @@ export default class Zotero {
               .filter(Boolean)
               .map((creator: string) => {
                 const parts = creator.split(", ").map((s) => s.trim());
-                const lastName = parts[0] || "";
-                const firstName = parts[1] || "";
                 return {
-                  lastName,
-                  firstName,
+                  lastName: parts[0] || "",
+                  firstName: parts[1] || "",
                   creatorType: "author",
                 };
               })
@@ -365,8 +347,9 @@ export default class Zotero {
         publicationTitle: item.publicationTitle,
       },
       meta: {
-        createdByUser: true,
         numChildren: 0,
+        creatorSummary: "",
+        parsedDate: "",
       },
       links: {},
     };

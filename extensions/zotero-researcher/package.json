@@ -58,11 +58,12 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
+    "lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish",
     "generate-icons": "node assets/command-icon.js",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
-    "prepack": "npm run generate-icons && npm run format"
+    "prepack": "npm run generate-icons && npm run format",
+    "prepublish": "npm run lint && npm run build"
   },
   "os": [
     "darwin"
