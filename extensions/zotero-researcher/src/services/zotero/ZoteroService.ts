@@ -1,4 +1,4 @@
-import { ZoteroItem } from "../../types/zoteroItems";
+import { ZoteroItem, ZoteroCollection } from "../../types/zoteroItems";
 import {
   ZoteroApiError,
   ZoteroAuthenticationError,
@@ -356,7 +356,7 @@ export class ZoteroService {
               if (normalizedItem.data) {
                 console.log("- Title:", normalizedItem.data.title);
                 console.log("- Creator count:", normalizedItem.data.creators?.length || 0);
-                if (normalizedItem.data.creators?.length > 0) {
+                if (normalizedItem.data.creators && normalizedItem.data.creators.length > 0) {
                   console.log("- First creator:", JSON.stringify(normalizedItem.data.creators[0]));
                 }
                 console.log("- Date:", normalizedItem.data.date);
@@ -557,7 +557,9 @@ export class ZoteroService {
    * @returns Parsed links object
    */
   private parseLinkHeader(linkHeader?: string): ZoteroApiLinks {
-    const links: ZoteroApiLinks = {};
+    const links: ZoteroApiLinks = {
+      self: { href: "...", type: "application/json" },
+    };
     if (!linkHeader) return links;
 
     // Split parts by comma
