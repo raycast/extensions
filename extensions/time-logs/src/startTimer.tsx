@@ -124,7 +124,11 @@ export default function TrackTime(props: { arguments: TrackTimeArguments }) {
       await saveTimeEntry(newEntry);
 
       // Refresh the menu bar timer first (this will show "Menu Bar item refreshed")
-      await launchCommand({ name: "menuBarTimer", type: LaunchType.UserInitiated });
+      try {
+        await launchCommand({ name: "menuBarTimer", type: LaunchType.UserInitiated });
+      } catch (error) {
+        console.error("Failed to refresh menu bar timer:", error);
+      }
 
       // Use Toast notification instead of HUD, with everything in the title
       await showToast({
