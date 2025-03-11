@@ -12,7 +12,12 @@ import { getAllComponents, filterComponents, sortComponentsByName } from "./util
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
-  const [components] = useState(getAllComponents());
+  const [isLoading, setIsLoading] = useState(true);
+  const [components] = useState(() => {
+    const comps = getAllComponents();
+    setIsLoading(false);
+    return comps;
+  });
 
   // Filter components based on search text and selected type
   const filteredComponents = filterComponents(components, searchText, selectedType);
@@ -22,6 +27,7 @@ export default function Command() {
 
   return (
     <List
+      isLoading={isLoading}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search Nuxt UI components..."
       throttle

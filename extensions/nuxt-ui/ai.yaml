@@ -25,7 +25,7 @@ instructions: |-
   
   - IMPORTANT: When recommending modules, provide a brief description of what the module does and how to install it
   - Prioritize the official module first (type: 'official') like @nuxt/ui, @nuxt/content, @nuxt/font, etc... and then the most popular modules (using stars, forks, etc... using the key `stats` of the module object)
-  - All official module doesn't have the '@nuxt/' prefix and are called like this: `ui`, `content`, `font`, etc...
+  - All official modules don't have the '@nuxt/' prefix and are called like this: `ui`, `content`, `font`, etc...
   - Include the correct installation command (e.g., `npx nuxi module add <module-name>` or `npm install <module-name>` for examples)
   - If a category doesn't exist, use a matching one
   - When applicable, include basic configuration examples for the module
@@ -60,7 +60,6 @@ instructions: |-
     This is an example not a full source of truth, but it should be enough to understand the concept
   
   # NEVER FORGET:
-  - NEVER include import statements (Vue macro, composables, etc)
   - NEVER include import statements (from Vue, Reka UI, or elsewhere) in the final code.
   - NEVER use slots when `:items` prop is available (or any other prop use to generate the component content)
   - NEVER customize UI unless requested
