@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, ActionPanel, Action, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Form, ActionPanel, Action, List, showToast, Toast, useNavigation, Icon } from "@raycast/api";
 import * as solanaWeb3 from "@solana/web3.js";
 import bs58 from "bs58";
 
@@ -71,7 +71,10 @@ function WalletList({ wallets }: { wallets: string[] }) {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Wallet" text={`#${index + 1}`} />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Private Key" text={wallet.split(",")[0]?.trim() || wallet} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Private Key"
+                      text={wallet.split(",")[0]?.trim() || wallet}
+                    />
                     {wallet.includes(",") && (
                       <List.Item.Detail.Metadata.Label title="Public Key" text={wallet.split(",")[1]?.trim() || ""} />
                     )}
