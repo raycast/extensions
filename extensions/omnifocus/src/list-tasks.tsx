@@ -7,12 +7,6 @@ import { TaskList } from "./lib/components/task-list";
 import { ValidateRequirements } from "./lib/components/with-requirements";
 import { GroupBy } from "./lib/components/task-list";
 
-type Preferences = {
-  showDetailsByDefault: boolean;
-  defaultPerspective?: string;
-  defaultGrouping?: GroupBy;
-};
-
 type ViewMode = {
   perspective: string;
   groupBy: GroupBy;
@@ -23,12 +17,12 @@ const isValidGroupBy = (value: string | undefined): value is GroupBy => {
 };
 
 export default function PerspectivesCommand() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
 
   // Initialize view mode with preferences but maintain state during session
   const [viewMode, setViewMode] = useState<ViewMode>({
     perspective: preferences.defaultPerspective || "Inbox",
-    groupBy: isValidGroupBy(preferences.defaultGrouping) ? preferences.defaultGrouping : "none",
+    groupBy: preferences.defaultGrouping || "none",
   });
 
   const {
