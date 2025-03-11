@@ -10,7 +10,18 @@ export default function History() {
     // Load history from LocalStorage when component mounts
     LocalStorage.getItem("gemini_command_history").then((storedHistory) => {
       if (storedHistory) {
-        commandHistory = JSON.parse(storedHistory);
+        // Ensure we're working with unique entries by using a Set with id as key
+        const historyData = JSON.parse(storedHistory);
+        // Create a Map to deduplicate entries by id
+        const uniqueEntries = new Map();
+        historyData.forEach(item => {
+          if (!uniqueEntries.has(item.id)) {
+            uniqueEntries.set(item.id, item);
+          }
+        });
+        
+        // Convert Map values back to array
+        commandHistory = Array.from(uniqueEntries.values());
         setHistory(commandHistory);
       }
     });
@@ -31,7 +42,7 @@ export default function History() {
           ]}
           detail={
             <List.Item.Detail
-              markdown={`## Prompt\n\n${item.prompt}\n\n## Response\n\n${item.response}\n\n**Time**: ${new Date(item.timestamp).toLocaleString()}\n**Model**: ${item.model || "Not specified"}`}
+              markdown={`## Prompt\n\n${item.prompt}\n\n---\n\n## Response\n\n${item.response}\n\n---\n\n**Time**: ${new Date(item.timestamp).toLocaleString()}\n**Model**: ${item.model || "Not specified"}`}
             />
           }
           actions={
