@@ -9,6 +9,7 @@ import {
   Keyboard,
   launchCommand,
   LaunchType,
+  LocalStorage,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -16,6 +17,31 @@ import fs from "fs";
 import Gemini from "gemini-ai";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
+
+// Import the history functionality
+let commandHistory = [];
+
+// Function to add to history
+const addToHistory = async (prompt, response, modelUsed) => {
+  const newEntry = {
+    id: Date.now(),
+    timestamp: new Date().toISOString(),
+    prompt,
+    response,
+    model: modelUsed
+  };
+  commandHistory = [newEntry, ...commandHistory];
+  
+  // Store in LocalStorage for persistence
+  await LocalStorage.setItem("gemini_command_history", JSON.stringify(commandHistory));
+};
+
+// Load history from LocalStorage
+LocalStorage.getItem("gemini_command_history").then((storedHistory) => {
+  if (storedHistory) {
+    commandHistory = JSON.parse(storedHistory);
+  }
+});
 
 export default (props, { context = undefined, allowPaste = false, useSelected = false, buffer = [] }) => {
   const Pages = {
@@ -59,6 +85,10 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
       });
       setMarkdown(response);
       setLastResponse(response);
+      
+      // Add to history with model information
+      const usedModel = model === "default" ? defaultModel : model;
+      await addToHistory(query, response, usedModel);
 
       await showToast({
         style: Toast.Style.Success,
@@ -139,6 +169,17 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
                 }}
               />
             )}
+            <Action
+              title="View History"
+              icon={Icon.Clock}
+              shortcut={{ modifiers: ["cmd"], key: "h" }}
+              onAction={async () => {
+                await launchCommand({
+                  name: "history",
+                  type: LaunchType.UserInitiated,
+                });
+              }}
+            />
           </ActionPanel>
         )
       }
