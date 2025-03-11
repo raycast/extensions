@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Icon, Keyboard, List, confirmAlert, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { fetchFiles, gokapiFile, getFileTypeIcon, getFileTypeTag, deleteFile } from "./utils";
+import { fetchFiles, GokapiFile, getFileTypeIcon, getFileTypeTag, deleteFile } from "./utils";
 import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
-  const [files, setFiles] = useState<gokapiFile[]>([]);
+  const [files, setFiles] = useState<GokapiFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showingDetail, setShowingDetail] = useState(false);
 

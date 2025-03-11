@@ -22,7 +22,7 @@
       "name": "upload-file",
       "title": "Upload File",
       "subtitle": "Gokapi",
-      "description": "Uplad a new file to the Gokapi server",
+      "description": "Upload a new file to the Gokapi server",
       "mode": "view"
     }
   ],

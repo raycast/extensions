@@ -10,14 +10,14 @@ const preferences = getPreferenceValues<{ server_url?: string; api_key?: string 
 
 if (!preferences.server_url || preferences.server_url === "undefined") {
   showFailureToast(new Error("Missing Gokapi server URL"), {
-    title: "Could not run find the server URL. Please set the Gokapi server URL in the preferences.",
+    title: "Could not find the server URL. Please set the Gokapi server URL in the preferences.",
   });
   popToRoot();
 }
 
 if (!preferences.api_key || preferences.api_key === "undefined") {
   showFailureToast(new Error("Missing API key"), {
-    title: "Could not run find the API key. Please set the Gokapi API key in the preferences.",
+    title: "Could not find the API key. Please set the Gokapi API key in the preferences.",
   });
   popToRoot();
 }
@@ -25,7 +25,7 @@ if (!preferences.api_key || preferences.api_key === "undefined") {
 const gokapiUrl = preferences.server_url;
 const gokapiKey = preferences.api_key ?? "";
 
-export interface gokapiFile {
+export interface GokapiFile {
   Id: string;
   Name: string;
   Size: string;
@@ -41,7 +41,7 @@ export interface gokapiFile {
   IsEndToEndEncrypted: boolean;
 }
 
-export async function fetchFiles(): Promise<gokapiFile[]> {
+export async function fetchFiles(): Promise<GokapiFile[]> {
   const response = await fetch(`${gokapiUrl}/api/files/list`, {
     method: "GET",
     headers: {
@@ -52,7 +52,7 @@ export async function fetchFiles(): Promise<gokapiFile[]> {
   if (!response.ok) {
     throw new Error("Failed to fetch files");
   }
-  return (await response.json()) as gokapiFile[];
+  return (await response.json()) as GokapiFile[];
 }
 
 export async function deleteFile(fileId: string): Promise<void> {
@@ -82,7 +82,6 @@ export async function uploadFile(
   // Use fileFromPath instead of fs.createReadStream
   formData.append("file", await fileFromPath(filePath));
 
-  // Create an encoder for the FormData
   const encoder = new FormDataEncoder(formData);
   const response = await fetch(`${gokapiUrl}/api/files/add`, {
     method: "POST",
@@ -96,12 +95,15 @@ export async function uploadFile(
   if (!response.ok) {
     throw new Error("Failed to upload file");
   }
-  // New: Parse JSON and copy UrlDownload to clipboard
-  const data = (await response.json()) as { FileInfo: { UrlDownload: string } };
-  await Clipboard.copy(data.FileInfo.UrlDownload);
+  try {
+    const data = (await response.json()) as { FileInfo: { UrlDownload: string } };
+    await Clipboard.copy(data.FileInfo.UrlDownload);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-export function getFileTypeIcon(file: gokapiFile) {
+export function getFileTypeIcon(file: GokapiFile) {
   const ct = file.ContentType.toLowerCase();
 
   if (ct === "application/pdf") {
@@ -157,7 +159,7 @@ export function getFileTypeIcon(file: gokapiFile) {
   return "icon/other.svg";
 }
 
-export function getFileTypeTag(file: gokapiFile) {
+export function getFileTypeTag(file: GokapiFile) {
   const ct = file.ContentType.toLowerCase();
 
   if (ct === "application/pdf") {
