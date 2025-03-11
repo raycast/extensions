@@ -14,21 +14,18 @@
     {
       "name": "ultrahuman-summary",
       "title": "Ultrahuman Summary",
-      "subtitle": "Dynamic",
       "description": "View a summary of your Ultrahuman health metrics",
       "mode": "view"
     },
     {
       "name": "ultrahuman-summary-yesterday",
       "title": "Ultrahuman Yesterday Summary",
-      "subtitle": "Dynamic",
       "description": "View a summary of your Ultrahuman health metrics from yesterday",
       "mode": "view"
     },
     {
       "name": "ultrahuman-sleep",
       "title": "Ultrahuman Sleep",
-      "subtitle": "Dynamic",
       "description": "View detailed sleep metrics",
       "mode": "view"
     }
