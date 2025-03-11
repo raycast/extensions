@@ -48,5 +48,9 @@ return JSON.stringify(validLeaves);
 `);
 
   // Parse the JSON string back into an array of tasks
-  return JSON.parse(result) as OmniFocusTask[];
+  try {
+    return JSON.parse(result) as OmniFocusTask[];
+  } catch (e) {
+    throw new Error(`Failed to parse tasks result: ${e}`);
+  }
 }

@@ -18,13 +18,17 @@ type ViewMode = {
   groupBy: GroupBy;
 };
 
+const isValidGroupBy = (value: string | undefined): value is GroupBy => {
+  return value === "none" || value === "project" || value === "tags" || value === "priority";
+};
+
 export default function PerspectivesCommand() {
   const preferences = getPreferenceValues<Preferences>();
 
   // Initialize view mode with preferences but maintain state during session
   const [viewMode, setViewMode] = useState<ViewMode>({
     perspective: preferences.defaultPerspective || "Inbox",
-    groupBy: (preferences.defaultGrouping as GroupBy) || "none",
+    groupBy: isValidGroupBy(preferences.defaultGrouping) ? preferences.defaultGrouping : "none",
   });
 
   const {
@@ -56,10 +60,13 @@ export default function PerspectivesCommand() {
   const handleViewChange = (value: string) => {
     if (value.startsWith("group:")) {
       // Update only grouping, maintain current perspective
-      setViewMode((current) => ({
-        ...current,
-        groupBy: value.replace("group:", "") as GroupBy,
-      }));
+      const newGroupBy = value.replace("group:", "");
+      if (isValidGroupBy(newGroupBy)) {
+        setViewMode((current) => ({
+          ...current,
+          groupBy: newGroupBy,
+        }));
+      }
     } else {
       // Update only perspective, maintain current grouping
       setViewMode((current) => ({
@@ -82,7 +89,7 @@ export default function PerspectivesCommand() {
         isLoading={perspectiveLoading || isLoading}
         tasks={data}
         title={viewMode.groupBy === "none" ? viewMode.perspective : `${viewMode.perspective} (${viewMode.groupBy})`}
-        onTaskUpdated={async () => await revalidate()}
+        onTaskUpdated={() => revalidate()}
         isShowingDetail={preferences.showDetailsByDefault}
         groupBy={viewMode.groupBy}
         searchBarAccessory={

@@ -3,6 +3,7 @@ import { OmniFocusTask } from "../types/task";
 import { completeTask } from "../api/complete.task";
 import { deleteTask } from "../api/delete-task";
 import { cleanupPerspective } from "../api/cleanup";
+import { showFailureToast } from "@raycast/utils";
 
 export type GroupBy = "none" | "project" | "tags" | "priority";
 
@@ -70,7 +71,8 @@ function groupTasks(tasks: OmniFocusTask[], groupBy: GroupBy): { title: string; 
         if (!groupedByProject.has(projectName)) {
           groupedByProject.set(projectName, []);
         }
-        groupedByProject.get(projectName)?.push(task);
+        const tasks = groupedByProject.get(projectName)!;
+        tasks.push(task);
       });
       return Array.from(groupedByProject.entries())
         .sort(([a], [b]) => {
@@ -92,13 +94,15 @@ function groupTasks(tasks: OmniFocusTask[], groupBy: GroupBy): { title: string; 
           if (!groupedByTags.has(noTags)) {
             groupedByTags.set(noTags, []);
           }
-          groupedByTags.get(noTags)?.push(task);
+          const tasks = groupedByTags.get(noTags)!;
+          tasks.push(task);
         } else {
           task.tags.forEach((tag) => {
             if (!groupedByTags.has(tag)) {
               groupedByTags.set(tag, []);
             }
-            groupedByTags.get(tag)?.push(task);
+            const tasks = groupedByTags.get(tag)!;
+            tasks.push(task);
           });
         }
       });
@@ -130,7 +134,8 @@ function groupTasks(tasks: OmniFocusTask[], groupBy: GroupBy): { title: string; 
         } else if (task.dueDate) {
           priority = "Due";
         }
-        groupedByPriority.get(priority)?.push(task);
+        const tasks = groupedByPriority.get(priority)!;
+        tasks.push(task);
       });
 
       // Return only non-empty priority groups in the specified order
@@ -226,10 +231,7 @@ export const TaskList: React.FunctionComponent<TaskListProps> = ({
       });
       await onTaskUpdated?.();
     } catch {
-      await showToast({
-        title: "An error occurred while deleting the task.",
-        style: Toast.Style.Failure,
-      });
+      await showFailureToast("An error occurred while deleting the task.");
     }
   }
 
@@ -242,10 +244,7 @@ export const TaskList: React.FunctionComponent<TaskListProps> = ({
       });
       await onTaskUpdated?.();
     } catch {
-      await showToast({
-        title: "An error occurred while completing the task.",
-        style: Toast.Style.Failure,
-      });
+      await showFailureToast("An error occurred while completing the task.");
     }
   }
 
@@ -258,10 +257,7 @@ export const TaskList: React.FunctionComponent<TaskListProps> = ({
       });
       await onTaskUpdated?.();
     } catch {
-      await showToast({
-        title: "An error occurred while cleaning up the perspective.",
-        style: Toast.Style.Failure,
-      });
+      await showFailureToast("An error occurred while cleaning up the perspective.");
     }
   }
 
@@ -287,7 +283,7 @@ export const TaskList: React.FunctionComponent<TaskListProps> = ({
                   icon={!t.completed ? Icon.Circle : Icon.Checkmark}
                   detail={
                     <List.Item.Detail
-                      markdown={t.name}
+                      markdown={`# ${t.name}`}
                       metadata={
                         <List.Item.Detail.Metadata>
                           <List.Item.Detail.Metadata.Label

@@ -20,7 +20,7 @@ return tasks.reduce((ts, t) => {
       dropped: t.dropped(),
       completed,
       tags: t.tags ? t.tags().map(tt => tt.name()) : [],
-      note: t.note ? t.note() : undefined
+      note: t.note ? t.note() : null
     });
   }
   return ts;
