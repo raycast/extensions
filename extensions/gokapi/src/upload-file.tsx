@@ -31,10 +31,10 @@ export default function Command() {
       const allowedDownloads = values.limitDownloads ? parseInt(values.maxDownloads) : 0;
       const expiryDays = values.expiry ? parseInt(values.expiryDays) : 0;
       try {
-        showToast({ style: Toast.Style.Animated, title: "File uploading" });
+        await showToast({ style: Toast.Style.Animated, title: "File uploading" });
         await uploadFile(values.files[0], allowedDownloads, expiryDays, values.password || "");
-        closeMainWindow({ clearRootSearch: true });
-        popToRoot();
+        await closeMainWindow({ clearRootSearch: true });
+        await popToRoot();
         await showToast({ style: Toast.Style.Success, title: "File uploaded successfully" });
       } catch (error) {
         await showFailureToast(error, { title: "Failed to upload file" });

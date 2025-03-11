@@ -113,8 +113,6 @@ export async function uploadFile(
 export function getFileTypeIcon(file: GokapiFile) {
   const ct = file.ContentType.toLowerCase();
 
-  console.log(ct);
-
   if (ct === "application/pdf") {
     return "pdf.svg";
   }
