@@ -74,7 +74,7 @@ Menu Bar Timer
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/time-logs.git
+git clone https://github.com/damianredecki/time-logs.git
 
 # Navigate to the project directory
 cd time-logs
