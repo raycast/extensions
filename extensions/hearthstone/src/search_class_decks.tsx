@@ -1,83 +1,72 @@
-import { Action, ActionPanel, List, useNavigation } from '@raycast/api';
-import { useState } from 'react';
-import { DeckList } from './DeckList';
-import { ClassName } from './domain';
-import { classIcon, getGameModeName } from './utils';
+import { Action, ActionPanel, Grid, useNavigation } from '@raycast/api'
+import { useState } from 'react'
+import { DeckList } from './DeckList'
+import { ClassName } from './domain'
+import { classIcon, getGameModeName } from './utils'
 
 export default function Command() {
-  const [format, setFormat] = useState(1); // 默认为狂野模式 (1)
-  const [minGames, setMinGames] = useState<number>();
-  const { push } = useNavigation();
+  const [format, setFormat] = useState(1)
+  const [minGames, setMinGames] = useState<number>()
+  const { push } = useNavigation()
 
-  const classes = Object.values(ClassName);
+  const classes = Object.values(ClassName)
 
   const handleFormatChange = (newValue: string) => {
-    const [newFormat, newMinGames] = newValue.split('_');
-    setFormat(Number(newFormat));
-    setMinGames(newMinGames ? Number(newMinGames) : undefined);
-  };
+    const [newFormat, newMinGames] = newValue.split('_')
+    setFormat(Number(newFormat))
+    setMinGames(newMinGames ? Number(newMinGames) : undefined)
+  }
 
   return (
-    <List
+    <Grid
+      columns={5} // 设置列数
+      inset={Grid.Inset.Medium} // 使用中等内边距
+      aspectRatio="1" // 确保每个元素是正方形
+      fit={Grid.Fit.Fill} // 填充可用空间
       searchBarAccessory={
-        <List.Dropdown tooltip="Select Format and Filters" onChange={handleFormatChange}>
-          <List.Dropdown.Section title="Game Mode">
-            <List.Dropdown.Item title="Wild" value="1" />
-            <List.Dropdown.Item title="Standard" value="2" />
-          </List.Dropdown.Section>
-          <List.Dropdown.Section title="Minimum Games">
-            <List.Dropdown.Item title="50+" value={`${format}_50`} />
-            <List.Dropdown.Item title="100+" value={`${format}_100`} />
-            <List.Dropdown.Item title="200+" value={`${format}_200`} />
-            <List.Dropdown.Item title="400+" value={`${format}_400`} />
-            <List.Dropdown.Item title="800+" value={`${format}_800`} />
-            <List.Dropdown.Item title="1600+" value={`${format}_1600`} />
-            <List.Dropdown.Item title="3200+" value={`${format}_3200`} />
-            <List.Dropdown.Item title="6400+" value={`${format}_6400`} />
-          </List.Dropdown.Section>
-        </List.Dropdown>
+        <Grid.Dropdown tooltip="Select Format and Filters" onChange={handleFormatChange}>
+          <Grid.Dropdown.Section title="Game Mode">
+            <Grid.Dropdown.Item title="Wild" value="1" />
+            <Grid.Dropdown.Item title="Standard" value="2" />
+          </Grid.Dropdown.Section>
+          <Grid.Dropdown.Section title="Minimum Games">
+            <Grid.Dropdown.Item title="50+" value={`${format}_50`} />
+            <Grid.Dropdown.Item title="100+" value={`${format}_100`} />
+            <Grid.Dropdown.Item title="200+" value={`${format}_200`} />
+            <Grid.Dropdown.Item title="400+" value={`${format}_400`} />
+            <Grid.Dropdown.Item title="800+" value={`${format}_800`} />
+            <Grid.Dropdown.Item title="1600+" value={`${format}_1600`} />
+            <Grid.Dropdown.Item title="3200+" value={`${format}_3200`} />
+            <Grid.Dropdown.Item title="6400+" value={`${format}_6400`} />
+          </Grid.Dropdown.Section>
+        </Grid.Dropdown>
       }
     >
       {classes.map((className) => (
-        <List.Item
+        <Grid.Item
           key={className}
-          icon={classIcon(className)}
+          content={{ source: classIcon(className).source, tintColor: null }}
           title={className}
           actions={
-            <Actions
-              className={className}
-              format={format}
-              onViewDecks={() =>
-                push(
-                  <DeckList
-                    className={className}
-                    format={format}
-                    minGames={minGames} // 这个保留在回调函数中
-                  />,
-                )
-              }
-            />
+            <ActionPanel title={className}>
+              <ActionPanel.Section>
+                <Action 
+                  title={`View ${getGameModeName(format)} Decks`} 
+                  onAction={() =>
+                    push(
+                      <DeckList
+                        className={className}
+                        format={format}
+                        minGames={minGames}
+                      />
+                    )
+                  } 
+                />
+              </ActionPanel.Section>
+            </ActionPanel>
           }
         />
       ))}
-    </List>
-  );
-}
-
-function Actions({
-  className,
-  format,
-  onViewDecks, // 移除未使用的minGames参数
-}: {
-  className: ClassName;
-  format: number;
-  onViewDecks: () => void;
-}) {
-  return (
-    <ActionPanel title={className}>
-      <ActionPanel.Section>
-        <Action title={`View ${getGameModeName(format)} Decks`} onAction={onViewDecks} />
-      </ActionPanel.Section>
-    </ActionPanel>
-  );
+    </Grid>
+  )
 }

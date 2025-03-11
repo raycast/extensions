@@ -1,12 +1,20 @@
-import { Action, ActionPanel, Icon, List } from '@raycast/api'
+import { Action, ActionPanel, Grid, Icon, List } from '@raycast/api'
 import { usePromise } from '@raycast/utils'
 import axios from 'axios'
 import { useEffect, useState } from 'react'
-import { CardSlot, ClassName, Deck } from './domain'
+import { CardDetailView } from './CardDetailView'
+import { CardSlot, ClassName } from './domain'
 import { gethsguruBestDecks, gethsguruBestDecksByClass } from './hsguru'
-import { classIcon, ellipsize, formatNumberWithK, getLocalCardData } from './utils'
+import {
+  classIcon,
+  ellipsize,
+  formatDust,
+  formatWinrate,
+  getLocalCardData,
+  getRarityColor
+} from './utils'
 
-// Define card data types
+// 定义卡牌数据类型
 interface CardData {
   id: string
   name: string
@@ -24,7 +32,7 @@ export const DeckList: React.FC<DeckListProps> = ({ className, format = 1, minGa
     ? usePromise(gethsguruBestDecksByClass, [className, format, minGames], {})
     : usePromise(gethsguruBestDecks, [format], {})
 
-  // 使用本地卡牌数据而不是从API获取
+  // 使用本地卡牌数据
   const [cardData, setCardData] = useState<CardData[]>([])
   const [cardsLoading, setCardsLoading] = useState(true)
 
@@ -55,87 +63,117 @@ export const DeckList: React.FC<DeckListProps> = ({ className, format = 1, minGa
   const isLoading = decksLoading || cardsLoading
 
   return (
-    <List isLoading={isLoading} isShowingDetail>
+    <Grid 
+      isLoading={isLoading}
+      columns={5} 
+      inset={Grid.Inset.Medium} 
+      aspectRatio="1" 
+      fit={Grid.Fit.Fill} 
+    >
       {decks?.map((deck) => (
-        <List.Item
+        <Grid.Item
           key={deck.code}
-          icon={classIcon(deck.className)}
+          content={{ 
+            source: classIcon(deck.className).source,
+            tintColor: null
+          }}
           title={ellipsize(deck.title, 10)}
-          accessories={[winrate(deck), dust(deck)]}
+          subtitle={`${formatWinrate(deck.winrate)}, ${formatDust(deck.dust)}`}
           actions={
-            <Actions
-              title={deck.title}
-              code={deck.code}
-              className={deck.className} // 添加className传递
-            />
+            <ActionPanel title={deck.title}>
+              <ActionPanel.Section>
+                <Action.Push 
+                  title="Show Deck Details" 
+                  target={
+                    <DeckDetails 
+                      title={deck.title} 
+                      slots={deck.slots} 
+                      cardData={cardData}
+                      deckCode={deck.code}
+                      className={deck.className}
+                      format={format}
+                    />
+                  } 
+                />
+                <Action.CopyToClipboard content={deck.code} title="Copy Deck Code" />
+                <Action.OpenInBrowser 
+                  url={`https://www.hsguru.com/decks?format=${format}&player_class=${encodeURIComponent(deck.className)}`} 
+                />
+              </ActionPanel.Section>
+            </ActionPanel>
           }
-          detail={<DeckDetails title={deck.title} slots={deck.slots} cardData={cardData} />}
         />
       ))}
+    </Grid>
+  )
+}
+
+function DeckDetails({ 
+  title, 
+  slots, 
+  cardData, 
+  deckCode, 
+  className, 
+  format 
+}: { 
+  title: string 
+  slots: CardSlot[] 
+  cardData: CardData[] 
+  deckCode: string
+  className: string
+  format: number
+}) {
+  return (
+    <List searchBarPlaceholder={`Browsing cards in: ${title}`}>
+      <List.Section title={title} subtitle={`Class: ${className}`}>
+        {slots.map((slot, index) => {
+          // 查找卡牌数据
+          let card = cardData.find((c) => c.name?.toLowerCase() === slot.card.title.toLowerCase())
+
+          if (!card) {
+            card = cardData.find(
+              (c) =>
+                c.name &&
+                slot.card.title &&
+                (c.name.toLowerCase().includes(slot.card.title.toLowerCase()) ||
+                  slot.card.title.toLowerCase().includes(c.name.toLowerCase())),
+            )
+          }
+
+          // 创建卡牌稀有度显示
+          const rarityText = slot.card.rarity || 'Unknown'
+
+          return (
+            <List.Item
+              key={index}
+              icon={{ 
+                source: Icon.CircleFilled, 
+                tintColor: getRarityColor(rarityText)
+              }}
+              title={`${slot.card.title}  💎 ${slot.card.mana}`}
+              subtitle={`🃏 ${slot.amount}`}
+              accessories={[
+                { text: rarityText }
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.Push 
+                    title="View Card Details" 
+                    target={<CardDetailView slot={slot} card={card || null} deckCode={deckCode} />}
+                    icon={Icon.Eye}
+                  />
+
+                  <Action.CopyToClipboard content={deckCode} title="Copy Deck Code" />
+                  <Action.OpenInBrowser shortcut={{ modifiers: ['cmd'], key: 'h' }}
+                    url={`https://www.hsguru.com/decks?format=${format}&player_class=${encodeURIComponent(className)}`} 
+                    title="Open in HSGuru"
+                  />
+                </ActionPanel>
+              }
+            />
+          )
+        })}
+      </List.Section>
     </List>
   )
-}
-
-// 修改后的Actions组件
-interface ActionsProps {
-  title: string
-  code: string
-  className: ClassName // 添加类型定义
-}
-
-function Actions({ title, code, className }: ActionsProps) {
-  return (
-    <ActionPanel title={title}>
-      <ActionPanel.Section>
-        <Action.CopyToClipboard content={code} title="Copy Deck Code" />
-        <Action.OpenInBrowser
-          url={`https://www.hsguru.com/decks?format=1&player_class=${encodeURIComponent(className)}`}
-        />
-      </ActionPanel.Section>
-    </ActionPanel>
-  )
-}
-
-function DeckDetails({ title, slots, cardData }: { title: string; slots: CardSlot[]; cardData: CardData[] }) {
-  return <List.Item.Detail markdown={generateMarkdownList(title, slots, cardData)} />
-}
-
-const generateMarkdownList = (title: string, cardSlots: CardSlot[], cardData: CardData[]): string => {
-  let markdown = `# ${title}\n\n`
-
-  cardSlots.forEach((slot) => {
-    // 尝试多种方式匹配卡牌
-    let card = cardData.find((c) => c.name?.toLowerCase() === slot.card.title.toLowerCase())
-
-    // 如果没有找到，尝试部分匹配
-    if (!card) {
-      card = cardData.find(
-        (c) =>
-          c.name &&
-          slot.card.title &&
-          (c.name.toLowerCase().includes(slot.card.title.toLowerCase()) ||
-            slot.card.title.toLowerCase().includes(c.name.toLowerCase())),
-      )
-    }
-
-    if (card && card.id) {
-      const cardId = card.id // 使用卡牌 ID
-      const cardName = card.name || slot.card.title
-
-      markdown += `${slot.amount}🃏  ${slot.card.mana}💎  ${cardName}\n\n`
-      markdown += `<img src="https://art.hearthstonejson.com/v1/render/latest/enUS/256x/${cardId}.png" alt="${cardName}">\n`
-    } else {
-      markdown += `- ${slot.amount}🃏  ${slot.card.mana}💎  ${slot.card.title} (Card image not found)\n\n`
-    }
-  })
-
-  return markdown
-}
-
-const winrate = (deck: Deck) => {
-  return { icon: Icon.LineChart, text: `${deck.winrate}%`, tooltip: 'winrate' }
-}
-
-const dust = (deck: Deck) => {
-  return { icon: Icon.Raindrop, text: formatNumberWithK(deck.dust), tooltip: 'dust' }
 }

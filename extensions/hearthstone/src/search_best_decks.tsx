@@ -1,24 +1,24 @@
-import { Action, ActionPanel, Icon, List } from '@raycast/api'
+import { Action, ActionPanel, Grid, Icon, List } from '@raycast/api'
 import { usePromise } from '@raycast/utils'
 import axios from 'axios'
 import { useEffect, useState } from 'react'
+import { CardDetailView } from './CardDetailView'
+import { CardSlot } from './domain'
 import { gethsguruBestDecks } from './hsguru'
-import { classIcon, ellipsize, formatNumberWithK, getLocalCardData, type Card } from './utils' // 新增类型导入
-
-// 新增类型定义
-interface CardSlot {
-  amount: number
-  card: {
-    title: string
-    mana: number
-  }
-}
+import {
+  classIcon,
+  ellipsize,
+  formatDust,
+  formatWinrate,
+  getLocalCardData,
+  getRarityColor,
+  type Card
+} from './utils'
 
 export default function Command() {
   const [format, setFormat] = useState(1)
   const { data: decks, isLoading: decksLoading } = usePromise(gethsguruBestDecks, [format])
 
-  // 修改点：替换 any[]
   const [cardData, setCardData] = useState<Card[]>([])
   const [cardsLoading, setCardsLoading] = useState(true)
 
@@ -33,7 +33,7 @@ export default function Command() {
           data = response.data
         }
 
-        setCardData(data as Card[]) // 类型断言
+        setCardData(data as Card[])
       } catch (error) {
         console.error('Error loading card data:', error)
       } finally {
@@ -47,69 +47,122 @@ export default function Command() {
   const isLoading = decksLoading || cardsLoading
 
   return (
-    <List
+    <Grid
       isLoading={isLoading}
-      isShowingDetail
+      columns={5}
+      inset={Grid.Inset.Medium}
+      aspectRatio="1"
+      fit={Grid.Fit.Fill}
       searchBarAccessory={
-        <List.Dropdown tooltip="Select Format" onChange={(value) => setFormat(Number(value))}>
-          <List.Dropdown.Section title="Game Mode">
-            <List.Dropdown.Item title="Wild" value="1" />
-            <List.Dropdown.Item title="Standard" value="2" />
-          </List.Dropdown.Section>
-        </List.Dropdown>
+        <Grid.Dropdown tooltip="Select Format" onChange={(value) => setFormat(Number(value))}>
+          <Grid.Dropdown.Section title="Game Mode">
+            <Grid.Dropdown.Item title="Wild" value="1" />
+            <Grid.Dropdown.Item title="Standard" value="2" />
+          </Grid.Dropdown.Section>
+        </Grid.Dropdown>
       }
     >
       {decks?.map((deck) => (
-        <List.Item
+        <Grid.Item
           key={deck.code}
-          icon={classIcon(deck.className)}
+          content={{ 
+            source: classIcon(deck.className).source,
+            tintColor: null
+          }}
           title={ellipsize(deck.title, 10)}
-          accessories={[
-            { icon: Icon.LineChart, text: `${deck.winrate}%`, tooltip: 'winrate' },
-            { icon: Icon.Raindrop, text: formatNumberWithK(deck.dust), tooltip: 'dust' },
-          ]}
+          subtitle={`${formatWinrate(deck.winrate)}, ${formatDust(deck.dust)}`}
           actions={
             <ActionPanel title={deck.title}>
               <ActionPanel.Section>
+                <Action.Push 
+                  title="Show Deck Details" 
+                  target={
+                    <DeckDetails 
+                      title={deck.title} 
+                      slots={deck.slots} 
+                      cardData={cardData}
+                      deckCode={deck.code}
+                      className={deck.className}
+                      format={format}
+                    />
+                  } 
+                />
                 <Action.CopyToClipboard content={deck.code} title="Copy Deck Code" />
                 <Action.OpenInBrowser url={`https://www.hsguru.com/decks?format=${format}`} />
               </ActionPanel.Section>
             </ActionPanel>
           }
-          detail={<List.Item.Detail markdown={generateMarkdownList(deck.title, deck.slots as CardSlot[], cardData)} />}
         />
       ))}
-    </List>
+    </Grid>
   )
 }
 
-// 修改点：替换 any[] 为具体类型
-const generateMarkdownList = (title: string, cardSlots: CardSlot[], cardData: Card[]): string => {
-  let markdown = `# ${title}\n\n`
+function DeckDetails({ 
+  title, 
+  slots, 
+  cardData, 
+  deckCode, 
+  className, 
+  format 
+}: { 
+  title: string 
+  slots: CardSlot[] 
+  cardData: Card[] 
+  deckCode: string
+  className: string
+  format: number
+}) {
+  return (
+    <List searchBarPlaceholder={`Browsing cards in: ${title}`}>
+      <List.Section title={title} subtitle={`Class: ${className}`}>
+        {slots.map((slot, index) => {
+          // 查找卡牌数据
+          let card = cardData.find((c) => c.name?.toLowerCase() === slot.card.title.toLowerCase())
 
-  cardSlots.forEach((slot) => {
-    let card = cardData.find((c) => c.name?.toLowerCase() === slot.card.title.toLowerCase())
+          if (!card) {
+            card = cardData.find(
+              (c) =>
+                c.name &&
+                slot.card.title &&
+                (c.name.toLowerCase().includes(slot.card.title.toLowerCase()) ||
+                  slot.card.title.toLowerCase().includes(c.name.toLowerCase())),
+            )
+          }
 
-    if (!card) {
-      card = cardData.find(
-        (c) =>
-          c.name &&
-          slot.card.title &&
-          (c.name.toLowerCase().includes(slot.card.title.toLowerCase()) ||
-            slot.card.title.toLowerCase().includes(c.name.toLowerCase())),
-      )
-    }
+          // 创建卡牌稀有度显示
+          const rarityText = slot.card.rarity || 'Unknown'
 
-    if (card?.id) {
-      const cardId = card.id
-      const cardName = card.name || slot.card.title
-
-      markdown += `${slot.amount}🃏  ${slot.card.mana}💎  ${cardName}\n\n`
-      markdown += `<img src="https://art.hearthstonejson.com/v1/render/latest/enUS/256x/${cardId}.png" alt="${cardName}">\n`
-    } else {
-      markdown += `- ${slot.amount}🃏  ${slot.card.mana}💎  ${slot.card.title} (Card image not found)\n\n`
-    }
-  })
-
-  return markdown
+          return (
+            <List.Item
+              key={index}
+              icon={{ 
+                source: Icon.CircleFilled, 
+                tintColor: getRarityColor(rarityText)
+              }}
+              title={`${slot.card.title} (${slot.card.mana} mana)`}
+              subtitle={`${slot.amount}x`}
+              accessories={[
+                { text: rarityText }
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.Push 
+                    title="View Card Details" 
+                    target={<CardDetailView slot={slot} card={card || null} deckCode={deckCode} />}
+                    icon={Icon.Eye}
+                  />
+                  <Action.CopyToClipboard content={deckCode} title="Copy Deck Code" />
+                  <Action.OpenInBrowser 
+                    url={`https://www.hsguru.com/decks?format=${format}`} 
+                    title="Open in HSGuru"
+                  />
+                </ActionPanel>
+              }
+            />
+          )
+        })}
+      </List.Section>
+    </List>
+  )
 }
