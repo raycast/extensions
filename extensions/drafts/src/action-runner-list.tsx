@@ -24,7 +24,14 @@ interface DraftsAction {
 }
 
 function AddAction(props: { defaultTitle?: string; onCreate: (action: DraftsAction) => void }) {
-  return <Action.Push icon={Icon.Plus} title="Add Action" target={<AddActionForm onCreate={props.onCreate} />} />;
+  return (
+    <Action.Push
+      icon={Icon.Plus}
+      title="Add Action"
+      shortcut={{ modifiers: ["opt"], key: "a" }}
+      target={<AddActionForm onCreate={props.onCreate} />}
+    />
+  );
 }
 
 function RunActionWithoutInput(props: { onOpen: () => void }) {
@@ -58,7 +65,14 @@ function RunActionWithInput(action: DraftsAction) {
 }
 
 function RemoveAction(props: { onDelete: () => void }) {
-  return <Action icon={Icon.Trash} title="Remove Action" onAction={props.onDelete} />;
+  return (
+    <Action
+      icon={Icon.Trash}
+      title="Remove Action"
+      shortcut={{ modifiers: ["opt"], key: "d" }}
+      onAction={props.onDelete}
+    />
+  );
 }
 
 function AddActionForm(props: { onCreate: (action: DraftsAction) => void }) {

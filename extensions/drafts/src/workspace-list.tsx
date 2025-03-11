@@ -22,7 +22,14 @@ interface DraftsWorkspace {
 }
 
 function AddWorkspaceAction(props: { defaultTitle?: string; onCreate: (workspace: DraftsWorkspace) => void }) {
-  return <Action.Push icon={Icon.Plus} title="Add Workspace" target={<AddWorkspaceForm onCreate={props.onCreate} />} />;
+  return (
+    <Action.Push
+      icon={Icon.Plus}
+      title="Add Workspace"
+      shortcut={{ modifiers: ["opt"], key: "a" }}
+      target={<AddWorkspaceForm onCreate={props.onCreate} />}
+    />
+  );
 }
 
 function OpenWorkspaceAction(props: { onOpen: () => void }) {
@@ -30,7 +37,14 @@ function OpenWorkspaceAction(props: { onOpen: () => void }) {
 }
 
 function RemoveWorkspaceAction(props: { onDelete: () => void }) {
-  return <Action icon={Icon.Trash} title="Remove Workspace" onAction={props.onDelete} />;
+  return (
+    <Action
+      icon={Icon.Trash}
+      title="Remove Workspace"
+      shortcut={{ modifiers: ["opt"], key: "d" }}
+      onAction={props.onDelete}
+    />
+  );
 }
 
 function AddWorkspaceForm(props: { onCreate: (workspace: DraftsWorkspace) => void }) {

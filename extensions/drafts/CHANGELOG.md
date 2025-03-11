@@ -3,6 +3,7 @@
 ## [Add AI Extension Support to Create Draft] - {PR_MERGE_DATE}
 
 - Add tool to create Draft with AI
+- Add keyboard shortcuts to simplify adding / removing actions and workspaces
 
 ## [Add Command for Capture] - 2024-10-04
 
