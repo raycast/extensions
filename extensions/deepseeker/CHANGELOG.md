@@ -1,6 +1,6 @@
 # DeepSeeker - Quick Actions Changelog
 
-## [March Update - Code Refactor] - {PR_MERGE_DATE}
+## [March Update - Code Refactor] - 2025-03-11
 
 - 📏 **Obey** case naming convention
 - ✂️ Remove redundant code
