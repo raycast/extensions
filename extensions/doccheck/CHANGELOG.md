@@ -1,6 +1,6 @@
 # DocCheck Changelog
 
-# [Version 2.1.2] - {PR_MERGE_DATE}
+# [Version 2.1.2] - 2025-03-11
 
 - Fixed: articles with neither author nor aliases weren't shown when searching for them
 
