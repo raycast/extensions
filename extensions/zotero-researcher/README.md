@@ -1,6 +1,6 @@
 # Zotero Researcher for Raycast
 
-A Raycast extension that connects to your local Zotero database, making it easy to access your research library without leaving your workflow.
+This is a Raycast extension that connects to your local Zotero database, making it easy to access your research library without leaving your workflow.
 
 ## Features
 
