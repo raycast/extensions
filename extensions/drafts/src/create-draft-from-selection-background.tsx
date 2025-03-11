@@ -1,4 +1,4 @@
-import { getSelectedText, showToast, Toast, PopToRootType, showHUD } from "@raycast/api";
+import { getSelectedText, showToast, Toast } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { checkAppInstallation } from "./utils/ApplicationInstalledCheck";
 import { closeMainWindowAndShowSuccessToast } from "./utils/NotificationUtils";

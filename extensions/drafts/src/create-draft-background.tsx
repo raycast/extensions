@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, PopToRootType, showHUD, showToast, Toast, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, LocalStorage } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import Style = Toast.Style;

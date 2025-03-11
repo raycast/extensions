@@ -1,6 +1,6 @@
-import { Clipboard, closeMainWindow, popToRoot, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, closeMainWindow, popToRoot, showToast, Toast } from "@raycast/api";
 import { checkAppInstallation } from "./utils/ApplicationInstalledCheck";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import Style = Toast.Style;
 import { closeMainWindowAndShowSuccessToast } from "./utils/NotificationUtils";
 
@@ -9,17 +9,22 @@ export default async () => {
   if (await checkAppInstallation()) {
     const clipboardText = await Clipboard.readText();
     if (clipboardText) {
-      await runAppleScript(
-        `
+      try {
+        await runAppleScript(
+          `
         on run argv
           tell application "Drafts"
             make new draft with properties {content: item 1 of argv, flagged: false}
           end tell
         end run
         `,
-        [clipboardText]
-      );
-      await closeMainWindowAndShowSuccessToast("Created Draft 👍");
+          [clipboardText]
+        );
+        await closeMainWindowAndShowSuccessToast("Created Draft 👍");
+      } catch (error) {
+        await showFailureToast("Failed to create Draft");
+        return;
+      }
     } else {
       await showToast({
         style: Style.Failure,
