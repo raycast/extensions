@@ -1,30 +1,7 @@
-import { exec } from "child_process";
-import { promisify } from "util";
-import { getPreferenceValues, Application, popToRoot } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { getPreferenceValues } from "@raycast/api";
+import { getCmdPath, runCommand } from "./utils";
 
-const execPromise = promisify(exec);
-const cliPath = "Contents/MacOS/BetterDisplay";
-const { betterdisplayApp } = getPreferenceValues<{ betterdisplayApp: Application }>();
-if (!betterdisplayApp?.path) {
-  showFailureToast("BetterDisplay app not set", {
-    title: "BetterDisplay app not set",
-    message: "Please set the BetterDisplay app in the extension preferences.",
-  });
-  popToRoot();
-}
-const cmdPath = `${betterdisplayApp.path}/${cliPath}`;
-
-// ...helper function...
-async function runCommand(command: string, errorMsg: string): Promise<string> {
-  try {
-    const { stdout } = await execPromise(command);
-    return stdout.trim();
-  } catch (error) {
-    console.error(`${errorMsg}:`, error);
-    throw error;
-  }
-}
+const cmdPath = getCmdPath();
 
 export async function toggleDisplay(tagID: string): Promise<string> {
   const command = `${cmdPath} toggle -tagID=${tagID} -feature=connected`;

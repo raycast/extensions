@@ -1,3 +1,50 @@
+import { getPreferenceValues, Application, popToRoot } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+export function getCmdPath() {
+  const cliPath = "Contents/MacOS/BetterDisplay";
+
+  const { betterdisplayApp } = getPreferenceValues<{ betterdisplayApp: Application }>();
+  if (!betterdisplayApp?.path) {
+    console.error("Error getting BetterDisplay CLI path", error);
+
+    showFailureToast("BetterDisplay app not set", {
+      title: "BetterDisplay app not set",
+      message: "Please set the BetterDisplay app in the extension preferences.",
+    });
+    popToRoot();
+  }
+
+  try {
+    const cmdPath = `${betterdisplayApp.path}/${cliPath}`;
+    return cmdPath;
+  } catch (error) {
+    console.error("Error getting BetterDisplay CLI path", error);
+
+    showFailureToast("BetterDisplay app not set", {
+      title: "BetterDisplay app not set",
+      message: "Please set the BetterDisplay app in the extension preferences.",
+    });
+    popToRoot();
+    
+    return "";
+  }
+}
+
+export async function runCommand(command: string, errorMsg: string): Promise<string> {
+  const execPromise = promisify(exec);
+
+  try {
+    const { stdout } = await execPromise(command);
+    return stdout.trim();
+  } catch (error) {
+    console.error(`${errorMsg}:`, error);
+    throw error;
+  }
+}
+
 export function parseResolutionList(output: string): ResolutionOption[] {
   const lines = output.split("\n").filter((line) => line.trim().length > 0);
   const options: ResolutionOption[] = [];
