@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { showToast, Toast, popToRoot, launchCommand, LaunchType } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { stopActiveTimer, getActiveTimer, getProjectById } from "./storage";
 
 export default function StopTimer() {
@@ -61,7 +62,7 @@ export default function StopTimer() {
       popToRoot();
     } catch (error) {
       console.error("Error stopping timer:", error);
-      await showFailureToast("Failed to stop timer");
+      await showFailureToast(error, { title: "Failed to stop timer" });
       popToRoot();
     }
   }
