@@ -247,7 +247,7 @@ class KeePassLoader {
           exited = true;
           tryResolve();
         } else {
-          reject(new Error(`Something went wrong when accessing the database`));
+          reject(new Error(`Something went wrong when accessing the database (exit code: ${code})`));
         }
       });
     });
