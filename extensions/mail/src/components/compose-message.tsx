@@ -77,7 +77,7 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
         }
       }
 
-      return [draftValues?.to] || [];
+      return draftValues?.to ? [draftValues?.to] : [];
     },
     [],
     {
