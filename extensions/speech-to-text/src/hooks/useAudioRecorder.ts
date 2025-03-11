@@ -74,7 +74,12 @@ export function useAudioRecorder(): AudioRecorderHook {
       setRecordingPath(outputPath);
 
       console.log("Starting recording with Sox");
-      recordingProcess.current = spawn(soxPath, buildSoxCommand(outputPath));
+      try {
+        recordingProcess.current = spawn(soxPath, buildSoxCommand(outputPath));
+      } catch (error) {
+        console.error('Failed to start recording process:', error);
+        throw error;
+      }
 
       recordingProcess.current.stdout?.on("data", (data) => {
         console.log(`Sox stdout: ${data}`);
