@@ -10,7 +10,8 @@
     "robert",
     "kuddl",
     "kevinxo328",
-    "ridemountainpig"
+    "ridemountainpig",
+    "pernielsentikaer"
   ],
   "categories": [
     "Design Tools",
@@ -18,9 +19,12 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   },
   "commands": [
     {
@@ -74,6 +78,10 @@
         {
           "title": "Copy Svg URL to Clipboard",
           "value": "copyURL"
+        },
+        {
+          "title": "Copy Data URI to Clipboard",
+          "value": "copyDataURI"
         }
       ]
     },
@@ -97,19 +105,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.0",
-    "axios": "^0.26.1",
-    "react-hooks-global-state": "^2.1.0",
-    "run-applescript": "^7.0.0"
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.18.0",
+    "axios": "^1.8.2",
+    "react-hooks-global-state": "^2.1.0"
   },
   "devDependencies": {
-    "@types/node": "^18.8.3",
-    "@typescript-eslint/eslint-plugin": "^5.15.0",
-    "@typescript-eslint/parser": "^5.15.0",
-    "eslint": "^8.11.0",
-    "eslint-config-prettier": "^8.5.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.24.1",
-    "typescript": "^4.6.2"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   }
 }
