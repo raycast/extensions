@@ -1,4 +1,4 @@
-import { MenuBarExtra, showHUD } from "@raycast/api";
+import { MenuBarExtra, showHUD, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getActiveTimer, getProjectById, stopActiveTimer } from "./storage";
@@ -79,7 +79,7 @@ export default function Command() {
       // Update the menubar (it will hide since there's no active timer)
       setActiveTimer(null);
     } catch (error) {
-      console.error("Error stopping timer:", error);
+      showFailureToast(error, { title: "Error stopping timer" });
     }
   };
 
