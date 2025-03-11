@@ -14,7 +14,7 @@ const BIN_PATH = join(environment.supportPath, "bin");
 
 const getTarget = () => {
   const arch = process.env.npm_config_arch || os.arch();
-  const platform = process.env.platform || os.platform();
+  const platform = os.platform();
   switch (platform) {
     case "darwin":
       switch (arch) {
