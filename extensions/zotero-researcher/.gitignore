@@ -1,0 +1,22 @@
+# Dependencies
+node_modules
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build
+dist
+*.tsbuildinfo
+
+# Editor
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+.idea
+
+# Misc
+.DS_Store
+Thumbs.db
+*.log 

@@ -1,0 +1,5 @@
+# Ignore documentation files
+src/services/zotero/README.md
+src/services/zotero/DOCS.txt
+*.md
+*.txt 

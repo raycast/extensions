@@ -1,0 +1,13 @@
+Zotero Service Documentation
+
+This service provides methods for accessing Zotero data.
+
+Features:
+- Local database access
+- API integration
+- Item and collection management
+
+The service connects to the local Zotero SQLite database at:
+~/Zotero/zotero.sqlite
+
+Error handling is included for database connection issues and query errors. 

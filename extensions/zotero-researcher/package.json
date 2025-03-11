@@ -1,0 +1,74 @@
+{
+  "name": "zotero-researcher",
+  "title": "Zotero Researcher",
+  "description": "Quickly insert academic citations from your Zotero library",
+  "icon": "command-icon.png",
+  "author": "Shreyas",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Zotero Researcher",
+      "description": "Search and insert citations from your Zotero library",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "Zotero API Key",
+      "description": "Your Zotero API key. You can find this at https://www.zotero.org/settings/keys",
+      "placeholder": "Enter your 24-character Zotero API key"
+    },
+    {
+      "name": "userId",
+      "type": "textfield",
+      "required": false,
+      "title": "Zotero User ID",
+      "description": "Your numeric Zotero user ID. Find this at https://www.zotero.org/settings/keys under 'Your user ID for use in API calls'",
+      "placeholder": "Enter your numeric user ID (e.g., 6537753)"
+    },
+    {
+      "name": "useLocalDatabase",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use Local Database",
+      "description": "Connect directly to your local Zotero database instead of using the API. Requires Zotero desktop to be installed.",
+      "default": false,
+      "label": "Use Local Zotero Database"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.0",
+    "sqlite": "^5.0.1",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.48",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3",
+    "canvas": "^2.11.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "generate-icons": "node assets/command-icon.js",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
+    "prepack": "npm run generate-icons && npm run format"
+  },
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ]
+} 
