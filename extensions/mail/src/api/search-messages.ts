@@ -63,10 +63,6 @@ export async function searchMessages({
   order = "desc",
   limit = 25,
 }: Partial<SearchOptions>): Promise<Message[]> {
-  if (!search && !before && !after && !from) {
-    throw new Error("No search options provided");
-  }
-
   const absoluteMessagePaths: string[] = [];
 
   const persistenceInfo = await getPersistenceInfo();
