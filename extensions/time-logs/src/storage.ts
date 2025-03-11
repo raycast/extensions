@@ -16,26 +16,50 @@ interface Preferences {
 // Time Entry Methods
 export async function getTimeEntries(): Promise<TimeEntry[]> {
   const entriesJson = await LocalStorage.getItem<string>(TIME_ENTRIES_KEY);
-  return entriesJson ? JSON.parse(entriesJson) : [];
+  const rawEntries = entriesJson ? JSON.parse(entriesJson) : [];
+  
+  // Convert string dates to Date objects
+  return rawEntries.map((entry: any) => ({
+    ...entry,
+    startTime: new Date(entry.startTime),
+    endTime: entry.endTime ? new Date(entry.endTime) : null
+  }));
 }
 
 export async function saveTimeEntry(entry: TimeEntry): Promise<void> {
+  // Get existing entries
   const entries = await getTimeEntries();
   const existingIndex = entries.findIndex((e) => e.id === entry.id);
 
+  // Add or update the entry
   if (existingIndex >= 0) {
     entries[existingIndex] = entry;
   } else {
     entries.push(entry);
   }
 
-  await LocalStorage.setItem(TIME_ENTRIES_KEY, JSON.stringify(entries));
+  // Convert Date objects to strings for storage
+  const entriesForStorage = entries.map(e => ({
+    ...e,
+    startTime: e.startTime.toISOString(),
+    endTime: e.endTime ? e.endTime.toISOString() : null
+  }));
+
+  await LocalStorage.setItem(TIME_ENTRIES_KEY, JSON.stringify(entriesForStorage));
 }
 
 export async function deleteTimeEntry(entryId: string): Promise<void> {
   const entries = await getTimeEntries();
   const updatedEntries = entries.filter((e) => e.id !== entryId);
-  await LocalStorage.setItem(TIME_ENTRIES_KEY, JSON.stringify(updatedEntries));
+  
+  // Convert Date objects to strings for storage
+  const entriesForStorage = updatedEntries.map(e => ({
+    ...e,
+    startTime: e.startTime.toISOString(),
+    endTime: e.endTime ? e.endTime.toISOString() : null
+  }));
+
+  await LocalStorage.setItem(TIME_ENTRIES_KEY, JSON.stringify(entriesForStorage));
 }
 
 // Gets the active timer if one exists
@@ -51,7 +75,7 @@ export async function stopActiveTimer(): Promise<TimeEntry | null> {
 
   if (activeTimer) {
     // Calculate the actual duration in minutes
-    const startTime = new Date(activeTimer.startTime);
+    const startTime = activeTimer.startTime; // Now already a Date object
     const endTime = new Date();
     const actualDuration = calculateDuration(startTime, endTime);
 
@@ -82,7 +106,7 @@ export async function stopActiveTimer(): Promise<TimeEntry | null> {
 
     // Update the timer with the rounded end time
     activeTimer.isActive = false;
-    activeTimer.endTime = roundedEndTime.toISOString();
+    activeTimer.endTime = roundedEndTime;
 
     await saveTimeEntry(activeTimer);
     return activeTimer;
@@ -124,7 +148,14 @@ export async function deleteProject(projectId: string): Promise<void> {
     return entry;
   });
 
-  await LocalStorage.setItem(TIME_ENTRIES_KEY, JSON.stringify(updatedEntries));
+  // Convert Date objects to strings for storage
+  const entriesForStorage = updatedEntries.map(e => ({
+    ...e,
+    startTime: e.startTime.toISOString(),
+    endTime: e.endTime ? e.endTime.toISOString() : null
+  }));
+
+  await LocalStorage.setItem(TIME_ENTRIES_KEY, JSON.stringify(entriesForStorage));
 }
 
 export async function getProjectById(projectId: string): Promise<Project | undefined> {

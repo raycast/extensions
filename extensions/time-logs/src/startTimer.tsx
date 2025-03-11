@@ -4,6 +4,7 @@ import { showToast, Toast, popToRoot, launchCommand, LaunchType } from "@raycast
 import { TimeEntry, Project } from "./models";
 import { saveTimeEntry, stopActiveTimer, getProjects, saveProject } from "./storage";
 import { generateId } from "./utils";
+import { nanoid } from "nanoid";
 
 // Define the command arguments
 export interface TrackTimeArguments {
@@ -111,9 +112,9 @@ export default function TrackTime(props: { arguments: TrackTimeArguments }) {
 
       // Create new timer
       const newEntry: TimeEntry = {
-        id: generateId(),
-        description: description ? description.trim() : "",
-        startTime: new Date().toISOString(),
+        id: nanoid(),
+        description: description ? description : null,
+        startTime: new Date(),
         endTime: null,
         isActive: true,
         createdAt: new Date().toISOString(),
@@ -128,7 +129,7 @@ export default function TrackTime(props: { arguments: TrackTimeArguments }) {
       // Use Toast notification instead of HUD, with everything in the title
       await showToast({
         style: Toast.Style.Success,
-        title: `${projectText ? projectText + " — " : ""}${description} timer started`,
+        title: `${projectText ? projectText + " — " : ""}${description ? description : ""} timer started`,
       });
 
       // Close Raycast

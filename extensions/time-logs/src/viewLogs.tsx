@@ -345,8 +345,8 @@ function AddTimeLogForm({ onSave }: { onSave: () => Promise<void> }) {
       const newLog: TimeEntry = {
         id: generateId(),
         description: description.trim() || null,
-        startTime: startDateTime.toISOString(),
-        endTime: endDateTimeToSave.toISOString(),
+        startTime: startDateTime,
+        endTime: endDateTimeToSave,
         isActive: false,
         createdAt: new Date().toISOString(),
         projectId: projectId,
@@ -672,8 +672,8 @@ function EditTimeLogForm({ entry, onSave }: { entry: TimeEntry; onSave: () => Pr
       const updatedLog: TimeEntry = {
         ...entry,
         description: description.trim() || null,
-        startTime: startDateTime.toISOString(),
-        endTime: endDateTimeToSave ? endDateTimeToSave.toISOString() : null,
+        startTime: startDateTime,
+        endTime: endDateTimeToSave,
         projectId: projectId,
       };
 
@@ -937,7 +937,7 @@ export default function ViewLogs() {
       const newLog: TimeEntry = {
         id: generateId(),
         description: logDescription.trim() === "" ? null : logDescription.trim(),
-        startTime: new Date().toISOString(),
+        startTime: new Date(),
         endTime: null,
         isActive: true,
         createdAt: new Date().toISOString(),
