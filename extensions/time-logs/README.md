@@ -1,4 +1,4 @@
-# Time Logs - Raycast Extension
+# Time Logs
 
 Track, manage, and export time logs on tasks and projects with this simple and powerful Raycast extension.
 
