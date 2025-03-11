@@ -28,7 +28,6 @@ export function getCmdPath() {
       message: "Please set the BetterDisplay app in the extension preferences.",
     });
     popToRoot();
-    
     return "";
   }
 }
