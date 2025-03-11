@@ -100,7 +100,7 @@ export default function Command() {
         "make new draft with properties {content: item 1 of argv, flagged: false, tags: {" + tagsString + "}}";
     }
 
-    const res = await runAppleScript(
+    await runAppleScript(
       `
       on run argv
         tell application "Drafts"

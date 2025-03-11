@@ -1,5 +1,9 @@
 # Drafts Changelog
 
+## [Add AI Extension Support to Create Draft] - 2025-03-11
+
+- Add tool to create Draft with AI
+
 ## [Add Command for Capture] - 2024-10-04
 
 - Add command to capture Draft from command argument

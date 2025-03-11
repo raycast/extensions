@@ -6,7 +6,7 @@ export default async function () {
   if (await checkAppInstallation()) {
     try {
       const selectedText = await getSelectedText();
-      const res = await runAppleScript(
+      await runAppleScript(
         `
         on run argv
           tell application "Drafts"

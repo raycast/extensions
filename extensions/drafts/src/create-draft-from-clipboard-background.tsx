@@ -8,7 +8,7 @@ export default async () => {
   if (await checkAppInstallation()) {
     const clipboardText = await Clipboard.readText();
     if (clipboardText) {
-      const res = await runAppleScript(
+      await runAppleScript(
         `
         on run argv
           tell application "Drafts"
