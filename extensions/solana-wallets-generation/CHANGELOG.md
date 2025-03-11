@@ -1,6 +1,6 @@
 # Solana Wallets Generation Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-03-11
 
 ### Added
 - Initial release of the Solana Wallets Generator extension
