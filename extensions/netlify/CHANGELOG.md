@@ -1,6 +1,6 @@
 # Changelog
 
-## [✨AI: View Env & DNS] - {PR_MERGE_DATE}
+## [✨AI: View Env & DNS] - 2025-03-11
 
 - AI Tools to:
     1. Get Environment Variables
