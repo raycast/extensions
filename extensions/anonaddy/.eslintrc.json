@@ -5,15 +5,13 @@
     "node": true
   },
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "import-x", "react"],
+  "plugins": ["import-x", "react"],
   "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
+    "@raycast",
     "plugin:import-x/recommended",
     "plugin:react/recommended",
     "plugin:react-hooks/recommended-legacy",
-    "prettier",
-    "@raycast"
+    "prettier"
   ],
   "rules": {
     "@typescript-eslint/consistent-type-definitions": ["error", "type"],
