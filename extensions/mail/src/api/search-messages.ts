@@ -136,7 +136,7 @@ export async function searchMessages({
     .map((line) => line.trim())
     .filter(Boolean)
     .slice(0, limit);
-  const absolutePaths = relativePaths.map((relativePath) => resolve(basePath, relativePath)).slice();
+  const absolutePaths = relativePaths.map((relativePath) => resolve(basePath, relativePath));
   absoluteMessagePaths.push(...absolutePaths);
 
   return Promise.all(
