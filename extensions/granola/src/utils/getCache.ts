@@ -16,8 +16,8 @@ function getCache() {
     const fileContent = fs.readFileSync(filePath, "utf8");
     const jsonData = JSON.parse(fileContent);
 
-    // Parse the data as a JSON string
-    const data = JSON.parse(jsonData.cache);
+    // Get the cache data, parsing it only if it's a string
+    const data = typeof jsonData.cache === "string" ? JSON.parse(jsonData.cache) : jsonData.cache;
 
     if (!data) {
       throw new Error(
