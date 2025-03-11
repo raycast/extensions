@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hearthstone",
   "title": "Hearthstone",
-  "description": "Search the best Hearthstone decks from HSGuru",
+  "description": "Search the best Hearthstone decks",
   "icon": "hearthstone-icon.png",
   "author": "RaffeYang",
   "categories": [

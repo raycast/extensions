@@ -2,10 +2,9 @@
 
 ⚡ Quickly find top Hearthstone decks and manage card collections directly from Raycast
 
-![Hearthstone](./metadata/showcase-1.png)
-![Hearthstone](./metadata/showcase-2.png)
-![Hearthstone](./metadata/showcase-3.png)
-![**Demo Screenshot**](https://via.placeholder.com/800x500.png?text=HS+Deck+Finder+Preview)
+![Hearthstone](./metadata/hearthstone-1.png)
+![Hearthstone](./metadata/hearthstone-2.png)
+![Hearthstone](./metadata/hearthstone-3.png)
 
 ## Features
 

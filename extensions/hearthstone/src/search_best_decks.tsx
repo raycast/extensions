@@ -140,8 +140,8 @@ function DeckDetails({
                 source: Icon.CircleFilled, 
                 tintColor: getRarityColor(rarityText)
               }}
-              title={`${slot.card.title} (${slot.card.mana} mana)`}
-              subtitle={`${slot.amount}x`}
+              title={`${slot.card.title} 💎 ${slot.card.mana}`}
+              subtitle={`🃏 ${slot.amount}`}
               accessories={[
                 { text: rarityText }
               ]}
