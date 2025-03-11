@@ -1,4 +1,13 @@
-import { Action, ActionPanel, closeMainWindow, Form, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Form,
+  getSelectedFinderItems,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect } from "react";
 import { useForm, FormValidation, showFailureToast } from "@raycast/utils";
 import { uploadFile } from "./utils";
@@ -22,8 +31,10 @@ export default function Command() {
       const allowedDownloads = values.limitDownloads ? parseInt(values.maxDownloads) : 0;
       const expiryDays = values.expiry ? parseInt(values.expiryDays) : 0;
       try {
-        closeMainWindow({ clearRootSearch: true });
+        showToast({ style: Toast.Style.Animated, title: "File uploading" });
         await uploadFile(values.files[0], allowedDownloads, expiryDays, values.password || "");
+        closeMainWindow({ clearRootSearch: true });
+        popToRoot();
         await showToast({ style: Toast.Style.Success, title: "File uploaded successfully" });
       } catch (error) {
         await showFailureToast(error, { title: "Failed to upload file" });

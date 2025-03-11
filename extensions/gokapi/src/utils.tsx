@@ -1,10 +1,13 @@
 import fetch from "node-fetch";
 import { FormData } from "formdata-node";
-import { fileFromPath } from "formdata-node/file-from-path";
+import { File } from "formdata-node";
+import { readFile } from "fs/promises";
+import path from "path";
 import { FormDataEncoder } from "form-data-encoder";
 import { Readable } from "stream";
 import { Clipboard, Color, getPreferenceValues, List, popToRoot } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import mime from "mime-types";
 
 const preferences = getPreferenceValues<{ server_url?: string; api_key?: string }>();
 
@@ -79,8 +82,12 @@ export async function uploadFile(
   formData.append("allowedDownloads", String(allowedDownloads));
   formData.append("expiryDays", String(expiryDays));
   formData.append("password", password);
-  // Use fileFromPath instead of fs.createReadStream
-  formData.append("file", await fileFromPath(filePath));
+  // Determine the correct MIME type
+  const contentType = mime.lookup(filePath) || "application/octet-stream";
+  const buffer = await readFile(filePath);
+  const fileName = path.basename(filePath);
+  const file = new File([buffer], fileName, { type: contentType });
+  formData.append("file", file);
 
   const encoder = new FormDataEncoder(formData);
   const response = await fetch(`${gokapiUrl}/api/files/add`, {
@@ -106,8 +113,10 @@ export async function uploadFile(
 export function getFileTypeIcon(file: GokapiFile) {
   const ct = file.ContentType.toLowerCase();
 
+  console.log(ct);
+
   if (ct === "application/pdf") {
-    return "icon/pdf.svg";
+    return "pdf.svg";
   }
 
   if (
@@ -117,7 +126,7 @@ export function getFileTypeIcon(file: GokapiFile) {
     ct === "application/vnd.apple.pages" ||
     ct === "application/vnd.oasis.opendocument.text"
   ) {
-    return "icon/doc.svg";
+    return "doc.svg";
   }
 
   if (
@@ -127,7 +136,7 @@ export function getFileTypeIcon(file: GokapiFile) {
     ct === "application/vnd.apple.numbers" ||
     ct === "application/vnd.oasis.opendocument.spreadsheet"
   ) {
-    return "icon/spreadsheet.svg";
+    return "spreadsheet.svg";
   }
 
   if (
@@ -137,26 +146,26 @@ export function getFileTypeIcon(file: GokapiFile) {
     ct === "application/vnd.apple.keynote" ||
     ct === "application/vnd.oasis.opendocument.presentation"
   ) {
-    return "icon/presentation.svg";
+    return "presentation.svg";
   }
 
   if (ct.startsWith("video/")) {
-    return "icon/video.svg";
+    return "video.svg";
   }
 
   if (ct.startsWith("audio/")) {
-    return "icon/audio.svg";
+    return "audio.svg";
   }
 
   if (ct.startsWith("image/")) {
-    return "icon/image.svg";
+    return "image.svg";
   }
 
   if (ct.startsWith("text/")) {
-    return "icon/doc.svg";
+    return "doc.svg";
   }
 
-  return "icon/other.svg";
+  return "other.svg";
 }
 
 export function getFileTypeTag(file: GokapiFile) {
