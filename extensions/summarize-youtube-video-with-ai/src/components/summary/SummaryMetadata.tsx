@@ -10,10 +10,11 @@ type SummaryMetadataProps = {
 };
 
 enum CommandNames {
-  "summarizeVideoWithRaycast" = "Raycast",
+  "summarizeVideoWithRaycast" = "Ray-1",
   "summarizeVideoWithAnthropic" = "Anthropic",
   "summarizeVideoWithOpenAI" = "OpenAI",
   "summarizeVideoWithOllama" = "Ollama",
+  "summarizeVideoWithPerplexity" = "Perplexity",
 }
 
 export default function SummaryMetadata({
