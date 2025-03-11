@@ -30,7 +30,11 @@ export default function StopTimer() {
           }
 
           // Refresh the menu bar timer first (this will show "Menu Bar item refreshed")
-          await launchCommand({ name: "menuBarTimer", type: LaunchType.UserInitiated });
+          try {
+            await launchCommand({ name: "menuBarTimer", type: LaunchType.UserInitiated });
+          } catch (error) {
+            console.error("Failed to refresh menu bar timer:", error);
+          }
 
           // Now show our toast message, which will be the last thing the user sees
           await showToast({
@@ -41,7 +45,11 @@ export default function StopTimer() {
           // Timer was discarded (less than 1 minute)
 
           // Refresh the menu bar timer first (this will show "Menu Bar item refreshed")
-          await launchCommand({ name: "menuBarTimer", type: LaunchType.UserInitiated });
+          try {
+            await launchCommand({ name: "menuBarTimer", type: LaunchType.UserInitiated });
+          } catch (error) {
+            console.error("Failed to refresh menu bar timer:", error);
+          }
 
           // Now show our toast message, which will be the last thing the user sees
           await showToast({
