@@ -1,7 +1,7 @@
 import { ActionPanel, Form, Action, showToast, Toast, popToRoot, closeMainWindow } from "@raycast/api";
 import fs from "fs";
 import path from "path";
-import { setFolderIcon } from "./utils/changeFolderIcon";
+import { replaceFolderIcon } from "./utils/replaceFolderIcon";
 
 export default function Command() {
   return (
@@ -59,7 +59,7 @@ export default function Command() {
                 style: Toast.Style.Animated,
                 title: "Setting Folder Icon",
               });
-              await setFolderIcon(folder, file);
+              await replaceFolderIcon(folder, file);
               await popToRoot();
             }}
           />

@@ -3,7 +3,7 @@ import { execa } from "execa";
 import fs from "fs";
 import path from "path";
 
-async function setFolderIcon(directoryPath: string, iconPath: string) {
+async function replaceFolderIcon(directoryPath: string, iconPath: string) {
   // Check if the source icon file exists
   if (!fs.existsSync(iconPath)) {
     await showToast({
@@ -62,4 +62,4 @@ async function setFolderIcon(directoryPath: string, iconPath: string) {
   }
 }
 
-export { setFolderIcon };
+export { replaceFolderIcon };

@@ -27,9 +27,9 @@
       "mode": "view"
     },
     {
-      "name": "changeFolderIcon",
-      "title": "Change Icon to customize image",
-      "description": "Change the icon of a folder with a custom image",
+      "name": "replaceFolderIcon",
+      "title": "Replace Folder Icon with Image",
+      "description": "Replace the icon of a folder with a custom image",
       "mode": "view"
     },
     {
