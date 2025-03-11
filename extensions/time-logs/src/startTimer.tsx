@@ -1,6 +1,7 @@
 // commands/trackTime.tsx
 import { useEffect } from "react";
 import { showToast, Toast, popToRoot, launchCommand, LaunchType } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { TimeEntry, Project } from "./models";
 import { saveTimeEntry, stopActiveTimer, getProjects, saveProject } from "./storage";
 import { generateId } from "./utils";
@@ -140,11 +141,7 @@ export default function TrackTime(props: { arguments: TrackTimeArguments }) {
       popToRoot();
     } catch (error) {
       console.error("Error starting timer:", error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to start timer",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Failed to start timer" });
       popToRoot();
     }
   }
