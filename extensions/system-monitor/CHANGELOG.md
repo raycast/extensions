@@ -1,5 +1,9 @@
 # System Monitor Changelog
 
+## [New Additions] - {PR_MERGE_DATE}
+
+- Add a new menubar feature to display system monitor information in the menubar
+
 ## [Update] - 2025-03-03
 
 - Update the action to open the corresponding tab in the System Monitor

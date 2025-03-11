@@ -48,3 +48,22 @@ export const convertMsToTime = (milliseconds: number): string => {
 export const convertMinutesToHours = (minutes: number): string => {
   return `${`0${(minutes / 60) ^ 0}`.slice(-2)}:${`0${minutes % 60}`.slice(-2)}`;
 };
+
+export const openActivityMonitorAppleScript = (radioButtonNumber: number) => {
+  return `
+  tell application "Activity Monitor"
+    activate
+    tell application "System Events"
+      tell process "Activity Monitor"
+        tell window 1
+          tell group 1 of toolbar 1
+            tell radio group 1
+              click radio button ${radioButtonNumber}
+            end tell
+          end tell
+        end tell
+      end tell
+    end tell
+  end tell
+`;
+};
