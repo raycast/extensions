@@ -114,7 +114,7 @@ export default function TrackTime(props: { arguments: TrackTimeArguments }) {
       // Create new timer
       const newEntry: TimeEntry = {
         id: nanoid(),
-        description: description ? description : null,
+        description: description ? description.trim() : "",
         startTime: new Date(),
         endTime: null,
         isActive: true,
