@@ -1,6 +1,6 @@
 # Summarize YouTube Video
 
-Summarize any YouTube Video with AI and ask follow up questions to get all the details. Choose between Raycast, OpenAI ChatGPT or Anthropic Claude. You have to either be a [Raycast Pro](https://www.raycast.com/pro) Member, have access to an [OpenAI API Key](https://platform.openai.com/account/api-keys) or [Anthropic API Key](https://www.anthropic.com/api) to use this extension. Alternatively, you can use the extension with [Ollama](https://ollama.com/) to summarize YouTube videos using a local LLM.
+Summarize any YouTube Video with AI and ask follow up questions to get all the details. Choose between Raycast, OpenAI ChatGPT or Anthropic Claude. You have to either be a [Raycast Pro](https://www.raycast.com/pro) Member, have access to an [OpenAI API Key](https://platform.openai.com/account/api-keys), [Anthropic API Key](https://www.anthropic.com/api) or [Perplexity API Key](https://www.perplexity.com/settings/api) to use this extension. Alternatively, you can use the extension with [Ollama](https://ollama.com/) to summarize YouTube videos using a local LLM.
 
 ## Preferences
 
@@ -59,6 +59,22 @@ Your Anthropic API Key. You can get one [here](https://console.anthropic.com/das
 ### Anthropic Model
 
 Choose the model you want to use. (default: `claude-3-5-sonnet-latest`).
+
+### Language
+
+The language you want the summary to be in. Your choice will be used in a prompt like this "Answer in english". (default: `english`).
+
+## `summarizeVideoWithPerplexity`
+
+### Preferences for Perplexity
+
+### Perplexity API Key
+
+Your Perplexity API Key. You can get one [here](https://www.perplexity.ai/settings/api). Necessary if you choose "Perplexity" as your "Choose AI" option.
+
+### Perplexity Model
+
+Choose the model you want to use. (default: `sonar`).
 
 ### Language
 
