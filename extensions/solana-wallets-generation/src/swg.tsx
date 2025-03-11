@@ -26,7 +26,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action title="Generate Wallets" onAction={handleSubmit} />
+          <Action icon={Icon.Wallet} title="Generate Wallets" onAction={handleSubmit} />
         </ActionPanel>
       }
     >
