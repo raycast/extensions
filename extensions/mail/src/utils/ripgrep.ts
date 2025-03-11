@@ -9,11 +9,11 @@ import { dirname, join } from "node:path";
 import { pipeline } from "node:stream/promises";
 
 const REPOSITORY = `microsoft/ripgrep-prebuilt`;
-const VERSION = process.env.RIPGREP_VERSION || "v13.0.0-10";
+const VERSION = "v13.0.0-10";
 const BIN_PATH = join(environment.supportPath, "bin");
 
 const getTarget = () => {
-  const arch = process.env.npm_config_arch || os.arch();
+  const arch = os.arch();
   const platform = os.platform();
   switch (platform) {
     case "darwin":
