@@ -43,8 +43,7 @@
   "dependencies": {
     "@raycast/api": "^1.66.0",
     "sqlite": "^5.0.1",
-    "sqlite3": "^5.1.6",
-    "canvas": "^2.11.2"
+    "sqlite3": "^5.1.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
