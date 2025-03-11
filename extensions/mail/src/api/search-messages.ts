@@ -36,7 +36,7 @@ async function parseMessage(message: string) {
 
 const getIdFromPath = (path: string) => {
   const filename = basename(path);
-  return filename.replace(".emlx", "").replace(".partial", "");
+  return parseInt(filename.replace(".emlx", "").replace(".partial", ""));
 };
 
 type SearchOptions = {
@@ -49,7 +49,7 @@ type SearchOptions = {
 };
 
 type Message = {
-  id: string;
+  id: number;
   from: string;
   subject: string;
   text: string;
@@ -63,61 +63,49 @@ export async function searchMessages({
   order = "desc",
   limit = 25,
 }: Partial<SearchOptions>): Promise<Message[]> {
-  const absoluteMessagePaths: string[] = [];
-
   const persistenceInfo = await getPersistenceInfo();
   const version = persistenceInfo.LastUsedVersionDirectoryName;
   const basePath = resolve(homedir(), `Library/Mail/${version}`);
 
-  const messageIds: number[] = [];
+  const rgPath = await ensureCLI();
 
-  if (before || after || from) {
-    const filters: string[] = [];
+  const filters: string[] = [];
 
-    if (before) {
-      filters.push(`messages.date_sent < ${toUnixTimestamp(before)}`);
-    }
-
-    if (after) {
-      filters.push(`messages.date_sent > ${toUnixTimestamp(after)}`);
-    }
-
-    if (from) {
-      filters.push(`addresses.address = "${from}"`);
-    }
-
-    const query = `
-      SELECT messages.ROWID as id
-      FROM messages
-      LEFT JOIN addresses ON addresses.ROWID = messages.sender
-      LEFT JOIN subjects ON messages.subject = subjects.ROWID
-      LEFT JOIN summaries ON messages.summary = summaries.ROWID
-      LEFT JOIN mailboxes ON messages.mailbox = mailboxes.ROWID
-      ${filters.length ? `WHERE ${filters.join(" AND ")}` : ""}
-      ORDER BY messages.date_sent ${order}
-      LIMIT ${limit};
-    `;
-
-    const dbPath = await getDbPath();
-    const messages = await executeSQL<{ id: number; mailbox: string }>(dbPath, query);
-
-    if (messages.length === 0) {
-      return [];
-    }
-
-    for (const message of messages) {
-      messageIds.push(message.id);
-    }
+  if (before) {
+    filters.push(`messages.date_sent < ${toUnixTimestamp(before)}`);
   }
 
-  const glob = messageIds.length === 0 ? "*.emlx" : `{${messageIds.join(",")}}.{emlx,partial.emlx}`;
+  if (after) {
+    filters.push(`messages.date_sent > ${toUnixTimestamp(after)}`);
+  }
 
-  const rgPath = await ensureCLI();
+  if (from) {
+    filters.push(`addresses.address = "${from}"`);
+  }
+
+  const query = `
+    SELECT messages.ROWID as id
+    FROM messages
+    LEFT JOIN addresses ON addresses.ROWID = messages.sender
+    LEFT JOIN subjects ON messages.subject = subjects.ROWID
+    LEFT JOIN summaries ON messages.summary = summaries.ROWID
+    LEFT JOIN mailboxes ON messages.mailbox = mailboxes.ROWID
+    ${filters.length ? `WHERE ${filters.join(" AND ")}` : ""}
+    ORDER BY messages.date_sent ${order}
+  `;
+
+  const dbPath = await getDbPath();
+  const messages = await executeSQL<{ id: number; mailbox: string }>(dbPath, query);
+  const messageIds = messages.map((message) => message.id);
+
+  if (messages.length === 0) {
+    return [];
+  }
 
   const { stdout, stderr } = await execa({ reject: false })(rgPath, [
     search || "(.*)",
     "-g",
-    glob,
+    search ? "*.emlx" : `{${messageIds.join(",")}}.{emlx,partial.emlx}`,
     "-i", // case insensitive
     "-l", // only output file names
     basePath,
@@ -131,12 +119,21 @@ export async function searchMessages({
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean)
+    .filter((path) => {
+      const id = getIdFromPath(path);
+      return !messageIds[id];
+    })
+    .toSorted((a, b) => {
+      const aId = getIdFromPath(a);
+      const bId = getIdFromPath(b);
+      return messageIds.indexOf(aId) - messageIds.indexOf(bId);
+    })
     .slice(0, limit);
+
   const absolutePaths = relativePaths.map((relativePath) => resolve(basePath, relativePath));
-  absoluteMessagePaths.push(...absolutePaths);
 
   return Promise.all(
-    absoluteMessagePaths.map(async (path) => {
+    absolutePaths.map(async (path) => {
       const parsedMessage = await readFile(path, "utf-8").then(parseMessage);
       return { id: getIdFromPath(path), ...parsedMessage };
     }),
