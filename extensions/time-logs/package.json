@@ -14,6 +14,7 @@
     {
       "name": "startTimer",
       "title": "Start Timer",
+      "subtitle": "Time Logs",
       "description": "Start a new Time Log for project and task",
       "mode": "view",
       "arguments": [
@@ -34,30 +35,35 @@
     {
       "name": "stopTimer",
       "title": "Stop Timer",
+      "subtitle": "Time Logs",
       "description": "Stop the currently running Time Log",
       "mode": "view"
     },
     {
       "name": "viewLogs",
       "title": "View Time Logs",
+      "subtitle": "Time Logs",
       "description": "View and manage all Time Logs",
       "mode": "view"
     },
     {
       "name": "viewProjects",
       "title": "View Projects",
+      "subtitle": "Time Logs",
       "description": "View and manage all projects",
       "mode": "view"
     },
     {
       "name": "exportLogs",
       "title": "Export Time Logs",
+      "subtitle": "Time Logs",
       "description": "Export time logs as markdown",
       "mode": "view"
     },
     {
       "name": "menuBarTimer",
-      "title": "Menu Bar Timer",  
+      "title": "Menu Bar Timer",
+      "subtitle": "Time Logs",
       "description": "Shows active Time Log in menu bar",
       "mode": "menu-bar",
       "interval": "1m",
