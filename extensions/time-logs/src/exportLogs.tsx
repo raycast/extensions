@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, Icon, Clipboard, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getTimeEntries, getProjects } from "./storage";
 import { TimeEntry, Project } from "./models";
 import { calculateDuration } from "./utils";
@@ -322,7 +323,7 @@ export default function ExportLogs() {
 
       pop();
     } catch (error) {
-      showFailureToast("Export failed", String(error));
+      showFailureToast(error, { title: "Export failed" });
     } finally {
       setIsLoading(false);
     }
