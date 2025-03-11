@@ -1,8 +1,11 @@
 # Changelog
 
-## [✨AI: Add Env Tools] - {PR_MERGE_DATE}
+## [✨AI: View Env & DNS] - {PR_MERGE_DATE}
 
-- AI Tool to Get Environment Variables
+- AI Tools to:
+    1. Get Environment Variables
+    2. Get DNS Records
+- fix typo in Create DNS Records (`Differenet` -> `Different`)
 
 ## [✨ AI Enhancements] - 2025-02-21
 

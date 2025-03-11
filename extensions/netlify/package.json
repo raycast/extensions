@@ -128,6 +128,11 @@
       "name": "get-environment-variables",
       "title": "Get Environment Variables",
       "description": "Get all the environment variables for a Netlify site"
+    },
+    {
+      "name": "get-dns-records",
+      "title": "Get DNS Records",
+      "description": "Get all the dns records for a Netlify site"
     }
   ],
   "ai": {
@@ -344,6 +349,53 @@
               "name": "get-environment-variables",
               "arguments": {
                 "siteId": "xxxxxx-xxxx-xxxx-xxxx-xxxxxxx"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@netlify Show me all records associated with raycast.com",
+        "mocks": {
+          "get-teams": [
+            {
+              "name": "Raycast's Team",
+              "slug": "raycast"
+            }
+          ],
+          "get-domains": [
+            {
+              "id": "xxxxxx-xxxx-xxxx-xxxx-xxxxxxx",
+              "name": "raycast.com"
+            }
+          ],
+          "get-dns-records": [
+            {
+              "type": "A",
+              "ttl": 3600,
+              "value": "xx.xxx.xxx.xx"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-domains",
+              "arguments": {
+                "teamSlug": "raycast"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-dns-records",
+              "arguments": {
+                "zoneId": "xxxxxx"
               }
             }
           }
