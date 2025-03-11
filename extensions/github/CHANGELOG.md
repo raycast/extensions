@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Add repository filtering for menu bar commands] - {PR_MERGE_DATE}
+## [Add repository filtering for menu bar commands] - 2025-03-11
 
 - Add the ability to include or exclude specific repositories from the results for the `My Pull Requests` and `Unread Notifications` Menu Bar commands.
 
