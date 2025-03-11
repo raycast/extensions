@@ -2,6 +2,7 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { TimeEntry, Project } from "./models";
 import { calculateDuration, roundDuration } from "./utils";
+import { showFailureToast } from "@raycast/utils";
 
 // Keys for localStorage
 const TIME_ENTRIES_KEY = "timeEntries";
@@ -60,9 +61,16 @@ export async function stopActiveTimer(): Promise<TimeEntry | null> {
       return null;
     }
 
-    // Get the rounding interval from preferences
-    const preferences = getPreferenceValues<Preferences>();
-    const roundingInterval = parseInt(preferences.roundingInterval, 10) || 15; // Default to 15 if not set
+    // When parsing preferences
+    let roundingInterval = 15; // Default to 15
+    try {
+      // Get the rounding interval from preferences
+      const preferences = getPreferenceValues<Preferences>();
+      roundingInterval = parseInt(preferences.roundingInterval, 10) || 15; // Default to 15 if not set
+    } catch (error) {
+      showFailureToast(error, { title: "Error parsing preferences" });
+      // Default value is already set
+    }
 
     // Round the duration according to the user's preference
     // We always want at least one interval for any timer that has been started and stopped
