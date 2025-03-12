@@ -14,7 +14,6 @@
     {
       "name": "show-pollenflug",
       "title": "Show Pollenflug",
-      "subtitle": "dwd",
       "description": "Shows pollen data",
       "mode": "view"
     }

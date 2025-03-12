@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCachedState, usePromise } from "@raycast/utils";
+import { showFailureToast, useCachedState, usePromise } from "@raycast/utils";
 import fetch from "node-fetch";
 import { getLocation, locations } from "./locations";
 import { handlePin, usePinned } from "./pin";
@@ -28,11 +28,16 @@ function getPollenDisplay(value: string): { color: Color; value: string } {
 }
 
 async function fetchPollenflugData(): Promise<PollenflugApiData | null> {
-  const response = await fetch("https://opendata.dwd.de/climate_environment/health/alerts/s31fg.json");
-  const result: PollenflugApiData = (await response.json()) as PollenflugApiData;
-  LocalStorage.setItem("pollenflug_data", JSON.stringify(result));
-  LocalStorage.setItem("pollenflug_data_last_update", new Date().toISOString());
-  return result;
+  try {
+    const response = await fetch("https://opendata.dwd.de/climate_environment/health/alerts/s31fg.json");
+    const result: PollenflugApiData = (await response.json()) as PollenflugApiData;
+    LocalStorage.setItem("pollenflug_data", JSON.stringify(result));
+    LocalStorage.setItem("pollenflug_data_last_update", new Date().toISOString());
+    return result;
+  } catch (error) {
+    showFailureToast("Failed to fetch pollen data");
+    return null;
+  }
 }
 
 function usePollenflug(location: Location): {
@@ -41,12 +46,13 @@ function usePollenflug(location: Location): {
   revalidate: () => Promise<PollenflugApiData | null>;
 } {
   const { data, isLoading, revalidate } = usePromise(async () => {
-    const cached = await LocalStorage.getItem("pollenflug_data").then((value) =>
-      value ? (JSON.parse(value?.toString()) as PollenflugApiData) : null,
-    );
-    const lastUpdate = await LocalStorage.getItem("pollenflug_data_last_update").then((value) =>
-      value ? new Date(value?.toString()) : null,
-    );
+    const cached = await LocalStorage.getItem("pollenflug_data")
+      .then((value) => (value ? (JSON.parse(value?.toString()) as PollenflugApiData) : null))
+      .catch(() => null);
+    const lastUpdate = await LocalStorage.getItem("pollenflug_data_last_update")
+      .then((value) => (value ? new Date(value?.toString()) : null))
+      .catch(() => null);
+
     const nextUpdate = cached ? new Date(cached.next_update.replace(" Uhr", "")) : null;
 
     if (cached && lastUpdate && nextUpdate && new Date() < nextUpdate) {
@@ -114,7 +120,7 @@ export default function Command() {
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
-          title={`Revalidate`}
+          title="Revalidate"
           icon={Icon.ArrowClockwise}
           onAction={() => revalidate()}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
@@ -176,7 +182,7 @@ function PollenflugListItem({
     <List.Item
       key={item.name}
       title={item.name}
-      accessories={[{ tag: getPollenDisplay(item[day]) }, {}]}
+      accessories={[{ tag: getPollenDisplay(item[day]) }]}
       actions={
         <ActionPanel>
           <Action

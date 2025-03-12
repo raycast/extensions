@@ -6,7 +6,7 @@ import { Pollenflug } from "./types";
 export async function handlePin(pollenName: string) {
   pollenName = pollenName.toLowerCase();
 
-  const pollenResponse = (await LocalStorage.getItem<string>("pollen")) || { pinned: [] };
+  const pollenResponse = JSON.parse((await LocalStorage.getItem<string>("pollen")) || '{"pinned":[]}');
 
   const pollen = typeof pollenResponse === "string" ? JSON.parse(pollenResponse) : pollenResponse;
 
@@ -38,7 +38,6 @@ export function usePinned(pollenflug?: Pollenflug) {
   }, []);
 
   useEffect(() => {
-    console.log("updating pinned items", pinned);
     if (!pollenflug || pollenflug.pollen === undefined) {
       return;
     }
@@ -46,7 +45,7 @@ export function usePinned(pollenflug?: Pollenflug) {
     const unpinnedItems = pollenflug.pollen.filter((item) => !pinned.includes(item.name.toLowerCase()));
     setPinnedItems(pinnedItems);
     setUnpinnedItems(unpinnedItems);
-  }, [pollenflug, pollenflug?.pollen, pinned]);
+  }, [pollenflug, pollenflug?.pollen, pinned, setPinnedItems, setUnpinnedItems]);
 
   const hasPinned = pinnedItems.length > 0;
 

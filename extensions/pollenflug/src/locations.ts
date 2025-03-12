@@ -165,7 +165,9 @@ export const locations: Location[] = [
     region_id: 120,
     region_name: "Bayern",
   },
-]; /**
+];
+
+/**
  * Tries to find the location by its id
  * @param id format "region_id:partregion_id"
  * @returns the location object or undefined
