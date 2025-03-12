@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "csv-to-json-array",
-  "title": "Csv to Json Array",
-  "description": "parse csv file into json file",
+  "title": "CSV to JSON Array",
+  "description": "This Raycast extension provides a powerful and reliable way to convert CSV files to JSON format. The script allows users to select one or more CSV files in Finder and automatically processes them, creating properly formatted JSON output files.",
   "categories": [
     "Data"
   ],
@@ -12,9 +12,9 @@
   "commands": [
     {
       "name": "csv2json",
-      "title": "Csv to Json Array",
+      "title": "CSV to JSON Array",
       "subtitle": "Select File",
-      "description": "convert selected csv into json array",
+      "description": "Convert selected csv file into json file",
       "mode": "no-view"
     }
   ],

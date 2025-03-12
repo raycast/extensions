@@ -1,10 +1,17 @@
 import { showHUD, getSelectedFinderItems } from "@raycast/api";
-import { createReadStream, createWriteStream } from "fs";
+import { createReadStream, createWriteStream, promises as fsPromises } from "fs";
 import { createInterface } from "readline";
 
 interface CSVProcessingOptions {
   inputPath: string;
   outputPath: string;
+}
+
+interface ProcessResult {
+  success: boolean;
+  path: string;
+  error?: string;
+  outputPath?: string;
 }
 
 function parseCSVLine(line: string): string[] {
@@ -13,8 +20,13 @@ function parseCSVLine(line: string): string[] {
   let inQuotes = false;
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
-    if (char === '"' && (i === 0 || line[i - 1] !== "\\")) {
-      inQuotes = !inQuotes;
+    if (char === '"') {
+      if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
     } else if (char === "," && !inQuotes) {
       values.push(current.trim());
       current = "";
@@ -24,7 +36,7 @@ function parseCSVLine(line: string): string[] {
   }
   values.push(current.trim());
   return values.map((val) => {
-    if (val.startsWith('"') && val.endsWith('"')) {
+    if (val.startsWith('"') && val.endsWith('"') && val.length >= 2) {
       return val.substring(1, val.length - 1);
     }
     return val;
@@ -57,77 +69,143 @@ function createJSONObject(headers: string[], values: string[]): Record<string, u
   return obj;
 }
 
-async function processCSVFile({ inputPath, outputPath }: CSVProcessingOptions): Promise<void> {
-  const stream = createReadStream(inputPath);
-  const outputStream = createWriteStream(outputPath);
-  const rl = createInterface({
-    input: stream,
-    crlfDelay: Infinity,
-  });
-  outputStream.write("[\n");
-  let isFirstLine = true;
-  let headers: string[] = [];
-  let isFirstDataLine = true;
-  for await (const line of rl) {
-    if (isFirstLine) {
-      headers = line.split(",").map((header) => header.trim());
-      isFirstLine = false;
-      continue;
-    }
-    const values = parseCSVLine(line);
-    const obj = createJSONObject(headers, values);
-    if (!isFirstDataLine) {
-      outputStream.write(",\n");
-    } else {
-      isFirstDataLine = false;
-    }
-    outputStream.write(JSON.stringify(obj, null, 2));
+async function validateCSVFile(path: string): Promise<void> {
+  if (!path.toLowerCase().endsWith(".csv")) {
+    throw new Error(`Not a CSV file: ${path}`);
   }
-  outputStream.write("\n]");
-  outputStream.end();
+  try {
+    await fsPromises.access(path, fsPromises.constants.R_OK);
+  } catch (error) {
+    throw new Error(`Cannot read file: ${path}`);
+  }
 }
 
-async function processSingleFile(path: string): Promise<string> {
-  const outputPath = path.replace(".csv", ".json");
-  await processCSVFile({
-    inputPath: path,
-    outputPath,
-  });
-  return outputPath;
+async function processCSVFile({ inputPath, outputPath }: CSVProcessingOptions): Promise<void> {
+  await validateCSVFile(inputPath);
+  let stream: ReturnType<typeof createReadStream> | null = null;
+  let outputStream: ReturnType<typeof createWriteStream> | null = null;
+  let rl: ReturnType<typeof createInterface> | null = null;
+  try {
+    stream = createReadStream(inputPath);
+    outputStream = createWriteStream(outputPath);
+    rl = createInterface({
+      input: stream,
+      crlfDelay: Infinity,
+    });
+    outputStream.write("[\n");
+    let isFirstLine = true;
+    let headers: string[] = [];
+    let isFirstDataLine = true;
+    let lineNumber = 0;
+    for await (const line of rl) {
+      lineNumber++;
+      if (line.trim() === "") {
+        continue;
+      }
+      if (isFirstLine) {
+        headers = parseCSVLine(line);
+        if (headers.length === 0) {
+          throw new Error(`No headers found in CSV file at line ${lineNumber}`);
+        }
+        isFirstLine = false;
+        continue;
+      }
+      try {
+        const values = parseCSVLine(line);
+        const obj = createJSONObject(headers, values);
+        if (!isFirstDataLine) {
+          outputStream.write(",\n");
+        } else {
+          isFirstDataLine = false;
+        }
+        outputStream.write(JSON.stringify(obj, null, 2));
+      } catch (parseError) {
+        throw new Error(
+          `Error parsing line ${lineNumber}: ${parseError instanceof Error ? parseError.message : "Unknown error"}`,
+        );
+      }
+    }
+    outputStream.write("\n]");
+  } finally {
+    if (rl) {
+      rl.close();
+    }
+    if (stream) {
+      stream.destroy();
+    }
+    if (outputStream) {
+      outputStream.end();
+    }
+  }
 }
 
-async function processBatch(files: string[], batchSize: number = 3): Promise<void> {
+async function processSingleFile(path: string): Promise<ProcessResult> {
+  try {
+    const outputPath = path.replace(".csv", ".json");
+    await processCSVFile({
+      inputPath: path,
+      outputPath,
+    });
+    return {
+      success: true,
+      path,
+      outputPath,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      path,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+async function processBatch(files: string[], batchSize: number = 3): Promise<ProcessResult[]> {
+  const allResults: ProcessResult[] = [];
+
   for (let i = 0; i < files.length; i += batchSize) {
     const batch = files.slice(i, i + batchSize);
-    const results = await Promise.all(
-      batch.map(async (path) => {
-        try {
-          const outputPath = await processSingleFile(path);
-          await showHUD(`File ${outputPath} as been converted successfully`);
-          return { success: true, path };
-        } catch (error: unknown) {
-          const errorMessage = error instanceof Error ? error.message : "Error";
-          await showHUD(`Error while converting ${path}: ${errorMessage}`);
-          return { success: false, path };
-        }
-      }),
-    );
-    const succeeded = results.filter((r) => r.success).length;
-    const failed = results.filter((r) => !r.success).length;
-    if (succeeded + failed > 1) {
-      await showHUD(`Batch compleated: ${succeeded} success, ${failed} errors`);
-    }
+    const batchResults = await Promise.all(batch.map((path) => processSingleFile(path)));
+    allResults.push(...batchResults);
   }
+
+  return allResults;
 }
 
 export default async function main(): Promise<void> {
-  const selected = await getSelectedFinderItems();
-  const csvFiles = selected.map((item) => item.path).filter((path) => path.includes(".csv"));
+  try {
+    const selected = await getSelectedFinderItems();
+    const csvFiles = selected.map((item) => item.path).filter((path) => path.toLowerCase().endsWith(".csv"));
 
-  if (csvFiles.length === 0) {
-    await showHUD("Select one or more CSV");
-    return;
+    if (csvFiles.length === 0) {
+      await showHUD("Select one or more CSV files to convert");
+      return;
+    }
+
+    const results = await processBatch(csvFiles);
+    const errors = results.filter((r) => !r.success);
+    const succeeded = results.filter((r) => r.success);
+    if (errors.length === 0) {
+      if (succeeded.length === 1) {
+        const filename = succeeded[0].outputPath?.split("/").pop() || "";
+        await showHUD(`Success: Converted to ${filename}`);
+      } else {
+        await showHUD(`Success: Converted all ${succeeded.length} files`);
+      }
+    } else if (succeeded.length === 0) {
+      if (errors.length === 1) {
+        await showHUD(`Error: ${errors[0].error}`);
+      } else {
+        await showHUD(`Failed: All ${errors.length} files failed to convert`);
+      }
+    } else {
+      await showHUD(`Completed: ${succeeded.length} successful, ${errors.length} failed`);
+      console.error(
+        "Conversion errors:",
+        errors.map((e) => `${e.path}: ${e.error}`),
+      );
+    }
+  } catch (error) {
+    await showHUD(`Critical error: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
-
-  await processBatch(csvFiles);
 }
