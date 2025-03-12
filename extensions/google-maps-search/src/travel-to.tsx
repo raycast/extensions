@@ -22,7 +22,7 @@ export default function Command() {
       setOrigin(newOrigin);
       if (newOrigin === OriginOption.Home) {
         setOriginAddress(preferences.homeAddress);
-      } else {
+      } else if (newOrigin === OriginOption.Custom) {
         setOriginAddress("");
       }
     },
