@@ -10,7 +10,7 @@ import { useState } from "react";
 export function SearchLinks() {
   const [query, setQuery] = useState<string | undefined>(undefined);
   const [showDetails, setShowDetails] = useCachedState<boolean>("show-details", false, {
-    cacheNamespace: "dub-search-links"
+    cacheNamespace: "dub-search-links",
   });
   const {
     shortLinks,
