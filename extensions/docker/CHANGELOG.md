@@ -1,6 +1,6 @@
 # Docker Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2025-03-12
 
 - Show project icon in green if all containers are running.
 
