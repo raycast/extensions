@@ -13,7 +13,7 @@ async function getClipboardFilePath(): Promise<string> {
     let filePath = clipboardContent.file.trim();
     if (filePath.startsWith("file://")) {
       // Convert file URL to local path
-      filePath = new URL(filePath).pathname;
+      filePath = decodeURIComponent(new URL(filePath).pathname);
     }
     return filePath;
   }
