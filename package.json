@@ -219,34 +219,6 @@
       "mode": "no-view"
     },
     {
-      "name": "add-keyword",
-      "title": "Add Keyword",
-      "description": "Add a new keyword to keywords list",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "keyword",
-          "placeholder": "Keyword to add",
-          "type": "text",
-          "required": true
-        }
-      ]
-    },
-    {
-      "name": "remove-keyword",
-      "title": "Remove Keyword",
-      "description": "Remove a keyword from keyword list",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "keyword",
-          "placeholder": "Keyword to remove",
-          "type": "text",
-          "required": true
-        }
-      ]
-    },
-    {
       "name": "edit-keywords",
       "title": "Edit Keywords",
       "description": "Edit keyword list",
