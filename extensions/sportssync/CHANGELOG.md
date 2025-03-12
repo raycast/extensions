@@ -1,6 +1,6 @@
 # Sportssync Changelog
 
-## [Implemented past and future scores] - {PR_MERGE_DATE}
+## [Implemented past and future scores] - 2025-03-12
 
 - Updated the NHL Standings command to use divisions instead of conferences
 - Updated each scores and schedule command to now show the scores for the past 3 days, and the games for the next 5 days
