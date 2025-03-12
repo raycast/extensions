@@ -10,7 +10,7 @@ The official Raycast extension for the German tech blog Caschys Blog (www.stadt-
 - Submit tips to the blog
 - Quick actions for opening articles in browser and copying links
 - AI-powered assistant for natural language interaction
-- Multilingual support - ask questions in any language
+- AI assistant supports questions in multiple languages
 
 ## Installation
 

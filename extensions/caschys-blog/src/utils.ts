@@ -83,6 +83,12 @@ export function fetchData(urlOrParams: string): Promise<string> {
           if (res.headers.location) {
             const redirectUrl = new URL(res.headers.location, url).toString();
             console.log(`Following redirect to: ${redirectUrl}`);
+            // Add redirect count to prevent infinite loops
+            const redirectCount = Number(req.getHeader("x-redirect-count") || 0);
+            if (redirectCount >= 5) {
+              reject(new Error("Too many redirects"));
+              return;
+            }
             return fetchData(redirectUrl).then(resolve).catch(reject);
           }
         }
@@ -313,14 +319,18 @@ export async function fetchArticles(forceRefresh: boolean = false): Promise<Arti
     // If there's an error, try to use cached data as fallback
     const cached = await LocalStorage.getItem<string>("cached_articles");
     if (cached) {
-      const cachedData: CachedData = JSON.parse(cached);
-      console.log("Using cached articles as fallback due to error");
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error loading fresh articles",
-        message: "Using cached articles instead",
-      });
-      return cachedData.articles;
+      try {
+        const cachedData: CachedData = JSON.parse(cached);
+        console.log("Using cached articles as fallback due to error");
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Error loading fresh articles",
+          message: "Using cached articles instead",
+        });
+        return cachedData.articles;
+      } catch (parseError) {
+        console.error("Error parsing cached data:", parseError);
+      }
     }
 
     await showToast({

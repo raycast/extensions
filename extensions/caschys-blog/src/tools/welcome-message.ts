@@ -1,8 +1,12 @@
 /**
  * Provides a welcome message with sample queries and information about multilingual support
- * @returns A welcome message with sample queries
+ * @returns {Object} An object containing:
+ *   @returns {string} message - The welcome message text
+ *   @returns {string[]} features - List of available features
+ *   @returns {string} multilingual - Information about language support
+ *   @returns {Array<{language: string, queries: string[]}>} sampleQueries - Sample queries in different languages
  */
-export default async function welcomeMessage() {
+export default function welcomeMessage() {
   return {
     message:
       "Welcome to the Caschys Blog Assistant! I can help you search for articles, get the latest news, and submit tips to the blog.",

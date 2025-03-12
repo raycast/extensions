@@ -47,14 +47,3 @@ export default async function searchArticles(input: Input) {
     count: sortedArticles.length,
   };
 }
-
-/**
- * Confirmation message for the search
- */
-export const confirmation = (input: Input) => {
-  return {
-    title: "Search Articles",
-    message: `Are you sure you want to search for "${input.query}"?`,
-    icon: "🔍",
-  };
-};

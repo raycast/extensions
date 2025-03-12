@@ -1,6 +1,6 @@
 # Caschys Blog Changelog
 
-## [Version 1.1.0] - 2025-03-11
+## [Version 1.0] - {PR_MERGE_DATE}
 
 ### Added
 - AI-powered assistant for natural language interaction
@@ -13,6 +13,3 @@
 ### Fixed
 - Updated Toast API usage to follow latest Raycast guidelines
 - Updated dependencies to latest versions
-
-## [Version 1.0.0] - 2024-09-19
-- Initial release with Latest Articles and Submit Tip commands
