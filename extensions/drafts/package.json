@@ -145,7 +145,7 @@
   "ai": {
     "evals": [
       {
-        "input": "@drafts create a new note listing the following grocories: water, oranges, apples, and bananas",
+        "input": "@drafts create a new weekly planning note listing all dates of this week as heading",
         "mocks": {
           "create-draft": "Successfully called \"create-draft\""
         },
