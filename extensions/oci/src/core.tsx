@@ -6,6 +6,7 @@ import * as core from "oci-core";
 import { Instance } from "oci-core/lib/model";
 import { mapObjectToMarkdownTable } from "./utils";
 import { InstanceActionRequest } from "oci-core/lib/request";
+import OpenInOCI from "./open-in-oci";
 
 const onError = (error: Error) => {
   const err = error.message as string | common.OciError;
@@ -148,6 +149,7 @@ function Core({ provider }: { provider: common.ConfigFileAuthenticationDetailsPr
                   title="View VNIC Attachments"
                   target={<ListInstanceVnicAttachments instanceId={instance.id} provider={provider} />}
                 />
+                <OpenInOCI route={`instances/${instance.id}`} />
                 <ActionPanel.Section>
                   {instance.lifecycleState === Instance.LifecycleState.Running && (
                     <>
