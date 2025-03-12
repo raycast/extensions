@@ -1,6 +1,6 @@
 # Vercast Changelog
 
-## [2.9] - {PR_MERGE_DATE}
+## [2.9] - 2025-03-12
 
 - Update items in `Search Components`
 - Fix extension stuck loading when Token Length is invalid
