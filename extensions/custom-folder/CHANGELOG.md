@@ -23,7 +23,7 @@
 
 - Added the ability to easily apply the new custom icon to a target folder.
 
-## [Feat Image shades ] - 2024-08-05
+## [Feat Image shades] - 2024-08-05
 
 - Added optional toggle - shading effect on the image, switching between a filled mask and shaded tones.
 

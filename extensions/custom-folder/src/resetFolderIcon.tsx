@@ -19,7 +19,7 @@ export default function Command() {
     async function getSelectedFolder() {
       try {
         const items = await getSelectedFinderItems();
-        if (items.length === 1 && items[0].path && items[0].path.endsWith("/")) {
+        if (items.length === 1 && items[0].path && fs.lstatSync(items[0].path).isDirectory()) {
           setSelectedFolder(items[0].path);
         }
       } catch (error) {
