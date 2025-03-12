@@ -19,8 +19,6 @@ import { useEffect, useState, useRef } from "react";
 
 const execPromise = promisify(exec);
 
-// Removed Preferences interface as it's auto-generated in raycast-env.d.ts
-
 // Image preview component
 function ImagePreview(props: { imagePath: string; format: string }) {
   const { imagePath, format } = props;
@@ -147,15 +145,27 @@ function ImagePreview(props: { imagePath: string; format: string }) {
 
 // Improved function to check for mmdc command availability
 async function findMmdcPath(): Promise<string> {
-  const possiblePaths = [
-    "/usr/local/bin/mmdc",
-    "/opt/homebrew/bin/mmdc",
-    "~/.npm-global/bin/mmdc",
-    "/usr/bin/mmdc",
-    path.join(os.homedir(), ".npm-global/bin/mmdc"),
-  ];
+  const preferences = getPreferenceValues<Preferences>();
 
-  // First check if mmdc is in PATH
+  // First check if user has specified a custom path
+  if (preferences.customMmdcPath?.trim()) {
+    const customPath = preferences.customMmdcPath.trim();
+    const expandedPath = customPath.startsWith("~/") ? customPath.replace("~/", `${os.homedir()}/`) : customPath;
+
+    if (fs.existsSync(expandedPath)) {
+      console.log("Using custom mmdc path:", expandedPath);
+      return expandedPath;
+    } else {
+      console.warn("Custom mmdc path specified but not found:", expandedPath);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Custom mmdc path not found",
+        message: "Check your extension preferences",
+      });
+    }
+  }
+
+  // Check if mmdc is in PATH
   try {
     const { stdout } = await execPromise("which mmdc");
     if (stdout.trim()) {
@@ -163,7 +173,6 @@ async function findMmdcPath(): Promise<string> {
       return stdout.trim();
     }
   } catch (error) {
-    // Command not found in PATH, continue with checking specific locations
     console.log("mmdc not found in PATH, checking specific locations...");
     console.error("which mmdc error:", error instanceof Error ? error.message : String(error));
 
@@ -174,32 +183,84 @@ async function findMmdcPath(): Promise<string> {
     });
   }
 
+  // Expanded list of possible paths including NVM locations
+  const possiblePaths = [
+    "/usr/local/bin/mmdc",
+    "/opt/homebrew/bin/mmdc",
+    "~/.npm-global/bin/mmdc",
+    "/usr/bin/mmdc",
+    path.join(os.homedir(), ".npm-global/bin/mmdc"),
+    // Add NVM paths
+    path.join(os.homedir(), ".nvm/versions/node/*/bin/mmdc"),
+    // Add Homebrew paths
+    "/opt/homebrew/lib/node_modules/@mermaid-js/mermaid-cli/node_modules/.bin/mmdc",
+    "/usr/local/lib/node_modules/@mermaid-js/mermaid-cli/node_modules/.bin/mmdc",
+  ];
+
   // Check specific locations
   for (const p of possiblePaths) {
-    const expandedPath = p.startsWith("~/") ? p.replace("~/", `${os.homedir()}/`) : p;
-    if (fs.existsSync(expandedPath)) {
-      console.log("Found mmdc at specific location:", expandedPath);
+    if (p.includes("*")) {
+      // Handle glob patterns (for NVM paths)
+      try {
+        const { stdout } = await execPromise(`ls -d ${p} 2>/dev/null || echo ""`);
+        const paths = stdout.trim().split("\n").filter(Boolean);
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Found mermaid-cli",
-        message: `Located at ${expandedPath}`,
-      });
-
-      return expandedPath;
+        for (const foundPath of paths) {
+          if (fs.existsSync(foundPath)) {
+            console.log("Found mmdc at NVM location:", foundPath);
+            await showToast({
+              style: Toast.Style.Success,
+              title: "Found mermaid-cli",
+              message: `Located at ${foundPath}`,
+            });
+            return foundPath;
+          }
+        }
+      } catch (error) {
+        console.error("Error checking glob pattern:", p, error);
+      }
+    } else {
+      const expandedPath = p.startsWith("~/") ? p.replace("~/", `${os.homedir()}/`) : p;
+      if (fs.existsSync(expandedPath)) {
+        console.log("Found mmdc at specific location:", expandedPath);
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Found mermaid-cli",
+          message: `Located at ${expandedPath}`,
+        });
+        return expandedPath;
+      }
     }
   }
 
-  console.error("mmdc not found in any of the expected locations:", possiblePaths);
+  // Try to find any mmdc in the user's home directory as a last resort
+  try {
+    const { stdout } = await execPromise(`find ${os.homedir()} -name mmdc -type f -perm -u+x 2>/dev/null || echo ""`);
+    const paths = stdout.trim().split("\n").filter(Boolean);
 
-  // Using showFailureToast instead of showToast with Style.Failure for consistency
+    if (paths.length > 0) {
+      console.log("Found mmdc in home directory:", paths[0]);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Found mermaid-cli",
+        message: `Located at ${paths[0]}`,
+      });
+      return paths[0];
+    }
+  } catch (error) {
+    console.error("Error searching home directory for mmdc:", error);
+  }
+
+  console.error("mmdc not found in any of the expected locations");
+
+  // Show a more helpful error message
   await showFailureToast({
     title: "mermaid-cli not found",
-    message: "Please install with 'npm install -g @mermaid-js/mermaid-cli'",
+    message: "Please install with 'npm install -g @mermaid-js/mermaid-cli' or set a custom path in preferences",
   });
 
   throw new Error(
-    "mermaid-cli (mmdc) command not found. Please install it with 'npm install -g @mermaid-js/mermaid-cli'",
+    "mermaid-cli (mmdc) command not found. Please install it with 'npm install -g @mermaid-js/mermaid-cli' or specify the path in extension preferences",
   );
 }
 

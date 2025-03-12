@@ -101,6 +101,14 @@
       "required": false,
       "placeholder": "Leave empty to use Downloads folder",
       "validate": "^$|^/?(/[^/]+)+/?$"
+    },
+    {
+      "name": "customMmdcPath",
+      "title": "Custom mmdc Path",
+      "description": "Specify a custom path to the mmdc executable (e.g., from NVM installations)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/Users/username/.nvm/versions/node/v22.12.0/bin/mmdc"
     }
   ]
 }
