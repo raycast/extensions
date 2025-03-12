@@ -1,3 +1,3 @@
-# IPA Tool Changelog
+# iOS App Search Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}

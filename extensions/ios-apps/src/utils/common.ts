@@ -108,8 +108,6 @@ export function extractFilePath(text: string, defaultPath: string): string {
   return defaultPath;
 }
 
-// These functions have been moved to itunes-api.ts
-
 /**
  * Renders star rating as text (e.g., "★★★★☆" for 4.0)
  */
