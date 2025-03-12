@@ -1,6 +1,6 @@
 # Custom folder Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-03-12
 
 - Added the ability to retrieve the selected folder when Finder is the frontmost application.
 
