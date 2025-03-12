@@ -181,6 +181,7 @@ function AddTimeLogForm({ onSave }: { onSave: () => Promise<void> }) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>("none");
   const [dropdownValue, setDropdownValue] = useState<string | undefined>("none");
   const [description, setDescription] = useState<string>("");
+  const [descriptionError, setDescriptionError] = useState<string | undefined>();
   const [startDateTime, setStartDateTime] = useState<Date>(new Date());
   const [endDateTime, setEndDateTime] = useState<Date>(
     new Date(new Date().getTime() + roundingIntervalNum * 60 * 1000),
@@ -302,6 +303,15 @@ function AddTimeLogForm({ onSave }: { onSave: () => Promise<void> }) {
     }
   }
 
+  // Handle description changes
+  const handleDescriptionChange = (value: string) => {
+    setDescription(value);
+    // Clear error when description is not empty
+    if (value && value.trim() !== "") {
+      setDescriptionError(undefined);
+    }
+  };
+
   // Submit the form
   async function handleSubmit() {
     try {
@@ -384,7 +394,8 @@ function AddTimeLogForm({ onSave }: { onSave: () => Promise<void> }) {
         title="Task"
         placeholder="What did you work on?"
         value={description}
-        onChange={setDescription}
+        onChange={handleDescriptionChange}
+        error={descriptionError}
       />
 
       <Form.Dropdown
@@ -452,6 +463,7 @@ function EditTimeLogForm({ entry, onSave }: { entry: TimeEntry; onSave: () => Pr
 
   // Form state
   const [description, setDescription] = useState(entry.description || "");
+  const [descriptionError, setDescriptionError] = useState<string | undefined>();
   const [startDateTime, setStartDateTime] = useState(new Date(entry.startTime));
   const [endDateTime, setEndDateTime] = useState(
     entry.endTime
@@ -614,6 +626,15 @@ function EditTimeLogForm({ entry, onSave }: { entry: TimeEntry; onSave: () => Pr
     }
   }
 
+  // Handle description changes
+  const handleDescriptionChange = (value: string) => {
+    setDescription(value);
+    // Clear error when description is not empty
+    if (value && value.trim() !== "") {
+      setDescriptionError(undefined);
+    }
+  };
+
   // Submit handler
   async function handleSubmit() {
     try {
@@ -628,7 +649,7 @@ function EditTimeLogForm({ entry, onSave }: { entry: TimeEntry; onSave: () => Pr
 
       // Validate input
       if (!description || description.trim() === "") {
-        setDescription("");
+        setDescriptionError("Task description is required");
         return;
       }
 
@@ -705,7 +726,8 @@ function EditTimeLogForm({ entry, onSave }: { entry: TimeEntry; onSave: () => Pr
         title="Task"
         placeholder="What did you work on?"
         value={description}
-        onChange={setDescription}
+        onChange={handleDescriptionChange}
+        error={descriptionError}
       />
 
       {/* Only show the dropdown when projects are loaded */}
