@@ -53,7 +53,7 @@
     {
       "name": "model",
       "title": "Model",
-      "description": "Model for the OpenAI API",
+      "description": "Model for emojifying text, you need to specify a valid model name if you specify a URL other than OpenAI",
       "type": "textfield",
       "required": false
     },
