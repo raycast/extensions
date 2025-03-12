@@ -1,6 +1,6 @@
 # Readwise Reader Changelog
 
-## [Add category filtering for documents in list view] - {PR_MERGE_DATE}
+## [Add category filtering for documents in list view] - 2025-03-12
 
 - Add category filtering for documents in list view
 
