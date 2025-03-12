@@ -89,7 +89,7 @@
         "name": "welcome-message-eval",
         "description": "Test the welcome message tool",
         "prompt": "What can you help me with?",
-        "input": "{}",
+        "input": "What can you help me with?",
         "expectedToolCalls": [
           {
             "name": "welcome-message"
@@ -100,12 +100,12 @@
         "name": "search-articles-eval",
         "description": "Test the search articles tool",
         "prompt": "Find articles about iPhone",
-        "input": "{\"query\": \"iPhone\"}",
+        "input": "Find articles about iPhone",
         "expectedToolCalls": [
           {
             "name": "search-articles",
             "arguments": {
-              "query": "iPhone"
+              "query": "Find articles about iPhone"
             }
           }
         ]
@@ -114,7 +114,7 @@
         "name": "get-latest-articles-eval",
         "description": "Test the get latest articles tool",
         "prompt": "Show me the latest articles",
-        "input": "{}",
+        "input": "Show me the latest articles",
         "expectedToolCalls": [
           {
             "name": "get-latest-articles"
@@ -125,7 +125,7 @@
         "name": "submit-tip-eval",
         "description": "Test the submit tip tool",
         "prompt": "I want to submit a tip about a new tech product",
-        "input": "{\"title\": \"New tech product\", \"description\": \"I found a new tech product that might be interesting for your readers.\"}",
+        "input": "I want to submit a tip about a new tech product",
         "expectedToolCalls": [
           {
             "name": "submit-tip"
