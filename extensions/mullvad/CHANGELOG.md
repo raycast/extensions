@@ -1,6 +1,6 @@
 # Mullvad Changelog
 
-## [Added config to select server for location based on ranking, added actions to reset ranking] - {PR_MERGE_DATE}
+## [Added config to select server for location based on ranking, added actions to reset ranking] - 2025-03-12
 
 ## [Added ability to select specific server, Added freceny sorting] - 2025-01-03
 
