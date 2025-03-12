@@ -30,7 +30,7 @@ export default function Command() {
         ${values["hidMouse"] ? "--mouse=uhid" : ""} \
         ${values["disableAudio"] ? "--no-audio" : ""} \
         ${values["alwaysOnTop"] ? "--always-on-top" : ""} \
-        ${!values["disableAudio"] ? `--audio-codec=${values["audioCodec"]}` : ""} \
+        --audio-codec=${values["audioCodec"]} \
         -m ${values["size"]} \
         -s ${serial} \
         ${values["moreOptions"]}`,
@@ -96,7 +96,13 @@ export default function Command() {
 
       <Form.Separator />
 
-      <Form.TextField id="moreOptions" defaultValue="" title="More options" info="For example: `--audio-bit-rate=64K --audio-buffer=40`" storeValue />
+      <Form.TextField
+        id="moreOptions"
+        defaultValue=""
+        title="More options"
+        info="For example: `--audio-bit-rate=64K --audio-buffer=40`"
+        storeValue
+      />
     </Form>
   );
 }
