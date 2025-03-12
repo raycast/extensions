@@ -178,7 +178,7 @@ function generateMockContributionData(): ContributionsCollection {
   const today = new Date();
   const weeks = [];
 
-  for (let w = 0; w < 12; w++) {
+  for (let w = 0; w < 52; w++) {
     const days = [];
     for (let d = 0; d < 7; d++) {
       const date = new Date(today);
