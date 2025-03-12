@@ -1,8 +1,17 @@
 # GitHub Changelog
 
+
 ## [Add repository blacklist for my-issues] - {PR_MERGE_DATE}
 
 - Add preference to my-issues command to remove issues from specific repositories.
+
+## [Add repository filtering for menu bar commands] - 2025-03-11
+
+- Add the ability to include or exclude specific repositories from the results for the `My Pull Requests` and `Unread Notifications` Menu Bar commands.
+
+## [Chore] - 2025-03-10
+
+- Fix typo in setting label
 
 ## [✨ AI Enhancements] - 2025-02-21
 
@@ -19,9 +28,9 @@
 
 - Use a new icon with indicator for unread state
 
-## [Support specifying git clone protocol] - 2024-12-12
+## [Support specifying Git clone protocol] - 2024-12-12
 
-- Added support to specify the git clone protocol (SSH or HTTPS) in extension preferences.
+- Added support to specify the Git clone protocol (SSH or HTTPS) in extension preferences.
 - `Copy Clone Command` and `Clone And Open` now respect the clone protocol from the preferences.
 
 ## [Update GraphQL generated types] - 2024-12-09

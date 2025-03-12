@@ -48,7 +48,7 @@
               "title": "Raycast AI"
             }
           ],
-          "required": true
+          "required": false
         },
         {
           "name": "creativity",
@@ -315,6 +315,75 @@
           "name": "anthropicModel",
           "title": "Anthropic Model",
           "description": "Choose the Anthropic model to use. Defaults to `claude-3-5-sonnet-latest`.",
+          "type": "textfield",
+          "required": false
+        },
+        {
+          "name": "language",
+          "title": "Language",
+          "description": "Define the language which the AI should use to summarize the video.",
+          "type": "textfield",
+          "default": "english",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "summarizeVideoWithOllama",
+      "title": "Summarize YouTube Video with Ollama",
+      "description": "Use Ollama to create a summary of any YouTube video.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "video",
+          "placeholder": "Video URL or ID",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "creativity",
+          "title": "Creativity",
+          "description": "Choose how creative the AI should be.",
+          "type": "dropdown",
+          "default": "0.5",
+          "data": [
+            {
+              "value": "0",
+              "title": "None"
+            },
+            {
+              "value": "0.5",
+              "title": "Low"
+            },
+            {
+              "value": "1",
+              "title": "Medium"
+            },
+            {
+              "value": "1.5",
+              "title": "High"
+            },
+            {
+              "value": "2",
+              "title": "Maximum"
+            }
+          ],
+          "required": false
+        },
+        {
+          "name": "ollamaEndpoint",
+          "title": "Ollama Endpoint",
+          "description": "The endpoint URL for your Ollama instance (e.g. http://localhost:11434/v1)",
+          "type": "textfield",
+          "default": "http://localhost:11434/v1",
+          "required": true
+        },
+        {
+          "name": "ollamaModel",
+          "title": "Ollama Model",
+          "description": "Choose the Ollama model to use. Defaults to `llama3.2:latest`.",
           "type": "textfield",
           "required": false
         },

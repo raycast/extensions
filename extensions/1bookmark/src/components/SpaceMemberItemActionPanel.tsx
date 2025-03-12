@@ -11,7 +11,7 @@ export const SpaceMemberItemActionPanel = (props: {
   refetch: () => void;
 }) => {
   const { myRole, me, spaceId, member, refetch } = props;
-  const removeUser = trpc.team.removeUser.useMutation();
+  const removeUser = trpc.space.removeUser.useMutation();
 
   const handleRemove = async () => {
     const confirmed = await confirmAlert({

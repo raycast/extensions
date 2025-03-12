@@ -1,5 +1,7 @@
 # Mullvad Changelog
 
+## [Added config to select server for location based on ranking, added actions to reset ranking] - 2025-03-12
+
 ## [Added ability to select specific server, Added freceny sorting] - 2025-01-03
 
 ## [Support Reconnecting via the Mullvad CLI, Fixed HUD message display] - 2024-10-25

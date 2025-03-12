@@ -186,7 +186,7 @@ export const createPost = async (postText: string, postReference?: PostReference
   await rt.detectFacets(agent);
 
   const postRecord: Partial<AppBskyFeedPost.Record> & Omit<AppBskyFeedPost.Record, "createdAt"> = {
-    $type: { BskyFeedType: BlueskyFeedType },
+    $type: BlueskyFeedType,
     text: rt.text,
     facets: rt.facets,
     createdAt: new Date().toISOString(),

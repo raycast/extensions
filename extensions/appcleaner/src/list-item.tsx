@@ -1,12 +1,10 @@
-import { ActionPanel, Action, List, getPreferenceValues } from "@raycast/api";
-import { AppItem, launchUninstaller, showError } from "./lib";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { AppItem, Uninstaller, showError } from "./lib";
 
 export function ListItem({ app }: { app: AppItem }) {
   function uninstall() {
-    const preferences = getPreferenceValues<Preferences>();
-
-    launchUninstaller(preferences.uninstaller_app, app).catch((error: Error) => {
-      showError(error.toString(), "Launching app failed");
+    Uninstaller.launch(app).catch((error: Error) => {
+      showError(error.toString());
     });
   }
 

@@ -44,72 +44,73 @@ function getReleaseAnnouncementLink(phpVersion: PhpVersion): string {
 export default function Command() {
   const { isLoading, data } = useFetch("https://endoflife.date/api/php.json");
 
-  const phpVersions = (data as PhpVersion[]).map((phpVersion: PhpVersion) => {
-    phpVersion.status = getPhpVersionStatus(phpVersion);
-    phpVersion.releaseDateHuman = getHumanDifference(phpVersion.releaseDate);
-    phpVersion.eolHuman = getHumanDifference(phpVersion.eol);
-    phpVersion.supportHuman = getHumanDifference(phpVersion.support);
-    phpVersion.latestReleaseDateHuman = getHumanDifference(phpVersion.latestReleaseDate);
-    return phpVersion;
-  });
+  const phpVersions = Array.isArray(data)
+    ? (data as PhpVersion[]).map((phpVersion: PhpVersion) => {
+        phpVersion.status = getPhpVersionStatus(phpVersion);
+        phpVersion.releaseDateHuman = getHumanDifference(phpVersion.releaseDate);
+        phpVersion.eolHuman = getHumanDifference(phpVersion.eol);
+        phpVersion.supportHuman = getHumanDifference(phpVersion.support);
+        phpVersion.latestReleaseDateHuman = getHumanDifference(phpVersion.latestReleaseDate);
+        return phpVersion;
+      })
+    : [];
 
   return (
     <List isShowingDetail isLoading={isLoading}>
-      {Array.isArray(phpVersions) &&
-        phpVersions.map((phpVersion, index) => (
-          <List.Item
-            key={index}
-            title={"PHP  " + phpVersion.cycle}
-            accessories={getAccessories(phpVersion)}
-            detail={
-              <List.Item.Detail
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.TagList title="Status">
-                      <List.Item.Detail.Metadata.TagList.Item
-                        text={phpVersion.status ?? ""}
-                        color={getStatusTagColor(phpVersion.status)}
-                      />
-                    </List.Item.Detail.Metadata.TagList>
-                    <List.Item.Detail.Metadata.Label title="Latest release version" text={phpVersion.latest} />
-                    <List.Item.Detail.Metadata.Label
-                      title="Active Support"
-                      text={phpVersion.supportHuman + " (" + phpVersion.support + ")"}
+      {phpVersions.map((phpVersion) => (
+        <List.Item
+          key={phpVersion.cycle}
+          title={"PHP  " + phpVersion.cycle}
+          accessories={getAccessories(phpVersion)}
+          detail={
+            <List.Item.Detail
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.TagList title="Status">
+                    <List.Item.Detail.Metadata.TagList.Item
+                      text={phpVersion.status ?? ""}
+                      color={getStatusTagColor(phpVersion.status)}
                     />
-                    <List.Item.Detail.Metadata.Label
-                      title="EOL / Security Updates until"
-                      text={phpVersion.eolHuman + " (" + phpVersion.eol + ")"}
-                    />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label
-                      title="Initial release date"
-                      text={phpVersion.releaseDateHuman + " (" + phpVersion.releaseDate + ")"}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Latest release date"
-                      text={phpVersion.latestReleaseDateHuman + " (" + phpVersion.latestReleaseDate + ")"}
-                    />
-                    <List.Item.Detail.Metadata.Separator />
-                  </List.Item.Detail.Metadata>
-                }
+                  </List.Item.Detail.Metadata.TagList>
+                  <List.Item.Detail.Metadata.Label title="Latest release version" text={phpVersion.latest} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Active Support"
+                    text={phpVersion.supportHuman + " (" + phpVersion.support + ")"}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="EOL / Security Updates until"
+                    text={phpVersion.eolHuman + " (" + phpVersion.eol + ")"}
+                  />
+                  <List.Item.Detail.Metadata.Separator />
+                  <List.Item.Detail.Metadata.Label
+                    title="Initial release date"
+                    text={phpVersion.releaseDateHuman + " (" + phpVersion.releaseDate + ")"}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Latest release date"
+                    text={phpVersion.latestReleaseDateHuman + " (" + phpVersion.latestReleaseDate + ")"}
+                  />
+                  <List.Item.Detail.Metadata.Separator />
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                icon={Icon.Megaphone}
+                title="Release Announcement on php.net"
+                url={getReleaseAnnouncementLink(phpVersion)}
               />
-            }
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser
-                  icon={Icon.Megaphone}
-                  title="Release Announcement on php.net"
-                  url={getReleaseAnnouncementLink(phpVersion)}
-                />
-                <Action.OpenInBrowser
-                  icon={Icon.AppWindowGrid3x3}
-                  title="Supported Versions on php.net"
-                  url="https://www.php.net/supported-versions.php"
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+              <Action.OpenInBrowser
+                icon={Icon.AppWindowGrid3x3}
+                title="Supported Versions on php.net"
+                url="https://www.php.net/supported-versions.php"
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }
