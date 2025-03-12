@@ -14,8 +14,17 @@ The Exa Raycast extension provides a friendly interface to interact with Exa's A
 - **Search**: Search the web with Exa's semantic search
 - **Similar**: Find web pages similar to a given URL
 - **Answers**: Ask questions and get AI-generated answers with citations
+- **Open in Browser**: Quickly open Exa search in your browser
+- **AI Tools**: Integration with Raycast AI for search, similar, contents, and answers
 
 ## Recent Changes
+
+### Extension Merger (March 2025)
+- Merged exa and exa-ai extensions into a single unified extension
+- Added Raycast AI Tools from exa extension
+- Added "Open in Browser" command from exa extension
+- Centralized API client with proxy support for API-key-less operation
+- Unified extension metadata with official exa_ai ownership
 
 ### Recent UI Fixes and Improvements (Feb 2025)
 - Fixed keyboard shortcut issues: replaced `cmd+escape` with `cmd+backspace`
@@ -69,6 +78,28 @@ The Exa Raycast extension provides a friendly interface to interact with Exa's A
 - Simplified feature descriptions
 
 ## Architecture
+
+### exa.ts (API Client)
+The exa.ts file provides a centralized API client for all commands:
+
+- **Features**:
+  - Singleton pattern for consistent API access
+  - Automatic proxy support when no API key is provided
+  - Used by all commands and AI tools
+
+### src/tools/ (AI Tools)
+The tools directory contains implementations for Raycast AI tools:
+
+- **Implementations**:
+  - `search.ts`: Perform web search with Exa
+  - `find-similar.ts`: Find similar pages to a URL
+  - `get-contents.ts`: Retrieve content from a webpage
+  - `get-answer.ts`: Get AI-powered answers to questions
+
+### open-in-browser.ts
+Simple command to open Exa search directly in the browser:
+- Supports opening with or without a query
+- Uses no-view mode for quick execution
 
 ### answers.tsx (Q&A Command)
 

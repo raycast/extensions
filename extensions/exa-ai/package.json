@@ -3,8 +3,12 @@
   "name": "exa",
   "title": "Exa AI",
   "description": "Use the Exa AI API to search the web and get AI-powered answers",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "abizer",
+  "contributors": [
+    "thomas"
+  ],
+  "owner": "exa_ai",
   "categories": [
     "Productivity",
     "Web"
@@ -28,6 +32,42 @@
       "title": "Exa Similar",
       "description": "Find web pages similar to a given URL",
       "mode": "view"
+    },
+    {
+      "name": "search-in-browser",
+      "title": "Search in Browser",
+      "description": "Opens the Exa Search in your browser.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "description": "The query to search for."
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search",
+      "title": "Search",
+      "description": "Perform an Exa search given an input query and retrieve a list of relevant results as links, including a summary of the content."
+    },
+    {
+      "name": "find-similar",
+      "title": "Find Similar",
+      "description": "Find a list of similar results based on a webpage's URL, including a summary of each result."
+    },
+    {
+      "name": "get-contents",
+      "title": "Get Contents",
+      "description": "Retrieves the full text of a webpage given its URL."
+    },
+    {
+      "name": "get-answer",
+      "title": "Get Answer",
+      "description": "Get an answer to a question informed by Exa search results."
     }
   ],
   "preferences": [
@@ -36,7 +76,7 @@
       "title": "Exa API Key",
       "description": "Your Exa API key from exa.ai",
       "type": "password",
-      "required": true
+      "required": false
     },
     {
       "name": "model",

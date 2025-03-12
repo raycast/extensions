@@ -11,7 +11,8 @@ import {
   getPreferenceValues,
   open,
 } from "@raycast/api";
-import Exa, { SearchResult } from "exa-js";
+import { SearchResult } from "exa-js";
+import exa from "./exa";
 import { typeid } from "typeid-js";
 import Fuse from "fuse.js";
 
@@ -183,7 +184,6 @@ export default function Command() {
       try {
         // Make API request
         const start = performance.now();
-        const exa = new Exa(preferences.apiKey);
         const response = await exa.searchAndContents(finalQuery, {
           text: true,
           numResults: 20,
@@ -248,7 +248,7 @@ export default function Command() {
     async (id: string): Promise<void> => {
       try {
         console.log(`Attempting to delete search with ID: ${id}`);
-        
+
         // First update in-memory state
         setAllSearches((prev) => {
           const filtered = prev.filter((s) => s.id !== id);
@@ -260,12 +260,12 @@ export default function Command() {
           setSelectedSearch(null);
           setViewMode("searches");
         }
-        
+
         // Clear this specific item from storage
         try {
           // Get all items from storage first
           const allItems = await LocalStorage.allItems();
-          
+
           // Look for the specific key that contains our ID
           for (const key of Object.keys(allItems)) {
             if (key === id) {
@@ -273,14 +273,14 @@ export default function Command() {
               await LocalStorage.removeItem(key);
             }
           }
-          
+
           // Also try the prefixed version as fallback
           await LocalStorage.removeItem(`${STORAGE_KEY_PREFIX}_${id}`);
           await LocalStorage.removeItem(STORAGE_KEY_PREFIX + id);
         } catch (storageError) {
           console.error("Error accessing storage during delete:", storageError);
         }
-        
+
         // Show success message - we show success even if storage fails, since UI state is updated
         await showToast({
           style: Toast.Style.Success,

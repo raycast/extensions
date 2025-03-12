@@ -11,7 +11,8 @@ import {
   getPreferenceValues,
   open,
 } from "@raycast/api";
-import Exa, { SearchResult } from "exa-js";
+import { SearchResult } from "exa-js";
+import exa from "./exa";
 import { typeid } from "typeid-js";
 import Fuse from "fuse.js";
 
@@ -37,7 +38,7 @@ function formatRelativeTime(date: Date): string {
   if (!date || isNaN(date.getTime())) {
     return "unknown time";
   }
-  
+
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffSec = Math.floor(diffMs / 1000);
@@ -49,12 +50,12 @@ function formatRelativeTime(date: Date): string {
   if (diffMin < 60) return `${diffMin}m ago`;
   if (diffHour < 24) return `${diffHour}h ago`;
   if (diffDay < 7) return `${diffDay}d ago`;
-  
+
   // For older dates, show the actual date
-  return date.toLocaleDateString(undefined, { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric' 
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 }
 
@@ -96,9 +97,10 @@ export default function Command() {
               search.createdAt = new Date(search.createdAt);
             } else {
               // If it's an object but not a proper Date instance, convert it
-              const timestamp = search.createdAt instanceof Date ? 
-                search.createdAt.getTime() : 
-                new Date(search.createdAt as any).getTime();
+              const timestamp =
+                search.createdAt instanceof Date
+                  ? search.createdAt.getTime()
+                  : new Date(search.createdAt as any).getTime();
               search.createdAt = new Date(timestamp);
             }
 
@@ -192,7 +194,6 @@ export default function Command() {
       try {
         // Make API request
         const start = performance.now();
-        const exa = new Exa(preferences.apiKey);
         const response = await exa.findSimilarAndContents(finalUrl, {
           text: true,
           numResults: 20,
@@ -217,9 +218,9 @@ export default function Command() {
         // Prepare for storage - convert Date to ISO string for proper serialization
         const searchToStore = {
           ...updatedSearch,
-          createdAt: updatedSearch.createdAt.toISOString()
+          createdAt: updatedSearch.createdAt.toISOString(),
         };
-        
+
         // Save to local storage - ensure we're using a consistent key format
         console.log(`Saving similar search with ID: ${id}`);
         await LocalStorage.setItem(id, JSON.stringify(searchToStore));
@@ -257,7 +258,7 @@ export default function Command() {
     async (id: string): Promise<void> => {
       try {
         console.log(`Attempting to delete similar search with ID: ${id}`);
-        
+
         // First update in-memory state
         setAllSearches((prev) => {
           const filtered = prev.filter((s) => s.id !== id);
@@ -269,12 +270,12 @@ export default function Command() {
           setSelectedSearch(null);
           setViewMode("searches");
         }
-        
+
         // Clear this specific item from storage
         try {
           // Get all items from storage first
           const allItems = await LocalStorage.allItems();
-          
+
           // Look for the specific key that contains our ID
           for (const key of Object.keys(allItems)) {
             if (key === id) {
@@ -282,14 +283,14 @@ export default function Command() {
               await LocalStorage.removeItem(key);
             }
           }
-          
+
           // Also try the prefixed version as fallback
           await LocalStorage.removeItem(`${STORAGE_KEY_PREFIX}_${id}`);
           await LocalStorage.removeItem(STORAGE_KEY_PREFIX + id);
         } catch (storageError) {
           console.error("Error accessing storage during delete:", storageError);
         }
-        
+
         // Show success message - we show success even if storage fails, since UI state is updated
         await showToast({
           style: Toast.Style.Success,
@@ -325,28 +326,28 @@ export default function Command() {
   const generateResultMarkdown = useCallback((result: SearchResult<{ text: true }>): string => {
     let md = `## ${result.title || "Untitled"}\n\n`;
     md += `URL: ${result.url}\n\n`;
-    
+
     if (result.score) {
       md += `Similarity: ${result.score.toFixed(2)}\n\n`;
     }
-    
+
     if (result.publishedDate) {
       md += `Published: ${new Date(result.publishedDate).toLocaleString()}\n\n`;
     }
-    
+
     md += `---\n\n`;
-    
+
     if (result.text) {
       md += result.text;
     } else {
       md += "_No content available_";
     }
-    
+
     md += `\n\n[Open in Browser](${result.url})`;
-    
+
     // Add minimal metadata at the bottom
     md += `\n\n${result.id}`;
-    
+
     return md;
   }, []);
 
@@ -414,11 +415,9 @@ export default function Command() {
               title={result.title || "Untitled"}
               icon={Icon.Document}
               accessories={[
-                { text: formatRelativeTime(result.publishedDate ? new Date(result.publishedDate) : new Date()) }
+                { text: formatRelativeTime(result.publishedDate ? new Date(result.publishedDate) : new Date()) },
               ]}
-              detail={
-                <List.Item.Detail markdown={generateResultMarkdown(result)} />
-              }
+              detail={<List.Item.Detail markdown={generateResultMarkdown(result)} />}
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser url={result.url} />
@@ -506,11 +505,7 @@ export default function Command() {
             ]}
             actions={
               <ActionPanel>
-                <Action 
-                  title="View Results" 
-                  icon={Icon.Eye} 
-                  onAction={() => viewSearchResults(search)} 
-                />
+                <Action title="View Results" icon={Icon.Eye} onAction={() => viewSearchResults(search)} />
                 <Action
                   title="Find Similar Again"
                   icon={Icon.Link}
@@ -523,11 +518,7 @@ export default function Command() {
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
                   onAction={() => handleCopyText(search.url)}
                 />
-                <Action.OpenInBrowser 
-                  title="Open URL" 
-                  url={search.url} 
-                  shortcut={{ modifiers: ["cmd"], key: "o" }} 
-                />
+                <Action.OpenInBrowser title="Open URL" url={search.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
                 <Action
                   title="Delete"
                   icon={Icon.Trash}

@@ -11,7 +11,8 @@ import {
   getPreferenceValues,
   open,
 } from "@raycast/api";
-import Exa, { AnswerResponse } from "exa-js";
+import { AnswerResponse } from "exa-js";
+import exa from "./exa";
 import { typeid } from "typeid-js";
 
 // Constants
@@ -136,7 +137,6 @@ export default function Command() {
       try {
         // Make API request
         const start = performance.now();
-        const exa = new Exa(preferences.apiKey);
         const response = await exa.answer(finalQuestion, {
           text: true,
           model: preferences.model,
