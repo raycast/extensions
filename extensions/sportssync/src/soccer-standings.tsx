@@ -1,4 +1,4 @@
-import { Detail, List, Action, ActionPanel } from "@raycast/api";
+import { Detail, List, Action, ActionPanel, Color, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
@@ -27,6 +27,12 @@ interface StandingsEntry {
 }
 
 interface StandingsData {
+  links: [
+    {
+      href: string;
+    },
+  ];
+
   children: [
     {
       name: string;
@@ -53,15 +59,77 @@ export default function scoresAndSchedule() {
 
   const eplItems = eplData?.children?.[0]?.standings?.entries || [];
   const eplTeams = eplItems.map((epl, index) => {
+    const teamPosition = Number(epl.stats[10].displayValue);
+    let tagColor;
+    let tagIcon;
+
+    if (teamPosition === 1) {
+      tagColor = Color.Yellow;
+      tagIcon = Icon.Trophy;
+    } else if (teamPosition >= 2) {
+      tagColor = Color.Green;
+      tagIcon = Icon.Leaderboard;
+    } else {
+      tagColor = Color.SecondaryText;
+    }
+
     return (
       <List.Item
         key={index}
         title={`${epl.team.displayName}`}
         icon={{ source: epl.team.logos[0].href }}
-        accessoryTitle={`${epl.stats[0].displayValue} GP | ${epl.stats[12].displayValue} | ${epl.stats[3].displayValue} pts | ${epl.stats[5].displayValue} GF | ${epl.stats[4].displayValue} GA | Dif: ${epl.stats[2].displayValue}`}
+        accessories={[
+          {
+            text: `${epl.stats[0].displayValue ?? "0"} GP | ${epl.stats[12].displayValue ?? "0-0-0"} | ${epl.stats[3].displayValue ?? "0"} pts | ${epl.stats[5].displayValue ?? "0"} GF | ${epl.stats[4].displayValue ?? "0"} GA | Dif: ${epl.stats[2].displayValue ?? "0"}`,
+          },
+          { tag: { value: epl.stats[10].displayValue, color: tagColor }, icon: tagIcon },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Team Details on ESPN" url={`${epl.team.links[0].href}`} />
+          </ActionPanel>
+        }
+      />
+    );
+  });
+
+  // Fetch UEFA Standings
+
+  const { isLoading: uefaStats, data: uefaData } = useFetch<StandingsData>(
+    "https://site.web.api.espn.com/apis/v2/sports/soccer/uefa.champions/standings",
+  );
+
+  const uefaItems = uefaData?.children?.[0]?.standings?.entries || [];
+
+  const uefaTeams = uefaItems.map((uefa, index) => {
+    const teamPosition = Number(uefa.stats[10].displayValue);
+    let tagColor;
+    let tagIcon;
+
+    if (teamPosition === 1) {
+      tagColor = Color.Yellow;
+      tagIcon = Icon.Trophy;
+    } else if (teamPosition >= 2) {
+      tagColor = Color.Green;
+      tagIcon = Icon.Leaderboard;
+    } else {
+      tagColor = Color.SecondaryText;
+    }
+
+    return (
+      <List.Item
+        key={index}
+        title={`${uefa.team.displayName}`}
+        icon={{ source: uefa.team.logos[0].href }}
+        accessories={[
+          {
+            text: `${uefa.stats[0].displayValue ?? "0"} GP | ${uefa.stats[12].displayValue ?? "0-0-0"} | ${uefa.stats[3].displayValue ?? "0"} pts | ${uefa.stats[5].displayValue ?? "0"} GF | ${uefa.stats[4].displayValue ?? "0"} GA | Dif: ${uefa.stats[2].displayValue ?? "0"}`,
+          },
+          { tag: { value: uefa.stats[10].displayValue, color: tagColor }, icon: tagIcon },
+        ]}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="View Team Details on ESPN" url={`${uefa.team.links[0].href}`} />
           </ActionPanel>
         }
       />
@@ -76,12 +144,31 @@ export default function scoresAndSchedule() {
 
   const sllItems = sllData?.children?.[0]?.standings?.entries || [];
   const sllTeams = sllItems.map((sll, index) => {
+    const teamPosition = Number(sll.stats[10].displayValue);
+    let tagColor;
+    let tagIcon;
+
+    if (teamPosition === 1) {
+      tagColor = Color.Yellow;
+      tagIcon = Icon.Trophy;
+    } else if (teamPosition >= 2) {
+      tagColor = Color.Green;
+      tagIcon = Icon.Leaderboard;
+    } else {
+      tagColor = Color.SecondaryText;
+    }
+
     return (
       <List.Item
         key={index}
         title={`${sll.team.displayName}`}
         icon={{ source: sll.team.logos[0].href }}
-        accessoryTitle={`${sll.stats[0].displayValue} GP | ${sll.stats[12].displayValue} | ${sll.stats[3].displayValue} pts | ${sll.stats[5].displayValue} GF | ${sll.stats[4].displayValue} GA | Dif: ${sll.stats[2].displayValue}`}
+        accessories={[
+          {
+            text: `${sll.stats[0].displayValue ?? "0"} GP | ${sll.stats[12].displayValue ?? "0-0-0"} | ${sll.stats[3].displayValue ?? "0"} pts | ${sll.stats[5].displayValue ?? "0"} GF | ${sll.stats[4].displayValue ?? "0"} GA | Dif: ${sll.stats[2].displayValue ?? "0"}`,
+          },
+          { tag: { value: sll.stats[10].displayValue, color: tagColor }, icon: tagIcon },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Team Details on ESPN" url={`${sll.team.links[0].href}`} />
@@ -99,12 +186,31 @@ export default function scoresAndSchedule() {
 
   const gerItems = gerData?.children?.[0]?.standings?.entries || [];
   const gerTeams = gerItems.map((ger, index) => {
+    const teamPosition = Number(ger.stats[10].displayValue);
+    let tagColor;
+    let tagIcon;
+
+    if (teamPosition === 1) {
+      tagColor = Color.Yellow;
+      tagIcon = Icon.Trophy;
+    } else if (teamPosition >= 2) {
+      tagColor = Color.Green;
+      tagIcon = Icon.Leaderboard;
+    } else {
+      tagColor = Color.SecondaryText;
+    }
+
     return (
       <List.Item
         key={index}
         title={`${ger.team.displayName}`}
         icon={{ source: ger.team.logos[0].href }}
-        accessoryTitle={`${ger.stats[0].displayValue} GP | ${ger.stats[12].displayValue} | ${ger.stats[3].displayValue} pts | ${ger.stats[5].displayValue} GF | ${ger.stats[4].displayValue} GA | Dif: ${ger.stats[2].displayValue}`}
+        accessories={[
+          {
+            text: `${ger.stats[0].displayValue ?? "0"} GP | ${ger.stats[12].displayValue ?? "0-0-0"} | ${ger.stats[3].displayValue ?? "0"} pts | ${ger.stats[5].displayValue ?? "0"} GF | ${ger.stats[4].displayValue ?? "0"} GA | Dif: ${ger.stats[2].displayValue ?? "0"}`,
+          },
+          { tag: { value: ger.stats[10].displayValue, color: tagColor }, icon: tagIcon },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Team Details on ESPN" url={`${ger.team.links[0].href}`} />
@@ -123,12 +229,31 @@ export default function scoresAndSchedule() {
   const itaItems = itaData?.children?.[0]?.standings?.entries || [];
 
   const itaTeams = itaItems.map((ita, index) => {
+    const teamPosition = Number(ita.stats[10].displayValue);
+    let tagColor;
+    let tagIcon;
+
+    if (teamPosition === 1) {
+      tagColor = Color.Yellow;
+      tagIcon = Icon.Trophy;
+    } else if (teamPosition >= 2) {
+      tagColor = Color.Green;
+      tagIcon = Icon.Leaderboard;
+    } else {
+      tagColor = Color.SecondaryText;
+    }
+
     return (
       <List.Item
         key={index}
         title={`${ita.team.displayName}`}
         icon={{ source: ita.team.logos[0].href }}
-        accessoryTitle={`${ita.stats[0].displayValue} GP | ${ita.stats[12].displayValue} | ${ita.stats[3].displayValue} pts | ${ita.stats[5].displayValue} GF | ${ita.stats[4].displayValue} GA | Dif: ${ita.stats[2].displayValue}`}
+        accessories={[
+          {
+            text: `${ita.stats[0].displayValue ?? "0"} GP | ${ita.stats[12].displayValue ?? "0-0-0"} | ${ita.stats[3].displayValue ?? "0"} pts | ${ita.stats[5].displayValue ?? "0"} GF | ${ita.stats[4].displayValue ?? "0"} GA | Dif: ${ita.stats[2].displayValue ?? "0"}`,
+          },
+          { tag: { value: ita.stats[10].displayValue, color: tagColor }, icon: tagIcon },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Team Details on ESPN" url={`${ita.team.links[0].href}`} />
@@ -138,31 +263,7 @@ export default function scoresAndSchedule() {
     );
   });
 
-  // Fetch UEFA Standings
-
-  const { isLoading: uefaStats, data: uefaData } = useFetch<StandingsData>(
-    "https://site.web.api.espn.com/apis/v2/sports/soccer/uefa.champions/standings",
-  );
-
-  const uefaItems = uefaData?.children?.[0]?.standings?.entries || [];
-
-  const uefaTeams = uefaItems.map((uefa, index) => {
-    return (
-      <List.Item
-        key={index}
-        title={`${uefa.team.displayName}`}
-        icon={{ source: uefa.team.logos[0].href }}
-        accessoryTitle={`${uefa.stats[0].displayValue} GP | ${uefa.stats[12].displayValue} | ${uefa.stats[3].displayValue} pts | ${uefa.stats[5].displayValue} GF | ${uefa.stats[4].displayValue} GA | Dif: ${uefa.stats[2].displayValue}`}
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser title="View Team Details on ESPN" url={`${uefa.team.links[0].href}`} />
-          </ActionPanel>
-        }
-      />
-    );
-  });
-
-  if (eplStats || sllStats || gerStats || itaStats || uefaStats) {
+  if (eplStats || uefaStats || sllStats || gerStats || itaStats) {
     return <Detail isLoading={true} />;
   }
 

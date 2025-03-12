@@ -1,4 +1,4 @@
-import { Detail, List } from "@raycast/api";
+import { Detail, List, Icon, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
@@ -48,15 +48,35 @@ export default function scoresAndSchedule() {
   );
 
   const driverItems = driverData?.children?.[0]?.standings?.entries || [];
-  const drivers = driverItems.map((driver, index) => {
+  const drivers = driverItems?.map((driver, index) => {
     const flagSrc = driver?.athlete?.flag.href ?? `${driver?.athlete?.flag?.href}`;
+
+    const driverPosition = Number(driver.stats[0].displayValue ?? "0");
+
+    let tagColor;
+    let tagIcon;
+
+    if (driverPosition === 1) {
+      tagColor = Color.Yellow;
+      tagIcon = Icon.Trophy;
+    } else if (driverPosition >= 2) {
+      tagColor = Color.Green;
+      tagIcon = Icon.Leaderboard;
+    } else {
+      tagColor = Color.SecondaryText;
+    }
 
     return (
       <List.Item
         key={index}
         title={`${driver?.athlete?.displayName}`}
         icon={{ source: flagSrc }}
-        accessoryTitle={`${driver.stats[1].displayValue} pts `}
+        accessories={[
+          {
+            text: `${driver?.stats[1]?.displayValue ?? "0"} pts`,
+          },
+          { tag: { value: driver?.stats[0]?.displayValue ?? "0", color: tagColor }, icon: tagIcon },
+        ]}
       />
     );
   });
@@ -68,12 +88,32 @@ export default function scoresAndSchedule() {
   );
 
   const constructorItems = constructorData?.children?.[1]?.standings?.entries || [];
-  const constructorTeams = constructorItems.map((constructor, index) => {
+  const constructorTeams = constructorItems?.map((constructor, index) => {
+    const constructorPosition = Number(constructor?.stats[0].displayValue ?? "0");
+
+    let tagColor;
+    let tagIcon;
+
+    if (constructorPosition === 1) {
+      tagColor = Color.Yellow;
+      tagIcon = Icon.Trophy;
+    } else if (constructorPosition >= 2) {
+      tagColor = Color.Green;
+      tagIcon = Icon.Leaderboard;
+    } else {
+      tagColor = Color.SecondaryText;
+    }
+
     return (
       <List.Item
         key={index}
         title={`${constructor?.team?.displayName}`}
-        accessoryTitle={`${constructor.stats[1].displayValue} pts `}
+        accessories={[
+          {
+            text: `${constructor?.stats[1]?.displayValue ?? "0"} pts`,
+          },
+          { tag: { value: constructor?.stats[0]?.displayValue ?? "0", color: tagColor }, icon: tagIcon },
+        ]}
       />
     );
   });
@@ -86,8 +126,8 @@ export default function scoresAndSchedule() {
     return <Detail markdown="No data found." />;
   }
 
-  const driverTitle = driverData.children[0].name;
-  const constructorTitle = constructorData.children[1].name;
+  const driverTitle = driverData?.children[0]?.name;
+  const constructorTitle = constructorData?.children[1]?.name;
 
   return (
     <List
