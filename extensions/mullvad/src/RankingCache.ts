@@ -27,12 +27,12 @@ export default class RankingCache<T> {
 
   public get(key: string): T {
     const storedValue = this.cache.get(key);
-    return storedValue != undefined ? this.parse(storedValue) : this.defaultValue;
+    return storedValue !== undefined ? this.parse(storedValue) : this.defaultValue;
   }
 
   public update(key: string, updater: (value: T) => T): void {
     const storedValue = this.cache.get(key);
-    const oldValue = storedValue != undefined ? this.parse(storedValue) : this.defaultValue;
+    const oldValue = storedValue !== undefined ? this.parse(storedValue) : this.defaultValue;
     const newValue = updater(oldValue);
     this.cache.set(key, this.stringify(newValue));
   }
