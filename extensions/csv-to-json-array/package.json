@@ -13,7 +13,6 @@
     {
       "name": "csv2json",
       "title": "CSV to JSON Array",
-      "subtitle": "Select File",
       "description": "Convert selected csv file into json file",
       "mode": "no-view"
     }
