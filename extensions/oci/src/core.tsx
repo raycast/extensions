@@ -81,10 +81,11 @@ function Core({ provider }: { provider: common.ConfigFileAuthenticationDetailsPr
     try {
       const computeClient = new core.ComputeClient({ authenticationDetailsProvider: provider });
       await mutate(
+        action!=="TERMINATE" ?
         computeClient.instanceAction({
           instanceId: instance.id,
           action,
-        }),
+        }) : computeClient.terminateInstance({ instanceId: instance.id }),
       );
       toast.style = Toast.Style.Success;
       toast.title = `${action} ✅`;
@@ -160,6 +161,7 @@ function Core({ provider }: { provider: common.ConfigFileAuthenticationDetailsPr
                   {instance.lifecycleState === Instance.LifecycleState.Stopped && (
                     <Action icon={Icon.Play} title="Start" onAction={() => doInstanceAction(instance, "START")} />
                   )}
+                  {![Instance.LifecycleState.Terminated, Instance.LifecycleState.Terminating].includes(instance.lifecycleState) && <Action icon={Icon.Trash} title="Terminate" onAction={() => doInstanceAction(instance, "TERMINATE")} style={Action.Style.Destructive} />}
                 </ActionPanel.Section>
               </ActionPanel>
             }
