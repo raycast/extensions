@@ -1,0 +1,6 @@
+{
+  "root": true,
+  "plugins": ["import"],
+  "extends": ["@raycast"],
+  "rules": { "import/order": ["error", { "alphabetize": { "order": "asc" } }] }
+}
