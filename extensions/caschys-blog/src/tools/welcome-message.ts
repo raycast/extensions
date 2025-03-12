@@ -1,5 +1,16 @@
 /**
- * Provides a welcome message with sample queries and information about multilingual support
+ * Welcome Message Tool
+ *
+ * This tool provides a welcome message with sample queries and information about the
+ * Caschys Blog Assistant capabilities. It's designed to be shown to users when they
+ * first interact with the AI assistant, helping them understand what they can do.
+ *
+ * The welcome message includes:
+ * - A friendly introduction to the assistant
+ * - A list of available features
+ * - Information about multilingual support
+ * - Sample queries in multiple languages (English, German, Spanish)
+ *
  * @returns {Object} An object containing:
  *   @returns {string} message - The welcome message text
  *   @returns {string[]} features - List of available features

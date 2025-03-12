@@ -15,7 +15,7 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
 
 ${article.categories && article.categories.length > 0 ? `**Categories:** ${article.categories.join(", ")}\n\n` : ""}
 
-${article.content || article.description}
+${article.content || article.description || "No content available"}
   `;
 
   return (

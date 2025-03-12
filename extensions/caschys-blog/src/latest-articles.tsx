@@ -1,23 +1,35 @@
-// src/latest-articles.tsx
-
-import { List, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import React from "react";
-import { Article, fetchArticles } from "./utils";
+import { Article, fetchArticles, safeParseDate } from "./utils";
 import ArticleDetail from "./components/ArticleDetail";
 import ArticleListItem from "./components/ArticleListItem";
 import SubmitTip from "./submit-tip";
 
+/**
+ * Latest Articles Command
+ *
+ * This component displays a list of the latest articles from Caschys Blog.
+ * It allows users to:
+ * - View a list of the most recent articles
+ * - Search through articles by title, description, author, and categories
+ * - View article details
+ * - Open articles in browser
+ * - Copy article links
+ * - Submit tips to the blog
+ *
+ * @returns {JSX.Element} The Latest Articles list view
+ */
 export default function LatestArticles() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchText, setSearchText] = useState<string>("");
 
-  // Load preferences but don't use them directly in this component
-  // They are used in the fetchArticles function
-  getPreferenceValues();
-
-  // Load articles
+  /**
+   * Load articles on component mount
+   * Fetches articles from the blog and handles loading state and errors
+   */
   useEffect(() => {
     async function loadArticles() {
       setIsLoading(true);
@@ -25,6 +37,8 @@ export default function LatestArticles() {
         // Force refresh on component mount to clear cache
         const fetchedArticles = await fetchArticles(true);
         setArticles(fetchedArticles);
+      } catch (error) {
+        showFailureToast(error, { title: "Failed to load articles" });
       } finally {
         setIsLoading(false);
       }
@@ -33,7 +47,10 @@ export default function LatestArticles() {
     loadArticles();
   }, []);
 
-  // Filter articles based on search
+  /**
+   * Filter articles based on search text
+   * Searches in title, description, creator, and categories
+   */
   const filteredArticles = articles.filter((article) => {
     if (!searchText) return true;
 
@@ -46,9 +63,12 @@ export default function LatestArticles() {
     );
   });
 
-  // Sort articles by date
+  /**
+   * Sort articles by publication date (newest first)
+   * Uses safeParseDate to handle potential invalid date strings
+   */
   const sortedArticles = [...filteredArticles].sort((a, b) => {
-    return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
+    return safeParseDate(b.pubDate) - safeParseDate(a.pubDate);
   });
 
   return (
@@ -58,15 +78,6 @@ export default function LatestArticles() {
       onSearchTextChange={setSearchText}
       throttle
       navigationTitle="Latest Articles"
-      searchBarAccessory={
-        <List.Dropdown
-          tooltip="Sort by"
-          storeValue={true}
-          onChange={() => {}} // Placeholder for future sorting functionality
-        >
-          <List.Dropdown.Item title="Newest first" value="newest" icon={Icon.Calendar} />
-        </List.Dropdown>
-      }
     >
       <List.Section title="Latest Articles" subtitle={`${filteredArticles.length} of ${articles.length} articles`}>
         {sortedArticles.map((article) => (

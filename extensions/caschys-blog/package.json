@@ -14,6 +14,7 @@
     {
       "name": "latest-articles",
       "title": "Latest Articles",
+      "subtitle": "Caschys Blog",
       "description": "Shows the latest articles from Caschys Blog",
       "mode": "view",
       "script": "latest-articles.tsx",
@@ -41,9 +42,18 @@
     {
       "name": "submit-tip",
       "title": "Submit Tip",
+      "subtitle": "Caschys Blog",
       "description": "Submit a tip to Caschys Blog",
       "mode": "view",
       "script": "submit-tip.tsx"
+    },
+    {
+      "name": "open-website",
+      "title": "Open Caschys Blog",
+      "subtitle": "Caschys Blog",
+      "description": "Opens the Caschys Blog website in your default browser",
+      "mode": "no-view",
+      "script": "open-website.tsx"
     }
   ],
   "tools": [
@@ -73,10 +83,61 @@
     }
   ],
   "ai": {
-    "instructions": "You are an assistant for Caschys Blog, a popular German tech blog. You can help users search for articles, get the latest articles, and submit tips to the blog. When users first interact with you, use the welcome-message tool to provide a welcome message with sample queries and information about multilingual support. When users ask about tech news or articles, use the search-articles tool to find relevant content. When users want to see the latest articles, use the get-latest-articles tool. When users want to submit a tip to the blog, use the submit-tip tool to help them create and send their tip. Users can ask questions in any language, and you should respond in the same language they use."
+    "instructions": "You are an assistant for Caschys Blog, a popular German tech blog. You can help users search for articles, get the latest articles, and submit tips to the blog. When users first interact with you, use the welcome-message tool to provide a welcome message with sample queries and information about multilingual support. When users ask about tech news or articles, use the search-articles tool to find relevant content. When users want to see the latest articles, use the get-latest-articles tool. When users want to submit a tip to the blog, use the submit-tip tool to help them create and send their tip. Users can ask questions in any language, and you should respond in the same language they use.",
+    "evals": [
+      {
+        "name": "welcome-message-eval",
+        "description": "Test the welcome message tool",
+        "prompt": "What can you help me with?",
+        "input": "{}",
+        "expectedToolCalls": [
+          {
+            "name": "welcome-message"
+          }
+        ]
+      },
+      {
+        "name": "search-articles-eval",
+        "description": "Test the search articles tool",
+        "prompt": "Find articles about iPhone",
+        "input": "{\"query\": \"iPhone\"}",
+        "expectedToolCalls": [
+          {
+            "name": "search-articles",
+            "arguments": {
+              "query": "iPhone"
+            }
+          }
+        ]
+      },
+      {
+        "name": "get-latest-articles-eval",
+        "description": "Test the get latest articles tool",
+        "prompt": "Show me the latest articles",
+        "input": "{}",
+        "expectedToolCalls": [
+          {
+            "name": "get-latest-articles"
+          }
+        ]
+      },
+      {
+        "name": "submit-tip-eval",
+        "description": "Test the submit tip tool",
+        "prompt": "I want to submit a tip about a new tech product",
+        "input": "{\"title\": \"New tech product\", \"description\": \"I found a new tech product that might be interesting for your readers.\"}",
+        "expectedToolCalls": [
+          {
+            "name": "submit-tip"
+          }
+        ]
+      }
+    ],
+    "documentation": "For more information on AI Evals, see the Raycast AI Evals Documentation: https://developers.raycast.com/ai/evals"
   },
   "dependencies": {
     "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.19.1",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {

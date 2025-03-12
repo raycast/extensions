@@ -59,6 +59,20 @@ async function clearCache() {
 }
 
 /**
+ * Safely parse a date string and return a timestamp
+ * @param dateString The date string to parse
+ * @returns The timestamp (milliseconds since epoch) or 0 if parsing fails
+ */
+export function safeParseDate(dateString: string): number {
+  try {
+    return new Date(dateString).getTime();
+  } catch (error) {
+    console.error(`Error parsing date: ${dateString}`, error);
+    return 0;
+  }
+}
+
+/**
  * Performs an HTTP request and returns the response as a string
  */
 export function fetchData(urlOrParams: string): Promise<string> {
