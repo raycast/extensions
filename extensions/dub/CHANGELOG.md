@@ -1,6 +1,6 @@
 # Dub Link Shortener Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-03-12
 
 - Add a toggle to show/hide details in the search links command
 - Keep previous data when fetching short links
