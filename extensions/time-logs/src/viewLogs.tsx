@@ -30,7 +30,7 @@ import {
   calculateMonthlyHoursSummary,
   generateId,
 } from "./utils";
-import { getProgressIcon, useLocalStorage } from "@raycast/utils";
+import { getProgressIcon, useLocalStorage, showFailureToast } from "@raycast/utils";
 
 // Preferences interface
 interface Preferences {
@@ -252,7 +252,7 @@ function AddTimeLogForm({ onSave }: { onSave: () => Promise<void> }) {
         setDropdownValue(latestProject.id);
       }
     } catch (error) {
-      // Handle error silently
+      showFailureToast(error, { title: "Failed to load updated projects" });
     } finally {
       setIsLoading(false);
     }
@@ -543,11 +543,7 @@ function EditTimeLogForm({ entry, onSave }: { entry: TimeEntry; onSave: () => Pr
         setSelectedProjectId(latestProject.id);
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to reload projects",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Failed to reload projects" });
     } finally {
       setIsLoading(false);
     }
