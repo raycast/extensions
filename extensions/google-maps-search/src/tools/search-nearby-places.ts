@@ -1,8 +1,9 @@
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { getNearbyPlaces, geocodeAddress } from "../utils/google-places-api";
 import { makeSearchURL } from "../utils/url";
 import { formatDistance, calculateDistance } from "../utils/common";
 import { Preferences } from "../types";
+import { showFailureToast } from "@raycast/utils";
 
 /**
  * Input type for the search-nearby-places tool
@@ -78,7 +79,7 @@ export default async function (input: SearchNearbyPlacesInput): Promise<string> 
       response += `  Distance: ${formatDistance(distance)}\n`;
       if (place.rating) response += `  Rating: ${place.rating}/5\n`;
       if (place.openNow !== undefined) response += `  Status: ${place.openNow ? "Open Now" : "Closed"}\n`;
-      response += `  [View on Google Maps](${makeSearchURL(place.name + " " + place.address)})\n\n`;
+      response += `  [View on Google Maps](${makeSearchURL(encodeURIComponent(`${place.name} ${place.address}`))})\n\n`;
     }
 
     if (filteredPlaces.length > limit) {
@@ -87,11 +88,7 @@ export default async function (input: SearchNearbyPlacesInput): Promise<string> 
 
     return response;
   } catch (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Error Searching Nearby Places",
-      message: String(error),
-    });
+    showFailureToast(error, { title: "Error Searching Nearby Places", message: String(error) });
     return `Sorry, I encountered an error while searching for ${input.type} places near "${input.location}". Please check your API key and try again.`;
   }
 }

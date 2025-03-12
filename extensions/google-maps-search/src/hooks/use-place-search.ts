@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
-import { getPreferenceValues, showToast, Toast, openExtensionPreferences } from "@raycast/api";
+import { getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { Preferences, PlaceSearchResult } from "../types";
 import { searchPlaces } from "../utils/google-places-api";
+import { showFailureToast } from "@raycast/utils";
 
 export function usePlaceSearch(initialSearchText?: string) {
   const [searchText, setSearchText] = useState(initialSearchText || "");
@@ -12,8 +13,7 @@ export function usePlaceSearch(initialSearchText?: string) {
   // Check if API key is set
   useEffect(() => {
     if (!preferences.googlePlacesApiKey) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "API Key Missing",
         message: "Please set your Google Places API key in preferences",
         primaryAction: {
@@ -22,7 +22,7 @@ export function usePlaceSearch(initialSearchText?: string) {
         },
       });
     }
-  }, []);
+  }, [preferences.googlePlacesApiKey]);
 
   // Search for places when the search text changes
   const performSearch = useCallback(async () => {
@@ -34,8 +34,7 @@ export function usePlaceSearch(initialSearchText?: string) {
       setPlaces(results);
     } catch (error) {
       console.error("Error searching places:", error);
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Search Failed",
         message: "Failed to search places. Check your API key and network connection.",
       });
@@ -61,7 +60,7 @@ export function usePlaceSearch(initialSearchText?: string) {
     if (initialSearchText && initialSearchText.trim().length > 2) {
       performSearch();
     }
-  }, []);
+  }, [initialSearchText, performSearch, preferences.googlePlacesApiKey]);
 
   return {
     searchText,

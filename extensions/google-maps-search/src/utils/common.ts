@@ -1,13 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../types";
-
-// Default radius values
-export const DEFAULT_RADIUS_KM = 5;
-export const DEFAULT_RADIUS_MILES = 3;
-
-// Default radius in meters for API calls (50km or ~31 miles)
-export const DEFAULT_SEARCH_RADIUS_METRIC = 50000;
-export const DEFAULT_SEARCH_RADIUS_IMPERIAL = Math.round(milesToKm(31) * 1000);
+import { TravelMode, UnitSystem } from "@googlemaps/google-maps-services-js";
 
 /**
  * Convert miles to kilometers
@@ -37,6 +30,23 @@ export function metersToFeet(meters: number): number {
 }
 
 /**
+ * Get the user's preferred unit system
+ * @returns The user's preferred unit system ("metric" or "imperial")
+ */
+export function getUnitSystem(): "metric" | "imperial" {
+  const preferences = getPreferenceValues<Preferences>();
+  return preferences.unitSystem || "metric";
+}
+
+// Default radius values
+export const DEFAULT_RADIUS_KM = 5;
+export const DEFAULT_RADIUS_MILES = 3;
+
+// Default radius in meters for API calls (50km or ~31 miles)
+export const DEFAULT_SEARCH_RADIUS_METRIC = 50000;
+export const DEFAULT_SEARCH_RADIUS_IMPERIAL = Math.round(31 * 1609.34);
+
+/**
  * Renders star rating as text (e.g., "★★★★☆" for 4.0)
  */
 export function renderStarRating(rating: number | undefined): string {
@@ -56,7 +66,14 @@ export function renderStarRating(rating: number | undefined): string {
  */
 export function formatPriceLevel(level?: number): string {
   if (level === undefined) return "Price not available";
-  return "$".repeat(level) || "Free";
+
+  // Validate that level is between 0-4
+  if (level < 0 || level > 4 || !Number.isInteger(level)) {
+    console.warn(`Invalid price level: ${level}. Expected integer between 0-4.`);
+    return "Price not available";
+  }
+
+  return level === 0 ? "Free" : "$".repeat(level);
 }
 
 /**
@@ -65,31 +82,39 @@ export function formatPriceLevel(level?: number): string {
  * @param format Format option: 1 = "4.8 ★★★★★ (58)", 2 = "★★★★☆ (4.0)", 3 = "★★★★☆"
  * @param totalRatings Total number of ratings (only used in format 1)
  * @returns Formatted rating string
+ * @throws Error if format is not 1, 2, or 3
  */
 export function formatRating(rating?: number, format: 1 | 2 | 3 = 2, totalRatings?: number): string {
   if (rating === undefined) return "No ratings yet";
 
+  // Validate rating is within a reasonable range
+  if (rating < 0 || rating > 5) {
+    console.warn(`Invalid rating value: ${rating}. Expected value between 0-5.`);
+    return "Invalid rating";
+  }
+
   const stars = renderStarRating(rating);
+
+  let formattedRating: string;
 
   switch (format) {
     case 1: // Overall rating average, stars, (Total Ratings Count)
-      return `${rating.toFixed(1)} ${stars}${totalRatings ? ` (${totalRatings})` : ""}`;
+      formattedRating = `${rating.toFixed(1)} ${stars}${totalRatings ? ` (${totalRatings})` : ""}`;
+      break;
     case 2: // Stars, Rating
-      return `${stars} (${rating.toFixed(1)})`;
+      formattedRating = `${stars} (${rating.toFixed(1)})`;
+      break;
     case 3: // Stars only
-      return stars;
+      formattedRating = stars;
+      break;
     default:
-      return `${stars} (${rating.toFixed(1)})`;
+      // This should never happen due to TypeScript's type checking,
+      // but we handle it anyway for runtime safety
+      console.error(`Invalid format: ${format}. Expected 1, 2, or 3.`);
+      throw new Error(`Invalid format: ${format}. Expected 1, 2, or 3.`);
   }
-}
 
-/**
- * Get the user's preferred unit system
- * @returns The user's preferred unit system ("metric" or "imperial")
- */
-export function getUnitSystem(): "metric" | "imperial" {
-  const preferences = getPreferenceValues<Preferences>();
-  return preferences.unitsystem || "metric";
+  return formattedRating;
 }
 
 /**
@@ -102,13 +127,30 @@ export function getDefaultRadius(): string {
 
 /**
  * Calculate distance between two coordinates
- * @param lat1 Latitude of first point
- * @param lon1 Longitude of first point
- * @param lat2 Latitude of second point
- * @param lon2 Longitude of second point
+ * @param lat1 Latitude of first point (-90 to 90)
+ * @param lon1 Longitude of first point (-180 to 180)
+ * @param lat2 Latitude of second point (-90 to 90)
+ * @param lon2 Longitude of second point (-180 to 180)
  * @returns Distance in kilometers
+ * @throws Error if any coordinate is outside its valid range
  */
 export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  // Validate latitude values (-90 to 90)
+  if (lat1 < -90 || lat1 > 90 || lat2 < -90 || lat2 > 90) {
+    const invalidLat = lat1 < -90 || lat1 > 90 ? lat1 : lat2;
+    const errorMsg = `Invalid latitude value: ${invalidLat}. Latitude must be between -90 and 90 degrees.`;
+    console.error(errorMsg);
+    throw new Error(errorMsg);
+  }
+
+  // Validate longitude values (-180 to 180)
+  if (lon1 < -180 || lon1 > 180 || lon2 < -180 || lon2 > 180) {
+    const invalidLon = lon1 < -180 || lon1 > 180 ? lon1 : lon2;
+    const errorMsg = `Invalid longitude value: ${invalidLon}. Longitude must be between -180 and 180 degrees.`;
+    console.error(errorMsg);
+    throw new Error(errorMsg);
+  }
+
   const R = 6371; // Radius of the earth in km
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
@@ -176,21 +218,26 @@ export function getDefaultSearchRadiusInMeters(): number {
 
 /**
  * Get the user's preferred unit system for Google Maps API
- * This is a wrapper around getUnitSystem that returns the value as unknown to avoid type issues
- * @returns The user's preferred unit system as unknown type for Google Maps API
+ * @returns The user's preferred unit system for Google Maps API
  */
-export function getUnitSystemForApi(): unknown {
-  return getUnitSystem();
+export function getUnitSystemForApi(): UnitSystem {
+  return getUnitSystem() === "metric" ? UnitSystem.metric : UnitSystem.imperial;
 }
 
 /**
  * Get the travel mode for Google Maps API
- * This is a helper to avoid type issues with the Google Maps API
  * @param mode The travel mode string
- * @returns The travel mode as unknown type for Google Maps API
+ * @returns The validated travel mode for Google Maps API
  */
-export function getTravelModeForApi(mode: string): unknown {
-  return mode;
+export function getTravelModeForApi(mode: string): TravelMode {
+  const validModes = Object.values(TravelMode);
+
+  if (validModes.includes(mode as TravelMode)) {
+    return mode as TravelMode;
+  }
+
+  console.warn(`Invalid travel mode: ${mode}. Using ${TravelMode.driving} instead.`);
+  return TravelMode.driving;
 }
 
 /**
@@ -200,5 +247,11 @@ export function getTravelModeForApi(mode: string): unknown {
  * @returns Formatted distance string
  */
 export function formatDistanceLegacy(meters: number, unitSystem: "metric" | "imperial"): string {
-  return formatDistance(meters, "m", unitSystem);
+  return unitSystem === "metric"
+    ? meters < 1000
+      ? `${meters}m`
+      : `${(meters / 1000).toFixed(1)}km`
+    : meters < 160
+    ? `${Math.round(metersToFeet(meters))}ft`
+    : `${(meters / 1609.34).toFixed(1)}mi`;
 }

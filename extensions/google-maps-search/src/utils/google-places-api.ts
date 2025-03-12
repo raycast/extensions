@@ -1,7 +1,7 @@
 import { Client, PlaceInputType } from "@googlemaps/google-maps-services-js";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences, PlaceSearchResult, PlaceDetails, RouteInfo } from "./types";
-import { milesToKm, getUnitSystem, getDefaultRadius } from "./common";
+import { Preferences, PlaceSearchResult, PlaceDetails, RouteInfo, TransportType } from "../types";
+import { milesToKm, getUnitSystem, getDefaultRadius, getTravelModeForApi, getUnitSystemForApi } from "./common";
 
 // Initialize the Google Maps client
 let client: Client | null = null;
@@ -166,8 +166,9 @@ export async function geocodeAddress(address: string): Promise<{ lat: number; ln
  * Get directions between two points
  * @param origin The starting point (address or coordinates)
  * @param destination The ending point (address or coordinates)
- * @param mode The travel mode
+ * @param mode The travel mode (driving, walking, bicycling, or transit)
  * @returns The API response
+ * @throws Error if the API request fails
  */
 export async function getDirections(
   origin: string | { lat: number; lng: number },
@@ -181,20 +182,22 @@ export async function getDirections(
     const originStr = typeof origin === "string" ? origin : `${origin.lat},${origin.lng}`;
     const destinationStr = typeof destination === "string" ? destination : `${destination.lat},${destination.lng}`;
 
+    // Get validated travel mode and unit system
+    const travelMode = getTravelModeForApi(mode);
+    const unitSystem = getUnitSystemForApi();
+
     const response = await getClient().directions({
       params: {
         origin: originStr,
         destination: destinationStr,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        mode: mode as any, // Using any here is necessary for the Google Maps API
+        mode: travelMode,
         key: apiKey,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        units: getUnitSystem() as any, // Using any here is necessary for the Google Maps API
+        units: unitSystem,
       },
     });
 
     if (response.data.status !== "OK" || response.data.routes.length === 0) {
-      return null;
+      throw new Error(`Directions API error: ${response.data.status || "No routes found"}`);
     }
 
     const route = response.data.routes[0];
@@ -211,14 +214,14 @@ export async function getDirections(
         distance: step.distance,
         duration: step.duration,
         instructions: step.html_instructions,
-        travelMode: step.travel_mode,
+        travelMode: step.travel_mode.toLowerCase() as TransportType,
         polyline: step.polyline.points,
       })),
       polyline: route.overview_polyline.points,
     };
   } catch (error) {
     console.error("Error getting directions:", error);
-    return null;
+    throw error;
   }
 }
 

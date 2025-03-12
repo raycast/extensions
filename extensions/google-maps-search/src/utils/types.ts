@@ -1,7 +1,9 @@
+import { Distance, Duration, TransportType } from "../types";
+
 /**
  * Corresponds to Google Map's four possible modes of travel.
  */
-export enum TransportType {
+export enum transportType {
   Cycling = "bicycling",
   Driving = "driving",
   Transit = "transit",
@@ -19,7 +21,7 @@ export enum OriginOption {
 /**
  * Sort order options for place results
  */
-export type SortOrder = "none" | "proximity" | "rating" | "price";
+export type SortOrder = "none" | "distance" | "rating" | "price" | "price-desc";
 
 /**
  * Corresponds to the preferences defined in package.json.
@@ -32,7 +34,7 @@ export interface Preferences {
   saveSearchHistory: boolean;
   googlePlacesApiKey: string;
   showMapInSidebar: boolean;
-  unitsystem: "metric" | "imperial";
+  unitSystem: "metric" | "imperial";
   defaultSortOrder: SortOrder;
 }
 
@@ -85,14 +87,8 @@ export interface PlaceReview {
  * Interface for route information
  */
 export interface RouteInfo {
-  distance: {
-    text: string;
-    value: number; // in meters
-  };
-  duration: {
-    text: string;
-    value: number; // in seconds
-  };
+  distance: Distance;
+  duration: Duration;
   startAddress: string;
   endAddress: string;
   steps: RouteStep[];
@@ -103,16 +99,10 @@ export interface RouteInfo {
  * Interface for route steps
  */
 export interface RouteStep {
-  distance: {
-    text: string;
-    value: number; // in meters
-  };
-  duration: {
-    text: string;
-    value: number; // in seconds
-  };
+  distance: Distance;
+  duration: Duration;
   instructions: string;
-  travelMode: string;
+  travelMode: TransportType;
   polyline: string; // encoded polyline
 }
 

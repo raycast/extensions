@@ -17,15 +17,23 @@ export enum OriginOption {
 }
 
 /**
+ * Reusable interface for geographic coordinates
+ */
+export interface GeoLocation {
+  lat: number;
+  lng: number;
+}
+
+/**
  * Corresponds to the preferences defined in package.json.
  */
 export interface Preferences {
   homeAddress: string;
-  preferredMode: string;
+  preferredMode: TransportType;
   preferredOrigin: OriginOption;
   useSelected: boolean;
   saveSearchHistory: boolean;
   googlePlacesApiKey: string;
   showMapInSidebar: boolean;
-  unitsystem: "metric" | "imperial";
+  unitSystem: "metric" | "imperial";
 }

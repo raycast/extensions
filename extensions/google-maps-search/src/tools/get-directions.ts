@@ -1,7 +1,8 @@
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { geocodeAddress } from "../utils/google-places-api";
 import { makeDirectionsURL } from "../utils/url";
 import { Preferences } from "../types";
+import { showFailureToast } from "@raycast/utils";
 
 /**
  * Input type for the get-directions tool
@@ -29,11 +30,13 @@ type GetDirectionsInput = {
 export default async function (input: GetDirectionsInput): Promise<string> {
   try {
     const preferences = getPreferenceValues<Preferences>();
-    const mode = input.mode || preferences.preferredMode || "driving";
+    let mode = input.mode || preferences.preferredMode || "driving";
 
-    // Validate destination
-    if (!input.destination) {
-      return "Please provide a destination to get directions.";
+    // Validate that mode is one of the allowed values
+    const validModes = ["driving", "walking", "bicycling", "transit"];
+    if (!validModes.includes(mode)) {
+      console.warn(`Invalid transportation mode: ${mode}. Defaulting to driving.`);
+      mode = "driving";
     }
 
     // Validate destination and origin by geocoding
@@ -70,11 +73,7 @@ export default async function (input: GetDirectionsInput): Promise<string> {
 
     return response;
   } catch (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Error Getting Directions",
-      message: String(error),
-    });
+    showFailureToast(error, { title: "Error Getting Directions", message: String(error) });
     return `Sorry, I encountered an error while getting directions to "${input.destination}". Please check your API key and try again.`;
   }
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Action, ActionPanel, Detail, getPreferenceValues, Icon, Color } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { Preferences, PlaceDetails } from "../types";
 import { getPlaceDetails, getStaticMapUrl } from "../utils/google-places-api";
 import { makeSearchURL } from "../utils/url";
@@ -14,7 +15,6 @@ interface PlaceDetailViewProps {
 export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [placeDetails, setPlaceDetails] = useState<PlaceDetails | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const preferences = getPreferenceValues<Preferences>();
 
   // Fetch place details when the component mounts
@@ -25,8 +25,7 @@ export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
         const details = await getPlaceDetails(placeId);
         setPlaceDetails(details);
       } catch (err) {
-        console.error("Error fetching place details:", err);
-        setError("Failed to fetch place details. Please check your API key.");
+        showFailureToast("Failed to fetch place details", { message: "Please check your API key." });
       } finally {
         setIsLoading(false);
       }
@@ -37,10 +36,9 @@ export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
 
   // Generate markdown for place details
   const generateMarkdown = (): string => {
-    if (error) return `# Error\n\n${error}`;
     if (!placeDetails) return "# Loading...";
 
-    const googleMapsUrl = makeSearchURL(placeDetails.name + " " + placeDetails.address);
+    const googleMapsUrl = makeSearchURL(encodeURIComponent(`${placeDetails.name} ${placeDetails.address}`));
     const mapImage = preferences.showMapInSidebar
       ? `\n\n[![Map](${getStaticMapUrl(placeDetails.location, 15, [
           { lat: placeDetails.location.lat, lng: placeDetails.location.lng },
@@ -120,7 +118,7 @@ export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
               <Detail.Metadata.Link
                 title="Photos"
                 text={`${placeDetails.photos.length} available`}
-                target={makeSearchURL(placeDetails.name + " " + placeDetails.address)}
+                target={makeSearchURL(encodeURIComponent(`${placeDetails.name} ${placeDetails.address}`))}
               />
             )}
           </Detail.Metadata>
@@ -138,9 +136,11 @@ export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
               rating: placeDetails.rating,
               openNow: placeDetails.openingHours?.isOpen,
             }}
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            onViewDetails={() => {}}
+            onViewDetails={() => {
+              /* Already in details view */
+            }}
             onBack={onBack}
+            isDetailView={true}
           />
         ) : (
           <ActionPanel>

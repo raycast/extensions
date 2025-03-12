@@ -130,7 +130,7 @@
       ]
     },
     {
-      "name": "unitsystem",
+      "name": "unitSystem",
       "type": "dropdown",
       "title": "Unit System",
       "required": false,

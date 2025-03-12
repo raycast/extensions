@@ -19,6 +19,7 @@ import { geocodeAddress, getNearbyPlaces } from "./utils/google-places-api";
 import { makeDirectionsURL, makeSearchURL } from "./utils/url";
 import { getUnitSystem, getDefaultRadius, formatRating, calculateDistance, formatDistance } from "./utils/common";
 import { PlaceDetailView } from "./components/place-detail-view";
+import { showFailureToast } from "@raycast/utils";
 
 // Sort places based on the specified sort order
 function sortPlaces(
@@ -31,7 +32,7 @@ function sortPlaces(
   }
 
   return [...places].sort((a, b) => {
-    if (sortOrder === "proximity" && originLocation) {
+    if (sortOrder === "distance" && originLocation) {
       const distanceA = calculateDistance(originLocation.lat, originLocation.lng, a.location.lat, a.location.lng);
       const distanceB = calculateDistance(originLocation.lat, originLocation.lng, b.location.lat, b.location.lng);
       return distanceA - distanceB;
@@ -45,6 +46,11 @@ function sortPlaces(
       const priceA = a.priceLevel !== undefined ? a.priceLevel : Number.MAX_SAFE_INTEGER;
       const priceB = b.priceLevel !== undefined ? b.priceLevel : Number.MAX_SAFE_INTEGER;
       return priceA - priceB;
+    } else if (sortOrder === "price-desc") {
+      // Sort by price level (highest first), handle undefined price levels
+      const priceA = a.priceLevel !== undefined ? a.priceLevel : -1; // Place undefined at the end
+      const priceB = b.priceLevel !== undefined ? b.priceLevel : -1;
+      return priceB - priceA;
     }
     return 0;
   });
@@ -128,13 +134,20 @@ function SearchResultsView({
                     )
                   : undefined,
               },
+              // Add price level indicator
+              {
+                text:
+                  place.priceLevel !== undefined
+                    ? { value: "$".repeat(place.priceLevel + 1), color: Color.Blue }
+                    : { value: "No Price Info", color: Color.SecondaryText },
+              },
             ]}
             actions={
               <ActionPanel>
                 <Action title="View Details" icon={Icon.Sidebar} onAction={() => onSelectPlace(place.placeId)} />
                 <Action.OpenInBrowser
                   title="Open in Google Maps"
-                  url={makeSearchURL(place.name + " " + place.address)}
+                  url={makeSearchURL(encodeURIComponent(`${place.name} ${place.address}`))}
                   icon={Icon.Globe}
                 />
                 <Action.OpenInBrowser
@@ -168,7 +181,7 @@ function SearchResultsView({
  * The component also handles the loading of saved search settings from LocalStorage, and saves the current search settings to LocalStorage when the form is submitted.
  */
 function SearchForm(): JSX.Element {
-  const { push } = useNavigation();
+  const { push, pop } = useNavigation();
   const preferences = getPreferenceValues<Preferences>();
   const [placeType, setPlaceType] = useState<string>("restaurant");
 
@@ -214,7 +227,8 @@ function SearchForm(): JSX.Element {
         (savedSortOrder === "none" ||
           savedSortOrder === "distance" ||
           savedSortOrder === "rating" ||
-          savedSortOrder === "price")
+          savedSortOrder === "price" ||
+          savedSortOrder === "price-desc")
       ) {
         setSortOrder(savedSortOrder as SortOrder);
       }
@@ -244,8 +258,7 @@ function SearchForm(): JSX.Element {
     try {
       // Check if API key is set
       if (!preferences.googlePlacesApiKey) {
-        showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast({
           title: "API Key Missing",
           message: "Please set your Google Places API key in preferences",
           primaryAction: {
@@ -268,47 +281,63 @@ function SearchForm(): JSX.Element {
         // Use home address
         searchLocation = await geocodeAddress(preferences.homeAddress);
         if (!searchLocation) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Geocoding Failed";
-          toast.message = "Could not find coordinates for your home address";
+          await showFailureToast({
+            title: "Geocoding Failed",
+            message: "Could not find coordinates for your home address",
+          });
           return;
         }
       } else if (origin === OriginOption.Custom) {
         // Use custom address
         if (!customAddress.trim()) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Missing Address";
-          toast.message = "Please enter a custom address";
+          await showFailureToast({
+            title: "Missing Address",
+            message: "Please enter a custom address",
+          });
           return;
         }
         searchLocation = await geocodeAddress(customAddress);
         if (!searchLocation) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Geocoding Failed";
-          toast.message = "Could not find coordinates for the provided address";
+          await showFailureToast({
+            title: "Geocoding Failed",
+            message: "Could not find coordinates for the provided address",
+          });
           return;
         }
       }
 
       // Ensure we have a valid location before proceeding
       if (!searchLocation) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Location Error";
-        toast.message = "Could not determine search location";
+        await showFailureToast({
+          title: "Location Error",
+          message: "Could not determine search location",
+        });
         return;
       }
 
       // Search for nearby places
       const radiusValue = parseInt(radius, 10);
+      if (isNaN(radiusValue) || radiusValue <= 0) {
+        await showFailureToast({
+          title: "Invalid Radius",
+          message: "Please enter a valid positive number for the radius",
+        });
+        return;
+      }
       const places = await getNearbyPlaces(searchLocation, placeType, radiusValue);
 
       // Save all search settings to LocalStorage
-      await LocalStorage.setItem("last-place-type", placeType);
-      await LocalStorage.setItem("last-radius", radiusValue.toString());
-      await LocalStorage.setItem("last-origin", JSON.stringify(searchLocation));
-      await LocalStorage.setItem("last-custom-address", customAddress || "");
-      await LocalStorage.setItem("last-sort-order", sortOrder);
-      await LocalStorage.setItem("last-show-only-open", showOnlyOpen.toString());
+      try {
+        await LocalStorage.setItem("last-place-type", placeType);
+        await LocalStorage.setItem("last-radius", radiusValue.toString());
+        await LocalStorage.setItem("last-origin", JSON.stringify(searchLocation));
+        await LocalStorage.setItem("last-custom-address", customAddress || "");
+        await LocalStorage.setItem("last-sort-order", sortOrder);
+        await LocalStorage.setItem("last-show-only-open", showOnlyOpen.toString());
+      } catch (error) {
+        console.error("Failed to save search settings to LocalStorage:", error);
+        // Continue with navigation even if saving fails
+      }
 
       // Update toast
       toast.style = Toast.Style.Success;
@@ -326,43 +355,28 @@ function SearchForm(): JSX.Element {
           showOnlyOpen={showOnlyOpen}
           onSelectPlace={(placeId) => {
             // When a place is selected, show its details
-            push(
-              <PlaceDetailView
-                placeId={placeId}
-                onBack={() => {
-                  // When back is pressed, return to the search results
-                  push(
-                    <SearchResultsView
-                      places={places}
-                      isLoading={false}
-                      selectedPlaceType={placeType}
-                      originLocation={searchLocation || undefined}
-                      sortOrder={sortOrder}
-                      showOnlyOpen={showOnlyOpen}
-                      onSelectPlace={(id) => push(<PlaceDetailView placeId={id} onBack={() => push(<SearchForm />)} />)}
-                      onBack={() => push(<SearchForm />)}
-                    />
-                  );
-                }}
-              />
-            );
+            push(<PlaceDetailView placeId={placeId} onBack={() => pop()} />);
           }}
           onBack={() => {
             // Save the current search settings to LocalStorage
-            LocalStorage.setItem("last-place-type", placeType);
-            LocalStorage.setItem("last-radius", radius);
-            LocalStorage.setItem("last-origin", JSON.stringify(origin));
-            LocalStorage.setItem("last-custom-address", customAddress || "");
-            LocalStorage.setItem("last-sort-order", sortOrder);
-            LocalStorage.setItem("last-show-only-open", showOnlyOpen.toString());
-            push(<SearchForm />);
+            try {
+              LocalStorage.setItem("last-place-type", placeType);
+              LocalStorage.setItem("last-radius", radius);
+              LocalStorage.setItem("last-origin", JSON.stringify(searchLocation));
+              LocalStorage.setItem("last-custom-address", customAddress || "");
+              LocalStorage.setItem("last-sort-order", sortOrder);
+              LocalStorage.setItem("last-show-only-open", showOnlyOpen.toString());
+            } catch (error) {
+              console.error("Failed to save search settings to LocalStorage:", error);
+              // Continue with navigation even if saving fails
+            }
+            pop();
           }}
         />
       );
     } catch (error) {
       console.error("Error searching for nearby places:", error);
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Search Failed",
         message: "Failed to search for nearby places. Check your API key and network connection.",
       });
@@ -413,13 +427,19 @@ function SearchForm(): JSX.Element {
         value={sortOrder}
         onChange={(value) => setSortOrder(value as SortOrder)}
       >
-        <Form.Dropdown.Item value="none" title="Default (Google's ranking)" />
+        <Form.Dropdown.Item value="none" title="Default" />
         <Form.Dropdown.Item value="distance" title="Distance" />
         <Form.Dropdown.Item value="rating" title="Rating (highest first)" />
         <Form.Dropdown.Item value="price" title="Price (lowest first)" />
+        <Form.Dropdown.Item value="price-desc" title="Price (highest first)" />
       </Form.Dropdown>
 
-      <Form.Checkbox id="showOnlyOpen" label="Only Show Open Now" value={showOnlyOpen} onChange={setShowOnlyOpen} />
+      <Form.Checkbox
+        id="showOnlyOpen"
+        label="Only show places that are open now"
+        value={showOnlyOpen}
+        onChange={setShowOnlyOpen}
+      />
     </Form>
   );
 }

@@ -1,0 +1,44 @@
+import { Navigation } from "@raycast/api";
+import React from "react";
+import { PlaceSearchResult } from "../types";
+import { PlaceSearchResults } from "../components/place-search-results";
+import { PlaceDetailView } from "../components/place-detail-view";
+
+/**
+ * Creates navigation functions for handling place search results and details
+ * @param push Navigation push function from useNavigation hook
+ * @param places Array of place search results
+ * @param HomeComponent Component to return to when navigating back from search results
+ * @returns Object containing navigation functions
+ */
+export function createPlaceNavigation(
+  push: Navigation["push"],
+  places: PlaceSearchResult[],
+  HomeComponent: React.ComponentType
+): {
+  navigateToResults: () => void;
+  navigateToDetails: (selectedPlaceId: string) => void;
+} {
+  // Navigate to search results with a simplified navigation pattern
+  // Note: isLoading is managed within PlaceDetailView component during place details fetch
+  const navigateToResults = () => {
+    push(
+      <PlaceSearchResults
+        places={places}
+        isLoading={false}
+        onSelectPlace={(selectedPlaceId) => navigateToDetails(selectedPlaceId)}
+        onBack={() => push(<HomeComponent />)}
+      />
+    );
+  };
+
+  // Navigate to place details with a simplified back function
+  const navigateToDetails = (selectedPlaceId: string) => {
+    push(<PlaceDetailView placeId={selectedPlaceId} onBack={() => navigateToResults()} />);
+  };
+
+  return {
+    navigateToResults,
+    navigateToDetails,
+  };
+}

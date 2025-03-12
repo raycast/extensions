@@ -1,3 +1,13 @@
+import { GeoLocation } from "./core";
+
+/**
+ * Interface for place opening hours
+ */
+export interface OpeningHours {
+  weekdayText?: string[];
+  isOpen?: boolean;
+}
+
 /**
  * Interface for place search results
  */
@@ -5,10 +15,7 @@ export interface PlaceSearchResult {
   placeId: string;
   name: string;
   address: string;
-  location: {
-    lat: number;
-    lng: number;
-  };
+  location: GeoLocation;
   types: string[];
   rating?: number;
   userRatingsTotal?: number;
@@ -24,10 +31,7 @@ export interface PlaceSearchResult {
 export interface PlaceDetails extends PlaceSearchResult {
   phoneNumber?: string;
   website?: string;
-  openingHours?: {
-    weekdayText?: string[];
-    isOpen?: boolean;
-  };
+  openingHours?: OpeningHours;
   reviews?: PlaceReview[];
   photos?: string[];
 }
@@ -66,7 +70,7 @@ export const PLACE_TYPES: PlaceTypeOption[] = [
   { title: "Hospital", value: "hospital", plural: "Hospitals" },
   { title: "Pharmacy", value: "pharmacy", plural: "Pharmacies" },
   { title: "Park", value: "park", plural: "Parks" },
-  { title: "Gym", value: "gym", plural: "Gyms" },
+  { title: "Gym", value: "gym_or_health_club", plural: "Gyms" },
   { title: "School", value: "school", plural: "Schools" },
   { title: "Shopping Mall", value: "shopping_mall", plural: "Shopping Malls" },
   { title: "Movie Theater", value: "movie_theater", plural: "Movie Theaters" },

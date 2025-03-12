@@ -1,29 +1,31 @@
 import { Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
-import { PlaceSearchResult } from "../types";
+import { PlaceSearchResult, Preferences } from "../types";
 import { makeDirectionsURL, makeSearchURL } from "../utils/url";
-import { Preferences } from "../types";
 
 interface PlaceActionsProps {
   place: PlaceSearchResult;
   onViewDetails: (placeId: string) => void;
   onBack?: () => void;
   preferredMode?: string;
+  isDetailView?: boolean;
 }
 
-export function PlaceActions({ place, onViewDetails, onBack, preferredMode }: PlaceActionsProps) {
+export function PlaceActions({ place, onViewDetails, onBack, preferredMode, isDetailView }: PlaceActionsProps) {
   const preferences = getPreferenceValues<Preferences>();
   const mode = preferredMode || preferences.preferredMode || "driving";
 
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action title="View Details" icon={Icon.Sidebar} onAction={() => onViewDetails(place.placeId)} />
+        {!isDetailView && (
+          <Action title="View Details" icon={Icon.Sidebar} onAction={() => onViewDetails(place.placeId)} />
+        )}
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Browser">
         <Action.OpenInBrowser
           title="Open in Google Maps"
-          url={makeSearchURL(place.name + " " + place.address)}
+          url={makeSearchURL(encodeURIComponent(`${place.name} ${place.address}`))}
           icon={Icon.Globe}
         />
         <Action.OpenInBrowser title="Get Directions" url={makeDirectionsURL("", place.address, mode)} icon={Icon.Map} />

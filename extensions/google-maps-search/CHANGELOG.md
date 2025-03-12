@@ -1,5 +1,5 @@
 # Google Maps Search Changelog
-## [2.0] - 2025-03-11
+## [2.0] - {PR_MERGE_DATE}
 
 ### Added
 

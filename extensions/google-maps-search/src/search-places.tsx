@@ -7,10 +7,10 @@ import {
   getPreferenceValues,
   LaunchProps,
   Clipboard,
-  showToast,
-  Toast,
   Action,
   ActionPanel,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { PlaceDetailView } from "./components/place-detail-view";
 import { usePlaceSearch } from "./hooks/use-place-search";
@@ -18,6 +18,7 @@ import { PlaceActions } from "./components/place-actions";
 import { PreferencesActions } from "./components/preferences-actions";
 import { makeSearchURL } from "./utils/url";
 import { Preferences } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command({ launchContext, fallbackText }: LaunchProps<{ launchContext: { query: string } }>) {
   return <SearchPlacesCommand initialSearchText={launchContext?.query ?? fallbackText} />;
@@ -53,7 +54,7 @@ function SearchPlacesCommand({ initialSearchText }: { initialSearchText?: string
         const updatedSearches = [searchText, ...recentSearches.filter((s) => s !== searchText)].slice(0, 10);
         await LocalStorage.setItem("recent-searches", JSON.stringify(updatedSearches));
         setRecentSearches(updatedSearches);
-      }, 3000);
+      }, 500);
 
       return () => clearTimeout(timeoutId);
     }
@@ -92,11 +93,7 @@ function SearchPlacesCommand({ initialSearchText }: { initialSearchText?: string
       });
     } catch (error) {
       // Show error toast
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to copy URL",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Failed to copy URL", message: String(error) });
     }
   }, []);
 
@@ -126,7 +123,7 @@ function SearchPlacesCommand({ initialSearchText }: { initialSearchText?: string
         <List.EmptyView
           title="API Key Missing"
           description="Please set your Google Places API key in preferences"
-          icon={Icon.ExclamationMark}
+          icon={Icon.Key}
           actions={<PreferencesActions onOpenPreferences={openExtensionPreferences} />}
         />
       ) : searchText.length < 3 ? (

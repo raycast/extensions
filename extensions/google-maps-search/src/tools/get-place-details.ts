@@ -1,8 +1,9 @@
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { getPlaceDetails, searchPlaces } from "../utils/google-places-api";
 import { makeSearchURL, makeDirectionsURL } from "../utils/url";
 import { formatPriceLevel, formatRating } from "../utils/common";
 import { Preferences } from "../types";
+import { showFailureToast } from "@raycast/utils";
 
 /**
  * Input type for the get-place-details tool
@@ -78,7 +79,7 @@ export default async function (input: GetPlaceDetailsInput): Promise<string> {
 
     // Links
     response += "\n**Links**:\n";
-    response += `- [View on Google Maps](${makeSearchURL(details.name + " " + details.address)})\n`;
+    response += `- [View on Google Maps](${makeSearchURL(`${details.name} ${details.address}`)})\n`;
     response += `- [Get Directions](${makeDirectionsURL("", details.address, preferences.preferredMode)})\n`;
 
     // Reviews
@@ -94,11 +95,7 @@ export default async function (input: GetPlaceDetailsInput): Promise<string> {
 
     return response;
   } catch (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Error Getting Place Details",
-      message: String(error),
-    });
+    showFailureToast(error, { title: "Error Getting Place Details", message: String(error) });
     return `Sorry, I encountered an error while getting details for "${input.place}". Please check your API key and try again.`;
   }
 }
