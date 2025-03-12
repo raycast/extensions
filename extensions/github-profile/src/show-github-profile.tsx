@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Detail, environment, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchContributionData, fetchUserProfile, fetchUserRepositories } from "./api/github";
 import { ActivityRepo, ContributionHeatmap } from "./components/ContributionHeatmap";
@@ -52,7 +52,7 @@ ${ContributionHeatmap({ weeks: contributions.contributionCalendar.weeks })}
     // Use the dynamically fetched user ID from the profile
     const userId = profile.id;
     console.log(`User ID: ${userId}`);
-    const ossInsights = `[![Dashboard stats of @${username}](https://next.ossinsight.io/widgets/official/compose-user-dashboard-stats/thumbnail.png?user_id=${userId}&image_size=auto&color_scheme=light)](https://next.ossinsight.io/widgets/official/compose-user-dashboard-stats?user_id=${userId})`;
+    const ossInsights = `[![Dashboard stats of @${username}](https://next.ossinsight.io/widgets/official/compose-user-dashboard-stats/thumbnail.png?user_id=${userId}&image_size=auto&color_scheme=${environment.appearance})](https://next.ossinsight.io/widgets/official/compose-user-dashboard-stats?user_id=${userId})`;
 
     return `# GitHub Profile: ${profile.login}\n${contributionHeatmapSection}\n${userProfileSection}\n${ossInsights}\n${repositoriesSection}\n${ActivityRepo(userId)}`;
   };
