@@ -1,4 +1,17 @@
-import { Action, ActionPanel, Alert, Color, Form, Icon, List, showToast, Toast, useNavigation, confirmAlert } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+  confirmAlert,
+} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { Project } from "./models";
 import { getProjects, saveProject, deleteProject } from "./storage";
@@ -19,11 +32,7 @@ export default function ViewProjects() {
       const loadedProjects = await getProjects();
       setProjects(loadedProjects);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load projects",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Failed to load projects" });
     } finally {
       setIsLoading(false);
     }
@@ -74,14 +83,16 @@ export default function ViewProjects() {
                 style={Action.Style.Destructive}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
                 onAction={async () => {
-                  if (await confirmAlert({
-                    title: "Delete Project",
-                    message: "Are you sure you want to delete this project? This action cannot be undone.",
-                    primaryAction: {
-                      title: "Delete",
-                      style: Alert.ActionStyle.Destructive,
-                    },
-                  })) {
+                  if (
+                    await confirmAlert({
+                      title: "Delete Project",
+                      message: "Are you sure you want to delete this project? This action cannot be undone.",
+                      primaryAction: {
+                        title: "Delete",
+                        style: Alert.ActionStyle.Destructive,
+                      },
+                    })
+                  ) {
                     await deleteProject(project.id);
                     await loadProjects();
                     showToast({
@@ -146,11 +157,7 @@ function ProjectForm({ project, onSave }: { project?: Project; onSave: () => Pro
       // Return to previous screen
       pop();
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to save project",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Failed to save project" });
     }
   }
 
