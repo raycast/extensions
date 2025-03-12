@@ -3,7 +3,7 @@ import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, 
 import { ShortLinksResponse, useShortLinks } from "@hooks/use-short-links";
 import { DUB_CO_URL } from "@utils/constants";
 import { deleteShortLink } from "@/api";
-import { MutatePromise, showFailureToast } from "@raycast/utils";
+import { MutatePromise, showFailureToast, useCachedState } from "@raycast/utils";
 import { withDubClient } from "./with-dub-client";
 import { useState } from "react";
 
