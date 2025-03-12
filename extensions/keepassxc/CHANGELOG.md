@@ -1,5 +1,21 @@
 # KeePassXC Extension Changelog
 
+## [1.5.5] - 2025-03-12
+
+### Changed
+
+- Use a global info message about security when the database is locked.
+- Update screenshot about the database being locked.
+- Use more explicit error messages when unable to execute the `keepassxc-cli` command.
+
+### Fixed
+
+- Use a correct link for the KeePassXC image in the README.
+
+### Removed
+
+- The test guide.
+
 ## [1.5.4] - 2025-02-10
 
 ### Fixed
