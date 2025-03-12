@@ -1,20 +1,41 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "exa-search",
-  "title": "Exa Search",
-  "description": "AI-powered search that understands your queries and delivers precise, context-aware results quickly",
+  "name": "exa",
+  "title": "Exa AI",
+  "description": "Use the Exa AI API to search the web and get AI-powered answers",
   "icon": "icon.png",
-  "author": "thomas",
+  "author": "abizer",
+  "contributors": [
+    "thomas"
+  ],
   "owner": "exa_ai",
-  "access": "public",
   "categories": [
-    "Data"
+    "Productivity",
+    "Web"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "open-in-browser",
-      "title": "Open in Browser",
+      "name": "answers",
+      "title": "Exa Answers",
+      "description": "Ask a question using the Exa Answers API",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Exa Search",
+      "description": "Search the web using Exa's semantic search engine",
+      "mode": "view"
+    },
+    {
+      "name": "similar",
+      "title": "Exa Similar",
+      "description": "Find web pages similar to a given URL",
+      "mode": "view"
+    },
+    {
+      "name": "search-in-browser",
+      "title": "Search in Browser",
       "description": "Opens the Exa Search in your browser.",
       "mode": "no-view",
       "arguments": [
@@ -52,24 +73,46 @@
   "preferences": [
     {
       "name": "apiKey",
-      "title": "API Key",
+      "title": "Exa API Key",
+      "description": "Your Exa API key from exa.ai",
       "type": "password",
+      "required": false
+    },
+    {
+      "name": "model",
+      "title": "Exa Model",
+      "description": "The Exa model to use for answers",
+      "type": "dropdown",
       "required": false,
-      "description": "Your Exa API key."
+      "default": "Exa",
+      "data": [
+        {
+          "title": "Exa",
+          "value": "exa"
+        },
+        {
+          "title": "Exa Pro",
+          "value": "exa-pro"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.90.0",
-    "@raycast/utils": "^1.17.0",
-    "exa-js": "^1.4.8"
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.13.4",
+    "exa-js": "^1.4.10",
+    "fuse.js": "^7.1.0",
+    "typeid-js": "^1.2.0",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "~20.8.10",
+    "@types/react": "^18.2.27",
+    "@types/uuid": "^9.0.8",
+    "eslint": "^8.57.1",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build",
