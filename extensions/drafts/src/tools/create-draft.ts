@@ -1,6 +1,6 @@
 import { Tool } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
-import { closeMainWindowAndShowSuccessToast } from "../utils/NotificationUtils";
+import { showSuccessToast } from "../utils/NotificationUtils";
 
 type Input = {
   /**
@@ -56,8 +56,7 @@ export default async function (input: Input) {
     end run 
       `
     );
-    await closeMainWindowAndShowSuccessToast("Created Draft 👍");
-
+    await showSuccessToast("Created Draft 👍");
     return res;
   } catch (error) {
     await showFailureToast("Failed to create Draft");

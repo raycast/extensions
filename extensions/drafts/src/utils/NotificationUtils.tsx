@@ -12,3 +12,14 @@ export async function closeMainWindowAndShowSuccessToast(text: string) {
     title: text,
   });
 }
+
+/**
+ * Shows a success toast with the given text.
+ * @param text the text to display in the toast
+ */
+export async function showSuccessToast(text: string) {
+  await showToast({
+    style: Toast.Style.Success,
+    title: text,
+  });
+}
