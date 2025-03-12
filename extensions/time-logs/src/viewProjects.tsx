@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Form, Icon, List, showToast, Toast, useNavigation, confirmAlert } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Project } from "./models";
 import { getProjects, saveProject, deleteProject } from "./storage";
@@ -74,7 +74,7 @@ export default function ViewProjects() {
                 style={Action.Style.Destructive}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
                 onAction={async () => {
-                  if (await Alert.prompt({
+                  if (await confirmAlert({
                     title: "Delete Project",
                     message: "Are you sure you want to delete this project? This action cannot be undone.",
                     primaryAction: {
