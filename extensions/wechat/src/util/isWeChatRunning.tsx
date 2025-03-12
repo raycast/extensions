@@ -14,12 +14,13 @@ export const isWeChatRunning = async () => {
       onAction: () => {
         try {
           // determine which path to use
-          const weChatPath = fs.existsSync("/Applications/WeChat.app")
-            ? "/Applications/WeChat.app"
-            : "/Applications/微信.app"
+          const foundWechatPath = [
+            "/Applications/WecChat.app",
+            "/Applications/微信.app"
+          ].find(fs.existsSync)
 
-          if (fs.existsSync(weChatPath)) {
-            open(weChatPath)
+          if (foundWechatPath) {
+            open(foundWechatPath)
           } else {
             showFailureToast("WeChat application not found")
           }
