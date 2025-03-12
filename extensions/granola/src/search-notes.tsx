@@ -42,7 +42,8 @@ const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
             content={convertHtmlToMarkdown(notes)}
             title="Copy Notes as Markdown"
           />
-          <Action.CopyToClipboard icon={Icon.CodeBlock} content={notes} title="Copy Notes as Html" />
+          {/* eslint-disable-next-line */}
+          <Action.CopyToClipboard icon={Icon.CodeBlock} content={notes} title="Copy Notes as HTML" />
         </>
       )}
     </>
@@ -94,6 +95,7 @@ export default function Command() {
               <ActionPanel>
                 <Action.Push
                   title="Show Details"
+                  icon={Icon.Book}
                   target={
                     <Detail
                       markdown={(() => {
