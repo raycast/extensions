@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "list-accounts",
-      "title": "List Accounts",
+      "title": "List Gmail Accounts",
       "description": "Lists all Gmail accounts in Chrome",
       "subtitle": "Gmail",
       "keywords": [
