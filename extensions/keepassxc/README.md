@@ -1,5 +1,5 @@
 <p align="center">
- <img width=125 src=https://github.com/raycast/extensions/blob/main/extensions/keepassxc/assets/keepassxc.png>
+ <img width="125" src="https://raw.githubusercontent.com/raycast/extensions/main/extensions/keepassxc/assets/keepassxc.png">
 </p>
 
 <h1 align="center">KeePassXC for Raycast</h1>

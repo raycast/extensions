@@ -1,5 +1,11 @@
 # KeePassXC Extension Changelog
 
+## [1.5.6] - 2025-03-12
+
+### Fixed
+
+- Use a raw.githubusercontent.com link for the KeePassXC image in the README.
+
 ## [1.5.5] - 2025-03-12
 
 ### Changed
@@ -10,7 +16,7 @@
 
 ### Fixed
 
-- Use a correct link for the KeePassXC image in the README.
+- Use a blob link for the KeePassXC image in the README.
 
 ### Removed
 
