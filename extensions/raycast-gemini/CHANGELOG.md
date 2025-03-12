@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [New Command] - {PR_MERGE_DATE}
+## [New Command] - 2025-03-12
 
 - 🆕 New Command: Command History: now you can 📜 view your command history.
 
