@@ -1,6 +1,6 @@
 # Drafts Changelog
 
-## [Add fallbackText capability to Capture command] - 2025-03-05
+## [Add fallbackText capability to Capture command] - {PR_MERGE_DATE}
 
 - Add fallbackText from root search to 'Capture Draft' command for Fallback Command capability
 
