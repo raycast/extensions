@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "beszel-extension",
+  "name": "beszel",
   "title": "Beszel",
   "description": "Monitor and configure your systems managed by Beszel.",
   "icon": "icon.png",
@@ -43,20 +43,237 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-systems",
+      "title": "Get Systems",
+      "description": "Get all systems monitored by Beszel"
+    },
+    {
+      "name": "get-system",
+      "title": "Get System",
+      "description": "Get a specific system monitored by Beszel by name"
+    }
+  ],
+  "ai": {
+    "instructions": "Beszel is a tool for monitoring and configuring systems managed by Beszel. Use this tool to get all systems monitored by Beszel.",
+    "evals": [
+      {
+        "input": "@beszel What systems are down?",
+        "mocks": {
+          "get-systems": [
+            {
+              "cpuChip": "Cortex-A76",
+              "cpuCores": 4,
+              "cpuPercent": 1.06,
+              "diskPercent": 6.78,
+              "host": "paulamyo",
+              "memoryPercent": 4.52,
+              "name": "paulamyo",
+              "network": 0.02,
+              "status": "up",
+              "threads": 4,
+              "updated": "2025-03-12 15:27:14.039Z",
+              "uptime": 5132140
+            },
+            {
+              "cpuChip": "Cortex-A53",
+              "cpuCores": 4,
+              "cpuPercent": 0.42,
+              "diskPercent": 12.25,
+              "host": "chihuahua",
+              "memoryPercent": 36.66,
+              "name": "chihuahua",
+              "network": 0,
+              "status": "up",
+              "threads": 4,
+              "updated": "2025-03-12 15:27:12.595Z",
+              "uptime": 1354915
+            },
+            {
+              "cpuChip": "Intel(R) Core(TM) i5-9600K CPU @ 3.70GHz",
+              "cpuCores": 6,
+              "cpuPercent": 2.92,
+              "diskPercent": 46.51,
+              "host": "host.docker.internal",
+              "memoryPercent": 13.49,
+              "name": "deepthought",
+              "network": 0.01,
+              "status": "up",
+              "threads": 6,
+              "updated": "2025-03-12 15:27:08.168Z",
+              "uptime": 164169
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-systems"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@beszel What is the memory usage of all monitored machines?",
+        "mocks": {
+          "get-systems": [
+            {
+              "cpuChip": "Cortex-A76",
+              "cpuCores": 4,
+              "cpuPercent": 1.06,
+              "diskPercent": 6.78,
+              "host": "paulamyo",
+              "memoryPercent": 4.52,
+              "name": "paulamyo",
+              "network": 0.02,
+              "status": "up",
+              "threads": 4,
+              "updated": "2025-03-12 15:27:14.039Z",
+              "uptime": 5132140
+            },
+            {
+              "cpuChip": "Cortex-A53",
+              "cpuCores": 4,
+              "cpuPercent": 0.42,
+              "diskPercent": 12.25,
+              "host": "chihuahua",
+              "memoryPercent": 36.66,
+              "name": "chihuahua",
+              "network": 0,
+              "status": "up",
+              "threads": 4,
+              "updated": "2025-03-12 15:27:12.595Z",
+              "uptime": 1354915
+            },
+            {
+              "cpuChip": "Intel(R) Core(TM) i5-9600K CPU @ 3.70GHz",
+              "cpuCores": 6,
+              "cpuPercent": 2.92,
+              "diskPercent": 46.51,
+              "host": "host.docker.internal",
+              "memoryPercent": 13.49,
+              "name": "deepthought",
+              "network": 0.01,
+              "status": "up",
+              "threads": 6,
+              "updated": "2025-03-12 15:27:08.168Z",
+              "uptime": 164169
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-systems"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@beszel What is the disk usage of all monitored machines?",
+        "mocks": {
+          "get-systems": [
+            {
+              "cpuChip": "Cortex-A76",
+              "cpuCores": 4,
+              "cpuPercent": 0.97,
+              "diskPercent": 6.78,
+              "host": "paulamyo",
+              "memoryPercent": 4.49,
+              "name": "paulamyo",
+              "network": 0.01,
+              "status": "up",
+              "threads": 4,
+              "updated": "2025-03-12 15:28:14.036Z",
+              "uptime": 5132200
+            },
+            {
+              "cpuChip": "Cortex-A53",
+              "cpuCores": 4,
+              "cpuPercent": 0.47,
+              "diskPercent": 12.25,
+              "host": "chihuahua",
+              "memoryPercent": 36.93,
+              "name": "chihuahua",
+              "network": 0,
+              "status": "up",
+              "threads": 4,
+              "updated": "2025-03-12 15:28:12.594Z",
+              "uptime": 1354975
+            },
+            {
+              "cpuChip": "Intel(R) Core(TM) i5-9600K CPU @ 3.70GHz",
+              "cpuCores": 6,
+              "cpuPercent": 3.18,
+              "diskPercent": 46.51,
+              "host": "host.docker.internal",
+              "memoryPercent": 13.43,
+              "name": "deepthought",
+              "network": 0.01,
+              "status": "up",
+              "threads": 6,
+              "updated": "2025-03-12 15:28:08.204Z",
+              "uptime": 164229
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-systems"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@beszel What's the status of paulamyo?",
+        "mocks": {
+          "get-system": {
+            "cpuChip": "Cortex-A76",
+            "cpuCores": 4,
+            "cpuPercent": 0.92,
+            "diskPercent": 6.78,
+            "host": "paulamyo",
+            "memoryPercent": 4.45,
+            "name": "paulamyo",
+            "network": 0.01,
+            "status": "up",
+            "threads": 4,
+            "updated": "2025-03-12 15:35:14.038Z",
+            "uptime": 5132620
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "name": "paulamyo"
+              },
+              "name": "get-system"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.89.0",
-    "@raycast/utils": "^1.17.0",
-    "eventsource": "^3.0.2",
-    "pocketbase": "^0.25.0",
-    "undici": "^7.2.3"
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
+    "eventsource": "^3.0.5",
+    "pocketbase": "^0.25.2",
+    "undici": "^7.4.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
