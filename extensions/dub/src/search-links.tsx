@@ -166,7 +166,7 @@ export function SearchLinks() {
                 />
                 <ActionPanel.Section>
                   <Action
-                    title="Show Details"
+                    title={showDetails ? "Hide Details" : "Show Details"}
                     shortcut={{ modifiers: ["cmd"], key: "d" }}
                     onAction={() => setShowDetails(!showDetails)}
                     icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
