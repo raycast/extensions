@@ -5,6 +5,7 @@
   "description": "Manage your Firebase Firestore database directly from Raycast",
   "icon": "extension-icon.png",
   "author": "bharath21",
+  "version": "1.0.0",
   "license": "MIT",
   "commands": [
     {
