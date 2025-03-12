@@ -30,7 +30,7 @@ export default function Command() {
         ${values["hidMouse"] ? "--mouse=uhid" : ""} \
         ${values["disableAudio"] ? "--no-audio" : ""} \
         ${values["alwaysOnTop"] ? "--always-on-top" : ""} \
-        --audio-codec=${values["audioCodec"]} \
+        ${!values["disableAudio"] ? `--audio-codec=${values["audioCodec"]}` : ""} \
         -m ${values["size"]} \
         -s ${serial} \
         ${values["moreOptions"]}`,
