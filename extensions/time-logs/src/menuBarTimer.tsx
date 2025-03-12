@@ -1,4 +1,4 @@
-import { MenuBarExtra, showHUD, showToast, Toast } from "@raycast/api";
+import { MenuBarExtra, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getActiveTimer, getProjectById, stopActiveTimer } from "./storage";

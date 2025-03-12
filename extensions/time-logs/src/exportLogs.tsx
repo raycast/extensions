@@ -205,8 +205,10 @@ export default function ExportLogs() {
       if (entry.isActive) return false; // Skip active timers
 
       const entryDate = new Date(entry.startTime);
-      const compareDate = new Date(entryDate.setHours(0,0,0,0));
-      const isInDateRange = compareDate >= new Date(startDate.setHours(0,0,0,0)) && compareDate <= new Date(endDate.setHours(23,59,59,999));
+      const compareDate = new Date(entryDate.setHours(0, 0, 0, 0));
+      const isInDateRange =
+        compareDate >= new Date(startDate.setHours(0, 0, 0, 0)) &&
+        compareDate <= new Date(endDate.setHours(23, 59, 59, 999));
 
       return isInDateRange;
     });

@@ -13,16 +13,26 @@ interface Preferences {
   roundingInterval: string;
 }
 
+// Interface for time entries stored in LocalStorage (with dates as strings)
+interface StoredTimeEntry {
+  id: string;
+  description: string;
+  startTime: string; // ISO string
+  endTime: string | null; // ISO string or null
+  projectId?: string;
+  isActive: boolean;
+}
+
 // Time Entry Methods
 export async function getTimeEntries(): Promise<TimeEntry[]> {
   const entriesJson = await LocalStorage.getItem<string>(TIME_ENTRIES_KEY);
   const rawEntries = entriesJson ? JSON.parse(entriesJson) : [];
-  
+
   // Convert string dates to Date objects
-  return rawEntries.map((entry: any) => ({
+  return rawEntries.map((entry: StoredTimeEntry) => ({
     ...entry,
     startTime: new Date(entry.startTime),
-    endTime: entry.endTime ? new Date(entry.endTime) : null
+    endTime: entry.endTime ? new Date(entry.endTime) : null,
   }));
 }
 
@@ -39,10 +49,10 @@ export async function saveTimeEntry(entry: TimeEntry): Promise<void> {
   }
 
   // Convert Date objects to strings for storage
-  const entriesForStorage = entries.map(e => ({
+  const entriesForStorage = entries.map((e) => ({
     ...e,
     startTime: e.startTime.toISOString(),
-    endTime: e.endTime ? e.endTime.toISOString() : null
+    endTime: e.endTime ? e.endTime.toISOString() : null,
   }));
 
   await LocalStorage.setItem(TIME_ENTRIES_KEY, JSON.stringify(entriesForStorage));
@@ -51,12 +61,12 @@ export async function saveTimeEntry(entry: TimeEntry): Promise<void> {
 export async function deleteTimeEntry(entryId: string): Promise<void> {
   const entries = await getTimeEntries();
   const updatedEntries = entries.filter((e) => e.id !== entryId);
-  
+
   // Convert Date objects to strings for storage
-  const entriesForStorage = updatedEntries.map(e => ({
+  const entriesForStorage = updatedEntries.map((e) => ({
     ...e,
     startTime: e.startTime.toISOString(),
-    endTime: e.endTime ? e.endTime.toISOString() : null
+    endTime: e.endTime ? e.endTime.toISOString() : null,
   }));
 
   await LocalStorage.setItem(TIME_ENTRIES_KEY, JSON.stringify(entriesForStorage));
@@ -149,10 +159,10 @@ export async function deleteProject(projectId: string): Promise<void> {
   });
 
   // Convert Date objects to strings for storage
-  const entriesForStorage = updatedEntries.map(e => ({
+  const entriesForStorage = updatedEntries.map((e) => ({
     ...e,
     startTime: e.startTime.toISOString(),
-    endTime: e.endTime ? e.endTime.toISOString() : null
+    endTime: e.endTime ? e.endTime.toISOString() : null,
   }));
 
   await LocalStorage.setItem(TIME_ENTRIES_KEY, JSON.stringify(entriesForStorage));
