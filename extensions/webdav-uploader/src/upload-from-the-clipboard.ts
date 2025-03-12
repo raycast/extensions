@@ -3,13 +3,6 @@ import { createClient } from "webdav";
 import * as fs from "fs";
 import * as path from "path";
 
-interface Preferences {
-  webdavUrl: string;
-  username: string;
-  password: string;
-  baseDir: string;
-}
-
 /**
  * Reads the clipboard using Raycast's Clipboard API.
  * It verifies that a file is present (and not text, HTML, or empty).
