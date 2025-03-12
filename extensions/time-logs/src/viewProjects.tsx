@@ -74,12 +74,21 @@ export default function ViewProjects() {
                 style={Action.Style.Destructive}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
                 onAction={async () => {
-                  await deleteProject(project.id);
-                  await loadProjects();
-                  showToast({
-                    style: Toast.Style.Success,
-                    title: "Project deleted",
-                  });
+                  if (await Alert.prompt({
+                    title: "Delete Project",
+                    message: "Are you sure you want to delete this project? This action cannot be undone.",
+                    primaryAction: {
+                      title: "Delete",
+                      style: Alert.ActionStyle.Destructive,
+                    },
+                  })) {
+                    await deleteProject(project.id);
+                    await loadProjects();
+                    showToast({
+                      style: Toast.Style.Success,
+                      title: "Project deleted",
+                    });
+                  }
                 }}
               />
             </ActionPanel>
