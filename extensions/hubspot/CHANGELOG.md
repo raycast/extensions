@@ -1,6 +1,6 @@
 # HubSpot Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-03-12
 - Added option in settings to choose custom company properties to display in company search
 - Added option to choose how to format said properties, eg currency, percentage
 
