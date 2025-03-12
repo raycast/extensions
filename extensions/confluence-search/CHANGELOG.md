@@ -1,6 +1,6 @@
 # Confluence Changelog
 
-## [Modernize Extension + Fix People Panel] - {PR_MERGE_DATE}
+## [Modernize Extension + Fix People Panel] - 2025-03-12
 
 - fix: "Popular" would error out if no popular items in feed
 - fix: "People" would error out during search
