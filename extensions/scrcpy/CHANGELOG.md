@@ -1,6 +1,6 @@
 # scrcpy Changelog
 
-## [New Additions] - {PR_MERGE_DATE}
+## [New Additions] - 2025-03-12
 
 - Add "--audio-codec" option
 - Allow arbitrary options by adding "More options" text field, since we have no better idea to cover all options provided by scrcpy.
