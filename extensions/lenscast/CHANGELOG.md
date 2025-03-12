@@ -1,6 +1,6 @@
 # Lenscast Changelog
 
-## [Modernize Extension + Update URLs] - {PR_MERGE_DATE}
+## [Modernize Extension + Update URLs] - 2025-03-12
 
 - Update queries so they use v2 of API
 - chore: remove many deps opting for Raycast `useFetch`
