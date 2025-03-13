@@ -10,6 +10,9 @@ export type ListItem = {
 export const useAddresses = () => {
   return useFetch<ListItem[]>(DATA_CSV_URL, {
     parseResponse: async (response) => {
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
       const text = await response.text();
       return text
         .split("\n")
