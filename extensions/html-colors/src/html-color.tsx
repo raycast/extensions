@@ -4,7 +4,7 @@ import { basicColors, extendedColors } from "./constants";
 import { ColorListItem } from "./components/color-list-item";
 import { searchColors, ColorResult } from "./utils/search-utils";
 import { showFailureToast } from "@raycast/utils";
-import { groupColorsByShade } from "./utils/shade-mapping";
+import { groupColorsByShade } from "./utils/color-utils";
 import { sortSectionsByRelevance } from "./utils/section-utils";
 
 type ViewOption = "all" | "basic" | "extended" | "grouped";

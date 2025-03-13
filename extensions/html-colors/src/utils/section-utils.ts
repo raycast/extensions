@@ -1,6 +1,6 @@
 import { ColorResult } from "./search-utils";
 import { getMatchScore } from "./search-utils";
-import { ShadeCategory, SHADE_ORDER } from "./shade-mapping";
+import { ShadeCategory, SHADE_ORDER } from "../constants";
 
 type ColorSection = [string, ColorResult[]];
 

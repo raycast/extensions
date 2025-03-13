@@ -1,4 +1,45 @@
-import { ShadeCategory } from "./utils/shade-mapping";
+/**
+ * Represents a shade category for HTML colors
+ */
+export type ShadeCategory = 
+  | "pink"
+  | "red"
+  | "orange"
+  | "yellow"
+  | "brown"
+  | "purple"
+  | "indigo"
+  | "blue"
+  | "cyan"
+  | "teal"
+  | "green"
+  | "lime"
+  | "mint"
+  | "white"
+  | "gray"
+  | "black";
+
+/**
+ * Static order of shade categories for consistent sorting
+ */
+export const SHADE_ORDER: ShadeCategory[] = [
+  "black",
+  "blue",
+  "brown",
+  "cyan",
+  "gray",
+  "green",
+  "indigo",
+  "lime",
+  "mint",
+  "orange",
+  "pink",
+  "purple",
+  "red",
+  "teal",
+  "white",
+  "yellow"
+];
 
 /**
  * Represents a color with its various formats and category information
