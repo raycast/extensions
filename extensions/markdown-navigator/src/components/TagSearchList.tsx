@@ -2,6 +2,7 @@
 import { List, ActionPanel, Action, Icon, useNavigation } from "@raycast/api";
 import { isSystemTag, getSystemTag } from "../utils/tagOperations";
 import { getTagTintColor } from "../utils/tagColorUtils";
+import { useMemo } from "react";
 
 interface TagSearchListProps {
   tags: string[];
@@ -45,6 +46,7 @@ export function TagSearchList({ tags, onTagSelect, selectedTag, showSections = t
       <List navigationTitle={NAVIGATION_TITLE}>
         <List.Item
           title="All Tags"
+          subtitle="Select a tag to view related items"
           icon={Icon.Tag}
           accessories={[{ text: `${tags.length} tags` }]}
           actions={
@@ -70,15 +72,16 @@ export function TagSearchList({ tags, onTagSelect, selectedTag, showSections = t
       </List>
     );
   } else {
-    // Flat list with sorted tags (system tags first)
-    const sortedTags = [...tags].sort((a, b) => {
-      const aIsSystem = isSystemTag(a);
-      const bIsSystem = isSystemTag(b);
+    const sortedTags = useMemo(() => {
+      return [...tags].sort((a, b) => {
+        const aIsSystem = isSystemTag(a);
+        const bIsSystem = isSystemTag(b);
 
-      if (aIsSystem && !bIsSystem) return -1;
-      if (!aIsSystem && bIsSystem) return 1;
-      return a.localeCompare(b);
-    });
+        if (aIsSystem && !bIsSystem) return -1;
+        if (!aIsSystem && bIsSystem) return 1;
+        return a.localeCompare(b);
+      });
+    }, [tags]);
 
     return (
       <List navigationTitle={NAVIGATION_TITLE}>

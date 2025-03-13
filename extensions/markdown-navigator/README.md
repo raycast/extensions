@@ -77,9 +77,14 @@ The extension requires a valid Markdown directory to be set in preferences:
 
 - **Smart Tag Extraction**: Tags are automatically extracted from:
   - Inline hashtags in Markdown content (`#tag`)
-  - YAML frontmatter tags (`tags: [tag1, tag2]` or `tags: tag1, tag2`)
+  - YAML frontmatter tags 
+  
+  ```yaml
+  tags: [tag1, tag2]
+  ```
+  
   - Supports both English and Chinese tags
-
+  
 - **System Tags vs. Custom Tags**: Tags are categorized into:
   - **System Tags**: Pre-defined tags with color coding for quick visual identification
     - Important (Red)
