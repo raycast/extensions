@@ -19,67 +19,111 @@ export function useMenuItemsLoader() {
   const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const initialLoadRef = useRef(true); // Track if this is the first load
   const abortControllerRef = useRef<AbortController | null>(null);
-  const messageIndex = useRef(0);
 
-  // Update loading messages when app or totalMenuItems change - only when loading from AppleScript
-  useEffect(() => {
-    if (!app?.name || !loadingFromAppleScript) {
-      // Clear loading message if not loading from AppleScript
-      setLoadingMessage(null);
-      setLoadingState(null);
-      return;
-    }
+  // Handle initial validation and setup
+  const setupLoadingOperation = useCallback(() => {
+    // Cancel any pending operations
+    if (abortControllerRef.current) abortControllerRef.current.abort();
 
-    if (totalMenuItems && totalMenuItems > 0) {
-      const estimatedMinutes = Math.ceil(totalMenuItems / 60);
-      setLoadingMessage(`Initial loading of ${totalMenuItems} menu items...`);
-      setLoadingState(
-        `Estimate: ${estimatedMinutes} ${estimatedMinutes === 1 ? "minute" : "minutes"}`,
+    // Create new abort controller for this operation
+    abortControllerRef.current = new AbortController();
+
+    // Reset loading states
+    setLoading(true);
+    setLoadingFromAppleScript(false);
+    setLoadingMessage(null);
+    setLoadingState(null);
+
+    return abortControllerRef.current.signal;
+  }, []);
+
+  // Check if we need to reload data
+  const shouldReloadData = useCallback(
+    (frontmostApp: Application, refresh?: "app" | "data") => {
+      // only reload if user is hard refreshing
+      // or the focused app has changed
+      // or the initial load hasn't completed
+      return (
+        refresh || frontmostApp?.name !== app?.name || initialLoadRef.current
       );
-    }
+    },
+    [app],
+  );
 
-    return () => {
-      setLoadingMessage(null);
-      setLoadingState(null);
-      messageIndex.current = 0;
-    };
-  }, [app?.name, totalMenuItems, loadingFromAppleScript]);
-
-  /*
-   * Manage loading of menu item data
-   */
-  const loadingHandler = useCallback(
-    async (refresh?: boolean) => {
-      if (loading && !initialLoadRef.current) return;
-
-      // Cancel any pending operations
-      if (abortControllerRef.current) abortControllerRef.current.abort();
-
-      // Create new abort controller for this operation
-      abortControllerRef.current = new AbortController();
-      const signal = abortControllerRef.current.signal;
+  // Cache loading handler
+  const tryLoadFromCache = useCallback(
+    async (frontmostApp: Application, refresh?: "app" | "data") => {
+      if (refresh === "data") return false;
 
       try {
-        setLoading(true);
-        // Reset loading message state at the start of loading
-        setLoadingFromAppleScript(false);
-        setLoadingMessage(null);
-        setLoadingState(null);
+        const cachedData = await getMenuBarShortcutsCache(frontmostApp);
+        if (!cachedData?.menus?.length) return false;
+        // First set the data
+        setData(cachedData);
 
+        // Then in the next tick, update loading state to prevent flash
+        setTimeout(() => {
+          setLoading(false);
+          initialLoadRef.current = false;
+        }, 0);
+        return true;
+      } catch {
+        // Cache failed, continue to AppleScript loading
+      }
+      return false;
+    },
+    [],
+  );
+
+  // Applescript loading handler
+  const loadFromAppleScript = useCallback(
+    async (frontmostApp: Application, signal: AbortSignal) => {
+      // Mark that we're now loading from AppleScript
+      setLoadingFromAppleScript(true);
+
+      // Get total menu items to handle loading estimates
+      const totalItems = await getTotalMenuBarItemsApplescript(frontmostApp);
+      if (signal.aborted) return;
+      setTotalMenuItems(totalItems);
+
+      // Load menu data from AppleScript
+      const menuData = await getMenuBarShortcutsApplescript(
+        frontmostApp,
+        totalItems,
+      );
+      if (signal.aborted) return;
+
+      // First set the data
+      setData(menuData);
+
+      // Wait to update loading state to prevent empty state flash
+      setTimeout(() => {
+        setLoading(false);
+        setLoadingFromAppleScript(false);
+        setTotalMenuItems(0);
+        initialLoadRef.current = false;
+      }, 0);
+    },
+    [],
+  );
+
+  /*
+   * Main loading process for getting menu data
+   */
+  const loadingHandler = useCallback(
+    async (refresh?: "app" | "data") => {
+      if (loading && !initialLoadRef.current && !refresh) return;
+
+      const signal = setupLoadingOperation();
+
+      try {
         // get current focused application
         const frontmostApp = await getFrontmostApplication();
         if (!frontmostApp.name)
           throw new Error("Could not detect frontmost application");
         setApp(frontmostApp);
 
-        // only reload if user is hard refreshing
-        // or the focused app has changed
-        // or the initial load hasn't completed
-        if (
-          !refresh &&
-          frontmostApp?.name === app?.name &&
-          !initialLoadRef.current
-        ) {
+        if (!shouldReloadData(frontmostApp, refresh)) {
           setLoading(false);
           return;
         }
@@ -92,53 +136,15 @@ export function useMenuItemsLoader() {
         if (signal.aborted) return;
 
         // Try loading from cache first
-        if (!refresh) {
-          try {
-            const cachedData = await getMenuBarShortcutsCache(frontmostApp);
-            if (cachedData?.menus?.length) {
-              // First set the data
-              setData(cachedData);
-              // Then in the next tick, update loading state to prevent flash
-              setTimeout(() => {
-                if (!signal.aborted) {
-                  setLoading(false);
-                  initialLoadRef.current = false;
-                }
-              }, 0);
-              return;
-            }
-          } catch {
-            // Cache failed, continue to AppleScript loading
-          }
-        }
-
-        // Mark that we're now loading from AppleScript
-        setLoadingFromAppleScript(true);
-
-        // Get total menu items to handle loading estimates
-        const totalItems = await getTotalMenuBarItemsApplescript(frontmostApp);
-        setTotalMenuItems(totalItems);
-
-        if (signal.aborted) return;
-
-        // Load menu data from AppleScript
-        const menuData = await getMenuBarShortcutsApplescript(
+        const loadedFromCache = await tryLoadFromCache(
           frontmostApp,
-          totalItems,
+          refresh,
+          signal,
         );
+        if (loadedFromCache || signal.aborted) return;
 
-        // First set the data
-        setData(menuData);
-
-        // Wait to update loading state to prevent empty state flash
-        setTimeout(() => {
-          if (!signal.aborted) {
-            setLoading(false);
-            setLoadingFromAppleScript(false);
-            setTotalMenuItems(0);
-            initialLoadRef.current = false;
-          }
-        }, 0);
+        // If cache loading failed or was skipped, load from AppleScript
+        await loadFromAppleScript(frontmostApp, signal);
       } catch (error) {
         // Only show error if not aborted
         if (signal.aborted) return;
@@ -148,7 +154,14 @@ export function useMenuItemsLoader() {
         setLoadingFromAppleScript(false);
       }
     },
-    [app, loading],
+    [
+      app,
+      loading,
+      setupLoadingOperation,
+      shouldReloadData,
+      tryLoadFromCache,
+      loadFromAppleScript,
+    ],
   );
 
   /*
@@ -173,7 +186,7 @@ export function useMenuItemsLoader() {
       try {
         const updatedApp = await getFrontmostApplication();
         if (app?.name === updatedApp.name) return;
-        await loadingHandler();
+        await loadingHandler("app");
       } catch (error) {
         console.error("Error checking focused app:", error);
       }
@@ -184,9 +197,33 @@ export function useMenuItemsLoader() {
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
-      if (abortControllerRef.current) abortControllerRef.current.abort();
     };
   }, [app?.name]);
+
+  /*
+   * Update loading messages
+   */
+  useEffect(() => {
+    if (!app?.name || !loadingFromAppleScript) {
+      // Clear loading message if not loading from AppleScript
+      setLoadingMessage(null);
+      setLoadingState(null);
+      return;
+    }
+
+    if (totalMenuItems && totalMenuItems > 0) {
+      const estimatedMinutes = Math.ceil(totalMenuItems / 60);
+      setLoadingMessage(`Initial loading of ${totalMenuItems} menu items...`);
+      setLoadingState(
+        `Estimate: ${estimatedMinutes} ${estimatedMinutes === 1 ? "minute" : "minutes"}`,
+      );
+    }
+
+    return () => {
+      setLoadingMessage(null);
+      setLoadingState(null);
+    };
+  }, [app?.name, totalMenuItems, loadingFromAppleScript]);
 
   // Create a computed "loaded" state that ensures we have data before showing content
   const loaded = Boolean(data?.menus?.length && app?.name && !loading);
@@ -200,7 +237,7 @@ export function useMenuItemsLoader() {
       loadingMessage,
       loadingState,
       loaded,
-      refreshMenuItemsData: () => loadingHandler(true),
+      refreshMenuItemsData: () => loadingHandler("data"),
     }),
     [
       loading,

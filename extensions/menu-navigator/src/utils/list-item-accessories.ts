@@ -106,8 +106,9 @@ export function getListItemAccessories(item: MenuItem) {
     return [{ tag: "Menu" }];
   }
 
-  const modifier = item.modifier !== null && MODIFIER_KEYCODES[item.modifier];
-  const glyph = item.glyph !== null && GLYPH_KEYCODES[item.glyph];
+  const modifier =
+    item.modifier !== null ? MODIFIER_KEYCODES[item.modifier] : null;
+  const glyph = item.glyph !== null ? GLYPH_KEYCODES[item.glyph] : null;
 
   if (modifier && (glyph || item.key)) {
     const modifierData = replaceFnWithGlobe(modifier);

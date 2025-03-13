@@ -136,8 +136,10 @@ function isDuplicate(items: MenuItem[], item: MenuItem): boolean {
  * Extracts a value from a string between start and optional end delimiters
  */
 function extract(text: string, start: string, end?: string): string {
-  const [, value] = text.split(start);
-  return end ? value.split(end)[0].trim() : value.trim();
+  const parts = text.split(start);
+  if (parts.length < 2) return "";
+  const value = parts[1];
+  return end ? (value.split(end)[0] || "").trim() : value.trim();
 }
 
 /*
@@ -167,7 +169,7 @@ export function parseAppleScriptResponse(app: Application, response: string) {
   const items = menuBarItems.map((item) => {
     const path = extract(item, "MP:", ":SN");
     const menus = path.split(">");
-    const menu = menus[menus.length - 2];
+    const menu = menus.length >= 2 ? menus[menus.length - 2] : "";
 
     return {
       path,
@@ -183,11 +185,14 @@ export function parseAppleScriptResponse(app: Application, response: string) {
 
   // Reorder menu groups
   const grouped = groupMenuBarItems(items);
-  const menus = [
-    ...grouped.slice(2), // Main groups
-    ...grouped.slice(1, 2), // Middle group
-    ...grouped.slice(0, 1), // First group
-  ];
+  const menus =
+    grouped?.length >= 3
+      ? [
+          ...grouped.slice(2), // Main groups
+          ...grouped.slice(1, 2), // Middle group
+          ...grouped.slice(0, 1), // First group
+        ]
+      : grouped;
 
   return {
     app,

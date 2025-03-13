@@ -1,5 +1,5 @@
 # Menu Navigator Changelog
 
-## [Initial Version] - 2025-03-11
+## [Initial Version] - {PR_MERGE_DATE}
 
 Initial version code for Menu Navigator

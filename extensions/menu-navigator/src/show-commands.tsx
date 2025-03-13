@@ -20,7 +20,7 @@ function MenuNavigator() {
   useEffect(() => {
     clearSearchBar();
     setFilter("all-commands");
-  }, []);
+  }, [setFilter]);
 
   return (
     <List

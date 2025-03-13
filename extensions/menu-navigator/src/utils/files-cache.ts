@@ -7,7 +7,7 @@ import { MenusConfig } from "../types";
  * Used for storing and retrieving menu bar items config based on app
  */
 export function getFileNameForCache(app: Application) {
-  return `${app.name}__config`;
+  return `${app.name.replace(/[^a-zA-Z0-9-_]/g, "_")}__config`;
 }
 
 /*
@@ -21,7 +21,9 @@ export async function readFileCache(filename: string): Promise<MenusConfig> {
     );
     return JSON.parse(data);
   } catch (e) {
-    throw new Error(`Could not parse local config file ${filename}.json`);
+    throw new Error(
+      `Could not find or parse local config file ${filename}.json`,
+    );
   }
 }
 

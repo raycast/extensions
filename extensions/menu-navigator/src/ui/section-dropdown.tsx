@@ -10,7 +10,6 @@ export function SectionDropdown(props: {
   return (
     <List.Dropdown
       tooltip="Filters"
-      storeValue={false}
       onChange={(newValue) => onSectionFilter(newValue)}
       defaultValue={defaultValue}
     >

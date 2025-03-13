@@ -12,11 +12,11 @@ export interface ListItemsProps {
 
 export function ListItems({ app, data, refresh }: ListItemsProps) {
   const renderedList = useMemo(() => {
-    if (!data?.menus?.length) return null;
+    if (!data?.menus?.length) return <List isLoading />;
 
     return data.menus.map((menu) => (
       <List.Section key={`${app.name}-${menu.menu}`} title={menu.menu}>
-        {menu.items?.map((item) => (
+        {(menu.items ?? []).map((item) => (
           <List.Item
             key={`${app.name}-${item.menu}-${item.shortcut}`}
             title={item.shortcut}

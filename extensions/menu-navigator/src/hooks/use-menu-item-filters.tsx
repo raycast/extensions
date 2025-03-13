@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MenusConfig, SectionTypes } from "../types";
-import { showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 const FILTER_TYPES = {
   ALL: "all-commands",
@@ -50,7 +50,13 @@ export function useMenuItemFilters(data?: MenusConfig): MenuItemFiltersResult {
     data &&
     (!Array.isArray(data.menus) || !data.menus.every((menu) => "menu" in menu))
   ) {
-    showHUD("Invalid menu configuration provided");
+    showFailureToast("Invalid menu configuration provided");
+    return {
+      options: [],
+      filter: FILTER_TYPES.ALL,
+      setFilter: () => {},
+      filteredData: undefined,
+    };
   }
 
   const [filter, setFilter] = useState<string>(FILTER_TYPES.ALL);

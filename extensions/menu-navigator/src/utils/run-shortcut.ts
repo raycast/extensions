@@ -1,6 +1,5 @@
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { MenuItem } from "../types";
-import { showHUD } from "@raycast/api";
 
 /*
  * Script to run top level menu item shortcut
@@ -14,10 +13,8 @@ function menuItemScript(appName: string, item: MenuItem) {
     tell application "System Events"
       tell process "${appName}"
         tell menu bar 1
-          tell menu bar item "${item.menu}"
-            tell menu "${item.menu}"
-              click menu item "${item.shortcut}"
-            end tell
+          tell menu "${item.menu}"
+            click menu item "${item.shortcut}"
           end tell
         end tell
       end tell
@@ -80,6 +77,7 @@ export async function runShortcut(appName: string, item: MenuItem) {
     const response = await runAppleScript(runItem(appName, item));
     return response;
   } catch (e) {
-    showHUD("Error running shortcut");
+    showFailureToast("Error running shortcut");
+    return false;
   }
 }

@@ -8,6 +8,7 @@ import {
 import { MenuItem } from "../types";
 import { runShortcut } from "../utils";
 import { SubMenuListItems } from "./submenu-list-items";
+import { showFailureToast } from "@raycast/utils";
 
 export interface ListItemActionsProps {
   app: Application;
@@ -31,8 +32,12 @@ export function ListItemActions({ app, item, refresh }: ListItemActionsProps) {
         <Action
           title="Run Command"
           onAction={async () => {
-            await closeMainWindow();
-            await runShortcut(app.name, item);
+            try {
+              await closeMainWindow();
+              await runShortcut(app.name, item);
+            } catch (error) {
+              await showFailureToast("Failed to run shortcut");
+            }
           }}
         />
       )}
