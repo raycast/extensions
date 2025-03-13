@@ -1,6 +1,6 @@
 # Search Router Changelog
 
-## [New Addtions] - {PR_MERGE_DATE}
+## [New Additions] - {PR_MERGE_DATE}
 
 - Added support for opening root domain when search query is empty
 
