@@ -92,7 +92,7 @@ export default function Command() {
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Failed to remove last tracking" });
     }
-  }
+  };
 
   const getHabitIcon = (habit: Habit) => {
     if (habit.repeatable) {
@@ -219,11 +219,7 @@ export default function Command() {
         title="Send Feedback"
         actions={
           <ActionPanel>
-            <Action.Push
-              title="Send Feedback"
-              icon={Icon.Envelope}
-              target={<FeedbackForm />}
-            />
+            <Action.Push title="Send Feedback" icon={Icon.Envelope} target={<FeedbackForm />} />
           </ActionPanel>
         }
       />
