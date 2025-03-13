@@ -48,6 +48,7 @@ export declare class BookmarkService {
     }>;
     update(params: {
         id: string;
+        email: string;
         name?: string;
         url?: string;
         description?: string;

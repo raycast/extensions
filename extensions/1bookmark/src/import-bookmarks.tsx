@@ -82,6 +82,10 @@ function Body() {
     return <LoginView />;
   }
 
+  if (!me.data) {
+    return <List isLoading={true} />;
+  }
+
   return (
     <List
       isLoading={isLoading}

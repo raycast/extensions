@@ -20,7 +20,7 @@ function Body(props: Props) {
   const { bookmarks, spaceId, spaceName, browserName } = props;
   const { pop } = useNavigation();
 
-  const { data: spaceTags, refetch: spaceTagsRefetch } = trpc.tag.list.useQuery({ spaceIds: [spaceId] });
+  const { data: spaceTags, refetch: spaceTagsRefetch, isLoading } = trpc.tag.list.useQuery({ spaceIds: [spaceId] });
   const importBookmarks = trpc.bookmark.import.useMutation();
 
   async function handleSubmit(values: FormValues) {
@@ -45,6 +45,10 @@ function Body(props: Props) {
     } catch (error) {
       showFailureToast(error, { title: "Failed to import bookmarks" });
     }
+  }
+
+  if (isLoading) {
+    return <Form isLoading={true} />;
   }
 
   return (
