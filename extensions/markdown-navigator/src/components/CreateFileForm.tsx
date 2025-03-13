@@ -40,6 +40,7 @@ export function CreateFileForm({ rootDirectory, currentFolder, onFileCreated }: 
 
     try {
       // Display the path where the archive will be created
+
       await showToast({
         style: Toast.Style.Animated,
         title: "Creating file...",

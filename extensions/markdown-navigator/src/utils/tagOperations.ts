@@ -99,13 +99,19 @@ export const sortTags = (tags: string[]): string[] => {
   });
 };
 
+// Helper function to centralize tag filtering logic
+export const shouldDisplayTag = (tag: string, showColorTags: boolean = false): boolean => {
+  // Filter out color tags conditionally and numeric tags always
+  return (showColorTags || !isColorTag(tag)) && !isNumericTag(tag);
+};
+
 // Get all unique tags
 export const getAllUniqueTags = (files: { tags: string[] }[], showColorTags: boolean = false): string[] => {
   const allTags = new Set<string>();
   files.forEach((file) => {
     file.tags.forEach((tag) => {
-      // Filter out color tags and numeric tags
-      if ((showColorTags || !isColorTag(tag)) && !isNumericTag(tag)) {
+      // Use the centralized helper function for consistent filtering
+      if (shouldDisplayTag(tag, showColorTags)) {
         allTags.add(tag);
       }
     });
@@ -117,9 +123,10 @@ export const getAllUniqueTags = (files: { tags: string[] }[], showColorTags: boo
 
 // Filter the displayed tags
 export const filterDisplayTags = (tags: string[], showColorTags: boolean = false): string[] => {
+  // Use the centralized helper function for consistent filtering
   const filtered = tags
     .filter((tag) => tag && typeof tag === "string" && tag.length > 0) // Ensure no falsy or blank tags
-    .filter((tag) => (showColorTags || !isColorTag(tag)) && !isNumericTag(tag));
+    .filter((tag) => shouldDisplayTag(tag, showColorTags));
   console.log("Filtered display tags:", filtered); // Log filtered display tags
   return filtered;
 };

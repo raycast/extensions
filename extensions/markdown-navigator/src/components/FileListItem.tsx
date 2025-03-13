@@ -48,7 +48,6 @@ const getVisibleTags = (
   // If tags is undefined, the default is an empty array.
   const safeTags = tags || [];
 
-  // If tags is undefined, the default is an empty array.
   const sortedTags = [...safeTags].sort((a, b) => a.length - b.length);
 
   // If even the shortest label exceeds the maximum display length, return "+N" directly
@@ -192,7 +191,7 @@ export function FileListItem({
 
   // Filter tags before sorting and rendering
   const filteredTags = filterDisplayTags(file.tags, showColorTags) || [];
-  console.log(`Filtered tags for ${file.name}:`, filteredTags); // Log filtered tags
+  //console.log(`Filtered tags for ${file.name}:`, filteredTags); // Log filtered tags
 
   // Sort tags with system tags first
   const sortedTags = sortTags(filteredTags);
@@ -200,7 +199,7 @@ export function FileListItem({
   // Get visible tags dynamically
   const { visible, hiddenCount } = getVisibleTags(sortedTags, MAX_DISPLAY_LENGTH);
 
-  console.log(`Rendering tags for ${file.name}:`, visible); // Log tags being rendered
+  //console.log(`Rendering tags for ${file.name}:`, visible); // Log tags being rendered
 
   // Create a Date object from the timestamp for the tooltip
   const lastModifiedDate = new Date(file.lastModified);
