@@ -21,6 +21,7 @@ export enum ComponentFilter {
   PICKERS = "Pickers",
   PROVIDERS = "Providers",
   MISCELLANEOUS = "Miscellaneous",
+  LABS = "Labs",
 }
 
 export enum SectionFilter {

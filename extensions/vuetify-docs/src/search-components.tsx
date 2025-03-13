@@ -43,6 +43,7 @@ export default function Command() {
           <List.Dropdown.Item title="Pickers" value={ComponentFilter.PICKERS} />
           <List.Dropdown.Item title="Providers" value={ComponentFilter.PROVIDERS} />
           <List.Dropdown.Item title="Miscellaneous" value={ComponentFilter.MISCELLANEOUS} />
+          <List.Dropdown.Item title="Labs" value={ComponentFilter.LABS} />
         </List.Dropdown>
       }
       filtering

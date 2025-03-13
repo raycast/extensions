@@ -356,6 +356,47 @@ const components: Section[] = [
       },
     ],
   },
+  {
+    title: "Labs",
+    items: [
+      {
+        title: "Calendars",
+        url: "https://vuetifyjs.com/en/components/calendars/",
+      },
+      {
+        title: "Date Inputs",
+        url: "https://vuetifyjs.com/en/components/date-inputs/",
+      },
+      {
+        title: "File Upload",
+        url: "https://vuetifyjs.com/en/components/file-upload/",
+      },
+      {
+        title: "Number inputs",
+        url: "https://vuetifyjs.com/en/components/number-inputs/",
+      },
+      {
+        title: "Pull to refresh",
+        url: "https://vuetifyjs.com/en/components/pull-to-refresh/",
+      },
+      {
+        title: "Snackbar Queue",
+        url: "https://vuetifyjs.com/en/components/snackbar-queue/",
+      },
+      {
+        title: "Steppers Vertical",
+        url: "https://vuetifyjs.com/en/components/vertical-steppers/",
+      },
+      {
+        title: "Time pickers",
+        url: "https://vuetifyjs.com/en/components/time-pickers/",
+      },
+      {
+        title: "Treeview",
+        url: "https://vuetifyjs.com/en/components/treeview/",
+      },
+    ],
+  },
 ];
 
 export default components;
