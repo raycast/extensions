@@ -70,11 +70,7 @@ export default function Command() {
         message: "Search results have been copied",
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Search failed",
-        message: error instanceof Error ? error.message : "An error occurred",
-      });
+      showFailureToast("Search failed", error instanceof Error ? error.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
