@@ -69,7 +69,7 @@ export default function Command() {
       setResults(data.results || []);
       setIsEditing(false);
     } catch (error) {
-      console.error("Failed to store in Mem0:", error);
+      showFailureToast("Failed to store in Mem0", error);
     }
     setIsLoading(false);
   }
