@@ -16,6 +16,7 @@ import NodeFetch from "node-fetch";
 import { Habit } from "./models/habit";
 import CreateHabitForm from "./components/create-habit-form";
 import CreateRepeatableHabitForm from "./components/create-repeatable-habit";
+import FeedbackForm from "./components/feedback-form";
 
 export default function Command() {
   const { secret } = getPreferenceValues<Preferences>();
@@ -209,6 +210,19 @@ export default function Command() {
               title="Track Past Habits"
               url="https://www.supahabits.com/dashboard/past-habits"
               shortcut={{ modifiers: ["cmd"], key: "h" }}
+            />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        icon={Icon.Bubble}
+        title="Send Feedback"
+        actions={
+          <ActionPanel>
+            <Action.Push
+              title="Send Feedback"
+              icon={Icon.Envelope}
+              target={<FeedbackForm />}
             />
           </ActionPanel>
         }
