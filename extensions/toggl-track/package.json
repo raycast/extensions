@@ -114,30 +114,30 @@
       "type": "password"
     },
     {
-      "name": "showClientInForm",
+      "name": "showClientsInForm",
       "type": "checkbox",
       "required": false,
-      "title": "Show Client in Form",
+      "title": "Show Clients in Form",
       "description": "Whether or not to show the client field in the form.",
-      "label": "Show client",
+      "label": "Show clients",
       "default": true
     },
     {
       "name": "showProjectsInForm",
       "type": "checkbox",
       "required": false,
-      "title": "Show Project in Form",
+      "title": "Show Projects in Form",
       "description": "Whether or not to show the project field in the form.",
-      "label": "Show project",
+      "label": "Show projects",
       "default": true
     },
     {
       "name": "showTasksInForm",
       "type": "checkbox",
       "required": false,
-      "title": "Show Task in Form",
+      "title": "Show Tasks in Form",
       "description": "Whether or not to show the task field in the form.",
-      "label": "Show task",
+      "label": "Show tasks",
       "default": true
     },
     {
