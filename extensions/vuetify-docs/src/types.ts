@@ -12,7 +12,7 @@ export enum ComponentFilter {
   ALL = "All",
   CONTAINMENT = "Containment",
   NAVIGATION = "Navigation",
-  FORM_INPUTS_CONTROLS = "Form Inputs and controls",
+  FORM_INPUTS_CONTROLS = "Form inputs and controls",
   LAYOUTS = "Layouts",
   SELECTION = "Selection",
   DATA_DISPLAY = "Data and display",
