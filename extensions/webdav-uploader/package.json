@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "upload-from-the-clipboard",
-      "title": "Upload from the Clipboard",
+      "title": "Upload from Clipboard",
+      "subtitle": "WebDAV Uploader",
       "description": "Upload files to WebDAV",
       "mode": "no-view"
     }
