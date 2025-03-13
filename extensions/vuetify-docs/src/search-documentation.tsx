@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List } from "@raycast/api";
 import sections from "./sections";
-import { SectionFilter } from "./types";
+import { SectionFilter, SectionFilterString } from "./types";
 import { useState } from "react";
 
 type State = {
@@ -31,18 +31,13 @@ export default function Command() {
           value={state.filter}
           onChange={(newValue) => setState((previous) => ({ ...previous, filter: newValue as SectionFilter }))}
         >
-          <List.Dropdown.Item title="All" value={SectionFilter.ALL} />
-          <List.Dropdown.Item title="Introduction" value={SectionFilter.INTRODUCTION} />
-          <List.Dropdown.Item title="Getting Started" value={SectionFilter.GETTING_STARTED} />
-          <List.Dropdown.Item title="Features" value={SectionFilter.FEATURES} />
-          <List.Dropdown.Item title="Styles and Animations" value={SectionFilter.STYLES_AND_ANIMATIONS} />
-          <List.Dropdown.Item title="Common Concepts" value={SectionFilter.COMMON_CONCEPTS} />
-          <List.Dropdown.Item title="Components" value={SectionFilter.COMPONENTS} />
-          <List.Dropdown.Item title="API" value={SectionFilter.API} />
-          <List.Dropdown.Item title="Directives" value={SectionFilter.DIRECTIVES} />
-          <List.Dropdown.Item title="Labs" value={SectionFilter.LABS} />
-          <List.Dropdown.Item title="Resources" value={SectionFilter.RESOURCES} />
-          <List.Dropdown.Item title="About" value={SectionFilter.ABOUT} />
+          {Object.keys(SectionFilter).map((key) => (
+            <List.Dropdown.Item
+              key={key}
+              title={SectionFilter[key as SectionFilterString]}
+              value={SectionFilter[key as SectionFilterString]}
+            />
+          ))}
         </List.Dropdown>
       }
       filtering

@@ -24,6 +24,8 @@ export enum ComponentFilter {
   LABS = "Labs",
 }
 
+export type ComponentFilterString = keyof typeof ComponentFilter;
+
 export enum SectionFilter {
   ALL = "All",
   INTRODUCTION = "Introduction",
@@ -38,3 +40,5 @@ export enum SectionFilter {
   RESOURCES = "Resources",
   ABOUT = "About",
 }
+
+export type SectionFilterString = keyof typeof SectionFilter;
