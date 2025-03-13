@@ -7,7 +7,7 @@
   "access": "public",
   "owner": "hypercode",
   "author": "hypercode-dev",
-  "contributers": [
+  "contributors": [
     "malte_18",
     "eay",
     "jens_von_der_heydt"
@@ -76,8 +76,7 @@
     "react": "^18.3.1",
     "react-devtools": "^5.2.0",
     "ts-jest": "^29.2.5",
-    "typescript": "^5.4.5",
-    "typescript-eslint": "^8.15.0"
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build",

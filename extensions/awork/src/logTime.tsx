@@ -8,123 +8,113 @@ import {
   showToast,
   Toast,
   useNavigation,
-} from '@raycast/api'
-import { FormValidation, useForm, useCachedPromise } from '@raycast/utils'
-import fetch from 'node-fetch'
-import {
-  getProjects,
-  getTasks,
-  getTypesOfWork,
-  task,
-} from './composables/FetchData'
-import {
-  convertDurationsToSeconds,
-  validateDuration,
-} from './composables/ValidateDuration'
-import {
-  authorizationInProgress,
-  baseURI,
-  getToken,
-} from './composables/WebClient'
+} from "@raycast/api";
+import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
+import fetch from "node-fetch";
+import { getProjects, getTasks, getTypesOfWork, task } from "./composables/FetchData";
+import { convertDurationsToSeconds, validateDuration } from "./composables/ValidateDuration";
+import { authorizationInProgress, baseURI, getToken } from "./composables/WebClient";
 
 interface FormValues {
-  note: string
-  projectId: string
-  taskId: string
-  typeOfWorkId: string
-  date: Date | null
-  startTime: string
-  duration: string
-  isBillable: boolean
+  note: string;
+  projectId: string;
+  taskId: string;
+  typeOfWorkId: string;
+  date: Date | null;
+  startTime: string;
+  duration: string;
+  isBillable: boolean;
 }
 
 const logTime = async (values: FormValues, tasks: task[] | string) => {
-  const token = await getToken()
-  values.date = values.date ? values.date : new Date()
+  const token = await getToken();
+  values.date = values.date ? values.date : new Date();
   if (!Array.isArray(tasks)) {
-    return
+    return;
   }
-  const task = tasks.filter((value) => value.id === values.taskId)[0]
+  const task = tasks.filter((value) => value.id === values.taskId)[0];
   const body = JSON.stringify({
     note: values.note,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     typeOfWorkId: values.typeOfWorkId,
-    userId: (await LocalStorage.getItem<string>('userId'))?.valueOf(),
-    projectId: values.projectId !== 'none' ? values.projectId : task.projectId,
-    taskId: values.taskId !== 'none' ? values.taskId : undefined,
-    StartDateLocal: `${values.date?.getFullYear()}-${values.date?.getMonth() + 1}-${values.date?.getDate()}`,
+    userId: (await LocalStorage.getItem<string>("userId"))?.valueOf(),
+    projectId: values.projectId !== "none" ? values.projectId : task.projectId,
+    taskId: values.taskId !== "none" ? values.taskId : undefined,
+    StartDateLocal: `${values.date?.getFullYear()}-${String(values.date?.getMonth() + 1).padStart(2, "0")}-${String(values.date?.getDate()).padStart(2, "0")}`,
     StartTimeLocal: values.startTime
-      ? values.startTime.includes('now')
-        ? new Date().toLocaleTimeString('de-DE')
+      ? values.startTime.includes("now")
+        ? new Date().toLocaleTimeString("de-DE")
         : values.startTime
       : undefined,
     Duration: convertDurationsToSeconds(values.duration),
     isBillable: values.isBillable,
-  })
+  });
 
-  await fetch(`${baseURI}/timeentries`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: body,
-    redirect: 'follow',
-  }).catch((e: Error) => {
-    showToast({ style: Toast.Style.Failure, title: e.name, message: e.message })
-    console.error(e)
-    return
-  })
-  await showHUD('Successfully logged time')
-}
+  try {
+    await fetch(`${baseURI}/timeentries`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: body,
+      redirect: "follow",
+    });
+  } catch (error) {
+    showFailureToast(error as Error);
+    console.error(error);
+    return;
+  }
+  await showHUD("Successfully logged time");
+};
 
 export default function Command(props: LaunchProps) {
   const {
     data: projects,
     isLoading: isLoadingProjects,
     revalidate: revalidateProjects,
-  } = useCachedPromise(getProjects, ['', 1000], {
+  } = useCachedPromise(getProjects, ["", 1000], {
     onData: (data) => {
       if ((!data || data.length === 0) && !authorizationInProgress) {
         setTimeout(() => {
-          console.log('Reloading projects')
-          revalidateProjects()
-        }, 500)
+          console.log("Reloading projects");
+          revalidateProjects();
+        }, 500);
       }
       if (props.launchContext?.projectId) {
-        setValue('projectId', props.launchContext.projectId)
+        setValue("projectId", props.launchContext.projectId);
       }
       if (props.draftValues?.projectId) {
-        setValue('projectId', props.draftValues.projectId)
+        setValue("projectId", props.draftValues.projectId);
       }
     },
     onError: () => {
-      revalidateProjects()
+      revalidateProjects();
     },
-  })
+  });
   const {
     data: tasks,
     isLoading: isLoadingTasks,
     revalidate: revalidateTasks,
-  } = useCachedPromise(getTasks, ['', 1000], {
+  } = useCachedPromise(getTasks, ["", 1000], {
     onData: (data) => {
       if ((!data || data.length === 0) && !authorizationInProgress) {
         setTimeout(() => {
-          console.log('Reloading tasks')
-          revalidateTasks()
-        }, 500)
+          console.log("Reloading tasks");
+          revalidateTasks();
+        }, 500);
       }
       if (props.launchContext?.taskId) {
-        setValue('taskId', props.launchContext.taskId)
+        setValue("taskId", props.launchContext.taskId);
       }
       if (props.draftValues?.taskId) {
-        setValue('taskId', props.draftValues.taskId)
+        setValue("taskId", props.draftValues.taskId);
       }
     },
     onError: () => {
-      revalidateTasks()
+      revalidateTasks();
     },
-  })
+  });
   const {
     data: typesOfWork,
     isLoading: isLoadingTypesOwWork,
@@ -133,64 +123,63 @@ export default function Command(props: LaunchProps) {
     onData: (data) => {
       if (!Array.isArray(data) && !authorizationInProgress) {
         setTimeout(() => {
-          console.log('Reloading typesOfWork')
-          revalidateTypesOfWork()
-        }, 500)
+          console.log("Reloading typesOfWork");
+          revalidateTypesOfWork();
+        }, 500);
       }
       if (props.launchContext?.typeOfWorkId) {
-        setValue('typeOfWorkId', props.launchContext.typeOfWorkId)
+        setValue("typeOfWorkId", props.launchContext.typeOfWorkId);
       }
       if (props.draftValues?.typeOfWorkId) {
-        setValue('typeOfWorkId', props.draftValues.typeOfWorkId)
+        setValue("typeOfWorkId", props.draftValues.typeOfWorkId);
       }
     },
     onError: () => {
-      revalidateTypesOfWork()
+      revalidateTypesOfWork();
     },
-  })
-  const { pop } = useNavigation()
+  });
+  const { pop } = useNavigation();
 
-  const { handleSubmit, itemProps, setValidationError, setValue, values } =
-    useForm<FormValues>({
-      onSubmit: async (values) => {
-        if (Array.isArray(tasks)) {
-          await logTime(values, tasks)
-          pop()
-        } else {
-          showToast({
-            title: 'Failed to log time',
-            message: `Expected tasks to be an array, but found ${typeof tasks}`,
-            style: Toast.Style.Failure,
-          })
+  const { handleSubmit, itemProps, setValidationError, setValue, values } = useForm<FormValues>({
+    onSubmit: async (values) => {
+      if (Array.isArray(tasks)) {
+        await logTime(values, tasks);
+        pop();
+      } else {
+        showToast({
+          title: "Failed to log time",
+          message: `Expected tasks to be an array, but found ${typeof tasks}`,
+          style: Toast.Style.Failure,
+        });
+      }
+    },
+    initialValues: {
+      date: new Date(),
+      isBillable: true,
+      ...props.draftValues,
+    },
+    validation: {
+      projectId: (value) => {
+        setValidationError("projectId", undefined);
+        if ((!value || value === "none") && values.taskId === "none") {
+          return "Please select a project";
         }
       },
-      initialValues: {
-        date: new Date(),
-        isBillable: true,
-        ...props.draftValues,
-      },
-      validation: {
-        projectId: (value) => {
-          setValidationError('projectId', undefined)
-          if ((!value || value === 'none') && values.taskId === 'none') {
-            return 'Please select a project'
+      typeOfWorkId: FormValidation.Required,
+      date: FormValidation.Required,
+      duration: validateDuration,
+      startTime: (value) => {
+        if (value) {
+          if (value.match(/^ *(([0-1]?\d)|(2[0-3])):[0-5]\d *$/)) {
+            return;
+          } else if (value.match(/^ *now *$/i)) {
+            return;
           }
-        },
-        typeOfWorkId: FormValidation.Required,
-        date: FormValidation.Required,
-        duration: validateDuration,
-        startTime: (value) => {
-          if (value) {
-            if (value.match(/^ *(([0-1]?\d)|(2[0-3])):[0-5]\d *$/)) {
-              return
-            } else if (value.match(/^ *now *$/i)) {
-              return
-            }
-            return 'Please use format hh:mm'
-          }
-        },
+          return "Please use format hh:mm";
+        }
       },
-    })
+    },
+  });
 
   return (
     <Form
@@ -202,98 +191,72 @@ export default function Command(props: LaunchProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        title={'Note'}
-        {...itemProps.note}
-        placeholder="What did you work on?"
-      />
+      <Form.TextField title={"Note"} {...itemProps.note} placeholder="What did you work on?" />
       <Form.Dropdown
-        title={'Project'}
+        title={"Project"}
         {...itemProps.projectId}
         onChange={(projectId) => {
-          setValidationError('projectId', undefined)
+          setValidationError("projectId", undefined);
           if (projectId && Array.isArray(projects)) {
-            setValue('projectId', projectId)
-            const project = projects.filter(
-              (value) => value.id === projectId,
-            )[0]
-            if (typeof project?.isBillableByDefault === 'boolean') {
-              setValue('isBillable', project.isBillableByDefault)
+            setValue("projectId", projectId);
+            const project = projects.filter((value) => value.id === projectId)[0];
+            if (typeof project?.isBillableByDefault === "boolean") {
+              setValue("isBillable", project.isBillableByDefault);
             }
           }
         }}
       >
-        <Form.Dropdown.Item key={'none'} title={'No Project'} value={'none'} />
+        <Form.Dropdown.Item key={"none"} title={"No Project"} value={"none"} />
         {projects &&
           Array.isArray(projects) &&
-          projects.map((project) => (
-            <Form.Dropdown.Item
-              key={project.id}
-              title={project.name}
-              value={project.id}
-            />
-          ))}
+          projects.map((project) => <Form.Dropdown.Item key={project.id} title={project.name} value={project.id} />)}
       </Form.Dropdown>
       <Form.Dropdown
-        title={'Task'}
+        title={"Task"}
         {...itemProps.taskId}
         onChange={(taskId) => {
           if (taskId && Array.isArray(tasks)) {
-            setValue('taskId', taskId)
-            const task = tasks.filter((value) => taskId === value.id)[0]
-            setValue('projectId', task?.projectId || '')
-            setValidationError('projectId', undefined)
+            setValue("taskId", taskId);
+            const task = tasks.filter((value) => taskId === value.id)[0];
+            setValue("projectId", task?.projectId || "");
+            setValidationError("projectId", undefined);
             if (task?.typeOfWorkId) {
-              setValue('typeOfWorkId', task.typeOfWorkId)
+              setValue("typeOfWorkId", task.typeOfWorkId);
             }
-            if (typeof task?.project.isBillableByDefault === 'boolean') {
-              setValue('isBillable', task.project.isBillableByDefault)
+            if (typeof task?.project.isBillableByDefault === "boolean") {
+              setValue("isBillable", task.project.isBillableByDefault);
             }
           }
         }}
       >
-        <Form.Dropdown.Item key={'none'} title={'No Task'} value={'none'} />
+        <Form.Dropdown.Item key={"none"} title={"No Task"} value={"none"} />
         {tasks &&
           Array.isArray(tasks) &&
           tasks
             .filter(
               (task) =>
                 !itemProps.projectId ||
-                itemProps.projectId.value === 'none' ||
-                task.projectId.includes(itemProps.projectId.value || ''),
+                itemProps.projectId.value === "none" ||
+                task.projectId.includes(itemProps.projectId.value || ""),
             )
-            .map((task) => (
-              <Form.Dropdown.Item
-                key={task.id}
-                title={task.name}
-                value={task.id}
-              />
-            ))}
+            .map((task) => <Form.Dropdown.Item key={task.id} title={task.name} value={task.id} />)}
       </Form.Dropdown>
-      <Form.Dropdown title={'Type of work'} {...itemProps.typeOfWorkId}>
+      <Form.Dropdown title={"Type of work"} {...itemProps.typeOfWorkId}>
         {typesOfWork &&
           Array.isArray(typesOfWork) &&
           typesOfWork.map((typeOfWork) => (
-            <Form.Dropdown.Item
-              key={typeOfWork.id}
-              title={typeOfWork.name}
-              value={typeOfWork.id}
-            />
+            <Form.Dropdown.Item key={typeOfWork.id} title={typeOfWork.name} value={typeOfWork.id} />
           ))}
       </Form.Dropdown>
       <Form.DatePicker type={Form.DatePicker.Type.Date} {...itemProps.date} />
       <Form.TextField
-        title={'Start time'}
+        title={"Start time"}
         {...itemProps.startTime}
-        info={'Format hh:mm'}
-        placeholder={new Date().toLocaleTimeString('de-DE').slice(0, 5)}
+        info={"Format hh:mm"}
+        placeholder={new Date().toLocaleTimeString("de-DE").slice(0, 5)}
       />
-      <Form.TextField
-        title={'Duration'}
-        {...itemProps.duration}
-        placeholder="1h 30m"
-      />
-      <Form.Checkbox {...itemProps.isBillable} label={'Billable'} />
+      <Form.TextField title={"Duration"} {...itemProps.duration} placeholder="1h 30m" />
+      <Form.Checkbox {...itemProps.isBillable} label={"Billable"} />
     </Form>
-  )
+  );
 }

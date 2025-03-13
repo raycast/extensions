@@ -1,154 +1,168 @@
-import {
-  getPreferenceValues,
-  LocalStorage,
-  OAuth,
-  PreferenceValues,
-} from '@raycast/api'
-import fetch, { RequestInit } from 'node-fetch'
+import { Alert, confirmAlert, getPreferenceValues, LocalStorage, OAuth, PreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import fetch, { RequestInit } from "node-fetch";
 
 interface workspace {
-  id: string
-  name: string
-  url: string
+  id: string;
+  name: string;
+  url: string;
 }
 
 interface User {
-  id: string
-  workspace: workspace
+  id: string;
+  workspace: workspace;
 }
 
-export const baseURI = 'https://api.awork.com/api/v1'
-export let authorizationInProgress = false
-export let revalidating = false
+export const baseURI = "https://api.awork.com/api/v1";
+export let authorizationInProgress = false;
+export let revalidating = false;
 
-const preferences = getPreferenceValues<PreferenceValues>()
+const preferences = getPreferenceValues<PreferenceValues>();
 
 export const client = new OAuth.PKCEClient({
-  providerName: 'awork',
+  providerName: "awork",
   redirectMethod: OAuth.RedirectMethod.Web,
-  description: 'Connect your awork account...',
-})
+  description: "Connect your awork account...",
+});
 
 const getRequestOptions = (body: URLSearchParams): RequestInit => ({
-  method: 'POST',
+  method: "POST",
   headers: {
-    'Content-Type': 'application/x-www-form-urlencoded',
-    Authorization: `Basic ${btoa(preferences.clientId + ':' + preferences.clientSecret)}`,
+    "Content-Type": "application/x-www-form-urlencoded",
+    Authorization: `Basic ${btoa(preferences.clientId + ":" + preferences.clientSecret)}`,
   },
   body: body,
-  redirect: 'follow',
-})
+  redirect: "follow",
+});
 
 const authorizeClient = async () => {
   if (await client.getTokens()) {
-    console.log('Already logged in!')
-    return
+    console.log("Already logged in!");
+    return;
   }
 
   if (authorizationInProgress) {
-    console.log('Already trying to login!')
-    return
+    console.log("Already trying to login!");
+    return;
   }
-  authorizationInProgress = true
+  authorizationInProgress = true;
 
   const authRequest = await client.authorizationRequest({
     endpoint: `${baseURI}/accounts/authorize`,
     clientId: preferences.clientId,
-    scope: 'offline_access',
+    scope: "offline_access",
     extraParameters: { clientSecret: preferences.clientSecret },
-  })
-  const { authorizationCode } = await client.authorize(authRequest)
-  const body = new URLSearchParams()
-  body.append(
-    'redirect_uri',
-    'https://raycast.com/redirect?packageName=Extension',
-  )
-  body.append('grant_type', 'authorization_code')
-  body.append('code', authorizationCode)
+  });
+  const { authorizationCode } = await client.authorize(authRequest);
+  const body = new URLSearchParams();
+  body.append("redirect_uri", "https://raycast.com/redirect?packageName=Extension");
+  body.append("grant_type", "authorization_code");
+  body.append("code", authorizationCode);
 
   await fetch(`${baseURI}/accounts/token`, getRequestOptions(body))
     .then((response) => response.text())
     .then((result) => {
-      client.setTokens(<OAuth.TokenResponse>JSON.parse(result))
+      client.setTokens(<OAuth.TokenResponse>JSON.parse(result));
     })
-    .catch((error: Error) => console.error(error))
+    .catch((error: Error) => console.error(error));
   if (await client.getTokens()) {
-    console.log('Logged in successfully!')
-    await getUserData()
+    console.log("Logged in successfully!");
+    await getUserData();
   }
-  authorizationInProgress = false
-}
+  authorizationInProgress = false;
+};
 
 export const refreshToken = async () => {
-  const tokens = await client.getTokens()
+  const tokens = await client.getTokens();
   if (!tokens) {
-    await authorizeClient()
-    return
+    await authorizeClient();
+    return;
   } else {
     if (revalidating) {
-      return
+      return;
     }
-    revalidating = true
+    revalidating = true;
     if (!tokens.refreshToken) {
-      return
+      confirmAlert({
+        title: "Couldn't refresh token",
+        message: "To continue using this extension please re-authorize.",
+        primaryAction: {
+          title: "Authorize",
+          style: Alert.ActionStyle.Default,
+          onAction: async () => {
+            await client.removeTokens();
+            await authorizeClient();
+          },
+        },
+      });
+      return;
     }
-    console.log('Refreshing token...')
+    console.log("Refreshing token...");
 
-    const body = new URLSearchParams()
-    body.append('grant_type', 'refresh_token')
-    body.append('refresh_token', tokens.refreshToken)
+    const body = new URLSearchParams();
+    body.append("grant_type", "refresh_token");
+    body.append("refresh_token", tokens.refreshToken);
 
     await fetch(`${baseURI}/accounts/token`, getRequestOptions(body))
-      .then((response) => response.text())
-      .then(async (result) => {
-        const newTokens = <OAuth.TokenResponse>JSON.parse(result)
-        await client.setTokens(newTokens)
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.text();
       })
-      .catch((error: Error) => console.error(error))
+      .then(async (result) => {
+        const newTokens = <OAuth.TokenResponse>JSON.parse(result);
+        await client.setTokens(newTokens);
+      })
+      .catch((error: Error) => console.error(error));
 
     if (tokens.accessToken !== (await client.getTokens())?.accessToken) {
-      console.log('Refreshed Token')
-      await getUserData()
+      console.log("Refreshed Token");
+      await getUserData();
     }
 
-    revalidating = false
+    revalidating = false;
   }
-}
+};
 
 const getUserData = async () => {
-  if (!(await client.getTokens())) await authorizeClient()
-  if ((await client.getTokens())?.isExpired()) await refreshToken()
+  if (!(await client.getTokens())) await authorizeClient();
+  if ((await client.getTokens())?.isExpired()) await refreshToken();
 
-  let data: User
+  let data: User;
 
   await fetch(`${baseURI}/users/me`, {
-    method: 'GET',
+    method: "GET",
     headers: {
       Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
     },
-    redirect: 'follow',
+    redirect: "follow",
   })
-    .then((response) => response.text())
-    .then(async (result) => {
-      data = <User>JSON.parse(result)
-      await LocalStorage.setItem('userId', data.id)
-      await LocalStorage.setItem('URL', data.workspace.url)
+    .then((response) => {
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return response.text();
     })
-    .catch((error: Error) => console.error(error))
-}
+    .then(async (result) => {
+      data = <User>JSON.parse(result);
+      await LocalStorage.setItem("userId", data.id);
+      await LocalStorage.setItem("URL", data.workspace.url);
+    })
+    .catch((error: Error) => {
+      showFailureToast("Failed to fetch user data", error);
+      console.error(error);
+    });
+};
 
 export const getToken = async () => {
   if (authorizationInProgress) {
-    console.log('Currently authorizing')
-    return
+    console.log("Currently authorizing");
+    return;
   }
   if (revalidating) {
-    console.log('Currently refreshing token')
-    return
+    console.log("Currently refreshing token");
+    return;
   }
   if (!(await client.getTokens())) {
-    console.log('Authorize Client')
-    await authorizeClient()
+    console.log("Authorize Client");
+    await authorizeClient();
   }
-  return (await client.getTokens())?.accessToken
-}
+  return (await client.getTokens())?.accessToken;
+};
