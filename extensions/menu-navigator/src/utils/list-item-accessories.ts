@@ -79,7 +79,7 @@ const GLYPH_KEYCODES: Record<number | string, string> = {
 
 // Map special menu items to their SF Symbol icons
 const SPECIAL_ICONS: Record<string, Icon> = {
-  "Start Dictation": Icon.Microphone,
+  "Start Dictation…": Icon.Microphone,
   "Emoji & Symbols": Icon.Globe,
 };
 
