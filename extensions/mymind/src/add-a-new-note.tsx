@@ -1,6 +1,5 @@
-import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
 import { createMyMindNote, addTagToCard } from "./utils";
-import SearchMyMind from "./search-my-mind";
 
 type Values = {
   title: string;
@@ -9,7 +8,6 @@ type Values = {
 };
 
 export default function Command() {
-  const { push } = useNavigation();
   async function handleSubmit(values: Values) {
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -33,7 +31,7 @@ export default function Command() {
       toast.title = "Note created successfully";
 
       // Close the main window instead of launching the search command
-      push(<SearchMyMind />);
+      popToRoot();
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to create note";
