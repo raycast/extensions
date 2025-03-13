@@ -7,6 +7,14 @@ const WARM_TEMPERATURE = 344; // 2900k
 const COLD_TEMPERATURE = 143; // 7000k
 const TEMPERATURE_STEP = (WARM_TEMPERATURE - COLD_TEMPERATURE) / 20; // 5%
 
+export function convertFormTemperatureToActual(formTemp: number) {
+  return Math.round(COLD_TEMPERATURE + (formTemp / 100) * (WARM_TEMPERATURE - COLD_TEMPERATURE));
+}
+
+export function convertActualTemperatureToForm(actualTemp: number) {
+  return Math.round(((actualTemp - COLD_TEMPERATURE) / (WARM_TEMPERATURE - COLD_TEMPERATURE)) * 100);
+}
+
 export type KeyLightSettings = {
   /**
    * The brightness of the key light.

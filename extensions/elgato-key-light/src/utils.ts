@@ -28,3 +28,20 @@ async function showFailureHUD(title: string, error?: unknown) {
   await showHUD(`❌ ${title}`);
   console.error(title, error);
 }
+
+export const rangeValidator = (min: number, max: number) => (value: string | undefined) => {
+  if (value === undefined) {
+    return "The item is required";
+  }
+
+  const parsedValue = parseInt(value);
+  if (isNaN(parsedValue)) {
+    return "The item must be a number";
+  }
+
+  if (parsedValue < min || parsedValue > max) {
+    return `The item must be between ${min} and ${max}`;
+  }
+
+  return undefined;
+};

@@ -54,6 +54,13 @@
       "subtitle": "Elgato Key Light",
       "description": "Decrease color temperature of Key Light by 5%",
       "mode": "no-view"
+    },
+    {
+      "name": "set-preset",
+      "title": "Set Preset",
+      "subtitle": "Elgato Key Light",
+      "description": "Create, edit, and activate presets for your Key Lights",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -76,12 +83,30 @@
       "name": "get-settings",
       "title": "Get Settings",
       "description": "Get the brightness, temperature, and power state of all Elgato Key Lights"
+    },
+    {
+      "name": "create-preset",
+      "title": "Create Preset",
+      "description": "Create a new preset for your Elgato Key Lights"
+    },
+    {
+      "name": "apply-preset",
+      "title": "Apply Preset",
+      "description": "Apply a preset to your Elgato Key Lights"
+    },
+    {
+      "name": "get-presets",
+      "title": "Get Presets",
+      "description": "Get all presets for your Elgato Key Lights"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.1",
     "axios": "^1.2.0",
     "bonjour": "^3.5.0",
+    "emoji-datasource-apple": "^15.1.2",
+    "emojilib": "^4.0.1",
     "prettier": "^3.5.3"
   },
   "devDependencies": {
