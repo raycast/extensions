@@ -29,6 +29,18 @@ export async function clearMarkdownFilesCache(): Promise<void> {
   }
 }
 
+// Check if the specified editor application exists
+export async function checkEditorExists(editor: string): Promise<boolean> {
+  try {
+    const { stdout } = await execAsync(`open -Ra "${editor}"`);
+    console.log(`Found editor at: ${stdout.trim()}`);
+    return true;
+  } catch (error) {
+    console.log(`Editor ${editor} not found:`, error);
+    return false;
+  }
+}
+
 // Get the Markdown file with optional limit
 export async function getMarkdownFiles(limit?: number): Promise<MarkdownFile[]> {
   try {
@@ -118,7 +130,7 @@ export async function getMarkdownFiles(limit?: number): Promise<MarkdownFile[]> 
         return {
           path: filePath,
           name: path.basename(filePath),
-          lastModified: stats.mtime.getTime(), // Fixed: Added () to call getTime function
+          lastModified: stats.mtime.getTime(),
           folder: folder,
           tags: extractTags(filePath),
           size: stats.size,
@@ -127,7 +139,6 @@ export async function getMarkdownFiles(limit?: number): Promise<MarkdownFile[]> 
 
       const sortedFiles = files.sort((a, b) => b.lastModified - a.lastModified);
       if (!limit) {
-        // Define now here as well
         const now = Date.now();
         await LocalStorage.setItem(CACHE_KEY, JSON.stringify({ files: sortedFiles, timestamp: now }));
       }
@@ -144,7 +155,7 @@ export async function getMarkdownFiles(limit?: number): Promise<MarkdownFile[]> 
 }
 
 // Get the default editor from preferences
-function getDefaultEditor(): string {
+export function getDefaultEditor(): string {
   const preferences = getPreferenceValues<Preferences>();
   return preferences.defaultEditor || "Typora"; // Fallback to Typora if not set
 }

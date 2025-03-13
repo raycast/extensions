@@ -1,4 +1,3 @@
-// src/components/FileListItem.tsx
 import {
   List,
   ActionPanel,
@@ -11,15 +10,16 @@ import {
   Toast,
   openCommandPreferences,
 } from "@raycast/api";
-import { MarkdownFile, MAX_VISIBLE_TAGS } from "../types/markdownTypes";
-import { openWithEditor, moveToTrash } from "../utils/fileOperations";
-import { isSystemTag, getSystemTag, sortTags } from "../utils/tagOperations";
+import { MarkdownFile } from "../types/markdownTypes";
+import { openWithEditor, moveToTrash, checkEditorExists, getDefaultEditor } from "../utils/fileOperations";
+import { isSystemTag, getSystemTag, sortTags, filterDisplayTags } from "../utils/tagOperations";
 import path from "path";
 import fs from "fs";
 import { exec } from "child_process";
 import { showFailureToast } from "@raycast/utils";
 import { formatDate } from "../utils/dateUtils";
 import { getTagTintColor } from "../utils/tagColorUtils";
+import { useState, useEffect } from "react";
 
 interface FileListItemProps {
   file: MarkdownFile;
@@ -36,6 +36,49 @@ interface FileListItemProps {
   selectedTag: string | null;
   setSelectedTag: (tag: string | null) => void;
 }
+
+// Define the maximum display length (can be adjusted according to actual UI requirements)
+const MAX_DISPLAY_LENGTH = 15;
+
+// Define the maximum display length (can be adjusted according to actual UI requirements)
+const getVisibleTags = (
+  tags: string[] | undefined,
+  maxDisplayLength: number,
+): { visible: string[]; hiddenCount: number } => {
+  // If tags is undefined, the default is an empty array.
+  const safeTags = tags || [];
+
+  // If tags is undefined, the default is an empty array.
+  const sortedTags = [...safeTags].sort((a, b) => a.length - b.length);
+
+  // If even the shortest label exceeds the maximum display length, return "+N" directly
+  if (sortedTags.length > 0 && sortedTags[0].length > maxDisplayLength) {
+    return { visible: [], hiddenCount: sortedTags.length };
+  }
+
+  const visible: string[] = [];
+  let currentLength = 0;
+
+  // Show at least the shortest tag (if any)
+  for (const tag of sortedTags) {
+    const tagLength = tag.length;
+    if (currentLength === 0 || currentLength + tagLength <= maxDisplayLength) {
+      visible.push(tag);
+      currentLength += tagLength;
+    } else {
+      break;
+    }
+  }
+
+  const hiddenCount = safeTags.length - visible.length;
+  return { visible, hiddenCount };
+};
+
+// Truncate labels (if necessary)
+const truncateTag = (tag: string, maxLength: number): string => {
+  if (tag.length <= maxLength) return tag;
+  return `${tag.substring(0, maxLength - 1)}…`;
+};
 
 export function FileListItem({
   file,
@@ -135,12 +178,29 @@ export function FileListItem({
     </>
   );
 
-  // Sort tags with system tags first
-  const sortedTags = sortTags(file.tags);
+  // Check if the default editor exists
+  const defaultEditor = getDefaultEditor();
+  const [editorExists, setEditorExists] = useState<boolean>(false);
 
-  // Limit visible tags
-  const visibleTags = sortedTags.slice(0, MAX_VISIBLE_TAGS);
-  const hiddenTagsCount = sortedTags.length - visibleTags.length;
+  useEffect(() => {
+    async function checkEditor() {
+      const exists = await checkEditorExists(defaultEditor);
+      setEditorExists(exists);
+    }
+    checkEditor();
+  }, [defaultEditor]);
+
+  // Filter tags before sorting and rendering
+  const filteredTags = filterDisplayTags(file.tags, showColorTags) || [];
+  console.log(`Filtered tags for ${file.name}:`, filteredTags); // Log filtered tags
+
+  // Sort tags with system tags first
+  const sortedTags = sortTags(filteredTags);
+
+  // Get visible tags dynamically
+  const { visible, hiddenCount } = getVisibleTags(sortedTags, MAX_DISPLAY_LENGTH);
+
+  console.log(`Rendering tags for ${file.name}:`, visible); // Log tags being rendered
 
   // Create a Date object from the timestamp for the tooltip
   const lastModifiedDate = new Date(file.lastModified);
@@ -155,25 +215,31 @@ export function FileListItem({
           text: formatDate(file.lastModified),
           tooltip: `Last modified: ${lastModifiedDate.toLocaleString()}`,
         },
-        ...visibleTags.map((tag) => {
-          const systemTag = getSystemTag(tag);
-          const isSystem = isSystemTag(tag);
+        ...visible
+          .filter((tag) => tag && typeof tag === "string" && tag.length > 0)
+          .map((tag) => {
+            const systemTag = getSystemTag(tag);
+            const isSystem = isSystemTag(tag);
 
-          return {
-            tag: {
-              value: tag,
-              color: showColorTags && isSystem ? getTagTintColor(isSystem, systemTag) : undefined,
-            },
-          };
-        }),
-        ...(hiddenTagsCount > 0
+            // Truncate tag if necessary
+            const truncatedTag = truncateTag(tag, MAX_DISPLAY_LENGTH);
+
+            return {
+              tag: {
+                value: truncatedTag,
+                tooltip: tag, // Show full tag on hover
+                color: showColorTags && isSystem ? getTagTintColor(isSystem, systemTag) : undefined,
+              },
+            };
+          }),
+        ...(hiddenCount > 0
           ? [
               {
                 tag: {
-                  value: `+${hiddenTagsCount}`,
+                  value: `+${hiddenCount}`,
                   color: Color.SecondaryText,
                 },
-                tooltip: `${hiddenTagsCount} more tags: ${sortedTags.slice(MAX_VISIBLE_TAGS).join(", ")}`,
+                tooltip: `${hiddenCount} more tags: ${sortedTags.slice(visible.length).join(", ")}`,
               },
             ]
           : []),
@@ -181,7 +247,17 @@ export function FileListItem({
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title="Open with Editor" icon={Icon.BlankDocument} onAction={() => openWithEditor(file.path)} />
+            {editorExists && (
+              <Action title="Open with Editor" icon={Icon.BlankDocument} onAction={() => openWithEditor(file.path)} />
+            )}
+            {!editorExists && (
+              <Action
+                title="Set Default Editor"
+                icon={Icon.Gear}
+                onAction={openCommandPreferences}
+                shortcut={{ modifiers: ["cmd"], key: "p" }}
+              />
+            )}
             <Action
               title="Open in Default App"
               icon={Icon.Document}
@@ -220,7 +296,6 @@ export function FileListItem({
             />
           </ActionPanel.Section>
 
-          {/* Add Tag Management Section */}
           <ActionPanel.Section>
             <Action
               title="Browse Tags"

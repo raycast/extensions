@@ -22,4 +22,5 @@ export const SYSTEM_TAGS: readonly SystemTag[] = [
   { id: "archive", label: "Archive", color: "blue" },
 ];
 
+
 export const MAX_VISIBLE_TAGS = 3;
