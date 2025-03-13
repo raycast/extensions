@@ -15,6 +15,7 @@ import { useBundles } from "./hooks/useBundles";
 import { getProfileNameByDirectory, openLinksInChrome } from "./utils/chrome";
 import { fuzzySearchList } from "./utils/fuzzySearch";
 import { Bundle } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   const { bundles, isLoading, createBundle, editBundle, deleteBundle } = useBundles();
@@ -33,13 +34,15 @@ export default function Command() {
           `Bundle opened in ${getProfileNameByDirectory(bundle.chromeProfileDirectory)} profile`,
         );
       } else {
-        for (const link of bundle.links) {
+        for (const link of [...bundle.links].reverse()) {
           await open(link);
         }
         await showToast(Toast.Style.Success, "Bundle opened in default browser");
       }
     } catch (error) {
-      await showFailureToast("Failed to open bundle", String(error));
+      await showFailureToast(error, {
+        title: "Failed to open bundle",
+      });
     }
   };
 
