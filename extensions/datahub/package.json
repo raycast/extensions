@@ -32,7 +32,7 @@
     {
       "name": "search",
       "title": "Search Datahub",
-      "subtitle": "Quick keyword search in Datahub",
+      "subtitle": "DataHub Utility",
       "description": "Quickly search Datahub by keywords and open results in browser",
       "mode": "no-view",
       "aliases": [
@@ -50,7 +50,7 @@
     {
       "name": "search-datasets",
       "title": "Search Datasets",
-      "subtitle": "Search and browse Datahub datasets",
+      "subtitle": "DataHub Utility",
       "description": "Find specific datasets in Datahub with interactive results",
       "mode": "view",
       "aliases": [

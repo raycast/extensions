@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import { DATAHUB_FRONTEND, DATAHUB_GMS_GRAPHQL_ENDPOINT } from "./constants";
+import { showFailureToast } from "@raycast/utils";
 
 export interface DatasetEntity {
   urn: string;
@@ -31,7 +32,7 @@ export const searchGraphForEntity = async (entityName: string): Promise<SearchRe
     {
       search(input: {
         type: DATASET,
-        query: "${entityName}",
+        query: "${entityName.replace(/"/g, '"')}",
         start: 0,
         count: 100
       }) {
@@ -64,13 +65,16 @@ export const searchGraphForEntity = async (entityName: string): Promise<SearchRe
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error ${response.status}`);
+      throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
     }
 
     const data: SearchResponse = await response.json();
     return data.data.search.searchResults || [];
   } catch (error) {
-    console.error("Error searching Datahub:", error);
-    throw error;
+    showFailureToast(error, {
+      title: "Error searching Datahub",
+      message: String(error),
+    });
+    return [];
   }
 };
