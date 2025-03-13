@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode",
   "title": "Xcode",
-  "version": "2.6.0",
+  "version": "3.0.0",
   "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, search the Apple Developer Documentation and quickly clear Xcode cache files.",
   "icon": "icon.png",
   "author": "SvenTiigi",
@@ -282,14 +282,74 @@
   ],
   "tools": [
     {
-      "name": "search-recent-projects",
-      "title": "Search Recent Projects",
-      "description": "Search and open your recent Xcode Projects."
+      "name": "xcode-projects",
+      "title": "Xcode Projects",
+      "description": "The recently opened Xcode Projects, Swift Packages, Xcode Workspaces or Swift Playgrounds."
+    },
+    {
+      "name": "xcode-swift-package-resolved",
+      "title": "Swift Package Dependencies",
+      "description": "The Swift Package dependencies of a Xcode Project, Xcode Workspace or Swift Package."
+    },
+    {
+      "name": "xcode-simulators",
+      "title": "Xcode Simulators",
+      "description": "The installed Xcode Simulators."
+    },
+    {
+      "name": "boot-xcode-simulator",
+      "title": "Boot a Xcode Simulator",
+      "description": "Boots the Xcode Simulator by its udid."
+    },
+    {
+      "name": "shutdown-xcode-simulator",
+      "title": "Shutdown a Xcode Simulator",
+      "description": "Shutdowns the Xcode Simulator by its udid."
+    },
+    {
+      "name": "restart-xcode-simulator",
+      "title": "Restart a Xcode Simulator",
+      "description": "Shutdowns the Xcode Simulator by its udid."
+    },
+    {
+      "name": "open-url-in-xcode-simulator",
+      "title": "Open a URL in a Xcode Simulator",
+      "description": "Opens a URL in a Xcode Simulator either the a specific one identified by its udid or the currently booted one, if any."
+    },
+    {
+      "name": "xcode-simulator-applications",
+      "title": "Xcode Simulator Builds",
+      "description": "The builds / apps installed on a Xcodes simulator."
+    },
+    {
+      "name": "xcode-releases",
+      "title": "Xcode Releases",
+      "description": "The releases of Xcode."
+    },
+    {
+      "name": "clear-derived-data",
+      "title": "Clear Derived Data",
+      "description": "Clears the derived data directory."
+    },
+    {
+      "name": "clear-swift-package-manager-cache",
+      "title": "Clear Swift Package Manager Cache",
+      "description": "Clears the Swift Package Manager cache directory."
+    },
+    {
+      "name": "clear-swift-ui-previews-cache",
+      "title": "Clear SwiftUI Previews Cache",
+      "description": "Clears the SwiftUI previews cache directory."
+    },
+    {
+      "name": "open-file-path",
+      "title": "Open File Path",
+      "description": "Opens a file path which either points to a directory, Xcode Project, Swift Package (Package.swift), Xcode Workspace, Swift Playground or a file."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
     "dedent": "^0.7.0",
     "node-fetch": "^3.2.10",
     "plist": "^3.0.6",

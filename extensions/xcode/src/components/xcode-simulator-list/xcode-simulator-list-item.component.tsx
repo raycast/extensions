@@ -68,7 +68,7 @@ export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; reval
                     `${props.simulator.name} restarted`,
                     `Failed to restart ${props.simulator.name}`,
                     async () => {
-                      await XcodeSimulatorService.restart(props.simulator);
+                      await XcodeSimulatorService.restart(props.simulator.udid);
                       props.revalidate();
                     }
                   );
