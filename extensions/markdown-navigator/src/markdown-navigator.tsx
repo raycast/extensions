@@ -31,9 +31,18 @@ export default function Command() {
   const [totalFiles, setTotalFiles] = useState<number>(0);
   const [rootDirectory, setRootDirectory] = useState<string>(markdownDir);
 
+  // Extracted shared function for directory validation
+  const isValidMarkdownDir = useCallback(() => {
+    if (!markdownDir || !fs.existsSync(markdownDir)) {
+      console.log("Invalid markdown directory");
+      return false;
+    }
+    return true;
+  }, []);
+
   // Validate markdownDir
   useEffect(() => {
-    if (!markdownDir || !fs.existsSync(markdownDir)) {
+    if (!isValidMarkdownDir()) {
       showFailureToast({
         title: "Invalid Markdown Directory",
         message: "Please set a valid directory in preferences.",
@@ -41,14 +50,14 @@ export default function Command() {
     } else {
       setRootDirectory(markdownDir);
     }
-  }, [markdownDir]);
+  }, [markdownDir, isValidMarkdownDir]);
 
   // Initialize total files count
   useEffect(() => {
     const getTotalFiles = async () => {
       try {
-        if (!markdownDir || !fs.existsSync(markdownDir)) {
-          console.log("Invalid markdown directory, skipping file count");
+        if (!isValidMarkdownDir()) {
+          console.log("Skipping file count");
           return;
         }
 
@@ -61,7 +70,7 @@ export default function Command() {
     };
 
     getTotalFiles();
-  }, [markdownDir]);
+  }, [markdownDir, isValidMarkdownDir]);
 
   // Define the fetch function
   const fetchMarkdownFiles = useCallback(async () => {
@@ -88,9 +97,7 @@ export default function Command() {
   }, [error]);
 
   // Debug log for key variables
-  useEffect(() => {
-    console.log(`loadLimit: ${loadLimit}, totalFiles: ${totalFiles}, selectedTag: ${selectedTag}`);
-  }, [loadLimit, totalFiles, selectedTag]);
+  useEffect(() => {}, [loadLimit, totalFiles, selectedTag]);
 
   // Reload files when loadLimit changes
   useEffect(() => {
@@ -261,14 +268,16 @@ export default function Command() {
     },
     [paginatedData],
   );
-
+  const navigationTitle = useMemo(() => {
+    return `Markdown files (${filteredData.length} items)`;
+  }, [filteredData.length]);
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search file name or folder..."
       onSearchTextChange={handleSearchTextChange}
       searchText={searchText}
-      navigationTitle={`Markdown files (${filteredData.length} items)`}
+      navigationTitle={navigationTitle}
       searchBarAccessory={
         allTags.length > 0 ? (
           <List.Dropdown tooltip="Filter by Tags" value={selectedTag || ""} onChange={handleTagSelect}>
