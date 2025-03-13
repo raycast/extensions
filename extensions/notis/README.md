@@ -4,12 +4,13 @@
 
 ## Installation
 
-1. Ask Notis for an API key.
-2. Add the API key to the extension preferences.
-3. Ask Notis to do something for you.
-4. Get some work done.
-5. Get notified when Notis has finished working on your request.
-6. Rinse and repeat.
+1. Create your account on [Notis](https://notis.ai).
+2. Ask Notis for an API key.
+3. Add the API key to the extension preferences.
+4. Ask Notis to do something for you.
+5. Get some work done.
+6. Get notified when Notis has finished working on your request.
+7. Rinse and repeat.
 
 
 

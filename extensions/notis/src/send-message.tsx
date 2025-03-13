@@ -1,4 +1,12 @@
-import { LaunchProps, showHUD, closeMainWindow, LocalStorage, launchCommand, LaunchType } from "@raycast/api";
+import {
+  LaunchProps,
+  showHUD,
+  closeMainWindow,
+  LocalStorage,
+  launchCommand,
+  LaunchType,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useEffect, useRef } from "react";
 import { showFailureToast } from "@raycast/utils";
 
@@ -13,6 +21,12 @@ interface CommandHistoryItem {
   timestamp: number;
   status: "pending" | "success" | "failed";
   id: string;
+}
+
+interface Preferences {
+  apiKey: string;
+  autoPlayAudio?: boolean;
+  ffmpegPath?: string;
 }
 
 // Utility Functions
@@ -76,6 +90,15 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
         console.log("Starting processing with input:", input);
 
         try {
+          // Validate API key before proceeding
+          const preferences = getPreferenceValues<Preferences>();
+          if (!preferences.apiKey || preferences.apiKey.trim() === "") {
+            await showFailureToast("API Key Missing", {
+              message: "Please set your Notis API key in the extension preferences",
+            });
+            return;
+          }
+
           // Store the request as pending
           console.log("Adding request to pending queue:", input);
           await addPendingRequest(input);

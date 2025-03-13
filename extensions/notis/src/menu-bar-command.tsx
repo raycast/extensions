@@ -1,4 +1,12 @@
-import { MenuBarExtra, Icon, launchCommand, LaunchType, getPreferenceValues, LocalStorage } from "@raycast/api";
+import {
+  MenuBarExtra,
+  Icon,
+  launchCommand,
+  LaunchType,
+  getPreferenceValues,
+  LocalStorage,
+  environment,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { exec } from "child_process";
@@ -40,11 +48,15 @@ interface Preferences {
 const DEV_API_ENDPOINT = "http://0.0.0.0:3000/submit";
 const PROD_API_ENDPOINT = "https://api.notis.ai/submit";
 
-// Determine which API endpoint to use
+// Determine which API endpoint to use based on Raycast's environment
 const getApiEndpoint = (): string => {
-  // Check if running in development mode
-  const isDev = process.env.NODE_ENV === "development";
-  return isDev ? DEV_API_ENDPOINT : PROD_API_ENDPOINT;
+  if (environment.isDevelopment) {
+    console.log("Running in dev mode");
+    return DEV_API_ENDPOINT;
+  }
+
+  console.log("Running in full development mode, using development API endpoint");
+  return PROD_API_ENDPOINT;
 };
 
 const API_ENDPOINT = getApiEndpoint();
@@ -106,9 +118,9 @@ const sendToNotisAPI = async (input: string): Promise<NotisApiResult> => {
     }
 
     // Extract message content and check for media
-    const messageContent = data?.body?.message || "No message content";
-    const mediaUrls = data?.body?.media_urls || [];
-    const mediaType = data?.body?.media_type || null;
+    const messageContent = data?.message || "No message content";
+    const mediaUrls = data?.media_urls || [];
+    const mediaType = data?.media_type || null;
 
     return {
       success: true,
