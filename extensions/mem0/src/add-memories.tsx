@@ -25,13 +25,18 @@ export default function Command() {
 
   useEffect(() => {
     async function getClipboardContent() {
-      const text = await Clipboard.readText();
-      if (text) {
-        setClipboardText(text);
-      } else {
-        setClipboardText("Clipboard is empty");
+      try {
+        const text = await Clipboard.readText();
+        if (text) {
+          setClipboardText(text);
+        } else {
+          setClipboardText("Clipboard is empty");
+        }
+      } catch (error) {
+        setClipboardText("Failed to read clipboard");
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }
     getClipboardContent();
   }, []);
