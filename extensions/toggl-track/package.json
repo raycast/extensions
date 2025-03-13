@@ -118,7 +118,7 @@
       "type": "checkbox",
       "required": false,
       "title": "Show Clients in Form",
-      "description": "Whether or not to show the client field in the form.",
+      "description": "Whether or not to show the client field in the create and update time entry forms.",
       "label": "Show clients",
       "default": true
     },
@@ -127,7 +127,7 @@
       "type": "checkbox",
       "required": false,
       "title": "Show Projects in Form",
-      "description": "Whether or not to show the project field in the form.",
+      "description": "Whether or not to show the project field in the create and update time entry forms.",
       "label": "Show projects",
       "default": true
     },
@@ -136,7 +136,7 @@
       "type": "checkbox",
       "required": false,
       "title": "Show Tasks in Form",
-      "description": "Whether or not to show the task field in the form.",
+      "description": "Whether or not to show the task field in the create and update time entry forms.",
       "label": "Show tasks",
       "default": true
     },
@@ -145,7 +145,7 @@
       "type": "checkbox",
       "required": false,
       "title": "Show Tags in Form",
-      "description": "Whether or not to show the tags field in the form.",
+      "description": "Whether or not to show the tags field in the create and update time entry forms.",
       "label": "Show tags",
       "default": true
     }
