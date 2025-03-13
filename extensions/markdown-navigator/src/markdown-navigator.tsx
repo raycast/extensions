@@ -13,7 +13,7 @@ import { MarkdownEmptyView } from "./components/MarkdownEmptyView";
 import { TagSearchList } from "./components/TagSearchList";
 import path from "path";
 import { getTagTintColor } from "./utils/tagColorUtils";
-
+import { clearMarkdownFilesCache } from "./utils/fileOperations";
 export const markdownDir = getPreferenceValues<{ markdownDir: string }>().markdownDir;
 
 const ITEMS_PER_PAGE = 20;
@@ -112,8 +112,8 @@ export default function Command() {
           (!selectedTag || file.tags.includes(selectedTag)),
       )
     : [];
-  console.log("Filtered data count:", filteredData.length);
 
+  console.log("Filtered data count:", filteredData.length);
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
   const paginatedData = filteredData.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE);
   console.log("Paginated data count:", paginatedData.length);
@@ -126,9 +126,17 @@ export default function Command() {
       ? `Showing ${startItem}-${endItem} of ${filteredData.length} (Total ${totalFiles} files)`
       : "File not found";
 
+  const forceRevalidate = useCallback(async () => {
+    console.log("Force revalidating file list");
+
+    await clearMarkdownFilesCache();
+    revalidate();
+  }, [revalidate]);
   // Navigate to the Create File form
   const showCreateFileForm = () => {
-    push(<CreateFileForm rootDirectory={rootDirectory} currentFolder={selectedFolder} onFileCreated={revalidate} />);
+    push(
+      <CreateFileForm rootDirectory={rootDirectory} currentFolder={selectedFolder} onFileCreated={forceRevalidate} />,
+    );
   };
 
   // Get all tags

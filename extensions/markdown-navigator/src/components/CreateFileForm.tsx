@@ -6,6 +6,7 @@ import path from "path";
 import { homedir } from "os";
 import { SYSTEM_TAGS } from "../types/markdownTypes";
 import { showFailureToast } from "@raycast/utils";
+import { clearMarkdownFilesCache } from "../utils/fileOperations";
 
 interface CreateFileFormProps {
   rootDirectory: string;
@@ -68,7 +69,20 @@ export function CreateFileForm({ rootDirectory, currentFolder, onFileCreated }: 
       });
 
       if (result.filePath) {
+        // Clear the cache first to ensure fresh data
+        await clearMarkdownFilesCache();
+
+        // Trigger revalidation immediately
         onFileCreated();
+
+        // Show a success toast that indicates refresh is happening
+        await showToast({
+          style: Toast.Style.Success,
+          title: "File created successfully",
+          message: "Refreshing file list...",
+        });
+
+        // Pop back to the main screen
         pop();
       }
     } catch (error) {

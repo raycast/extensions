@@ -5,6 +5,7 @@ import path from "path";
 import { homedir } from "os";
 import { exec } from "child_process";
 import { promisify } from "util";
+import { clearMarkdownFilesCache } from "./fileOperations";
 
 const execPromise = promisify(exec);
 
@@ -171,6 +172,9 @@ async function createMarkdownFileHelper({
 
     // Write file
     fs.writeFileSync(filePath, content);
+
+    // Clear the cache to ensure fresh data on next fetch
+    await clearMarkdownFilesCache();
 
     // Show success toast with path information
     await showToast({
