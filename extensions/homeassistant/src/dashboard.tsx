@@ -1,27 +1,34 @@
 import { ha } from "@lib/common";
-import { getPreferenceValues, popToRoot, showHUD } from "@raycast/api";
-import open from "open";
+import { getPreferenceValues, popToRoot, showHUD, open, showToast, Toast } from "@raycast/api";
+import urljoin from "url-join";
 
-function dashboardPath() {
+function getDashboardPath(): string {
   const prefs = getPreferenceValues();
-  const path: string | undefined = prefs.dashboardpath;
-
-  if (!path || path.trim().length <= 0) {
-    return "/";
-  }
-  if (!path.startsWith("/")) {
-    return `/${path}`;
-  }
-  return path;
+  return prefs.dashboardpath || "";
 }
 
-async function main() {
-  const path = dashboardPath();
-  const baseUrl = ha.preferCompanionApp ? ha.navigateUrl("") : await ha.nearestDefinedURL();
-  const url = baseUrl + path;
-  open(url);
-  showHUD("Open Dashboard");
-  popToRoot();
-}
+export default async function Command() {
+  try {
+    const path = getDashboardPath();
+    const baseUrl = ha.preferCompanionApp ? ha.navigateUrl("") : await ha.nearestDefinedURL();
 
-main();
+    if (!baseUrl) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to open dashboard",
+        message: "Could not determine Home Assistant URL",
+      });
+      return;
+    }
+    await open(urljoin(baseUrl, path));
+    await showHUD("Open Dashboard");
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to open dashboard",
+      message: error instanceof Error ? error.message : "Unknown error occurred",
+    });
+  } finally {
+    await popToRoot();
+  }
+}
