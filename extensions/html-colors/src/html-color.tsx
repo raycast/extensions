@@ -5,6 +5,7 @@ import { ColorListItem } from "./components/color-list-item";
 import { searchColors, ColorResult } from "./utils/search-utils";
 import { showFailureToast } from "@raycast/utils";
 import { groupColorsByShade } from "./utils/shade-mapping";
+import { sortSectionsByRelevance } from "./utils/section-utils";
 
 type ViewOption = "all" | "basic" | "extended" | "grouped";
 
@@ -34,6 +35,11 @@ export default function Command() {
     if (viewOption !== "grouped") return null;
     return groupColorsByShade(filteredColors);
   }, [filteredColors, viewOption]);
+
+  const sortedSections = useMemo(() => {
+    if (!groupedColors) return [];
+    return sortSectionsByRelevance(Object.entries(groupedColors), searchText);
+  }, [groupedColors, searchText]);
 
   const handleColorSelect = async (color: ColorResult) => {
     let textToCopy = "";
@@ -86,22 +92,20 @@ export default function Command() {
       }
     >
       {viewOption === "grouped" && groupedColors ? (
-        Object.entries(groupedColors).map(([shade, colors]) => (
-          colors.length > 0 && (
-            <List.Section key={shade} title={shade.charAt(0).toUpperCase() + shade.slice(1)}>
-              {colors.map((color) => (
-                <ColorListItem
-                  key={`${color.categories[0]}-${color.name}-${color.hex}-${color.rgb}-${color.format}`}
-                  color={color}
-                  onSelect={handleColorSelect}
-                  showHex={showHex}
-                  onToggleFormat={() => setShowHex(!showHex)}
-                  isDetailVisible={isDetailVisible}
-                  onToggleDetail={() => setIsDetailVisible(!isDetailVisible)}
-                />
-              ))}
-            </List.Section>
-          )
+        sortedSections.map(([shade, colors]) => (
+          <List.Section key={shade} title={shade.charAt(0).toUpperCase() + shade.slice(1)}>
+            {colors.map((color) => (
+              <ColorListItem
+                key={`${color.categories[0]}-${color.name}-${color.hex}-${color.rgb}-${color.format}`}
+                color={color}
+                onSelect={handleColorSelect}
+                showHex={showHex}
+                onToggleFormat={() => setShowHex(!showHex)}
+                isDetailVisible={isDetailVisible}
+                onToggleDetail={() => setIsDetailVisible(!isDetailVisible)}
+              />
+            ))}
+          </List.Section>
         ))
       ) : (
         filteredColors.map((color) => (
