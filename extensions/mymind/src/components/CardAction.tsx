@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, Action, Icon, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
+import { ActionPanel, Detail, Action, Icon, showToast, Toast, confirmAlert, Alert, Keyboard } from "@raycast/api";
 import { proseToMarkdown, deleteMyMindCard } from "../utils";
 import AddNote from "../add-a-new-note";
 import { CardWithSlug } from "../schemas";
@@ -106,7 +106,7 @@ ${proseToMarkdown(card.note.prose.content)}`
             icon={Icon.Trash}
             style={Action.Style.Destructive}
             onAction={handleDelete}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+            shortcut={Keyboard.Shortcut.Common.Remove}
           />
         )}
       </ActionPanel.Section>
