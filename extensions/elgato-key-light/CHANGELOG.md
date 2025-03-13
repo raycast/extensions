@@ -1,6 +1,6 @@
 # Elgato light Changelog
 
-## [Added Preset Management and AI] - 2024-05-24
+## [1.1.0] - {PR_MERGE_DATE}
 
 - Added support for creating and saving custom presets
   - Quick access to default presets (Default, Night, Day, Warm, Cold)
