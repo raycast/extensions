@@ -1,9 +1,5 @@
 # Remove Background
 
-## File Picker (2022-03-21)
-
-- Files can be selected using the Finder file picker;
-
 ## [Advanced Options] {PR_MERGE_DATE}
 
 ### Added
@@ -40,3 +36,7 @@
 
 ### Fixed
 - Error handling for invalid file paths and non-existent output folders
+
+## File Picker (2022-03-21)
+
+- Files can be selected using the Finder file picker;
