@@ -1,6 +1,6 @@
 # ColorPicker Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-03-13
 
 - Added support for the OKLCH color format.
 - Update dependencies and Tailwind CSS colors to their latest versions.
