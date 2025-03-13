@@ -33,6 +33,17 @@ export function makeSearchURL(query: string): string {
 }
 
 /**
+ * Creates a Google Maps place URL that makes it easier to copy coordinates
+ * Using the "place" endpoint instead of "search" makes it easier to get coordinates
+ *
+ * @param query The query string for the place
+ * @returns A properly URI encoded Google Maps place URL
+ */
+export function createPlaceURL(query: string): string {
+  return `https://www.google.com/maps/place/${encodeURIComponent(query)}`;
+}
+
+/**
  * Extracts coordinates from a Google Maps URL
  * Note: This is a fallback method and may not always work reliably
  *

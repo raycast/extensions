@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon, popToRoot } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import { fetchItemInput } from "./utils/input";
-import { Preferences, TransportType, OriginOption } from "./utils/types";
+import { Preferences, transportType, OriginOption } from "./utils/types";
 import { makeDirectionsURL } from "./utils/url";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   // Get user preferences
@@ -20,11 +21,9 @@ export default function Command() {
     (value: string) => {
       const newOrigin = value as OriginOption;
       setOrigin(newOrigin);
-      if (newOrigin === OriginOption.CurLoc) {
-        setOriginAddress("");
-      } else if (newOrigin === OriginOption.Home) {
+      if (newOrigin === OriginOption.Home) {
         setOriginAddress(preferences.homeAddress);
-      } else {
+      } else if (newOrigin === OriginOption.Custom) {
         setOriginAddress("");
       }
     },
@@ -39,7 +38,7 @@ export default function Command() {
           const inputItem = await fetchItemInput();
           setDestination(inputItem);
         } catch (error) {
-          console.error("Error fetching input:", error);
+          showFailureToast("Error fetching input", { message: String(error) });
         } finally {
           setIsLoading(false);
         }
@@ -82,7 +81,6 @@ export default function Command() {
       <Form.Separator />
       {/* Origin selection dropdown */}
       <Form.Dropdown id="origin" title="Starting from" value={origin} onChange={handleOriginChange}>
-        <Form.Dropdown.Item value={OriginOption.CurLoc} title="Current Location" icon={Icon.Pin} />
         <Form.Dropdown.Item value={OriginOption.Home} title="Home" icon={Icon.House} />
         <Form.Dropdown.Item value={OriginOption.Custom} title="Custom Address" icon={Icon.Pencil} />
       </Form.Dropdown>
@@ -97,11 +95,11 @@ export default function Command() {
         />
       )}
       {/* Transport mode selection dropdown */}
-      <Form.Dropdown id="TransportType" title="Transport Preference" value={mode} onChange={setMode}>
-        <Form.Dropdown.Item value={TransportType.Driving} title="Driving" icon={Icon.Car} />
-        <Form.Dropdown.Item value={TransportType.Transit} title="Transit" icon={Icon.Train} />
-        <Form.Dropdown.Item value={TransportType.Walking} title="Walking" icon={Icon.Footprints} />
-        <Form.Dropdown.Item value={TransportType.Cycling} title="Cycling" icon={Icon.Bike} />
+      <Form.Dropdown id="transportType" title="Transport Preference" value={mode} onChange={setMode}>
+        <Form.Dropdown.Item value={transportType.Driving} title="Driving" icon={Icon.Car} />
+        <Form.Dropdown.Item value={transportType.Transit} title="Transit" icon={Icon.Train} />
+        <Form.Dropdown.Item value={transportType.Walking} title="Walking" icon={Icon.Footprints} />
+        <Form.Dropdown.Item value={transportType.Cycling} title="Cycling" icon={Icon.Bike} />
       </Form.Dropdown>
     </Form>
   );

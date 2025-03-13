@@ -1,8 +1,8 @@
 import { Navigation } from "@raycast/api";
 import React from "react";
 import { PlaceSearchResult } from "../types";
-import { PlaceSearchResults } from "../components/place-search-results";
-import { PlaceDetailView } from "../components/place-detail-view";
+import { PlaceSearchResults } from "../components/placeSearchResults";
+import { PlaceDetailView } from "../components/placeDetailView";
 
 /**
  * Creates navigation functions for handling place search results and details

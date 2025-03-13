@@ -22,21 +22,34 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "travel-home",
+      "name": "searchPlaces",
+      "title": "Search Places",
+      "subtitle": "Google Maps",
+      "description": "Search for places and see detailed information and a map view. Enable autofill to use selected text or clipboard.",
+      "mode": "view"
+    },
+    {
+      "name": "findNearbyPlaces",
+      "title": "Find Nearby Places",
+      "subtitle": "Google Places",
+      "description": "Find places near your home or current location.",
+      "mode": "view"
+    },{
+      "name": "travelHome",
       "title": "Get Me Home",
       "subtitle": "Google Maps",
       "description": "Open Google Maps with directions from your current location to your home.",
       "mode": "no-view"
     },
     {
-      "name": "travel-to",
+      "name": "travelTo",
       "title": "Get Me Somewhere",
       "subtitle": "Google Maps",
       "description": "Get directions to a destination.",
       "mode": "view"
     },
     {
-      "name": "quick-search-maps",
+      "name": "quickSearchMaps",
       "title": "Quickly Search Google Maps",
       "subtitle": "Google Maps",
       "description": "Quickly search for a place or category on Google Maps.",
@@ -52,20 +65,6 @@
       "keywords": [
         "find place"
       ]
-    },
-    {
-      "name": "search-places",
-      "title": "Search Places",
-      "subtitle": "Google Maps",
-      "description": "Search for places and see detailed information and a map view. Enable autofill to use selected text or clipboard.",
-      "mode": "view"
-    },
-    {
-      "name": "nearby-places",
-      "title": "Find Nearby Places",
-      "subtitle": "Google Places",
-      "description": "Find places near your home or current location.",
-      "mode": "view"
     }
   ],
   "preferences": [
@@ -203,36 +202,36 @@
   ],
   "tools": [
     {
-      "name": "find-places",
+      "name": "findPlaces",
       "title": "Find Places",
       "description": "Search for places by name, address, or category",
       "mode": "view",
-      "path": "./src/tools/find-places.ts",
-      "confirmation": "./src/tools/find-places.ts:confirmation"
+      "path": "./src/tools/findPlaces.ts",
+      "confirmation": "./src/tools/findPlaces.ts:confirmation"
     },
     {
-      "name": "search-nearby-places",
-      "title": "Search Nearby Places",
+      "name": "findNearbyPlaces",
+      "title": "Find Nearby Places",
       "description": "Find places near a specified location",
       "mode": "view",
-      "path": "./src/tools/search-nearby-places.ts",
-      "confirmation": "./src/tools/search-nearby-places.ts:confirmation"
+      "path": "./src/tools/findNearbyPlaces.ts",
+      "confirmation": "./src/tools/findNearbyPlaces.ts:confirmation"
     },
     {
-      "name": "get-place-details",
+      "name": "getPlaceDetails",
       "title": "Get Place Details",
       "description": "Get detailed information about a specific place",
       "mode": "view",
-      "path": "./src/tools/get-place-details.ts",
-      "confirmation": "./src/tools/get-place-details.ts:confirmation"
+      "path": "./src/tools/getPlaceDetails.ts",
+      "confirmation": "./src/tools/getPlaceDetails.ts:confirmation"
     },
     {
-      "name": "get-directions",
+      "name": "getDirections",
       "title": "Get Directions",
       "description": "Get directions between locations",
       "mode": "view",
-      "path": "./src/tools/get-directions.ts",
-      "confirmation": "./src/tools/get-directions.ts:confirmation"
+      "path": "./src/tools/getDirections.ts",
+      "confirmation": "./src/tools/getDirections.ts:confirmation"
     }
   ],
   "dependencies": {
@@ -258,44 +257,44 @@
       {
         "input": "@google-maps-search find restaurants in San Francisco",
         "mocks": {
-          "find-places": "Here are some places matching \"restaurants in San Francisco\":\n\n- **Lazy Bear**\n  Address: 3416 19th St, San Francisco, CA 94110, USA\n  Rating: 4.5/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/Lazy+Bear+3416+19th+St%2C+San+Francisco%2C+CA+94110%2C+USA)\n\n- **Nopa**\n  Address: 560 Divisadero St, San Francisco, CA 94117, USA\n  Rating: 4.6/5\n  Status: Closed\n  [View on Google Maps](https://www.google.com/maps/search/Nopa+560+Divisadero+St%2C+San+Francisco%2C+CA+94117%2C+USA)\n\n- **State Bird Provisions**\n  Address: 1529 Fillmore St, San Francisco, CA 94115, USA\n  Rating: 4.5/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/State+Bird+Provisions+1529+Fillmore+St%2C+San+Francisco%2C+CA+94115%2C+USA)"
+          "findPlaces": "Here are some places matching \"restaurants in San Francisco\":\n\n- **Lazy Bear**\n  Address: 3416 19th St, San Francisco, CA 94110, USA\n  Rating: 4.5/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/Lazy+Bear+3416+19th+St%2C+San+Francisco%2C+CA+94110%2C+USA)\n\n- **Nopa**\n  Address: 560 Divisadero St, San Francisco, CA 94117, USA\n  Rating: 4.6/5\n  Status: Closed\n  [View on Google Maps](https://www.google.com/maps/search/Nopa+560+Divisadero+St%2C+San+Francisco%2C+CA+94117%2C+USA)\n\n- **State Bird Provisions**\n  Address: 1529 Fillmore St, San Francisco, CA 94115, USA\n  Rating: 4.5/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/State+Bird+Provisions+1529+Fillmore+St%2C+San+Francisco%2C+CA+94115%2C+USA)"
         },
         "expected": [
           {
-            "callsTool": "find-places"
+            "callsTool": "findPlaces"
           }
         ]
       },
       {
         "input": "@google-maps-search find coffee shops near Golden Gate Park",
         "mocks": {
-          "search-nearby-places": "Here are coffee places near \"Golden Gate Park\":\n\n- **Andytown Coffee Roasters**\n  Address: 3655 Lawton St, San Francisco, CA 94122, USA\n  Distance: 1.2 mi\n  Rating: 4.7/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/Andytown+Coffee+Roasters+3655+Lawton+St%2C+San+Francisco%2C+CA+94122%2C+USA)\n\n- **Trouble Coffee**\n  Address: 4033 Judah St, San Francisco, CA 94122, USA\n  Distance: 1.5 mi\n  Rating: 4.5/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/Trouble+Coffee+4033+Judah+St%2C+San+Francisco%2C+CA+94122%2C+USA)"
+          "findNearbyPlaces": "Here are coffee places near \"Golden Gate Park\":\n\n- **Andytown Coffee Roasters**\n  Address: 3655 Lawton St, San Francisco, CA 94122, USA\n  Distance: 1.2 mi\n  Rating: 4.7/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/Andytown+Coffee+Roasters+3655+Lawton+St%2C+San+Francisco%2C+CA+94122%2C+USA)\n\n- **Trouble Coffee**\n  Address: 4033 Judah St, San Francisco, CA 94122, USA\n  Distance: 1.5 mi\n  Rating: 4.5/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/Trouble+Coffee+4033+Judah+St%2C+San+Francisco%2C+CA+94122%2C+USA)"
         },
         "expected": [
           {
-            "callsTool": "search-nearby-places"
+            "callsTool": "findNearbyPlaces"
           }
         ]
       },
       {
         "input": "@google-maps-search tell me about the Ferry Building in San Francisco",
         "mocks": {
-          "get-place-details": "# Ferry Building\n\n**Address**: Ferry Building, San Francisco, CA 94111, USA\n**Phone**: +1 415-983-8000\n**Website**: [https://www.ferrybuildingmarketplace.com/](https://www.ferrybuildingmarketplace.com/)\n**Rating**: ★★★★★ (4.7) based on 25,413 reviews\n**Price Level**: $$\n\n**Status**: Open Now\n\n**Opening Hours**:\n- Monday: 7:00 AM – 10:00 PM\n- Tuesday: 7:00 AM – 10:00 PM\n- Wednesday: 7:00 AM – 10:00 PM\n- Thursday: 7:00 AM – 10:00 PM\n- Friday: 7:00 AM – 10:00 PM\n- Saturday: 8:00 AM – 10:00 PM\n- Sunday: 8:00 AM – 10:00 PM\n\n**Categories**: tourist_attraction, food, point_of_interest, establishment\n\n**Links**:\n- [View on Google Maps](https://www.google.com/maps/search/Ferry+Building+Ferry+Building%2C+San+Francisco%2C+CA+94111%2C+USA)\n- [Get Directions](https://www.google.com/maps/dir/?api=1&destination=Ferry+Building%2C+San+Francisco%2C+CA+94111%2C+USA&travelmode=driving)"
+          "getPlaceDetails": "# Ferry Building\n\n**Address**: Ferry Building, San Francisco, CA 94111, USA\n**Phone**: +1 415-983-8000\n**Website**: [https://www.ferrybuildingmarketplace.com/](https://www.ferrybuildingmarketplace.com/)\n**Rating**: ★★★★★ (4.7) based on 25,413 reviews\n**Price Level**: $$\n\n**Status**: Open Now\n\n**Opening Hours**:\n- Monday: 7:00 AM – 10:00 PM\n- Tuesday: 7:00 AM – 10:00 PM\n- Wednesday: 7:00 AM – 10:00 PM\n- Thursday: 7:00 AM – 10:00 PM\n- Friday: 7:00 AM – 10:00 PM\n- Saturday: 8:00 AM – 10:00 PM\n- Sunday: 8:00 AM – 10:00 PM\n\n**Categories**: tourist_attraction, food, point_of_interest, establishment\n\n**Links**:\n- [View on Google Maps](https://www.google.com/maps/search/Ferry+Building+Ferry+Building%2C+San+Francisco%2C+CA+94111%2C+USA)\n- [Get Directions](https://www.google.com/maps/dir/?api=1&destination=Ferry+Building%2C+San+Francisco%2C+CA+94111%2C+USA&travelmode=driving)"
         },
         "expected": [
           {
-            "callsTool": "get-place-details"
+            "callsTool": "getPlaceDetails"
           }
         ]
       },
       {
         "input": "@google-maps-search how do I get from Fisherman's Wharf to Alcatraz Island?",
         "mocks": {
-          "get-directions": "## Directions to Alcatraz Island\n\nFrom: Fisherman's Wharf\nTo: Alcatraz Island\nMode: Driving\n\n[Open Directions in Google Maps](https://www.google.com/maps/dir/?api=1&origin=Fisherman%27s+Wharf&destination=Alcatraz+Island&travelmode=driving)\n\nYou can view turn-by-turn directions, traffic information, and estimated travel time by opening the link in Google Maps."
+          "getDirections": "## Directions to Alcatraz Island\n\nFrom: Fisherman's Wharf\nTo: Alcatraz Island\nMode: Driving\n\n[Open Directions in Google Maps](https://www.google.com/maps/dir/?api=1&origin=Fisherman%27s+Wharf&destination=Alcatraz+Island&travelmode=driving)\n\nYou can view turn-by-turn directions, traffic information, and estimated travel time by opening the link in Google Maps."
         },
         "expected": [
           {
-            "callsTool": "get-directions"
+            "callsTool": "getDirections"
           }
         ]
       }
