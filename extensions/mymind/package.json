@@ -21,6 +21,7 @@
     {
       "name": "add-a-new-note",
       "title": "Add a New Note",
+      "subtitle": "mymind",
       "description": "Adds a new note to mymind",
       "mode": "view"
     }
