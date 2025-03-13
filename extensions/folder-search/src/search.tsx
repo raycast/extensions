@@ -7,40 +7,23 @@ import {
   Form,
   Icon,
   List,
-  LocalStorage,
   Toast,
   closeMainWindow,
-  environment,
   popToRoot,
   showToast,
-  showHUD,
   confirmAlert,
   open,
   getSelectedFinderItems,
   Keyboard,
 } from "@raycast/api";
 
-import { usePromise } from "@raycast/utils";
-import { useEffect, useRef, useState } from "react";
-
 import { runAppleScript } from "run-applescript";
-
-import { searchSpotlight } from "./search-spotlight";
-import { FolderSearchPlugin, SpotlightSearchResult } from "./types";
-
-import {
-  loadPlugins,
-  folderName,
-  enclosingFolderName,
-  showFolderInfoInFinder,
-  copyFolderToClipboard,
-  maybeMoveResultToTrash,
-  lastUsedSort,
-  fixDoubleConcat,
-} from "./utils";
-
-import fse from "fs-extra";
 import path from "node:path";
+import fse from "fs-extra";
+
+import { SpotlightSearchResult } from "./types";
+
+import { folderName, showFolderInfoInFinder, copyFolderToClipboard, maybeMoveResultToTrash } from "./utils";
 
 import { useFolderSearch } from "./hooks/useFolderSearch";
 import { FolderListSection } from "./components/FolderListSection";
@@ -121,7 +104,7 @@ export default function Command() {
   };
 
   // Render actions for the folder list items
-  const renderFolderActions = (result: any, resultIndex: number) => {
+  const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number) => {
     return (
       <ActionPanel title={folderName(result)}>
         <Action.Open
@@ -136,13 +119,13 @@ export default function Command() {
           onShow={() => popToRoot({ clearSearchBar: true })}
         />
         <Action
-          title="Send Finder selection to Folder"
+          title="Send Finder Selection to Folder"
           icon={Icon.Folder}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           onAction={() => sendFinderSelectionToFolder(result.path)}
         />
         <Action.OpenWith
-          title="Open With..."
+          title="Open With…"
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           path={result.path}
           onOpen={() => popToRoot({ clearSearchBar: true })}
@@ -221,19 +204,29 @@ export default function Command() {
           />
         </ActionPanel.Section>
         <ActionPanel.Section title="Plugins">
-          {plugins.map((plugin: any, pluginIndex: number) => (
-            <Action
-              key={pluginIndex}
-              title={plugin.title}
-              icon={IconDictionaried[plugin.icon]}
-              shortcut={{ ...plugin.shortcut }}
-              onAction={() => {
-                popToRoot({ clearSearchBar: true });
-                closeMainWindow({ clearRootSearch: true });
-                runAppleScript(plugin.appleScript(result));
-              }}
-            />
-          ))}
+          {plugins.map(
+            (
+              plugin: {
+                title: string;
+                icon: string;
+                shortcut: Keyboard.Shortcut;
+                appleScript: (result: SpotlightSearchResult) => string;
+              },
+              pluginIndex: number
+            ) => (
+              <Action
+                key={pluginIndex}
+                title={plugin.title}
+                icon={IconDictionaried[plugin.icon]}
+                shortcut={{ ...plugin.shortcut }}
+                onAction={() => {
+                  popToRoot({ clearSearchBar: true });
+                  closeMainWindow({ clearRootSearch: true });
+                  runAppleScript(plugin.appleScript(result));
+                }}
+              />
+            )
+          )}
         </ActionPanel.Section>
       </ActionPanel>
     );

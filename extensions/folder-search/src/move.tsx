@@ -15,13 +15,13 @@ import {
   getSelectedFinderItems,
 } from "@raycast/api";
 
-import { useEffect } from "react";
 import path from "node:path";
 import fse from "fs-extra";
 
 import { useFolderSearch } from "./hooks/useFolderSearch";
 import { FolderListSection } from "./components/FolderListSection";
 import { folderName } from "./utils";
+import { SpotlightSearchResult } from "./types";
 
 export default function Command() {
   const {
@@ -103,7 +103,7 @@ export default function Command() {
   };
 
   // Render actions for the folder list items
-  const renderFolderActions = (result: any, resultIndex: number) => {
+  const renderFolderActions = (result: SpotlightSearchResult) => {
     return (
       <ActionPanel title={folderName(result)}>
         <Action

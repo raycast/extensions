@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { folderName, enclosingFolderName } from "../utils";
 import { ReactNode } from "react";
 import { SpotlightSearchResult } from "../types";
