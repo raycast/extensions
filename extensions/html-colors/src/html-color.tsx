@@ -86,7 +86,7 @@ export default function Command() {
           <List.Dropdown.Item title="Basic Colors" value="basic" icon={Icon.Circle} />
           <List.Dropdown.Item title="Extended Colors" value="extended" icon={Icon.CircleEllipsis} />
           <List.Dropdown.Section title="Grouping">
-            <List.Dropdown.Item title="Group by Shade" value="grouped" icon={Icon.StackedBars3} />
+            <List.Dropdown.Item title="Group by Shade" value="grouped" icon={Icon.Layers} />
           </List.Dropdown.Section>
         </List.Dropdown>
       }
