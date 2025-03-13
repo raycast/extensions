@@ -34,7 +34,7 @@
   ],
   "preferences": [
     {
-      "name": "mem0mem0ApiKey",
+      "name": "mem0ApiKey",
       "type": "password",
       "required": true,
       "title": "Mem0 API Key",
