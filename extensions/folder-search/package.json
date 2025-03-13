@@ -29,6 +29,7 @@
     {
       "name": "move",
       "title": "Move to a Folder",
+      "subtitle": "Folder Search",
       "description": "Move selected files to a folder",
       "mode": "view"
     }
