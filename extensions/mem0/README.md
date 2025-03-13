@@ -1,3 +1,3 @@
 # mem0
 
-Let's you store and retrieve text snippets.
+Lets you store and retrieve text snippets.
