@@ -2,7 +2,9 @@ import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/a
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { list } from "./api/list";
+import { titlecase } from "./utils/titlecase";
 import { type Document } from "./utils/document";
+import { type Category } from "./utils/category";
 import { type PaginationOptions } from "@raycast/utils/dist/types";
 
 function getProgressIcon(readingProgress: number) {
@@ -28,10 +30,11 @@ export default function ListDocumentsCommand() {
   const [documentLocation, setDocumentLocation] = useState<Document["location"]>(
     getPreferenceValues<Preference>().defaultListLocation,
   );
+  const [category, setCategory] = useState<Category | undefined>();
 
   const { isLoading, data, pagination } = usePromise(
-    (location) => async (options: PaginationOptions<Document[]>) => {
-      const { results, nextPageCursor } = await list(location, options.cursor);
+    (location, selectedCategory) => async (options: PaginationOptions<Document[]>) => {
+      const { results, nextPageCursor } = await list(location, selectedCategory, options.cursor);
       const sortedDocuments = results.sort(
         (a, b) => new Date(b.last_moved_at).getTime() - new Date(a.last_moved_at).getTime(),
       );
@@ -42,7 +45,7 @@ export default function ListDocumentsCommand() {
         cursor: nextPageCursor,
       };
     },
-    [documentLocation],
+    [documentLocation, category],
   );
 
   return (
@@ -51,7 +54,7 @@ export default function ListDocumentsCommand() {
       isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Location if the article to fetch"
+          tooltip="Location of the article to fetch"
           defaultValue={documentLocation}
           onChange={(value) => setDocumentLocation(value as Document["location"])}
         >
@@ -63,43 +66,123 @@ export default function ListDocumentsCommand() {
         </List.Dropdown>
       }
       pagination={pagination}
+      navigationTitle={`Documents in ${titlecase(documentLocation)}${category ? ` (${titlecase(category)})` : ""}`}
     >
-      {data?.map((article) => {
-        const markdown = `
+      {data?.length === 0 && category !== undefined ? (
+        <List.EmptyView
+          title="No documents found"
+          description={`No documents found in the "${titlecase(category)}" category.`}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Reset Category Filter"
+                onAction={() => setCategory(undefined)}
+                icon={Icon.ArrowClockwise}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        data?.map((article) => {
+          const markdown = `
 # ${article.title}
 
 ${article.summary}
             `;
-        return (
-          <List.Item
-            key={article.id}
-            title={article.title}
-            detail={
-              <List.Item.Detail
-                markdown={markdown}
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Author" text={article.author} />
-                    <List.Item.Detail.Metadata.Label title="Website" text={article.site_name} />
-                    <List.Item.Detail.Metadata.TagList title="Tags">
-                      {Object.values(article.tags).map(({ name }) => (
-                        <List.Item.Detail.Metadata.TagList.Item text={name} key={name} />
-                      ))}
-                    </List.Item.Detail.Metadata.TagList>
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
-            icon={getProgressIcon(article.reading_progress)}
-            actions={
-              <ActionPanel title={article.title}>
-                <Action.OpenInBrowser url={article.url} title="Open Article in Readwise" />
-                <Action.OpenInBrowser url={article.source_url} title="Open Article in Source Website" />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+          return (
+            <List.Item
+              key={article.id}
+              title={article.title}
+              detail={
+                <List.Item.Detail
+                  markdown={markdown}
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label title="Author" text={article.author} />
+                      <List.Item.Detail.Metadata.Label title="Website" text={article.site_name} />
+                      <List.Item.Detail.Metadata.Label title="Category" text={article.category} />
+                      <List.Item.Detail.Metadata.TagList title="Tags">
+                        {Object.values(article.tags).map(({ name }) => (
+                          <List.Item.Detail.Metadata.TagList.Item text={name} key={name} />
+                        ))}
+                      </List.Item.Detail.Metadata.TagList>
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
+              icon={getProgressIcon(article.reading_progress)}
+              actions={
+                <ActionPanel title={article.title}>
+                  <Action.OpenInBrowser url={article.url} title="Open Article in Readwise" />
+                  <Action.OpenInBrowser url={article.source_url} title="Open Article in Source Website" />
+                  <ActionPanel.Submenu title="Filter by Category…" shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}>
+                    <Action
+                      title="All Categories"
+                      onAction={() => setCategory(undefined)}
+                      icon={Icon.Tag}
+                      shortcut={{ modifiers: ["cmd"], key: "1" }}
+                    />
+                    <Action
+                      title="Article"
+                      onAction={() => setCategory("article")}
+                      icon={Icon.Document}
+                      shortcut={{ modifiers: ["cmd"], key: "2" }}
+                    />
+                    <Action
+                      title="Email"
+                      onAction={() => setCategory("email")}
+                      icon={Icon.Envelope}
+                      shortcut={{ modifiers: ["cmd"], key: "3" }}
+                    />
+                    <Action
+                      title="Rss"
+                      onAction={() => setCategory("rss")}
+                      icon={Icon.Wifi}
+                      shortcut={{ modifiers: ["cmd"], key: "4" }}
+                    />
+                    <Action
+                      title="Highlight"
+                      onAction={() => setCategory("highlight")}
+                      icon={Icon.Highlight}
+                      shortcut={{ modifiers: ["cmd"], key: "5" }}
+                    />
+                    <Action
+                      title="Note"
+                      onAction={() => setCategory("note")}
+                      icon={Icon.Pencil}
+                      shortcut={{ modifiers: ["cmd"], key: "6" }}
+                    />
+                    <Action
+                      title="Pdf"
+                      onAction={() => setCategory("pdf")}
+                      icon={{ source: { light: "pdf-light.svg", dark: "pdf-dark.svg" } }}
+                      shortcut={{ modifiers: ["cmd"], key: "7" }}
+                    />
+                    <Action
+                      title="Epub"
+                      onAction={() => setCategory("epub")}
+                      icon={Icon.Book}
+                      shortcut={{ modifiers: ["cmd"], key: "8" }}
+                    />
+                    <Action
+                      title="Tweet"
+                      onAction={() => setCategory("tweet")}
+                      icon={Icon.Bird}
+                      shortcut={{ modifiers: ["cmd"], key: "9" }}
+                    />
+                    <Action
+                      title="Video"
+                      onAction={() => setCategory("video")}
+                      icon={Icon.Video}
+                      shortcut={{ modifiers: ["cmd"], key: "0" }}
+                    />
+                  </ActionPanel.Submenu>
+                </ActionPanel>
+              }
+            />
+          );
+        })
+      )}
     </List>
   );
 }

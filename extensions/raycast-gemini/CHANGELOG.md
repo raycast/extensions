@@ -1,5 +1,9 @@
 # Google Gemini Changelog
 
+## [New Command] - 2025-03-12
+
+- 🆕 New Command: Command History: now you can 📜 view your command history.
+
 ## [New Command] - 2025-03-10
 
 - 🆕 New Command: Ask About Selected Screen Area

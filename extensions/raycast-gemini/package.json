@@ -18,6 +18,14 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "history",
+      "title": "Command History",
+      "subtitle": "Google Gemini",
+      "description": "View your command history",
+      "mode": "view",
+      "icon": "gemini-icon.png"
+    },
+    {
       "name": "askAI",
       "title": "Ask AI",
       "subtitle": "Google Gemini",

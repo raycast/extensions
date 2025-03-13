@@ -6,6 +6,10 @@
 - Add keyboard shortcuts to simplify adding / removing actions and workspaces
 - Created Quicklinks to run actions in Drafts will now store the provided content in a draft
 
+## [Add fallbackText capability to Capture command] - 2025-03-12
+
+- Add fallbackText from root search to 'Capture Draft' command for Fallback Command capability
+
 ## [Add Command for Capture] - 2024-10-04
 
 - Add command to capture Draft from command argument
