@@ -1,6 +1,9 @@
 import { Clipboard, List, ActionPanel, Action, Form, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
+import { showFailureToast } from "@raycast/utils";
+
+const API_BASE_URL = "https://api.mem0.ai/v1/memories/";
 
 interface MemoryResult {
   memory: string;
@@ -17,7 +20,7 @@ interface Preferences {
 }
 
 export default function Command() {
-  const { mem0ApiKey, defaultUserId = "raycast" } = getPreferenceValues<Preferences>();
+  const { mem0ApiKey, defaultUserId } = getPreferenceValues<Preferences>();
   const [clipboardText, setClipboardText] = useState<string>("");
   const [results, setResults] = useState<MemoryResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,7 +47,7 @@ export default function Command() {
   async function handleAddMemory(text: string) {
     setIsLoading(true);
     try {
-      const response = await fetch("https://api.mem0.ai/v1/memories/", {
+      const response = await fetch(API_BASE_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -69,7 +72,12 @@ export default function Command() {
       setResults(data.results || []);
       setIsEditing(false);
     } catch (error) {
-      showFailureToast("Failed to store in Mem0", error);
+      showFailureToast("Failed to store in Mem0", {
+        primaryAction: {
+          title: "Retry",
+          onAction: () => handleAddMemory(clipboardText),
+        },
+      });
     }
     setIsLoading(false);
   }

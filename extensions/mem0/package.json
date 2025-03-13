@@ -13,21 +13,21 @@
     {
       "name": "add-memories",
       "title": "Add Text Snippet",
-      "subtitle": "Add Text Snippet",
+      "subtitle": "Mem0",
       "description": "Adds text to mem0",
       "mode": "view"
     },
     {
       "name": "get-memories",
       "title": "Get Text Snippet",
-      "subtitle": "Get Text Snippet",
+      "subtitle": "Mem0",
       "description": "Retrieves text snippet from mem0",
       "mode": "view"
     },
     {
       "name": "search-memories",
       "title": "Search Text Snippet",
-      "subtitle": "Search Text Snippet",
+      "subtitle": "Mem0",
       "description": "Search through your text snippets and get concatenated results",
       "mode": "view"
     }

@@ -1,6 +1,9 @@
 import { Form, ActionPanel, Action, showToast, Toast, Clipboard, Detail, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import fetch from "node-fetch";
+import { showFailureToast } from "@raycast/utils";
+
+const API_URL = "https://api.mem0.ai/v1/memories/search/";
 
 interface SearchResult {
   id: string;
@@ -23,7 +26,7 @@ interface Preferences {
 }
 
 export default function Command() {
-  const { mem0ApiKey, defaultUserId = "raycast" } = getPreferenceValues<Preferences>();
+  const { mem0ApiKey, defaultUserId } = getPreferenceValues<Preferences>();
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<string>("");
   const [showResults, setShowResults] = useState(false);
@@ -33,7 +36,7 @@ export default function Command() {
     setIsLoading(true);
     setQuery(values.query);
     try {
-      const response = await fetch("https://api.mem0.ai/v1/memories/search/", {
+      const response = await fetch(API_URL, {
         method: "POST",
         headers: {
           Authorization: `Token ${mem0ApiKey}`,
@@ -70,7 +73,12 @@ export default function Command() {
         message: "Search results have been copied",
       });
     } catch (error) {
-      showFailureToast("Search failed", error instanceof Error ? error.message : "An error occurred");
+      showFailureToast("Search failed", {
+        primaryAction: {
+          title: "Retry",
+          onAction: () => handleSubmit({ query }),
+        },
+      });
     } finally {
       setIsLoading(false);
     }

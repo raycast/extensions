@@ -2,6 +2,8 @@ import { List, Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/a
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 
+const API_BASE_URL = "https://api.mem0.ai/v1";
+
 interface Memory {
   id: string;
   memory: string;
@@ -27,7 +29,7 @@ interface Preferences {
 }
 
 export default function Command() {
-  const { mem0ApiKey, defaultUserId = "raycast" } = getPreferenceValues<Preferences>();
+  const { mem0ApiKey, defaultUserId } = getPreferenceValues<Preferences>();
   const [memories, setMemories] = useState<Memory[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [nextPage, setNextPage] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export default function Command() {
   useEffect(() => {
     async function fetchMemories() {
       try {
-        const response = await fetch(`https://api.mem0.ai/v1/memories/?user_id=${defaultUserId}&page=1&page_size=50`, {
+        const response = await fetch(`${API_BASE_URL}/memories/?user_id=${defaultUserId}&page=1&page_size=50`, {
           method: "GET",
           headers: {
             Authorization: `Token ${mem0ApiKey}`,
