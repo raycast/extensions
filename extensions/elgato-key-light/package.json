@@ -13,7 +13,7 @@
     {
       "name": "keyLights_count",
       "title": "Number of Key Lights",
-      "description": "Enter the number of Key Lights on your network that you wish to controll",
+      "description": "Enter the number of Key Lights on your network that you wish to control",
       "type": "textfield",
       "required": true,
       "default": "1"
