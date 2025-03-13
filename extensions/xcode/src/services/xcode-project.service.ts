@@ -11,55 +11,80 @@ import { searchRecentProjectsCommandPreferences } from "../shared/preferences";
  */
 export class XcodeProjectService {
   /**
-   * Retrieve XcodeProjects
+   * Returns the Xcode projects.
    */
   static async xcodeProjects(): Promise<XcodeProject[]> {
-    // Initialize Spotlight Search Parameters
-    const spotlightSearchParameters = [
+    // Initialize the Spotlight search patterns
+    const spotlightSearchPatterns = [
       "kMDItemDisplayName == *.xcodeproj",
       "kMDItemDisplayName == *.xcworkspace",
       "kMDItemDisplayName == Package.swift",
       "kMDItemDisplayName == *.playground",
     ];
-    // Execute command with kMDItemLastUsedDate
-    const output = await execAsync(
-      `mdfind '${spotlightSearchParameters.join(" || ")}' -onlyin ~ -attr kMDItemLastUsedDate`
+    // Execute spotlight query
+    const spotlightQueryOutput = await execAsync(
+      `mdfind '${spotlightSearchPatterns.join(" || ")}' -onlyin ~ -attr kMDItemLastUsedDate`
     );
     // Retrieve the excluded Xcode Project Paths
     const excludedXcodeProjectPaths = XcodeProjectService.excludedXcodeProjectPaths();
-    // Initialize XcodeProjects
-    const xcodeProjects = output.stdout
-      // Split standard output by new line
-      .split("\n")
-      // Use a regular expression to parse the path and last used date
-      .map((line) => {
-        const match = line.match(/^(.*)\s+kMDItemLastUsedDate\s+=\s+(.*)$/);
-        if (match && match.length > 2) {
-          const path = match[1].trim();
-          const lastUsedDate = match[2] !== "(null)" ? new Date(match[2].trim()) : undefined;
-          return { path, lastUsedDate: isNaN(lastUsedDate?.getTime() ?? NaN) ? undefined : lastUsedDate };
+    // Initialize regular expression
+    const regularExpression = /^(.*?)\s+kMDItemLastUsedDate\s+=\s+(.*)$/;
+    // Initialize Xcode project array
+    const xcodeProjects: XcodeProject[] = [];
+    // For each raw line of spotlight query output
+    for (const rawLine of spotlightQueryOutput.stdout.trim().split("\n")) {
+      // Trim the raw line
+      const line = rawLine.trim();
+      // Check if line is empty
+      if (!line) {
+        // Continue with next line
+        continue;
+      }
+      // Declare path and last used date
+      let path: string;
+      let lastUsed: Date | undefined;
+      // Perform regular expression
+      const match = line.match(regularExpression);
+      // Check if regular expression has two matches
+      if (match && match.length > 2) {
+        // Initialize path with first component of match
+        path = match[1].trim();
+        // Initialize last used date with second component of match
+        const lastUsedDateString = match[2].trim();
+        // Check if last used date string is not null
+        if (lastUsedDateString !== "(null)") {
+          // Initialize date from string
+          const date = new Date(lastUsedDateString);
+          // Initialize last used date
+          lastUsed = isNaN(date.getTime()) ? undefined : date;
         }
-        return { path: line.trim(), lastUsedDate: undefined };
-      })
-      // Filter out any Xcode Project that is included in Carthage/Checkouts or Pods from CocoaPods
-      .filter(({ path }) => {
-        return (
-          !path.includes("Carthage/Checkouts") &&
-          !path.includes("Pods") &&
-          !path.includes("Library/Autosave Information")
-        );
-      })
-      // Filter out Xcode Projects that should be excluded based on the preferences
-      .filter(({ path }) => {
-        return !excludedXcodeProjectPaths.find((excludedPath) => path.startsWith(excludedPath));
-      })
-      // Sort by last used date, placing projects without a date at the end
-      .sort((a, b) => (b.lastUsedDate?.getTime() ?? 0) - (a.lastUsedDate?.getTime() ?? 0))
-      // Decode each Xcode Project Path
-      .map(({ path }) => XcodeProjectService.decodeXcodeProject(path))
-      // Filter out null values
-      .filter(Boolean) as XcodeProject[];
-    // Return XcodeProjects
+      } else {
+        // Otherwise use the line as path
+        path = line;
+      }
+      // Check if path is excluded
+      if (
+        path.includes("Carthage/Checkouts") ||
+        path.includes("/Pods/") ||
+        path.includes("Library/Autosave Information") ||
+        excludedXcodeProjectPaths.some((excludedPath) => path.startsWith(excludedPath))
+      ) {
+        // Continue with next line
+        continue;
+      }
+      // Decode Xcode project
+      const xcodeProject = XcodeProjectService.decodeXcodeProject(path, lastUsed);
+      // Check if Xcode project could not be decoded from path
+      if (!xcodeProject) {
+        // Continue with next line
+        continue;
+      }
+      // Append Xcode project
+      xcodeProjects.push(xcodeProject);
+    }
+    // Sort Xcode projects by lastUsedDate (descending order).
+    xcodeProjects.sort((lhs, rhs) => (rhs.lastUsed?.getTime() ?? 0) - (lhs.lastUsed?.getTime() ?? 0));
+    // Return xcode projects
     return xcodeProjects;
   }
 
@@ -141,8 +166,9 @@ export class XcodeProjectService {
   /**
    * Decode XcodeProject from Xcode Project Path
    * @param xcodeProjectPath The Xcode Project Path
+   * @param lastUsed The date when the project was last used or opened
    */
-  private static decodeXcodeProject(xcodeProjectPath: string): XcodeProject | undefined {
+  private static decodeXcodeProject(xcodeProjectPath: string, lastUsed?: Date): XcodeProject | undefined {
     // Initialize the last path component
     const lastPathComponent = xcodeProjectPath.substring(xcodeProjectPath.lastIndexOf("/") + 1);
     // Initialize the file extension
@@ -185,6 +211,7 @@ export class XcodeProjectService {
       type: fileExtension,
       directoryPath: Path.dirname(xcodeProjectPath),
       filePath: xcodeProjectPath,
+      lastUsed: lastUsed,
       keywords: keywords.reverse(),
     };
   }
