@@ -1,6 +1,6 @@
 import { ColorResult } from "./search-utils";
 import { getMatchScore } from "./search-utils";
-import { ShadeCategory } from "./shade-mapping";
+import { ShadeCategory, SHADE_ORDER } from "./shade-mapping";
 
 type ColorSection = [string, ColorResult[]];
 
@@ -9,7 +9,7 @@ type ColorSection = [string, ColorResult[]];
  * Returns sections ordered by:
  * 1. Best match score within each section
  * 2. Number of matches when scores are equal
- * 3. Alphabetically by shade name when all else is equal
+ * 3. Static shade order when all else is equal
  * 
  * @param sections - Array of [shade, colors] tuples
  * @param searchText - Text to match against
@@ -19,10 +19,15 @@ export function sortSectionsByRelevance(
   sections: ColorSection[],
   searchText: string
 ): ColorSection[] {
-  if (!searchText) return sections;
-
   // Get all non-empty sections
   const nonEmptySections = sections.filter(([_, colors]) => colors.length > 0);
+  
+  // If no search text, sort by static shade order
+  if (!searchText) {
+    return nonEmptySections.sort(([shadeA], [shadeB]) => 
+      SHADE_ORDER.indexOf(shadeA as ShadeCategory) - SHADE_ORDER.indexOf(shadeB as ShadeCategory)
+    );
+  }
   
   // Sort sections based on the best match score within each section
   return nonEmptySections.sort(([shadeA, colorsA], [shadeB, colorsB]) => {
@@ -41,12 +46,12 @@ export function sortSectionsByRelevance(
       return Math.min(nameScore, hexScore, rgbScore);
     }));
 
-    // If scores are equal, sort by number of matches and then alphabetically
+    // If scores are equal, sort by number of matches and then by static shade order
     if (scoreA === scoreB) {
       const matchesA = colorsA.filter(c => c.name.toLowerCase().includes(searchText.toLowerCase())).length;
       const matchesB = colorsB.filter(c => c.name.toLowerCase().includes(searchText.toLowerCase())).length;
       if (matchesA !== matchesB) return matchesB - matchesA;
-      return shadeA.localeCompare(shadeB);
+      return SHADE_ORDER.indexOf(shadeA as ShadeCategory) - SHADE_ORDER.indexOf(shadeB as ShadeCategory);
     }
 
     return scoreA - scoreB;

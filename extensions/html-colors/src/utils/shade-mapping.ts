@@ -22,6 +22,28 @@ export type ShadeCategory =
   | "gray"
   | "black";
 
+/**
+ * Static order of shade categories for consistent sorting
+ */
+export const SHADE_ORDER: ShadeCategory[] = [
+  "black",
+  "blue",
+  "brown",
+  "cyan",
+  "gray",
+  "green",
+  "indigo",
+  "lime",
+  "mint",
+  "orange",
+  "pink",
+  "purple",
+  "red",
+  "teal",
+  "white",
+  "yellow"
+];
+
 const EMPTY_GROUPS: Record<ShadeCategory, ColorResult[]> = Object.freeze({
   pink: [],
   red: [],
