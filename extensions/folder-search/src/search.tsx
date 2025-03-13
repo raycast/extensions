@@ -119,13 +119,13 @@ export default function Command() {
           onShow={() => popToRoot({ clearSearchBar: true })}
         />
         <Action
-          title="Send Finder Selection to Folder"
+          title="Send Finder selection to Folder"
           icon={Icon.Folder}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           onAction={() => sendFinderSelectionToFolder(result.path)}
         />
         <Action.OpenWith
-          title="Open With…"
+          title="Open With..."
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           path={result.path}
           onOpen={() => popToRoot({ clearSearchBar: true })}
@@ -148,7 +148,7 @@ export default function Command() {
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           onAction={() => toggleResultPinnedStatus(result, resultIndex)}
         />
-        {result.title === "Pinned" && (
+        {resultIsPinned(result) && (
           <>
             {resultIndex > 0 && (
               <Action
