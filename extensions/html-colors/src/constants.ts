@@ -1,3 +1,5 @@
+import { ShadeCategory } from "./utils/shade-mapping";
+
 /**
  * Represents a color with its various formats and category information
  */
@@ -8,28 +10,29 @@ export type Color = {
   category: "basic" | "extended";
   format: "hex" | "rgb" | "name";
   id: string;
+  shade: ShadeCategory;
 };
 
 /**
  * Collection of basic HTML colors with their hex, rgb, and name values
  */
 export const basicColors: Color[] = [
-  { name: "Black", hex: "#000000", rgb: "rgb(0, 0, 0)", category: "basic", format: "name", id: "black" },
-  { name: "Silver", hex: "#C0C0C0", rgb: "rgb(192, 192, 192)", category: "basic", format: "name", id: "silver" },
-  { name: "Gray", hex: "#808080", rgb: "rgb(128, 128, 128)", category: "basic", format: "name", id: "gray" },
-  { name: "White", hex: "#FFFFFF", rgb: "rgb(255, 255, 255)", category: "basic", format: "name", id: "white" },
-  { name: "Maroon", hex: "#800000", rgb: "rgb(128, 0, 0)", category: "basic", format: "name", id: "maroon" },
-  { name: "Red", hex: "#FF0000", rgb: "rgb(255, 0, 0)", category: "basic", format: "name", id: "red" },
-  { name: "Purple", hex: "#800080", rgb: "rgb(128, 0, 128)", category: "basic", format: "name", id: "purple" },
-  { name: "Fuchsia", hex: "#FF00FF", rgb: "rgb(255, 0, 255)", category: "basic", format: "name", id: "fuchsia" },
-  { name: "Green", hex: "#008000", rgb: "rgb(0, 128, 0)", category: "basic", format: "name", id: "green" },
-  { name: "Lime", hex: "#00FF00", rgb: "rgb(0, 255, 0)", category: "basic", format: "name", id: "lime" },
-  { name: "Olive", hex: "#808000", rgb: "rgb(128, 128, 0)", category: "basic", format: "name", id: "olive" },
-  { name: "Yellow", hex: "#FFFF00", rgb: "rgb(255, 255, 0)", category: "basic", format: "name", id: "yellow" },
-  { name: "Navy", hex: "#000080", rgb: "rgb(0, 0, 128)", category: "basic", format: "name", id: "navy" },
-  { name: "Blue", hex: "#0000FF", rgb: "rgb(0, 0, 255)", category: "basic", format: "name", id: "blue" },
-  { name: "Teal", hex: "#008080", rgb: "rgb(0, 128, 128)", category: "basic", format: "name", id: "teal" },
-  { name: "Aqua", hex: "#00FFFF", rgb: "rgb(0, 255, 255)", category: "basic", format: "name", id: "aqua" },
+  { name: "Black", hex: "#000000", rgb: "rgb(0, 0, 0)", category: "basic", format: "name", id: "black", shade: "black" },
+  { name: "Silver", hex: "#C0C0C0", rgb: "rgb(192, 192, 192)", category: "basic", format: "name", id: "silver", shade: "gray" },
+  { name: "Gray", hex: "#808080", rgb: "rgb(128, 128, 128)", category: "basic", format: "name", id: "gray", shade: "gray" },
+  { name: "White", hex: "#FFFFFF", rgb: "rgb(255, 255, 255)", category: "basic", format: "name", id: "white", shade: "white" },
+  { name: "Maroon", hex: "#800000", rgb: "rgb(128, 0, 0)", category: "basic", format: "name", id: "maroon", shade: "red" },
+  { name: "Red", hex: "#FF0000", rgb: "rgb(255, 0, 0)", category: "basic", format: "name", id: "red", shade: "red" },
+  { name: "Purple", hex: "#800080", rgb: "rgb(128, 0, 128)", category: "basic", format: "name", id: "purple", shade: "purple" },
+  { name: "Fuchsia", hex: "#FF00FF", rgb: "rgb(255, 0, 255)", category: "basic", format: "name", id: "fuchsia", shade: "purple" },
+  { name: "Green", hex: "#008000", rgb: "rgb(0, 128, 0)", category: "basic", format: "name", id: "green", shade: "green" },
+  { name: "Lime", hex: "#00FF00", rgb: "rgb(0, 255, 0)", category: "basic", format: "name", id: "lime", shade: "lime" },
+  { name: "Olive", hex: "#808000", rgb: "rgb(128, 128, 0)", category: "basic", format: "name", id: "olive", shade: "yellow" },
+  { name: "Yellow", hex: "#FFFF00", rgb: "rgb(255, 255, 0)", category: "basic", format: "name", id: "yellow", shade: "yellow" },
+  { name: "Navy", hex: "#000080", rgb: "rgb(0, 0, 128)", category: "basic", format: "name", id: "navy", shade: "blue" },
+  { name: "Blue", hex: "#0000FF", rgb: "rgb(0, 0, 255)", category: "basic", format: "name", id: "blue", shade: "blue" },
+  { name: "Teal", hex: "#008080", rgb: "rgb(0, 128, 128)", category: "basic", format: "name", id: "teal", shade: "teal" },
+  { name: "Aqua", hex: "#00FFFF", rgb: "rgb(0, 255, 255)", category: "basic", format: "name", id: "aqua", shade: "cyan" },
 ];
 
 /**
@@ -43,6 +46,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "aliceblue",
+    shade: "white",
   },
   {
     name: "AntiqueWhite",
@@ -51,8 +55,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "antiquewhite",
+    shade: "white",
   },
-  { name: "Aqua", hex: "#00FFFF", rgb: "rgb(0, 255, 255)", category: "extended", format: "name", id: "aqua" },
+  { name: "Aqua", hex: "#00FFFF", rgb: "rgb(0, 255, 255)", category: "extended", format: "name", id: "aqua", shade: "cyan" },
   {
     name: "Aquamarine",
     hex: "#7FFFD4",
@@ -60,11 +65,12 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "aquamarine",
+    shade: "green",
   },
-  { name: "Azure", hex: "#F0FFFF", rgb: "rgb(240, 255, 255)", category: "extended", format: "name", id: "azure" },
-  { name: "Beige", hex: "#F5F5DC", rgb: "rgb(245, 245, 220)", category: "extended", format: "name", id: "beige" },
-  { name: "Bisque", hex: "#FFE4C4", rgb: "rgb(255, 228, 196)", category: "extended", format: "name", id: "bisque" },
-  { name: "Black", hex: "#000000", rgb: "rgb(0, 0, 0)", category: "extended", format: "name", id: "black" },
+  { name: "Azure", hex: "#F0FFFF", rgb: "rgb(240, 255, 255)", category: "extended", format: "name", id: "azure", shade: "white" },
+  { name: "Beige", hex: "#F5F5DC", rgb: "rgb(245, 245, 220)", category: "extended", format: "name", id: "beige", shade: "yellow" },
+  { name: "Bisque", hex: "#FFE4C4", rgb: "rgb(255, 228, 196)", category: "extended", format: "name", id: "bisque", shade: "white" },
+  { name: "Black", hex: "#000000", rgb: "rgb(0, 0, 0)", category: "extended", format: "name", id: "black", shade: "black" },
   {
     name: "BlanchedAlmond",
     hex: "#FFEBCD",
@@ -72,8 +78,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "blanchedalmond",
+    shade: "white",
   },
-  { name: "Blue", hex: "#0000FF", rgb: "rgb(0, 0, 255)", category: "extended", format: "name", id: "blue" },
+  { name: "Blue", hex: "#0000FF", rgb: "rgb(0, 0, 255)", category: "extended", format: "name", id: "blue", shade: "blue" },
   {
     name: "BlueViolet",
     hex: "#8A2BE2",
@@ -81,8 +88,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "blueviolet",
+    shade: "purple",
   },
-  { name: "Brown", hex: "#A52A2A", rgb: "rgb(165, 42, 42)", category: "extended", format: "name", id: "brown" },
+  { name: "Brown", hex: "#A52A2A", rgb: "rgb(165, 42, 42)", category: "extended", format: "name", id: "brown", shade: "red" },
   {
     name: "BurlyWood",
     hex: "#DEB887",
@@ -90,6 +98,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "burlywood",
+    shade: "yellow",
   },
   {
     name: "CadetBlue",
@@ -98,6 +107,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "cadetblue",
+    shade: "teal",
   },
   {
     name: "Chartreuse",
@@ -106,6 +116,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "chartreuse",
+    shade: "green",
   },
   {
     name: "Chocolate",
@@ -114,8 +125,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "chocolate",
+    shade: "red",
   },
-  { name: "Coral", hex: "#FF7F50", rgb: "rgb(255, 127, 80)", category: "extended", format: "name", id: "coral" },
+  { name: "Coral", hex: "#FF7F50", rgb: "rgb(255, 127, 80)", category: "extended", format: "name", id: "coral", shade: "red" },
   {
     name: "CornflowerBlue",
     hex: "#6495ED",
@@ -123,12 +135,13 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "cornflowerblue",
+    shade: "blue",
   },
-  { name: "Cornsilk", hex: "#FFF8DC", rgb: "rgb(255, 248, 220)", category: "extended", format: "name", id: "cornsilk" },
-  { name: "Crimson", hex: "#DC143C", rgb: "rgb(220, 20, 60)", category: "extended", format: "name", id: "crimson" },
-  { name: "Cyan", hex: "#00FFFF", rgb: "rgb(0, 255, 255)", category: "extended", format: "name", id: "cyan" },
-  { name: "DarkBlue", hex: "#00008B", rgb: "rgb(0, 0, 139)", category: "extended", format: "name", id: "darkblue" },
-  { name: "DarkCyan", hex: "#008B8B", rgb: "rgb(0, 139, 139)", category: "extended", format: "name", id: "darkcyan" },
+  { name: "Cornsilk", hex: "#FFF8DC", rgb: "rgb(255, 248, 220)", category: "extended", format: "name", id: "cornsilk", shade: "yellow" },
+  { name: "Crimson", hex: "#DC143C", rgb: "rgb(220, 20, 60)", category: "extended", format: "name", id: "crimson", shade: "red" },
+  { name: "Cyan", hex: "#00FFFF", rgb: "rgb(0, 255, 255)", category: "extended", format: "name", id: "cyan", shade: "cyan" },
+  { name: "DarkBlue", hex: "#00008B", rgb: "rgb(0, 0, 139)", category: "extended", format: "name", id: "darkblue", shade: "blue" },
+  { name: "DarkCyan", hex: "#008B8B", rgb: "rgb(0, 139, 139)", category: "extended", format: "name", id: "darkcyan", shade: "teal" },
   {
     name: "DarkGoldenrod",
     hex: "#B8860B",
@@ -136,9 +149,10 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "darkgoldenrod",
+    shade: "yellow",
   },
-  { name: "DarkGray", hex: "#A9A9A9", rgb: "rgb(169, 169, 169)", category: "extended", format: "name", id: "darkgray" },
-  { name: "DarkGreen", hex: "#006400", rgb: "rgb(0, 100, 0)", category: "extended", format: "name", id: "darkgreen" },
+  { name: "DarkGray", hex: "#A9A9A9", rgb: "rgb(169, 169, 169)", category: "extended", format: "name", id: "darkgray", shade: "gray" },
+  { name: "DarkGreen", hex: "#006400", rgb: "rgb(0, 100, 0)", category: "extended", format: "name", id: "darkgreen", shade: "green" },
   {
     name: "DarkKhaki",
     hex: "#BDB76B",
@@ -146,6 +160,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "darkkhaki",
+    shade: "yellow",
   },
   {
     name: "DarkMagenta",
@@ -154,6 +169,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "darkmagenta",
+    shade: "purple",
   },
   {
     name: "DarkOliveGreen",
@@ -162,6 +178,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "darkolivegreen",
+    shade: "green",
   },
   {
     name: "DarkOrange",
@@ -170,6 +187,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "darkorange",
+    shade: "red",
   },
   {
     name: "DarkOrchid",
@@ -178,8 +196,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "darkorchid",
+    shade: "purple",
   },
-  { name: "DarkRed", hex: "#8B0000", rgb: "rgb(139, 0, 0)", category: "extended", format: "name", id: "darkred" },
+  { name: "DarkRed", hex: "#8B0000", rgb: "rgb(139, 0, 0)", category: "extended", format: "name", id: "darkred", shade: "red" },
   {
     name: "DarkSalmon",
     hex: "#E9967A",
@@ -187,6 +206,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "darksalmon",
+    shade: "red",
   },
   {
     name: "DarkSeaGreen",
@@ -195,6 +215,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "darkseagreen",
+    shade: "green",
   },
   {
     name: "DarkSlateBlue",
@@ -203,6 +224,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "darkslateblue",
+    shade: "blue",
   },
   {
     name: "DarkSlateGray",
@@ -211,6 +233,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "darkslategray",
+    shade: "gray",
   },
   {
     name: "DarkTurquoise",
@@ -219,6 +242,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "darkturquoise",
+    shade: "teal",
   },
   {
     name: "DarkViolet",
@@ -227,8 +251,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "darkviolet",
+    shade: "purple",
   },
-  { name: "DeepPink", hex: "#FF1493", rgb: "rgb(255, 20, 147)", category: "extended", format: "name", id: "deeppink" },
+  { name: "DeepPink", hex: "#FF1493", rgb: "rgb(255, 20, 147)", category: "extended", format: "name", id: "deeppink", shade: "red" },
   {
     name: "DeepSkyBlue",
     hex: "#00BFFF",
@@ -236,8 +261,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "deepskyblue",
+    shade: "blue",
   },
-  { name: "DimGray", hex: "#696969", rgb: "rgb(105, 105, 105)", category: "extended", format: "name", id: "dimgray" },
+  { name: "DimGray", hex: "#696969", rgb: "rgb(105, 105, 105)", category: "extended", format: "name", id: "dimgray", shade: "gray" },
   {
     name: "DodgerBlue",
     hex: "#1E90FF",
@@ -245,8 +271,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "dodgerblue",
+    shade: "blue",
   },
-  { name: "FireBrick", hex: "#B22222", rgb: "rgb(178, 34, 34)", category: "extended", format: "name", id: "firebrick" },
+  { name: "FireBrick", hex: "#B22222", rgb: "rgb(178, 34, 34)", category: "extended", format: "name", id: "firebrick", shade: "red" },
   {
     name: "FloralWhite",
     hex: "#FFFAF0",
@@ -254,6 +281,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "floralwhite",
+    shade: "white",
   },
   {
     name: "ForestGreen",
@@ -262,8 +290,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "forestgreen",
+    shade: "green",
   },
-  { name: "Fuchsia", hex: "#FF00FF", rgb: "rgb(255, 0, 255)", category: "extended", format: "name", id: "fuchsia" },
+  { name: "Fuchsia", hex: "#FF00FF", rgb: "rgb(255, 0, 255)", category: "extended", format: "name", id: "fuchsia", shade: "purple" },
   {
     name: "Gainsboro",
     hex: "#DCDCDC",
@@ -271,6 +300,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "gainsboro",
+    shade: "gray",
   },
   {
     name: "GhostWhite",
@@ -279,8 +309,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "ghostwhite",
+    shade: "white",
   },
-  { name: "Gold", hex: "#FFD700", rgb: "rgb(255, 215, 0)", category: "extended", format: "name", id: "gold" },
+  { name: "Gold", hex: "#FFD700", rgb: "rgb(255, 215, 0)", category: "extended", format: "name", id: "gold", shade: "yellow" },
   {
     name: "Goldenrod",
     hex: "#DAA520",
@@ -288,9 +319,10 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "goldenrod",
+    shade: "yellow",
   },
-  { name: "Gray", hex: "#808080", rgb: "rgb(128, 128, 128)", category: "extended", format: "name", id: "gray" },
-  { name: "Green", hex: "#008000", rgb: "rgb(0, 128, 0)", category: "extended", format: "name", id: "green" },
+  { name: "Gray", hex: "#808080", rgb: "rgb(128, 128, 128)", category: "extended", format: "name", id: "gray", shade: "gray" },
+  { name: "Green", hex: "#008000", rgb: "rgb(0, 128, 0)", category: "extended", format: "name", id: "green", shade: "green" },
   {
     name: "GreenYellow",
     hex: "#ADFF2F",
@@ -298,14 +330,15 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "greenyellow",
+    shade: "yellow",
   },
-  { name: "Honeydew", hex: "#F0FFF0", rgb: "rgb(240, 255, 240)", category: "extended", format: "name", id: "honeydew" },
-  { name: "HotPink", hex: "#FF69B4", rgb: "rgb(255, 105, 180)", category: "extended", format: "name", id: "hotpink" },
-  { name: "IndianRed", hex: "#CD5C5C", rgb: "rgb(205, 92, 92)", category: "extended", format: "name", id: "indianred" },
-  { name: "Indigo", hex: "#4B0082", rgb: "rgb(75, 0, 130)", category: "extended", format: "name", id: "indigo" },
-  { name: "Ivory", hex: "#FFFFF0", rgb: "rgb(255, 255, 240)", category: "extended", format: "name", id: "ivory" },
-  { name: "Khaki", hex: "#F0E68C", rgb: "rgb(240, 230, 140)", category: "extended", format: "name", id: "khaki" },
-  { name: "Lavender", hex: "#E6E6FA", rgb: "rgb(230, 230, 250)", category: "extended", format: "name", id: "lavender" },
+  { name: "Honeydew", hex: "#F0FFF0", rgb: "rgb(240, 255, 240)", category: "extended", format: "name", id: "honeydew", shade: "white" },
+  { name: "HotPink", hex: "#FF69B4", rgb: "rgb(255, 105, 180)", category: "extended", format: "name", id: "hotpink", shade: "red" },
+  { name: "IndianRed", hex: "#CD5C5C", rgb: "rgb(205, 92, 92)", category: "extended", format: "name", id: "indianred", shade: "red" },
+  { name: "Indigo", hex: "#4B0082", rgb: "rgb(75, 0, 130)", category: "extended", format: "name", id: "indigo", shade: "purple" },
+  { name: "Ivory", hex: "#FFFFF0", rgb: "rgb(255, 255, 240)", category: "extended", format: "name", id: "ivory", shade: "white" },
+  { name: "Khaki", hex: "#F0E68C", rgb: "rgb(240, 230, 140)", category: "extended", format: "name", id: "khaki", shade: "yellow" },
+  { name: "Lavender", hex: "#E6E6FA", rgb: "rgb(230, 230, 250)", category: "extended", format: "name", id: "lavender", shade: "white" },
   {
     name: "LavenderBlush",
     hex: "#FFF0F5",
@@ -313,8 +346,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "lavenderblush",
+    shade: "white",
   },
-  { name: "LawnGreen", hex: "#7CFC00", rgb: "rgb(124, 252, 0)", category: "extended", format: "name", id: "lawngreen" },
+  { name: "LawnGreen", hex: "#7CFC00", rgb: "rgb(124, 252, 0)", category: "extended", format: "name", id: "lawngreen", shade: "green" },
   {
     name: "LemonChiffon",
     hex: "#FFFACD",
@@ -322,6 +356,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "lemonchiffon",
+    shade: "yellow",
   },
   {
     name: "LightBlue",
@@ -330,6 +365,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "lightblue",
+    shade: "blue",
   },
   {
     name: "LightCoral",
@@ -338,6 +374,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "lightcoral",
+    shade: "red",
   },
   {
     name: "LightCyan",
@@ -346,6 +383,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "lightcyan",
+    shade: "cyan",
   },
   {
     name: "LightGoldenrodYellow",
@@ -354,6 +392,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "lightgoldenrodyellow",
+    shade: "yellow",
   },
   {
     name: "LightGray",
@@ -362,6 +401,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "lightgray",
+    shade: "gray",
   },
   {
     name: "LightGreen",
@@ -370,6 +410,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "lightgreen",
+    shade: "green",
   },
   {
     name: "LightPink",
@@ -378,6 +419,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "lightpink",
+    shade: "red",
   },
   {
     name: "LightSalmon",
@@ -386,6 +428,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "lightsalmon",
+    shade: "red",
   },
   {
     name: "LightSeaGreen",
@@ -394,6 +437,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "lightseagreen",
+    shade: "green",
   },
   {
     name: "LightSkyBlue",
@@ -402,6 +446,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "lightskyblue",
+    shade: "blue",
   },
   {
     name: "LightSlateGray",
@@ -410,6 +455,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "lightslategray",
+    shade: "gray",
   },
   {
     name: "LightSteelBlue",
@@ -418,6 +464,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "lightsteelblue",
+    shade: "blue",
   },
   {
     name: "LightYellow",
@@ -426,12 +473,13 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "lightyellow",
+    shade: "yellow",
   },
-  { name: "Lime", hex: "#00FF00", rgb: "rgb(0, 255, 0)", category: "extended", format: "name", id: "lime" },
-  { name: "LimeGreen", hex: "#32CD32", rgb: "rgb(50, 205, 50)", category: "extended", format: "name", id: "limegreen" },
-  { name: "Linen", hex: "#FAF0E6", rgb: "rgb(250, 240, 230)", category: "extended", format: "name", id: "linen" },
-  { name: "Magenta", hex: "#FF00FF", rgb: "rgb(255, 0, 255)", category: "extended", format: "name", id: "magenta" },
-  { name: "Maroon", hex: "#800000", rgb: "rgb(128, 0, 0)", category: "extended", format: "name", id: "maroon" },
+  { name: "Lime", hex: "#00FF00", rgb: "rgb(0, 255, 0)", category: "extended", format: "name", id: "lime", shade: "lime" },
+  { name: "LimeGreen", hex: "#32CD32", rgb: "rgb(50, 205, 50)", category: "extended", format: "name", id: "limegreen", shade: "green" },
+  { name: "Linen", hex: "#FAF0E6", rgb: "rgb(250, 240, 230)", category: "extended", format: "name", id: "linen", shade: "white" },
+  { name: "Magenta", hex: "#FF00FF", rgb: "rgb(255, 0, 255)", category: "extended", format: "name", id: "magenta", shade: "purple" },
+  { name: "Maroon", hex: "#800000", rgb: "rgb(128, 0, 0)", category: "extended", format: "name", id: "maroon", shade: "red" },
   {
     name: "MediumAquamarine",
     hex: "#66CDAA",
@@ -439,8 +487,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "mediumaquamarine",
+    shade: "green",
   },
-  { name: "MediumBlue", hex: "#0000CD", rgb: "rgb(0, 0, 205)", category: "extended", format: "name", id: "mediumblue" },
+  { name: "MediumBlue", hex: "#0000CD", rgb: "rgb(0, 0, 205)", category: "extended", format: "name", id: "mediumblue", shade: "blue" },
   {
     name: "MediumOrchid",
     hex: "#BA55D3",
@@ -448,6 +497,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "mediumorchid",
+    shade: "purple",
   },
   {
     name: "MediumPurple",
@@ -456,6 +506,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "mediumpurple",
+    shade: "purple",
   },
   {
     name: "MediumSeaGreen",
@@ -464,6 +515,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "mediumseagreen",
+    shade: "green",
   },
   {
     name: "MediumSlateBlue",
@@ -472,6 +524,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "mediumslateblue",
+    shade: "blue",
   },
   {
     name: "MediumSpringGreen",
@@ -480,6 +533,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "mediumspringgreen",
+    shade: "green",
   },
   {
     name: "MediumTurquoise",
@@ -488,6 +542,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "mediumturquoise",
+    shade: "teal",
   },
   {
     name: "MediumVioletRed",
@@ -496,6 +551,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "mediumvioletred",
+    shade: "red",
   },
   {
     name: "MidnightBlue",
@@ -504,6 +560,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "midnightblue",
+    shade: "blue",
   },
   {
     name: "MintCream",
@@ -512,6 +569,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "mintcream",
+    shade: "white",
   },
   {
     name: "MistyRose",
@@ -520,8 +578,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "mistyrose",
+    shade: "white",
   },
-  { name: "Moccasin", hex: "#FFE4B5", rgb: "rgb(255, 228, 181)", category: "extended", format: "name", id: "moccasin" },
+  { name: "Moccasin", hex: "#FFE4B5", rgb: "rgb(255, 228, 181)", category: "extended", format: "name", id: "moccasin", shade: "yellow" },
   {
     name: "NavajoWhite",
     hex: "#FFDEAD",
@@ -529,10 +588,11 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "navajowhite",
+    shade: "yellow",
   },
-  { name: "Navy", hex: "#000080", rgb: "rgb(0, 0, 128)", category: "extended", format: "name", id: "navy" },
-  { name: "OldLace", hex: "#FDF5E6", rgb: "rgb(253, 245, 230)", category: "extended", format: "name", id: "oldlace" },
-  { name: "Olive", hex: "#808000", rgb: "rgb(128, 128, 0)", category: "extended", format: "name", id: "olive" },
+  { name: "Navy", hex: "#000080", rgb: "rgb(0, 0, 128)", category: "extended", format: "name", id: "navy", shade: "blue" },
+  { name: "OldLace", hex: "#FDF5E6", rgb: "rgb(253, 245, 230)", category: "extended", format: "name", id: "oldlace", shade: "white" },
+  { name: "Olive", hex: "#808000", rgb: "rgb(128, 128, 0)", category: "extended", format: "name", id: "olive", shade: "yellow" },
   {
     name: "OliveDrab",
     hex: "#6B8E23",
@@ -540,10 +600,11 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "olivedrab",
+    shade: "green",
   },
-  { name: "Orange", hex: "#FFA500", rgb: "rgb(255, 165, 0)", category: "extended", format: "name", id: "orange" },
-  { name: "OrangeRed", hex: "#FF4500", rgb: "rgb(255, 69, 0)", category: "extended", format: "name", id: "orangered" },
-  { name: "Orchid", hex: "#DA70D6", rgb: "rgb(218, 112, 214)", category: "extended", format: "name", id: "orchid" },
+  { name: "Orange", hex: "#FFA500", rgb: "rgb(255, 165, 0)", category: "extended", format: "name", id: "orange", shade: "red" },
+  { name: "OrangeRed", hex: "#FF4500", rgb: "rgb(255, 69, 0)", category: "extended", format: "name", id: "orangered", shade: "red" },
+  { name: "Orchid", hex: "#DA70D6", rgb: "rgb(218, 112, 214)", category: "extended", format: "name", id: "orchid", shade: "purple" },
   {
     name: "PaleGoldenrod",
     hex: "#EEE8AA",
@@ -551,6 +612,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "palegoldenrod",
+    shade: "yellow",
   },
   {
     name: "PaleGreen",
@@ -559,6 +621,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "palegreen",
+    shade: "green",
   },
   {
     name: "PaleTurquoise",
@@ -567,6 +630,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "paleturquoise",
+    shade: "cyan",
   },
   {
     name: "PaleVioletRed",
@@ -575,6 +639,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "palevioletred",
+    shade: "red",
   },
   {
     name: "PapayaWhip",
@@ -583,6 +648,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "papayawhip",
+    shade: "white",
   },
   {
     name: "PeachPuff",
@@ -591,10 +657,11 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "peachpuff",
+    shade: "yellow",
   },
-  { name: "Peru", hex: "#CD853F", rgb: "rgb(205, 133, 63)", category: "extended", format: "name", id: "peru" },
-  { name: "Pink", hex: "#FFC0CB", rgb: "rgb(255, 192, 203)", category: "extended", format: "name", id: "pink" },
-  { name: "Plum", hex: "#DDA0DD", rgb: "rgb(221, 160, 221)", category: "extended", format: "name", id: "plum" },
+  { name: "Peru", hex: "#CD853F", rgb: "rgb(205, 133, 63)", category: "extended", format: "name", id: "peru", shade: "yellow" },
+  { name: "Pink", hex: "#FFC0CB", rgb: "rgb(255, 192, 203)", category: "extended", format: "name", id: "pink", shade: "red" },
+  { name: "Plum", hex: "#DDA0DD", rgb: "rgb(221, 160, 221)", category: "extended", format: "name", id: "plum", shade: "purple" },
   {
     name: "PowderBlue",
     hex: "#B0E0E6",
@@ -602,9 +669,10 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "powderblue",
+    shade: "cyan",
   },
-  { name: "Purple", hex: "#800080", rgb: "rgb(128, 0, 128)", category: "extended", format: "name", id: "purple" },
-  { name: "Red", hex: "#FF0000", rgb: "rgb(255, 0, 0)", category: "extended", format: "name", id: "red" },
+  { name: "Purple", hex: "#800080", rgb: "rgb(128, 0, 128)", category: "extended", format: "name", id: "purple", shade: "purple" },
+  { name: "Red", hex: "#FF0000", rgb: "rgb(255, 0, 0)", category: "extended", format: "name", id: "red", shade: "red" },
   {
     name: "RosyBrown",
     hex: "#BC8F8F",
@@ -612,6 +680,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "rosybrown",
+    shade: "gray",
   },
   {
     name: "RoyalBlue",
@@ -620,6 +689,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "royalblue",
+    shade: "blue",
   },
   {
     name: "SaddleBrown",
@@ -628,8 +698,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "saddlebrown",
+    shade: "yellow",
   },
-  { name: "Salmon", hex: "#FA8072", rgb: "rgb(250, 128, 114)", category: "extended", format: "name", id: "salmon" },
+  { name: "Salmon", hex: "#FA8072", rgb: "rgb(250, 128, 114)", category: "extended", format: "name", id: "salmon", shade: "red" },
   {
     name: "SandyBrown",
     hex: "#F4A460",
@@ -637,12 +708,13 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "sandybrown",
+    shade: "yellow",
   },
-  { name: "SeaGreen", hex: "#2E8B57", rgb: "rgb(46, 139, 87)", category: "extended", format: "name", id: "seagreen" },
-  { name: "Seashell", hex: "#FFF5EE", rgb: "rgb(255, 245, 238)", category: "extended", format: "name", id: "seashell" },
-  { name: "Sienna", hex: "#A0522D", rgb: "rgb(160, 82, 45)", category: "extended", format: "name", id: "sienna" },
-  { name: "Silver", hex: "#C0C0C0", rgb: "rgb(192, 192, 192)", category: "extended", format: "name", id: "silver" },
-  { name: "SkyBlue", hex: "#87CEEB", rgb: "rgb(135, 206, 235)", category: "extended", format: "name", id: "skyblue" },
+  { name: "SeaGreen", hex: "#2E8B57", rgb: "rgb(46, 139, 87)", category: "extended", format: "name", id: "seagreen", shade: "green" },
+  { name: "Seashell", hex: "#FFF5EE", rgb: "rgb(255, 245, 238)", category: "extended", format: "name", id: "seashell", shade: "white" },
+  { name: "Sienna", hex: "#A0522D", rgb: "rgb(160, 82, 45)", category: "extended", format: "name", id: "sienna", shade: "yellow" },
+  { name: "Silver", hex: "#C0C0C0", rgb: "rgb(192, 192, 192)", category: "extended", format: "name", id: "silver", shade: "gray" },
+  { name: "SkyBlue", hex: "#87CEEB", rgb: "rgb(135, 206, 235)", category: "extended", format: "name", id: "skyblue", shade: "blue" },
   {
     name: "SlateBlue",
     hex: "#6A5ACD",
@@ -650,6 +722,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "slateblue",
+    shade: "blue",
   },
   {
     name: "SlateGray",
@@ -658,8 +731,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "slategray",
+    shade: "gray",
   },
-  { name: "Snow", hex: "#FFFAFA", rgb: "rgb(255, 250, 250)", category: "extended", format: "name", id: "snow" },
+  { name: "Snow", hex: "#FFFAFA", rgb: "rgb(255, 250, 250)", category: "extended", format: "name", id: "snow", shade: "white" },
   {
     name: "SpringGreen",
     hex: "#00FF7F",
@@ -667,6 +741,7 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "springgreen",
+    shade: "green",
   },
   {
     name: "SteelBlue",
@@ -675,11 +750,12 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "steelblue",
+    shade: "blue",
   },
-  { name: "Tan", hex: "#D2B48C", rgb: "rgb(210, 180, 140)", category: "extended", format: "name", id: "tan" },
-  { name: "Teal", hex: "#008080", rgb: "rgb(0, 128, 128)", category: "extended", format: "name", id: "teal" },
-  { name: "Thistle", hex: "#D8BFD8", rgb: "rgb(216, 191, 216)", category: "extended", format: "name", id: "thistle" },
-  { name: "Tomato", hex: "#FF6347", rgb: "rgb(255, 99, 71)", category: "extended", format: "name", id: "tomato" },
+  { name: "Tan", hex: "#D2B48C", rgb: "rgb(210, 180, 140)", category: "extended", format: "name", id: "tan", shade: "yellow" },
+  { name: "Teal", hex: "#008080", rgb: "rgb(0, 128, 128)", category: "extended", format: "name", id: "teal", shade: "teal" },
+  { name: "Thistle", hex: "#D8BFD8", rgb: "rgb(216, 191, 216)", category: "extended", format: "name", id: "thistle", shade: "purple" },
+  { name: "Tomato", hex: "#FF6347", rgb: "rgb(255, 99, 71)", category: "extended", format: "name", id: "tomato", shade: "red" },
   {
     name: "Turquoise",
     hex: "#40E0D0",
@@ -687,10 +763,11 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "turquoise",
+    shade: "cyan",
   },
-  { name: "Violet", hex: "#EE82EE", rgb: "rgb(238, 130, 238)", category: "extended", format: "name", id: "violet" },
-  { name: "Wheat", hex: "#F5DEB3", rgb: "rgb(245, 222, 179)", category: "extended", format: "name", id: "wheat" },
-  { name: "White", hex: "#FFFFFF", rgb: "rgb(255, 255, 255)", category: "extended", format: "name", id: "white" },
+  { name: "Violet", hex: "#EE82EE", rgb: "rgb(238, 130, 238)", category: "extended", format: "name", id: "violet", shade: "purple" },
+  { name: "Wheat", hex: "#F5DEB3", rgb: "rgb(245, 222, 179)", category: "extended", format: "name", id: "wheat", shade: "yellow" },
+  { name: "White", hex: "#FFFFFF", rgb: "rgb(255, 255, 255)", category: "extended", format: "name", id: "white", shade: "white" },
   {
     name: "WhiteSmoke",
     hex: "#F5F5F5",
@@ -698,8 +775,9 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "whitesmoke",
+    shade: "white",
   },
-  { name: "Yellow", hex: "#FFFF00", rgb: "rgb(255, 255, 0)", category: "extended", format: "name", id: "yellow" },
+  { name: "Yellow", hex: "#FFFF00", rgb: "rgb(255, 255, 0)", category: "extended", format: "name", id: "yellow", shade: "yellow" },
   {
     name: "YellowGreen",
     hex: "#9ACD32",
@@ -707,5 +785,6 @@ export const extendedColors: Color[] = [
     category: "extended",
     format: "name",
     id: "yellowgreen",
+    shade: "green",
   },
 ];
