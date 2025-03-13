@@ -41,7 +41,7 @@ export enum ActionName {
 
 export interface StatusInfo {
   level: StatusLevel;
-  color: string;
+  color: Color;
   icon: Icon;
 }
 

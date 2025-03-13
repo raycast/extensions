@@ -5,7 +5,7 @@ A virtual pet in your Raycast menu bar. Feed, play with, and care for your virtu
 ## Features
 
 - Adopt a virtual pet that lives in your menu bar
-- Monitor your pet's status and care for it through various interactions, to keep him happy
+- Monitor your pet's status and care for it through various interactions, to keep it happy
 - **Fox**, **Red Panda**, **Ferret**, **Pig**, **Cat**, and **Octopus** companions to choose from
 
 ## Pet Status
@@ -38,8 +38,8 @@ Your pet has five key metrics that affect its overall well-being:
 
 - Add more pet types with unique animations
 - Implement pet evolution based on care quality
-- Fine-tune ad optimize stat changes based on user feedback
-- Add actions cooldown to prevent action spaming
+- Fine-tune and optimize stat changes based on user feedback
+- Add actions cooldown to prevent action spamming
 - Add more animations for different pet states:
   - Eating animation when fed
   - Playing animation for playtime

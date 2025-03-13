@@ -1,5 +1,3 @@
-"use client";
-
 import { Action, ActionPanel, confirmAlert, Detail, environment } from "@raycast/api";
 import {
   feedPet,
@@ -21,6 +19,7 @@ import AdoptPet from "./adopt";
 import { usePetState } from "./hooks/usePetState";
 import { Icon } from "./utils/icons";
 import { ActionName } from "./types";
+import { HEALTH_THRESHOLD } from "./utils/consts";
 
 export default function ViewPet() {
   const { petState, isLoading, handleAction, removePetState } = usePetState();
@@ -119,9 +118,9 @@ ${isSleeping ? "It is sleeping right now, so let it rest for a while. \n\n*You c
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
                 onAction={() => handleAction(cleanPet, ActionName.Cleaning)}
               />
-              {health <= 70 && canHealToday(petState) && (
+              {health <= HEALTH_THRESHOLD && canHealToday(petState) && (
                 <Action
-                  title={canHealToday(petState) ? "Heal" : "Already Healed Today"}
+                  title={"Heal"}
                   icon={Icon.BandAid}
                   shortcut={{ modifiers: ["cmd"], key: "h" }}
                   onAction={() => handleAction(healPet, ActionName.Healing)}

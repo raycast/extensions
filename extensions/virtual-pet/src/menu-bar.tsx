@@ -19,6 +19,7 @@ import {
 import { usePetState } from "./hooks/usePetState";
 import { Icon } from "./utils/icons";
 import { ActionName } from "./types";
+import { HEALTH_THRESHOLD } from "./utils/consts";
 
 export default function Command() {
   const { petState, isLoading, handleAction } = usePetState();
@@ -30,8 +31,12 @@ export default function Command() {
     }
 
     const loadPetState = async () => {
-      await handleAction(updatePetState, ActionName.CheckingStatus);
-      initialRefreshDone.current = true;
+      try {
+        await handleAction(updatePetState, ActionName.CheckingStatus);
+        initialRefreshDone.current = true;
+      } catch (error) {
+        console.error("Failed to load pet state:", error);
+      }
     };
 
     loadPetState();
@@ -150,7 +155,7 @@ export default function Command() {
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               onAction={() => handleAction(restPet, ActionName.Resting)}
             />
-            {health <= 70 &&
+            {health <= HEALTH_THRESHOLD &&
               (canHealToday(petState) ? (
                 <MenuBarExtra.Item
                   title="Heal"

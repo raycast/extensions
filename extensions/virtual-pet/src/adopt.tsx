@@ -3,6 +3,7 @@ import { availablePets } from "./data/pets";
 import { adoptPet } from "./utils";
 import ViewPet from ".";
 import { usePetState } from "./hooks/usePetState";
+import { showFailureToast } from "@raycast/utils";
 
 export default function AdoptPet() {
   const { petState, isLoading, setPetState } = usePetState();
@@ -12,6 +13,8 @@ export default function AdoptPet() {
     if (pet) {
       const newPetState = adoptPet(pet);
       setPetState(newPetState);
+    } else {
+      showFailureToast("Pet not found");
     }
   };
 
