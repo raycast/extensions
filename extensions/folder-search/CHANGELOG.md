@@ -1,6 +1,6 @@
 # Folder Search Changelog
 
-## [New Features] - {PR_MERGE_DATE}
+## [New Features] - 2025-03-13
 
 - **added** 'Move' action for selected finder items
 
