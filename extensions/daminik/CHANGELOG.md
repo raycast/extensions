@@ -1,6 +1,6 @@
 # Daminik Changelog
 
-## [Add `Copy` Action] - {PR_MERGE_DATE}
+## [Add `Copy` Action] - 2025-03-13
 
 - New `Action` copies **Public URL** to Clipboard for easier sharing
 
