@@ -5,7 +5,7 @@ import createMarkdown from "../utils/createMarkdown";
 import path from "path";
 import { homedir } from "os";
 import { SYSTEM_TAGS } from "../types/markdownTypes";
-
+import { showFailureToast } from "@raycast/utils";
 interface CreateFileFormProps {
   rootDirectory: string;
   currentFolder?: string;
@@ -71,10 +71,9 @@ export function CreateFileForm({ rootDirectory, currentFolder, onFileCreated }: 
         pop();
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to create file",
-        message: String(error),
+        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsCreating(false);
@@ -92,7 +91,7 @@ export function CreateFileForm({ rootDirectory, currentFolder, onFileCreated }: 
     >
       <Form.TextField id="title" title="Title" placeholder="Enter file title" />
 
-      <Form.Dropdown id="template" title="Template">
+      <Form.Dropdown id="template" title="Template" defaultValue="basic">
         <Form.Dropdown.Item value="basic" title="Basic Note" />
         <Form.Dropdown.Item value="meeting" title="Meeting Notes" />
         <Form.Dropdown.Item value="blog" title="Blog Post" />

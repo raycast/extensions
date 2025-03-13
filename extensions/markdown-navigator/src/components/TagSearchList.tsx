@@ -1,5 +1,5 @@
 // src/components/TagSearchList.tsx
-import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, useNavigation } from "@raycast/api";
 import { isSystemTag, getSystemTag } from "../utils/tagOperations";
 
 interface TagSearchListProps {
@@ -9,17 +9,48 @@ interface TagSearchListProps {
   showSections?: boolean;
 }
 
+interface TagsAccumulator {
+  systemTags: string[];
+  customTags: string[];
+}
+
+const TAG_COLOR_MAP: Record<string, Color> = {
+  red: Color.Red,
+  yellow: Color.Yellow,
+  green: Color.Green,
+  orange: Color.Orange,
+  blue: Color.Blue,
+};
+
+function getTagTintColor(isSystem: boolean, systemTag?: { color?: string }): Color {
+  if (!isSystem) {
+    return Color.SecondaryText;
+  }
+
+  return TAG_COLOR_MAP[systemTag?.color || ""] || Color.PrimaryText;
+}
+
 export function TagSearchList({ tags, onTagSelect, selectedTag, showSections = true }: TagSearchListProps) {
-  console.log("TagSearchList rendered with tags:", tags);
-  console.log("Selected tag:", selectedTag);
-  console.log("Show sections:", showSections);
+  const { pop } = useNavigation();
 
   // Separate system tags and custom tags
-  const systemTags = tags.filter((tag) => isSystemTag(tag));
-  const customTags = tags.filter((tag) => !isSystemTag(tag));
+  const { systemTags, customTags } = tags.reduce<TagsAccumulator>(
+    (acc, tag) => {
+      if (isSystemTag(tag)) {
+        acc.systemTags.push(tag);
+      } else {
+        acc.customTags.push(tag);
+      }
+      return acc;
+    },
+    { systemTags: [], customTags: [] },
+  );
 
-  console.log("System tags:", systemTags);
-  console.log("Custom tags:", customTags);
+  // Process tag selection and return to main page
+  const handleTagSelection = (tag: string) => {
+    onTagSelect(tag);
+    pop();
+  };
 
   if (showSections && (systemTags.length > 0 || customTags.length > 0)) {
     return (
@@ -30,20 +61,20 @@ export function TagSearchList({ tags, onTagSelect, selectedTag, showSections = t
           accessories={[{ text: `${tags.length} tags` }]}
           actions={
             <ActionPanel>
-              <Action title="Clear Tag Filter" onAction={() => onTagSelect("")} />
+              <Action title="Clear Tag Filter" onAction={() => handleTagSelection("")} />
             </ActionPanel>
           }
         />
 
         {systemTags.length > 0 && (
           <List.Section title="System Tags">
-            {systemTags.map((tag) => renderTagItem(tag, true, onTagSelect, selectedTag))}
+            {systemTags.map((tag) => renderTagItem(tag, true, handleTagSelection, selectedTag))}
           </List.Section>
         )}
 
         {customTags.length > 0 && (
           <List.Section title="Custom Tags">
-            {customTags.map((tag) => renderTagItem(tag, false, onTagSelect, selectedTag))}
+            {customTags.map((tag) => renderTagItem(tag, false, handleTagSelection, selectedTag))}
           </List.Section>
         )}
       </List>
@@ -67,14 +98,14 @@ export function TagSearchList({ tags, onTagSelect, selectedTag, showSections = t
           accessories={[{ text: `${tags.length} tags` }]}
           actions={
             <ActionPanel>
-              <Action title="Clear Tag Filter" onAction={() => onTagSelect("")} />
+              <Action title="Clear Tag Filter" onAction={() => handleTagSelection("")} />
             </ActionPanel>
           }
         />
 
         {sortedTags.map((tag) => {
           const isSystem = isSystemTag(tag);
-          return renderTagItem(tag, isSystem, onTagSelect, selectedTag);
+          return renderTagItem(tag, isSystem, handleTagSelection, selectedTag);
         })}
       </List>
     );
@@ -85,27 +116,13 @@ function renderTagItem(tag: string, isSystem: boolean, onTagSelect: (tag: string
   const systemTag = isSystem ? getSystemTag(tag) : undefined;
   const isSelected = selectedTag === tag;
 
-  console.log(`Rendering tag: ${tag}, isSystem: ${isSystem}, systemTag:`, systemTag);
-
   return (
     <List.Item
       key={tag}
       title={`#${tag}`}
       icon={{
         source: isSelected ? Icon.CheckCircle : Icon.Tag,
-        tintColor: isSystem
-          ? systemTag?.color === "red"
-            ? Color.Red
-            : systemTag?.color === "yellow"
-              ? Color.Yellow
-              : systemTag?.color === "green"
-                ? Color.Green
-                : systemTag?.color === "orange"
-                  ? Color.Orange
-                  : systemTag?.color === "blue"
-                    ? Color.Blue
-                    : Color.PrimaryText
-          : Color.SecondaryText,
+        tintColor: getTagTintColor(isSystem, systemTag),
       }}
       accessories={[
         {

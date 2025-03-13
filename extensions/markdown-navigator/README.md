@@ -46,9 +46,8 @@ The extension requires a valid Markdown directory to be set in preferences:
 
 ### File Actions
 
-- **Open with Typora**: Select a file and press `Enter`
 - **Open in Default App**: Press `⏎`
-- **Open With...**: Press⏎ `⌘` + `⇧` + `O` to choose an application
+- **Open With...**: Press `⌘` + `⇧` + `O` to choose an application
 - **Show in Finder**: Press `⌘` + `F`
 - **Copy Path**: Press `⌘` + `⇧` + `C`
 - **Move to Trash**: Press `⌃` + `X`
@@ -124,7 +123,7 @@ The extension initially loads a limited number of files for better performance. 
 
 ## Support
 
-If you encounter any issues or have suggestions for improvements, please submit an issue on the [GitHub repository](https://github.com/yourusername/markdown-navigator).
+If you encounter any issues or have suggestions for improvements, please submit an issue on the [GitHub repository](https://github.com/chihkang/markdown-navigator).
 
 ## License
 

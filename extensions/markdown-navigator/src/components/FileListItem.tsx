@@ -17,6 +17,7 @@ import { isSystemTag, getSystemTag, sortTags } from "../utils/tagOperations";
 import path from "path";
 import fs from "fs";
 import { exec } from "child_process";
+import { showFailureToast } from "@raycast/utils";
 
 interface FileListItemProps {
   file: MarkdownFile;
@@ -32,6 +33,22 @@ interface FileListItemProps {
   showTagSearchList: () => void;
   selectedTag: string | null;
   setSelectedTag: (tag: string | null) => void;
+}
+
+const TAG_COLOR_MAP: Record<string, Color> = {
+  red: Color.Red,
+  yellow: Color.Yellow,
+  green: Color.Green,
+  orange: Color.Orange,
+  blue: Color.Blue,
+};
+
+function getTagTintColor(isSystem: boolean, systemTag?: { color?: string }): Color {
+  if (!isSystem) {
+    return Color.SecondaryText;
+  }
+
+  return TAG_COLOR_MAP[systemTag?.color || ""] || Color.PrimaryText;
 }
 
 export function FileListItem({
@@ -50,7 +67,8 @@ export function FileListItem({
   setSelectedTag,
 }: FileListItemProps) {
   // Format the date
-  const formatDate = (date: Date) => {
+  const formatDate = (timestamp: number) => {
+    const date = new Date(timestamp);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const day = 24 * 60 * 60 * 1000;
@@ -89,10 +107,9 @@ export function FileListItem({
         });
         revalidate();
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "Error deleting file",
-          message: String(error),
+          message: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -160,6 +177,9 @@ export function FileListItem({
   const visibleTags = sortedTags.slice(0, MAX_VISIBLE_TAGS);
   const hiddenTagsCount = sortedTags.length - visibleTags.length;
 
+  // Create a Date object from the timestamp for the tooltip
+  const lastModifiedDate = new Date(file.lastModified);
+
   return (
     <List.Item
       id={file.path}
@@ -168,7 +188,7 @@ export function FileListItem({
       accessories={[
         {
           text: formatDate(file.lastModified),
-          tooltip: `Last modified: ${file.lastModified.toLocaleString()}`,
+          tooltip: `Last modified: ${lastModifiedDate.toLocaleString()}`,
         },
         ...visibleTags.map((tag) => {
           const systemTag = getSystemTag(tag);
@@ -177,20 +197,7 @@ export function FileListItem({
           return {
             tag: {
               value: tag,
-              color:
-                showColorTags && isSystem
-                  ? systemTag?.color === "red"
-                    ? Color.Red
-                    : systemTag?.color === "yellow"
-                      ? Color.Yellow
-                      : systemTag?.color === "green"
-                        ? Color.Green
-                        : systemTag?.color === "orange"
-                          ? Color.Orange
-                          : systemTag?.color === "blue"
-                            ? Color.Blue
-                            : undefined
-                  : undefined,
+              color: showColorTags && isSystem ? getTagTintColor(isSystem, systemTag) : undefined,
             },
           };
         }),

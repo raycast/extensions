@@ -4,18 +4,18 @@ import { ActionPanel, Action, Icon } from "@raycast/api";
 interface CommonActionsProps {
   showCreateFileForm: () => void;
   revalidate: () => void;
-  loadMoreFiles: () => void;
   showColorTags: boolean;
   setShowColorTags: (show: boolean) => void;
   selectedTag: string | null;
   setSelectedTag: (tag: string | null) => void;
-  showTagSearchList: () => void; // Add this new prop
+  showTagSearchList: () => void;
 }
+
+// Removed loadMoreFiles from CommonActionsProps since it has its own component
 
 export function CommonActions({
   showCreateFileForm,
   revalidate,
-  loadMoreFiles,
   showColorTags,
   setShowColorTags,
   selectedTag,
@@ -27,7 +27,6 @@ export function CommonActions({
       <ActionPanel.Section>
         <Action title="Create New Markdown File" icon={Icon.NewDocument} onAction={showCreateFileForm} />
         <Action title="Refresh List" icon={Icon.RotateClockwise} onAction={revalidate} />
-        <Action title="Load More Files" icon={Icon.Plus} onAction={loadMoreFiles} />
         <Action
           title="Browse Tags"
           icon={Icon.Tag}
@@ -53,7 +52,12 @@ export function CommonActions({
   );
 }
 
-export function LoadMoreAction({ loadMoreFiles }: { loadMoreFiles: () => void }) {
+// Create a separate interface for LoadMoreAction to avoid dependency on CommonActionsProps
+interface LoadMoreActionProps {
+  loadMoreFiles: () => void;
+}
+
+export function LoadMoreAction({ loadMoreFiles }: LoadMoreActionProps) {
   return (
     <ActionPanel>
       <Action title="Load More Files" icon={Icon.Plus} onAction={loadMoreFiles} />

@@ -7,6 +7,7 @@ import { MarkdownFile } from "../types/markdownTypes";
 import { extractTags } from "./tagOperations";
 import { markdownDir } from "../markdown-navigator";
 import { LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 const execAsync = promisify(exec);
 const CACHE_KEY = "markdownFilesCache";
@@ -42,10 +43,7 @@ export async function getMarkdownFiles(limit?: number): Promise<MarkdownFile[]> 
       const { files, timestamp } = JSON.parse(cached);
       if (now - timestamp < CACHE_EXPIRY) {
         console.log("Using cached files");
-        return files.map((f: { path: string; name: string; lastModified: string; folder: string; tags: string[] }) => ({
-          ...f,
-          lastModified: new Date(f.lastModified),
-        }));
+        return files;
       }
     }
 
@@ -74,9 +72,10 @@ export async function getMarkdownFiles(limit?: number): Promise<MarkdownFile[]> 
           files.push({
             path: filePath,
             name: path.basename(filePath),
-            lastModified: stats.mtime,
+            lastModified: stats.mtime.getTime(),
             folder: folder,
             tags: extractTags(filePath),
+            size: stats.size,
           });
           console.log(`Processed file: ${filePath}, folder: ${folder}`);
         } else {
@@ -88,7 +87,7 @@ export async function getMarkdownFiles(limit?: number): Promise<MarkdownFile[]> 
     }
 
     // Sort by last modified time, with the latest one first
-    const sortedFiles = files.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
+    const sortedFiles = files.sort((a, b) => b.lastModified - a.lastModified);
     if (!limit) {
       await LocalStorage.setItem(CACHE_KEY, JSON.stringify({ files: sortedFiles, timestamp: now }));
     }
@@ -119,22 +118,23 @@ export async function getMarkdownFiles(limit?: number): Promise<MarkdownFile[]> 
         return {
           path: filePath,
           name: path.basename(filePath),
-          lastModified: stats.mtime,
+          lastModified: stats.mtime.getTime(), // Fixed: Added () to call getTime function
           folder: folder,
           tags: extractTags(filePath),
+          size: stats.size,
         };
       });
 
-      const sortedFiles = files.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
+      const sortedFiles = files.sort((a, b) => b.lastModified - a.lastModified);
       if (!limit) {
+        // Define now here as well
         const now = Date.now();
         await LocalStorage.setItem(CACHE_KEY, JSON.stringify({ files: sortedFiles, timestamp: now }));
       }
       return sortedFiles;
     } catch (fallbackError) {
       console.error("Alternative method also failed:", fallbackError);
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to load Markdown files",
         message: "Both mdfind and find commands failed. Check console for details.",
       });
@@ -162,8 +162,7 @@ export async function openWithEditor(filePath: string) {
     });
   } catch (error) {
     console.error(`Error opening file using ${getDefaultEditor()}:`, error);
-    showToast({
-      style: Toast.Style.Failure,
+    showFailureToast({
       title: "Unable to open file",
       message: `Make sure ${getDefaultEditor()} is installed or change your default editor in preferences.`,
     });
@@ -188,8 +187,7 @@ export const openInEditorWithSize = (filePath: string) => {
     `;
     exec(`osascript -e '${appleScript}'`, (error) => {
       if (error) {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "Cannot open Typora",
           message: "Please make sure Typora is installed and supports AppleScript",
         });
@@ -212,8 +210,7 @@ export const createMarkdownFile = (filePath: string, content: string): boolean =
 
     // Check if the file already exists
     if (fs.existsSync(filePath)) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "File already exists",
         message: `${path.basename(filePath)} already exists in the directory`,
       });
@@ -224,8 +221,7 @@ export const createMarkdownFile = (filePath: string, content: string): boolean =
     fs.writeFileSync(filePath, content);
     return true;
   } catch (error) {
-    showToast({
-      style: Toast.Style.Failure,
+    showFailureToast({
       title: "Error creating file",
       message: error instanceof Error ? error.message : "An unknown error occurred",
     });

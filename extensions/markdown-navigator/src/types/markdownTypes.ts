@@ -2,7 +2,7 @@
 export interface MarkdownFile {
   name: string;
   path: string;
-  lastModified: Date;
+  lastModified: number;
   tags: string[];
   size: number;
   folder: string;
@@ -14,7 +14,7 @@ export interface SystemTag {
   color: string;
 }
 
-export const SYSTEM_TAGS: SystemTag[] = [
+export const SYSTEM_TAGS: readonly SystemTag[] = [
   { id: "important", label: "Important", color: "red" },
   { id: "draft", label: "Draft", color: "yellow" },
   { id: "complete", label: "Complete", color: "green" },
