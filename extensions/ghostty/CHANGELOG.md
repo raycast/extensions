@@ -1,6 +1,6 @@
 # Ghostty Changelog
 
-## [Command] {PR_MERGE_DATE}
+## [Command] 2025-03-13
 
 - Add new command to open currently selected Finder directory in new Ghostty Window
 
