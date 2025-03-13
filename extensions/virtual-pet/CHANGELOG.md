@@ -1,3 +1,3 @@
-# Stand up Changelog
+# Virtual Pet Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
