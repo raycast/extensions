@@ -9,7 +9,8 @@
     "rspeicher",
     "amuelli",
     "xilopaint",
-    "krsntn"
+    "krsntn",
+    "mikikiv"
   ],
   "license": "MIT",
   "description": "Manage your smart home with Raycast",
@@ -108,7 +109,17 @@
       "title": "Dashboard",
       "subtitle": "Home Assistant",
       "description": "Open Home Assistant dashboard",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "title": "Dashboard path",
+          "name": "dashboardpath",
+          "required": false,
+          "type": "textfield",
+          "description": "Path to page to open",
+          "placeholder": "/my-dashboard"
+        }
+      ]
     },
     {
       "name": "climate",
