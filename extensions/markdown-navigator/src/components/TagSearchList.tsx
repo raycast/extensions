@@ -88,6 +88,7 @@ export function TagSearchList({ tags, onTagSelect, selectedTag, showSections = t
         <List.Item
           title="All Tags"
           icon={Icon.Tag}
+          subtitle="Select a tag to view related items"
           accessories={[{ text: `${tags.length} tags` }]}
           actions={
             <ActionPanel>

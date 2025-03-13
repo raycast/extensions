@@ -128,7 +128,7 @@ The extension initially loads a limited number of files for better performance. 
 
 ## Support
 
-If you encounter any issues or have suggestions for improvements, please submit an issue on the [GitHub repository](https://github.com/chihkang/markdown-navigator).
+If you encounter any issues or have suggestions for improvements, please submit an issue on the [GitHub repository](https://github.com/raycast/extensions).
 
 ## License
 
