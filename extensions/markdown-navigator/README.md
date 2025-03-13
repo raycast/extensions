@@ -119,7 +119,7 @@ The extension initially loads a limited number of files for better performance. 
 
 - [Raycast](https://raycast.com/)
 - macOS
-- A Markdown editor (Typora is recommended but not required)
+- A Markdown editor
 
 ## Support
 

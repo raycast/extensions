@@ -1,6 +1,7 @@
 // src/components/TagSearchList.tsx
-import { List, ActionPanel, Action, Icon, Color, useNavigation } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, useNavigation } from "@raycast/api";
 import { isSystemTag, getSystemTag } from "../utils/tagOperations";
+import { getTagTintColor } from "../utils/tagColorUtils";
 
 interface TagSearchListProps {
   tags: string[];
@@ -14,21 +15,7 @@ interface TagsAccumulator {
   customTags: string[];
 }
 
-const TAG_COLOR_MAP: Record<string, Color> = {
-  red: Color.Red,
-  yellow: Color.Yellow,
-  green: Color.Green,
-  orange: Color.Orange,
-  blue: Color.Blue,
-};
-
-function getTagTintColor(isSystem: boolean, systemTag?: { color?: string }): Color {
-  if (!isSystem) {
-    return Color.SecondaryText;
-  }
-
-  return TAG_COLOR_MAP[systemTag?.color || ""] || Color.PrimaryText;
-}
+const NAVIGATION_TITLE = "Filter by Tags";
 
 export function TagSearchList({ tags, onTagSelect, selectedTag, showSections = true }: TagSearchListProps) {
   const { pop } = useNavigation();
@@ -52,9 +39,10 @@ export function TagSearchList({ tags, onTagSelect, selectedTag, showSections = t
     pop();
   };
 
+  // Render list with sections if enabled and tags exist
   if (showSections && (systemTags.length > 0 || customTags.length > 0)) {
     return (
-      <List navigationTitle="Filter by Tags">
+      <List navigationTitle={NAVIGATION_TITLE}>
         <List.Item
           title="All Tags"
           icon={Icon.Tag}
@@ -66,12 +54,14 @@ export function TagSearchList({ tags, onTagSelect, selectedTag, showSections = t
           }
         />
 
+        {/* System tags section */}
         {systemTags.length > 0 && (
           <List.Section title="System Tags">
             {systemTags.map((tag) => renderTagItem(tag, true, handleTagSelection, selectedTag))}
           </List.Section>
         )}
 
+        {/* Custom tags section */}
         {customTags.length > 0 && (
           <List.Section title="Custom Tags">
             {customTags.map((tag) => renderTagItem(tag, false, handleTagSelection, selectedTag))}
@@ -80,7 +70,7 @@ export function TagSearchList({ tags, onTagSelect, selectedTag, showSections = t
       </List>
     );
   } else {
-    // Sort tags with system tags first
+    // Flat list with sorted tags (system tags first)
     const sortedTags = [...tags].sort((a, b) => {
       const aIsSystem = isSystemTag(a);
       const bIsSystem = isSystemTag(b);
@@ -91,7 +81,7 @@ export function TagSearchList({ tags, onTagSelect, selectedTag, showSections = t
     });
 
     return (
-      <List navigationTitle="Filter by Tags">
+      <List navigationTitle={NAVIGATION_TITLE}>
         <List.Item
           title="All Tags"
           icon={Icon.Tag}
@@ -112,7 +102,20 @@ export function TagSearchList({ tags, onTagSelect, selectedTag, showSections = t
   }
 }
 
-function renderTagItem(tag: string, isSystem: boolean, onTagSelect: (tag: string) => void, selectedTag: string | null) {
+/**
+ * Renders a list item for a tag with appropriate styling and actions
+ *
+ * @param tag - The tag name
+ * @param isSystem - Whether this is a system tag
+ * @param handleTagSelection - Function to handle tag selection with navigation
+ * @param selectedTag - Currently selected tag for highlighting
+ */
+function renderTagItem(
+  tag: string,
+  isSystem: boolean,
+  handleTagSelection: (tag: string) => void,
+  selectedTag: string | null,
+) {
   const systemTag = isSystem ? getSystemTag(tag) : undefined;
   const isSelected = selectedTag === tag;
 
@@ -132,7 +135,7 @@ function renderTagItem(tag: string, isSystem: boolean, onTagSelect: (tag: string
       ]}
       actions={
         <ActionPanel>
-          <Action title="Filter by Tag" onAction={() => onTagSelect(tag)} />
+          <Action title="Filter by Tag" onAction={() => handleTagSelection(tag)} />
         </ActionPanel>
       }
     />

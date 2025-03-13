@@ -1,4 +1,4 @@
-import { List, showToast, Toast, Icon, getPreferenceValues, useNavigation, Color } from "@raycast/api";
+import { List, showToast, Toast, Icon, getPreferenceValues, useNavigation } from "@raycast/api";
 import { usePromise, showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
 import fs from "fs";
@@ -12,6 +12,7 @@ import { CommonActions, LoadMoreAction } from "./components/ActionComponents";
 import { MarkdownEmptyView } from "./components/MarkdownEmptyView";
 import { TagSearchList } from "./components/TagSearchList";
 import path from "path";
+import { getTagTintColor } from "./utils/tagColorUtils";
 
 export const markdownDir = getPreferenceValues<{ markdownDir: string }>().markdownDir;
 
@@ -95,7 +96,13 @@ export default function Command() {
   useEffect(() => {
     revalidate();
   }, [loadLimit, revalidate]);
-
+  useEffect(() => {
+    if (selectedTag !== undefined) {
+      // Skip the initial render
+      console.log("Revalidating due to tag change:", selectedTag);
+      revalidate();
+    }
+  }, [selectedTag, revalidate]);
   // Filtering and paging data
   const filteredData = data
     ? data.filter(
@@ -146,7 +153,7 @@ export default function Command() {
         const newLimit = prevLimit + LOAD_INCREMENT;
         console.log(`Increasing load limit from ${prevLimit} to ${newLimit}`);
 
-        // 在狀態更新後顯示 Toast
+        // Display a Toast after the status is updated
         setTimeout(() => {
           showToast({
             style: Toast.Style.Success,
@@ -170,11 +177,6 @@ export default function Command() {
   const handleTagSelect = (tag: string) => {
     setSelectedTag(tag || null);
     setCurrentPage(0);
-    console.log("Selected tag:", tag);
-    // Force revalidation of data
-    setTimeout(() => {
-      revalidate();
-    }, 100);
   };
 
   // Show tag search list
@@ -240,18 +242,7 @@ export default function Command() {
                       value={tag}
                       icon={{
                         source: Icon.Circle,
-                        tintColor:
-                          systemTag?.color === "red"
-                            ? Color.Red
-                            : systemTag?.color === "yellow"
-                              ? Color.Yellow
-                              : systemTag?.color === "green"
-                                ? Color.Green
-                                : systemTag?.color === "orange"
-                                  ? Color.Orange
-                                  : systemTag?.color === "blue"
-                                    ? Color.Blue
-                                    : undefined,
+                        tintColor: isSystemTag(tag) ? getTagTintColor(true, systemTag) : undefined,
                       }}
                     />
                   );

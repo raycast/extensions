@@ -1,7 +1,7 @@
 // src/utils/tagOperations.ts
 import fs from "fs";
 import { SYSTEM_TAGS, SystemTag } from "../types/markdownTypes";
-
+import { showFailureToast } from "@raycast/utils";
 // Check if it is a color code label
 export const isColorTag = (tag: string): boolean => {
   // Check if it is a 3 or 6 digit hexadecimal color code
@@ -55,9 +55,12 @@ export const extractTags = (filePath: string): string[] => {
     }
 
     // Remove duplicates and return
-    return [...new Set(tags)].filter(Boolean);
+    return Array.from(new Set(tags.filter(Boolean)));
   } catch (error) {
-    console.error(`Error extracting tags from ${filePath}:`, error);
+    showFailureToast({
+      title: `Error extracting tags from ${filePath}`,
+      message: error instanceof Error ? error.message : String(error),
+    });
     return [];
   }
 };

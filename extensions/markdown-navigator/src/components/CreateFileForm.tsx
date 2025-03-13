@@ -6,6 +6,7 @@ import path from "path";
 import { homedir } from "os";
 import { SYSTEM_TAGS } from "../types/markdownTypes";
 import { showFailureToast } from "@raycast/utils";
+
 interface CreateFileFormProps {
   rootDirectory: string;
   currentFolder?: string;

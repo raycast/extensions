@@ -18,6 +18,8 @@ import path from "path";
 import fs from "fs";
 import { exec } from "child_process";
 import { showFailureToast } from "@raycast/utils";
+import { formatDate } from "../utils/dateUtils";
+import { getTagTintColor } from "../utils/tagColorUtils";
 
 interface FileListItemProps {
   file: MarkdownFile;
@@ -35,22 +37,6 @@ interface FileListItemProps {
   setSelectedTag: (tag: string | null) => void;
 }
 
-const TAG_COLOR_MAP: Record<string, Color> = {
-  red: Color.Red,
-  yellow: Color.Yellow,
-  green: Color.Green,
-  orange: Color.Orange,
-  blue: Color.Blue,
-};
-
-function getTagTintColor(isSystem: boolean, systemTag?: { color?: string }): Color {
-  if (!isSystem) {
-    return Color.SecondaryText;
-  }
-
-  return TAG_COLOR_MAP[systemTag?.color || ""] || Color.PrimaryText;
-}
-
 export function FileListItem({
   file,
   showColorTags,
@@ -66,26 +52,6 @@ export function FileListItem({
   selectedTag,
   setSelectedTag,
 }: FileListItemProps) {
-  // Format the date
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const day = 24 * 60 * 60 * 1000;
-
-    if (diff < day) {
-      return `Today, ${date.toLocaleTimeString()}`;
-    } else if (diff < 2 * day) {
-      return `Yesterday, ${date.toLocaleTimeString()}`;
-    } else {
-      return date.toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    }
-  };
-
   // Confirm and delete file
   const confirmDelete = async () => {
     if (
@@ -130,8 +96,7 @@ export function FileListItem({
         throw new Error("Failed to move file to trash");
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Error moving file to trash",
         message: error instanceof Error ? error.message : String(error),
       });
