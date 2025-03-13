@@ -1,6 +1,6 @@
 # Raycast Notification Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-03-13
 
 - Remove unused files
 
