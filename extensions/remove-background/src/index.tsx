@@ -161,7 +161,6 @@ export default function Command() {
             title: "Output folder does not exist",
             message: `Folder not found: ${outputDir}`,
           });
-          setIsLoading(false);
           return;
         }
 
