@@ -6,7 +6,7 @@ import { homedir } from "os";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { clearMarkdownFilesCache } from "./fileOperations";
-
+import { showFailureToast } from "@raycast/utils";
 const execPromise = promisify(exec);
 
 // Get user preferences
@@ -189,8 +189,7 @@ async function createMarkdownFileHelper({
     return filePath;
   } catch (error) {
     console.error("Error creating Markdown file:", error);
-    await showToast({
-      style: Toast.Style.Failure,
+    showFailureToast({
       title: "Failed to create Markdown file",
       message: String(error),
     });

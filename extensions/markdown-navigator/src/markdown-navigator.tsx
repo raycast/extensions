@@ -1,8 +1,8 @@
 import { List, showToast, Toast, Icon, getPreferenceValues, useNavigation } from "@raycast/api";
 import { usePromise, showFailureToast } from "@raycast/utils";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import fs from "fs";
-import { getMarkdownFiles } from "./utils/fileOperations";
+import { getMarkdownFiles, clearMarkdownFilesCache } from "./utils/fileOperations";
 import { getAllUniqueTags, isSystemTag, getSystemTag } from "./utils/tagOperations";
 import { groupFilesByFolder } from "./utils/groupOperations";
 import { CreateFileForm } from "./components/CreateFileForm";
@@ -13,7 +13,7 @@ import { MarkdownEmptyView } from "./components/MarkdownEmptyView";
 import { TagSearchList } from "./components/TagSearchList";
 import path from "path";
 import { getTagTintColor } from "./utils/tagColorUtils";
-import { clearMarkdownFilesCache } from "./utils/fileOperations";
+
 export const markdownDir = getPreferenceValues<{ markdownDir: string }>().markdownDir;
 
 const ITEMS_PER_PAGE = 20;
@@ -96,51 +96,61 @@ export default function Command() {
   useEffect(() => {
     revalidate();
   }, [loadLimit, revalidate]);
-  useEffect(() => {
-    if (selectedTag !== undefined) {
-      // Skip the initial render
-      console.log("Revalidating due to tag change:", selectedTag);
-      revalidate();
-    }
-  }, [selectedTag, revalidate]);
+
   // Filtering and paging data
-  const filteredData = data
-    ? data.filter(
-        (file) =>
-          (file.name.toLowerCase().includes(searchText.toLowerCase()) ||
-            file.folder.toLowerCase().includes(searchText.toLowerCase())) &&
-          (!selectedTag || file.tags.includes(selectedTag)),
-      )
-    : [];
+  const filteredData = useMemo(() => {
+    return data
+      ? data.filter(
+          (file) =>
+            (file.name.toLowerCase().includes(searchText.toLowerCase()) ||
+              file.folder.toLowerCase().includes(searchText.toLowerCase())) &&
+            (!selectedTag || file.tags.includes(selectedTag)),
+        )
+      : [];
+  }, [data, searchText, selectedTag]);
 
   console.log("Filtered data count:", filteredData.length);
+
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
-  const paginatedData = filteredData.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE);
+
+  const paginatedData = useMemo(() => {
+    return filteredData.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE);
+  }, [filteredData, currentPage]);
+
   console.log("Paginated data count:", paginatedData.length);
 
+  // Use useMemo to optimize the grouping operation
+  const groupedData = useMemo(() => {
+    console.log("Computing grouped data");
+    return groupFilesByFolder(paginatedData);
+  }, [paginatedData]);
+
   // Calculate the current page display range
-  const startItem = currentPage * ITEMS_PER_PAGE + 1;
-  const endItem = Math.min((currentPage + 1) * ITEMS_PER_PAGE, filteredData.length);
-  const pageInfoText =
-    filteredData.length > 0
+  const pageInfoText = useMemo(() => {
+    const startItem = currentPage * ITEMS_PER_PAGE + 1;
+    const endItem = Math.min((currentPage + 1) * ITEMS_PER_PAGE, filteredData.length);
+    return filteredData.length > 0
       ? `Showing ${startItem}-${endItem} of ${filteredData.length} (Total ${totalFiles} files)`
       : "File not found";
+  }, [currentPage, filteredData.length, totalFiles]);
 
   const forceRevalidate = useCallback(async () => {
     console.log("Force revalidating file list");
-
     await clearMarkdownFilesCache();
     revalidate();
   }, [revalidate]);
+
   // Navigate to the Create File form
-  const showCreateFileForm = () => {
+  const showCreateFileForm = useCallback(() => {
     push(
       <CreateFileForm rootDirectory={rootDirectory} currentFolder={selectedFolder} onFileCreated={forceRevalidate} />,
     );
-  };
+  }, [push, rootDirectory, selectedFolder, forceRevalidate]);
 
   // Get all tags
-  const allTags = data ? getAllUniqueTags(data, showColorTags) : [];
+  const allTags = useMemo(() => {
+    return data ? getAllUniqueTags(data, showColorTags) : [];
+  }, [data, showColorTags]);
 
   // Update rootDirectory if data is available
   useEffect(() => {
@@ -155,7 +165,7 @@ export default function Command() {
   }, [data, rootDirectory, markdownDir]);
 
   // Load more files action
-  const loadMoreFiles = () => {
+  const loadMoreFiles = useCallback(() => {
     if (loadLimit < totalFiles) {
       setLoadLimit((prevLimit) => {
         const newLimit = prevLimit + LOAD_INCREMENT;
@@ -179,36 +189,48 @@ export default function Command() {
         message: `Already loaded all ${totalFiles} files`,
       });
     }
-  };
+  }, [loadLimit, totalFiles]);
 
   // Handle tag selection
-  const handleTagSelect = (tag: string) => {
+  const handleTagSelect = useCallback((tag: string) => {
     setSelectedTag(tag || null);
     setCurrentPage(0);
-  };
+  }, []);
 
   // Show tag search list
-  const showTagSearchList = () => {
+  const showTagSearchList = useCallback(() => {
     console.log("Showing tag search list");
     push(<TagSearchList tags={allTags} onTagSelect={handleTagSelect} selectedTag={selectedTag} showSections={true} />);
-  };
+  }, [push, allTags, handleTagSelect, selectedTag]);
 
-  const commonActionsProps = {
-    showCreateFileForm,
-    revalidate,
-    loadMoreFiles,
-    showColorTags,
-    setShowColorTags,
-    selectedTag,
-    setSelectedTag,
-    showTagSearchList,
-  };
+  const commonActionsProps = useMemo(
+    () => ({
+      showCreateFileForm,
+      revalidate,
+      loadMoreFiles,
+      showColorTags,
+      setShowColorTags,
+      selectedTag,
+      setSelectedTag,
+      showTagSearchList,
+    }),
+    [
+      showCreateFileForm,
+      revalidate,
+      loadMoreFiles,
+      showColorTags,
+      setShowColorTags,
+      selectedTag,
+      setSelectedTag,
+      showTagSearchList,
+    ],
+  );
 
   // Common actions for both main view and empty view
   const commonActions = <CommonActions {...commonActionsProps} />;
 
   // Add a footer section to display load status
-  const renderFooter = () => {
+  const renderFooter = useCallback(() => {
     if (loadLimit < totalFiles) {
       return (
         <List.Item
@@ -219,17 +241,32 @@ export default function Command() {
       );
     }
     return null;
-  };
+  }, [loadLimit, totalFiles, loadMoreFiles]);
+
+  const handleSearchTextChange = useCallback((text: string) => {
+    setSearchText(text);
+    setCurrentPage(0);
+    console.log("Search text changed:", text);
+  }, []);
+
+  const handleSelectionChange = useCallback(
+    (id: string | null) => {
+      if (id) {
+        const file = paginatedData.find((f) => f.path === id);
+        if (file) {
+          setSelectedFolder(file.folder);
+          console.log("Selected folder:", file.folder);
+        }
+      }
+    },
+    [paginatedData],
+  );
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search file name or folder..."
-      onSearchTextChange={(text) => {
-        setSearchText(text);
-        setCurrentPage(0);
-        console.log("Search text changed:", text);
-      }}
+      onSearchTextChange={handleSearchTextChange}
       searchText={searchText}
       navigationTitle={`Markdown files (${filteredData.length} items)`}
       searchBarAccessory={
@@ -269,15 +306,7 @@ export default function Command() {
         ) : undefined
       }
       actions={commonActions}
-      onSelectionChange={(id) => {
-        if (id) {
-          const file = paginatedData.find((f) => f.path === id);
-          if (file) {
-            setSelectedFolder(file.folder);
-            console.log("Selected folder:", file.folder);
-          }
-        }
-      }}
+      onSelectionChange={handleSelectionChange}
     >
       {filteredData.length > 0 ? (
         <>
@@ -298,8 +327,8 @@ export default function Command() {
             />
           )}
 
-          {/* Group by folder */}
-          {Object.entries(groupFilesByFolder(paginatedData)).map(([folder, files]) => (
+          {/* Group by folder - using memoized groupedData */}
+          {Object.entries(groupedData).map(([folder, files]) => (
             <List.Section key={folder} title={folder} subtitle={`${files.length} files`}>
               {files.map((file) => (
                 <FileListItem
