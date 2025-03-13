@@ -295,6 +295,7 @@
 /extensions/connect-to-vpn                                          @rasmusbe @sato11 @stonerl @vpukhanov @Yshmeel
 /extensions/consoledev                                              @Rawnly @aliaksandrZh
 /extensions/contentful                                              @ewgenius @xmok
+/extensions/contexts                                                @marcmagn1
 /extensions/control-d                                               @httpjamesm
 /extensions/control-viscosity                                       @lialios
 /extensions/conventional-comments                                   @krzysztofzuraw
@@ -966,6 +967,7 @@
 /extensions/maven-central-repository                                @koinzhang
 /extensions/mayar                                                   @moerdowo
 /extensions/mbta-tracker                                            @djpowers
+/extensions/mcp                                                     @EvanZhouDev
 /extensions/md-to-excel                                             @victor-defi
 /extensions/media-converter                                         @llfmaia @wattmalsh @samuelkraft
 /extensions/medialister-marketplace-helper                          @td-sedov
