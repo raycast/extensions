@@ -56,6 +56,28 @@
       "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "turn-on",
+      "title": "Turn On",
+      "description": "Turns on the Elgato Key Lights"
+    },
+    {
+      "name": "turn-off",
+      "title": "Turn Off",
+      "description": "Turns off the Elgato Key Lights"
+    },
+    {
+      "name": "update-settings",
+      "title": "Update Settings",
+      "description": "Update brightness, temperature, or power state of Elgato Key Lights"
+    },
+    {
+      "name": "get-settings",
+      "title": "Get Settings",
+      "description": "Get the brightness, temperature, and power state of all Elgato Key Lights"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.93.0",
     "axios": "^1.2.0",
