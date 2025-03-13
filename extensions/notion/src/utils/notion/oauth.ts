@@ -58,11 +58,6 @@ export function getNotionToken() {
 
 // Wrapper function to handle token and client initialization for all tools
 export async function withNotionClient<T>(fn: (client: Client) => Promise<T>): Promise<T> {
-  const token = getNotionToken();
-  if (!token) {
-    throw new Error("No Notion token available");
-  }
-
-  const client = new Client({ auth: token });
+  const client = getNotionClient();
   return fn(client);
 }
