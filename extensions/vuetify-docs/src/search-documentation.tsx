@@ -50,8 +50,8 @@ export default function Command() {
         setState((previous) => ({ ...previous, searchText: newValue }));
       }}
     >
-      {filteredSections.map((section, index) => (
-        <List.Section key={index} title={section.title}>
+      {filteredSections.map((section) => (
+        <List.Section key={section.title} title={section.title}>
           {section.items.map((item) => (
             <List.Item
               key={item.title}

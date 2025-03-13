@@ -1,4 +1,5 @@
-import { open, captureException, showToast, Toast } from "@raycast/api";
+import { open, captureException } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   const url = "https://vuetifyjs.com/en/";
@@ -6,9 +7,6 @@ export default async function Command() {
     await open(url);
   } catch (e: unknown) {
     captureException(e);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: `Could not open ${url}.`,
-    });
+    await showFailureToast(`Could not open ${url}.`);
   }
 }
