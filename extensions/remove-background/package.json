@@ -6,13 +6,14 @@
   "icon": "command-icon.png",
   "author": "maantje",
   "contributors": [
-    "FezVrasta"
+    "FezVrasta",
+    "ScottNiswander"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Remove Background From Image",
+      "title": "Remove Background from Image",
       "subtitle": "remove.bg",
       "description": "Remove the background from an image",
       "mode": "view",
@@ -20,16 +21,149 @@
         {
           "name": "apiKey",
           "required": true,
-          "title": "API key",
+          "title": "API Key",
+          "label": "API Key",
           "type": "password",
           "description": "You can find your API key on the remove.bg Dashboard."
+        },
+        {
+          "name": "cropToContent",
+          "required": false,
+          "title": "Crop Image to Content",
+          "label": "Crop Image to Content",
+          "type": "checkbox",
+          "default": false,
+          "description": "Automatically crop image to content boundaries"
+        },
+        {
+          "name": "filenameFormat",
+          "required": false,
+          "title": "Filename Format",
+          "label": "Filename Format",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "No Change",
+              "value": "nochange"
+            },
+            {
+              "title": "Prepend Text",
+              "value": "prepend"
+            },
+            {
+              "title": "Append Text",
+              "value": "append"
+            }
+          ],
+          "default": "nochange",
+          "description": "How to modify output filenames"
+        },
+        {
+          "name": "fileNameModifier",
+          "required": false,
+          "title": "Filename Modifier",
+          "label": "Filename Modifier",
+          "type": "textfield",
+          "placeholder": "no-bg-",
+          "default": "no-bg-",
+          "description": "Text to add to filenames"
+        },
+        {
+          "name": "defaultSize",
+          "required": false,
+          "title": "Default Size",
+          "label": "Default Size",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Preview (0.25 MP)",
+              "value": "preview"
+            },
+            {
+              "title": "Auto (Up to 25 MP)",
+              "value": "auto"
+            },
+            {
+              "title": "Full (Up to 25 MP)",
+              "value": "full"
+            },
+            {
+              "title": "50MP (Up to 50 MP)",
+              "value": "50MP"
+            }
+          ],
+          "default": "auto",
+          "description": "Default output size"
+        },
+        {
+          "name": "defaultType",
+          "required": false,
+          "title": "Default Object Type",
+          "label": "Default Object Type",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Auto (Detect Automatically)",
+              "value": "auto"
+            },
+            {
+              "title": "Person",
+              "value": "person"
+            },
+            {
+              "title": "Product",
+              "value": "product"
+            },
+            {
+              "title": "Car",
+              "value": "car"
+            },
+            {
+              "title": "Animal",
+              "value": "animal"
+            },
+            {
+              "title": "Graphic",
+              "value": "graphic"
+            },
+            {
+              "title": "Transportation",
+              "value": "transportation"
+            }
+          ],
+          "default": "auto",
+          "description": "Default object type to extract"
+        },
+        {
+          "name": "defaultFormat",
+          "required": false,
+          "title": "Default Format",
+          "label": "Default Format",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "PNG",
+              "value": "png"
+            },
+            {
+              "title": "JPG",
+              "value": "jpg"
+            },
+            {
+              "title": "ZIP (PNG + Mask)",
+              "value": "zip"
+            }
+          ],
+          "default": "png",
+          "description": "Default output format"
         }
       ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.30.3",
-    "raycast-toolkit": "^1.0.2",
+    "@raycast/utils": "^1.0.0",
+    "raycast-toolkit": "^1.0.6",
     "remove.bg": "^1.3.0"
   },
   "devDependencies": {
@@ -39,11 +173,13 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
