@@ -1,5 +1,8 @@
 # Notion Changelog
 
+## [notion-ai-token-fix] - 2025-03-13
+Fixed NotionAI not using token in dev mode
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Use pagination for fetching users list] - 2025-01-24
