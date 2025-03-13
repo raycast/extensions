@@ -108,7 +108,8 @@ export const MyMindResponseSchema = z.record(CardSchema);
 
 export const CreateNoteResponseSchema = z.object({
   id: z.string(),
-  type: z.literal("Note"),
+  // type: z.enum(["Note", "WebPage", "YouTubeVideo", "Post", "MusicRecording"]), // too many different types and no docs
+  type: z.string(),
   title: z.string(),
   created: z.string(),
 });
