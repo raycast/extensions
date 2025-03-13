@@ -2,6 +2,7 @@ import { List, showToast, Toast, Icon, Clipboard } from "@raycast/api";
 import { useState, useMemo } from "react";
 import { basicColors, extendedColors } from "./constants";
 import { ColorListItem } from "./components/color-list-item";
+import { ColorSection } from "./components/color-section";
 import { searchColors, ColorResult } from "./utils/search-utils";
 import { showFailureToast } from "@raycast/utils";
 import { groupColorsByShade } from "./utils/color-utils";
@@ -69,6 +70,9 @@ export default function Command() {
     }
   };
 
+  const handleToggleFormat = () => setShowHex(!showHex);
+  const handleToggleDetail = () => setIsDetailVisible(!isDetailVisible);
+
   return (
     <List
       searchText={searchText}
@@ -93,19 +97,16 @@ export default function Command() {
     >
       {viewOption === "grouped" && groupedColors ? (
         sortedSections.map(([shade, colors]) => (
-          <List.Section key={shade} title={shade.charAt(0).toUpperCase() + shade.slice(1)}>
-            {colors.map((color) => (
-              <ColorListItem
-                key={`${color.categories[0]}-${color.name}-${color.hex}-${color.rgb}-${color.format}`}
-                color={color}
-                onSelect={handleColorSelect}
-                showHex={showHex}
-                onToggleFormat={() => setShowHex(!showHex)}
-                isDetailVisible={isDetailVisible}
-                onToggleDetail={() => setIsDetailVisible(!isDetailVisible)}
-              />
-            ))}
-          </List.Section>
+          <ColorSection
+            key={shade}
+            shade={shade}
+            colors={colors}
+            showHex={showHex}
+            isDetailVisible={isDetailVisible}
+            onColorSelect={handleColorSelect}
+            onToggleFormat={handleToggleFormat}
+            onToggleDetail={handleToggleDetail}
+          />
         ))
       ) : (
         filteredColors.map((color) => (
@@ -114,9 +115,9 @@ export default function Command() {
             color={color}
             onSelect={handleColorSelect}
             showHex={showHex}
-            onToggleFormat={() => setShowHex(!showHex)}
+            onToggleFormat={handleToggleFormat}
             isDetailVisible={isDetailVisible}
-            onToggleDetail={() => setIsDetailVisible(!isDetailVisible)}
+            onToggleDetail={handleToggleDetail}
           />
         ))
       )}
