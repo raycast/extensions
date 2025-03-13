@@ -39,7 +39,7 @@ export default function Command() {
         await showToast(Toast.Style.Success, "Bundle opened in default browser");
       }
     } catch (error) {
-      await showToast(Toast.Style.Failure, "Failed to open bundle", String(error));
+      await showFailureToast("Failed to open bundle", String(error));
     }
   };
 
