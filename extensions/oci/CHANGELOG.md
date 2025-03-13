@@ -2,7 +2,7 @@
 
 ## [] - {PR_MERGE_DATE}
 
-- Terminate Instance
+- (Confrm and) Terminate Instance
 - Add "Open in OCI" `Action`
 
 ## [Perform Instance Actions] - 2025-02-13

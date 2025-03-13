@@ -1,5 +1,5 @@
 /* eslint-disable @raycast/prefer-title-case */
-import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { getFavicon, showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import common = require("oci-common");
 import * as core from "oci-core";
@@ -74,6 +74,20 @@ function Core({ provider }: { provider: common.ConfigFileAuthenticationDetailsPr
       default:
         return undefined;
     }
+  }
+  
+  async function confirmAndTerminate(instance: Instance) {
+    const options: Alert.Options = {
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+      title: "Terminate instance",
+      message: `Do you want to permanently delete instance "${instance.displayName || instance.id}"?`,
+      primaryAction: {
+        title: "Terminate",
+        style: Alert.ActionStyle.Destructive
+      }
+    }
+
+    if (await confirmAlert(options)) doInstanceAction(instance, "TERMINATE");
   }
 
   async function doInstanceAction(instance: Instance, action: InstanceActionRequest["action"]) {
@@ -161,7 +175,7 @@ function Core({ provider }: { provider: common.ConfigFileAuthenticationDetailsPr
                   {instance.lifecycleState === Instance.LifecycleState.Stopped && (
                     <Action icon={Icon.Play} title="Start" onAction={() => doInstanceAction(instance, "START")} />
                   )}
-                  {![Instance.LifecycleState.Terminated, Instance.LifecycleState.Terminating].includes(instance.lifecycleState) && <Action icon={Icon.Trash} title="Terminate" onAction={() => doInstanceAction(instance, "TERMINATE")} style={Action.Style.Destructive} />}
+                  {![Instance.LifecycleState.Terminated, Instance.LifecycleState.Terminating].includes(instance.lifecycleState) && <Action icon={Icon.Trash} title="Terminate" onAction={() => confirmAndTerminate(instance)} style={Action.Style.Destructive} />}
                 </ActionPanel.Section>
               </ActionPanel>
             }
