@@ -74,7 +74,7 @@ function UpdateTimeEntryForm({ timeEntry, revalidateTimeEntries }: UpdateTimeEnt
     if (selectedProject) return clients.filter((client) => !client.archived && client.id === selectedProject.client_id);
     else
       return clients.filter((client) => !client.archived && (client.wid === selectedWorkspace || !selectedWorkspace));
-  }, [projects, selectedWorkspace, selectedProject, showClientsInForm]);
+  }, [projects, selectedWorkspace, selectedProject, showClientsInForm, clients]);
 
   const filteredProjects = useMemo(() => {
     if (!showProjectsInForm) return [];
