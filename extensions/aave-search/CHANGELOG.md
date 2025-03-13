@@ -1,6 +1,6 @@
 # Aave Search Changelog
 
-## [Initial Version] - 2024-03-21
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 - Initial release of Aave Search extension
