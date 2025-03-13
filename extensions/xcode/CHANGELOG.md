@@ -1,5 +1,11 @@
 # Xcode Changelog
 
+## [AI Tools & Improved Search Recent Projects] - 2025-03-13
+
+- Added AI tools to search for your recent Xcode projects, Swift packages, boot and shutdown simulators, and more.
+- Improved the "Search Recent Projects" command to sort the most recent projects by their last usage.
+- Removed the "Search Apple Developer Documentation" command due to the unavailability of the underlying API.
+
 ## [Improvements] - 2024-12-18
 
 - Improved the ordering of the "Search Recent Projects" command to show the most recent projects first.
