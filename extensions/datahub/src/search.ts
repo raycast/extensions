@@ -1,5 +1,6 @@
 import { open } from "@raycast/api";
 import { DATAHUB_FRONTEND } from "./utils/constants";
+import { showFailureToast } from "@raycast/utils";
 
 interface Arguments {
   query: string;
@@ -11,7 +12,6 @@ export default async function main(props: { arguments: Arguments }) {
   try {
     await open(url);
   } catch (error) {
-    console.error("Failed to open URL:", error);
-    throw error;
+    await showFailureToast(error, { title: "Failed to open URL", message: String(error) });
   }
 }
