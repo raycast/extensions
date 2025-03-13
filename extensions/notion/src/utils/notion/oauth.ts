@@ -2,6 +2,17 @@ import { Client } from "@notionhq/client";
 import { OAuth, getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 
+const { notion_token } = getPreferenceValues();
+
+// Initialize the client with the personal access token if available
+let notion: Client | null = null;
+if (notion_token) {
+  notion = new Client({ 
+    auth: notion_token,
+    timeoutMs: 10000 // 10 second timeout
+  });
+}
+
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Notion",
@@ -9,10 +20,6 @@ const client = new OAuth.PKCEClient({
   providerId: "notion",
   description: "Connect your Notion account",
 });
-
-const { notion_token } = getPreferenceValues<Preferences>();
-
-let notion: Client | null = null;
 
 export const notionService = new OAuthService({
   client,
@@ -23,14 +30,39 @@ export const notionService = new OAuthService({
   personalAccessToken: notion_token,
   extraParameters: { owner: "user" },
   onAuthorize({ token }) {
-    notion = new Client({ auth: token });
+    notion = new Client({ 
+      auth: token,
+      timeoutMs: 10000 // 10 second timeout
+    });
   },
 });
 
 export function getNotionClient() {
   if (!notion) {
-    throw new Error("No Notion client initialized");
+    if (notion_token) {
+      notion = new Client({ 
+        auth: notion_token,
+        timeoutMs: 10000 // 10 second timeout
+      });
+    } else {
+      throw new Error("No Notion client initialized and no token available");
+    }
+  }
+  return notion;
+}
+
+// Export a function to get the token for AI tools
+export function getNotionToken() {
+  return notion_token;
+}
+
+// Wrapper function to handle token and client initialization for all tools
+export async function withNotionClient<T>(fn: (client: Client) => Promise<T>): Promise<T> {
+  const token = getNotionToken();
+  if (!token) {
+    throw new Error("No Notion token available");
   }
 
-  return notion;
+  const client = new Client({ auth: token });
+  return fn(client);
 }
