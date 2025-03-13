@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "smbdy",
   "categories": [
-    "Developer Tools"
+    "Developer Tools",
+    "Finance"
   ],
   "license": "MIT",
   "commands": [
