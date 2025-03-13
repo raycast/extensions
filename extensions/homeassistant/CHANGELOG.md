@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Update] {PR_MERGE_DATE}
+## [Update] - {PR_MERGE_DATE}
 
 - Added preference to Dashboard command to allow opening specific HA page.
 
