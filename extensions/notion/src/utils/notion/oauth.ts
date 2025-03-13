@@ -7,9 +7,9 @@ const { notion_token } = getPreferenceValues();
 // Initialize the client with the personal access token if available
 let notion: Client | null = null;
 if (notion_token) {
-  notion = new Client({ 
+  notion = new Client({
     auth: notion_token,
-    timeoutMs: 10000 // 10 second timeout
+    timeoutMs: 10000, // 10 second timeout
   });
 }
 
@@ -30,9 +30,9 @@ export const notionService = new OAuthService({
   personalAccessToken: notion_token,
   extraParameters: { owner: "user" },
   onAuthorize({ token }) {
-    notion = new Client({ 
+    notion = new Client({
       auth: token,
-      timeoutMs: 10000 // 10 second timeout
+      timeoutMs: 10000, // 10 second timeout
     });
   },
 });
@@ -40,9 +40,9 @@ export const notionService = new OAuthService({
 export function getNotionClient() {
   if (!notion) {
     if (notion_token) {
-      notion = new Client({ 
+      notion = new Client({
         auth: notion_token,
-        timeoutMs: 10000 // 10 second timeout
+        timeoutMs: 10000, // 10 second timeout
       });
     } else {
       throw new Error("No Notion client initialized and no token available");
