@@ -1,5 +1,9 @@
 # Dub Link Shortener Changelog
 
+## [A.I Extension support] - 2025-03-13
+
+- Added tools to work with Raycast Pro's new A.I extensions feature.
+
 ## [Improvements] - 2025-03-12
 
 - Add a toggle to show/hide details in the search links command

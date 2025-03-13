@@ -18,7 +18,8 @@
     "stelo",
     "steventey",
     "devkiran",
-    "alexs"
+    "alexs",
+    "JoshuaRileyDev"
   ],
   "license": "MIT",
   "commands": [
@@ -45,6 +46,38 @@
       "title": "Search Links",
       "description": "Search shortened links with dub.co in different workspaces",
       "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "getAllShortLinks",
+      "title": "Get All Short Links",
+      "description": "Get all shortened links from dub.co"
+    },
+    {
+      "name": "getAllDomains",
+      "title": "Get All Domains",
+      "description": "Get all domains from dub.co"
+    },
+    {
+      "name": "createShortLink",
+      "title": "Create Short Link",
+      "description": "Create a new shortened link with dub.co"
+    },
+    {
+      "name": "deleteShortLink",
+      "title": "Delete Short Link",
+      "description": "Delete a shortened link from dub.co"
+    },
+    {
+      "name": "getAllTags",
+      "title": "Get All Tags",
+      "description": "Get all tags from dub.co"
+    },
+    {
+      "name": "getShortLinksCount",
+      "title": "Get Short Links Count",
+      "description": "Get the number of shortened links in dub.co"
     }
   ],
   "dependencies": {
