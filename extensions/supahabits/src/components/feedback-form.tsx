@@ -36,10 +36,10 @@ export default function FeedbackForm() {
         </ActionPanel>
       }
     >
-      <Form.TextArea 
-        id="message" 
-        title="Feedback" 
-        placeholder="Please share your thoughts, suggestions or report any issues..." 
+      <Form.TextArea
+        id="message"
+        title="Feedback"
+        placeholder="Please share your thoughts, suggestions or report any issues..."
       />
       <Form.Description
         title="Note"
