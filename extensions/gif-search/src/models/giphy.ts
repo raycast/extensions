@@ -3,7 +3,7 @@ import { formatRelative } from "date-fns";
 import type { IGif as GiphyGif } from "@giphy/js-types";
 
 import { APIOpt, IGif, IGifAPI, slugify } from "../models/gif";
-import { getPreferenceValues } from "@raycast/api";
+import { getGiphyLocale } from "../preferences";
 
 const API_BASE_URL = "https://gif-search.raycast.com/api/giphy";
 
@@ -14,7 +14,7 @@ export default async function giphy(type?: "gifs" | "videos") {
       reqUrl.searchParams.set("q", term);
       reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
       reqUrl.searchParams.set("offset", opt?.offset?.toString() ?? "0");
-      reqUrl.searchParams.set("lang", getPreferenceValues().giphyLocale);
+      reqUrl.searchParams.set("lang", getGiphyLocale());
 
       if (type) {
         reqUrl.searchParams.set("type", type);
@@ -32,7 +32,7 @@ export default async function giphy(type?: "gifs" | "videos") {
       const reqUrl = new URL(API_BASE_URL);
       reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
       reqUrl.searchParams.set("offset", opt?.offset?.toString() ?? "0");
-      reqUrl.searchParams.set("lang", getPreferenceValues().giphyLocale);
+      reqUrl.searchParams.set("lang", getGiphyLocale());
 
       if (type) {
         reqUrl.searchParams.set("type", type);
