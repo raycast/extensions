@@ -318,7 +318,7 @@ const COLORS = () => {
         oklch: tw_colors[colorName][shade],
         hex: formatHex(tw_colors[colorName][shade]) || "",
         rgb: HexToRGB(tw_colors[colorName][shade]),
-      })
+      }),
     );
   });
 
@@ -354,10 +354,10 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard title="Copy Hex" content={item.hex.toUpperCase()} />
-              <Action.CopyToClipboard title="Copy Rgb" content={item.rgb} />
+              <Action.CopyToClipboard title="Copy RGB" content={item.rgb} />
               <Action.CopyToClipboard title="Copy Oklch" content={item.oklch} />
               <Action.CopyToClipboard
-                title="Copy Tailwind Css Name"
+                title="Copy Tailwind CSS Name"
                 shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
                 content={item.title}
               />
