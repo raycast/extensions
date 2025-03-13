@@ -136,11 +136,7 @@ export function useMenuItemsLoader() {
         if (signal.aborted) return;
 
         // Try loading from cache first
-        const loadedFromCache = await tryLoadFromCache(
-          frontmostApp,
-          refresh,
-          signal,
-        );
+        const loadedFromCache = await tryLoadFromCache(frontmostApp, refresh);
         if (loadedFromCache || signal.aborted) return;
 
         // If cache loading failed or was skipped, load from AppleScript
