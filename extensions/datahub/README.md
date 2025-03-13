@@ -1,11 +1,11 @@
-# DataHub for Raycast
+# DataHub Utility
 
 Search and explore datasets in your [DataHub](https://datahubproject.io/) data catalog directly from Raycast.
 
 ## Features
 
-- **Quick Search**: Instantly search your DataHub catalog with the `dh` command
-- **Dataset Explorer**: Browse and find detailed information about datasets with `dhdataset`
+- **Quick Search**: Instantly search your DataHub catalog with the `Search Datahub` command
+- **Dataset Explorer**: Browse and find detailed information about datasets with `Search Datasets`
 - **Copy Links & URNs**: Easily share links to datasets
 
 ## Setup
