@@ -59,9 +59,6 @@ export default function Command() {
   useEffect(() => {
     fetchSelectedFiles();
 
-    // Set default values from preferences
-    setSaveLocation("desktop");
-
     // Set default filename format from preferences
     setFilenameFormat(preferences.filenameFormat || "nochange");
     setFilenameModifier(preferences.fileNameModifier || "");
