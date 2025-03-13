@@ -1,7 +1,7 @@
 ---
 description: Describes what is the purpose of the extension and how users should use it
 globs: *.ts, *.tsx, *.md, package.json
-alwaysApply: false
+alwaysApply: true
 ---
 # Purpose of the extension
 

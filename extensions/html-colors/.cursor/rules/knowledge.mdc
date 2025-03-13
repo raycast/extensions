@@ -1,7 +1,7 @@
 ---
 description: Knowledge base for the problem domain
 globs: *.ts, *.tsx, *.md
-alwaysApply: false
+alwaysApply: true
 ---
 # Knowledge
 
