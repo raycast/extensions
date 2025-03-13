@@ -7,6 +7,7 @@ import {
   Toast,
   useNavigation,
   openExtensionPreferences,
+  open,
 } from "@raycast/api";
 import { useState, useMemo } from "react";
 import { BundleForm } from "./components/BundleForm";
@@ -23,12 +24,20 @@ export default function Command() {
   const filteredBundles = useMemo(() => fuzzySearchList(bundles, searchText), [searchText, bundles]);
 
   const handleOpenBundle = async (bundle: Bundle) => {
+    const { openInChrome } = bundle;
     try {
-      await openLinksInChrome(bundle);
-      await showToast(
-        Toast.Style.Success,
-        `Bundle opened in ${getProfileNameByDirectory(bundle.chromeProfileDirectory)} profile`,
-      );
+      if (openInChrome) {
+        await openLinksInChrome(bundle);
+        await showToast(
+          Toast.Style.Success,
+          `Bundle opened in ${getProfileNameByDirectory(bundle.chromeProfileDirectory)} profile`,
+        );
+      } else {
+        for (const link of bundle.links) {
+          await open(link);
+        }
+        await showToast(Toast.Style.Success, "Bundle opened in default browser");
+      }
     } catch (error) {
       await showToast(Toast.Style.Failure, "Failed to open bundle", String(error));
     }
