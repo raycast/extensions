@@ -41,7 +41,10 @@ export default function PresetList() {
         temperature: convertFormTemperatureToActual(parseInt(values.temperature)),
       },
     };
-    await setPresets([...(presets ?? []), preset]);
+    await setPresets([
+      ...(presets ?? []).filter((p) => p.id !== preset.id),
+      preset
+    ]);
   }
 
   async function handleDelete(preset: Preset) {
