@@ -4,7 +4,7 @@ export type DebugTarget = {
   url: string;
   webSocketDebuggerUrl: string;
   devtoolsFrontendUrl: string;
-  type: string;
+  type: 'page' | 'background_page' | 'service_worker' | 'node' | 'browser';
 };
 
 export type LogEntry =
