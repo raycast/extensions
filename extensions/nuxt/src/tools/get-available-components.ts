@@ -1,4 +1,4 @@
-import { components, proseComponents, proComponents } from "../components";
+import { components, proseComponents, proComponents } from "../utils/components-list";
 
 /**
  * Get the list of all available Nuxt UI components
@@ -9,11 +9,6 @@ import { components, proseComponents, proComponents } from "../components";
  * - Determine the appropriate component type (basic, pro, or prose)
  *
  * @returns Categorized lists of all available components
- * @example
- * // When user asks "Create a button component"
- * // First check if Button exists in the available components
- * const { components } = await getAvailableComponents();
- * const buttonExists = components.includes("Button");
  */
 export default async function tool() {
   return {
