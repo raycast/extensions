@@ -24,8 +24,7 @@
       "name": "add-delivery",
       "title": "Add Delivery",
       "description": "Add a new delivery to track",
-      "mode": "view",
-      "icon": "extension-icon.png"
+      "mode": "view"
     }
   ],
   "tools": [
