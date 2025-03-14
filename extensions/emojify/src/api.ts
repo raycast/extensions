@@ -1,13 +1,6 @@
-import { getPreferenceValues } from "@raycast/api";
+import { AI, environment, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import OpenAI from "openai";
-
-interface Preferences {
-  apiKey: string;
-  baseURL?: string;
-  model?: string;
-  customPrompt?: string;
-}
 
 interface EmojifyResponse {
   text: string;
@@ -37,7 +30,7 @@ const defaultPromptConfig: PromptConfig = {
     "- Add new features",
     "=>",
     "- 🐞 Fix bugs",
-    "- ⚡ Improve performance",
+    "- ⚡️ Improve performance",
     "- ✨ Add new features",
     "For Greetings:",
     "Good morning everyone -> 🌅 Good morning everyone!",
@@ -46,11 +39,7 @@ const defaultPromptConfig: PromptConfig = {
   userMessageTemplate: `Add appropriate emojis to enhance this text: {text}. ONLY return the emojified text.`,
 };
 
-async function callOpenAI(
-  text: string,
-  config: OpenAIConfig,
-  promptConfig: PromptConfig = defaultPromptConfig,
-): Promise<string> {
+async function callOpenAI(text: string, config: OpenAIConfig, promptConfig: PromptConfig): Promise<string> {
   const client = new OpenAI({
     baseURL: config.baseURL,
     apiKey: config.apiKey,
@@ -82,6 +71,39 @@ async function callOpenAI(
   return content;
 }
 
+async function callRaycastAI(text: string, promptConfig: PromptConfig): Promise<string> {
+  const prompt = [promptConfig.systemMessage, promptConfig.userMessageTemplate, text].join("\n");
+  return AI.ask(prompt);
+}
+
+async function callAI(text: string, promptConfig = defaultPromptConfig): Promise<string> {
+  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const isCustomAIValid = Boolean(preferences.apiKey);
+  const config: OpenAIConfig = {
+    baseURL: preferences.baseURL || "https://api.openai.com",
+    apiKey: preferences.apiKey || "",
+    model: preferences.model || "gpt-4o-mini",
+  };
+
+  let basePromptConfig = promptConfig;
+  if (preferences.customPrompt) {
+    basePromptConfig = {
+      ...defaultPromptConfig,
+      userMessageTemplate: preferences.customPrompt,
+    };
+  }
+
+  if (isCustomAIValid) {
+    return callOpenAI(text, config, basePromptConfig);
+  }
+
+  if (!environment.canAccess(AI)) {
+    throw new Error("Raycast AI is not available, please configure a custom AI in the extension preferences.");
+  }
+
+  return callRaycastAI(text, basePromptConfig);
+}
+
 const emojiSelectorPromptConfig: PromptConfig = {
   systemMessage: [
     "You are a helpful assistant that selects the single most appropriate emoji for a given text.",
@@ -97,30 +119,8 @@ const emojiSelectorPromptConfig: PromptConfig = {
 };
 
 export async function emojifyText(text: string): Promise<EmojifyResponse> {
-  const preferences = getPreferenceValues<Preferences>();
-
-  if (!preferences.apiKey) {
-    throw new Error("OpenAI API key is not set. Please set it in the extension preferences.");
-  }
-
   try {
-    const config: OpenAIConfig = {
-      baseURL: preferences.baseURL || "https://api.openai.com",
-      apiKey: preferences.apiKey,
-      model: preferences.model || "gpt-4o-mini",
-    };
-
-    // Create a custom prompt config if user has provided a custom prompt template
-    let promptConfig = defaultPromptConfig;
-    if (preferences.customPrompt) {
-      promptConfig = {
-        ...defaultPromptConfig,
-        userMessageTemplate: preferences.customPrompt,
-      };
-    }
-
-    const emojifiedText = await callOpenAI(text, config, promptConfig);
-
+    const emojifiedText = await callAI(text);
     return {
       text: emojifiedText,
       timestamp: Date.now(),
@@ -132,20 +132,8 @@ export async function emojifyText(text: string): Promise<EmojifyResponse> {
 }
 
 export async function getEmojiForText(text: string): Promise<EmojifyResponse> {
-  const preferences = getPreferenceValues<Preferences>();
-
-  if (!preferences.apiKey) {
-    throw new Error("OpenAI API key is not set. Please set it in the extension preferences.");
-  }
-
   try {
-    const config: OpenAIConfig = {
-      baseURL: preferences.baseURL || "https://api.openai.com",
-      apiKey: preferences.apiKey,
-      model: preferences.model || "gpt-4o-mini",
-    };
-
-    const emoji = await callOpenAI(text, config, emojiSelectorPromptConfig);
+    const emoji = await callAI(text, emojiSelectorPromptConfig);
 
     return {
       text: emoji,

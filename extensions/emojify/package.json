@@ -41,7 +41,7 @@
       "title": "OpenAI API Key",
       "description": "Your OpenAI API key for emojifying text",
       "type": "password",
-      "required": true
+      "required": false
     },
     {
       "name": "baseURL",
