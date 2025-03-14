@@ -40,7 +40,6 @@
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@hey-api/openapi-ts": "0.57.1",
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",

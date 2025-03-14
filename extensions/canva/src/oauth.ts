@@ -1,6 +1,5 @@
 import { getPreferenceValues, OAuth } from "@raycast/api";
 import "cross-fetch/polyfill";
-import { URLSearchParams } from "url";
 
 const preferences = getPreferenceValues<Preferences>();
 
