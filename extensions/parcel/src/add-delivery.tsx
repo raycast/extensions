@@ -12,8 +12,7 @@ export default function Command() {
 
   async function handleSubmit(values: FormValues) {
     if (!values.trackingNumber.trim()) {
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Tracking Number Required",
         message: "Please enter a tracking number",
       });
@@ -50,7 +49,10 @@ export default function Command() {
       await closeMainWindow({ popToRootType: PopToRootType.Immediate });
     } catch (error) {
       console.error("Error adding delivery:", error);
-      showFailureToast("Failed to Add Delivery", String(error));
+      await showFailureToast({
+        title: "Failed to Add Delivery",
+        message: String(error),
+      });
     } finally {
       setIsLoading(false);
     }
