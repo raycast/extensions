@@ -6,6 +6,7 @@ import { titleCase } from "../utils";
 import { MailIcon } from "../utils/presets";
 import { sortMailboxes } from "../utils/mailbox";
 import { Cache } from "../utils/cache";
+import { useMemo } from "react";
 
 export type MailboxListProps = Account;
 
@@ -16,6 +17,8 @@ export const MailboxList = (props: MailboxListProps) => {
 
   const unreadMessages =
     numUnread === 0 ? "No Unread Messages" : `${numUnread} Unread Message${numUnread === 1 ? "" : "s"}`;
+
+  const sortedMailboxes = useMemo(() => mailboxes.toSorted(sortMailboxes), [mailboxes]);
 
   return (
     <List.Item
@@ -30,7 +33,7 @@ export const MailboxList = (props: MailboxListProps) => {
       ]}
       actions={
         <ActionPanel>
-          {mailboxes.sort(sortMailboxes).map((mailbox) => (
+          {sortedMailboxes.map((mailbox) => (
             <MailboxAction key={mailbox.name} account={props} mailbox={mailbox} />
           ))}
 
