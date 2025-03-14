@@ -14,6 +14,7 @@
     {
       "name": "search-components",
       "title": "Search Components",
+      "subtitle": "Vuetify Docs",
       "description": "Search Vuetify components and open the documentation in the browser",
       "icon": "v-logo.png",
       "mode": "view"
@@ -21,6 +22,7 @@
     {
       "name": "open-docs",
       "title": "Open Vuetify Docs",
+      "subtitle": "Vuetify Docs",
       "description": "Opens the homepage of the Vuetify documentation",
       "icon": "v-logo.png",
       "mode": "no-view"
@@ -28,6 +30,7 @@
     {
       "name": "search-documentation",
       "title": "Search Documentation",
+      "subtitle": "Vuetify Docs",
       "description": "Search the Vuetify documentation and open it in the browser",
       "icon": "v-logo.png",
       "mode": "view"
