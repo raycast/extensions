@@ -1,6 +1,6 @@
 # SupaHabits Changelog
 
-### [Unmark as Done & Feedback] - {PR_MERGE_DATE}
+### [Unmark as Done & Feedback] - 2025-03-14
 
 Added the ability to unmark a habit as done and added a feedback form.
 
