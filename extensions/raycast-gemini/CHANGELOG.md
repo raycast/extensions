@@ -7,7 +7,7 @@
   - Removed the `createNewChatName` function as it is no longer needed.
   - Added validation to ensure the chat name is never blank.
 
-## [New Command] - 2025-03-12
+## [New Command] - {PR_MERGE_DATE}
 
 - 🆕 New Command: Command History: now you can 📜 view your command history.
 
