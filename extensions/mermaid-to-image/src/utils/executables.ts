@@ -43,7 +43,7 @@ export async function findNodePath(): Promise<string> {
       const dirs = fs.readdirSync(nvmPath);
       if (dirs.length > 0) {
         // Sort versions and get the latest
-        const latestVersion = dirs.sort().pop();
+        const latestVersion = dirs.slice().sort().pop();
         if (latestVersion) {
           // Explicit check for latestVersion
           const nodePath = path.join(nvmPath, latestVersion, "bin", "node");

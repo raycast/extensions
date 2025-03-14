@@ -37,6 +37,14 @@ async function generateDiagramWithExplicitNode(
   tempFileRef: MutableRefObject<string | null>,
   timeout: number,
 ): Promise<string> {
+  // Define a helper function for cleanup operations
+  const cleanupResources = (filePath: string | null) => {
+    if (filePath) {
+      cleanupTempFile(filePath);
+    }
+    tempFileRef.current = null;
+  };
+
   try {
     console.log(`Executing: ${nodePath} ${mmdcPath} with input ${inputFile} and output ${outputPath}`);
 
@@ -52,13 +60,6 @@ async function generateDiagramWithExplicitNode(
 
     // Execute Node.js with mmdc as an argument
     await execFilePromise(nodePath, args, { env, timeout });
-    // Define a helper function for cleanup operations
-    const cleanupResources = (filePath: string | null) => {
-      if (filePath) {
-        cleanupTempFile(filePath);
-      }
-      tempFileRef.current = null;
-    };
 
     if (!fs.existsSync(outputPath)) {
       cleanupResources(inputFile);
@@ -72,9 +73,8 @@ async function generateDiagramWithExplicitNode(
   } catch (error: unknown) {
     console.error("Command execution failed:", error);
 
-    // Clean up temporary files
-    cleanupTempFile(inputFile);
-    tempFileRef.current = null;
+    // Clean up temporary files using the helper function
+    cleanupResources(inputFile);
 
     // Log the full error for debugging
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -122,11 +122,12 @@ export async function generateMermaidDiagram(
       console.log("Using Node.js at:", nodePath);
     } catch (error) {
       console.error("Failed to find Node.js:", error);
+      const errorMessage = "Could not find Node.js installation. Please make sure Node.js is installed.";
       await showFailureToast({
         title: "Node.js Not Found",
-        message: "Could not find Node.js installation. Please make sure Node.js is installed.",
+        message: errorMessage,
       });
-      throw new Error("Could not find Node.js installation. Please make sure Node.js is installed.");
+      throw new Error(errorMessage);
     }
 
     // Find mmdc path
