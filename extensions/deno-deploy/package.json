@@ -44,11 +44,43 @@
     },
     {
       "name": "create-playground-quick",
-      "title": "Create Playground (Quick)",
+      "title": "Create Playground (quick)",
       "subtitle": "Deno Deploy",
       "description": "Create a new playground for Deno Deploy",
       "icon": "command-icon.png",
       "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-organizations",
+      "title": "Get Organizations",
+      "description": "Get all organizations for the user"
+    },
+    {
+      "name": "get-projects",
+      "title": "Get Projects",
+      "description": "Get all projects for the user"
+    },
+    {
+      "name": "create-playground-snippet",
+      "title": "Create Playground (snippet)",
+      "description": "Create a new playground for Deno Deploy"
+    },
+    {
+      "name": "open-project",
+      "title": "Open Project",
+      "description": "Open a project in the browser"
+    },
+    {
+      "name": "delete-project",
+      "title": "Delete Project",
+      "description": "Delete a project"
+    },
+    {
+      "name": "rename-project",
+      "title": "Rename Project",
+      "description": "Rename a project"
     }
   ],
   "preferences": [
@@ -63,19 +95,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.71.4",
-    "@raycast/utils": "^1.14.0",
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
     "node-fetch": "^3.3.2",
-    "swr": "^2.2.5"
+    "swr": "^2.3.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/node": "20.12.7",
     "@types/react": "18.2.79",
     "eslint": "^8.56.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
