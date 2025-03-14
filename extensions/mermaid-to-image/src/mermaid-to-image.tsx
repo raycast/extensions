@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { showToast, Toast, Detail, Icon, ActionPanel, Action } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { ImagePreview } from "./components/ImagePreview";
-import { getSelectedText } from "./utils/clipboard";
 import { generateMermaidDiagram } from "./utils/diagram";
 import { cleanupTempFile } from "./utils/files";
 import { Clipboard, getPreferenceValues } from "@raycast/api";
@@ -16,7 +15,7 @@ export default function Command() {
   const tempFileRef = useRef<string | null>(null);
   const preferences = getPreferenceValues<Preferences>();
 
-  async function processMermaidCode(useSelection = false) {
+  async function processMermaidCode() {
     if (isProcessingRef.current) return;
     isProcessingRef.current = true;
 
@@ -24,44 +23,29 @@ export default function Command() {
       setIsLoading(true);
       setError(null);
 
+      // Use clipboard content
       let mermaidCode;
-
-      if (useSelection) {
-        // Try to get selected text
-        mermaidCode = await getSelectedText();
+      try {
+        mermaidCode = await Clipboard.readText();
         if (!mermaidCode) {
-          setError("No text was selected.");
-          setIsLoading(false);
+          setError("Clipboard is empty. Please copy a Mermaid diagram code first.");
           await showFailureToast({
-            title: "Failed to generate diagram",
-            message: "No text was selected. Please select Mermaid diagram code first.",
+            title: "Empty Clipboard",
+            message: "Please copy a Mermaid diagram code first.",
           });
+          setIsLoading(false);
           return;
         }
-      } else {
-        // Use clipboard content
-        try {
-          mermaidCode = await Clipboard.readText();
-          if (!mermaidCode) {
-            setError("Clipboard is empty.");
-            setIsLoading(false);
-            await showFailureToast({
-              title: "Failed to generate diagram",
-              message: "Clipboard is empty. Please copy a Mermaid diagram code first.",
-            });
-            return;
-          }
-        } catch (error: unknown) {
-          console.error("Failed to read clipboard:", error);
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          setError(`Failed to read clipboard: ${errorMessage}`);
-          setIsLoading(false);
-          await showFailureToast({
-            title: "Failed to read clipboard",
-            message: errorMessage,
-          });
-          return;
-        }
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        setError("Failed to read clipboard. Please try again.");
+        await showFailureToast({
+          title: "Clipboard Error",
+          message: "Failed to read clipboard. Please try again.",
+        });
+        console.error("Clipboard error details:", errorMessage);
+        setIsLoading(false);
+        return;
       }
 
       await showToast({
@@ -77,11 +61,23 @@ export default function Command() {
         title: "Diagram generated successfully",
       });
     } catch (error) {
+      // Log the full error for debugging but show a simplified version to the user
       console.error("Error details:", error);
-      setError(String(error));
+
+      // Extract a user-friendly message
+      let userMessage = "An unexpected error occurred.";
+      if (error instanceof Error) {
+        userMessage = error.message;
+      } else if (typeof error === "string") {
+        userMessage = error;
+      }
+
+      setError(userMessage);
+
+      // Show failure toast with the user-friendly message
       await showFailureToast({
-        title: "Diagram generation failed",
-        message: String(error),
+        title: "Diagram Generation Failed",
+        message: userMessage,
       });
     } finally {
       setIsLoading(false);
@@ -90,7 +86,7 @@ export default function Command() {
   }
 
   useEffect(() => {
-    processMermaidCode(false); // Default to using clipboard content
+    processMermaidCode(); // Process clipboard content on load
   }, []);
 
   useEffect(() => {
@@ -141,20 +137,23 @@ export default function Command() {
   if (error) {
     return (
       <Detail
-        markdown={`# Diagram generation failed\n\n${error}`}
+        markdown={`# Diagram Generation Failed
+
+${error}
+
+## Common Solutions:
+- Ensure your Mermaid syntax is valid
+- Check that your diagram starts with a proper declaration (like \`graph TD\` or \`sequenceDiagram\`)
+- Make sure Mermaid CLI is properly installed
+
+[View Mermaid Syntax Documentation](https://mermaid.js.org/syntax/flowchart.html)`}
         actions={
           <ActionPanel>
             <Action
-              title="Generate from Clipboard"
+              title="Try Again"
               icon={Icon.Clipboard}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={() => processMermaidCode(false)}
-            />
-            <Action
-              title="Generate from Selection"
-              icon={Icon.Text}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-              onAction={() => processMermaidCode(true)}
+              onAction={() => processMermaidCode()}
             />
           </ActionPanel>
         }
@@ -176,13 +175,7 @@ export default function Command() {
             title="Generate from Clipboard"
             icon={Icon.Clipboard}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={() => processMermaidCode(false)}
-          />
-          <Action
-            title="Generate from Selection"
-            icon={Icon.Text}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-            onAction={() => processMermaidCode(true)}
+            onAction={() => processMermaidCode()}
           />
         </ActionPanel>
       }

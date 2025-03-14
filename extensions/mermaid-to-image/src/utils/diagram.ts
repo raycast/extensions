@@ -7,6 +7,7 @@ import { MutableRefObject } from "react";
 import { findNodePath, findMmdcPath } from "./executables";
 import { cleanupTempFile, createTempFile } from "./files";
 import { Preferences } from "../types";
+import { showFailureToast } from "@raycast/utils";
 
 const execFilePromise = promisify(execFile);
 
@@ -52,7 +53,7 @@ async function generateDiagramWithExplicitNode(
     if (!fs.existsSync(outputPath)) {
       cleanupTempFile(inputFile);
       tempFileRef.current = null;
-      throw new Error(`Diagram generation failed: Output file not found ${outputPath}`);
+      throw new Error(`Output file not found`);
     }
 
     // Clean up temporary .mmd file
@@ -67,14 +68,22 @@ async function generateDiagramWithExplicitNode(
     cleanupTempFile(inputFile);
     tempFileRef.current = null;
 
-    // Provide more specific error messages
-    if (error instanceof Error && error.message.includes("ETIMEDOUT")) {
-      throw new Error(
-        `Diagram generation timed out after ${timeout / 1000} seconds. Try increasing the timeout in preferences.`,
-      );
-    }
+    // Log the full error for debugging
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Full error details:", errorMessage);
 
-    throw new Error(`Failed to generate diagram: ${error instanceof Error ? error.message : String(error)}`);
+    // Parse common error patterns for user-friendly messages
+    if (errorMessage.includes("ETIMEDOUT")) {
+      throw new Error(`Diagram generation timed out. Try increasing the timeout in preferences.`);
+    } else if (errorMessage.includes("UnknownDiagramError") || errorMessage.includes("No diagram type detected")) {
+      throw new Error("Invalid Mermaid syntax. Please check your diagram code.");
+    } else if (errorMessage.includes("syntax error")) {
+      throw new Error("Mermaid syntax error. Please check your diagram code for mistakes.");
+    } else if (errorMessage.includes("Command failed")) {
+      throw new Error("Failed to execute Mermaid CLI. Please check your installation.");
+    } else {
+      throw new Error("Failed to generate diagram. Please verify your Mermaid syntax.");
+    }
   }
 }
 
@@ -85,44 +94,62 @@ export async function generateMermaidDiagram(
   mermaidCode: string,
   tempFileRef: MutableRefObject<string | null>,
 ): Promise<string> {
-  const preferences = getPreferenceValues<Preferences>();
-  const cleanCode = cleanMermaidCode(mermaidCode);
-
-  // Create temporary file with mermaid code
-  const tempFile = createTempFile(cleanCode, "mmd");
-  tempFileRef.current = tempFile;
-
-  // Create output path
-  const outputPath = path.join(environment.supportPath, `diagram-${Date.now()}.${preferences.outputFormat}`);
-
-  console.log(`Generating diagram, theme: ${preferences.theme}, format: ${preferences.outputFormat}`);
-
-  // Find Node.js path
-  let nodePath;
   try {
-    nodePath = await findNodePath();
-    console.log("Using Node.js at:", nodePath);
+    const preferences = getPreferenceValues<Preferences>();
+    const cleanCode = cleanMermaidCode(mermaidCode);
+
+    // Create temporary file with mermaid code
+    const tempFile = createTempFile(cleanCode, "mmd");
+    tempFileRef.current = tempFile;
+
+    // Create output path
+    const outputPath = path.join(environment.supportPath, `diagram-${Date.now()}.${preferences.outputFormat}`);
+
+    console.log(`Generating diagram, theme: ${preferences.theme}, format: ${preferences.outputFormat}`);
+
+    // Find Node.js path
+    let nodePath;
+    try {
+      nodePath = await findNodePath();
+      console.log("Using Node.js at:", nodePath);
+    } catch (error) {
+      console.error("Failed to find Node.js:", error);
+      await showFailureToast({
+        title: "Node.js Not Found",
+        message: "Could not find Node.js installation. Please make sure Node.js is installed.",
+      });
+      throw new Error("Could not find Node.js installation. Please make sure Node.js is installed.");
+    }
+
+    // Find mmdc path
+    const mmdcPath = await findMmdcPath(preferences);
+    console.log("Using mmdc at:", mmdcPath);
+
+    // Get timeout from preferences and convert to number in milliseconds
+    const timeoutStr = preferences.generationTimeout || "10";
+    const timeoutInMs = parseInt(timeoutStr, 10) * 1000;
+
+    // Generate the diagram using execFile with explicit Node.js path
+    return await generateDiagramWithExplicitNode(
+      nodePath,
+      mmdcPath,
+      tempFile,
+      outputPath,
+      preferences.theme,
+      tempFileRef,
+      timeoutInMs,
+    );
   } catch (error) {
-    console.error("Failed to find Node.js:", error);
-    throw new Error("Could not find Node.js installation. Please make sure Node.js is installed.");
+    // Handle errors at the top level
+    console.error("Diagram generation error:", error);
+
+    // For errors that haven't been handled with showFailureToast yet
+    if (error instanceof Error) {
+      // If it's already a parsed error from generateDiagramWithExplicitNode, pass it through
+      throw error;
+    } else {
+      // For unexpected errors
+      throw new Error("An unexpected error occurred during diagram generation.");
+    }
   }
-
-  // Find mmdc path
-  const mmdcPath = await findMmdcPath(preferences);
-  console.log("Using mmdc at:", mmdcPath);
-
-  // Get timeout from preferences and convert to number in milliseconds
-  const timeoutStr = preferences.generationTimeout || "10";
-  const timeoutInMs = parseInt(timeoutStr, 10) * 1000;
-
-  // Generate the diagram using execFile with explicit Node.js path
-  return await generateDiagramWithExplicitNode(
-    nodePath,
-    mmdcPath,
-    tempFile,
-    outputPath,
-    preferences.theme,
-    tempFileRef,
-    timeoutInMs,
-  );
 }
