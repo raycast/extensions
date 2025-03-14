@@ -83,13 +83,18 @@ export default async function (input: Input) {
     throw new Error("No accounts found");
   }
 
-  await sendMessage({
-    account: account.id,
-    to: input.to,
-    cc: input.cc,
-    bcc: input.bcc,
-    subject: input.subject,
-    content: input.content,
-    attachments: input.attachments,
-  });
+  try {
+    await sendMessage({
+      account: account.id,
+      to: input.to,
+      cc: input.cc,
+      bcc: input.bcc,
+      subject: input.subject,
+      content: input.content,
+      attachments: input.attachments,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to send email: ${message}`);
+  }
 }
