@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Alert,
   Icon,
+  Keyboard,
   List,
   LocalStorage,
   Toast,
@@ -260,7 +261,7 @@ export default function CopyMoveTo(props: CopyMoveToProps) {
                   title="Delete"
                   style={Action.Style.Destructive}
                   icon={Icon.Trash}
-                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={() => handleDelete(destination.name)}
                 />
               </ActionPanel>
