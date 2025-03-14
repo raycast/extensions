@@ -1,4 +1,3 @@
-import { environment } from "@raycast/api";
 import { Pet, type PetState } from "../types";
 import { DECAY_RATES } from "./consts";
 
@@ -66,15 +65,18 @@ export function wakeUpPet(state: PetState): PetState {
   // If pet is not sleeping, return the state unchanged
   if (!state.isSleeping) return state;
 
+  // If sleepUntil is not set, something went wrong
+  if (!state.sleepUntil) return state;
+
   // Calculate how long the pet has been sleeping
   const now = Date.now();
-  const sleepStartTime = state.sleepUntil! - 60 * 60 * 1000; // 1 hour before wake time
+  const sleepStartTime = state.sleepUntil - 60 * 60 * 1000; // 1 hour before wake time
   const sleepDuration = now - sleepStartTime;
   const sleepHours = sleepDuration / (1000 * 60 * 60);
 
-  // Energy recovery is proportional to sleep duration, maximum 40% for full hour
+  // Energy recovery is proportional to sleep duration, maximum 50% for full hour
   // Minimum 5% recovery even if woken immediately
-  const energyRecovery = environment.isDevelopment ? 100 : Math.max(5, Math.min(40, Math.floor(sleepHours * 40)));
+  const energyRecovery = Math.max(5, Math.min(50, Math.floor(sleepHours * 50)));
 
   // Calculate moodiness from being woken up early
   // The earlier they're woken up, the more moody they get
@@ -98,8 +100,10 @@ export function healPet(state: PetState): PetState {
   // Record that pet was healed today
   return {
     ...state,
-    health: Math.min(100, state.health + 30),
-    happiness: Math.min(100, state.happiness + 5),
+    health: Math.min(100, state.health + 50),
+    happiness: Math.min(100, state.happiness + 20),
+    energy: Math.min(100, state.energy + 20),
+    hunger: Math.min(100, state.cleanliness + 20),
     lastHealed: Date.now(),
   };
 }
@@ -199,7 +203,7 @@ export function updatePetState(state: PetState): PetState {
     newState.health < 100
   ) {
     // Health slowly recovers if all other stats are good
-    newState.health = Math.min(100, state.health + 2 * hoursPassed);
+    newState.health = Math.min(100, state.health + DECAY_RATES.HEALTH * hoursPassed);
   }
 
   return newState;
