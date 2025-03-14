@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { popToRoot, showToast, Toast } from "@raycast/api";
-import { DriverStanding } from "../types";
+import { DriverStanding, DriverStandingResponse } from "../types";
 
 type State = {
   driverStandings: DriverStanding[];
@@ -26,7 +26,7 @@ const useDriverStandings = (season: string | null): [DriverStanding[], boolean] 
           method: "get",
           signal: cancelRef.current.signal,
         });
-        const data = (await res.json()) as any;
+        const data = (await res.json()) as DriverStandingResponse;
         setState((previous) => ({
           ...previous,
           isLoading: false,

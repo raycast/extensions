@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { popToRoot, showToast, Toast } from "@raycast/api";
-import { Race } from "../types";
+import { Race, ScheduleResponse } from "../types";
 
 const isUpcoming = (race: Race) => {
   const today = new Date();
@@ -35,7 +35,7 @@ const useRaces = (season: string | null): [{ [round: string]: Race }, { [round: 
           method: "get",
           signal: cancelRef.current.signal,
         });
-        const data = (await res.json()) as any;
+        const data = (await res.json()) as ScheduleResponse;
         const upcomingRaces: { [round: string]: Race } = {};
         const pastRaces: { [round: string]: Race } = {};
 

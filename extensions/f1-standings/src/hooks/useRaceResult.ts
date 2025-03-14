@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { showToast, Toast, useNavigation } from "@raycast/api";
-import { RaceResult } from "../types";
+import { RaceResult, ResultResponse } from "../types";
 
 type State = {
   isLoading: boolean;
@@ -29,7 +29,7 @@ const useRaceResult = (season: string | null, round: string | null): [RaceResult
           method: "get",
           signal: cancelRef.current.signal,
         });
-        const data = (await res.json()) as any;
+        const data = (await res.json()) as ResultResponse;
         setState({ isLoading: false, result: data.MRData.RaceTable.Races[0] });
       } catch (error) {
         if (error instanceof AbortError) {
