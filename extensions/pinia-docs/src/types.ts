@@ -1,6 +1,6 @@
 export interface Section {
   title: SectionTitle;
-  items: SectionItem[]; // Fixed to be an array of SecctionItem
+  items: SectionItem[];
 }
 
 interface SectionItem {
