@@ -49,11 +49,7 @@ export default function Command() {
       await closeMainWindow({ popToRootType: PopToRootType.Immediate });
     } catch (error) {
       console.error("Error adding delivery:", error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Add Delivery",
-        message: String(error),
-      });
+      showFailureToast("Failed to Add Delivery", String(error));
     } finally {
       setIsLoading(false);
     }
