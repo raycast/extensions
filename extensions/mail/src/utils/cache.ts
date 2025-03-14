@@ -107,7 +107,8 @@ const getDefaultAccount = (): Account | undefined => {
   const defaultAccountId = defaultAccount.get("default-account-id");
 
   if (defaultAccountId) {
-    return accounts.find((account) => account.id === defaultAccountId) as Account;
+    const account = accounts.find((account) => account.id === defaultAccountId);
+    if (account) return account;
   }
 
   return accounts[0];
