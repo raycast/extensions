@@ -33,7 +33,7 @@ export async function findNodePath(): Promise<string> {
       return stdout.trim();
     }
   } catch (error) {
-    console.log("Could not find node using which command");
+    console.log("Could not find node using which command", error);
   }
 
   // Look for NVM installations
