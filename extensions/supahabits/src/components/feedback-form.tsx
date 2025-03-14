@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import fetch from "node-fetch";
+import { showFailureToast } from "@raycast/utils";
 
 export default function FeedbackForm() {
   const { secret } = getPreferenceValues<Preferences>();
@@ -9,7 +10,7 @@ export default function FeedbackForm() {
     const { message } = values;
 
     if (!message || message === "") {
-      showToast({ style: Toast.Style.Failure, title: "🚫 Feedback message is required" });
+      showFailureToast("🚫 Feedback message is required");
       return;
     }
 
@@ -24,7 +25,7 @@ export default function FeedbackForm() {
       showToast({ style: Toast.Style.Success, title: "✅ Feedback submitted successfully" });
       pop();
     } catch (error) {
-      showFailureToast("Failed to submit feedback", error);
+      showFailureToast("🚫 Failed to submit feedback");
     }
   };
 
