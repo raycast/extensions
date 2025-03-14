@@ -16,34 +16,19 @@
       "name": "add-new-destination",
       "title": "Add New Destination",
       "description": "Create a new destination for copying or moving files",
-      "mode": "view",
-      "view": {
-        "path": "src/add-new-destination.tsx"
-      }
+      "mode": "view"
     },
     {
       "name": "copy-to",
-      "title": "Copy To...",
+      "title": "Copy Selected Files To",
       "description": "Copy the selected files to a destination",
-      "mode": "view",
-      "view": {
-        "path": "src/copy-move-to.tsx",
-        "launchContext": {
-          "mode": "copy"
-        }
-      }
+      "mode": "view"
     },
     {
       "name": "move-to",
-      "title": "Move To...",
+      "title": "Move Selected Files To",
       "description": "Move the selected files to a destination",
-      "mode": "view",
-      "view": {
-        "path": "src/copy-move-to.tsx",
-        "launchContext": {
-          "mode": "move"
-        }
-      }
+      "mode": "view"
     }
   ],
   "preferences": [
