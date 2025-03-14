@@ -1,6 +1,6 @@
 # Mermaid to Image Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-03-14
 ### Added
 - Initial release of mermaid-to-image extension
 - Automatic conversion of clipboard Mermaid code to images
