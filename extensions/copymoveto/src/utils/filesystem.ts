@@ -15,10 +15,6 @@ export async function transfer(source: string, destination: string, operation: "
     const srcStat = await fs.lstat(source);
 
     if (srcStat.isDirectory()) {
-      if (!(await checkDirExists(source))) {
-        throw new Error(`Source directory does not exist: ${source}`);
-      }
-
       let destDir = destination;
       try {
         const destStat = await fs.stat(destination);
@@ -40,7 +36,7 @@ export async function transfer(source: string, destination: string, operation: "
       }
 
       if (operation === "move") {
-        await fs.rmdir(source);
+        await fs.rm(source, { recursive: true, force: true });
       }
     } else if (srcStat.isFile()) {
       let destPath = destination;

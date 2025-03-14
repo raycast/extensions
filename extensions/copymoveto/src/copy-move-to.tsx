@@ -6,16 +6,16 @@ import {
   List,
   LocalStorage,
   Toast,
+  closeMainWindow,
   confirmAlert,
   getPreferenceValues,
   getSelectedFinderItems,
   showToast,
-  closeMainWindow,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import EditDestination from "./destination-form";
-import { Destination, destinationRepo } from "./repo/destination";
+import { type Destination, destinationRepo } from "./repo/destination";
 import { checkExistence, copy, getFilenameFromPath, isDirectory, isFile, move } from "./utils/filesystem";
 
 interface CopyMoveToProps {
@@ -31,7 +31,7 @@ export default function CopyMoveTo(props: CopyMoveToProps) {
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [activeDestination, setActiveDestination] = useState<Destination | null>(null);
 
-  async function fetchDestinations() {
+  const fetchDestinations = useCallback(async () => {
     try {
       const items = await LocalStorage.allItems<Destination[]>();
       const validDestinations: Destination[] = [];
@@ -64,10 +64,10 @@ export default function CopyMoveTo(props: CopyMoveToProps) {
         title: "Failed to load destinations",
       });
     }
-  }
+  }, [isMove]);
   useEffect(() => {
     fetchDestinations();
-  }, []);
+  }, [fetchDestinations]);
 
   async function handleAction(name: string) {
     try {
@@ -117,7 +117,7 @@ export default function CopyMoveTo(props: CopyMoveToProps) {
                 await closeMainWindow();
                 await fileAction(item.path, destination.directory);
               } else {
-                return;
+                continue;
               }
               break;
             }
@@ -159,7 +159,7 @@ export default function CopyMoveTo(props: CopyMoveToProps) {
     } catch (error) {
       await showToast({
         title: `Failed to ${actionText} files`,
-        style: Toast.Style.Success,
+        style: Toast.Style.Failure,
       });
     }
   }
