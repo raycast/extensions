@@ -10,12 +10,12 @@ interface EmptyViewProps {
 
 export default function EmptyView(props: EmptyViewProps) {
   const { contacts, filter, searchText } = props;
-  
+
   if (contacts.length === 0) {
     let title = "No contacts";
     let description = "Create a new contact to get started";
     let icon = { source: Icon.Person, tintColor: Color.PrimaryText };
-    
+
     if (searchText) {
       title = "No matching contacts";
       description = "Try a different search term";
@@ -25,7 +25,7 @@ export default function EmptyView(props: EmptyViewProps) {
       description = "Mark contacts as favorites to see them here";
       icon = { source: Icon.Star, tintColor: Color.Yellow };
     }
-    
+
     return (
       <List.EmptyView
         icon={icon}
@@ -33,16 +33,12 @@ export default function EmptyView(props: EmptyViewProps) {
         description={description}
         actions={
           <ActionPanel>
-            <Action.Push
-              title="Create Contact"
-              icon={Icon.Plus}
-              target={<CreateContactForm />}
-            />
+            <Action.Push title="Create Contact" icon={Icon.Plus} target={<CreateContactForm />} />
           </ActionPanel>
         }
       />
     );
   }
-  
+
   return null;
 }
