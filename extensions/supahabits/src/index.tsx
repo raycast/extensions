@@ -16,6 +16,7 @@ import NodeFetch from "node-fetch";
 import { Habit } from "./models/habit";
 import CreateHabitForm from "./components/create-habit-form";
 import CreateRepeatableHabitForm from "./components/create-repeatable-habit";
+import FeedbackForm from "./components/feedback-form";
 
 export default function Command() {
   const { secret } = getPreferenceValues<Preferences>();
@@ -65,6 +66,34 @@ export default function Command() {
     }
   };
 
+  const removeLastTracking = async (habitId: number) => {
+    try {
+      await mutate(
+        NodeFetch(`https://www.supahabits.com/api/habits/${habitId}/complete`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${secret}`,
+          },
+          body: JSON.stringify({ secret }),
+        }),
+        {
+          optimisticUpdate(data: Habit[] | undefined) {
+            if (!data) {
+              return [];
+            }
+
+            return data.map((habit) => (habit.id === habitId ? { ...habit, completed: false } : habit));
+          },
+        },
+      );
+      showToast({ style: Toast.Style.Success, title: "Last tracking removed" });
+      revalidate();
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: "Failed to remove last tracking" });
+    }
+  };
+
   const getHabitIcon = (habit: Habit) => {
     if (habit.repeatable) {
       if (habit.completed === true) {
@@ -79,11 +108,14 @@ export default function Command() {
       : { source: Icon.Circle, tintColor: Color.Red };
   };
 
-  const getHabitActions = (habit: Habit, markHabitAsCompleted: (habitId: number) => void) => {
+  const getHabitActions = (
+    habit: Habit,
+    markHabitAsCompleted: (habitId: number) => void,
+    removeLastTracking: (habitId: number) => void,
+  ) => {
     if (habit.repeatable === true) {
       return (
         <ActionPanel>
-          <Action title="Track Habit" icon={Icon.CheckCircle} onAction={() => markHabitAsCompleted(habit.id)} />
           <Action.OpenInBrowser
             title="View Habits Details Online"
             url="https://www.supahabits.com/dashboard"
@@ -118,6 +150,7 @@ export default function Command() {
 
     return (
       <ActionPanel>
+        <Action title="Unmark as Done" icon={Icon.Xmark} onAction={() => removeLastTracking(habit.id)} />
         <Action.OpenInBrowser
           title="View Habits Details Online"
           url="https://www.supahabits.com/dashboard"
@@ -140,7 +173,7 @@ export default function Command() {
             key={habit.id}
             icon={getHabitIcon(habit)}
             title={habit.name}
-            actions={getHabitActions(habit, markHabitAsCompleted)}
+            actions={getHabitActions(habit, markHabitAsCompleted, removeLastTracking)}
           />
         ))
       ) : (
@@ -178,6 +211,15 @@ export default function Command() {
               url="https://www.supahabits.com/dashboard/past-habits"
               shortcut={{ modifiers: ["cmd"], key: "h" }}
             />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        icon={Icon.Bubble}
+        title="Send Feedback"
+        actions={
+          <ActionPanel>
+            <Action.Push title="Send Feedback" icon={Icon.Envelope} target={<FeedbackForm />} />
           </ActionPanel>
         }
       />
