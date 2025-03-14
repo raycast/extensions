@@ -48,7 +48,3 @@ export enum SectionFilter {
 }
 
 export type SectionFilterString = keyof typeof SectionFilter;
-
-export type SectionContent = {
-  [key in SectionTitle]: SectionItemTitle[];
-};
