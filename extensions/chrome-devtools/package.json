@@ -14,7 +14,7 @@
     {
       "name": "consoles",
       "title": "Consoles",
-      "description": "A Raycast extension that fetches and displays Chrome’s console logs and network requests in real time, enabling quick debugging and insights without leaving Raycast.",
+      "description": "View and monitor Chrome's console logs in real-time, including errors, warnings, and debug messages.",
       "mode": "view"
     }
   ],
