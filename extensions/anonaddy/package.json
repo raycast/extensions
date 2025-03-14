@@ -27,7 +27,7 @@
       "mode": "no-view"
     },
     {
-      "name": "aliases",
+      "name": "list-aliases",
       "title": "My Aliases",
       "description": "View, search, and manage your existing Addy email aliases.",
       "mode": "view"
