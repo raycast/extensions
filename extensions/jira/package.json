@@ -152,29 +152,11 @@
     },
     {
       "name": "personalAccessToken",
-      "label": "Use Personal Access Token (PAT)",
-      "description": "Some self-hosted Jira requires PAT instead of Basic authentication with API Token.",
+      "label": "Use token for self-hosted Jira (Experimental)",
+      "description": "Some self-hosted Jira requires PAT instead of Basic authentication with API Token. The feature is experimental and might be broken in the future updates.",
       "type": "checkbox",
       "required": false,
       "default": false
-    },
-    {
-      "name": "apiVersion",
-      "type": "dropdown",
-      "title": "API version",
-      "description": "Jira Cloud typically uses v3. Choose v2 in case of problems with self-hosted Jira.",
-      "data": [
-        {
-          "title": "v3 (Cloud)",
-          "value": "3"
-        },
-        {
-          "title": "v2 (Self-hosted)",
-          "value": "2"
-        }
-      ],
-      "default": "3",
-      "required": false
     },
     {
       "name": "open_in",

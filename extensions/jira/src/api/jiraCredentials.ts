@@ -8,13 +8,16 @@ type JiraCredentials = {
   cloudId?: string;
   siteUrl: string;
   authorizationHeader: string;
-  apiVersion: string;
+  apiVersion: number;
   myself: User;
 };
 
+const DEFAULT_API_VERSION = 3;
+const SELF_HOSTED_API_VERSION = 2; // The latest supported version for self-hosted Jira
+
 export const jiraWithApiToken = {
   authorize: async () => {
-    const { siteUrl, token, email, personalAccessToken, apiVersion } = getPreferenceValues();
+    const { siteUrl, token, email, personalAccessToken } = getPreferenceValues();
 
     let hostname;
     try {
@@ -25,8 +28,10 @@ export const jiraWithApiToken = {
     }
 
     let authorizationHeader;
+    let apiVersion = DEFAULT_API_VERSION;
     if (personalAccessToken) {
       authorizationHeader = `Bearer ${token}`;
+      apiVersion = SELF_HOSTED_API_VERSION;
     } else {
       authorizationHeader = `Basic ${btoa(`${email}:${token}`)}`;
     }
@@ -87,7 +92,7 @@ export const jira = OAuthService.jira({
       jiraCredentials = {
         cloudId: site.id,
         siteUrl: site.url,
-        apiVersion: "3",
+        apiVersion: DEFAULT_API_VERSION,
         authorizationHeader,
         myself,
       };
