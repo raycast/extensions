@@ -152,12 +152,19 @@ export async function generateMermaidDiagram(
     // Handle errors at the top level
     console.error("Diagram generation error:", error);
 
-    // For errors that haven't been handled with showFailureToast yet
     if (error instanceof Error) {
-      // If it's already a parsed error from generateDiagramWithExplicitNode, pass it through
-      throw error;
+      // If it is an error that has been resolved, display the corresponding error message
+      await showFailureToast({
+        title: "Diagram Generation Failed",
+        message: error.message,
+      });
+      throw error; // Still throws an error to let the caller know the operation failed
     } else {
       // For unexpected errors
+      await showFailureToast({
+        title: "Diagram Generation Failed",
+        message: "An unexpected error occurred during diagram generation.",
+      });
       throw new Error("An unexpected error occurred during diagram generation.");
     }
   }
