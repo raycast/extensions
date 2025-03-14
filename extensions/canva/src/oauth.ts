@@ -11,10 +11,10 @@ const redirectUri = "https://raycast.com/redirect/extension";
 const tokenUrl = "https://api.canva.com/rest/v1/oauth/token";
 
 export const client = new OAuth.PKCEClient({
-    redirectMethod: OAuth.RedirectMethod.Web,
-    providerName: "Canva",
-    providerIcon: "command-icon.png",
-    description: "Connect your Canva account"
+  redirectMethod: OAuth.RedirectMethod.Web,
+  providerName: "Canva",
+  providerIcon: "extension_icon.png",
+  description: "Connect your Canva account",
 });
 
 // Authorization
@@ -35,15 +35,15 @@ export async function authorize(): Promise<void> {
     clientId: clientId,
     scope: scopes.join(" "),
     extraParameters: {
-        "redirect_uri": redirectUri
-    }
+      redirect_uri: redirectUri,
+    },
   });
   const { authorizationCode } = await client.authorize(authRequest);
   await client.setTokens(await fetchTokens(authRequest, authorizationCode));
 }
 export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
-  authCode: string
+  authCode: string,
 ): Promise<OAuth.TokenResponse> {
   const bodyParams = new URLSearchParams();
   bodyParams.append("client_id", clientId);
@@ -57,7 +57,7 @@ export async function fetchTokens(
   const response = await fetch(tokenUrl, {
     method: "POST",
     headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Type": "application/x-www-form-urlencoded",
     },
     body: bodyParams,
   });
@@ -72,6 +72,7 @@ export async function fetchTokens(
 async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
   const bodyParams = new URLSearchParams();
   bodyParams.append("client_id", clientId);
+  bodyParams.append("client_secret", clientSecret);
   bodyParams.append("grant_type", "refresh_token");
   bodyParams.append("refresh_token", refreshToken);
   bodyParams.append("redirect_uri", redirectUri);

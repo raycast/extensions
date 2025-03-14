@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "canva",
   "title": "Canva",
-  "description": "",
-  "icon": "extension-icon.png",
+  "description": "View Designs and Open in Browser",
+  "icon": "extension_icon.png",
   "author": "xmok",
   "categories": [
     "Design Tools"
@@ -15,7 +15,7 @@
       "title": "OAuth Client ID",
       "type": "textfield",
       "required": true,
-      "description": "",
+      "description": "Client ID from Canva Integration",
       "placeholder": "OC-AZRfvFkTEJIn"
     },
     {
@@ -23,7 +23,7 @@
       "title": "OAuth Client Secret",
       "type": "password",
       "required": true,
-      "description": "",
+      "description": "Client Secret from Canva Integration",
       "placeholder": "cnvcaXX...XXX"
     }
   ],
@@ -31,13 +31,13 @@
     {
       "name": "designs",
       "title": "View Designs",
-      "description": "",
+      "description": "View Designs and Open in Browser",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
