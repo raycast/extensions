@@ -1,5 +1,11 @@
 # 1bookmark Changelog
 
+## [New Command: Import Bookmarks] - 2025-03-14
+
+- 0.6.0
+- 📱 **Import Bookmarks** command added. It supports importing bookmarks from browsers.
+  Thanks to **Browser Bookmarks** contributors. Many codes from that extension are reused.
+
 ## [Sign In UX Improvement] - 2025-03-04
 
 - 0.5.1
