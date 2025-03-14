@@ -24,7 +24,7 @@ export default function FeedbackForm() {
       showToast({ style: Toast.Style.Success, title: "✅ Feedback submitted successfully" });
       pop();
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "🚫 Failed to submit feedback" });
+      showFailureToast("Failed to submit feedback", error);
     }
   };
 
