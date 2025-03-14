@@ -90,7 +90,10 @@ function buildMenuGroups(itemsByPath: Map<string, MenuItem>): MenuGroup[] {
     if (!topLevelMenus.has(topLevelMenu)) {
       topLevelMenus.set(topLevelMenu, { menu: topLevelMenu, items: [] });
     }
-    const menuGroup = topLevelMenus.get(topLevelMenu)!;
+    const menuGroup = topLevelMenus.get(topLevelMenu) ?? {
+      menu: topLevelMenu,
+      items: [],
+    };
 
     if (pathParts.length === 2) {
       // Direct child of top-level menu

@@ -41,7 +41,7 @@ const MODIFIER_KEYCODES: Record<number, string> = {
   55: "Fn ⌃ ⌥ ⇧ ⌘", // Function+Control+Option+Shift+Command
 };
 
-const GLYPH_KEYCODES: Record<number | string, string> = {
+const GLYPH_KEYCODES: Record<number, string> = {
   4: "⌫", // Backspace/Delete
   5: "⇥", // Tab
   6: "⇤", // Backtab

@@ -75,10 +75,20 @@ export function useMenuItemFilters(data?: MenusConfig): MenuItemFiltersResult {
   useEffect(() => {
     if (!data?.menus?.length) return;
 
-    const filterFn = filterFunctions[filter as keyof typeof filterFunctions];
-    const menus = filterFn
-      ? filterFn(data.menus)
-      : [data.menus[data.menus.findIndex((menu) => menu.menu === filter)]];
+    let menus;
+    // Check if it's a predefined filter type
+    if (filter in filterFunctions) {
+      menus = filterFunctions[filter as keyof typeof filterFunctions](
+        data.menus,
+      );
+    } else {
+      // Try to find a menu with matching name
+      const menuIndex = data.menus.findIndex((menu) => menu.menu === filter);
+      menus =
+        menuIndex !== -1
+          ? [data.menus[menuIndex]]
+          : filterFunctions[FILTER_TYPES.ALL](data.menus);
+    }
 
     setFilteredData({ ...data, menus });
   }, [filter, data]);

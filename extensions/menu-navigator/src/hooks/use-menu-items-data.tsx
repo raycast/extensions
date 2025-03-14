@@ -6,6 +6,7 @@ import {
   getMenuBarShortcutsCache,
   getTotalMenuBarItemsApplescript,
 } from "../utils";
+import { showFailureToast } from "@raycast/utils";
 
 export function useMenuItemsLoader() {
   const [loading, setLoading] = useState(true);
@@ -52,7 +53,11 @@ export function useMenuItemsLoader() {
 
   // Cache loading handler
   const tryLoadFromCache = useCallback(
-    async (frontmostApp: Application, refresh?: "app" | "data") => {
+    async (
+      frontmostApp: Application,
+      refresh?: "app" | "data",
+      signal?: AbortSignal,
+    ) => {
       if (refresh === "data") return false;
 
       try {
@@ -63,6 +68,7 @@ export function useMenuItemsLoader() {
 
         // Then in the next tick, update loading state to prevent flash
         setTimeout(() => {
+          if (signal?.aborted) return;
           setLoading(false);
           initialLoadRef.current = false;
         }, 0);
@@ -136,7 +142,11 @@ export function useMenuItemsLoader() {
         if (signal.aborted) return;
 
         // Try loading from cache first
-        const loadedFromCache = await tryLoadFromCache(frontmostApp, refresh);
+        const loadedFromCache = await tryLoadFromCache(
+          frontmostApp,
+          refresh,
+          signal,
+        );
         if (loadedFromCache || signal.aborted) return;
 
         // If cache loading failed or was skipped, load from AppleScript
@@ -184,7 +194,7 @@ export function useMenuItemsLoader() {
         if (app?.name === updatedApp.name) return;
         await loadingHandler("app");
       } catch (error) {
-        console.error("Error checking focused app:", error);
+        showFailureToast("Error checking for focused app change");
       }
     };
 
