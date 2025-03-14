@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pinia-docs",
   "title": "Pinia Docs",
-  "description": "Search through the Pinia docs directly from Raycast",
+  "description": "Quickly search Pinia docs from Raycast",
   "icon": "p-logo.png",
   "author": "jeffnawroth",
   "categories": [
@@ -15,17 +15,9 @@
       "name": "search-documentation",
       "title": "Search Documentation",
       "subtitle": "Pinia Docs",
-      "description": "Search the Pinia documentation and open it in the browser",
+      "description": "Search the Pinia docs and open in browser",
       "icon": "p-logo.png",
       "mode": "view"
-    },
-    {
-      "name": "open-pinia-docs",
-      "title": "Open Pinia Docs",
-      "subtitle": "Pinia Docs",
-      "description": "Opens the homepage of the Pinia documentation",
-      "icon": "p-logo.png",
-      "mode": "no-view"
     }
   ],
   "dependencies": {

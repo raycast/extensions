@@ -53,7 +53,7 @@ export default function Command() {
               title={item.title}
               icon="p-logo.png"
               actions={
-                <ActionPanel>
+                <ActionPanel title={item.url}>
                   <Action.OpenInBrowser url={item.url} />
                   <Action.CopyToClipboard content={item.url} title="Copy URL" />
                 </ActionPanel>
