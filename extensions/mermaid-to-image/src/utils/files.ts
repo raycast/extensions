@@ -6,11 +6,14 @@ import { environment } from "@raycast/api";
  * Safely clean up temporary files
  */
 export function cleanupTempFile(filePath: string | null): void {
-  if (filePath && fs.existsSync(filePath)) {
-    try {
-      fs.unlinkSync(filePath);
-      console.log("Temporary file cleaned up:", filePath);
-    } catch (error) {
+  if (!filePath) return;
+
+  try {
+    fs.unlinkSync(filePath);
+    console.log("Temporary file cleaned up:", filePath);
+  } catch (error) {
+    // Only log if it's not a "file not found" error
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
       console.error("Failed to clean up temporary file:", error);
     }
   }

@@ -17,7 +17,10 @@ const execFilePromise = promisify(execFile);
 export function cleanMermaidCode(mermaidCode: string): string {
   let cleanCode = mermaidCode;
   if (cleanCode.includes("```mermaid")) {
-    cleanCode = cleanCode.replace(/```mermaid\n/, "").replace(/```$/, "");
+    const mermaidMatch = cleanCode.match(/```mermaid\s*\n([\s\S]*?)```+/);
+    if (mermaidMatch && mermaidMatch[1]) {
+      cleanCode = mermaidMatch[1];
+    }
   }
   return cleanCode;
 }
@@ -44,21 +47,26 @@ async function generateDiagramWithExplicitNode(
     const env = {
       ...process.env,
       NODE_OPTIONS: "--max-old-space-size=4096",
-      PATH: `${path.dirname(nodePath)}:/usr/local/bin:/opt/homebrew/bin:${process.env.PATH || ""}`,
+      PATH: `${path.dirname(nodePath)}${path.delimiter}/usr/local/bin${path.delimiter}/opt/homebrew/bin${path.delimiter}${process.env.PATH || ""}`,
     };
 
     // Execute Node.js with mmdc as an argument
     await execFilePromise(nodePath, args, { env, timeout });
+    // Define a helper function for cleanup operations
+    const cleanupResources = (filePath: string | null) => {
+      if (filePath) {
+        cleanupTempFile(filePath);
+      }
+      tempFileRef.current = null;
+    };
 
     if (!fs.existsSync(outputPath)) {
-      cleanupTempFile(inputFile);
-      tempFileRef.current = null;
+      cleanupResources(inputFile);
       throw new Error(`Output file not found`);
     }
 
     // Clean up temporary .mmd file
-    cleanupTempFile(inputFile);
-    tempFileRef.current = null;
+    cleanupResources(tempFileRef.current);
 
     return outputPath;
   } catch (error: unknown) {
@@ -126,8 +134,8 @@ export async function generateMermaidDiagram(
     console.log("Using mmdc at:", mmdcPath);
 
     // Get timeout from preferences and convert to number in milliseconds
-    const timeoutStr = preferences.generationTimeout || "10";
-    const timeoutInMs = parseInt(timeoutStr, 10) * 1000;
+    const timeoutValue = preferences.generationTimeout || 10; // use 10 as default
+    const timeoutInMs = (typeof timeoutValue !== "number" || timeoutValue <= 0 ? 10 : timeoutValue) * 1000;
 
     // Generate the diagram using execFile with explicit Node.js path
     return await generateDiagramWithExplicitNode(

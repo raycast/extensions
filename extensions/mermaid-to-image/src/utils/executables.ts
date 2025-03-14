@@ -44,10 +44,13 @@ export async function findNodePath(): Promise<string> {
       if (dirs.length > 0) {
         // Sort versions and get the latest
         const latestVersion = dirs.sort().pop();
-        const nodePath = path.join(nvmPath, latestVersion!, "bin", "node");
-        if (fs.existsSync(nodePath)) {
-          console.log("Found Node.js in NVM directory:", nodePath);
-          return nodePath;
+        if (latestVersion) {
+          // Explicit check for latestVersion
+          const nodePath = path.join(nvmPath, latestVersion, "bin", "node");
+          if (fs.existsSync(nodePath)) {
+            console.log("Found Node.js in NVM directory:", nodePath);
+            return nodePath;
+          }
         }
       }
     }

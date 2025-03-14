@@ -1,7 +1,7 @@
 export interface Preferences {
   outputFormat: "png" | "svg";
-  theme: string;
+  theme: "default" | "forest" | "dark" | "neutral";
   savePath?: string;
   customMmdcPath?: string;
-  generationTimeout?: string;
+  generationTimeout?: number;
 }
