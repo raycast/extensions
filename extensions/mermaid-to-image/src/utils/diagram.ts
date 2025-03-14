@@ -123,7 +123,7 @@ export async function generateMermaidDiagram(
     } catch (error) {
       console.error("Failed to find Node.js:", error);
       const errorMessage = "Could not find Node.js installation. Please make sure Node.js is installed.";
-      await showFailureToast({
+      await showFailureToast(error, {
         title: "Node.js Not Found",
         message: errorMessage,
       });
@@ -161,7 +161,7 @@ export async function generateMermaidDiagram(
       throw error; // Still throws an error to let the caller know the operation failed
     } else {
       // For unexpected errors
-      await showFailureToast({
+      await showFailureToast(error, {
         title: "Diagram Generation Failed",
         message: "An unexpected error occurred during diagram generation.",
       });

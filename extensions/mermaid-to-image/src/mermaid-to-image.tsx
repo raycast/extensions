@@ -39,7 +39,7 @@ export default function Command() {
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         setError("Failed to read clipboard. Please try again.");
-        await showFailureToast({
+        await showFailureToast(error, {
           title: "Clipboard Error",
           message: "Failed to read clipboard. Please try again.",
         });
@@ -75,7 +75,7 @@ export default function Command() {
       setError(userMessage);
 
       // Show failure toast with the user-friendly message
-      await showFailureToast({
+      await showFailureToast(error, {
         title: "Diagram Generation Failed",
         message: userMessage,
       });

@@ -48,7 +48,7 @@ export function ImagePreview({ imagePath, format }: ImagePreviewProps) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         setImageError(`Unable to read image: ${errorMessage}`);
         setIsLoading(false);
-        await showFailureToast({
+        await showFailureToast(error, {
           title: "Failed to load image",
           message: errorMessage,
         });
@@ -92,7 +92,7 @@ export function ImagePreview({ imagePath, format }: ImagePreviewProps) {
                 });
               } catch (error) {
                 console.error("Copy error:", error);
-                await showFailureToast({
+                await showFailureToast(error, {
                   title: "Copy failed",
                   message: String(error),
                 });
@@ -119,7 +119,7 @@ export function ImagePreview({ imagePath, format }: ImagePreviewProps) {
                 });
                 await open(path.dirname(savedPath));
               } catch (error) {
-                await showFailureToast({
+                await showFailureToast(error, {
                   title: "Save failed",
                   message: String(error),
                 });
@@ -134,7 +134,7 @@ export function ImagePreview({ imagePath, format }: ImagePreviewProps) {
               try {
                 await open(imagePath);
               } catch (error) {
-                await showFailureToast({
+                await showFailureToast(error, {
                   title: "Failed to open image",
                   message: String(error),
                 });
