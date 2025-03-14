@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "glide-tables",
+  "title": "Glide Tables",
+  "description": "Add a row to Glide table",
+  "icon": "extension-icon.png",
+  "author": "lasa",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "glide-tables",
+      "title": "Add to Glide Table",
+      "description": "Add a new row to your Glide table",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@glideapps/tables": "1.0.21",
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.17.0",
+    "axios": "1.8.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "glideToken",
+      "title": "Glide API Token",
+      "description": "Your Glide API Token",
+      "type": "password",
+      "required": true,
+      "default": "5205740a-be0b-413d-a058-cb675586ce08"
+    },
+    {
+      "name": "glideAppId",
+      "title": "Glide App ID",
+      "description": "Your Glide App ID (e.g. 2stAJT1lg23FxMhzCywN)",
+      "type": "textfield",
+      "required": true,
+      "default": "2stAJT1lg23FxMhzCywN"
+    },
+    {
+      "name": "glideTableId",
+      "title": "Glide Table ID",
+      "description": "Your Glide Table ID (e.g. native-table-JU0RIdiigpadiFHcUMHJ)",
+      "type": "textfield",
+      "required": true,
+      "default": "native-table-JU0RIdiigpadiFHcUMHJ"
+    }
+  ]
+}
