@@ -1,6 +1,6 @@
 # Parcel Changelog
 
-## [Added Package Tracking] - 2025-03-18
+## [Added Package Tracking] - {PR_MERGE_DATE}
 
 - Added "Add Delivery" command with a form interface to add new deliveries to Parcel
 - Added support for both labeled and unlabeled package tracking using Parcel's protocol handlers
