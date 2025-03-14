@@ -20,9 +20,6 @@
       "icon": "extension-icon.png"
     }    
   ],
-  "permissions": [
-    "file-system"
-  ],
   "dependencies": {
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.17.0"
