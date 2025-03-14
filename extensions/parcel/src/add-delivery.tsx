@@ -1,4 +1,5 @@
 import { Form, ActionPanel, Action, showToast, Toast, Icon, closeMainWindow, PopToRootType, open } from "@raycast/api";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 
 interface FormValues {
