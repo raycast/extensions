@@ -1,15 +1,17 @@
 import { List, Icon, getPreferenceValues, Color } from "@raycast/api";
 import { Preferences, PlaceSearchResult } from "../types";
 import { PlaceActions } from "./placeActions";
+import { PLACE_TYPES } from "../types/places";
 
 interface PlaceSearchResultsProps {
   places: PlaceSearchResult[];
   isLoading: boolean;
   onSelectPlace: (placeId: string) => void;
   onBack?: () => void;
+  placeType?: string;
 }
 
-export function PlaceSearchResults({ places, isLoading, onSelectPlace, onBack }: PlaceSearchResultsProps) {
+export function PlaceSearchResults({ places, isLoading, onSelectPlace, onBack, placeType }: PlaceSearchResultsProps) {
   const preferences = getPreferenceValues<Preferences>();
 
   // Format place types for display
@@ -20,9 +22,40 @@ export function PlaceSearchResults({ places, isLoading, onSelectPlace, onBack }:
       .join(", ");
   };
 
+  // Format place type for display in title
+  const formatPlaceTypeTitle = (type?: string): string => {
+    if (!type) return "Places";
+
+    // Find the place type in the predefined list and use its plural form
+    const placeTypeOption = PLACE_TYPES.find((option) => option.value === type);
+    if (placeTypeOption && placeTypeOption.plural) {
+      return placeTypeOption.plural;
+    }
+
+    // Fallback for custom types not in the predefined list
+    // Convert from camelCase or snake_case and capitalize first letter of each word
+    const formatted = type
+      .replace(/_/g, " ")
+      .replace(/([A-Z])/g, " $1")
+      .trim()
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+
+    // Simple pluralization for fallback
+    if (formatted.endsWith("y")) {
+      return formatted.slice(0, -1) + "ies";
+    } else if (!formatted.endsWith("s")) {
+      return formatted + "s";
+    }
+
+    return formatted;
+  };
+
+  const sectionTitle = formatPlaceTypeTitle(placeType);
+
   return (
     <List isLoading={isLoading}>
-      <List.Section title="Places" subtitle={`${places.length} found`}>
+      <List.Section title={sectionTitle} subtitle={`${places.length} found`}>
         {places.map((place) => (
           <List.Item
             key={place.placeId}
@@ -44,11 +77,13 @@ export function PlaceSearchResults({ places, isLoading, onSelectPlace, onBack }:
           />
         ))}
       </List.Section>
-      <List.EmptyView
-        title="Type Query to Search"
-        description="Search for places by name, address, or type."
-        icon={require("../assets/no-view.png")}
-      />
+      {places.length === 0 && !isLoading && (
+        <List.EmptyView
+          title="Type Query to Search"
+          description="Search for places by name, address, or type."
+          icon="no-view.png"
+        />
+      )}
     </List>
   );
 }

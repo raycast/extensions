@@ -4,7 +4,7 @@ import { makeDirectionsURL, makeSearchURL } from "../utils/url";
 
 interface PlaceActionsProps {
   place: PlaceSearchResult;
-  onViewDetails: (placeId: string) => void;
+  onViewDetails?: (placeId: string) => void;
   onBack?: () => void;
   preferredMode?: string;
   isDetailView?: boolean;
@@ -17,7 +17,7 @@ export function PlaceActions({ place, onViewDetails, onBack, preferredMode, isDe
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        {!isDetailView && (
+        {!isDetailView && onViewDetails && (
           <Action title="View Details" icon={Icon.Sidebar} onAction={() => onViewDetails(place.placeId)} />
         )}
       </ActionPanel.Section>

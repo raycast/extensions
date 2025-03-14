@@ -1,6 +1,8 @@
+// External library imports
 import { showFailureToast } from "@raycast/utils";
-import { openExtensionPreferences } from "@raycast/api";
-import { getPreferenceValues } from "@raycast/api";
+import { openExtensionPreferences, getPreferenceValues } from "@raycast/api";
+
+// Internal type exports
 import { Preferences } from "../types";
 
 /**
@@ -45,10 +47,17 @@ export async function executeApiRequest<T>(
 
     return await requestFn();
   } catch (error) {
-    console.error(`${errorTitle}: ${error}`);
+    // Get detailed error information
+    const errorDetails =
+      error instanceof Error
+        ? error.message + (error.stack ? `\nStack: ${error.stack.split("\n")[1]?.trim()}` : "")
+        : String(error);
+
+    console.error(`${errorTitle}: ${errorDetails}`);
+
     await showFailureToast({
       title: errorTitle,
-      message: errorMessage,
+      message: `${errorMessage}${error instanceof Error ? `\nDetails: ${error.message}` : ""}`,
     });
     return null;
   }

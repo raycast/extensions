@@ -1,6 +1,17 @@
+// External library imports
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../types";
-import { TravelMode, UnitSystem } from "@googlemaps/google-maps-services-js";
+
+// Internal type exports
+import { TravelMode, UnitSystem } from "../types/googleMapsApi";
+
+// Default radius values
+export const DEFAULT_RADIUS_KM = 5;
+export const DEFAULT_RADIUS_MILES = 3;
+
+// Default radius in meters for API calls (50km or ~31 miles)
+export const DEFAULT_SEARCH_RADIUS_METRIC = 50000;
+export const DEFAULT_SEARCH_RADIUS_IMPERIAL = Math.round(31 * 1609.34);
 
 /**
  * Convert miles to kilometers
@@ -37,14 +48,6 @@ export function getUnitSystem(): "metric" | "imperial" {
   const preferences = getPreferenceValues<Preferences>();
   return preferences.unitSystem || "metric";
 }
-
-// Default radius values
-export const DEFAULT_RADIUS_KM = 5;
-export const DEFAULT_RADIUS_MILES = 3;
-
-// Default radius in meters for API calls (50km or ~31 miles)
-export const DEFAULT_SEARCH_RADIUS_METRIC = 50000;
-export const DEFAULT_SEARCH_RADIUS_IMPERIAL = Math.round(31 * 1609.34);
 
 /**
  * Renders star rating as text (e.g., "★★★★☆" for 4.0)
@@ -174,6 +177,10 @@ export function formatDistance(
   unit: "km" | "m" = "km",
   unitSystemOverride?: "metric" | "imperial"
 ): string {
+  if (distance < 0) {
+    console.warn(`Invalid distance value: ${distance}. Expected non-negative number.`);
+    return "Invalid distance";
+  }
   const unitSystem = unitSystemOverride || getUnitSystem();
 
   // Convert to kilometers if input is in meters
@@ -238,20 +245,4 @@ export function getTravelModeForApi(mode: string): TravelMode {
 
   console.warn(`Invalid travel mode: ${mode}. Using ${TravelMode.driving} instead.`);
   return TravelMode.driving;
-}
-
-/**
- * Format distance for legacy code (kept for backward compatibility)
- * @param meters Distance in meters
- * @param unitSystem User's preferred unit system ("metric" or "imperial")
- * @returns Formatted distance string
- */
-export function formatDistanceLegacy(meters: number, unitSystem: "metric" | "imperial"): string {
-  return unitSystem === "metric"
-    ? meters < 1000
-      ? `${meters}m`
-      : `${(meters / 1000).toFixed(1)}km`
-    : meters < 160
-    ? `${Math.round(metersToFeet(meters))}ft`
-    : `${(meters / 1609.34).toFixed(1)}mi`;
 }

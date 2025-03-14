@@ -134,7 +134,7 @@
       "title": "Unit System",
       "required": false,
       "default": "metric",
-      "description": "Unit System",
+      "description": "Choose between metric or imperial units for distances.",
       "data": [
         {
           "title": "Metric System",

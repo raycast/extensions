@@ -25,9 +25,15 @@ export interface GeoLocation {
 }
 
 /**
+ * Sort order options for place results
+ */
+export type SortOrder = "none" | "distance" | "rating" | "price" | "price-desc";
+
+/**
  * Corresponds to the preferences defined in package.json.
  */
 export interface Preferences {
+  apiKey: unknown;
   homeAddress: string;
   preferredMode: TransportType;
   preferredOrigin: OriginOption;
@@ -36,4 +42,5 @@ export interface Preferences {
   googlePlacesApiKey: string;
   showMapInSidebar: boolean;
   unitSystem: "metric" | "imperial";
+  defaultSortOrder: SortOrder;
 }

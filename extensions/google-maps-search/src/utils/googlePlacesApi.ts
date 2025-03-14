@@ -1,7 +1,12 @@
+// External library imports
 import { Client, PlaceInputType } from "@googlemaps/google-maps-services-js";
-import { getPreferenceValues } from "@raycast/api";
-import { Preferences, PlaceSearchResult, PlaceDetails, RouteInfo, TransportType } from "../types";
+
+// Internal type exports
+import { Preferences, PlaceSearchResult, PlaceDetails, RouteInfo, TransportType, PLACE_TYPES } from "../types";
+
+// Internal helper functions
 import { milesToKm, getUnitSystem, getDefaultRadius, getTravelModeForApi, getUnitSystemForApi } from "./common";
+import { getPreferenceValues } from "@raycast/api";
 
 // Initialize the Google Maps client
 let client: Client | null = null;
@@ -58,8 +63,16 @@ export async function searchPlaces(
     name: result.name || "",
     address: result.formatted_address || "",
     location: {
-      lat: result.geometry?.location?.lat || 0,
-      lng: result.geometry?.location?.lng || 0,
+      lat:
+        result.geometry?.location?.lat ??
+        (() => {
+          throw new Error("Missing location latitude");
+        })(),
+      lng:
+        result.geometry?.location?.lng ??
+        (() => {
+          throw new Error("Missing location longitude");
+        })(),
     },
     types: result.types || [],
     rating: result.rating,
@@ -112,8 +125,16 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceDetails> {
     name: result.name || "",
     address: result.formatted_address || "",
     location: {
-      lat: result.geometry?.location?.lat || 0,
-      lng: result.geometry?.location?.lng || 0,
+      lat:
+        result.geometry?.location?.lat ??
+        (() => {
+          throw new Error("Missing location latitude");
+        })(),
+      lng:
+        result.geometry?.location?.lng ??
+        (() => {
+          throw new Error("Missing location longitude");
+        })(),
     },
     types: result.types || [],
     rating: result.rating,
@@ -173,7 +194,7 @@ export async function geocodeAddress(address: string): Promise<{ lat: number; ln
 export async function getDirections(
   origin: string | { lat: number; lng: number },
   destination: string | { lat: number; lng: number },
-  mode: string
+  mode: TransportType
 ): Promise<RouteInfo | null> {
   try {
     const apiKey = getApiKey();
@@ -242,7 +263,13 @@ export async function getNearbyPlaces(
     const unitSystem = getUnitSystem();
 
     // Convert radius to meters if using imperial units (input would be in miles)
-    const radiusInMeters = unitSystem === "imperial" ? Math.round(milesToKm(radius) * 1000) : radius;
+    const radiusInMeters = Math.min(unitSystem === "imperial" ? Math.round(milesToKm(radius) * 1000) : radius, 50000);
+
+    // Validate the place type
+    const validPlaceTypes = new Set(PLACE_TYPES.map((placeType) => placeType.value as PlaceInputType));
+    if (!validPlaceTypes.has(type as PlaceInputType)) {
+      console.warn(`Invalid place type: ${type}. This may cause the API request to fail.`);
+    }
 
     const response = await getClient().placesNearby({
       params: {
@@ -296,7 +323,9 @@ export function getStaticMapUrl(
   const apiKey = getApiKey();
   const centerStr = typeof center === "string" ? center : `${center.lat},${center.lng}`;
 
-  let url = `https://maps.googleapis.com/maps/api/staticmap?center=${centerStr}&zoom=${zoom}&size=600x300&scale=2&key=${apiKey}`;
+  let url = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(
+    centerStr
+  )}&zoom=${zoom}&size=600x300&scale=2&key=${apiKey}`;
 
   // Add markers
   if (markers && markers.length > 0) {

@@ -25,13 +25,14 @@ export function useGeocoding() {
           title: "Geocoding Failed",
           message: "Could not find coordinates for your home address",
         });
+        return null;
       }
       return location;
     } catch (error) {
       console.error("Error geocoding home address:", error);
       await showFailureToast({
         title: "Geocoding Error",
-        message: String(error),
+        message: error instanceof Error ? error.message : "An unexpected error occurred",
       });
       return null;
     } finally {
@@ -61,13 +62,14 @@ export function useGeocoding() {
           title: "Geocoding Failed",
           message: "Could not find coordinates for the provided address",
         });
+        return null;
       }
       return location;
     } catch (error) {
       console.error("Error geocoding custom address:", error);
       await showFailureToast({
         title: "Geocoding Error",
-        message: String(error),
+        message: error instanceof Error ? error.message : "An unexpected error occurred",
       });
       return null;
     } finally {

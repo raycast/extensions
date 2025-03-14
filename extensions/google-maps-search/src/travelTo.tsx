@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon, popToRoot } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import { fetchItemInput } from "./utils/input";
-import { Preferences, transportType, OriginOption } from "./utils/types";
+import { Preferences, TransportType, OriginOption } from "./types";
 import { makeDirectionsURL } from "./utils/url";
 import { showFailureToast } from "@raycast/utils";
 
@@ -11,7 +11,9 @@ export default function Command() {
 
   // State variables
   const [origin, setOrigin] = useState<OriginOption>(preferences.preferredOrigin); // Controls which origin option is selected
-  const [originAddress, setOriginAddress] = useState<string>(""); // Stores the origin address
+  const [originAddress, setOriginAddress] = useState<string>(
+    preferences.preferredOrigin === OriginOption.Home ? preferences.homeAddress : ""
+  ); // Stores the origin address
   const [destination, setDestination] = useState<string>(""); // Stores the destination address
   const [mode, setMode] = useState<string>(preferences.preferredMode); // Stores the selected transport mode
   const [isLoading, setIsLoading] = useState<boolean>(preferences.useSelected); // Controls loading state
@@ -19,6 +21,13 @@ export default function Command() {
   // Handle changes to the origin dropdown
   const handleOriginChange = useCallback(
     (value: string) => {
+      // Validate that value is a valid OriginOption
+      const isValidOriginOption = Object.values(OriginOption).includes(value as OriginOption);
+      if (!isValidOriginOption) {
+        console.warn(`Invalid origin option: ${value}`);
+        return;
+      }
+
       const newOrigin = value as OriginOption;
       setOrigin(newOrigin);
       if (newOrigin === OriginOption.Home) {
@@ -96,10 +105,10 @@ export default function Command() {
       )}
       {/* Transport mode selection dropdown */}
       <Form.Dropdown id="transportType" title="Transport Preference" value={mode} onChange={setMode}>
-        <Form.Dropdown.Item value={transportType.Driving} title="Driving" icon={Icon.Car} />
-        <Form.Dropdown.Item value={transportType.Transit} title="Transit" icon={Icon.Train} />
-        <Form.Dropdown.Item value={transportType.Walking} title="Walking" icon={Icon.Footprints} />
-        <Form.Dropdown.Item value={transportType.Cycling} title="Cycling" icon={Icon.Bike} />
+        <Form.Dropdown.Item value={TransportType.Driving} title="Driving" icon={Icon.Car} />
+        <Form.Dropdown.Item value={TransportType.Transit} title="Transit" icon={Icon.Train} />
+        <Form.Dropdown.Item value={TransportType.Walking} title="Walking" icon={Icon.Footprints} />
+        <Form.Dropdown.Item value={TransportType.Cycling} title="Cycling" icon={Icon.Bike} />
       </Form.Dropdown>
     </Form>
   );

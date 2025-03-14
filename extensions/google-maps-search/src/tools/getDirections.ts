@@ -27,7 +27,7 @@ type GetDirectionsInput = {
 /**
  * Tool for getting directions between locations
  */
-export default async function (input: GetDirectionsInput): Promise<string> {
+export async function getDirections(input: GetDirectionsInput): Promise<string> {
   try {
     const preferences = getPreferenceValues<Preferences>();
     let mode = input.mode || preferences.preferredMode || "driving";
@@ -62,6 +62,9 @@ export default async function (input: GetDirectionsInput): Promise<string> {
 
     if (input.origin) {
       response += `From: ${input.origin}\n`;
+    } else {
+      // If no origin was provided, we're using the home address from preferences
+      response += `From: Home Address (${preferences.homeAddress || "Not set"})\n`;
     }
     response += `To: ${input.destination}\n`;
     response += `Mode: ${mode.charAt(0).toUpperCase() + mode.slice(1)}\n\n`;
@@ -77,3 +80,6 @@ export default async function (input: GetDirectionsInput): Promise<string> {
     return `Sorry, I encountered an error while getting directions to "${input.destination}". Please check your API key and try again.`;
   }
 }
+
+// Export as default for Raycast tool compatibility
+export default getDirections;

@@ -1,5 +1,19 @@
+// External library imports
 import { getPreferenceValues } from "@raycast/api";
+
+// Internal type exports
 import { Preferences } from "../types";
+
+// Conversion constants
+export const KM_PER_MILE = 1.60934;
+export const FEET_PER_METER = 3.28084;
+export const METERS_PER_MILE = 1609.34;
+
+// Default values
+export const DEFAULT_RADIUS_KM = 5;
+export const DEFAULT_RADIUS_MILES = 3;
+export const DEFAULT_SEARCH_RADIUS_KM = 50000; // 50km in meters
+export const DEFAULT_SEARCH_RADIUS_MILES = 30; // miles
 
 /**
  * Convert miles to kilometers
@@ -7,7 +21,7 @@ import { Preferences } from "../types";
  * @returns Distance in kilometers
  */
 export function milesToKm(miles: number): number {
-  return miles * 1.60934;
+  return miles * KM_PER_MILE;
 }
 
 /**
@@ -16,7 +30,7 @@ export function milesToKm(miles: number): number {
  * @returns Distance in miles
  */
 export function kmToMiles(km: number): number {
-  return km / 1.60934;
+  return km / KM_PER_MILE;
 }
 
 /**
@@ -25,7 +39,7 @@ export function kmToMiles(km: number): number {
  * @returns Distance in feet
  */
 export function metersToFeet(meters: number): number {
-  return meters * 3.28084;
+  return meters * FEET_PER_METER;
 }
 
 /**
@@ -34,7 +48,7 @@ export function metersToFeet(meters: number): number {
  * @returns Distance in meters
  */
 export function feetToMeters(feet: number): number {
-  return feet / 3.28084;
+  return feet / FEET_PER_METER;
 }
 
 /**
@@ -43,7 +57,7 @@ export function feetToMeters(feet: number): number {
  * @returns Distance in miles
  */
 export function metersToMiles(meters: number): number {
-  return meters / 1609.34;
+  return meters / METERS_PER_MILE;
 }
 
 /**
@@ -52,7 +66,7 @@ export function metersToMiles(meters: number): number {
  * @returns Distance in meters
  */
 export function milesToMeters(miles: number): number {
-  return miles * 1609.34;
+  return miles * METERS_PER_MILE;
 }
 
 /**
@@ -66,11 +80,11 @@ export function getUnitSystem(): "metric" | "imperial" {
 
 /**
  * Get the default radius based on the user's preferred unit system
- * @returns Default radius as a string (5 for km, 3 for miles)
+ * @returns Default radius as a number (5 for km, 3 for miles)
  */
-export function getDefaultRadius(): string {
+export function getDefaultRadius(): number {
   const unitSystem = getUnitSystem();
-  return unitSystem === "metric" ? "5" : "3";
+  return unitSystem === "metric" ? DEFAULT_RADIUS_KM : DEFAULT_RADIUS_MILES;
 }
 
 /**
@@ -79,24 +93,5 @@ export function getDefaultRadius(): string {
  */
 export function getDefaultSearchRadiusInMeters(): number {
   const unitSystem = getUnitSystem();
-  return unitSystem === "metric" ? 50000 : Math.round(31 * 1609.34);
-}
-
-/**
- * Get the user's preferred unit system for Google Maps API
- * This is a wrapper around getUnitSystem that returns the value as unknown to avoid type issues
- * @returns The user's preferred unit system as unknown type for Google Maps API
- */
-export function getUnitSystemForApi(): unknown {
-  return getUnitSystem() as unknown;
-}
-
-/**
- * Get the travel mode for Google Maps API
- * This is a helper to avoid type issues with the Google Maps API
- * @param mode The travel mode string
- * @returns The travel mode as unknown type for Google Maps API
- */
-export function getTravelModeForApi(mode: string): unknown {
-  return mode as unknown;
+  return unitSystem === "metric" ? DEFAULT_SEARCH_RADIUS_KM : Math.round(DEFAULT_SEARCH_RADIUS_MILES * METERS_PER_MILE);
 }

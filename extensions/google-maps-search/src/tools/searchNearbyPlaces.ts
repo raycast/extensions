@@ -38,10 +38,13 @@ type SearchNearbyPlacesInput = {
 /**
  * Tool for searching places near a specified location
  */
-export default async function (input: SearchNearbyPlacesInput): Promise<string> {
+export async function searchNearbyPlaces(input: SearchNearbyPlacesInput): Promise<string> {
   try {
     // Get API key from preferences if needed in getNearbyPlaces
-    getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues<Preferences>();
+    if (!preferences.googlePlacesApiKey) {
+      throw new Error("Google Places API key is required");
+    }
     const radius = input.radius || 1000;
     const limit = input.limit || 5;
 
@@ -92,3 +95,6 @@ export default async function (input: SearchNearbyPlacesInput): Promise<string> 
     return `Sorry, I encountered an error while searching for ${input.type} places near "${input.location}". Please check your API key and try again.`;
   }
 }
+
+// Export as default for Raycast tool compatibility
+export default searchNearbyPlaces;

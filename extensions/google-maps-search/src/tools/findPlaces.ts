@@ -22,7 +22,7 @@ type FindPlacesInput = {
 /**
  * Tool for finding places by search query
  */
-export default async function (input: FindPlacesInput): Promise<string> {
+export async function findPlaces(input: FindPlacesInput): Promise<string> {
   try {
     // Get API key from preferences if needed in searchPlaces
     const preferences = getPreferenceValues<Preferences>();
@@ -45,7 +45,9 @@ export default async function (input: FindPlacesInput): Promise<string> {
       response += `  Address: ${place.address}\n`;
       if (place.rating) response += `  Rating: ${place.rating}/5\n`;
       if (place.openNow !== undefined) response += `  Status: ${place.openNow ? "Open Now" : "Closed"}\n`;
-      response += `  [View on Google Maps](${makeSearchURL(encodeURIComponent(`${place.name} ${place.address}`))})\n\n`;
+      response += `  [View on Google Maps](${makeSearchURL(
+        encodeURIComponent(place.name) + " " + encodeURIComponent(place.address)
+      )})\n\n`;
     }
 
     if (results.length > limit) {
@@ -58,3 +60,6 @@ export default async function (input: FindPlacesInput): Promise<string> {
     return `Sorry, I encountered an error while searching for "${input.query}". Please check your API key and try again.`;
   }
 }
+
+// Export as default for Raycast tool compatibility
+export default findPlaces;

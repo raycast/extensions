@@ -20,7 +20,13 @@ export function validateRequired(value: string, fieldName: string): string | nul
  */
 export function validateNumeric(value: string, fieldName: string): string | null {
   const num = Number(value);
-  return !isNaN(num) && num > 0 ? null : `${fieldName} must be a positive number`;
+
+  // Handle NaN, zero (including negative zero), and negative numbers
+  if (isNaN(num) || num <= 0 || Object.is(num, -0)) {
+    return `${fieldName} must be a positive number`;
+  }
+
+  return null;
 }
 
 /**
@@ -30,8 +36,14 @@ export function validateNumeric(value: string, fieldName: string): string | null
  * @param max The maximum allowed value
  * @param fieldName The name of the field (for error messages)
  * @returns Error message or null if valid
+ * @throws Error if min > max (invalid range definition)
  */
 export function validateRange(value: string, min: number, max: number, fieldName: string): string | null {
+  // Validate the range definition
+  if (min > max) {
+    throw new Error(`Invalid range definition: min (${min}) cannot be greater than max (${max})`);
+  }
+
   const num = Number(value);
   if (isNaN(num)) {
     return `${fieldName} must be a number`;

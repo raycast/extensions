@@ -40,8 +40,10 @@ type FindNearbyPlacesInput = {
  */
 export default async function (input: FindNearbyPlacesInput): Promise<string> {
   try {
-    // Get API key from preferences if needed in getNearbyPlaces
-    getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues<Preferences>();
+    if (!preferences.apiKey) {
+      return "Please set your Google Maps API key in preferences.";
+    }
     const radius = input.radius || 1000;
     const limit = input.limit || 5;
 

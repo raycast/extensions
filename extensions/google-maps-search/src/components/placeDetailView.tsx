@@ -136,9 +136,6 @@ export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
               rating: placeDetails.rating,
               openNow: placeDetails.openingHours?.isOpen,
             }}
-            onViewDetails={() => {
-              /* Already in details view */
-            }}
             onBack={onBack}
             isDetailView={true}
           />

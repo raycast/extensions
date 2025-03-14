@@ -27,10 +27,10 @@ export interface GoogleMapsDirectionsParams {
   key: string;
   units: UnitSystem;
   alternatives?: boolean;
-  avoid?: string;
+  avoid?: "tolls" | "highways" | "ferries";
   language?: string;
   region?: string;
-  traffic_model?: string;
+  traffic_model?: "best_guess" | "pessimistic" | "optimistic";
   transit_mode?: string;
-  transit_routing_preference?: string;
+  transit_routing_preference?: "less" | "more";
 }

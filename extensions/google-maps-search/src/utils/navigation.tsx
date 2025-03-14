@@ -1,5 +1,8 @@
-import { Navigation } from "@raycast/api";
+// External library imports
 import React from "react";
+import { Navigation } from "@raycast/api";
+
+// Internal type exports
 import { PlaceSearchResult } from "../types";
 import { PlaceSearchResults } from "../components/placeSearchResults";
 import { PlaceDetailView } from "../components/placeDetailView";
@@ -9,12 +12,14 @@ import { PlaceDetailView } from "../components/placeDetailView";
  * @param push Navigation push function from useNavigation hook
  * @param places Array of place search results
  * @param HomeComponent Component to return to when navigating back from search results
+ * @param placeType Optional place type that was searched for
  * @returns Object containing navigation functions
  */
 export function createPlaceNavigation(
   push: Navigation["push"],
   places: PlaceSearchResult[],
-  HomeComponent: React.ComponentType
+  HomeComponent: React.ComponentType,
+  placeType?: string
 ): {
   navigateToResults: () => void;
   navigateToDetails: (selectedPlaceId: string) => void;
@@ -28,6 +33,7 @@ export function createPlaceNavigation(
         isLoading={false}
         onSelectPlace={(selectedPlaceId) => navigateToDetails(selectedPlaceId)}
         onBack={() => push(<HomeComponent />)}
+        placeType={placeType}
       />
     );
   };

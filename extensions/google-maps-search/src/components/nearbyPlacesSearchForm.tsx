@@ -1,142 +1,183 @@
-import { useState } from "react";
 import { Action, ActionPanel, Form, Icon, openExtensionPreferences, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { OriginOption, PLACE_TYPES } from "../utils/types";
+import { showFailureToast, useForm, useLocalStorage } from "@raycast/utils";
+import { OriginOption, PLACE_TYPES } from "../types";
 import { useNearbyPlaces } from "../hooks/useNearbyPlaces";
-import { getUnitSystem, getDefaultRadius } from "../utils/common";
+import { getDefaultRadius, getUnitSystem } from "../utils/common";
 import { createPlaceNavigation } from "../utils/navigation";
 
 /**
  * The NearbyPlacesSearchForm component is a form for the user to input search criteria,
- * such as the type of places to search for, the search radius, the origin (home address or custom address),
- * and whether to only show open places.
+ * which is then used to search for nearby places using the Google Maps API.
  *
- * This component is wrapped in a navigation context, which provides the `push` function. When the search form is submitted,
- * the `push` function is called with a new `SearchResultsView` component as its argument.
- *
- * The component also handles the loading of saved search settings from LocalStorage, and saves the current search settings to
- * LocalStorage when the form is submitted.
+ * Features:
+ * - Persists form values using localStorage
+ * - Validates form values before submission using Raycast's useForm hook
+ * - Handles errors and displays appropriate messages
+ * - Uses the createPlaceNavigation utility to navigate to search results
  */
+
+/**
+ * Form values interface for the NearbyPlacesSearchForm
+ */
+interface NearbyPlacesFormValues {
+  placeType: string;
+  origin: string;
+  customAddress: string;
+  radius: string;
+}
+
 export function NearbyPlacesSearchForm() {
   const { push } = useNavigation();
   const { searchNearbyPlaces, isLoading } = useNearbyPlaces();
 
-  const [placeType, setPlaceType] = useState<string>("restaurant");
-  const [origin, setOrigin] = useState<OriginOption>(OriginOption.Home);
+  // Use localStorage to persist form values
+  const { value: savedPlaceType, setValue: setSavedPlaceType } = useLocalStorage<string>(
+    "last-place-type",
+    "restaurant"
+  );
+  const { value: savedRadius, setValue: setSavedRadius } = useLocalStorage<string>("last-radius", getDefaultRadius());
+  const { value: savedOrigin, setValue: setSavedOrigin } = useLocalStorage<OriginOption>(
+    "last-origin-option",
+    OriginOption.Home
+  );
+  const { value: savedCustomAddress, setValue: setSavedCustomAddress } = useLocalStorage<string>(
+    "last-custom-address",
+    ""
+  );
 
-  // Handle origin change with proper type conversion
-  const handleOriginChange = (newValue: string) => {
-    setOrigin(newValue as OriginOption);
-  };
-
-  // Get user's preferred unit system and default radius
-  const unitSystem = getUnitSystem();
-  const [radius, setRadius] = useState<string>(getDefaultRadius());
-
-  const [customAddress, setCustomAddress] = useState<string>("");
+  // Common error messages
+  const NO_PLACES_FOUND_MESSAGE =
+    "No places found matching your criteria. Try increasing the search radius or changing the place type.";
 
   // Handle search submission
-  const handleSubmit = async () => {
+  const handleSubmit = async (values: NearbyPlacesFormValues) => {
     try {
-      // Validate custom address is set when origin is Custom
-      if (origin === OriginOption.Custom && !customAddress.trim()) {
-        await showFailureToast({
-          title: "Missing Address",
-          message: "Please enter a custom address before searching",
-        });
-        return;
-      }
+      // Save form values to localStorage
+      setSavedPlaceType(values.placeType);
+      setSavedRadius(values.radius);
+      setSavedOrigin(values.origin as OriginOption);
+      setSavedCustomAddress(values.customAddress);
 
-      // Validate radius is a positive number
-      const radiusValue = parseInt(radius, 10);
-      if (isNaN(radiusValue) || radiusValue <= 0) {
-        await showFailureToast({
-          title: "Invalid Radius",
-          message: "Please enter a valid positive number for the radius",
-        });
-        return;
-      }
+      const radiusValue = parseFloat(values.radius);
 
-      const places = await searchNearbyPlaces(placeType, origin, customAddress, radiusValue);
+      const places = await searchNearbyPlaces(
+        values.placeType,
+        values.origin as OriginOption,
+        values.customAddress,
+        radiusValue
+      );
 
       if (places && places.length > 0) {
-        // Use the navigation utility to create navigation functions
-        const { navigateToResults } = createPlaceNavigation(push, places, NearbyPlacesSearchForm);
-
-        // Initial navigation to results
+        const { navigateToResults } = createPlaceNavigation(push, places, NearbyPlacesSearchForm, values.placeType);
         navigateToResults();
       } else {
         await showFailureToast({
           title: "No places found",
-          message:
-            "No places found for the given search criteria. Try increasing the radius or changing the place type.",
+          message: NO_PLACES_FOUND_MESSAGE,
         });
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error in handleSubmit:", error);
 
-      // Handle specific error cases
-      if (error instanceof Error) {
-        const errorMessage = error.message || "";
-
-        if (errorMessage.includes("ZERO_RESULTS")) {
-          await showFailureToast({
-            title: "No Results Found",
-            message:
-              "No places found matching your criteria. Try increasing the search radius or changing the place type.",
-          });
-        } else {
-          await showFailureToast({
-            title: "Error searching for places",
-            message: errorMessage || "An unknown error occurred",
-          });
-        }
+      if (error instanceof Error && error.message.includes("ZERO_RESULTS")) {
+        await showFailureToast({
+          title: "No Results Found",
+          message: NO_PLACES_FOUND_MESSAGE,
+        });
       } else {
         await showFailureToast({
           title: "Error searching for places",
-          message: "An unknown error occurred",
+          message: error instanceof Error ? error.message : "An unknown error occurred",
         });
       }
     }
   };
 
+  // Use the useForm hook for form validation
+  const {
+    handleSubmit: formSubmit,
+    itemProps,
+    values,
+  } = useForm<NearbyPlacesFormValues>({
+    onSubmit: handleSubmit,
+    initialValues: {
+      placeType: savedPlaceType,
+      origin: savedOrigin,
+      customAddress: savedCustomAddress,
+      radius: savedRadius,
+    },
+    validation: {
+      radius: (value) => {
+        if (!value) return "Please enter a radius value";
+
+        const num = parseFloat(value);
+        if (isNaN(num)) {
+          return "Please enter a valid number";
+        }
+        if (num < 0.5) {
+          return "Radius must be at least 0.5";
+        }
+        if (num > 50) {
+          return "Radius must be at most 50";
+        }
+      },
+      customAddress: (value) => {
+        if (values.origin === OriginOption.Custom) {
+          // Check if address is empty
+          if (!value?.trim()) {
+            return "Please enter a custom address";
+          }
+
+          // Check for minimum length
+          if (value.trim().length < 5) {
+            return "Address is too short, please be more specific";
+          }
+
+          // Check for address format - should contain at least some alphanumeric characters
+          if (!/[a-zA-Z0-9]/.test(value)) {
+            return "Address should contain alphanumeric characters";
+          }
+
+          // Check for special characters that might cause issues with the API
+          if (/[<>{}[\]\\^~`|]/.test(value)) {
+            return "Address contains invalid special characters";
+          }
+        }
+      },
+    },
+  });
+
   return (
     <Form
       isLoading={isLoading}
+      enableDrafts
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Search" icon={Icon.MagnifyingGlass} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Search" icon={Icon.MagnifyingGlass} onSubmit={formSubmit} />
           <Action title="Open Preferences" icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="placeType" title="Type of Places" value={placeType} onChange={setPlaceType}>
+      <Form.Dropdown {...itemProps.placeType} title="Type of Places">
         {PLACE_TYPES.map((type) => (
           <Form.Dropdown.Item key={type.value} value={type.value} title={type.title} />
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown id="origin" title="Search Near" value={origin} onChange={handleOriginChange}>
+      <Form.Dropdown {...itemProps.origin} title="Search Near">
         <Form.Dropdown.Item value={OriginOption.Home} title="Home Address" icon={Icon.House} />
         <Form.Dropdown.Item value={OriginOption.Custom} title="Custom Address" icon={Icon.Pencil} />
       </Form.Dropdown>
 
-      {origin === OriginOption.Custom && (
-        <Form.TextField
-          id="customAddress"
-          title="Custom Address"
-          placeholder="Enter address"
-          value={customAddress}
-          onChange={setCustomAddress}
-        />
+      {values.origin === OriginOption.Custom && (
+        <Form.TextField {...itemProps.customAddress} title="Custom Address" placeholder="Enter address" />
       )}
 
       <Form.TextField
-        id="radius"
-        title={`Search Radius (${unitSystem === "imperial" ? "miles" : "km"})`}
+        {...itemProps.radius}
+        title={`Search Radius (${getUnitSystem() === "imperial" ? "miles" : "km"})`}
         placeholder={getDefaultRadius()}
-        value={radius}
-        onChange={setRadius}
+        info="Enter a value between 0.5 and 50"
       />
     </Form>
   );

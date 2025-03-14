@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { showFailureToast, useLocalStorage } from "@raycast/utils";
+import { useState, useCallback } from "react";
 import {
   List,
   Icon,
   openExtensionPreferences,
-  LocalStorage,
   getPreferenceValues,
   LaunchProps,
   Clipboard,
@@ -18,7 +18,10 @@ import { PlaceActions } from "./components/placeActions";
 import { PreferencesActions } from "./components/preferencesActions";
 import { makeSearchURL, createPlaceURL } from "./utils/url";
 import { Preferences } from "./types";
-import { showFailureToast } from "@raycast/utils";
+
+// Constants
+const MIN_SEARCH_LENGTH = 3; // Minimum characters required for a valid search
+const DEBOUNCE_DELAY_MS = 500; // Delay for debounced operations
 
 export default function Command({ launchContext, fallbackText }: LaunchProps<{ launchContext: { query: string } }>) {
   return <SearchPlacesCommand initialSearchText={launchContext?.query ?? fallbackText} />;
@@ -29,46 +32,51 @@ function SearchPlacesCommand({ initialSearchText }: { initialSearchText?: string
   const { saveSearchHistory } = preferences;
   const { searchText, setSearchText, isLoading, places, hasApiKey } = usePlaceSearch(initialSearchText);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
-  // Load recent searches from local storage
-  const loadRecentSearchesCallback = useCallback(async () => {
-    const storedSearches = await LocalStorage.getItem<string>("recent-searches");
-    setRecentSearches(storedSearches ? JSON.parse(storedSearches) : []);
-  }, []);
-
-  useEffect(() => {
-    loadRecentSearchesCallback();
-  }, [loadRecentSearchesCallback]);
+  // Use useLocalStorage hook for recent searches
+  const { value: recentSearches = [], setValue: setRecentSearches } = useLocalStorage<string[]>("recent-searches", []);
 
   // Save search to recent searches
-  useEffect(() => {
-    if (searchText.length > 3 && !recentSearches.includes(searchText.trim()) && saveSearchHistory) {
-      const timeoutId = setTimeout(async () => {
-        const updatedSearches = [searchText, ...recentSearches.filter((s) => s !== searchText)].slice(0, 10);
-        await LocalStorage.setItem("recent-searches", JSON.stringify(updatedSearches));
+  const saveSearch = useCallback(
+    (search: string) => {
+      if (search.length >= MIN_SEARCH_LENGTH && !recentSearches.includes(search.trim()) && saveSearchHistory) {
+        const updatedSearches = [search, ...recentSearches.filter((s) => s !== search)].slice(0, 10);
         setRecentSearches(updatedSearches);
-      }, 500);
+      }
+    },
+    [recentSearches, saveSearchHistory, setRecentSearches]
+  );
 
-      return () => clearTimeout(timeoutId);
-    }
-  }, [searchText, recentSearches, saveSearchHistory]);
+  // Handle search text change with debounce
+  const handleSearchTextChange = useCallback(
+    (text: string) => {
+      setSearchText(text);
+
+      // Debounce saving to recent searches
+      if (text.length >= MIN_SEARCH_LENGTH && !recentSearches.includes(text.trim()) && saveSearchHistory) {
+        const timeoutId = setTimeout(() => {
+          saveSearch(text);
+        }, DEBOUNCE_DELAY_MS);
+
+        return () => clearTimeout(timeoutId);
+      }
+    },
+    [setSearchText, recentSearches, saveSearchHistory, saveSearch]
+  );
 
   // Handle removing a search from history
   const handleRemoveSearchCallback = useCallback(
-    async (searchToRemove: string) => {
+    (searchToRemove: string) => {
       const updatedSearches = recentSearches.filter((s) => s !== searchToRemove);
-      await LocalStorage.setItem("recent-searches", JSON.stringify(updatedSearches));
       setRecentSearches(updatedSearches);
     },
-    [recentSearches]
+    [recentSearches, setRecentSearches]
   );
 
   // Handle clearing all recent searches
-  const handleClearAllSearchesCallback = useCallback(async () => {
-    await LocalStorage.removeItem("recent-searches");
+  const handleClearAllSearchesCallback = useCallback(() => {
     setRecentSearches([]);
-  }, []);
+  }, [setRecentSearches]);
 
   // Handle copying coordinates URL
   const handleCopyCoordinatesCallback = useCallback(async (query: string) => {
@@ -110,7 +118,7 @@ function SearchPlacesCommand({ initialSearchText }: { initialSearchText?: string
       isLoading={isLoading}
       searchBarPlaceholder="Search for places..."
       searchText={searchText}
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={handleSearchTextChange}
       throttle
     >
       {!hasApiKey ? (
@@ -120,12 +128,12 @@ function SearchPlacesCommand({ initialSearchText }: { initialSearchText?: string
           icon={Icon.Key}
           actions={<PreferencesActions onOpenPreferences={openExtensionPreferences} />}
         />
-      ) : searchText.length < 3 ? (
+      ) : searchText.length < MIN_SEARCH_LENGTH ? (
         <>
           <List.EmptyView
-            title="Enter at least 3 characters"
+            title={`Enter at least ${MIN_SEARCH_LENGTH} characters`}
             description="Search for places by name, address, or type"
-            icon="no-view.png"
+            icon={{ source: "no-view.png" }}
           />
           {recentSearches.length > 0 && (
             <List.Section title="Recent Searches">
@@ -206,5 +214,3 @@ function SearchPlacesCommand({ initialSearchText }: { initialSearchText?: string
     </List>
   );
 }
-
-// Renamed to search-places.tsx
