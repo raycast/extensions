@@ -11,13 +11,16 @@ import {
   confirmAlert,
   getPreferenceValues,
   getSelectedFinderItems,
+  launchCommand,
   showToast,
+  LaunchType,
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 
 import EditDestination from "./destination-form";
 import { type Destination, destinationRepo } from "./repo/destination";
 import { checkExistence, copy, getFilenameFromPath, isDirectory, isFile, move } from "./utils/filesystem";
+import { showFailureToast } from "@raycast/utils";
 
 interface CopyMoveToProps {
   mode: "copy" | "move";
@@ -226,7 +229,26 @@ export default function CopyMoveTo(props: CopyMoveToProps) {
   return !isInEditMode ? (
     <List searchBarPlaceholder="Search Destinations...">
       {destinations.length === 0 ? (
-        <List.EmptyView title="No destinations!" />
+        <List.EmptyView
+          title="No Destinations Available"
+          description={`Add your first destination to start ${actionText}ing files\nHit enter to add a new destination`}
+          icon={Icon.NewFolder}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Add New Destination"
+                icon={Icon.NewFolder}
+                onAction={async () => {
+                  try {
+                    await launchCommand({ name: "add-new-destination", type: LaunchType.UserInitiated });
+                  } catch (error) {
+                    showFailureToast(error, { title: "Failed to launch add-new-destination command" });
+                  }
+                }}
+              />
+            </ActionPanel>
+          }
+        />
       ) : (
         destinations.map((destination) => (
           <List.Item
