@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-03-14
 
 - Update the Zen Browser name.
 - Update the AppleScript for Firefox-based browsers.
