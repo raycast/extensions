@@ -27,18 +27,6 @@ export default function Chat({ launchContext }) {
   const { apiKey, defaultModel } = getPreferenceValues();
   const gemini = new Gemini(apiKey, { fetch });
 
-  let createNewChatName = (prefix = "New Chat ") => {
-    const existingChatNames = chatData.chats.map((x) => x.name);
-    const newChatNumbers = existingChatNames
-      .filter((x) => x.match(/^New Chat \d+$/))
-      .map((x) => parseInt(x.replace(prefix, "")));
-    let lowestAvailableNumber = 1;
-    while (newChatNumbers.includes(lowestAvailableNumber)) {
-      lowestAvailableNumber++;
-    }
-    return prefix + lowestAvailableNumber;
-  };
-
   let CreateChat = () => {
     const { pop } = useNavigation();
 
@@ -49,20 +37,23 @@ export default function Chat({ launchContext }) {
             <Action.SubmitForm
               title="Create Chat"
               onSubmit={(values) => {
+                if (!values.chatName.trim()) {
+                  toast(Toast.Style.Failure, "Chat name cannot be empty.");
+                  return;
+                }
                 if (chatData.chats.map((x) => x.name).includes(values.chatName)) {
                   toast(Toast.Style.Failure, "Chat with that name already exists.");
                 } else {
                   pop();
                   setChatData((oldData) => {
-                    let newName = createNewChatName();
                     let newChatData = structuredClone(oldData);
                     newChatData.chats.push({
-                      name: newName,
+                      name: values.chatName,
                       creationDate: new Date(),
                       messages: [],
                       model: values.model === "default" ? defaultModel : values.model,
                     });
-                    newChatData.currentChat = newName;
+                    newChatData.currentChat = values.chatName;
 
                     return newChatData;
                   });
@@ -285,6 +276,7 @@ export default function Chat({ launchContext }) {
       </ActionPanel>
     );
   };
+
   let formatDate = (dateToCheckISO) => {
     const dateToCheck = new Date(dateToCheckISO);
     if (dateToCheck.toDateString() === new Date().toDateString()) {
