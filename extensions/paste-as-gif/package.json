@@ -1,0 +1,37 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "paste-as-gif",
+  "title": "Paste Video as Gif",
+  "description": "Converts video files from the clipboard to a gif and pastes that instead",
+  "icon": "command-icon.png",
+  "author": "davidjbng",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Paste Video as Gif",
+      "subtitle": "Your clipboard must contain a valid video file",
+      "description": "Creates a gif from the video file in your clipboard and pastes it",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "22.13.10",
+    "eslint": "^8.51.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
