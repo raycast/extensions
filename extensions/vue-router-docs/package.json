@@ -12,14 +12,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "open-vue-router-docs",
-      "title": "Open Vue Router Docs",
-      "subtitle": "Vue Router Docs",
-      "description": "Open the homepage of the Vue Router docs",
-      "icon": "v-logo.png",
-      "mode": "no-view"
-    },
-    {
       "name": "search-documentation",
       "title": "Search Documentation",
       "subtitle": "Vue Router Docs",
