@@ -7,7 +7,7 @@ import { Bundle } from "../types";
 import { decodeUrlSafely } from "./url";
 
 const execAsync = promisify(exec);
-const preferences = getPreferenceValues();
+const preferences: Preferences = getPreferenceValues();
 
 interface ChromeProfile {
   name: string;
