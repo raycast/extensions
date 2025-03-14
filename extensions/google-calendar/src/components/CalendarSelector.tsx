@@ -23,8 +23,8 @@ const CalendarSelector = ({
         {calendars.selected.map((calendar) => (
           <List.Dropdown.Item
             key={calendar.id}
-            value={calendar.id!}
-            title={calendar.summaryOverride ?? calendar.summary ?? ""}
+            value={calendar.id}
+            title={calendar.summaryOverride ?? calendar.summary ?? "(Untitled Calendar)"}
           />
         ))}
       </List.Dropdown.Section>
@@ -32,8 +32,8 @@ const CalendarSelector = ({
         {calendars.unselected.map((calendar) => (
           <List.Dropdown.Item
             key={calendar.id}
-            value={calendar.id!}
-            title={calendar.summaryOverride ?? calendar.summary ?? ""}
+            value={calendar.id}
+            title={calendar.summaryOverride ?? calendar.summary ?? "(Untitled Calendar)"}
           />
         ))}
       </List.Dropdown.Section>

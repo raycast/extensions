@@ -3,8 +3,8 @@ import { useMemo } from "react";
 import { calendar_v3 } from "@googleapis/calendar";
 
 export type UseCalendarsData = {
-  selected: calendar_v3.Schema$CalendarListEntry[];
-  unselected: calendar_v3.Schema$CalendarListEntry[];
+  selected: Array<calendar_v3.Schema$CalendarListEntry & { id: string }>;
+  unselected: Array<calendar_v3.Schema$CalendarListEntry & { id: string }>;
 };
 
 export type UseCalendarsResult = {
@@ -22,10 +22,10 @@ const useCalendars = (): UseCalendarsResult => {
       return (a.summary ?? "").localeCompare(b.summary ?? "");
     };
 
-    const selected = (calendars ?? []).filter((calendar) => calendar.selected).sort(sortCalendars);
-    const unselected = (calendars ?? []).filter((calendar) => !calendar.selected).sort(sortCalendars);
+    const selected = (calendars ?? []).filter((calendar) => calendar.selected && !!calendar.id).sort(sortCalendars);
+    const unselected = (calendars ?? []).filter((calendar) => !calendar.selected && !!calendar.id).sort(sortCalendars);
 
-    return { selected, unselected };
+    return { selected, unselected } as UseCalendarsData;
   }, [calendars]);
 
   return { data, isLoading, revalidate };

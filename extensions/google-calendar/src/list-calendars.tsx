@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, launchCommand, LaunchType, List } from "@ray
 import { withGoogleAPIs } from "./lib/google";
 import useCalendars from "./hooks/useCalendars";
 import { calendar_v3 } from "@googleapis/calendar";
+import { showFailureToast } from "@raycast/utils";
 
 const calendarItemAccessoiries = (calendar?: calendar_v3.Schema$CalendarListEntry) =>
   calendar &&
@@ -26,11 +27,17 @@ const CalendarActions = ({ calendar }: { calendar: calendar_v3.Schema$CalendarLi
         title="Show Events"
         icon={Icon.List}
         onAction={async () => {
-          await launchCommand({
-            name: "list-events",
-            type: LaunchType.UserInitiated,
-            context: { calendarId: calendar.id },
-          });
+          try {
+            await launchCommand({
+              name: "list-events",
+              type: LaunchType.UserInitiated,
+              context: { calendarId: calendar.id },
+            });
+          } catch (error) {
+            showFailureToast(error, {
+              title: "Failed to show events",
+            });
+          }
         }}
       />
     </ActionPanel>

@@ -52,11 +52,11 @@ const EventActions = ({
                     tintColor: isCurrentStatus ? Color.Green : Color.PrimaryText,
                   }}
                   onAction={async () => {
-                    const calendar = getCalendarClient();
+                    const calendarClient = getCalendarClient();
                     try {
                       await showToast({ style: Toast.Style.Animated, title: "Changing response status" });
-                      await calendar.events.patch({
-                        calendarId: "primary",
+                      await calendarClient.events.patch({
+                        calendarId: calendar?.id ?? "primary",
                         eventId: event.id ?? undefined,
                         requestBody: {
                           attendees: event.attendees?.map((attendee) =>
@@ -68,7 +68,7 @@ const EventActions = ({
                         style: Toast.Style.Success,
                         title: `Changed response status to ${messages[status as keyof typeof messages]}`,
                       });
-                      await revalidate();
+                      revalidate();
                     } catch (error) {
                       await showFailureToast(error, { title: "Failed changing response status" });
                     }

@@ -8,7 +8,7 @@
 - Remove auto creation of Google Meet link on creating event using AI (request [#17802](https://github.com/raycast/extensions/issues/17802))
 
 
-## [1.1.0] - 2024-03-04
+## [1.1.0] - 2025-03-04
 
 ### Changed
 
