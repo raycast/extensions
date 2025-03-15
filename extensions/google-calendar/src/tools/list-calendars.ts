@@ -1,5 +1,6 @@
 import { calendar_v3 } from "@googleapis/calendar";
 import { getCalendarClient, withGoogleAPIs } from "../lib/google";
+import { showFailureToast } from "@raycast/utils";
 
 type Input = {
   /**
@@ -35,25 +36,31 @@ type Input = {
 
 const tool = async (input: Input) => {
   const calendar = getCalendarClient();
+  const maxResults = input.maxResults ? Math.max(1, Math.min(250, input.maxResults)) : 10;
 
   const requestParams: calendar_v3.Params$Resource$Calendarlist$List = {
     showDeleted: input.showDeleted,
     showHidden: input.showHidden,
-    maxResults: input.maxResults || 10,
+    maxResults,
   };
 
-  const response = await calendar.calendarList.list(requestParams);
+  try {
+    const response = await calendar.calendarList.list(requestParams);
 
-  return (
-    response.data.items?.map((calendar) => ({
-      id: calendar.id,
-      name: calendar.summary,
-      description: calendar.description,
-      primary: calendar.primary,
-      visible: calendar.selected,
-      accessRole: calendar.accessRole,
-    })) || []
-  );
+    return (
+      response.data.items?.map((calendar) => ({
+        id: calendar.id,
+        name: calendar.summary,
+        description: calendar.description,
+        primary: calendar.primary,
+        visible: calendar.selected,
+        accessRole: calendar.accessRole,
+      })) || []
+    );
+  } catch (error) {
+    showFailureToast(error, { title: "Failed to list calendars" });
+    throw error;
+  }
 };
 
 export default withGoogleAPIs(tool);

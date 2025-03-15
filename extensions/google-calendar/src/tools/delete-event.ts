@@ -1,3 +1,4 @@
+import { showFailureToast } from "@raycast/utils";
 import { getCalendarClient, withGoogleAPIs } from "../lib/google";
 
 type Input = {
@@ -23,8 +24,13 @@ export const confirmation = withGoogleAPIs(async (input: Input) => {
 });
 
 const tool = async (input: Input) => {
-  const calendar = getCalendarClient();
-  await calendar.events.delete({ calendarId: input.calendarId ?? "primary", eventId: input.eventId });
+  try {
+    const calendar = getCalendarClient();
+    await calendar.events.delete({ calendarId: input.calendarId ?? "primary", eventId: input.eventId });
+  } catch (error) {
+    showFailureToast(error, { title: "Failed to delete event" });
+    throw error;
+  }
 };
 
 export default withGoogleAPIs(tool);
