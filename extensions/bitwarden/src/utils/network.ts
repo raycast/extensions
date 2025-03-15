@@ -5,10 +5,13 @@ import http from "http";
 import https from "https";
 import { captureException } from "~/utils/development";
 
+const maxRedirects = 10;
 export function download(url: string, path: string, onProgress?: (percent: number) => void): Promise<void> {
   return new Promise((resolve, reject) => {
     const uri = parse(url);
     const protocol = uri.protocol === "https:" ? https : http;
+
+    let redirectCount = 0;
     const request = protocol.get(uri.href, (response) => {
       if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400) {
         const redirectUrl = response.headers.location;
@@ -18,6 +21,10 @@ export function download(url: string, path: string, onProgress?: (percent: numbe
         }
 
         request.destroy();
+        if (++redirectCount >= maxRedirects) {
+          reject(new Error("Too many redirects"));
+          return;
+        }
         download(redirectUrl, path, onProgress).then(resolve).catch(reject);
         return;
       }
