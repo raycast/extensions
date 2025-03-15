@@ -76,7 +76,7 @@ export default function TrackNewDeliveryView({
     } else {
       setValidationError("trackingNumber", undefined);
     }
-  }
+  };
 
   return (
     <Form
@@ -89,11 +89,15 @@ export default function TrackNewDeliveryView({
     >
       <Form.Description text="Fill in the details of the delivery you want to track." />
       <Form.TextField title="Name" placeholder="Name for the delivery" {...itemProps.name} />
-      <Form.Dropdown title="Carrier" {...itemProps.carrier} onChange={(e) => {
-        itemProps.carrier.onChange?.(e);
-        showDatePickerIfNecessary(e);
-        validateForDuplicateTrackingNumber(values.trackingNumber, e);
-      }}>
+      <Form.Dropdown
+        title="Carrier"
+        {...itemProps.carrier}
+        onChange={(e) => {
+          itemProps.carrier.onChange?.(e);
+          showDatePickerIfNecessary(e);
+          validateForDuplicateTrackingNumber(values.trackingNumber, e);
+        }}
+      >
         {Array.from(carriers.values()).map((carrier) => (
           <Form.Dropdown.Item key={carrier.id} value={carrier.id} title={carrier.name} />
         ))}
