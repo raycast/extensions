@@ -6,7 +6,6 @@ import { XcodeSwiftPackageMetadata } from "../models/swift-package/xcode-swift-p
 import { URL } from "url";
 import fetch from "node-fetch";
 import * as Path from "path";
-import { XcodeProject } from "../models/xcode-project/xcode-project.model";
 
 /**
  * XcodeSwiftPackageService
@@ -81,7 +80,7 @@ export class XcodeSwiftPackageService {
   /**
    * Add Swift Package from an Url to a XcodeProject
    * @param url The Swift Package Url
-   * @param xcodeProjectFilePath The file paht of the Xcode project where the Swift Package should be added
+   * @param xcodeProjectFilePath The file path of the Xcode project where the Swift Package should be added
    */
   static async addSwiftPackage(url: string, xcodeProjectFilePath: string): Promise<void> {
     // Open Xcode Project
