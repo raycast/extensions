@@ -2,17 +2,32 @@ import { Action, ActionPanel, Icon, Keyboard, List, confirmAlert, Toast, showToa
 import { useEffect, useState } from "react";
 import { fetchFiles, GokapiFile, getFileTypeIcon, getFileTypeTag, deleteFile } from "./utils";
 import { showFailureToast } from "@raycast/utils";
+import QRCode from "qrcode"; // added import
 
 export default function Command() {
   const [files, setFiles] = useState<GokapiFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showingDetail, setShowingDetail] = useState(false);
+  const [qrCodes, setQrCodes] = useState<Record<string, string>>({}); // added state for storing QR code data URLs keyed by file ID
 
   useEffect(() => {
     fetchFiles()
       .then((data) => {
-        setFiles(data || []);
+        const fileData = data || [];
+        setFiles(fileData);
         setIsLoading(false);
+        // Generate QR codes for each file's download URL
+        Promise.all(
+          fileData.map((file) =>
+            QRCode.toDataURL(file.UrlDownload).then((qrData) => ({ id: file.Id, qrData }))
+          )
+        ).then((results) => {
+          const mapping: Record<string, string> = {};
+          results.forEach(({ id, qrData }) => {
+            mapping[id] = qrData;
+          });
+          setQrCodes(mapping);
+        });
       })
       .catch((error) => {
         console.error(error);
@@ -65,6 +80,7 @@ export default function Command() {
           }
           detail={
             <List.Item.Detail
+              markdown={qrCodes[file.Id] ? `![QR Code](${qrCodes[file.Id]})` : ""} // added markdown QR code above metadata, if available
               metadata={
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="Size" text={file.Size} />

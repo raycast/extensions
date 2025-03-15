@@ -49,7 +49,8 @@
     "form-data": "^4.0.2",
     "form-data-encoder": "^4.0.2",
     "formdata-node": "^6.0.3",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
