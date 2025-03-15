@@ -68,6 +68,11 @@ export default function TrackNewDeliveryView({
   };
 
   const validateForDuplicateTrackingNumber = async (trackingNumber: string, carrierId: string) => {
+    if (!trackingNumber || !carrierId) {
+      setValidationError("trackingNumber", undefined);
+      return;
+    }
+
     const matchingDelivery = deliveries?.find(
       (delivery) => delivery.trackingNumber === trackingNumber && delivery.carrier === carrierId,
     );
