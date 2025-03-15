@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Updated Models] - {PR_MERGE_DATE}
+## [Updated Models] - 2025-03-15
 
 - ⬆️ Upgrade the Gemini 2.0 Flash from preview to release
 - ⚠️ Add alerts to models that will be deprecated in Sep 2025
