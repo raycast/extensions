@@ -18,9 +18,7 @@ export default function Command() {
         setIsLoading(false);
         // Generate QR codes for each file's download URL
         Promise.all(
-          fileData.map((file) =>
-            QRCode.toDataURL(file.UrlDownload).then((qrData) => ({ id: file.Id, qrData }))
-          )
+          fileData.map((file) => QRCode.toDataURL(file.UrlDownload).then((qrData) => ({ id: file.Id, qrData }))),
         ).then((results) => {
           const mapping: Record<string, string> = {};
           results.forEach(({ id, qrData }) => {
