@@ -1,5 +1,7 @@
 # Todoist Changelog
 
+## [Added contributors] - 2025-03-15
+
 ## [Removal of Deadline Feature for Non-Premium Users] - 2025-02-28
 
 The deadline field has been removed from the task creation process for users without a premium subscription.
