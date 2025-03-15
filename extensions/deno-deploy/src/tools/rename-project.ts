@@ -27,6 +27,12 @@ const tool = async (input: Input) => {
   if (!project) {
     throw new Error(`Project not found: ${input.projectId}`);
   }
+
+  const newName = input.newName.trim();
+  if (!newName.match(/^[a-zA-Z0-9-]+$/)) {
+    throw new Error("The new name should only contain alphanumeric characters and dashes.");
+  }
+
   const denoFetcher = createDenoFetcher();
   await denoFetcher.request(`/projects/${input.projectId}`, {
     method: "PATCH",

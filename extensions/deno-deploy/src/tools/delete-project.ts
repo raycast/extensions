@@ -3,13 +3,6 @@ import { Action, type Tool } from "@raycast/api";
 import { createWindowLessFetcher } from "@/api/dash/fetcher";
 import type { Project } from "@/api/types";
 
-/**
- *   const deleteProject = useCallback(
-     (id: string, abort?: AbortSignal) => fetcher.request(`/projects/${id}`, { method: "DELETE", signal: abort }),
-     [fetcher],
-   );
- */
-
 type Input = {
   /**
    * The ID of the project.

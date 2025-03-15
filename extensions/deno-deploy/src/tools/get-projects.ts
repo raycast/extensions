@@ -6,7 +6,7 @@ type Input = {
    * The ID of the organization.
    *
    * @remarks
-   * Use the `get-organizations` tool to get a list of organizations. If no organization is provided, use the `Personal` organization.
+   * Use the `get-organizations` tool to get a list of organizations. If no organization is provided, use the organization that has the name `Personal`
    */
   organizationId: string;
   /**

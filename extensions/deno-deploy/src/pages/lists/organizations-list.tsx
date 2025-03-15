@@ -116,7 +116,7 @@ const ProjectListSection = () => {
       ) : (
         <List.Item
           title="Something might be wrong"
-          subtitle={"No data"}
+          subtitle={"No data, please refresh the list"}
           icon={{ source: Icon.XMarkCircle, tintColor: "red" }}
           actions={
             <ActionPanel>
