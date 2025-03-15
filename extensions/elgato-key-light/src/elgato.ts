@@ -319,7 +319,7 @@ export class KeyLight {
         } else {
           reject(new Error("Cannot discover any Key Lights in the network"));
         }
-      }, 5000);
+      }, 6000);
     });
 
     try {
