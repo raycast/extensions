@@ -626,13 +626,19 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
                     title="Delete"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
                     onAction={() => deleteObject(obj.name)}
                   />
                   <Action 
                     title="Refresh" 
                     icon={Icon.ArrowClockwise}
                     onAction={fetchObjects} 
+                  />
+                  <Action
+                    title="Upload File"
+                    icon={Icon.Upload}
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    onAction={selectAndUploadFile}
                   />
                 </ActionPanel>
               }

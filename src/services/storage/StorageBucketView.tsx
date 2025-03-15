@@ -536,8 +536,76 @@ A unique name with random suffix has been generated for you.`}
                     title="Delete Bucket"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
                     onAction={() => deleteBucket(bucket.name)}
+                  />
+                  <Action
+                    title="Create Bucket"
+                    icon={Icon.Plus}
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    onAction={() => {
+                      const suggestedName = generateUniqueBucketName();
+                      push(
+                        <Form
+                          navigationTitle="Create New Bucket"
+                          actions={
+                            <ActionPanel>
+                              <Action.SubmitForm 
+                                title="Create Bucket" 
+                                icon={Icon.Plus} 
+                                shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                                onSubmit={createBucket} 
+                              />
+                              <Action 
+                                title="Cancel" 
+                                icon={Icon.XmarkCircle} 
+                                shortcut={{ modifiers: ["cmd"], key: "escape" }} 
+                                onAction={() => pop()} 
+                              />
+                            </ActionPanel>
+                          }
+                        >
+                          <Form.TextField
+                            id="name"
+                            title="Bucket Name"
+                            placeholder={`${projectId}-storage`}
+                            defaultValue={suggestedName}
+                            info={`Must be globally unique across all of Google Cloud. Suggested formats:
+• ${projectId}-[purpose]-[env]
+• [company]-${projectId}-[purpose]
+• [purpose]-${projectId}-[random]`}
+                            autoFocus
+                          />
+                          <Form.Description
+                            title="Naming Best Practices"
+                            text={`• Use only lowercase letters, numbers, hyphens (-), and periods (.)
+• Start and end with a letter or number
+• Cannot contain "goog" prefix or close misspellings
+• Cannot contain the word "google"
+• 3-63 characters in length
+• Globally unique across all of Google Cloud
+
+A unique name with random suffix has been generated for you.`}
+                          />
+                          <Form.Dropdown id="location" title="Location" defaultValue="us-central1" info="Where to store your data">
+                            <Form.Dropdown.Item value="us-central1" title="US Central (Iowa)" icon={Icon.Globe} />
+                            <Form.Dropdown.Item value="us-east1" title="US East (South Carolina)" icon={Icon.Globe} />
+                            <Form.Dropdown.Item value="us-west1" title="US West (Oregon)" icon={Icon.Globe} />
+                            <Form.Dropdown.Item value="europe-west1" title="Europe West (Belgium)" icon={Icon.Globe} />
+                            <Form.Dropdown.Item value="asia-east1" title="Asia East (Taiwan)" icon={Icon.Globe} />
+                            <Form.Dropdown.Item value="asia-northeast1" title="Asia Northeast (Tokyo)" icon={Icon.Globe} />
+                            <Form.Dropdown.Item value="asia-south1" title="Asia South (Mumbai)" icon={Icon.Globe} />
+                            <Form.Dropdown.Item value="australia-southeast1" title="Australia Southeast (Sydney)" icon={Icon.Globe} />
+                          </Form.Dropdown>
+                          <Form.Dropdown id="storageClass" title="Storage Class" defaultValue="STANDARD" info="Determines pricing and availability">
+                            <Form.Dropdown.Item value="STANDARD" title="Standard" icon={Icon.HardDrive} />
+                            <Form.Dropdown.Item value="NEARLINE" title="Nearline" icon={Icon.Clock} />
+                            <Form.Dropdown.Item value="COLDLINE" title="Coldline" icon={Icon.Snowflake} />
+                            <Form.Dropdown.Item value="ARCHIVE" title="Archive" icon={Icon.Box} />
+                          </Form.Dropdown>
+                        </Form>
+                      );
+                    }}
                   />
                   <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchBuckets} />
                 </ActionPanel>
