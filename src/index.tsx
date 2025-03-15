@@ -6,7 +6,8 @@ import { homedir } from "os";
 import { join } from "path";
 import fs from "fs";
 import ProjectView from "./ProjectView";
-import { StorageBucketView } from "./services/storage";
+import { StorageBucketView, StorageTransferView, IAMMembersView, IAMMembersByPrincipalView, StorageStatsView } from "./services/storage";
+import { IAMMembersByPrincipalView as IAMProjectMembersByPrincipalView, IAMDashboardView } from "./services/iam";
 import { executeGcloudCommand } from "./gcloud";
 
 const execPromise = promisify(exec);
@@ -219,6 +220,14 @@ export default function Command() {
     push(<StorageBucketView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
   }
 
+  function viewStorageTransfer(projectId: string) {
+    push(<StorageTransferView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
+  }
+
+  function viewStorageStats(projectId: string) {
+    push(<StorageStatsView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
+  }
+
   if (error) {
     return (
       <List isLoading={false}>
@@ -325,6 +334,18 @@ export default function Command() {
                     icon={Icon.Folder}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                     onAction={() => viewStorageBuckets(project.id)}
+                  />
+                  <Action
+                    title="View Storage Transfer Service"
+                    icon={Icon.ArrowRight}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                    onAction={() => viewStorageTransfer(project.id)}
+                  />
+                  <Action
+                    title="View Storage Statistics"
+                    icon={Icon.BarChart}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                    onAction={() => viewStorageStats(project.id)}
                   />
                   <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchProjects} />
                 </ActionPanel>
