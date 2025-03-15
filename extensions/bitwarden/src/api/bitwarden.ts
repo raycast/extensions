@@ -147,7 +147,7 @@ export class Bitwarden {
 
     this.initPromise = (async (): Promise<void> => {
       await this.ensureCliBinary();
-      this.cacheCliVersion();
+      this.retrieveAndCacheCliVersion();
       await this.checkServerUrl(serverUrl);
     })();
   }
@@ -194,6 +194,8 @@ export class Bitwarden {
 
         await chmod(this.cliPath, "755");
         await rm(zipPath, { force: true });
+
+        Cache.set(CACHE_KEYS.CLI_VERSION, cliInfo.version);
         this.wasCliUpdated = true;
       } catch (extractError) {
         toast.title = "Failed to extract Bitwarden CLI";
@@ -214,7 +216,7 @@ export class Bitwarden {
     }
   }
 
-  private cacheCliVersion(): void {
+  private retrieveAndCacheCliVersion(): void {
     void this.getVersion().then(({ error, result }) => {
       if (!error) Cache.set(CACHE_KEYS.CLI_VERSION, result);
     });
