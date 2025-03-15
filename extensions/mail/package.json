@@ -159,7 +159,7 @@
     }
   ],
   "ai": {
-    "instructions": "- If you can't access the Apple Mail database, tell the user he needs to give Raycast the full disk access permission in the system settings. Be detailed about the steps.",
+    "instructions": "- If you can't access the Apple Mail database, tell the user they need to give Raycast the full disk access permission in the system settings. Be detailed about the steps.",
     "evals": [
       {
         "input": "@mail when is the raycast hackathon?",
