@@ -51,6 +51,129 @@
       "mode": "no-view"
     }
   ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@deno-deploy list my projects",
+        "mocks": {
+          "get-organizations": [
+            {
+              "createdAt": "",
+              "features": {},
+              "id": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              "name": "Sample Organization",
+              "pro": false,
+              "subscription": {
+                "currentPeriodEnd": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "currentPeriodStart": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "plan": "free"
+              },
+              "updatedAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ"
+            },
+            {
+              "createdAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+              "features": {
+                "database": true
+              },
+              "id": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              "name": "Personal",
+              "pro": false,
+              "subscription": {
+                "currentPeriodEnd": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "currentPeriodStart": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "plan": "free"
+              },
+              "updatedAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ"
+            }
+          ],
+          "get-projects": [
+            {
+              "createdAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+              "description": "",
+              "id": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              "name": "deno-project-1",
+              "updatedAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ"
+            },
+            {
+              "createdAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+              "description": "",
+              "id": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              "name": "deno-project-2",
+              "updatedAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-organizations"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "organizationId": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+              },
+              "name": "get-projects"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@deno-deploy create playground in my sample organization",
+        "mocks": {
+          "create-playground-snippet": "Successfully called \"create-playground-snippet\"",
+          "get-organizations": [
+            {
+              "createdAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+              "features": {},
+              "id": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              "name": "Sample Organization",
+              "pro": false,
+              "subscription": {
+                "currentPeriodEnd": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "currentPeriodStart": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "plan": "free"
+              },
+              "updatedAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ"
+            },
+            {
+              "createdAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+              "features": {
+                "database": true
+              },
+              "id": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              "name": "Personal",
+              "pro": false,
+              "subscription": {
+                "currentPeriodEnd": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "currentPeriodStart": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ",
+                "plan": "free"
+              },
+              "updatedAt": "xxxx-xx-xxTxx:xx:xx.xxxxxxZ"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-organizations"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "organizationId": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+              },
+              "name": "create-playground-snippet"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "tools": [
     {
       "name": "get-organizations",
