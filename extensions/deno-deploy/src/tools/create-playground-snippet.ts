@@ -1,4 +1,5 @@
 import { type Tool, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import type { CreatePlaygroundMediaType } from "@/api/dash/requests";
 import { createPlayground } from "@/api/dash/requests";
@@ -38,7 +39,12 @@ const tool = async (input: Input) => {
   const mediaType = input.mediaType ?? "ts";
   const snippet = input.snippet ?? snippets[mediaType];
   const project = await createPlayground(input.organizationId, snippet, mediaType);
-  open(`https://dash.deno.com/playground/${project.name}`);
+  try {
+    await open(`https://dash.deno.com/playground/${project.name}`);
+  } catch (error) {
+    const err = error instanceof Error ? error : new Error("Unknown error");
+    showFailureToast("Failed to open the playground", err);
+  }
 };
 
 export default tool;

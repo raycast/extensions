@@ -1,4 +1,5 @@
 import { Action, type Tool } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import { createWindowLessFetcher as createDashFetcher } from "@/api/dash/fetcher";
 import { createWindowLessFetcher as createDenoFetcher } from "@/api/deno/fetcher";
@@ -25,12 +26,16 @@ const tool = async (input: Input) => {
   const dashFetcher = createDashFetcher();
   const project = await dashFetcher.requestJSON<Project | null>(`/projects/${input.projectId}`);
   if (!project) {
-    throw new Error(`Project not found: ${input.projectId}`);
+    const err = new Error(`Project not found: ${input.projectId}`);
+    showFailureToast("Project not found", err);
+    throw err;
   }
 
   const newName = input.newName.trim();
   if (!newName.match(/^[a-zA-Z0-9-]+$/)) {
-    throw new Error("The new name should only contain alphanumeric characters and dashes.");
+    const err = new Error("The new name should only contain alphanumeric characters and dashes.");
+    showFailureToast("Naming error", err);
+    throw err;
   }
 
   const denoFetcher = createDenoFetcher();

@@ -1,4 +1,5 @@
 import { Action, type Tool } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import { createWindowLessFetcher } from "@/api/dash/fetcher";
 import type { Project } from "@/api/types";
@@ -17,7 +18,9 @@ const tool = async (input: Input) => {
   const fetcher = createWindowLessFetcher();
   const project = await fetcher.requestJSON<Project | null>(`/projects/${input.projectId}`);
   if (!project) {
-    throw new Error(`Project not found: ${input.projectId}`);
+    const err = new Error(`Project not found: ${input.projectId}`);
+    showFailureToast("Project not found", err);
+    throw err;
   }
   await fetcher.request(`/projects/${input.projectId}`, { method: "DELETE" });
   return `Project with name \`${project.name}\` has been deleted.`;

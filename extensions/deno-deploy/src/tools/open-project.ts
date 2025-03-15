@@ -1,4 +1,5 @@
 import { open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import { createWindowLessFetcher } from "@/api/dash/fetcher";
 import type { Project } from "@/api/types";
@@ -19,7 +20,13 @@ const tool = async (input: Input) => {
   if (!project) {
     throw new Error(`Project not found: ${input.projectId}`);
   }
-  open(`https://dash.deno.com/projects/${project.name}`);
+  try {
+    open(`https://dash.deno.com/projects/${project.name}`);
+  } catch (error) {
+    const err = error instanceof Error ? error : new Error("Unknown error");
+    showFailureToast("Failed to open the project", err);
+    throw err;
+  }
 };
 
 export default tool;
