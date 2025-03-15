@@ -40,16 +40,16 @@
     },
     {
       "name": "increaseTemperature",
-      "title": "Increase Color Temperature",
+      "title": "Warmer Color Temperature",
       "subtitle": "Elgato Key Light",
-      "description": "Increase color temperature of Key Light by 5%",
+      "description": "Make light color warmer (lower Kelvin)",
       "mode": "no-view"
     },
     {
       "name": "decreaseTemperature",
-      "title": "Decrease Color Temperature",
+      "title": "Cooler Color Temperature",
       "subtitle": "Elgato Key Light",
-      "description": "Decrease color temperature of Key Light by 5%",
+      "description": "Make light color cooler (higher Kelvin)",
       "mode": "no-view"
     },
     {

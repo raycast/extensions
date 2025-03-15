@@ -1,10 +1,18 @@
 import { KeyLight } from "./elgato";
-import { run } from "./utils";
+import { showHUD } from "@raycast/api";
 
 const command = async () => {
-  const keyLight = await KeyLight.discover();
-  const isOn = await keyLight.toggle();
-  return isOn ? "Key Light turned on" : "Key Light turned off";
+  try {
+    const keyLight = await KeyLight.discover();
+    try {
+      const isOn = await keyLight.toggle();
+      await showHUD(isOn ? "Key Light turned on" : "Key Light turned off");
+    } catch (error) {
+      await showHUD(`Failed to toggle Key Light: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  } catch (error) {
+    await showHUD(`Failed to discover Key Lights: ${error instanceof Error ? error.message : "Unknown error"}`);
+  }
 };
 
-export default run(command);
+export default command;
