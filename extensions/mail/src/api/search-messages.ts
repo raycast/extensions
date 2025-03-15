@@ -6,9 +6,8 @@ import { readFile } from "fs/promises";
 import { executeSQL } from "@raycast/utils";
 import { basename } from "path/posix";
 
-import { getPersistenceInfo } from "./get-persistence-info";
+import { getDatabasePath, getPersistenceInfo } from "./get-persistence-info";
 import { ensureCLI } from "../utils/ripgrep";
-import { getDbPath } from "../utils/constants";
 
 const toUnixTimestamp = (date: string) => {
   return new Date(date).getTime() / 1000;
@@ -95,8 +94,8 @@ export async function searchMessages({
     ${search ? "" : `LIMIT ${limit}`};
   `;
 
-  const dbPath = await getDbPath();
-  const messages = await executeSQL<{ id: number; mailbox: string }>(dbPath, query);
+  const databasePath = await getDatabasePath();
+  const messages = await executeSQL<{ id: number; mailbox: string }>(databasePath, query);
   const messageIds = messages.map((message) => message.id);
 
   if (messages.length === 0) {

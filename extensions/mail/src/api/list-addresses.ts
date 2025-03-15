@@ -1,5 +1,5 @@
 import { executeSQL } from "@raycast/utils";
-import { getDbPath } from "../utils/constants";
+import { getDatabasePath } from "./get-persistence-info";
 
 type Address = {
   address: string;
@@ -7,7 +7,7 @@ type Address = {
 };
 
 export async function listAddresses(query?: string) {
-  const dbPath = await getDbPath();
+  const databasePath = await getDatabasePath();
   const MESSAGES_QUERY = `
 SELECT 
 address,
@@ -16,5 +16,5 @@ FROM addresses
 ${query ? `WHERE address LIKE '%${query}%'` : ""};
 `;
 
-  return await executeSQL<Address>(dbPath, MESSAGES_QUERY);
+  return await executeSQL<Address>(databasePath, MESSAGES_QUERY);
 }
