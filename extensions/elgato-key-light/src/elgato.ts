@@ -156,7 +156,6 @@ export class KeyLight {
       console.log("Starting Bonjour discovery for Key Lights...");
     }
 
-    let discoveryTimeout: NodeJS.Timeout;
     let discoveryComplete = false;
 
     const find = new Promise<KeyLight>((resolve, reject) => {
@@ -268,7 +267,6 @@ export class KeyLight {
         }
       });
 
-      // @ts-ignore - Bonjour types are incomplete, error event exists but isn't typed
       browser.on("error", (error: Error) => {
         if (environment.isDevelopment) {
           console.error("Bonjour browser error:", error);
@@ -276,7 +274,7 @@ export class KeyLight {
         reject(new Error(`Bonjour discovery error: ${error.toString()}`));
       });
 
-      discoveryTimeout = setTimeout(() => {
+      setTimeout(() => {
         if (environment.isDevelopment) {
           console.log(`Discovery timeout reached. Found ${this.keyLights.length} light(s)`);
         }

@@ -19,7 +19,7 @@
     },
     {
       "name": "toggle",
-      "title": "Toggle On/Off",
+      "title": "Toggle On/off",
       "subtitle": "Elgato Key Light",
       "description": "Toggles all connected Key Lights on or off",
       "mode": "no-view"
