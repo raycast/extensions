@@ -15,7 +15,7 @@
     {
       "name": "yarn-monorepo-cli",
       "title": "Yarn Monorepo CLI",
-      "subtitle": "Manage your yarn monorepo",
+      "subtitle": "Yarn",
       "description": "Select and run yarn scripts from packages in your monorepo",
       "mode": "view"
     }
