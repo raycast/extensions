@@ -10,10 +10,6 @@ export default async function Command() {
         style: Toast.Style.Failure,
         title: "No Key Lights found",
         message: "Could not discover any Key Lights on your network",
-        primaryAction: {
-          title: "Dismiss",
-          onAction: () => {},
-        },
       });
       return;
     }
@@ -24,20 +20,12 @@ export default async function Command() {
       style: Toast.Style.Success,
       title: `Found ${lights.length} Key Light${lights.length > 1 ? "s" : ""}`,
       message: lightNames,
-      primaryAction: {
-        title: "Dismiss",
-        onAction: () => {},
-      },
     });
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed to discover Key Lights",
       message: (error as Error).message,
-      primaryAction: {
-        title: "Dismiss",
-        onAction: () => {},
-      },
     });
   }
 }
