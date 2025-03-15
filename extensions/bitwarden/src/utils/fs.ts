@@ -7,7 +7,7 @@ import { tryExec } from "~/utils/errors";
 export function waitForFileAvailable(path: string): Promise<void> {
   return new Promise((resolve) => {
     const interval = setInterval(() => {
-      tryExec(() => {});
+      if (!existsSync(path)) return;
       const stats = statSync(path);
       if (stats.isFile()) {
         clearInterval(interval);

@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
+import { DebuggingBugReportingActionSection } from "~/components/actions";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
 import { Preferences } from "~/types/preferences";
@@ -102,6 +103,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
               style={Action.Style.Destructive}
             />
           )}
+          <DebuggingBugReportingActionSection />
         </ActionPanel>
       }
     >
