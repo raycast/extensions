@@ -22,9 +22,24 @@ interface ElgatoService {
   fqdn: string;
 }
 
-const WARM_TEMPERATURE = 344; // 2900k
-const COLD_TEMPERATURE = 143; // 7000k
-const TEMPERATURE_STEP = (WARM_TEMPERATURE - COLD_TEMPERATURE) / 20; // 5%
+// Bonjour query parameters interface
+interface BonjourQuery {
+  type: string; // Required: The service type to discover (e.g., "elg" for Elgato)
+  protocol?: "tcp" | "udp"; // Optional: The protocol to use
+  subtypes?: string[]; // Optional: Service subtypes to filter
+  txt?: Record<string, string | Buffer>; // Optional: TXT record data to match (strings or buffers)
+  name?: string; // Optional: Service name to match
+}
+
+const WARM_TEMPERATURE = 344; // 2900K (warmest)
+const COLD_TEMPERATURE = 143; // 7000K (coolest)
+const TEMPERATURE_STEP = (WARM_TEMPERATURE - COLD_TEMPERATURE) / 20; // 5% step
+
+// Helper functions to convert between internal values and Kelvin
+function internalToKelvin(internalValue: number): number {
+  // Linear interpolation between 2900K (344) and 7000K (143)
+  return Math.round(2900 + ((7000 - 2900) * (344 - internalValue)) / (344 - 143));
+}
 
 interface CacheData {
   lights: Array<{ service: ElgatoService }>;
@@ -33,6 +48,7 @@ interface CacheData {
 
 export class KeyLight {
   private static CACHE_FILE = path.join(os.tmpdir(), "raycast-elgato-keylights.json");
+  private static CACHE_TTL = 1000 * 60 * 60; // 1 hour TTL
   static keyLights: Array<KeyLight>;
   public readonly service: ElgatoService;
 
@@ -40,6 +56,16 @@ export class KeyLight {
     try {
       if (fs.existsSync(this.CACHE_FILE)) {
         const data = JSON.parse(fs.readFileSync(this.CACHE_FILE, "utf8"));
+
+        // Check if cache has expired
+        const now = Date.now();
+        if (now - data.lastDiscoveryTime > this.CACHE_TTL) {
+          if (environment.isDevelopment) {
+            console.log("Cache has expired, forcing fresh discovery");
+          }
+          return null;
+        }
+
         return data;
       }
     } catch (e) {
@@ -134,7 +160,7 @@ export class KeyLight {
     let discoveryComplete = false;
 
     const find = new Promise<KeyLight>((resolve, reject) => {
-      const browser = bonjour.find({ type: "elg" }, (service: ElgatoService) => {
+      const browser = bonjour.find({ type: "elg" } as BonjourQuery, (service: ElgatoService) => {
         // Log complete service object for debugging
         if (environment.isDevelopment) {
           console.log(
@@ -339,11 +365,13 @@ export class KeyLight {
   }
 
   async increaseBrightness() {
-    let newBrightness;
+    // Get the first light's brightness as reference
+    const firstLight = await this.getKeyLight(KeyLight.keyLights[0].service);
+    const currentBrightness = firstLight.brightness;
+    const newBrightness = Math.min(currentBrightness + 5, 100);
+
     for (let x = 0; x < KeyLight.keyLights.length; x++) {
       try {
-        const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-        newBrightness = Math.min(keyLight.brightness + 5, 100);
         await this.updateKeyLight(KeyLight.keyLights[x].service, { brightness: newBrightness });
       } catch (e) {
         const error = e as Error;
@@ -359,8 +387,6 @@ export class KeyLight {
           KeyLight.clearCache();
           try {
             await KeyLight.discover(true);
-            const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-            newBrightness = Math.min(keyLight.brightness + 5, 100);
             await this.updateKeyLight(KeyLight.keyLights[x].service, { brightness: newBrightness });
           } catch (retryError) {
             throw new Error(`Failed increasing brightness: ${(retryError as Error).message}`);
@@ -376,11 +402,13 @@ export class KeyLight {
   }
 
   async decreaseBrightness() {
-    let newBrightness;
+    // Get the first light's brightness as reference
+    const firstLight = await this.getKeyLight(KeyLight.keyLights[0].service);
+    const currentBrightness = firstLight.brightness;
+    const newBrightness = Math.max(currentBrightness - 5, 0);
+
     for (let x = 0; x < KeyLight.keyLights.length; x++) {
       try {
-        const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-        newBrightness = Math.max(keyLight.brightness - 5, 0);
         await this.updateKeyLight(KeyLight.keyLights[x].service, { brightness: newBrightness });
       } catch (e) {
         const error = e as Error;
@@ -396,8 +424,6 @@ export class KeyLight {
           KeyLight.clearCache();
           try {
             await KeyLight.discover(true);
-            const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-            newBrightness = Math.max(keyLight.brightness - 5, 0);
             await this.updateKeyLight(KeyLight.keyLights[x].service, { brightness: newBrightness });
           } catch (retryError) {
             throw new Error(`Failed decreasing brightness: ${(retryError as Error).message}`);
@@ -413,11 +439,13 @@ export class KeyLight {
   }
 
   async increaseTemperature() {
-    let newTemperature;
+    // Get the first light's temperature as reference
+    const firstLight = await this.getKeyLight(KeyLight.keyLights[0].service);
+    const currentTemperature = firstLight.temperature;
+    const newTemperature = Math.min(currentTemperature + TEMPERATURE_STEP, WARM_TEMPERATURE);
+
     for (let x = 0; x < KeyLight.keyLights.length; x++) {
       try {
-        const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-        newTemperature = Math.max(keyLight.temperature + TEMPERATURE_STEP, COLD_TEMPERATURE);
         await this.updateKeyLight(KeyLight.keyLights[x].service, { temperature: newTemperature });
       } catch (e) {
         const error = e as Error;
@@ -433,8 +461,6 @@ export class KeyLight {
           KeyLight.clearCache();
           try {
             await KeyLight.discover(true);
-            const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-            newTemperature = Math.max(keyLight.temperature + TEMPERATURE_STEP, COLD_TEMPERATURE);
             await this.updateKeyLight(KeyLight.keyLights[x].service, { temperature: newTemperature });
           } catch (retryError) {
             throw new Error(`Failed increasing temperature: ${(retryError as Error).message}`);
@@ -446,15 +472,18 @@ export class KeyLight {
       }
     }
 
-    return newTemperature;
+    // Return the Kelvin value for display
+    return internalToKelvin(newTemperature);
   }
 
   async decreaseTemperature() {
-    let newTemperature;
+    // Get the first light's temperature as reference
+    const firstLight = await this.getKeyLight(KeyLight.keyLights[0].service);
+    const currentTemperature = firstLight.temperature;
+    const newTemperature = Math.max(currentTemperature - TEMPERATURE_STEP, COLD_TEMPERATURE);
+
     for (let x = 0; x < KeyLight.keyLights.length; x++) {
       try {
-        const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-        newTemperature = Math.max(keyLight.temperature - TEMPERATURE_STEP, COLD_TEMPERATURE);
         await this.updateKeyLight(KeyLight.keyLights[x].service, { temperature: newTemperature });
       } catch (e) {
         const error = e as Error;
@@ -470,8 +499,6 @@ export class KeyLight {
           KeyLight.clearCache();
           try {
             await KeyLight.discover(true);
-            const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-            newTemperature = Math.max(keyLight.temperature - TEMPERATURE_STEP, COLD_TEMPERATURE);
             await this.updateKeyLight(KeyLight.keyLights[x].service, { temperature: newTemperature });
           } catch (retryError) {
             throw new Error(`Failed decreasing temperature: ${(retryError as Error).message}`);
@@ -483,7 +510,8 @@ export class KeyLight {
       }
     }
 
-    return newTemperature;
+    // Return the Kelvin value for display
+    return internalToKelvin(newTemperature);
   }
 
   private async getKeyLight(service: ElgatoService) {
@@ -528,3 +556,5 @@ export class KeyLight {
     }
   }
 }
+
+export { WARM_TEMPERATURE, COLD_TEMPERATURE };

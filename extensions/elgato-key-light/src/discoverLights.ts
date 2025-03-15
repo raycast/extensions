@@ -1,9 +1,8 @@
-import { showHUD, Toast, showToast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { KeyLight } from "./elgato";
 
 export default async function Command() {
   try {
-    await showHUD("Discovering Key Lights...");
     const keyLight = await KeyLight.discover(true);
     if (!keyLight) {
       await showToast({
