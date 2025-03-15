@@ -11,6 +11,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "discoverLights",
+      "title": "Discover Lights",
+      "subtitle": "Elgato Key Light",
+      "description": "Force a fresh discovery of Key Lights on your network",
+      "mode": "no-view"
+    },
+    {
       "name": "toggle",
       "title": "Toggle On/Off",
       "subtitle": "Elgato Key Light",

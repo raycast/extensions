@@ -59,6 +59,7 @@ export type KeyLightSettings = {
 export class KeyLight {
   private static CACHE_FILE = path.join(os.tmpdir(), "raycast-elgato-keylights.json");
   static keyLights: Array<KeyLight>;
+  public readonly service: ElgatoService;
 
   private static loadCache(): CacheData | null {
     try {
@@ -101,22 +102,50 @@ export class KeyLight {
     this.keyLights = [];
   }
 
+  private static async validateCachedLights(lights: Array<KeyLight>): Promise<Array<KeyLight>> {
+    const validLights: Array<KeyLight> = [];
+
+    for (const light of lights) {
+      try {
+        // Try to fetch the light's state to verify it's still reachable
+        await light.getKeyLight(light.service);
+        validLights.push(light);
+      } catch (e) {
+        if (environment.isDevelopment) {
+          console.error(`Cached light ${light.service.name} is no longer reachable:`, e);
+        }
+      }
+    }
+
+    return validLights;
+  }
+
   static async discover(forceRefresh = false) {
     // Try to load from cache first
     if (!forceRefresh) {
       const cache = this.loadCache();
       if (cache) {
         if (environment.isDevelopment) {
-          console.log("Found cached lights, creating instances...");
+          console.log("Found cached lights, validating...");
         }
         this.keyLights = cache.lights.map((light) => new KeyLight(light.service));
-        if (environment.isDevelopment) {
-          console.log(
-            "Using cached Key Lights:",
-            this.keyLights.map((light) => `${light.service.name} at ${light.service.referer.address}`).join(", ")
-          );
+
+        // Validate cached lights are still reachable
+        this.keyLights = await this.validateCachedLights(this.keyLights);
+
+        if (this.keyLights.length > 0) {
+          if (environment.isDevelopment) {
+            console.log(
+              "Using validated cached Key Lights:",
+              this.keyLights.map((light) => `${light.service.name} at ${light.service.referer.address}`).join(", ")
+            );
+          }
+          return this.keyLights[0];
+        } else {
+          if (environment.isDevelopment) {
+            console.log("No cached lights are reachable, performing fresh discovery");
+          }
         }
-        return this.keyLights[0];
       }
     }
 
@@ -278,8 +307,6 @@ export class KeyLight {
       throw error;
     }
   }
-
-  private service: ElgatoService;
 
   private constructor(service: ElgatoService) {
     this.service = service;

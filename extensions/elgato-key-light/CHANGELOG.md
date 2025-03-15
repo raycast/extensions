@@ -7,6 +7,8 @@
 - Add proper error handling and undefined checks
 - Update bonjour package to fix deprecation warnings
 - Improve caching mechanism for discovered lights
+- Add validation of cached lights to ensure they are still reachable
+- Add "Discover Lights" command to force fresh discovery of lights
 
 ## [1.1.0] - {PR_MERGE_DATE}
 
