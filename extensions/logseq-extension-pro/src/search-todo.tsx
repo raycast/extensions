@@ -46,18 +46,44 @@ export default function Command() {
       const content = await readFile(filePath, "utf-8");
       const lines = content.split("\n");
 
-      lines.forEach((line, index) => {
-        const todoMatch = line.match(/^- (TODO|NOW|WAITING|LATER|DOING|DONE|CANCELED) \[#([ABC])\] (.+)$/);
-        if (todoMatch && todoMatch[3] === todo.content) {
-          lines[index] = `- ${newStatus} [#${newPriority}] ${todo.content}`;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const todoMatch = line.match(
+          /^- (TODO|NOW|WAITING|LATER|DOING|DONE|CANCELED) \[#([ABC])\] ([^\n]+?)(?:\s+(?:#[^\s]+\s*)*)?(?:\s+📅\s*[^\n]+)?$/,
+        );
+        if (todoMatch) {
+          const currentContent = todoMatch[3];
+          const currentContentWithoutTags = currentContent.replace(/#[^\s]+/g, "").trim();
+          const todoContentWithoutPriority = todo.content.replace(/\s*\[#[ABC]\]\s*/g, "").trim();
+          const todoContentWithoutDeadline = todoContentWithoutPriority.replace(/📅.*$/, "").trim();
+
+          if (
+            currentContentWithoutTags === todoContentWithoutPriority ||
+            todoContentWithoutDeadline === currentContentWithoutTags
+          ) {
+            const tagsMatch = line.match(/ #[^\s\]]+/g) || [];
+            const dateMatch = line.match(/📅\s*([^\n]+)/);
+            const tags = tagsMatch.length > 0 ? ` ${tagsMatch.join(" ")}` : "";
+            const date = dateMatch ? ` 📅 ${dateMatch[1]}` : "";
+            const deadlineMatch = lines[i + 1] && lines[i + 1].trim().match(/^DEADLINE:\s*<([^>]+)>/);
+            const deadline = deadlineMatch ? `\nDEADLINE: <${deadlineMatch[1]}>` : "";
+            const cleanContent = currentContentWithoutTags;
+            const updatedLine = `- ${newStatus} [#${newPriority}] ${cleanContent}${tags}${date}${deadline}`;
+            lines[i] = updatedLine;
+            await showToast({
+              style: Toast.Style.Success,
+              title: "Content to be updated",
+              message: `"${updatedLine.trim()}"`,
+            });
+          }
         }
-      });
+      }
 
       await writeFile(filePath, lines.join("\n"));
       await loadTodos();
-      await showToast(Toast.Style.Success, "更新成功");
+      await showToast(Toast.Style.Success, "Update successful");
     } catch (error) {
-      await showToast(Toast.Style.Failure, "更新失败");
+      await showToast(Toast.Style.Failure, "Update failed");
     }
   }
 
@@ -100,7 +126,7 @@ export default function Command() {
       setTodos(allTodos);
       setIsLoading(false);
     } catch (error) {
-      await showToast(Toast.Style.Failure, "搜索失败");
+      await showToast(Toast.Style.Failure, "Search failed");
       return [];
     }
   }, [preferences]);
@@ -117,12 +143,12 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="搜索内容或页面名称 (输入a/b/c过滤优先级)"
+      searchBarPlaceholder="Search content or page name (type a/b/c to filter priority)"
       searchText={searchContent}
       onSearchTextChange={handleSearchChange}
       searchBarAccessory={
-        <List.Dropdown tooltip="选择状态" value={selectedStatus} onChange={setSelectedStatus}>
-          <List.Dropdown.Item title="全部状态" value="" />
+        <List.Dropdown tooltip="Select Status" value={selectedStatus} onChange={setSelectedStatus}>
+          <List.Dropdown.Item title="All Status" value="" />
           <List.Dropdown.Item title="TODO" value="TODO" />
           <List.Dropdown.Item title="NOW" value="NOW" />
           <List.Dropdown.Item title="WAITING" value="WAITING" />
@@ -150,37 +176,32 @@ export default function Command() {
                       : todo.status === "NOW"
                         ? Icon.Star
                         : todo.status === "WAITING"
-                          ? Icon.BellDot
+                          ? Icon.Mask
                           : todo.status === "LATER"
                             ? Icon.Calendar
-                            : todo.status === "NOW"
-                              ? Icon.Star
-                              : todo.status === "WAITING"
-                                ? Icon.BellDot
-                                : todo.status === "LATER"
-                                  ? Icon.Calendar
-                                  : Icon.Circle,
+                            : Icon.Circle,
               text: todo.status,
               tooltip: todo.status,
             },
+
             {
               icon: todo.priority === "A" ? Icon.ExclamationMark : todo.priority === "B" ? Icon.Minus : Icon.ArrowDown,
-              text: `${todo.priority}级`,
-              tooltip: `${todo.priority}级优先级`,
+              text: `Priority ${todo.priority}`,
+              tooltip: `Priority Level ${todo.priority}`,
             },
             ...(todo.dueDate
               ? [
                   {
                     icon: Icon.Calendar,
                     text: todo.dueDate,
-                    tooltip: "截止日期",
+                    tooltip: "Due Date",
                   },
                 ]
               : []),
           ]}
           actions={
             <ActionPanel>
-              <ActionPanel.Submenu title="修改状态">
+              <ActionPanel.Submenu title="Change Status">
                 <Action title="Todo" onAction={() => updateTodo(todo, "TODO", todo.priority)} />
                 <Action title="Now" onAction={() => updateTodo(todo, "NOW", todo.priority)} />
                 <Action title="Waiting" onAction={() => updateTodo(todo, "WAITING", todo.priority)} />
@@ -189,13 +210,13 @@ export default function Command() {
                 <Action title="Done" onAction={() => updateTodo(todo, "DONE", todo.priority)} />
                 <Action title="Canceled" onAction={() => updateTodo(todo, "CANCELED", todo.priority)} />
               </ActionPanel.Submenu>
-              <ActionPanel.Submenu title="修改优先级">
-                <Action title="高优先级 (a)" onAction={() => updateTodo(todo, todo.status, "A")} />
-                <Action title="中优先级 (b)" onAction={() => updateTodo(todo, todo.status, "B")} />
-                <Action title="低优先级 (c)" onAction={() => updateTodo(todo, todo.status, "C")} />
+              <ActionPanel.Submenu title="Change Priority">
+                <Action title="High - Priority (a)" onAction={() => updateTodo(todo, todo.status, "A")} />
+                <Action title="Medium Priority (b)" onAction={() => updateTodo(todo, todo.status, "B")} />
+                <Action title="Low Priority (c)" onAction={() => updateTodo(todo, todo.status, "C")} />
               </ActionPanel.Submenu>
               <Action
-                title="删除todo"
+                title="Delete Todo"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 onAction={async () => {
@@ -203,13 +224,46 @@ export default function Command() {
                     const filePath = join(preferences.logseqPath, "pages", `${todo.page}.md`);
                     const content = await readFile(filePath, "utf-8");
                     const lines = content.split("\n");
-                    const newLines = lines.filter((line) => !line.includes(todo.content));
-                    await writeFile(filePath, newLines.join("\n"));
+                    let skipNext = false;
+                    const newLines = lines.filter((line, index) => {
+                      if (skipNext) {
+                        skipNext = false;
+                        return false;
+                      }
+                      const todoMatch = line.match(
+                        /^- (TODO|NOW|WAITING|LATER|DOING|DONE|CANCELED) \[#([ABC])\] ([^\n]+?)(?:\s+(?:#[^\s]+\s*)*)?(?:\s+📅\s*[^\n]+)?$/,
+                      );
+                      if (!todoMatch) return true;
+                      const currentContentWithoutTags = todo.content.replace(/#[^\s]+/g, "").trim();
+                      const todoContentWithoutPriority = currentContentWithoutTags
+                        .replace(/\s*\[#[ABC]\]\s*/g, "")
+                        .trim();
+                      const todoContentWithoutDeadline = todoContentWithoutPriority.replace(/📅.*$/, "").trim();
+                      const todoContent = todoMatch[3].replace(/#[^\s]+/g, "").trim();
+                      console.log(todoContent, todoContentWithoutDeadline);
+                      if (todoContent === todoContentWithoutDeadline) {
+                        if (
+                          lines[index + 1] &&
+                          lines[index + 1].trim().startsWith("  DEADLINE:") &&
+                          lines[index + 1].trim().startsWith("  SCHEDULED:")
+                        ) {
+                          skipNext = true;
+                        }
+                        return false;
+                      }
+                      return true;
+                    });
+                    const finalContent = newLines.join("\n");
+                    await showToast({
+                      style: Toast.Style.Success,
+                      title: "Content to be deleted",
+                      message: `"${todo.content}"`,
+                    });
+                    await writeFile(filePath, finalContent);
                     await loadTodos();
-                    await showToast(Toast.Style.Success, "Todo已删除");
+                    await showToast(Toast.Style.Success, "Todo deleted successfully");
                   } catch (error) {
-                    console.error(error);
-                    await showToast(Toast.Style.Failure, "删除Todo失败");
+                    await showToast(Toast.Style.Failure, "Failed to delete Todo");
                   }
                 }}
               />

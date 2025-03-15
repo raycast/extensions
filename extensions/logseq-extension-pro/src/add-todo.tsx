@@ -16,6 +16,7 @@ interface FormValues {
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [pageCache, setPageCache] = useState<Record<string, string>>({});
+  const [lastSubmittedContent, setLastSubmittedContent] = useState<string>("");
 
   const loadPageContent = useCallback(
     async (pagePath: string) => {
@@ -33,8 +34,25 @@ export default function Command() {
     [pageCache],
   );
 
+  const [formValues, setFormValues] = useState<FormValues>({
+    content: "",
+    page: "",
+    status: "WAITING",
+    priority: "B",
+    tags: "",
+    dueDate: "",
+  });
+
   async function handleSubmit(values: FormValues) {
     try {
+      if (values.content === lastSubmittedContent) {
+        await showToast({
+          style: Toast.Style.Warning,
+          title: "Duplicate Content",
+          message: "You just submitted the same content. Are you sure you want to submit it again?",
+        });
+      }
+      setLastSubmittedContent(values.content);
       const page = values.page || preferences.defaultPage;
       const pagePath = join(preferences.logseqPath, "pages", `${page}.md`);
 
@@ -63,13 +81,14 @@ export default function Command() {
         : content.endsWith("\n")
           ? content + "\n" + todoItem
           : content + "\n\n" + todoItem;
-
-      `"${newContent}"`;
-
       await writeFile(pagePath, newContent, "utf-8");
-      await showToast(Toast.Style.Success, "Todo已添加");
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Success",
+        message: "Todo item added successfully",
+      });
     } catch (error) {
-      await showToast(Toast.Style.Failure, "添加Todo失败");
+      await showToast(Toast.Style.Failure, "Failed to add Todo");
     }
   }
 
@@ -77,13 +96,16 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="添加todo" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Add Todo" onSubmit={handleSubmit} />
         </ActionPanel>
       }
+      enableDrafts
+      value={formValues}
+      onChange={setFormValues}
     >
-      <Form.TextField id="content" title="Todo内容" placeholder="输入Todo内容" autoFocus />
-      <Form.TextField id="page" title="页面名称" placeholder={preferences.defaultPage} />
-      <Form.Dropdown id="status" title="状态" defaultValue="WAITING">
+      <Form.TextField id="content" title="Todo Content" placeholder="Enter Todo content" autoFocus />
+      <Form.TextField id="page" title="Page Name" placeholder={preferences.defaultPage} />
+      <Form.Dropdown id="status" title="Status" defaultValue="WAITING">
         <Form.Dropdown.Item value="TODO" title="TODO" />
         <Form.Dropdown.Item value="NOW" title="NOW" />
         <Form.Dropdown.Item value="WAITING" title="WAITING" />
@@ -92,13 +114,13 @@ export default function Command() {
         <Form.Dropdown.Item value="DONE" title="DONE" />
         <Form.Dropdown.Item value="CANCELED" title="CANCELED" />
       </Form.Dropdown>
-      <Form.Dropdown id="priority" title="优先级" defaultValue="B">
-        <Form.Dropdown.Item value="A" title="A级 - 紧急" />
-        <Form.Dropdown.Item value="B" title="B级 - 普通" />
-        <Form.Dropdown.Item value="C" title="C级 - 低优先级" />
+      <Form.Dropdown id="priority" title="Priority" defaultValue="B">
+        <Form.Dropdown.Item value="A" title="A - High Priority" />
+        <Form.Dropdown.Item value="B" title="B - Medium Priority" />
+        <Form.Dropdown.Item value="C" title="C - Low Priority" />
       </Form.Dropdown>
-      <Form.TextField id="tags" title="标签" placeholder="输入标签，用逗号分隔" />
-      <Form.DatePicker id="dueDate" title="截止日期" type="date" />
+      <Form.TextField id="tags" title="Tags" placeholder="Enter tags, separated by commas" />
+      <Form.DatePicker id="dueDate" title="Due Date" type="date" />
     </Form>
   );
 }

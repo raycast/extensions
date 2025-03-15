@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="500" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="500" fill="#2C2C2C"/>
+  <rect x="50" y="50" width="700" height="400" rx="10" fill="#1E1E1E"/>
+  <text x="80" y="100" fill="#FFFFFF" font-family="Arial" font-size="24">Add Note</text>
+  <rect x="70" y="120" width="660" height="120" rx="5" fill="#3C3C3C"/>
+  <text x="90" y="150" fill="#CCCCCC" font-family="Arial" font-size="16">Enter Note content</text>
+  <rect x="70" y="260" width="660" height="40" rx="5" fill="#3C3C3C"/>
+  <text x="90" y="285" fill="#CCCCCC" font-family="Arial" font-size="16">Page Name</text>
+  <rect x="70" y="320" width="660" height="40" rx="5" fill="#3C3C3C"/>
+  <text x="90" y="345" fill="#CCCCCC" font-family="Arial" font-size="16">Tags</text>
+</svg>

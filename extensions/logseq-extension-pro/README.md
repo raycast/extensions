@@ -1,46 +1,108 @@
 # Logseq Extension Pro
 
-这是一个Raycast扩展，用于快速添加和查询Logseq中的Todo。
+A powerful Raycast extension that enhances your Logseq workflow by providing quick access to add and manage Todos and Notes.
 
-## 功能
+Visit our [GitHub repository](https://github.com/ybooks240/Logseq_extension_pro) for source code and updates.
 
-- 快速添加Todo到指定页面
-- 搜索已存在的Todo
-- Todo状态管理（TODO、NOW、WAITING、LATER、DOING、DONE、CANCELED）
-- 优先级设置（A/B/C）
-- 标签管理功能
-- 截止日期设置
-- 搜索过滤功能
+![Add Todo Interface](metadata/add-todo.jpg)
 
-## 配置
+## Features
 
-1. Logseq Graph Path: 设置你的Logseq图谱本地路径
-2. Default Page: 设置默认添加Todo的页面名称
+### Todo Management
+- Quick Todo addition to any Logseq page
+- Comprehensive Todo status management (TODO, NOW, WAITING, LATER, DOING, DONE, CANCELED)
+- Priority settings (A/B/C)
+- Tag support with multiple tags
+- Due date setting with automatic date formatting
+- Advanced Todo search and filtering
 
-## 使用方法
+### Note Management
+- Fast note creation for any Logseq page
+- Direct access through Raycast
 
-### 添加Todo
-1. 使用快捷键打开Raycast
-2. 输入 "Add Todo"
-3. 输入Todo内容
-4. 可选：指定页面名称（默认使用配置中的页面）
-5. 可选：设置Todo状态（TODO、NOW、WAITING、LATER、DOING、DONE、CANCELED）
-6. 可选：设置优先级（A/B/C）
-7. 可选：添加标签（多个标签用逗号分隔）
-8. 可选：设置截止日期
-9. 按回车确认
+## Installation
 
-### 搜索Todo
-1. 使用快捷键打开Raycast
-2. 输入 "Search Todo"
-3. 使用过滤选项筛选Todo：
-   - 按状态筛选
-   - 按优先级筛选（输入a/b/c快速筛选）
-   - 按关键词搜索（支持内容和页面名称搜索）
-   - 按标签筛选
-   - 按截止日期筛选
-4. 查看筛选后的Todo列表
-5. 可以直接在列表中：
-   - 修改Todo状态
-   - 修改优先级
-   - 删除Todo
+1. Install the extension from Raycast Store
+2. Configure the required settings (see Configuration section)
+
+## Configuration
+
+Before using the extension, you need to set up two essential configurations:
+
+1. **Logseq Graph Path**: Set the local path to your Logseq graph
+   - This is where your Logseq pages are stored
+   - Example: `/Users/username/Documents/logseq-notes/`
+   ![Configuration](metadata/config.jpg)
+
+2. **Default Page**: Set the default page name for adding Todos
+   - This page will be used when no specific page is selected
+   - Example: `todos`
+
+## Usage Guide
+
+### Adding Todos
+
+![Add Todo Interface](metadata/add-todo-1.jpg)
+
+1. Open Raycast and type "Add Todo"
+2. Fill in the Todo details:
+   - Content (required)
+   - Page name (optional, uses default if not specified)
+   - Status (TODO, NOW, WAITING, LATER, DOING, DONE, CANCELED)
+   - Priority (A - High, B - Medium, C - Low)
+   - Tags (comma-separated)
+   - Due date
+3. Press Enter to save
+
+### Searching and Managing Todos
+
+![Search Todo Interface](metadata/search-todo.jpg)
+
+1. Open Raycast and type "Search Todo"
+2. Use the powerful filtering options:
+   - Filter by status
+   - Quick priority filtering (type a/b/c)
+   - Keyword search (searches both content and page names)
+   - Tag filtering
+   - Due date filtering
+
+#### Todo Management Features
+
+1. **Change Todo Status**
+   ![Alter Status](metadata/search-todo-alter-status.jpg)
+   - Select a Todo
+   - Choose "Change Status"
+   - Pick the new status
+
+2. **Modify Priority**
+   ![Alter Priority](metadata/search-todo-alter-priority.jpg)
+   - Select a Todo
+   - Choose "Change Priority"
+   - Select the new priority level
+
+3. **Delete Todo**
+   ![Delete Todo](metadata/search-todo-to-delete.jpg)
+   - Select a Todo
+   - Choose "Delete"
+   - Confirm deletion
+
+### Adding Notes
+
+![Add Note Interface](metadata/add-note.jpg)
+
+1. Open Raycast and type "Add Note"
+2. Enter your note content
+3. Specify the page name (optional)
+4. Press Enter to save
+
+## Tips
+
+- Use keyboard shortcuts for faster navigation
+- Utilize the default page setting for frequently used pages
+- Take advantage of the quick priority filtering in search (a/b/c)
+- Use tags for better organization and easier filtering
+- Set due dates for time-sensitive Todos
+
+## Support
+
+If you encounter any issues or have suggestions, please visit our [GitHub repository](https://github.com/ybooks240/Logseq_extension_pro) to create an issue.

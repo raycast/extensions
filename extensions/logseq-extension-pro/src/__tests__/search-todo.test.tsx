@@ -40,7 +40,7 @@ describe("SearchTodo Command", () => {
     expect(showToast).toHaveBeenCalledWith(
       expect.objectContaining({
         style: "failure",
-        title: "加载Todo失败",
+        title: "Failed to load Todo",
       }),
     );
   });

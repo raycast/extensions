@@ -41,10 +41,9 @@ export default function Command() {
           : content + "\n\n" + noteItem;
 
       await writeFile(pagePath, newContent, "utf-8");
-      await showToast(Toast.Style.Success, "Note已添加");
+      await showToast(Toast.Style.Success, "Note added successfully");
     } catch (error) {
-      console.error(error);
-      await showToast(Toast.Style.Failure, "添加Note失败");
+      await showToast(Toast.Style.Failure, "Failed to add Note");
     }
   }
 
@@ -52,13 +51,13 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="添加note" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Add Note" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextArea id="content" title="Note内容" placeholder="输入Note内容" autoFocus />
-      <Form.TextField id="page" title="页面名称" placeholder={preferences.defaultPage} />
-      <Form.TextField id="tags" title="标签" placeholder="输入标签，用逗号分隔" />
+      <Form.TextArea id="content" title="Note Content" placeholder="Enter Note content" autoFocus />
+      <Form.TextField id="page" title="Page Name" placeholder={preferences.defaultPage} />
+      <Form.TextField id="tags" title="Tags" placeholder="Enter tags, separated by commas" />
     </Form>
   );
 }
