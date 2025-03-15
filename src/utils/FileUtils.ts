@@ -152,4 +152,74 @@ export async function getFileInfo(filePath: string): Promise<{
     console.error(`Error getting file info: ${filePath}`, error);
     return null;
   }
+}
+
+/**
+ * Formats a timestamp into a human-readable date and time
+ * @param timestamp ISO timestamp string
+ * @returns Formatted date and time string
+ */
+export function formatTimestamp(timestamp: string): string {
+  if (!timestamp) return "Unknown";
+  try {
+    return new Date(timestamp).toLocaleString();
+  } catch (e) {
+    return timestamp;
+  }
+}
+
+/**
+ * Formats a generation ID to be more readable
+ * @param generation The generation ID string
+ * @returns Formatted generation ID
+ */
+export function formatGeneration(generation: string): string {
+  if (!generation) return "Unknown";
+  // Shorten the generation ID for display purposes
+  return generation.length > 12 ? `${generation.substring(0, 6)}...${generation.substring(generation.length - 6)}` : generation;
+}
+
+/**
+ * Determines if an object is the current version
+ * @param object The storage object
+ * @returns True if it's the current version
+ */
+export function isCurrentVersion(object: any): boolean {
+  return object.timeDeleted === undefined;
+}
+
+/**
+ * Calculates the age of an object version
+ * @param timestamp ISO timestamp string
+ * @returns Human-readable age string
+ */
+export function calculateAge(timestamp: string): string {
+  if (!timestamp) return "Unknown";
+  
+  try {
+    const created = new Date(timestamp).getTime();
+    const now = new Date().getTime();
+    const diff = now - created;
+    
+    // Convert to appropriate time unit
+    const seconds = Math.floor(diff / 1000);
+    if (seconds < 60) return `${seconds} second${seconds !== 1 ? 's' : ''}`;
+    
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''}`;
+    
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days} day${days !== 1 ? 's' : ''}`;
+    
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months} month${months !== 1 ? 's' : ''}`;
+    
+    const years = Math.floor(months / 12);
+    return `${years} year${years !== 1 ? 's' : ''}`;
+  } catch (e) {
+    return "Unknown";
+  }
 } 
