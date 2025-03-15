@@ -50,5 +50,5 @@ const tool = async (input: Input) => {
 export default tool;
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  return { message: `Create a ${input.mediaType ?? "Typescript"} playground? This will open a new browser tab.` };
+  return { message: `Create a ${input.mediaType ?? "TypeScript"} playground? This will open a new browser tab.` };
 };
