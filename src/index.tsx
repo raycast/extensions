@@ -6,7 +6,7 @@ import { homedir } from "os";
 import { join } from "path";
 import fs from "fs";
 import ProjectView from "./ProjectView";
-import StorageBucketView from "./StorageBucketView";
+import { StorageBucketView } from "./services/storage";
 import { executeGcloudCommand } from "./gcloud";
 
 const execPromise = promisify(exec);

@@ -2,8 +2,8 @@ import { ActionPanel, Action, List, showToast, Toast, useNavigation, Icon, confi
 import { useState, useEffect } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
-import StorageObjectsView from "./StorageObjectsView";
-import { executeGcloudCommand } from "./gcloud";
+import { StorageObjectsView } from "./";
+import { executeGcloudCommand } from "../../gcloud";
 
 const execPromise = promisify(exec);
 

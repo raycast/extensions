@@ -1,8 +1,8 @@
-import { ActionPanel, Action, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, useNavigation } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
-import StorageBucketView from "./StorageBucketView";
+import { StorageBucketView } from "./services/storage";
 import { executeGcloudCommand } from "./gcloud";
 
 const execPromise = promisify(exec);

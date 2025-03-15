@@ -2,14 +2,14 @@ import { ActionPanel, Action, List, showToast, Toast, Icon, confirmAlert, Detail
 import { useState, useEffect } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { executeGcloudCommand } from "./gcloud";
+import { executeGcloudCommand } from "../../gcloud";
 import { homedir } from "os";
 import { join } from "path";
 import fs from "fs";
-import { CloudStorageUploader } from "./utils/FilePicker";
-import { CloudStorageDownloader } from "./utils/FileDownloader";
-import { formatFileSize, guessContentType, validateFile, getFileInfo } from "./utils/FileUtils";
-import { openFilePicker } from "./utils/NativeFilePicker";
+import { CloudStorageUploader } from "../../utils/FilePicker";
+import { CloudStorageDownloader } from "../../utils/FileDownloader";
+import { formatFileSize, guessContentType, validateFile, getFileInfo } from "../../utils/FileUtils";
+import { openFilePicker } from "../../utils/NativeFilePicker";
 
 const execPromise = promisify(exec);
 
