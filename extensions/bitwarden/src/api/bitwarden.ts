@@ -147,7 +147,7 @@ export class Bitwarden {
 
     this.initPromise = (async (): Promise<void> => {
       await this.ensureCliBinary();
-      this.retrieveAndCacheCliVersion();
+      void this.retrieveAndCacheCliVersion();
       await this.checkServerUrl(serverUrl);
     })();
   }
@@ -216,10 +216,13 @@ export class Bitwarden {
     }
   }
 
-  private retrieveAndCacheCliVersion(): void {
-    void this.getVersion().then(({ error, result }) => {
+  private async retrieveAndCacheCliVersion(): Promise<void> {
+    try {
+      const { error, result } = await this.getVersion();
       if (!error) Cache.set(CACHE_KEYS.CLI_VERSION, result);
-    });
+    } catch (error) {
+      captureException("Failed to retrieve and cache cli version", error, { captureToRaycast: true });
+    }
   }
 
   private checkCliBinIsReady(filePath: string): boolean {
