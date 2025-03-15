@@ -12,5 +12,9 @@ type Input = {
   xcodeProjectFilePath: string;
 };
 
+/**
+ * Adds a Swift Package to an Xcode project or workspace.
+ * @param input The input.
+ */
 export default (input: Input) =>
   XcodeSwiftPackageService.addSwiftPackage(input.swiftPackageUrl, input.xcodeProjectFilePath);
