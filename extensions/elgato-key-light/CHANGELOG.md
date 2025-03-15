@@ -1,4 +1,12 @@
-# Elgato light Changelog
+# Elgato Key Light Changelog
+
+## [Improved Controls and Feedback] - {PR_MERGE_DATE}
+
+- Replace showHUD with showToast for better visual feedback
+- Keep Raycast window open after commands for easier adjustments
+- Add proper error handling and undefined checks
+- Update bonjour package to fix deprecation warnings
+- Improve caching mechanism for discovered lights
 
 ## [1.1.0] - {PR_MERGE_DATE}
 
