@@ -113,10 +113,13 @@ export const cliInfo = {
     return `bw-${this.version}`;
   },
   get downloadUrl() {
-    return `${this.downloadPage}/download/cli-v${this.version}/bw-macos-${this.version}.zip`;
+    const archSuffix = process.arch === "arm64" ? "-arm64" : "";
+    return `${this.downloadPage}/download/cli-v${this.version}/bw-macos${archSuffix}-${this.version}.zip`;
   },
   checkHashMatchesFile: function (filePath: string) {
-    return getFileSha256(filePath) === this.sha256;
+    const newLocal = getFileSha256(filePath);
+    console.log(newLocal, this.sha256);
+    return newLocal === this.sha256;
   },
 } as const;
 
@@ -172,17 +175,25 @@ export class Bitwarden {
       try {
         toast.message = "Downloading...";
         await download(cliInfo.downloadUrl, zipPath, (percent) => (toast.message = `Downloading ${percent}%`));
-        if (!cliInfo.checkHashMatchesFile(zipPath)) throw new EnsureCliBinError("Binary hash does not match");
+        await waitForFileAvailable(zipPath);
+        if (!cliInfo.checkHashMatchesFile(zipPath)) {
+          throw new EnsureCliBinError("Binary hash does not match");
+        }
       } catch (downloadError) {
         toast.title = "Failed to download Bitwarden CLI";
         throw downloadError;
       }
+
       try {
         toast.message = "Extracting...";
         await decompressFile(zipPath, supportPath);
         const decompressedBinPath = join(supportPath, "bw");
-        await waitForFileAvailable(decompressedBinPath);
-        await rename(decompressedBinPath, this.cliPath);
+
+        // For some reason this rename started throwing an error after succeeding, so for now we're just
+        // catching it and checking if the file exists ¯\_(ツ)_/¯
+        await rename(decompressedBinPath, this.cliPath).catch(() => null);
+        await waitForFileAvailable(this.cliPath);
+
         await chmod(this.cliPath, "755");
         await rm(zipPath, { force: true });
         this.wasCliUpdated = true;
@@ -194,9 +205,10 @@ export class Bitwarden {
     } catch (error) {
       toast.message = error instanceof EnsureCliBinError ? error.message : "Please try again";
       toast.style = Toast.Style.Failure;
-      unlinkAllSync(zipPath, this.cliPath);
-      BinDownloadLogger.logError(error);
 
+      unlinkAllSync(zipPath, this.cliPath);
+
+      if (!environment.isDevelopment) BinDownloadLogger.logError(error);
       if (error instanceof Error) throw new EnsureCliBinError(`${error.name}: ${error.message}`, error.stack);
       throw error;
     } finally {
