@@ -1,5 +1,9 @@
 # Delivery Tracker Changelog
 
+## [Prevent Duplicate Deliveries] - {PR_MERGE_DATE}
+
+Duplicate deliveries are no longer allowed to be added.
+
 ## [FedEx Delivery Date Bug Fix] - 2025-03-07
 
 Fixed a bug for the delivery date from FedEx.  People living in timezones with a negative UTC offset incorrectly saw
