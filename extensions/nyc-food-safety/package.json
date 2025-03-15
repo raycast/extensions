@@ -15,21 +15,12 @@
       "title": "NYC Food Safety Search",
       "subtitle": "Food safety records for thousands of restaurants in NYC",
       "description": "Accesses public records from safety inspections at food establishments across the big apple.",
-      "mode": "no-view",
+      "mode": "view",
       "arguments": [
         {
           "name": "restaurantName",
           "placeholder": "Restaurant Name",
           "type": "text",
-          "required": true
-        }
-      ],
-      "preferences": [
-        {
-          "name": "openaiApiKey",
-          "title": "OpenAI API Key",
-          "description": "Your OpenAI API key for generating summaries",
-          "type": "password",
           "required": true
         }
       ]
@@ -38,20 +29,20 @@
   "dependencies": {
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.17.0",
-    "axios": "^1.6.2",
-    "openai": "^4.20.1",
-    "date-fns": "^2.30.0"
+    "date-fns": "^2.30.0",
+    "node-fetch": "^2.6.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.11",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "build": "ray build",
+    "build": "ray build -e src/nyc-food-safety-search.tsx",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
