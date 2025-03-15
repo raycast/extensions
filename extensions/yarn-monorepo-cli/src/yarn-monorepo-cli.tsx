@@ -58,8 +58,16 @@ export default function Command() {
             <Action.SubmitForm
               title="Set Root Path"
               onSubmit={async (values) => {
-                await LocalStorage.setItem("monorepo-root", values.rootPath);
-                setRootPath(values.rootPath);
+                try {
+                  const packageJsonPath = path.join(values.rootPath, "package.json");
+                  if (!fs.existsSync(packageJsonPath)) {
+                    throw new Error("No package.json found at specified path");
+                  }
+                  await LocalStorage.setItem("monorepo-root", values.rootPath);
+                  setRootPath(values.rootPath);
+                } catch (error) {
+                  showFailureToast(error, { title: "Invalid monorepo path" });
+                }
               }}
             />
           </ActionPanel>
@@ -102,13 +110,17 @@ function ScriptList({ package: pkg }: { package: PackageInfo }) {
               <Action
                 title="Paste Command"
                 onAction={async () => {
-                  const command = `yarn workspace "${pkg.name}" "${name}"`;
-                  await Clipboard.paste(command);
-                  await showToast({
-                    style: Toast.Style.Success,
-                    title: "Command pasted",
-                    message: `"${command}" has been pasted into the active window`,
-                  });
+                  try {
+                    const command = `yarn workspace "${pkg.name}" "${name}"`;
+                    await Clipboard.paste(command);
+                    await showToast({
+                      style: Toast.Style.Success,
+                      title: "Command pasted",
+                      message: `"${command}" has been pasted into the active window`,
+                    });
+                  } catch (error) {
+                    showFailureToast(error, { title: "Command paste failed" });
+                  }
                 }}
               />
             </ActionPanel>

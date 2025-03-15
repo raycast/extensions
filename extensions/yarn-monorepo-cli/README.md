@@ -1,3 +1,5 @@
-# Yarn monorepo CLI
+# Yarn Monorepo CLI
 
-Raycast extension - yarn monorepo CLI to manage your yarn monorepo, select package and script from a list, and paste it into an active terminal window
+Manage your yarn monorepo
+
+Effortlessly manage your Yarn monorepo with this Raycast extension! Quickly browse and select packages or scripts from an intuitive list, then seamlessly paste commands into your active terminal window—saving you time and streamlining your workflow.

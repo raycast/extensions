@@ -3,7 +3,7 @@
   "name": "yarn-monorepo-cli",
   "private": true,
   "title": "Yarn Monorepo CLI",
-  "description": "yarn monorepo CLI to manage your yarn monorepo, select script from package and paste it into an active terminal",
+  "description": "Manage your yarn monorepo",
   "icon": "extension-icon.png",
   "author": "sasha_khamkov",
   "categories": [
