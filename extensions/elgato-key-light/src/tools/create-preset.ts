@@ -1,37 +1,55 @@
+import { Preset, savePreset } from "../presets";
 import { randomUUID } from "crypto";
-import { savePreset } from "../presets";
+import { ToolResponse, formatErrorResponse } from "../utils";
 
-// TODO: Use `Preset` type from `presets.ts` when we support `Omit`
-type Input = {
-  /**
-   * An emoji as the preset icon.
-   */
-  icon?: string;
-  /**
-   * The name of the preset.
-   */
+// Default values for brightness and temperature
+const DEFAULT_BRIGHTNESS = 50;
+const DEFAULT_TEMPERATURE = 50;
+
+/**
+ * Tool to create a new preset for Key Lights
+ */
+export default async function tool(input: {
   name: string;
-  /**
-   * The settings of the preset.
-   */
-  settings: {
-    /**
-     * The brightness (percentage) of the key light.
-     * @default 20
-     * @min 0
-     * @max 100
-     */
-    brightness?: number;
-    /**
-     * The temperature (percentage) of the key light.
-     * @default 20
-     * @min 0 (cold, ~2000K)
-     * @max 100 (warm, ~7000K)
-     */
-    temperature?: number;
-  };
-};
+  icon?: string;
+  brightness?: number;
+  temperature?: number;
+}): Promise<ToolResponse<Preset>> {
+  try {
+    const id = randomUUID();
 
-export default async function tool(input: Input) {
-  await savePreset({ ...input, id: randomUUID() });
+    // Use default values if not provided
+    const brightness = input.brightness ?? DEFAULT_BRIGHTNESS;
+    const temperature = input.temperature ?? DEFAULT_TEMPERATURE;
+
+    const preset: Preset = {
+      id,
+      name: input.name,
+      icon: input.icon,
+      settings: {
+        brightness,
+        temperature,
+      },
+    };
+
+    await savePreset(preset);
+
+    return {
+      success: true,
+      message: `Created preset "${preset.name}"`,
+      data: preset,
+    };
+  } catch (error) {
+    return {
+      ...formatErrorResponse(error, "create preset"),
+      data: {
+        id: "",
+        name: "",
+        settings: {
+          brightness: 0,
+          temperature: 0,
+        },
+      },
+    };
+  }
 }

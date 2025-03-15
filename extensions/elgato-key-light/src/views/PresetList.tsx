@@ -1,9 +1,10 @@
-import { List, ActionPanel, Action, showToast, Toast, Icon, confirmAlert, Keyboard } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, Icon, confirmAlert, Keyboard, environment } from "@raycast/api";
 import { Preset, deletePreset, usePresets } from "../presets";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { convertFormTemperatureToActual, KeyLight } from "../elgato";
-import { showFailureToast } from "@raycast/utils";
 import PresetForm, { FormValues } from "./PresetForm";
 import { randomUUID } from "crypto";
+import { discoverKeyLights, formatErrorResponse } from "../utils";
 
 export default function PresetList() {
   const { value: presets, isLoading, setValue: setPresets, removeValue } = usePresets();
@@ -14,20 +15,40 @@ export default function PresetList() {
         style: Toast.Style.Animated,
         title: `Activating "${preset.name}" preset`,
       });
-      const keyLight = await KeyLight.discover();
+
+      const keyLight = await discoverKeyLights();
+
+      // First turn on the lights to ensure they are responsive
+      try {
+        await keyLight.turnOn();
+      } catch (error) {
+        // If turning on fails, try force discovery again
+        if (environment.isDevelopment) {
+          console.error("Failed to turn on Key Light, forcing fresh discovery and retrying");
+        }
+        const keyLightRetry = await discoverKeyLights(true);
+        await keyLightRetry.turnOn();
+      }
+
+      // Now apply the preset settings
       await keyLight.update({
         brightness: preset.settings.brightness,
         temperature: preset.settings.temperature
           ? convertFormTemperatureToActual(preset.settings.temperature)
           : undefined,
       });
-      await keyLight.turnOn();
+
       await showToast({
         style: Toast.Style.Success,
         title: `Activated "${preset.name}" preset`,
       });
     } catch (error) {
-      await showFailureToast(error, { title: `Failed activating "${preset.name}" preset` });
+      const response = formatErrorResponse(error, `activate preset "${preset.name}"`);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: response.message,
+        message: response.error,
+      });
     }
   }
 
@@ -38,10 +59,10 @@ export default function PresetList() {
       icon: values.icon,
       settings: {
         brightness: parseInt(values.brightness),
-        temperature: convertFormTemperatureToActual(parseInt(values.temperature)),
+        temperature: parseInt(values.temperature),
       },
     };
-    await setPresets([...(presets ?? []).filter((p) => p.id !== preset.id), preset]);
+    await setPresets([...(presets ?? []).filter((p: Preset) => p.id !== preset.id), preset]);
   }
 
   async function handleDelete(preset: Preset) {
@@ -58,7 +79,12 @@ export default function PresetList() {
         title: `Deleted "${preset.name}" preset`,
       });
     } catch (error) {
-      await showFailureToast(error, { title: `Failed deleting "${preset.name}" preset` });
+      const response = formatErrorResponse(error, `delete preset "${preset.name}"`);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: response.message,
+        message: response.error,
+      });
     }
   }
 
