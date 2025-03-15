@@ -1,5 +1,10 @@
 # NotePlan 3 Changelog
 
+## [New Addition] - {PR_MERGE_DATE}
+
+- Added Save as Quicklink action to notes
+
+
 ## [Fixes] - 2023-03-28
 
 - Added new calendar format
