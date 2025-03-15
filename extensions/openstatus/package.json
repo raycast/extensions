@@ -49,6 +49,173 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "show-incidents",
+      "title": "Show Incidents",
+      "description": "View all your incidents from your OpenStatus account"
+    },
+    {
+      "name": "show-monitors",
+      "title": "Show Monitors",
+      "description": "View all your monitors from your OpenStatus account"
+    },
+    {
+      "name": "show-status-pages",
+      "title": "Show Status Pages",
+      "description": "View all your status pages from your OpenStatus account"
+    },
+    {
+      "name": "create-status-report",
+      "title": "Create Status Report",
+      "description": ""
+    }
+      ],
+  "ai": {
+    "evals": [
+      {
+        "input" : "@openstatus show all monitors",
+        "mocks" : {
+          "show-monitors" : [
+            {
+              "active" : true,
+              "jobType" : "http",
+              "name" : "",
+              "public" : false,
+              "regions" : [
+                "ams"
+              ]
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "show-monitors"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@openstatus show me actve status pages",
+        "mocks" : {
+          "show-status-pages" : [
+            {
+              "description" : "Description",
+              "id" : 1457,
+              "slug" : "prickly-wolf",
+              "title" : ""
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "show-status-pages"
+            }
+          }
+        ]
+      },{
+        "input" : "@openstatus show all status pages",
+        "mocks" : {
+          "show-status-pages" : [
+            {
+              "description" : "Description",
+              "slug" : "slug",
+              "title" : "Title"
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "show-status-pages"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@openstatus create report for openstatus saying we are investigating",
+        "mocks" : {
+          "show-status-pages" : [
+            {
+              "description" : "Description",
+              "slug" : "slug",
+              "title" : "Title"
+            }
+          ],
+          "create-status-report": [
+            {
+              
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "show-status-pages"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "create-status-report"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@openstatus create report for page 1 saying we are investigating date of next monday 9am",
+        "mocks" : {
+          "create-status-report" : "Successfully called \"create-status-report\"",
+          "show-status-pages" : [
+            {
+              "description" : "Description",
+              "id" : 0,
+              "slug" : "slug",
+              "title" : "Title"
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "show-status-pages"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "date" : "2025-03-17T09:00:00+05:00",
+                "message" : "We are investigating",
+                "pageId" : "0",
+                "status" : "investigating",
+                "title" : "Investigating Issue"
+              },
+              "name" : "create-status-report"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "access_token",
