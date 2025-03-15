@@ -9,16 +9,6 @@
     "omarshahine"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "keyLights_count",
-      "title": "Number of Key Lights",
-      "description": "Enter the number of Key Lights on your network that you wish to control",
-      "type": "textfield",
-      "required": true,
-      "default": "1"
-    }
-  ],
   "commands": [
     {
       "name": "toggle",
@@ -207,7 +197,7 @@
     "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.19.1",
     "axios": "^1.2.0",
-    "bonjour": "^3.5.0",
+    "bonjour-service": "^1.1.1",
     "emojilib": "^4.0.1",
     "prettier": "^3.5.3"
   },
