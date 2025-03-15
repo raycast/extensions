@@ -4,7 +4,7 @@ import { waitUntil } from "./utils";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { environment, showHUD } from "@raycast/api";
+import { environment } from "@raycast/api";
 
 interface ElgatoService {
   name: string;
