@@ -327,6 +327,11 @@
       "description": "The releases of Xcode."
     },
     {
+      "name": "xcode-add-swift-package",
+      "title": "Add Swift Package",
+      "description": "Adds a Swift Package to an Xcode project (*.xcodeproj) or Xcode workspace (*.xcworkspace) using its HTTPS or SSH URL."
+    },
+    {
       "name": "clear-derived-data",
       "title": "Clear Derived Data",
       "description": "Clears the derived data directory."
