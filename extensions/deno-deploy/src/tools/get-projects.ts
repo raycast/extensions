@@ -21,7 +21,7 @@ type Input = {
 const tool = async (input: Input) => {
   const fetcher = createWindowLessFetcher();
   const projects = await fetcher.requestJSON<Project[]>(
-    `/organizations/${input.organizationId}/projects?q=${input.query ?? ""}`,
+    `/organizations/${input.organizationId}/projects?q=${encodeURIComponent(input.query ?? "")}`,
   );
   return projects;
 };
