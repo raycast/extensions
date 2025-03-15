@@ -309,12 +309,12 @@
     {
       "name": "restart-xcode-simulator",
       "title": "Restart a Xcode Simulator",
-      "description": "Shutdowns the Xcode Simulator by its udid."
+      "description": "Restarts the Xcode Simulator by its udid."
     },
     {
       "name": "open-url-in-xcode-simulator",
       "title": "Open a URL in a Xcode Simulator",
-      "description": "Opens a URL in a Xcode Simulator either the a specific one identified by its udid or the currently booted one, if any."
+      "description": "Opens a URL in a Xcode Simulator either a specific one identified by its udid or the currently booted one, if any."
     },
     {
       "name": "xcode-simulator-applications",

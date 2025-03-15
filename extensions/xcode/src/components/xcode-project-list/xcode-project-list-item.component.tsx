@@ -45,7 +45,7 @@ export function XcodeProjectListItem(props: {
               shortcut={Keyboard.Shortcut.Common.OpenWith}
               onAction={() =>
                 open(props.project.directoryPath, terminalApp).catch(() =>
-                  showToast(Toast.Style.Failure, `Failed to open with ${terminalApp?.name}`)
+                  showToast(Toast.Style.Failure, `Failed to open with ${terminalApp.name}`)
                 )
               }
             />

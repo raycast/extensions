@@ -7,7 +7,7 @@
 <p align="center">
     Search and open your recent Xcode Projects, manage your Simulators & Apps, 
     <br/>
-    create Swift Packages & Playgrounds and quickly clear Xcode cache files..
+    create Swift Packages & Playgrounds and quickly clear Xcode cache files.
 </p>
 
 ![Search Recent Projects](metadata/xcode-1.png)

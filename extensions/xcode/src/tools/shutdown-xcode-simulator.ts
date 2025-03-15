@@ -6,7 +6,7 @@ type Input = {
 };
 
 /**
- * Shut downs an Xcode Simulator via its UDID.
+ * Shuts down an Xcode Simulator via its UDID.
  * @param input
  */
 export default (input: Input) => XcodeSimulatorService.shutdown(input.xcodeSimulatorUDID);

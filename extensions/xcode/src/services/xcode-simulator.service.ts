@@ -247,7 +247,7 @@ export class XcodeSimulatorService {
   }
 
   /**
-   * Rename XcodeSimulator
+   * Trigger iCloud Sync for XcodeSimulator
    * @param xcodeSimulator The Xcode Simulator to trigger iCloud Sync to
    */
   static async triggerIcloudSync(xcodeSimulator: XcodeSimulator): Promise<void> {
