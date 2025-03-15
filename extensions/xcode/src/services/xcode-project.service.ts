@@ -1,7 +1,6 @@
 import { XcodeProject } from "../models/xcode-project/xcode-project.model";
 import { XcodeProjectType } from "../models/xcode-project/xcode-project-type.model";
 import { execAsync } from "../shared/exec-async";
-import { runAppleScript } from "../shared/run-apple-script";
 import untildify from "untildify";
 import * as Path from "path";
 import { searchRecentProjectsCommandPreferences } from "../shared/preferences";
@@ -23,7 +22,7 @@ export class XcodeProjectService {
     ];
     // Execute spotlight query
     const spotlightQueryOutput = await execAsync(
-      `mdfind '${spotlightSearchPatterns.join(" || ")}' -onlyin ~ -attr kMDItemLastUsedDate`
+      `mdfind -attr kMDItemLastUsedDate '${spotlightSearchPatterns.join(" || ")}'`
     );
     // Retrieve the excluded Xcode Project Paths
     const excludedXcodeProjectPaths = XcodeProjectService.excludedXcodeProjectPaths();
@@ -64,9 +63,9 @@ export class XcodeProjectService {
       }
       // Check if path is excluded
       if (
-        path.includes("Carthage/Checkouts") ||
+        path.includes("/Carthage/Checkouts") ||
         path.includes("/Pods/") ||
-        path.includes("Library/Autosave Information") ||
+        path.includes("/Library/Autosave Information") ||
         excludedXcodeProjectPaths.some((excludedPath) => path.startsWith(excludedPath))
       ) {
         // Continue with next line
@@ -86,57 +85,6 @@ export class XcodeProjectService {
     xcodeProjects.sort((lhs, rhs) => (rhs.lastUsed?.getTime() ?? 0) - (lhs.lastUsed?.getTime() ?? 0));
     // Return xcode projects
     return xcodeProjects;
-  }
-
-  /**
-   * Retrieve the currently opened XcodeProjects
-   */
-  static async openedXcodeProjects(): Promise<XcodeProject[]> {
-    // Declare opened XcodeProject paths
-    let openedXcodeProjectPaths: string;
-    try {
-      // Run AppleScript to retrieve the opened XcodeProject paths
-      openedXcodeProjectPaths = await runAppleScript([
-        'tell application "Xcode"',
-        "return path of workspace documents",
-        "end tell",
-      ]);
-    } catch {
-      // Catch error and return an empty error
-      // usually the error indicates that either
-      // Xcode is not installed or not running
-      return [];
-    }
-    // Check if opened XcodeProject paths are empty
-    if (!openedXcodeProjectPaths.trim()) {
-      // Return an empty array
-      return [];
-    }
-    // Decode opened XcodeProject paths
-    return (
-      openedXcodeProjectPaths
-        // Split by semicolon
-        .split(",")
-        // Trim each path
-        .map((path) => path.trim())
-        .map((path) => {
-          // Check if path does not contain a file extension
-          if (!path.split("/").at(-1)?.includes(".")) {
-            // As no file extension is available in the path
-            // the opened XcodeProject path is a Swift Package Project
-            // which has been opened by clicking the "Package.swift" file.
-            // Therefore, the path will be appended with the "Package.swift" file
-            return Path.join(path, "Package.swift");
-          } else {
-            // Otherwise, return unmodified path
-            return path;
-          }
-        })
-        // Decode each Xcode Project Path
-        .map((xcodeProjectPath) => XcodeProjectService.decodeXcodeProject(xcodeProjectPath))
-        // Filter out null values
-        .filter(Boolean) as XcodeProject[]
-    );
   }
 
   /**
