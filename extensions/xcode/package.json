@@ -347,9 +347,9 @@
       "description": "Clears the SwiftUI previews cache directory."
     },
     {
-      "name": "open-file-path",
-      "title": "Open File Path",
-      "description": "Opens a file path which either points to a directory, Xcode Project, Swift Package (Package.swift), Xcode Workspace, Swift Playground or a file."
+      "name": "open-path",
+      "title": "Open Path",
+      "description": "Opens a path which either points to a directory, Xcode Project, Swift Package (Package.swift), Xcode Workspace, Swift Playground or a file."
     }
   ],
   "dependencies": {
