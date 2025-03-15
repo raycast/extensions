@@ -1,0 +1,543 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dev-toolkit",
+  "title": "Dev Toolkit",
+  "description": "Dev Toolkit brings essential developer utilities to your fingertips. Quickly generate UUIDs, format JSON, convert between encodings, transform text case, and handle timestamps all from Raycast. A comprehensive toolbox for developers that eliminates the need for multiple browser tabs and standalone applications.",
+  "icon": "extension-icon.png",
+  "author": "mblode",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "action",
+      "type": "dropdown",
+      "title": "Default Action",
+      "description": "What you would like to happen when running the command",
+      "data": [
+        {
+          "value": "clipboard",
+          "title": "Copy to Clipboard"
+        },
+        {
+          "value": "paste",
+          "title": "Paste to Active App"
+        },
+        {
+          "value": "pasteAndCopy",
+          "title": "Paste and Copy to Clipboard"
+        }
+      ],
+      "default": "clipboard",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "format-json",
+      "title": "Format JSON",
+      "description": "Format and prettify JSON data",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-v1-uuid",
+      "title": "Generate V1 UUIDs",
+      "description": "Copy generated V1 UUID to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "placeholder": "1",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generate-v4-uuid",
+      "title": "Generate V4 UUIDs",
+      "description": "Copy generated V4 UUID to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "placeholder": "1",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generate-v6-uuid",
+      "title": "Generate V6 UUIDs",
+      "description": "Copy generated V6 UUID to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "placeholder": "1",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generate-v7-uuid",
+      "title": "Generate V7 UUIDs",
+      "description": "Copy generated V7 UUID to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "placeholder": "1",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generate-nanoid",
+      "title": "Generate Nanoids",
+      "description": "Copy generated nanoid to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfNanoidsToGenerate",
+          "placeholder": "1",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generate-ulid",
+      "title": "Generate ULIDs",
+      "description": "Copy generated ULID to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfULIDsToGenerate",
+          "placeholder": "1",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generate-typeid",
+      "title": "Generate TypeIDs",
+      "description": "Copy generated TypeID to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "typePrefix",
+          "placeholder": "Prefix",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "numberOfTypeIDsToGenerate",
+          "placeholder": "1",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "description": "Generate a secure random password",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "length",
+          "placeholder": "8",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "shorten-link",
+      "title": "Shorten Link",
+      "description": "Create a shortened URL",
+      "mode": "no-view"
+    },
+    {
+      "name": "count-words",
+      "title": "Count Words",
+      "description": "Count words in text",
+      "mode": "no-view"
+    },
+    {
+      "name": "count-characters",
+      "title": "Count Characters",
+      "description": "Count characters in text",
+      "mode": "no-view"
+    },
+    {
+      "name": "count-lines",
+      "title": "Count Lines",
+      "description": "Count lines in text",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-unix-timestamp-to-date",
+      "title": "Convert Unix Timestamp to Date",
+      "description": "Convert Unix timestamp to date",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-date-to-unix-timestamp",
+      "title": "Convert Date to Unix Timestamp",
+      "description": "Convert date to Unix timestamp",
+      "mode": "no-view"
+    },
+    {
+      "name": "encode-jwt",
+      "title": "Encode JWT",
+      "description": "Encode JSON Web Tokens",
+      "mode": "no-view"
+    },
+    {
+      "name": "decode-jwt",
+      "title": "Decode JWT",
+      "description": "Decode and inspect JSON Web Tokens",
+      "mode": "no-view"
+    },
+    {
+      "name": "encode-url",
+      "title": "Encode URL",
+      "description": "URL encode text",
+      "mode": "no-view"
+    },
+    {
+      "name": "decode-url",
+      "title": "Decode URL",
+      "description": "URL decode text",
+      "mode": "no-view"
+    },
+    {
+      "name": "encode-md5",
+      "title": "Encode MD5",
+      "description": "Generate MD5 hash from text",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-sha1",
+      "title": "Generate SHA1",
+      "description": "Generate SHA1 hash from text",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-sha256",
+      "title": "Generate SHA256",
+      "description": "Generate SHA256 hash from text",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-sha512",
+      "title": "Generate SHA512",
+      "description": "Generate SHA512 hash from text",
+      "mode": "no-view"
+    },
+    {
+      "name": "encrypt-bcrypt",
+      "title": "Encrypt with Bcrypt",
+      "description": "Encrypt text using Bcrypt",
+      "mode": "no-view"
+    },
+    {
+      "name": "encode-base64",
+      "title": "Encode Base64",
+      "description": "Convert text to Base64",
+      "mode": "no-view"
+    },
+    {
+      "name": "decode-base64",
+      "title": "Decode Base64",
+      "description": "Convert Base64 to text",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-lorem-ipsum-words",
+      "title": "Generate Lorem Ipsum Words",
+      "description": "Generate lorem ipsum placeholder words",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfWords",
+          "type": "text",
+          "required": false,
+          "placeholder": "5"
+        }
+      ]
+    },
+    {
+      "name": "generate-lorem-ipsum-sentences",
+      "title": "Generate Lorem Ipsum Sentences",
+      "description": "Generate lorem ipsum placeholder sentences",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfSentences",
+          "type": "text",
+          "required": false,
+          "placeholder": "5"
+        }
+      ]
+    },
+    {
+      "name": "generate-lorem-ipsum-paragraphs",
+      "title": "Generate Lorem Ipsum Paragraphs",
+      "description": "Generate lorem ipsum placeholder paragraphs",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfParagraphs",
+          "type": "text",
+          "required": false,
+          "placeholder": "5"
+        }
+      ]
+    },
+    {
+      "name": "convert-to-camel-case",
+      "title": "To Camel Case",
+      "description": "Convert text to camelCase",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-capital-case",
+      "title": "To Capital Case",
+      "description": "Convert text to Capital Case",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-constant-case",
+      "title": "To Constant Case",
+      "description": "Convert text to CONSTANT_CASE",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-dotcase",
+      "title": "To Dot Case",
+      "description": "Convert text to dot.case",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-kebab-case",
+      "title": "To Kebab Case",
+      "description": "Convert text to kebab-case",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-no-case",
+      "title": "To No Case",
+      "description": "Convert text to no case",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-pascal-case",
+      "title": "To Pascal Case",
+      "description": "Convert text to PascalCase",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-pascal-snake-case",
+      "title": "To Pascal Snake Case",
+      "description": "Convert text to Pascal_Snake_Case",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-path-case",
+      "title": "To Path Case",
+      "description": "Convert text to path/case",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-sentence-case",
+      "title": "To Sentence Case",
+      "description": "Convert text to Sentence case",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-snake-case",
+      "title": "To Snake Case",
+      "description": "Convert text to snake_case",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-train-case",
+      "title": "To Train Case",
+      "description": "Convert text to Train-Case",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-upper-case",
+      "title": "To Upper Case",
+      "description": "Convert text to UPPER CASE",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-lower-case",
+      "title": "To Lower Case",
+      "description": "Convert text to lower case",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-date-to-epoch",
+      "title": "Convert Date to Epoch Time",
+      "description": "Convert date string to Unix epoch timestamp",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-epoch-to-date",
+      "title": "Convert Epoch Time to Date",
+      "description": "Convert Unix epoch timestamp to human-readable date",
+      "mode": "no-view"
+    },
+    {
+      "name": "parse-url",
+      "title": "Parse URL",
+      "description": "Parse URL into its components",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-svg-to-base64",
+      "title": "Convert SVG to Base64",
+      "description": "Convert SVG content to Base64 string",
+      "mode": "no-view"
+    },
+    {
+      "name": "days-from-today",
+      "title": "Days from Today",
+      "description": "Calculate a date by adding or subtracting days from today",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "days",
+          "placeholder": "Number of days (+ or -)",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "format",
+          "placeholder": "Date format pattern",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "format-date",
+      "title": "Format Date",
+      "description": "Convert a date to various formats",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "date",
+          "placeholder": "Date string",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "formatType",
+          "placeholder": "Choose a format",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "ISO",
+              "value": "iso"
+            },
+            {
+              "title": "Short",
+              "value": "short"
+            },
+            {
+              "title": "Long",
+              "value": "long"
+            },
+            {
+              "title": "Full",
+              "value": "full"
+            },
+            {
+              "title": "Time Only",
+              "value": "time"
+            },
+            {
+              "title": "RFC",
+              "value": "rfc"
+            },
+            {
+              "title": "SQL",
+              "value": "sql"
+            },
+            {
+              "title": "Compact",
+              "value": "compact"
+            },
+            {
+              "title": "Relative",
+              "value": "relative"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "date-distance",
+      "title": "Date Distance",
+      "description": "Calculate human-readable time between dates",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "targetDate",
+          "placeholder": "Target date",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.17.0",
+    "bcryptjs": "^3.0.2",
+    "change-case": "^5.4.4",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "generate-password": "^1.7.1",
+    "jsonwebtoken": "^9.0.2",
+    "lorem-ipsum": "^2.0.8",
+    "nanoid": "^5.1.2",
+    "node-fetch": "^3.3.2",
+    "typeid-js": "^1.2.0",
+    "ulid": "^2.3.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
