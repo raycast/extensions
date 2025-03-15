@@ -6,6 +6,7 @@ import os from "os";
 import path from "path";
 import { environment } from "@raycast/api";
 
+// Define the ElgatoService interface - represents the service returned by bonjour
 interface ElgatoService {
   name: string;
   type: string;
@@ -22,15 +23,6 @@ interface ElgatoService {
   fqdn: string;
 }
 
-// Bonjour query parameters interface
-interface BonjourQuery {
-  type: string; // Required: The service type to discover (e.g., "elg" for Elgato)
-  protocol?: "tcp" | "udp"; // Optional: The protocol to use
-  subtypes?: string[]; // Optional: Service subtypes to filter
-  txt?: Record<string, string | Buffer>; // Optional: TXT record data to match (strings or buffers)
-  name?: string; // Optional: Service name to match
-}
-
 const WARM_TEMPERATURE = 344; // 2900K (warmest)
 const COLD_TEMPERATURE = 143; // 7000K (coolest)
 const TEMPERATURE_STEP = (WARM_TEMPERATURE - COLD_TEMPERATURE) / 20; // 5% step
@@ -40,6 +32,44 @@ function internalToKelvin(internalValue: number): number {
   // Linear interpolation between 2900K (344) and 7000K (143)
   return Math.round(2900 + ((7000 - 2900) * (344 - internalValue)) / (344 - 143));
 }
+
+function kelvinToInternal(kelvinValue: number): number {
+  // Linear interpolation between 7000K (143) and 2900K (344)
+  return Math.round(143 + ((7000 - kelvinValue) / (7000 - 2900)) * (344 - 143));
+}
+
+export function convertFormTemperatureToActual(formTemp: number) {
+  return Math.round(COLD_TEMPERATURE + (formTemp / 100) * (WARM_TEMPERATURE - COLD_TEMPERATURE));
+}
+
+export function convertActualTemperatureToForm(actualTemp: number) {
+  return Math.round(((actualTemp - COLD_TEMPERATURE) / (WARM_TEMPERATURE - COLD_TEMPERATURE)) * 100);
+}
+
+// Export the function to avoid unused variable warning since it's a useful utility function
+export { kelvinToInternal };
+
+export type KeyLightSettings = {
+  /**
+   * The brightness of the key light.
+   * @default 20
+   * @min 0
+   * @max 100
+   */
+  brightness?: number;
+  /**
+   * The temperature of the key light.
+   * @default 200
+   * @min 143
+   * @max 344
+   */
+  temperature?: number;
+  /**
+   * Whether the key light is on.
+   * @default true
+   */
+  on?: boolean;
+};
 
 interface CacheData {
   lights: Array<{ service: ElgatoService }>;
@@ -160,21 +190,24 @@ export class KeyLight {
     let discoveryComplete = false;
 
     const find = new Promise<KeyLight>((resolve, reject) => {
-      const browser = bonjour.find({ type: "elg" } as BonjourQuery, (service: ElgatoService) => {
+      const browser = bonjour.find({ type: "elg" }, (service: ElgatoService) => {
+        // Convert to our ElgatoService type
+        const elgatoService = service;
+
         // Log complete service object for debugging
         if (environment.isDevelopment) {
           console.log(
             "Bonjour service details:",
             JSON.stringify(
               {
-                name: service.name,
-                type: service.type,
-                protocol: service.protocol,
-                addresses: service.addresses,
-                referer: service.referer,
-                port: service.port,
-                host: service.host,
-                fqdn: service.fqdn,
+                name: elgatoService.name,
+                type: elgatoService.type,
+                protocol: elgatoService.protocol,
+                addresses: elgatoService.addresses,
+                referer: elgatoService.referer,
+                port: elgatoService.port,
+                host: elgatoService.host,
+                fqdn: elgatoService.fqdn,
               },
               null,
               2
@@ -183,8 +216,8 @@ export class KeyLight {
         }
 
         // Get all possible addresses
-        const addresses = service.addresses || [];
-        const refererAddress = service.referer?.address;
+        const addresses = elgatoService.addresses || [];
+        const refererAddress = elgatoService.referer?.address;
         if (refererAddress && !addresses.includes(refererAddress)) {
           addresses.push(refererAddress);
         }
@@ -204,7 +237,7 @@ export class KeyLight {
 
         if (validAddresses.length === 0) {
           if (environment.isDevelopment) {
-            console.error("No valid IP addresses found for service:", service.name);
+            console.error("No valid IP addresses found for service:", elgatoService.name);
           }
           return;
         }
@@ -212,26 +245,26 @@ export class KeyLight {
         // Use the first valid address
         const address = validAddresses[0];
         if (environment.isDevelopment) {
-          console.log(`Using address ${address} for Key Light ${service.name}`);
+          console.log(`Using address ${address} for Key Light ${elgatoService.name}`);
         }
 
         // Check if we already have this light
         const isDuplicate = this.keyLights.some(
-          (light) => light.service.name === service.name && light.service.referer.address === address
+          (light) => light.service.name === elgatoService.name && light.service.referer.address === address
         );
 
         if (isDuplicate) {
           if (environment.isDevelopment) {
-            console.log(`Skipping duplicate Key Light: ${service.name}`);
+            console.log(`Skipping duplicate Key Light: ${elgatoService.name}`);
           }
           return;
         }
 
         // Create a modified service object with the correct address
         const serviceWithAddress = {
-          ...service,
+          ...elgatoService,
           referer: {
-            ...service.referer,
+            ...elgatoService.referer,
             address: address,
           },
         };
@@ -257,24 +290,20 @@ export class KeyLight {
       });
 
       browser.on("up", (service: ElgatoService) => {
+        const elgatoService = service;
         if (environment.isDevelopment) {
-          console.log("Service came up:", service.name);
+          console.log("Service came up:", elgatoService.name);
         }
       });
 
       browser.on("down", (service: ElgatoService) => {
+        const elgatoService = service;
         if (environment.isDevelopment) {
-          console.log("Service went down:", service.name);
+          console.log("Service went down:", elgatoService.name);
         }
       });
 
-      browser.on("error", (error: Error) => {
-        if (environment.isDevelopment) {
-          console.error("Bonjour browser error:", error);
-        }
-        reject(new Error(`Bonjour discovery error: ${error.toString()}`));
-      });
-
+      // Handle bonjour errors via timeout
       setTimeout(() => {
         if (environment.isDevelopment) {
           console.log(`Discovery timeout reached. Found ${this.keyLights.length} light(s)`);
@@ -553,6 +582,27 @@ export class KeyLight {
         console.error(`Failed to update Key Light: ${error.message}`);
       }
       throw error;
+    }
+  }
+
+  async update(options: { brightness?: number; temperature?: number; on?: boolean }) {
+    for (let x = 0; x < KeyLight.keyLights.length; x++) {
+      const service = KeyLight.keyLights[x].service;
+      await this.updateKeyLight(service, options);
+    }
+  }
+
+  async turnOn() {
+    for (let x = 0; x < KeyLight.keyLights.length; x++) {
+      const service = KeyLight.keyLights[x].service;
+      await this.updateKeyLight(service, { on: true });
+    }
+  }
+
+  async turnOff() {
+    for (let x = 0; x < KeyLight.keyLights.length; x++) {
+      const service = KeyLight.keyLights[x].service;
+      await this.updateKeyLight(service, { on: false });
     }
   }
 }

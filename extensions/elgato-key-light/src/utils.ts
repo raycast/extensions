@@ -1,4 +1,6 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
+import { KeyLight } from "./elgato";
+import { environment } from "@raycast/api";
 
 export async function waitUntil<T>(
   promise: Promise<T> | (() => Promise<T>),
@@ -27,4 +29,82 @@ export async function run(fn: () => Promise<string>) {
 async function showFailureHUD(title: string, error?: unknown) {
   await showHUD(`❌ ${title}`);
   console.error(title, error);
+}
+
+/**
+ * Validates that a value is within a specified range
+ *
+ * @param min Minimum value (inclusive)
+ * @param max Maximum value (inclusive)
+ * @returns A validation function that returns an error message if value is outside the range
+ */
+export function rangeValidator(min: number, max: number) {
+  return (value?: string) => {
+    if (!value) {
+      return "Value is required";
+    }
+
+    const num = parseInt(value, 10);
+    if (isNaN(num)) {
+      return "Value must be a number";
+    }
+
+    if (num < min || num > max) {
+      return `Value must be between ${min} and ${max}`;
+    }
+
+    return undefined;
+  };
+}
+
+// Default values for presets
+export const DEFAULT_BRIGHTNESS = 20;
+export const DEFAULT_TEMPERATURE = 50; // Midpoint between warm and cold
+
+// Common response type for tools
+export interface ToolResponse<T = undefined> {
+  success: boolean;
+  message: string;
+  data?: T;
+  error?: string;
+}
+
+/**
+ * Discover KeyLights with built-in retry mechanism.
+ * First attempts to use cache, then falls back to forced refresh if needed.
+ *
+ * @param forceRefresh Whether to bypass cache and force a new discovery
+ * @returns A KeyLight instance or throws an error
+ */
+export async function discoverKeyLights(forceRefresh = false): Promise<KeyLight> {
+  try {
+    const keyLight = await KeyLight.discover(forceRefresh);
+    if (!keyLight) {
+      throw new Error("No Key Lights were discovered");
+    }
+    return keyLight;
+  } catch (error) {
+    if (!forceRefresh) {
+      // If discovery fails using cache, try to force a fresh discovery
+      if (environment.isDevelopment) {
+        console.log("Failed to discover Key Lights using cache, forcing fresh discovery");
+      }
+      return discoverKeyLights(true); // Retry with forced refresh
+    }
+    throw error; // If we've already tried forced refresh, propagate the error
+  }
+}
+
+/**
+ * Helper function to format error responses for tools
+ */
+export function formatErrorResponse(error: unknown, operation: string): ToolResponse {
+  if (environment.isDevelopment) {
+    console.error(`Failed to ${operation}:`, error);
+  }
+  return {
+    success: false,
+    message: `Failed to ${operation}`,
+    error: error instanceof Error ? error.message : "Unknown error",
+  };
 }
