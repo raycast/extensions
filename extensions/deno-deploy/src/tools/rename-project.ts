@@ -1,8 +1,8 @@
 import { Action, type Tool } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
-import { createWindowLessFetcher as createDashFetcher } from "@/api/dash/fetcher";
-import { createWindowLessFetcher as createDenoFetcher } from "@/api/deno/fetcher";
+import { createWindowLessFetcher as createDashFetcher } from "@/api/dash";
+import { createWindowLessFetcher as createDenoFetcher } from "@/api/deno";
 import type { Project } from "@/api/types";
 
 type Input = {

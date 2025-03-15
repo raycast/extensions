@@ -1,4 +1,4 @@
-import { createWindowLessFetcher } from "@/api/dash/fetcher";
+import { createWindowLessFetcher } from "@/api/dash";
 import type { Organization } from "@/api/types";
 
 const tool = async () => {

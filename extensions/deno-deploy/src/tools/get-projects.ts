@@ -1,4 +1,4 @@
-import { createWindowLessFetcher } from "@/api/deno/fetcher";
+import { createWindowLessFetcher } from "@/api/deno";
 import type { Project } from "@/api/types";
 
 type Input = {
