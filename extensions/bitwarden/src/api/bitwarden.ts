@@ -117,9 +117,7 @@ export const cliInfo = {
     return `${this.downloadPage}/download/cli-v${this.version}/bw-macos${archSuffix}-${this.version}.zip`;
   },
   checkHashMatchesFile: function (filePath: string) {
-    const newLocal = getFileSha256(filePath);
-    console.log(newLocal, this.sha256);
-    return newLocal === this.sha256;
+    return getFileSha256(filePath) === this.sha256;
   },
 } as const;
 
