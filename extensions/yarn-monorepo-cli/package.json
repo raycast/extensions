@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "yarn-monorepo-cli",
-      "title": "Yarn Monorepo Cli",
+      "title": "Yarn Monorepo CLI",
       "subtitle": "Manage your yarn monorepo",
       "description": "Manage your yarn monorepo, select script from package and paste it into an active terminal",
       "mode": "view"
