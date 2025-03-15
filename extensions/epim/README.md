@@ -6,9 +6,11 @@ Activate Entra roles via PIM using Microsoft Graph API directly from Raycast.
 
 1. Ensure you have Raycast installed.
 2. Ensure that Powershell for macOS is installed.
-2. Ensure that the following Powershell modules are installed.
-  * `Microsoft.Graph.Authentication`
-  * `Microsoft.Graph.Identity.Governance`
+3. Ensure that the following Powershell modules are installed.
+```powershell
+Install-Module Microsoft.Graph.Authentication
+Install-Module Microsoft.Graph.Identity.Governance
+```
 
 ## Usage
 
@@ -27,4 +29,4 @@ Contributions are welcome! Please ensure any changes are accompanied by updates 
 
 ## License
 
-This extension is licensed under the MIT License
+This extension is licensed under the MIT License.

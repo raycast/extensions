@@ -417,7 +417,7 @@ function CommandList({ userId, roles }: { userId: string; roles: Role[] }) {
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label
                         title="Remaining Time"
-                        text={{ value: role.remainingTime, color: Color.Green } || { value: "", color: Color.Green }}
+                        text={{ value: role.remainingTime, color: Color.Green }}
                       />
                       <List.Item.Detail.Metadata.Label
                         title="End Time"
@@ -444,7 +444,13 @@ function CommandList({ userId, roles }: { userId: string; roles: Role[] }) {
                 target={<JustificationForm role={role} userId={userId} />}
                 disabled={role.isActive}
               />
-              {role.isActive && <Action title="Show Active Until" shortcut={{ modifiers: ["cmd"], key: "i" }} />}
+              {role.isActive && (
+                <Action
+                  title="Show Active Until"
+                  onAction={() => showToast({ title: `Active until ${formatDateTime(role.endDateTime)}` })}
+                  shortcut={{ modifiers: ["cmd"], key: "i" }}
+                />
+              )}
             </ActionPanel>
           }
         />
