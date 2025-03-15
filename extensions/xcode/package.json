@@ -349,7 +349,7 @@
     {
       "name": "open-path",
       "title": "Open Path",
-      "description": "Opens a path which either points to a directory, Xcode Project, Swift Package (Package.swift), Xcode Workspace, Swift Playground or a file."
+      "description": "Opens a file path which either points to a file for example a Xcode Project (*.xcodeproj), Swift Package (Package.swift), Xcode Workspace (*.xcworkspace), Swift Playground (*.playground) or a directory."
     }
   ],
   "dependencies": {
