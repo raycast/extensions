@@ -1,6 +1,6 @@
 # Simulator Manager Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-03-15
 
 - List iOS simulators and Android emulators
 - Boot, shutdown, and open simulators/emulators
