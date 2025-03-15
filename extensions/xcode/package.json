@@ -319,7 +319,7 @@
     {
       "name": "xcode-simulator-applications",
       "title": "Xcode Simulator Builds",
-      "description": "The builds / apps installed on a Xcodes simulator."
+      "description": "The builds / apps installed on a Xcode simulator."
     },
     {
       "name": "xcode-releases",
