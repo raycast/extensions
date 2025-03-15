@@ -10,6 +10,7 @@ import { CloudStorageUploader } from "../../utils/FilePicker";
 import { CloudStorageDownloader } from "../../utils/FileDownloader";
 import { formatFileSize, guessContentType, validateFile, getFileInfo } from "../../utils/FileUtils";
 import { openFilePicker } from "../../utils/NativeFilePicker";
+import ObjectVersionsView from "./ObjectVersionsView";
 
 const execPromise = promisify(exec);
 
@@ -455,6 +456,17 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
                 icon={Icon.Download}
                 onAction={() => directDownloadObject(objectName)}
               />
+              <Action
+                title="View Versions"
+                icon={Icon.Clock}
+                shortcut={{ modifiers: ["cmd"], key: "v" }}
+                onAction={() => push(<ObjectVersionsView 
+                  projectId={projectId} 
+                  gcloudPath={gcloudPath} 
+                  bucketName={bucketName} 
+                  objectName={objectName} 
+                />)}
+              />
               <Action title="Delete" icon={Icon.Trash} style={Action.Style.Destructive} onAction={() => deleteObject(objectName)} />
               <Action title="Back to Objects" icon={Icon.ArrowLeft} shortcut={{ modifiers: ["cmd"], key: "b" }} onAction={() => pop()} />
               <Action title="Back to Buckets" icon={Icon.ArrowLeft} shortcut={{ modifiers: ["cmd", "shift"], key: "b" }} onAction={() => { pop(); pop(); }} />
@@ -615,6 +627,17 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
                     title="View Details"
                     icon={Icon.Eye}
                     onAction={() => viewObjectDetails(obj.name)}
+                  />
+                  <Action
+                    title="View Versions"
+                    icon={Icon.Clock}
+                    shortcut={{ modifiers: ["cmd"], key: "v" }}
+                    onAction={() => push(<ObjectVersionsView 
+                      projectId={projectId} 
+                      gcloudPath={gcloudPath} 
+                      bucketName={bucketName} 
+                      objectName={obj.name} 
+                    />)}
                   />
                   <Action
                     title="Download"

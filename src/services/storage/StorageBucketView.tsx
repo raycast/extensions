@@ -4,6 +4,11 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { StorageObjectsView } from "./";
 import { executeGcloudCommand } from "../../gcloud";
+import BucketLifecycleView from "./BucketLifecycleView";
+import BucketIAMView from "./BucketIAMView";
+import IAMMembersView from "./IAMMembersView";
+import IAMMembersByPrincipalView from "./IAMMembersByPrincipalView";
+import StorageStatsView from "./StorageStatsView";
 
 const execPromise = promisify(exec);
 
@@ -316,6 +321,18 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
     }
   }
 
+  function viewBucketIAM(bucketName: string) {
+    push(<BucketIAMView projectId={projectId} gcloudPath={gcloudPath} bucketName={bucketName} />);
+  }
+
+  function viewIAMMembers(bucketName: string) {
+    push(<IAMMembersView projectId={projectId} gcloudPath={gcloudPath} resourceName={bucketName} resourceType="storage" />);
+  }
+
+  function viewIAMMembersByPrincipal(bucketName: string) {
+    push(<IAMMembersByPrincipalView projectId={projectId} gcloudPath={gcloudPath} resourceName={bucketName} resourceType="storage" />);
+  }
+
   if (error) {
     return (
       <List isLoading={false}>
@@ -356,13 +373,13 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
                       <Action.SubmitForm 
                         title="Create Bucket" 
                         icon={Icon.Plus} 
-                        shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                         onSubmit={createBucket} 
                       />
                       <Action 
                         title="Cancel" 
                         icon={Icon.XmarkCircle} 
-                        shortcut={{ modifiers: ["cmd"], key: "escape" }} 
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} 
                         onAction={() => pop()} 
                       />
                     </ActionPanel>
@@ -435,13 +452,13 @@ A unique name with random suffix has been generated for you.`}
                           <Action.SubmitForm 
                             title="Create Bucket" 
                             icon={Icon.Plus} 
-                            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                             onSubmit={createBucket} 
                           />
                           <Action 
                             title="Cancel" 
                             icon={Icon.XmarkCircle} 
-                            shortcut={{ modifiers: ["cmd"], key: "escape" }} 
+                            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} 
                             onAction={() => pop()} 
                           />
                         </ActionPanel>
@@ -533,6 +550,34 @@ A unique name with random suffix has been generated for you.`}
                     onAction={() => viewBucketObjects(bucket.name)}
                   />
                   <Action
+                    title="Manage Lifecycle"
+                    icon={Icon.Clock}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                    onAction={() => push(<BucketLifecycleView 
+                      projectId={projectId} 
+                      gcloudPath={gcloudPath} 
+                      bucketName={bucket.name} 
+                    />)}
+                  />
+                  <ActionPanel.Section title="IAM">
+                    <Action
+                      title="Manage IAM Permissions"
+                      icon={Icon.Key}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                      onAction={() => viewIAMMembersByPrincipal(bucket.name)}
+                    />
+                  </ActionPanel.Section>
+                  <Action
+                    title="View Storage Statistics"
+                    icon={Icon.BarChart}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                    onAction={() => push(<StorageStatsView 
+                      projectId={projectId} 
+                      gcloudPath={gcloudPath} 
+                      bucketName={bucket.name}
+                    />)}
+                  />
+                  <Action
                     title="Delete Bucket"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
@@ -553,13 +598,13 @@ A unique name with random suffix has been generated for you.`}
                               <Action.SubmitForm 
                                 title="Create Bucket" 
                                 icon={Icon.Plus} 
-                                shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                                 onSubmit={createBucket} 
                               />
                               <Action 
                                 title="Cancel" 
                                 icon={Icon.XmarkCircle} 
-                                shortcut={{ modifiers: ["cmd"], key: "escape" }} 
+                                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} 
                                 onAction={() => pop()} 
                               />
                             </ActionPanel>
