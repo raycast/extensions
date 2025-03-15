@@ -1,4 +1,7 @@
+import * as fs from "fs"
+
 import { Alert, confirmAlert, open, closeMainWindow } from "@raycast/api"
+import { showFailureToast } from "@raycast/utils"
 
 export const isWeChatRunning = async () => {
   const options: Alert.Options = {
@@ -9,7 +12,21 @@ export const isWeChatRunning = async () => {
     primaryAction: {
       title: "Open WeChat",
       onAction: () => {
-        open("/Applications/WeChat.app" || "/Applications/微信.app")
+        try {
+          // determine which path to use
+          const foundWechatPath = [
+            "/Applications/WecChat.app",
+            "/Applications/微信.app"
+          ].find(fs.existsSync)
+
+          if (foundWechatPath) {
+            open(foundWechatPath)
+          } else {
+            showFailureToast("WeChat application not found")
+          }
+        } catch {
+          showFailureToast("Error opening WeChat")
+        }
       }
     }
   }
