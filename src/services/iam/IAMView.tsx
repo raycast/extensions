@@ -56,13 +56,35 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
   
   async function fetchIAMPolicy() {
     setIsLoading(true);
+    
+    // Show loading toast for initial load only
+    let loadingToast;
+    if (principals.length === 0) {
+      loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading IAM policy...",
+        message: resourceName ? `For ${resourceType}: ${resourceName}` : `For project: ${projectId}`,
+      });
+    }
+    
     try {
       const fetchedPrincipals = await iamService.getIAMPrincipals(resourceType, resourceName);
       setPrincipals(fetchedPrincipals);
       setError(null);
+      
+      // Hide loading toast if it exists
+      if (loadingToast) {
+        loadingToast.hide();
+      }
     } catch (error) {
       console.error("Error fetching IAM policy:", error);
       setError("Failed to fetch IAM policy");
+      
+      // Hide loading toast if it exists
+      if (loadingToast) {
+        loadingToast.hide();
+      }
+      
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch IAM policy",
@@ -104,22 +126,24 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
     });
   }, [principals, searchText, selectedType, selectedService]);
   
-  // Get unique principals by type for dropdown suggestions
+  // Group principals by type for the dropdown
   const principalsByType = useMemo(() => {
-    const result: Record<string, IAMPrincipal[]> = {};
+    const byType: Record<string, IAMPrincipal[]> = {};
     
     principals.forEach(principal => {
-      if (!result[principal.type]) {
-        result[principal.type] = [];
+      if (!byType[principal.type]) {
+        byType[principal.type] = [];
       }
       
-      // Only add if not already in the array
-      if (!result[principal.type].some(p => p.id === principal.id)) {
-        result[principal.type].push(principal);
-      }
+      byType[principal.type].push(principal);
     });
     
-    return result;
+    // Sort principals within each type
+    Object.values(byType).forEach(typePrincipals => {
+      typePrincipals.sort((a, b) => a.id.localeCompare(b.id));
+    });
+    
+    return byType;
   }, [principals]);
   
   async function showAddMemberForm() {
@@ -132,6 +156,14 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
               title="Add Member"
               onSubmit={async (values) => {
                 setIsLoading(true);
+                
+                // Show loading toast
+                const loadingToast = await showToast({
+                  style: Toast.Style.Animated,
+                  title: "Adding member...",
+                  message: `Adding member to ${values.role}`,
+                });
+                
                 try {
                   // Determine which member ID to use
                   let memberId = "";
@@ -145,6 +177,7 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                   }
                   
                   if (!memberId) {
+                    loadingToast.hide();
                     throw new Error("Member ID is required");
                   }
                   
@@ -156,6 +189,9 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                     resourceName
                   );
                   
+                  // Hide loading toast
+                  loadingToast.hide();
+                  
                   showToast({
                     style: Toast.Style.Success,
                     title: "Member added",
@@ -166,6 +202,10 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                   fetchIAMPolicy();
                 } catch (error) {
                   console.error("Error adding member:", error);
+                  
+                  // Hide loading toast
+                  loadingToast.hide();
+                  
                   showToast({
                     style: Toast.Style.Failure,
                     title: "Failed to add member",
@@ -263,12 +303,23 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
               title="Create Group"
               onSubmit={async (values) => {
                 setIsLoading(true);
+                
+                // Show loading toast
+                const loadingToast = await showToast({
+                  style: Toast.Style.Animated,
+                  title: "Creating group...",
+                  message: `Creating group ${values.groupId}`,
+                });
+                
                 try {
                   await iamService.createGroup(
                     values.groupId,
                     values.displayName,
                     values.description
                   );
+                  
+                  // Hide loading toast
+                  loadingToast.hide();
                   
                   showToast({
                     style: Toast.Style.Success,
@@ -280,6 +331,10 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                   fetchIAMPolicy();
                 } catch (error) {
                   console.error("Error creating group:", error);
+                  
+                  // Hide loading toast
+                  loadingToast.hide();
+                  
                   showToast({
                     style: Toast.Style.Failure,
                     title: "Failed to create group",
@@ -331,6 +386,14 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
     
     if (confirmed) {
       setIsLoading(true);
+      
+      // Show loading toast
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Removing member...",
+        message: `Removing ${principal.id} from ${role.title}`,
+      });
+      
       try {
         await iamService.removeMember(
           role.role,
@@ -339,6 +402,9 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
           resourceType,
           resourceName
         );
+        
+        // Hide loading toast
+        loadingToast.hide();
         
         showToast({
           style: Toast.Style.Success,
@@ -349,6 +415,10 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
         fetchIAMPolicy();
       } catch (error) {
         console.error("Error removing member:", error);
+        
+        // Hide loading toast
+        loadingToast.hide();
+        
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to remove member",
@@ -468,6 +538,14 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
               title="Add Role"
               onSubmit={async (values) => {
                 setIsLoading(true);
+                
+                // Show loading toast
+                const loadingToast = await showToast({
+                  style: Toast.Style.Animated,
+                  title: "Adding role...",
+                  message: `Please wait while the role is being added`,
+                });
+                
                 try {
                   // Determine which member ID to use
                   let memberId = "";
@@ -484,6 +562,7 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                   }
                   
                   if (!memberId) {
+                    loadingToast.hide();
                     throw new Error("Member ID is required");
                   }
                   
@@ -506,6 +585,9 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                     resourceName
                   );
                   
+                  // Hide loading toast
+                  loadingToast.hide();
+                  
                   showToast({
                     style: Toast.Style.Success,
                     title: "Role added",
@@ -516,6 +598,10 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                   fetchIAMPolicy();
                 } catch (error) {
                   console.error("Error adding role:", error);
+                  
+                  // Hide loading toast
+                  loadingToast.hide();
+                  
                   showToast({
                     style: Toast.Style.Failure,
                     title: "Failed to add role",
