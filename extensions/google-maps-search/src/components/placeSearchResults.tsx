@@ -81,7 +81,7 @@ export function PlaceSearchResults({ places, isLoading, onSelectPlace, onBack, p
         <List.EmptyView
           title="Type Query to Search"
           description="Search for places by name, address, or type."
-          icon="no-view.png"
+          icon={{ source: "no-view.png" }}
         />
       )}
     </List>
