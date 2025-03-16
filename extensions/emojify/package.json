@@ -5,6 +5,9 @@
   "description": "Improve your text with emojis properly within the context",
   "icon": "icon.png",
   "author": "ViGeng",
+  "contributors": [
+    "LitoMore"
+  ],
   "categories": [
     "Productivity",
     "Fun",
