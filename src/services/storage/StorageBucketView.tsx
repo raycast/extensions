@@ -516,12 +516,9 @@ A unique name with random suffix has been generated for you.`}
             <List.Item
               key={bucket.id}
               title={bucket.name}
-              subtitle={bucket.location}
+              subtitle=""
               icon={getStorageClassIcon(bucket.storageClass)}
-              accessories={[
-                { text: bucket.storageClass, tooltip: "Storage Class" },
-                { text: new Date(bucket.created).toLocaleDateString(), tooltip: "Creation Date" }
-              ]}
+              accessories={[]}
               detail={
                 <List.Item.Detail
                   markdown={`# ${bucket.name}\n\n**Location:** ${bucket.location}\n\n**Storage Class:** ${bucket.storageClass}\n\n**Created:** ${new Date(bucket.created).toLocaleString()}`}

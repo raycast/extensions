@@ -7,7 +7,7 @@ import { join } from "path";
 import fs from "fs";
 import ProjectView from "./ProjectView";
 import { StorageBucketView, StorageTransferView, IAMMembersView, IAMMembersByPrincipalView, StorageStatsView } from "./services/storage";
-import { IAMMembersByPrincipalView as IAMProjectMembersByPrincipalView, IAMDashboardView } from "./services/iam";
+import { IAMMembersByPrincipalView as IAMProjectMembersByPrincipalView, IAMView } from "./services/iam";
 import { executeGcloudCommand } from "./gcloud";
 
 const execPromise = promisify(exec);
@@ -286,11 +286,9 @@ export default function Command() {
             <List.Item
               key={project.id}
               title={project.name}
-              subtitle={project.id}
+              subtitle=""
               icon={{ source: preferences.projectId === project.id ? Icon.CheckCircle : Icon.Circle, tintColor: preferences.projectId === project.id ? Color.Green : Color.SecondaryText }}
-              accessories={[
-                { text: new Date(project.createTime).toLocaleDateString(), tooltip: "Creation Date" }
-              ]}
+              accessories={[]}
               detail={
                 <List.Item.Detail
                   markdown={`# ${project.name}\n\n**Project ID:** ${project.id}\n\n**Project Number:** ${project.projectNumber}\n\n**Created:** ${new Date(project.createTime).toLocaleString()}`}

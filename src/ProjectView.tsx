@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { StorageBucketView, IAMMembersByPrincipalView } from "./services/storage";
-import { IAMDashboardView } from "./services/iam";
+import { IAMView } from "./services/iam";
 import { executeGcloudCommand } from "./gcloud";
 
 const execPromise = promisify(exec);
@@ -17,17 +17,34 @@ interface Service {
   id: string;
   name: string;
   description: string;
+  icon: Icon;
 }
 
 export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [services, setServices] = useState<Service[]>([]);
+  const [projectDetails, setProjectDetails] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const { push } = useNavigation();
 
   useEffect(() => {
     fetchServices();
+    fetchProjectDetails();
   }, []);
+
+  async function fetchProjectDetails() {
+    try {
+      const result = await executeGcloudCommand(
+        gcloudPath, 
+        `projects describe ${projectId} --format=json`
+      );
+      if (result && result.length > 0) {
+        setProjectDetails(result[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching project details:", error);
+    }
+  }
 
   async function fetchServices() {
     setIsLoading(true);
@@ -37,12 +54,14 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
         { 
           id: "storage", 
           name: "Cloud Storage", 
-          description: "Object storage for companies of all sizes"
+          description: "Object storage for companies of all sizes",
+          icon: Icon.Box
         },
         {
           id: "iam",
           name: "Identity and Access Management (IAM)",
-          description: "Fine-grained access control and visibility for centrally managing cloud resources"
+          description: "Fine-grained access control and visibility for centrally managing cloud resources",
+          icon: Icon.Key
         }
       ];
       
@@ -64,7 +83,7 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
   }
 
   async function viewIAMService() {
-    push(<IAMDashboardView projectId={projectId} gcloudPath={gcloudPath} />);
+    push(<IAMView projectId={projectId} gcloudPath={gcloudPath} />);
   }
 
   if (error) {
@@ -72,54 +91,65 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search services...">
-      <List.Section title={`Project: ${projectId}`}>
-        {services.map((service: Service) => {
-          if (service.id === "storage") {
-            return (
-              <List.Item
-                key={service.id}
-                title={service.name}
-                subtitle={service.description}
-                icon={{ source: Icon.Box }}
-                actions={
-                  <ActionPanel>
-                    <Action 
-                      title="View Storage Buckets" 
-                      icon={Icon.Box}
-                      onAction={viewStorageBuckets} 
-                    />
-                    <Action 
-                      title="Manage IAM Permissions" 
-                      icon={Icon.Key}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
-                      onAction={viewIAMPermissions} 
-                    />
-                  </ActionPanel>
+    <List 
+      isLoading={isLoading} 
+      searchBarPlaceholder="Search services..."
+      navigationTitle={`Project: ${projectId}`}
+      isShowingDetail
+    >
+      <List.Section title={`Project Services`}>
+        {services.map((service: Service) => (
+          <List.Item
+            key={service.id}
+            title={service.name}
+            subtitle=""
+            icon={{ source: service.icon }}
+            detail={
+              <List.Item.Detail
+                markdown={`# ${service.name}\n\n${service.description}\n\n## Project Information\n\n**ID:** ${projectId}\n${projectDetails ? `**Name:** ${projectDetails.name}\n**Number:** ${projectDetails.projectNumber}\n**Created:** ${new Date(projectDetails.createTime).toLocaleString()}` : ''}`}
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Service" text={service.name} />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label title="Project ID" text={projectId} />
+                    {projectDetails && (
+                      <>
+                        <List.Item.Detail.Metadata.Label title="Project Name" text={projectDetails.name} />
+                        <List.Item.Detail.Metadata.Label title="Project Number" text={projectDetails.projectNumber} />
+                        <List.Item.Detail.Metadata.Label title="Created" text={new Date(projectDetails.createTime).toLocaleString()} />
+                      </>
+                    )}
+                  </List.Item.Detail.Metadata>
                 }
               />
-            );
-          } else if (service.id === "iam") {
-            return (
-              <List.Item
-                key={service.id}
-                title={service.name}
-                subtitle={service.description}
-                icon={{ source: Icon.Key }}
-                actions={
-                  <ActionPanel>
-                    <Action 
-                      title="Manage IAM" 
-                      icon={Icon.Key}
-                      onAction={viewIAMService} 
-                    />
-                  </ActionPanel>
-                }
-              />
-            );
-          }
-          return null;
-        })}
+            }
+            actions={
+              <ActionPanel>
+                {service.id === "storage" ? (
+                  <Action 
+                    title="View Storage Buckets" 
+                    icon={Icon.Box}
+                    onAction={viewStorageBuckets} 
+                  />
+                ) : service.id === "iam" ? (
+                  <Action 
+                    title="Manage IAM" 
+                    icon={Icon.Key}
+                    onAction={viewIAMService} 
+                  />
+                ) : null}
+                {service.id === "storage" && (
+                  <Action 
+                    title="Manage IAM Permissions" 
+                    icon={Icon.Key}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                    onAction={viewIAMPermissions} 
+                  />
+                )}
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
     </List>
   );
