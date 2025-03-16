@@ -20,6 +20,7 @@ export default function Command() {
   } = usePromise(async () => {
     const osInfo = await getOSInfo();
     const storage = await calculateDiskStorage();
+
     return { osInfo, storage };
   });
 
@@ -102,7 +103,7 @@ export default function Command() {
           title="macOS"
           subtitle={`${systemInfo?.osInfo.release}` || "Loading..."}
           icon={Icon.Finder}
-          onAction={() => {}}
+          onAction={() => runAppleScript(openActivityMonitorAppleScript())}
         />
       </MenuBarExtra.Section>
 
