@@ -6,9 +6,13 @@ interface Preferences {
 }
 
 export default async function command() {
-  // Get user's preferred package manager from preferences
-  const preferences = getPreferenceValues<Preferences>();
-  const packageManager = preferences.defaultPackageManager;
+  try {
+    // Get user's preferred package manager from preferences
+    const preferences = getPreferenceValues<Preferences>();
+    const packageManager = preferences.defaultPackageManager;
 
-  await convertCommand("npm", packageManager);
+    await convertCommand("npm", packageManager);
+  } catch (error) {
+    showFailureToast("Failed to convert package manager command", error);
+  }
 }
