@@ -13,11 +13,10 @@ A lightweight Raycast extension for managing Google Cloud resources efficiently.
 
 ## Screenshots
 
-<!-- Add your screenshots here - examples:
-![Project Selection](assets/screenshots/project-selection.png)
-![IAM Management](assets/screenshots/iam-management.png)
-![Storage Browser](assets/screenshots/storage-browser.png)
--->
+
+[Project Selection](assets/homescreen.png)
+[Services View](assets/services.png)
+[IAM Management ](assets/iam.png)
 
 ## Prerequisites
 
