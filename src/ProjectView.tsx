@@ -1,11 +1,12 @@
-import { ActionPanel, Action, List, Icon, useNavigation, Cache, showToast } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, useNavigation, Cache, showToast, Toast, Color } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { StorageBucketView, IAMMembersByPrincipalView } from "./services/storage";
 import { IAMView } from "./services/iam";
 import { ServiceHubView } from "./services/servicehub";
-import { executeGcloudCommand } from "./gcloud";
+import { executeGcloudCommand, getProjects } from "./gcloud";
+import { CacheManager } from "./utils/CacheManager";
 
-// Create a cache instance
+// Create a cache instance for project details
 const cache = new Cache({ namespace: "project-details" });
 // Cache expiration time in milliseconds (1 hour)
 const CACHE_TTL = 3600000;
@@ -49,42 +50,182 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
   const [projectDetails, setProjectDetails] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const { push } = useNavigation();
+  const [projects, setProjects] = useState<any[]>([]);
+  const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+
+  // If no projectId is provided, fetch all projects instead
+  useEffect(() => {
+    if (!projectId) {
+      fetchProjects();
+    }
+  }, [projectId]);
+
+  // Function to fetch all projects
+  const fetchProjects = async () => {
+    setIsLoading(true);
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading projects...",
+        message: "Fetching your Google Cloud projects"
+      });
+
+      // Use the getProjects function which now has built-in caching
+      const result = await getProjects(gcloudPath);
+      
+      loadingToast.hide();
+      
+      if (result && result.length > 0) {
+        setProjects(result);
+        // Cache the projects list
+        CacheManager.saveProjectsList(result);
+        
+        showToast({
+          style: Toast.Style.Success,
+          title: "Projects loaded",
+          message: `${result.length} projects found`
+        });
+      } else {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "No projects found",
+          message: "You don't have any Google Cloud projects"
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      setError("Failed to fetch projects");
+      
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch projects",
+        message: error instanceof Error ? error.message : String(error)
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Function to select a project
+  const selectProject = async (selectedProjectId: string) => {
+    if (!selectedProjectId || typeof selectedProjectId !== 'string') {
+      console.error("Invalid project ID provided to selectProject:", selectedProjectId);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid project ID",
+        message: "Cannot select project with invalid ID"
+      });
+      return;
+    }
+    
+    setActionInProgress("selecting");
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Selecting project...",
+        message: selectedProjectId
+      });
+      
+      console.log("Saving selected project:", selectedProjectId);
+      // Save to cache
+      CacheManager.saveSelectedProject(selectedProjectId);
+      
+      loadingToast.hide();
+      
+      showToast({
+        style: Toast.Style.Success,
+        title: "Project selected",
+        message: selectedProjectId
+      });
+      
+      // Navigate to the project view with the selected project
+      push(<ProjectView projectId={selectedProjectId} gcloudPath={gcloudPath} />);
+    } catch (error) {
+      console.error("Error selecting project:", error);
+      
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to select project",
+        message: error instanceof Error ? error.message : String(error)
+      });
+    } finally {
+      setActionInProgress(null);
+    }
+  };
 
   // Memoize the fetchProjectDetails function to avoid recreating it on each render
   const fetchProjectDetails = useCallback(async () => {
-    // Check if we have cached project details
-    const cachedDetails = cache.get(`project-${projectId}`);
-    const cachedTimestamp = cache.get(`project-${projectId}-timestamp`);
+    // Skip if no projectId is provided
+    if (!projectId) {
+      setIsLoading(false);
+      return;
+    }
     
-    if (cachedDetails && cachedTimestamp) {
-      const timestamp = parseInt(cachedTimestamp, 10);
-      // Check if cache is still valid
-      if (Date.now() - timestamp < CACHE_TTL) {
+    setIsLoading(true);
+    
+    // First try to get from cache
+    const cachedDetailsStr = cache.get(`project-${projectId}`);
+    const timestampStr = cache.get(`project-${projectId}-timestamp`);
+    
+    if (cachedDetailsStr && timestampStr) {
+      const timestamp = parseInt(timestampStr, 10);
+      
+      // Check if cache is not expired
+      if (Date.now() - timestamp <= 24 * 60 * 60 * 1000) { // 24 hours
         try {
-          setProjectDetails(JSON.parse(cachedDetails));
+          const cachedDetails = JSON.parse(cachedDetailsStr);
+          setProjectDetails(cachedDetails);
+          
+          // Update the selected project in the global cache to ensure recently used list is updated
+          CacheManager.saveSelectedProject(projectId);
+          
+          setIsLoading(false);
           return;
-        } catch (e) {
-          // If parsing fails, continue to fetch fresh data
-          console.error("Failed to parse cached project details:", e);
+        } catch (error) {
+          console.error("Error parsing cached project details:", error);
+          // Continue to fetch from API
         }
       }
     }
-
-    setIsLoading(true);
+    
     try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading project details...",
+        message: projectId
+      });
+      
       const result = await executeGcloudCommand(
         gcloudPath, 
         `projects describe ${projectId}`
       );
+      
+      loadingToast.hide();
+      
       if (result && result.length > 0) {
         setProjectDetails(result[0]);
         // Cache the result
         cache.set(`project-${projectId}`, JSON.stringify(result[0]));
         cache.set(`project-${projectId}-timestamp`, Date.now().toString());
+        
+        // Also update the selected project in the global cache
+        CacheManager.saveSelectedProject(projectId);
+        
+        showToast({
+          style: Toast.Style.Success,
+          title: "Project details loaded",
+          message: projectId
+        });
       }
     } catch (error) {
       console.error("Error fetching project details:", error);
       setError("Failed to fetch project details");
+      
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch project details",
+        message: error instanceof Error ? error.message : String(error)
+      });
     } finally {
       setIsLoading(false);
     }
@@ -94,71 +235,278 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
     fetchProjectDetails();
   }, [fetchProjectDetails]);
 
-  const viewStorageBuckets = () => {
-    push(<StorageBucketView projectId={projectId} gcloudPath={gcloudPath} />);
+  const viewStorageBuckets = async () => {
+    setActionInProgress("storage");
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading Storage Buckets...",
+        message: `Project: ${projectId}`
+      });
+      
+      // Short delay to show the toast before navigation
+      setTimeout(() => {
+        loadingToast.hide();
+        push(<StorageBucketView projectId={projectId} gcloudPath={gcloudPath} />);
+      }, 500);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to navigate",
+        message: error instanceof Error ? error.message : String(error)
+      });
+      setActionInProgress(null);
+    }
   };
 
-  const viewIAMPermissions = () => {
-    push(<IAMMembersByPrincipalView projectId={projectId} gcloudPath={gcloudPath} />);
+  const viewIAMPermissions = async () => {
+    setActionInProgress("iam-permissions");
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading IAM Permissions...",
+        message: `Project: ${projectId}`
+      });
+      
+      // Short delay to show the toast before navigation
+      setTimeout(() => {
+        loadingToast.hide();
+        push(<IAMMembersByPrincipalView projectId={projectId} gcloudPath={gcloudPath} />);
+      }, 500);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to navigate",
+        message: error instanceof Error ? error.message : String(error)
+      });
+      setActionInProgress(null);
+    }
   };
 
-  const viewIAMService = () => {
-    push(<IAMView projectId={projectId} gcloudPath={gcloudPath} />);
+  const viewIAMService = async () => {
+    setActionInProgress("iam-service");
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading IAM Service...",
+        message: `Project: ${projectId}`
+      });
+      
+      // Short delay to show the toast before navigation
+      setTimeout(() => {
+        loadingToast.hide();
+        push(<IAMView projectId={projectId} gcloudPath={gcloudPath} />);
+      }, 500);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to navigate",
+        message: error instanceof Error ? error.message : String(error)
+      });
+      setActionInProgress(null);
+    }
   };
 
-  const viewServiceHub = () => {
-    push(<ServiceHubView projectId={projectId} gcloudPath={gcloudPath} />);
+  const viewServiceHub = async () => {
+    setActionInProgress("servicehub");
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading ServiceHub...",
+        message: `Project: ${projectId}`
+      });
+      
+      // Short delay to show the toast before navigation
+      setTimeout(() => {
+        loadingToast.hide();
+        push(<ServiceHubView projectId={projectId} gcloudPath={gcloudPath} />);
+      }, 500);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to navigate",
+        message: error instanceof Error ? error.message : String(error)
+      });
+      setActionInProgress(null);
+    }
   };
 
-  const clearCache = useCallback(async () => {
-    cache.remove(`project-${projectId}`);
-    cache.remove(`project-${projectId}-timestamp`);
-    await fetchProjectDetails();
-  }, [projectId, fetchProjectDetails]);
+  const clearCache = async () => {
+    setActionInProgress("clearing-cache");
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Clearing cache...",
+        message: projectId ? `Project: ${projectId}` : "All projects"
+      });
+      
+      // Clear project-specific cache
+      if (projectId) {
+        cache.remove(`project-${projectId}`);
+        cache.remove(`project-${projectId}-timestamp`);
+      } else {
+        // Clear all project caches
+        CacheManager.clearProjectsListCache();
+      }
+      
+      loadingToast.hide();
+      
+      showToast({
+        style: Toast.Style.Success,
+        title: "Cache cleared",
+        message: "Project cache has been cleared"
+      });
+      
+      // Refresh data
+      if (projectId) {
+        fetchProjectDetails();
+      } else {
+        fetchProjects();
+      }
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to clear cache",
+        message: error instanceof Error ? error.message : String(error)
+      });
+    } finally {
+      setActionInProgress(null);
+    }
+  };
 
   if (error) {
-    return <List isLoading={false}><List.EmptyView title={error} /></List>;
+    return (
+      <List isLoading={false}>
+        <List.EmptyView 
+          title={error} 
+          description="An error occurred"
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          actions={
+            <ActionPanel>
+              <Action 
+                title="Try Again" 
+                icon={Icon.RotateClockwise} 
+                onAction={projectId ? fetchProjectDetails : fetchProjects} 
+              />
+              <Action 
+                title="Clear Cache" 
+                icon={Icon.Trash} 
+                onAction={clearCache} 
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
   }
 
   return (
     <List 
-      isLoading={isLoading} 
-      searchBarPlaceholder="Search services..."
-      navigationTitle={`Project: ${projectId}`}
+      isLoading={isLoading || actionInProgress !== null} 
+      searchBarPlaceholder={projectId ? "Search services..." : "Search projects..."}
+      navigationTitle={projectId ? `Project: ${projectId}` : "Google Cloud Projects"}
     >
-      <List.Section title="Project Services">
-        {AVAILABLE_SERVICES.map((service) => (
-          <List.Item
-            id={service.id}
-            key={service.id}
-            title={service.name}
-            subtitle={service.description}
-            icon={service.icon}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  {service.id === "storage" && (
-                    <Action title="View Storage Buckets" icon={Icon.Box} onAction={viewStorageBuckets} />
-                  )}
-                  {service.id === "iam" && (
-                    <>
-                      <Action title="View IAM Permissions" icon={Icon.Key} onAction={viewIAMService} />
-                      <Action title="View IAM by Principal" icon={Icon.Person} onAction={viewIAMPermissions} />
-                    </>
-                  )}
-                  {service.id === "servicehub" && (
-                    <Action title="View ServiceHub" icon={Icon.Globe} onAction={viewServiceHub} />
-                  )}
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  <Action title="Refresh Project Details" icon={Icon.RotateClockwise} onAction={fetchProjectDetails} />
-                  <Action title="Clear Cache" icon={Icon.Trash} onAction={clearCache} />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+      {projectId ? (
+        <List.Section title="Project Services">
+          {AVAILABLE_SERVICES.map((service) => (
+            <List.Item
+              id={service.id}
+              key={service.id}
+              title={service.name}
+              subtitle={service.description}
+              icon={service.icon}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    {service.id === "storage" && (
+                      <Action 
+                        title="View Storage Buckets" 
+                        icon={Icon.Box} 
+                        onAction={viewStorageBuckets}
+                      />
+                    )}
+                    {service.id === "iam" && (
+                      <>
+                        <Action 
+                          title="View IAM Permissions" 
+                          icon={Icon.Key} 
+                          onAction={viewIAMService}
+                        />
+                        <Action 
+                          title="View IAM by Principal" 
+                          icon={Icon.Person} 
+                          onAction={viewIAMPermissions}
+                        />
+                      </>
+                    )}
+                    {service.id === "servicehub" && (
+                      <Action 
+                        title="View ServiceHub" 
+                        icon={Icon.Globe} 
+                        onAction={viewServiceHub}
+                      />
+                    )}
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <Action 
+                      title="Refresh Project Details" 
+                      icon={Icon.RotateClockwise} 
+                      onAction={fetchProjectDetails}
+                    />
+                    <Action 
+                      title="Clear Cache" 
+                      icon={Icon.Trash} 
+                      onAction={clearCache}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      ) : (
+        <List.Section title="Google Cloud Projects" subtitle={`${projects.length} projects`}>
+          {projects.map((project) => (
+            <List.Item
+              key={project.id}
+              title={project.name || project.id}
+              subtitle={project.id}
+              icon={{ source: Icon.Document, tintColor: Color.Blue }}
+              accessories={[
+                { 
+                  text: project.createTime ? new Date(project.createTime).toLocaleDateString() : "", 
+                  icon: Icon.Calendar 
+                }
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Open Project"
+                    icon={Icon.Forward}
+                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    onAction={() => {
+                      console.log("Selecting project:", project.id, project);
+                      selectProject(project.id);
+                    }}
+                  />
+                  <Action
+                    title="Refresh Projects"
+                    icon={Icon.RotateClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={fetchProjects}
+                  />
+                  <Action
+                    title="Clear Cache"
+                    icon={Icon.Trash}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    onAction={clearCache}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 } 

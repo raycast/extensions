@@ -173,4 +173,72 @@ const computeServices = getServicesByCategory(GCPServiceCategory.COMPUTE);
 
 // Get all services
 const allServices = getAllServices();
-``` 
+```
+
+## CacheManager.ts
+
+Project and API response caching utility.
+
+### Constants
+
+| Constant | Description | Type |
+|----------|-------------|------|
+| `CACHE_KEYS` | Cache key constants | `Record<string, string>` |
+| `CACHE_TTL` | Cache expiration times | `Record<string, number>` |
+
+### Interfaces
+
+| Interface | Description | Properties |
+|-----------|-------------|------------|
+| `Project` | Project information | `id: string, name: string, projectNumber: string, createTime: string` |
+| `CachedAuth` | Cached authentication | `isAuthenticated: boolean, user: string, timestamp: number` |
+| `CachedProject` | Cached project reference | `projectId: string, timestamp: number` |
+| `CachedProjectsList` | Cached list of projects | `projects: Project[], timestamp: number` |
+
+### Functions
+
+| Function | Description | Parameters | Return Value |
+|----------|-------------|------------|--------------|
+| `saveAuthStatus` | Saves authentication status | `isAuthenticated: boolean, user: string` | `void` |
+| `getAuthStatus` | Gets cached auth status | None | `CachedAuth \| null` |
+| `updateAuthCacheDuration` | Updates auth cache duration | `hours: number` | `void` |
+| `clearAuthCache` | Clears auth cache | None | `void` |
+| `getCacheLimit` | Gets project cache limit | None | `number` |
+| `saveSelectedProject` | Saves selected project and updates recently used list | `projectId: string` | `void` |
+| `getSelectedProject` | Gets cached selected project | None | `CachedProject \| null` |
+| `getRecentlyUsedProjects` | Gets IDs of recently used projects | None | `string[]` |
+| `saveRecentlyUsedProjects` | Saves list of recently used projects | `projectIds: string[]` | `void` |
+| `clearProjectCache` | Clears project cache | None | `void` |
+| `saveProjectsList` | Saves full list of projects | `projects: Project[]` | `void` |
+| `getProjectsList` | Gets cached list of projects | None | `CachedProjectsList \| null` |
+| `clearProjectsListCache` | Clears projects list cache | None | `void` |
+| `clearAllCaches` | Clears all caches | None | `void` |
+| `getProjectDetails` | Gets detailed project information | `projectId: string, gcloudPath: string` | `Promise<Project \| null>` |
+| `getRecentlyUsedProjectsWithDetails` | Gets recently used projects with details | `gcloudPath: string` | `Promise<Project[]>` |
+| `syncRecentlyUsedProjectsWithCacheLimit` | Ensures recently used list respects cache limit | None | `void` |
+
+### Usage
+
+```typescript
+import { CacheManager } from "../utils/CacheManager";
+
+// Get the cache limit
+const cacheLimit = CacheManager.getCacheLimit();
+
+// Get cached project
+const cachedProject = CacheManager.getSelectedProject();
+
+// Save a project as selected and update recently used list
+CacheManager.saveSelectedProject("my-project-id");
+
+// Get list of recently used projects
+const recentlyUsed = CacheManager.getRecentlyUsedProjects();
+
+// Get projects with full details
+const projectsWithDetails = await CacheManager.getRecentlyUsedProjectsWithDetails(gcloudPath);
+
+// Clear all caches
+CacheManager.clearAllCaches();
+```
+
+For detailed information on the caching system, see [Caching System](CACHING_SYSTEM.md). 

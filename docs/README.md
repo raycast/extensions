@@ -8,6 +8,7 @@ This directory contains documentation for the G-Cloud project. Use these documen
 - [Code Patterns](CODE_PATTERNS.md) - Common code patterns and conventions used throughout the project
 - [UI Patterns](UI_PATTERNS.md) - UI component patterns and design guidelines
 - [Utils Reference](UTILS_REFERENCE.md) - Reference for utility functions available in the project
+- [Caching System](CACHING_SYSTEM.md) - Detailed explanation of the caching system for projects and API calls
 - [Shortcuts](SHORTCUTS.md) - Keyboard shortcuts and navigation
 
 ## Development Guidelines
@@ -19,6 +20,7 @@ When developing new features or modifying existing ones:
 3. **Maintain project structure**: Follow the project structure guidelines for new services
 4. **Update documentation**: Keep these documents up to date as the project evolves
 5. **Respect file size limits**: No file should exceed 200 lines of code
+6. **Leverage caching**: Use the caching system for performance-critical operations
 
 ## Component-Based Architecture
 
@@ -39,6 +41,7 @@ When implementing a new service:
 4. Reuse utility functions where appropriate
 5. Add appropriate error handling and loading states
 6. Break down large components into smaller, reusable pieces
+7. Implement caching for expensive API calls
 
 ## Key Services
 
@@ -66,6 +69,7 @@ The project includes several utility modules to avoid code duplication:
 - `iamRoles.ts`: Provides information about IAM roles without needing to fetch from the API
 - `gcpServices.ts`: Contains comprehensive information about Google Cloud services and APIs
 - `FileUtils.ts`: Handles file system operations
+- `CacheManager.ts`: Manages caching of projects and API responses
 - Other utilities for UI components and Raycast integration
 
 ## Code Style
@@ -81,4 +85,5 @@ The project includes several utility modules to avoid code duplication:
 - Implement caching for expensive API calls
 - Use memoization for computed values
 - Optimize rendering of large lists
-- Show appropriate loading indicators for async operations 
+- Show appropriate loading indicators for async operations
+- Leverage the project caching system for frequently accessed resources 

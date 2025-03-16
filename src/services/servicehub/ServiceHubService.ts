@@ -82,8 +82,8 @@ export class ServiceHubService {
   private gcloudPath: string;
   private projectId: string;
   private cache: Map<string, { data: any; timestamp: number }> = new Map();
-  private readonly CACHE_TTL = 300000; // 5 minutes cache TTL
-  private readonly CACHE_TTL_DETAILS = 600000; // 10 minutes cache TTL for details
+  private readonly CACHE_TTL = 900000; // 15 minutes cache TTL (increased from 5 minutes)
+  private readonly CACHE_TTL_DETAILS = 1800000; // 30 minutes cache TTL for details (increased from 10 minutes)
   private pendingRequests: Map<string, Promise<any>> = new Map();
 
   constructor(gcloudPath: string, projectId: string) {
@@ -230,15 +230,26 @@ export class ServiceHubService {
    */
   private async getEnabledServices(): Promise<string[]> {
     try {
-      // Use a simple command to get only enabled services
-      const command = "services list --filter=state:ENABLED --format=json";
+      // Cache key for enabled services list
+      const cacheKey = `enabled-services:${this.projectId}`;
+      
+      // Check cache first before making API call
+      const cachedData = this.cache.get(cacheKey);
+      const now = Date.now();
+      
+      if (cachedData && (now - cachedData.timestamp < this.CACHE_TTL)) {
+        return cachedData.data;
+      }
+      
+      // Use a simple command to get only enabled services with a higher limit
+      const command = "services list --filter=state:ENABLED --limit=500 --format=json";
       const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
       
       // Parse JSON result if it's a string
       const services = typeof result === 'string' ? JSON.parse(result) : result;
       
       // Extract service names
-      return services.map((service: any) => {
+      const enabledServices = services.map((service: any) => {
         // Handle different response formats
         if (typeof service === 'string') {
           return service.endsWith('.googleapis.com') ? service : `${service}.googleapis.com`;
@@ -252,6 +263,11 @@ export class ServiceHubService {
         }
         return name;
       }).filter(Boolean);
+      
+      // Store in cache
+      this.cache.set(cacheKey, { data: enabledServices, timestamp: now });
+      
+      return enabledServices;
     } catch (error) {
       console.error("Error getting enabled services:", error);
       return [];
@@ -444,19 +460,58 @@ export class ServiceHubService {
    */
   async isServiceEnabled(serviceName: string): Promise<boolean> {
     try {
-      // Direct check for more accurate results
+      // Check if we already have this information in cache
+      // First check the service details cache
+      const detailsCacheKey = `service-details:${this.projectId}:${serviceName}`;
+      const cachedDetails = this.cache.get(detailsCacheKey);
+      const now = Date.now();
+      
+      if (cachedDetails && (now - cachedDetails.timestamp < this.CACHE_TTL_DETAILS)) {
+        return cachedDetails.data.isEnabled;
+      }
+      
+      // Then check the enabled services list cache
+      const listCacheKey = `enabled-services:${this.projectId}`;
+      const cachedList = this.cache.get(listCacheKey);
+      
+      if (cachedList && (now - cachedList.timestamp < this.CACHE_TTL)) {
+        return cachedList.data.includes(serviceName);
+      }
+      
+      // If not in cache, make a direct API call
       const command = `services list --filter=name:${serviceName} --filter=state:ENABLED --format=json`;
       const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
       
       // Parse JSON result if it's a string
       const services = typeof result === 'string' ? JSON.parse(result) : result;
+      const isEnabled = services && services.length > 0;
       
-      return services && services.length > 0;
+      // Cache this result in service details format
+      this.cache.set(detailsCacheKey, { 
+        data: {
+          name: serviceName,
+          displayName: getServiceInfo(serviceName).displayName,
+          description: getServiceInfo(serviceName).description,
+          isEnabled: isEnabled,
+          state: isEnabled ? "ENABLED" : "NOT_ACTIVATED"
+        }, 
+        timestamp: now 
+      });
+      
+      return isEnabled;
     } catch (error: unknown) {
       console.error(`Error checking if service ${serviceName} is enabled:`, error);
       
-      // Fallback to cached details
+      // Fallback to cached details even if expired
       try {
+        const detailsCacheKey = `service-details:${this.projectId}:${serviceName}`;
+        const cachedDetails = this.cache.get(detailsCacheKey);
+        
+        if (cachedDetails) {
+          return cachedDetails.data.isEnabled;
+        }
+        
+        // If still no cached data, try to get fresh details
         const serviceDetails = await this.getServiceDetails(serviceName);
         return serviceDetails.isEnabled;
       } catch {
