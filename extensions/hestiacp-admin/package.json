@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hestiacp-admin",
   "title": "HestiaCP Admin",
-  "description": "Manage Users, Domains, Mail Domains, Databases, and more, in your HestiaCP isntance",
+  "description": "Manage Users, Domains, Mail Domains, Databases, and more, in your HestiaCP instance",
   "icon": "hestia.png",
   "author": "xmok",
   "categories": [
