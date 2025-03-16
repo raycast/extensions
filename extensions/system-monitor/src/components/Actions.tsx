@@ -9,7 +9,7 @@ interface ActionsProps {
 export const Actions = ({ radioButtonNumber }: ActionsProps) => {
   const handleRunAppleScript = async () => {
     try {
-      await runAppleScript(openActivityMonitorAppleScript(radioButtonNumber || null));
+      await runAppleScript(openActivityMonitorAppleScript(radioButtonNumber ?? null));
       await closeMainWindow();
     } catch (error) {
       await showToast({
