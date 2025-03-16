@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, useNavigation, showToast, Toast, Color, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, useNavigation, showToast, Toast, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { CacheManager, Project } from "../utils/CacheManager";
 import ProjectView from "../ProjectView";
@@ -131,26 +131,27 @@ export default function CachedProjectView({ gcloudPath }: CachedProjectViewProps
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search projects..."
-      navigationTitle="Cached Project"
+      navigationTitle="Welcome Back to Google Cloud"
     >
-      <List.Section title="Cached Project">
+      <List.Section title="Quick Access" subtitle="Continue where you left off">
         <List.Item
-          title={projectName}
-          subtitle={`Last used: ${lastUsed}`}
-          icon={{ source: Icon.Clock, tintColor: Color.Blue }}
+          title="Continue with Last Project"
+          subtitle={projectName}
+          icon={{ source: Icon.ArrowRight, tintColor: Color.Green }}
           accessories={[
+            { text: `Last used: ${lastUsed}`, icon: Icon.Clock },
             { text: cachedProject.projectId }
           ]}
           actions={
             <ActionPanel>
               <Action
-                title="Continue with this Project"
+                title="Open Project"
                 icon={Icon.Forward}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
                 onAction={continueWithCachedProject}
               />
               <Action
-                title="Select Different Project"
+                title="Browse All Projects"
                 icon={Icon.List}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
                 onAction={selectNewProject}
@@ -164,22 +165,45 @@ export default function CachedProjectView({ gcloudPath }: CachedProjectViewProps
             </ActionPanel>
           }
         />
+        <List.Item
+          title="Browse All Projects"
+          subtitle="View and select from all your Google Cloud projects"
+          icon={{ source: Icon.List, tintColor: Color.Blue }}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Browse Projects"
+                icon={Icon.List}
+                shortcut={{ modifiers: ["cmd"], key: "b" }}
+                onAction={selectNewProject}
+              />
+            </ActionPanel>
+          }
+        />
       </List.Section>
       
       {projects.length > 0 && (
-        <List.Section title="Recent Projects">
+        <List.Section title="Recent Projects" subtitle="Quick access to your recent projects">
           {projects.slice(0, 5).map((project) => (
             <List.Item
               key={project.id}
               title={project.name}
               subtitle={project.id}
               icon={{ source: project.id === cachedProject.projectId ? Icon.CheckCircle : Icon.Circle, tintColor: project.id === cachedProject.projectId ? Color.Green : Color.SecondaryText }}
+              accessories={[
+                { text: project.id === cachedProject.projectId ? "Current" : "", icon: project.id === cachedProject.projectId ? Icon.Star : undefined }
+              ]}
               actions={
                 <ActionPanel>
                   <Action
-                    title="Select Project"
-                    icon={Icon.Check}
+                    title="Open Project"
+                    icon={Icon.Forward}
                     onAction={() => setShouldNavigate({ action: "select", projectId: project.id })}
+                  />
+                  <Action
+                    title="Browse All Projects"
+                    icon={Icon.List}
+                    onAction={selectNewProject}
                   />
                 </ActionPanel>
               }

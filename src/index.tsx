@@ -26,7 +26,16 @@ export default function Command() {
   const [error, setError] = useState<string | null>(null);
   const [preferences, setPreferences] = useState<Preferences>({});
   const [showCachedProjectView, setShowCachedProjectView] = useState(false);
+  const [shouldNavigateToProject, setShouldNavigateToProject] = useState<string | null>(null);
   const { push } = useNavigation();
+
+  // Handle navigation to project with useEffect
+  useEffect(() => {
+    if (shouldNavigateToProject) {
+      push(<ProjectView projectId={shouldNavigateToProject} gcloudPath={GCLOUD_PATH} />);
+      setShouldNavigateToProject(null);
+    }
+  }, [shouldNavigateToProject, push]);
 
   useEffect(() => {
     checkGcloudInstallation();
@@ -293,7 +302,8 @@ export default function Command() {
         message: projectId,
       });
       
-      push(<ProjectView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
+      // Use state to trigger navigation in useEffect
+      setShouldNavigateToProject(projectId);
     } catch (error: any) {
       selectingToast.hide();
       setError(`Failed to select project: ${error.message}`);
@@ -303,6 +313,11 @@ export default function Command() {
         message: error.message,
       });
     }
+  }
+
+  function viewProject(projectId: string) {
+    // Use state to trigger navigation in useEffect
+    setShouldNavigateToProject(projectId);
   }
 
   function viewStorageBuckets(projectId: string) {
@@ -364,16 +379,6 @@ export default function Command() {
     return <CachedProjectView gcloudPath={GCLOUD_PATH} />;
   }
 
-  // Use useEffect for navigation instead of doing it directly in render
-  useEffect(() => {
-    // If we have a cached project, we can navigate to the project view
-    const cachedProject = CacheManager.getSelectedProject();
-    if (cachedProject && !isLoading && preferences.projectId) {
-      // Only navigate if we're not in the middle of loading
-      push(<ProjectView projectId={cachedProject.projectId} gcloudPath={GCLOUD_PATH} />);
-    }
-  }, [isLoading, preferences.projectId]);
-
   return (
     <List
       isLoading={isLoading}
@@ -401,7 +406,10 @@ export default function Command() {
               title={project.name}
               subtitle=""
               icon={{ source: preferences.projectId === project.id ? Icon.CheckCircle : Icon.Circle, tintColor: preferences.projectId === project.id ? Color.Green : Color.SecondaryText }}
-              accessories={[]}
+              accessories={[
+                { text: project.id },
+                { text: preferences.projectId === project.id ? "Current Project" : "", icon: preferences.projectId === project.id ? Icon.Star : undefined }
+              ]}
               detail={
                 <List.Item.Detail
                   markdown={`# ${project.name}\n\n**Project ID:** ${project.id}\n\n**Project Number:** ${project.projectNumber}\n\n**Created:** ${new Date(project.createTime).toLocaleString()}`}
@@ -428,38 +436,44 @@ export default function Command() {
               }
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Select Project"
-                    icon={Icon.Check}
-                    shortcut={{ modifiers: ["cmd"], key: "s" }}
-                    onAction={() => selectProject(project.id)}
-                  />
-                  <Action
-                    title="View Project Dashboard"
-                    icon={Icon.Eye}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
-                    onAction={() => push(<ProjectView projectId={project.id} gcloudPath={GCLOUD_PATH} />)}
-                  />
-                  <Action
-                    title="View Storage Buckets"
-                    icon={Icon.Folder}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                    onAction={() => viewStorageBuckets(project.id)}
-                  />
-                  <Action
-                    title="View Storage Transfer Service"
-                    icon={Icon.ArrowRight}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-                    onAction={() => viewStorageTransfer(project.id)}
-                  />
-                  <Action
-                    title="View Storage Statistics"
-                    icon={Icon.BarChart}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
-                    onAction={() => viewStorageStats(project.id)}
-                  />
-                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => fetchProjects(false)} />
-                  <Action title="Clear Cache" icon={Icon.Trash} onAction={clearCache} />
+                  <ActionPanel.Section title="Project Actions">
+                    <Action
+                      title="Open Project"
+                      icon={Icon.Forward}
+                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                      onAction={() => viewProject(project.id)}
+                    />
+                    <Action
+                      title="Set as Current Project"
+                      icon={Icon.Check}
+                      shortcut={{ modifiers: ["cmd"], key: "s" }}
+                      onAction={() => selectProject(project.id)}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Services">
+                    <Action
+                      title="View Storage Buckets"
+                      icon={Icon.Folder}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                      onAction={() => viewStorageBuckets(project.id)}
+                    />
+                    <Action
+                      title="View Storage Transfer Service"
+                      icon={Icon.ArrowRight}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                      onAction={() => viewStorageTransfer(project.id)}
+                    />
+                    <Action
+                      title="View Storage Statistics"
+                      icon={Icon.BarChart}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                      onAction={() => viewStorageStats(project.id)}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Utilities">
+                    <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => fetchProjects(false)} />
+                    <Action title="Clear Cache" icon={Icon.Trash} onAction={clearCache} />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
