@@ -364,13 +364,15 @@ export default function Command() {
     return <CachedProjectView gcloudPath={GCLOUD_PATH} />;
   }
 
-  // If we have a cached project, we can directly go to the project view
-  const cachedProject = CacheManager.getSelectedProject();
-  if (cachedProject && !isLoading && preferences.projectId) {
-    // Only auto-navigate if we're not in the middle of loading
-    push(<ProjectView projectId={cachedProject.projectId} gcloudPath={GCLOUD_PATH} />);
-    return null;
-  }
+  // Use useEffect for navigation instead of doing it directly in render
+  useEffect(() => {
+    // If we have a cached project, we can navigate to the project view
+    const cachedProject = CacheManager.getSelectedProject();
+    if (cachedProject && !isLoading && preferences.projectId) {
+      // Only navigate if we're not in the middle of loading
+      push(<ProjectView projectId={cachedProject.projectId} gcloudPath={GCLOUD_PATH} />);
+    }
+  }, [isLoading, preferences.projectId]);
 
   return (
     <List

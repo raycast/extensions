@@ -14,7 +14,8 @@ export default function CachedProjectView({ gcloudPath }: CachedProjectViewProps
   const [projectDetails, setProjectDetails] = useState<any>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const { pop } = useNavigation();
+  const [shouldNavigate, setShouldNavigate] = useState<{action: string; projectId?: string} | null>(null);
+  const { pop, push } = useNavigation();
 
   useEffect(() => {
     async function initialize() {
@@ -49,33 +50,43 @@ export default function CachedProjectView({ gcloudPath }: CachedProjectViewProps
     initialize();
   }, [gcloudPath]);
 
-  function continueWithCachedProject() {
-    if (cachedProject) {
-      // Use the pop() navigation method to go back to the main view
+  // Handle navigation with useEffect
+  useEffect(() => {
+    if (!shouldNavigate) return;
+
+    if (shouldNavigate.action === "continue" && cachedProject) {
+      push(<ProjectView projectId={cachedProject.projectId} gcloudPath={gcloudPath} />);
+    } else if (shouldNavigate.action === "select" && shouldNavigate.projectId) {
+      CacheManager.saveSelectedProject(shouldNavigate.projectId);
+      push(<ProjectView projectId={shouldNavigate.projectId} gcloudPath={gcloudPath} />);
+    } else if (shouldNavigate.action === "new" || shouldNavigate.action === "clear") {
+      if (shouldNavigate.action === "new") {
+        CacheManager.clearProjectCache();
+      } else if (shouldNavigate.action === "clear") {
+        CacheManager.clearAllCaches();
+        showToast({
+          style: Toast.Style.Success,
+          title: "Cache cleared",
+          message: "All cached data has been cleared"
+        });
+      }
       pop();
-      // The main view will automatically navigate to the project view
     }
+
+    // Reset navigation state
+    setShouldNavigate(null);
+  }, [shouldNavigate, cachedProject, gcloudPath, push, pop]);
+
+  function continueWithCachedProject() {
+    setShouldNavigate({ action: "continue" });
   }
 
   function selectNewProject() {
-    // Clear the project cache
-    CacheManager.clearProjectCache();
-    
-    // Go back to the main view
-    pop();
+    setShouldNavigate({ action: "new" });
   }
 
   function clearAllCache() {
-    CacheManager.clearAllCaches();
-    
-    showToast({
-      style: Toast.Style.Success,
-      title: "Cache cleared",
-      message: "All cached data has been cleared"
-    });
-    
-    // Go back to the main view
-    pop();
+    setShouldNavigate({ action: "clear" });
   }
 
   if (error) {
@@ -87,7 +98,7 @@ export default function CachedProjectView({ gcloudPath }: CachedProjectViewProps
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
           actions={
             <ActionPanel>
-              <Action title="Try Again" icon={Icon.RotateClockwise} onAction={pop} />
+              <Action title="Try Again" icon={Icon.RotateClockwise} onAction={() => setShouldNavigate({ action: "new" })} />
               <Action title="Clear Cache" icon={Icon.Trash} onAction={clearAllCache} />
             </ActionPanel>
           }
@@ -168,10 +179,7 @@ export default function CachedProjectView({ gcloudPath }: CachedProjectViewProps
                   <Action
                     title="Select Project"
                     icon={Icon.Check}
-                    onAction={() => {
-                      CacheManager.saveSelectedProject(project.id);
-                      pop();
-                    }}
+                    onAction={() => setShouldNavigate({ action: "select", projectId: project.id })}
                   />
                 </ActionPanel>
               }
