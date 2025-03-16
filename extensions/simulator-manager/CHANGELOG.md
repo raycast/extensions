@@ -2,7 +2,7 @@
 
 ## [Improvements] - {PR_MERGE_DATE}
 
-- Improved code organization and performance:
+- Improved code organization and performance
 - Added preferences action to iOS simulator empty state for better user experience
 - Enhanced error handling across the extension
 - Improved performance when loading and filtering large numbers of devices

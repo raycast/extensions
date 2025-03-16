@@ -1,5 +1,4 @@
-// utils/simulator-commands.ts
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { exec, spawn } from "child_process";
 import { promisify } from "util";
@@ -8,6 +7,7 @@ import { homedir } from "os";
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { getAndroidVersionFromApiLevel, getDeviceType } from "../utils";
+import { TOAST_MESSAGES } from "../constants";
 
 // Get user preferences
 interface Preferences {
@@ -16,7 +16,6 @@ interface Preferences {
 
 export const execAsync = promisify(exec);
 
-// Fetch iOS simulators
 // Fetch iOS simulators
 export async function fetchIOSDevices() {
   try {
@@ -45,7 +44,7 @@ export async function fetchIOSDevices() {
           name: device.name,
           status: device.state,
           type: device.deviceTypeIdentifier || "",
-          runtime: formattedRuntime, // Usar a versão já formatada
+          runtime: formattedRuntime,
           category: "ios",
           deviceType,
         });
@@ -286,24 +285,25 @@ export async function fetchAndroidDevices() {
   }
 }
 
-// Execute a simulator command
-export async function executeSimulatorCommand(command: string, deviceId: string, successMessage: string) {
+export async function bootAndOpenSimulator(deviceId: string) {
   try {
-    await execAsync(`xcrun simctl ${command} ${deviceId}`);
-    showToast({ style: Toast.Style.Success, title: successMessage });
+    await execAsync(`xcrun simctl boot ${deviceId}`);
+    await execAsync(`open -a Simulator --args -CurrentDeviceUDID ${deviceId}`);
+
+    showToast(TOAST_MESSAGES.SUCCESS.SIMULATOR_STARTED);
   } catch (error) {
-    showFailureToast(error, { title: `Failed to ${command} simulator` });
+    showFailureToast(error, TOAST_MESSAGES.FAILURE.SIMULATOR_START_FAILED);
     throw error;
   }
 }
 
-// Open a simulator
-export async function openSimulator(deviceId: string) {
+export async function shutdownSimulator(deviceId: string) {
   try {
-    await execAsync(`open -a Simulator --args -CurrentDeviceUDID ${deviceId}`);
-    showToast({ style: Toast.Style.Success, title: "Opening simulator" });
+    await execAsync(`xcrun simctl shutdown ${deviceId}`);
+
+    showToast(TOAST_MESSAGES.SUCCESS.SIMULATOR_SHUTDOWN);
   } catch (error) {
-    showFailureToast(error, { title: "Failed to open simulator" });
+    showFailureToast(error, TOAST_MESSAGES.FAILURE.SIMULATOR_SHUTDOWN_FAILED);
     throw error;
   }
 }
@@ -324,13 +324,9 @@ export async function startAndroidEmulator(avdName: string) {
     // Unref the process to allow the parent to exit independently
     process.unref();
 
-    showToast({
-      style: Toast.Style.Success,
-      title: "Starting Android emulator",
-      message: `${avdName} is starting in the background`,
-    });
+    showToast(TOAST_MESSAGES.SUCCESS.ANDROID_EMULATOR_STARTING);
   } catch (error) {
-    showFailureToast(error, { title: "Failed to start Android emulator" });
+    showFailureToast(error, TOAST_MESSAGES.FAILURE.ANDROID_EMULATOR_START_FAILED);
     throw error;
   }
 }
@@ -520,41 +516,10 @@ export async function stopAndroidEmulator(avdName: string) {
     // Stop the target emulator
     await execAsync(`${adbPath} -s ${targetEmulatorId} emu kill`);
 
-    showToast({
-      style: Toast.Style.Success,
-      title: "Android emulator stopped",
-      message: `${avdName} has been shut down`,
-    });
+    showToast(TOAST_MESSAGES.SUCCESS.ANDROID_EMULATOR_STOPPED);
   } catch (error) {
     console.error("Error stopping Android emulator:", error);
-    showFailureToast(error, { title: "Failed to stop Android emulator" });
-    throw error;
-  }
-}
-
-export async function openAndroidEmulator(avdName: string) {
-  try {
-    const emulatorPath = findAndroidSdkTool("emulator");
-    if (!emulatorPath) {
-      throw new Error("Android emulator executable not found");
-    }
-
-    // Start the emulator using spawn instead of exec
-    const process = spawn(emulatorPath, ["-avd", avdName], {
-      detached: true,
-      stdio: "ignore",
-    });
-
-    // Unref the process to allow the parent to exit independently
-    process.unref();
-
-    showToast({
-      style: Toast.Style.Success,
-      title: "Opening Android emulator",
-      message: avdName,
-    });
-  } catch (error) {
-    showFailureToast(error, { title: "Failed to open Android emulator" });
+    showFailureToast(error, TOAST_MESSAGES.FAILURE.ANDROID_EMULATOR_STOP_FAILED);
     throw error;
   }
 }

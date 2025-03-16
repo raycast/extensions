@@ -22,8 +22,8 @@ export function DeviceListItem({ device, onRefresh }: DeviceListItemProps) {
   const accessories = useMemo(
     () => [
       {
-        text: device?.runtime,
-        tooltip: `Version: ${device?.runtime}`,
+        text: device.runtime,
+        tooltip: `Version: ${device.runtime}`,
       },
       {
         icon: { source: getStatusIcon(device.status), tintColor: getStatusColor(device.status) },

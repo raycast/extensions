@@ -139,5 +139,5 @@ export function getAndroidVersionFromApiLevel(apiLevel: number) {
     21: "5.0", // Android Lollipop
   };
 
-  return `Android ${versionMap[apiLevel]}` || `Android API ${apiLevel}`;
+  return `Android ${versionMap[apiLevel] ?? `API ${apiLevel}`}`;
 }
