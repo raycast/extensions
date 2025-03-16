@@ -1,10 +1,12 @@
 import { Action, ActionPanel, Detail, Form, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { isServiceAccountConfigured } from "../utils/firebase";
-import { queryDocuments } from "../api/firestore";
-import * as admin from "firebase-admin";
+import { getDocuments } from "../api/firestore";
+import { JsonViewer } from "../components/JsonViewer";
+import { FirestoreDocument } from "../types/firestore";
+import SetupServiceAccount from "../setup-service-account";
 
-export default function FilterDocuments() {
+export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isConfigured, setIsConfigured] = useState<boolean>(false);
   const { push } = useNavigation();
@@ -14,7 +16,7 @@ export default function FilterDocuments() {
       try {
         const configured = await isServiceAccountConfigured();
         setIsConfigured(configured);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("Error checking service account configuration:", error);
         await showToast({
           style: Toast.Style.Failure,
@@ -39,99 +41,53 @@ export default function FilterDocuments() {
         markdown="# Firebase Service Account Not Configured\n\nYou need to set up your Firebase service account before you can use this extension.\n\nClick the 'Set Up Service Account' button below to configure your Firebase service account."
         actions={
           <ActionPanel>
-            <Action
-              title="Set up Service Account"
-              onAction={() => {
-                // Import the setup component dynamically to avoid circular dependencies
-                const SetupServiceAccount = require("./setup-service-account").default;
-                push(<SetupServiceAccount />);
-              }}
-            />
+            <Action title="Set up Service Account" onAction={() => push(<SetupServiceAccountView />)} />
           </ActionPanel>
         }
       />
     );
   }
 
-  return <FilterForm />;
+  return <CollectionForm />;
 }
 
-function FilterForm() {
+function SetupServiceAccountView() {
+  const { pop } = useNavigation();
+
+  try {
+    return <SetupServiceAccount onComplete={pop} />;
+  } catch (error: unknown) {
+    console.error("Error loading setup component:", error);
+    return (
+      <Detail
+        markdown="# Error Loading Setup Component\n\nFailed to load the service account setup component. Please try again."
+        actions={
+          <ActionPanel>
+            <Action title="Go Back" onAction={pop} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+}
+
+function CollectionForm() {
   const [collectionName, setCollectionName] = useState<string>("");
-  const [fieldName, setFieldName] = useState<string>("");
-  const [operator, setOperator] = useState<string>("==");
-  const [fieldValue, setFieldValue] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
   const { push } = useNavigation();
 
-  const operators: { value: admin.firestore.WhereFilterOp; label: string }[] = [
-    { value: "==", label: "Equal to (==)" },
-    { value: ">", label: "Greater than (>)" },
-    { value: "<", label: "Less than (<)" },
-    { value: ">=", label: "Greater than or equal to (>=)" },
-    { value: "<=", label: "Less than or equal to (<=)" },
-    { value: "!=", label: "Not equal to (!=)" },
-    { value: "array-contains", label: "Array contains" },
-    { value: "array-contains-any", label: "Array contains any" },
-    { value: "in", label: "In" },
-    { value: "not-in", label: "Not in" },
-  ];
-
   async function handleSubmit() {
-    if (!collectionName.trim()) {
+    if (!collectionName) {
       setError("Collection name is required");
       return;
     }
 
-    if (!fieldName.trim()) {
-      setError("Field name is required");
-      return;
-    }
-
-    if (!fieldValue.trim()) {
-      setError("Field value is required");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(undefined);
-
     try {
-      // Parse the field value based on the operator
-      let parsedValue: any = fieldValue;
-
-      // Try to parse as JSON if it looks like an array or object
-      if (
-        (fieldValue.startsWith("[") && fieldValue.endsWith("]")) ||
-        (fieldValue.startsWith("{") && fieldValue.endsWith("}"))
-      ) {
-        try {
-          parsedValue = JSON.parse(fieldValue);
-        } catch (e) {
-          // If parsing fails, use the original string value
-          console.error("Failed to parse JSON value:", e);
-        }
-      } else if (fieldValue === "true") {
-        parsedValue = true;
-      } else if (fieldValue === "false") {
-        parsedValue = false;
-      } else if (!isNaN(Number(fieldValue))) {
-        parsedValue = Number(fieldValue);
-      }
-
-      push(
-        <FilteredDocumentList
-          collectionName={collectionName}
-          fieldName={fieldName}
-          operator={operator as admin.firestore.WhereFilterOp}
-          fieldValue={parsedValue}
-        />,
-      );
-    } catch (error) {
+      push(<DocumentList collectionName={collectionName} />);
+    } catch (error: unknown) {
       setError("An unexpected error occurred. Please try again.");
-      console.error("Error navigating to filtered document list:", error);
-      setIsLoading(false);
+      console.error("Error navigating to document list:", error);
     }
   }
 
@@ -139,7 +95,17 @@ function FilterForm() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Filter Documents" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="List Documents" onSubmit={handleSubmit} />
+          {error && (
+            <Action
+              title="Retry"
+              onAction={() => {
+                setIsLoading(true);
+                setError(undefined);
+                setIsLoading(false);
+              }}
+            />
+          )}
         </ActionPanel>
       }
       isLoading={isLoading}
@@ -147,142 +113,144 @@ function FilterForm() {
       <Form.TextField
         id="collectionName"
         title="Collection Name"
-        placeholder="Enter Firestore collection name"
         value={collectionName}
         onChange={setCollectionName}
         error={error}
-        autoFocus
-      />
-      <Form.TextField
-        id="fieldName"
-        title="Field Name"
-        placeholder="Enter field name to filter by"
-        value={fieldName}
-        onChange={setFieldName}
-      />
-      <Form.Dropdown id="operator" title="Comparison Operator" value={operator} onChange={setOperator}>
-        {operators.map((op) => (
-          <Form.Dropdown.Item key={op.value} value={op.value} title={op.label} />
-        ))}
-      </Form.Dropdown>
-      <Form.TextField
-        id="fieldValue"
-        title="Field Value"
-        placeholder="Enter value to compare against"
-        value={fieldValue}
-        onChange={setFieldValue}
-        info='For arrays or objects, use JSON format: [1,2,3] or {"key":"value"}'
+        placeholder="Enter collection name"
       />
     </Form>
   );
 }
 
-interface FilteredDocumentListProps {
+interface DocumentListProps {
   collectionName: string;
-  fieldName: string;
-  operator: admin.firestore.WhereFilterOp;
-  fieldValue: any;
 }
 
-function FilteredDocumentList({ collectionName, fieldName, operator, fieldValue }: FilteredDocumentListProps) {
-  const [documents, setDocuments] = useState<any[]>([]);
+function DocumentList({ collectionName }: DocumentListProps) {
+  const [documents, setDocuments] = useState<FirestoreDocument[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
   const { push } = useNavigation();
 
   useEffect(() => {
+    let isMounted = true;
+    let retryCount = 0;
+    const maxRetries = 2;
+
     async function fetchDocuments() {
       try {
-        const docs = await queryDocuments(collectionName, fieldName, operator, fieldValue);
-        setDocuments(docs);
-      } catch (error) {
-        console.error("Error fetching filtered documents:", error);
-        setError("Failed to fetch documents. Please try again.");
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to Fetch Documents",
-          message: `Error fetching documents from ${collectionName}`,
-        });
+        const docs = await getDocuments(collectionName);
+        if (isMounted) {
+          setDocuments(docs);
+          setError(undefined);
+        }
+      } catch (error: unknown) {
+        console.error("Error fetching documents:", error);
+        if (isMounted) {
+          if (retryCount < maxRetries) {
+            retryCount++;
+            setTimeout(fetchDocuments, 1000 * retryCount);
+            return;
+          }
+
+          setError("Failed to fetch documents. Please try again.");
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to Fetch Documents",
+            message: `Error fetching documents from ${collectionName}`,
+          });
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     fetchDocuments();
-  }, [collectionName, fieldName, operator, fieldValue]);
 
-  // Format the filter criteria for display
-  const formattedValue = typeof fieldValue === "object" ? JSON.stringify(fieldValue) : String(fieldValue);
-  const filterDescription = `${fieldName} ${operator} ${formattedValue}`;
+    return () => {
+      isMounted = false;
+    };
+  }, [collectionName]);
+
+  if (error) {
+    return (
+      <List
+        isLoading={isLoading}
+        searchBarPlaceholder={`Search documents in ${collectionName}...`}
+        filtering={true}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Retry"
+              onAction={() => {
+                setIsLoading(true);
+                setError(undefined);
+                getDocuments(collectionName)
+                  .then((docs) => {
+                    setDocuments(docs);
+                  })
+                  .catch((error) => {
+                    console.error("Error fetching documents:", error);
+                    setError("Failed to fetch documents. Please try again.");
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to Fetch Documents",
+                      message: `Error fetching documents from ${collectionName}`,
+                    });
+                  })
+                  .finally(() => {
+                    setIsLoading(false);
+                  });
+              }}
+            />
+          </ActionPanel>
+        }
+      >
+        <List.EmptyView title="Error Fetching Documents" description={error} icon="⚠️" />
+      </List>
+    );
+  }
+
+  if (documents.length === 0) {
+    return (
+      <List isLoading={isLoading} searchBarPlaceholder={`Search documents in ${collectionName}...`} filtering={true}>
+        <List.EmptyView
+          title="No Documents Found"
+          description={`No documents found in the collection '${collectionName}'`}
+          icon="📄"
+        />
+      </List>
+    );
+  }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder={`Search filtered documents in ${collectionName}...`}
-      filtering={true}
-    >
-      <List.Section title={`Filter: ${filterDescription}`}>
-        {error ? (
-          <List.EmptyView title="Error Fetching Documents" description={error} icon="⚠️" />
-        ) : documents.length === 0 ? (
-          <List.EmptyView
-            title="No Documents Found"
-            description={`No documents found matching the filter criteria`}
-            icon="🔍"
-          />
-        ) : (
-          documents.map((doc) => (
-            <List.Item
-              key={doc.id}
-              title={doc.id}
-              subtitle={`${Object.keys(doc).length - 1} fields`}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="View Document"
-                    onAction={() => push(<DocumentDetail document={doc} collectionName={collectionName} />)}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))
-        )}
-      </List.Section>
+    <List isLoading={isLoading} searchBarPlaceholder={`Search documents in ${collectionName}...`} filtering={true}>
+      {documents.map((doc) => (
+        <List.Item
+          key={`${doc.id}-${collectionName}`}
+          title={doc.id}
+          subtitle={`${Object.keys(doc).length - 1} fields`}
+          actions={
+            <ActionPanel>
+              <Action
+                title="View Document"
+                onAction={() => push(<DocumentDetail document={doc} collectionName={collectionName} />)}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }
 
 interface DocumentDetailProps {
-  document: any;
+  document: FirestoreDocument;
   collectionName: string;
 }
 
 function DocumentDetail({ document, collectionName }: DocumentDetailProps) {
-  // Format document data for display
-  const formattedData = Object.entries(document)
-    .map(([key, value]) => {
-      if (key === "id") {
-        return `## ID: ${value}`;
-      }
-
-      let formattedValue = value;
-      if (typeof value === "object") {
-        formattedValue = "```json\n" + JSON.stringify(value, null, 2) + "\n```";
-      }
-
-      return `### ${key}\n${formattedValue}`;
-    })
-    .join("\n\n");
-
-  return (
-    <Detail
-      markdown={`# Document in ${collectionName}\n\n${formattedData}`}
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard title="Copy Document Id" content={document.id} />
-          <Action.CopyToClipboard title="Copy Document as JSON" content={JSON.stringify(document, null, 2)} />
-        </ActionPanel>
-      }
-    />
-  );
+  return <JsonViewer data={document} title={`Document in ${collectionName}`} />;
 }

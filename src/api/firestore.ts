@@ -41,7 +41,7 @@ export async function getDocuments(collectionName: string): Promise<FirestoreDoc
     const snapshot = await db.collection(collectionName).get();
     return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     }));
   } catch (error) {
     console.error(`Error fetching documents from ${collectionName}:`, error);
@@ -52,10 +52,7 @@ export async function getDocuments(collectionName: string): Promise<FirestoreDoc
 /**
  * Fetches a single document by ID
  */
-export async function getDocument(
-  collectionName: string,
-  documentId: string,
-): Promise<admin.firestore.DocumentData | null> {
+export async function getDocument(collectionName: string, documentId: string): Promise<FirestoreDocument | null> {
   const firestore = await getFirestore();
   if (!firestore) {
     throw new Error("Firestore is not initialized. Please set up your service account.");
@@ -68,7 +65,7 @@ export async function getDocument(
     }
     return {
       id: doc.id,
-      ...doc.data(),
+      ...(doc.data() as admin.firestore.DocumentData),
     };
   } catch (error) {
     console.error(`Error fetching document ${documentId} from ${collectionName}:`, error);
@@ -83,9 +80,9 @@ export async function queryDocuments(
   collectionName: string,
   field: string,
   operator: admin.firestore.WhereFilterOp,
-  value: any,
+  value: admin.firestore.DocumentData[keyof admin.firestore.DocumentData],
   limit?: number,
-): Promise<admin.firestore.DocumentData[]> {
+): Promise<FirestoreDocument[]> {
   const firestore = await getFirestore();
   if (!firestore) {
     throw new Error("Firestore is not initialized. Please set up your service account.");
@@ -113,7 +110,7 @@ export async function queryDocuments(
 /**
  * Creates a new document in a collection
  */
-export async function createDocument(collectionName: string, data: Record<string, any>): Promise<string> {
+export async function createDocument(collectionName: string, data: admin.firestore.DocumentData): Promise<string> {
   const firestore = await getFirestore();
   if (!firestore) {
     throw new Error("Firestore is not initialized. Please set up your service account.");
@@ -134,7 +131,7 @@ export async function createDocument(collectionName: string, data: Record<string
 export async function updateDocument(
   collectionName: string,
   documentId: string,
-  data: Record<string, any>,
+  data: admin.firestore.DocumentData,
 ): Promise<void> {
   const firestore = await getFirestore();
   if (!firestore) {

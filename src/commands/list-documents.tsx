@@ -1,9 +1,12 @@
 import { Action, ActionPanel, Detail, Form, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { isServiceAccountConfigured } from "../utils/firebase";
-import { getDocuments } from "../api/firestore";
+import { getCollections, getDocuments } from "../api/firestore";
+import { JsonViewer } from "../components/JsonViewer";
+import { FirestoreDocument } from "../types/firestore";
+import SetupServiceAccount from "../setup-service-account";
 
-export default function ListDocuments() {
+export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isConfigured, setIsConfigured] = useState<boolean>(false);
   const { push } = useNavigation();
@@ -48,27 +51,89 @@ export default function ListDocuments() {
   return <CollectionForm />;
 }
 
+function SetupServiceAccountView() {
+  const { pop } = useNavigation();
+
+  try {
+    return <SetupServiceAccount onComplete={pop} />;
+  } catch (error: unknown) {
+    console.error("Error loading setup component:", error);
+    return (
+      <Detail
+        markdown="# Error Loading Setup Component\n\nFailed to load the service account setup component. Please try again."
+        actions={
+          <ActionPanel>
+            <Action title="Go Back" onAction={pop} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+}
+
 function CollectionForm() {
+  const [collections, setCollections] = useState<string[]>([]);
   const [collectionName, setCollectionName] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
   const { push } = useNavigation();
 
+  useEffect(() => {
+    let isMounted = true;
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    async function fetchCollections() {
+      try {
+        const fetchedCollections = await getCollections();
+        if (isMounted) {
+          setCollections(fetchedCollections);
+          if (fetchedCollections.length > 0) {
+            setCollectionName(fetchedCollections[0]);
+          }
+          setError(undefined);
+        }
+      } catch (error) {
+        console.error("Error fetching collections:", error);
+        if (isMounted) {
+          if (retryCount < maxRetries) {
+            retryCount++;
+            setTimeout(fetchCollections, 1000 * retryCount);
+            return;
+          }
+
+          setError("Failed to fetch collections. Please try again.");
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to Fetch Collections",
+            message: "Error fetching Firestore collections",
+          });
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchCollections();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   async function handleSubmit() {
-    if (!collectionName.trim()) {
+    if (!collectionName) {
       setError("Collection name is required");
       return;
     }
-
-    setIsLoading(true);
-    setError(undefined);
 
     try {
       push(<DocumentList collectionName={collectionName} />);
     } catch (error) {
       setError("An unexpected error occurred. Please try again.");
       console.error("Error navigating to document list:", error);
-      setIsLoading(false);
     }
   }
 
@@ -77,19 +142,56 @@ function CollectionForm() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="List Documents" onSubmit={handleSubmit} />
+          {error && (
+            <Action
+              title="Retry Fetching Collections"
+              onAction={() => {
+                setIsLoading(true);
+                setError(undefined);
+                getCollections()
+                  .then((fetchedCollections) => {
+                    setCollections(fetchedCollections);
+                    if (fetchedCollections.length > 0) {
+                      setCollectionName(fetchedCollections[0]);
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error fetching collections:", error);
+                    setError("Failed to fetch collections. Please try again.");
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to Fetch Collections",
+                      message: "Error fetching Firestore collections",
+                    });
+                  })
+                  .finally(() => {
+                    setIsLoading(false);
+                  });
+              }}
+            />
+          )}
         </ActionPanel>
       }
       isLoading={isLoading}
     >
-      <Form.TextField
-        id="collectionName"
-        title="Collection Name"
-        placeholder="Enter Firestore collection name"
-        value={collectionName}
-        onChange={setCollectionName}
-        error={error}
-        autoFocus
-      />
+      {collections.length > 0 ? (
+        <Form.Dropdown
+          id="collectionName"
+          title="Collection Name"
+          value={collectionName}
+          onChange={setCollectionName}
+          error={error}
+        >
+          {collections.map((collection) => (
+            <Form.Dropdown.Item key={collection} value={collection} title={collection} />
+          ))}
+        </Form.Dropdown>
+      ) : (
+        <Form.Description
+          title="No Collections Found"
+          text={error || "No collections found in your Firestore database. Please create a collection first."}
+        />
+      )}
     </Form>
   );
 }
@@ -99,114 +201,130 @@ interface DocumentListProps {
 }
 
 function DocumentList({ collectionName }: DocumentListProps) {
-  const [documents, setDocuments] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<FirestoreDocument[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
   const { push } = useNavigation();
 
   useEffect(() => {
+    let isMounted = true;
+    let retryCount = 0;
+    const maxRetries = 2;
+
     async function fetchDocuments() {
       try {
         const docs = await getDocuments(collectionName);
-        setDocuments(docs);
-      } catch (error) {
+        if (isMounted) {
+          setDocuments(docs);
+          setError(undefined);
+        }
+      } catch (error: unknown) {
         console.error("Error fetching documents:", error);
-        setError("Failed to fetch documents. Please try again.");
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to Fetch Documents",
-          message: `Error fetching documents from ${collectionName}`,
-        });
+        if (isMounted) {
+          if (retryCount < maxRetries) {
+            retryCount++;
+            setTimeout(fetchDocuments, 1000 * retryCount);
+            return;
+          }
+
+          setError("Failed to fetch documents. Please try again.");
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to Fetch Documents",
+            message: `Error fetching documents from ${collectionName}`,
+          });
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     fetchDocuments();
+
+    return () => {
+      isMounted = false;
+    };
   }, [collectionName]);
 
-  return (
-    <List isLoading={isLoading} searchBarPlaceholder={`Search documents in ${collectionName}...`} filtering={true}>
-      {error ? (
+  if (error) {
+    return (
+      <List
+        isLoading={isLoading}
+        searchBarPlaceholder={`Search documents in ${collectionName}...`}
+        filtering={true}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Retry"
+              onAction={() => {
+                setIsLoading(true);
+                setError(undefined);
+                getDocuments(collectionName)
+                  .then((docs) => {
+                    setDocuments(docs);
+                  })
+                  .catch((error) => {
+                    console.error("Error fetching documents:", error);
+                    setError("Failed to fetch documents. Please try again.");
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to Fetch Documents",
+                      message: `Error fetching documents from ${collectionName}`,
+                    });
+                  })
+                  .finally(() => {
+                    setIsLoading(false);
+                  });
+              }}
+            />
+          </ActionPanel>
+        }
+      >
         <List.EmptyView title="Error Fetching Documents" description={error} icon="⚠️" />
-      ) : documents.length === 0 ? (
+      </List>
+    );
+  }
+
+  if (documents.length === 0) {
+    return (
+      <List isLoading={isLoading} searchBarPlaceholder={`Search documents in ${collectionName}...`} filtering={true}>
         <List.EmptyView
           title="No Documents Found"
           description={`No documents found in the collection '${collectionName}'`}
           icon="📄"
         />
-      ) : (
-        documents.map((doc) => (
-          <List.Item
-            key={doc.id}
-            title={doc.id}
-            subtitle={`${Object.keys(doc).length - 1} fields`}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="View Document"
-                  onAction={() => push(<DocumentDetail document={doc} collectionName={collectionName} />)}
-                />
-              </ActionPanel>
-            }
-          />
-        ))
-      )}
+      </List>
+    );
+  }
+
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder={`Search documents in ${collectionName}...`} filtering={true}>
+      {documents.map((doc) => (
+        <List.Item
+          key={`${doc.id}-${collectionName}`}
+          title={doc.id}
+          subtitle={`${Object.keys(doc).length - 1} fields`}
+          actions={
+            <ActionPanel>
+              <Action
+                title="View Document"
+                onAction={() => push(<DocumentDetail document={doc} collectionName={collectionName} />)}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }
 
 interface DocumentDetailProps {
-  document: any;
+  document: FirestoreDocument;
   collectionName: string;
 }
 
 function DocumentDetail({ document, collectionName }: DocumentDetailProps) {
-  // Format document data for display
-  const formattedData = Object.entries(document)
-    .map(([key, value]) => {
-      if (key === "id") {
-        return `## ID: ${value}`;
-      }
-
-      let formattedValue = value;
-      if (typeof value === "object") {
-        formattedValue = "```json\n" + JSON.stringify(value, null, 2) + "\n```";
-      }
-
-      return `### ${key}\n${formattedValue}`;
-    })
-    .join("\n\n");
-
-  return (
-    <Detail
-      markdown={`# Document in ${collectionName}\n\n${formattedData}`}
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard title="Copy Document Id" content={document.id} />
-          <Action.CopyToClipboard title="Copy Document as JSON" content={JSON.stringify(document, null, 2)} />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-function SetupServiceAccountView() {
-  const { pop } = useNavigation();
-
-  // Import the setup component dynamically to avoid circular dependencies
-  const SetupServiceAccount = require("./setup-service-account").default;
-
-  return (
-    <SetupServiceAccount
-      onComplete={() => {
-        pop();
-        showToast({
-          style: Toast.Style.Success,
-          title: "Service Account Configured",
-          message: "You can now use the Firebase Firestore Manager.",
-        });
-      }}
-    />
-  );
+  return <JsonViewer data={document} title={`Document in ${collectionName}`} />;
 }

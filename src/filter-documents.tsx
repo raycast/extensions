@@ -2,8 +2,10 @@ import { Action, ActionPanel, Detail, Form, List, showToast, Toast, useNavigatio
 import { useEffect, useState } from "react";
 import { isServiceAccountConfigured } from "./utils/firebase";
 import { getCollections, queryDocuments } from "./api/firestore";
-import * as admin from "firebase-admin";
 import { JsonViewer } from "./components/JsonViewer";
+import { FirestoreDocument } from "./types/firestore";
+import SetupServiceAccount from "./setup-service-account";
+import * as admin from "firebase-admin";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -43,9 +45,7 @@ export default function Command() {
             <Action
               title="Set up Service Account"
               onAction={() => {
-                // Import the setup component dynamically to avoid circular dependencies
-                const SetupServiceAccount = require("./setup-service-account").default;
-                push(<SetupServiceAccount />);
+                push(<SetupServiceAccountView />);
               }}
             />
           </ActionPanel>
@@ -57,12 +57,43 @@ export default function Command() {
   return <FilterForm />;
 }
 
+function SetupServiceAccountView() {
+  const { pop } = useNavigation();
+
+  try {
+    return <SetupServiceAccount onComplete={pop} />;
+  } catch (error: unknown) {
+    console.error("Error loading setup component:", error);
+    return (
+      <Detail
+        markdown="# Error Loading Setup Component\n\nFailed to load the service account setup component. Please try again."
+        actions={
+          <ActionPanel>
+            <Action title="Go Back" onAction={pop} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+}
+
+interface FilterFormState {
+  collectionName: string;
+  field: string;
+  operator: admin.firestore.WhereFilterOp;
+  value: admin.firestore.DocumentData[keyof admin.firestore.DocumentData];
+  limit: number;
+}
+
 function FilterForm() {
   const [collections, setCollections] = useState<string[]>([]);
-  const [collectionName, setCollectionName] = useState<string>("");
-  const [fieldName, setFieldName] = useState<string>("");
-  const [operator, setOperator] = useState<string>("==");
-  const [fieldValue, setFieldValue] = useState<string>("");
+  const [formState, setFormState] = useState<FilterFormState>({
+    collectionName: "",
+    field: "",
+    operator: "==",
+    value: "",
+    limit: 10,
+  });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
   const { push } = useNavigation();
@@ -78,7 +109,7 @@ function FilterForm() {
         if (isMounted) {
           setCollections(fetchedCollections);
           if (fetchedCollections.length > 0) {
-            setCollectionName(fetchedCollections[0]);
+            setFormState((prevState) => ({ ...prevState, collectionName: fetchedCollections[0] }));
           }
           setError(undefined);
         }
@@ -127,17 +158,17 @@ function FilterForm() {
   ];
 
   async function handleSubmit() {
-    if (!collectionName) {
+    if (!formState.collectionName) {
       setError("Collection name is required");
       return;
     }
 
-    if (!fieldName.trim()) {
+    if (!formState.field.trim()) {
       setError("Field name is required");
       return;
     }
 
-    if (!fieldValue.trim()) {
+    if (!formState.value.toString().trim()) {
       setError("Field value is required");
       return;
     }
@@ -146,33 +177,34 @@ function FilterForm() {
 
     try {
       // Parse the field value based on the operator
-      let parsedValue: any = fieldValue;
+      let parsedValue: admin.firestore.DocumentData[keyof admin.firestore.DocumentData] = formState.value;
 
       // Try to parse as JSON if it looks like an array or object
       if (
-        (fieldValue.startsWith("[") && fieldValue.endsWith("]")) ||
-        (fieldValue.startsWith("{") && fieldValue.endsWith("}"))
+        (formState.value.toString().startsWith("[") && formState.value.toString().endsWith("]")) ||
+        (formState.value.toString().startsWith("{") && formState.value.toString().endsWith("}"))
       ) {
         try {
-          parsedValue = JSON.parse(fieldValue);
+          parsedValue = JSON.parse(formState.value.toString());
         } catch (e) {
           // If parsing fails, use the original string value
           console.error("Failed to parse JSON value:", e);
         }
-      } else if (fieldValue === "true") {
+      } else if (formState.value === "true") {
         parsedValue = true;
-      } else if (fieldValue === "false") {
+      } else if (formState.value === "false") {
         parsedValue = false;
-      } else if (!isNaN(Number(fieldValue))) {
-        parsedValue = Number(fieldValue);
+      } else if (!isNaN(Number(formState.value))) {
+        parsedValue = Number(formState.value);
       }
 
       push(
         <FilteredDocumentList
-          collectionName={collectionName}
-          fieldName={fieldName}
-          operator={operator as admin.firestore.WhereFilterOp}
-          fieldValue={parsedValue}
+          collectionName={formState.collectionName}
+          field={formState.field}
+          operator={formState.operator}
+          value={parsedValue}
+          limit={formState.limit}
         />,
       );
     } catch (error) {
@@ -196,7 +228,7 @@ function FilterForm() {
                   .then((fetchedCollections) => {
                     setCollections(fetchedCollections);
                     if (fetchedCollections.length > 0) {
-                      setCollectionName(fetchedCollections[0]);
+                      setFormState((prevState) => ({ ...prevState, collectionName: fetchedCollections[0] }));
                     }
                   })
                   .catch((error) => {
@@ -222,8 +254,8 @@ function FilterForm() {
         <Form.Dropdown
           id="collectionName"
           title="Collection Name"
-          value={collectionName}
-          onChange={setCollectionName}
+          value={formState.collectionName}
+          onChange={(value) => setFormState((prevState) => ({ ...prevState, collectionName: value }))}
           error={error}
         >
           {collections.map((collection) => (
@@ -237,24 +269,44 @@ function FilterForm() {
         />
       )}
       <Form.TextField
-        id="fieldName"
+        id="field"
         title="Field Name"
         placeholder="Enter field name to filter by"
-        value={fieldName}
-        onChange={setFieldName}
+        value={formState.field}
+        onChange={(value) => setFormState((prevState) => ({ ...prevState, field: value }))}
       />
-      <Form.Dropdown id="operator" title="Comparison Operator" value={operator} onChange={setOperator}>
+      <Form.Dropdown
+        id="operator"
+        title="Comparison Operator"
+        value={formState.operator}
+        onChange={(value) =>
+          setFormState((prevState) => ({ ...prevState, operator: value as admin.firestore.WhereFilterOp }))
+        }
+        error={error}
+      >
         {operators.map((op) => (
           <Form.Dropdown.Item key={op.value} value={op.value} title={op.label} />
         ))}
       </Form.Dropdown>
       <Form.TextField
-        id="fieldValue"
+        id="value"
         title="Field Value"
         placeholder="Enter value to compare against"
-        value={fieldValue}
-        onChange={setFieldValue}
+        value={formState.value.toString()}
+        onChange={(value) =>
+          setFormState((prevState) => ({
+            ...prevState,
+            value: value as admin.firestore.DocumentData[keyof admin.firestore.DocumentData],
+          }))
+        }
         info='For arrays or objects, use JSON format: [1,2,3] or {"key":"value"}'
+      />
+      <Form.TextField
+        id="limit"
+        title="Limit"
+        placeholder="Enter the number of documents to fetch"
+        value={formState.limit.toString()}
+        onChange={(value) => setFormState((prevState) => ({ ...prevState, limit: Number(value) }))}
       />
     </Form>
   );
@@ -262,13 +314,14 @@ function FilterForm() {
 
 interface FilteredDocumentListProps {
   collectionName: string;
-  fieldName: string;
+  field: string;
   operator: admin.firestore.WhereFilterOp;
-  fieldValue: any;
+  value: admin.firestore.DocumentData[keyof admin.firestore.DocumentData];
+  limit: number;
 }
 
-function FilteredDocumentList({ collectionName, fieldName, operator, fieldValue }: FilteredDocumentListProps) {
-  const [documents, setDocuments] = useState<any[]>([]);
+function FilteredDocumentList({ collectionName, field, operator, value, limit }: FilteredDocumentListProps) {
+  const [documents, setDocuments] = useState<FirestoreDocument[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
   const { push } = useNavigation();
@@ -280,17 +333,16 @@ function FilteredDocumentList({ collectionName, fieldName, operator, fieldValue 
 
     async function fetchDocuments() {
       try {
-        const docs = await queryDocuments(collectionName, fieldName, operator, fieldValue);
+        const docs = await queryDocuments(collectionName, field, operator, value, limit);
         if (isMounted) {
           setDocuments(docs);
           setError(undefined);
         }
-      } catch (error) {
-        console.error("Error fetching filtered documents:", error);
+      } catch (error: unknown) {
+        console.error("Error fetching documents:", error);
         if (isMounted) {
           if (retryCount < maxRetries) {
             retryCount++;
-            // Wait a bit longer between retries
             setTimeout(fetchDocuments, 1000 * retryCount);
             return;
           }
@@ -314,11 +366,11 @@ function FilteredDocumentList({ collectionName, fieldName, operator, fieldValue 
     return () => {
       isMounted = false;
     };
-  }, [collectionName, fieldName, operator, fieldValue]);
+  }, [collectionName, field, operator, value, limit]);
 
   // Format the filter criteria for display
-  const formattedValue = typeof fieldValue === "object" ? JSON.stringify(fieldValue) : String(fieldValue);
-  const filterDescription = `${fieldName} ${operator} ${formattedValue}`;
+  const formattedValue = typeof value === "object" ? JSON.stringify(value) : String(value);
+  const filterDescription = `${field} ${operator} ${formattedValue}`;
 
   if (error) {
     return (
@@ -333,7 +385,7 @@ function FilteredDocumentList({ collectionName, fieldName, operator, fieldValue 
               onAction={() => {
                 setIsLoading(true);
                 setError(undefined);
-                queryDocuments(collectionName, fieldName, operator, fieldValue)
+                queryDocuments(collectionName, field, operator, value, limit)
                   .then((docs) => {
                     setDocuments(docs);
                   })
@@ -384,7 +436,7 @@ function FilteredDocumentList({ collectionName, fieldName, operator, fieldValue 
       <List.Section title={`Filter: ${filterDescription}`}>
         {documents.map((doc) => (
           <List.Item
-            key={`${doc.id}-${collectionName}-${fieldName}`}
+            key={`${doc.id}-${collectionName}-${field}`}
             title={doc.id}
             subtitle={`${Object.keys(doc).length - 1} fields`}
             actions={
@@ -403,7 +455,7 @@ function FilteredDocumentList({ collectionName, fieldName, operator, fieldValue 
 }
 
 interface DocumentDetailProps {
-  document: any;
+  document: FirestoreDocument;
   collectionName: string;
 }
 

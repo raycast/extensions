@@ -5,6 +5,7 @@ import { getCollections, getDocuments } from "./api/firestore";
 import { JsonViewer } from "./components/JsonViewer";
 import { showFailureToast } from "@raycast/utils";
 import { FirestoreDocument } from "./types/firestore";
+import SetupServiceAccount from "./setup-service-account";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -211,7 +212,7 @@ function DocumentList({ collectionName }: DocumentListProps) {
           setError("Failed to fetch documents. Please try again.");
           await showFailureToast({
             title: "Failed to Fetch Documents",
-            message: `Error fetching documents from ${collectionName}`
+            message: `Error fetching documents from ${collectionName}`,
           });
         }
       } finally {
@@ -313,8 +314,6 @@ function SetupServiceAccountView() {
   const { pop } = useNavigation();
 
   try {
-    // Import the setup component dynamically to avoid circular dependencies
-    const SetupServiceAccount = require("./setup-service-account").default;
     return <SetupServiceAccount onComplete={pop} />;
   } catch (error: unknown) {
     console.error("Error loading setup component:", error);

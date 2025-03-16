@@ -2,7 +2,7 @@ import * as admin from "firebase-admin";
 
 export interface FirestoreDocument {
   id: string;
-  [key: string]: any; // Allow dynamic fields since Firestore documents are schemaless
+  [key: string]: admin.firestore.DocumentData[keyof admin.firestore.DocumentData];
 }
 
-export type WhereFilterOp = admin.firestore.WhereFilterOp; 
+export type WhereFilterOp = admin.firestore.WhereFilterOp;
