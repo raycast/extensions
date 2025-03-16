@@ -33,12 +33,40 @@ The project follows a component-based architecture:
 
 When implementing a new service:
 
-1. Study the IAM and Storage services as reference implementations
+1. Study the IAM, Storage, and ServiceHub services as reference implementations
 2. Follow the same directory structure and code organization
 3. Implement consistent UI patterns for resource views
 4. Reuse utility functions where appropriate
 5. Add appropriate error handling and loading states
 6. Break down large components into smaller, reusable pieces
+
+## Key Services
+
+### IAM Service
+
+The Identity and Access Management (IAM) service provides functionality for managing access control in Google Cloud.
+
+### Storage Service
+
+The Cloud Storage service provides functionality for managing storage buckets and objects.
+
+### ServiceHub
+
+The ServiceHub service provides functionality for managing Google Cloud service activation and API enablement. It allows users to:
+
+- View all available Google Cloud services
+- Enable and disable services
+- View service details and dependencies
+- Filter services by category and status
+
+## Utilities
+
+The project includes several utility modules to avoid code duplication:
+
+- `iamRoles.ts`: Provides information about IAM roles without needing to fetch from the API
+- `gcpServices.ts`: Contains comprehensive information about Google Cloud services and APIs
+- `FileUtils.ts`: Handles file system operations
+- Other utilities for UI components and Raycast integration
 
 ## Code Style
 

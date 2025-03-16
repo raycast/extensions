@@ -82,6 +82,37 @@ The `src/utils/` directory contains reusable utility functions:
 - `FileDownloader.tsx`: File download component
 - `NativeFilePicker.ts`: Native file system integration
 - `CodeEditor.tsx`: Code editing component
+- `gcpServices.ts`: Google Cloud services and APIs information
+
+## Key Services
+
+### IAM Service
+
+The Identity and Access Management (IAM) service provides functionality for managing access control in Google Cloud. It includes:
+
+- Role management
+- Policy binding
+- Principal management
+
+### Storage Service
+
+The Cloud Storage service provides functionality for managing storage buckets and objects. It includes:
+
+- Bucket management
+- Object management
+- Access control
+- Lifecycle management
+
+### ServiceHub
+
+The ServiceHub service provides functionality for managing Google Cloud service activation. It includes:
+
+- Listing available services
+- Enabling and disabling services
+- Viewing service details
+- Categorizing services by type
+
+The ServiceHub uses the `gcpServices.ts` utility to provide comprehensive information about Google Cloud services without needing to fetch this data from the API each time.
 
 ## Adding New Services
 

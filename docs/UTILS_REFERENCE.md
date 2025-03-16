@@ -130,4 +130,47 @@ Native file system integration.
 | `showOpenDialog` | Shows file open dialog | `options: OpenDialogOptions` | `Promise<string[]>` |
 | `showSaveDialog` | Shows file save dialog | `options: SaveDialogOptions` | `Promise<string \| undefined>` |
 | `readTextFile` | Reads text from a file | `path: string` | `Promise<string>` |
-| `writeTextFile` | Writes text to a file | `path: string, content: string` | `Promise<void>` | 
+| `writeTextFile` | Writes text to a file | `path: string, content: string` | `Promise<void>` |
+
+## gcpServices.ts
+
+Google Cloud Platform services and APIs information.
+
+### Interfaces and Enums
+
+| Name | Description | Type |
+|------|-------------|------|
+| `GCPServiceInfo` | Information about a GCP service | Interface with name, displayName, description, category, etc. |
+| `GCPServiceCategory` | Categories of GCP services | Enum with values like COMPUTE, STORAGE, DATABASE, etc. |
+
+### Constants
+
+| Constant | Description | Type |
+|----------|-------------|------|
+| `predefinedServices` | Map of predefined GCP services | `Record<string, GCPServiceInfo>` |
+
+### Functions
+
+| Function | Description | Parameters | Return Value |
+|----------|-------------|------------|--------------|
+| `getServiceInfo` | Gets information about a service | `serviceName: string` | `GCPServiceInfo` |
+| `formatServiceName` | Formats a service name for display | `serviceName: string` | `string` |
+| `getServicesByCategory` | Gets services in a category | `category: GCPServiceCategory` | `GCPServiceInfo[]` |
+| `getAllCategories` | Gets all service categories | None | `string[]` |
+| `getAllServices` | Gets all services | None | `GCPServiceInfo[]` |
+
+### Usage
+
+```typescript
+import { getServiceInfo, GCPServiceCategory, getAllServices } from "../utils/gcpServices";
+
+// Get information about a specific service
+const serviceInfo = getServiceInfo("compute.googleapis.com");
+console.log(serviceInfo.displayName); // "Compute Engine"
+
+// Get all services in a category
+const computeServices = getServicesByCategory(GCPServiceCategory.COMPUTE);
+
+// Get all services
+const allServices = getAllServices();
+``` 

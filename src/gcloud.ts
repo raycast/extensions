@@ -18,7 +18,8 @@ export async function executeGcloudCommand(gcloudPath: string, command: string, 
     
     console.log(`Executing command: ${fullCommand}`);
     
-    const { stdout, stderr } = await execPromise(fullCommand);
+    // Increase maxBuffer to handle large outputs (10MB)
+    const { stdout, stderr } = await execPromise(fullCommand, { maxBuffer: 10 * 1024 * 1024 });
     
     if (stderr) {
       console.warn(`Command produced stderr: ${stderr}`);
