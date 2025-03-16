@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { convertCommand, PackageManager } from "./lib/converter";
+import { showFailureToast } from "@raycast/utils";
 
 interface Preferences {
   defaultPackageManager: PackageManager;
