@@ -35,7 +35,6 @@
       "title": "Manage Time Zones",
       "subtitle": "Update/Delete Cities",
       "description": "Open a list to manage and customize team time zones.",
-      "template": "form",
       "mode": "view"
     },
     {
@@ -43,7 +42,6 @@
       "title": "Edit Label",
       "subtitle": "Modify Team Time Label",
       "description": "Update how time zones are displayed in the list.",
-      "template": "form",
       "mode": "view"
     },
     {

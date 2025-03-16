@@ -12,31 +12,19 @@ const flattenAvailableCities = (): Array<Omit<TimeEntry, "id"> & { state?: strin
   const data = worldCitiesTimezones as CountryData[];
 
   return data.flatMap((country) => {
-    const baseCity = {
-      country: country.country,
-      isoCode: country.isoCode,
-    };
+    const baseCity = { country: country.country, isoCode: country.isoCode };
 
     if (country.states) {
       return country.states.flatMap((state) =>
         state.timeZones.flatMap((tz) =>
-          tz.cities.map((cityName) => ({
-            ...baseCity,
-            city: cityName,
-            state: state.state,
-            timeZone: tz.zone,
-          })),
+          tz.cities.map((cityName) => ({ ...baseCity, city: cityName, state: state.state, timeZone: tz.zone })),
         ),
       );
     }
 
     if (country.timeZones) {
       return country.timeZones.flatMap((tz) =>
-        tz.cities.map((cityName) => ({
-          ...baseCity,
-          city: cityName,
-          timeZone: tz.zone,
-        })),
+        tz.cities.map((cityName) => ({ ...baseCity, city: cityName, timeZone: tz.zone })),
       );
     }
 
@@ -79,7 +67,11 @@ const EditTeamTime = () => {
 
       const newEntry: TimeEntry = { id: nanoid(), ...cityData };
       setSavedCities([...(savedCities ?? []), newEntry]);
-      await launchCommand({ name: "teamTimeOverview", type: LaunchType.Background });
+      try {
+        await launchCommand({ name: "teamTimeOverview", type: LaunchType.Background });
+      } catch (launchError) {
+        console.error("Failed to launch command teamTimeOverview:", launchError);
+      }
     },
     [savedCities, setSavedCities],
   );
@@ -88,7 +80,11 @@ const EditTeamTime = () => {
     async (id: string) => {
       const newSavedCities = savedCities?.filter((entry) => entry.id !== id) ?? [];
       await setSavedCities(newSavedCities);
-      await launchCommand({ name: "teamTimeOverview", type: LaunchType.Background });
+      try {
+        await launchCommand({ name: "teamTimeOverview", type: LaunchType.Background });
+      } catch (launchError) {
+        console.error("Failed to launch command teamTimeOverview:", launchError);
+      }
     },
     [savedCities, setSavedCities],
   );

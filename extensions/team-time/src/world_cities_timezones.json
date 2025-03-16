@@ -585,27 +585,6 @@
     ]
   },
   {
-    "country": "Mexico",
-    "isoCode": "MX",
-    "timeZones": [
-      {
-        "zone": "America/Mexico_City",
-        "cities": [
-          "Mexico City",
-          "Guadalajara",
-          "Monterrey",
-          "Puebla",
-          "Tijuana",
-          "León",
-          "Ciudad Juárez",
-          "Torreón",
-          "San Nicolás de los Garza",
-          "Querétaro"
-        ]
-      }
-    ]
-  },
-  {
     "country": "Afghanistan",
     "isoCode": "AF",
     "timeZones": [
@@ -836,7 +815,6 @@
           "Rio de Janeiro",
           "Brasília",
           "Salvador",
-          "Fortaleza",
           "Belo Horizonte",
           "Curitiba",
           "Recife",
@@ -1870,7 +1848,6 @@
           "Guadalajara",
           "Monterrey",
           "Puebla",
-          "Tijuana",
           "León",
           "Ciudad Juárez",
           "Torreón",

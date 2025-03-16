@@ -27,7 +27,12 @@ export default function EditTeamTimeFlags() {
         computeTimeGroups(),
         LocalStorage.getItem<string>("team_time_custom_mapping"),
       ]);
-      const mapping = mappingRaw ? JSON.parse(mappingRaw) : {};
+      let mapping = {};
+      try {
+        mapping = mappingRaw ? JSON.parse(mappingRaw) : {};
+      } catch (parseError) {
+        console.error("Failed to parse custom mapping:", parseError);
+      }
 
       setGroups(timeGroups);
       setCustomMapping(mapping);
@@ -51,7 +56,11 @@ export default function EditTeamTimeFlags() {
     try {
       await LocalStorage.setItem("team_time_custom_mapping", JSON.stringify(customMapping));
       await showToast(Toast.Style.Success, "Custom flags saved");
-      await launchCommand({ name: "teamTimeOverview", type: LaunchType.Background });
+      try {
+        await launchCommand({ name: "teamTimeOverview", type: LaunchType.Background });
+      } catch (launchError) {
+        console.error("Failed to launch command teamTimeOverview:", launchError);
+      }
     } catch (error) {
       console.error("Error saving data:", error);
       await showToast(Toast.Style.Failure, "Failed to save custom flags");
@@ -62,7 +71,11 @@ export default function EditTeamTimeFlags() {
     try {
       await LocalStorage.removeItem("team_time_custom_mapping");
       setCustomMapping({});
-      await launchCommand({ name: "teamTimeOverview", type: LaunchType.Background });
+      try {
+        await launchCommand({ name: "teamTimeOverview", type: LaunchType.Background });
+      } catch (launchError) {
+        console.error("Failed to launch command teamTimeOverview:", launchError);
+      }
       await showToast(Toast.Style.Success, "Reset to default");
     } catch (error) {
       console.error("Error resetting data:", error);
@@ -73,13 +86,7 @@ export default function EditTeamTimeFlags() {
   if (groups.length === 0) {
     return (
       <List>
-        {groups.length === 0 ? (
-          <List.EmptyView title="No Groups Found" description="Go to Manage Time Zones to add cities" />
-        ) : (
-          groups.map((group) => (
-            <List.Item key={group.signature} title={group.cities.join(", ")} subtitle={group.time} />
-          ))
-        )}
+        <List.EmptyView title="No Groups Found" description="Go to Manage Time Zones to add cities" />
       </List>
     );
   }

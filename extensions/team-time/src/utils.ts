@@ -1,6 +1,6 @@
 import { format, toZonedTime } from "date-fns-tz";
 import { updateCommandMetadata, LocalStorage, getPreferenceValues } from "@raycast/api";
-import { FormatTimePreference, LocationEntry, TimeEntry, TimeGroup } from "./types";
+import { LocationEntry, TimeEntry, TimeGroup } from "./types";
 
 /** Convert a two-letter ISO code like "DE" into a flag emoji */
 export function getFlagEmoji(isoCode: string): string {
@@ -8,7 +8,7 @@ export function getFlagEmoji(isoCode: string): string {
 }
 
 export function formatLocalTime(timeZone: string): string {
-  const { timeFormat } = getPreferenceValues<FormatTimePreference>();
+  const { timeFormat } = getPreferenceValues<ExtensionPreferences>();
   const now = new Date();
   const localDate = toZonedTime(now, timeZone);
 
@@ -26,7 +26,12 @@ export function formatLocalTime(timeZone: string): string {
  */
 export async function computeTimeGroups(): Promise<TimeGroup[]> {
   const raw = await LocalStorage.getItem<string>("team_time_cities");
-  const savedCities: TimeEntry[] = raw ? JSON.parse(raw) : [];
+  let savedCities: TimeEntry[] = [];
+  try {
+    savedCities = raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    console.error("Failed to parse saved cities:", e);
+  }
 
   // Step 1: Group by ephemeral localTime
   const ephemeralGroups: Record<string, TimeEntry[]> = {};
@@ -88,7 +93,13 @@ export async function computeTimeGroups(): Promise<TimeGroup[]> {
  */
 export async function updateTeamTimeLabel() {
   const mappingRaw = await LocalStorage.getItem<string>("team_time_custom_mapping");
-  const customMapping: Record<string, string> = mappingRaw ? JSON.parse(mappingRaw) : {};
+  let customMapping: Record<string, string> = {};
+
+  try {
+    customMapping = mappingRaw ? JSON.parse(mappingRaw) : {};
+  } catch (e) {
+    console.error("Failed to parse custom mapping:", e);
+  }
 
   const groups = await computeTimeGroups();
 
@@ -99,7 +110,11 @@ export async function updateTeamTimeLabel() {
   });
 
   const subtitle = subtitleParts.join("  ");
-  await updateCommandMetadata({ subtitle });
+  try {
+    await updateCommandMetadata({ subtitle });
+  } catch (e) {
+    console.error("Failed to update command metadata:", e);
+  }
 }
 
 export const formatLocation = (entry: LocationEntry) => {

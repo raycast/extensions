@@ -32,8 +32,4 @@ export type TimeGroup = {
   combinedFlags: string;
 };
 
-export type FormatTimePreference = {
-  timeFormat: "24h" | "12h";
-};
-
 export type LocationEntry = TimeEntry | (Omit<TimeEntry, "id"> & { state?: string });
