@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin";
 import { getFirestore } from "../utils/firebase";
+import { FirestoreDocument } from "../types/firestore";
 
 /**
  * Helper function to add a small delay
@@ -30,24 +31,17 @@ export async function getCollections(): Promise<string[]> {
 /**
  * Fetches all documents from a collection
  */
-export async function getDocuments(collectionName: string, limit?: number): Promise<admin.firestore.DocumentData[]> {
-  const firestore = await getFirestore();
-  if (!firestore) {
+export async function getDocuments(collectionName: string): Promise<FirestoreDocument[]> {
+  const db = await getFirestore();
+  if (!db) {
     throw new Error("Firestore is not initialized. Please set up your service account.");
   }
 
   try {
-    let query: admin.firestore.Query = firestore.collection(collectionName);
-
-    // Apply limit if provided
-    if (limit !== undefined && limit > 0) {
-      query = query.limit(limit);
-    }
-
-    const snapshot = await query.get();
-    return snapshot.docs.map((doc) => ({
+    const snapshot = await db.collection(collectionName).get();
+    return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
       id: doc.id,
-      ...doc.data(),
+      ...doc.data()
     }));
   } catch (error) {
     console.error(`Error fetching documents from ${collectionName}:`, error);

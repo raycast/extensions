@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { isServiceAccountConfigured } from "./utils/firebase";
 import { getCollections, getDocuments } from "./api/firestore";
 import { JsonViewer } from "./components/JsonViewer";
+import { showFailureToast } from "@raycast/utils";
+import { FirestoreDocument } from "./types/firestore";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -180,7 +182,7 @@ interface DocumentListProps {
 }
 
 function DocumentList({ collectionName }: DocumentListProps) {
-  const [documents, setDocuments] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<FirestoreDocument[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
   const { push } = useNavigation();
@@ -197,21 +199,19 @@ function DocumentList({ collectionName }: DocumentListProps) {
           setDocuments(docs);
           setError(undefined);
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("Error fetching documents:", error);
         if (isMounted) {
           if (retryCount < maxRetries) {
             retryCount++;
-            // Wait a bit longer between retries
             setTimeout(fetchDocuments, 1000 * retryCount);
             return;
           }
 
           setError("Failed to fetch documents. Please try again.");
-          await showToast({
-            style: Toast.Style.Failure,
+          await showFailureToast({
             title: "Failed to Fetch Documents",
-            message: `Error fetching documents from ${collectionName}`,
+            message: `Error fetching documents from ${collectionName}`
           });
         }
       } finally {
@@ -301,7 +301,7 @@ function DocumentList({ collectionName }: DocumentListProps) {
 }
 
 interface DocumentDetailProps {
-  document: any;
+  document: FirestoreDocument;
   collectionName: string;
 }
 
@@ -312,19 +312,21 @@ function DocumentDetail({ document, collectionName }: DocumentDetailProps) {
 function SetupServiceAccountView() {
   const { pop } = useNavigation();
 
-  // Import the setup component dynamically to avoid circular dependencies
-  const SetupServiceAccount = require("./setup-service-account").default;
-
-  return (
-    <SetupServiceAccount
-      onComplete={() => {
-        pop();
-        showToast({
-          style: Toast.Style.Success,
-          title: "Service Account Configured",
-          message: "You can now use the Firebase Firestore Manager.",
-        });
-      }}
-    />
-  );
+  try {
+    // Import the setup component dynamically to avoid circular dependencies
+    const SetupServiceAccount = require("./setup-service-account").default;
+    return <SetupServiceAccount onComplete={pop} />;
+  } catch (error: unknown) {
+    console.error("Error loading setup component:", error);
+    return (
+      <Detail
+        markdown="# Error Loading Setup Component\n\nFailed to load the service account setup component. Please try again."
+        actions={
+          <ActionPanel>
+            <Action title="Go Back" onAction={pop} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 }
