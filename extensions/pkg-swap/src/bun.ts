@@ -1,5 +1,9 @@
 import { convertCommand } from "./lib/converter";
 
 export default async function command() {
-  await convertCommand("npm", "bun");
+  try {
+    await convertCommand("npm", "bun");
+  } catch (error) {
+    await showFailureToast("Failed to convert to bun", error);
+  }
 }
