@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, Form, useNavigation, Color } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, Form, useNavigation, Color, Cache } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -14,6 +14,9 @@ import CachedProjectView from "./views/CachedProjectView";
 
 const execPromise = promisify(exec);
 const GCLOUD_PATH = "/usr/local/bin/gcloud";
+
+// Create a navigation cache instance
+const navigationCache = new Cache({ namespace: "navigation-state" });
 
 interface Preferences {
   projectId?: string;
@@ -58,6 +61,16 @@ export default function Command() {
 
   // New function to initialize from cache
   async function initializeFromCache() {
+    // Check if we should show the projects list instead of the cached project view
+    const showProjectsList = navigationCache.get("showProjectsList");
+    if (showProjectsList === "true") {
+      // Clear the flag
+      navigationCache.remove("showProjectsList");
+      // Skip the cached project view
+      checkAuthStatus();
+      return;
+    }
+    
     // Try to get authentication status from cache
     const cachedAuth = CacheManager.getAuthStatus();
     

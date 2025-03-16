@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, useNavigation, showToast, Toast, Color } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, useNavigation, showToast, Toast, Color, Cache } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { CacheManager, Project } from "../utils/CacheManager";
 import ProjectView from "../ProjectView";
@@ -7,6 +7,9 @@ import { executeGcloudCommand } from "../gcloud";
 interface CachedProjectViewProps {
   gcloudPath: string;
 }
+
+// Create a navigation cache instance
+const navigationCache = new Cache({ namespace: "navigation-state" });
 
 export default function CachedProjectView({ gcloudPath }: CachedProjectViewProps) {
   const [isLoading, setIsLoading] = useState(true);
@@ -59,17 +62,20 @@ export default function CachedProjectView({ gcloudPath }: CachedProjectViewProps
     } else if (shouldNavigate.action === "select" && shouldNavigate.projectId) {
       CacheManager.saveSelectedProject(shouldNavigate.projectId);
       push(<ProjectView projectId={shouldNavigate.projectId} gcloudPath={gcloudPath} />);
-    } else if (shouldNavigate.action === "new" || shouldNavigate.action === "clear") {
-      if (shouldNavigate.action === "new") {
-        CacheManager.clearProjectCache();
-      } else if (shouldNavigate.action === "clear") {
-        CacheManager.clearAllCaches();
-        showToast({
-          style: Toast.Style.Success,
-          title: "Cache cleared",
-          message: "All cached data has been cleared"
-        });
-      }
+    } else if (shouldNavigate.action === "new") {
+      // Instead of popping, we need to clear the project cache and go back to the main view
+      CacheManager.clearProjectCache();
+      // Signal to the parent component that we want to show the projects list
+      navigationCache.set("showProjectsList", "true");
+      pop();
+    } else if (shouldNavigate.action === "clear") {
+      CacheManager.clearAllCaches();
+      showToast({
+        style: Toast.Style.Success,
+        title: "Cache cleared",
+        message: "All cached data has been cleared"
+      });
+      navigationCache.set("showProjectsList", "true");
       pop();
     }
 
