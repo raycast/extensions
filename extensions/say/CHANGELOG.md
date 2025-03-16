@@ -1,5 +1,10 @@
 # Say - Text to Speech Changelog
 
+## [Routine Maintenance] - {PR_MERGE_DATE}
+
+- Add FAQs
+- Bump all dependencies to the latest
+
 ## [Enhancement] - 2025-01-08
 
 - Suppress error message if argument is empty
