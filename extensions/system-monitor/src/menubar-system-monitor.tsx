@@ -141,12 +141,9 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Network Usage"
           subtitle={
-            `↓ ${networkUsage?.download !== undefined
-              ? formatBytes(networkUsage.download)
-              : "0 B"}/s ↑ ${networkUsage?.upload !== undefined
-                ? formatBytes(networkUsage.upload)
-                : "0 B"}/s`
-              || "Loading..."
+            `↓ ${networkUsage?.download !== undefined ? formatBytes(networkUsage.download) : "0 B"}/s ↑ ${
+              networkUsage?.upload !== undefined ? formatBytes(networkUsage.upload) : "0 B"
+            }/s` || "Loading..."
           }
           icon={Icon.Network}
           onAction={() => runAppleScript(openActivityMonitorAppleScript(5))}
