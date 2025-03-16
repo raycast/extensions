@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { Action, ActionPanel, Detail, getPreferenceValues, Icon, Color } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { Preferences, PlaceDetails } from "../types";
-import { getPlaceDetails, getStaticMapUrl } from "../utils/googlePlacesApi";
-import { makeSearchURL } from "../utils/url";
+import { getPlaceDetails } from "../utils/googlePlacesApi";
 import { formatPriceLevel, formatRating } from "../utils/common";
+import { makeSearchURL } from "../utils/url";
 import { PlaceActions } from "./placeActions";
+import { renderSingleLocationMap } from "../utils/mapRenderer";
 
 interface PlaceDetailViewProps {
   placeId: string;
@@ -15,6 +16,7 @@ interface PlaceDetailViewProps {
 export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [placeDetails, setPlaceDetails] = useState<PlaceDetails | null>(null);
+  const [markdown, setMarkdown] = useState("");
   const preferences = getPreferenceValues<Preferences>();
 
   // Fetch place details when the component mounts
@@ -35,16 +37,17 @@ export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
   }, [placeId]);
 
   // Generate markdown for place details
-  const generateMarkdown = (): string => {
-    if (!placeDetails) return "# Loading...";
+  useEffect(() => {
+    if (!placeDetails) return;
 
     const googleMapsUrl = makeSearchURL(encodeURIComponent(`${placeDetails.name} ${placeDetails.address}`));
-    const mapImage = preferences.showMapInSidebar
-      ? `\n\n[![Map](${getStaticMapUrl(placeDetails.location, 15, [
-          { lat: placeDetails.location.lat, lng: placeDetails.location.lng },
-        ])})](${googleMapsUrl})`
-      : "";
 
+    // Use the new map renderer utility instead of directly calling getStaticMapUrl
+    const mapPromise = preferences.showMapInSidebar
+      ? renderSingleLocationMap(placeDetails.location, 15, true, `Map of ${placeDetails.name}`, googleMapsUrl)
+      : Promise.resolve("");
+
+    // We need to handle the async nature of the map renderer
     let markdown = `# ${placeDetails.name}\n\n`;
     markdown +=
       "### " +
@@ -56,7 +59,8 @@ export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
         ? `${placeDetails.types[0].replace(/\b\w/g, (l) => l.toUpperCase()).replace(/_/g, " ")}\n\n`
         : "";
 
-    markdown += mapImage + "\n\n";
+    // Add a placeholder for the map that will be replaced asynchronously
+    markdown += preferences.showMapInSidebar ? "[MAP_PLACEHOLDER]\n\n" : "\n\n";
 
     if (placeDetails.reviews && placeDetails.reviews.length > 0) {
       markdown += "\n*\t*\t*\t\n";
@@ -69,13 +73,26 @@ export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
       });
     }
 
-    return markdown;
-  };
+    setMarkdown(markdown);
+
+    mapPromise
+      .then((mapMarkdown) => {
+        if (mapMarkdown) {
+          setMarkdown((prevMarkdown) => {
+            // Replace the [MAP_PLACEHOLDER] with the actual map
+            return prevMarkdown.replace("[MAP_PLACEHOLDER]", mapMarkdown);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error rendering map:", error);
+      });
+  }, [placeDetails, preferences.showMapInSidebar]);
 
   return (
     <Detail
       isLoading={isLoading}
-      markdown={generateMarkdown()}
+      markdown={markdown}
       metadata={
         placeDetails && (
           <Detail.Metadata>

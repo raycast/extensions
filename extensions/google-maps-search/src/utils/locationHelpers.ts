@@ -50,17 +50,6 @@ export function isValidLocation(location: unknown): location is { lat: number; l
 }
 
 /**
- * Format coordinates as a string
- * @param lat Latitude
- * @param lng Longitude
- * @returns Formatted coordinates string
- * @deprecated Use formatLocation(lat, lng) instead
- */
-export function formatCoordinates(lat: number, lng: number): string {
-  return formatLocation(lat, lng);
-}
-
-/**
  * Calculate the distance between two points using the Haversine formula
  * @param lat1 Latitude of first point
  * @param lng1 Longitude of first point

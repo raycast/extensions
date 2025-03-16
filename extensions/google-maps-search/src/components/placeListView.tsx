@@ -2,7 +2,8 @@ import { List, Color } from "@raycast/api";
 import { PlaceSearchResult } from "../types";
 import { formatRating, formatDistance, calculateDistance } from "../utils/common";
 import { PlaceActions } from "./placeActions";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
+import { debounce } from "../helpers/debounce";
 
 interface PlaceListViewProps {
   places: PlaceSearchResult[];
@@ -13,6 +14,9 @@ interface PlaceListViewProps {
   originLocation?: { lat: number; lng: number };
   formatPlaceTypes?: (types: string[]) => string;
 }
+
+// Delay in milliseconds before showing the empty view
+const EMPTY_VIEW_DELAY = 1000;
 
 export function PlaceListView({
   places,
@@ -27,6 +31,31 @@ export function PlaceListView({
       .map((type) => type.replace(/_/g, " "))
       .join(", "),
 }: PlaceListViewProps) {
+  // State to track whether to show the empty view
+  const [showEmptyView, setShowEmptyView] = useState(false);
+
+  // Create a debounced function to set the empty view state
+  // This will only be created once when the component mounts
+  const debouncedSetEmptyView = useCallback(
+    debounce((isEmpty: boolean) => {
+      setShowEmptyView(isEmpty);
+      return true; // Return value for the Promise
+    }, EMPTY_VIEW_DELAY),
+    []
+  );
+
+  // Update the empty view state when loading or places change
+  useEffect(() => {
+    // If loading or we have places, don't show empty view
+    if (isLoading || places.length > 0) {
+      setShowEmptyView(false);
+      return;
+    }
+
+    // If not loading and no places, debounce showing the empty view
+    debouncedSetEmptyView(true);
+  }, [isLoading, places.length, debouncedSetEmptyView]);
+
   // Memoize distance calculations to avoid recalculating on every render
   const distanceMap = useMemo(() => {
     if (!originLocation) return {};
@@ -48,7 +77,7 @@ export function PlaceListView({
 
   return (
     <List isLoading={isLoading}>
-      {places.length === 0 ? (
+      {places.length === 0 && showEmptyView ? (
         <List.EmptyView title="No places found" />
       ) : (
         <List.Section title={sectionTitle} subtitle={sectionSubtitle || `${places.length} found`}>

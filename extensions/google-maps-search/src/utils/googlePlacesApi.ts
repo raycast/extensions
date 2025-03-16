@@ -1,5 +1,16 @@
 // External library imports
-import { Client, PlaceInputType } from "@googlemaps/google-maps-services-js";
+import {
+  Client,
+  PlaceInputType,
+  GeocodeRequest,
+  LatLngBounds,
+  Status,
+  TextSearchRequest,
+  PlacesNearbyRequest,
+  DirectionsRequest,
+  TravelMode,
+  UnitSystem,
+} from "@googlemaps/google-maps-services-js";
 
 // Internal type exports
 import { Preferences, PlaceSearchResult, PlaceDetails, RouteInfo, TransportType, PLACE_TYPES } from "../types";
@@ -28,7 +39,17 @@ export function getClient(): Client {
  */
 export function getApiKey(): string {
   const preferences = getPreferenceValues<Preferences>();
-  return preferences.googlePlacesApiKey;
+
+  // Add validation and logging to help diagnose API key issues
+  const apiKey = preferences.googlePlacesApiKey;
+
+  if (!apiKey || apiKey.trim() === "") {
+    console.error("Google Places API key is missing or empty in preferences");
+  } else if (apiKey.length < 20) {
+    console.warn("Google Places API key appears to be invalid (too short)");
+  }
+
+  return apiKey;
 }
 
 /**
@@ -43,45 +64,64 @@ export async function searchPlaces(
   location?: { lat: number; lng: number },
   radius?: number
 ): Promise<PlaceSearchResult[]> {
-  const apiKey = getApiKey();
+  try {
+    const apiKey = getApiKey();
 
-  const response = await getClient().textSearch({
-    params: {
+    // Create properly typed params object
+    const params: TextSearchRequest["params"] = {
       query,
       key: apiKey,
-      ...(location && { location: `${location.lat},${location.lng}` }),
-      ...(radius && { radius }),
-    },
-  });
+    };
 
-  if (response.data.status !== "OK") {
-    throw new Error(`Places API error: ${response.data.status}`);
+    // Add optional parameters if provided
+    if (location) {
+      params.location = `${location.lat},${location.lng}`;
+    }
+
+    if (radius) {
+      params.radius = radius;
+    }
+
+    const response = await getClient().textSearch({ params });
+
+    if (response.data.status !== Status.OK) {
+      console.error(`Places API error: ${response.data.status}`);
+      throw new Error(`Places API error: ${response.data.status}`);
+    }
+
+    if (!response.data.results || !Array.isArray(response.data.results)) {
+      console.error("Invalid response format: results is not an array");
+      throw new Error("Invalid response format from Google Places API");
+    }
+
+    return response.data.results.map((result) => {
+      // Validate location data to prevent errors
+      if (!result.geometry?.location?.lat || !result.geometry?.location?.lng) {
+        console.error("Missing location data in result:", result.name);
+        throw new Error(`Missing location data for "${result.name || "unknown place"}"`);
+      }
+
+      return {
+        placeId: result.place_id || "",
+        name: result.name || "",
+        address: result.formatted_address || result.vicinity || "",
+        location: {
+          lat: result.geometry.location.lat,
+          lng: result.geometry.location.lng,
+        },
+        types: result.types || [],
+        rating: result.rating,
+        userRatingsTotal: result.user_ratings_total,
+        photoReference: result.photos?.[0]?.photo_reference,
+        vicinity: result.vicinity,
+        priceLevel: result.price_level,
+        openNow: result.opening_hours?.open_now,
+      };
+    });
+  } catch (error) {
+    console.error("Error searching for places:", error);
+    return [];
   }
-
-  return response.data.results.map((result) => ({
-    placeId: result.place_id || "",
-    name: result.name || "",
-    address: result.formatted_address || "",
-    location: {
-      lat:
-        result.geometry?.location?.lat ??
-        (() => {
-          throw new Error("Missing location latitude");
-        })(),
-      lng:
-        result.geometry?.location?.lng ??
-        (() => {
-          throw new Error("Missing location longitude");
-        })(),
-    },
-    types: result.types || [],
-    rating: result.rating,
-    userRatingsTotal: result.user_ratings_total,
-    photoReference: result.photos?.[0]?.photo_reference,
-    vicinity: result.vicinity,
-    priceLevel: result.price_level,
-    openNow: result.opening_hours?.open_now,
-  }));
 }
 
 /**
@@ -164,23 +204,69 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceDetails> {
 /**
  * Geocode an address to get its coordinates
  * @param address The address to geocode
+ * @param locationBias Optional location to bias results toward (string address or coordinates)
  * @returns The latitude and longitude
  */
-export async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+export async function geocodeAddress(
+  address: string,
+  locationBias?: string | { lat: number; lng: number }
+): Promise<{ lat: number; lng: number } | null> {
   const apiKey = getApiKey();
 
-  const response = await getClient().geocode({
-    params: {
-      address,
-      key: apiKey,
-    },
-  });
-
-  if (response.data.status !== "OK") {
-    throw new Error(`Geocoding API error: ${response.data.status}`);
+  if (!address.trim()) {
+    console.warn("Empty address provided to geocodeAddress");
+    return null;
   }
 
-  return response.data.results[0]?.geometry?.location || null;
+  try {
+    // Create base params with proper typing
+    const params: GeocodeRequest["params"] = {
+      address,
+      key: apiKey,
+    };
+
+    // Add location bias if provided
+    if (locationBias) {
+      if (typeof locationBias === "string") {
+        // Use region bias if it's a string (typically a city or region name)
+        const region = locationBias.split(",")[0].trim();
+        params.region = region;
+        console.log(`Geocoding "${address}" with region bias: ${region}`);
+      } else {
+        // Use bounds bias with coordinates
+        const delta = 0.045; // Roughly 5km at equator
+        const bounds: LatLngBounds = {
+          northeast: { lat: locationBias.lat + delta, lng: locationBias.lng + delta },
+          southwest: { lat: locationBias.lat - delta, lng: locationBias.lng - delta },
+        };
+        params.bounds = bounds;
+        console.log(`Geocoding "${address}" with bounds bias`);
+      }
+    } else {
+      console.log(`Geocoding "${address}" without bias`);
+    }
+
+    // Make the geocoding request
+    const response = await getClient().geocode({ params });
+
+    // Handle response based on status
+    if (response.data.status === Status.OK) {
+      const location = response.data.results[0]?.geometry?.location;
+      if (location) {
+        console.log(`Successfully geocoded "${address}" to:`, location);
+        return location;
+      }
+    } else if (response.data.status === Status.ZERO_RESULTS) {
+      console.log(`No geocoding results found for address: ${address}`);
+    } else {
+      console.error(`Geocoding API error: ${response.data.status} for address: ${address}`);
+    }
+
+    return null;
+  } catch (error) {
+    console.error(`Error during geocoding for address ${address}:`, error);
+    return null;
+  }
 }
 
 /**
@@ -207,17 +293,18 @@ export async function getDirections(
     const travelMode = getTravelModeForApi(mode);
     const unitSystem = getUnitSystemForApi();
 
-    const response = await getClient().directions({
-      params: {
-        origin: originStr,
-        destination: destinationStr,
-        mode: travelMode,
-        key: apiKey,
-        units: unitSystem,
-      },
-    });
+    // Create properly typed params object
+    const params: DirectionsRequest["params"] = {
+      origin: originStr,
+      destination: destinationStr,
+      mode: travelMode as TravelMode,
+      key: apiKey,
+      units: unitSystem as UnitSystem,
+    };
 
-    if (response.data.status !== "OK" || response.data.routes.length === 0) {
+    const response = await getClient().directions({ params });
+
+    if (response.data.status !== Status.OK || response.data.routes.length === 0) {
       throw new Error(`Directions API error: ${response.data.status || "No routes found"}`);
     }
 
@@ -251,19 +338,24 @@ export async function getDirections(
  * @param location The location to search near
  * @param type The type of place to search for
  * @param radiusInMeters The search radius in meters
+ * @param openNow Whether to only return places that are currently open
  * @returns The API response
  */
 export async function getNearbyPlaces(
   location: { lat: number; lng: number },
   type: string,
-  radius = parseInt(getDefaultRadius(), 10)
+  radius = parseInt(getDefaultRadius(), 10),
+  openNow = false
 ): Promise<PlaceSearchResult[]> {
   try {
     const apiKey = getApiKey();
     const unitSystem = getUnitSystem();
 
     // Convert radius to meters if using imperial units (input would be in miles)
-    const radiusInMeters = Math.min(unitSystem === "imperial" ? Math.round(milesToKm(radius) * 1000) : radius, 50000);
+    const radiusInMeters = Math.min(
+      unitSystem === "imperial" ? Math.round(milesToKm(radius) * 1000) : radius,
+      50000 // Google Places API maximum radius
+    );
 
     // Validate the place type
     const validPlaceTypes = new Set(PLACE_TYPES.map((placeType) => placeType.value as PlaceInputType));
@@ -271,38 +363,78 @@ export async function getNearbyPlaces(
       console.warn(`Invalid place type: ${type}. This may cause the API request to fail.`);
     }
 
-    const response = await getClient().placesNearby({
-      params: {
-        location: `${location.lat},${location.lng}`,
-        radius: radiusInMeters,
-        type: type as PlaceInputType,
-        key: apiKey,
-      },
-    });
+    // Create properly typed params object
+    const params: PlacesNearbyRequest["params"] = {
+      location: `${location.lat},${location.lng}`,
+      radius: radiusInMeters,
+      type: type as PlaceInputType,
+      key: apiKey,
+    };
 
-    if (response.data.status !== "OK") {
-      throw new Error(`Nearby places API error: ${response.data.status}`);
+    // Add openNow parameter if requested
+    if (openNow) {
+      params.opennow = true;
     }
 
-    return response.data.results.map((result) => ({
-      placeId: result.place_id || "",
-      name: result.name || "",
-      address: result.vicinity || "",
-      location: {
-        lat: result.geometry?.location?.lat || 0,
-        lng: result.geometry?.location?.lng || 0,
-      },
-      types: result.types || [],
-      rating: result.rating,
-      userRatingsTotal: result.user_ratings_total,
-      photoReference: result.photos?.[0]?.photo_reference,
-      vicinity: result.vicinity,
-      priceLevel: result.price_level,
-      openNow: result.opening_hours?.open_now,
-    }));
+    const response = await getClient().placesNearby({ params });
+
+    if (response.data.status !== Status.OK && response.data.status !== Status.ZERO_RESULTS) {
+      console.error(`Nearby places API error: ${response.data.status}`);
+      return [];
+    }
+
+    if (!response.data.results || !Array.isArray(response.data.results)) {
+      console.error("Invalid response format: results is not an array");
+      return [];
+    }
+
+    // Return empty array for ZERO_RESULTS
+    if (response.data.status === Status.ZERO_RESULTS) {
+      return [];
+    }
+
+    return response.data.results.map((result) => {
+      // Validate location data to prevent errors
+      if (!result.geometry?.location?.lat || !result.geometry?.location?.lng) {
+        console.error("Missing location data in result:", result.name);
+        return {
+          placeId: "",
+          name: "",
+          address: "",
+          location: {
+            lat: 0,
+            lng: 0,
+          },
+          types: [],
+          rating: 0,
+          userRatingsTotal: 0,
+          photoReference: "",
+          vicinity: "",
+          priceLevel: 0,
+          openNow: false,
+        };
+      }
+
+      return {
+        placeId: result.place_id || "",
+        name: result.name || "",
+        address: result.vicinity || "",
+        location: {
+          lat: result.geometry.location.lat,
+          lng: result.geometry.location.lng,
+        },
+        types: result.types || [],
+        rating: result.rating,
+        userRatingsTotal: result.user_ratings_total,
+        photoReference: result.photos?.[0]?.photo_reference,
+        vicinity: result.vicinity,
+        priceLevel: result.price_level,
+        openNow: result.opening_hours?.open_now,
+      };
+    });
   } catch (error) {
     console.error("Error getting nearby places:", error);
-    throw error;
+    return [];
   }
 }
 

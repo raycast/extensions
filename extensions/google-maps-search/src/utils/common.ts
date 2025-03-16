@@ -4,6 +4,7 @@ import { Preferences } from "../types";
 
 // Internal type exports
 import { TravelMode, UnitSystem } from "../types/googleMapsApi";
+import { PLACE_TYPES } from "../types/places";
 
 // Default radius values
 export const DEFAULT_RADIUS_KM = 5;
@@ -12,6 +13,36 @@ export const DEFAULT_RADIUS_MILES = 3;
 // Default radius in meters for API calls (50km or ~31 miles)
 export const DEFAULT_SEARCH_RADIUS_METRIC = 50000;
 export const DEFAULT_SEARCH_RADIUS_IMPERIAL = Math.round(31 * 1609.34);
+
+/**
+ * Determines if the input is likely a business name rather than a place type
+ * @param input The user input string
+ * @returns True if the input appears to be a business name
+ */
+export function isLikelyBusinessName(input: string): boolean {
+  // Check if input contains multiple words (most business names do)
+  if (input.trim().split(/\s+/).length > 1) {
+    return true;
+  }
+
+  // Check if input contains capital letters (indicating proper nouns)
+  if (/[A-Z]/.test(input) && input !== input.toUpperCase()) {
+    return true;
+  }
+
+  // Check if input contains special characters common in business names
+  if (/[&'"]/.test(input)) {
+    return true;
+  }
+
+  // Check if input is not in our place types list
+  const normalizedInput = input.toLowerCase().replace(/\s+/g, "_");
+  const isKnownPlaceType = PLACE_TYPES.some(
+    (type) => type.value === normalizedInput || type.title.toLowerCase() === input.toLowerCase()
+  );
+
+  return !isKnownPlaceType;
+}
 
 /**
  * Convert miles to kilometers

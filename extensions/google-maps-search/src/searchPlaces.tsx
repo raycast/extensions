@@ -1,5 +1,5 @@
 import { showFailureToast, useLocalStorage } from "@raycast/utils";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   List,
   Icon,
@@ -13,11 +13,12 @@ import {
   Toast,
 } from "@raycast/api";
 import { PlaceDetailView } from "./components/placeDetailView";
-import { usePlaceSearch } from "./hooks/usePlaceSearch";
 import { PlaceActions } from "./components/placeActions";
 import { PreferencesActions } from "./components/preferencesActions";
 import { makeSearchURL, createPlaceURL } from "./utils/url";
 import { Preferences } from "./types";
+import { usePlaceSearch } from "./hooks/usePlaceSearch";
+import { debounce } from "./helpers/debounce";
 
 // Constants
 const MIN_SEARCH_LENGTH = 3; // Minimum characters required for a valid search
@@ -47,21 +48,24 @@ function SearchPlacesCommand({ initialSearchText }: { initialSearchText?: string
     [recentSearches, saveSearchHistory, setRecentSearches]
   );
 
+  // Create a debounced save search function using our custom debounce helper
+  const debouncedSaveSearch = useMemo(
+    () => debounce((text: string) => saveSearch(text), DEBOUNCE_DELAY_MS),
+    [saveSearch]
+  );
+
   // Handle search text change with debounce
   const handleSearchTextChange = useCallback(
     (text: string) => {
       setSearchText(text);
 
-      // Debounce saving to recent searches
+      // Only attempt to save if it meets our criteria
       if (text.length >= MIN_SEARCH_LENGTH && !recentSearches.includes(text.trim()) && saveSearchHistory) {
-        const timeoutId = setTimeout(() => {
-          saveSearch(text);
-        }, DEBOUNCE_DELAY_MS);
-
-        return () => clearTimeout(timeoutId);
+        // Use our debounced save function
+        debouncedSaveSearch(text);
       }
     },
-    [setSearchText, recentSearches, saveSearchHistory, saveSearch]
+    [setSearchText, recentSearches, saveSearchHistory, debouncedSaveSearch]
   );
 
   // Handle removing a search from history

@@ -27,16 +27,28 @@ export function PlaceActions({ place, onViewDetails, onBack, preferredMode, isDe
           title="Open in Google Maps"
           url={makeSearchURL(encodeURIComponent(`${place.name} ${place.address}`))}
           icon={Icon.Globe}
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
         />
-        <Action.OpenInBrowser title="Get Directions" url={makeDirectionsURL("", place.address, mode)} icon={Icon.Map} />
+        <Action.OpenInBrowser
+          title="Get Directions"
+          url={makeDirectionsURL("", place.address, mode)}
+          icon={Icon.Map}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Copy">
-        <Action.CopyToClipboard title="Copy Address" content={place.address} icon={Icon.Clipboard} />
+        <Action.CopyToClipboard
+          title="Copy Address"
+          content={place.address}
+          icon={Icon.Clipboard}
+          shortcut={{ modifiers: ["cmd"], key: "c" }}
+        />
         <Action.CopyToClipboard
           title="Copy Coordinates"
           content={`${place.location.lat},${place.location.lng}`}
           icon={Icon.Pin}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
       </ActionPanel.Section>
 

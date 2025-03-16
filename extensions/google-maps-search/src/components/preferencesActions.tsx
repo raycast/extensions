@@ -7,7 +7,12 @@ interface PreferencesActionsProps {
 export function PreferencesActions({ onOpenPreferences }: PreferencesActionsProps) {
   return (
     <ActionPanel>
-      <Action title="Open Preferences" icon={Icon.Gear} onAction={onOpenPreferences} />
+      <Action
+        title="Open Preferences"
+        icon={Icon.Gear}
+        onAction={onOpenPreferences}
+        shortcut={{ modifiers: ["cmd"], key: "," }}
+      />
     </ActionPanel>
   );
 }

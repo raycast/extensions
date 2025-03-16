@@ -16,6 +16,27 @@ import { createPlaceNavigation } from "../utils/navigation";
  * - Uses the createPlaceNavigation utility to navigate to search results
  */
 
+// Default values for form fields
+const DEFAULT_PLACE_TYPE = "restaurant";
+const DEFAULT_ORIGIN = OriginOption.Home;
+const DEFAULT_CUSTOM_ADDRESS = "";
+const DEFAULT_RADIUS = getDefaultRadius();
+
+// Local storage keys
+const STORAGE_KEY = {
+  PLACE_TYPE: "last-place-type",
+  RADIUS: "last-radius",
+  ORIGIN: "last-origin-option",
+  CUSTOM_ADDRESS: "last-custom-address",
+  OPEN_NOW: "last-open-now",
+};
+
+// Error messages
+const ERROR_MESSAGES = {
+  NO_PLACES_FOUND:
+    "No places found matching your criteria. Try increasing the search radius or changing the place type.",
+};
+
 /**
  * Form values interface for the NearbyPlacesSearchForm
  */
@@ -24,39 +45,36 @@ interface NearbyPlacesFormValues {
   origin: string;
   customAddress: string;
   radius: string;
+  openNow: boolean;
 }
 
 export function NearbyPlacesSearchForm() {
   const { push } = useNavigation();
   const { searchNearbyPlaces, isLoading } = useNearbyPlaces();
 
-  // Use localStorage to persist form values
+  // Use localStorage to persist form values with proper default values
   const { value: savedPlaceType, setValue: setSavedPlaceType } = useLocalStorage<string>(
-    "last-place-type",
-    "restaurant"
+    STORAGE_KEY.PLACE_TYPE,
+    DEFAULT_PLACE_TYPE
   );
-  const { value: savedRadius, setValue: setSavedRadius } = useLocalStorage<string>("last-radius", getDefaultRadius());
-  const { value: savedOrigin, setValue: setSavedOrigin } = useLocalStorage<OriginOption>(
-    "last-origin-option",
-    OriginOption.Home
-  );
+  const { value: savedRadius, setValue: setSavedRadius } = useLocalStorage<string>(STORAGE_KEY.RADIUS, DEFAULT_RADIUS);
+  const { value: savedOrigin, setValue: setSavedOrigin } = useLocalStorage<string>(STORAGE_KEY.ORIGIN, DEFAULT_ORIGIN);
   const { value: savedCustomAddress, setValue: setSavedCustomAddress } = useLocalStorage<string>(
-    "last-custom-address",
-    ""
+    STORAGE_KEY.CUSTOM_ADDRESS,
+    DEFAULT_CUSTOM_ADDRESS
   );
-
-  // Common error messages
-  const NO_PLACES_FOUND_MESSAGE =
-    "No places found matching your criteria. Try increasing the search radius or changing the place type.";
+  const { value: savedOpenNow, setValue: setSavedOpenNow } = useLocalStorage<boolean>(STORAGE_KEY.OPEN_NOW, false);
 
   // Handle search submission
   const handleSubmit = async (values: NearbyPlacesFormValues) => {
     try {
-      // Save form values to localStorage
-      setSavedPlaceType(values.placeType);
-      setSavedRadius(values.radius);
-      setSavedOrigin(values.origin as OriginOption);
-      setSavedCustomAddress(values.customAddress);
+      // Save form values to localStorage with null/undefined checks
+      if (values.placeType) setSavedPlaceType(values.placeType);
+      if (values.radius) setSavedRadius(values.radius);
+      if (values.origin) setSavedOrigin(values.origin);
+      // For custom address, we can save empty string
+      setSavedCustomAddress(values.customAddress || DEFAULT_CUSTOM_ADDRESS);
+      setSavedOpenNow(values.openNow);
 
       const radiusValue = parseFloat(values.radius);
 
@@ -64,7 +82,8 @@ export function NearbyPlacesSearchForm() {
         values.placeType,
         values.origin as OriginOption,
         values.customAddress,
-        radiusValue
+        radiusValue,
+        values.openNow
       );
 
       if (places && places.length > 0) {
@@ -73,7 +92,7 @@ export function NearbyPlacesSearchForm() {
       } else {
         await showFailureToast({
           title: "No places found",
-          message: NO_PLACES_FOUND_MESSAGE,
+          message: ERROR_MESSAGES.NO_PLACES_FOUND,
         });
       }
     } catch (error: unknown) {
@@ -82,7 +101,7 @@ export function NearbyPlacesSearchForm() {
       if (error instanceof Error && error.message.includes("ZERO_RESULTS")) {
         await showFailureToast({
           title: "No Results Found",
-          message: NO_PLACES_FOUND_MESSAGE,
+          message: ERROR_MESSAGES.NO_PLACES_FOUND,
         });
       } else {
         await showFailureToast({
@@ -101,10 +120,11 @@ export function NearbyPlacesSearchForm() {
   } = useForm<NearbyPlacesFormValues>({
     onSubmit: handleSubmit,
     initialValues: {
-      placeType: savedPlaceType,
-      origin: savedOrigin,
-      customAddress: savedCustomAddress,
-      radius: savedRadius,
+      placeType: savedPlaceType || DEFAULT_PLACE_TYPE,
+      origin: savedOrigin || DEFAULT_ORIGIN,
+      customAddress: savedCustomAddress || DEFAULT_CUSTOM_ADDRESS,
+      radius: savedRadius || DEFAULT_RADIUS,
+      openNow: savedOpenNow,
     },
     validation: {
       radius: (value) => {
@@ -176,9 +196,11 @@ export function NearbyPlacesSearchForm() {
       <Form.TextField
         {...itemProps.radius}
         title={`Search Radius (${getUnitSystem() === "imperial" ? "miles" : "km"})`}
-        placeholder={getDefaultRadius()}
+        placeholder={DEFAULT_RADIUS}
         info="Enter a value between 0.5 and 50"
       />
+
+      <Form.Checkbox {...itemProps.openNow} label="Only show places that are open now" />
     </Form>
   );
 }
