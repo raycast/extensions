@@ -269,7 +269,7 @@
         "input" : "@google-maps-search show me a nearby coffee shop on a map",
         "mocks" : {
           "searchPlaces" : "Here is a place matching \"coffee shop\":\n\n- **Damask Rose**\n  Address: 6606 Shattuck Ave., Oakland, CA 94609, United States\n  Rating: 4.9/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/?api=1&query=Damask%2520Rose%206606%2520Shattuck%2520Ave.%252C%2520Oakland%252C%2520CA%252094609%252C%2520United%2520States)",
-          "showPlacesOnMap" : "# Place on Map\n\n[![Map of place](https://maps.googleapis.com/maps/api/staticmap?size=600x400&format=png32&scale=2&maptype=roadmap&markers=color:red%7Clabel:A%7C37.811722,-122.267222&visible=37.811722,-122.267222&key=AIzaSyB1TczjLO1OBLHfcGiJBC2Yf93tiu1hsY8)](https://www.google.com/maps?q=37.8117223,-122.2672224)\n\n## Place Shown\n\n1. Damask Rose\n"
+          "showPlacesOnMap" : "# Place on Map\n\n[![Map of place](https://maps.googleapis.com/maps/api/staticmap?size=600x400&format=png32&scale=2&maptype=roadmap&markers=color:red%7Clabel:A%7C37.811722,-122.267222&visible=37.811722,-122.267222&key=)](https://www.google.com/maps?q=37.8117223,-122.2672224)\n\n## Place Shown\n\n1. Damask Rose\n"
         },
         "expected" : [
           {
