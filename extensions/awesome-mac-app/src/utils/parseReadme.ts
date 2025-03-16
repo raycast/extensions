@@ -1,6 +1,32 @@
 import { showFailureToast } from "@raycast/utils";
 import https from "https";
 
+/**
+ * Cleans markdown formatting from description text
+ * Removes various markdown link formats, image references, and icon tags
+ */
+function cleanMarkdownDescription(description: string): string {
+  return (
+    description
+      .trim()
+      // Remove nested icon links like [![Open-Source Software][OSS Icon]](https://github.com/...)
+      .replace(/\[!?\[.*?\]\[.*?\]\]\(.*?\)/g, "")
+      // Remove standalone icon references like ![Open-Source Software][OSS Icon]
+      .replace(/!?\[.*?\]\[.*?\]/g, "")
+      // Remove markdown links like [text](url)
+      .replace(/\[.*?\]\(.*?\)/g, "")
+      // Remove image markdown like ![alt](url)
+      .replace(/!\[.*?\]\(.*?\)/g, "")
+      // Remove any remaining icon tags like [OSS Icon] or [Freeware Icon]
+      .replace(/\[.*?Icon\]/gi, "")
+      // Replace multiple spaces with a single space
+      .replace(/\s{2,}/g, " ")
+      // Remove any trailing exclamation marks that might be left after cleaning
+      .replace(/\s*!+\s*$/g, "")
+      .trim()
+  );
+}
+
 export interface AppItem {
   name: string;
   description: string;
@@ -67,9 +93,20 @@ export async function fetchReadmeContent(): Promise<AppItem[]> {
           const description = appMatch[3] || "";
           const descriptionLower = description.toLowerCase();
 
+          // Clean description by removing markdown icon links and other unnecessary formatting
+          const cleanDescription = cleanMarkdownDescription(description);
+          console.log(cleanDescription);
+          description
+            .replace(/\[!?\[.*?\]\[.*?\]\]\(.*?\)/g, "") // Remove nested icon links like [![Open-Source Software][OSS Icon]](https://github.com/...)
+            .replace(/\[[\w\s-]+\]\[[\w\s-]+\s*Icon\]/gi, "") // Remove icon references like [OSS Icon]
+            .replace(/\[!\[.*?\]\(.*?\)\]\(.*?\)/g, "") // Remove other nested markdown links
+            .replace(/!\[.*?\]\(.*?\)/g, "") // Remove image markdown
+            .replace(/\[\w+-?\w*\s?\w*\s?Icon\]/gi, "") // Remove remaining icon tags
+            .replace(/\s{2,}/g, " ") // Replace multiple spaces with a single space
+            .trim();
           const app: AppItem = {
             name,
-            description: description.trim(),
+            description: cleanDescription,
             url,
             category: currentCategory,
             isOpenSource: descriptionLower.includes("[oss icon]"),
