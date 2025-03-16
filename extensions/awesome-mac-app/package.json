@@ -1,20 +1,30 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "awesome-mac",
-  "title": "Awesome Mac",
+  "name": "awesome-mac-apps",
+  "title": "Awesome Mac Apps",
   "description": "Search Awesome Mac Apps",
-  "icon": "favicon.png",
+  "icon": "icon.png",
   "author": "ViGeng",
   "categories": [
     "Applications",
     "Developer Tools",
     "Web"
   ],
+  "keywords": [
+    "awesome",
+    "mac",
+    "app",
+    "application",
+    "macos",
+    "macos-apps",
+    "mac-app",
+    "Store"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "search",
-      "title": "Search",
+      "name": "searchAwesomeMac",
+      "title": "Search Awesome Mac",
       "subtitle": "Awesome Mac Apps",
       "description": "Search Awesome Mac Apps",
       "mode": "view"

@@ -1,4 +1,4 @@
-# Awesome Mac Changelog
+# Awesome Mac Applications Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
