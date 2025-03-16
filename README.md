@@ -1,64 +1,23 @@
-# Google Cloud Raycast Extension
+# G-Cloud
 
-A Raycast extension for managing Google Cloud resources.
+A lightweight Raycast extension for managing Google Cloud resources efficiently. Access and control your GCP projects, services, IAM, storage, and more—all without leaving Raycast.
 
 ## Features
 
-### Storage Management
-- View and manage storage buckets
-- Browse objects within buckets
-- Manage object versions
-- Configure bucket lifecycle rules
-- View storage statistics
+- **Project Management**: Quick access to all your Google Cloud projects
+- **Project Caching**: Fast switching between frequently used projects
+- **IAM Management**: View and modify permissions for users, groups, and service accounts
+- **Storage Management**: Browse and manage buckets, objects, and lifecycle rules
+- **Service Hub**: Enable, disable, and manage Google Cloud services
+- **Command Caching**: Improved performance through intelligent caching
 
-### IAM Management
-- Unified IAM management interface
-- View and manage IAM permissions by principal (user, group, service account)
-- View and manage IAM permissions by role
-- Advanced view for detailed policy information
-- Add and remove IAM bindings
-- Support for conditional role bindings
+## Screenshots
 
-## IAM Management
-
-The IAM management functionality provides a unified interface for managing IAM permissions across Google Cloud resources. It offers three different views:
-
-1. **By Principal View**: Organizes IAM data by member (user, group, service account), showing all roles assigned to each principal.
-   - Accounts are grouped by type (User, Group, Service Account, etc.)
-   - Each account shows its roles, permissions, and access level
-   - Detailed view for each account with comprehensive permission information
-   - Visual indicators for access levels (Admin, Editor, Viewer)
-
-2. **By Role View**: Organizes IAM data by role, showing all members assigned to each role.
-   - Roles are displayed with their descriptions and assigned members
-   - Easy to see which accounts have specific roles
-
-3. **Advanced View**: Provides a detailed view of the raw IAM policy with debugging information.
-   - View the complete IAM policy in JSON format
-   - Useful for troubleshooting and advanced users
-
-### Key Features
-
-- **Filter by Principal Type**: Quickly filter accounts by type (user, group, service account, etc.)
-- **Search**: Search for specific accounts, roles, or emails
-- **Add Members**: Add new members with specific roles
-- **Remove Roles**: Remove roles from existing members
-- **Conditional Bindings**: Support for adding conditions to role bindings
-- **Detailed Information**: View detailed information about each account's permissions
-- **Visual Indicators**: Icons and colors indicate different access levels and account types
-- **Grouped View**: Accounts are organized by type for better visibility
-
-### Shortcuts
-
-- `cmd+shift+i`: Access IAM management from any resource
-- `cmd+shift+n`: Add a new IAM member
-- `cmd+r`: Refresh IAM policy
-
-## Requirements
-
-- Google Cloud SDK installed (`gcloud`)
-- Authenticated with Google Cloud (`gcloud auth login`)
-- Appropriate permissions to view and manage resources
+<!-- Add your screenshots here - examples:
+![Project Selection](assets/screenshots/project-selection.png)
+![IAM Management](assets/screenshots/iam-management.png)
+![Storage Browser](assets/screenshots/storage-browser.png)
+-->
 
 ## Prerequisites
 
@@ -72,33 +31,22 @@ The IAM management functionality provides a unified interface for managing IAM p
 3. Run `npm install` to install dependencies
 4. Run `npm run dev` to start the development server in Raycast
 
-## Usage
-
-1. Open Raycast and search for "Google Cloud"
-2. If not authenticated, click "Login to Google Cloud" to authenticate
-3. Once authenticated, you'll see a list of your Google Cloud projects
-4. Select a project to view available services and actions
-5. Use the actions to interact with your Google Cloud resources
-
 ## Configuration
 
-You can configure the path to your gcloud CLI in the extension preferences:
+You can configure the path to your gcloud CLI and caching options in the extension preferences:
 
-1. Open Raycast
-2. Go to Extensions
-3. Find "Google Cloud" and click on it
-4. Click on "Preferences"
-5. Set the path to your gcloud CLI (default is "gcloud")
+1. Open Raycast and search for "Google Cloud"
+2. Click "Preferences" in the action panel
+3. Set the path to your gcloud CLI (default is "gcloud")
+4. Configure cache settings to your preference
 
-## Development
+## Documentation
 
-- `npm run dev` - Start the development server
-- `npm run build` - Build the extension
-- `npm run lint` - Lint the code
+For detailed information about this extension, see the documentation in the `docs` directory:
 
-## Keyboard Shortcuts
-
-For a comprehensive list of keyboard shortcuts used in this extension and information about Raycast's reserved shortcuts, see [SHORTCUTS.md](docs/SHORTCUTS.md).
+- [Caching System](docs/CACHING_SYSTEM.md)
+- [Project Structure](docs/PROJECT_STRUCTURE.md)
+- [Keyboard Shortcuts](docs/SHORTCUTS.md)
 
 ## License
 
