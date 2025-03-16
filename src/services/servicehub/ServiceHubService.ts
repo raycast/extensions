@@ -4,6 +4,7 @@
  */
 
 import { executeGcloudCommand } from "../../gcloud";
+import { getServiceInfo, GCPServiceCategory, getAllServices, predefinedServices } from "../../utils/gcpServices";
 
 export interface GCPService {
   name: string;
@@ -13,6 +14,9 @@ export interface GCPService {
   state?: string;
   dependsOn?: string[];
   category?: string;
+  documentation?: string;
+  console?: string;
+  region?: string;
 }
 
 export interface ServiceEnableOptions {
@@ -24,14 +28,62 @@ export interface ServiceListOptions {
   limit?: number;
   pageSize?: number;
   includeDisabled?: boolean;
+  category?: string;
+  useLocalOnly?: boolean;
+  coreServicesOnly?: boolean;
 }
+
+// Core services that are most commonly used
+const CORE_SERVICES = [
+  // Compute
+  "compute.googleapis.com",
+  "container.googleapis.com",
+  "run.googleapis.com",
+  "cloudfunctions.googleapis.com",
+  "appengine.googleapis.com",
+  
+  // Storage
+  "storage.googleapis.com",
+  "file.googleapis.com",
+  
+  // Database
+  "sqladmin.googleapis.com",
+  "firestore.googleapis.com",
+  "datastore.googleapis.com",
+  "bigtable.googleapis.com",
+  "spanner.googleapis.com",
+  
+  // Security & IAM
+  "iam.googleapis.com",
+  "cloudkms.googleapis.com",
+  "secretmanager.googleapis.com",
+  
+  // Networking
+  "dns.googleapis.com",
+  "networkservices.googleapis.com",
+  "vpcaccess.googleapis.com",
+  
+  // DevOps
+  "cloudbuild.googleapis.com",
+  "artifactregistry.googleapis.com",
+  "containerregistry.googleapis.com",
+  
+  // Analytics
+  "bigquery.googleapis.com",
+  "pubsub.googleapis.com",
+  
+  // Management
+  "monitoring.googleapis.com",
+  "logging.googleapis.com",
+  "cloudresourcemanager.googleapis.com"
+];
 
 export class ServiceHubService {
   private gcloudPath: string;
   private projectId: string;
   private cache: Map<string, { data: any; timestamp: number }> = new Map();
-  private readonly CACHE_TTL = 60000; // 60 seconds cache TTL
-  private readonly CACHE_TTL_DETAILS = 300000; // 5 minutes cache TTL for details
+  private readonly CACHE_TTL = 300000; // 5 minutes cache TTL
+  private readonly CACHE_TTL_DETAILS = 600000; // 10 minutes cache TTL for details
   private pendingRequests: Map<string, Promise<any>> = new Map();
 
   constructor(gcloudPath: string, projectId: string) {
@@ -77,44 +129,164 @@ export class ServiceHubService {
    */
   private async fetchServices(options: ServiceListOptions, cacheKey: string): Promise<GCPService[]> {
     try {
-      let command = "services list";
+      // Get all predefined services from our utility
+      let allPredefinedServices = getAllServices();
       
-      if (options.filter) {
-        command += ` --filter=${options.filter}`;
+      // Filter to core services if requested
+      if (options.coreServicesOnly) {
+        allPredefinedServices = allPredefinedServices.filter(service => 
+          CORE_SERVICES.includes(service.name)
+        );
       }
       
-      if (options.limit) {
-        command += ` --limit=${options.limit}`;
+      // If useLocalOnly is true, just use the predefined services without API call
+      if (options.useLocalOnly) {
+        // If category is specified, filter predefined services by category
+        const filteredServices = options.category 
+          ? allPredefinedServices.filter(service => service.category === options.category)
+          : allPredefinedServices;
+        
+        const formattedServices: GCPService[] = filteredServices.map(predefinedService => {
+          return {
+            name: predefinedService.name,
+            displayName: predefinedService.displayName,
+            description: predefinedService.description,
+            isEnabled: false, // We don't know without API call
+            state: "UNKNOWN",
+            category: predefinedService.category,
+            documentation: predefinedService.documentation,
+            console: predefinedService.console,
+            dependsOn: predefinedService.dependsOn,
+            region: predefinedService.region || "global"
+          };
+        });
+        
+        // Store in cache
+        const now = Date.now();
+        this.cache.set(cacheKey, { data: formattedServices, timestamp: now });
+        
+        return formattedServices;
       }
       
-      if (options.pageSize) {
-        command += ` --page-size=${options.pageSize}`;
-      }
+      // Get the actual enabled services from the project
+      const enabledServices = await this.getEnabledServices();
       
-      if (options.includeDisabled) {
-        command += " --available";
-      }
+      // Get the relevant predefined services based on category
+      const relevantPredefinedServices = options.category
+        ? allPredefinedServices.filter(service => service.category === options.category)
+        : allPredefinedServices;
       
-      const services = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
+      // Combine with enabled status
+      const formattedServices: GCPService[] = relevantPredefinedServices.map(predefinedService => {
+        const isEnabled = enabledServices.includes(predefinedService.name);
+        
+        return {
+          name: predefinedService.name,
+          displayName: predefinedService.displayName,
+          description: predefinedService.description,
+          isEnabled: isEnabled,
+          state: isEnabled ? "ENABLED" : "NOT_ACTIVATED",
+          category: predefinedService.category,
+          documentation: predefinedService.documentation,
+          console: predefinedService.console,
+          dependsOn: predefinedService.dependsOn,
+          region: predefinedService.region || "global"
+        };
+      });
       
-      const formattedServices: GCPService[] = services.map((service: any) => ({
-        name: service.name || service.config?.name,
-        displayName: service.displayName || service.config?.title,
-        description: service.description || service.config?.documentation?.summary,
-        isEnabled: service.state === "ENABLED",
-        state: service.state,
-        category: this.getCategoryForService(service.name || service.config?.name)
-      }));
+      // Apply active only filter if needed
+      const result = !options.includeDisabled
+        ? formattedServices.filter(service => service.isEnabled)
+        : formattedServices;
       
       // Store in cache
       const now = Date.now();
-      this.cache.set(cacheKey, { data: formattedServices, timestamp: now });
+      this.cache.set(cacheKey, { data: result, timestamp: now });
       
-      return formattedServices;
+      return result;
     } catch (error: unknown) {
       console.error("Error listing services:", error);
+      
+      // On error, try to return cached data even if expired
+      const cachedData = this.cache.get(cacheKey);
+      if (cachedData) {
+        console.log("Returning expired cached data due to error");
+        return cachedData.data;
+      }
+      
+      // If no cached data, return predefined services as fallback
+      if (error instanceof Error && error.message.includes("maxBuffer")) {
+        console.log("Buffer exceeded, falling back to predefined services");
+        return this.getLocalServices(options.category, options.coreServicesOnly);
+      }
+      
       throw new Error(`Failed to list services: ${error instanceof Error ? error.message : String(error)}`);
     }
+  }
+
+  /**
+   * Get enabled services in the current project
+   * This is a direct API call to get accurate status
+   */
+  private async getEnabledServices(): Promise<string[]> {
+    try {
+      // Use a simple command to get only enabled services
+      const command = "services list --filter=state:ENABLED --format=json";
+      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
+      
+      // Parse JSON result if it's a string
+      const services = typeof result === 'string' ? JSON.parse(result) : result;
+      
+      // Extract service names
+      return services.map((service: any) => {
+        // Handle different response formats
+        if (typeof service === 'string') {
+          return service.endsWith('.googleapis.com') ? service : `${service}.googleapis.com`;
+        }
+        
+        const name = service.name || service.config?.name;
+        if (name && name.includes('/')) {
+          // Extract just the service name from paths like "projects/123/services/compute.googleapis.com"
+          const parts = name.split('/');
+          return parts[parts.length - 1];
+        }
+        return name;
+      }).filter(Boolean);
+    } catch (error) {
+      console.error("Error getting enabled services:", error);
+      return [];
+    }
+  }
+
+  /**
+   * Get local services without API call
+   */
+  private getLocalServices(category?: string, coreServicesOnly?: boolean): GCPService[] {
+    let allPredefinedServices = getAllServices();
+    
+    // Filter to core services if requested
+    if (coreServicesOnly) {
+      allPredefinedServices = allPredefinedServices.filter(service => 
+        CORE_SERVICES.includes(service.name)
+      );
+    }
+    
+    const services = allPredefinedServices.map(service => ({
+      name: service.name,
+      displayName: service.displayName,
+      description: service.description,
+      isEnabled: false,
+      state: "UNKNOWN",
+      category: service.category,
+      documentation: service.documentation,
+      console: service.console,
+      dependsOn: service.dependsOn,
+      region: service.region || "global"
+    }));
+    
+    return category 
+      ? services.filter(service => service.category === category)
+      : services;
   }
 
   /**
@@ -167,14 +339,14 @@ export class ServiceHubService {
    * Get details about a specific service
    */
   async getServiceDetails(serviceName: string): Promise<GCPService> {
-    const cacheKey = `service:${this.projectId}:${serviceName}`;
+    const cacheKey = `service-details:${this.projectId}:${serviceName}`;
     
     // Check if there's a pending request for this service
     if (this.pendingRequests.has(cacheKey)) {
       return this.pendingRequests.get(cacheKey) as Promise<GCPService>;
     }
     
-    // Check cache with longer TTL for details
+    // Check cache
     const cachedData = this.cache.get(cacheKey);
     const now = Date.now();
     
@@ -201,136 +373,128 @@ export class ServiceHubService {
    */
   private async fetchServiceDetails(serviceName: string, cacheKey: string): Promise<GCPService> {
     try {
-      const command = `services describe ${serviceName}`;
+      // Get service info from predefined services
+      const serviceInfo = getServiceInfo(serviceName);
       
+      // Check if service is enabled with a direct query
+      // This is more accurate than the list approach
+      const command = `services list --filter=name:${serviceName} --format=json`;
       const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
-      const serviceData = result[0]; // Get the first item since describe returns a single item
       
-      const formattedService: GCPService = {
-        name: serviceData.name || serviceData.config?.name,
-        displayName: serviceData.displayName || serviceData.config?.title,
-        description: serviceData.description || serviceData.config?.documentation?.summary,
-        isEnabled: serviceData.state === "ENABLED",
-        state: serviceData.state,
-        dependsOn: serviceData.dependsOn || [],
-        category: this.getCategoryForService(serviceData.name || serviceData.config?.name)
+      // Parse JSON result if it's a string
+      const services = typeof result === 'string' ? JSON.parse(result) : result;
+      
+      let isEnabled = false;
+      let state = "NOT_ACTIVATED";
+      
+      if (services && services.length > 0) {
+        const service = services[0];
+        isEnabled = service.state === "ENABLED";
+        state = service.state || "UNKNOWN";
+      }
+      
+      // Combine information
+      const serviceDetails: GCPService = {
+        name: serviceName,
+        displayName: serviceInfo.displayName,
+        description: serviceInfo.description,
+        isEnabled: isEnabled,
+        state: state,
+        category: serviceInfo.category,
+        documentation: serviceInfo.documentation,
+        console: serviceInfo.console,
+        dependsOn: serviceInfo.dependsOn,
+        region: serviceInfo.region || "global"
       };
       
-      // Store in cache with timestamp
+      // Store in cache
       const now = Date.now();
-      this.cache.set(cacheKey, { data: formattedService, timestamp: now });
+      this.cache.set(cacheKey, { data: serviceDetails, timestamp: now });
       
-      return formattedService;
+      return serviceDetails;
     } catch (error: unknown) {
-      console.error(`Error getting service details for ${serviceName}:`, error);
-      throw new Error(`Failed to get service details for ${serviceName}: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(`Error fetching service details for ${serviceName}:`, error);
+      
+      // Try to return cached data even if expired
+      const cachedData = this.cache.get(cacheKey);
+      if (cachedData) {
+        console.log("Returning expired cached data due to error");
+        return cachedData.data;
+      }
+      
+      // If no cached data, return basic info from predefined services
+      const serviceInfo = getServiceInfo(serviceName);
+      return {
+        name: serviceName,
+        displayName: serviceInfo.displayName,
+        description: serviceInfo.description,
+        isEnabled: false,
+        state: "UNKNOWN",
+        category: serviceInfo.category,
+        documentation: serviceInfo.documentation,
+        console: serviceInfo.console,
+        dependsOn: serviceInfo.dependsOn,
+        region: serviceInfo.region || "global"
+      };
     }
   }
-
+  
   /**
    * Check if a service is enabled
    */
   async isServiceEnabled(serviceName: string): Promise<boolean> {
     try {
-      const service = await this.getServiceDetails(serviceName);
-      return service.isEnabled;
+      // Direct check for more accurate results
+      const command = `services list --filter=name:${serviceName} --filter=state:ENABLED --format=json`;
+      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
+      
+      // Parse JSON result if it's a string
+      const services = typeof result === 'string' ? JSON.parse(result) : result;
+      
+      return services && services.length > 0;
     } catch (error: unknown) {
       console.error(`Error checking if service ${serviceName} is enabled:`, error);
-      throw new Error(`Failed to check if service ${serviceName} is enabled: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // Fallback to cached details
+      try {
+        const serviceDetails = await this.getServiceDetails(serviceName);
+        return serviceDetails.isEnabled;
+      } catch {
+        return false;
+      }
     }
   }
-
+  
   /**
-   * Clear the service cache
+   * Clear service cache
    */
   private clearServiceCache(): void {
+    // Clear all cache entries that start with "services:" or "service-details:"
     for (const key of this.cache.keys()) {
-      if (key.startsWith('service:') || key.startsWith('services:')) {
+      if (key.startsWith("services:") || key.startsWith("service-details:")) {
         this.cache.delete(key);
       }
     }
   }
   
   /**
-   * Prefetch service details for a list of services
-   * This can be used to warm up the cache
+   * Get services by category
+   * @param category The category to filter by
+   * @param includeDisabled Whether to include disabled services
+   * @returns Array of services in the specified category
    */
-  async prefetchServiceDetails(serviceNames: string[]): Promise<void> {
-    // Use Promise.all to fetch details in parallel
-    await Promise.all(
-      serviceNames.map(name => this.getServiceDetails(name).catch(err => {
-        console.warn(`Failed to prefetch details for ${name}:`, err);
-        return null;
-      }))
-    );
+  async getServicesByCategory(category: string, includeDisabled: boolean = true): Promise<GCPService[]> {
+    return this.listServices({ 
+      category, 
+      includeDisabled,
+      coreServicesOnly: true
+    });
   }
-
+  
   /**
-   * Get category for a service based on its name
-   * This is a helper method to organize services into logical groups
+   * Get all available categories
    */
-  private getCategoryForService(serviceName: string): string {
-    const serviceCategories: Record<string, string[]> = {
-      "Compute": [
-        "compute.googleapis.com",
-        "appengine.googleapis.com",
-        "run.googleapis.com",
-        "cloudfunctions.googleapis.com",
-        "cloudscheduler.googleapis.com"
-      ],
-      "Storage": [
-        "storage.googleapis.com",
-        "firestore.googleapis.com",
-        "bigtable.googleapis.com",
-        "spanner.googleapis.com",
-        "datastore.googleapis.com"
-      ],
-      "Database": [
-        "sqladmin.googleapis.com",
-        "redis.googleapis.com",
-        "memcache.googleapis.com",
-        "mongodb.googleapis.com"
-      ],
-      "Networking": [
-        "dns.googleapis.com",
-        "compute.googleapis.com",
-        "networkservices.googleapis.com",
-        "networksecurity.googleapis.com",
-        "vpcaccess.googleapis.com"
-      ],
-      "Security": [
-        "iam.googleapis.com",
-        "cloudkms.googleapis.com",
-        "secretmanager.googleapis.com",
-        "cloudasset.googleapis.com"
-      ],
-      "Analytics": [
-        "bigquery.googleapis.com",
-        "dataflow.googleapis.com",
-        "dataproc.googleapis.com",
-        "pubsub.googleapis.com"
-      ],
-      "AI & ML": [
-        "ml.googleapis.com",
-        "aiplatform.googleapis.com",
-        "speech.googleapis.com",
-        "vision.googleapis.com",
-        "translate.googleapis.com"
-      ],
-      "DevOps": [
-        "cloudbuild.googleapis.com",
-        "containerregistry.googleapis.com",
-        "artifactregistry.googleapis.com",
-        "sourcerepo.googleapis.com"
-      ]
-    };
-
-    for (const [category, services] of Object.entries(serviceCategories)) {
-      if (services.includes(serviceName)) {
-        return category;
-      }
-    }
-
-    return "Other";
+  async getAllCategories(): Promise<string[]> {
+    return Object.values(GCPServiceCategory).sort();
   }
 } 
