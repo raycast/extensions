@@ -1,6 +1,6 @@
 # System Information Changelog
 
-## [Improved Storage Calculation] - 2025-03-16
+## [Improved Storage Calculation] - {PR_MERGE_DATE}
 - Implement storage calculation with Swift script to be more accurate.
 
 ## [macOS Sequoia Support + Running Processes] - 2024-10-28
