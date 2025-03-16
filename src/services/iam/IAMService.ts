@@ -372,4 +372,66 @@ export class IAMService {
         return id.trim() !== '';
     }
   }
+
+  /**
+   * Creates a new Google Cloud IAM group
+   * @param groupId The ID of the group to create (e.g., my-group@example.com)
+   * @param displayName Optional display name for the group
+   * @param description Optional description for the group
+   * @returns Promise resolving to the created group details
+   */
+  async createGroup(groupId: string, displayName?: string, description?: string): Promise<any> {
+    try {
+      let command = `identity groups create ${groupId}`;
+      
+      if (displayName) {
+        command += ` --display-name="${displayName}"`;
+      }
+      
+      if (description) {
+        command += ` --description="${description}"`;
+      }
+      
+      const result = await executeGcloudCommand(this.gcloudPath, command);
+      return result[0] || {};
+    } catch (error) {
+      console.error('Error creating group:', error);
+      throw new Error(`Failed to create group: ${error}`);
+    }
+  }
+  
+  /**
+   * Gets role suggestions based on a partial role name or description
+   * @param query The search query for role suggestions
+   * @returns Promise resolving to an array of suggested roles
+   */
+  async getRoleSuggestions(query: string): Promise<IAMRole[]> {
+    try {
+      if (!query || query.length < 2) {
+        return [];
+      }
+      
+      const allRoles = await executeGcloudCommand(this.gcloudPath, 'iam roles list');
+      
+      // Filter roles based on query
+      const filteredRoles = allRoles.filter((role: any) => {
+        const roleId = role.name.split('/').pop();
+        return (
+          roleId.toLowerCase().includes(query.toLowerCase()) ||
+          (role.title && role.title.toLowerCase().includes(query.toLowerCase())) ||
+          (role.description && role.description.toLowerCase().includes(query.toLowerCase()))
+        );
+      });
+      
+      // Map to our IAMRole interface
+      return filteredRoles.map((role: any) => ({
+        role: role.name,
+        title: role.title || role.name,
+        description: role.description || ''
+      }));
+    } catch (error) {
+      console.error('Error getting role suggestions:', error);
+      return [];
+    }
+  }
 } 

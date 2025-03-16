@@ -502,6 +502,7 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
           <List.Item
             key={service}
             title={service}
+            subtitle=""
             icon={
               service === 'Storage' ? { source: Icon.HardDrive, tintColor: Color.Blue } :
               service === 'Compute Engine' ? { source: Icon.Desktop, tintColor: Color.Green } :
@@ -511,8 +512,7 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
             }
             accessories={[
               { 
-                icon: selectedService === service ? Icon.Checkmark : undefined,
-                text: selectedService === service ? "Selected" : "Filter by this service"
+                icon: selectedService === service ? Icon.Checkmark : undefined
               }
             ]}
             actions={
@@ -568,11 +568,9 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
                   <List.Item
                     key={`${principal.type}-${principal.id}`}
                     title={principal.id || principal.type}
-                    subtitle={`${principal.roles.length} roles`}
+                    subtitle=""
                     icon={getMemberIcon(principal.type)}
-                    accessories={[
-                      { text: `${principal.roles.length} roles` }
-                    ]}
+                    accessories={[]}
                     detail={
                       <List.Item.Detail
                         markdown={`# ${principal.displayName}: ${principal.id}\n\n## Roles\n\n${principal.roles.map(role => `- **${role.title}** (${role.role})`).join('\n\n')}`}

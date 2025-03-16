@@ -4,4 +4,5 @@
 
 export { IAMService } from './IAMService';
 export { default as IAMMembersByPrincipalView } from './IAMMembersByPrincipalView';
-export { default as IAMDashboardView } from './IAMDashboardView'; 
+// Removing dashboard export as per user request
+export { default as IAMView } from './IAMView'; 
