@@ -6,19 +6,21 @@ import { SearchBar } from "./components/SearchBar";
 import { useDeviceManager } from "./hooks/useDeviceManager";
 import { useCategoryManager } from "./hooks/useCategoryManager";
 import { useEnvironmentChecker } from "./hooks/useEnvironmentChecker";
+import { DeviceDisplayCategory } from "./types";
 
 interface Preferences {
   androidSdkPath?: string;
-  deviceTypesToDisplay: string;
+  deviceTypesToDisplay?: DeviceDisplayCategory;
 }
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
   const preferences = getPreferenceValues<Preferences>();
-  const deviceTypesToDisplay = preferences.deviceTypesToDisplay || "all";
 
-  const { selectedCategory, handleCategoryChange, showDropdown } = useCategoryManager(deviceTypesToDisplay);
+  const { selectedCategory, deviceTypesToDisplay, handleCategoryChange, showDropdown } = useCategoryManager(
+    preferences.deviceTypesToDisplay,
+  );
 
   const { androidSdkFound, xcodeFound, isChecking: isCheckingEnvironment } = useEnvironmentChecker();
 

@@ -24,16 +24,14 @@ export function DeviceList({
   isLoading,
   xcodeFound,
 }: DeviceListProps) {
-  const deviceArray = Array.isArray(devices) ? devices : [];
+  const groupedDevices = groupDevicesByType(devices);
 
-  const groupedDevices = groupDevicesByType(deviceArray);
-
-  if (deviceArray.length === 0) {
+  if (devices.length === 0) {
     return (
       <DeviceEmptyView
         androidSdkFound={androidSdkFound}
         isLoading={isLoading}
-        isSearching={searchText?.length > 0}
+        isSearching={searchText.length > 0}
         onRefresh={onRefresh}
         selectedCategory={selectedCategory}
         xcodeFound={xcodeFound}

@@ -1,5 +1,12 @@
 # Simulator Manager Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Improved code organization and performance:
+- Added preferences action to iOS simulator empty state for better user experience
+- Enhanced error handling across the extension
+- Improved performance when loading and filtering large numbers of devices
+
 ## [Initial Version] - 2025-03-15
 
 - List iOS simulators and Android emulators
