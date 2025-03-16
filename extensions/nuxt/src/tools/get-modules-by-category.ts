@@ -22,6 +22,8 @@ type Input = {
  * @returns The list of modules in the specified category
  */
 export default async function tool(input: Input) {
-  const { modules } = await $fetch<ApiResponse>(`https://api.nuxt.com/modules?category=${encodeURIComponent(input.category)}`);
+  const { modules } = await $fetch<ApiResponse>(
+    `https://api.nuxt.com/modules?category=${encodeURIComponent(input.category)}`,
+  );
   return modules;
 }

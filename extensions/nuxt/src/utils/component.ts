@@ -94,7 +94,7 @@ export async function openDocumentation(
 /**
  * Get the appropriate icon for a component type
  */
-export function getComponentIcon(type: ComponentItem['type']): Icon {
+export function getComponentIcon(type: ComponentItem["type"]): Icon {
   switch (type) {
     case "base":
       return Icon.Box;
@@ -110,7 +110,7 @@ export function getComponentIcon(type: ComponentItem['type']): Icon {
 /**
  * Get the label for a component type
  */
-export function getComponentTypeLabel(type: ComponentItem['type']): string {
+export function getComponentTypeLabel(type: ComponentItem["type"]): string {
   switch (type) {
     case "base":
       return "Base Component";
