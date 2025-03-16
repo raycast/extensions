@@ -10,7 +10,7 @@ import { components, proseComponents, proComponents } from "../utils/components-
  *
  * @returns Categorized lists of all available components
  */
-export default async function tool() {
+export default function tool() {
   return {
     components, // Basic components (free, prefixed with U)
     proComponents, // Pro components (paid version)

@@ -22,7 +22,7 @@ export function getAllComponents(): ComponentItem[] {
     allComponents.push({
       name: kebabCase(name),
       type: "pro",
-      camelCaseName: name,
+      camelCaseName: camelCase(name),
     });
   });
 
@@ -72,5 +72,5 @@ export function sortComponentsByName(components: ComponentItem[]): ComponentItem
   return [...components].sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export const V3_URL = "https://ui3.nuxt.dev";
-export const V2_URL = "https://ui.nuxt.com";
+export const V3_URL = "https://ui.nuxt.com";
+export const V2_URL = "https://ui2.nuxt.com";

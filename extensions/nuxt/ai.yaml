@@ -21,7 +21,7 @@ instructions: |-
   - You MAY call these tools in this EXACT sequence for EVERY module request:
     1. FIRST: Call `get-module-categories` to get the available module categories
     2. SECOND: Call `get-modules-by-category` with the correct category parameter
-    3. NEVER call any other tools for module requests
+    3. Normally, you should not call any other tools for module requests
   
   - IMPORTANT: When recommending modules, provide a brief description of what the module does and how to install it
   - Prioritize the official module first (type: 'official') like @nuxt/ui, @nuxt/content, @nuxt/font, etc... and then the most popular modules (using stars, forks, etc... using the key `stats` of the module object)

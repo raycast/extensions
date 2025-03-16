@@ -42,11 +42,11 @@ export function buildDocumentationUrl(context: ComponentContext, version: string
   const versionUrl = isPro && version === "v2" ? `${baseUrl}/pro` : baseUrl;
 
   if (hasProsePrefix) {
-    return `https://ui3.nuxt.dev/getting-started/typography#${sanitizedName.replace(/-/g, "")}`;
+    return `${V3_URL}/getting-started/typography#${sanitizedName.replace(/-/g, "")}`;
   }
 
   if (isProse && !isBase) {
-    return `https://ui3.nuxt.dev/getting-started/typography#${sanitizedName.replace(/-/g, "")}`;
+    return `${V3_URL}/getting-started/typography#${sanitizedName.replace(/-/g, "")}`;
   }
 
   return `${versionUrl}/components/${sanitizedName}#theme`;

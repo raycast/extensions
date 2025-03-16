@@ -8,6 +8,7 @@ import {
   openDocumentation,
 } from "./utils/component";
 import { getAllComponents, filterComponents, sortComponentsByName } from "./utils/search";
+import { showFailureToast } from "./utils/commands";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -52,12 +53,24 @@ export default function Command() {
                 <Action
                   title="Open Documentation"
                   icon={Icon.Book}
-                  onAction={() => openDocumentation(component, false)}
+                  onAction={async () => {
+                    try {
+                      await openDocumentation(component, false);
+                    } catch (error) {
+                      await showFailureToast("Failed to open documentation");
+                    }
+                  }}
                 />
                 <Action
                   title="Open Theme Documentation"
                   icon={Icon.Brush}
-                  onAction={() => openDocumentation(component, true)}
+                  onAction={async () => {
+                    try {
+                      await openDocumentation(component, true);
+                    } catch (error) {
+                      await showFailureToast("Failed to open documentation");
+                    }
+                  }}
                 />
                 <Action.CopyToClipboard title="Copy Component Name" content={getFormattedComponentName(component)} />
               </ActionPanel>
