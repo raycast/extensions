@@ -1,11 +1,12 @@
-import { ActionPanel, Action, List, Icon, useNavigation, Cache, showToast } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, useNavigation, Cache, showToast, Toast, Color } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { StorageBucketView, IAMMembersByPrincipalView } from "./services/storage";
 import { IAMView } from "./services/iam";
 import { ServiceHubView } from "./services/servicehub";
 import { executeGcloudCommand } from "./gcloud";
+import { CacheManager } from "./utils/CacheManager";
 
-// Create a cache instance
+// Create a cache instance for project details
 const cache = new Cache({ namespace: "project-details" });
 // Cache expiration time in milliseconds (1 hour)
 const CACHE_TTL = 3600000;
@@ -81,6 +82,9 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
         // Cache the result
         cache.set(`project-${projectId}`, JSON.stringify(result[0]));
         cache.set(`project-${projectId}-timestamp`, Date.now().toString());
+        
+        // Also update the selected project in the global cache
+        CacheManager.saveSelectedProject(projectId);
       }
     } catch (error) {
       console.error("Error fetching project details:", error);
@@ -111,13 +115,38 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
   };
 
   const clearCache = useCallback(async () => {
+    // Clear local cache
     cache.remove(`project-${projectId}`);
     cache.remove(`project-${projectId}-timestamp`);
+    
+    // Clear global cache
+    CacheManager.clearProjectCache();
+    
     await fetchProjectDetails();
+    
+    showToast({
+      style: Toast.Style.Success,
+      title: "Cache cleared",
+      message: "Project details refreshed"
+    });
   }, [projectId, fetchProjectDetails]);
 
   if (error) {
-    return <List isLoading={false}><List.EmptyView title={error} /></List>;
+    return (
+      <List isLoading={false}>
+        <List.EmptyView 
+          title={error} 
+          description="Failed to fetch project details"
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.RotateClockwise} onAction={fetchProjectDetails} />
+              <Action title="Clear Cache" icon={Icon.Trash} onAction={clearCache} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
   }
 
   return (

@@ -9,6 +9,8 @@ import ProjectView from "./ProjectView";
 import { StorageBucketView, StorageTransferView, IAMMembersView, IAMMembersByPrincipalView, StorageStatsView } from "./services/storage";
 import { IAMMembersByPrincipalView as IAMProjectMembersByPrincipalView, IAMView } from "./services/iam";
 import { executeGcloudCommand } from "./gcloud";
+import { CacheManager, Project } from "./utils/CacheManager";
+import CachedProjectView from "./views/CachedProjectView";
 
 const execPromise = promisify(exec);
 const GCLOUD_PATH = "/usr/local/bin/gcloud";
@@ -17,19 +19,13 @@ interface Preferences {
   projectId?: string;
 }
 
-interface Project {
-  id: string;
-  name: string;
-  projectNumber: string;
-  createTime: string;
-}
-
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [preferences, setPreferences] = useState<Preferences>({});
+  const [showCachedProjectView, setShowCachedProjectView] = useState(false);
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -39,7 +35,7 @@ export default function Command() {
   async function checkGcloudInstallation() {
     try {
       await execPromise(`${GCLOUD_PATH} --version`);
-      checkAuthStatus();
+      initializeFromCache();
     } catch (error) {
       setIsLoading(false);
       setError("Google Cloud SDK not found. Please install it using Homebrew: brew install google-cloud-sdk");
@@ -51,56 +47,125 @@ export default function Command() {
     }
   }
 
-  async function checkAuthStatus() {
-    setIsLoading(true);
+  // New function to initialize from cache
+  async function initializeFromCache() {
+    // Try to get authentication status from cache
+    const cachedAuth = CacheManager.getAuthStatus();
     
-    const loadingToast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Checking authentication status...",
-    });
+    if (cachedAuth && cachedAuth.isAuthenticated) {
+      setIsAuthenticated(true);
+      
+      // Try to get projects list from cache
+      const cachedProjects = CacheManager.getProjectsList();
+      
+      if (cachedProjects) {
+        setProjects(cachedProjects.projects);
+        
+        // Try to get selected project from cache
+        const cachedProject = CacheManager.getSelectedProject();
+        
+        if (cachedProject) {
+          setPreferences({ projectId: cachedProject.projectId });
+          
+          // If we have all cached data, show the cached project view
+          setShowCachedProjectView(true);
+          setIsLoading(false);
+          
+          // Optionally refresh in background
+          setTimeout(() => {
+            checkAuthStatus(true);
+          }, 1000);
+          
+          return;
+        }
+      }
+    }
+    
+    // If we don't have complete cached data, check auth status normally
+    checkAuthStatus();
+  }
+
+  async function checkAuthStatus(silent = false) {
+    if (!silent) {
+      setIsLoading(true);
+    }
+    
+    let loadingToast;
+    if (!silent) {
+      loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Checking authentication status...",
+      });
+    }
     
     try {
       const { stdout } = await execPromise(`${GCLOUD_PATH} auth list --format="value(account)" --filter="status=ACTIVE"`);
       
       if (stdout.trim()) {
         setIsAuthenticated(true);
-        loadingToast.hide();
-        showToast({
-          style: Toast.Style.Success,
-          title: "Authenticated",
-          message: stdout.trim(),
-        });
-        fetchProjects();
+        
+        // Cache the authentication status
+        CacheManager.saveAuthStatus(true, stdout.trim());
+        
+        if (!silent && loadingToast) {
+          loadingToast.hide();
+          showToast({
+            style: Toast.Style.Success,
+            title: "Authenticated",
+            message: stdout.trim(),
+          });
+        }
+        
+        fetchProjects(silent);
       } else {
         setIsAuthenticated(false);
         setIsLoading(false);
-        loadingToast.hide();
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Not authenticated",
-          message: "Please authenticate with Google Cloud",
-        });
+        
+        // Clear auth cache
+        CacheManager.clearAuthCache();
+        
+        if (!silent && loadingToast) {
+          loadingToast.hide();
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Not authenticated",
+            message: "Please authenticate with Google Cloud",
+          });
+        }
       }
     } catch (error: any) {
       setIsAuthenticated(false);
       setIsLoading(false);
-      setError(`Authentication check failed: ${error.message}`);
-      loadingToast.hide();
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Authentication check failed",
-        message: error.message,
-      });
+      
+      // Clear auth cache
+      CacheManager.clearAuthCache();
+      
+      if (!silent) {
+        setError(`Authentication check failed: ${error.message}`);
+        if (loadingToast) {
+          loadingToast.hide();
+        }
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Authentication check failed",
+          message: error.message,
+        });
+      }
     }
   }
 
-  async function fetchProjects() {
-    setIsLoading(true);
+  async function fetchProjects(silent = false) {
+    if (!silent) {
+      setIsLoading(true);
+    }
     
-    const loadingToast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Loading projects...",
-    });
+    let loadingToast;
+    if (!silent) {
+      loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading projects...",
+      });
+    }
     
     try {
       const { stdout } = await execPromise(`${GCLOUD_PATH} projects list --format=json`);
@@ -117,41 +182,55 @@ export default function Command() {
         
         setProjects(formattedProjects);
         
-        try {
-          const prefsPath = join(homedir(), '.raycast-gcloud-prefs.json');
-          if (fs.existsSync(prefsPath)) {
-            const prefsData = JSON.parse(fs.readFileSync(prefsPath, 'utf8'));
-            setPreferences(prefsData);
-          }
-        } catch (e) {
-          console.error("Failed to load preferences:", e);
+        // Cache the projects list
+        CacheManager.saveProjectsList(formattedProjects);
+        
+        // Try to get selected project from cache or preferences
+        const cachedProject = CacheManager.getSelectedProject();
+        
+        if (cachedProject) {
+          setPreferences({ projectId: cachedProject.projectId });
         }
         
-        loadingToast.hide();
-        showToast({
-          style: Toast.Style.Success,
-          title: "Projects loaded",
-          message: `Found ${formattedProjects.length} projects`,
-        });
+        if (!silent && loadingToast) {
+          loadingToast.hide();
+          showToast({
+            style: Toast.Style.Success,
+            title: "Projects loaded",
+            message: `Found ${formattedProjects.length} projects`,
+          });
+        }
       } else {
         setProjects([]);
-        loadingToast.hide();
-        showToast({
-          style: Toast.Style.Failure,
-          title: "No projects found",
-          message: "Create a project in Google Cloud Console",
-        });
+        
+        // Clear projects list cache
+        CacheManager.clearProjectsListCache();
+        
+        if (!silent && loadingToast) {
+          loadingToast.hide();
+          showToast({
+            style: Toast.Style.Failure,
+            title: "No projects found",
+            message: "Create a project in Google Cloud Console",
+          });
+        }
       }
     } catch (error: any) {
-      setError(`Failed to fetch projects: ${error.message}`);
-      loadingToast.hide();
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch projects",
-        message: error.message,
-      });
+      if (!silent) {
+        setError(`Failed to fetch projects: ${error.message}`);
+        if (loadingToast) {
+          loadingToast.hide();
+        }
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch projects",
+          message: error.message,
+        });
+      }
     } finally {
-      setIsLoading(false);
+      if (!silent) {
+        setIsLoading(false);
+      }
     }
   }
 
@@ -165,6 +244,13 @@ export default function Command() {
     try {
       await execPromise(`${GCLOUD_PATH} auth login --no-launch-browser`);
       setIsAuthenticated(true);
+      
+      // Get the authenticated user
+      const { stdout } = await execPromise(`${GCLOUD_PATH} auth list --format="value(account)" --filter="status=ACTIVE"`);
+      
+      // Cache the authentication status
+      CacheManager.saveAuthStatus(true, stdout.trim());
+      
       authToast.hide();
       showToast({
         style: Toast.Style.Success,
@@ -174,6 +260,10 @@ export default function Command() {
     } catch (error: any) {
       authToast.hide();
       setError(`Authentication failed: ${error.message}`);
+      
+      // Clear auth cache
+      CacheManager.clearAuthCache();
+      
       showToast({
         style: Toast.Style.Failure,
         title: "Authentication failed",
@@ -192,9 +282,8 @@ export default function Command() {
     try {
       await execPromise(`${GCLOUD_PATH} config set project ${projectId}`);
       
-      // Save preference
-      const prefsPath = join(homedir(), '.raycast-gcloud-prefs.json');
-      fs.writeFileSync(prefsPath, JSON.stringify({ projectId }));
+      // Save to cache and preferences
+      CacheManager.saveSelectedProject(projectId);
       setPreferences({ projectId });
       
       selectingToast.hide();
@@ -228,6 +317,12 @@ export default function Command() {
     push(<StorageStatsView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
   }
 
+  function clearCache() {
+    CacheManager.clearAllCaches();
+    setShowCachedProjectView(false);
+    checkAuthStatus();
+  }
+
   if (error) {
     return (
       <List isLoading={false}>
@@ -238,6 +333,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action title="Try Again" icon={Icon.RotateClockwise} onAction={checkGcloudInstallation} />
+              <Action title="Clear Cache" icon={Icon.Trash} onAction={clearCache} />
             </ActionPanel>
           }
         />
@@ -255,11 +351,25 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action title="Authenticate" icon={Icon.Key} onAction={authenticate} />
+              <Action title="Clear Cache" icon={Icon.Trash} onAction={clearCache} />
             </ActionPanel>
           }
         />
       </List>
     );
+  }
+
+  // If we have a cached project and showCachedProjectView is true, show the cached project view
+  if (showCachedProjectView) {
+    return <CachedProjectView gcloudPath={GCLOUD_PATH} />;
+  }
+
+  // If we have a cached project, we can directly go to the project view
+  const cachedProject = CacheManager.getSelectedProject();
+  if (cachedProject && !isLoading && preferences.projectId) {
+    // Only auto-navigate if we're not in the middle of loading
+    push(<ProjectView projectId={cachedProject.projectId} gcloudPath={GCLOUD_PATH} />);
+    return null;
   }
 
   return (
@@ -270,7 +380,8 @@ export default function Command() {
       isShowingDetail
       actions={
         <ActionPanel>
-          <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={fetchProjects} />
+          <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={() => fetchProjects(false)} />
+          <Action title="Clear Cache" icon={Icon.Trash} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} onAction={clearCache} />
         </ActionPanel>
       }
     >
@@ -345,7 +456,8 @@ export default function Command() {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
                     onAction={() => viewStorageStats(project.id)}
                   />
-                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchProjects} />
+                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => fetchProjects(false)} />
+                  <Action title="Clear Cache" icon={Icon.Trash} onAction={clearCache} />
                 </ActionPanel>
               }
             />
