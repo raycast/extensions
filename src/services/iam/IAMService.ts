@@ -67,7 +67,7 @@ export class IAMService {
   private gcloudPath: string;
   private projectId: string;
   private policyCache: Map<string, { policy: IAMPolicy; timestamp: number }> = new Map();
-  private readonly CACHE_TTL = 30000; // 30 seconds cache TTL
+  private readonly CACHE_TTL = 300000; // 5 minutes cache TTL (increased from 30 seconds)
 
   constructor(gcloudPath: string, projectId: string) {
     this.gcloudPath = gcloudPath;
