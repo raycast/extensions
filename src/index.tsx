@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, Form, useNavigation, Color, Cache } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, Form, useNavigation, Color, Cache, open, Detail } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -30,7 +30,7 @@ export default function Command() {
   const [preferences, setPreferences] = useState<Preferences>({});
   const [showCachedProjectView, setShowCachedProjectView] = useState(false);
   const [shouldNavigateToProject, setShouldNavigateToProject] = useState<string | null>(null);
-  const { push } = useNavigation();
+  const { push, pop } = useNavigation();
 
   // Handle navigation to project with useEffect
   useEffect(() => {
@@ -121,13 +121,17 @@ export default function Command() {
     }
     
     try {
+      // Only check auth status, don't make changes that could log the user out
       const { stdout } = await execPromise(`${GCLOUD_PATH} auth list --format="value(account)" --filter="status=ACTIVE"`);
       
       if (stdout.trim()) {
         setIsAuthenticated(true);
         
-        // Cache the authentication status
-        CacheManager.saveAuthStatus(true, stdout.trim());
+        // Only update cache if not already authenticated to prevent unexpected cache updates
+        if (!isAuthenticated) {
+          // Cache the authentication status
+          CacheManager.saveAuthStatus(true, stdout.trim());
+        }
         
         if (!silent && loadingToast) {
           loadingToast.hide();
@@ -143,8 +147,10 @@ export default function Command() {
         setIsAuthenticated(false);
         setIsLoading(false);
         
-        // Clear auth cache
-        CacheManager.clearAuthCache();
+        // Clear auth cache only if we were previously authenticated
+        if (isAuthenticated) {
+          CacheManager.clearAuthCache();
+        }
         
         if (!silent && loadingToast) {
           loadingToast.hide();
@@ -156,11 +162,17 @@ export default function Command() {
         }
       }
     } catch (error: any) {
-      setIsAuthenticated(false);
-      setIsLoading(false);
+      // Only change auth state if there's a definitive failure
+      if (error.message.includes("not logged in") || error.message.includes("no active account")) {
+        setIsAuthenticated(false);
+        
+        // Clear auth cache only if we were previously authenticated
+        if (isAuthenticated) {
+          CacheManager.clearAuthCache();
+        }
+      }
       
-      // Clear auth cache
-      CacheManager.clearAuthCache();
+      setIsLoading(false);
       
       if (!silent) {
         setError(`Authentication check failed: ${error.message}`);
@@ -257,30 +269,17 @@ export default function Command() {
   }
 
   async function authenticate() {
-    const authToast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Starting authentication...",
-      message: "Please follow the instructions in your browser",
-    });
-    
     try {
-      await execPromise(`${GCLOUD_PATH} auth login --no-launch-browser`);
-      setIsAuthenticated(true);
+      console.log("Starting Google Cloud authentication process");
       
-      // Get the authenticated user
-      const { stdout } = await execPromise(`${GCLOUD_PATH} auth list --format="value(account)" --filter="status=ACTIVE"`);
+      // Show a dedicated authentication view that will handle the process
+      push(<AuthenticationView gcloudPath={GCLOUD_PATH} onAuthenticated={() => {
+        setIsAuthenticated(true);
+        fetchProjects();
+      }} />);
       
-      // Cache the authentication status
-      CacheManager.saveAuthStatus(true, stdout.trim());
-      
-      authToast.hide();
-      showToast({
-        style: Toast.Style.Success,
-        title: "Authentication successful",
-      });
-      fetchProjects();
     } catch (error: any) {
-      authToast.hide();
+      console.error(`Authentication error: ${error.message}`);
       setError(`Authentication failed: ${error.message}`);
       
       // Clear auth cache
@@ -295,6 +294,16 @@ export default function Command() {
   }
 
   async function selectProject(projectId: string) {
+    if (!projectId || typeof projectId !== 'string') {
+      console.error("Invalid project ID provided to selectProject:", projectId);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid project ID",
+        message: "Cannot select project with invalid ID"
+      });
+      return;
+    }
+    
     const selectingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Selecting project...",
@@ -315,6 +324,11 @@ export default function Command() {
         message: projectId,
       });
       
+      // Save to cached projects list in the background
+      CacheManager.getRecentlyUsedProjectsWithDetails(GCLOUD_PATH).catch(error => {
+        console.error("Error updating cached projects:", error);
+      });
+      
       // Use state to trigger navigation in useEffect
       setShouldNavigateToProject(projectId);
     } catch (error: any) {
@@ -329,6 +343,9 @@ export default function Command() {
   }
 
   function viewProject(projectId: string) {
+    // Save this project as recently used
+    CacheManager.saveSelectedProject(projectId);
+    
     // Use state to trigger navigation in useEffect
     setShouldNavigateToProject(projectId);
   }
@@ -349,6 +366,293 @@ export default function Command() {
     CacheManager.clearAllCaches();
     setShowCachedProjectView(false);
     checkAuthStatus();
+  }
+
+  // Update the AuthenticationView component
+  function AuthenticationView({ gcloudPath, onAuthenticated }: { gcloudPath: string; onAuthenticated: () => void }) {
+    const [isLoading, setIsLoading] = useState(false);
+    const [authUrl, setAuthUrl] = useState("");
+    const [verificationCode, setVerificationCode] = useState("");
+    const [statusMessage, setStatusMessage] = useState("Enter the verification code from Google");
+    const [authProcess, setAuthProcess] = useState<ReturnType<typeof exec> | null>(null);
+    const { pop } = useNavigation();
+    
+    // Start authentication process when component mounts
+    useEffect(() => {
+      startAuthentication();
+      
+      // Cleanup function to handle component unmount
+      return () => {
+        if (authProcess) {
+          try {
+            authProcess.kill();
+          } catch (error) {
+            console.error("Error killing auth process:", error);
+          }
+        }
+      };
+    }, []);
+    
+    async function startAuthentication() {
+      setIsLoading(true);
+      setStatusMessage("Initializing authentication...");
+      
+      try {
+        // Execute the gcloud auth login command
+        const process = exec(`${gcloudPath} auth login --no-launch-browser`, { maxBuffer: 1024 * 1024 });
+        setAuthProcess(process);
+        
+        // Listen for stdout data to capture instructions
+        process.stdout?.on('data', (data) => {
+          console.log(`Auth process stdout: ${data}`);
+          const output = data.toString();
+          
+          if (output.includes("Enter verification code:") || output.includes("Enter authorization code:")) {
+            setStatusMessage("Enter the verification code from Google");
+            setIsLoading(false);
+          }
+        });
+        
+        // Listen for stderr to detect errors and extract URL
+        process.stderr?.on('data', (data) => {
+          console.error(`Auth process stderr: ${data}`);
+          const output = data.toString();
+          
+          // Extract the auth URL if present
+          const urlMatch = output.match(/(https:\/\/accounts\.google\.com\/o\/oauth2\/auth[^\s]+)/);
+          if (urlMatch && urlMatch[1]) {
+            setAuthUrl(urlMatch[1]);
+            setStatusMessage("Authentication URL detected - Enter code from browser");
+            setIsLoading(false);
+            
+            // Automatically open the URL in the browser
+            open(urlMatch[1]);
+          }
+        });
+        
+        // Handle process completion
+        process.on('close', async (code) => {
+          console.log(`Auth process exited with code ${code}`);
+          
+          if (code === 0) {
+            setStatusMessage("Verifying authentication...");
+            setIsLoading(true);
+            
+            try {
+              const { stdout } = await execPromise(`${gcloudPath} auth list --format="value(account)" --filter="status=ACTIVE"`);
+              
+              if (stdout.trim()) {
+                // Cache the authentication status
+                CacheManager.saveAuthStatus(true, stdout.trim());
+                showToast({
+                  style: Toast.Style.Success,
+                  title: "Authenticated as",
+                  message: stdout.trim()
+                });
+                
+                // Call the onAuthenticated callback
+                onAuthenticated();
+                pop();
+              } else {
+                setStatusMessage("Authentication failed - try again");
+                setIsLoading(false);
+              }
+            } catch (error: any) {
+              setStatusMessage(`Error: ${error.message}`);
+              setIsLoading(false);
+            }
+          } else {
+            setStatusMessage("Authentication failed - try again");
+            setIsLoading(false);
+          }
+        });
+        
+        // Handle process errors
+        process.on('error', (error) => {
+          console.error(`Auth process error: ${error.message}`);
+          setStatusMessage(`Error: ${error.message}`);
+          setIsLoading(false);
+        });
+        
+      } catch (error: any) {
+        console.error(`Authentication error: ${error.message}`);
+        setStatusMessage(`Error: ${error.message}`);
+        setIsLoading(false);
+      }
+    }
+    
+    // Function to submit verification code to the process
+    async function submitVerificationCode() {
+      if (!verificationCode.trim()) {
+        setStatusMessage("Please enter a valid verification code");
+        return;
+      }
+      
+      setIsLoading(true);
+      setStatusMessage("Submitting code...");
+      
+      try {
+        if (authProcess && authProcess.stdin) {
+          // Write the verification code to the process stdin
+          authProcess.stdin.write(verificationCode + '\n');
+        } else {
+          setStatusMessage("Error: Authentication process not ready");
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error submitting verification code:", error);
+        setStatusMessage(`Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+        setIsLoading(false);
+      }
+    }
+    
+    // Function to restart the authentication process
+    function restartAuthentication() {
+      if (authProcess) {
+        try {
+          authProcess.kill();
+        } catch (error) {
+          console.error("Error killing auth process:", error);
+        }
+      }
+      
+      // Reset state
+      setVerificationCode("");
+      setAuthUrl("");
+      
+      // Start the authentication process again
+      startAuthentication();
+    }
+    
+    // Single authentication screen with simplified UI
+    if (!isLoading) {
+      return (
+        <Form
+          actions={
+            <ActionPanel>
+              <Action
+                title="Submit Code"
+                icon={Icon.CheckCircle}
+                shortcut={{ modifiers: ["cmd"], key: "return" }}
+                onAction={submitVerificationCode}
+              />
+              <Action
+                title="Restart Authentication"
+                icon={Icon.RotateClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={restartAuthentication}
+              />
+              <Action
+                title="Cancel"
+                icon={Icon.XmarkCircle}
+                onAction={() => {
+                  if (authProcess) {
+                    try {
+                      authProcess.kill();
+                    } catch (error) {
+                      console.error("Error killing auth process:", error);
+                    }
+                  }
+                  pop();
+                }}
+              />
+            </ActionPanel>
+          }
+        >
+          <Form.Description
+            title="Google Cloud Authentication"
+            text={statusMessage}
+          />
+          {authUrl && (
+            <Form.Description
+              title="Authentication URL"
+              text={`[Click here to open authentication page](${authUrl})`}
+            />
+          )}
+          <Form.TextField
+            id="verificationCode"
+            title="Verification Code"
+            placeholder="Enter code from Google"
+            value={verificationCode}
+            onChange={setVerificationCode}
+            autoFocus
+          />
+        </Form>
+      );
+    } else {
+      return (
+        <Detail
+          navigationTitle="Google Cloud Authentication"
+          markdown={`# Google Cloud Authentication
+
+⏳ ${statusMessage}
+          
+${authUrl ? `\n\n[Click here to open authentication page](${authUrl})` : ""}`}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Cancel"
+                icon={Icon.XmarkCircle}
+                onAction={() => {
+                  if (authProcess) {
+                    try {
+                      authProcess.kill();
+                    } catch (error) {
+                      console.error("Error killing auth process:", error);
+                    }
+                  }
+                  pop();
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      );
+    }
+  }
+
+  // Update loginWithDifferentAccount to use the new authentication view
+  async function loginWithDifferentAccount() {
+    // Clear auth cache first
+    CacheManager.clearAuthCache();
+    
+    // First show toast for revoking current credentials
+    const revokingToast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Logging out current account...",
+      message: "Revoking current credentials"
+    });
+    
+    try {
+      console.log("Revoking all existing credentials");
+      // Force new authentication - first revoke all existing credentials
+      await execPromise(`${GCLOUD_PATH} auth revoke --all --quiet`);
+      revokingToast.hide();
+      
+      // Show the authentication view
+      push(<AuthenticationView gcloudPath={GCLOUD_PATH} onAuthenticated={() => {
+        setIsAuthenticated(true);
+        // Clear cached project to avoid confusion with the new account
+        CacheManager.clearProjectCache();
+        // Reset state and navigation
+        setShowCachedProjectView(false);
+        fetchProjects();
+      }} />);
+      
+    } catch (error: any) {
+      console.error(`Account switch error: ${error.message}`);
+      revokingToast?.hide();
+      setError(`Authentication switch failed: ${error.message}`);
+      
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Authentication failed",
+        message: error.message
+      });
+      
+      // Re-check authentication status to recover
+      checkAuthStatus();
+    }
   }
 
   if (error) {
@@ -389,7 +693,12 @@ export default function Command() {
 
   // If we have a cached project and showCachedProjectView is true, show the cached project view
   if (showCachedProjectView) {
-    return <CachedProjectView gcloudPath={GCLOUD_PATH} />;
+    return (
+      <CachedProjectView 
+        gcloudPath={GCLOUD_PATH} 
+        onLoginWithDifferentAccount={loginWithDifferentAccount} 
+      />
+    );
   }
 
   return (
@@ -402,6 +711,7 @@ export default function Command() {
         <ActionPanel>
           <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={() => fetchProjects(false)} />
           <Action title="Clear Cache" icon={Icon.Trash} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} onAction={clearCache} />
+          <Action title="Login with Different Account" icon={Icon.Person} shortcut={{ modifiers: ["cmd"], key: "l" }} onAction={loginWithDifferentAccount} />
         </ActionPanel>
       }
     >
@@ -412,86 +722,105 @@ export default function Command() {
           icon={{ source: Icon.Document, tintColor: Color.Blue }}
         />
       ) : (
-        <List.Section title="Google Cloud Projects" subtitle={`${projects.length} projects`}>
-          {projects.map((project) => (
+        <>
+          <List.Section title="Account Actions">
             <List.Item
-              key={project.id}
-              title={project.name}
-              subtitle=""
-              icon={{ source: preferences.projectId === project.id ? Icon.CheckCircle : Icon.Circle, tintColor: preferences.projectId === project.id ? Color.Green : Color.SecondaryText }}
-              accessories={[
-                { text: project.id },
-                { text: preferences.projectId === project.id ? "Current Project" : "", icon: preferences.projectId === project.id ? Icon.Star : undefined }
-              ]}
-              detail={
-                <List.Item.Detail
-                  markdown={`# ${project.name}\n\n**Project ID:** ${project.id}\n\n**Project Number:** ${project.projectNumber}\n\n**Created:** ${new Date(project.createTime).toLocaleString()}`}
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label title="Project Name" text={project.name} />
-                      <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Label title="Project ID" text={project.id} />
-                      <List.Item.Detail.Metadata.Label title="Project Number" text={project.projectNumber} />
-                      <List.Item.Detail.Metadata.Label title="Created" text={new Date(project.createTime).toLocaleString()} />
-                      {preferences.projectId === project.id && (
-                        <>
-                          <List.Item.Detail.Metadata.Separator />
-                          <List.Item.Detail.Metadata.Label 
-                            title="Status" 
-                            text="Current Project" 
-                            icon={{ source: Icon.CheckCircle, tintColor: Color.Green }} 
-                          />
-                        </>
-                      )}
-                    </List.Item.Detail.Metadata>
-                  }
-                />
-              }
+              icon={{ source: Icon.Person, tintColor: Color.Orange }}
+              title="Login with Different Account"
+              subtitle="Switch to another Google Cloud account"
               actions={
                 <ActionPanel>
-                  <ActionPanel.Section title="Project Actions">
-                    <Action
-                      title="Open Project"
-                      icon={Icon.Forward}
-                      shortcut={{ modifiers: ["cmd"], key: "o" }}
-                      onAction={() => viewProject(project.id)}
-                    />
-                    <Action
-                      title="Set as Current Project"
-                      icon={Icon.Check}
-                      shortcut={{ modifiers: ["cmd"], key: "s" }}
-                      onAction={() => selectProject(project.id)}
-                    />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section title="Services">
-                    <Action
-                      title="View Storage Buckets"
-                      icon={Icon.Folder}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                      onAction={() => viewStorageBuckets(project.id)}
-                    />
-                    <Action
-                      title="View Storage Transfer Service"
-                      icon={Icon.ArrowRight}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-                      onAction={() => viewStorageTransfer(project.id)}
-                    />
-                    <Action
-                      title="View Storage Statistics"
-                      icon={Icon.BarChart}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
-                      onAction={() => viewStorageStats(project.id)}
-                    />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section title="Utilities">
-                    <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => fetchProjects(false)} />
-                    <Action title="Clear Cache" icon={Icon.Trash} onAction={clearCache} />
-                  </ActionPanel.Section>
+                  <Action
+                    title="Switch Account"
+                    icon={Icon.Switch}
+                    shortcut={{ modifiers: ["cmd"], key: "l" }}
+                    onAction={loginWithDifferentAccount}
+                  />
                 </ActionPanel>
               }
             />
-          ))}
-        </List.Section>
+          </List.Section>
+          <List.Section title="Google Cloud Projects" subtitle={`${projects.length} projects`}>
+            {projects.map((project) => (
+              <List.Item
+                key={project.id}
+                title={project.name}
+                subtitle=""
+                icon={{ source: preferences.projectId === project.id ? Icon.CheckCircle : Icon.Circle, tintColor: preferences.projectId === project.id ? Color.Green : Color.SecondaryText }}
+                accessories={[
+                  { text: project.id },
+                  { text: preferences.projectId === project.id ? "Current Project" : "", icon: preferences.projectId === project.id ? Icon.Star : undefined }
+                ]}
+                detail={
+                  <List.Item.Detail
+                    markdown={`# ${project.name}\n\n**Project ID:** ${project.id}\n\n**Project Number:** ${project.projectNumber}\n\n**Created:** ${new Date(project.createTime).toLocaleString()}`}
+                    metadata={
+                      <List.Item.Detail.Metadata>
+                        <List.Item.Detail.Metadata.Label title="Project Name" text={project.name} />
+                        <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Label title="Project ID" text={project.id} />
+                        <List.Item.Detail.Metadata.Label title="Project Number" text={project.projectNumber} />
+                        <List.Item.Detail.Metadata.Label title="Created" text={new Date(project.createTime).toLocaleString()} />
+                        {preferences.projectId === project.id && (
+                          <>
+                            <List.Item.Detail.Metadata.Separator />
+                            <List.Item.Detail.Metadata.Label 
+                              title="Status" 
+                              text="Current Project" 
+                              icon={{ source: Icon.CheckCircle, tintColor: Color.Green }} 
+                            />
+                          </>
+                        )}
+                      </List.Item.Detail.Metadata>
+                    }
+                  />
+                }
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Section title="Project Actions">
+                      <Action
+                        title="Open Project"
+                        icon={Icon.Forward}
+                        shortcut={{ modifiers: ["cmd"], key: "o" }}
+                        onAction={() => viewProject(project.id)}
+                      />
+                      <Action
+                        title="Set as Current Project"
+                        icon={Icon.Check}
+                        shortcut={{ modifiers: ["cmd"], key: "s" }}
+                        onAction={() => selectProject(project.id)}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section title="Services">
+                      <Action
+                        title="View Storage Buckets"
+                        icon={Icon.Folder}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                        onAction={() => viewStorageBuckets(project.id)}
+                      />
+                      <Action
+                        title="View Storage Transfer Service"
+                        icon={Icon.ArrowRight}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                        onAction={() => viewStorageTransfer(project.id)}
+                      />
+                      <Action
+                        title="View Storage Statistics"
+                        icon={Icon.BarChart}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                        onAction={() => viewStorageStats(project.id)}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section title="Utilities">
+                      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => fetchProjects(false)} />
+                      <Action title="Clear Cache" icon={Icon.Trash} onAction={clearCache} />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        </>
       )}
     </List>
   );
