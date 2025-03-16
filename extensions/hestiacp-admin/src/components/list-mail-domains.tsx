@@ -79,7 +79,7 @@ function AddMailDomain({ user, onMailDomainAdded }: AddMailDomainProps) {
     async onData() {
       await showToast({
         title: "SUCCESS",
-        message: `Added ${values.domain}>`,
+        message: `Added ${values.domain}`,
       });
       onMailDomainAdded();
       pop();
