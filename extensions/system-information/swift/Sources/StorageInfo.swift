@@ -14,7 +14,6 @@ struct StorageInfo: Encodable {
 }
 
 @raycast func getStorageInfo() throws -> StorageInfo {
-    let fileManager = FileManager.default
     let volumeURL = URL(fileURLWithPath: "/")
     
     guard let values = try? volumeURL.resourceValues(forKeys: [
