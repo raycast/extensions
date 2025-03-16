@@ -1,4 +1,5 @@
 import { convertCommand } from "./lib/converter";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function command() {
   try {
