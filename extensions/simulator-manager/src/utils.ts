@@ -1,4 +1,4 @@
-import { Color, Icon } from "@raycast/api";
+import { closeMainWindow, Color, Icon } from "@raycast/api";
 import { Device, DeviceType } from "./types";
 import { showFailureToast } from "@raycast/utils";
 
@@ -117,6 +117,8 @@ export async function executeWithErrorHandling(action: () => Promise<void>, onSu
     if (onSuccess) onSuccess();
   } catch (error) {
     showFailureToast(error);
+  } finally {
+    closeMainWindow();
   }
 }
 
