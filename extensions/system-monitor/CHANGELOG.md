@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-03-17
 
 - Improve the `onAction()` so it can open the Activity Monitor directly without selecting a tab
 
