@@ -116,6 +116,7 @@ export default function Command() {
     if (habit.repeatable === true) {
       return (
         <ActionPanel>
+          <Action title="Track Habit" icon={Icon.CheckCircle} onAction={() => markHabitAsCompleted(habit.id)} />
           <Action.OpenInBrowser
             title="View Habits Details Online"
             url="https://www.supahabits.com/dashboard"
