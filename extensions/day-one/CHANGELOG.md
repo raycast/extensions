@@ -1,6 +1,6 @@
 # Day One Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2025-03-17
 
 - Fixed an issue where adding an entry when the journal name contains a space character causes an error.
 
