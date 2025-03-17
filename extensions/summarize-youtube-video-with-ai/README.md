@@ -1,12 +1,30 @@
 # Summarize YouTube Video
 
-Summarize any YouTube Video with AI and ask follow up questions to get all the details. Choose between Raycast AI, OpenAI ChatGPT or Anthropic Claude. You have to either be a [Raycast Pro](https://www.raycast.com/pro) Member, have access to an [OpenAI API Key](https://platform.openai.com/account/api-keys) or [Anthropic API Key](https://www.anthropic.com/api) to use this extension.
+Summarize any YouTube Video with AI and ask follow up questions to get all the details. Choose between Raycast, OpenAI ChatGPT or Anthropic Claude. You have to either be a [Raycast Pro](https://www.raycast.com/pro) Member, have access to an [OpenAI API Key](https://platform.openai.com/account/api-keys) or [Anthropic API Key](https://www.anthropic.com/api) to use this extension. Alternatively, you can use the extension with [Ollama](https://ollama.com/) to summarize YouTube videos using a local LLM.
 
 ## Preferences
 
-### Choose AI
+### Commands
 
-Choose between Raycast AI (default), OpenAI ChatGPT or Anthropic Claude.
+## `summarizeVideo`
+
+This command is deprecated. Please use one of the below commands instead. If you have set preferences for this command, please migrate them to the new command.
+
+## `summarizeVideoWithRaycast`
+
+### Preferences for Raycast
+
+### Creativity
+
+Choose how creative the AI should be.
+
+### Language
+
+The language you want the summary to be in. Your choice will be used in a prompt like this "Answer in english". (default: `english`).
+
+## `summarizeVideoWithOpenAI`
+
+### Preferences for OpenAI
 
 ### Creativity
 
@@ -24,6 +42,16 @@ Choose the OpenAI endpoint you want to use.
 
 Choose the model you want to use. (default: `chatgpt-4o-latest`).
 
+### Language
+
+The language you want the summary to be in. Your choice will be used in a prompt like this "Answer in english". (default: `english`).
+
+## `summarizeVideoWithAnthropic`
+
+### Creativity
+
+Choose how creative the AI should be.
+
 ### Anthropic API Key
 
 Your Anthropic API Key. You can get one [here](https://console.anthropic.com/dashboard). Necessary if you choose "Anthropic Claude" as your "Choose AI" option.
@@ -36,10 +64,22 @@ Choose the model you want to use. (default: `claude-3-5-sonnet-latest`).
 
 The language you want the summary to be in. Your choice will be used in a prompt like this "Answer in english". (default: `english`).
 
-## Using the extension with Ollama
+## `summarizeVideoWithOllama`
 
-It is possible to use the OpenAI compatible API endpoint from Ollama to summarize YouTube videos using a local LLM. To do this use the following preferences:
+### Preferences for Ollama
 
-- Choose AI: `OpenAI ChatGPT`
-- OpenAI Endpoint: `http://localhost:11434/v1/`
-- OpenAI Model: `llama3.2:latest` or any other model from [Ollama's model catalog](https://ollama.com/search).
+### Creativity
+
+Choose how creative the AI should be.
+
+### Ollama Endpoint
+
+Choose the Ollama endpoint you want to use. (default: `http://localhost:11434/v1`).
+
+### Ollama Model
+
+Choose one of the models from Ollama's [model catalog](https://ollama.com/search). (default: `llama3.2:latest`).
+
+### Language
+
+The language you want the summary to be in. Your choice will be used in a prompt like this "Answer in english". (default: `english`).

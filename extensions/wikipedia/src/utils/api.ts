@@ -1,5 +1,6 @@
 import { environment } from "@raycast/api";
 import fetch from "node-fetch";
+import wiki from "wikijs";
 
 export interface PageSummary {
   title: string;
@@ -20,6 +21,22 @@ export interface WikiNode {
   content: string;
   items?: WikiNode[];
 }
+
+export interface SearchResult {
+  ns: number;
+  title: string;
+  pageid: number;
+  size: number;
+  wordcount: number;
+  snippet: string;
+  timestamp: string;
+}
+
+export interface SearchResults {
+  query: { search: SearchResult[] };
+}
+
+export type PageMetadata = Record<string, unknown>;
 
 export const getApiUrl = (language = "en") => {
   return `https://${language.split("-").at(0)}.wikipedia.org/`;
@@ -64,4 +81,47 @@ export async function getPageData(title: string, language: string) {
     `${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`,
     getApiOptions(language),
   ).then((res) => res.json() as Promise<PageSummary>);
+}
+
+export async function searchPages(query: string, language: string) {
+  const url = new URL(`${getApiUrl("en")}w/api.php`);
+
+  url.searchParams.set("action", "query");
+  url.searchParams.set("list", "search");
+  url.searchParams.set("format", "json");
+  url.searchParams.set("srsearch", query);
+  url.searchParams.set("srlimit", "1");
+
+  return fetch(url, getApiOptions(language))
+    .then((r) => r.json() as Promise<SearchResults>)
+    .then((r) => r.query.search);
+}
+
+export async function getPageMetadata(title: string, language: string) {
+  return wiki({
+    apiUrl: `${getApiUrl(language)}w/api.php`,
+    headers: getApiOptions(language)?.headers,
+  })
+    .page(title)
+    .then((page) => page.fullInfo());
+}
+
+export function getPageContent(title: string, language: string) {
+  return wiki({
+    apiUrl: `${getApiUrl(language)}w/api.php`,
+    headers: getApiOptions(language)?.headers,
+  })
+    .page(title)
+    .then((page) => page.content())
+    .then((result) => result as unknown as WikiNode[]);
+}
+
+export function getPageLinks(title: string, language: string) {
+  return wiki({
+    apiUrl: `${getApiUrl(language)}w/api.php`,
+    headers: getApiOptions(language)?.headers,
+  })
+    .page(title)
+    .then((page) => page.links())
+    .catch(() => [] as string[]);
 }

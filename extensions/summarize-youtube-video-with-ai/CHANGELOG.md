@@ -1,5 +1,18 @@
 # Summarize YouTube Video Changelog
 
+## [New Features] - 2025-03-05
+
+- 🤖 created separate command for Ollama
+
+## [New Features] - 2025-02-19
+
+- ⁉ Reworked the follow up questions to be a list of questions and answers
+
+## [New Features] - 2025-01-18
+
+- 🔎 Added support for clipboard and browser extension detection
+- 🪓 Split AIs into separate commands
+
 ## [New Features] - 2024-12-21
 
 - Added preferences to set a custom OpenAI API endpoint

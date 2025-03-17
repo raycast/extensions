@@ -5,15 +5,20 @@ import streamZip from "node-stream-zip";
 import { tryExec } from "~/utils/errors";
 
 export function waitForFileAvailable(path: string): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const interval = setInterval(() => {
-      tryExec(() => {});
+      if (!existsSync(path)) return;
       const stats = statSync(path);
       if (stats.isFile()) {
         clearInterval(interval);
         resolve();
       }
     }, 300);
+
+    setTimeout(() => {
+      clearInterval(interval);
+      reject(new Error(`File ${path} not found.`));
+    }, 5000);
   });
 }
 

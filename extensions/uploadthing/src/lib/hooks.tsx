@@ -12,6 +12,7 @@ import {
   readFilesFromClipboard,
 } from "./utils";
 import { ACL } from "@uploadthing/shared";
+import { useCachedPromise } from "@raycast/utils";
 
 export const useUpload = () => {
   const toast = useRef<Toast | null>(null);
@@ -92,4 +93,25 @@ export const useAppInfo = () => {
   });
 
   return query.data;
+};
+
+export const useFiles = () => {
+  const utapi = new UTApi({ token: getToken() });
+  const LIMIT = 20;
+  const { isLoading, data, pagination } = useCachedPromise(
+    () => async (options: { page: number }) => {
+      const res = await utapi.listFiles({
+        offset: options.page * LIMIT,
+        limit: LIMIT,
+      });
+
+      return {
+        data: [...res.files],
+        hasMore: res.hasMore,
+      };
+    },
+    [],
+    { initialData: [] },
+  );
+  return { isLoading, files: data, pagination };
 };

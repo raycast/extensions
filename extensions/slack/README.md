@@ -25,6 +25,9 @@ If you don't want to log in through OAuth, you can use an access token instead. 
     oauth_config:
       scopes:
         user:
+          # Command: Search Messages
+          - search:read
+
           # Command: Search & Unread Messages & Set Presence
           - users:read
 

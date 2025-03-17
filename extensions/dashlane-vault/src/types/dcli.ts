@@ -73,3 +73,13 @@ export const VaultNoteSchema = v.object({
 });
 
 export type VaultNote = v.InferOutput<typeof VaultNoteSchema>;
+
+export type Device = {
+  deviceId: string;
+  deviceName?: string;
+  devicePlatform?: string;
+  creationDateUnix: number;
+  lastUpdateDateUnix: number;
+  lastActivityDateUnix: number;
+  isCurrentDevice: boolean;
+};

@@ -10,7 +10,13 @@ export default function Command() {
   const isLoading = searchText.length > 0 ? searchIsLoading : favoritesIsLoading;
 
   return (
-    <List onSearchTextChange={setSearchText} searchText={searchText} throttle isShowingDetail isLoading={isLoading}>
+    <List
+      onSearchTextChange={setSearchText}
+      searchText={searchText}
+      throttle={true}
+      isShowingDetail
+      isLoading={isLoading}
+    >
       {searchText.length > 0 ? (
         <SearchList searchText={searchText} handleLoading={setSearchIsLoading} />
       ) : (

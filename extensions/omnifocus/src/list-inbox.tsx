@@ -1,10 +1,9 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { completeTask } from "./lib/api/complete.task";
-import { deleteTask } from "./lib/api/delete-task";
 import { listTasks } from "./lib/api/list-tasks";
 import { OmniFocusTask } from "./lib/types/task";
 import { useValidateRequirements } from "./lib/utils/useValidateRequirements";
+import { useTaskActions } from "./lib/hooks/use-task-actions";
 
 function getAccessories(task: OmniFocusTask): List.Item.Accessory[] {
   const accessories: List.Item.Accessory[] = [];
@@ -67,37 +66,7 @@ export default function ListInboxTasks() {
     }
   };
 
-  async function actionComplete(id: string) {
-    try {
-      await completeTask(id);
-      await showToast({
-        title: "Task completed!",
-        style: Toast.Style.Success,
-      });
-      await fetchTasks();
-    } catch {
-      await showToast({
-        title: "An error occurred while completing the task.",
-        style: Toast.Style.Failure,
-      });
-    }
-  }
-
-  async function actionDelete(id: string) {
-    try {
-      await deleteTask(id);
-      await showToast({
-        title: "Task deleted!",
-        style: Toast.Style.Success,
-      });
-      await fetchTasks();
-    } catch {
-      await showToast({
-        title: "An error occurred while deleting the task.",
-        style: Toast.Style.Failure,
-      });
-    }
-  }
+  const { actionComplete, actionDelete } = useTaskActions(fetchTasks);
 
   useEffect(() => {
     if (!loading) {

@@ -1,14 +1,13 @@
-import { Icon, List, showToast, Toast, Image } from "@raycast/api";
+import { Icon, List, showToast, Toast, Image, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { useSpaces } from "./hooks/useSpaces";
-import { useSearch } from "./hooks/useSearch";
+import { useGlobalSearch } from "./hooks/useGlobalSearch";
 import { getAllTypesFromSpaces } from "./helpers/types";
-import { SpaceObject } from "./helpers/schemas";
 import ObjectListItem from "./components/ObjectListItem";
 import EmptyView from "./components/EmptyView";
 import EnsureAuthenticated from "./components/EnsureAuthenticated";
-import { pluralize } from "./helpers/strings";
+import { getDateLabel, pluralize } from "./helpers/strings";
 
 const searchBarPlaceholder = "Globally search objects across spaces...";
 
@@ -23,13 +22,12 @@ export default function Command() {
 function Search() {
   const [searchText, setSearchText] = useState("");
   const [objectTypes, setObjectTypes] = useState<string[]>([]);
-  const [filteredItems, setFilteredItems] = useState<SpaceObject[]>([]);
   const [spaceIcons, setSpaceIcons] = useState<{ [key: string]: string }>({});
   const [filterType, setFilterType] = useState("all");
   const [uniqueKeysForPages, setUniqueKeysForPages] = useState<string[]>([]);
   const [uniqueKeysForTasks, setUniqueKeysForTasks] = useState<string[]>([]);
 
-  const { objects, objectsError, isLoadingObjects, mutateObjects, objectsPagination } = useSearch(
+  const { objects, objectsError, isLoadingObjects, mutateObjects, objectsPagination } = useGlobalSearch(
     searchText,
     objectTypes,
   );
@@ -97,17 +95,6 @@ function Search() {
   }, [spaces]);
 
   useEffect(() => {
-    if (objects) {
-      const filteredObjects = objects.filter(
-        (object) =>
-          object.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          object.object_type.toLowerCase().includes(searchText.toLowerCase()),
-      );
-      setFilteredItems(filteredObjects);
-    }
-  }, [objects, searchText]);
-
-  useEffect(() => {
     const objectTypeMap: { [key: string]: string[] } = {
       all: [],
       pages: uniqueKeysForPages,
@@ -125,6 +112,51 @@ function Search() {
       showToast(Toast.Style.Failure, "Failed to fetch latest data", (objectsError || spacesError)?.message);
     }
   }, [objectsError, spacesError]);
+
+  const processedObjects = objects.map((object) => {
+    const spaceIcon = spaceIcons[object.space_id];
+    const dateToSortAfter = getPreferenceValues().sort;
+    const date = object.details.find((detail) => detail.id === dateToSortAfter)?.details[dateToSortAfter] as string;
+
+    return {
+      key: object.id,
+      spaceId: object.space_id,
+      objectId: object.id,
+      icon: {
+        source: object.icon,
+        mask:
+          (object.layout === "participant" || object.layout === "profile") && object.icon != Icon.Document
+            ? Image.Mask.Circle
+            : Image.Mask.RoundedRectangle,
+      },
+      title: object.name,
+      subtitle: {
+        value: object.type,
+        tooltip: `Type: ${object.type}`,
+      },
+      accessories: [
+        ...(date
+          ? [
+              {
+                date: new Date(date),
+                tooltip: `${getDateLabel()}: ${format(new Date(date), "EEEE d MMMM yyyy 'at' HH:mm")}`,
+              },
+            ]
+          : []),
+        ...(spaceIcon
+          ? [
+              {
+                icon: {
+                  source: spaceIcon,
+                  mask: Image.Mask.RoundedRectangle,
+                },
+                tooltip: `Space: ${spaces?.find((space) => space.id === object.space_id)?.name}`,
+              },
+            ]
+          : []),
+      ],
+    };
+  });
 
   return (
     <List
@@ -144,43 +176,29 @@ function Search() {
         </List.Dropdown>
       }
     >
-      {filteredItems.length > 0 ? (
+      {processedObjects.length > 0 ? (
         <List.Section
-          title={searchText ? "Search Results" : "Modified Recently"}
-          subtitle={`${pluralize(filteredItems.length, viewType, { withNumber: true })}`}
+          title={
+            searchText
+              ? "Search Results"
+              : `${getPreferenceValues()
+                  .sort.split("_")
+                  .slice(-2, -1)[0]
+                  .replace(/^./, (char: string) => char.toUpperCase())} Recently`
+          }
+          subtitle={`${pluralize(processedObjects.length, viewType, { withNumber: true })}`}
         >
-          {filteredItems.map((object) => (
+          {processedObjects.map((object) => (
             <ObjectListItem
-              key={object.id}
-              spaceId={object.space_id}
-              objectId={object.id}
-              icon={{
-                source: object.icon,
-                mask:
-                  (object.layout === "participant" || object.layout === "profile") && object.icon != Icon.Document
-                    ? Image.Mask.Circle
-                    : Image.Mask.RoundedRectangle,
-              }}
-              title={object.name}
-              subtitle={{
-                value: object.object_type,
-                tooltip: `Object Type: ${object.object_type}`,
-              }}
-              accessories={[
-                {
-                  date: new Date(object.details[0]?.details.last_modified_date as string),
-                  tooltip: `Last Modified: ${format(new Date(object.details[0]?.details.last_modified_date as string), "EEEE d MMMM yyyy 'at' HH:mm")}`,
-                },
-                {
-                  icon: {
-                    source: spaceIcons[object.space_id],
-                    mask: Image.Mask.RoundedRectangle,
-                  },
-                  tooltip: `Space: ${spaces?.find((space) => space.id === object.space_id)?.name}`,
-                },
-              ]}
+              key={object.key}
+              spaceId={object.spaceId}
+              objectId={object.objectId}
+              icon={object.icon}
+              title={object.title}
+              subtitle={object.subtitle}
+              accessories={object.accessories}
               mutate={mutateObjects}
-              viewType={viewType}
+              viewType={filterType}
             />
           ))}
         </List.Section>

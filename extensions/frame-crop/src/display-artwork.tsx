@@ -1,6 +1,7 @@
 import { Detail, Action, ActionPanel, Icon } from "@raycast/api";
 import saveImage from "./functions/saveImage";
 import copyFileToClipboard from "./functions/copyFileToClipboard";
+import { setWallpaper } from "./functions/setWallpaper";
 import { Artwork } from "./types";
 import { capitalizeFirstChar } from "./functions/utils";
 
@@ -34,9 +35,16 @@ const DisplayArtwork = ({ artwork, onRefresh }: DisplayArtworkProps) => {
         <ActionPanel>
           {onRefresh && <Action title="Fetch a Random Artwork" onAction={onRefresh} icon={Icon.RotateClockwise} />}
           <Action
-            title="Copy Image to Clipboard"
+            title="Copy to Clipboard"
             onAction={() => copyFileToClipboard({ url: artwork.full_url, id: artwork.username })}
             icon={Icon.CopyClipboard}
+          />
+          <Action
+            title="Set Desktop Wallpaper"
+            onAction={() => {
+              setWallpaper({ url: artwork.full_url, id: artwork.username });
+            }}
+            icon={Icon.Monitor}
           />
           <Action
             title="Download Full"

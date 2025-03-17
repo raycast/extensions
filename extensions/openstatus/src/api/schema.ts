@@ -8,6 +8,7 @@ export const monitorPeriodicitySchema = z.enum(monitorPeriodicity);
 
 export const monitorSchema = z.object({
   id: z.number(),
+  description: z.string(),
   url: z.string(),
   periodicity: monitorPeriodicitySchema,
   regions: z.array(z.string()),
@@ -66,3 +67,15 @@ export const pageSchema = z.object({
 });
 
 export type Page = z.infer<typeof pageSchema>;
+
+// Incidents
+export const incidentSchema = z.object({
+  id: z.number(),
+  startedAt: z.string(),
+  monitorId: z.number(),
+  acknowledgedAt: z.string().nullable(),
+  acknowledgedBy: z.number().nullable(),
+  resolvedAt: z.string().nullable(),
+  resolvedBy: z.number().nullable(),
+});
+export type Incident = z.infer<typeof incidentSchema>;

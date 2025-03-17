@@ -1,5 +1,5 @@
-import fetch from "cross-fetch";
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
+import { callCider } from "./functions";
 
 interface Preferences {
   exitOnSuccess: boolean;
@@ -8,9 +8,7 @@ interface Preferences {
 export default async function Command() {
   const { exitOnSuccess } = getPreferenceValues<Preferences>();
   try {
-    await fetch("http://localhost:10767/api/v1/playback/next", {
-      method: "POST",
-    });
+    await callCider("/playback/next", "POST");
     if (exitOnSuccess) await showHUD("⏭️ Skipped to the Next Track");
     else
       await showToast({

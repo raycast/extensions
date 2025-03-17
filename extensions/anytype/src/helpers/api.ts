@@ -23,6 +23,8 @@ export async function apiFetch<T>(url: string, options: FetchOptions): Promise<T
     if (!response.ok) {
       if (response.status === 429) {
         await showToast(Toast.Style.Failure, "Rate Limit Exceeded", "Please try again later.");
+      } else if (response.status === 403) {
+        throw new Error("Operation not permitted.");
       } else {
         throw new Error(`API request failed: [${response.status}] ${response.statusText} ${await response.text()}`);
       }

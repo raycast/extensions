@@ -1,7 +1,7 @@
 import { closeMainWindow, getSelectedText, LaunchProps } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
-import { createNote } from "./api";
+import { createNote } from "./api/applescript";
 
 export default async (props: LaunchProps<{ arguments: Arguments.New }>) => {
   await closeMainWindow();

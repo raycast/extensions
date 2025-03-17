@@ -1,5 +1,9 @@
 # Folder Search Changelog
 
+## [New Features] - 2025-03-13
+
+- **added** 'Move' action for selected finder items
+
 ## [New Features] - 2024-08-20
 
 - **added** Pins can now be ordered by `Move Pin Up` and `Move Pin Down` actions

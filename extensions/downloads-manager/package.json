@@ -83,6 +83,33 @@
       "description": "The folder where your downloads are stored",
       "default": "~/Downloads",
       "required": true
+    },
+    {
+      "type": "dropdown",
+      "name": "lastestDownloadOrder",
+      "label": "Lastest Download Order",
+      "title": "Lastest Download Order",
+      "description": "The order of the lastest download",
+      "required": false,
+      "default": "modifiedTime",
+      "data": [
+        {
+          "title": "Modified Time",
+          "value": "modifiedTime"
+        },
+        {
+          "title": "Add Time",
+          "value": "addTime"
+        },
+        {
+          "title": "Create Time",
+          "value": "createTime"
+        },
+        {
+          "title": "Birth Time",
+          "value": "birthTime"
+        }
+      ]
     }
   ],
   "dependencies": {

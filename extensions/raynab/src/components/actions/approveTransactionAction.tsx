@@ -2,7 +2,7 @@ import { TransactionEditForm } from '@components/transactions/transactionEditFor
 import { Shortcuts } from '@constants';
 import { useTransactions } from '@hooks/useTransactions';
 import { updateTransaction } from '@lib/api';
-import { formatToReadablePrice } from '@lib/utils';
+import { formatToReadableAmount } from '@lib/utils';
 import {
   Action,
   confirmAlert,
@@ -41,7 +41,7 @@ export function ApproveTransactionAction({ transaction }: ApproveTransactionActi
           // Show a modal to make sure the user really wants to update
           const options: Alert.Options = {
             title: 'Approve the transaction?',
-            message: `The ${formatToReadablePrice({
+            message: `The ${formatToReadableAmount({
               amount: transaction.amount,
               currency: activeBudgetCurrency,
             })} transaction with ${transaction.payee_name} will be approved`,
@@ -52,31 +52,35 @@ export function ApproveTransactionAction({ transaction }: ApproveTransactionActi
 
           if (await confirmAlert(options)) {
             const toast = await showToast({ style: Toast.Style.Animated, title: 'Approving transaction' });
-            mutate(updateTransaction(activeBudgetId, transaction.id, { ...transaction, approved: true }), {
-              optimisticUpdate(currentData) {
-                if (!currentData) return;
+            try {
+              await mutate(updateTransaction(activeBudgetId, transaction.id, { ...transaction, approved: true }), {
+                optimisticUpdate(currentData) {
+                  if (!currentData) return;
 
-                const transactionIdx = currentData.findIndex((tx) => tx.id === transaction.id);
+                  const transactionIdx = currentData.findIndex((tx) => tx.id === transaction.id);
 
-                if (transactionIdx < 0) return currentData;
+                  if (transactionIdx < 0) return currentData;
 
-                const newData = [...currentData];
+                  const newData = [...currentData];
 
-                newData.splice(transactionIdx, 1, { ...transaction, approved: true });
+                  newData.splice(transactionIdx, 1, { ...transaction, approved: true });
 
-                return newData;
-              },
-              shouldRevalidateAfter: !preferences.quickRevalidate,
-            })
-              .then(() => {
-                toast.style = Toast.Style.Success;
-                toast.title = 'Transaction approved successfully';
-              })
-              .catch(() => {
-                toast.style = Toast.Style.Failure;
-                toast.title = 'Failed to approve transaction';
+                  return newData;
+                },
+                shouldRevalidateAfter: !preferences.quickRevalidate,
               });
-            return;
+
+              toast.style = Toast.Style.Success;
+              toast.title = 'Transaction approved successfully';
+              return;
+            } catch (error) {
+              toast.style = Toast.Style.Failure;
+              toast.title = 'Failed to approve transaction';
+
+              if (error instanceof Error) {
+                toast.message = error.message;
+              }
+            }
           }
         } else if (!transaction.category_id) {
           push(<TransactionEditForm transaction={transaction} forApproval />);

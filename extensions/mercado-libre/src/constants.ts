@@ -8,6 +8,7 @@ export const SITE_TO_LOCALE_MAP: Record<string, string> = {
   MCO: "es-CO", // Colombia
   MCR: "es-CR", // Costa Rica
   MRD: "es-DO", // Dominican Republic
+  MEC: "es-EC", // Ecuador
   MSV: "es-SV", // El Salvador
   MGT: "es-GT", // Guatemala
   MHN: "es-HN", // Honduras

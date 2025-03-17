@@ -1,8 +1,8 @@
-import { CoreV1Api, V1Endpoints } from "@kubernetes/client-node";
-import { listEndpoints } from "./api/coreV1";
-import { ResourceList } from "./components/resource-list";
+import { V1Endpoints } from "@kubernetes/client-node";
+import { ResourceList } from "./components/ResourceList";
 import { KubernetesContextProvider } from "./states/context";
 import { KubernetesNamespaceProvider } from "./states/namespace";
+import { kubernetesObjectAge } from "./utils/duration";
 
 export default function Command() {
   return (
@@ -12,8 +12,6 @@ export default function Command() {
           apiVersion="v1"
           kind="Endpoints"
           namespaced={true}
-          apiClientType={CoreV1Api}
-          listResources={listEndpoints}
           matchResource={matchEndpoint}
           renderFields={renderEndpointFields}
         />
@@ -37,7 +35,7 @@ function matchEndpoint(endpoint: V1Endpoints, searchText: string): boolean {
 }
 
 function renderEndpointFields(endpoint: V1Endpoints) {
-  return [endpointEndpoints(endpoint)];
+  return [endpointEndpoints(endpoint), `Age: ${kubernetesObjectAge(endpoint)}`];
 }
 
 function endpointEndpoints(endpoint: V1Endpoints) {

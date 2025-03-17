@@ -8,6 +8,6 @@ export default async () => {
   await pipe(
     getVolumeStep(),
     music.player.volume.increase,
-    handleTaskEitherError("Failed to increase volume", "Volume Up")
+    handleTaskEitherError("Failed to increase volume", "Volume Up"),
   )();
 };

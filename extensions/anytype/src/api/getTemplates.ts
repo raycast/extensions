@@ -1,6 +1,6 @@
 import { apiFetch } from "../helpers/api";
 import { apiEndpoints } from "../helpers/constants";
-import { mapTemplates } from "../helpers/mappers/templates";
+import { mapTemplates } from "../mappers/templates";
 import { Template, PaginatedResponse } from "../helpers/schemas";
 import { Pagination } from "../helpers/schemas";
 

@@ -5,26 +5,53 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-dd 00:19:37
- * Last modified  : 2024-06-26 21:37:46
  */
 
 import { execSync } from "child_process";
+import { readdirSync } from "fs";
 import path from "path";
 
 import { environment, getPreferenceValues } from "@raycast/api";
 
+import { getAVIFEncPaths } from "../utilities/avif";
 import {
   addItemToRemove,
   convertPDF,
   convertSVG,
+  expandTilde,
   getDestinationPaths,
   getScopedTempFile,
   getWebPBinaryPath,
   moveImageResultsToFinalDestination,
 } from "../utilities/utils";
-import { getAVIFEncPaths } from "../utilities/avif";
-import { readdirSync } from "fs";
-import { ConvertPreferences, ExtensionPreferences } from "../utilities/preferences";
+
+/**
+ * All supported image formats for conversion.
+ */
+export const imageFormats = [
+  "ASTC",
+  "AVIF",
+  "BMP",
+  "DDS",
+  "EXR",
+  "GIF",
+  "HEIC",
+  "HEICS",
+  "ICNS",
+  "ICO",
+  "JPEG",
+  "JP2",
+  "KTX",
+  "PBM",
+  "PDF",
+  "PNG",
+  "PSD",
+  "PVR",
+  "TGA",
+  "TIFF",
+  "WEBP",
+  "SVG",
+] as const;
 
 /**
  * Converts images to the specified format, storing the results according to the user's preferences.
@@ -39,9 +66,15 @@ export default async function convert(
   outputPaths?: string[],
   intermediate = false,
 ) {
-  const preferences = getPreferenceValues<ConvertPreferences & ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences.Convert>();
+  if (environment.commandName === "tools/convert-images") {
+    preferences.jpegExtension = "jpg";
+  }
+
   const resultPaths = [];
-  for (const [index, item] of sourcePaths.entries()) {
+  const expandedPaths = sourcePaths.map((path) => expandTilde(path));
+
+  for (const [index, item] of expandedPaths.entries()) {
     const originalType = path.extname(item).slice(1);
     const newType = desiredType === "JPEG" ? preferences.jpegExtension : desiredType.toLowerCase();
     const newPath = outputPaths?.[index] || (await getDestinationPaths([item], false, newType))[0];
@@ -81,20 +114,17 @@ export default async function convert(
         // SVG -> PNG -> AVIF, PDF, or WebP
         await using pngFile = await getScopedTempFile("tmp", "png");
         await convertSVG("PNG", item, pngFile.path);
-        await convert([pngFile.path], desiredType, [newPath]);
-        return;
+        return await convert([pngFile.path], desiredType, [newPath]);
       } else {
         // SVG -> NSBitmapImageRep -> Desired Format
         await convertSVG(desiredType, item, newPath);
-        await convert([newPath], desiredType, [newPath]);
-        return;
+        return await convert([newPath], desiredType, [newPath]);
       }
     } else if (desiredType == "SVG") {
       await using bmpFile = await getScopedTempFile("tmp", "bmp");
       execSync(`chmod +x ${environment.assetsPath}/potrace/potrace`);
       if (originalType.toLowerCase() == "webp") {
         // WebP -> PNG -> BMP -> SVG
-        // const pngPath = await scopedTempFile("tmp", "png");
         await using pngFile = await getScopedTempFile("tmp", "png");
         const [dwebpPath] = await getWebPBinaryPath();
         execSync(`${dwebpPath} "${item}" -o "${pngFile.path}"`);
@@ -170,8 +200,7 @@ export default async function convert(
       const { decoderPath } = await getAVIFEncPaths();
       await using pngFile = await getScopedTempFile("tmp", "png");
       execSync(`${decoderPath} "${item}" "${pngFile.path}"`);
-      await convert([pngFile.path], desiredType, [newPath]);
-      return;
+      return await convert([pngFile.path], desiredType, [newPath]);
     } else {
       // General Input Format -> Desired Format
       execSync(`sips --setProperty format ${desiredType.toLowerCase()} "${item}" --out "${newPath}"`);
@@ -183,4 +212,5 @@ export default async function convert(
   if (!intermediate) {
     await moveImageResultsToFinalDestination(resultPaths);
   }
+  return resultPaths;
 }

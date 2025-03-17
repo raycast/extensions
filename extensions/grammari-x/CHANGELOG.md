@@ -1,5 +1,9 @@
 # GrammariX Changelog
 
+## [Features] - 2025-03-17
+
+- Change model from GPT-3 Turbo to GPT-4o Mini
+
 ## [Features] - 2025-01-22
 
 - Add the `Improve Selected Text` command to enhance the selected text.

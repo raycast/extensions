@@ -17,7 +17,7 @@ export async function fetchAllTypesForSpace(spaceId: string): Promise<Type[]> {
       hasMore = response.pagination.has_more;
       offset += apiLimit;
     } catch (err) {
-      console.error(`Error fetching types for space ${spaceId} at offset ${offset}:`, err);
+      console.log(`Error fetching types for space ${spaceId} at offset ${offset}:`, err);
       break;
     }
   }
@@ -35,7 +35,7 @@ export async function getAllTypesFromSpaces(spaces: Space[]): Promise<Type[]> {
       const types = await fetchAllTypesForSpace(space.id);
       allTypes.push(...types);
     } catch (err) {
-      console.error(`Error fetching types for space ${space.id}:`, err);
+      console.log(`Error fetching types for space ${space.id}:`, err);
     }
   }
   return allTypes;
