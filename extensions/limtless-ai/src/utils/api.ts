@@ -1,5 +1,6 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import fetch from "node-fetch";
+import type { RequestInit } from "node-fetch";
 
 interface Preferences {
   limitlessApiKey?: string;
@@ -104,16 +105,16 @@ export class LimitlessAPI {
       throw new Error("API key not set. Please set your API key in the extension preferences.");
     }
 
-    const headers = {
+    // Create a new headers object
+    const requestHeaders = {
       "X-API-Key": this.apiKey,
       "Content-Type": "application/json",
-      ...(options.headers as Record<string, string>),
     };
 
     try {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         ...options,
-        headers,
+        headers: requestHeaders,
       });
 
       if (!response.ok) {

@@ -161,7 +161,7 @@ export default function Command() {
           subtitle={error}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Manage Api Key" url="raycast://extensions/limtless-ai/manage-api-key" />
+              <Action.OpenInBrowser title="Manage API Key" url="raycast://extensions/limtless-ai/manage-api-key" />
             </ActionPanel>
           }
         />
