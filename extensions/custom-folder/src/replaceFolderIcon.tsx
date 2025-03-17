@@ -1,11 +1,40 @@
-import { ActionPanel, Form, Action, showToast, Toast, popToRoot, closeMainWindow } from "@raycast/api";
+import {
+  ActionPanel,
+  Form,
+  Action,
+  showToast,
+  Toast,
+  popToRoot,
+  closeMainWindow,
+  getSelectedFinderItems,
+} from "@raycast/api";
+import { useEffect, useState } from "react";
 import fs from "fs";
 import path from "path";
 import { replaceFolderIcon } from "./utils/replaceFolderIcon";
 
 export default function Command() {
+  const [selectedFolder, setSelectedFolder] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  useEffect(() => {
+    async function getSelectedFolder() {
+      try {
+        const items = await getSelectedFinderItems();
+        if (items.length === 1 && items[0].path && fs.lstatSync(items[0].path).isDirectory()) {
+          setSelectedFolder(items[0].path);
+        }
+      } catch (error) {
+        return;
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    getSelectedFolder();
+  }, []);
+
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -30,12 +59,12 @@ export default function Command() {
               if (values.image.length === 0) {
                 showToast({
                   style: Toast.Style.Failure,
-                  title: "Please select an image file.",
+                  title: "Please select a PNG image file.",
                 });
                 return;
               }
               const file = values.image[0];
-              const allowedExtensions = [".png", ".jpg", ".jpeg"];
+              const allowedExtensions = [".png"];
 
               if (!fs.existsSync(file) || fs.lstatSync(file).isDirectory()) {
                 showToast({
@@ -49,7 +78,7 @@ export default function Command() {
               if (!allowedExtensions.includes(fileExtension)) {
                 showToast({
                   style: Toast.Style.Failure,
-                  title: "Images must be in one of the following formats: .png, .jpg, .jpeg",
+                  title: "Images must be in PNG format.",
                 });
                 return;
               }
@@ -69,6 +98,8 @@ export default function Command() {
       <Form.FilePicker
         id="folder"
         title="Select a Folder"
+        value={selectedFolder ? [selectedFolder] : []}
+        onChange={(values) => setSelectedFolder(values[0] || "")}
         allowMultipleSelection={false}
         canChooseDirectories
         canChooseFiles={false}
@@ -78,7 +109,7 @@ export default function Command() {
         allowMultipleSelection={false}
         canChooseDirectories={false}
         canChooseFiles
-        title="Select an Image"
+        title="Select a PNG Image"
       />
     </Form>
   );

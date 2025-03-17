@@ -49,7 +49,15 @@ export const convertMinutesToHours = (minutes: number): string => {
   return `${`0${(minutes / 60) ^ 0}`.slice(-2)}:${`0${minutes % 60}`.slice(-2)}`;
 };
 
-export const openActivityMonitorAppleScript = (radioButtonNumber: number) => {
+export const openActivityMonitorAppleScript = (radioButtonNumber?: number | null): string => {
+  if (!radioButtonNumber) {
+    return `
+    tell application "Activity Monitor"
+      activate
+    end tell
+  `;
+  }
+
   return `
   tell application "Activity Monitor"
     activate
