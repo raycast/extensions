@@ -312,6 +312,19 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 updatedAt: Date;
             };
         }>;
+        import: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+                tags: string[];
+                bookmarks: {
+                    name: string;
+                    url: string;
+                    description?: string | undefined;
+                }[];
+                browserName: string;
+            };
+            output: void;
+        }>;
     }>;
     space: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
         ctx: {
@@ -512,7 +525,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
     }, {
         create: import("@trpc/server").TRPCMutationProcedure<{
             input: {
-                type: "APP_OPEN" | "LOGIN" | "LOGOUT" | "BOOKMARK_OPEN" | "BOOKMARK_COPY" | "BOOKMARK_CREATED" | "BOOKMARK_UPDATED" | "BOOKMARK_DELETED" | "SUBSCRIBE_TAG" | "UNSUBSCRIBE_TAG" | "TAG_CREATED" | "TAG_UPDATED" | "TAG_DELETED" | "SPACE_CREATED" | "SPACE_UPDATED" | "SPACE_DELETED" | "SPACE_MEMBER_INVITED" | "SPACE_MEMBER_JOINED" | "SPACE_MEMBER_LEFT" | "SPACE_MEMBER_REMOVED" | "SPACE_MEMBER_ROLE_CHANGED" | "SPACE_PLAN_CHANGED";
+                type: "APP_OPEN" | "LOGIN" | "LOGOUT" | "BOOKMARK_OPEN" | "BOOKMARK_COPY" | "BOOKMARK_CREATED" | "BOOKMARK_UPDATED" | "BOOKMARK_DELETED" | "BOOKMARK_IMPORTED_FROM_BROWSER" | "SUBSCRIBE_TAG" | "UNSUBSCRIBE_TAG" | "TAG_CREATED" | "TAG_UPDATED" | "TAG_DELETED" | "SPACE_CREATED" | "SPACE_UPDATED" | "SPACE_DELETED" | "SPACE_MEMBER_INVITED" | "SPACE_MEMBER_JOINED" | "SPACE_MEMBER_LEFT" | "SPACE_MEMBER_REMOVED" | "SPACE_MEMBER_ROLE_CHANGED" | "SPACE_PLAN_CHANGED";
                 spaceId: string;
                 data: Record<string, string>;
             };

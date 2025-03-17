@@ -1,5 +1,10 @@
 # Google Gemini Changelog
 
+## [Updated Models] - 2025-03-15
+
+- ⬆️ Upgrade the Gemini 2.0 Flash from preview to release
+- ⚠️ Add alerts to models that will be deprecated in Sep 2025
+
 ## [New Command] - 2025-03-12
 
 - 🆕 New Command: Command History: now you can 📜 view your command history.

@@ -1,5 +1,14 @@
 # Bitwarden Changelog
 
+## [Fix] - 2025-03-17
+
+- Fix CLI binary download hash mismatch error
+
+## [Feature] - 2025-03-15
+
+- Re-enable CLI binary download for arm64 devices
+- Add Debugging & Bug Reporting action section to more commands
+
 ## [Fix] - 2025-03-04
 
 - Fix search when vault contains SSH keys
