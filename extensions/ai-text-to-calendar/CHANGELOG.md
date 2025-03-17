@@ -1,6 +1,6 @@
 # AI Text to Calendar Changelog
 
-## [Enhancement] - 2025-03-17
+## [Enhancement] - {PR_MERGE_DATE}
 
 - 🗓️ Outlook Calendar Support - added
 

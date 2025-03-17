@@ -4,7 +4,6 @@ import { parseDateTimes } from "../utils";
 export function toGoolgleCalenderURL(event: CalendarEvent) {
   const dateTimes = parseDateTimes(event);
 
-  // Clean up and format dates/times - remove any non-numeric characters
   const startDateTime = `${dateTimes.startDate}T${dateTimes.startTime}00`;
   const endDateTime = `${dateTimes.endDate}T${dateTimes.endTime}00`;
   const params = {
