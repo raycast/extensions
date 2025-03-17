@@ -20,9 +20,6 @@
       "icon": "extension-icon.png"
     }    
   ],
-  "permissions": [
-    "file-system"
-  ],
   "dependencies": {
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.17.0"
@@ -56,8 +53,8 @@
       "title": "Default Markdown Editor",
       "description": "The application to use for opening Markdown files",
       "type": "textfield",
-      "default": "Typora",
-      "placeholder": "Typora, Visual Studio Code, iA Writer, etc.",
+      "default": "Visual Studio Code",
+      "placeholder": "Visual Studio Code, TextEdit, iA Writer, etc.",
       "required": false
     }
   ]

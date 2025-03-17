@@ -171,7 +171,7 @@ async function createMarkdownFileHelper({
       .replace(/{{tags}}/g, formattedTags && formattedTags.length > 0 ? formattedTags.join(", ") : "");
 
     // Write file
-    fs.writeFileSync(filePath, content);
+    await fs.promises.writeFile(filePath, content);
 
     // Clear the cache to ensure fresh data on next fetch
     await clearMarkdownFilesCache();

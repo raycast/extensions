@@ -10,21 +10,26 @@ export const formatDate = (timestamp: number): string => {
     day: "numeric",
   };
 
+  const TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+
   if (diff < 0) {
     // Future date
     const futureDiff = Math.abs(diff);
 
     if (futureDiff < MS_PER_DAY) {
-      return `Tomorrow, ${date.toLocaleTimeString()}`;
+      return `Tomorrow, ${date.toLocaleTimeString(undefined, TIME_FORMAT_OPTIONS)}`;
     } else if (futureDiff < 2 * MS_PER_DAY) {
-      return `Day after tomorrow, ${date.toLocaleTimeString()}`;
+      return `Day after tomorrow, ${date.toLocaleTimeString(undefined, TIME_FORMAT_OPTIONS)}`;
     } else {
       return date.toLocaleDateString(undefined, DATE_FORMAT_OPTIONS);
     }
   } else if (diff < MS_PER_DAY) {
-    return `Today, ${date.toLocaleTimeString()}`;
+    return `Today, ${date.toLocaleTimeString(undefined, TIME_FORMAT_OPTIONS)}`;
   } else if (diff < 2 * MS_PER_DAY) {
-    return `Yesterday, ${date.toLocaleTimeString()}`;
+    return `Yesterday, ${date.toLocaleTimeString(undefined, TIME_FORMAT_OPTIONS)}`;
   } else {
     return date.toLocaleDateString(undefined, DATE_FORMAT_OPTIONS);
   }

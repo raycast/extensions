@@ -3,7 +3,7 @@ import { List } from "@raycast/api";
 
 interface MarkdownEmptyViewProps {
   isLoading: boolean;
-  error: Error | unknown;
+  error: Error | string | null;
   selectedTag: string | null;
   actions: JSX.Element;
 }

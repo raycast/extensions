@@ -88,16 +88,9 @@ export default function Command() {
   // Handle errors
   useEffect(() => {
     if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Loading Markdown files failed",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      showFailureToast("Loading Markdown files failed", error);
     }
   }, [error]);
-
-  // Debug log for key variables
-  useEffect(() => {}, [loadLimit, totalFiles, selectedTag]);
 
   // Reload files when loadLimit changes
   useEffect(() => {
@@ -179,13 +172,11 @@ export default function Command() {
         console.log(`Increasing load limit from ${prevLimit} to ${newLimit}`);
 
         // Display a Toast after the status is updated
-        setTimeout(() => {
-          showToast({
-            style: Toast.Style.Success,
-            title: "Loading more files",
-            message: `Increasing limit from ${prevLimit} to ${newLimit}`,
-          });
-        }, 0);
+        showToast({
+          style: Toast.Style.Success,
+          title: "Loading more files",
+          message: `Increasing limit from ${prevLimit} to ${newLimit}`,
+        });
 
         return newLimit;
       });
@@ -364,7 +355,12 @@ export default function Command() {
           {renderFooter()}
         </>
       ) : (
-        <MarkdownEmptyView isLoading={isLoading} error={error} selectedTag={selectedTag} actions={commonActions} />
+        <MarkdownEmptyView
+          isLoading={isLoading}
+          error={error || null}
+          selectedTag={selectedTag}
+          actions={commonActions}
+        />
       )}
     </List>
   );
