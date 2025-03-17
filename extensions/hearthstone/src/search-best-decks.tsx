@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Grid, Icon, List } from '@raycast/api';
-import { usePromise } from '@raycast/utils';
-import { useEffect, useState } from 'react';
-import { CardDetailView } from './components/card-detail-view';
-import { Card, CardSlot } from './types/types';
-import { gethsguruBestDecks } from './utils/hsguru';
+import { Action, ActionPanel, Grid, Icon, List } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { CardDetailView } from "./components/card-detail-view";
+import { Card, CardSlot } from "./types/types";
+import { gethsguruBestDecks } from "./utils/hsguru";
 import {
   classIcon,
   ellipsize,
@@ -13,11 +13,14 @@ import {
   getAmountEmoji,
   getLocalCardData,
   getRarityColor,
-} from './utils/utils';
+} from "./utils/utils";
 
 export default function Command() {
   const [format, setFormat] = useState(1);
-  const { data: decks, isLoading: decksLoading } = usePromise(gethsguruBestDecks, [format]);
+  const { data: decks, isLoading: decksLoading } = usePromise(
+    gethsguruBestDecks,
+    [format],
+  );
 
   const [cardData, setCardData] = useState<Card[]>([]);
   const [cardsLoading, setCardsLoading] = useState(true);
@@ -29,7 +32,7 @@ export default function Command() {
         setCardData(data);
         setCardsLoading(false);
       } catch (error) {
-        console.error('Error loading card data:', error);
+        showFailureToast(error, { title: "Error loading card data" });
         setCardsLoading(false);
       }
     };
@@ -47,7 +50,10 @@ export default function Command() {
       aspectRatio="1"
       fit={Grid.Fit.Fill}
       searchBarAccessory={
-        <Grid.Dropdown tooltip="Select Format" onChange={(value) => setFormat(Number(value))}>
+        <Grid.Dropdown
+          tooltip="Select Format"
+          onChange={(value) => setFormat(Number(value))}
+        >
           <Grid.Dropdown.Section title="Game Mode">
             <Grid.Dropdown.Item title="Wild" value="1" />
             <Grid.Dropdown.Item title="Standard" value="2" />
@@ -80,8 +86,13 @@ export default function Command() {
                     />
                   }
                 />
-                <Action.CopyToClipboard content={deck.code} title="Copy Deck Code" />
-                <Action.OpenInBrowser url={`https://www.hsguru.com/decks?format=${format}`} />
+                <Action.CopyToClipboard
+                  content={deck.code}
+                  title="Copy Deck Code"
+                />
+                <Action.OpenInBrowser
+                  url={`https://www.hsguru.com/decks?format=${format}`}
+                />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -109,15 +120,15 @@ function DeckDetails({
     <List searchBarPlaceholder={`Browsing cards in: ${title}`}>
       <List.Section title={title} subtitle={`Class: ${className}`}>
         {slots.map((slot, index) => {
-          // 使用 ID 优先匹配
+          // Use ID-first matching
           const card = findCard(
             slot.card.name,
             cardData,
-            // 尝试从 slot 中获取 ID（如果有的话）
+            // Try to get the ID from the slot (if any)
             slot.card.id,
           );
 
-          const rarityText = slot.card.rarity || 'Unknown';
+          const rarityText = slot.card.rarity || "Unknown";
 
           return (
             <List.Item
@@ -129,17 +140,28 @@ function DeckDetails({
               title={`${slot.card.name}`}
               accessories={[
                 { text: rarityText },
-                { text: `♦${(slot.card.mana ?? 0).toString().padStart(3, '0')}` },
+                {
+                  text: `♦${(slot.card.mana ?? 0).toString().padStart(3, "0")}`,
+                },
                 { text: getAmountEmoji(slot.amount) },
               ]}
               actions={
                 <ActionPanel>
                   <Action.Push
                     title="View Card Details"
-                    target={<CardDetailView slot={slot} card={card || null} deckCode={deckCode} />}
+                    target={
+                      <CardDetailView
+                        slot={slot}
+                        card={card || null}
+                        deckCode={deckCode}
+                      />
+                    }
                     icon={Icon.Eye}
                   />
-                  <Action.CopyToClipboard content={deckCode} title="Copy Deck Code" />
+                  <Action.CopyToClipboard
+                    content={deckCode}
+                    title="Copy Deck Code"
+                  />
                 </ActionPanel>
               }
             />

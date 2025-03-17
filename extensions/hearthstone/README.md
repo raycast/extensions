@@ -1,4 +1,4 @@
-# # Hearthstone
+# Hearthstone
 
 ⚡ Quickly find top Hearthstone decks and manage card collections directly from Raycast
 
@@ -31,14 +31,6 @@
 2. **Manual Build**:
 `npm install && npm run dev`
 
-## Usage
-
-### Basic Commands
-| Command      | Shortcut  | Description         |
-|--------------|-----------|---------------------|
-| `Copy Decks` | `Enter`   | Copy Top Wild Decks |
-| `View Decks` | `⌘ Enter` | View Deck In HSGuru |
-
 ### Workflow Example
 1. Open Raycast and type `hs`
 2. Select format:  
@@ -53,4 +45,4 @@
 ---
 
 **Disclaimer**: Not affiliated with Blizzard Entertainment. Card data © respective rights holders.  
-**License**: MIT © 2024 Raffe Yang
+**License**: [MIT](LICENSE)

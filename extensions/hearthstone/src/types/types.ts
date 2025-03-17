@@ -1,15 +1,15 @@
 export enum ClassName {
-  DRUID = 'Druid',
-  HUNTER = 'Hunter',
-  MAGE = 'Mage',
-  PALADIN = 'Paladin',
-  PRIEST = 'Priest',
-  ROGUE = 'Rogue',
-  SHAMAN = 'Shaman',
-  WARLOCK = 'Warlock',
-  WARRIOR = 'Warrior',
-  DEMONHUNTER = 'Demon Hunter',
-  DEATHKNIGHT = 'Death Knight',
+  DRUID = "Druid",
+  HUNTER = "Hunter",
+  MAGE = "Mage",
+  PALADIN = "Paladin",
+  PRIEST = "Priest",
+  ROGUE = "Rogue",
+  SHAMAN = "Shaman",
+  WARLOCK = "Warlock",
+  WARRIOR = "Warrior",
+  DEMONHUNTER = "Demon Hunter",
+  DEATHKNIGHT = "Death Knight",
 }
 
 export interface Card {
@@ -39,10 +39,10 @@ export interface CardSlot {
 }
 
 export enum Rarity {
-  COMMON = 'Common',
-  RARE = 'Rare',
-  EPIC = 'Epic',
-  LEGENDARY = 'Legendary',
+  COMMON = "Common",
+  RARE = "Rare",
+  EPIC = "Epic",
+  LEGENDARY = "Legendary",
 }
 
 export interface Deck {
@@ -76,7 +76,7 @@ export interface CardDetailViewProps {
   slot?: Partial<CardSlot>;
   card?: Partial<Card> | null;
   deckCode?: string;
-  language?: 'enUS' | 'zhCN';
+  language?: "enUS" | "zhCN";
 }
 
 export interface MatchResult {
