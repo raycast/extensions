@@ -33,6 +33,8 @@ const ListFolders = () => {
     }
   };
 
+  const listIsEmpty = folders.length <= 0;
+
   return (
     <List
       isLoading={isLoading}
@@ -43,36 +45,44 @@ const ListFolders = () => {
         </ActionPanel>
       }
     >
-      {folders?.map((folder) => {
-        return (
-          <List.Item
-            title={folder.id}
-            key={folder.id}
-            detail={
-              <List.Item.Detail
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label icon={Icon.Folder} title={folder.path} />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.TagList title="Extensions">
-                      {folder.extensions.map((extension) => (
-                        <List.Item.Detail.Metadata.TagList.Item key={extension} text={extension} />
-                      ))}
-                    </List.Item.Detail.Metadata.TagList>
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
-            actions={
-              <ActionPanel>
-                <AddFoldersAction onCreate={createNewFolder} />
-                <EditFolderAction folder={folder} onEdit={editFolder} />
-                <Action icon={Icon.Trash} title="Delete Folder" onAction={() => deleteFolder(folder.id)} />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+      {listIsEmpty ? (
+        <List.EmptyView
+          icon={Icon.Folder}
+          title="Folders not Setup"
+          description="Oops! Looks like you haven't setup any folders."
+        />
+      ) : (
+        folders?.map((folder) => {
+          return (
+            <List.Item
+              title={folder.id}
+              key={folder.id}
+              detail={
+                <List.Item.Detail
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label icon={Icon.Folder} title={folder.path} />
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.TagList title="Extensions">
+                        {folder.extensions.map((extension) => (
+                          <List.Item.Detail.Metadata.TagList.Item key={extension} text={extension} />
+                        ))}
+                      </List.Item.Detail.Metadata.TagList>
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
+              actions={
+                <ActionPanel>
+                  <AddFoldersAction onCreate={createNewFolder} />
+                  <EditFolderAction folder={folder} onEdit={editFolder} />
+                  <Action icon={Icon.Trash} title="Delete Folder" onAction={() => deleteFolder(folder.id)} />
+                </ActionPanel>
+              }
+            />
+          );
+        })
+      )}
     </List>
   );
 };

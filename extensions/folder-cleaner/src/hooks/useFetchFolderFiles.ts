@@ -25,9 +25,9 @@ export const useFetchFolderFiles = (folderToClean: string) => {
             folderToClean,
           }),
         );
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     void fetchFolderFiles();

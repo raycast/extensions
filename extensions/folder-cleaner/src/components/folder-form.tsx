@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
 import { availableExtensions } from "../utils/availableExtensions";
+import { FormValidation, useForm } from "@raycast/utils";
 
 export type FormValues = {
   folderId: string;
-  folderPath: string;
+  folderPath: string[];
   extensions: string[];
 };
 
@@ -12,16 +13,32 @@ type FolderFormProps = {
   defaultFolderId?: string;
   defaultFolderPath?: string[];
   defaultFolderExtensions?: string[];
-  handleSubmit: (values: FormValues) => void;
+  handleOnSubmit: (values: FormValues) => void;
 };
 
 export const FolderForm = ({
   submitText,
-  handleSubmit,
-  defaultFolderId = "",
-  defaultFolderPath = [],
-  defaultFolderExtensions = [],
+  handleOnSubmit,
+  defaultFolderId,
+  defaultFolderPath,
+  defaultFolderExtensions,
 }: FolderFormProps) => {
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    onSubmit: (values) => {
+      handleOnSubmit(values);
+    },
+    initialValues: {
+      folderId: defaultFolderId ?? "",
+      folderPath: defaultFolderPath ?? [],
+      extensions: defaultFolderExtensions ?? [],
+    },
+    validation: {
+      folderId: FormValidation.Required,
+      folderPath: FormValidation.Required,
+      extensions: FormValidation.Required,
+    },
+  });
+
   return (
     <Form
       actions={
@@ -30,21 +47,15 @@ export const FolderForm = ({
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="folderId"
-        title="Folder Identifier"
-        defaultValue={defaultFolderId}
-        placeholder="e.g. Documents"
-      />
+      <Form.TextField title="Folder Identifier" placeholder="e.g. Documents" {...itemProps.folderId} />
       <Form.FilePicker
-        id="folderPath"
         title="Folder Path"
-        defaultValue={defaultFolderPath}
         allowMultipleSelection={false}
         canChooseDirectories
         canChooseFiles={false}
+        {...itemProps.folderPath}
       />
-      <Form.TagPicker id="extensions" title="Extensions" defaultValue={defaultFolderExtensions}>
+      <Form.TagPicker title="Extensions" defaultValue={defaultFolderExtensions} {...itemProps.extensions}>
         {availableExtensions.map((extension) => (
           <Form.TagPicker.Item key={extension.value} value={extension.value} title={extension.title} />
         ))}

@@ -10,6 +10,7 @@ export const useFetchStoredFolders = () => {
   const refetchFolders = useCallback(async () => {
     const storedFoldersObject = await LocalStorage.allItems<Record<string, string>>();
     if (!Object.keys(storedFoldersObject).length) {
+      setFolders([]);
       return;
     }
 
@@ -34,9 +35,9 @@ export const useFetchStoredFolders = () => {
   useEffect(() => {
     setIsLoading(true);
 
-    refetchFolders();
-
-    setIsLoading(false);
+    refetchFolders().finally(() => {
+      setIsLoading(false);
+    });
   }, [refetchFolders]);
 
   return {

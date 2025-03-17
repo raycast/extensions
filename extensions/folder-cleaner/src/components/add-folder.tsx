@@ -29,7 +29,7 @@ const FolderFormSwitcher = (props: FolderFormSwitcherProps) => {
         pop();
       };
 
-      return <FolderForm submitText="Add Folder" handleSubmit={handleSubmit} />;
+      return <FolderForm submitText="Add Folder" handleOnSubmit={handleSubmit} />;
     }
     case "edit": {
       const { folder } = props;
@@ -51,7 +51,7 @@ const FolderFormSwitcher = (props: FolderFormSwitcherProps) => {
           defaultFolderId={folder.id}
           defaultFolderPath={[folder.path]}
           defaultFolderExtensions={folder.extensions}
-          handleSubmit={handleSubmit}
+          handleOnSubmit={handleSubmit}
         />
       );
     }
