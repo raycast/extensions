@@ -77,7 +77,7 @@ function TranscriptDetail({ transcript }: { transcript: Lifelog }) {
       actions={
         <ActionPanel>
           <Action.CopyToClipboard
-            title="Copy Transcript"
+            title="Copy to Clipboard"
             content={markdown}
             shortcut={{ modifiers: ["cmd"], key: "." }}
           />
@@ -188,7 +188,7 @@ export default function Command() {
             <ActionPanel>
               <Action.Push title="View Details" target={<TranscriptDetail transcript={transcript} />} />
               <Action.CopyToClipboard
-                title="Copy To Clipboard"
+                title="Copy to Clipboard"
                 content={transcript.contents.map((content: LifelogContent) => content.content).join("\n\n")}
                 shortcut={{ modifiers: ["cmd"], key: "." }}
               />
