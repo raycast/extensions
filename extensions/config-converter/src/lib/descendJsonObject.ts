@@ -4,7 +4,7 @@ import { KeyValuePair } from "./types";
 export function descendJsonObject(obj: any, path?: string) {
   const keyValuePairs: KeyValuePair[] = [];
 
-  if (typeof obj !== "object" && path) {
+  if (obj === null || typeof obj !== "object" && path) {
     return [{ key: path, value: obj } satisfies KeyValuePair];
   }
   if (Array.isArray(obj)) {
