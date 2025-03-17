@@ -22,6 +22,12 @@ export default async function search(props: LaunchProps<{ arguments: { query: st
     }
 
     const cleanQuery = query.replace(/!\S+\s*/i, "").trim();
+    if (!cleanQuery) {
+      const url = new URL(searchEngine.u);
+      await open(url.origin);
+      return;
+    }
+
     const searchUrl = searchEngine.u.replace("{{{s}}}", encodeURIComponent(cleanQuery).replace(/%2F/g, "/"));
     await open(searchUrl);
   } catch (error) {
