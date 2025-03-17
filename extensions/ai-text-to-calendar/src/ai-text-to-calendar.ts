@@ -95,7 +95,6 @@ Note:
 
 function toURL(json: CalendarEvent, calendar: Calendar) {
   let url: string;
-  console.log(json);
 
   const startDate = json.start_date.replace(/\D/g, "");
   const startTime = json.start_time.replace(/\D/g, "");
@@ -110,8 +109,8 @@ function toURL(json: CalendarEvent, calendar: Calendar) {
           ? "https://outlook.office.com/calendar/deeplink/compose"
           : "https://outlook.live.com/calendar/deeplink/compose";
 
-      const startDateTime = `${formatDateTimeForOutlook(startDate, startTime)}`;
-      const endDateTime = `${formatDateTimeForOutlook(endDate, endTime)}`;
+      const startDateTime = formatDateTimeForOutlook(startDate, startTime);
+      const endDateTime = formatDateTimeForOutlook(endDate, endTime);
 
       const params = {
         text: encodeURIComponent(json.title),
@@ -121,7 +120,6 @@ function toURL(json: CalendarEvent, calendar: Calendar) {
         location: encodeURIComponent(json.location),
       };
       url = `${baseUrl}?subject=${params.text}&startdt=${params.startdt}&enddt=${params.enddt}&body=${params.body}&location=${params.location}`;
-      console.log(url);
       break;
     }
     case "googleCalendar":
