@@ -16,6 +16,20 @@ interface SalesforceCredentials {
   securityToken: string;
 }
 
+// Salesforceレコードの属性型
+interface SalesforceAttributes {
+  type?: string;
+  url?: string;
+}
+
+// Salesforceレコードの型
+interface SalesforceRecordData {
+  Id: string;
+  Name: string;
+  attributes?: SalesforceAttributes;
+  [key: string]: unknown;
+}
+
 export interface SalesforceRecord {
   Id: string;
   Name: string;
@@ -115,7 +129,7 @@ export class SalesforceService {
       if (result.searchRecords) {
         console.log("検索結果:", JSON.stringify(result.searchRecords, null, 2));
 
-        for (const record of result.searchRecords) {
+        for (const record of result.searchRecords as SalesforceRecordData[]) {
           // SOSLの結果には各レコードのオブジェクト型を表す属性が含まれているはず
           console.log("レコード詳細:", JSON.stringify(record, null, 2));
 
@@ -257,7 +271,7 @@ export class SalesforceService {
           }
         }
 
-        return result.id;
+        return result.id as string;
       } else {
         console.error(`${objectName}作成失敗:`, result);
         throw new Error(`メモの作成に失敗しました: ${JSON.stringify(result)}`);
