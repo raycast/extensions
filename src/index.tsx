@@ -563,12 +563,6 @@ export default function Command() {
             title="Google Cloud Authentication"
             text={statusMessage}
           />
-          {authUrl && (
-            <Form.Description
-              title="Authentication URL"
-              text={`[Click here to open authentication page](${authUrl})`}
-            />
-          )}
           <Form.TextField
             id="verificationCode"
             title="Verification Code"
@@ -585,9 +579,7 @@ export default function Command() {
           navigationTitle="Google Cloud Authentication"
           markdown={`# Google Cloud Authentication
 
-⏳ ${statusMessage}
-          
-${authUrl ? `\n\n[Click here to open authentication page](${authUrl})` : ""}`}
+${statusMessage}`}
           actions={
             <ActionPanel>
               <Action
