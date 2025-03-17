@@ -14,8 +14,8 @@ export const spongeCase = (input: string, _options?: changeCase.Options) => spon
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const swapCase = (input: string, _options?: changeCase.Options) => swapCaseLib(input);
 
-export const lowerCase = (input: string, options?: changeCase.Options) =>
-  changeCase.noCase(input, options).toLowerCase();
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const lowerCase = (input: string, _options?: changeCase.Options) => input.toLowerCase();
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const lowerFirst = (input: string, _options?: changeCase.Options) => {
