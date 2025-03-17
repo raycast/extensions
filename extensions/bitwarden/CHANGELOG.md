@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix CLI binary download hash mismatch error
+
 ## [Feature] - 2025-03-15
 
 - Re-enable CLI binary download for arm64 devices
