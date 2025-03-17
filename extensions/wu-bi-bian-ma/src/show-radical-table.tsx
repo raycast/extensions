@@ -9,15 +9,15 @@ type Item = {
 
 const ImageMap: Record<WubiVersion, Item> = {
   "86": {
-    url: "	https://wubi.superyi.top/_next/image?url=%2Fwubi86.webp&w=1920&q=100",
+    url: "wubi86.webp",
     description: "86版五笔字型是最常用的五笔版本，字根数量少，规则简单，适合初学者",
   },
   "98": {
-    url: "https://wubi.superyi.top/_next/image?url=%2Fwubi98.png&w=1920&q=100",
+    url: "wubi98.webp",
     description: "98版五笔是86版的改进版本，扩展了字库，收录更多汉字",
   },
   xsj: {
-    url: "https://wubi.superyi.top/_next/image?url=%2Fwubixsj.jpg&w=1920&q=100",
+    url: "wubixsj.webp",
     description: "新世纪版五笔进一步扩充了字库，支持GBK、Unicode等更多字符集",
   },
 };

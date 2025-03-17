@@ -13,6 +13,7 @@
     {
       "name": "query-code",
       "title": "Wubi Code",
+      "subtitle": "五笔编码",
       "description": "请输入汉字以查询五笔编码",
       "mode": "view",
       "arguments": [
@@ -28,6 +29,7 @@
     {
       "name": "show-radical-table",
       "title": "Wubi Table",
+      "subtitle": "五笔字根表",
       "description": "显示完整的五笔字根表图片",
       "mode": "view",
       "arguments": [
