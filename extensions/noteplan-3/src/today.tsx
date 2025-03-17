@@ -3,13 +3,14 @@ import { getPreferences } from "./lib/preferences";
 import { NoteDetail } from "./lib/components";
 import { format } from "date-fns";
 
-export default () => (
-  <NoteDetail
+export default () => {
+  const path = `${format(new Date(), "yyyyMMdd")}.${getPreferences().fileExtension}`
+  return <NoteDetail
     entry={{
-      relativePath: `/Calendar/${format(new Date(), "yyyyMMdd")}.${getPreferences().fileExtension}`,
+      relativePath: `/Calendar/{$path}`,
       fileName: format(new Date(), "yyyyMMdd"),
       type: NoteType.Calendar,
-      callbackPath: `${format(new Date(), "yyyyMMdd")}.${getPreferences().fileExtension}`,
+      callbackPath: path,
     }}
   />
-);
+  };
