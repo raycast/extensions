@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Routine Maintenance] - {PR_MERGE_DATE}
+## [Routine Maintenance] - 2025-03-17
 
 - Add FAQs
 - Bump all dependencies to the latest
