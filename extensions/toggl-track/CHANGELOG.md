@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-03-17
 
 - Add preferences to show/hide clients, projects, tasks, and tags in the time entry form
 
