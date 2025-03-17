@@ -277,7 +277,7 @@ export default function Command() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Remove Background" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Remove Background" onSubmit={handleSubmit} />
           <Action$.SelectFile
             icon={Icon.Finder}
             title="Select Image From Finder..."
