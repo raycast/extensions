@@ -11,14 +11,12 @@ type DownloadOptions = {
   sha256?: string;
 };
 
-const maxRedirects = 10;
 export function download(url: string, path: string, options?: DownloadOptions): Promise<void> {
   const { onProgress, sha256 } = options ?? {};
 
   return new Promise((resolve, reject) => {
     const uri = parse(url);
     const protocol = uri.protocol === "https:" ? https : http;
-    console.log("downloading", url);
 
     let redirectCount = 0;
     const request = protocol.get(uri.href, (response) => {
@@ -32,10 +30,11 @@ export function download(url: string, path: string, options?: DownloadOptions): 
           return;
         }
 
-        if (++redirectCount >= maxRedirects) {
+        if (++redirectCount >= 10) {
           reject(new Error("Too many redirects"));
           return;
         }
+
         download(redirectUrl, path, options).then(resolve).catch(reject);
         return;
       }
