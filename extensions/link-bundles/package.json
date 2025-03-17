@@ -27,13 +27,13 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "defaultOpenInChrome",
+          "name": "defaultOpenInDefaultBrowser",
           "title": "Default values for flags in a form",
-          "label": "Open in Chrome",
-          "description": "Whether new bundles should open in Chrome",
+          "label": "Open in Default Browser",
+          "description": "Whether new bundles should open in the default browser instead of Chrome",
           "type": "checkbox",
           "required": false,
-          "default": true
+          "default": false
         },
         {
           "name": "defaultNewWindow",
