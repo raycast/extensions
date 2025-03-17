@@ -272,7 +272,7 @@ export default function CardListCommand() {
                   <Action
                     title="Load More Cards"
                     icon={Icon.Download}
-                    shortcut={{ modifiers: ["cmd"], key: "arrowDown" }}
+                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
                     onAction={() => {
                       loadMoreCards();
                       return { keepWindowOpen: true };
