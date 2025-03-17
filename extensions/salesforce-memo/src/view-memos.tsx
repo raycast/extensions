@@ -130,7 +130,7 @@ export default function ViewMemos() {
 
     if (confirmed) {
       try {
-        fs.unlinkSync(memo.path);
+        await fs.promises.unlink(memo.path);
         await showToast({
           style: Toast.Style.Success,
           title: "メモを削除しました",
