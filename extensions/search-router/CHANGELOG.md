@@ -1,5 +1,9 @@
 # Search Router Changelog
 
+## [New Additions] - 2025-03-15
+
+- Added support for opening root domain when search query is empty
+
 ## [Initial Release] - 2025-03-05
 
 - Implemented DuckDuckGo !Bangs search functionality directly in Raycast

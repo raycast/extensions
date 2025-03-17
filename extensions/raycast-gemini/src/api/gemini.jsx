@@ -16,6 +16,7 @@ import fs from "fs";
 import Gemini from "gemini-ai";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
+import { useCommandHistory } from "./useCommandHistory";
 
 export default (props, { context = undefined, allowPaste = false, useSelected = false, buffer = [] }) => {
   const Pages = {
@@ -36,6 +37,7 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
   const [lastQuery, setLastQuery] = useState("");
   const [lastResponse, setLastResponse] = useState("");
   const [textarea, setTextarea] = useState("");
+  const { addToHistory } = useCommandHistory();
 
   const getResponse = async (query, data) => {
     setLastQuery(query);
@@ -59,6 +61,10 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
       });
       setMarkdown(response);
       setLastResponse(response);
+
+      // Add to history with model information
+      const usedModel = model === "default" ? defaultModel : model;
+      await addToHistory(query, response, usedModel);
 
       await showToast({
         style: Toast.Style.Success,
@@ -139,6 +145,17 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
                 }}
               />
             )}
+            <Action
+              title="View History"
+              icon={Icon.Clock}
+              shortcut={{ modifiers: ["cmd"], key: "h" }}
+              onAction={async () => {
+                await launchCommand({
+                  name: "history",
+                  type: LaunchType.UserInitiated,
+                });
+              }}
+            />
           </ActionPanel>
         )
       }

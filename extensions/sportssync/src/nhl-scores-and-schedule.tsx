@@ -1,5 +1,6 @@
-import { Detail, List, Color, Action, ActionPanel } from "@raycast/api";
+import { Detail, List, Color, Icon, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import getPastAndFutureDays from "./utils/getDateRange";
 
 interface Competitor {
   team: {
@@ -34,6 +35,11 @@ interface Game {
   links: { href: string }[];
 }
 
+interface DayItems {
+  title: string;
+  games: JSX.Element[];
+}
+
 interface Response {
   events: Game[];
   day: { date: string };
@@ -41,68 +47,99 @@ interface Response {
 
 export default function scoresAndSchedule() {
   // Fetch NHL Stats
+
+  const dateRange = getPastAndFutureDays(new Date());
+
   const { isLoading: nhlScheduleStats, data: nhlScoresAndSchedule } = useFetch<Response>(
-    "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard",
+    `https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard?dates=${dateRange}`,
   );
 
+  const nhlDayItems: DayItems[] = [];
   const nhlGames = nhlScoresAndSchedule?.events || [];
-  const nhlItems: JSX.Element[] = [];
 
-  nhlGames.forEach((nhlGame, index) => {
-    const gameTime = new Date(nhlGame.date).toLocaleTimeString([], {
+  nhlGames?.forEach((nhlGame, index) => {
+    const gameDate = new Date(nhlGame?.date);
+    const nhlGameDay = gameDate?.toLocaleDateString([], {
+      dateStyle: "medium",
+    });
+
+    if (!nhlDayItems?.find((nhlDay) => nhlDay?.title === nhlGameDay)) {
+      nhlDayItems?.push({
+        title: nhlGameDay,
+        games: [],
+      });
+    }
+
+    const nhlDay = nhlDayItems?.find((nhlDay) => nhlDay?.title === nhlGameDay);
+
+    const gameTime = new Date(nhlGame?.date).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
 
     let accessoryTitle = gameTime;
     let accessoryColor = Color.SecondaryText;
-    let accessoryToolTip;
+    let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
+    let accessoryToolTip = "Scheduled";
 
-    if (nhlGame.status.type.state === "in") {
-      accessoryTitle = `${nhlGame.competitions[0].competitors[1].team.abbreviation} ${nhlGame.competitions[0].competitors[1].score} - ${nhlGame.competitions[0].competitors[0].team.abbreviation} ${nhlGame.competitions[0].competitors[0].score}     P${nhlGame.status.period} ${nhlGame.status.displayClock}`;
+    const startingSoonInterval = 15 * 60 * 1000;
+    const currentDate = new Date();
+    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
+
+    if (timeUntilGameStarts <= startingSoonInterval && nhlGame?.status?.type?.state === "pre") {
+      accessoryColor = Color.Yellow;
+      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
+      accessoryToolTip = "Starting Soon";
+    }
+
+    if (nhlGame?.status?.type?.state === "in") {
+      accessoryTitle = `${nhlGame?.competitions[0]?.competitors[1]?.team.abbreviation} ${nhlGame?.competitions[0]?.competitors[1]?.score} - ${nhlGame?.competitions[0]?.competitors[0]?.team?.abbreviation} ${nhlGame?.competitions[0]?.competitors[0]?.score}     P${nhlGame?.status?.period} ${nhlGame?.status?.displayClock}`;
       accessoryColor = Color.Green;
+      accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
       accessoryToolTip = "In Progress";
     }
 
-    if (nhlGame.status.type.state === "post") {
-      accessoryTitle = `${nhlGame.competitions[0].competitors[1].team.abbreviation} ${nhlGame.competitions[0].competitors[1].score} - ${nhlGame.competitions[0].competitors[0].team.abbreviation} ${nhlGame.competitions[0].competitors[0].score}`;
+    if (nhlGame?.status?.type?.state === "post") {
+      accessoryTitle = `${nhlGame?.competitions[0]?.competitors[1]?.team?.abbreviation} ${nhlGame?.competitions[0]?.competitors[1]?.score} - ${nhlGame?.competitions[0]?.competitors[0]?.team?.abbreviation} ${nhlGame?.competitions[0]?.competitors[0]?.score}`;
       accessoryColor = Color.SecondaryText;
+      accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
       accessoryToolTip = "Final";
     }
 
-    if (nhlGame.status.type.state === "post" && nhlGame.status.type.completed === false) {
+    if (nhlGame?.status?.type?.state === "post" && nhlGame?.status?.type?.completed === false) {
       accessoryTitle = `Postponed`;
+      accessoryIcon = { source: Icon.XMarkCircle, tintColor: Color.Orange };
       accessoryColor = Color.Orange;
     }
 
-    let gameTitle = nhlGame.name.replace(" at ", " vs ");
-
-    const team1 = nhlGame.competitions[0].competitors[0].team.abbreviation;
-    const team2 = nhlGame.competitions[0].competitors[1].team.abbreviation;
-
-    if (gameTitle.includes(`${team1} ${team1}`) || gameTitle.includes(`${team2} ${team2}`)) {
-      gameTitle = `${team2} vs ${team1}`;
-    }
-
-    nhlItems.push(
+    nhlDay?.games.push(
       <List.Item
         key={index}
-        title={gameTitle}
-        icon={{ source: nhlGame.competitions[0].competitors[1].team.logo }}
-        accessories={[{ text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip }]}
+        title={nhlGame?.name?.replace(" at ", " vs ")}
+        icon={{ source: nhlGame?.competitions[0]?.competitors[1]?.team?.logo }}
+        accessories={[
+          {
+            text: { value: `${accessoryTitle ?? "No Date Found"}`, color: accessoryColor },
+            tooltip: accessoryToolTip ?? "Unknown",
+          },
+          { icon: accessoryIcon },
+        ]}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="View Game Details on ESPN" url={`${nhlGame.links[0].href}`} />
-            {nhlGame.competitions[0].competitors[1].team.links?.length > 0 && (
+            <Action.OpenInBrowser
+              title="View Game Details on ESPN"
+              url={`${nhlGame?.links[0]?.href ?? "https://www.espn.com"}`}
+            />
+            {nhlGame?.competitions[0]?.competitors[1]?.team.links?.length > 0 && (
               <Action.OpenInBrowser
                 title="View Away Team Details"
-                url={nhlGame.competitions[0].competitors[1].team.links[0].href}
+                url={nhlGame?.competitions[0]?.competitors[1]?.team?.links[0]?.href ?? "https://www.espn.com"}
               />
             )}
-            {nhlGame.competitions[0].competitors[0].team.links?.length > 0 && (
+            {nhlGame.competitions[0]?.competitors[0]?.team?.links?.length > 0 && (
               <Action.OpenInBrowser
                 title="View Home Team Details"
-                url={nhlGame.competitions[0].competitors[0].team.links[0].href}
+                url={nhlGame?.competitions[0]?.competitors[0]?.team?.links[0]?.href ?? "https://www.espn.com"}
               />
             )}
           </ActionPanel>
@@ -119,13 +156,23 @@ export default function scoresAndSchedule() {
     return <Detail markdown="No data found." />;
   }
 
-  const nhlGamesDate = nhlScoresAndSchedule.day.date;
+  nhlDayItems.sort((a, b) => {
+    const dateA = new Date(a.title);
+    const dateB = new Date(b.title);
+    return dateA.getTime() - dateB.getTime();
+  });
 
   return (
     <List searchBarPlaceholder="Search for your favorite team" isLoading={nhlScheduleStats}>
-      <List.Section title={`${nhlGamesDate}`} subtitle={`${nhlItems.length} Game${nhlItems.length !== 1 ? "s" : ""}`}>
-        {nhlItems}
-      </List.Section>
+      {nhlDayItems?.map((nhlDay, index) => (
+        <List.Section
+          key={index}
+          title={`${nhlDay?.title}`}
+          subtitle={`${nhlDay?.games?.length} Game${nhlDay?.games?.length !== 1 ? "s" : ""}`}
+        >
+          {nhlDay?.games}
+        </List.Section>
+      ))}
     </List>
   );
 }
