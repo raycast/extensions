@@ -52,11 +52,15 @@ export function download(url: string, path: string, options?: DownloadOptions): 
       const fileStream = createWriteStream(path, { autoClose: true });
       let downloadedBytes = 0;
 
-      const cleanup = (error?: Error) => {
+      const cleanup = () => {
         request.destroy();
         response.destroy();
         fileStream.close();
-        if (error) reject(error);
+      };
+
+      const cleanupAndReject = (error?: Error) => {
+        cleanup();
+        reject(error);
       };
 
       response.on("data", (chunk) => {
@@ -70,6 +74,8 @@ export function download(url: string, path: string, options?: DownloadOptions): 
           await waitForFileAvailable(path);
           if (sha256) await waitForHashToMatch(path, sha256);
           resolve();
+        } catch (error) {
+          reject(error);
         } finally {
           cleanup();
         }
@@ -77,17 +83,17 @@ export function download(url: string, path: string, options?: DownloadOptions): 
 
       fileStream.on("error", (error) => {
         captureException(`File stream error while downloading ${url}`, error);
-        unlink(path, () => cleanup(error));
+        unlink(path, () => cleanupAndReject(error));
       });
 
       response.on("error", (error) => {
         captureException(`Response error while downloading ${url}`, error);
-        unlink(path, () => cleanup(error));
+        unlink(path, () => cleanupAndReject(error));
       });
 
       request.on("error", (error) => {
         captureException(`Request error while downloading ${url}`, error);
-        unlink(path, () => cleanup(error));
+        unlink(path, () => cleanupAndReject(error));
       });
 
       response.pipe(fileStream);
