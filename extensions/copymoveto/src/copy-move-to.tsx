@@ -22,6 +22,12 @@ import { type Destination, destinationRepo } from "./repo/destination";
 import { checkExistence, copy, getFilenameFromPath, isDirectory, isFile, move } from "./utils/filesystem";
 import { showFailureToast } from "@raycast/utils";
 
+interface Preferences {
+  fileConflictAction: "prompt" | "overwrite" | "skip" | "rename";
+  showPath: boolean;
+  showHiddenFolders: boolean;
+}
+
 interface CopyMoveToProps {
   mode: "copy" | "move";
 }
@@ -265,7 +271,7 @@ export default function CopyMoveTo(props: CopyMoveToProps) {
                 <Action
                   title={isMove ? "Move Here" : "Copy Here"}
                   style={Action.Style.Regular}
-                  icon={isMove ? Icon.ArrowRight : Icon.Duplicate}
+                  icon={isMove ? Icon.ArrowRight : Icon.CopyClipboard}
                   onAction={() => handleAction(destination.name)}
                 />
                 <Action
