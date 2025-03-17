@@ -12,6 +12,26 @@ import TaskListSections from "./TaskListSections";
 
 type FilterTasksProps = { name: string; quickLinkView?: QuickLinkView };
 
+function sortTasks(tasks: any[]) {
+  return tasks.sort((a, b) => {
+    const aHasDateTime = a.due && a.due.datetime;
+    const bHasDateTime = b.due && b.due.datetime;
+
+    if (aHasDateTime && bHasDateTime) {
+      // Both have datetime, sort by priority
+      return b.priority - a.priority; // Higher priority first
+    }
+    if (aHasDateTime) {
+      return -1; // a comes before b
+    }
+    if (bHasDateTime) {
+      return 1; // b comes before a
+    }
+    // If neither has datetime, sort by priority
+    return b.priority - a.priority; // Higher priority first
+  });
+}
+
 function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   const [cachedData] = useCachedData();
   const filters = cachedData?.filters;
@@ -20,17 +40,22 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
 
   const { data } = useCachedPromise(
     async (search) => {
-      const filterTasks = await getFilterTasks(search);
-      return filterSort(filterTasks);
+      const queries = search.split(",").map((part: string) => part.trim());
+      const sections = await Promise.all(queries.map(async (q: string) => {
+        const tasks = await getFilterTasks(q);
+        const sortedTasks = sortTasks(tasks);
+        return { name: q, tasks: sortedTasks };
+      }));
+      return sections;
     },
     [query],
   );
 
-  const tasks = data ?? [];
+  const sections = data ?? [];
 
-  const { sections, viewProps } = useViewTasks(`todoist.filter${name}`, { tasks });
+  const { viewProps } = useViewTasks(`todoist.filter${name}`, { tasks: sections.flatMap(section => section.tasks) });
 
-  if (tasks.length === 0) {
+  if (sections.length === 0) {
     return (
       <List.EmptyView
         title="No tasks for this filter."
@@ -58,7 +83,7 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   return (
     <TaskListSections
       mode={ViewMode.project}
-      sections={viewProps.groupBy?.value === "default" ? [{ name, tasks: tasks }] : sections}
+      sections={sections} // Use the dynamically created sections
       viewProps={viewProps}
       quickLinkView={quickLinkView}
     />
