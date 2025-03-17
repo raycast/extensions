@@ -1,5 +1,7 @@
 # Todo List Changelog
 
+## [Chore: Moved contributor] - 2025-03-17
+
 ## [Enhancements] - 2025-02-25
 
 - Added an action to set a due date for a todo item.
