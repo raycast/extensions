@@ -295,6 +295,7 @@ ai:
 }
 ```
 
+{% endtab %}
 {% endtabs %}
 
 {% hint style="info" %}
