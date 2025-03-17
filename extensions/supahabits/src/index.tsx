@@ -17,6 +17,7 @@ import { Habit } from "./models/habit";
 import CreateHabitForm from "./components/create-habit-form";
 import CreateRepeatableHabitForm from "./components/create-repeatable-habit";
 import FeedbackForm from "./components/feedback-form";
+import { getColorValue } from "./utils/colors";
 
 export default function Command() {
   const { secret } = getPreferenceValues<Preferences>();
@@ -95,16 +96,20 @@ export default function Command() {
   };
 
   const getHabitIcon = (habit: Habit) => {
+    const habitColor = habit.color ? getColorValue(habit.color) : Color.PrimaryText;
+    
     if (habit.repeatable) {
       if (habit.completed === true) {
-        return { source: Icon.Repeat, tintColor: Color.Green };
+        // For completed repeatable habits, show in their selected color
+        return { source: Icon.Repeat, tintColor: habitColor };
       }
 
+      // For non-completed repeatable habits, always show in red
       return { source: Icon.Repeat, tintColor: Color.Red };
     }
 
     return habit.completed
-      ? { source: Icon.CheckCircle, tintColor: Color.Green }
+      ? { source: Icon.CheckCircle, tintColor: habitColor }
       : { source: Icon.Circle, tintColor: Color.Red };
   };
 
@@ -175,6 +180,7 @@ export default function Command() {
             icon={getHabitIcon(habit)}
             title={habit.name}
             actions={getHabitActions(habit, markHabitAsCompleted, removeLastTracking)}
+            accessories={[{ text: habit.repeatable ? "Repeatable" : "" }]}
           />
         ))
       ) : (
