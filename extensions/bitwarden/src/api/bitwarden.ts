@@ -22,7 +22,6 @@ import {
 import { join } from "path";
 import { chmod, rename, rm } from "fs/promises";
 import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAvailable } from "~/utils/fs";
-import { getFileSha256 } from "~/utils/crypto";
 import { download } from "~/utils/network";
 import { captureException } from "~/utils/development";
 import { ReceivedSend, Send, SendCreatePayload, SendType } from "~/types/send";
@@ -78,7 +77,7 @@ type ReceiveSendOptions = {
 
 const { supportPath } = environment;
 
-const Δ = "3"; // changing this forces a new bin download for people that had a failed one
+const Δ = "4"; // changing this forces a new bin download for people that had a failed one
 const BinDownloadLogger = (() => {
   /* The idea of this logger is to write a log file when the bin download fails, so that we can let the extension crash,
    but fallback to the local cli path in the next launch. This allows the error to be reported in the issues dashboard. It uses files to keep it synchronous, as it's needed in the constructor.
@@ -115,9 +114,6 @@ export const cliInfo = {
   get downloadUrl() {
     const archSuffix = process.arch === "arm64" ? "-arm64" : "";
     return `${this.downloadPage}/download/cli-v${this.version}/bw-macos${archSuffix}-${this.version}.zip`;
-  },
-  checkHashMatchesFile: function (filePath: string) {
-    return getFileSha256(filePath) === this.sha256;
   },
 } as const;
 
@@ -172,11 +168,10 @@ export class Bitwarden {
     try {
       try {
         toast.message = "Downloading...";
-        await download(cliInfo.downloadUrl, zipPath, (percent) => (toast.message = `Downloading ${percent}%`));
-        await waitForFileAvailable(zipPath);
-        if (!cliInfo.checkHashMatchesFile(zipPath)) {
-          throw new EnsureCliBinError("Binary hash does not match");
-        }
+        await download(cliInfo.downloadUrl, zipPath, {
+          onProgress: (percent) => (toast.message = `Downloading ${percent}%`),
+          sha256: cliInfo.sha256,
+        });
       } catch (downloadError) {
         toast.title = "Failed to download Bitwarden CLI";
         throw downloadError;
@@ -209,7 +204,7 @@ export class Bitwarden {
       unlinkAllSync(zipPath, this.cliPath);
 
       if (!environment.isDevelopment) BinDownloadLogger.logError(error);
-      if (error instanceof Error) throw new EnsureCliBinError(`${error.name}: ${error.message}`, error.stack);
+      if (error instanceof Error) throw new EnsureCliBinError(error.message, error.stack);
       throw error;
     } finally {
       await toast.restore();
