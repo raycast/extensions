@@ -1,5 +1,7 @@
 # Todo List Changelog
 
+## [Chore: Moved contributor] - {PR_MERGE_DATE}
+
 ## [New Action] - 2024-07-28
 
 - Added an action to set a tag for a todo item.
