@@ -5,5 +5,5 @@ export interface Bundle {
   chromeProfileDirectory: string;
   openInNewWindow: boolean;
   openInIncognitoWindow: boolean;
-  openInChrome: boolean;
+  openInDefaultBrowser: boolean;
 }
