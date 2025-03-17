@@ -1,6 +1,6 @@
 # Simulator Manager Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-03-17
 
 - Optimized performance for loading and filtering devices
 - Added keyboard shortcuts for common operations (Cmd+I to copy device ID)
