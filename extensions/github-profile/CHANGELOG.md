@@ -1,8 +1,8 @@
 # GitHub Profile Changelog
 
-## [Fix Mock Toast] - {PR_MERGE_DATE}
+## [Fix Mock Data] - {PR_MERGE_DATE}
 
-- 🐛 Alert user when using mock data without a GitHub token
+- 🔐 Change GitHub token as required field
 
 ## [Initial Version] - 2025-03-12
 

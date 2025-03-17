@@ -8,7 +8,7 @@ View GitHub user profiles directly from Raycast. 🔦
 
 You need to add a GitHub token to use this extension:
 
-1. Create a token at [GitHub Settings](https://github.com/settings/tokens) ⚙️
+1. Create a token at [GitHub Settings](https://github.com/settings/tokens).
 2. Add this token to the extension preferences in Raycast
 
 **! Please remind that the token is required** ⚠️
