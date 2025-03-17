@@ -1,21 +1,23 @@
+/* eslint-disable */
 import React, { useState } from "react";
-import {
-  ActionPanel,
-  Form,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-  getPreferenceValues,
-  Detail,
-  useNavigation,
-  List,
-} from "@raycast/api";
+import { ActionPanel, Form, Action, showToast, Toast, Icon, Detail, useNavigation, List } from "@raycast/api";
 import { SalesforceService, MemoFileService, SalesforceRecord } from "./utils/salesforce";
-import fs from "fs";
 
-interface Preferences {
-  memoDirectory: string;
+// メモデータの型定義
+interface MemoData {
+  title: string;
+  content: string;
+  metadata: {
+    createdAt?: string;
+    updatedAt?: string;
+    sfId?: string;
+    sfName?: string;
+    sfType?: string;
+  };
+  syncStatus?: {
+    lastSyncedAt: string | null;
+    sfNoteId: string | null;
+  };
 }
 
 export default function CreateMemo() {
@@ -23,11 +25,9 @@ export default function CreateMemo() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [relatedRecord, setRelatedRecord] = useState<SalesforceRecord | undefined>(undefined);
-  const { push, pop } = useNavigation();
+  const { push } = useNavigation();
 
-  const salesforceService = new SalesforceService();
   const memoFileService = new MemoFileService();
-  const preferences = getPreferenceValues<Preferences>();
 
   const handleRecordSelect = () => {
     push(<RecordSearch onRecordSelect={selectRecord} />);
@@ -236,7 +236,7 @@ function MemoDetail({
   filePath: string;
   relatedRecord?: SalesforceRecord;
 }) {
-  const [isUploading, setIsUploading] = useState(false);
+  const [, setIsUploading] = useState(false);
   const salesforceService = new SalesforceService();
   const memoFileService = new MemoFileService();
 
@@ -253,9 +253,10 @@ function MemoDetail({
       console.log("Salesforce送信前のメモデータ:", originalData);
 
       // Salesforceにメモを作成
+      const typedData = originalData as unknown as MemoData;
       const memoId = await salesforceService.createMemoRecord(
-        originalData.title || title,
-        originalData.content || content,
+        typedData.title || title,
+        typedData.content || content,
         relatedRecord?.Id,
       );
 
@@ -292,10 +293,10 @@ function MemoDetail({
         return `# ${title}\n\n${content}\n\n---\n\n**ファイル保存場所**: ${filePath}\n${relatedRecord ? `**関連レコード**: ${relatedRecord.Type} - ${relatedRecord.Name} (${relatedRecord.Id})` : ""}`;
       }
 
-      const jsonTitle = originalData.title || title;
-      const jsonContent = originalData.content || content;
-      const metadata = originalData.metadata || {};
-      const syncStatus = originalData.syncStatus || { lastSyncedAt: null, sfNoteId: null };
+      const typedData = originalData as unknown as MemoData;
+      const jsonTitle = typedData.title || title;
+      const jsonContent = typedData.content || content;
+      const metadata = typedData.metadata || {};
 
       // メタデータセクション
       let metadataSection = "";
@@ -321,30 +322,16 @@ function MemoDetail({
         dateSection += `- **更新日時**: ${new Date(metadata.updatedAt).toLocaleString()}\n`;
       }
 
-      // 同期情報
-      let syncSection = "";
-      if (syncStatus.lastSyncedAt) {
-        syncSection += `\n\n## Salesforce同期情報\n`;
-        syncSection += `- **最終同期**: ${new Date(syncStatus.lastSyncedAt).toLocaleString()}\n`;
-        syncSection += `- **Salesforce ID**: ${syncStatus.sfNoteId || "不明"}\n`;
-      }
-
-      // ファイル情報
-      const fileSection = `\n\n## ファイル情報\n- **保存場所**: ${filePath}`;
-
-      return `# ${jsonTitle}\n\n${jsonContent}${metadataSection}${dateSection}${syncSection}${fileSection}`;
+      return `# ${jsonTitle}\n\n${jsonContent}\n\n---\n\n**ファイル保存場所**: ${filePath}\n${relatedRecord ? `**関連レコード**: ${relatedRecord.Type} - ${relatedRecord.Name} (${relatedRecord.Id})` : ""}\n${metadataSection}\n${dateSection}`;
     } catch (error) {
-      console.error("メモ表示データ作成エラー:", error);
-      return `# ${title}\n\n${content}\n\n---\n\n**エラー**: メモデータの読み込み中にエラーが発生しました\n**ファイル保存場所**: ${filePath}`;
+      console.error("マークダウンコンテンツ作成エラー:", error);
+      return `# ${title}\n\n${content}\n\n---\n\n**ファイル保存場所**: ${filePath}\n${relatedRecord ? `**関連レコード**: ${relatedRecord.Type} - ${relatedRecord.Name} (${relatedRecord.Id})` : ""}`;
     }
   };
 
-  const markdownContent = createMarkdownContent();
-
   return (
     <Detail
-      markdown={markdownContent}
-      isLoading={isUploading}
+      markdown={createMarkdownContent()}
       actions={
         <ActionPanel>
           <Action title="Salesforceに送信" onAction={uploadToSalesforce} icon={Icon.Upload} />

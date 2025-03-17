@@ -6,6 +6,8 @@ import path from "path";
 interface Preferences {
   salesforceUrl: string;
   memoDirectory: string;
+  salesforceObjectType: string;
+  customObjectName: string;
 }
 
 interface SalesforceCredentials {
@@ -27,6 +29,17 @@ export class SalesforceService {
 
   constructor() {
     this.preferences = getPreferenceValues<Preferences>();
+  }
+
+  // 使用するSalesforceオブジェクトの名前を取得
+  private getSalesforceObjectName(): string {
+    const { salesforceObjectType, customObjectName } = this.preferences;
+
+    if (salesforceObjectType === "Custom" && customObjectName) {
+      return customObjectName;
+    }
+
+    return salesforceObjectType || "ContentNote"; // デフォルトはContentNote
   }
 
   // ログイン情報を保存
@@ -168,11 +181,12 @@ export class SalesforceService {
       console.log(`タイトル長: ${Buffer.from(safeSubject).length} バイト`);
       console.log(`本文長: ${Buffer.from(safeBody).length} バイト`);
 
-      // ContentNoteオブジェクトの作成
-      console.log("ContentNoteレコード作成準備");
+      // Salesforceオブジェクトの作成
+      const objectName = this.getSalesforceObjectName();
+      console.log(`${objectName}レコード作成準備`);
 
-      // ContentNoteオブジェクトのフィールド
-      const memoData: any = {
+      // Salesforceオブジェクトのフィールド
+      const memoData: Record<string, string> = {
         Title: safeSubject,
       };
 
@@ -193,36 +207,49 @@ export class SalesforceService {
       }
 
       // Salesforce API実行時の詳細ログ
-      console.log("ContentNote作成リクエスト準備:", {
+      console.log(`${objectName}作成リクエスト準備:`, {
         title: memoData.Title,
         contentLength: memoData.Content?.length,
       });
 
-      // ContentNoteレコード作成
-      const result = await this.conn!.sobject("ContentNote").create(memoData);
-      console.log("ContentNote作成レスポンス:", JSON.stringify(result));
+      // Salesforceレコード作成
+      const result = await this.conn!.sobject(objectName).create(memoData);
+      console.log(`${objectName}作成レスポンス:`, JSON.stringify(result));
 
       if (result.success) {
         // 関連レコードがある場合はContentDocumentLinkを作成
         if (relatedRecordId) {
           try {
-            // ContentDocumentLinkオブジェクトを作成して関連付け
-            console.log("ContentDocumentLink作成開始:", {
-              contentDocumentId: result.id,
-              linkedEntityId: relatedRecordId,
-            });
+            // 選択したオブジェクトがContentNoteかContentDocumentの場合のみContentDocumentLinkを作成
+            if (objectName === "ContentNote" || objectName === "ContentDocument") {
+              // ContentDocumentLinkオブジェクトを作成して関連付け
+              console.log("ContentDocumentLink作成開始:", {
+                contentDocumentId: result.id,
+                linkedEntityId: relatedRecordId,
+              });
 
-            const linkData = {
-              ContentDocumentId: result.id,
-              LinkedEntityId: relatedRecordId,
-              ShareType: "V", // V=Viewer
-            };
+              const linkData = {
+                ContentDocumentId: result.id,
+                LinkedEntityId: relatedRecordId,
+                ShareType: "V", // V=Viewer
+              };
 
-            const linkResult = await this.conn!.sobject("ContentDocumentLink").create(linkData);
-            console.log("ContentDocumentLink作成結果:", JSON.stringify(linkResult));
+              const linkResult = await this.conn!.sobject("ContentDocumentLink").create(linkData);
+              console.log("ContentDocumentLink作成結果:", JSON.stringify(linkResult));
 
-            if (!linkResult.success) {
-              console.error("関連レコードのリンク作成に失敗:", linkResult);
+              if (!linkResult.success) {
+                console.error("関連レコードのリンク作成に失敗:", linkResult);
+              }
+            } else if (objectName === "Task") {
+              // Taskの場合はWhatIdを使用して関連付け
+              await this.conn!.sobject("Task").update({
+                Id: result.id,
+                WhatId: relatedRecordId,
+              });
+              console.log("Task関連付け完了:", relatedRecordId);
+            } else {
+              // カスタムオブジェクトの場合は必要に応じて関連付けロジックを実装
+              console.log("カスタムオブジェクトの関連付けはサポートされていません");
             }
           } catch (linkError) {
             console.error("関連レコードのリンク作成エラー:", linkError);
@@ -232,7 +259,7 @@ export class SalesforceService {
 
         return result.id;
       } else {
-        console.error("ContentNote作成失敗:", result);
+        console.error(`${objectName}作成失敗:`, result);
         throw new Error(`メモの作成に失敗しました: ${JSON.stringify(result)}`);
       }
     } catch (error) {
@@ -264,7 +291,7 @@ export class MemoFileService {
     const filePath = path.join(memoDir, fileName);
 
     // JSONデータ構造を作成
-    const memoData: any = {
+    const memoData: Record<string, unknown> = {
       title: title,
       content: content,
       metadata: {
@@ -279,7 +306,7 @@ export class MemoFileService {
     // 関連レコードがある場合は追加
     if (relatedRecord) {
       memoData.metadata = {
-        ...memoData.metadata,
+        createdAt: (memoData.metadata as { createdAt: string }).createdAt,
         sfId: relatedRecord.Id,
         sfName: relatedRecord.Name,
         sfType: relatedRecord.Type,
@@ -299,7 +326,11 @@ export class MemoFileService {
   }
 
   // 保存済みのメモを読み込む（JSON形式のみに対応）
-  readMemo(filePath: string): { content: string; metadata: any; originalData?: any } {
+  readMemo(filePath: string): {
+    content: string;
+    metadata: Record<string, unknown>;
+    originalData?: Record<string, unknown>;
+  } {
     try {
       // ファイル拡張子を確認
       if (!filePath.toLowerCase().endsWith(".json")) {

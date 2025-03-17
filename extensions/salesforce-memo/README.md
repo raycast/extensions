@@ -1,101 +1,81 @@
-# Salesforce メモ拡張機能
+# Salesforce Memo
 
-この拡張機能を使用すると、Raycast から Salesforce へ簡単にメモを作成・閲覧することができます。
+This extension allows you to easily create and view memos from Raycast and sync them with Salesforce.
 
-## 機能
+## Features
 
-- Salesforce へのメモの作成
-- 過去のメモの閲覧
-- 設定画面からの Salesforce 接続情報の管理
+- Create memos for Salesforce
+- View and manage your past memos
+- Configure Salesforce connection settings
 
-## インストール方法
+## Installation
 
-### 1. ZIPファイルからのインストール（推奨）
+### From Raycast Store (Recommended)
 
-1. 提供された `salesforce-memo.zip` ファイルをダウンロードしてください
-2. ダウンロードしたZIPファイルを好きな場所に解凍してください
-3. Raycastを開きます（⌘+スペース で起動）
-4. Raycastの設定画面を開きます（⌘+,）
-5. 「Extensions」タブを選択します
-6. 右下の「+」ボタンをクリックし、「Import Extension」を選択します
-7. 解凍した `package` フォルダを選択して、「Open」をクリックします
+1. Open Raycast
+2. Search for "Salesforce Memo"
+3. Click Install
 
-**注意**: インポート後にエラーが表示される場合は、Raycastを一度完全に終了（⌘+Q）して再起動してみてください。
+### For Development
 
-### 2. 開発環境からのインストール（上級者向け）
+If you have a development environment:
 
-開発環境がある場合は、以下の手順でインストールできます：
-
-1. リポジトリをクローンします
-2. ターミナルで以下のコマンドを実行します：
+1. Clone the repository
+2. Run the following commands in your terminal:
    ```bash
    cd salesforce-memo
    npm install
    npm run build
    ```
-3. Raycastを開き、設定画面の「Extensions」タブから「Import Extension」を選択し、ビルドしたフォルダを選択します
+3. Open Raycast, go to Extensions preferences, and select "Import Extension"
 
-## 初期設定
+## Initial Setup
 
-インストール後、使用するには以下の設定が必要です：
+After installation, you need to configure the following:
 
-1. Raycastを開き、「Salesforce Memo Settings」と入力して設定画面を開きます
-2. 以下の情報を入力してください：
-   - **Salesforce インスタンスURL**: あなたのSalesforceインスタンスのURL（例：`https://your-instance.my.salesforce.com`）
-   - **Salesforce ユーザー名**: Salesforceログイン用のユーザー名（メールアドレス）
-   - **Salesforce パスワード**: Salesforceログイン用のパスワード
-   - **Salesforce セキュリティトークン**: Salesforceセキュリティトークン（必要な場合）
+1. Open Raycast and type "Salesforce Memo Settings"
+2. Enter the following information:
+   - **Salesforce URL**: Your Salesforce instance URL (e.g., `https://your-instance.my.salesforce.com`)
+   - **Salesforce Username**: Your Salesforce login username (email)
+   - **Salesforce Password**: Your Salesforce login password
+   - **Salesforce Security Token**: Your Salesforce security token (if required)
 
-## 使い方
+## Usage
 
-### メモの作成
+### Creating Memos
 
-1. Raycastを開き、「Create Salesforce Memo」と入力します
-2. メモの内容を入力し、Enterキーを押して送信します
-3. メモが正常に作成されると、確認メッセージが表示されます
+1. Open Raycast and type "Create Memo"
+2. Enter the memo content and press Enter
+3. Optionally search for and link to a Salesforce record
 
-### メモの閲覧
+### Viewing Memos
 
-1. Raycastを開き、「View Salesforce Memos」と入力します
-2. 過去に作成したメモの一覧が表示されます
-3. メモを選択すると詳細が表示されます
+1. Open Raycast and type "View Memos"
+2. Browse your previously created memos
+3. Select a memo to view its details
 
-## トラブルシューティング
+## Troubleshooting
 
-### 「Could not find command's executable JS file」エラーが表示される場合
+### Connection Issues
 
-このエラーは通常、拡張機能のビルドファイルが適切に読み込まれていない場合に発生します。以下の手順を試してください：
+1. Verify your connection settings (URL, username, password, security token)
+2. Ensure your internet connection is working properly
+3. Check for authentication issues on the Salesforce side
 
-1. Raycastを完全に終了します（⌘+Q）
-2. Raycastを再起動します
-3. それでも解決しない場合は、以下の手順で拡張機能を再インポートしてください：
-   - Raycastの設定画面で「Extensions」タブを開きます
-   - 「Salesforce Memo」拡張機能を一度削除します
-   - 再度、提供されたパッケージからインポートします
-4. システム要件を確認してください：
-   - Node.js 16.0.0以上が必要です
-   - npm 8.0.0以上が必要です
+## Data Format
 
-### 接続エラーが発生する場合
+By default, this extension uses Salesforce's "ContentNote" object to store memos. You can change this in the settings to use other object types like ContentDocument, Task, or a custom object of your choice.
 
-1. 設定情報（URL、ユーザー名、パスワード、セキュリティトークン）が正しいか確認してください
-2. インターネット接続が正常に機能しているか確認してください
-3. Salesforce側で認証情報に関する問題がないか確認してください
+## Notes
 
-## データ形式
+- Node.js 16.0.0 or higher is required
+- Salesforce credentials are stored locally using Raycast's secure storage
+- This extension adheres to Salesforce API usage limits
 
-この拡張機能はSalesforceの「ContentNote」オブジェクトを使用してメモを保存します。
+## Version
 
-## 注意事項
+Version: 1.0.0
 
-- この拡張機能はNode.js 16.0.0以上が必要です
-- Salesforceの認証情報はローカルに保存され、Raycastのセキュア保存を利用します
-- この拡張機能はSalesforceのAPI利用制限に従います
+## Support
 
-## バージョン情報
-
-バージョン: 1.0.0
-
-## サポート
-
-問題や質問がある場合は、開発者までお問い合わせください。
+If you encounter any issues or have questions, please contact the developer.

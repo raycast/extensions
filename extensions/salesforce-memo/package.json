@@ -2,9 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "salesforce-memo",
   "title": "Salesforce Memo",
-  "description": "メモを作成して管理し、Salesforceと連携するための拡張機能です。JSONフォーマットでメモを保存し、Salesforceのレコードと関連付けることができます。",
+  "description": "Create, manage and sync memos with Salesforce. Store memos in JSON format and link them to Salesforce records.",
   "icon": "icon.png",
-  "author": "user_227acdf12acbbac7bc91",
+  "author": "dd.suzuki",
   "categories": [
     "Applications",
     "Productivity"
@@ -18,19 +18,22 @@
     {
       "name": "create-memo",
       "title": "Create Memo",
-      "description": "新しいメモを作成し、必要に応じてSalesforceレコードと関連付けます",
+      "subtitle": "Salesforce Memo",
+      "description": "Create a new memo and optionally link it to a Salesforce record",
       "mode": "view"
     },
     {
       "name": "view-memos",
       "title": "View Memos",
-      "description": "保存されたメモを表示・編集・Salesforceに送信します",
+      "subtitle": "Salesforce Memo",
+      "description": "View, edit and send memos to Salesforce",
       "mode": "view"
     },
     {
       "name": "settings",
       "title": "Settings",
-      "description": "Salesforce接続設定とメモの保存先を設定します",
+      "subtitle": "Salesforce Memo",
+      "description": "Configure Salesforce connection and memo storage settings",
       "mode": "view"
     }
   ],
@@ -38,14 +41,48 @@
     {
       "name": "memoDirectory",
       "title": "Memo Directory",
-      "description": "メモファイルを保存するディレクトリ（必須設定）",
+      "description": "Directory to store memo files (required)",
       "type": "directory",
       "required": true
     },
     {
       "name": "salesforceUrl",
       "title": "Salesforce URL",
-      "description": "Salesforceインスタンスの URL (例: https://yourinstance.my.salesforce.com)",
+      "description": "Your Salesforce instance URL (e.g. https://yourinstance.my.salesforce.com)",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "salesforceObjectType",
+      "title": "Salesforce Object Type",
+      "description": "The Salesforce object type to use for storing memos",
+      "type": "dropdown",
+      "required": false,
+      "default": "ContentNote",
+      "data": [
+        {
+          "title": "Content Note",
+          "value": "ContentNote"
+        },
+        {
+          "title": "Content Document",
+          "value": "ContentDocument"
+        },
+        {
+          "title": "Task",
+          "value": "Task"
+        },
+        {
+          "title": "Custom Object",
+          "value": "Custom"
+        }
+      ]
+    },
+    {
+      "name": "customObjectName",
+      "title": "Custom Object Name",
+      "description": "Name of custom Salesforce object (only if 'Custom Object' is selected above)",
       "type": "textfield",
       "required": false,
       "default": ""
@@ -72,6 +109,6 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "ray build && npx @raycast/api@latest publish"
   }
 }
