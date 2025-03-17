@@ -121,6 +121,7 @@ function toURL(json: CalendarEvent, calendar: Calendar) {
         location: encodeURIComponent(json.location),
       };
       url = `${baseUrl}?subject=${params.text}&startdt=${params.startdt}&enddt=${params.enddt}&body=${params.body}&location=${params.location}`;
+      console.log(url);
       break;
     }
     case "googleCalendar":

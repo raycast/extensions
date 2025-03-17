@@ -50,18 +50,76 @@
           "type": "dropdown",
           "default": "English",
           "data": [
-            { "title": "English","value": "English" },
-            { "title": "Chinese", "value": "Chinese"},
-            { "title": "Japanese", "value": "Japanese"},
-            { "title": "Korean", "value": "Korean"},
-            { "title": "Spanish", "value": "Spanish"},
-            { "title": "French", "value": "French"},
-            { "title": "German", "value": "German"},
-            { "title": "Italian", "value": "Italian"},
-            { "title": "Dutch", "value": "Dutch"},
-            { "title": "Portuguese", "value": "Portuguese"},
-            { "title": "Russian", "value": "Russian"},
-            { "title": "Arabic", "value": "Arabic"}
+            {
+              "title": "English",
+              "value": "English"
+            },
+            {
+              "title": "Chinese",
+              "value": "Chinese"
+            },
+            {
+              "title": "Japanese",
+              "value": "Japanese"
+            },
+            {
+              "title": "Korean",
+              "value": "Korean"
+            },
+            {
+              "title": "Spanish",
+              "value": "Spanish"
+            },
+            {
+              "title": "French",
+              "value": "French"
+            },
+            {
+              "title": "German",
+              "value": "German"
+            },
+            {
+              "title": "Italian",
+              "value": "Italian"
+            },
+            {
+              "title": "Dutch",
+              "value": "Dutch"
+            },
+            {
+              "title": "Portuguese",
+              "value": "Portuguese"
+            },
+            {
+              "title": "Russian",
+              "value": "Russian"
+            },
+            {
+              "title": "Arabic",
+              "value": "Arabic"
+            }
+          ],
+          "required": false
+        },
+        {
+          "name": "calendar",
+          "title": "Calendar",
+          "description": "Calendar to post",
+          "type": "dropdown",
+          "default": "googleCalendar",
+          "data": [
+            {
+              "title": "Google calendar",
+              "value": "googleCalendar"
+            },
+            {
+              "title": "Outlook calendar (personal)",
+              "value": "outlookPersonal"
+            },
+            {
+              "title": "Outlook calendar (Office 365)",
+              "value": "outlookOffice365"
+            }
           ],
           "required": false
         }
