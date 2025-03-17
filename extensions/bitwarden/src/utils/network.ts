@@ -61,7 +61,7 @@ export function download(url: string, path: string, options?: DownloadOptions): 
 
       response.on("data", (chunk) => {
         downloadedBytes += chunk.length;
-        const percent = (downloadedBytes / fileSize) * 100;
+        const percent = Math.floor((downloadedBytes / fileSize) * 100);
         onProgress?.(percent);
       });
 
