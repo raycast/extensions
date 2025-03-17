@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-03-17
 
 - Fix CLI binary download hash mismatch error
 
