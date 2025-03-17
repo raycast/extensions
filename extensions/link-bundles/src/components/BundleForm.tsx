@@ -14,7 +14,7 @@ import { useState, Fragment } from "react";
 import { Bundle } from "../types";
 import { getChromeProfiles } from "../utils/chrome";
 
-const { defaultNewWindow, defaultIncognitoWindow, defaultOpenInChrome } = getPreferenceValues();
+const { defaultNewWindow, defaultIncognitoWindow, defaultOpenInDefaultBrowser } = getPreferenceValues();
 
 interface BundleFormProps {
   bundle?: Bundle;
@@ -26,7 +26,9 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
   const [title, setTitle] = useState(bundle?.title || "");
   const [titleError, setTitleError] = useState<string | undefined>();
   const [description, setDescription] = useState(bundle?.description || "");
-  const [openInChrome, setOpenInChrome] = useState(bundle?.openInChrome || defaultOpenInChrome || false);
+  const [openInDefaultBrowser, setOpenInDefaultBrowser] = useState(
+    bundle?.openInDefaultBrowser || defaultOpenInDefaultBrowser || false,
+  );
   const [chromeProfileDirectory, setChromeProfileDirectory] = useState(bundle?.chromeProfileDirectory || "Default");
   const [linkInputs, setLinkInputs] = useState<{ url: string; error?: string }[]>(
     bundle?.links.length ? bundle.links.map((url) => ({ url })) : [{ url: "" }],
@@ -122,7 +124,7 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
       chromeProfileDirectory: chromeProfileDirectory,
       openInNewWindow: openInNewWindow,
       openInIncognitoWindow: openInIncognitoWindow,
-      openInChrome: openInChrome,
+      openInDefaultBrowser: openInDefaultBrowser,
     }).then((success) => {
       if (success) pop();
     });
@@ -150,9 +152,16 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
       />
       <Form.TextField id="description" title="Bundle Description" value={description} onChange={setDescription} />
 
-      <Form.Checkbox id="openInChrome" label="Open in Chrome" value={openInChrome} onChange={setOpenInChrome} />
+      <Form.Separator />
 
-      {openInChrome && (
+      <Form.Checkbox
+        id="openInDefaultBrowser"
+        label="Open in Default Browser"
+        value={openInDefaultBrowser}
+        onChange={setOpenInDefaultBrowser}
+      />
+
+      {!openInDefaultBrowser && (
         <>
           <Form.Separator />
           <Form.Checkbox
@@ -170,7 +179,7 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
         </>
       )}
 
-      {openInChrome && !openInIncognitoWindow && (
+      {!openInDefaultBrowser && !openInIncognitoWindow && (
         <Form.Dropdown
           id="chromeProfile"
           title="Chrome Profile"
