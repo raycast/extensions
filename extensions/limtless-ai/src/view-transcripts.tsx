@@ -188,7 +188,7 @@ export default function Command() {
             <ActionPanel>
               <Action.Push title="View Details" target={<TranscriptDetail transcript={transcript} />} />
               <Action.CopyToClipboard
-                title="Copy to Clipboard"
+                title="Copy To Clipboard"
                 content={transcript.contents.map((content: LifelogContent) => content.content).join("\n\n")}
                 shortcut={{ modifiers: ["cmd"], key: "." }}
               />
