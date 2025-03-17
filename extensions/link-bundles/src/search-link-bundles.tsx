@@ -25,9 +25,9 @@ export default function Command() {
   const filteredBundles = useMemo(() => fuzzySearchList(bundles, searchText), [searchText, bundles]);
 
   const handleOpenBundle = async (bundle: Bundle) => {
-    const { openInChrome } = bundle;
+    const { openInDefaultBrowser } = bundle;
     try {
-      if (openInChrome) {
+      if (!openInDefaultBrowser) {
         await openLinksInChrome(bundle);
         await showToast(
           Toast.Style.Success,
