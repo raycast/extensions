@@ -58,12 +58,17 @@ export class SalesforceService {
 
   // ログイン情報を保存
   async saveCredentials(credentials: SalesforceCredentials): Promise<void> {
-    await LocalStorage.setItem("salesforce_credentials", JSON.stringify(credentials));
+    await LocalStorage.setItem(
+      "salesforce_credentials",
+      JSON.stringify(credentials),
+    );
   }
 
   // ログイン情報を取得
   async getCredentials(): Promise<SalesforceCredentials | null> {
-    const storedCredentials = await LocalStorage.getItem<string>("salesforce_credentials");
+    const storedCredentials = await LocalStorage.getItem<string>(
+      "salesforce_credentials",
+    );
     if (!storedCredentials) {
       return null;
     }
@@ -79,7 +84,8 @@ export class SalesforceService {
 
     try {
       this.conn = new jsforce.Connection({
-        loginUrl: this.preferences.salesforceUrl || "https://login.salesforce.com",
+        loginUrl:
+          this.preferences.salesforceUrl || "https://login.salesforce.com",
       });
 
       // UTF-8エンコーディングを使用するように設定
@@ -97,7 +103,10 @@ export class SalesforceService {
 
       // ログイン処理
       console.log("Salesforceログイン開始");
-      await this.conn.login(credentials.username, credentials.password + (credentials.securityToken || ""));
+      await this.conn.login(
+        credentials.username,
+        credentials.password + (credentials.securityToken || ""),
+      );
 
       // 接続成功後にログ出力
       console.log("Salesforceに接続しました。");
@@ -142,13 +151,16 @@ export class SalesforceService {
           }
           // 方法2: レコード名にTypeが含まれる属性を探す
           else {
-            const typeField = Object.keys(record).find((key) => key.endsWith("Type"));
+            const typeField = Object.keys(record).find((key) =>
+              key.endsWith("Type"),
+            );
             if (typeField) {
               objectType = typeField.replace("Type", "");
             }
             // 方法3: URLから推測
             else if (record.attributes && record.attributes.url) {
-              const urlMatch = record.attributes.url.match(/\/sobjects\/(\w+)\//);
+              const urlMatch =
+                record.attributes.url.match(/\/sobjects\/(\w+)\//);
               if (urlMatch && urlMatch[1]) {
                 objectType = urlMatch[1];
               }
@@ -176,7 +188,11 @@ export class SalesforceService {
   }
 
   // メモレコードを作成
-  async createMemoRecord(subject: string, body: string, relatedRecordId?: string): Promise<string> {
+  async createMemoRecord(
+    subject: string,
+    body: string,
+    relatedRecordId?: string,
+  ): Promise<string> {
     if (!this.conn) {
       const connected = await this.connect();
       if (!connected) {
@@ -185,7 +201,11 @@ export class SalesforceService {
     }
 
     try {
-      console.log("Salesforceメモ作成開始:", { subject, bodyLength: body.length, relatedRecordId });
+      console.log("Salesforceメモ作成開始:", {
+        subject,
+        bodyLength: body.length,
+        relatedRecordId,
+      });
 
       // 文字化け防止のための処理
       // タイトルと本文をエンコードして送信
@@ -235,7 +255,10 @@ export class SalesforceService {
         if (relatedRecordId) {
           try {
             // 選択したオブジェクトがContentNoteかContentDocumentの場合のみContentDocumentLinkを作成
-            if (objectName === "ContentNote" || objectName === "ContentDocument") {
+            if (
+              objectName === "ContentNote" ||
+              objectName === "ContentDocument"
+            ) {
               // ContentDocumentLinkオブジェクトを作成して関連付け
               console.log("ContentDocumentLink作成開始:", {
                 contentDocumentId: result.id,
@@ -248,8 +271,13 @@ export class SalesforceService {
                 ShareType: "V", // V=Viewer
               };
 
-              const linkResult = await this.conn!.sobject("ContentDocumentLink").create(linkData);
-              console.log("ContentDocumentLink作成結果:", JSON.stringify(linkResult));
+              const linkResult = await this.conn!.sobject(
+                "ContentDocumentLink",
+              ).create(linkData);
+              console.log(
+                "ContentDocumentLink作成結果:",
+                JSON.stringify(linkResult),
+              );
 
               if (!linkResult.success) {
                 console.error("関連レコードのリンク作成に失敗:", linkResult);
@@ -263,7 +291,9 @@ export class SalesforceService {
               console.log("Task関連付け完了:", relatedRecordId);
             } else {
               // カスタムオブジェクトの場合は必要に応じて関連付けロジックを実装
-              console.log("カスタムオブジェクトの関連付けはサポートされていません");
+              console.log(
+                "カスタムオブジェクトの関連付けはサポートされていません",
+              );
             }
           } catch (linkError) {
             console.error("関連レコードのリンク作成エラー:", linkError);
@@ -278,7 +308,8 @@ export class SalesforceService {
       }
     } catch (error) {
       console.error("Salesforceメモ作成エラー:", error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       throw new Error(`メモの作成中にエラーが発生しました: ${errorMessage}`);
     }
   }
@@ -293,7 +324,11 @@ export class MemoFileService {
   }
 
   // メモをローカルに保存（JSON形式）
-  saveMemo(title: string, content: string, relatedRecord?: SalesforceRecord): string {
+  saveMemo(
+    title: string,
+    content: string,
+    relatedRecord?: SalesforceRecord,
+  ): string {
     const memoDir = this.preferences.memoDirectory;
 
     // タイムスタンプをファイル名に使用
@@ -359,7 +394,10 @@ export class MemoFileService {
       console.log(`ファイル読み込み: ${filePath} (UTF-8形式)`);
 
       // BOMがある場合は除去
-      const content = fileContent.charCodeAt(0) === 0xfeff ? fileContent.substring(1) : fileContent;
+      const content =
+        fileContent.charCodeAt(0) === 0xfeff
+          ? fileContent.substring(1)
+          : fileContent;
 
       // JSONデータを解析
       try {
@@ -393,13 +431,18 @@ export class MemoFileService {
       const isJsonFile = filePath.toLowerCase().endsWith(".json");
 
       if (!isJsonFile) {
-        console.log("Markdownファイルの同期ステータス更新はサポートしていません");
+        console.log(
+          "Markdownファイルの同期ステータス更新はサポートしていません",
+        );
         return false;
       }
 
       // ファイル読み込み
       const fileContent = fs.readFileSync(filePath, { encoding: "utf8" });
-      const content = fileContent.charCodeAt(0) === 0xfeff ? fileContent.substring(1) : fileContent;
+      const content =
+        fileContent.charCodeAt(0) === 0xfeff
+          ? fileContent.substring(1)
+          : fileContent;
 
       // JSONデータ解析と更新
       try {
@@ -413,7 +456,9 @@ export class MemoFileService {
         const updatedContent = JSON.stringify(memoData, null, 2);
         fs.writeFileSync(filePath, updatedContent, { encoding: "utf8" });
 
-        console.log(`同期ステータスを更新しました: ${filePath}, sfNoteId=${sfNoteId}`);
+        console.log(
+          `同期ステータスを更新しました: ${filePath}, sfNoteId=${sfNoteId}`,
+        );
         return true;
       } catch (jsonError) {
         console.error("JSON更新エラー:", jsonError);

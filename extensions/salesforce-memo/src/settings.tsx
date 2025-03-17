@@ -58,7 +58,8 @@ export default function Settings() {
         const stats = fs.statSync(preferences.memoDirectory);
         if (!stats.isDirectory()) {
           isValid = false;
-          message += "• 設定されたメモディレクトリが有効なディレクトリではありません。\n";
+          message +=
+            "• 設定されたメモディレクトリが有効なディレクトリではありません。\n";
         }
       } catch (error) {
         isValid = false;
@@ -158,7 +159,11 @@ export default function Settings() {
       <Form
         actions={
           <ActionPanel>
-            <Action title="Raycast設定を開く" onAction={openSettings} icon={Icon.Gear} />
+            <Action
+              title="Raycast設定を開く"
+              onAction={openSettings}
+              icon={Icon.Gear}
+            />
           </ActionPanel>
         }
       >
@@ -175,12 +180,23 @@ export default function Settings() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="設定を保存" onSubmit={handleSubmit} icon={Icon.SaveDocument} />
-          <Action title="Raycast設定を開く" onAction={openSettings} icon={Icon.Gear} />
+          <Action.SubmitForm
+            title="設定を保存"
+            onSubmit={handleSubmit}
+            icon={Icon.SaveDocument}
+          />
+          <Action
+            title="Raycast設定を開く"
+            onAction={openSettings}
+            icon={Icon.Gear}
+          />
         </ActionPanel>
       }
     >
-      <Form.Description title="Salesforce接続設定" text="Salesforceに接続するための認証情報を入力してください。" />
+      <Form.Description
+        title="Salesforce接続設定"
+        text="Salesforceに接続するための認証情報を入力してください。"
+      />
       <Form.TextField
         id="username"
         title="ユーザー名"

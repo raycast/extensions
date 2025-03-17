@@ -12,7 +12,11 @@ import {
   confirmAlert,
   Form,
 } from "@raycast/api";
-import { SalesforceService, MemoFileService, SalesforceRecord } from "./utils/salesforce";
+import {
+  SalesforceService,
+  MemoFileService,
+  SalesforceRecord,
+} from "./utils/salesforce";
 import path from "path";
 import fs from "fs";
 
@@ -76,7 +80,9 @@ export default function ViewMemos() {
               title = filename;
             }
             // コンソールにタイトルのバイト表現も出力（デバッグ用）
-            console.log(`タイトル「${title}」のバイト長: ${Buffer.from(title).length}`);
+            console.log(
+              `タイトル「${title}」のバイト長: ${Buffer.from(title).length}`,
+            );
           }
 
           memoItems.push({
@@ -91,8 +97,12 @@ export default function ViewMemos() {
 
       // 作成日時の新しい順に並べ替え
       memoItems.sort((a, b) => {
-        const dateA = a.metadata.createdAt ? new Date(a.metadata.createdAt).getTime() : 0;
-        const dateB = b.metadata.createdAt ? new Date(b.metadata.createdAt).getTime() : 0;
+        const dateA = a.metadata.createdAt
+          ? new Date(a.metadata.createdAt).getTime()
+          : 0;
+        const dateB = b.metadata.createdAt
+          ? new Date(b.metadata.createdAt).getTime()
+          : 0;
         return dateB - dateA;
       });
 
@@ -143,13 +153,33 @@ export default function ViewMemos() {
         <List.Item
           key={memo.path}
           title={memo.title}
-          subtitle={memo.metadata.sfName ? `関連レコード: ${memo.metadata.sfType} - ${memo.metadata.sfName}` : ""}
-          accessoryTitle={memo.metadata.createdAt ? new Date(memo.metadata.createdAt).toLocaleString() : ""}
+          subtitle={
+            memo.metadata.sfName
+              ? `関連レコード: ${memo.metadata.sfType} - ${memo.metadata.sfName}`
+              : ""
+          }
+          accessoryTitle={
+            memo.metadata.createdAt
+              ? new Date(memo.metadata.createdAt).toLocaleString()
+              : ""
+          }
           actions={
             <ActionPanel>
-              <Action title="メモを表示" icon={Icon.Eye} onAction={() => push(<MemoDetail memo={memo} />)} />
-              <Action title="メモを編集" icon={Icon.Pencil} onAction={() => push(<EditMemo memo={memo} />)} />
-              <Action title="メモを削除" icon={Icon.Trash} onAction={() => deleteMemo(memo)} />
+              <Action
+                title="メモを表示"
+                icon={Icon.Eye}
+                onAction={() => push(<MemoDetail memo={memo} />)}
+              />
+              <Action
+                title="メモを編集"
+                icon={Icon.Pencil}
+                onAction={() => push(<EditMemo memo={memo} />)}
+              />
+              <Action
+                title="メモを削除"
+                icon={Icon.Trash}
+                onAction={() => deleteMemo(memo)}
+              />
             </ActionPanel>
           }
         />
@@ -177,7 +207,10 @@ function MemoDetail({ memo }: { memo: MemoItem }) {
     const title = typedData.title || "タイトルなし";
     const content = typedData.content || "";
     const metadata = typedData.metadata || {};
-    const syncStatus = typedData.syncStatus || { lastSyncedAt: null, sfNoteId: null };
+    const syncStatus = typedData.syncStatus || {
+      lastSyncedAt: null,
+      sfNoteId: null,
+    };
 
     // メタデータセクション
     let metadataSection = "";
@@ -226,7 +259,11 @@ function MemoDetail({ memo }: { memo: MemoItem }) {
       const metadata = typedData.metadata || {};
 
       // Salesforceにメモを作成
-      const memoId = await salesforceService.createMemoRecord(title, content, metadata.sfId);
+      const memoId = await salesforceService.createMemoRecord(
+        title,
+        content,
+        metadata.sfId,
+      );
 
       // 送信成功後、同期ステータスを更新
       const updated = memoFileService.updateSyncStatus(memo.path, memoId);
@@ -257,8 +294,16 @@ function MemoDetail({ memo }: { memo: MemoItem }) {
       isLoading={isUploading}
       actions={
         <ActionPanel>
-          <Action title="Salesforceに送信" icon={Icon.Upload} onAction={uploadToSalesforce} />
-          <Action title="メモを編集" icon={Icon.Pencil} onAction={() => push(<EditMemo memo={memo} />)} />
+          <Action
+            title="Salesforceに送信"
+            icon={Icon.Upload}
+            onAction={uploadToSalesforce}
+          />
+          <Action
+            title="メモを編集"
+            icon={Icon.Pencil}
+            onAction={() => push(<EditMemo memo={memo} />)}
+          />
         </ActionPanel>
       }
     />
@@ -271,7 +316,9 @@ function EditMemo({ memo }: { memo: MemoItem }) {
   const salesforceService = new SalesforceService();
   const { pop, push } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
-  const [relatedRecord, setRelatedRecord] = useState<SalesforceRecord | undefined>(undefined);
+  const [relatedRecord, setRelatedRecord] = useState<
+    SalesforceRecord | undefined
+  >(undefined);
 
   // メモの内容を読み込む
   const { metadata, originalData } = memoFileService.readMemo(memo.path);
@@ -391,16 +438,32 @@ function EditMemo({ memo }: { memo: MemoItem }) {
   };
 
   // 現在の関連レコード表示用テキスト
-  const relatedRecordText = relatedRecord ? `${relatedRecord.Type}: ${relatedRecord.Name}` : "なし";
+  const relatedRecordText = relatedRecord
+    ? `${relatedRecord.Type}: ${relatedRecord.Name}`
+    : "なし";
 
   return (
     <Form
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="メモを保存" onSubmit={handleSubmit} icon={Icon.Document} />
-          <Action title="関連レコードを選択" onAction={handleRecordSelect} icon={Icon.Link} />
-          {relatedRecord && <Action title="関連レコードをクリア" onAction={clearRelatedRecord} icon={Icon.Trash} />}
+          <Action.SubmitForm
+            title="メモを保存"
+            onSubmit={handleSubmit}
+            icon={Icon.Document}
+          />
+          <Action
+            title="関連レコードを選択"
+            onAction={handleRecordSelect}
+            icon={Icon.Link}
+          />
+          {relatedRecord && (
+            <Action
+              title="関連レコードをクリア"
+              onAction={clearRelatedRecord}
+              icon={Icon.Trash}
+            />
+          )}
         </ActionPanel>
       }
     >
@@ -425,7 +488,11 @@ function EditMemo({ memo }: { memo: MemoItem }) {
 }
 
 // レコード検索コンポーネント (view-memosにも追加)
-function RecordSearch({ onRecordSelect }: { onRecordSelect: (record: SalesforceRecord) => void }) {
+function RecordSearch({
+  onRecordSelect,
+}: {
+  onRecordSelect: (record: SalesforceRecord) => void;
+}) {
   const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [records, setRecords] = useState<SalesforceRecord[]>([]);
@@ -502,7 +569,12 @@ function RecordSearch({ onRecordSelect }: { onRecordSelect: (record: SalesforceR
   };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="レコードを検索" onSearchTextChange={setSearchText} throttle>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="レコードを検索"
+      onSearchTextChange={setSearchText}
+      throttle
+    >
       {records.map((record) => (
         <List.Item
           key={record.Id}
@@ -512,7 +584,10 @@ function RecordSearch({ onRecordSelect }: { onRecordSelect: (record: SalesforceR
           icon={getObjectIcon(record.Type)}
           actions={
             <ActionPanel>
-              <Action title="このレコードを選択" onAction={() => handleRecordSelection(record)} />
+              <Action
+                title="このレコードを選択"
+                onAction={() => handleRecordSelection(record)}
+              />
             </ActionPanel>
           }
         />

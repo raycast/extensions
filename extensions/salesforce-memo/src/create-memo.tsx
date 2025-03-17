@@ -1,7 +1,21 @@
 /* eslint-disable */
 import React, { useState } from "react";
-import { ActionPanel, Form, Action, showToast, Toast, Icon, Detail, useNavigation, List } from "@raycast/api";
-import { SalesforceService, MemoFileService, SalesforceRecord } from "./utils/salesforce";
+import {
+  ActionPanel,
+  Form,
+  Action,
+  showToast,
+  Toast,
+  Icon,
+  Detail,
+  useNavigation,
+  List,
+} from "@raycast/api";
+import {
+  SalesforceService,
+  MemoFileService,
+  SalesforceRecord,
+} from "./utils/salesforce";
 
 // メモデータの型定義
 interface MemoData {
@@ -24,7 +38,9 @@ export default function CreateMemo() {
   const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [relatedRecord, setRelatedRecord] = useState<SalesforceRecord | undefined>(undefined);
+  const [relatedRecord, setRelatedRecord] = useState<
+    SalesforceRecord | undefined
+  >(undefined);
   const { push } = useNavigation();
 
   const memoFileService = new MemoFileService();
@@ -55,7 +71,11 @@ export default function CreateMemo() {
     setIsLoading(true);
     try {
       // メモをローカルに保存
-      const filePath = memoFileService.saveMemo(values.title, values.content, relatedRecord);
+      const filePath = memoFileService.saveMemo(
+        values.title,
+        values.content,
+        relatedRecord,
+      );
 
       await showToast({
         style: Toast.Style.Success,
@@ -65,7 +85,12 @@ export default function CreateMemo() {
 
       // 詳細画面に遷移して、メモとSalesforceへの送信ボタンを表示
       push(
-        <MemoDetail title={values.title} content={values.content} filePath={filePath} relatedRecord={relatedRecord} />,
+        <MemoDetail
+          title={values.title}
+          content={values.content}
+          filePath={filePath}
+          relatedRecord={relatedRecord}
+        />,
       );
     } catch (error) {
       console.error("メモ保存エラー:", error);
@@ -79,15 +104,25 @@ export default function CreateMemo() {
     }
   };
 
-  const relatedRecordText = relatedRecord ? `${relatedRecord.Type}: ${relatedRecord.Name}` : "なし";
+  const relatedRecordText = relatedRecord
+    ? `${relatedRecord.Type}: ${relatedRecord.Name}`
+    : "なし";
 
   return (
     <Form
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="メモを保存" onSubmit={handleSubmit} icon={Icon.Document} />
-          <Action title="関連レコードを選択" onAction={handleRecordSelect} icon={Icon.Link} />
+          <Action.SubmitForm
+            title="メモを保存"
+            onSubmit={handleSubmit}
+            icon={Icon.Document}
+          />
+          <Action
+            title="関連レコードを選択"
+            onAction={handleRecordSelect}
+            icon={Icon.Link}
+          />
         </ActionPanel>
       }
     >
@@ -99,14 +134,24 @@ export default function CreateMemo() {
         onChange={setTitle}
         autoFocus
       />
-      <Form.TextArea id="content" title="内容" placeholder="メモの内容を入力" value={content} onChange={setContent} />
+      <Form.TextArea
+        id="content"
+        title="内容"
+        placeholder="メモの内容を入力"
+        value={content}
+        onChange={setContent}
+      />
       <Form.Description title="関連レコード" text={relatedRecordText} />
     </Form>
   );
 }
 
 // レコード検索コンポーネント
-function RecordSearch({ onRecordSelect }: { onRecordSelect: (record: SalesforceRecord) => void }) {
+function RecordSearch({
+  onRecordSelect,
+}: {
+  onRecordSelect: (record: SalesforceRecord) => void;
+}) {
   const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [records, setRecords] = useState<SalesforceRecord[]>([]);
@@ -183,7 +228,12 @@ function RecordSearch({ onRecordSelect }: { onRecordSelect: (record: SalesforceR
   };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="レコードを検索" onSearchTextChange={setSearchText} throttle>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="レコードを検索"
+      onSearchTextChange={setSearchText}
+      throttle
+    >
       {records.map((record) => (
         <List.Item
           key={record.Id}
@@ -193,7 +243,10 @@ function RecordSearch({ onRecordSelect }: { onRecordSelect: (record: SalesforceR
           icon={getObjectIcon(record.Type)}
           actions={
             <ActionPanel>
-              <Action title="このレコードを選択" onAction={() => handleRecordSelection(record)} />
+              <Action
+                title="このレコードを選択"
+                onAction={() => handleRecordSelection(record)}
+              />
             </ActionPanel>
           }
         />
@@ -334,7 +387,11 @@ function MemoDetail({
       markdown={createMarkdownContent()}
       actions={
         <ActionPanel>
-          <Action title="Salesforceに送信" onAction={uploadToSalesforce} icon={Icon.Upload} />
+          <Action
+            title="Salesforceに送信"
+            onAction={uploadToSalesforce}
+            icon={Icon.Upload}
+          />
         </ActionPanel>
       }
     />
