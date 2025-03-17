@@ -146,7 +146,7 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
     setIsLoading(true);
     try {
       // Build the command with all options
-      const command = `${gcloudPath} storage buckets create gs://${values.name} --project=${projectId} --location=${values.location} --storage-class=${values.storageClass}`;
+      const command = `${gcloudPath} storage buckets create gs://${values.name} --project=${projectId} --location=${values.location} --default-storage-class=${values.storageClass}`;
       
       console.log(`Creating bucket with command: ${command}`);
       

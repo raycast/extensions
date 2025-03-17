@@ -47,7 +47,7 @@ export default function CreateBucketForm({
     
     try {
       // Build the command with all options
-      let command = `${gcloudPath} storage buckets create gs://${values.name} --project=${projectId} --location=${values.location} --storage-class=${values.storageClass}`;
+      let command = `${gcloudPath} storage buckets create gs://${values.name} --project=${projectId} --location=${values.location} --default-storage-class=${values.storageClass}`;
       
       // Add optional flags
       if (values.publicAccess) {
