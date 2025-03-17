@@ -36,11 +36,10 @@ export async function getUrlFromSelectionOrClipboard(): Promise<string | undefin
       return selectedText;
     }
   } catch (error) {
-    if (error instanceof Error && error.message === "Unable to get selected text from frontmost application") {
-      console.log("Failed to get text from selection. Trying clipboard instead.");
-    } else {
-      console.error(error);
+    if (error instanceof Error) {
+      throw new Error(`Failed to get selected text: ${error.message}`);
     }
+    throw new Error("Failed to get selected text");
   }
 
   try {
@@ -52,14 +51,17 @@ export async function getUrlFromSelectionOrClipboard(): Promise<string | undefin
       }
     }
   } catch (error) {
-    console.error(error);
+    if (error instanceof Error) {
+      throw new Error(`Failed to read clipboard: ${error.message}`);
+    }
+    throw new Error("Failed to read clipboard");
   }
+
+  return undefined;
 }
 
 export async function unshortenUrl(url: string): Promise<{ redirectionSteps: RedirectionStep[] }> {
   try {
-    console.log("Starting URL expansion for:", url);
-
     const commonHeaders = {
       "User-Agent":
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
@@ -77,16 +79,12 @@ export async function unshortenUrl(url: string): Promise<{ redirectionSteps: Red
 
     // If HEAD fails or returns an error, retry with GET
     if (response.status >= 400 || !response.headers.get("location")) {
-      console.log("HEAD request failed or no location header, retrying with GET");
       response = await fetch(url, {
         method: "GET",
         redirect: "manual",
         headers: commonHeaders,
       });
     }
-
-    console.log("Initial response status:", response.status);
-    console.log("Initial response headers:", Object.fromEntries(response.headers.entries()));
 
     const redirectionSteps = [{ url: url, statusCode: response.status, statusName: response.statusText }];
     let currentUrl = url;
@@ -96,7 +94,6 @@ export async function unshortenUrl(url: string): Promise<{ redirectionSteps: Red
     while (redirectCount < maxRedirects) {
       if (response.status >= 300 && response.status < 400) {
         const nextUrl = response.headers.get("location");
-        console.log("Found redirect to:", nextUrl);
 
         if (nextUrl) {
           // Handle relative URLs
@@ -113,16 +110,12 @@ export async function unshortenUrl(url: string): Promise<{ redirectionSteps: Red
 
             // If HEAD fails or returns an error, retry with GET
             if (response.status >= 400 || !response.headers.get("location")) {
-              console.log("HEAD request failed for redirect, retrying with GET");
               response = await fetch(resolvedUrl, {
                 method: "GET",
                 redirect: "manual",
                 headers: commonHeaders,
               });
             }
-
-            console.log("Redirect response status:", response.status);
-            console.log("Redirect response headers:", Object.fromEntries(response.headers.entries()));
 
             redirectionSteps.push({
               url: resolvedUrl,
@@ -131,12 +124,9 @@ export async function unshortenUrl(url: string): Promise<{ redirectionSteps: Red
             });
             redirectCount++;
           } catch (redirectError) {
-            console.error("Error following redirect:", redirectError);
-            // Don't throw, just break the chain and return what we have
             break;
           }
         } else {
-          console.log("No location header found in redirect response");
           break;
         }
       } else {
@@ -145,7 +135,6 @@ export async function unshortenUrl(url: string): Promise<{ redirectionSteps: Red
     }
     return { redirectionSteps };
   } catch (error) {
-    console.error("Error in unshortenUrl:", error);
     if (error instanceof Error) {
       throw new Error(`URL expansion failed: ${error.message}`);
     } else {
