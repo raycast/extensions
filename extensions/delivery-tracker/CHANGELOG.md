@@ -1,6 +1,6 @@
 # Delivery Tracker Changelog
 
-## [Prevent Duplicate Deliveries] - {PR_MERGE_DATE}
+## [Prevent Duplicate Deliveries] - 2025-03-17
 
 Duplicate deliveries are no longer allowed to be added.
 
