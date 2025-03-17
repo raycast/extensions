@@ -1,5 +1,40 @@
 # Jira Changelog
 
+## [AI Extension Fix] - {PR_MERGE_DATE}
+
+Reduced the numbers of issues being passed to the AI during search to avoid bloating it.
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Avatars now display with a circular mask] - 2025-02-10
+
+- To be consistent with avatars with initials, the profile pictures now show with a circular mask.
+
+## [Fix Git branch name format] - 2025-02-10
+
+- Fixed an issue where the Git branch name format, specifically the issue summary, was not slugified.
+
+## [Add ability to configuring Git branch name format] - 2025-01-09
+
+- Implemented the ability to configure the Git branch name format in the extension settings.
+
+## [Add ability to open issues in other application defined in extension preferences] - 2024-12-25
+
+- Implemented the ability to open by default in any other application (e.g. other browser) any issue.
+
+## [Add ability to copy newly created issue url to clipboard as an optional config] - 2024-12-12
+
+- If you want to copy the newly created issue URL to the clipboard, you can now enable this feature in the extension settings.
+
+## [Added Parent Issue support] - 2024-12-02
+
+- Implemented the ability to open the parent issue from a child issue.
+
+## [Added Child Issues support] - 2024-11-15
+
+- Implemented the ability to view and manage child-related issues within the issue detail view, as well as a new component that provides a comprehensive list of all current issue child issues.
+- Resolved an issue where the child’s status updates were not reflected in the user interface upon changing their status.
+
 ## [Fix number search to include issue keys for all projects.] - 2024-09-30
 
 - When a user searches for a number without a project selected, the extension matches the number against issue keys in all projects.

@@ -1,5 +1,24 @@
 # Say - Text to Speech Changelog
 
+## [Routine Maintenance] - 2025-03-17
+
+- Add FAQs
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2025-01-08
+
+- Suppress error message if argument is empty
+- Add Deeplinks usage to documentation
+
+## [Chore & Fixes] - 2024-11-21
+
+- Bump all dependencies to the latest
+- Fix argument types for spawn
+
+## [Chore] - 2024-10-28
+
+- Bump all dependencies to the latest
+
 ## [Chore] - 2024-10-02
 
 - Rename extension title

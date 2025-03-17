@@ -18,9 +18,9 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
 
   useEffect(() => {
     if (!markdown) {
-      getProjectMarkdown(deployment).then(setMarkdown);
+      getProjectMarkdown(deployment, selectedTeam).then(setMarkdown);
     }
-  }, [markdown, deployment]);
+  }, [markdown, deployment, selectedTeam]);
 
   // useEffect(() => {
   //   async function fetchBuilds() {
@@ -32,7 +32,7 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
   // }, [deployment]);
 
   // @ts-expect-error Property 'id' does not exist on type 'Deployment'.
-  const url = getFetchDeploymentBuildsURL(deployment.uid || deployment.id, selectedTeam, 1);
+  const url = getFetchDeploymentBuildsURL(deployment.uid || deployment.id, selectedTeam?.id, 1);
 
   const { isLoading, data } = useFetch<{
     builds: Build[];

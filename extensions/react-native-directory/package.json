@@ -40,11 +40,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.82.5",
-    "@raycast/utils": "^1.16.3"
+    "@raycast/api": "^1.89.0",
+    "@raycast/utils": "^1.18.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",

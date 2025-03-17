@@ -5,24 +5,24 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-05 23:49:16
- * Last modified  : 2024-06-26 21:37:46
  */
 
 import { execSync } from "child_process";
 import * as fs from "fs";
 import path from "path";
+
+import { environment, getPreferenceValues } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { optimize as svgoOptimize } from "svgo";
 
+import { getAVIFEncPaths } from "../utilities/avif";
 import {
+  expandTilde,
   getDestinationPaths,
   getScopedTempFile,
   getWebPBinaryPath,
   moveImageResultsToFinalDestination,
 } from "../utilities/utils";
-import { getAVIFEncPaths } from "../utilities/avif";
-import { runAppleScript } from "@raycast/utils";
-import { environment, getPreferenceValues } from "@raycast/api";
-import { ExtensionPreferences } from "../utilities/preferences";
 
 /**
  * Optimizes a JPEG image by applying lossy compression.
@@ -57,8 +57,8 @@ const optimizeJPEG = async (jpegPath: string, newPath: string, amount: number) =
  * @returns The path of the optimized WebP image.
  */
 const optimizeWEBP = async (webpPath: string, amount: number) => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  const optimizedPath = `${path.dirname(webpPath)}/${path.basename(webpPath, path.extname(webpPath))} (Optimized).webp`;
+  const preferences = getPreferenceValues<Preferences>();
+  const optimizedPath = `${path.dirname(webpPath)}/${path.basename(webpPath, path.extname(webpPath))}-optimized.webp`;
   const newPath = (await getDestinationPaths([optimizedPath]))[0];
 
   const [cwebpPath] = await getWebPBinaryPath();
@@ -75,7 +75,7 @@ const optimizeWEBP = async (webpPath: string, amount: number) => {
  * @returns The path of the optimized SVG image.
  */
 const optimizeSVG = async (svgPath: string) => {
-  const optimizedPath = `${path.dirname(svgPath)}/${path.basename(svgPath, path.extname(svgPath))} (Optimized).svg`;
+  const optimizedPath = `${path.dirname(svgPath)}/${path.basename(svgPath, path.extname(svgPath))}-optimized.svg`;
   const newPath = (await getDestinationPaths([optimizedPath]))[0];
 
   const data = fs.readFileSync(svgPath);
@@ -89,7 +89,7 @@ const optimizeSVG = async (svgPath: string) => {
 
 const optimizePNG = async (pngPath: string, optimizationAmount: number) => {
   const strategy = Math.floor(5 - optimizationAmount / 20);
-  const optimizedPath = `${path.dirname(pngPath)}/${path.basename(pngPath, path.extname(pngPath))} (Optimized).png`;
+  const optimizedPath = `${path.dirname(pngPath)}/${path.basename(pngPath, path.extname(pngPath))}-optimized.png`;
   const newPath = (await getDestinationPaths([optimizedPath]))[0];
 
   const pngoutPath = `${environment.assetsPath}/pngout/pngout`;
@@ -106,10 +106,11 @@ const optimizePNG = async (pngPath: string, optimizationAmount: number) => {
  * @returns A promise that resolves when optimization is complete.
  */
 export default async function optimize(sourcePaths: string[], amount: number) {
-  const newPaths = await getDestinationPaths(sourcePaths);
+  const expandedPaths = sourcePaths.map((path) => expandTilde(path));
+  const newPaths = await getDestinationPaths(expandedPaths);
 
   const resultPaths = [];
-  for (const imgPath of sourcePaths) {
+  for (const imgPath of expandedPaths) {
     if (imgPath.toLowerCase().endsWith("webp")) {
       // Convert to JPEG, optimize, and restore to WebP
       resultPaths.push(await optimizeWEBP(imgPath, amount));
@@ -118,13 +119,13 @@ export default async function optimize(sourcePaths: string[], amount: number) {
       resultPaths.push(await optimizeSVG(imgPath));
     } else if (imgPath.toLowerCase().endsWith("jpg") || imgPath.toLowerCase().endsWith("jpeg")) {
       // Optimize JPEG images using NSBitmapImageRep compression
-      let newPath = newPaths[sourcePaths.indexOf(imgPath)];
-      newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + " (Optimized).jpeg");
+      let newPath = newPaths[expandedPaths.indexOf(imgPath)];
+      newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + "-optimized.jpeg");
       resultPaths.push(newPath);
       await optimizeJPEG(imgPath, newPath, amount);
     } else if (imgPath.toLowerCase().endsWith("avif")) {
       // Optimize AVIF images using avifenc
-      const preferences = getPreferenceValues<ExtensionPreferences>();
+      const preferences = getPreferenceValues<Preferences>();
       const { encoderPath, decoderPath } = await getAVIFEncPaths();
 
       // Convert to JPEG
@@ -132,8 +133,8 @@ export default async function optimize(sourcePaths: string[], amount: number) {
       execSync(`${decoderPath} -q ${amount} "${imgPath}" "${jpegFile.path}"`);
 
       // Convert back to AVIF
-      let newPath = newPaths[sourcePaths.indexOf(imgPath)];
-      newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + " (Optimized).avif");
+      let newPath = newPaths[expandedPaths.indexOf(imgPath)];
+      newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + "-optimized.avif");
       resultPaths.push(newPath);
       execSync(
         `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""} "${jpegFile.path}" "${newPath}"`,
@@ -153,10 +154,10 @@ export default async function optimize(sourcePaths: string[], amount: number) {
     } else {
       // Optimize any other SIPS-compatible image type
       await using jpegFile = await getScopedTempFile("tmp", "jpeg");
-      let newPath = newPaths[sourcePaths.indexOf(imgPath)];
+      let newPath = newPaths[expandedPaths.indexOf(imgPath)];
       newPath = path.join(
         path.dirname(newPath),
-        path.basename(newPath, path.extname(newPath)) + " (Optimized)" + path.extname(newPath),
+        path.basename(newPath, path.extname(newPath)) + "-optimized" + path.extname(newPath),
       );
       resultPaths.push(newPath);
 
@@ -166,4 +167,5 @@ export default async function optimize(sourcePaths: string[], amount: number) {
     }
   }
   await moveImageResultsToFinalDestination(resultPaths);
+  return resultPaths;
 }

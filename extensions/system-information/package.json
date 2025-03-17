@@ -5,8 +5,14 @@
   "description": "Quick access to your system information so you never have to open System Settings.",
   "icon": "command-icon.png",
   "author": "Visual-Studio-Coder",
-  "contributors": ["nagauta", "air-rn"],
-  "categories": ["Developer Tools", "Productivity"],
+  "contributors": [
+    "nagauta",
+    "air-rn"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {

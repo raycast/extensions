@@ -3,7 +3,8 @@ import { createHash } from "crypto";
 
 export function getFileSha256(filePath: string): string | null {
   try {
-    return createHash("sha256").update(readFileSync(filePath)).digest("hex");
+    const fileBuffer = readFileSync(filePath);
+    return createHash("sha256").update(new Uint8Array(fileBuffer)).digest("hex");
   } catch (error) {
     return null;
   }

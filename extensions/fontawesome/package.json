@@ -80,6 +80,36 @@
       ],
       "title": "Icon family and style preference",
       "description": "Choose which icon family and style you prefer."
+    },
+    {
+      "name": "PRIMARY_ACTION",
+      "type": "dropdown",
+      "default": "copyIconName",
+      "required": false,
+      "data": [
+        {
+          "title": "Copy Icon Name",
+          "value": "copyIconName"
+        },
+        {
+          "title": "Copy Icon Classes",
+          "value": "copyIconClasses"
+        },
+        {
+          "title": "Copy as Svg",
+          "value": "copyAsSvg"
+        },
+        {
+          "title": "Copy Icon Glyph",
+          "value": "copyIconGlyph"
+        },
+        {
+          "title": "Copy Icon Unicode",
+          "value": "copyIconUnicode"
+        }
+      ],
+      "title": "Icon primary action",
+      "description": "Choose which action to perform when selecting an icon."
     }
   ],
   "dependencies": {

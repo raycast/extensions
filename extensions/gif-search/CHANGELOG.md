@@ -1,5 +1,22 @@
 # GIF Search Changelog
 
+## [Locale Support] - 2025-03-17
+
+- Added locale support for Giphy and Tenor, configurable via Preferences
+- Updated Raycast packages to latest versions
+
+## [Enhancement] - 2024-11-25
+
+- Update README with FAQs
+
+## [Add download location preference] - 2024-11-17
+
+- Adds a new preference to define the download location of GIFs
+
+## [Hide Filename on Copy or Download] - 2024-11-04
+
+- Adds a new preference to hide the original GIF filename when copying or downloading GIFs
+
 ## [Fix Recent GIFs can't be add to favorites] - 2024-10-08
 
 - Fixes a bug where recent GIFs couldn't be added to favorites
@@ -11,6 +28,7 @@
 ## [Fix favorites GIFS can't be removed] - 2024-09-02
 
 - Fixes a bug where favorited GIFs couldn't be removed from the favorites list
+
 
 ## [Better Results] - 2024-04-19
 

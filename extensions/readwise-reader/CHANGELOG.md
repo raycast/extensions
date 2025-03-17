@@ -1,5 +1,21 @@
 # Readwise Reader Changelog
 
+## [Add category filtering for documents in list view] - 2025-03-12
+
+- Add category filtering for documents in list view
+
+## [Add list documents command] - 2025-02-26
+
+- Add `List documents` command
+  - Default list location configurable under preference (defaults to shortlist)
+  - Shows description, tags and author in detail view
+  - Action to open in Readwise
+  - Action to open original url in browser
+
+## [Add save multiple links] - 2024-12-13
+
+- Add `Save Links` command
+
 ## [Improve README] - 2023-05-31
 
 - Add link to get the access token.

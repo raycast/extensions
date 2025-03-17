@@ -1,36 +1,30 @@
 import { Grid } from "@raycast/api";
-import { TimeInfo, Timezone } from "../types/types";
-import {
-  buildFullDateTime,
-  buildIntervalTime,
-  calculateDateTimeByOffset,
-  getGridAvatar,
-  isEmpty,
-} from "../utils/common-utils";
+import { CurrentTime, Timezone } from "../types/types";
+import { buildFullDateTime, buildIntervalTime, formatMenubarDate, getGridAvatar, isEmpty } from "../utils/common-utils";
 import { ActionOnTimezone } from "./action-on-timezone";
 import { ActionOnStarredTimezone } from "./action-on-starred-timezone";
 
 export function TimeZoneGridItem(props: {
   index: number;
   timezone: string;
-  timeInfo: TimeInfo;
+  currentTime: CurrentTime | undefined;
   starTimezones: Timezone[];
   mutate: () => Promise<void>;
 }) {
-  const { index, timezone, timeInfo, starTimezones, mutate } = props;
+  const { index, timezone, currentTime, starTimezones, mutate } = props;
   return (
     <Grid.Item
       id={JSON.stringify({ type: "all", index: index, region: timezone })}
       content={
-        timeInfo.timezone === timezone
+        currentTime && currentTime.timeZone === timezone
           ? {
               value: {
                 source: {
-                  light: `clock-icons/${new Date(timeInfo.datetime).getHours()}.svg`,
-                  dark: `clock-icons@dark/${new Date(timeInfo.datetime).getHours()}.svg`,
+                  light: `clock-icons/${new Date(currentTime.dateTime).getHours()}.svg`,
+                  dark: `clock-icons@dark/${new Date(currentTime.dateTime).getHours()}.svg`,
                 },
               },
-              tooltip: timeInfo.datetime + buildIntervalTime(timeInfo.datetime),
+              tooltip: formatMenubarDate(new Date(currentTime.dateTime)) + buildIntervalTime(currentTime.dateTime),
             }
           : {
               source: {
@@ -39,15 +33,11 @@ export function TimeZoneGridItem(props: {
               },
             }
       }
-      subtitle={
-        timeInfo.timezone === timezone
-          ? calculateDateTimeByOffset(timeInfo.utc_offset).date_time + buildIntervalTime(timeInfo.datetime)
-          : undefined
-      }
+      subtitle={currentTime?.timeZone === timezone ? formatMenubarDate(new Date(currentTime.dateTime)) : undefined}
       title={timezone}
       actions={
         <ActionOnTimezone
-          timeInfo={timeInfo}
+          currentTime={currentTime}
           starTimezones={starTimezones}
           timezone={timezone}
           mutate={mutate}
@@ -61,13 +51,13 @@ export function TimeZoneGridItem(props: {
 
 export function StarredTimeZoneGridItem(props: {
   index: number;
-  timezone: string;
-  timeInfo: TimeInfo;
+  timezone: Timezone;
+  currentTime: CurrentTime | undefined;
   starTimezones: Timezone[];
   mutate: () => Promise<void>;
 }) {
-  const { index, timezone, timeInfo, starTimezones, mutate } = props;
-  const keywords = timezone.toLowerCase().split("/");
+  const { index, timezone, currentTime, starTimezones, mutate } = props;
+  const keywords = timezone.timezone.toLowerCase().split("/");
   return (
     <Grid.Item
       id={JSON.stringify({ type: "star", index: index, region: timezone })}
@@ -82,7 +72,7 @@ export function StarredTimeZoneGridItem(props: {
 ${buildFullDateTime(new Date(starTimezones[index].unixtime))}${buildIntervalTime(starTimezones[index].unixtime)}`,
       }}
       keywords={keywords}
-      title={isEmpty(starTimezones[index].alias) ? timezone : starTimezones[index].alias + ""}
+      title={isEmpty(starTimezones[index].alias) ? timezone.timezone : starTimezones[index].alias + ""}
       subtitle={starTimezones[index].date_time + buildIntervalTime(starTimezones[index].unixtime)}
       accessory={{
         icon: getGridAvatar(starTimezones[index]),
@@ -91,8 +81,8 @@ ${starTimezones[index].memo}`,
       }}
       actions={
         <ActionOnStarredTimezone
-          timeInfo={timeInfo}
           index={index}
+          currentTime={currentTime}
           starTimezones={starTimezones}
           timezone={timezone}
           mutate={mutate}

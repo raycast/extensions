@@ -27,13 +27,13 @@ export default function checkAuthEffect(src: Sourcegraph) {
                 push,
                 "Authentication error",
                 `Failed to authenticate against ${srcName}`,
-                `${err.message}. ${helpText}`
+                `${err.message}. ${helpText}`,
               )
             : ExpandableToast(
                 push,
                 "Authentication error",
                 `Encountered error authenticating against ${srcName}`,
-                `${String(err)}. ${helpText}`
+                `${String(err)}. ${helpText}`,
               );
         await toast.show();
       }

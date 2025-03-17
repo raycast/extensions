@@ -1,5 +1,9 @@
 # Pick Your Wallpaper Changelog
 
+## [1.0.6] - 2025-01-12
+
+- Create small thumbnails for faster loading times when using high resolution wallpaper images.
+
 ## [1.0.5] - 2024-05-20
 
 - Improved search by making it non-case sensitive.

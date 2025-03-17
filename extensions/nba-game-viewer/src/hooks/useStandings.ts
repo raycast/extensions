@@ -22,7 +22,6 @@ const getConferenceStandings = (conferenceStanding: ConferenceStanding): Team[] 
 
 const fetchStandings = async (league: string) => {
   const standingsData = await getStandings({
-    year: new Date().getFullYear().toString(),
     league: league,
     group: "conference",
   });

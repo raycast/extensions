@@ -80,7 +80,7 @@
           "type": "text",
           "placeholder": "Profile ID",
           "description": "The profile ID to get the balances from",
-          "required": true
+          "required": false
         }
       ],
       "mode": "view"

@@ -13,7 +13,7 @@ import {
 import { useState, useEffect } from "react";
 import Gemini from "gemini-ai";
 import fetch from "node-fetch";
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, getSelectedText } from "@raycast/api";
 
 export default function Chat({ launchContext }) {
   let toast = async (style, title, message) => {
@@ -32,7 +32,6 @@ export default function Chat({ launchContext }) {
     const newChatNumbers = existingChatNames
       .filter((x) => x.match(/^New Chat \d+$/))
       .map((x) => parseInt(x.replace(prefix, "")));
-    console.log(newChatNumbers);
     let lowestAvailableNumber = 1;
     while (newChatNumbers.includes(lowestAvailableNumber)) {
       lowestAvailableNumber++;
@@ -86,6 +85,13 @@ export default function Chat({ launchContext }) {
           <Form.Dropdown.Item title="Default" value="default" />
           <Form.Dropdown.Item title="Gemini 1.5 Pro" value="gemini-1.5-pro-latest" />
           <Form.Dropdown.Item title="Gemini 1.5 Flash" value="gemini-1.5-flash-latest" />
+          <Form.Dropdown.Item title="Gemini 2.0 Flash Experimental" value="gemini-2.0-flash-exp" />
+          <Form.Dropdown.Item title="Gemini Experimental 1206" value="gemini-exp-1206" />
+          <Form.Dropdown.Item
+            title="Gemini 2.0 Flash Thinking Experimental"
+            value="gemini-2.0-flash-thinking-exp-1219"
+          />
+          <Form.Dropdown.Item title="LearnLM 1.5 Pro Experimental" value="learnlm-1.5-pro-experimental" />
         </Form.Dropdown>
       </Form>
     );
@@ -215,6 +221,19 @@ export default function Chat({ launchContext }) {
             }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
           />
+          <Action
+            icon={Icon.Clipboard}
+            title="Append Selected Text"
+            onAction={async () => {
+              try {
+                const selectedText = await getSelectedText();
+                setSearchText((oldText) => oldText + selectedText);
+              } catch (error) {
+                toast(Toast.Style.Failure, "Could not get the selected text");
+              }
+            }}
+            shortcut={{ modifiers: ["ctrl", "shift"], key: "v" }}
+          />
         </ActionPanel.Section>
         <ActionPanel.Section title="Danger zone">
           <Action
@@ -285,13 +304,11 @@ export default function Chat({ launchContext }) {
 
         if (getChat(newData.currentChat, newData.chats).messages[0]?.finished === false) {
           let currentChat = getChat(newData.currentChat, newData.chats);
-          console.log(currentChat);
           let aiChat = gemini.createChat({
             model: "gemini-1.5-pro-latest",
             messages: currentChat.messages.map((x) => [x.prompt, x.answer]),
           });
           currentChat.messages[0].answer = "";
-          console.log(toast);
           toast(Toast.Style.Animated, "Regenerating Last Message");
           (async () => {
             try {

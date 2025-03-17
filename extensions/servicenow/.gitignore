@@ -12,4 +12,6 @@ compiled_raycast_swift
 # misc
 .DS_Store
 /dist
+CLIFF.md
+cliff.toml
 

@@ -1,11 +1,17 @@
-import { Action, ActionPanel, Detail } from '@raycast/api';
+import { Detail } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
+import { useMemo } from 'react';
 import { dailyChallengeQuery, endpoint } from './api';
 import { DailyChallenge, DailyChallengeResponse } from './types';
 import { formatProblemMarkdown } from './utils';
+import { useProblemTemplateActions } from './useProblemTemplateActions';
 
 export default function Command(): JSX.Element {
-  const { isLoading, data: dailyChallenge } = useFetch<DailyChallengeResponse, undefined, DailyChallenge>(endpoint, {
+  const { isLoading: isDailyChallengeLoading, data: dailyChallenge } = useFetch<
+    DailyChallengeResponse,
+    undefined,
+    DailyChallenge
+  >(endpoint, {
     method: 'POST',
     body: JSON.stringify({
       query: dailyChallengeQuery,
@@ -21,19 +27,17 @@ export default function Command(): JSX.Element {
     },
   });
 
-  return (
-    <Detail
-      isLoading={isLoading}
-      markdown={formatProblemMarkdown(dailyChallenge?.problem, dailyChallenge?.date)}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" url={`https://leetcode.com${dailyChallenge?.link}`} />
-          <Action.CopyToClipboard
-            title="Copy Link to Clipboard"
-            content={`https://leetcode.com${dailyChallenge?.link}`}
-          />
-        </ActionPanel>
-      }
-    ></Detail>
+  const problemMarkdown = useMemo(
+    () => formatProblemMarkdown(dailyChallenge?.problem, dailyChallenge?.date),
+    [dailyChallenge],
   );
+
+  const actions = useProblemTemplateActions({
+    codeSnippets: dailyChallenge?.problem.codeSnippets,
+    problemMarkdown,
+    isPaidOnly: dailyChallenge?.problem.isPaidOnly,
+    linkUrl: `https://leetcode.com${dailyChallenge?.link}`,
+  });
+
+  return <Detail isLoading={isDailyChallengeLoading} markdown={problemMarkdown} actions={actions} />;
 }

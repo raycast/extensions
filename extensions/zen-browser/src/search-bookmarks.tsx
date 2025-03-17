@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { useState, ReactElement } from "react";
+import { ReactElement, useState } from "react";
 import { ZenListEntries } from "./components";
 import { useBookmarkSearch } from "./hooks/useBookmarkSearch";
 

@@ -25,7 +25,7 @@ const useConstructorStandings = (season: string | null): [ConstructorStanding[],
         isLoading: true,
       }));
       try {
-        const res = await fetch(`https://ergast.com/api/f1/${season}/constructorStandings.json`, {
+        const res = await fetch(`https://api.jolpi.ca/ergast/f1/${season}/constructorStandings.json`, {
           method: "get",
           signal: cancelRef.current.signal,
         });

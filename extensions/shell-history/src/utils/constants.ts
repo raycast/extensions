@@ -5,11 +5,13 @@ export const TERMINAL = "/System/Applications/Utilities/Terminal.app";
 export const ITERM2 = "/Applications/iTerm.app";
 export const WARP = "/Applications/Warp.app";
 export const HYPER = "/Applications/Hyper.app";
+export const GHOSTTY = "/Applications/Ghostty.app";
 const terminalPath = [
-  { path: TERMINAL, supportInput: true },
-  { path: ITERM2, supportInput: true },
-  { path: WARP, supportInput: false },
-  { path: HYPER, supportInput: false },
+  { path: TERMINAL, supportInput: true, key: "t" },
+  { path: ITERM2, supportInput: true, key: "i" },
+  { path: WARP, supportInput: false, key: "w" },
+  { path: HYPER, supportInput: false, key: "h" },
+  { path: GHOSTTY, supportInput: false, key: "g" },
 ];
 
 export const getTerminals = async () => {
@@ -17,9 +19,9 @@ export const getTerminals = async () => {
   for (const terminal of terminalPath) {
     try {
       const app = await getDefaultApplication(terminal.path);
-      terminals.push({ application: app, supportInput: terminal.supportInput });
+      terminals.push({ application: app, supportInput: terminal.supportInput, key: terminal.key });
     } catch (e) {
-      console.error("Application not found: ", terminal);
+      // Ignore
     }
   }
   return terminals;

@@ -7,3 +7,10 @@ export const CONTENTFUL_ENVIRONMENT = getPreferenceValues<Preferences>().environ
 export const CONTENTFUL_LIMIT = 100;
 export const CONTENTFUL_APP_URL = "https://app.contentful.com/";
 export const CONTENTFUL_LOCALE = "en-US";
+
+const spaceLink = `${CONTENTFUL_APP_URL}spaces/${CONTENTFUL_SPACE}/`;
+export const CONTENTFUL_LINKS = {
+  space: spaceLink,
+  roles: `${spaceLink}settings/roles`,
+  users: `${spaceLink}settings/users`,
+};

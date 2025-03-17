@@ -1,4 +1,17 @@
-# pieces-raycast Changelog
+# Pieces for Raycast Changelog
+
+## [0.3.0] - 2025-02-27
+
+- Fixes website link color contrast in search results
+- Notifies user to update Raycast permissions if unable to select text in frontmost app
+
+## [0.2.0] - 2025-02-03
+
+- Renames commands according to new branding guidelines
+
+## [0.1.0] - 2025-01-06
+
+- Fixes broken port connector
 
 ## [Initial Version] - 2024-08-08
 

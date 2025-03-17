@@ -6,10 +6,11 @@ export default async function Command() {
   const isMullvadInstalled = await verifyIsMullvadInstalled();
   if (!isMullvadInstalled) return;
 
-  const priorStatus = execSync("mullvad status").toString();
+  const priorStatus = execSync("mullvad status").toString().split("\n")[0];
   execSync("mullvad disconnect");
 
-  const message = priorStatus.trim() === "Disconnected" ? "Already Disconnected" : `Disconnected. Was ${priorStatus}`;
+  const message = priorStatus === "Disconnected" ? "Already Disconnected" : "Disconnected";
+
   await showHUD(message, {
     clearRootSearch: true,
     popToRootType: PopToRootType.Immediate,

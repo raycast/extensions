@@ -19,3 +19,5 @@ _\*Only use if "Manually finish sessions and breaks" is selected in preferences_
 **Hide**: Hides the timer window
 
 **Show**: Shows the timer window
+
+**Toggle Timer Widget** Shows or hides the timer widget

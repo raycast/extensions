@@ -365,7 +365,8 @@
     "hendrikbunnick",
     "stelo",
     "romanschmid",
-    "jessedobbelaere"
+    "jessedobbelaere",
+    "heavyrisem"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",

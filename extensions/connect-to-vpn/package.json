@@ -8,7 +8,8 @@
   "contributors": [
     "sato11",
     "stonerl",
-    "vyacheslav"
+    "vyacheslav",
+    "yshmeel"
   ],
   "license": "MIT",
   "commands": [
@@ -24,7 +25,8 @@
       "title": "Network Services",
       "subtitle": "VPN",
       "description": "View your Network Services at a glance",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "interval": "30s"
     }
   ],
   "preferences": [

@@ -1,5 +1,13 @@
 # Google Translate Changelog
 
+## [Feature] - 2025-01-09
+
+- Add ability to set multiple target languages to translate
+
+## [Fix] - 2024-12-25
+
+- Fixed a typo for Traditional Chinese
+
 ## [Fix] - 2024-07-05
 
 - Keep language names consistent with `translate.google.com`

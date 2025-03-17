@@ -60,6 +60,22 @@
       "required": true,
       "title": "API Token",
       "description": "Jira API token"
+    },
+    {
+      "name": "customJQL",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom JQL Query",
+      "description": "Enter a custom JQL query to filter issues (optional).",
+      "placeholder": "e.g., assignee = currentUser() AND status = 'In Progress'"
+    },
+    {
+      "name": "defaultProject",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Project Key",
+      "description": "Set the key of a project to select by default (e.g., 'MYPROJECT').",
+      "placeholder": "Enter project key"
     }
   ],
   "dependencies": {

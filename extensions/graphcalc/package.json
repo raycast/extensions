@@ -31,21 +31,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.74.1",
-    "@raycast/utils": "^1.15.0",
-    "chart.js": "^4.4.3",
-    "mathjs": "^12.4.2",
+    "@raycast/api": "^1.85.1",
+    "@raycast/utils": "^1.18.0",
+    "chart.js": "^4.4.6",
+    "mathjs": "^12.4.3",
     "react-vis": "^1.12.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
-    "@types/react-dom": "^18.3.0",
+    "@types/react-dom": "^18.3.1",
     "@types/react-vis": "^1.11.15",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -9,7 +9,6 @@ const generateIcon = (icon: string) => {
 };
 
 const iconPath = (icon: string) => `${ICONS_DIRECTORY}/${iconName(icon)}`;
-
 const iconName = (icon: string) => icon.substring(icon.lastIndexOf("/") + 1);
 
 export { iconPath, generateIcon };

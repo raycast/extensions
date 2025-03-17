@@ -12,7 +12,8 @@
     "kenan",
     "dmacdermott",
     "pernielsentikaer",
-    "yansq"
+    "yansq",
+    "amureki"
   ],
   "license": "MIT",
   "commands": [
@@ -98,7 +99,7 @@
     },
     {
       "name": "backwardToBeginning",
-      "title": "Backward to The Beginning",
+      "title": "Backward to the Beginning",
       "subtitle": "Spotify",
       "description": "Plays current track from the beginning in Spotify.",
       "mode": "no-view"
@@ -137,6 +138,15 @@
           "placeholder": "10%",
           "required": false
         }
+      ],
+      "arguments": [
+        {
+          "name": "step",
+          "type": "text",
+          "description": "The amount to increase the volume by.",
+          "placeholder": "10",
+          "required": false
+        }
       ]
     },
     {
@@ -153,6 +163,15 @@
           "default": "10",
           "description": "The amount to decrease the volume by.",
           "placeholder": "10%",
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "step",
+          "type": "text",
+          "description": "The amount to decrease the volume by.",
+          "placeholder": "10",
           "required": false
         }
       ]
@@ -243,6 +262,8 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

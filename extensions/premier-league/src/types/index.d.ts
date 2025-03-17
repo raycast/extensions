@@ -145,6 +145,7 @@ export interface Entry {
 export interface Annotation {
   destination: string;
   type: string;
+  description: string;
 }
 
 export interface Stats {

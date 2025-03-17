@@ -1,14 +1,13 @@
-import { Application, getApplications, Grid, getPreferenceValues, LaunchProps } from "@raycast/api";
-import FileGridItem from "./components/FileGridItem";
-import { ErrorView } from "./components/ErrorView";
-import { useVisitedFiles } from "./hooks/useVisitedFiles";
-import { resolveAllFiles } from "./api";
+import { type Application, Grid, type LaunchProps, getApplications, getPreferenceValues } from "@raycast/api";
+import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { useCachedPromise } from "@raycast/utils";
-import type { TeamFiles } from "./types";
-import { loadStarredFiles } from "./starFiles";
+import { resolveAllFiles } from "./api";
+import { ErrorView } from "./components/ErrorView";
+import FileGridItem from "./components/FileGridItem";
+import { useVisitedFiles } from "./hooks/useVisitedFiles";
 import { figma } from "./oauth";
-import { withAccessToken } from "@raycast/utils";
+import { loadStarredFiles } from "./starFiles";
+import type { TeamFiles } from "./types";
 
 function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { query: string } }>>) {
   const { data, isLoading, error } = useCachedPromise(

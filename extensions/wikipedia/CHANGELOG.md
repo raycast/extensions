@@ -1,5 +1,16 @@
 # Wikipedia Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Add languages] - 2025-01-02
+
+- Add `Finnish`, `Swedish` and `Norwegian` languages
+- Fix spelling for `Ukrainian`
+
+## [Fixes] - 2024-10-25
+
+- Fix page-item crash when the URL is `undefined`
+
 ## [Add languages] - 2024-08-24
 
 - Add `Catalan`, `Basque`, `Galician`, `Occitan`, `Aragonese` and `Asturian` languages

@@ -5,7 +5,14 @@ import { getHistoryDateColumn, getHistoryDbPath, getHistoryTable } from "../util
 import { NotInstalledError } from "../components";
 
 const whereClauses = (tableTitle: string, terms: string[], tableUrl?: string) => {
-  return terms.map((t) => `${tableTitle}.title LIKE '%${t}%'`).join(" AND ");
+  const urlTable = tableUrl || tableTitle;
+  return (
+    "(" +
+    terms.map((t) => `${tableTitle}.title LIKE '%${t}%'`).join(" AND ") +
+    ") OR (" +
+    terms.map((t) => `${urlTable}.url LIKE '%${t}%'`).join(" AND ") +
+    ")"
+  );
 };
 
 const getWebKitHistoryQuery = (table: string, date_field: string, terms: string[]) =>

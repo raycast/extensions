@@ -6,7 +6,7 @@ export type Server = {
   is_reachable: boolean;
   is_usable: boolean;
   user: string;
-  port: number;
+  port: string;
   settings: Record<string, string | number | boolean | null>;
 };
 export type ServerDetails = {
@@ -55,6 +55,16 @@ export type Resource = {
   updated_at: string;
   status: string;
 };
+export enum DatabaseType {
+  Clickhouse = "standalone-clickhouse",
+  DragonFly = "standalone-dragonfly",
+  KeyDB = "standalone-keydb",
+  MariaDB = "standalone-mariadb",
+  MongoDB = "standalone-mongodb",
+  MySQL = "standalone-mysql",
+  PostgreSQL = "standalone-postgresql",
+  Redis = "standalone-redis",
+}
 export type ResourceDetails = {
   id: number;
   uuid: string;
@@ -62,7 +72,7 @@ export type ResourceDetails = {
   status: string;
 } & (
   | {
-      type: "application";
+      type: "application" | DatabaseType;
       destination: {
         id: number;
         name: string;
@@ -85,6 +95,7 @@ export type PrivateKey = {
   uuid: string;
   name: string;
   description: string;
+  fingerprint: string | null;
   private_key: string;
   is_git_related: true;
   team_id: number;
@@ -149,6 +160,42 @@ export type TeamMember = {
   two_factor_confirmed_at: string | null;
   force_password_reset: boolean;
   marketing_emails: boolean;
+};
+
+export type Project = {
+  id: number;
+  uuid: string;
+  name: string;
+  default_environment: string;
+  description: string | null;
+};
+export type ProjectDetails = Project & {
+  environments: Environment[];
+  team_id: number;
+  updated_at: string;
+  created_at: string;
+};
+export type CreateProject = {
+  name: string;
+  description: string;
+};
+
+export type Environment = {
+  id: number;
+  name: string;
+  project_id: number;
+  created_at: string;
+  updated_at: string;
+  description: string | null;
+};
+export type EnvironmentDetails = Environment & {
+  applications: Resource[];
+  mariadbs: Resource[];
+  mongodbs: Resource[];
+  mysqls: Resource[];
+  postgresqls: Resource[];
+  redis: Resource[];
+  services: Resource[];
 };
 
 export type MessageResult = {

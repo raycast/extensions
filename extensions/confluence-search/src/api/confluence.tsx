@@ -12,6 +12,7 @@ function parseDate(date?: string) {
 
 export async function fetchHydratedPopularFeed(site: Site): Promise<Content[]> {
   const popularContent = (await fetchPopularFeed(site)) as PopularResponse;
+  if (!popularContent.nodes.length) return [];
   const contentIds = popularContent.nodes.map((i: any) => i.id);
   const cql = `content in (${contentIds.join(",")})`;
   const expand = "content.metadata.currentuser.viewed,content.metadata.likes,content.children.comment,content.history";

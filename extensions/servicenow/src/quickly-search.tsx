@@ -1,5 +1,4 @@
 import { LocalStorage, LaunchProps, showToast, Toast, popToRoot } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 
 import SearchResults from "./components/SearchResults";
 
@@ -9,8 +8,7 @@ import { Instance } from "./types";
 
 export default function Search(props: LaunchProps) {
   const { instanceName, query } = props.arguments;
-  const { instances } = useInstances();
-  const [, setSelectedInstance] = useCachedState<Instance>("instance");
+  const { instances, setSelectedInstance } = useInstances();
 
   if (instances.length === 0) {
     showToast(Toast.Style.Failure, "No instances found", "Please create an instance profile first");

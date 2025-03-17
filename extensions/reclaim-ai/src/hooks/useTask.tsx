@@ -25,7 +25,7 @@ export const useTaskActions = () => {
 
   const createTask = async (task: CreateTaskProps) => {
     const data = {
-      eventCategory: "WORK",
+      eventCategory: task.category,
       timeSchemeId: task.timePolicy,
       title: task.title,
       timeChunksRequired: task.timeNeeded,

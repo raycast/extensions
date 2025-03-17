@@ -121,7 +121,8 @@ export function MediaPlayerActionPanel(props: { state: State }) {
     <ActionPanel>
       <ActionPanel.Section title="Controls">
         <Action
-          title="Play/pause"
+          // eslint-disable-next-line @raycast/prefer-title-case
+          title="Play/Pause"
           onAction={async () => await ha.playPauseMedia(entityID)}
           icon={{ source: "play-pause.svg", tintColor: Color.PrimaryText }}
         />
@@ -132,7 +133,7 @@ export function MediaPlayerActionPanel(props: { state: State }) {
         />
         <Action
           title="Pause"
-          shortcut={{ modifiers: ["cmd"], key: "p" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           onAction={async () => await ha.pauseMedia(entityID)}
           icon={{ source: "pause.svg", tintColor: Color.PrimaryText }}
         />
@@ -140,7 +141,7 @@ export function MediaPlayerActionPanel(props: { state: State }) {
           title="Stop"
           shortcut={{ modifiers: ["cmd"], key: "s" }}
           onAction={async () => await ha.stopMedia(entityID)}
-          icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
+          icon={{ source: "stop.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Next"

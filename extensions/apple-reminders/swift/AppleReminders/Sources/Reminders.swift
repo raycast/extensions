@@ -56,7 +56,7 @@ enum RemindersError: Error {
   guard granted else {
     throw RemindersError.accessDenied
   }
-  
+
   let predicate = eventStore.predicateForIncompleteReminders(
     withDueDateStarting: nil,
     ending: nil,
@@ -65,20 +65,20 @@ enum RemindersError: Error {
   guard let reminders = await eventStore.fetchReminders(matching: predicate) else {
     throw RemindersError.noRemindersFound
   }
-  
+
   let remindersData = reminders.prefix(1000).map { $0.toStruct() }
-  
+
   let calendars = eventStore.calendars(for: .reminder)
   let defaultList = eventStore.defaultCalendarForNewReminders()
-  
+
   let listsData = calendars.map { $0.toStruct(defaultCalendarId: defaultList?.calendarIdentifier) }
-  
+
   return RemindersData(reminders: remindersData, lists: listsData)
 }
 
 @raycast func getCompletedReminders(listId: String?) async throws -> [Reminder] {
   let eventStore = EKEventStore()
-  
+
   let granted: Bool
   if #available(macOS 14.0, *) {
     granted = try await eventStore.requestFullAccessToReminders()
@@ -88,14 +88,14 @@ enum RemindersError: Error {
   guard granted else {
     throw RemindersError.accessDenied
   }
-  
+
   let calendars: [EKCalendar]?
   if let listId {
     calendars = [eventStore.calendar(withIdentifier: listId)].compactMap { $0 }
   } else {
     calendars = nil
   }
-  
+
   let predicate = eventStore.predicateForCompletedReminders(
     withCompletionDateStarting: nil,
     ending: nil,
@@ -105,7 +105,7 @@ enum RemindersError: Error {
   guard let reminders = reminders else {
     throw RemindersError.noRemindersFound
   }
-  
+
   let remindersData = reminders.prefix(1000).map { $0.toStruct() }
   return remindersData
 }
@@ -175,9 +175,26 @@ struct Recurrence: Decodable {
     }
 
     var recurrenceFrequency: EKRecurrenceFrequency
+    var daysOfTheWeek: [EKRecurrenceDayOfWeek]? = nil
+
     switch recurrence.frequency {
     case "daily":
       recurrenceFrequency = .daily
+    case "weekdays":
+      recurrenceFrequency = .weekly
+      daysOfTheWeek = [
+        EKRecurrenceDayOfWeek(.monday),
+        EKRecurrenceDayOfWeek(.tuesday),
+        EKRecurrenceDayOfWeek(.wednesday),
+        EKRecurrenceDayOfWeek(.thursday),
+        EKRecurrenceDayOfWeek(.friday),
+      ]
+    case "weekends":
+      recurrenceFrequency = .weekly
+      daysOfTheWeek = [
+        EKRecurrenceDayOfWeek(.saturday),
+        EKRecurrenceDayOfWeek(.sunday),
+      ]
     case "weekly":
       recurrenceFrequency = .weekly
     case "monthly":
@@ -191,6 +208,12 @@ struct Recurrence: Decodable {
     let recurrenceRule = EKRecurrenceRule(
       recurrenceWith: recurrenceFrequency,
       interval: recurrence.interval,
+      daysOfTheWeek: daysOfTheWeek,
+      daysOfTheMonth: nil,
+      monthsOfTheYear: nil,
+      weeksOfTheYear: nil,
+      daysOfTheYear: nil,
+      setPositions: nil,
       end: recurrenceEnd
     )
     reminder.addRecurrenceRule(recurrenceRule)
@@ -419,5 +442,139 @@ struct SetLocationPayload: Decodable {
     reminder.addAlarm(alarm)
     try eventStore.save(reminder, commit: true)
   } catch {
+  }
+}
+
+struct UpdateReminderPayload: Decodable {
+  let reminderId: String
+  let title: String?
+  let notes: String?
+  let dueDate: String?
+  let priority: String?
+  let isCompleted: Bool?
+  let recurrence: Recurrence?
+}
+
+@raycast func updateReminder(payload: UpdateReminderPayload) throws {
+  let eventStore = EKEventStore()
+
+  guard let item = eventStore.calendarItem(withIdentifier: payload.reminderId) as? EKReminder else {
+    throw RemindersError.noReminderFound
+  }
+
+  if let isCompleted = payload.isCompleted {
+    item.isCompleted = isCompleted
+  }
+
+  if let title = payload.title {
+    item.title = title
+  }
+
+  if let notes = payload.notes {
+    item.notes = notes
+  }
+
+  if payload.dueDate != nil {
+    // Remove all alarms, otherwise overdue reminders won't be properly updated natively
+    if let alarms = item.alarms {
+      for alarm in alarms {
+        item.removeAlarm(alarm)
+      }
+    }
+
+    if let dueDateString = payload.dueDate, !dueDateString.isEmpty {
+      if dueDateString.contains("T"), let dueDate = isoDateFormatter.date(from: dueDateString) {
+        item.dueDateComponents = Calendar.current.dateComponents(
+          [.year, .month, .day, .hour, .minute, .second],
+          from: dueDate
+        )
+        item.addAlarm(EKAlarm(absoluteDate: dueDate))
+      } else if let dueDate = dateOnlyFormatter.date(from: dueDateString) {
+        item.dueDateComponents = Calendar.current.dateComponents(
+          [.year, .month, .day],
+          from: dueDate
+        )
+      }
+    } else {
+      // If dueDate is an empty string, remove the due date
+      item.dueDateComponents = nil
+    }
+  }
+
+  if let priority = payload.priority {
+    switch priority {
+    case "high":
+      item.priority = Int(EKReminderPriority.high.rawValue)
+    case "medium":
+      item.priority = Int(EKReminderPriority.medium.rawValue)
+    case "low":
+      item.priority = Int(EKReminderPriority.low.rawValue)
+    default:
+      item.priority = Int(EKReminderPriority.none.rawValue)
+    }
+  }
+
+  if let recurrence = payload.recurrence {
+    // Remove existing recurrence rules
+    item.recurrenceRules?.removeAll()
+
+    var recurrenceEnd: EKRecurrenceEnd? = nil
+    if let endDateString = recurrence.endDate {
+      let dateFormatter = DateFormatter()
+      dateFormatter.dateFormat = "yyyy-MM-dd"
+      if let endDate = dateFormatter.date(from: endDateString) {
+        recurrenceEnd = EKRecurrenceEnd(end: endDate)
+      }
+    }
+
+    var recurrenceFrequency: EKRecurrenceFrequency
+    var daysOfTheWeek: [EKRecurrenceDayOfWeek]? = nil
+
+    switch recurrence.frequency {
+    case "daily":
+      recurrenceFrequency = .daily
+    case "weekdays":
+      recurrenceFrequency = .weekly
+      daysOfTheWeek = [
+        EKRecurrenceDayOfWeek(.monday),
+        EKRecurrenceDayOfWeek(.tuesday),
+        EKRecurrenceDayOfWeek(.wednesday),
+        EKRecurrenceDayOfWeek(.thursday),
+        EKRecurrenceDayOfWeek(.friday),
+      ]
+    case "weekends":
+      recurrenceFrequency = .weekly
+      daysOfTheWeek = [
+        EKRecurrenceDayOfWeek(.saturday),
+        EKRecurrenceDayOfWeek(.sunday),
+      ]
+    case "weekly":
+      recurrenceFrequency = .weekly
+    case "monthly":
+      recurrenceFrequency = .monthly
+    case "yearly":
+      recurrenceFrequency = .yearly
+    default:
+      throw RemindersError.other
+    }
+
+    let recurrenceRule = EKRecurrenceRule(
+      recurrenceWith: recurrenceFrequency,
+      interval: recurrence.interval,
+      daysOfTheWeek: daysOfTheWeek,
+      daysOfTheMonth: nil,
+      monthsOfTheYear: nil,
+      weeksOfTheYear: nil,
+      daysOfTheYear: nil,
+      setPositions: nil,
+      end: recurrenceEnd
+    )
+    item.addRecurrenceRule(recurrenceRule)
+  }
+
+  do {
+    try eventStore.save(item, commit: true)
+  } catch {
+    throw RemindersError.unableToSaveReminder
   }
 }

@@ -1,8 +1,8 @@
-![cover](./assets/screenshot.png)
+![cover](./media/rebrandly-1.png)
 
 # Rebrandly Raycast Extension
 
-Browse [Rebrandly](https://rebrandly.com/) shortlinks on [Raycast](https://www.raycast.com/)
+Browse [Rebrandly](https://rebrandly.com/) shortlinks on [Raycast](https://www.raycast.com/).
 
 ## Requirements
 
@@ -17,6 +17,10 @@ Browse [Rebrandly](https://rebrandly.com/) shortlinks on [Raycast](https://www.r
 ## Author
 
 - Griko Nibras ([@grikomsn](https://www.raycast.com/grikomsn))
+
+## Contributor
+
+- xmok ([@xmok](https://www.raycast.com/xmok))
 
 ## License
 

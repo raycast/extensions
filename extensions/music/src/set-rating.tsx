@@ -25,15 +25,17 @@ export default function SetRating() {
   useEffect(() => {
     pipe(
       music.currentTrack.getCurrentTrack(),
-      handleTaskEitherError((error) => error, setTrack)
+      handleTaskEitherError((error) => error, setTrack),
     )();
   }, []);
 
   return (
     <List isLoading={!track}>
-      {ratings.map((rating) => (
-        <List.Item key={rating} title={rating.toString()} icon={Icon.Star} actions={<Actions value={rating} />} />
-      ))}
+      <List.Section title={track ? `${track.name} - ${track.artist}` : undefined}>
+        {ratings.map((rating) => (
+          <List.Item key={rating} title={rating.toString()} icon={Icon.Star} actions={<Actions value={rating} />} />
+        ))}
+      </List.Section>
     </List>
   );
 }
@@ -52,7 +54,7 @@ function Actions({ value }: { value: number }) {
       TE.map(() => {
         showHUD("Rated " + "⭐".repeat(value));
         closeMainWindow();
-      })
+      }),
     )();
 
     pop();

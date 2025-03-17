@@ -1,4 +1,6 @@
 import fetch from "node-fetch";
+import { LocalStorage } from "@raycast/api";
+import { Hue, HueGenerateRecord } from "./types";
 
 export async function getHue() {
   const response = await fetch(
@@ -16,10 +18,6 @@ export async function generateHue(colorOne: string, colorTwo: string) {
   return data;
 }
 
-export function generateColorImageUrl(color: string) {
-  return `https://singlecolorimage.com/get/${color}/400x400`;
-}
-
 export function generateRandomHexColor(): string {
   const hexChars = "0123456789ABCDEF";
   let color = "#";
@@ -29,4 +27,35 @@ export function generateRandomHexColor(): string {
   }
 
   return color;
+}
+
+export async function addHueGenerateRecord(hue: Hue) {
+  const storedRecord = await LocalStorage.getItem("hue-generator-record");
+  const hueGeneratorRecord: HueGenerateRecord[] = storedRecord
+    ? JSON.parse(storedRecord as string)
+    : [];
+  const hueRecord = {
+    hue: hue as Hue,
+    star: false,
+    createAt: new Date().toISOString(),
+  };
+  hueGeneratorRecord.unshift(hueRecord);
+  await LocalStorage.setItem(
+    "hue-generator-record",
+    JSON.stringify(hueGeneratorRecord),
+  );
+}
+
+export async function getHueGenerateRecord() {
+  const storedRecord = await LocalStorage.getItem("hue-generator-record");
+  return storedRecord ? JSON.parse(storedRecord as string) : [];
+}
+
+export async function updateHueGenerateRecord(
+  hueGenerateRecords: HueGenerateRecord[],
+) {
+  await LocalStorage.setItem(
+    "hue-generator-record",
+    JSON.stringify(hueGenerateRecords),
+  );
 }

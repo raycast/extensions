@@ -1,9 +1,8 @@
+import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
+import { getFavicon, getProgressIcon, useFrecencySorting } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { JsonFormat } from "./helpers/types";
 import { getJsonFormatFromStore } from "./helpers";
-import { useFrecencySorting } from "@raycast/utils";
-import { getProgressIcon, getFavicon } from "@raycast/utils";
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import { JsonFormat } from "./helpers/types";
 
 // Ente colors - purple #A400B6, orange #FF9800
 const getProgressColor = (remainingTime: number) => {
@@ -49,9 +48,28 @@ export default function Command() {
   const Label = Metadata.Label;
   const Separator = Metadata.Separator;
 
+  const PreferredAction = getPreferenceValues().action;
+
   return (
     <List navigationTitle="Get TOTP" searchBarPlaceholder="Search..." isShowingDetail>
       {secrets.map((item, index) => {
+        const userActions = [
+          <Action.CopyToClipboard
+            key="copy"
+            title="Copy Current"
+            icon={Icon.Key}
+            content={item.current_totp}
+            onCopy={() => visitItem(item)}
+          />,
+          <Action.Paste
+            key="paste"
+            title="Paste Current"
+            icon={Icon.Key}
+            content={item.current_totp}
+            onPaste={() => visitItem(item)}
+          />,
+        ];
+
         return (
           <List.Item
             key={index}
@@ -96,18 +114,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Current">
-                  <Action.Paste
-                    title="Paste TOTP"
-                    icon={Icon.Clipboard}
-                    content={item.current_totp}
-                    onPaste={() => visitItem(item)}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Current"
-                    icon={Icon.Key}
-                    content={item.current_totp}
-                    onCopy={() => visitItem(item)}
-                  />
+                  {PreferredAction === "copy" ? userActions : userActions.toReversed()}
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Next">
                   <Action.CopyToClipboard

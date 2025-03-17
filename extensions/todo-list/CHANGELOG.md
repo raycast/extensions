@@ -2,6 +2,12 @@
 
 ## [Chore: Moved contributor] - {PR_MERGE_DATE}
 
+## [Enhancements] - 2025-02-25
+
+- Added an action to set a due date for a todo item.
+- Added optional natural language parsing of items to extract due date and tags automatically.
+- Added configuration option to order tasks by title.
+
 ## [New Action] - 2024-07-28
 
 - Added an action to set a tag for a todo item.

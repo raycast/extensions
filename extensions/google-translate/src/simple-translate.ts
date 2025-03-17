@@ -32,13 +32,13 @@ export async function simpleTranslate(text: string, options: LanguageCodeSet): P
         translatedText: "",
         pronunciationText: "",
         langFrom: options.langFrom,
-        langTo: options.langTo,
+        langTo: options.langTo[0],
       };
     }
 
     const translated = await translate(text, {
       from: options.langFrom,
-      to: options.langTo,
+      to: options.langTo[0],
       raw: true,
     });
 
@@ -47,7 +47,7 @@ export async function simpleTranslate(text: string, options: LanguageCodeSet): P
       translatedText: translated.text,
       pronunciationText: extractPronounceTextFromRaw(translated?.raw),
       langFrom: translated?.from?.language?.iso as LanguageCode,
-      langTo: options.langTo,
+      langTo: options.langTo[0],
     };
   } catch (err) {
     if (err instanceof Error) {
@@ -81,8 +81,8 @@ export async function doubleWayTranslate(text: string, options: LanguageCodeSet)
 
     if (translated1?.langFrom) {
       const translated2 = await simpleTranslate(translated1.translatedText, {
-        langFrom: options.langTo,
-        langTo: translated1.langFrom,
+        langFrom: options.langTo[0],
+        langTo: [translated1.langFrom],
       });
 
       return [translated1, translated2];
@@ -96,8 +96,8 @@ export async function doubleWayTranslate(text: string, options: LanguageCodeSet)
         langTo: options.langTo,
       }),
       simpleTranslate(text, {
-        langFrom: options.langTo,
-        langTo: options.langFrom,
+        langFrom: options.langTo[0],
+        langTo: [options.langFrom],
       }),
     ]);
   }

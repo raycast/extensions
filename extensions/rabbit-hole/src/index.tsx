@@ -14,6 +14,16 @@ interface JournalEntry {
   type: string;
   title: string;
   data: {
+    reminderData?: {
+      textContent: string;
+    };
+    memoryData?: {
+      textContent: string;
+    };
+    betaRabbitData?: {
+      titleImageUrl?: string;
+      textContent: string;
+    };
     magicCameraData?: {
       originalImage: {
         url: string;
@@ -85,92 +95,112 @@ export default function Command() {
 
   const JournalItem = (item: JournalEntry) => {
     // set up header
-    let markdown = `# ${item.title} \n at ${formatDate(item.createdOn)}`;
-    if (item.type === "recording" || item.type === "search" || item.type === "conversation") {
-      markdown += ` _via voice prompt:_ "${item.utterance.prompt}" \n`;
+    let markdown = item?.title ? `# ${item.title}` : "# Untitled Entry";
+    markdown += item?.createdOn ? ` \n at ${formatDate(item.createdOn)}` : "";
+    if (item?.type === "recording" || item?.type === "search" || item?.type === "conversation") {
+      markdown += item?.utterance?.prompt ? ` _via voice prompt:_ "${item.utterance.prompt}" \n` : "\n";
     }
     markdown += `\n\n---\n`;
 
     // set up body and actions per type
     let journalActions = null;
-    switch (item.type) {
+    switch (item?.type) {
       case "recording":
         markdown += `\n## Summary: \n`;
-        markdown += item.data.recordingData?.textContent;
-        markdown += `\n---\n ## Original Transcript: \n ${item.data.recordingData?.files[0].transcript || "No transcript available"}`;
+        markdown += item.data?.recordingData?.textContent || "No summary available";
+        markdown += `\n---\n ## Original Transcript: \n ${item.data?.recordingData?.files?.[0]?.transcript || "No transcript available"}`;
         journalActions = (
           <ActionPanel>
-            <RemotePlay file={item.data.recordingData?.files[0].url as string} />
-            {item.data.recordingData?.textContent && (
-              <Action.CopyToClipboard title="Copy Summarized Notes" content={item.data.recordingData?.textContent} />
+            {item.data?.recordingData?.files?.[0]?.url && (
+              <RemotePlay file={item.data.recordingData.files[0].url as string} />
             )}
-            {item.data.recordingData?.files[0].transcript && (
+            {item.data?.recordingData?.textContent && (
+              <Action.CopyToClipboard title="Copy Summarized Notes" content={item.data.recordingData.textContent} />
+            )}
+            {item.data?.recordingData?.files?.[0]?.transcript && (
               <Action.CopyToClipboard
                 title="Copy Original Transcript"
-                content={item.data.recordingData?.files[0].transcript}
+                content={item.data.recordingData.files[0].transcript}
               />
             )}
           </ActionPanel>
         );
         break;
       case "note":
-        markdown += item.data.noteData?.textContent;
+        markdown += item.data?.noteData?.textContent || "No note content available";
         journalActions = (
           <ActionPanel>
-            {item.data.noteData?.textContent && (
-              <Action.CopyToClipboard title="Copy Note" content={item.data.noteData?.textContent} />
+            {item.data?.noteData?.textContent && (
+              <Action.CopyToClipboard title="Copy Note" content={item.data.noteData.textContent} />
             )}
           </ActionPanel>
         );
         break;
       case "conversation":
-        markdown += item.data.conversationData?.textContent;
+        markdown += item.data?.conversationData?.textContent || "No conversation content available";
         journalActions = (
           <ActionPanel>
-            {item.data.conversationData?.textContent && (
+            {item.data?.conversationData?.textContent && (
               <Action.CopyToClipboard
                 title="Copy Conversation Response"
-                content={item.data.conversationData?.textContent}
+                content={item.data.conversationData.textContent}
               />
             )}
           </ActionPanel>
         );
         break;
       case "search":
-        markdown += item.data.searchData?.textContent;
+        markdown += item.data?.searchData?.textContent || "No search results available";
         journalActions = (
           <ActionPanel>
-            {item.data.searchData?.textContent && (
-              <Action.CopyToClipboard title="Copy Search Result" content={item.data.searchData?.textContent} />
+            {item.data?.searchData?.textContent && (
+              <Action.CopyToClipboard title="Copy Search Result" content={item.data.searchData.textContent} />
             )}
           </ActionPanel>
         );
         break;
       case "ai-generated-image":
-        markdown += item.data.aiGeneratedImageData?.textContent;
-        markdown += RabbitAsset(item.data.aiGeneratedImageData?.files[0].url as string);
+        markdown += item.data?.aiGeneratedImageData?.textContent || "No image description available";
+        if (item.data?.aiGeneratedImageData?.files?.[0]?.url) {
+          markdown += RabbitAsset(item.data.aiGeneratedImageData.files[0].url);
+        }
         markdown += disclaimer;
         journalActions = (
           <ActionPanel>
-            {item.data.aiGeneratedImageData?.textContent && (
+            {item.data?.aiGeneratedImageData?.textContent && (
               <Action.CopyToClipboard
                 title="Copy Generated Image Description"
-                content={item.data.aiGeneratedImageData?.textContent}
+                content={item.data.aiGeneratedImageData.textContent}
               />
             )}
           </ActionPanel>
         );
         break;
       case "magic-camera":
-        markdown += RabbitAsset(item.data.magicCameraData?.aiGeneratedImages[0].url as string);
-        markdown += "\n\n---\n\n";
-        markdown += RabbitAsset(item.data.magicCameraData?.originalImage.url as string);
-        markdown += disclaimer;
+        if (item.data?.magicCameraData?.aiGeneratedImages?.[0]?.url) {
+          markdown += RabbitAsset(item.data.magicCameraData.aiGeneratedImages[0].url);
+          markdown += "\n\n---\n\n";
+        }
+        if (item.data?.magicCameraData?.originalImage?.url) {
+          markdown += RabbitAsset(item.data.magicCameraData.originalImage.url);
+        }
+        markdown += disclaimer || "";
         break;
       case "vision":
-        markdown += RabbitAsset(item.data.visionData?.files[0].url as string);
-        markdown += "\n\n";
-        markdown += item.data.visionData?.textContent;
+        if (item.data?.visionData?.files?.[0]?.url) {
+          markdown += RabbitAsset(item.data.visionData.files[0].url);
+          markdown += "\n\n";
+        }
+        markdown += item.data?.visionData?.textContent || "No vision analysis available";
+        break;
+      case "beta-rabbit":
+        markdown += item.data?.betaRabbitData?.textContent || "No search results available";
+        break;
+      case "reminder":
+        markdown += item.data?.reminderData?.textContent || "No reminder details available";
+        break;
+      case "search-memory":
+        markdown += item.data?.memoryData?.textContent || "No results found in your journal";
         break;
       default:
         markdown += "Sorry, that intent type is not supported yet.";

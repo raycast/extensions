@@ -1,19 +1,15 @@
-import fetch from "cross-fetch";
-import {
-  getPreferenceValues,
-  LaunchProps,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { getPreferenceValues, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
+import { callCider } from "./functions";
+
+interface AdjustVolumeArguments {
+  volume: string;
+}
 
 interface Preferences {
   exitOnSuccess: boolean;
 }
 
-export default async function Command(
-  props: LaunchProps<{ arguments: Arguments.AdjustVolume }>,
-) {
+export default async function Command(props: LaunchProps<{ arguments: AdjustVolumeArguments }>) {
   const volume = parseInt(props.arguments.volume);
 
   if (volume === undefined || isNaN(volume) || volume < 0 || volume > 100) {
@@ -28,9 +24,9 @@ export default async function Command(
   const { exitOnSuccess } = getPreferenceValues() as Preferences;
 
   try {
-    await fetch("http://localhost:10769/active");
+    await callCider("/playback/active");
     try {
-      await fetch("http://localhost:10769/volume/" + volume / 100);
+      await callCider("/playback/volume", "POST", { volume: volume / 100 });
       if (exitOnSuccess) await showHUD("🔊 Adjusted Volume");
       else
         await showToast({
@@ -49,8 +45,7 @@ export default async function Command(
     await showToast({
       style: Toast.Style.Failure,
       title: "Couldn't Connect to Cider",
-      message:
-        "Make sure Cider is running and playing something and try again.",
+      message: "Make sure Cider is running and playing something and try again.",
     });
   }
 }

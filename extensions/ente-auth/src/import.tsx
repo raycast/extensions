@@ -1,5 +1,5 @@
-import { EXPORTPATH } from "./constants/ente";
 import { showToast, Toast } from "@raycast/api";
+import { EXPORT_FILE_PATH } from "./constants/ente";
 import { getSecrets, parseSecrets, storeSecrets } from "./helpers/secrets";
 
 export default async function Command() {
@@ -9,7 +9,7 @@ export default async function Command() {
   });
 
   try {
-    const secrets = parseSecrets(getSecrets(EXPORTPATH));
+    const secrets = parseSecrets(getSecrets(EXPORT_FILE_PATH));
     await storeSecrets(secrets);
 
     if (secrets.length > 0) {

@@ -1,5 +1,20 @@
 # svgl Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Updated the SVG logo request form.  
+- Added the action `Visit SVG Brand Website` to open the SVG brand website in the browser.
+- Added the action `Copy SVG File` to copy the SVG as a file to the clipboard.
+
+## [Add Angular Component Feature] - 2025-01-10
+
+- Add the action `Copy Angular Component` to copy the Angular component code to the clipboard.
+- Remove duplicate action shortcuts.
+
+## [Add Copy Vue & Svelte Component Feature] - 2024-11-04
+
+- Add the actions `Copy Vue Component` and `Copy Svelte Component` to copy the Vue and Svelte component code to the clipboard.
+
 ## [Add Copy SVG URL Feature] - 2024-09-17
 
 - Add the commands `Copy SVG URL` and `Copy SVG Wordmark URL` to copy the SVG URL to the clipboard.

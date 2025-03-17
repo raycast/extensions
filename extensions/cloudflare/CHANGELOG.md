@@ -1,4 +1,16 @@
-# Changelog
+# Cloudflare Changelog
+
+## [Cache Enhancements] - 2024-12-06
+
+- `Action` to `openExtensionPreferences` on invalid token error
+- `EmptyView` when no **Pages** or **Sites**
+- `Cache` **DNS Records** through `useCachedPromise`
+- `Cache` **Sites** through `useCachedPromise`
+- `Cache` **Zone Details** through `useCachedPromise` & show more
+- `Cache` **Members** through `useCachedPromise`
+- `Cache` **Pages** through `useCachedPromise`
+- Changed status icons to be `...Cirle` for consistency
+- Added `metadata` images
 
 ## [Add copy actions] - 2024-02-28
 

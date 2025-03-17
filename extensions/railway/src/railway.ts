@@ -5,7 +5,7 @@ const backboardUrl = "https://backboard.railway.app/graphql/v2";
 export const railwayWebUrl = "https://railway.app";
 
 export const projectUrl = (projectId: string, page?: string): string =>
-  `${railwayWebUrl}/project/${projectId}/${page ?? "settings"}`;
+  `${railwayWebUrl}/project/${projectId}/${page ?? ""}`;
 
 const token = getPreferenceValues<Preferences>().railwayApiKey;
 

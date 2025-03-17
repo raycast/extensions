@@ -6,13 +6,13 @@ export type VideoDataTypes = {
   ownerChannelName: ytdl.videoInfo["videoDetails"]["ownerChannelName"];
   ownerProfileUrl: ytdl.videoInfo["videoDetails"]["ownerProfileUrl"];
   publishDate: ytdl.videoInfo["videoDetails"]["publishDate"];
-  thumbnail: ytdl.videoInfo["videoDetails"]["thumbnails"][0]["url"];
+  thumbnail: ytdl.thumbnail;
   title: ytdl.videoInfo["videoDetails"]["title"];
   video_url: ytdl.videoInfo["videoDetails"]["video_url"];
   viewCount: ytdl.videoInfo["videoDetails"]["viewCount"];
 };
 
-async function getVideoData(video: string) {
+export async function getVideoData(video: string) {
   const basicVideoInformation = await ytdl.getBasicInfo(video);
 
   const publishDate = new Date(basicVideoInformation.videoDetails.publishDate).toLocaleDateString();
@@ -27,7 +27,7 @@ async function getVideoData(video: string) {
     ownerChannelName: basicVideoInformation.videoDetails.ownerChannelName,
     ownerProfileUrl: basicVideoInformation.videoDetails.ownerProfileUrl,
     publishDate,
-    thumbnail: basicVideoInformation.videoDetails.thumbnails[3].url,
+    thumbnail: basicVideoInformation.videoDetails.thumbnails[4],
     title: basicVideoInformation.videoDetails.title,
     video_url: basicVideoInformation.videoDetails.video_url,
     viewCount,
@@ -35,5 +35,3 @@ async function getVideoData(video: string) {
 
   return videoDetails;
 }
-
-export default getVideoData;
