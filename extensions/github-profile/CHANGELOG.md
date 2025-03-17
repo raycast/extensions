@@ -1,6 +1,6 @@
 # GitHub Profile Changelog
 
-## [Fix Mock Data] - {PR_MERGE_DATE}
+## [Fix Mock Data] - 2025-03-17
 
 - 🔐 Change GitHub token as required field
 
