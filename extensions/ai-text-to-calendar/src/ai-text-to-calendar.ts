@@ -11,12 +11,15 @@ interface CalendarEvent {
   location: string;
 }
 
+type Calendar = "googleCalendar" | "outlookPersonal" | "outlookOffice365";
+
 export default async function main() {
   try {
     const apiKey = getPreferenceValues().apiKey;
     const endpoint = getPreferenceValues().endpoint || "https://api.openai.com/v1";
     const language = getPreferenceValues().language || "English";
     const model = getPreferenceValues().model || "gpt-4o-mini";
+    const calendar = getPreferenceValues().calendar || "googleCalendar";
 
     showToast({ style: Toast.Style.Animated, title: "Extracting..." });
     const selectedText = await getSelectedText();
@@ -26,7 +29,7 @@ export default async function main() {
     }
 
     const calendarEvent = JSON.parse(json) as CalendarEvent;
-    const url = toURL(calendarEvent);
+    const url = toURL(calendarEvent, calendar);
 
     await showHUD("Extracted! Copied to clipboard and opened in browser.");
     await Clipboard.copy(`${url}`);
@@ -90,19 +93,68 @@ Note:
   return response.choices[0].message.content;
 }
 
-function toURL(json: CalendarEvent) {
-  // Clean up and format dates/times - remove any non-numeric characters
-  const startDateTime = `${json.start_date.replace(/-/g, "")}T${json.start_time.replace(/:/g, "")}00`;
-  const endDateTime = `${json.end_date.replace(/-/g, "")}T${json.end_time.replace(/:/g, "")}00`;
+function toURL(json: CalendarEvent, calendar: Calendar) {
+  let url: string;
+  console.log(json);
 
-  // Encode parameters for URL safety
-  const params = {
-    text: encodeURIComponent(json.title),
-    dates: `${startDateTime}/${endDateTime}`,
-    details: encodeURIComponent(json.details),
-    location: encodeURIComponent(json.location),
-  };
+  const startDate = json.start_date.replace(/\D/g, "");
+  const startTime = json.start_time.replace(/\D/g, "");
+  const endDate = json.end_date.replace(/\D/g, "");
+  const endTime = json.end_time.replace(/\D/g, "");
 
-  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${params.text}&dates=${params.dates}&details=${params.details}&location=${params.location}&trp=false`;
+  switch (calendar) {
+    case "outlookOffice365":
+    case "outlookPersonal": {
+      const baseUrl =
+        calendar === "outlookOffice365"
+          ? "https://outlook.office.com/calendar/deeplink/compose"
+          : "https://outlook.live.com/calendar/deeplink/compose";
+
+      const startDateTime = `${formatDateTimeForOutlook(startDate, startTime)}`;
+      const endDateTime = `${formatDateTimeForOutlook(endDate, endTime)}`;
+
+      const params = {
+        text: encodeURIComponent(json.title),
+        startdt: startDateTime,
+        enddt: endDateTime,
+        body: encodeURIComponent(json.details),
+        location: encodeURIComponent(json.location),
+      };
+      url = `${baseUrl}?subject=${params.text}&startdt=${params.startdt}&enddt=${params.enddt}&body=${params.body}&location=${params.location}`;
+      break;
+    }
+    case "googleCalendar":
+    default: {
+      // Clean up and format dates/times - remove any non-numeric characters
+      const startDateTime = `${startDate}T${startTime}00`;
+      const endDateTime = `${endDate}T${endTime}00`;
+      const params = {
+        text: encodeURIComponent(json.title),
+        dates: `${startDateTime}/${endDateTime}`,
+        details: encodeURIComponent(json.details),
+        location: encodeURIComponent(json.location),
+      };
+      url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${params.text}&dates=${params.dates}&details=${params.details}&location=${params.location}&trp=false`;
+    }
+  }
   return url;
+}
+
+function formatDateTimeForOutlook(dateStr: string, timeStr: string): string {
+  if (dateStr.length !== 8) {
+    throw new Error(`Invalid date format: ${dateStr}. Expected YYYYMMDD.`);
+  }
+  if (timeStr.length !== 6) {
+    throw new Error(`Invalid time format: ${timeStr}. Expected hhmmss.`);
+  }
+
+  const year = dateStr.slice(0, 4);
+  const month = dateStr.slice(4, 6);
+  const day = dateStr.slice(6, 8);
+
+  const hh = timeStr.slice(0, 2);
+  const mm = timeStr.slice(2, 4);
+  const ss = timeStr.slice(4, 6);
+
+  return `${year}-${month}-${day}T${hh}:${mm}:${ss}00`;
 }
