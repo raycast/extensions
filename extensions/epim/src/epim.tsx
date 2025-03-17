@@ -375,7 +375,7 @@ function JustificationForm({ role, userId }: JustificationFormProps) {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="justification" title="Justification" placeholder="Why do you need this role?" required />
+      <Form.TextArea id="justification" title="Justification" placeholder="Why do you need this role?" />
       <Form.Dropdown id="duration" title="Duration" defaultValue="1">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((hours) => (
           <Form.Dropdown.Item key={hours} value={hours.toString()} title={`${hours} hour${hours > 1 ? "s" : ""}`} />
@@ -393,12 +393,10 @@ function CommandList({ userId, roles }: { userId: string; roles: Role[] }) {
         <List.Item
           key={role.roleTemplateId || index}
           title={role.displayName}
-          // icon={role.isActive ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
           accessories={[
             {
-              // text: role.isActive ? "Active" : "",
               icon: role.isActive ? { source: Icon.CircleFilled, tintColor: Color.Green } : undefined,
-              tooltip: role.isActive ? `Expires in ${role.remainingTime}` : "Inactive",
+              tooltip: role.isActive ? `Expires in ${role.remainingTime!}` : "Inactive",
             },
           ]}
           detail={
@@ -417,16 +415,11 @@ function CommandList({ userId, roles }: { userId: string; roles: Role[] }) {
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label
                         title="Remaining Time"
-                        text={{ value: role.remainingTime, color: Color.Green }}
+                        text={{ value: role.remainingTime!, color: Color.Green }}
                       />
                       <List.Item.Detail.Metadata.Label
                         title="End Time"
-                        text={
-                          { value: formatDateTime(role.endDateTime), color: Color.Green } || {
-                            value: "",
-                            color: Color.Green,
-                          }
-                        }
+                        text={{ value: formatDateTime(role.endDateTime!), color: Color.Green }}
                       />
                     </>
                   )}
@@ -442,12 +435,17 @@ function CommandList({ userId, roles }: { userId: string; roles: Role[] }) {
               <Action.Push
                 title={role.isActive ? "Role Already Active" : "Activate Role"}
                 target={<JustificationForm role={role} userId={userId} />}
-                disabled={role.isActive}
               />
               {role.isActive && (
                 <Action
                   title="Show Active Until"
-                  onAction={() => showToast({ title: `Active until ${formatDateTime(role.endDateTime)}` })}
+                  onAction={() =>
+                    showToast({
+                      style: Toast.Style.Success,
+                      title: "Active until:",
+                      message: formatDateTime(role.endDateTime!),
+                    })
+                  }
                   shortcut={{ modifiers: ["cmd"], key: "i" }}
                 />
               )}

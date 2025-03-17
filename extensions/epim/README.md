@@ -27,6 +27,17 @@ Install-Module Microsoft.Graph.Identity.Governance
 
 Contributions are welcome! Please ensure any changes are accompanied by updates to the `CHANGELOG.md` and follow the existing code style.
 
+## Screenshots
+
+<p align="center">
+    <img src="./metadata/raycast-epim-1.png" width="100%" />
+    <img src="./metadata/raycast-epim-2.png" width="100%" />
+    <img src="./metadata/raycast-epim-3.png" width="100%" />
+    <img src="./metadata/raycast-epim-4.png" width="100%" />
+    <img src="./metadata/raycast-epim-5.png" width="100%" />
+    <img src="./metadata/raycast-epim-6.png" width="100%" />
+</p>
+
 ## License
 
 This extension is licensed under the MIT License.
