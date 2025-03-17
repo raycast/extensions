@@ -33,7 +33,7 @@
       "title": "GitHub Personal Access Token",
       "description": "Your GitHub personal access token (optional, but recommended to avoid rate limits)",
       "type": "password",
-      "required": false,
+      "required": true,
       "placeholder": "ghp_xxxxxxxxxxxxxxxx"
     }
   ],
