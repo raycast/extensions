@@ -12,26 +12,6 @@ import TaskListSections from "./TaskListSections";
 
 type FilterTasksProps = { name: string; quickLinkView?: QuickLinkView };
 
-function sortTasks(tasks: any[]) {
-  return tasks.sort((a, b) => {
-    const aHasDateTime = a.due && a.due.datetime;
-    const bHasDateTime = b.due && b.due.datetime;
-
-    if (aHasDateTime && bHasDateTime) {
-      // Both have datetime, sort by priority
-      return b.priority - a.priority; // Higher priority first
-    }
-    if (aHasDateTime) {
-      return -1; // a comes before b
-    }
-    if (bHasDateTime) {
-      return 1; // b comes before a
-    }
-    // If neither has datetime, sort by priority
-    return b.priority - a.priority; // Higher priority first
-  });
-}
-
 function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   const [cachedData] = useCachedData();
   const filters = cachedData?.filters;
@@ -43,7 +23,7 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
       const queries = search.split(",").map((part: string) => part.trim());
       const sections = await Promise.all(queries.map(async (q: string) => {
         const tasks = await getFilterTasks(q);
-        const sortedTasks = sortTasks(tasks);
+        const sortedTasks = filterSort(tasks);
         return { name: q, tasks: sortedTasks };
       }));
       return sections;
