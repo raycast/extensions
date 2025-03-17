@@ -20,9 +20,6 @@ export async function processJson(base64encode = false) {
     await showHUD("Environment copied to clipboard");
     await closeMainWindow({ clearRootSearch: true });
   } catch (error) {
-    await showToast({
-      title: "Error parsing JSON",
-      style: Toast.Style.Failure,
-    });
+    await showFailureToast("Error parsing JSON");
   }
 }
