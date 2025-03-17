@@ -1,7 +1,8 @@
 import { Clipboard, getPreferenceValues, getSelectedText, open, showHUD, showToast, Toast } from "@raycast/api";
 import OpenAI from "openai";
+import { toURL } from "./calendars";
 
-interface CalendarEvent {
+export interface CalendarEvent {
   title: string;
   start_date: string;
   start_time: string;
@@ -10,8 +11,6 @@ interface CalendarEvent {
   details: string;
   location: string;
 }
-
-type Calendar = "googleCalendar" | "outlookPersonal" | "outlookOffice365";
 
 export default async function main() {
   try {
@@ -91,69 +90,4 @@ Note:
   });
 
   return response.choices[0].message.content;
-}
-
-function toURL(json: CalendarEvent, calendar: Calendar) {
-  let url: string;
-
-  const startDate = json.start_date.replace(/\D/g, "");
-  const startTime = json.start_time.replace(/\D/g, "");
-  const endDate = json.end_date.replace(/\D/g, "");
-  const endTime = json.end_time.replace(/\D/g, "");
-
-  switch (calendar) {
-    case "outlookOffice365":
-    case "outlookPersonal": {
-      const baseUrl =
-        calendar === "outlookOffice365"
-          ? "https://outlook.office.com/calendar/deeplink/compose"
-          : "https://outlook.live.com/calendar/deeplink/compose";
-
-      const startDateTime = formatDateTimeForOutlook(startDate, startTime);
-      const endDateTime = formatDateTimeForOutlook(endDate, endTime);
-
-      const params = {
-        text: encodeURIComponent(json.title),
-        startdt: startDateTime,
-        enddt: endDateTime,
-        body: encodeURIComponent(json.details),
-        location: encodeURIComponent(json.location),
-      };
-      url = `${baseUrl}?subject=${params.text}&startdt=${params.startdt}&enddt=${params.enddt}&body=${params.body}&location=${params.location}`;
-      break;
-    }
-    case "googleCalendar":
-    default: {
-      // Clean up and format dates/times - remove any non-numeric characters
-      const startDateTime = `${startDate}T${startTime}00`;
-      const endDateTime = `${endDate}T${endTime}00`;
-      const params = {
-        text: encodeURIComponent(json.title),
-        dates: `${startDateTime}/${endDateTime}`,
-        details: encodeURIComponent(json.details),
-        location: encodeURIComponent(json.location),
-      };
-      url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${params.text}&dates=${params.dates}&details=${params.details}&location=${params.location}&trp=false`;
-    }
-  }
-  return url;
-}
-
-function formatDateTimeForOutlook(dateStr: string, timeStr: string): string {
-  if (dateStr.length !== 8) {
-    throw new Error(`Invalid date format: ${dateStr}. Expected YYYYMMDD.`);
-  }
-  if (timeStr.length !== 6) {
-    throw new Error(`Invalid time format: ${timeStr}. Expected hhmmss.`);
-  }
-
-  const year = dateStr.slice(0, 4);
-  const month = dateStr.slice(4, 6);
-  const day = dateStr.slice(6, 8);
-
-  const hh = timeStr.slice(0, 2);
-  const mm = timeStr.slice(2, 4);
-  const ss = timeStr.slice(4, 6);
-
-  return `${year}-${month}-${day}T${hh}:${mm}:${ss}00`;
 }

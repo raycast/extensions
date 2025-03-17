@@ -113,12 +113,12 @@
               "value": "googleCalendar"
             },
             {
-              "title": "Outlook calendar (personal)",
+              "title": "Outlook calendar (Personal)",
               "value": "outlookPersonal"
             },
             {
               "title": "Outlook calendar (Office 365)",
-              "value": "outlookOffice365"
+              "value": "outlookOffice"
             }
           ],
           "required": false
