@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   Form,
   ActionPanel,
-  SubmitFormAction,
   getPreferenceValues,
   showToast,
   Toast,
@@ -17,16 +16,6 @@ import { existsSync } from "fs";
 import path from "path";
 import { homedir } from "os";
 import { Action$ } from "raycast-toolkit";
-
-interface Preferences {
-  apiKey: string;
-  cropToContent: boolean;
-  fileNameModifier: string;
-  filenameFormat: string;
-  defaultSize: string;
-  defaultFormat: string;
-  defaultType: string;
-}
 
 interface FormValues {
   filePath: string;
@@ -54,14 +43,14 @@ export default function Command() {
   const [saveLocation, setSaveLocation] = useState<string>("same");
   const [filenameFormat, setFilenameFormat] = useState<string>("nochange");
   const [filenameModifier, setFilenameModifier] = useState<string>("");
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Index>();
 
   useEffect(() => {
     fetchSelectedFiles();
 
     // Set default filename format from preferences
     setFilenameFormat(preferences.filenameFormat || "nochange");
-    setFilenameModifier(preferences.fileNameModifier || "");
+    setFilenameModifier(preferences.filenameModifier || "");
   }, []);
 
   // Function to fetch selected files from Finder
