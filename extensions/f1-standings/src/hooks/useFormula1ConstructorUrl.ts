@@ -55,11 +55,11 @@ const matches = (haystack: string, needles: string[]) => {
 };
 
 const useFormula1ConstructorUrl = (season: string | null, constructor: Constructor | null): string | null => {
-  const [state, setState] = usePersistentState<State>("driver-urls", {});
+  const [state, setState] = usePersistentState<State>("constructor-urls", {});
   const key = `${season || ""}-${constructor?.constructorId || ""}`;
 
   useEffect(() => {
-    async function fetchFormula1DriverUrl() {
+    async function fetchFormula1ConstructorUrl() {
       if (!season) {
         return;
       }
@@ -90,7 +90,7 @@ const useFormula1ConstructorUrl = (season: string | null, constructor: Construct
         // swallow error
       }
     }
-    fetchFormula1DriverUrl();
+    fetchFormula1ConstructorUrl();
   }, [constructor, season, key, setState]);
 
   return state[key] || null;

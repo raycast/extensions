@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import { ConstructorStandingResponse } from "../types";
+import { BASE_API_URL } from "../constants";
 
 type Input = {
   /**
@@ -13,7 +14,7 @@ type Input = {
  */
 export default async function constructorStandings(input: Input) {
   try {
-    const res = await fetch(`https://api.jolpi.ca/ergast/f1/${input.year}/constructorstandings.json`, {
+    const res = await fetch(`${BASE_API_URL}/f1/${input.year}/constructorstandings.json`, {
       method: "get",
     });
     const data = (await res.json()) as ConstructorStandingResponse;

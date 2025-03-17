@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { popToRoot, showToast, Toast } from "@raycast/api";
 import { DriverStanding, DriverStandingResponse } from "../types";
+import { BASE_API_URL } from "../constants";
 
 type State = {
   driverStandings: DriverStanding[];
@@ -22,7 +23,7 @@ const useDriverStandings = (season: string | null): [DriverStanding[], boolean] 
       cancelRef.current = new AbortController();
       setState((previous) => ({ ...previous, isLoading: true }));
       try {
-        const res = await fetch(`https://api.jolpi.ca/ergast/f1/${season}/driverStandings.json`, {
+        const res = await fetch(`${BASE_API_URL}/f1/${season}/driverStandings.json`, {
           method: "get",
           signal: cancelRef.current.signal,
         });

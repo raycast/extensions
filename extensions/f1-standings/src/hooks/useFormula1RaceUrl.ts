@@ -37,7 +37,7 @@ const matches = (haystack: string, needles: string[]) => {
 };
 
 const useFormula1RaceUrl = (season: string | null, race: Race | null): string | null => {
-  const [state, setState] = usePersistentState<State>("driver-urls", {});
+  const [state, setState] = usePersistentState<State>("race-urls", {});
   const key = `${season || ""}-${race?.Circuit.circuitId || ""}`;
 
   useEffect(() => {

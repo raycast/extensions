@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import { ConstructorsResponse } from "../types";
+import { BASE_API_URL } from "../constants";
 
 type Input = {
   /**
@@ -9,11 +10,11 @@ type Input = {
 };
 
 /**
- * Get driver attendings for a specific season
+ * Get constructor attendings for a specific season
  */
-export default async function drivers(input: Input) {
+export default async function constructors(input: Input) {
   try {
-    const res = await fetch(`https://api.jolpi.ca/ergast/f1/${input.year}/constructors.json`, {
+    const res = await fetch(`${BASE_API_URL}/f1/${input.year}/constructors.json`, {
       method: "get",
     });
     const data = (await res.json()) as ConstructorsResponse;

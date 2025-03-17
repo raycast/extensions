@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import { QualifyingResultResponse } from "../types";
+import { BASE_API_URL } from "../constants";
 
 type Input = {
   /**
@@ -13,11 +14,11 @@ type Input = {
 };
 
 /**
- * Get driver standings for a specific season
+ * Get qualifying results for a specific race
  */
 export default async function qualifyingResults(input: Input) {
   try {
-    const res = await fetch(`https://api.jolpi.ca/ergast/f1/${input.year}/${input.round}/qualifying.json`, {
+    const res = await fetch(`${BASE_API_URL}/f1/${input.year}/${input.round}/qualifying.json`, {
       method: "get",
     });
     const data = (await res.json()) as QualifyingResultResponse;

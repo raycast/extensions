@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { popToRoot, showToast, Toast } from "@raycast/api";
 import { Race, ScheduleResponse } from "../types";
+import { BASE_API_URL } from "../constants";
 
 const isUpcoming = (race: Race) => {
   const today = new Date();
@@ -31,7 +32,7 @@ const useRaces = (season: string | null): [{ [round: string]: Race }, { [round: 
         isShowingDetail: false,
       }));
       try {
-        const res = await fetch(`https://api.jolpi.ca/ergast/f1/${season}.json`, {
+        const res = await fetch(`${BASE_API_URL}/f1/${season}.json`, {
           method: "get",
           signal: cancelRef.current.signal,
         });

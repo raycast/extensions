@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { popToRoot, showToast, Toast } from "@raycast/api";
 import { ConstructorStanding, ConstructorStandingResponse } from "../types";
+import { BASE_API_URL } from "../constants";
 
 type State = {
   constructorStandings: ConstructorStanding[];
@@ -25,7 +26,7 @@ const useConstructorStandings = (season: string | null): [ConstructorStanding[],
         isLoading: true,
       }));
       try {
-        const res = await fetch(`https://api.jolpi.ca/ergast/f1/${season}/constructorStandings.json`, {
+        const res = await fetch(`${BASE_API_URL}/f1/${season}/constructorStandings.json`, {
           method: "get",
           signal: cancelRef.current.signal,
         });
