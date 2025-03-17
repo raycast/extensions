@@ -1,6 +1,6 @@
 # Team Time Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-03-17
 
 - Add "Team Time" command to display current times for different cities
 - Add "Manage Time Zones" command to add/remove cities
