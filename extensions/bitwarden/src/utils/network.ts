@@ -1,5 +1,4 @@
 import { createWriteStream, unlink } from "fs";
-import { parse } from "url";
 import http from "http";
 import https from "https";
 import { captureException } from "~/utils/development";
@@ -15,7 +14,7 @@ export function download(url: string, path: string, options?: DownloadOptions): 
   const { onProgress, sha256 } = options ?? {};
 
   return new Promise((resolve, reject) => {
-    const uri = parse(url);
+    const uri = new URL(url);
     const protocol = uri.protocol === "https:" ? https : http;
 
     let redirectCount = 0;
