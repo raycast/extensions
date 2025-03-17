@@ -1,5 +1,9 @@
 # Link Bundles Changelog
 
+## [Default Browser Update] - {PR_MERGE_DATE}
+
+- Added option to open links in your default browser, rather than in Chrome
+
 ## [Open In Other Browsers Update] - {PR_MERGE_DATE}
 
 - Added option to open links in your default browser, rather than in Chrome
