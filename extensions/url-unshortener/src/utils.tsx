@@ -58,23 +58,85 @@ export async function getUrlFromSelectionOrClipboard(): Promise<string | undefin
 
 export async function unshortenUrl(url: string): Promise<{ redirectionSteps: RedirectionStep[] }> {
   try {
+    console.log("Starting URL expansion for:", url);
+
+    const commonHeaders = {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.5",
+      Connection: "keep-alive",
+    };
+
+    // Try HEAD request first
     let response = await fetch(url, {
       method: "HEAD",
       redirect: "manual",
+      headers: commonHeaders,
     });
-    const redirectionSteps = [{ url: url, statusCode: response.status, statusName: response.statusText }];
 
-    while (response.url) {
+    // If HEAD fails or returns an error, retry with GET
+    if (response.status >= 400 || !response.headers.get("location")) {
+      console.log("HEAD request failed or no location header, retrying with GET");
+      response = await fetch(url, {
+        method: "GET",
+        redirect: "manual",
+        headers: commonHeaders,
+      });
+    }
+
+    console.log("Initial response status:", response.status);
+    console.log("Initial response headers:", Object.fromEntries(response.headers.entries()));
+
+    const redirectionSteps = [{ url: url, statusCode: response.status, statusName: response.statusText }];
+    let currentUrl = url;
+    const maxRedirects = 10; // Safety limit
+    let redirectCount = 0;
+
+    while (redirectCount < maxRedirects) {
       if (response.status >= 300 && response.status < 400) {
         const nextUrl = response.headers.get("location");
+        console.log("Found redirect to:", nextUrl);
+
         if (nextUrl) {
-          response = await fetch(nextUrl, { method: "HEAD", redirect: "manual" });
-          redirectionSteps.push({
-            url: nextUrl,
-            statusCode: response.status,
-            statusName: response.statusText,
-          });
+          // Handle relative URLs
+          const resolvedUrl = new URL(nextUrl, currentUrl).toString();
+          currentUrl = resolvedUrl;
+
+          try {
+            // Try HEAD request first for redirects too
+            response = await fetch(resolvedUrl, {
+              method: "HEAD",
+              redirect: "manual",
+              headers: commonHeaders,
+            });
+
+            // If HEAD fails or returns an error, retry with GET
+            if (response.status >= 400 || !response.headers.get("location")) {
+              console.log("HEAD request failed for redirect, retrying with GET");
+              response = await fetch(resolvedUrl, {
+                method: "GET",
+                redirect: "manual",
+                headers: commonHeaders,
+              });
+            }
+
+            console.log("Redirect response status:", response.status);
+            console.log("Redirect response headers:", Object.fromEntries(response.headers.entries()));
+
+            redirectionSteps.push({
+              url: resolvedUrl,
+              statusCode: response.status,
+              statusName: response.statusText,
+            });
+            redirectCount++;
+          } catch (redirectError) {
+            console.error("Error following redirect:", redirectError);
+            // Don't throw, just break the chain and return what we have
+            break;
+          }
         } else {
+          console.log("No location header found in redirect response");
           break;
         }
       } else {
@@ -83,10 +145,11 @@ export async function unshortenUrl(url: string): Promise<{ redirectionSteps: Red
     }
     return { redirectionSteps };
   } catch (error) {
+    console.error("Error in unshortenUrl:", error);
     if (error instanceof Error) {
-      throw new Error(error.message);
+      throw new Error(`URL expansion failed: ${error.message}`);
     } else {
-      throw new Error("An unknown error occurred");
+      throw new Error("An unknown error occurred during URL expansion");
     }
   }
 }
