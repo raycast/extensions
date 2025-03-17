@@ -4,7 +4,7 @@
   "title": "Google Cloud",
   "description": "Manage your Google Cloud resources",
   "icon": "cloud-icon.svg",
-  "version": "0.1.28",
+  "version": "0.0.29",
   "author": "Jonatas Walker Filho",
   "categories": [
     "Developer Tools"
