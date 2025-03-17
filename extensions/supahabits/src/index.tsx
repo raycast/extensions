@@ -17,7 +17,6 @@ import NodeFetch from "node-fetch";
 
 import { Habit } from "./models/habit";
 import CreateHabitForm from "./components/create-habit-form";
-import CreateRepeatableHabitForm from "./components/create-repeatable-habit";
 import FeedbackForm from "./components/feedback-form";
 import { getColorValue } from "./utils/colors";
 
@@ -248,19 +247,6 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action.Push title="Create Habit" icon={Icon.Wand} target={<CreateHabitForm revalidate={revalidate} />} />
-          </ActionPanel>
-        }
-      />
-      <List.Item
-        icon={Icon.Plus}
-        title="Create Repeatable Habit"
-        actions={
-          <ActionPanel>
-            <Action.Push
-              title="Create Repeatable Habit"
-              icon={Icon.Wand}
-              target={<CreateRepeatableHabitForm revalidate={revalidate} />}
-            />
           </ActionPanel>
         }
       />
