@@ -45,14 +45,9 @@
   ],
   "tools": [
     {
-      "name": "get-systems",
-      "title": "Get Systems",
-      "description": "Get all systems monitored by Beszel"
-    },
-    {
       "name": "get-system",
-      "title": "Get System",
-      "description": "Get a specific system monitored by Beszel by name"
+      "title": "Get System(s)",
+      "description": "Get a specific system monitored by Beszel by name or all the systems if no name is provided"
     }
   ],
   "ai": {
@@ -61,48 +56,48 @@
       {
         "input": "@beszel What systems are down?",
         "mocks": {
-          "get-systems": [
+          "get-system": [
             {
               "cpuChip": "Cortex-A76",
               "cpuCores": 4,
               "cpuPercent": 1.06,
-              "diskPercent": 6.78,
+              "diskPercent": 6.75,
               "host": "paulamyo",
-              "memoryPercent": 4.52,
+              "memoryPercent": 4.58,
               "name": "paulamyo",
               "network": 0.02,
               "status": "up",
               "threads": 4,
-              "updated": "2025-03-12 15:27:14.039Z",
-              "uptime": 5132140
+              "updated": "2025-03-17 16:32:27.946Z",
+              "uptime": 5568054
             },
             {
               "cpuChip": "Cortex-A53",
               "cpuCores": 4,
-              "cpuPercent": 0.42,
-              "diskPercent": 12.25,
+              "cpuPercent": 0.45,
+              "diskPercent": 12.28,
               "host": "chihuahua",
-              "memoryPercent": 36.66,
+              "memoryPercent": 45.28,
               "name": "chihuahua",
               "network": 0,
               "status": "up",
               "threads": 4,
-              "updated": "2025-03-12 15:27:12.595Z",
-              "uptime": 1354915
+              "updated": "2025-03-17 16:32:30.325Z",
+              "uptime": 1790833
             },
             {
               "cpuChip": "Intel(R) Core(TM) i5-9600K CPU @ 3.70GHz",
               "cpuCores": 6,
-              "cpuPercent": 2.92,
-              "diskPercent": 46.51,
+              "cpuPercent": 2.93,
+              "diskPercent": 46.98,
               "host": "host.docker.internal",
-              "memoryPercent": 13.49,
+              "memoryPercent": 13.87,
               "name": "deepthought",
               "network": 0.01,
               "status": "up",
               "threads": 6,
-              "updated": "2025-03-12 15:27:08.168Z",
-              "uptime": 164169
+              "updated": "2025-03-17 16:32:25.996Z",
+              "uptime": 600086
             }
           ]
         },
@@ -110,121 +105,7 @@
           {
             "callsTool": {
               "arguments": {},
-              "name": "get-systems"
-            }
-          }
-        ]
-      },
-      {
-        "input": "@beszel What is the memory usage of all monitored machines?",
-        "mocks": {
-          "get-systems": [
-            {
-              "cpuChip": "Cortex-A76",
-              "cpuCores": 4,
-              "cpuPercent": 1.06,
-              "diskPercent": 6.78,
-              "host": "paulamyo",
-              "memoryPercent": 4.52,
-              "name": "paulamyo",
-              "network": 0.02,
-              "status": "up",
-              "threads": 4,
-              "updated": "2025-03-12 15:27:14.039Z",
-              "uptime": 5132140
-            },
-            {
-              "cpuChip": "Cortex-A53",
-              "cpuCores": 4,
-              "cpuPercent": 0.42,
-              "diskPercent": 12.25,
-              "host": "chihuahua",
-              "memoryPercent": 36.66,
-              "name": "chihuahua",
-              "network": 0,
-              "status": "up",
-              "threads": 4,
-              "updated": "2025-03-12 15:27:12.595Z",
-              "uptime": 1354915
-            },
-            {
-              "cpuChip": "Intel(R) Core(TM) i5-9600K CPU @ 3.70GHz",
-              "cpuCores": 6,
-              "cpuPercent": 2.92,
-              "diskPercent": 46.51,
-              "host": "host.docker.internal",
-              "memoryPercent": 13.49,
-              "name": "deepthought",
-              "network": 0.01,
-              "status": "up",
-              "threads": 6,
-              "updated": "2025-03-12 15:27:08.168Z",
-              "uptime": 164169
-            }
-          ]
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "arguments": {},
-              "name": "get-systems"
-            }
-          }
-        ]
-      },
-      {
-        "input": "@beszel What is the disk usage of all monitored machines?",
-        "mocks": {
-          "get-systems": [
-            {
-              "cpuChip": "Cortex-A76",
-              "cpuCores": 4,
-              "cpuPercent": 0.97,
-              "diskPercent": 6.78,
-              "host": "paulamyo",
-              "memoryPercent": 4.49,
-              "name": "paulamyo",
-              "network": 0.01,
-              "status": "up",
-              "threads": 4,
-              "updated": "2025-03-12 15:28:14.036Z",
-              "uptime": 5132200
-            },
-            {
-              "cpuChip": "Cortex-A53",
-              "cpuCores": 4,
-              "cpuPercent": 0.47,
-              "diskPercent": 12.25,
-              "host": "chihuahua",
-              "memoryPercent": 36.93,
-              "name": "chihuahua",
-              "network": 0,
-              "status": "up",
-              "threads": 4,
-              "updated": "2025-03-12 15:28:12.594Z",
-              "uptime": 1354975
-            },
-            {
-              "cpuChip": "Intel(R) Core(TM) i5-9600K CPU @ 3.70GHz",
-              "cpuCores": 6,
-              "cpuPercent": 3.18,
-              "diskPercent": 46.51,
-              "host": "host.docker.internal",
-              "memoryPercent": 13.43,
-              "name": "deepthought",
-              "network": 0.01,
-              "status": "up",
-              "threads": 6,
-              "updated": "2025-03-12 15:28:08.204Z",
-              "uptime": 164229
-            }
-          ]
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "arguments": {},
-              "name": "get-systems"
+              "name": "get-system"
             }
           }
         ]
@@ -235,16 +116,16 @@
           "get-system": {
             "cpuChip": "Cortex-A76",
             "cpuCores": 4,
-            "cpuPercent": 0.92,
-            "diskPercent": 6.78,
+            "cpuPercent": 1.06,
+            "diskPercent": 6.75,
             "host": "paulamyo",
-            "memoryPercent": 4.45,
+            "memoryPercent": 4.58,
             "name": "paulamyo",
-            "network": 0.01,
+            "network": 0.02,
             "status": "up",
             "threads": 4,
-            "updated": "2025-03-12 15:35:14.038Z",
-            "uptime": 5132620
+            "updated": "2025-03-17 16:32:27.946Z",
+            "uptime": 5568054
           }
         },
         "expected": [
@@ -253,6 +134,63 @@
               "arguments": {
                 "name": "paulamyo"
               },
+              "name": "get-system"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@beszel What is the disk usage of all monitored machines?",
+        "mocks": {
+          "get-system": [
+            {
+              "cpuChip": "Cortex-A76",
+              "cpuCores": 4,
+              "cpuPercent": 1.01,
+              "diskPercent": 6.75,
+              "host": "paulamyo",
+              "memoryPercent": 4.6,
+              "name": "paulamyo",
+              "network": 0.01,
+              "status": "up",
+              "threads": 4,
+              "updated": "2025-03-17 16:33:27.944Z",
+              "uptime": 5568114
+            },
+            {
+              "cpuChip": "Cortex-A53",
+              "cpuCores": 4,
+              "cpuPercent": 0.49,
+              "diskPercent": 12.28,
+              "host": "chihuahua",
+              "memoryPercent": 44.45,
+              "name": "chihuahua",
+              "network": 0,
+              "status": "up",
+              "threads": 4,
+              "updated": "2025-03-17 16:33:30.327Z",
+              "uptime": 1790893
+            },
+            {
+              "cpuChip": "Intel(R) Core(TM) i5-9600K CPU @ 3.70GHz",
+              "cpuCores": 6,
+              "cpuPercent": 2.9,
+              "diskPercent": 46.98,
+              "host": "host.docker.internal",
+              "memoryPercent": 13.86,
+              "name": "deepthought",
+              "network": 0.01,
+              "status": "up",
+              "threads": 6,
+              "updated": "2025-03-17 16:33:26.003Z",
+              "uptime": 600146
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
               "name": "get-system"
             }
           }
