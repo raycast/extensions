@@ -1,6 +1,6 @@
 # Password Store Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-03-17
 
 - Added ability to specify custom PATH to allow custom executable locations
 - Fixed some typos in the README
