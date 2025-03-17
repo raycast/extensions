@@ -21,11 +21,13 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   const { data } = useCachedPromise(
     async (search) => {
       const queries = search.split(",").map((part: string) => part.trim());
-      const sections = await Promise.all(queries.map(async (q: string) => {
-        const tasks = await getFilterTasks(q);
-        const sortedTasks = filterSort(tasks);
-        return { name: q, tasks: sortedTasks };
-      }));
+      const sections = await Promise.all(
+        queries.map(async (q: string) => {
+          const tasks = await getFilterTasks(q);
+          const sortedTasks = filterSort(tasks);
+          return { name: q, tasks: sortedTasks };
+        }),
+      );
       return sections;
     },
     [query],
@@ -33,7 +35,7 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
 
   const sections = data ?? [];
 
-  const { viewProps } = useViewTasks(`todoist.filter${name}`, { tasks: sections.flatMap(section => section.tasks) });
+  const { viewProps } = useViewTasks(`todoist.filter${name}`, { tasks: sections.flatMap((section) => section.tasks) });
 
   if (sections.length === 0) {
     return (
