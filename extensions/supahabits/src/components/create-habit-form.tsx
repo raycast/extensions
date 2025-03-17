@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import fetch from "node-fetch";
 
+import { COLOR_OPTIONS } from "../utils/colors";
+
 interface CreateHabitFormProps {
   revalidate: () => void;
 }
@@ -10,8 +12,8 @@ export default function CreateHabitForm(props: CreateHabitFormProps) {
   const { revalidate } = props;
   const { pop } = useNavigation();
 
-  const createHabit = async (values: { name: string; description: string; days: number }) => {
-    const { name, description, days } = values;
+  const createHabit = async (values: { name: string; description: string; days: number; color: string }) => {
+    const { name, description, days, color } = values;
 
     if (!name || name === "") {
       showToast({ style: Toast.Style.Failure, title: "🚫 Habit name is required" });
@@ -24,7 +26,7 @@ export default function CreateHabitForm(props: CreateHabitFormProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ secret, name, description, amount: days }),
+        body: JSON.stringify({ secret, name, description, amount: days, color }),
       });
       showToast({ style: Toast.Style.Success, title: "✅ Habit created successfully" });
       revalidate();
@@ -44,6 +46,11 @@ export default function CreateHabitForm(props: CreateHabitFormProps) {
     >
       <Form.TextField id="name" title="Habit Name" placeholder="💪🏼 Workout" />
       <Form.TextArea id="description" title="Description" placeholder="Do 10 pushups and 10 squats" />
+      <Form.Dropdown id="color" title="Habit Color" defaultValue="green">
+        {Object.entries(COLOR_OPTIONS).map(([value, title]) => (
+          <Form.Dropdown.Item key={value} value={value} title={title} />
+        ))}
+      </Form.Dropdown>
       <Form.Separator />
       <Form.Description
         title="Note"
