@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { StorageBucketView, IAMMembersByPrincipalView } from "./services/storage";
 import { IAMView } from "./services/iam";
 import { ServiceHubView } from "./services/servicehub";
+import { ComputeInstancesView, ComputeDisksView } from "./services/compute";
 import { executeGcloudCommand, getProjects } from "./gcloud";
 import { CacheManager } from "./utils/CacheManager";
 
@@ -36,6 +37,12 @@ const AVAILABLE_SERVICES: Service[] = [
     name: "Identity and Access Management (IAM)",
     description: "Fine-grained access control and visibility for centrally managing cloud resources",
     icon: Icon.Key
+  },
+  {
+    id: "compute",
+    name: "Compute Engine",
+    description: "Virtual machines running in Google's data centers",
+    icon: Icon.Desktop
   },
   {
     id: "servicehub",
@@ -331,6 +338,54 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
     }
   };
 
+  const viewComputeInstances = async () => {
+    setActionInProgress("compute-instances");
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading Compute Instances...",
+        message: `Project: ${projectId}`
+      });
+      
+      // Short delay to show the toast before navigation
+      setTimeout(() => {
+        loadingToast.hide();
+        push(<ComputeInstancesView projectId={projectId} gcloudPath={gcloudPath} />);
+      }, 500);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to navigate",
+        message: error instanceof Error ? error.message : String(error)
+      });
+      setActionInProgress(null);
+    }
+  };
+
+  const viewComputeDisks = async () => {
+    setActionInProgress("compute-disks");
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading Compute Disks...",
+        message: `Project: ${projectId}`
+      });
+      
+      // Short delay to show the toast before navigation
+      setTimeout(() => {
+        loadingToast.hide();
+        push(<ComputeDisksView projectId={projectId} gcloudPath={gcloudPath} />);
+      }, 500);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to navigate",
+        message: error instanceof Error ? error.message : String(error)
+      });
+      setActionInProgress(null);
+    }
+  };
+
   const clearCache = async () => {
     setActionInProgress("clearing-cache");
     try {
@@ -445,6 +500,20 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
                         icon={Icon.Globe} 
                         onAction={viewServiceHub}
                       />
+                    )}
+                    {service.id === "compute" && (
+                      <>
+                        <Action 
+                          title="View Compute Instances" 
+                          icon={Icon.Desktop} 
+                          onAction={viewComputeInstances}
+                        />
+                        <Action 
+                          title="View Compute Disks" 
+                          icon={Icon.Disk} 
+                          onAction={viewComputeDisks}
+                        />
+                      </>
                     )}
                   </ActionPanel.Section>
                   <ActionPanel.Section>
