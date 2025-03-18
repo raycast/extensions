@@ -3,6 +3,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import fs from "fs";
 import path from "path";
+import { showFailureToast } from "@raycast/utils";
 
 const execAsync = promisify(exec);
 const INIT_CACHE_KEY = "alarms-extension-initialized";
@@ -20,7 +21,7 @@ const isInitialized = async (): Promise<boolean> => {
  */
 const markAsInitialized = async (): Promise<void> => {
   const cache = new Cache();
-  await cache.set(INIT_CACHE_KEY, "true");
+  cache.set(INIT_CACHE_KEY, "true");
 };
 
 /**
@@ -46,11 +47,7 @@ const runInstallScript = async (): Promise<void> => {
 
     if (stderr) {
       console.error(`Installation error: ${stderr}`);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Setup failed",
-        message: "Check logs for details",
-      });
+      showFailureToast(stderr, { title: "Setup failed" });
       return;
     }
 
@@ -67,11 +64,7 @@ const runInstallScript = async (): Promise<void> => {
     });
   } catch (error) {
     console.error("Failed to run install script:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Setup failed",
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    showFailureToast(error, { title: "Setup failed" });
   }
 };
 
@@ -81,20 +74,15 @@ const runInstallScript = async (): Promise<void> => {
 export const initializeExtension = async (): Promise<void> => {
   // Check if we already initialized
   const initialized = await isInitialized();
+  if (initialized) return;
 
-  if (!initialized) {
-    // Check if install script exists
-    const installScriptPath = path.join(environment.assetsPath, "scripts", "install.sh");
+  // Check if install script exists
+  const installScriptPath = path.join(environment.assetsPath, "scripts", "install.sh");
 
-    if (fs.existsSync(installScriptPath)) {
-      await runInstallScript();
-    } else {
-      console.error("Install script not found at:", installScriptPath);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Setup failed",
-        message: "Installation script not found",
-      });
-    }
+  if (fs.existsSync(installScriptPath)) {
+    await runInstallScript();
+  } else {
+    console.error("Install script not found at:", installScriptPath);
+    showFailureToast("Installation script not found", { title: "Setup failed" });
   }
 };
