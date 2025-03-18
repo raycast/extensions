@@ -71,10 +71,12 @@ export default function Command() {
           subtitle={bundle.description}
           accessories={[
             { icon: Icon.Link, text: `${bundle.links.length}` },
-            bundle.openInIncognitoWindow
-              ? { icon: Icon.Person, tag: "Incognito" }
-              : { tag: getProfileNameByDirectory(bundle.chromeProfileDirectory) },
-          ]}
+            bundle.openInDefaultBrowser
+              ? { tag: "Default browser" }
+              : bundle.openInIncognitoWindow
+                ? { icon: Icon.Person, tag: "Incognito" }
+                : { tag: getProfileNameByDirectory(bundle.chromeProfileDirectory) },
+          ].filter(Boolean)}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
