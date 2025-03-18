@@ -86,4 +86,9 @@ The project includes several utility modules to avoid code duplication:
 - Use memoization for computed values
 - Optimize rendering of large lists
 - Show appropriate loading indicators for async operations
-- Leverage the project caching system for frequently accessed resources 
+- Leverage the project caching system for frequently accessed resources
+
+## Version History
+
+- **v0.0.2** - Added "Copy Connection Command" feature for VM instances, allowing users to quickly copy the gcloud ssh command to clipboard
+- **v0.0.1** - Initial implementation of Compute Engine service with instance management and VM creation 

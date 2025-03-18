@@ -1,3 +1,4 @@
 export { default as ComputeInstancesView } from './ComputeInstancesView';
+export { default as ComputeInstanceDetailView } from './ComputeInstanceDetailView';
 export { default as ComputeDisksView } from './ComputeDisksView';
-export { ComputeService } from './ComputeService'; 
+export { default as CreateVMForm } from './components/CreateVMForm'; 

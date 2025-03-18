@@ -10,9 +10,11 @@ import {
   confirmAlert,
   Alert,
   useNavigation,
+  Clipboard,
 } from "@raycast/api";
 import { ComputeService, ComputeInstance } from "./ComputeService";
 import ComputeInstanceDetailView from "./ComputeInstanceDetailView";
+import CreateVMForm from "./components/CreateVMForm";
 
 interface ComputeInstancesViewProps {
   projectId: string;
@@ -98,48 +100,93 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
             message: "Please re-authenticate with Google Cloud",
           });
         } else {
+          // Generic error message
           showToast({
             style: Toast.Style.Failure,
-            title: "Failed to Load Instances",
+            title: "Failed to load instances",
             message: error.message,
           });
         }
-        
-        // Set instances to empty array to avoid UI hanging
-        setInstances([]);
       } finally {
         setIsLoading(false);
       }
     };
-
+    
     initializeData();
   }, [gcloudPath, projectId]);
-  
+
   const fetchZones = async (computeService: ComputeService) => {
     try {
       const zonesList = await computeService.listZones();
       setZones(zonesList);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error fetching zones:", error);
-      // Don't show error toast for zones, as it's not critical
+      // Don't show errors for background fetches to avoid overwhelming the user
     }
   };
-
+  
   const fetchInstances = async (computeService: ComputeService) => {
-    setIsLoading(true);
-    
-    const loadingToast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Loading instances...",
-      message: selectedZone ? `Zone: ${selectedZone}` : "All zones",
-    });
-    
     try {
+      setIsLoading(true);
+      
+      const fetchingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Refreshing instances...",
+      });
+      
+      // Fetch instances based on selected zone or all zones
       const fetchedInstances = await computeService.getInstances(selectedZone);
+      
       setInstances(fetchedInstances);
       
-      loadingToast.hide();
+      fetchingToast.hide();
       
+      // Show toast with number of instances found
+      showToast({
+        style: Toast.Style.Success,
+        title: "Instances refreshed",
+        message: `${fetchedInstances.length} instances found`,
+      });
+    } catch (error: any) {
+      console.error("Error fetching instances:", error);
+      
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to refresh instances",
+        message: error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleZoneChange = async (newZone: string | undefined) => {
+    if (newZone === selectedZone) {
+      return; // No change
+    }
+    
+    setSelectedZone(newZone);
+    
+    if (!service) {
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      
+      const fetchingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: newZone ? `Loading instances in ${newZone}...` : "Loading instances in all zones...",
+      });
+      
+      // Fetch instances based on selected zone or all zones
+      const fetchedInstances = await service.getInstances(newZone);
+      
+      setInstances(fetchedInstances);
+      
+      fetchingToast.hide();
+      
+      // Show toast with number of instances found
       showToast({
         style: Toast.Style.Success,
         title: "Instances loaded",
@@ -148,258 +195,296 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
     } catch (error: any) {
       console.error("Error fetching instances:", error);
       
-      loadingToast.hide();
-      
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to Fetch Instances",
+        title: "Failed to load instances",
         message: error.message,
       });
     } finally {
       setIsLoading(false);
     }
   };
-
-  const refreshInstances = useCallback(async () => {
-    if (!service) return;
-    await fetchInstances(service);
-  }, [service, selectedZone]);
-
-  const handleZoneChange = async (newZone: string | undefined) => {
-    // Convert "all" to undefined for filtering
-    const zoneFilter = newZone === "all" ? undefined : newZone;
-    setSelectedZone(zoneFilter);
-    
-    if (service) {
-      try {
-        setIsLoading(true);
-        
-        const loadingToast = await showToast({
-          style: Toast.Style.Animated,
-          title: "Changing zone...",
-          message: zoneFilter ? `Loading instances in ${zoneFilter}` : "Loading instances in all zones",
-        });
-        
-        const fetchedInstances = await service.getInstances(zoneFilter);
-        setInstances(fetchedInstances);
-        
-        loadingToast.hide();
-        
-        showToast({
-          style: Toast.Style.Success,
-          title: "Zone changed",
-          message: `${fetchedInstances.length} instances found in ${zoneFilter || "all zones"}`,
-        });
-      } catch (error: any) {
-        console.error("Error fetching instances:", error);
-        
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to Fetch Instances",
-          message: error.message,
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
+  
   const startInstance = async (instance: ComputeInstance) => {
-    if (!service) return;
-    
-    try {
-      setIsLoading(true);
-      const loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: `Starting ${instance.name}...`,
-        message: `Zone: ${service.formatZone(instance.zone)}`,
-      });
-      
-      const success = await service.startInstance(
-        instance.name,
-        service.formatZone(instance.zone)
-      );
-      
-      loadingToast.hide();
-      
-      if (success) {
-        showToast({
-          style: Toast.Style.Success,
-          title: `Started ${instance.name}`,
-          message: `The instance should be running soon`,
-        });
-        
-        // Refresh the instance list
-        await refreshInstances();
-      }
-    } catch (error: any) {
+    if (!service) {
       showToast({
         style: Toast.Style.Failure,
-        title: `Failed to Start ${instance.name}`,
+        title: "Service not initialized",
+        message: "Please try again",
+      });
+      return;
+    }
+    
+    try {
+      const zone = service.formatZone(instance.zone);
+      const name = instance.name;
+      
+      const confirmationResponse = await confirmAlert({
+        title: "Start Instance",
+        message: `Are you sure you want to start the instance ${name}?`,
+        primaryAction: {
+          title: "Start",
+          style: Alert.ActionStyle.Default,
+        },
+      });
+      
+      if (!confirmationResponse) {
+        return;
+      }
+      
+      const startingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: `Starting instance ${name}...`,
+        message: `Zone: ${zone}`,
+      });
+      
+      await service.startInstance(name, zone);
+      
+      startingToast.hide();
+      
+      showToast({
+        style: Toast.Style.Success,
+        title: "Instance started",
+        message: `${name} is starting. It may take a few moments to be ready.`,
+      });
+      
+      // Refresh instances after a short delay to allow the status to update
+      setTimeout(() => fetchInstances(service), 3000);
+    } catch (error: any) {
+      console.error("Error starting instance:", error);
+      
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to start instance",
         message: error.message,
       });
-    } finally {
-      setIsLoading(false);
     }
   };
-
+  
   const stopInstance = async (instance: ComputeInstance) => {
-    if (!service) return;
-    
-    const shouldProceed = await confirmAlert({
-      title: `Stop ${instance.name}?`,
-      message: "This will stop the virtual machine. Are you sure?",
-      primaryAction: {
-        title: "Stop",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-    
-    if (!shouldProceed) return;
-    
-    try {
-      setIsLoading(true);
-      const loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: `Stopping ${instance.name}...`,
-        message: `Zone: ${service.formatZone(instance.zone)}`,
-      });
-      
-      const success = await service.stopInstance(
-        instance.name,
-        service.formatZone(instance.zone)
-      );
-      
-      loadingToast.hide();
-      
-      if (success) {
-        showToast({
-          style: Toast.Style.Success,
-          title: `Stopped ${instance.name}`,
-          message: "The instance has been stopped",
-        });
-        
-        // Refresh the instance list
-        await refreshInstances();
-      }
-    } catch (error: any) {
+    if (!service) {
       showToast({
         style: Toast.Style.Failure,
-        title: `Failed to Stop ${instance.name}`,
+        title: "Service not initialized",
+        message: "Please try again",
+      });
+      return;
+    }
+    
+    try {
+      const zone = service.formatZone(instance.zone);
+      const name = instance.name;
+      
+      const confirmationResponse = await confirmAlert({
+        title: "Stop Instance",
+        message: `Are you sure you want to stop the instance ${name}?`,
+        primaryAction: {
+          title: "Stop",
+          style: Alert.ActionStyle.Destructive,
+        },
+      });
+      
+      if (!confirmationResponse) {
+        return;
+      }
+      
+      const stoppingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: `Stopping instance ${name}...`,
+        message: `Zone: ${zone}`,
+      });
+      
+      await service.stopInstance(name, zone);
+      
+      stoppingToast.hide();
+      
+      showToast({
+        style: Toast.Style.Success,
+        title: "Instance stopped",
+        message: `${name} is stopping. It may take a few moments to stop completely.`,
+      });
+      
+      // Refresh instances after a short delay to allow the status to update
+      setTimeout(() => fetchInstances(service), 3000);
+    } catch (error: any) {
+      console.error("Error stopping instance:", error);
+      
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to stop instance",
         message: error.message,
       });
-    } finally {
-      setIsLoading(false);
     }
   };
-
-  // Use the imported ComputeInstanceDetailView component
+  
   const viewInstanceDetails = (instance: ComputeInstance) => {
-    if (!service) return;
-    push(<ComputeInstanceDetailView 
-      instance={instance} 
-      service={service} 
-      onRefresh={refreshInstances} 
-    />);
+    if (!service) {
+      return;
+    }
+    
+    push(
+      <ComputeInstanceDetailView
+        instance={instance}
+        service={service}
+        onRefresh={() => fetchInstances(service)}
+      />
+    );
   };
-
-  // Filter instances based on search text
-  const filteredInstances = instances.filter((instance) =>
-    instance.name.toLowerCase().includes(searchText.toLowerCase())
-  );
+  
+  const copyConnectionCommand = (instance: ComputeInstance) => {
+    if (!service) {
+      return;
+    }
+    
+    const zone = service.formatZone(instance.zone).split('/').pop() || "";
+    const projectId = service.formatZone(instance.zone).split('/')[0] || "";
+    const command = `gcloud compute ssh --zone="${zone}" "${instance.name}" --project="${projectId}"`;
+    
+    Clipboard.copy(command);
+    showToast({
+      style: Toast.Style.Success,
+      title: "Connection command copied",
+      message: "Paste in your terminal to connect",
+    });
+  };
+  
+  const createVMInstance = () => {
+    if (!service) {
+      return;
+    }
+    
+    push(
+      <CreateVMForm
+        projectId={projectId}
+        gcloudPath={gcloudPath}
+        onVMCreated={() => fetchInstances(service)}
+      />
+    );
+  };
 
   const getStatusIcon = (status: string) => {
     const lowerStatus = status.toLowerCase();
-    if (lowerStatus === "running") return { source: Icon.Circle, tintColor: Color.Green };
-    if (lowerStatus === "terminated" || lowerStatus === "stopped") return { source: Icon.Circle, tintColor: Color.Red };
-    if (lowerStatus === "stopping" || lowerStatus === "starting") return { source: Icon.Circle, tintColor: Color.Orange };
-    return { source: Icon.Circle, tintColor: Color.PrimaryText };
+    if (lowerStatus === "running") {
+      return { source: Icon.Circle, tintColor: Color.Green };
+    } else if (lowerStatus === "terminated" || lowerStatus === "stopped") {
+      return { source: Icon.Circle, tintColor: Color.Red };
+    } else if (lowerStatus === "stopping" || lowerStatus === "starting") {
+      return { source: Icon.Circle, tintColor: Color.Orange };
+    }
+    return { source: Icon.Circle, tintColor: Color.SecondaryText };
   };
 
   return (
     <List
       isLoading={isLoading}
-      searchText={searchText}
+      searchBarPlaceholder="Search VM instances..."
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search instances..."
+      filtering={{ keepSectionOrder: true }}
+      navigationTitle="Compute Engine Instances"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Zone"
           value={selectedZone || "all"}
-          onChange={handleZoneChange}
+          onChange={(newValue) => handleZoneChange(newValue === "all" ? undefined : newValue)}
         >
           <List.Dropdown.Item title="All Zones" value="all" />
-          {zones.length === 0 ? (
-            <List.Dropdown.Item title="Loading zones..." value="loading" />
-          ) : (
-            zones.map((zone) => (
-              <List.Dropdown.Item
-                key={zone}
-                title={zone}
-                value={zone}
-              />
-            ))
-          )}
+          {zones.map((zone) => (
+            <List.Dropdown.Item key={zone} title={zone} value={zone} />
+          ))}
         </List.Dropdown>
       }
-      navigationTitle="Compute Engine Instances"
-      filtering={false}
-      throttle
     >
-      {filteredInstances.length === 0 && !isLoading ? (
-        <List.EmptyView
-          title="No VM Instances Found"
-          description={searchText ? "Try a different search term" : "Try selecting a different zone or create a new instance"}
-          icon={{ source: Icon.Desktop }}
-        />
-      ) : (
-        filteredInstances.map((instance) => (
-          <List.Item
-            key={instance.id || instance.name}
-            title={instance.name}
-            subtitle={service?.formatMachineType(instance.machineType) || ""}
-            accessories={[
-              { text: service?.formatZone(instance.zone) || "", tooltip: "Zone" },
-              { text: instance.status, tooltip: "Status" },
-            ]}
-            icon={getStatusIcon(instance.status)}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section title="Instance Actions">
-                  <Action
-                    title="View Instance Details"
-                    icon={Icon.Eye}
-                    onAction={() => viewInstanceDetails(instance)}
-                  />
-                  <Action
-                    title="Refresh Instances"
-                    icon={Icon.ArrowClockwise}
-                    onAction={refreshInstances}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  />
-                </ActionPanel.Section>
-                
-                <ActionPanel.Section title="Power Actions">
-                  {instance.status.toLowerCase() === "running" ? (
-                    <Action
-                      title="Stop Instance"
-                      icon={{ source: Icon.Stop, tintColor: Color.Red }}
-                      onAction={() => stopInstance(instance)}
-                    />
-                  ) : (
-                    instance.status.toLowerCase() !== "starting" && (
+      <List.EmptyView
+        title="No VM instances found"
+        description={isLoading ? "Loading instances..." : "No VM instances found in the selected zone"}
+        icon={{ source: "https://cloud.google.com/compute/images/logo_compute_black.svg" }}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Create VM Instance"
+              icon={Icon.Plus}
+              onAction={createVMInstance}
+            />
+            <Action
+              title="Refresh"
+              icon={Icon.ArrowClockwise}
+              onAction={() => service && fetchInstances(service)}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+            />
+          </ActionPanel>
+        }
+      />
+      {service && (
+        <List.Section title="VM Instances" subtitle={instances.length > 0 ? `${instances.length} instances` : undefined}>
+          {instances.map((instance) => {
+            const zone = service.formatZone(instance.zone);
+            const machineType = service.formatMachineType(instance.machineType);
+            const networkIP = instance.networkInterfaces?.[0]?.networkIP || "No IP";
+            const externalIP = instance.networkInterfaces?.[0]?.accessConfigs?.[0]?.natIP || "No external IP";
+            
+            return (
+              <List.Item
+                key={instance.id}
+                title={instance.name}
+                subtitle={`${machineType} in ${zone}`}
+                accessories={[
+                  { text: instance.status, icon: getStatusIcon(instance.status) },
+                  { text: externalIP !== "No external IP" ? externalIP : networkIP },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Section title="Instance Actions">
                       <Action
-                        title="Start Instance"
-                        icon={{ source: Icon.Play, tintColor: Color.Green }}
-                        onAction={() => startInstance(instance)}
+                        title="View Instance Details"
+                        icon={Icon.Eye}
+                        onAction={() => viewInstanceDetails(instance)}
                       />
-                    )
-                  )}
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))
+                      {instance.status.toLowerCase() === "running" && (
+                        <Action
+                          title="Copy Connection Command"
+                          icon={Icon.Terminal}
+                          onAction={() => copyConnectionCommand(instance)}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                        />
+                      )}
+                      {instance.status.toLowerCase() === "running" ? (
+                        <Action
+                          title="Stop Instance"
+                          icon={{ source: Icon.Stop, tintColor: Color.Red }}
+                          onAction={() => stopInstance(instance)}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                        />
+                      ) : (
+                        instance.status.toLowerCase() === "terminated" && (
+                          <Action
+                            title="Start Instance"
+                            icon={{ source: Icon.Play, tintColor: Color.Green }}
+                            onAction={() => startInstance(instance)}
+                            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                          />
+                        )
+                      )}
+                    </ActionPanel.Section>
+                    <ActionPanel.Section title="Management">
+                      <Action
+                        title="Create VM Instance"
+                        icon={Icon.Plus}
+                        onAction={createVMInstance}
+                        shortcut={{ modifiers: ["cmd"], key: "n" }}
+                      />
+                      <Action
+                        title="Refresh"
+                        icon={Icon.ArrowClockwise}
+                        onAction={() => fetchInstances(service)}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
       )}
     </List>
   );

@@ -10,6 +10,7 @@ import {
   Alert,
   Detail,
   Clipboard,
+  useNavigation,
 } from "@raycast/api";
 import { ComputeService, ComputeInstance } from "./ComputeService";
 import { useMemo, useCallback } from "react";
@@ -23,6 +24,7 @@ interface ComputeInstanceDetailViewProps {
 export default function ComputeInstanceDetailView({ instance, service, onRefresh }: ComputeInstanceDetailViewProps) {
   const zone = service.formatZone(instance.zone);
   const machineType = service.formatMachineType(instance.machineType);
+  const { push } = useNavigation();
   
   // Memoize status info to avoid re-rendering
   const statusInfo = useMemo(() => {
@@ -342,6 +344,18 @@ export default function ComputeInstanceDetailView({ instance, service, onRefresh
     }
   }, [instance.name, zone, service, onRefresh]);
   
+  const copyConnectionCommand = useCallback(() => {
+    const zoneName = zone.split('/').pop() || zone;
+    const command = `gcloud compute ssh --zone="${zoneName}" "${instance.name}" --project="${service.formatZone(instance.zone).split('/')[0]}"`;
+    
+    Clipboard.copy(command);
+    showToast({
+      style: Toast.Style.Success,
+      title: "Connection command copied",
+      message: "Paste in your terminal to connect",
+    });
+  }, [instance, zone]);
+  
   return (
     <Detail
       markdown={markdown}
@@ -376,6 +390,17 @@ export default function ComputeInstanceDetailView({ instance, service, onRefresh
               />
             )}
           </ActionPanel.Section>
+          
+          {instance.status.toLowerCase() === "running" && (
+            <ActionPanel.Section title="Connection">
+              <Action
+                title="Copy Connection Command"
+                icon={Icon.Terminal}
+                onAction={copyConnectionCommand}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+              />
+            </ActionPanel.Section>
+          )}
           
           <ActionPanel.Section title="Power Actions">
             {instance.status.toLowerCase() === "running" ? (
