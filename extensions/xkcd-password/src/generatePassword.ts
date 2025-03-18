@@ -12,7 +12,9 @@ export function generateXkcdPassword(wordCount: number = 4, separator: string = 
   const words = [];
   // Generate one less word than wordCount to leave room for digits
   for (let i = 0; i < wordCount - 1; i++) {
-    const randomIndex = Math.floor(Math.random() * wordList.length);
+    const randomBytes = new Uint32Array(1);
+    crypto.getRandomValues(randomBytes);
+    const randomIndex = randomBytes[0] % wordList.length;
     const word = capitalizeWord(wordList[randomIndex]);
     words.push(word);
   }
