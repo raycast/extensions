@@ -25,7 +25,7 @@ function generatePasswords(count: number): string[] {
 }
 
 export default function Command() {
-  const passwords = generatePasswords(10);
+  const [passwords] = useState(() => generatePasswords(10));
 
   return (
     <List>
