@@ -12,10 +12,6 @@ export default async function Command() {
       message: password,
     });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to generate password",
-      message: String(error),
-    });
+    await showFailureToast(String(error));
   }
 }
