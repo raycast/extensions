@@ -220,45 +220,45 @@ export default function CreateAlarm() {
   minDate.setMilliseconds(0);
 
   const handleCreateAlarm = async () => {
-    stopPreview();
-
-    await logToFile("handleCreateAlarm called");
-
-    if (!scheduledTime) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Missing Time",
-        message: "Please select a time for your alarm",
-      });
-      return;
-    }
-
-    // Validate that the scheduled time is in the future
-    const now = new Date();
-    if (scheduledTime <= now) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid Time",
-        message: "Alarm time must be in the future",
-      });
-      await logToFile(`Alarm submission rejected: time (${scheduledTime.toISOString()}) is not in the future`);
-      return;
-    }
-
-    setIsLoading(true);
-
     try {
-      const scriptPath = `${os.homedir()}/.raycast-alarms/scripts/manage-crontab.sh`;
-      await logToFile(`Using script path: ${scriptPath}`);
+      stopPreview();
 
-      // Check if script exists
-      await fs.promises.access(scriptPath, fs.constants.X_OK);
-      await logToFile("Script exists and is executable");
-    } catch (error) {
-      await logToFile(`Script not found or not executable: ${scriptPath}`);
-      showFailureToast("Script not found or not executable", scriptPath);
-      return;
-    }
+      await logToFile("handleCreateAlarm called");
+
+      if (!scheduledTime) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Missing Time",
+          message: "Please select a time for your alarm",
+        });
+        return;
+      }
+
+      // Validate that the scheduled time is in the future
+      const now = new Date();
+      if (scheduledTime <= now) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Time",
+          message: "Alarm time must be in the future",
+        });
+        await logToFile(`Alarm submission rejected: time (${scheduledTime.toISOString()}) is not in the future`);
+        return;
+      }
+
+      setIsLoading(true);
+
+      const scriptPath = `${os.homedir()}/.raycast-alarms/scripts/manage-crontab.sh`;
+      try {
+        await logToFile(`Using script path: ${scriptPath}`);
+
+        // Check if script exists
+        await fs.promises.access(scriptPath, fs.constants.X_OK);
+        await logToFile("Script exists and is executable");
+      } catch (error) {
+        await logToFile(`Script not found or not executable: ${scriptPath}`);
+        return;
+      }
 
       const alarmId = `raycast_alarm_${Date.now()}`;
       const soundPath = getRingtonePath(selectedRingtone);
