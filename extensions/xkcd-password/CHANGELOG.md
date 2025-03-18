@@ -1,6 +1,6 @@
 # XKCD Password Generator Changelog
 
-## [Initial Version] - 2024-02-28
+## [Initial Version] {PR_MERGE_DATE}
 
 - Initial version of XKCD Password Generator
 - Added "Copy Random XKCD Password" command for quick password generation
