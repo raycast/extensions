@@ -1,7 +1,7 @@
 import Groq from "groq-sdk";
 import fs from "fs-extra";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences, TranscriptionModelId, TranscriptionResult } from "../../types";
+import { TranscriptionModelId, TranscriptionResult } from "../../types";
 import { buildCompletePrompt } from "../../constants";
 import path from "path";
 

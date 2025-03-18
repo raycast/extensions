@@ -14,7 +14,7 @@ import {
 import { useForm, showFailureToast } from "@raycast/utils";
 import { transcribeAudio } from "./utils/ai/transcription";
 import { useAudioRecorder } from "./hooks/useAudioRecorder";
-import { Preferences, TranscriptionModelId } from "./types";
+import { TranscriptionModelId } from "./types";
 import { LANGUAGE_OPTIONS, TRANSCRIPTION_MODELS } from "./constants";
 
 interface TranscriptFormValues {

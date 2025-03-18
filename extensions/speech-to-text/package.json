@@ -37,7 +37,7 @@
       "description": "The Groq model to use for transcription",
       "type": "dropdown",
       "required": true,
-      "default": "whisper-large-v3-turbo",
+      "default": "whisper-large-v3",
       "data": [
         {
           "title": "Whisper Large v3",
@@ -49,7 +49,7 @@
         },
         {
           "title": "Distil Whisper",
-          "value": "distil-whisper"
+          "value": "distil-whisper-large-v3-en"
         }
       ]
     },
@@ -131,13 +131,6 @@
       "description": "Automatically use any text you have highlighted in other apps as context for transcription",
       "type": "checkbox",
       "default": true,
-      "required": false
-    },
-    {
-      "name": "tempDirectory",
-      "title": "Temporary Directory",
-      "description": "Directory to store temporary audio recordings",
-      "type": "directory",
       "required": false
     }
   ],

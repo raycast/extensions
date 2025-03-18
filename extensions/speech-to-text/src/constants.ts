@@ -1,10 +1,7 @@
-import { getPreferenceValues } from "@raycast/api";
-import os from "os";
+import { environment } from "@raycast/api";
 import path from "path";
-import { Preferences } from "./types";
 
-const preferences = getPreferenceValues<Preferences>();
-export const DEFAULT_TEMP_DIR = path.join(os.homedir(), preferences.tempDirectory ?? ".raycast-speech-to-text-temp");
+export const DEFAULT_TEMP_DIR = path.join(environment.supportPath, "audio");
 
 export const RECORDING_FILE_FORMAT = "wav";
 export const RECORDING_SAMPLE_RATE = 16000; // 16kHz

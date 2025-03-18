@@ -8,7 +8,6 @@ A Raycast extension that allows you to convert speech to text using Groq's API.
 - Select existing audio files for transcription
 - Transcribe audio to text using Groq's powerful speech-to-text models
 - Copy transcription results to clipboard
-- Manage temporary audio recordings
 - View and search transcription history
 
 ## Requirements
@@ -23,7 +22,6 @@ A Raycast extension that allows you to convert speech to text using Groq's API.
 2. Get a Groq API key from [console.groq.com](https://console.groq.com/)
 3. Enter your API key in the extension preferences
 4. Select your preferred transcription model
-5. Optionally, set a custom temporary directory for audio recordings
 
 ## Usage
 
@@ -74,7 +72,6 @@ You can customize the transcription process through the extension preferences:
 - **Custom Prompts**: Add specific instructions to improve transcription accuracy
 - **Specialized Terms**: List domain-specific terms or names for better recognition
 - **Context Awareness**: Enable to use highlighted text as context
-- **Temporary Directory**: Set a custom directory for storing recordings
 
 ## Troubleshooting
 
@@ -82,8 +79,7 @@ You can customize the transcription process through the extension preferences:
 - Ensure your microphone permissions are enabled for Raycast
 - Check your Groq API key is valid and has access to the speech-to-text models
 - If transcription fails, try a different model or check your internet connection
-- For history-related issues, check if the temporary directory exists and is writable
 
 ## Privacy Note
 
-Audio recordings are stored locally in your specified temporary directory. You can manage or delete these recordings through the Transcription History feature or by accessing the directory directly.
+Audio recordings are stored locally in a dedicated directory managed by Raycast. You can manage or delete these recordings through the Transcription History feature.

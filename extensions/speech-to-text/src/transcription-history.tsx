@@ -23,7 +23,7 @@ import { exec } from "child_process";
 import { listAudioFiles, getAudioDuration } from "./utils/audio";
 import { saveTranscription, transcribeAudio, loadTranscription } from "./utils/ai/transcription";
 import { formatDate, formatDuration, formatFileSize } from "./utils/formatting";
-import { TranscriptionFile, TranscriptionResult, Preferences, TranscriptionModelId } from "./types";
+import { TranscriptionFile, TranscriptionResult, TranscriptionModelId } from "./types";
 import { LANGUAGE_OPTIONS, TRANSCRIPTION_MODELS, buildCompletePrompt } from "./constants";
 
 export default function TranscriptionHistory() {
