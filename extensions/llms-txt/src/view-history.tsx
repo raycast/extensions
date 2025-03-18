@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, showToast, Toast, Keyboard } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getHistory, removeFromHistory, formatTimestamp } from "./storage";
 import type { HistoryEntry, ActionType } from "./types";
@@ -20,9 +20,8 @@ export default function ViewHistory() {
 
       setHistory(entries);
     } catch (error) {
-      await showFailureToast("Failed to load history", {
+      await showFailureToast(error, {
         title: "Failed to load history",
-        message: String(error),
       });
     } finally {
       setIsLoading(false);
@@ -40,9 +39,8 @@ export default function ViewHistory() {
         title: "Removed from history",
       });
     } catch (error) {
-      await showFailureToast("Failed to remove entry", {
+      await showFailureToast(error, {
         title: "Failed to remove entry",
-        message: String(error),
       });
     }
   }
@@ -95,7 +93,8 @@ export default function ViewHistory() {
                 <Action
                   title="Remove from History"
                   icon={Icon.Trash}
-                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                  style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={() => handleRemove(entry)}
                 />
               </ActionPanel.Section>
