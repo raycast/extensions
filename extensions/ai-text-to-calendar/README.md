@@ -26,7 +26,7 @@ Configure the extension via `Raycast Settings > Extensions > AI Text to Calendar
 
 - [ ] User default settings (e.g., default date, time)
 - [ ] With supplementary information (e.g., selected text + user input)
-- [ ] Support for other calendar services (e.g., use Apple Script or Shortcut for Apple Calendar)
+- [x] Support for other calendar services (e.g., use Apple Script or Shortcut for Apple Calendar)
 
 ## License
 
