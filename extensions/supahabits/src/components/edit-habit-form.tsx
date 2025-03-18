@@ -31,7 +31,7 @@ export default function EditHabitForm(props: EditHabitFormProps) {
 
     try {
       await fetch(`https://www.supahabits.com/api/habits/${habit.id}`, {
-        method: "POST",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
