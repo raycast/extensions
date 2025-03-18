@@ -2,7 +2,7 @@
 
 ### [Habit Colors & Manage habits features] - {PR_MERGE_DATE}
 
-    - Habits uses colors to identify them
+    - Habits use colors to identify them
     - User can edit/delete habits
     - Fix track repeatable habit
 
