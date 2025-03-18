@@ -45,7 +45,6 @@ const CleanFolderCommand = () => {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="Files inside Folder"
       actions={
         <ActionPanel>
           <ListFoldersAction refetchFolders={refetchFolders} />
@@ -68,7 +67,7 @@ const CleanFolderCommand = () => {
               <ActionPanel>
                 {folders.length > 0 && (
                   <ActionPanel.Section title="Cleaner Actions">
-                    <Action title="Clean All" onAction={cleanAllFiles} />
+                    <Action title="Clean All" onAction={cleanAllFiles} icon={Icon.Checkmark} />
                   </ActionPanel.Section>
                 )}
                 <ActionPanel.Section title="Settings">

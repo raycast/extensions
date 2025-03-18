@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { Folder } from "../types/folders";
 import { AddFoldersAction, EditFolderAction } from "./add-folder";
 import { CreateNewFolder } from "../actions/createNewFolder";
@@ -76,7 +76,13 @@ const ListFolders = () => {
                 <ActionPanel>
                   <AddFoldersAction onCreate={createNewFolder} />
                   <EditFolderAction folder={folder} onEdit={editFolder} />
-                  <Action icon={Icon.Trash} title="Delete Folder" onAction={() => deleteFolder(folder.id)} />
+                  <Action
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    title="Delete Folder"
+                    onAction={() => deleteFolder(folder.id)}
+                  />
                 </ActionPanel>
               }
             />
