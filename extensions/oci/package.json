@@ -15,6 +15,12 @@
       "title": "Manage Core Services",
       "description": "Manage Instances and more",
       "mode": "view"
+    },
+    {
+      "name": "object-storage",
+      "title": "Manage Object Storage Services",
+      "description": "Manage Object Storage & Archive Storage",
+      "mode": "view"
     }
   ],
   "dependencies": {
