@@ -2,9 +2,9 @@
 
 ### [Habit Colors & Manage habits features] - {PR_MERGE_DATE}
 
-    - Habits use colors to identify them
-    - User can edit/delete habits
-    - Fix track repeatable habit
+- Habits use colors to identify them
+- User can edit/delete habits
+- Fix track repeatable habit
 
 ### [Unmark as Done & Feedback] - 2025-03-14
 
