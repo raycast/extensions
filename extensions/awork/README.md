@@ -5,13 +5,13 @@ This is a Raycast extension with commands for the work management platform [awor
 
 ## Installation & Authorization
 
-To use this extension you need to add an API client to awork. You can add this under "Settings / Integrations / API clients" and you may need admin rights. However, the users of the extension will only be able to see/access the projects that they are individually allowed to see in your workspace.
+To use this extension you need to add an API client to awork. You can add this under "(Workspace) Settings / Integrations / API clients" and you may need admin rights. However, the users of the extension will only be able to see/access the projects that they are individually allowed to see in your workspace.
 
 Please enter something like:
 
 - Name: `awork Extension for Raycast`
 - Client ID: `raycast-awork-extension`
-- Redirect URI: `https://raycast.com/redirect?packageName=awork` (hit the "+")
+- Redirect URI: `https://raycast.com/redirect?packageName=Extension` (hit the "+")
 
 Then copy/save the generated new client secret.
 

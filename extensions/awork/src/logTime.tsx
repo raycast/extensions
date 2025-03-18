@@ -160,7 +160,6 @@ export default function Command(props: LaunchProps) {
     },
     validation: {
       projectId: (value) => {
-        setValidationError("projectId", undefined);
         if ((!value || value === "none") && values.taskId === "none") {
           return "Please select a project";
         }

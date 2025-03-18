@@ -10,7 +10,7 @@ const Actions = (props: { projectID: string; isBillable: boolean }) => {
   return (
     <ActionPanel>
       <Action.OpenInBrowser url={`${BaseUrl}/projects/${props.projectID}`} />
-      <Action.CopyToClipboard content={`${BaseUrl}/projects/${props.projectID}`} />
+      <Action.CopyToClipboard title={"Copy URL to Clipboard"} content={`${BaseUrl}/projects/${props.projectID}`} />
       <Action.CopyToClipboard
         icon={Icon.Envelope}
         title="Copy Project Mail Address"
@@ -61,6 +61,7 @@ const Actions = (props: { projectID: string; isBillable: boolean }) => {
 const ProjectItem = (props: { project: project }) => {
   return (
     <List.Item
+      icon={Icon.Folder}
       title={props.project.name}
       subtitle={props.project.company?.name}
       actions={<Actions projectID={props.project.id} isBillable={props.project.isBillableByDefault} />}
@@ -87,9 +88,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} pagination={pagination} throttle onSearchTextChange={setSearchText}>
-      {projects &&
-        Array.isArray(projects) &&
-        projects.map((project) => <ProjectItem key={project.id} project={project} />)}
+      {projects && projects.map((project) => <ProjectItem key={project.id} project={project} />)}
     </List>
   );
 }

@@ -45,14 +45,16 @@
       "description": "Enter the Client ID of your workspace",
       "type": "textfield",
       "required": true,
-      "title": "Client ID"
+      "title": "Client ID",
+      "placeholder": "my-client-id"
     },
     {
       "name": "clientSecret",
       "description": "Enter the Client Secret of your workspace",
       "type": "password",
       "required": true,
-      "title": "Client Secret"
+      "title": "Client Secret",
+      "placeholder": "my-client-secret"
     }
   ],
   "dependencies": {

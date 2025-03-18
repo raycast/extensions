@@ -1,4 +1,4 @@
-import { Alert, confirmAlert, getPreferenceValues, LocalStorage, OAuth, PreferenceValues } from "@raycast/api";
+import { Alert, confirmAlert, getPreferenceValues, LocalStorage, OAuth } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import fetch, { RequestInit } from "node-fetch";
 
@@ -17,7 +17,7 @@ export const baseURI = "https://api.awork.com/api/v1";
 export let authorizationInProgress = false;
 export let revalidating = false;
 
-const preferences = getPreferenceValues<PreferenceValues>();
+const preferences = getPreferenceValues<Preferences>();
 
 export const client = new OAuth.PKCEClient({
   providerName: "awork",

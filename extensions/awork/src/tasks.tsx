@@ -10,7 +10,7 @@ const Actions = (props: { taskId: string; projectId: string; typeOfWorkId: strin
   return (
     <ActionPanel>
       <Action.OpenInBrowser url={`${BaseUrl}/tasks/${props.taskId}`} />
-      <Action.CopyToClipboard content={`${BaseUrl}/tasks/${props.taskId}`} />
+      <Action.CopyToClipboard title={"Copy URL to Clipboard"} content={`${BaseUrl}/tasks/${props.taskId}`} />
       <Action.CopyToClipboard
         title={"Copy Task ID"} // eslint-disable-line
         content={props.taskId}
@@ -43,6 +43,7 @@ const Actions = (props: { taskId: string; projectId: string; typeOfWorkId: strin
 const TaskItem = (props: { task: task }) => {
   return (
     <List.Item
+      icon={Icon.Document}
       title={props.task.name}
       subtitle={props.task.project.name}
       keywords={[props.task.project.name, props.task.id]}
@@ -63,7 +64,7 @@ export default function Command(props: LaunchProps) {
     revalidate: updateTasks,
   } = useCachedPromise(getTasks, [searchText, 100, projectId], {
     onData: (data) => {
-      if ((!data || (data.length === 0 && !searchText)) && !authorizationInProgress) {
+      if (data.length === 0 && !searchText && !authorizationInProgress) {
         setTimeout(() => {
           console.log("Reloading tasks");
           updateTasks();
@@ -77,7 +78,7 @@ export default function Command(props: LaunchProps) {
     revalidate: updateProjects,
   } = useCachedPromise(getProjects, ["", 1000], {
     onData: (data) => {
-      if ((!data || data.length === 0) && !authorizationInProgress) {
+      if (data.length === 0 && !authorizationInProgress) {
         setTimeout(() => {
           console.log("Reloading projects");
           updateProjects();
@@ -110,8 +111,9 @@ export default function Command(props: LaunchProps) {
       }
     >
       {tasks &&
-        Array.isArray(tasks) &&
-        tasks.filter((value) => value.projectId === projectId).map((task) => <TaskItem key={task.id} task={task} />)}
+        tasks
+          .filter((task) => !projectId || task.projectId === projectId)
+          .map((task) => <TaskItem key={task.id} task={task} />)}
     </List>
   );
 }
