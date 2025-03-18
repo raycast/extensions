@@ -110,7 +110,7 @@
         ]
       },
       {
-        "input" : "@openstatus show me actve status pages",
+        "input" : "@openstatus show me active status pages",
         "mocks" : {
           "show-status-pages" : [
             {
@@ -154,52 +154,25 @@
         ]
       },
       {
-        "input" : "@openstatus create report for openstatus saying we are investigating",
+        "input" : "@openstatus create report for raycast saying we are investigating date of next monday 9am",
         "mocks" : {
-          "show-status-pages" : [
-            {
-              "description" : "Description",
-              "slug" : "slug",
-              "title" : "Title"
-            }
-          ],
-          "create-status-report": [
-            {
-              
-            }
-          ]
-        },
-        "expected" : [
-          {
-            "callsTool" : {
-              "arguments" : {
-      
-              },
-              "name" : "show-status-pages"
-            }
-          },
-          {
-            "callsTool" : {
-              "arguments" : {
-      
-              },
-              "name" : "create-status-report"
-            }
-          }
-        ]
-      },
-      {
-        "input" : "@openstatus create report for page 1 saying we are investigating date of next monday 9am",
-        "mocks" : {
-          "create-status-report" : "Successfully called \"create-status-report\"",
           "show-status-pages" : [
             {
               "description" : "Description",
               "id" : 0,
-              "slug" : "slug",
-              "title" : "Title"
+              "slug" : "raycast",
+              "title" : "Raycast"
             }
-          ]
+          ],
+          "create-status-report" : {
+            "id" : 0,
+            "pageId" : 0,
+            "status" : "investigating",
+            "statusReportUpdateIds" : [
+              2
+            ],
+            "title" : "Investigation Ongoing"
+          }
         },
         "expected" : [
           {
@@ -213,11 +186,11 @@
           {
             "callsTool" : {
               "arguments" : {
-                "date" : "2025-03-17T09:00:00+05:00",
+                "date" : "2025-03-24T09:00:00",
                 "message" : "We are investigating",
                 "pageId" : "0",
                 "status" : "investigating",
-                "title" : "Investigating Issue"
+                "title" : "Investigation Ongoing"
               },
               "name" : "create-status-report"
             }
