@@ -12,12 +12,12 @@
     "jkorol3",
     "madza",
     "pernielsentikaer",
-    "telmen",
     "ridemountainpig",
     "dedalusj"
   ],
   "pastContributors": [
-    "bkeys818"
+    "bkeys818",
+    "telmen"
   ],
   "scripts": {
     "build": "ray build -e dist",
