@@ -1,3 +1,4 @@
+import React from "react";
 import { ActionPanel, Action, Icon, List, Color } from "@raycast/api";
 import { Contact, Filter } from "../types";
 import CreateContactForm from "./CreateContactForm";

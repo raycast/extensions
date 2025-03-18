@@ -1,3 +1,4 @@
+import React from "react";
 import { Action, ActionPanel, Form, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 import { useState } from "react";
 import { createContact } from "../api/endpoints";
@@ -89,7 +90,7 @@ export default function CreateContactForm() {
 
     try {
       // Prepare data for contact creation
-      const contactData: any = {};
+      const contactData: Record<string, unknown> = {};
 
       // Add name if provided
       if (values.givenName || values.familyName || values.middleName || values.prefix || values.suffix) {
@@ -189,7 +190,7 @@ export default function CreateContactForm() {
 
       // Add birthday if provided
       if (values.birthdayDay || values.birthdayMonth) {
-        const birthdayData: any = {
+        const birthdayData: { date: Record<string, number> } = {
           date: {},
         };
 

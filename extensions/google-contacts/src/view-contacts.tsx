@@ -1,3 +1,4 @@
+import React from "react";
 import { Detail, Toast, showToast, LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
 import * as google from "./api/oauth";

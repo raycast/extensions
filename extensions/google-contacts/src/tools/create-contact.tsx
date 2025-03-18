@@ -94,7 +94,7 @@ export default async function createContactTool(input: CreateContactInput): Prom
     await google.authorize();
 
     // Prepare data for contact creation
-    const contactData: any = {};
+    const contactData: Record<string, unknown> = {};
 
     // Add name
     contactData.names = [
@@ -151,7 +151,13 @@ export default async function createContactTool(input: CreateContactInput): Prom
       // Parse birthday from DD.MM.YYYY format
       const parts = input.birthday.split(".");
       if (parts.length >= 2) {
-        const birthdayData: any = {
+        const birthdayData: {
+          date: {
+            day?: number;
+            month?: number;
+            year?: number;
+          };
+        } = {
           date: {
             day: parseInt(parts[0]),
             month: parseInt(parts[1]),

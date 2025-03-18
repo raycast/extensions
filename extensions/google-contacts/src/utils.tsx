@@ -137,7 +137,7 @@ export function getPrimaryAddress(contact: Contact): string | undefined {
   return addressToUse.formattedValue || formatAddress(addressToUse);
 }
 
-function formatAddress(address: any): string {
+function formatAddress(address: import("./types").ContactAddress): string {
   const parts = [];
 
   if (address.streetAddress) parts.push(address.streetAddress);

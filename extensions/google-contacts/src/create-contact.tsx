@@ -1,5 +1,5 @@
-import { Detail } from "@raycast/api";
 import React, { useState, useEffect } from "react";
+import { Detail } from "@raycast/api";
 import * as google from "./api/oauth";
 import CreateContactForm from "./components/CreateContactForm";
 

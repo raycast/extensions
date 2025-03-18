@@ -1,3 +1,4 @@
+import React from "react";
 import { Action, ActionPanel, Form, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 import { useState } from "react";
 import { Contact } from "../types";
@@ -34,12 +35,12 @@ export default function EditContactForm({ contact }: EditContactFormProps) {
   const birthdayMonth = birthdayToEdit?.date?.month?.toString() || "";
   const birthdayYear = birthdayToEdit?.date?.year?.toString() || "";
 
-  async function handleSubmit(values: any) {
+  async function handleSubmit(values: Record<string, unknown>) {
     setIsLoading(true);
 
     try {
       // Prepare data for update
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       const updateFields: string[] = [];
 
       // Update name if changed
@@ -197,18 +198,24 @@ export default function EditContactForm({ contact }: EditContactFormProps) {
         values.birthdayYear !== birthdayYear
       ) {
         if (values.birthdayDay || values.birthdayMonth) {
-          const birthdayData: any = {
+          const birthdayData: {
+            date: {
+              day?: number;
+              month?: number;
+              year?: number;
+            };
+          } = {
             date: {},
           };
 
           if (values.birthdayDay) {
-            birthdayData.date.day = parseInt(values.birthdayDay);
+            birthdayData.date.day = parseInt(String(values.birthdayDay));
           }
           if (values.birthdayMonth) {
-            birthdayData.date.month = parseInt(values.birthdayMonth);
+            birthdayData.date.month = parseInt(String(values.birthdayMonth));
           }
           if (values.birthdayYear) {
-            birthdayData.date.year = parseInt(values.birthdayYear);
+            birthdayData.date.year = parseInt(String(values.birthdayYear));
           }
 
           updateData.birthdays = [birthdayData];

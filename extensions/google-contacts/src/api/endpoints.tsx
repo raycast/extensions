@@ -94,7 +94,7 @@ export async function fetchContactGroups(): Promise<ContactGroup[]> {
   }, "Error fetching contact groups");
 }
 
-export async function fetchContacts(maxResults = 1000, filter = ""): Promise<Contact[]> {
+export async function fetchContacts(maxResults = 1000): Promise<Contact[]> {
   let allContacts: Contact[] = [];
   let nextPageToken: string | undefined;
   const pageSize = 100; // API max is 100 per page

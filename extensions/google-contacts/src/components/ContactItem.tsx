@@ -1,3 +1,4 @@
+import React from "react";
 import { Action, ActionPanel, Icon, List, Color } from "@raycast/api";
 import { Contact, LocalFavorites } from "../types";
 import { getPrimaryName, isFavorite, getIcon, getFirstLastName, getResourceId, getBirthdayInfo } from "../utils";
