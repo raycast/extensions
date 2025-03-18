@@ -139,8 +139,8 @@ export default function Command() {
   };
 
   const getHabitIcon = (habit: Habit) => {
-    const habitColor = habit.color ? getColorValue(habit.color) : Color.PrimaryText;
-    
+    const habitColor: Color = habit.color ? getColorValue(habit.color) : Color.PrimaryText;
+
     if (habit.repeatable) {
       if (habit.completed === true) {
         return { source: Icon.Repeat, tintColor: habitColor };

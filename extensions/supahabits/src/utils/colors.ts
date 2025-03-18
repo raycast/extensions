@@ -15,8 +15,6 @@ export const getColorValue = (color: string): Color => {
       return Color.Green;
     case "purple":
       return Color.Purple;
-    case "red":
-      return Color.Red;
     case "blue":
       return Color.Blue;
     case "yellow":
