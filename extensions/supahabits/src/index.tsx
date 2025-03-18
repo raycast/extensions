@@ -126,7 +126,7 @@ export default function Command() {
             if (!data) {
               return [];
             }
-            
+
             return data.filter((habit) => habit.id !== habitId);
           },
         },
@@ -170,9 +170,9 @@ export default function Command() {
     );
 
     const editAction = (
-      <Action.Push 
-        title="Edit Habit" 
-        icon={Icon.Pencil} 
+      <Action.Push
+        title="Edit Habit"
+        icon={Icon.Pencil}
         shortcut={{ modifiers: ["cmd"], key: "e" }}
         target={<EditHabitForm habit={habit} revalidate={revalidate} />}
       />

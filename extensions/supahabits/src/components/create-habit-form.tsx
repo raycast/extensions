@@ -12,12 +12,12 @@ export default function CreateHabitForm(props: CreateHabitFormProps) {
   const { revalidate } = props;
   const { pop } = useNavigation();
 
-  const createHabit = async (values: { 
-    name: string; 
-    description: string; 
-    days: number; 
-    color: string; 
-    isRepeatable: boolean 
+  const createHabit = async (values: {
+    name: string;
+    description: string;
+    days: number;
+    color: string;
+    isRepeatable: boolean;
   }) => {
     const { name, description, days, color, isRepeatable } = values;
 
@@ -32,16 +32,16 @@ export default function CreateHabitForm(props: CreateHabitFormProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
-          secret, 
-          name, 
-          description, 
-          amount: days || 7, 
-          repeatable: isRepeatable, 
-          color 
+        body: JSON.stringify({
+          secret,
+          name,
+          description,
+          amount: days || 7,
+          repeatable: isRepeatable,
+          color,
         }),
       });
-      
+
       const habitType = isRepeatable ? "Repeatable habit" : "Habit";
       showToast({ style: Toast.Style.Success, title: `✅ ${habitType} created successfully` });
       revalidate();
@@ -66,29 +66,22 @@ export default function CreateHabitForm(props: CreateHabitFormProps) {
           <Form.Dropdown.Item key={value} value={value} title={title} />
         ))}
       </Form.Dropdown>
-      
+
       <Form.Separator />
-      
+
       <Form.Description
         title="Habit Type"
         text="Choose if this is a regular or repeatable habit. A repeatable habit can be submitted multiple times a day, it's great for habits like drinking water or reading a book."
       />
-      <Form.Checkbox 
-        id="isRepeatable" 
-        label="Repeatable Habit"
-      />
-      
+      <Form.Checkbox id="isRepeatable" label="Repeatable Habit" />
+
       <Form.Separator />
-      
+
       <Form.Description
         title="Frequency"
         text="This is just for reference and analytics, you can submit it as many times as you want"
       />
-      <Form.Dropdown 
-        id="days" 
-        title="How many days a week do you want to do this habit?" 
-        defaultValue="7"
-      >
+      <Form.Dropdown id="days" title="How many days a week do you want to do this habit?" defaultValue="7">
         <Form.Dropdown.Item value="1" title="1 day" />
         <Form.Dropdown.Item value="2" title="2 days" />
         <Form.Dropdown.Item value="3" title="3 days" />

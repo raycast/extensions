@@ -15,12 +15,12 @@ export default function EditHabitForm(props: EditHabitFormProps) {
   const { secret } = getPreferenceValues<Preferences>();
   const { pop } = useNavigation();
 
-  const updateHabit = async (values: { 
-    name: string; 
-    description: string; 
-    days: number; 
-    color: string; 
-    isRepeatable: boolean 
+  const updateHabit = async (values: {
+    name: string;
+    description: string;
+    days: number;
+    color: string;
+    isRepeatable: boolean;
   }) => {
     const { name, description, days, color, isRepeatable } = values;
 
@@ -35,22 +35,22 @@ export default function EditHabitForm(props: EditHabitFormProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
-          secret, 
-          name, 
-          description, 
-          amount: days, 
-          repeatable: isRepeatable, 
-          color 
+        body: JSON.stringify({
+          secret,
+          name,
+          description,
+          amount: days,
+          repeatable: isRepeatable,
+          color,
         }),
       });
-      
+
       const habitType = isRepeatable ? "Repeatable habit" : "Habit";
       showToast({ style: Toast.Style.Success, title: `✅ ${habitType} updated successfully` });
       revalidate();
       pop();
     } catch (error) {
-      showFailureToast("🚫 Failed to update habit")
+      showFailureToast("🚫 Failed to update habit");
     }
   };
 
@@ -69,28 +69,24 @@ export default function EditHabitForm(props: EditHabitFormProps) {
           <Form.Dropdown.Item key={value} value={value} title={title} />
         ))}
       </Form.Dropdown>
-      
+
       <Form.Separator />
-      
+
       <Form.Description
         title="Habit Type"
         text="Choose if this is a regular or repeatable habit. A repeatable habit can be submitted multiple times a day, it's great for habits like drinking water or reading a book."
       />
-      <Form.Checkbox 
-        id="isRepeatable" 
-        label="Repeatable Habit"
-        defaultValue={habit.repeatable}
-      />
-      
+      <Form.Checkbox id="isRepeatable" label="Repeatable Habit" defaultValue={habit.repeatable} />
+
       <Form.Separator />
-      
+
       <Form.Description
         title="Frequency"
         text="This is just for reference and analytics, you can submit it as many times as you want"
       />
-      <Form.Dropdown 
-        id="days" 
-        title="How many days a week do you want to do this habit?" 
+      <Form.Dropdown
+        id="days"
+        title="How many days a week do you want to do this habit?"
         defaultValue={String(habit.amount)}
       >
         <Form.Dropdown.Item value="1" title="1 day" />
