@@ -15,7 +15,7 @@
       "name": "create-alarm",
       "title": "Create Alarm",
       "subtitle": "Alarms",
-      "description": "Alarms - Create a new alarm that will play a sound at the specified time",
+      "description": "Create a new alarm that will play a sound at the specified time",
       "mode": "view",
       "icon": "create-alarm.png"
     },
@@ -23,7 +23,7 @@
       "name": "manage-alarms",
       "title": "My Alarms",
       "subtitle": "Alarms",
-      "description": "Alarms - View, edit, or delete your scheduled alarms",
+      "description": "View, edit, or delete your scheduled alarms",
       "mode": "view",
       "icon": "list-alarms.png"
     }
