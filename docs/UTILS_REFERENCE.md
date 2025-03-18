@@ -241,4 +241,15 @@ const projectsWithDetails = await CacheManager.getRecentlyUsedProjectsWithDetail
 CacheManager.clearAllCaches();
 ```
 
-For detailed information on the caching system, see [Caching System](CACHING_SYSTEM.md). 
+For detailed information on the caching system, see [Caching System](CACHING_SYSTEM.md).
+
+## Compute Service
+
+### VM Instance Management
+
+- **View Instances**: Lists all VM instances in the project or a specific zone
+- **Filter by Zone**: Filter VM instances by zone
+- **Instance Details**: View detailed information about a VM instance
+- **Power Management**: Start and stop VM instances
+- **Copy Connection Command**: Copy the gcloud SSH command to connect to a VM instance
+- **VM Creation**: Create new VM instances with customizable options 
