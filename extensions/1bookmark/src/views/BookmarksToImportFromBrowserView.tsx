@@ -164,7 +164,7 @@ function Body(props: Props) {
         const urlResult = fuzzysort.single(keyword, item.urlPrepared);
         const folderResult = fuzzysort.single(keyword, item.folderPrepared);
 
-        // 가장 좋은 점수 선택
+        // Select the best score
         const bestScore = [titleResult?.score, urlResult?.score, folderResult?.score]
           .filter((score) => score !== undefined)
           .reduce(

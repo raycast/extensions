@@ -102,25 +102,29 @@ export const useBookmarkSearch = (params: { keyword: string; searchData: Prepare
   const { searchInTags, searchInUntagged, taggedBookmarks, untaggedBookmarks } = searchData;
 
   return useMemo(() => {
-    if (!searchInTags || !searchInUntagged || keyword === "") {
-      // Limit the number of results even when there's no keyword
+    // Return all bookmarks if no search keyword is provided
+    if (keyword === "") {
       return {
         filteredTaggedList: taggedBookmarks,
         filteredUntaggedList: untaggedBookmarks,
       };
     }
 
-    // Search and process tagged bookmarks
-    const taggedResults = processSearchResults({
-      keyword,
-      searchTarget: searchInTags,
-    });
+    // Process tagged bookmarks if available
+    const taggedResults = searchInTags
+      ? processSearchResults({
+          keyword,
+          searchTarget: searchInTags,
+        })
+      : taggedBookmarks;
 
-    // Search and process untagged bookmarks
-    const untaggedResults = processSearchResults({
-      keyword,
-      searchTarget: searchInUntagged,
-    });
+    // Process untagged bookmarks if available
+    const untaggedResults = searchInUntagged
+      ? processSearchResults({
+          keyword,
+          searchTarget: searchInUntagged,
+        })
+      : untaggedBookmarks;
 
     return {
       filteredTaggedList: taggedResults,

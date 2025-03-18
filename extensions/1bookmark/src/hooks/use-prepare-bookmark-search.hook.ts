@@ -79,46 +79,50 @@ export const usePrepareBookmarkSearch = (params: { selectedTags: string[]; data?
 
     // Prepare data for fuzzysort
     // This operation is performed only when data changes (see useMemo dependency array)
-    const prepareTaggedBookmarks = taggedBookmarks.map((bookmark, index) => {
-      return {
-        original: bookmark,
-        nameSearchTarget: {
-          prepared: fuzzysort.prepare(bookmark.name),
-          originalIndex: index,
-        },
-        urlSearchTarget: {
-          prepared: fuzzysort.prepare(bookmark.url),
-          originalIndex: index,
-        },
-      };
-    });
+    const prepareBookmarkData = (bookmarks: Bookmark[]) => {
+      const prepared: PreparedBookmarkItem[] = [];
+      const nameSearchTargets: Array<{ prepared: Fuzzysort.Prepared; originalIndex: number }> = [];
+      const urlSearchTargets: Array<{ prepared: Fuzzysort.Prepared; originalIndex: number }> = [];
 
-    const prepareUntaggedBookmarks = untaggedBookmarks.map((bookmark, index) => {
-      return {
-        original: bookmark,
-        nameSearchTarget: {
+      bookmarks.forEach((bookmark, index) => {
+        const nameSearchTarget = {
           prepared: fuzzysort.prepare(bookmark.name),
           originalIndex: index,
-        },
-        urlSearchTarget: {
+        };
+
+        const urlSearchTarget = {
           prepared: fuzzysort.prepare(bookmark.url),
           originalIndex: index,
-        },
-      };
-    });
+        };
+
+        prepared.push({
+          original: bookmark,
+          nameSearchTarget,
+          urlSearchTarget,
+        });
+
+        nameSearchTargets.push(nameSearchTarget);
+        urlSearchTargets.push(urlSearchTarget);
+      });
+
+      return { prepared, nameSearchTargets, urlSearchTargets };
+    };
+
+    const taggedData = prepareBookmarkData(taggedBookmarks);
+    const untaggedData = prepareBookmarkData(untaggedBookmarks);
 
     return {
       searchInTags: {
         bookmarks: taggedBookmarks,
-        prepared: prepareTaggedBookmarks,
-        nameSearchTargets: prepareTaggedBookmarks.map((item) => item.nameSearchTarget),
-        urlSearchTargets: prepareTaggedBookmarks.map((item) => item.urlSearchTarget),
+        prepared: taggedData.prepared,
+        nameSearchTargets: taggedData.nameSearchTargets,
+        urlSearchTargets: taggedData.urlSearchTargets,
       },
       searchInUntagged: {
         bookmarks: untaggedBookmarks,
-        prepared: prepareUntaggedBookmarks,
-        nameSearchTargets: prepareUntaggedBookmarks.map((item) => item.nameSearchTarget),
-        urlSearchTargets: prepareUntaggedBookmarks.map((item) => item.urlSearchTarget),
+        prepared: untaggedData.prepared,
+        nameSearchTargets: untaggedData.nameSearchTargets,
+        urlSearchTargets: untaggedData.urlSearchTargets,
       },
       taggedBookmarks,
       untaggedBookmarks,
