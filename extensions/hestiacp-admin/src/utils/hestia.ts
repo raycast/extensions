@@ -1,6 +1,9 @@
+// API functions wrapping `useHestia` hook
+
 import { showToast } from "@raycast/api";
 import {
   ListUserAuthLogResponse,
+  ListUserBackupsResponse,
   ListUserLogsResponse,
   ListUserNotificationsResponse,
   ListUserStatsResponse,
@@ -15,8 +18,9 @@ import {
   ListWebDomainSSLResponse,
 } from "../types/web-domains";
 import { DOMAIN_LOG_LINES } from "../constants";
-import { ListMailDomainsResponse, ListUserIPsResponse } from "../types";
+import { ListUserIPsResponse } from "../types";
 import { ListDatabasesResponse } from "../types/databases";
+import { ListMailDomainsResponse } from "../types/mail-domains";
 
 // USERS
 export function getUsers() {
@@ -40,6 +44,11 @@ export function getUserAuthLog(user: string) {
 }
 export function getUserNotifications(user: string) {
   return useHestia<ListUserNotificationsResponse>("v-list-user-notifications", "Fetching User Notifications", {
+    body: [user],
+  });
+}
+export function getUserBackups(user: string) {
+  return useHestia<ListUserBackupsResponse>("v-list-user-backups", "Fetching User Backups", {
     body: [user],
   });
 }

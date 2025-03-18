@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Locale Support] - 2025-03-17
+
+- Added locale support for Giphy and Tenor, configurable via Preferences
+- Updated Raycast packages to latest versions
 
 ## [Enhancement] - 2024-11-25
 

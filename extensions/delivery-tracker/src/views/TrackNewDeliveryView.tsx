@@ -25,7 +25,7 @@ export default function TrackNewDeliveryView({
 
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const { handleSubmit, itemProps } = useForm<AddDeliveryForm>({
+  const { handleSubmit, itemProps, values, setValidationError } = useForm<AddDeliveryForm>({
     onSubmit: async (deliveryForm) => {
       try {
         const delivery: Delivery = {
@@ -60,11 +60,27 @@ export default function TrackNewDeliveryView({
     },
   });
 
-  const handleCarrierChange = async (carrierId: string) => {
+  const showDatePickerIfNecessary = async (carrierId: string) => {
     const carrier = carriers.get(carrierId);
 
     const shouldShowDatePicker = carrier === undefined ? true : !(await carrier.ableToTrackRemotely());
     setShowDatePicker(shouldShowDatePicker);
+  };
+
+  const validateForDuplicateTrackingNumber = async (trackingNumber: string, carrierId: string) => {
+    if (!trackingNumber || !carrierId) {
+      setValidationError("trackingNumber", undefined);
+      return;
+    }
+
+    const matchingDelivery = deliveries?.find(
+      (delivery) => delivery.trackingNumber === trackingNumber && delivery.carrier === carrierId,
+    );
+    if (matchingDelivery) {
+      setValidationError("trackingNumber", `Tracking number is already tracked with ${matchingDelivery.name}`);
+    } else {
+      setValidationError("trackingNumber", undefined);
+    }
   };
 
   return (
@@ -78,7 +94,15 @@ export default function TrackNewDeliveryView({
     >
       <Form.Description text="Fill in the details of the delivery you want to track." />
       <Form.TextField title="Name" placeholder="Name for the delivery" {...itemProps.name} />
-      <Form.Dropdown title="Carrier" {...itemProps.carrier} onChange={handleCarrierChange}>
+      <Form.Dropdown
+        title="Carrier"
+        {...itemProps.carrier}
+        onChange={(e) => {
+          itemProps.carrier.onChange?.(e);
+          showDatePickerIfNecessary(e);
+          validateForDuplicateTrackingNumber(values.trackingNumber, e);
+        }}
+      >
         {Array.from(carriers.values()).map((carrier) => (
           <Form.Dropdown.Item key={carrier.id} value={carrier.id} title={carrier.name} />
         ))}
@@ -87,6 +111,10 @@ export default function TrackNewDeliveryView({
         title="Tracking number"
         placeholder="Tracking number from the carrier"
         {...itemProps.trackingNumber}
+        onChange={(e) => {
+          itemProps.trackingNumber.onChange?.(e);
+          validateForDuplicateTrackingNumber(e, values.carrier);
+        }}
       />
       {showDatePicker && (
         <Form.DatePicker
