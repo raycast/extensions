@@ -143,11 +143,9 @@ export default function Command() {
     
     if (habit.repeatable) {
       if (habit.completed === true) {
-        // For completed repeatable habits, show in their selected color
         return { source: Icon.Repeat, tintColor: habitColor };
       }
 
-      // For non-completed repeatable habits, always show in red
       return { source: Icon.Repeat, tintColor: Color.Red };
     }
 
