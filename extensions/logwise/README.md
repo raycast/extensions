@@ -1,6 +1,6 @@
 # LogWise - Raycast Plugin
 
-A streamlined Raycast plugin for generating LOKI queries and opening the LOKI dashboard directly in your browser.
+A streamlined Raycast plugin for generating LOKI queries and opening the LOKI dashboard directly in your browser. (Designed specially for company)
 
 ## Features
 
@@ -20,7 +20,7 @@ A streamlined Raycast plugin for generating LOKI queries and opening the LOKI da
 5. Optionally enable case-insensitive search
 6. Click "Generate Query and Open Dashboard"
 
-The plugin will generate the LOKI query, copy it to your clipboard, and open the appropriate dashboard in your browser with the query pre-filled.
+The plugin will generate the LOKI query, open the appropriate dashboard in your browser with the query pre-filled.
 
 ## Development
 
