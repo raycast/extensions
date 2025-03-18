@@ -3,6 +3,7 @@ import fetch from "node-fetch";
 
 import { COLOR_OPTIONS } from "../utils/colors";
 import { Habit } from "../models/habit";
+import { showFailureToast } from "@raycast/utils";
 
 interface EditHabitFormProps {
   habit: Habit;
@@ -49,7 +50,7 @@ export default function EditHabitForm(props: EditHabitFormProps) {
       revalidate();
       pop();
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "🚫 Failed to update habit" });
+      showFailureToast("🚫 Failed to update habit")
     }
   };
 
