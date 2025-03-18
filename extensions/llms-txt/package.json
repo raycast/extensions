@@ -5,6 +5,9 @@
   "description": "Search and access llms.txt files from various websites. Llms.txt is a proposed standard file that defines how AI models and LLMs should interact with website content. The llms-full.txt variant provides more detailed rules and guidelines.",
   "icon": "extension-icon.png",
   "author": "thedaviddias",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity",
