@@ -8,29 +8,54 @@ import { exifFromFile, exifFromUrl } from "@/utils/exif";
 import TagsScreen from "./screens/TagsScreen";
 
 const main = ({ arguments: { url } }: { arguments: { url: string } }) => {
-  const [tagState, setTags] = useState<{ file: string; tags: ExifReader.Tags } | null>(null);
+  const [tagState, setTags] = useState<{ file: string; tags: Tags } | null>(null);
 
   useEffect(() => {
-    const handleTags = (tags: Tags | null, file: string) => {
-      if (tags === null) {
-        console.log("No tags found, popping to root.");
-        popToRoot();
-        return;
-      }
-      setTags({ file, tags });
-    };
+   const handleTags = (tags: Tags | null, file: string) => {
+     if (!tags || typeof tags !== 'object') {
+       console.log("No valid tags found, popping to root.");
+       popToRoot();
+       return;
+     }
+   
+     // Ensure all tag values have the correct structure
+     const validTags = Object.fromEntries(
+       Object.entries(tags).map(([key, value]) => {
+         if (!value) return [key, { value: null, description: 'null' }];
+         if (typeof value === 'object' && 'value' in value && 'description' in value) {
+           return [key, value];
+         }
+         return [key, { value, description: String(value) }];
+       })
+     );
+   
+     setTags({ file, tags: validTags as Tags });
+   };
 
     (async () => {
+      // Check Finder selection first
+      const finderItems = await getSelectedFinderItems();
+      console.debug('Checking Finder items...');
+      if (finderItems.length > 0) {
+        console.debug('Using Finder selection:', finderItems[0].path);
+        const tags = await exifFromFile(finderItems[0].path);
+        handleTags(tags, `file://${finderItems[0].path}`);
+        return;
+      }
+
+      // Then check URL argument
       if (url && url.length > 0 && url.startsWith("http")) {
+        console.debug('Using URL argument:', url);
         const tags = await exifFromUrl(url);
         handleTags(tags, url);
         return;
       }
 
+      // Finally check clipboard
       const { file, text } = await Clipboard.read();
 
       if (file && file.startsWith("file://")) {
-        // Convert file URL to file path
+        console.debug('Using file from clipboard:', file);
         const filePath = file.replace("file://", "");
         const tags = await exifFromFile(filePath);
         handleTags(tags, file);
@@ -38,16 +63,9 @@ const main = ({ arguments: { url } }: { arguments: { url: string } }) => {
       }
 
       if (text && text.startsWith("http")) {
+        console.debug('Using URL from clipboard:', text);
         const tags = await exifFromUrl(text);
         handleTags(tags, text);
-        return;
-      }
-
-      const finderItems = await getSelectedFinderItems();
-      if (finderItems.length > 0) {
-        const file = finderItems[0].path;
-        const tags = await exifFromFile(file);
-        handleTags(tags, file);
         return;
       }
 

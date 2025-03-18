@@ -47,7 +47,7 @@ export async function showFailureToast(title: string, error: Error): Promise<voi
 
   console.log(`${title}: ${error}`);
   let stderr = `${error}`;
-
+  
   // Add more specific error messages
   if (error.message.includes("Invalid image format")) {
     stderr = "Only JPEG, PNG, WebP, TIFF, and HEIC/HEIF formats are supported.";

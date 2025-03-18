@@ -8,7 +8,7 @@ import { exifFromFile, exifFromUrl } from "@/utils/exif";
 import TagsScreen from "./screens/TagsScreen";
 
 const main = ({ arguments: { url } }: { arguments: { url: string } }) => {
-  const [tagState, setTags] = useState<{ file: string; tags: ExifReader.Tags } | null>(null);
+  const [tagState, setTags] = useState<{ file: string; tags: Tags } | null>(null);
 
   useEffect(() => {
     const handleTags = (tags: Tags | null, file: string) => {

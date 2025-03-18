@@ -40,7 +40,7 @@
     },
     {
       "name": "show-exif-data-for-image-browser",
-      "title": "Show Metadata for Image - Browser Extension",
+      "title": "Show Metadata for Image - browser extension",
       "subtitle": "Exif Viewer",
       "description": "Show Metadata for Image (EXIF) from your active tab in the browser",
       "mode": "no-view"

@@ -8,7 +8,7 @@ import { exifFromFile, exifFromUrl } from "@/utils/exif";
 import TagsScreen from "./screens/TagsScreen";
 
 const main = ({ arguments: { url } }: { arguments: { url: string } }) => {
-  const [tagState, setTags] = useState<{ file: string; tags: ExifReader.Tags } | null>(null);
+  const [tagState, setTags] = useState<{ file: string; tags: Tags } | null>(null);
 
   useEffect(() => {
     const handleTags = (tags: Tags | null, file: string) => {
@@ -17,7 +17,9 @@ const main = ({ arguments: { url } }: { arguments: { url: string } }) => {
         popToRoot();
         return;
       }
-      setTags({ file, tags });
+      // Ensure file path starts with file:// for local files
+      const filePath = file.startsWith("file://") ? file : `file://${file}`;
+      setTags({ file: filePath, tags });
     };
 
     (async () => {
@@ -30,10 +32,10 @@ const main = ({ arguments: { url } }: { arguments: { url: string } }) => {
       const { file, text } = await Clipboard.read();
 
       if (file && file.startsWith("file://")) {
-        // Convert file URL to file path
+        // Convert file URL to file path for exifFromFile
         const filePath = file.replace("file://", "");
         const tags = await exifFromFile(filePath);
-        handleTags(tags, file);
+        handleTags(tags, file); // Pass original file URL
         return;
       }
 
@@ -45,9 +47,9 @@ const main = ({ arguments: { url } }: { arguments: { url: string } }) => {
 
       const finderItems = await getSelectedFinderItems();
       if (finderItems.length > 0) {
-        const file = finderItems[0].path;
-        const tags = await exifFromFile(file);
-        handleTags(tags, file);
+        const filePath = finderItems[0].path;
+        const tags = await exifFromFile(filePath);
+        handleTags(tags, filePath);
         return;
       }
 

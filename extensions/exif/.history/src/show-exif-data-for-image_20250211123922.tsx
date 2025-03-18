@@ -1,0 +1,95 @@
+import type { Tags } from "exifreader";
+import { useEffect, useState } from "react";
+
+import { Clipboard, Toast, getSelectedFinderItems, open, popToRoot, showToast } from "@raycast/api";
+
+import { exifFromFile, exifFromUrl } from "@/utils/exif";
+
+import TagsScreen from "./screens/TagsScreen";
+
+const main = ({ arguments: { url } }: { arguments: { url: string } }) => {
+  const [tagState, setTags] = useState<{ file: string; tags: Tags } | null>(null);
+
+  useEffect(() => {
+   const handleTags = (tags: Tags | null, file: string) => {
+     if (!tags || typeof tags !== 'object') {
+       console.log("No valid tags found, popping to root.");
+       popToRoot();
+       return;
+     }
+   
+     // Ensure all tag values have the correct structure
+     const validTags = Object.fromEntries(
+       Object.entries(tags).map(([key, value]) => {
+         if (!value) return [key, { value: null, description: 'null' }];
+         if (typeof value === 'object' && 'value' in value && 'description' in value) {
+           return [key, value];
+         }
+         return [key, { value, description: String(value) }];
+       })
+     );
+   
+     setTags({ file, tags: validTags as Tags });
+   };
+
+    (async () => {
+      // If URL argument is provided, use it immediately (browser context)
+      if (url && url.length > 0 && url.startsWith("http")) {
+        console.debug('Using URL argument:', url);
+        const tags = await exifFromUrl(url);
+        handleTags(tags, url);
+        return;
+      }
+
+      // No URL argument, try Finder selection (Finder context)
+      try {
+        const finderItems = await getSelectedFinderItems();
+        console.debug('Checking Finder items...');
+        if (finderItems.length > 0) {
+          console.debug('Using Finder selection:', finderItems[0].path);
+          const tags = await exifFromFile(finderItems[0].path);
+          handleTags(tags, `file://${finderItems[0].path}`);
+          return;
+        }
+      } catch (error) {
+        console.debug('Finder not accessible:', error);
+        // Continue to clipboard if Finder is not accessible
+      }
+
+      // Finally check clipboard
+      const { file, text } = await Clipboard.read();
+
+      if (file && file.startsWith("file://")) {
+        console.debug('Using file from clipboard:', file);
+        const filePath = file.replace("file://", "");
+        const tags = await exifFromFile(filePath);
+        handleTags(tags, file);
+        return;
+      }
+
+      if (text && text.startsWith("http")) {
+        console.debug('Using URL from clipboard:', text);
+        const tags = await exifFromUrl(text);
+        handleTags(tags, text);
+        return;
+      }
+
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No image found",
+        message: "Please copy an image/url to the clipboard, select a file in Finder, or pass a URL as an argument.",
+        primaryAction: {
+          title: "Open Clipboard history",
+          onAction: async (toast) => {
+            await open("raycast://extensions/raycast/clipboard-history/clipboard-history");
+            await toast.hide();
+          },
+        },
+      });
+    })();
+  }, [url]);
+
+  return tagState ? <TagsScreen tags={tagState.tags} file={tagState.file} /> : null;
+};
+
+export default main;
