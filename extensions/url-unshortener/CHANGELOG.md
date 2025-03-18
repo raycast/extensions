@@ -1,6 +1,6 @@
 # URL Unshortener Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2025-03-18
 
 - Improved URL unshortening to better handle complex URLs like Microsoft SafeLinks
 - Implemented hybrid HEAD/GET approach for optimal performance and reliability
