@@ -64,14 +64,19 @@ export default function Command() {
 
   // Fetch fresh contacts and update cache
   useEffect(() => {
-    const fetchFreshContacts = async () => {
+    const fetchFreshContacts = async (retryAfterReauth = false) => {
       try {
         // Check if we need to refresh the cache
         const lastUpdated = await LocalStorage.getItem<string>(CACHE_TIMESTAMP_KEY);
         const now = new Date().getTime();
 
         // If cache exists and is still fresh, don't refresh immediately
-        if (lastUpdated && now - parseInt(lastUpdated) < CACHE_EXPIRY_TIME && contacts.length > 0) {
+        if (
+          !retryAfterReauth &&
+          lastUpdated &&
+          now - parseInt(lastUpdated) < CACHE_EXPIRY_TIME &&
+          contacts.length > 0
+        ) {
           console.log("Using cached contacts, still fresh");
           return;
         }
@@ -95,6 +100,49 @@ export default function Command() {
         console.log(`Fetched and cached ${sortedContacts.length} contacts`);
       } catch (error) {
         console.error("Error fetching fresh contacts:", error);
+
+        // Check if this is an authentication-related error
+        const errorStr = String(error).toLowerCase();
+        const isAuthError =
+          errorStr.includes("unauthorized") ||
+          errorStr.includes("unauthenticated") ||
+          errorStr.includes("bad request") ||
+          errorStr.includes("invalid") ||
+          errorStr.includes("forbidden") ||
+          errorStr.includes("401") ||
+          errorStr.includes("403");
+
+        if (isAuthError && !retryAfterReauth) {
+          // Show toast about authentication issue
+          showToast({
+            style: Toast.Style.Animated,
+            title: "Authentication error detected",
+            message: "Attempting to re-login...",
+          });
+
+          try {
+            // Attempt to force a new authentication
+            await google.forceReauthenticate();
+
+            // Try fetching contacts again after successful reauthentication
+            showToast({
+              style: Toast.Style.Success,
+              title: "Re-authenticated successfully",
+              message: "Fetching your contacts...",
+            });
+
+            await fetchFreshContacts(true); // Retry with flag to prevent infinite loops
+            return;
+          } catch (reauthError) {
+            console.error("Reauthentication failed:", reauthError);
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Login failed",
+              message: "Please try again later",
+            });
+          }
+        }
+
         setIsRefreshing(false);
 
         // Only show error toast if we don't have cached contacts to show

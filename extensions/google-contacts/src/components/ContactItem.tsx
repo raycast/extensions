@@ -1,16 +1,6 @@
-import { Action, ActionPanel, Icon, List, Color, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Color } from "@raycast/api";
 import { Contact, LocalFavorites } from "../types";
-import {
-  getPrimaryName,
-  getPrimaryEmail,
-  getPrimaryPhone,
-  isFavorite,
-  getIcon,
-  getFirstLastName,
-  getResourceId,
-  formatBirthday,
-  getBirthdayInfo,
-} from "../utils";
+import { getPrimaryName, isFavorite, getIcon, getFirstLastName, getResourceId, getBirthdayInfo } from "../utils";
 import EditContactForm from "./EditContactForm";
 
 export default function ContactItem(props: {
@@ -22,8 +12,6 @@ export default function ContactItem(props: {
   const { contact, localFavorites } = props;
   const name = getPrimaryName(contact);
   const simpleName = getFirstLastName(contact);
-  const email = getPrimaryEmail(contact);
-  const phone = getPrimaryPhone(contact);
 
   return (
     <List.Item

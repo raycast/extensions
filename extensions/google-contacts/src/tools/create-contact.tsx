@@ -1,4 +1,4 @@
-import { showToast, Toast, Tool, Image, Icon } from "@raycast/api";
+import { Tool } from "@raycast/api";
 import * as google from "../api/oauth";
 import { createContact } from "../api/endpoints";
 
@@ -178,7 +178,7 @@ export default async function createContactTool(input: CreateContactInput): Prom
     }
 
     // Create the contact
-    const newContact = await createContact(contactData);
+    await createContact(contactData);
 
     // Format full name for response
     const fullName = input.lastName ? `${input.firstName} ${input.lastName}` : input.firstName;
@@ -186,7 +186,7 @@ export default async function createContactTool(input: CreateContactInput): Prom
     // Return success message
     return (
       `Successfully created contact for ${fullName}.\n\n` +
-      `Contact details:\n` +
+      "Contact details:\n" +
       `- Name: ${fullName}\n` +
       (input.email ? `- Email: ${input.email}\n` : "") +
       (input.phone ? `- Phone: ${input.phone}\n` : "") +

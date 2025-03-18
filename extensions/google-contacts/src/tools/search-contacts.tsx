@@ -1,4 +1,4 @@
-import { showToast, Toast, Tool, List, Action, ActionPanel, Icon, AI } from "@raycast/api";
+import { Tool, Action } from "@raycast/api";
 import * as google from "../api/oauth";
 import { fetchContacts } from "../api/endpoints";
 import { Contact } from "../types";

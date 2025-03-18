@@ -1,10 +1,9 @@
 import { List, Toast, showToast, ActionPanel, Action, Icon, Color } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import * as google from "../api/oauth";
-import { fetchContacts, fetchContactsInGroup, deleteContact } from "../api/endpoints";
+import { fetchContactsInGroup, deleteContact } from "../api/endpoints";
 import { Contact, Filter, LocalFavorites } from "../types";
 import ContactItem from "./ContactItem";
-import EmptyView from "./EmptyView";
 import CreateContactForm from "./CreateContactForm";
 import { getPrimaryName, getPrimaryEmail, getLocalFavorites, toggleLocalFavorite } from "../utils";
 
@@ -26,7 +25,7 @@ interface ContactsViewProps {
 export default function ContactsView(props: ContactsViewProps) {
   const [state, setState] = useState<State>({
     filter: props.filter || Filter.All,
-    isLoading: props.initialContacts ? false : true,
+    isLoading: !props.initialContacts,
     searchText: "",
     contacts: props.initialContacts || [],
     localFavorites: {},

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, useNavigation, showToast, Toast, Icon, Color } from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 import { useState } from "react";
 import { createContact } from "../api/endpoints";
 

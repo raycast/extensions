@@ -1,30 +1,35 @@
+// The Filter enum for contact list filtering
+/* eslint-disable no-unused-vars */
 export enum Filter {
   All = "all",
   Favorites = "favorites",
   Recent = "recent",
 }
+/* eslint-enable no-unused-vars */
 
 // For storing local favorites
 export type LocalFavorites = {
   [resourceName: string]: boolean;
 };
 
-export interface Contact {
-  resourceName: string; // The identifier for the contact
-  etag?: string;
-  names?: ContactName[];
-  emailAddresses?: ContactEmail[];
-  phoneNumbers?: ContactPhone[];
-  addresses?: ContactAddress[];
-  organizations?: ContactOrganization[];
-  biographies?: ContactBiography[];
-  photos?: ContactPhoto[];
-  urls?: ContactUrl[];
-  birthdays?: ContactBirthday[];
-  userDefined?: ContactUserDefined[];
-  metadata?: ContactMetadata;
+// Base interfaces
+export interface Source {
+  type?: string;
+  id?: string;
 }
 
+export interface FieldMetadata {
+  primary?: boolean;
+  verified?: boolean;
+  source?: Source;
+}
+
+export interface ContactMetadata {
+  sources?: Source[];
+  starred?: boolean;
+}
+
+// Contact field interfaces
 export interface ContactName {
   metadata?: FieldMetadata;
   displayName?: string;
@@ -116,20 +121,21 @@ export interface ContactUserDefined {
   value?: string;
 }
 
-export interface FieldMetadata {
-  primary?: boolean;
-  verified?: boolean;
-  source?: Source;
-}
-
-export interface Source {
-  type?: string;
-  id?: string;
-}
-
-export interface ContactMetadata {
-  sources?: Source[];
-  starred?: boolean;
+// Main Contact interface
+export interface Contact {
+  resourceName: string; // The identifier for the contact
+  etag?: string;
+  names?: ContactName[];
+  emailAddresses?: ContactEmail[];
+  phoneNumbers?: ContactPhone[];
+  addresses?: ContactAddress[];
+  organizations?: ContactOrganization[];
+  biographies?: ContactBiography[];
+  photos?: ContactPhoto[];
+  urls?: ContactUrl[];
+  birthdays?: ContactBirthday[];
+  userDefined?: ContactUserDefined[];
+  metadata?: ContactMetadata;
 }
 
 export interface ContactForm {

@@ -1,10 +1,10 @@
 import { Detail } from "@raycast/api";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import * as google from "./api/oauth";
 import CreateContactForm from "./components/CreateContactForm";
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Authorize with Google first
   useEffect(() => {

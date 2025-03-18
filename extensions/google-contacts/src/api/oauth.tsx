@@ -16,6 +16,16 @@ export const client = new OAuth.PKCEClient({
 
 // Authorization
 
+/**
+ * Clears existing tokens and forces a new authentication flow
+ */
+export async function forceReauthenticate(): Promise<void> {
+  // Clear any existing tokens
+  await client.removeTokens();
+  // Trigger a fresh authentication
+  await authorize();
+}
+
 export async function authorize(): Promise<void> {
   const tokenSet = await client.getTokens();
   if (tokenSet?.accessToken) {
@@ -27,7 +37,7 @@ export async function authorize(): Promise<void> {
 
   const authRequest = await client.authorizationRequest({
     endpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-    clientId: clientId,
+    clientId,
     scope: "https://www.googleapis.com/auth/contacts",
   });
   const { authorizationCode } = await client.authorize(authRequest);
