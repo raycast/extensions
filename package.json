@@ -1,11 +1,11 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "g-cloud",
-  "title": "Google Cloud",
+  "title": "Google Cloud CLI",
   "description": "Manage your Google Cloud resources",
-  "icon": "cloud-icon.svg",
+  "icon": "icon.png",
   "version": "0.0.29",
-  "author": "Jonatas Walker Filho",
+  "author": "ojowwalker77",
   "categories": [
     "Developer Tools"
   ],
@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Google Cloud",
+      "title": "Google Cloud CLI",
       "description": "Manage your Google Cloud resources",
       "mode": "view"
     }
