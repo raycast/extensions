@@ -103,6 +103,11 @@ export default function ViewHistory() {
           }
         />
       ))}
+      <List.EmptyView
+        title="No History Yet"
+        description="Your llms.txt viewing and copying actions will appear here. Use the extension to view or copy llms.txt files to start building your history."
+        icon={Icon.Clock}
+      />
     </List>
   );
 }
