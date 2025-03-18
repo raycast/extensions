@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { ActionPanel, Action, List, Icon, useNavigation } from "@raycast/api";
-import MiniSearch from "minisearch";
+import fuzzysort from "fuzzysort";
 import useChromeBookmarks from "../browser-bookmark-hooks/useChromeBookmarks";
 import useSafariBookmarks from "../browser-bookmark-hooks/useSafariBookmarks";
 import useFirefoxBookmarks from "../browser-bookmark-hooks/useFirefoxBookmarks";
@@ -125,12 +125,14 @@ function Body(props: Props) {
     prismaAccessBookmarks.isLoading ||
     whaleBookmarks.isLoading;
 
-  const [miniSearch] = useState(() => {
-    return new MiniSearch<BrowserBookmark>({
-      fields: ["title", "url", "folder"],
-      storeFields: ["id", "title", "url", "folder"],
-    });
-  });
+  const [preparedBookmarks, setPreparedBookmarks] = useState<
+    {
+      original: BrowserBookmark;
+      titlePrepared: Fuzzysort.Prepared;
+      urlPrepared: Fuzzysort.Prepared;
+      folderPrepared: Fuzzysort.Prepared;
+    }[]
+  >([]);
 
   const importAvailableBookmarks = useMemo(() => {
     if (!existingBookmarks.data) return undefined;
@@ -138,22 +140,50 @@ function Body(props: Props) {
     return allBookmarks.filter((b) => !existingBookmarks.data.some((eb) => eb.url === b.url));
   }, [existingBookmarks.data, allBookmarks]);
 
+  // Prepare bookmarks for fuzzysort when importAvailableBookmarks changes
+  useEffect(() => {
+    if (!importAvailableBookmarks) return;
+
+    const prepared = importAvailableBookmarks.map((bookmark) => ({
+      original: bookmark,
+      titlePrepared: fuzzysort.prepare(bookmark.title || ""),
+      urlPrepared: fuzzysort.prepare(bookmark.url || ""),
+      folderPrepared: fuzzysort.prepare(bookmark.folder || ""),
+    }));
+
+    setPreparedBookmarks(prepared);
+  }, [importAvailableBookmarks]);
+
   const filtered = useMemo(() => {
     if (!importAvailableBookmarks) return undefined;
     if (!keyword) return importAvailableBookmarks.slice(0, LIMIT_AT_ONCE);
 
-    miniSearch.removeAll();
-    miniSearch.addAll(importAvailableBookmarks);
+    const results = preparedBookmarks
+      .map((item) => {
+        const titleResult = fuzzysort.single(keyword, item.titlePrepared);
+        const urlResult = fuzzysort.single(keyword, item.urlPrepared);
+        const folderResult = fuzzysort.single(keyword, item.folderPrepared);
 
-    const results = miniSearch.search(keyword, { prefix: true, combineWith: "AND" }) as unknown as BrowserBookmark[];
-    return results.slice(0, LIMIT_AT_ONCE);
-  }, [importAvailableBookmarks, keyword]);
+        // 가장 좋은 점수 선택
+        const bestScore = [titleResult?.score, urlResult?.score, folderResult?.score]
+          .filter((score) => score !== undefined)
+          .reduce(
+            (best, current) => (current && (best === undefined || current > best) ? current : best),
+            undefined as number | undefined,
+          );
 
-  useEffect(() => {
-    return () => {
-      miniSearch.removeAll();
-    };
-  }, []);
+        return {
+          item: item.original,
+          score: bestScore,
+        };
+      })
+      .filter((result) => result.score !== undefined)
+      .sort((a, b) => (b.score || 0) - (a.score || 0))
+      .map((result) => result.item)
+      .slice(0, LIMIT_AT_ONCE);
+
+    return results;
+  }, [importAvailableBookmarks, keyword, preparedBookmarks]);
 
   const toggleBookmarkSelection = (bookmark: BrowserBookmark) => {
     setSelectedBookmarks((prev) =>
