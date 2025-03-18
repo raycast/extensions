@@ -17,6 +17,7 @@ import NodeFetch from "node-fetch";
 
 import { Habit } from "./models/habit";
 import CreateHabitForm from "./components/create-habit-form";
+import EditHabitForm from "./components/edit-habit-form";
 import FeedbackForm from "./components/feedback-form";
 import { getColorValue } from "./utils/colors";
 
@@ -170,10 +171,20 @@ export default function Command() {
       />
     );
 
+    const editAction = (
+      <Action.Push 
+        title="Edit Habit" 
+        icon={Icon.Pencil} 
+        shortcut={{ modifiers: ["cmd"], key: "e" }}
+        target={<EditHabitForm habit={habit} revalidate={revalidate} />}
+      />
+    );
+
     if (habit.repeatable === true) {
       return (
         <ActionPanel>
           <Action title="Track Habit" icon={Icon.CheckCircle} onAction={() => markHabitAsCompleted(habit.id)} />
+          {editAction}
           <Action.OpenInBrowser
             title="View Habits Details Online"
             url="https://www.supahabits.com/dashboard"
@@ -193,6 +204,7 @@ export default function Command() {
       return (
         <ActionPanel>
           <Action title="Mark as Done" icon={Icon.CheckCircle} onAction={() => markHabitAsCompleted(habit.id)} />
+          {editAction}
           <Action.OpenInBrowser
             title="View Habits Details Online"
             url="https://www.supahabits.com/dashboard"
@@ -211,6 +223,7 @@ export default function Command() {
     return (
       <ActionPanel>
         <Action title="Unmark as Done" icon={Icon.Xmark} onAction={() => removeLastTracking(habit.id)} />
+        {editAction}
         <Action.OpenInBrowser
           title="View Habits Details Online"
           url="https://www.supahabits.com/dashboard"
