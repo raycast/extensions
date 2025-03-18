@@ -175,7 +175,7 @@ export default function Command() {
             accessories={[{ text: device.ip }]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Copy Ip Address" content={device.ip} />
+                <Action.CopyToClipboard title="Copy IP Address" content={device.ip} />
               </ActionPanel>
             }
           />
