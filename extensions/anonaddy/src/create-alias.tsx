@@ -70,7 +70,6 @@ const CreateAlias = () => {
       setValue("format", options.data.defaultAliasFormat);
     }
     // We don't want to set (again) the default values when the response is the same (due to revalidation)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(options.data), setValue]);
 
   return (
