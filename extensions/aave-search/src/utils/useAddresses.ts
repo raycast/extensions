@@ -10,7 +10,6 @@ export type ListItem = {
   searchPath: string;
 };
 
-
 const TAG_MAP: Record<string, string[]> = {
   S_TOKEN: ["stable", "debt"],
   V_TOKEN: ["variable", "debt"],
@@ -27,7 +26,7 @@ export const useAddresses = () => {
           const [address, fullPath, chainId] = line.split(",");
           const parsedChainId = parseInt(chainId, 10);
           const path = fullPath.trim().split(" ");
-          
+
           return {
             value: address,
             path,
