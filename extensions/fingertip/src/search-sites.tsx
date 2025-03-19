@@ -25,7 +25,7 @@ export default function Command() {
 
   const { isLoading, data, pagination } = useFetch(
     (options) => {
-      return `https://ap1-production-creator-api.fingertip.com/api/v1/sites?${new URLSearchParams({ search: searchText, ...(options?.cursor ? { cursor: options?.cursor } : {}) }).toString()}`;
+      return `https://api.fingertip.com/v1/sites?${new URLSearchParams({ search: searchText, ...(options?.cursor ? { cursor: options?.cursor } : {}) }).toString()}`;
     },
     {
       headers: {
@@ -42,7 +42,7 @@ export default function Command() {
           message: error.message || "Unknown error occurred",
         });
       },
-      mapResult(result: Fingertip.API.V1.Sites.SiteListResponsesMyCursorPage) {
+      mapResult(result: Fingertip.V1.Sites.SiteListResponsesMyCursorPage) {
         const {
           items,
           pageInfo: { endCursor, hasNextPage },
