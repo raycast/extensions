@@ -1,3 +1,3 @@
-# MacTest Changelog
+# Terminal Shop Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
