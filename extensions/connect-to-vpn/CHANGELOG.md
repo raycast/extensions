@@ -1,6 +1,6 @@
 # Connect to VPN Changelog
 
-## [Performance Improvements] {PR_MERGE_DATE}
+## [Performance Improvements] 2025-03-19
 
 - Significantly improved menubar icon update speed when connecting/disconnecting via main Raycast interface
 - Fixed synchronization issues between main extension and menubar
