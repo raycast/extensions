@@ -1,6 +1,6 @@
 # SupaHabits Changelog
 
-### [Habit Colors & Manage habits features] - {PR_MERGE_DATE}
+### [Habit Colors & Manage habits features] - 2025-03-19
 
 - Habits use colors to identify them
 - User can edit/delete habits
