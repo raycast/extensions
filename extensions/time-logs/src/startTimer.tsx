@@ -5,7 +5,6 @@ import { showFailureToast } from "@raycast/utils";
 import { TimeEntry, Project } from "./models";
 import { saveTimeEntry, stopActiveTimer, getProjects, saveProject } from "./storage";
 import { generateId } from "./utils";
-import { nanoid } from "nanoid";
 
 // Define the command arguments
 export interface TrackTimeArguments {
@@ -113,7 +112,7 @@ export default function TrackTime(props: { arguments: TrackTimeArguments }) {
 
       // Create new timer
       const newEntry: TimeEntry = {
-        id: nanoid(),
+        id: generateId(),
         description: description ? description.trim() : "",
         startTime: new Date(),
         endTime: null,

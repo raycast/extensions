@@ -2,10 +2,11 @@
 
 import { TimeEntry, Project } from "./models";
 import { parse } from "date-fns";
+import { randomUUID } from "crypto";
 
 // Generate a unique ID
 export function generateId(): string {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  return randomUUID();
 }
 
 // Format a date to a readable string
