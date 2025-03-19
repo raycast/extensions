@@ -1,8 +1,14 @@
 import { closeMainWindow, LaunchProps } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { checkAntinoteInstalled } from "./utils";
 
 export default async function Command(props: LaunchProps<{ arguments: { content: string } }>) {
-  console.log(props.arguments.content);
+  const isInstalled = await checkAntinoteInstalled();
+
+  if (!isInstalled) {
+    return;
+  }
+
   try {
     await runAppleScript(
       `tell application "Antinote"

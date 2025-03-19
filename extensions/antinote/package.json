@@ -34,9 +34,9 @@
     },
     {
       "name": "pin-unpin",
-      "title": "Pin / Unpin",
+      "title": "Pin / Unpin Window",
       "subtitle": "Antinote",
-      "description": "Pins / unpins Antinote window",
+      "description": "Pins / unpins Antinote window on top",
       "mode": "no-view"
     }
       ],
