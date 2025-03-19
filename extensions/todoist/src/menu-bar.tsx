@@ -34,9 +34,13 @@ function MenuBar(props: MenuBarProps) {
   const { view, filter, upcomingDays, hideMenuBarCount, showNextTask, taskWidth } =
     getPreferenceValues<Preferences.MenuBar>();
   const { data: filterTasks, isLoading: isLoadingFilter } = useFilterTasks(view === "filter" ? filter : "");
-  const { data: inboxTasks, isLoading: isLoadingInbox } = useFilterTasks(view === "inbox" ? "##Inbox" : "");
 
   const tasks = useMemo(() => {
+    if (view === "inbox") {
+      const inboxProject = data?.projects.find((p) => p.inbox_project);
+      return data?.items.filter((t) => t.project_id === inboxProject?.id) ?? [];
+    }
+
     const tasks = data ? getTasksForTodayOrUpcomingView(data.items, data.user.id) : [];
 
     if (view === "today") {
@@ -60,6 +64,7 @@ function MenuBar(props: MenuBarProps) {
         return isBefore(new Date(t.due.date), dateToCompare);
       });
     }
+
     return data?.items.filter((t) => t.due?.date) ?? [];
   }, [data, upcomingDays, view]);
 
@@ -89,22 +94,24 @@ function MenuBar(props: MenuBarProps) {
       return "";
     }
 
-    if (tasks && !["filter", "inbox"].includes(view)) {
+    if (tasks && !["filter"].includes(view)) {
       return tasks.length > 0 ? tasks.length.toString() : "🎉";
-    } else if (filterTasks) {
+    }
+
+    if (filterTasks) {
       return filterTasks.length > 0 ? filterTasks.length.toString() : "🎉";
-    } else if (inboxTasks) {
-      return inboxTasks.length > 0 ? inboxTasks.length.toString() : "🎉";
     }
   }, [focusedTask, tasks, hideMenuBarCount, filterTasks, view, showNextTask, taskWidth]);
 
   let taskView = tasks && <UpcomingView tasks={tasks} data={data} setData={setData} />;
   if (view === "today") {
     taskView = tasks && <TodayView tasks={tasks} data={data} setData={setData} />;
-  } else if (view === "filter") {
+  }
+  if (view === "filter") {
     taskView = <FilterView tasks={filterTasks || []} data={data} setData={setData} />;
-  } else if (view === "inbox") {
-    taskView = <InboxView tasks={inboxTasks || []} data={data} setData={setData} />;
+  }
+  if (view === "inbox") {
+    taskView = <InboxView tasks={tasks || []} data={data} setData={setData} />;
   }
 
   return (
@@ -117,7 +124,7 @@ function MenuBar(props: MenuBarProps) {
           adjustContrast: false,
         },
       }}
-      isLoading={isLoading || isLoadingFilter || isLoadingInbox}
+      isLoading={isLoading || isLoadingFilter}
       title={menuBarExtraTitle}
     >
       {taskView}
@@ -286,21 +293,11 @@ const UpcomingView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
 };
 
 const InboxView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
-  const sections = useMemo(() => {
-    return groupByDates(tasks);
-  }, [tasks]);
-
   return tasks.length > 0 ? (
-    <MenuBarExtra.Section title={"Inbox tasks"}>
-      {sections.map((section, index) => {
-        return (
-          <MenuBarExtra.Section title={section.name} key={index}>
-            {section.tasks.map((task) => (
-              <MenuBarTask key={task.id} task={task} data={data} setData={setData} />
-            ))}
-          </MenuBarExtra.Section>
-        );
-      })}
+    <MenuBarExtra.Section title="Inbox tasks">
+      {tasks.map((task) => (
+        <MenuBarTask key={task.id} task={task} data={data} setData={setData} />
+      ))}
     </MenuBarExtra.Section>
   ) : (
     <MenuBarExtra.Item title="No tasks in inbox." />
