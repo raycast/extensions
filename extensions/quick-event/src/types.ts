@@ -5,5 +5,5 @@ export interface CalendarEvent {
   endDate: Date;
   isAllDay: boolean;
   validated: boolean;
-  location: string;
+  location?: string;
 }

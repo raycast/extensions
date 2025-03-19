@@ -41,10 +41,14 @@ export function useCalendar() {
         const parsedEvent = Sherlock.parse(preprocessedQuery);
 
         let location = '';
-        if (environment.canAccess(AI)) {
-          location = await AI.ask(
-            `Help me filter the location for this event: "${query}", just type the location or empty string`,
-          );
+        try {
+          if (environment.canAccess(AI)) {
+            location = await AI.ask(
+              `Extract only the location from this event text, or return an empty string don't need quote if no location is found: "${query}"`,
+            );
+          }
+        } catch (error) {
+          location = '';
         }
 
         const event: CalendarEvent = {
@@ -63,8 +67,6 @@ export function useCalendar() {
 
         setResults([event]);
       }
-
-      setIsLoading(false);
     } catch (error) {
       console.error('error', error);
       showToast({
@@ -72,6 +74,8 @@ export function useCalendar() {
         title: 'Could not parse event',
         message: String(error),
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 
