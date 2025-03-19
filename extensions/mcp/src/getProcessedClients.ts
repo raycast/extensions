@@ -26,7 +26,7 @@ export default async function (clientName?: string) {
 
   function getUserShellPath() {
     const shell = os.userInfo().shell || "/bin/sh";
-    const command = `${shell} -l -i -c 'echo $PATH'`;
+    const command = `${shell} -l -c 'echo $PATH'`;
 
     try {
       const path = execSync(command).toString().trim();
