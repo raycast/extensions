@@ -826,21 +826,19 @@ function isCurrentMonth(date: Date): boolean {
 }
 
 export default function ViewLogs() {
-  const [timeLogs, setTimeLogs] = useState<TimeEntry[]>([]);
+  const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
   const [activeTimer, setActiveTimer] = useState<TimeEntry | null>(null);
   const [projects, setProjects] = useState<Record<string, Project>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState<string>("");
   const [filterProject, setFilterProject] = useState<string>("all");
-  const [monthsToDisplay, setMonthsToDisplay] = useState<number>(2);
+  const [monthsToDisplay, setMonthsToDisplay] = useState<number>(3);
   const [activeTimerDuration, setActiveTimerDuration] = useState<string>("00:00");
 
-  // Use local storage for view mode preference
-  const {
-    value: viewMode,
-    setValue: setViewMode,
-    isLoading: isViewModeLoading,
-  } = useLocalStorage<"detailed" | "summary">("time-tracker-view-mode", "detailed");
+  const { value: viewMode, setValue: setViewMode } = useLocalStorage<"detailed" | "monthly">(
+    "time-tracker-view-mode",
+    "detailed",
+  );
 
   const { push } = useNavigation();
 
@@ -923,7 +921,7 @@ export default function ViewLogs() {
       // Load time logs
       const logs = await getTimeEntries();
       logs.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
-      setTimeLogs(logs);
+      setTimeEntries(logs);
 
       // Load active timer
       const active = await getActiveTimer();
@@ -1014,7 +1012,7 @@ export default function ViewLogs() {
   async function deleteLog(logId: string) {
     try {
       // Find the log in the current data before deleting it
-      const logToDelete = timeLogs.find((log) => log.id === logId);
+      const logToDelete = timeEntries.find((log) => log.id === logId);
       if (!logToDelete) {
         showToast({
           style: Toast.Style.Failure,
@@ -1052,7 +1050,7 @@ export default function ViewLogs() {
 
   // Filter logs to only show the last X months
   const visibleLogs = useMemo(() => {
-    if (!timeLogs || timeLogs.length === 0) return [];
+    if (!timeEntries || timeEntries.length === 0) return [];
 
     // Get current date
     const today = new Date();
@@ -1075,14 +1073,14 @@ export default function ViewLogs() {
     // Last day of the current month
     const endDate = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
 
-    return timeLogs.filter((log) => {
+    return timeEntries.filter((log) => {
       // Keep active timer regardless of date
       if (log.isActive) return true;
 
       const logDate = new Date(log.startTime);
       return logDate >= cutoffDate && logDate <= endDate;
     });
-  }, [timeLogs, monthsToDisplay]);
+  }, [timeEntries, monthsToDisplay]);
 
   // Memoize the filtered time logs to prevent unnecessary recalculations
   const filteredLogs = useMemo(() => {
@@ -1186,7 +1184,7 @@ export default function ViewLogs() {
 
   // Toggle view mode function to be used in action panels
   const toggleViewMode = useCallback(async () => {
-    const newMode = viewMode === "detailed" ? "summary" : "detailed";
+    const newMode = viewMode === "detailed" ? "monthly" : "detailed";
     await setViewMode(newMode);
   }, [viewMode, setViewMode]);
 
@@ -1198,7 +1196,7 @@ export default function ViewLogs() {
   // Check if there are more logs to load
   const hasMoreLogs = useMemo(() => {
     // Count logs that are outside the current date range
-    if (!timeLogs || timeLogs.length === 0) return false;
+    if (!timeEntries || timeEntries.length === 0) return false;
 
     // Get current date
     const today = new Date();
@@ -1214,12 +1212,12 @@ export default function ViewLogs() {
     const cutoffDate = new Date(startYear, normalizedStartMonth, 1);
     cutoffDate.setHours(0, 0, 0, 0);
 
-    return timeLogs.some((log) => !log.isActive && new Date(log.startTime) < cutoffDate);
-  }, [timeLogs, monthsToDisplay]);
+    return timeEntries.some((log) => !log.isActive && new Date(log.startTime) < cutoffDate);
+  }, [timeEntries, monthsToDisplay]);
 
   return (
     <List
-      isLoading={isLoading || isViewModeLoading}
+      isLoading={isLoading}
       searchBarPlaceholder="Search time logs..."
       navigationTitle="Time Logs"
       searchText={searchText}
@@ -1624,8 +1622,7 @@ export default function ViewLogs() {
 
       {/* Empty State */}
       {Object.keys(viewMode === "detailed" ? groupedLogs : groupedByMonthAndProject || {}).length === 0 &&
-        !activeTimer &&
-        !isLoading && (
+        !activeTimer && (
           <List.EmptyView
             title="No Time Logs"
             description="Start tracking your time or add a time log manually"
