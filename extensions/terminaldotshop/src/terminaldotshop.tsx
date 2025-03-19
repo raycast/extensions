@@ -354,7 +354,7 @@ const CreateCard = () => {
       <Form.TextField title="Card Holder's Name" {...itemProps.name} />
       <Form.PasswordField title="Card Number" {...itemProps.number} />
       <Form.Dropdown title="Expiry Month" {...itemProps.exp_month}>
-        {[1, 2, 3, 4, 5, 6, 7, 7, 9, 10, 11, 12].map((n) => (
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => (
           <Form.Dropdown.Item value={n.toString()} title={n.toString().padStart(2, "0")} />
         ))}
       </Form.Dropdown>
