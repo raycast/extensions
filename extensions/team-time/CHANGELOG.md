@@ -1,6 +1,6 @@
 # Team Time Changelog
 
-## [Add two countries and allow for reordering saved times] - {PR_MERGE_DATE}
+## [Add two countries and allow for reordering saved times] - 2025-03-19
 
 - Support for reordering saved locations with keyboard shortcuts (Shift+Cmd+↑ and Shift+Cmd+↓)
 - Added timezone data for Australia and Democratic Republic of the Congo
