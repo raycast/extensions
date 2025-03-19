@@ -70,12 +70,12 @@ export default function Command() {
           title={bundle.title}
           subtitle={bundle.description}
           accessories={[
-            { icon: Icon.Link, text: `${bundle.links.length}` },
             bundle.openInDefaultBrowser
-              ? { tag: "Default browser" }
+              ? {}
               : bundle.openInIncognitoWindow
                 ? { icon: Icon.Person, tag: "Incognito" }
                 : { tag: getProfileNameByDirectory(bundle.chromeProfileDirectory) },
+            { icon: Icon.Link, text: `${bundle.links.length}` },
           ].filter(Boolean)}
           actions={
             <ActionPanel>
