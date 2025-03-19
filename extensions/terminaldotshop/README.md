@@ -26,7 +26,7 @@ for example, the way the routing is handle here isn't so much like a dom where t
 I noticed that new component that you pushed _wasn't a child of the parent_, although you can pass props to it. but with the flow of
 
 ```tsx
-<Cart /> -> <Address /> -> <Cards /> -> <Confirm /> -> <Recipt />
+<Cart /> -> <Address /> -> <Cards /> -> <Confirm /> -> <Receipt />
 ```
 
 The `<Confirm />` page needs product list, cart items, chosen addressId, and chosen cardId, as well as the addresses and cards lists to hydrate the IDs. Prop drilling that is insane as they're picked up along the way.
