@@ -1,6 +1,6 @@
 # 1bookmark Changelog
 
-## [Improve Search UX] - {PR_MERGE_DATE}
+## [Improve Search UX] - 2025-03-19
 
 - 0.7.0
 - 💻 Replace search library from `minisearch` to `fuzzysort`. So fuzzy search is now more accurate.
