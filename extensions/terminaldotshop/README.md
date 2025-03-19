@@ -1,4 +1,4 @@
-# MacTest
+# Terminal Shop
 
 ### Some design choices...
 
