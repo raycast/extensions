@@ -1,6 +1,9 @@
 # Model Context Protocol Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Fix env issues] - {PR_MERGE_DATE}
+* Fix issue caused by passing `env` in `mcp-config.json` 
+
+## [Initial Version] - 13.03.2025
 
 Introducing the Model Context Protocol integration for Raycast.
 
