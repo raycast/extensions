@@ -37,4 +37,4 @@ and single flight mutations.
 
 react query solved all of this.
 
-but because new routes you push to aren't children of the prio, had to create a `withQc(<Cards />)` HOC wrapper to make it such that the query client was shared between them.
+but because new routes you push to aren't children of the prior, had to create a `withQc(<Cards />)` HOC wrapper to make it such that the query client was shared between them.
