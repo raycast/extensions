@@ -87,8 +87,8 @@ export default function Command() {
       }
     };
 
-    // Check very frequently (50ms for faster response)
-    refreshCheckInterval.current = setInterval(checkForUpdates, 50);
+    // Check frequently (500ms for fast response)
+    refreshCheckInterval.current = setInterval(checkForUpdates, 500);
 
     return () => {
       if (refreshCheckInterval.current) {
