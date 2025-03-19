@@ -1,5 +1,11 @@
 # Say - Text to Speech Changelog
 
+## [Routine Maintenance] - {PR_MERGE_DATE}
+
+- Migrate to `@raycast/api@1.94.0`
+- Use ESLint flag config
+- Bump all dependencies to the latest
+
 ## [Routine Maintenance] - 2025-03-17
 
 - Add FAQs
