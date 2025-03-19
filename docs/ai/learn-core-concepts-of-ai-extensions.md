@@ -61,7 +61,7 @@ A tool expects a single object as its input.
 
 ### Descriptions
 
-To better teach AI how to use your tools, you can add descriptions to tools and their inputs. The better you describe your tools, the more likely AI is to use them correctly.
+To better teach AI how to use your tools, you can add descriptions as JSDoc comments (eg. `/** ... */`) to tools and their inputs. The better you describe your tools, the more likely AI is to use them correctly.
 
 ```typescript
 type Input = {
