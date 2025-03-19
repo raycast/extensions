@@ -102,17 +102,12 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://fingertip.com/sites/${site.slug}`} title="Home" icon={Icon.House} />
+                <Action.OpenInBrowser url={`https://fingertip.com/${site.slug}`} title="Open Site" icon={Icon.Link} />
                 <Action.OpenInBrowser
                   url={`https://fingertip.com/sites/${site.slug}/pages`}
                   title="Pages"
                   icon={Icon.Document}
                 />
-                <Action.OpenInBrowser
-                  url={`https://fingertip.com/sites/${site.slug}/settings`}
-                  title="Settings"
-                  icon={Icon.Cog}
-                />
-                <Action.OpenInBrowser url={`https://fingertip.com/${site.slug}`} title="Open Site" icon={Icon.Link} />
                 <Action.OpenInBrowser
                   url={`https://fingertip.com/sites/${site.slug}/calendar`}
                   title="Scheduling"
@@ -124,7 +119,7 @@ export default function Command() {
                   icon={Icon.TwoPeople}
                 />
                 <Action.OpenInBrowser
-                  url={`https://fingertip.com/sites/${site.slug}/invoicing`}
+                  url={`https://fingertip.com/sites/${site.slug}/invoices`}
                   title="Invoicing"
                   icon={Icon.Coins}
                 />
@@ -143,7 +138,19 @@ export default function Command() {
                   title="Blog"
                   icon={Icon.Pencil}
                 />
+                <Action.OpenInBrowser
+                  url={`https://fingertip.com/sites/${site.slug}/analytics`}
+                  title="Analytics"
+                  icon={Icon.BarChart}
+                />
+                <Action.OpenInBrowser
+                  url={`https://fingertip.com/sites/${site.slug}/settings`}
+                  title="Settings"
+                  icon={Icon.Cog}
+                />
                 <Action.CopyToClipboard content={`https://fingertip.com/${site.slug}`} title="Copy Site URL" />
+                <Action.CopyToClipboard content={site.slug} title="Copy Site Slug" />
+                <Action.CopyToClipboard content={site.id} title={`Copy Site ID`} />
               </ActionPanel>
             }
           />
