@@ -1,6 +1,6 @@
 # Link Bundles Changelog
 
-## [Open In Other Browsers Update] - {PR_MERGE_DATE}
+## [Open In Other Browsers Update] - 2025-03-19
 
 - Added option to open links in your default browser, rather than in Chrome
 
