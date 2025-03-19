@@ -15,14 +15,20 @@ export default function searchLinkding() {
     null
   );
   const [linkdingAccountMap, setLinkdingAccountMap] = useState<LinkdingAccountMap>({});
-  const [hasLinkdingAccounts, setHasLindingAccounts] = useState(false);
+  const [hasLinkdingAccounts, setHasLinkdingAccounts] = useState(false);
+  const [numberOfAccounts, setNumberOfAccounts] = useState(0);
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     getPersistedLinkdingAccounts().then((linkdingMap) => {
       if (linkdingMap) {
         setLinkdingAccountMap(linkdingMap);
-        setHasLindingAccounts(Object.keys(linkdingMap).length > 0);
+        const accountNames = Object.keys(linkdingMap);
+        setNumberOfAccounts(accountNames.length);
+        setHasLinkdingAccounts(accountNames.length > 0);
+        if (accountNames.length > 0) {
+          setSelectedLinkdingAccount(linkdingMap[accountNames[0]]);
+        }
       }
     });
   }, [setLinkdingAccountMap]);
@@ -58,6 +64,8 @@ export default function searchLinkding() {
   }
 
   function LinkdingAccountDropdown() {
+    if (numberOfAccounts < 2) return;
+
     function setSelectedAccount(name: string): void {
       const linkdingAccount = { name, ...linkdingAccountMap[name] };
       setSelectedLinkdingAccount(linkdingAccount);
