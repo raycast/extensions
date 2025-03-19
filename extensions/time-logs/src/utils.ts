@@ -1,6 +1,7 @@
 // utils.ts
 
 import { TimeEntry, Project } from "./models";
+import { parse } from "date-fns";
 
 // Generate a unique ID
 export function generateId(): string {
@@ -68,7 +69,7 @@ export function groupEntriesByMonth(entries: TimeEntry[]): Record<string, TimeEn
   const grouped: Record<string, TimeEntry[]> = {};
 
   entries.forEach((entry) => {
-    const startDate = new Date(entry.startTime);
+    const startDate = entry.startTime;
     const monthYear = getMonthName(startDate);
 
     if (!grouped[monthYear]) {
@@ -132,8 +133,8 @@ export function calculateMonthlyHoursSummary(entries: TimeEntry[]): { label: str
   // Process each entry and accumulate minutes by month
   entries.forEach((entry) => {
     if (entry.startTime && entry.endTime && !entry.isActive) {
-      const startDate = new Date(entry.startTime);
-      const endDate = new Date(entry.endTime);
+      const startDate = entry.startTime;
+      const endDate = entry.endTime;
       const monthYear = getMonthName(startDate);
       const durationMinutes = calculateDuration(startDate, endDate);
 
@@ -149,9 +150,9 @@ export function calculateMonthlyHoursSummary(entries: TimeEntry[]): { label: str
   return Object.entries(monthSummary)
     .map(([label, minutes]) => ({ label, minutes }))
     .sort((a, b) => {
-      // Assuming format is "Month Year" (e.g., "January 2023")
-      const dateA = new Date(a.label);
-      const dateB = new Date(b.label);
+      // Parse "Month Year" format using date-fns
+      const dateA = parse(a.label, "MMMM yyyy", new Date());
+      const dateB = parse(b.label, "MMMM yyyy", new Date());
       return dateB.getTime() - dateA.getTime();
     });
 }
