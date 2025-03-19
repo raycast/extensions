@@ -1,11 +1,7 @@
 import React, { useState } from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import {
-  searchGraphForEntity,
-  getUrlForDataset,
-  SearchResult,
-} from "./utils/api";
+import { searchGraphForEntity, getUrlForDataset, SearchResult } from "./utils/api";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -27,7 +23,7 @@ export default function Command() {
           message: String(error),
         });
       },
-    }
+    },
   );
 
   return (
@@ -48,23 +44,10 @@ export default function Command() {
             accessories={[{ text: "Dataset" }]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  title="Open in Datahub"
-                  url={getUrlForDataset(result.entity.urn)}
-                />
-                <Action.CopyToClipboard
-                  title="Copy URL"
-                  content={getUrlForDataset(result.entity.urn)}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Urn"
-                  content={result.entity.urn}
-                />
-                <Action
-                  title="Refresh Results"
-                  icon={Icon.ArrowClockwise}
-                  onAction={revalidate}
-                />
+                <Action.OpenInBrowser title="Open in Datahub" url={getUrlForDataset(result.entity.urn)} />
+                <Action.CopyToClipboard title="Copy URL" content={getUrlForDataset(result.entity.urn)} />
+                <Action.CopyToClipboard title="Copy Urn" content={result.entity.urn} />
+                <Action title="Refresh Results" icon={Icon.ArrowClockwise} onAction={revalidate} />
               </ActionPanel>
             }
           />
