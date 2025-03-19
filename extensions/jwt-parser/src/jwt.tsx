@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Action, ActionPanel, Clipboard, Color, Form, Icon, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 interface JWTFormValues {
@@ -36,11 +37,12 @@ export default function JwtParser() {
     secret: "",
   });
   const [tokenError, setTokenError] = useState<string | undefined>(undefined);
+  const [filter, setFilter] = useState<"all" | "header" | "payload">("all");
 
   // Custom form handling since useForm is not available
   const formProps: FormProps = {
     handleSubmit: (values: JWTFormValues) => {
-      if (!values.token || values.token === "") {
+      if (!values.token) {
         setTokenError("JWT token is required");
         return;
       }
@@ -105,28 +107,25 @@ export default function JwtParser() {
       setIsLoading(true);
       try {
         const text = await Clipboard.read();
-        console.log("Clipboard content:", text);
 
         // Convert clipboard content to string and validate it's not empty
         if (text && text.text) {
           const clipboardStr = String(text.text).trim();
-          console.log("Trimmed clipboard string:", clipboardStr);
-          console.log("Number of dots:", clipboardStr.split(".").length);
 
           // Check if this looks like a JWT token (has two dots)
           if (clipboardStr.length > 0 && clipboardStr.split(".").length === 3) {
-            console.log("Valid JWT token detected in clipboard");
             setClipboardText(clipboardStr);
             formProps.setValue("token", clipboardStr);
           } else {
-            console.log("Clipboard content is not a valid JWT token");
             setClipboardText(clipboardStr);
           }
-        } else {
-          console.log("No clipboard content found");
         }
       } catch (error) {
-        console.error("Error reading clipboard:", error);
+        await showFailureToast(error, {
+          title: "Failed to read clipboard",
+          message: "Please make sure you have clipboard permissions enabled",
+        });
+        setClipboardText("");
       } finally {
         setIsLoading(false);
       }
@@ -136,37 +135,39 @@ export default function JwtParser() {
   }, []);
 
   function decodeJwt(token: string): DecodedJWT {
-    const parts = token.split(".");
-    if (parts.length !== 3) {
-      throw new Error("Invalid JWT format");
+    const [headerB64, payloadB64, signature] = token.split(".");
+
+    if (!headerB64 || !payloadB64 || !signature) {
+      throw new Error("Invalid JWT token format");
     }
 
     try {
-      // Properly decode Base64Url format
-      const base64UrlDecode = (str: string) => {
-        // Convert base64url to base64
-        let base64 = str.replace(/-/g, "+").replace(/_/g, "/");
-
-        // Add padding if needed
-        while (base64.length % 4) {
-          base64 += "=";
-        }
-
-        // Decode base64 to string
-        return Buffer.from(base64, "base64").toString();
-      };
-
-      const header = JSON.parse(base64UrlDecode(parts[0]));
-      const payload = JSON.parse(base64UrlDecode(parts[1]));
+      const header = JSON.parse(base64UrlDecode(headerB64));
+      const payload = JSON.parse(base64UrlDecode(payloadB64));
 
       return {
         header,
         payload,
-        signature: parts[2],
+        signature,
       };
-    } catch (error) {
-      console.error("Error decoding JWT:", error);
-      throw new Error("Error decoding JWT");
+    } catch {
+      throw new Error("Invalid JWT token format");
+    }
+  }
+
+  function base64UrlDecode(str: string): string {
+    try {
+      // Convert Base64URL to Base64
+      str = str.replace(/-/g, "+").replace(/_/g, "/");
+
+      // Add padding if needed
+      while (str.length % 4) {
+        str += "=";
+      }
+
+      return Buffer.from(str, "base64").toString("utf8");
+    } catch {
+      throw new Error("Invalid Base64URL encoding");
     }
   }
 
@@ -271,10 +272,15 @@ export default function JwtParser() {
         isLoading={isLoading}
         searchBarPlaceholder="Search token claims..."
         searchBarAccessory={
-          <List.Dropdown tooltip="View Options" storeValue={true} onChange={() => {}}>
-            <List.Dropdown.Item title="All Claims" value="all" icon={Icon.List} />
-            <List.Dropdown.Item title="Header" value="header" icon={Icon.Terminal} />
-            <List.Dropdown.Item title="Payload" value="payload" icon={Icon.Box} />
+          <List.Dropdown
+            tooltip="Filter by section"
+            value={filter}
+            onChange={(value) => setFilter(value as "all" | "header" | "payload")}
+            storeValue={true}
+          >
+            <List.Dropdown.Item title="All" value="all" />
+            <List.Dropdown.Item title="Header" value="header" />
+            <List.Dropdown.Item title="Payload" value="payload" />
           </List.Dropdown>
         }
       >
