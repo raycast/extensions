@@ -22,7 +22,7 @@ const FolderFormSwitcher = (props: FolderFormSwitcherProps) => {
         const newFolder = {
           id: values.folderId,
           path: values.folderPath[0],
-          extensions: values.extensions,
+          extensions: values.extensions.split(",").map((ext) => `.${ext.trim()}`),
         };
         props.onCreate(newFolder);
 
@@ -38,7 +38,7 @@ const FolderFormSwitcher = (props: FolderFormSwitcherProps) => {
         const newFolder = {
           id: values.folderId,
           path: values.folderPath[0],
-          extensions: values.extensions,
+          extensions: values.extensions.split(",").map((ext) => `.${ext.trim()}`),
         };
         props.onEdit(props.folder, newFolder);
 
@@ -50,7 +50,7 @@ const FolderFormSwitcher = (props: FolderFormSwitcherProps) => {
           submitText="Edit Folder"
           defaultFolderId={folder.id}
           defaultFolderPath={[folder.path]}
-          defaultFolderExtensions={folder.extensions}
+          defaultFolderExtensions={folder.extensions.join(", ").replaceAll(".", "")}
           handleOnSubmit={handleSubmit}
         />
       );

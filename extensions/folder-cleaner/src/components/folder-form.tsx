@@ -1,18 +1,17 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
-import { availableExtensions } from "../utils/availableExtensions";
 import { FormValidation, useForm } from "@raycast/utils";
 
 export type FormValues = {
   folderId: string;
   folderPath: string[];
-  extensions: string[];
+  extensions: string;
 };
 
 type FolderFormProps = {
   submitText: string;
   defaultFolderId?: string;
   defaultFolderPath?: string[];
-  defaultFolderExtensions?: string[];
+  defaultFolderExtensions?: string;
   handleOnSubmit: (values: FormValues) => void;
 };
 
@@ -30,7 +29,7 @@ export const FolderForm = ({
     initialValues: {
       folderId: defaultFolderId ?? "",
       folderPath: defaultFolderPath ?? [],
-      extensions: defaultFolderExtensions ?? [],
+      extensions: defaultFolderExtensions ?? "",
     },
     validation: {
       folderId: FormValidation.Required,
@@ -55,11 +54,12 @@ export const FolderForm = ({
         canChooseFiles={false}
         {...itemProps.folderPath}
       />
-      <Form.TagPicker title="Extensions" defaultValue={defaultFolderExtensions} {...itemProps.extensions}>
-        {availableExtensions.map((extension) => (
-          <Form.TagPicker.Item key={extension.value} value={extension.value} title={extension.title} />
-        ))}
-      </Form.TagPicker>
+      <Form.TextField
+        title="Extensions"
+        placeholder="e.g. png, jpeg, pdf"
+        info="Add extensions separated by a comma"
+        {...itemProps.extensions}
+      />
     </Form>
   );
 };
