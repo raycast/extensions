@@ -39,7 +39,7 @@
       "title": "Gokapi API Key",
       "required": true,
       "description": "The API key to authenticate with the Gokapi server. You can generate a new API key in the admin panel of your Gokapi server in the API tab.",
-      "type": "textfield"
+      "type": "password"
     }
   ],
   "dependencies": {
