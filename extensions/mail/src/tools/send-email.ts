@@ -1,6 +1,7 @@
 import type { Tool } from "@raycast/api";
 import { sendMessage } from "../scripts/messages";
 import { Cache } from "../utils/cache";
+import { getAccounts } from "../scripts/accounts";
 
 type Input = {
   /**
@@ -47,6 +48,10 @@ type Input = {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  // Load the user's mail accounts if this is the first time they're
+  // using the extension.
+  await getAccounts();
+
   const account = Cache.getDefaultAccount();
   if (!account) {
     throw new Error("No accounts found");
@@ -78,6 +83,10 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 };
 
 export default async function (input: Input) {
+  // Load the user's mail accounts if this is the first time they're
+  // using the extension.
+  await getAccounts();
+
   const account = Cache.getDefaultAccount();
   if (!account) {
     throw new Error("No accounts found");
