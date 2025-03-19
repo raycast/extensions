@@ -11,6 +11,8 @@ import {
   useNavigation,
   Color,
   getPreferenceValues,
+  Alert,
+  confirmAlert,
 } from "@raycast/api";
 import { TimeEntry, Project } from "./models";
 import {
@@ -1547,29 +1549,41 @@ export default function ViewLogs() {
                                   icon={Icon.Trash}
                                   style={Action.Style.Destructive}
                                   shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                                  onAction={() => {
-                                    // Ask for confirmation before deleting multiple logs
-                                    showToast({
-                                      style: Toast.Style.Animated,
-                                      title: "Deleting time logs...",
-                                    });
+                                  onAction={async () => {
+                                    if (
+                                      await confirmAlert({
+                                        title: "Delete Time Logs",
+                                        message: `Are you sure you want to delete ${logs.length} time logs?`,
+                                        primaryAction: {
+                                          title: "Delete",
+                                          style: Alert.ActionStyle.Destructive,
+                                        },
+                                      })
+                                    ) {
+                                      showToast({
+                                        style: Toast.Style.Animated,
+                                        title: "Deleting time logs...",
+                                      });
 
-                                    // Delete all logs in this group
-                                    Promise.all(logs.map((log) => deleteTimeEntry(log.id)))
-                                      .then(() => {
+                                      try {
+                                        // Delete logs one by one for better reliability
+                                        for (const log of logs) {
+                                          await deleteTimeEntry(log.id);
+                                        }
+                                        
                                         showToast({
                                           style: Toast.Style.Success,
                                           title: `${logs.length} Time Logs deleted`,
                                         });
-                                        loadData();
-                                      })
-                                      .catch((error) => {
+                                        await loadData();
+                                      } catch (error) {
                                         console.error("Error deleting time logs:", error);
                                         showToast({
                                           style: Toast.Style.Failure,
                                           title: "Failed to delete Time Logs",
                                         });
-                                      });
+                                      }
+                                    }
                                   }}
                                 />
                               </ActionPanel.Section>
