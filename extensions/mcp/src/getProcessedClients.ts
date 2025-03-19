@@ -19,7 +19,7 @@ export default async function (clientName?: string) {
       });
     } catch (error) {
       console.error("Error retrieving shell PATH:", error);
-      return process.env.PATH || "";
+      process.env.PATH = process.env.PATH || "";
     }
   }
   initEnv();
