@@ -6,12 +6,6 @@ import { useMemo, useState } from "react";
 import { getChainIcon } from "./utils/getChainIcon";
 import { Icon } from "@raycast/api";
 
-const TAG_MAP: Record<string, string[]> = {
-  S_TOKEN: ["stable", "debt"],
-  V_TOKEN: ["variable", "debt"],
-  STATA_TOKEN: ["stata", "static"],
-};
-
 const VERSION_PRIORITY: { [key: string]: number } = {
   AaveV3: 1,
   AaveV2: 2,
@@ -27,12 +21,7 @@ function getVersionPriority(name: string): number {
   return 4;
 }
 
-type AddressItem = ListItem & {
-  link: string;
-  searchPath: string;
-};
-
-function comp(a: AddressItem, b: AddressItem) {
+function comp(a: ListItem, b: ListItem) {
   const aInProduction = !ChainList[a.chainId as keyof typeof ChainList].testnet;
   const bInProduction = !ChainList[b.chainId as keyof typeof ChainList].testnet;
 
@@ -53,17 +42,7 @@ function comp(a: AddressItem, b: AddressItem) {
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const { isLoading, data: rawAddresses, error } = useAddresses();
-
-  const addresses = useMemo(() => {
-    if (!rawAddresses) return [];
-
-    return rawAddresses.map((item) => ({
-      ...item,
-      link: `${ChainList[item.chainId as keyof typeof ChainList]?.blockExplorers?.default.url.replace(/\/$/, "")}/address/${item.value}`,
-      searchPath: [...item.path, item.value, ...(TAG_MAP[item.path[item.path.length - 1]] ?? [])].join(" "),
-    }));
-  }, [rawAddresses]);
+  const { isLoading, data: addresses, error } = useAddresses();
 
   const uf = useMemo(() => {
     const opts = {
@@ -74,7 +53,7 @@ export default function Command() {
   }, []);
 
   const filteredAddresses = useMemo(() => {
-    if (!searchText) return [];
+    if (!searchText || !addresses) return [];
 
     const searchPaths = addresses.map((addr) => addr.searchPath.replace(/_/g, ""));
     const [matches, , order] = uf.search(searchPaths, searchText, 10);
