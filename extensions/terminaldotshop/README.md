@@ -32,7 +32,7 @@ I noticed that new component that you pushed _wasn't a child of the parent_, alt
 The `<Confirm />` page needs product list, cart items, chosen addressId, and chosen cardId, as well as the addresses and cards lists to hydrate the IDs. Prop drilling that is insane as they're picked up along the way.
 
 On top of that, I was assuming that the `useCachedPromise()` from raycast's libs would do something like `react-query` and share the state to all the hooks that used the
-same "dependency array". `useCachedPromise(() => fetch(...), [someKeys])`. This was not the case, all the components would rip up the api and would break a lof of opti-ui
+same "dependency array". `useCachedPromise(() => fetch(...), [someKeys])`. This was not the case, all the components would rip up the api and would break a lot of opti-ui
 and single flight mutations.
 
 react query solved all of this.
