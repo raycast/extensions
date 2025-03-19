@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Add the ability to search for collaborators in the pull request actions] - {PR_MERGE_DATE}
+## [Add the ability to search for collaborators in the pull request actions] - 2025-03-19
 
 - Add the ability to search for collaborators in the pull request actions, instead of just showing the first 25.
 
