@@ -36,7 +36,7 @@
     "@raycast/api": "^1.92.1",
     "@raycast/utils": "^1.17.0",
     "change-case": "^5.4.4",
-    "fingertip": "^0.4.2",
+    "fingertip": "^0.12.0",
     "fuse.js": "^7.1.0",
     "node-fetch-native": "^1.6.6"
   },

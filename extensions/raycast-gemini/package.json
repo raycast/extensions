@@ -55,11 +55,11 @@
               "value": "default"
             },
             {
-              "title": "Gemini 1.5 Flash",
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
               "value": "gemini-1.5-flash-latest"
             },
             {
-              "title": "Gemini 1.5 Pro",
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
               "value": "gemini-1.5-pro-latest"
             },
             {
@@ -67,8 +67,8 @@
               "value": "learnlm-1.5-pro-experimental"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
             },
             {
               "title": "Gemini 2.0 Flash",
@@ -135,11 +135,11 @@
               "value": "default"
             },
             {
-              "title": "Gemini 1.5 Flash",
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
               "value": "gemini-1.5-flash-latest"
             },
             {
-              "title": "Gemini 1.5 Pro",
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
               "value": "gemini-1.5-pro-latest"
             },
             {
@@ -147,8 +147,8 @@
               "value": "learnlm-1.5-pro-experimental"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
             },
             {
               "title": "Gemini 2.0 Flash",
@@ -207,11 +207,11 @@
               "value": "default"
             },
             {
-              "title": "Gemini 1.5 Flash",
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
               "value": "gemini-1.5-flash-latest"
             },
             {
-              "title": "Gemini 1.5 Pro",
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
               "value": "gemini-1.5-pro-latest"
             },
             {
@@ -219,8 +219,8 @@
               "value": "learnlm-1.5-pro-experimental"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
             },
             {
               "title": "Gemini 2.0 Flash",
@@ -279,11 +279,11 @@
               "value": "default"
             },
             {
-              "title": "Gemini 1.5 Flash",
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
               "value": "gemini-1.5-flash-latest"
             },
             {
-              "title": "Gemini 1.5 Pro",
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
               "value": "gemini-1.5-pro-latest"
             },
             {
@@ -291,8 +291,8 @@
               "value": "learnlm-1.5-pro-experimental"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
             },
             {
               "title": "Gemini 2.0 Flash",
@@ -342,11 +342,11 @@
               "value": "default"
             },
             {
-              "title": "Gemini 1.5 Flash",
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
               "value": "gemini-1.5-flash-latest"
             },
             {
-              "title": "Gemini 1.5 Pro",
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
               "value": "gemini-1.5-pro-latest"
             },
             {
@@ -354,8 +354,8 @@
               "value": "learnlm-1.5-pro-experimental"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
             },
             {
               "title": "Gemini 2.0 Flash",
@@ -405,11 +405,11 @@
               "value": "default"
             },
             {
-              "title": "Gemini 1.5 Flash",
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
               "value": "gemini-1.5-flash-latest"
             },
             {
-              "title": "Gemini 1.5 Pro",
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
               "value": "gemini-1.5-pro-latest"
             },
             {
@@ -417,8 +417,8 @@
               "value": "learnlm-1.5-pro-experimental"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
             },
             {
               "title": "Gemini 2.0 Flash",
@@ -468,11 +468,11 @@
               "value": "default"
             },
             {
-              "title": "Gemini 1.5 Flash",
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
               "value": "gemini-1.5-flash-latest"
             },
             {
-              "title": "Gemini 1.5 Pro",
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
               "value": "gemini-1.5-pro-latest"
             },
             {
@@ -480,8 +480,8 @@
               "value": "learnlm-1.5-pro-experimental"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
             },
             {
               "title": "Gemini 2.0 Flash",
@@ -531,11 +531,11 @@
               "value": "default"
             },
             {
-              "title": "Gemini 1.5 Flash",
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
               "value": "gemini-1.5-flash-latest"
             },
             {
-              "title": "Gemini 1.5 Pro",
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
               "value": "gemini-1.5-pro-latest"
             },
             {
@@ -543,8 +543,8 @@
               "value": "learnlm-1.5-pro-experimental"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
             },
             {
               "title": "Gemini 2.0 Flash",
@@ -594,11 +594,11 @@
               "value": "default"
             },
             {
-              "title": "Gemini 1.5 Flash",
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
               "value": "gemini-1.5-flash-latest"
             },
             {
-              "title": "Gemini 1.5 Pro",
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
               "value": "gemini-1.5-pro-latest"
             },
             {
@@ -606,8 +606,8 @@
               "value": "learnlm-1.5-pro-experimental"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
             },
             {
               "title": "Gemini 2.0 Flash",
@@ -657,11 +657,11 @@
               "value": "default"
             },
             {
-              "title": "Gemini 1.5 Flash",
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
               "value": "gemini-1.5-flash-latest"
             },
             {
-              "title": "Gemini 1.5 Pro",
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
               "value": "gemini-1.5-pro-latest"
             },
             {
@@ -669,8 +669,8 @@
               "value": "learnlm-1.5-pro-experimental"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
             },
             {
               "title": "Gemini 2.0 Flash",
@@ -720,11 +720,11 @@
               "value": "default"
             },
             {
-              "title": "Gemini 1.5 Flash",
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
               "value": "gemini-1.5-flash-latest"
             },
             {
-              "title": "Gemini 1.5 Pro",
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
               "value": "gemini-1.5-pro-latest"
             },
             {
@@ -732,8 +732,8 @@
               "value": "learnlm-1.5-pro-experimental"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
             },
             {
               "title": "Gemini 2.0 Flash",
@@ -783,11 +783,11 @@
               "value": "default"
             },
             {
-              "title": "Gemini 1.5 Flash",
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
               "value": "gemini-1.5-flash-latest"
             },
             {
-              "title": "Gemini 1.5 Pro",
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
               "value": "gemini-1.5-pro-latest"
             },
             {
@@ -795,8 +795,8 @@
               "value": "learnlm-1.5-pro-experimental"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
             },
             {
               "title": "Gemini 2.0 Flash",
@@ -846,11 +846,11 @@
               "value": "default"
             },
             {
-              "title": "Gemini 1.5 Flash",
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
               "value": "gemini-1.5-flash-latest"
             },
             {
-              "title": "Gemini 1.5 Pro",
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
               "value": "gemini-1.5-pro-latest"
             },
             {
@@ -858,8 +858,8 @@
               "value": "learnlm-1.5-pro-experimental"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
             },
             {
               "title": "Gemini 2.0 Flash",
@@ -917,11 +917,11 @@
               "value": "default"
             },
             {
-              "title": "Gemini 1.5 Flash",
+              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
               "value": "gemini-1.5-flash-latest"
             },
             {
-              "title": "Gemini 1.5 Pro",
+              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
               "value": "gemini-1.5-pro-latest"
             },
             {
@@ -929,8 +929,8 @@
               "value": "learnlm-1.5-pro-experimental"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
+              "title": "Gemini 2.0 Flash-Lite",
+              "value": "gemini-2.0-flash-lite"
             },
             {
               "title": "Gemini 2.0 Flash",
@@ -994,11 +994,11 @@
       "default": "gemini-2.0-flash",
       "data": [
         {
-          "title": "Gemini 1.5 Flash",
+          "title": "Gemini 1.5 Flash (Deprecated Sep25)",
           "value": "gemini-1.5-flash-latest"
         },
         {
-          "title": "Gemini 1.5 Pro",
+          "title": "Gemini 1.5 Pro (Deprecated Sep25)",
           "value": "gemini-1.5-pro-latest"
         },
         {
@@ -1006,8 +1006,8 @@
           "value": "learnlm-1.5-pro-experimental"
         },
         {
-          "title": "Gemini 2.0 Flash-Lite Preview",
-          "value": "gemini-2.0-flash-lite-preview-02-05"
+          "title": "Gemini 2.0 Flash-Lite",
+          "value": "gemini-2.0-flash-lite"
         },
         {
           "title": "Gemini 2.0 Flash",
