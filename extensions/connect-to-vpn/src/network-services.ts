@@ -135,7 +135,7 @@ export function useNetworkServices() {
             resolve(status);
           } else {
             // Continue checking with shorter interval
-            setTimeout(checkStatus, 300);
+            setTimeout(checkStatus, 500);
           }
         } catch (err) {
           console.error(`Error checking final status for ${service.name} (attempt ${attempts}/${maxAttempts}):`, err);
@@ -148,7 +148,7 @@ export function useNetworkServices() {
             );
             resolve(service.status);
           } else {
-            setTimeout(checkStatus, 300);
+            setTimeout(checkStatus, 500);
           }
         }
       };
