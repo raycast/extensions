@@ -12,6 +12,13 @@ import {
 } from "@raycast/api";
 import { executeGcloudCommand } from "../../../gcloud";
 import { ComputeService } from "../ComputeService";
+import {
+  getMachineTypesByFamily,
+  imageProjects,
+  imageFamilies,
+  getImageFamiliesByProject,
+  diskTypes,
+} from "../../../utils/computeResources";
 
 interface CreateVMFormProps {
   projectId: string;
@@ -34,11 +41,12 @@ interface DiskImage {
 export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: CreateVMFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [zones, setZones] = useState<string[]>([]);
-  const [machineTypes, setMachineTypes] = useState<MachineType[]>([]);
-  const [diskImages, setDiskImages] = useState<DiskImage[]>([]);
+  const [machineTypesByFamily, setMachineTypesByFamily] = useState<{ title: string; types: MachineType[] }[]>([]);
   const [networks, setNetworks] = useState<string[]>([]);
   const [subnetworks, setSubnetworks] = useState<Record<string, string[]>>({});
   const [selectedNetwork, setSelectedNetwork] = useState<string>("");
+  const [selectedImageProject, setSelectedImageProject] = useState<string>("debian-cloud");
+  const [imageFamiliesByProject, setImageFamiliesByProject] = useState<{ name: string; title: string }[]>([]);
   const [serviceAccounts, setServiceAccounts] = useState<string[]>([]);
   const [nameError, setNameError] = useState<string | undefined>();
   const [advancedMode, setAdvancedMode] = useState<boolean>(false);
@@ -57,23 +65,21 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       try {
         const service = new ComputeService(gcloudPath, projectId);
         
-        // Fetch zones
+        // Fetch zones - still need to fetch these dynamically as they vary by project
         const zonesList = await service.listZones();
         setZones(zonesList);
         
-        // Fetch machine types for the first zone
-        const machineTypesList = await fetchMachineTypes(zonesList[0]);
-        setMachineTypes(machineTypesList);
+        // Set machine types from predefined data
+        setMachineTypesByFamily(getMachineTypesByFamily());
         
-        // Fetch disk images - common ones
-        const imagesList = await fetchDiskImages();
-        setDiskImages(imagesList);
+        // Set initial image families based on default image project
+        setImageFamiliesByProject(getImageFamiliesByProject(selectedImageProject));
         
-        // Fetch networks
+        // Fetch networks - still need to fetch these dynamically
         const networksList = await fetchNetworks();
         setNetworks(networksList);
         
-        // Fetch service accounts
+        // Fetch service accounts - still need to fetch these dynamically
         const serviceAccountsList = await fetchServiceAccounts();
         setServiceAccounts(serviceAccountsList);
         
@@ -96,45 +102,6 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
     
     loadData();
   }, [gcloudPath, projectId]);
-  
-  const fetchMachineTypes = async (zone: string): Promise<MachineType[]> => {
-    try {
-      const result = await executeGcloudCommand(
-        gcloudPath,
-        `compute machine-types list --zones=${zone}`,
-        projectId
-      );
-      
-      return result.map((mt: any) => ({
-        name: mt.name,
-        description: `${mt.guestCpus} vCPUs, ${mt.memoryMb} MB RAM`,
-      }));
-    } catch (error) {
-      console.error("Error fetching machine types:", error);
-      return [];
-    }
-  };
-  
-  const fetchDiskImages = async (): Promise<DiskImage[]> => {
-    try {
-      // Only fetch common images to avoid long loading times
-      const result = await executeGcloudCommand(
-        gcloudPath,
-        `compute images list --standard-images --filter="(family~'^debian|^ubuntu|^cos|^rhel|^windows')"`,
-        projectId
-      );
-      
-      return result.map((img: any) => ({
-        name: img.name,
-        project: img.selfLink.split('/')[6],
-        family: img.family,
-        description: img.description || img.family,
-      }));
-    } catch (error) {
-      console.error("Error fetching disk images:", error);
-      return [];
-    }
-  };
   
   const fetchNetworks = async (): Promise<string[]> => {
     try {
@@ -192,13 +159,16 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
   };
   
   const handleZoneChange = async (newZone: string) => {
-    // Update machine types for the selected zone
-    const machineTypesList = await fetchMachineTypes(newZone);
-    setMachineTypes(machineTypesList);
+    // No need to do anything with machine types as they're predefined
   };
   
   const handleNetworkChange = async (newNetwork: string) => {
     setSelectedNetwork(newNetwork);
+  };
+
+  const handleImageProjectChange = (project: string) => {
+    setSelectedImageProject(project);
+    setImageFamiliesByProject(getImageFamiliesByProject(project));
   };
   
   const validateName = (name: string) => {
@@ -228,6 +198,10 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
     });
     
     try {
+      // Sanitize values to prevent null
+      const network = values.network === "null" || !values.network ? "default" : values.network;
+      const subnet = values.subnet === "null" ? "" : values.subnet;
+      
       // Build the command
       let command = `compute instances create ${values.name} --zone=${values.zone} --machine-type=${values.machineType}`;
       
@@ -235,9 +209,9 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       command += ` --image-project=${values.imageProject} --image-family=${values.imageFamily}`;
       
       // Add network options
-      command += ` --network=${values.network}`;
-      if (values.subnet) {
-        command += ` --subnet=${values.subnet}`;
+      command += ` --network=${network}`;
+      if (subnet) {
+        command += ` --subnet=${subnet}`;
       }
       
       // Add public IP option
@@ -355,7 +329,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
             title={advancedMode ? "Simple Mode" : "Advanced Mode"}
             icon={advancedMode ? Icon.List : Icon.Cog}
             onAction={() => setAdvancedMode(!advancedMode)}
-            shortcut={{ modifiers: ["cmd"], key: "a" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
           />
         </ActionPanel>
       }
@@ -379,7 +353,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         onChange={handleZoneChange}
       >
         {zones.map((zone) => (
-          <Form.Dropdown.Item key={zone} value={zone} title={zone} />
+          <Form.Dropdown.Item key={`zone-${zone}`} value={zone} title={zone} />
         ))}
       </Form.Dropdown>
       
@@ -387,15 +361,21 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         id="machineType"
         title="Machine Type"
         placeholder="Select a machine type"
+        defaultValue={machineTypesByFamily.length > 0 && machineTypesByFamily[0].types.length > 0 ? 
+          machineTypesByFamily[0].types[0].name : undefined}
       >
-        {machineTypes.map((machineType) => (
-          <Form.Dropdown.Item
-            key={machineType.name}
-            value={machineType.name}
-            title={`${machineType.name} (${machineType.description})`}
-          />
+        {machineTypesByFamily.map((family) => (
+          <Form.Dropdown.Section key={family.title} title={family.title}>
+            {family.types.map((machineType) => (
+              <Form.Dropdown.Item
+                key={`mt-${machineType.name}`}
+                value={machineType.name}
+                title={`${machineType.name} (${machineType.description})`}
+              />
+            ))}
+          </Form.Dropdown.Section>
         ))}
-        {advancedMode && <Form.Dropdown.Item key="custom" value="custom" title="Custom" />}
+        {advancedMode && <Form.Dropdown.Item key="mt-custom" value="custom" title="Custom" />}
       </Form.Dropdown>
       
       {advancedMode && (
@@ -425,61 +405,22 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         title="Image Project"
         placeholder="Select an image project"
         defaultValue="debian-cloud"
+        onChange={handleImageProjectChange}
       >
-        <Form.Dropdown.Item key="debian-cloud" value="debian-cloud" title="Debian Cloud" />
-        <Form.Dropdown.Item key="ubuntu-os-cloud" value="ubuntu-os-cloud" title="Ubuntu Cloud" />
-        <Form.Dropdown.Item key="cos-cloud" value="cos-cloud" title="Container-Optimized OS" />
-        <Form.Dropdown.Item key="centos-cloud" value="centos-cloud" title="CentOS Cloud" />
-        <Form.Dropdown.Item key="rhel-cloud" value="rhel-cloud" title="Red Hat Enterprise Linux" />
-        <Form.Dropdown.Item key="rocky-linux-cloud" value="rocky-linux-cloud" title="Rocky Linux" />
-        <Form.Dropdown.Item key="windows-cloud" value="windows-cloud" title="Windows Cloud" />
+        {imageProjects.map((project) => (
+          <Form.Dropdown.Item key={`imgp-${project.name}`} value={project.name} title={project.title} />
+        ))}
       </Form.Dropdown>
       
       <Form.Dropdown
         id="imageFamily"
         title="Image Family"
         placeholder="Select an image family"
-        defaultValue="debian-11"
+        defaultValue={imageFamiliesByProject.length > 0 ? imageFamiliesByProject[0].name : undefined}
       >
-        {/* Debian */}
-        <Form.Dropdown.Section title="Debian">
-          <Form.Dropdown.Item key="debian-11" value="debian-11" title="Debian 11 (Bullseye)" />
-          <Form.Dropdown.Item key="debian-10" value="debian-10" title="Debian 10 (Buster)" />
-          <Form.Dropdown.Item key="debian-9" value="debian-9" title="Debian 9 (Stretch)" />
-        </Form.Dropdown.Section>
-        
-        {/* Ubuntu */}
-        <Form.Dropdown.Section title="Ubuntu">
-          <Form.Dropdown.Item key="ubuntu-2204-lts" value="ubuntu-2204-lts" title="Ubuntu 22.04 LTS" />
-          <Form.Dropdown.Item key="ubuntu-2004-lts" value="ubuntu-2004-lts" title="Ubuntu 20.04 LTS" />
-          <Form.Dropdown.Item key="ubuntu-1804-lts" value="ubuntu-1804-lts" title="Ubuntu 18.04 LTS" />
-        </Form.Dropdown.Section>
-        
-        {/* CentOS */}
-        <Form.Dropdown.Section title="CentOS">
-          <Form.Dropdown.Item key="centos-7" value="centos-7" title="CentOS 7" />
-          <Form.Dropdown.Item key="centos-stream-8" value="centos-stream-8" title="CentOS Stream 8" />
-        </Form.Dropdown.Section>
-        
-        {/* RHEL */}
-        <Form.Dropdown.Section title="RHEL">
-          <Form.Dropdown.Item key="rhel-9" value="rhel-9" title="RHEL 9" />
-          <Form.Dropdown.Item key="rhel-8" value="rhel-8" title="RHEL 8" />
-          <Form.Dropdown.Item key="rhel-7" value="rhel-7" title="RHEL 7" />
-        </Form.Dropdown.Section>
-        
-        {/* Windows */}
-        <Form.Dropdown.Section title="Windows">
-          <Form.Dropdown.Item key="windows-2022" value="windows-2022" title="Windows Server 2022" />
-          <Form.Dropdown.Item key="windows-2019" value="windows-2019" title="Windows Server 2019" />
-          <Form.Dropdown.Item key="windows-2016" value="windows-2016" title="Windows Server 2016" />
-        </Form.Dropdown.Section>
-        
-        {/* Container-Optimized OS */}
-        <Form.Dropdown.Section title="Container-Optimized OS">
-          <Form.Dropdown.Item key="cos-stable" value="cos-stable" title="COS Stable" />
-          <Form.Dropdown.Item key="cos-beta" value="cos-beta" title="COS Beta" />
-        </Form.Dropdown.Section>
+        {imageFamiliesByProject.map((family) => (
+          <Form.Dropdown.Item key={`imgf-${family.name}`} value={family.name} title={family.title} />
+        ))}
       </Form.Dropdown>
       
       <Form.Dropdown
@@ -487,12 +428,13 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         title="Boot Disk Type"
         defaultValue="pd-balanced"
       >
-        <Form.Dropdown.Item key="pd-standard" value="pd-standard" title="Standard persistent disk" />
-        <Form.Dropdown.Item key="pd-balanced" value="pd-balanced" title="Balanced persistent disk" />
-        <Form.Dropdown.Item key="pd-ssd" value="pd-ssd" title="SSD persistent disk" />
-        {advancedMode && <Form.Dropdown.Item key="pd-extreme" value="pd-extreme" title="Extreme persistent disk" />}
-        {advancedMode && <Form.Dropdown.Item key="hyperdisk-balanced" value="hyperdisk-balanced" title="Hyperdisk Balanced" />}
-        {advancedMode && <Form.Dropdown.Item key="hyperdisk-extreme" value="hyperdisk-extreme" title="Hyperdisk Extreme" />}
+        {diskTypes.map((diskType) => (
+          <Form.Dropdown.Item 
+            key={`disk-${diskType.name}`} 
+            value={diskType.name} 
+            title={diskType.title} 
+          />
+        ))}
       </Form.Dropdown>
       
       <Form.TextField
@@ -508,8 +450,8 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
           title="Auto Delete Boot Disk"
           defaultValue="true"
         >
-          <Form.Dropdown.Item key="true" value="true" title="Yes" />
-          <Form.Dropdown.Item key="false" value="false" title="No" />
+          <Form.Dropdown.Item key="delete-true" value="true" title="Yes" />
+          <Form.Dropdown.Item key="delete-false" value="false" title="No" />
         </Form.Dropdown>
       )}
       
@@ -523,19 +465,28 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         defaultValue="default"
         onChange={handleNetworkChange}
       >
-        {networks.map((network) => (
-          <Form.Dropdown.Item key={network} value={network} title={network} />
-        ))}
+        {networks.length > 0 ? (
+          networks.map((network) => (
+            <Form.Dropdown.Item key={`network-${network}`} value={network} title={network} />
+          ))
+        ) : (
+          <Form.Dropdown.Item key="network-default" value="default" title="default" />
+        )}
       </Form.Dropdown>
       
       <Form.Dropdown
         id="subnet"
         title="Subnetwork"
         placeholder="Select a subnetwork"
+        defaultValue={selectedNetwork && subnetworks[selectedNetwork]?.length > 0 ? subnetworks[selectedNetwork][0] : "default"}
       >
-        {selectedNetwork && subnetworks[selectedNetwork]?.map((subnet) => (
-          <Form.Dropdown.Item key={subnet} value={subnet} title={subnet} />
-        ))}
+        {selectedNetwork && subnetworks[selectedNetwork]?.length > 0 ? (
+          subnetworks[selectedNetwork].map((subnet, index) => (
+            <Form.Dropdown.Item key={`subnet-${subnet}-${index}`} value={subnet} title={subnet} />
+          ))
+        ) : (
+          <Form.Dropdown.Item key="subnet-default-fallback" value="default" title="default" />
+        )}
       </Form.Dropdown>
       
       <Form.Dropdown
@@ -543,8 +494,8 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         title="External IP"
         defaultValue="auto"
       >
-        <Form.Dropdown.Item key="auto" value="auto" title="Automatic (ephemeral)" />
-        <Form.Dropdown.Item key="none" value="none" title="None (private instance)" />
+        <Form.Dropdown.Item key="ip-auto" value="auto" title="Automatic (ephemeral)" />
+        <Form.Dropdown.Item key="ip-none" value="none" title="None (private instance)" />
       </Form.Dropdown>
       
       {/* Service Account */}
@@ -555,10 +506,11 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         id="serviceAccount"
         title="Service Account"
         placeholder="Select a service account"
+        defaultValue="default"
       >
-        <Form.Dropdown.Item key="default" value="default" title="Default compute service account" />
+        <Form.Dropdown.Item key="sa-default" value="default" title="Default compute service account" />
         {serviceAccounts.map((sa) => (
-          <Form.Dropdown.Item key={sa} value={sa} title={sa} />
+          <Form.Dropdown.Item key={`sa-${sa}`} value={sa} title={sa} />
         ))}
       </Form.Dropdown>
       
@@ -599,8 +551,8 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
             title="Preemptible VM"
             defaultValue="false"
           >
-            <Form.Dropdown.Item key="false" value="false" title="No" />
-            <Form.Dropdown.Item key="true" value="true" title="Yes" />
+            <Form.Dropdown.Item key="preempt-false" value="false" title="No" />
+            <Form.Dropdown.Item key="preempt-true" value="true" title="Yes" />
           </Form.Dropdown>
           
           <Form.Dropdown
@@ -608,8 +560,8 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
             title="Spot VM"
             defaultValue="false"
           >
-            <Form.Dropdown.Item key="false" value="false" title="No" />
-            <Form.Dropdown.Item key="true" value="true" title="Yes" />
+            <Form.Dropdown.Item key="spot-false" value="false" title="No" />
+            <Form.Dropdown.Item key="spot-true" value="true" title="Yes" />
           </Form.Dropdown>
           
           <Form.Dropdown
@@ -617,8 +569,8 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
             title="On Host Maintenance"
             defaultValue="MIGRATE"
           >
-            <Form.Dropdown.Item key="MIGRATE" value="MIGRATE" title="Migrate VM instance" />
-            <Form.Dropdown.Item key="TERMINATE" value="TERMINATE" title="Terminate VM instance" />
+            <Form.Dropdown.Item key="maint-MIGRATE" value="MIGRATE" title="Migrate VM instance" />
+            <Form.Dropdown.Item key="maint-TERMINATE" value="TERMINATE" title="Terminate VM instance" />
           </Form.Dropdown>
           
           <Form.TextField

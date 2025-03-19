@@ -327,6 +327,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         instance={instance}
         service={service}
         onRefresh={() => fetchInstances(service)}
+        projectId={projectId}
       />
     );
   };
@@ -337,7 +338,6 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
     }
     
     const zone = service.formatZone(instance.zone).split('/').pop() || "";
-    const projectId = service.formatZone(instance.zone).split('/')[0] || "";
     const command = `gcloud compute ssh --zone="${zone}" "${instance.name}" --project="${projectId}"`;
     
     Clipboard.copy(command);

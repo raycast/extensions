@@ -19,9 +19,10 @@ interface ComputeInstanceDetailViewProps {
   instance: ComputeInstance;
   service: ComputeService;
   onRefresh: () => Promise<void>;
+  projectId?: string;
 }
 
-export default function ComputeInstanceDetailView({ instance, service, onRefresh }: ComputeInstanceDetailViewProps) {
+export default function ComputeInstanceDetailView({ instance, service, onRefresh, projectId }: ComputeInstanceDetailViewProps) {
   const zone = service.formatZone(instance.zone);
   const machineType = service.formatMachineType(instance.machineType);
   const { push } = useNavigation();
@@ -346,7 +347,7 @@ export default function ComputeInstanceDetailView({ instance, service, onRefresh
   
   const copyConnectionCommand = useCallback(() => {
     const zoneName = zone.split('/').pop() || zone;
-    const command = `gcloud compute ssh --zone="${zoneName}" "${instance.name}" --project="${service.formatZone(instance.zone).split('/')[0]}"`;
+    const command = `gcloud compute ssh --zone="${zoneName}" "${instance.name}" --project="${projectId || instance.id.split('/')[1]}"`;
     
     Clipboard.copy(command);
     showToast({
@@ -354,7 +355,7 @@ export default function ComputeInstanceDetailView({ instance, service, onRefresh
       title: "Connection command copied",
       message: "Paste in your terminal to connect",
     });
-  }, [instance, zone]);
+  }, [instance, zone, projectId]);
   
   return (
     <Detail

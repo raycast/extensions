@@ -510,7 +510,7 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
                         />
                         <Action 
                           title="View Compute Disks" 
-                          icon={Icon.Disk} 
+                          icon={Icon.HardDrive} 
                           onAction={viewComputeDisks}
                         />
                       </>
