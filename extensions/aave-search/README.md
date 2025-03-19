@@ -2,7 +2,7 @@
   <img src="assets/icon.png" width="128" height="128" />
 </div>
 
-# Aave Search for Raycast
+# Aave Search
 
 A Raycast extension that provides quick access to official Aave ecosystem smart contract addresses across multiple networks.
 
@@ -16,7 +16,7 @@ A Raycast extension that provides quick access to official Aave ecosystem smart 
 
 ## Usage
 
-1. Open Raycast (default shortcut: `⌘ + Space`)
+1. Open Raycast
 2. Type "aave" to access the extension
 3. Search for any Aave contract (e.g., "lending pool", "aToken", etc.)
 4. Select a result to view contract in explorer or copy the address to your clipboard
