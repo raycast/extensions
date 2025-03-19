@@ -24,6 +24,7 @@ export async function executeGcloudCommand(
     skipCache?: boolean;
     cacheTTL?: number;
     maxRetries?: number;
+    timeout?: number;
   } = {}
 ) {
   // Validate inputs
@@ -36,7 +37,7 @@ export async function executeGcloudCommand(
   }
   
   try {
-    const { skipCache = false, cacheTTL = COMMAND_CACHE_TTL, maxRetries = 1 } = options;
+    const { skipCache = false, cacheTTL = COMMAND_CACHE_TTL, maxRetries = 1, timeout = 25000 } = options;
     
     // Only add project flag if projectId is provided and not empty
     const projectFlag = projectId && typeof projectId === 'string' && projectId.trim() !== "" 
@@ -64,8 +65,13 @@ export async function executeGcloudCommand(
       }
     }
     
-    // Create a promise for this request
-    const requestPromise = executeCommand(fullCommand, cacheKey, maxRetries);
+    // Create a promise for this request with timeout
+    const requestPromise = Promise.race([
+      executeCommand(fullCommand, cacheKey, maxRetries),
+      new Promise((_, reject) => {
+        setTimeout(() => reject(new Error(`Command timed out after ${timeout}ms: ${fullCommand}`)), timeout);
+      })
+    ]);
     
     // Store the promise so parallel calls can use it
     pendingRequests.set(cacheKey, requestPromise);
@@ -95,12 +101,27 @@ async function executeCommand(fullCommand: string, cacheKey: string, maxRetries:
     // Increase maxBuffer to handle large outputs (10MB)
     const { stdout, stderr } = await execPromise(fullCommand, { maxBuffer: 10 * 1024 * 1024 });
     
-    if (stderr) {
+    if (stderr && stderr.trim() !== "") {
       console.warn(`Command produced stderr: ${stderr}`);
+      
+      // Check for auth errors in stderr
+      if (stderr.includes("not authorized") || stderr.includes("not authenticated") || 
+          stderr.includes("requires authentication") || stderr.includes("login required")) {
+        throw new Error("Authentication error: Please re-authenticate with Google Cloud");
+      }
+      
+      // Check for project errors
+      if (stderr.includes("project not found") || stderr.includes("project ID not specified") ||
+          stderr.includes("project does not exist")) {
+        throw new Error("Project error: The specified project was not found or is invalid");
+      }
     }
     
     if (!stdout || stdout.trim() === "") {
-      console.log("Command returned empty output");
+      console.log("Command returned empty output, treating as empty array result");
+      
+      // Store empty array in cache
+      commandCache.set(cacheKey, { result: [], timestamp: Date.now() });
       return [];
     }
     
@@ -114,7 +135,7 @@ async function executeCommand(fullCommand: string, cacheKey: string, maxRetries:
       return parsedResult;
     } catch (error) {
       console.error(`Error parsing JSON: ${error}`);
-      console.error(`Raw output: ${stdout}`);
+      console.error(`Raw output: ${stdout.substring(0, 200)}...`); // Show first 200 chars
       throw new Error(`Failed to parse command output as JSON: ${error}`);
     }
   } catch (error: any) {

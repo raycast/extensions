@@ -8,6 +8,7 @@ import fs from "fs";
 import ProjectView from "./ProjectView";
 import { StorageBucketView, StorageTransferView, IAMMembersView, IAMMembersByPrincipalView, StorageStatsView } from "./services/storage";
 import { IAMMembersByPrincipalView as IAMProjectMembersByPrincipalView, IAMView } from "./services/iam";
+import { ComputeInstancesView, ComputeDisksView } from "./services/compute";
 import { executeGcloudCommand } from "./gcloud";
 import { CacheManager, Project } from "./utils/CacheManager";
 import CachedProjectView from "./views/CachedProjectView";
@@ -360,6 +361,14 @@ export default function Command() {
 
   function viewStorageStats(projectId: string) {
     push(<StorageStatsView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
+  }
+
+  function viewComputeInstances(projectId: string) {
+    push(<ComputeInstancesView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
+  }
+
+  function viewComputeDisks(projectId: string) {
+    push(<ComputeDisksView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
   }
 
   function clearCache() {
@@ -801,6 +810,18 @@ ${statusMessage}`}
                         icon={Icon.BarChart}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
                         onAction={() => viewStorageStats(project.id)}
+                      />
+                      <Action
+                        title="View Compute Instances"
+                        icon={Icon.Desktop}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                        onAction={() => viewComputeInstances(project.id)}
+                      />
+                      <Action
+                        title="View Compute Disks"
+                        icon={Icon.HardDrive}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                        onAction={() => viewComputeDisks(project.id)}
                       />
                     </ActionPanel.Section>
                     <ActionPanel.Section title="Utilities">
