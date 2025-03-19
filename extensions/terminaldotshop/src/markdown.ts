@@ -119,7 +119,8 @@ ${items.map((i) => {
 
 **${address.name}**
 
-${address.phone ? "Phone: ${address.phone}\n" : ""}
+${address.phone ? `Phone: ${address.phone}
+` : ""}
 ${address.street1}
 ${address.street2}
 ${address.city}, ${address.country} - ${address.zip}
