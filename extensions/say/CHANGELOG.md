@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Routine Maintenance] - {PR_MERGE_DATE}
+## [Routine Maintenance] - 2025-03-19
 
 - Migrate to `@raycast/api@1.94.0`
 - Use ESLint flag config
