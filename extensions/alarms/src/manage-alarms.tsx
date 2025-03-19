@@ -1,5 +1,5 @@
 import React from "react";
-import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, launchCommand, LaunchType, Keyboard } from "@raycast/api";
 import { useCallback, useState, useEffect } from "react";
 import { spawn } from "child_process";
 import os from "os";
@@ -225,7 +225,7 @@ export default function ListAlarms() {
   // Handle opening the create alarm command
   const handleCreateAlarm = async () => {
     try {
-      await open("raycast://extensions/codista/alarms/create-alarm");
+      await launchCommand({ name: "create-alarm", type: LaunchType.UserInitiated });
     } catch (error) {
       showFailureToast(error, { title: "Failed to open Create Alarm command" });
     }
@@ -266,8 +266,9 @@ export default function ListAlarms() {
                     <Action
                       title="Remove Alarm"
                       icon={Icon.Trash}
+                      style={Action.Style.Destructive}
                       onAction={() => handleRemoveAlarm(alarm.id, getAlarmTitle(alarm))}
-                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
