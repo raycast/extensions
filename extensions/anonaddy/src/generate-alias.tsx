@@ -1,4 +1,4 @@
-import { Cache, Clipboard, Toast, showHUD, showToast } from "@raycast/api";
+import { Cache, Clipboard, Toast, showHUD, showToast, captureException } from "@raycast/api";
 
 import { alias, domains } from "./api";
 import * as context from "./context";
@@ -51,6 +51,8 @@ const GenerateAlias = async ({ launchContext: options }: LaunchProps) => {
       toast.title = "Failed to generate Alias";
     }
   } catch (error) {
+    captureException(error);
+
     toast.style = Toast.Style.Failure;
     toast.title = "Invalid Credentials";
     toast.message = "Please check your credentials in the extension preferences.";

@@ -1,16 +1,12 @@
-import nf from "node-fetch";
-
 import APIError from "./APIError";
 import preferences from "../preferences";
-
-import type { RequestInit, Response } from "node-fetch";
 
 type Init = { body?: Record<string, unknown> | null | undefined } & Omit<RequestInit, "body">;
 
 const fetch = async (path: string, init: Init = {}): Promise<Response> => {
   const url = new URL(path, "https://app.addy.io/api/v1/");
 
-  const response = await nf(url.toString(), {
+  const response = await global.fetch(url.toString(), {
     ...init,
     body: JSON.stringify(init.body),
     headers: {
