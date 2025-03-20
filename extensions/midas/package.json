@@ -49,7 +49,7 @@
     {
       "name": "authCode",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "Authentication Code",
       "description": "Your unique authentication code from Midas web app",
       "default": ""
