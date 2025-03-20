@@ -239,6 +239,7 @@
     "mailparser": "^3.7.2",
     "mime-types": "^2.1.35",
     "plist": "^3.1.0",
+    "string-strip-html": "^13.4.12",
     "turndown": "^7.2.0",
     "utf8": "^3.0.0"
   },

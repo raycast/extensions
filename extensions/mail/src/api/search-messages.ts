@@ -5,6 +5,7 @@ import { simpleParser } from "mailparser";
 import { readFile } from "fs/promises";
 import { executeSQL } from "@raycast/utils";
 import { basename } from "path/posix";
+import { stripHtml } from "string-strip-html";
 
 import { getDatabasePath, getPersistenceInfo } from "./get-persistence-info";
 import { ensureCLI } from "../utils/ripgrep";
@@ -29,7 +30,7 @@ async function parseMessage(message: string) {
   return {
     from: parsed.from?.value[0].address || "",
     subject: parsed.subject || "",
-    text: parsed.text || "",
+    text: parsed.html ? stripHtml(parsed.html).result.replaceAll("\n", " ") : parsed.text || "",
   };
 }
 
