@@ -1,6 +1,6 @@
 # WeChat Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-03-20
 
 - Update project files
 - Use Raycast recommended configurations
