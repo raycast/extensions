@@ -24,9 +24,9 @@ function transformResponse(response: ResponseData): { data: Item[] } {
   }
   return {
     data: [
-      { code: response.wubi86, word: response.char, version: "86版", id: 1 },
-      { code: response.wubi98, word: response.char, version: "98版", id: 2 },
-      { code: response.wubiXSJ, word: response.char, version: "新世纪版", id: 3 },
+      { code: response.wubi86, word: response.char, version: "86 Version", id: 1 },
+      { code: response.wubi98, word: response.char, version: "98 Version", id: 2 },
+      { code: response.wubiXSJ, word: response.char, version: "New-century Version", id: 3 },
     ],
   };
 }
@@ -57,7 +57,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.QueryC
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={handleSearchChange}
-      searchBarPlaceholder="输入单个汉字查询编码"
+      searchBarPlaceholder="Enter a single Chinese character to query its code"
       throttle
     >
       {data?.length === 0 ? (

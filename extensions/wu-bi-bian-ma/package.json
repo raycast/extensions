@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wu-bi-bian-ma",
-  "title": "五笔编码",
-  "description": "查询汉字的86版、98版和新世纪版五笔编码",
+  "title": "Wubi Code",
+  "description": "Look up Chinese characters in Wubi 86, 98, and New Century encoding",
   "icon": "extension-icon.png",
   "author": "hunter27",
   "categories": [
@@ -13,43 +13,43 @@
     {
       "name": "query-code",
       "title": "Wubi Code",
-      "subtitle": "五笔编码",
-      "description": "请输入汉字以查询五笔编码",
+      "subtitle": "Wubi Encoding",
+      "description": "Enter Chinese characters to look up Wubi encoding",
       "mode": "view",
       "arguments": [
         {
           "name": "word",
-          "description": "汉字",
+          "description": "Chinese Character",
           "type": "text",
           "required": true,
-          "placeholder": "请输入要查询的汉字"
+          "placeholder": "Enter character to look up"
         }
       ]
     },
     {
       "name": "show-radical-table",
       "title": "Wubi Table",
-      "subtitle": "五笔字根表",
-      "description": "显示完整的五笔字根表图片",
+      "subtitle": "Wubi Radical Table",
+      "description": "Display the complete Wubi radical table image",
       "mode": "view",
       "arguments": [
         {
           "name": "version",
-          "description": "五笔版本",
+          "description": "Wubi Version",
           "type": "dropdown",
           "required": true,
-          "placeholder": "请选择五笔版本",
+          "placeholder": "Select Wubi version",
           "data": [
             {
-              "title": "86版",
+              "title": "86 Version",
               "value": "86"
             },
             {
-              "title": "98版",
+              "title": "98 Version",
               "value": "98"
             },
             {
-              "title": "新世纪版",
+              "title": "New-century Version",
               "value": "xsj"
             }
           ]

@@ -1,6 +1,6 @@
-# 五笔编码 - Raycast Extension
+# Wubi Code - Raycast Extension
 
-查询汉字的86版、98版和新世纪版五笔编码
+Look up Chinese characters' encodings in Wubi 86, Wubi 98, and New Century versions
 
 ## Features
 - Look up Wubi code (encoding) for Chinese characters
@@ -9,7 +9,7 @@
 ## Installation
 
 1. Make sure you have [Raycast](https://raycast.com/) installed.
-2. Open Raycast and search for "五笔编码".
+2. Open Raycast and search for "Wubi Code".
 3. Click "Install" to add the extension to your Raycast.
 
 ## Usage

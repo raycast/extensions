@@ -1,3 +1,3 @@
-# 五笔编码 Changelog
+# Wubi Code Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
