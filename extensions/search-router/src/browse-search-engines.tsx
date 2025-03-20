@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List, showToast } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { searchEngines } from "./data/search-engines";
-import { SearchEngine } from "./search-engine";
+import { SearchEngine } from "./types";
 import { useDefaultSearchEngine } from "./data/cache";
 
 export default function BrowseSearchEngines() {
