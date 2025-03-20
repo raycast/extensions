@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [1.2.0] - {PR_MERGE_DATE}
 
 - Added listing of calendars (request [#17411](https://github.com/raycast/extensions/issues/17411))
 - Fix issue with timezones in calendar event creation using AI
