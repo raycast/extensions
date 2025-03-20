@@ -9,8 +9,8 @@ import { BookmarkFilter } from "./components/BookmarkFilter";
 import { LoginView } from "./views/LoginView";
 import { useMe } from "./hooks/use-me.hook";
 import { useBookmarks } from "./hooks/use-bookmarks.hook";
-import { Bookmark } from "./types";
-import { useBookmarkSearches } from "./hooks/use-bookmark-searchs.hook";
+import { usePrepareBookmarkSearch } from "./hooks/use-prepare-bookmark-search.hook";
+import { useBookmarkSearch } from "./hooks/use-bookmark-search.hook";
 import { RequiredActions } from "./components/BookmarkItemActionPanel";
 
 const cache = new Cache();
@@ -50,40 +50,19 @@ export function Body() {
     });
   }, [me.data]);
 
-  const { searchInTags, searchInUntagged, taggedBookmarks, untaggedBookmarks } = useBookmarkSearches({
+  // Prepare bookmark data for fuzzysort search
+  // The prepare operation is performed only once if the data doesn't change
+  const searchData = usePrepareBookmarkSearch({
     data,
     selectedTags,
   });
 
-  const { filteredTaggedList, filteredUntaggedList } = useMemo(() => {
-    if (!searchInTags || !searchInUntagged || keyword === "") {
-      return {
-        filteredTaggedList: taggedBookmarks,
-        filteredUntaggedList: untaggedBookmarks,
-      };
-    }
-
-    if (keyword.startsWith("#")) {
-      return {
-        filteredTaggedList: searchInTags.search(`slack ${keyword}`, {
-          prefix: true,
-          combineWith: "AND",
-        }) as unknown as Bookmark[],
-        filteredUntaggedList: searchInUntagged.search(`slack ${keyword}`, {
-          prefix: true,
-          combineWith: "AND",
-        }) as unknown as Bookmark[],
-      };
-    }
-
-    return {
-      filteredTaggedList: searchInTags.search(keyword, { prefix: true, combineWith: "AND" }) as unknown as Bookmark[],
-      filteredUntaggedList: searchInUntagged.search(keyword, {
-        prefix: true,
-        combineWith: "AND",
-      }) as unknown as Bookmark[],
-    };
-  }, [searchInTags, searchInUntagged, keyword, taggedBookmarks, untaggedBookmarks]);
+  // Perform actual search using prepared data
+  // Search results are updated whenever the keyword changes
+  const { filteredTaggedList, filteredUntaggedList } = useBookmarkSearch({
+    keyword,
+    searchData,
+  });
 
   const [after1Sec, setAfter1Sec] = useState(false);
   useEffect(() => {

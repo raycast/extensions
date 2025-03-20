@@ -8,8 +8,10 @@ import {
   Icon,
   showToast,
   Toast,
+  launchCommand,
+  LaunchType,
 } from "@raycast/api";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocalStorage, showFailureToast } from "@raycast/utils";
 import { promises as fs } from "fs";
 import os from "os";
@@ -25,7 +27,7 @@ interface CommandHistoryItem {
   command: string;
   response: string;
   timestamp: number;
-  status: "pending" | "success" | "failed" | "read";
+  status: "queued" | "processing" | "success" | "failed" | "read";
   id: string;
   mediaUrls?: string[]; // Media URLs if any
   mediaType?: string; // Media type
@@ -36,108 +38,112 @@ const formatDate = (timestamp: number): string => {
   return new Date(timestamp).toLocaleString();
 };
 
-// Mark all items as read when viewed in history
-const markAllAsRead = async (history: CommandHistoryItem[]): Promise<CommandHistoryItem[]> => {
-  // Mark all success items as read by changing their status
-  const updatedHistory = history.map((item) =>
-    item.status === "success" ? { ...item, status: "read" as const } : item,
+// Utility function to safely read history from LocalStorage
+const readHistoryFromStorage = async (): Promise<CommandHistoryItem[]> => {
+  try {
+    const historyJson = await LocalStorage.getItem<string>("commandHistory");
+    if (!historyJson) return [];
+    return JSON.parse(historyJson) as CommandHistoryItem[];
+  } catch (error) {
+    console.error("Error reading history from storage:", error);
+    return [];
+  }
+};
+
+// Mark a single item as read
+const markItemAsRead = async (
+  item: CommandHistoryItem,
+  history: CommandHistoryItem[],
+): Promise<CommandHistoryItem[]> => {
+  // Only mark success items as read
+  if (item.status !== "success") {
+    return history;
+  }
+
+  // Update the item status
+  const updatedHistory = history.map((historyItem) =>
+    historyItem.id === item.id ? { ...historyItem, status: "read" as const } : historyItem,
   );
 
   // Save back to LocalStorage
   await LocalStorage.setItem("commandHistory", JSON.stringify(updatedHistory));
-
-  // Save the view timestamp
-  await LocalStorage.setItem("lastViewTimestamp", Date.now().toString());
 
   return updatedHistory;
 };
 
 // Audio utility functions
 const isAudioFile = (url: string): boolean => {
-  const lowercaseUrl = url.toLowerCase();
-  const isAudio = lowercaseUrl.endsWith(".ogg");
-  return isAudio;
+  return url.toLowerCase().endsWith(".ogg");
 };
 
-// Function to download and play OGG audio
-const downloadAndPlayAudio = async (url: string): Promise<void> => {
+// Function to play OGG audio directly from URL
+const playAudioFromUrl = async (url: string): Promise<void> => {
   try {
-    console.log(`Starting download and playback for audio: ${url}`);
+    console.log(`Starting playback for audio: ${url}`);
 
     // Get FFmpeg path from preferences
     const preferences = getPreferenceValues<{
       ffmpegPath?: string;
     }>();
     const ffmpegPath = preferences.ffmpegPath?.trim() || "ffmpeg";
-
-    // Better handling of ffplay path derivation
-    let ffplayPath = "ffplay";
-    if (preferences.ffmpegPath?.trim()) {
-      console.log(`Custom ffmpeg path provided: ${preferences.ffmpegPath.trim()}`);
-      // If the path ends with 'ffmpeg', replace it with 'ffplay'
-      if (preferences.ffmpegPath.trim().endsWith("ffmpeg")) {
-        ffplayPath = preferences.ffmpegPath.trim().replace(/ffmpeg$/, "ffplay");
-        console.log(`Derived ffplay path by replacing 'ffmpeg' with 'ffplay': ${ffplayPath}`);
-      } else {
-        // Otherwise assume ffplay is in the same directory
-        const directory = path.dirname(preferences.ffmpegPath.trim());
-        ffplayPath = path.join(directory, "ffplay");
-        console.log(`Derived ffplay path using same directory: ${ffplayPath}`);
-      }
-    } else {
-      console.log("Using default ffplay path: ffplay");
-    }
+    const ffplayPath = ffmpegPath.endsWith("ffmpeg")
+      ? ffmpegPath.replace(/ffmpeg$/, "ffplay")
+      : path.join(path.dirname(ffmpegPath), "ffplay");
 
     console.log(`Using ffmpeg path: ${ffmpegPath}`);
     console.log(`Using ffplay path: ${ffplayPath}`);
 
-    // Create a temporary file name
-    const tmpDir = os.tmpdir();
-    const fileName = `notis-audio-${Date.now()}.ogg`;
-    const filePath = path.join(tmpDir, fileName);
-
-    // Download the file
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to download audio: ${response.statusText}`);
-    }
-
-    // Get file buffer and write to disk
-    const buffer = await response.buffer();
-    await fs.writeFile(filePath, buffer);
-
-    console.log(`Audio saved to: ${filePath}`);
-
-    // Try to use ffplay first (better OGG support)
+    // Try to use ffplay directly with the URL (no download needed)
     try {
-      console.log("Attempting to play with ffplay...");
-      await execPromise(`${ffplayPath} -nodisp -autoexit "${filePath}"`);
+      console.log("Attempting to play directly with ffplay...");
+      await execPromise(`${ffplayPath} -nodisp -autoexit "${url}"`);
     } catch (ffplayError) {
-      console.log("ffplay not available or failed, trying to convert with ffmpeg...");
-      try {
-        // Try to convert to m4a which macOS can play
-        const m4aPath = filePath.replace(".ogg", ".m4a");
-        await execPromise(`${ffmpegPath} -i "${filePath}" -c:a aac "${m4aPath}"`);
-        await execPromise(`afplay "${m4aPath}"`);
+      console.log("Direct ffplay failed, falling back to temporary download...");
 
-        // Clean up the converted file
-        await fs.unlink(m4aPath).catch((err) => console.error("Error deleting converted file:", err));
-      } catch (ffmpegError) {
-        console.error("ffmpeg conversion failed:", ffmpegError);
-        showFailureToast("Unable to play audio", {
-          message: "Failed to play audio. Please make sure you have FFmpeg installed.",
-        });
+      // Create a temporary file for download
+      const tmpDir = os.tmpdir();
+      const fileName = `notis-audio-${Date.now()}.ogg`;
+      const filePath = path.join(tmpDir, fileName);
+
+      try {
+        // Download the file
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Failed to download audio: ${response.statusText}`);
+        }
+
+        // Get file buffer and write to disk
+        const buffer = await response.buffer();
+        await fs.writeFile(filePath, buffer);
+        console.log(`Audio temporarily saved to: ${filePath}`);
+
+        // Try ffplay on the local file
+        try {
+          await execPromise(`${ffplayPath} -nodisp -autoexit "${filePath}"`);
+        } catch (localFfplayError) {
+          // Try to convert to m4a which macOS can play
+          console.log("Local ffplay failed, converting to m4a...");
+          const m4aPath = filePath.replace(".ogg", ".m4a");
+          await execPromise(`${ffmpegPath} -i "${filePath}" -c:a aac "${m4aPath}"`);
+          await execPromise(`afplay "${m4aPath}"`);
+
+          // Clean up the converted file
+          await fs.unlink(m4aPath).catch((err) => console.error("Error deleting converted file:", err));
+        }
+
+        // Clean up the temporary file
+        await fs.unlink(filePath).catch((err) => console.error("Error deleting temporary file:", err));
+      } catch (error) {
+        console.error("Error with temporary file approach:", error);
+        throw error;
       }
     }
-
-    // Clean up the temporary file
-    await fs.unlink(filePath).catch((err) => console.error("Error deleting temporary file:", err));
   } catch (error) {
     console.error("Error playing audio:", error);
     console.log("Falling back to browser playback...");
     // Fallback to opening in browser if native playback fails
     showFailureToast("Error Playing Audio", {
-      message: "Failed to play audio. Please try again.",
+      message: "Failed to play audio. Please try again or open in browser.",
     });
   }
 };
@@ -146,16 +152,9 @@ const downloadAndPlayAudio = async (url: string): Promise<void> => {
 const markAudioAsPlayed = async (item: CommandHistoryItem): Promise<void> => {
   if (!item.id || item.status !== "success") return;
 
-  // Store the timestamp and ID to prevent duplicate plays
-  await LocalStorage.setItem("lastAudioPlayedTimestamp", item.timestamp.toString());
-  await LocalStorage.setItem("lastPlayedAudioId", item.id);
-
   // Mark the item as read
-  const historyJson = await LocalStorage.getItem<string>("commandHistory");
-  if (!historyJson) return;
-
   try {
-    const history = JSON.parse(historyJson) as CommandHistoryItem[];
+    const history = await readHistoryFromStorage();
     const updatedHistory = history.map((historyItem) =>
       historyItem.id === item.id ? { ...historyItem, status: "read" as const } : historyItem,
     );
@@ -186,7 +185,7 @@ const playItemAudio = async (item: CommandHistoryItem): Promise<void> => {
   console.log(`Found audio URL to play: ${audioUrl}`);
 
   // Play the audio file
-  await downloadAndPlayAudio(audioUrl);
+  await playAudioFromUrl(audioUrl);
 
   // Mark as played
   await markAudioAsPlayed(item);
@@ -196,7 +195,7 @@ const playItemAudio = async (item: CommandHistoryItem): Promise<void> => {
  * Displays detailed information about a history item
  */
 const HistoryItemDetail = ({ item }: { item: CommandHistoryItem }) => {
-  return <List.Item.Detail markdown={`\`\`\`\n${item.command}\n\`\`\`\n\n${item.response.trim()}`} />;
+  return <List.Item.Detail markdown={`${item.command}\n\n\n---\n\n${item.response}`} />;
 };
 
 /**
@@ -209,19 +208,75 @@ export default function Command() {
     setValue: setHistory,
   } = useLocalStorage<CommandHistoryItem[]>("commandHistory", []);
 
-  // Mark all items as read when history is loaded
-  useEffect(() => {
-    if (!isLoading && history.length > 0) {
-      // Use a timeout to make sure we don't mark things read immediately on load
-      // This ensures the user has actually seen the history
-      const timer = setTimeout(async () => {
-        const updatedHistory = await markAllAsRead(history);
-        setHistory(updatedHistory);
-      }, 2000); // 2 second delay
+  // Track the currently selected item
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
-      return () => clearTimeout(timer);
+  // Continuous synchronization with local storage
+  useEffect(() => {
+    // Function to check for updates in local storage
+    const checkForUpdates = async () => {
+      try {
+        const storedHistory = await readHistoryFromStorage();
+
+        // Quick length check first
+        if (storedHistory.length !== history.length) {
+          console.log("History length changed, updating state");
+          setHistory(storedHistory);
+          return;
+        }
+
+        // More detailed comparison if lengths match
+        let hasChanges = false;
+
+        // Only check the first few items (most recent) for efficiency
+        const itemsToCheck = Math.min(storedHistory.length, 10);
+
+        for (let i = 0; i < itemsToCheck; i++) {
+          const storedItem = storedHistory[i];
+          const currentItem = history[i];
+
+          // Skip if same item with same status and response
+          if (
+            storedItem.id === currentItem.id &&
+            storedItem.status === currentItem.status &&
+            storedItem.response === currentItem.response &&
+            (storedItem.mediaUrls?.length || 0) === (currentItem.mediaUrls?.length || 0)
+          ) {
+            continue;
+          }
+
+          hasChanges = true;
+          break;
+        }
+
+        if (hasChanges) {
+          console.log("History content changed, updating state");
+          setHistory(storedHistory);
+        }
+      } catch (error) {
+        console.error("Error checking for history updates:", error);
+      }
+    };
+
+    // Set up polling interval (every 2 seconds)
+    const intervalId = setInterval(checkForUpdates, 2000);
+
+    // Clean up interval on component unmount
+    return () => clearInterval(intervalId);
+  }, [history, setHistory]);
+
+  // Mark item as read when selected
+  useEffect(() => {
+    if (selectedItemId) {
+      const selectedItem = history.find((item) => item.id === selectedItemId);
+      if (selectedItem && selectedItem.status === "success") {
+        (async () => {
+          const updatedHistory = await markItemAsRead(selectedItem, history);
+          setHistory(updatedHistory);
+        })();
+      }
     }
-  }, [isLoading, history.length]);
+  }, [selectedItemId]);
 
   const deleteHistoryItem = async (index: number) => {
     const newHistory = [...history];
@@ -249,42 +304,142 @@ export default function Command() {
     }
   };
 
-  const refreshHistory = async () => {
-    // Show a brief loading state and reload from storage
+  const refreshHistory = async (updatedMessages?: CommandHistoryItem[]) => {
+    // If messages are provided, use them directly
+    if (updatedMessages) {
+      setHistory(updatedMessages);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "History refreshed",
+      });
+      return;
+    }
+
+    // Otherwise, show a brief loading state and reload from storage
     await showToast({
       style: Toast.Style.Animated,
       title: "Refreshing history",
     });
 
-    // Force a reload from LocalStorage
-    const historyJson = await LocalStorage.getItem<string>("commandHistory");
-    if (historyJson) {
-      try {
-        const refreshedHistory = JSON.parse(historyJson) as CommandHistoryItem[];
-        setHistory(refreshedHistory);
-        await showToast({
-          style: Toast.Style.Success,
-          title: "History refreshed",
-        });
-      } catch (error) {
-        console.error("Error parsing history:", error);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to refresh history",
-          message: "Error parsing history data",
-        });
-      }
+    try {
+      const refreshedHistory = await readHistoryFromStorage();
+      setHistory(refreshedHistory);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "History refreshed",
+      });
+    } catch (error) {
+      console.error("Error refreshing history:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to refresh history",
+        message: "Error loading history data",
+      });
     }
   };
 
   // Helper to check if an item has audio
   const hasAudio = (item: CommandHistoryItem): boolean => {
-    const result = !!item.mediaUrls && item.mediaUrls.some((url) => isAudioFile(url));
-    return result;
+    return !!item.mediaUrls && item.mediaUrls.some((url) => isAudioFile(url));
+  };
+
+  // Add pending request to history
+  const addPendingRequest = async (command: string): Promise<string> => {
+    const requestId = `RC${Date.now().toString(36)}${Math.random().toString(36).substring(2, 9)}`;
+
+    const newItem: CommandHistoryItem = {
+      id: requestId,
+      command,
+      response: "",
+      timestamp: Date.now(),
+      status: "queued",
+    };
+
+    // Get current history and add new item
+    const history = await readHistoryFromStorage();
+    const updatedHistory = [newItem, ...history].slice(0, 50);
+    await LocalStorage.setItem("commandHistory", JSON.stringify(updatedHistory));
+
+    return requestId;
+  };
+
+  // Function to resend a command
+  const resendCommand = async (command: string, existingItemId?: string): Promise<void> => {
+    try {
+      console.log("Starting to resend command:", command);
+
+      let updatedHistory: CommandHistoryItem[] = [];
+
+      if (existingItemId) {
+        // Get current history
+        const historyList = await readHistoryFromStorage();
+        const existingItem = historyList.find((item) => item.id === existingItemId);
+
+        if (existingItem) {
+          // Update the item status and timestamp
+          const updatedItem = {
+            ...existingItem,
+            status: "queued" as const,
+            timestamp: Date.now(),
+          };
+
+          // Remove the existing item and add updated version to the top
+          updatedHistory = historyList.filter((item) => item.id !== existingItemId);
+          updatedHistory.unshift(updatedItem);
+
+          // Save the updated history
+          await LocalStorage.setItem("commandHistory", JSON.stringify(updatedHistory));
+          console.log("Updated existing item and moved to top of list");
+        } else {
+          // If item not found, create a new one
+          await addPendingRequest(command);
+          updatedHistory = await readHistoryFromStorage();
+        }
+      } else {
+        // No existing item ID provided, create a new request
+        await addPendingRequest(command);
+        updatedHistory = await readHistoryFromStorage();
+      }
+
+      // Launch the menu-bar command to process the request
+      console.log("Launching menu-bar-command");
+      await launchCommand({
+        name: "menu-bar-command",
+        type: LaunchType.Background,
+      });
+
+      // Show success notification
+      await showToast({
+        style: Toast.Style.Success,
+        title: "📤 Message sent to Notis",
+      });
+
+      // Refresh the history with the updated messages we already have
+      await refreshHistory(updatedHistory);
+    } catch (error) {
+      console.error("Error resending command:", error);
+
+      showFailureToast("Error Sending Message", {
+        message: "Please ensure the menu bar command is running",
+      });
+    }
   };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search message history..." isShowingDetail>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search message history..."
+      isShowingDetail
+      navigationTitle="Message History"
+      onSelectionChange={(id) => {
+        if (id) {
+          const index = parseInt(id);
+          if (!isNaN(index) && index >= 0 && index < history.length) {
+            setSelectedItemId(history[index].id);
+          }
+        }
+      }}
+    >
       {history.length === 0 ? (
         <List.EmptyView title="No Message History" description="Send a message to Notis to see her response here." />
       ) : (
@@ -293,7 +448,7 @@ export default function Command() {
             key={item.id}
             id={index.toString()}
             icon={
-              item.status === "pending"
+              item.status === "queued"
                 ? { source: "clock", tintColor: "blue" }
                 : item.status === "success"
                   ? { source: "checkmark-circle.fill", tintColor: "green" }
@@ -314,7 +469,7 @@ export default function Command() {
             detail={<HistoryItemDetail item={item} />}
             actions={
               <ActionPanel>
-                <ActionPanel.Section title="History Actions">
+                <ActionPanel.Section title="Item Actions">
                   {item.mediaUrls && item.mediaUrls.some((url) => isAudioFile(url)) && (
                     <Action
                       title="Play Audio"
@@ -323,16 +478,6 @@ export default function Command() {
                       onAction={() => playItemAudio(item)}
                     />
                   )}
-
-                  <Action
-                    title="Refresh"
-                    icon={Icon.RotateClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    onAction={refreshHistory}
-                  />
-                </ActionPanel.Section>
-
-                <ActionPanel.Section title="Item Actions">
                   <Action.CopyToClipboard
                     title="Copy Response"
                     content={item.response}
@@ -341,11 +486,18 @@ export default function Command() {
                   />
                   <Action.CopyToClipboard title="Copy Command" content={item.command} icon={Icon.Terminal} />
 
+                  <Action
+                    title="Resend"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={() => resendCommand(item.command, item.id)}
+                  />
+
                   {item.mediaUrls && item.mediaUrls.length > 0 && (
                     <Action.OpenInBrowser title="Open Media File" icon={Icon.Link} url={item.mediaUrls[0]} />
                   )}
 
-                  {item.status === "pending" && (
+                  {item.status === "queued" && (
                     <Action
                       title="Mark as Failed"
                       icon={Icon.XMarkCircle}
@@ -359,6 +511,22 @@ export default function Command() {
                     />
                   )}
 
+                  {item.status === "success" && (
+                    <Action
+                      title="Mark as Read"
+                      icon={Icon.Eye}
+                      shortcut={{ modifiers: ["cmd"], key: "m" }}
+                      onAction={async () => {
+                        const updatedHistory = await markItemAsRead(item, history);
+                        setHistory(updatedHistory);
+                        await showToast({
+                          style: Toast.Style.Success,
+                          title: "Marked as read",
+                        });
+                      }}
+                    />
+                  )}
+
                   <Action
                     title="Remove Item"
                     icon={Icon.Trash}
@@ -368,7 +536,14 @@ export default function Command() {
                   />
                 </ActionPanel.Section>
 
-                <ActionPanel.Section title="Global Actions">
+                <ActionPanel.Section title="History Actions">
+                  <Action
+                    title="Refresh"
+                    icon={Icon.RotateClockwise}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                    onAction={() => refreshHistory()}
+                  />
+
                   <Action
                     title="Clear All History"
                     icon={Icon.ExclamationMark}
@@ -388,19 +563,35 @@ export default function Command() {
 
 // Helper functions for status tags
 const getStatusTagValue = (item: CommandHistoryItem): string => {
-  if (item.status === "pending") return "Pending";
-  if (item.status === "failed") return "Failed";
-  if (item.status === "read") return "Read";
-
-  // For success status
-  return "Success";
+  switch (item.status) {
+    case "queued":
+      return "Queued";
+    case "processing":
+      return "Processing";
+    case "failed":
+      return "Failed";
+    case "read":
+      return "Read";
+    case "success":
+      return "Success";
+    default:
+      return item.status;
+  }
 };
 
 const getStatusTagColor = (item: CommandHistoryItem): string => {
-  if (item.status === "pending") return "#007AFF"; // Blue
-  if (item.status === "failed") return "#FF6369"; // Red
-  if (item.status === "read") return "#8E8E93"; // Gray for read items
-
-  // For success status
-  return "#28C941"; // Regular green for unread success
+  switch (item.status) {
+    case "queued":
+      return "#007AFF"; // Blue
+    case "processing":
+      return "#5856D6"; // Purple
+    case "failed":
+      return "#FF6369"; // Red
+    case "read":
+      return "#8E8E93"; // Gray for read items
+    case "success":
+      return "#28C941"; // Green for unread success
+    default:
+      return "#8E8E93"; // Default gray
+  }
 };

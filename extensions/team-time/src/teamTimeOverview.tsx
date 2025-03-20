@@ -10,7 +10,6 @@ const TeamTimeOverview = async () => {
   }
 
   if (environment.launchType === LaunchType.UserInitiated) {
-    // Show toast if the user runs it manually
     const toast = new Toast({ style: Toast.Style.Success, title: "Refreshed Team Times" });
     await toast.show();
   }
