@@ -30,7 +30,7 @@ async function parseMessage(message: string) {
   return {
     from: parsed.from?.value[0].address || "",
     subject: parsed.subject || "",
-    text: parsed.html ? stripHtml(parsed.html).result.replaceAll("\n", " ") : parsed.text || "",
+    text: parsed.text || (parsed.html ? stripHtml(parsed.html).result.replaceAll("\n", " ") : ""),
   };
 }
 
