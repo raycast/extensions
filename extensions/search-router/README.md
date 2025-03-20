@@ -38,17 +38,27 @@ For the most seamless experience:
 
 Contributions welcome! Submit a pull request to add more search engines or improvements.
 
-### Adding New Search Engines
+### Managing Search Engines
 
-To add new search engines to the extension:
+This extension uses search engine definitions from [Kagi's bangs repository](https://github.com/kagisearch/bangs). Here's how to add or update search engines:
 
-1. Modify the `src/data/search-engines.ts` file with your new search engine definitions
-2. Test your changes locally with `npm run dev`
-3. Submit a pull request with your additions
+1. To add a new search engine:
+   - Fork [Kagi's bangs repository](https://github.com/kagisearch/bangs)
+   - Add your search engine definition following their schema
+   - Submit a PR to Kagi's repository
+
+2. To update this extension with latest engines:
+   - Fork this repository
+   - Run `npm run download-kagi-bangs` to fetch latest definitions
+   - Test locally with `npm run dev`
+   - Submit a PR
+
+Want to add custom search engines directly in the extension? We plan to add UI configuration in the future. In the meantime, PRs implementing this feature are welcome! 🙂
 
 ## Credits 🙏
 
 - [Kagi Search Bangs](https://help.kagi.com/kagi/features/bangs.html) - The implementation of the bangs concept 🔍
 - [Kagi Bangs Repository](https://github.com/kagisearch/bangs) - The official repository of Kagi Search bangs 📚
+- [DuckDuckGo !Bangs](https://duckduckgo.com/bangs) - The original implementation of the bangs concept 🦆
 - [Theo Browne's video on DuckDuckGo !Bangs](https://www.youtube.com/watch?v=_DnNzRaBWUU) - A great walkthrough of bangs and why he chose to implement it himself 📹
 - [unduck.link](https://unduck.link/) - Theo's web implementation of the original functionality with DuckDuckGo's bang 🔗
