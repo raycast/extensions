@@ -1,6 +1,6 @@
 # Language Detector Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-03-20
 
 - Cache selected options
 - Add support for choosing available AI models
