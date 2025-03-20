@@ -2,7 +2,7 @@
 
 ## [Changing the name of app called] - {PR_MERGE_DATE}
 
-- Changed name of app being call from "Zen Browser" to "Zen"
+- Changed name of app being called from "Zen Browser" to "Zen"
 
 ## [Add custom new tab shortcut] - 2025-03-10
 
