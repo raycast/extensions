@@ -14,21 +14,21 @@
     {
       "name": "copy-plain-text",
       "title": "Copy Link as Plain Text",
-      "subtitle": "Copy the current browser URL as plain text.",
+      "subtitle": "Create Link",
       "description": "This command captures the current URL from your browser and copies it directly to your clipboard, allowing for quick and easy sharing or pasting into other applications.",
       "mode": "no-view"
     },
     {
       "name": "copy-html",
       "title": "Copy Link as HTML",
-      "subtitle": "Copy the current browser URL as an HTML anchor tag.",
+      "subtitle": "Create Link",
       "description": "This command captures the current URL from your browser, formats it as an HTML anchor tag, and copies it to your clipboard. This allows for easy integration into web pages or HTML documents.",
       "mode": "no-view"
     },
     {
       "name": "copy-markdown",
       "title": "Copy Link as Markdown",
-      "subtitle": "Copy the current browser URL as a Markdown link.",
+      "subtitle": "Create Link",
       "description": "This command captures the current URL from your browser, formats it as a Markdown link, and copies it to your clipboard. This is useful for integrating links into Markdown documents or notes.",
       "mode": "no-view"
     }
