@@ -1,6 +1,6 @@
 # CCFDDL Changelog
 
-## [Performance Optimization] - {PR_MERGE_DATE}
+## [Performance Optimization] - 2025-03-20
 
 - 🚀 Optimize data fetching and processing, now it's super fast with CDN usage and batch fetching.
 
