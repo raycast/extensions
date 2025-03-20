@@ -14,17 +14,11 @@
       "name": "convert-file",
       "title": "Convert Files",
       "description": "Convert file(s) to a specified format",
-      "mode": "no-view",
+      "mode": "view",
       "arguments": [
         {
           "name": "format",
           "placeholder": "Output format",
-          "type": "text",
-          "required": true
-        },
-        {
-          "name": "inputPath",
-          "placeholder": "File path",
           "type": "text",
           "required": false
         }
@@ -34,15 +28,7 @@
       "name": "convert-to-pdf",
       "title": "Convert to PDF",
       "description": "Convert file(s) to PDF",
-      "mode": "no-view",
-      "arguments": [
-          {
-          "name": "inputPath",
-          "placeholder": "File path",
-          "type": "text",
-          "required": false
-          }
-      ]
+      "mode": "view"
     }
   ],
   "dependencies": {
