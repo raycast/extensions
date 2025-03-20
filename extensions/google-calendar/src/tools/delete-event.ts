@@ -24,13 +24,8 @@ export const confirmation = withGoogleAPIs(async (input: Input) => {
 });
 
 const tool = async (input: Input) => {
-  try {
-    const calendar = getCalendarClient();
-    await calendar.events.delete({ calendarId: input.calendarId ?? "primary", eventId: input.eventId });
-  } catch (error) {
-    showFailureToast(error, { title: "Failed to delete event" });
-    throw error;
-  }
+  const calendar = getCalendarClient();
+  await calendar.events.delete({ calendarId: input.calendarId ?? "primary", eventId: input.eventId });
 };
 
 export default withGoogleAPIs(tool);
