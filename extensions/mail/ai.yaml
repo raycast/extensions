@@ -14,6 +14,16 @@ evals:
           name: search-emails
           arguments:
             search: raycast hackathon
+  - input: "@mail when is my meeting with john smith?"
+    mocks:
+      search-emails:
+    expected:
+      - callsTool:
+          name: search-emails
+      - callsTool:
+          name: search-emails
+      - callsTool:
+          name: search-emails
   - input: "@mail tell john i will have that pr done tomorrow"
     mocks:
       list-addresses:
