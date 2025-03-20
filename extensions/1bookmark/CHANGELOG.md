@@ -1,5 +1,10 @@
 # 1bookmark Changelog
 
+## [Improve Search UX] - 2025-03-19
+
+- 0.7.0
+- 💻 Replace search library from `minisearch` to `fuzzysort`. So fuzzy search is now more accurate.
+
 ## [New Command: Import Bookmarks] - 2025-03-14
 
 - 0.6.0

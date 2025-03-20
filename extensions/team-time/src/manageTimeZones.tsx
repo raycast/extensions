@@ -89,6 +89,48 @@ const EditTeamTime = () => {
     [savedCities, setSavedCities],
   );
 
+  const handleMoveUp = useCallback(
+    async (id: string) => {
+      if (!savedCities || savedCities.length <= 1) return;
+
+      const index = savedCities.findIndex((entry) => entry.id === id);
+      if (index <= 0) return; // Already at the top
+
+      const newSavedCities = [...savedCities];
+      // Swap the item with the one above it
+      [newSavedCities[index], newSavedCities[index - 1]] = [newSavedCities[index - 1], newSavedCities[index]];
+
+      await setSavedCities(newSavedCities);
+      try {
+        await launchCommand({ name: "teamTimeOverview", type: LaunchType.Background });
+      } catch (launchError) {
+        console.error("Failed to launch command teamTimeOverview:", launchError);
+      }
+    },
+    [savedCities, setSavedCities],
+  );
+
+  const handleMoveDown = useCallback(
+    async (id: string) => {
+      if (!savedCities || savedCities.length <= 1) return;
+
+      const index = savedCities.findIndex((entry) => entry.id === id);
+      if (index === -1 || index >= savedCities.length - 1) return; // Already at the bottom
+
+      const newSavedCities = [...savedCities];
+      // Swap the item with the one below it
+      [newSavedCities[index], newSavedCities[index + 1]] = [newSavedCities[index + 1], newSavedCities[index]];
+
+      await setSavedCities(newSavedCities);
+      try {
+        await launchCommand({ name: "teamTimeOverview", type: LaunchType.Background });
+      } catch (launchError) {
+        console.error("Failed to launch command teamTimeOverview:", launchError);
+      }
+    },
+    [savedCities, setSavedCities],
+  );
+
   return (
     <List
       isLoading={isLoading}
@@ -110,7 +152,7 @@ const EditTeamTime = () => {
       {/* Section for saved cities */}
       {(viewOption === "all" || viewOption === "saved") && (
         <List.Section title="My Team's Times">
-          {(savedCities ?? []).map((entry) => (
+          {(savedCities ?? []).map((entry, index) => (
             <List.Item
               key={entry.id}
               title={formatLocation(entry)}
@@ -118,12 +160,32 @@ const EditTeamTime = () => {
               icon={getFlagEmoji(entry.isoCode)}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Remove City"
-                    style={Action.Style.Destructive}
-                    icon={Icon.Trash}
-                    onAction={() => handleRemoveCity(entry.id)}
-                  />
+                  <ActionPanel.Section title="Manage">
+                    <Action
+                      title="Remove City"
+                      style={Action.Style.Destructive}
+                      icon={Icon.Trash}
+                      onAction={() => handleRemoveCity(entry.id)}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Reorder">
+                    {index > 0 && (
+                      <Action
+                        title="Move Up"
+                        icon={Icon.ArrowUp}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                        onAction={() => handleMoveUp(entry.id)}
+                      />
+                    )}
+                    {index < (savedCities?.length ?? 0) - 1 && (
+                      <Action
+                        title="Move Down"
+                        icon={Icon.ArrowDown}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                        onAction={() => handleMoveDown(entry.id)}
+                      />
+                    )}
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />

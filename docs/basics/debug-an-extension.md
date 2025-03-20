@@ -57,7 +57,7 @@ We support [React Developer Tools](https://github.com/facebook/react/tree/main/p
 To get started, add the `react-devtools` to your extension. Open a terminal, navigate to your extension directory and run the following command:
 
 ```typescript
-npm install --save-dev react-devtools@5.2.0
+npm install --save-dev react-devtools@6.1.1
 ```
 
 Then re-build your extension with `npm run dev`, open the command you want to debug in Raycast, and launch the React Developer Tools with `⌘` `⌥` `D`. Now select one of the React components, change a prop in the right sidebar, and hit enter. You'll notice the change immediately in Raycast.
@@ -67,7 +67,7 @@ Then re-build your extension with `npm run dev`, open the command you want to de
 If you prefer to install the `react-devtools` globally, you can do the following:
 
 ```bash
-npm install -g react-devtools@5.2.0
+npm install -g react-devtools@6.1.1
 ```
 
 Then you can run `react-devtools` from a terminal to launch the standalone DevTools app. Raycast connects automatically, and you can start debugging your component tree.
