@@ -1,0 +1,321 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "languagetool",
+  "title": "LanguageTool",
+  "description": "Integrates LanguageTool spell-checking directly into Raycast",
+  "icon": "extension-icon.png",
+  "author": "marvinvr",
+  "type": "module",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-spelling",
+      "title": "Check Spelling",
+      "subtitle": "Use LanguageTool to check spelling",
+      "description": "Check spelling of selected text or clipboard content", "Description": "Check spelling of selected text or clipboard content",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "endpoint",
+      "title": "API Endpoint",
+      "description": "The API endpoint to use",
+      "type": "textfield",
+      "required": true,
+      "default": "https://api.languagetool.org/v2/check"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your LanguageTool API key (optional)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "preferredLanguage",
+      "title": "Preferred Language",
+      "description": "The language to use for spell checking",
+      "type": "dropdown",
+      "required": true,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto-detect",
+          "value": "auto"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "German (Germany)",
+          "value": "de-DE"
+        },
+        {
+          "title": "German (Austria)",
+          "value": "de-AT"
+        },
+        {
+          "title": "German (Swiss)",
+          "value": "de-CH"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "English (US)",
+          "value": "en-US"
+        },
+        {
+          "title": "English (Australian)",
+          "value": "en-AU"
+        },
+        {
+          "title": "English (GB)",
+          "value": "en-GB"
+        },
+        {
+          "title": "English (Canadian)",
+          "value": "en-CA"
+        },
+        {
+          "title": "English (New Zealand)",
+          "value": "en-NZ"
+        },
+        {
+          "title": "English (South African)",
+          "value": "en-ZA"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Spanish (voseo)",
+          "value": "es-AR"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "French (Canada)",
+          "value": "fr-CA"
+        },
+        {
+          "title": "French (Switzerland)",
+          "value": "fr-CH"
+        },
+        {
+          "title": "French (Belgium)",
+          "value": "fr-BE"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Dutch (Belgium)",
+          "value": "nl-BE"
+        },
+        {
+          "title": "Portuguese (Angola preAO)",
+          "value": "pt-AO"
+        },
+        {
+          "title": "Portuguese (Brazil)",
+          "value": "pt-BR"
+        },
+        {
+          "title": "Portuguese (Moçambique preAO)",
+          "value": "pt-MZ"
+        },
+        {
+          "title": "Portuguese (Portugal)",
+          "value": "pt-PT"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Asturian",
+          "value": "ast-ES"
+        },
+        {
+          "title": "Belarusian",
+          "value": "be-BY"
+        },
+        {
+          "title": "Breton",
+          "value": "br-FR"
+        },
+        {
+          "title": "Catalan",
+          "value": "ca-ES"
+        },
+        {
+          "title": "Catalan (Valencian)",
+          "value": "ca-ES-valencia"
+        },
+        {
+          "title": "Catalan (Balearic)",
+          "value": "ca-ES-balear"
+        },
+        {
+          "title": "Danish",
+          "value": "da-DK"
+        },
+        {
+          "title": "Simple German",
+          "value": "de-DE-x-simple-language"
+        },
+        {
+          "title": "Greek",
+          "value": "el-GR"
+        },
+        {
+          "title": "Esperanto",
+          "value": "eo"
+        },
+        {
+          "title": "Persian",
+          "value": "fa"
+        },
+        {
+          "title": "Irish",
+          "value": "ga-IE"
+        },
+        {
+          "title": "Galician",
+          "value": "gl-ES"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja-JP"
+        },
+        {
+          "title": "Khmer",
+          "value": "km-KH"
+        },
+        {
+          "title": "Polish",
+          "value": "pl-PL"
+        },
+        {
+          "title": "Romanian",
+          "value": "ro-RO"
+        },
+        {
+          "title": "Russian",
+          "value": "ru-RU"
+        },
+        {
+          "title": "Slovak",
+          "value": "sk-SK"
+        },
+        {
+          "title": "Slovenian",
+          "value": "sl-SI"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "Tamil",
+          "value": "ta-IN"
+        },
+        {
+          "title": "Tagalog",
+          "value": "tl-PH"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk-UA"
+        },
+        {
+          "title": "Chinese",
+          "value": "zh-CN"
+        },
+        {
+          "title": "Crimean Tatar",
+          "value": "crh-UA"
+        },
+        {
+          "title": "Norwegian (Bokmål)",
+          "value": "nb"
+        },
+        {
+          "title": "Norwegian (Bokmål)",
+          "value": "no"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl-NL"
+        },
+        {
+          "title": "Simple German",
+          "value": "de-DE-x-simple-language-DE"
+        },
+        {
+          "title": "Spanish",
+          "value": "es-ES"
+        },
+        {
+          "title": "Italian",
+          "value": "it-IT"
+        },
+        {
+          "title": "Persian",
+          "value": "fa-IR"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv-SE"
+        },
+        {
+          "title": "German",
+          "value": "de-LU"
+        },
+        {
+          "title": "French",
+          "value": "fr-FR"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
