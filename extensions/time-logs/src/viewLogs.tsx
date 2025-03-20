@@ -235,7 +235,7 @@ function AddTimeLogForm({ onSave }: { onSave: () => Promise<void> }) {
           setEndDateTime(newEndTime);
           setDurationError(undefined);
         }
-      } catch (e) {
+      } catch {
         // Invalid time or duration, don't update end time
         setDurationError("Please enter a valid duration in HH:MM format");
       }
@@ -587,7 +587,7 @@ function EditTimeLogForm({ entry, onSave }: { entry: TimeEntry; onSave: () => Pr
           setEndDateTime(newEndTime);
           setDurationError(undefined);
         }
-      } catch (e) {
+      } catch {
         // Invalid time or duration, don't update end time
         setDurationError("Please enter a valid duration in HH:MM format");
       }

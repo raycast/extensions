@@ -1,31 +1,29 @@
-import tsParser from "@typescript-eslint/parser";
+// ESLint v9 configuration for Raycast extensions
+import js from '@eslint/js';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
+import prettierConfig from 'eslint-config-prettier';
 
 export default [
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
-    files: ["**/*.ts", "**/*.tsx"],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        ecmaVersion: 2022,
-        sourceType: "module",
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-    },
-    rules: {}
-  },
-  {
-    files: ["**/*.js", "**/*.jsx"],
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: "module",
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
+      globals: {
+        ...globals.node,
       },
     },
-    rules: {}
-  }
-];
+  },
+  // Raycast-specific rules would go here
+  prettierConfig,
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    rules: {
+      // Common Raycast-specific rules
+      'react/prop-types': 'off',
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'warn',
+    },
+  },
+]; 
