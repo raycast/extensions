@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "create-link",
+  "title": "Create Link",
+  "description": "Create a link to the currently open browser.",
+  "icon": "extension_icon.png",
+  "author": "sinsky",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy-plain-text",
+      "title": "Copy Link as Plain Text",
+      "subtitle": "Copy the current browser URL as plain text.",
+      "description": "This command captures the current URL from your browser and copies it directly to your clipboard, allowing for quick and easy sharing or pasting into other applications.",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-html",
+      "title": "Copy Link as HTML",
+      "subtitle": "Copy the current browser URL as an HTML anchor tag.",
+      "description": "This command captures the current URL from your browser, formats it as an HTML anchor tag, and copies it to your clipboard. This allows for easy integration into web pages or HTML documents.",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-markdown",
+      "title": "Copy Link as Markdown",
+      "subtitle": "Copy the current browser URL as a Markdown link.",
+      "description": "This command captures the current URL from your browser, formats it as a Markdown link, and copies it to your clipboard. This is useful for integrating links into Markdown documents or notes.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
