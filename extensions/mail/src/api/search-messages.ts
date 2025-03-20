@@ -103,8 +103,10 @@ export async function searchMessages({
     return [];
   }
 
+  const regexify = (search: string) => `(${search.split(" ").join("|")})`;
+
   const { stdout, stderr } = await execa({ reject: false })(rgPath, [
-    search || "(.*)",
+    search ? regexify(search) : "(.*)",
     "-g",
     search ? "*.emlx" : `{${messageIds.join(",")}}.{emlx,partial.emlx}`,
     "-i", // case insensitive
