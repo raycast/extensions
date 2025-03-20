@@ -42,7 +42,7 @@ export function isFileItem(entry: VsCodeEntry): entry is FileEntry {
 export function useVsCodeEntries(bundleId: VSCodeBundleId) {
   const { data, isLoading } = useSQL<{ entries: string }>(
     `${homedir()}/Library/Application Support/${BundleIdBuildMapping[bundleId]}/User/globalStorage/state.vscdb`,
-    "SELECT json_extract(value, '$.entries') as entries FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'"
+    "SELECT json_extract(value, '$.entries') as entries FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'",
   );
 
   const entries: Entry[] =

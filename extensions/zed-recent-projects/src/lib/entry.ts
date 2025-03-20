@@ -24,7 +24,7 @@ export function getEntryFromVSCodeEntryUri(uri: string): Entry | null {
       subtitle,
       is_remote: false,
     };
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -41,7 +41,7 @@ export function getEntry(entry: ZedEntry): Entry | null {
       subtitle,
       is_remote: !!entry.host,
     };
-  } catch (e) {
+  } catch {
     return null;
   }
 }

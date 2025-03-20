@@ -29,7 +29,7 @@ function exists(p: string) {
 export const withZed = <P extends object>(Component: ComponentType<P>) => {
   return (props: P) => {
     const { data: zed, isLoading } = usePromise(async () =>
-      (await getApplications()).find((a) => a.bundleId === getZedBundleId(zedBuild))
+      (await getApplications()).find((a) => a.bundleId === getZedBundleId(zedBuild)),
     );
 
     if (!zed) {
@@ -45,7 +45,6 @@ export const withZed = <P extends object>(Component: ComponentType<P>) => {
 };
 
 export function Command() {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const zed = useContext(ZedContext).zed!;
   const { entries, isLoading, error } = useZedRecentWorkspaces();
   const { pinnedEntries, pinEntry, unpinEntry, moveUp, moveDown } = usePinnedEntries();
@@ -85,7 +84,7 @@ export function Command() {
               />
               {e.order > 0 ? (
                 <Action
-                  title="Move Up"
+                  title="Move up"
                   icon={Icon.ArrowUp}
                   onAction={() => moveUp(e)}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
