@@ -50,6 +50,5 @@ To add new search engines to the extension:
 
 - [Kagi Search Bangs](https://help.kagi.com/kagi/features/bangs.html) - The implementation of the bangs concept 🔍
 - [Kagi Bangs Repository](https://github.com/kagisearch/bangs) - The official repository of Kagi Search bangs 📚
-- [Theo Browne's video on DuckDuckGo !Bangs](https://www.youtube.com/watch?v=_DnNzRaBWUU) - A great walkthrough of bangs and why he chose to implement it himself 
-📹
+- [Theo Browne's video on DuckDuckGo !Bangs](https://www.youtube.com/watch?v=_DnNzRaBWUU) - A great walkthrough of bangs and why he chose to implement it himself 📹
 - [unduck.link](https://unduck.link/) - Theo's web implementation of the original functionality with DuckDuckGo's bang 🔗
