@@ -29,7 +29,7 @@ export default function Command() {
     }
   };
 
-  if (preferences.hiddenWhenDisabled && !status) {
+  if (preferences.icon === "" || (preferences.hiddenWhenDisabled && !status)) {
     return null;
   }
 
@@ -38,8 +38,8 @@ export default function Command() {
       isLoading={false}
       icon={
         status
-          ? { source: `door-open.svg`, tintColor: Color.PrimaryText }
-          : { source: `door-closed.svg`, tintColor: Color.PrimaryText }
+          ? { source: `${preferences.icon}-open.svg`, tintColor: Color.PrimaryText }
+          : { source: `${preferences.icon}-closed.svg`, tintColor: Color.PrimaryText }
       }
     >
       <>
