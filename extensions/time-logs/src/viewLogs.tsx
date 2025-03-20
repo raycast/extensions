@@ -1570,7 +1570,7 @@ export default function ViewLogs() {
                                         for (const log of logs) {
                                           await deleteTimeEntry(log.id);
                                         }
-                                        
+
                                         showToast({
                                           style: Toast.Style.Success,
                                           title: `${logs.length} Time Logs deleted`,
