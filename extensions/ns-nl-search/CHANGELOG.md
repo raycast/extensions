@@ -1,4 +1,4 @@
-# NS (Nederlandse Spoorwegen) Changelog
+# Dutch Railways Train Search Changelog
 
 ## [Initial version] - {PR_MERGE_DATE}
 
