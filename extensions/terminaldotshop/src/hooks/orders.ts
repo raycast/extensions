@@ -5,9 +5,7 @@ export const useOrders = () => {
   const terminal = useTerminal();
   return useQuery({
     queryKey: ["orders"],
-    queryFn: async () => {
-      return terminal.order.list().then((r) => r.data);
-    },
+    queryFn: () => terminal.order.list().then((r) => r.data),
   });
 };
 
