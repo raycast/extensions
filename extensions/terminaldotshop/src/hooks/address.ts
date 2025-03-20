@@ -40,7 +40,7 @@ export const useCreateAddress = () => {
 export const useSetAddress = () => {
   const terminal = useTerminal();
   const qc = useQueryClient();
-  const { data: cart, refetch } = useCart();
+  const { data: cart } = useCart();
   return useMutation({
     mutationFn: async (addressID: string) => {
       qc.setQueryData(["cart"], { ...cart, addressID });

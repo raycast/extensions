@@ -18,7 +18,8 @@ export const provider = new OAuthService({
   bodyEncoding: "url-encoded",
 });
 
-const makeTerminal = (token: string) => new Terminal({ environment: config.env, appId: "raycast", bearerToken: token });
+const makeTerminal = (token: string) =>
+  new Terminal({ environment: config.env as any, appId: "raycast", bearerToken: token });
 
 export const useTerminal = () => {
   const { token } = getAccessToken();
