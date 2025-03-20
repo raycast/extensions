@@ -49,7 +49,7 @@ function Command() {
       {icons.map((icon) => {
         const { set, id, body, width, height } = icon;
         const { id: setId, title: setName } = set;
-        const svgIcon = toSvg(body, width, height, iconColor === iconColorEnum.customColor && customColor ? customColor : iconColor);
+        const svgIcon = toSvg(body, width, height, iconColor === iconColorEnum.customColor && customColor && /^#([0-9a-fA-F]{6})$/.test(customColor) ? customColor : iconColor);
         const dataURIIcon = toDataURI(svgIcon);
 
         const paste = (
