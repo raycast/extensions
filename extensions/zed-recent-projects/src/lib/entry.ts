@@ -1,5 +1,4 @@
 import { dirname, basename } from "path";
-import { fileURLToPath } from "url";
 import tildify from "tildify";
 import { ZedEntry } from "./zedEntries";
 
@@ -9,24 +8,6 @@ export interface Entry {
   title: string;
   subtitle: string;
   is_remote: boolean;
-}
-
-export function getEntryFromVSCodeEntryUri(uri: string): Entry | null {
-  try {
-    const path = fileURLToPath(uri);
-    const title = decodeURIComponent(basename(uri));
-    const subtitle = tildify(dirname(path));
-
-    return {
-      uri,
-      path,
-      title,
-      subtitle,
-      is_remote: false,
-    };
-  } catch {
-    return null;
-  }
 }
 
 export function getEntry(entry: ZedEntry): Entry | null {
