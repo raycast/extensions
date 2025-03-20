@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "llms-txt",
-  "title": "Llms Txt",
-  "description": "Search and access llms.txt files from various websites. Llms.txt is a proposed standard file that defines how AI models and LLMs should interact with website content. The llms-full.txt variant provides more detailed rules and guidelines.",
+  "title": "LLMs Txt",
+  "description": "Search and access llms.txt files from various websites. llms.txt is a proposed standard file that defines how AI models and LLMs should interact with website content. The llms-full.txt variant provides more detailed rules and guidelines.",
   "icon": "extension-icon.png",
   "author": "thedaviddias",
   "contributors": [
@@ -19,7 +19,7 @@
   "commands": [
     {
       "name": "search-websites",
-      "title": "Search Llms.txt",
+      "title": "Search llms.txt",
       "description": "Search through a curated list of websites that implement the proposed llms.txt standard.",
       "mode": "view"
     },

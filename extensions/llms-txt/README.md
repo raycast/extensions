@@ -1,4 +1,4 @@
-# Llms Txt
+# LLMs Txt
 
 Discover and explore websites implementing the llms.txt standard - your gateway to understanding AI interaction policies across the web.
 
@@ -19,12 +19,12 @@ Discover and explore websites implementing the llms.txt standard - your gateway 
 
 ## Usage
 
-### Search Llms.txt Command
+### Search llms.txt Command
 
 The extension provides a powerful search interface to find websites implementing the llms.txt standard:
 
 1. Open Raycast
-2. Type "Search Llms.txt" or select it from your commands
+2. Type "Search llms.txt" or select it from your commands
 3. Enter your search terms to filter the list of websites
 4. Select a website to view available actions:
    - View llms.txt in browser

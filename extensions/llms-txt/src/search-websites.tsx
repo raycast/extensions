@@ -1,3 +1,4 @@
+/* eslint-disable @raycast/prefer-title-case */
 import { List, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import type { Website, Category, ActionType } from "./types";
@@ -38,7 +39,7 @@ function getPrimaryAction(website: Website, preferences: Preferences) {
     case "copy_llms":
       return (
         <Action
-          title="Copy Llms.txt URL"
+          title="Copy llms.txt URL"
           icon={Icon.Clipboard}
           onAction={() => handleWebsiteAction(website, "copy_llms")}
         />
@@ -46,30 +47,30 @@ function getPrimaryAction(website: Website, preferences: Preferences) {
     case "view_llms_full":
       return website.llmsFullTxtUrl ? (
         <Action
-          title="View Llms-full.txt"
+          title="View llms-full.txt"
           icon={Icon.Globe}
           onAction={() => handleWebsiteAction(website, "view_llms_full")}
         />
       ) : (
-        <Action title="View Llms.txt" icon={Icon.Globe} onAction={() => handleWebsiteAction(website, DEFAULT_ACTION)} />
+        <Action title="View llms.txt" icon={Icon.Globe} onAction={() => handleWebsiteAction(website, DEFAULT_ACTION)} />
       );
     case "copy_llms_full":
       return website.llmsFullTxtUrl ? (
         <Action
-          title="Copy Llms-full.txt URL"
+          title="Copy llms-full.txt URL"
           icon={Icon.Clipboard}
           onAction={() => handleWebsiteAction(website, "copy_llms_full")}
         />
       ) : (
         <Action
-          title="Copy Llms.txt URL"
+          title="Copy llms.txt URL"
           icon={Icon.Clipboard}
           onAction={() => handleWebsiteAction(website, "copy_llms")}
         />
       );
     default:
       return (
-        <Action title="View Llms.txt" icon={Icon.Globe} onAction={() => handleWebsiteAction(website, DEFAULT_ACTION)} />
+        <Action title="View llms.txt" icon={Icon.Globe} onAction={() => handleWebsiteAction(website, DEFAULT_ACTION)} />
       );
   }
 }
@@ -83,7 +84,7 @@ function getSecondaryActions(website: Website, preferences: Preferences) {
     actions.push(
       <Action
         key="view-llms"
-        title="View Llms.txt"
+        title="View llms.txt"
         icon={Icon.Globe}
         onAction={() => handleWebsiteAction(website, DEFAULT_ACTION)}
       />,
@@ -95,7 +96,7 @@ function getSecondaryActions(website: Website, preferences: Preferences) {
     actions.push(
       <Action
         key="view-llms-full"
-        title="View Llms-full.txt"
+        title="View llms-full.txt"
         icon={Icon.Globe}
         onAction={() => handleWebsiteAction(website, "view_llms_full")}
       />,
@@ -122,7 +123,7 @@ function getSecondaryActions(website: Website, preferences: Preferences) {
   copyItems.push(
     <Action
       key="copy-llms"
-      title="Copy Llms.txt URL"
+      title="Copy llms.txt URL"
       icon={Icon.Clipboard}
       onAction={() => handleWebsiteAction(website, "copy_llms")}
       shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
@@ -134,7 +135,7 @@ function getSecondaryActions(website: Website, preferences: Preferences) {
     copyItems.push(
       <Action
         key="copy-llms-full"
-        title="Copy Llms-full.txt URL"
+        title="Copy llms-full.txt URL"
         icon={Icon.Clipboard}
         onAction={() => handleWebsiteAction(website, "copy_llms_full")}
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}

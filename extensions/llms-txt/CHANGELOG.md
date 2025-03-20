@@ -1,4 +1,4 @@
-# Llms Txt Changelog
+# LLMs Txt Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
