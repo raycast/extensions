@@ -1,6 +1,6 @@
 # Deno Deploy Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [Update] - {PR_MERGE_DATE}
 
 - Update dependencies
 - Fix issue where the extension doesn't show organizations
