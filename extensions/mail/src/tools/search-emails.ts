@@ -5,9 +5,6 @@ type Input = {
    * The search query compared against the email subject and content.
    *
    * Supports regular expressions.
-   *
-   * If you can't find the email you're looking for, try performing multiple
-   * searches with different keywords.
    */
   search?: string;
 
@@ -47,6 +44,14 @@ type Input = {
   order?: "asc" | "desc";
 };
 
+/**
+ * Try multiple queries with different keywords if your first attempt doesn't succeed. For example,
+ * when looking for a meeting with John Smith, search separately for "meeting", "john smith", and "john".
+ *
+ * IMPORTANT: Always try at least 2-3 different search terms before concluding the
+ * email can't be found. If specific searches fail, try broader terms related to the
+ * content you're seeking.
+ */
 export default async function (input: Input) {
   const messages = await searchMessages(input);
   return messages;
