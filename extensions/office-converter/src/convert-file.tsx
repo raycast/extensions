@@ -38,7 +38,7 @@ export default function ConvertFiles(props: { arguments: { format?: string; inpu
       }
     }
 
-    const message = `Converted ${successful} file(s) successfully`;
+    const message = `Converted ${successful} file(s) to ${params.format}`;
     if (failed > 0) {
       await showToast(Toast.Style.Failure, `${message}, ${failed} failed`);
     } else {
