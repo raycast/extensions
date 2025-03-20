@@ -12,7 +12,7 @@
   ],
   "commands": [
     {
-      "name": "sl",
+      "name": "departures",
       "title": "List Departures",
       "description": "List upcoming departures",
       "mode": "view"

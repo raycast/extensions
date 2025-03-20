@@ -49,7 +49,7 @@ const Site = ({ site }: { site: SiteType }) => {
   const { isLoading: busIsLoading, data: busData, revalidate: revalidateBus } = useBus(site);
 
   const isLoading = metroIsLoading || busIsLoading || ferryIsLoading || shipIsLoading || tramIsLoading;
-  const compindedData = [
+  const combinedData = [
     ...(metroData?.departures ?? []),
     ...(ferryData?.departures ?? []),
     ...(shipData?.departures ?? []),
@@ -70,13 +70,13 @@ const Site = ({ site }: { site: SiteType }) => {
         title: "Error",
         message: "Failed to fetch data",
       });
-      console.error("Failed to revalidate", revalidate);
+      console.error("Failed to revalidate", err);
     }
   };
 
   return (
     <List isLoading={isLoading}>
-      {compindedData.map((item) => {
+      {combinedData.map((item) => {
         const line = getMetroLine(item.line.id);
         return (
           <List.Item

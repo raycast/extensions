@@ -29,5 +29,5 @@ export type Departure = {
     transport_mode: TransportMode;
     group_of_lines: string;
   };
-  deviations: unkown[];
+  deviations: unknown[];
 };
