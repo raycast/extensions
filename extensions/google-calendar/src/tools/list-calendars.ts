@@ -44,23 +44,18 @@ const tool = async (input: Input) => {
     maxResults,
   };
 
-  try {
-    const response = await calendar.calendarList.list(requestParams);
+  const response = await calendar.calendarList.list(requestParams);
 
-    return (
-      response.data.items?.map((calendar) => ({
-        id: calendar.id,
-        name: calendar.summary,
-        description: calendar.description,
-        primary: calendar.primary,
-        visible: calendar.selected,
-        accessRole: calendar.accessRole,
-      })) || []
-    );
-  } catch (error) {
-    showFailureToast(error, { title: "Failed to list calendars" });
-    throw error;
-  }
+  return (
+    response.data.items?.map((calendar) => ({
+      id: calendar.id,
+      name: calendar.summary,
+      description: calendar.description,
+      primary: calendar.primary,
+      visible: calendar.selected,
+      accessRole: calendar.accessRole,
+    })) || []
+  );
 };
 
 export default withGoogleAPIs(tool);
