@@ -12,6 +12,7 @@ import { Message, SearchType, MessageSource, Preferences } from "./types";
 import { extractCode, formatDate } from "./utils";
 import applescript from "applescript";
 import { promisify } from "util";
+import { runAppleScript } from "@raycast/utils";
 
 // Interval for polling new messages (1 second)
 const POLLING_INTERVAL = 1_000;
@@ -187,9 +188,9 @@ function Actions(props: { message: Message; code: string }) {
   return (
     <ActionPanel title="Action">
       <ActionPanel.Section>
-        <Action title="Type Code" icon={Icon.Keyboard} onAction={() => TypeCode({ code: props.code })} />
         <Action.Paste title="Paste Code" content={props.code} />
         <Action.CopyToClipboard title="Copy Code" content={props.code} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+        <TypeCode code={props.code} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.CopyToClipboard
@@ -207,13 +208,20 @@ function Actions(props: { message: Message; code: string }) {
   );
 }
 
-async function TypeCode(props: { code: string }) {
-  const { code } = props;
+function TypeCode(props: { code: string }) {
+  async function handleAction() {
+    await closeMainWindow();
+    await type(props.code);
+  }
 
+  return <Action title="Type Code" icon={Icon.Keyboard} onAction={handleAction} />;
+}
+
+async function type(text: string) {
   const script = `
     tell application "System Events"
       delay 0.3
-      ${code
+      ${text
         .split("")
         .map(
           (char, i) => `
@@ -224,12 +232,6 @@ async function TypeCode(props: { code: string }) {
         .join("")}
     end tell
   `;
-  const runApplescript = promisify(applescript.execString);
 
-  await closeMainWindow();
-
-  runApplescript(script).catch((error: Error) => {
-    console.error("Error typing code:", error);
-    throw error;
-  });
+  await runAppleScript(script);
 }
