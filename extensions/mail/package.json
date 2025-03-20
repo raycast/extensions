@@ -229,7 +229,7 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.93.2",
+    "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.19.1",
     "execa": "^9.5.2",
     "got": "^14.4.6",
