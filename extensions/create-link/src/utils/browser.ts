@@ -5,7 +5,12 @@ export function isExtensionInstalled() {
 }
 
 export async function getActiveTab() {
-  const tabs = await BrowserExtension.getTabs();
-  const tab = tabs.find((tab) => tab.active);
-  return tab;
+  try {
+    const tabs = await BrowserExtension.getTabs();
+    const tab = tabs.find((tab) => tab.active);
+    return tab;
+  } catch (error) {
+    throw new Error(`Failed to get active tab: ${error.message}`);
+  }
+}
 }
