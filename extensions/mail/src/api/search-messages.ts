@@ -1,38 +1,17 @@
 import { execa } from "execa";
 import { homedir } from "os";
 import { resolve } from "path";
-import { simpleParser } from "mailparser";
 import { readFile } from "fs/promises";
 import { executeSQL } from "@raycast/utils";
 import { basename } from "path/posix";
-import { stripHtml } from "string-strip-html";
 
 import { getDatabasePath, getPersistenceInfo } from "./get-persistence-info";
 import { ensureCLI } from "../utils/ripgrep";
+import { parseMessage } from "../utils/parse-message";
 
 const toUnixTimestamp = (date: string) => {
   return new Date(date).getTime() / 1000;
 };
-
-/**
- * Parses an Apple Mail .emlx file by removing the byte count at the beginning
- * and the plist at the end, then extracting the email text content.
- */
-async function parseMessage(message: string) {
-  const lines = message.split("\n");
-  lines.shift(); // remove the first line containing the byte count
-  const emailContent = lines.join("\n");
-  const plistStartIndex = emailContent.lastIndexOf("<?xml");
-  const emailOnly = plistStartIndex !== -1 ? emailContent.substring(0, plistStartIndex) : emailContent;
-
-  const parsed = await simpleParser(emailOnly);
-
-  return {
-    from: parsed.from?.value[0].address || "",
-    subject: parsed.subject || "",
-    text: parsed.text || (parsed.html ? stripHtml(parsed.html).result.replaceAll("\n", " ") : ""),
-  };
-}
 
 const getIdFromPath = (path: string) => {
   const filename = basename(path);
@@ -48,13 +27,6 @@ type SearchOptions = {
   limit: number;
 };
 
-type Message = {
-  id: number;
-  from: string;
-  subject: string;
-  text: string;
-};
-
 export async function searchMessages({
   search,
   before,
@@ -62,7 +34,7 @@ export async function searchMessages({
   from,
   order = "desc",
   limit = 25,
-}: Partial<SearchOptions>): Promise<Message[]> {
+}: Partial<SearchOptions>) {
   const persistenceInfo = await getPersistenceInfo();
   const version = persistenceInfo.LastUsedVersionDirectoryName;
   const basePath = resolve(homedir(), `Library/Mail/${version}`);
@@ -92,7 +64,7 @@ export async function searchMessages({
     LEFT JOIN mailboxes ON messages.mailbox = mailboxes.ROWID
     ${filters.length ? `WHERE ${filters.join(" AND ")}` : ""}
     ORDER BY messages.date_sent ${order}
-    ${search ? "" : `LIMIT ${limit}`};
+    ${search ? "" : `LIMIT ${Math.min(limit, 50)}`};
   `;
 
   const databasePath = await getDatabasePath();
@@ -135,8 +107,15 @@ export async function searchMessages({
 
   return Promise.all(
     absolutePaths.map(async (path) => {
-      const parsedMessage = await readFile(path, "utf-8").then(parseMessage);
-      return { id: getIdFromPath(path), ...parsedMessage };
+      const { from, subject, text } = await readFile(path, "utf-8").then(parseMessage);
+
+      return {
+        id: getIdFromPath(path),
+        filePath: path,
+        from,
+        subject,
+        summary: text.substring(0, Math.min(text.length, 100)),
+      };
     }),
   );
 }

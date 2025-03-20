@@ -32,6 +32,8 @@ type Input = {
   /**
    * Limit the number of results returned.
    *
+   * Maximum is 50.
+   *
    * @default 25
    */
   limit?: number;
