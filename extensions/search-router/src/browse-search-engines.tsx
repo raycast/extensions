@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List, showToast } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { SearchEngine, searchEngines } from "./data/search-engines";
+import { searchEngines } from "./data/search-engines";
+import { SearchEngine } from "./search-engine";
 import { useDefaultSearchEngine } from "./data/cache";
 
 export default function BrowseSearchEngines() {
@@ -10,7 +11,6 @@ export default function BrowseSearchEngines() {
   const filteredSearchEngines = useMemo(() => {
     const trimmedSearch = searchText.trim();
     return searchEngines
-      .sort((a, b) => (b.r ?? 0) - (a.r ?? 0))
       .filter((engine) => engine.t.includes(trimmedSearch) || engine.s.includes(trimmedSearch))
       .slice(0, 20);
   }, [searchText]);
