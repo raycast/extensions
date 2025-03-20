@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import * as yaml from "js-yaml";
 import { cache, CACHE_KEY } from "./api";
 import { Item } from "./types";
@@ -36,7 +37,11 @@ export async function fetchFromCDN(
     const filesResponse = await fetch(JSDELIVR_API_URL);
 
     if (!filesResponse.ok) {
-      throw new Error(`jsDelivr API error: ${filesResponse.statusText}`);
+      showFailureToast({
+        title: "Failed to fetch file listing",
+        message: `jsDelivr API error: ${filesResponse.statusText}`,
+      });
+      return;
     }
 
     const filesData = await filesResponse.json();
@@ -71,6 +76,10 @@ export async function fetchFromCDN(
 
           if (!yamlResponse.ok) {
             console.error(`Failed to fetch ${fileUrl}: ${yamlResponse.statusText}`);
+            showFailureToast({
+              title: "Failed to Fetch YAML",
+              message: `Failed to fetch ${file.name}: ${yamlResponse.statusText}`,
+            });
             return;
           }
 
@@ -87,9 +96,17 @@ export async function fetchFromCDN(
             }
           } catch (yamlError) {
             console.error(`Failed to parse YAML for ${file.name}:`, yamlError);
+            showFailureToast({
+              title: "Failed to Parse YAML",
+              message: `Failed to parse YAML for ${file.name}: ${yamlError instanceof Error ? yamlError.message : String(yamlError)}`,
+            });
           }
         } catch (fileError) {
           console.error(`Error processing file ${file.name}:`, fileError);
+          showFailureToast({
+            title: "Error Processing File",
+            message: `Failed to process file ${file.name}: ${fileError instanceof Error ? fileError.message : String(fileError)}`,
+          });
         }
       })();
 
@@ -103,7 +120,11 @@ export async function fetchFromCDN(
 
     // If no items were found, throw an error
     if (allItems.length === 0) {
-      throw new Error("No conference data found from CDN. Please try again later.");
+      showFailureToast({
+        title: "No Conference Data Found",
+        message: "No conference data found from CDN. Please try again later.",
+      });
+      return;
     }
 
     // Sort conferences within each item by year (descending)
