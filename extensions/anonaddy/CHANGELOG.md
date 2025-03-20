@@ -1,6 +1,6 @@
 # Addy Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-03-20
 
 - Added support for creating custom aliases through a form.
 - Improved alias management with list and detail views.
