@@ -1,6 +1,6 @@
 # Baby Buddy Changelog
 
-## [Initial Version] - 2025-03-19
+## [Initial Version] - {PR_MERGE_DATE}
 - Initial version code
 - Added "Show Baby Info" command to display children and their recent activities
 - Added ability to view detailed information about each child
