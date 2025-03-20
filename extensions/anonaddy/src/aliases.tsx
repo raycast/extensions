@@ -19,7 +19,7 @@ import * as api from "./api";
 import EditAlias from "./edit-alias";
 import useAliases from "./useAliases";
 
-const MyAliases = () => {
+const Aliases = () => {
   const { data: list = [], isLoading, revalidate } = useAliases();
   const navigation = useNavigation();
 
@@ -125,4 +125,4 @@ const MyAliases = () => {
   );
 };
 
-export default MyAliases;
+export default Aliases;
