@@ -28,8 +28,7 @@ type Input = {
   /**
    * Filter emails sent from the given email address.
    *
-   * This must be a valid email address from the account's address book
-   * which you must get using the `list-addresses` tool.
+   * You can use the `list-addresses` tool to get a list of email addresses.
    */
   from?: string;
 
