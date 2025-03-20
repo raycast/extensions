@@ -1,10 +1,10 @@
-import { Color, getPreferenceValues, LaunchProps, MenuBarExtra, showHUD } from "@raycast/api";
+import { Color, getPreferenceValues, MenuBarExtra, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { isDoorstopperEnabled, startDoorstopper, stopDoorstopper } from "./util";
+import { showFailureToast } from "@raycast/utils";
 
-export default function Command(props: LaunchProps) {
-  const hasLaunchContext = props.launchContext?.enabled !== undefined;
-  const isEnabled = hasLaunchContext ? props?.launchContext?.enabled : isDoorstopperEnabled();
+export default function Command() {
+  const isEnabled = isDoorstopperEnabled();
   const preferences = getPreferenceValues<Preferences.Statusmenu>();
   const [status, setDoorstopperStatus] = useState(isEnabled);
 
@@ -13,15 +13,19 @@ export default function Command(props: LaunchProps) {
   }, [isEnabled]);
 
   const handleStatus = async () => {
-    if (status) {
-      setDoorstopperStatus(false);
-      stopDoorstopper({ status: true });
-      if (preferences.hiddenWhenDisabled) {
-        showHUD("Doorstopper is now disabled");
+    try {
+      if (status) {
+        setDoorstopperStatus(false);
+        await stopDoorstopper({ status: true });
+        if (preferences.hiddenWhenDisabled) {
+          showHUD("Doorstopper is now disabled");
+        }
+      } else {
+        setDoorstopperStatus(true);
+        await startDoorstopper({ status: true });
       }
-    } else {
-      setDoorstopperStatus(true);
-      startDoorstopper({ status: true });
+    } catch (error) {
+      showFailureToast("Failed to disable Doorstopper", { message: String(error) });
     }
   };
 

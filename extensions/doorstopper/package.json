@@ -23,6 +23,7 @@
     {
       "name": "toggle",
       "title": "Toggle Doorstopper",
+      "subtitle": "Doorstopper",
       "description": "Toggle Doorstopper",
       "mode": "no-view"
     },

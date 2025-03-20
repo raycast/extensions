@@ -1,5 +1,5 @@
 # Doorstopper Changelog
 
-## [Add Doorstopper] - 2025-03-19
+## [Add Doorstopper] - {PR_MERGE_DATE}
 
 Initial version
