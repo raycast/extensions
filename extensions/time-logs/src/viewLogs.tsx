@@ -892,22 +892,6 @@ export default function ViewLogs() {
     loadData();
   }, []);
 
-  // Format task descriptions for summary view with counts
-  function formatTaskDescriptions(logs: TimeEntry[]): string {
-    const taskCounts: Record<string, number> = {};
-
-    // Count occurrences of each task description
-    logs.forEach((log) => {
-      const description = log.description || "Untitled";
-      taskCounts[description] = (taskCounts[description] || 0) + 1;
-    });
-
-    // Format descriptions with counts
-    return Object.entries(taskCounts)
-      .map(([description, count]) => (count > 1 ? `${description} [${count}]` : description))
-      .join(", ");
-  }
-
   // Load time logs and active timer
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -1142,7 +1126,7 @@ export default function ViewLogs() {
       if (!monthGroups[monthKey][dayKey][projectKey]) {
         monthGroups[monthKey][dayKey][projectKey] = {};
       }
-      
+
       // Create task group if doesn't exist
       if (!monthGroups[monthKey][dayKey][projectKey][taskKey]) {
         monthGroups[monthKey][dayKey][projectKey][taskKey] = [];
@@ -1499,122 +1483,128 @@ export default function ViewLogs() {
                     );
 
                     // Project groups for this day
-                    return Object.entries(projectGroups).flatMap(([projectKey, taskGroups]) => {
-                      // Get project info
-                      const project = projectKey !== "unassigned" ? projects[projectKey] : null;
-                      const projectName = project ? project.name : "Unassigned";
-                      const projectColor = project ? project.color : Color.SecondaryText;
-                      
-                      // Return task groups for this project
-                      return Object.entries(taskGroups).map(([taskKey, logs]) => {
-                        // Calculate total duration for this task
-                        const totalMinutes = logs.reduce((total, log) => {
-                          if (log.endTime) {
-                            return total + calculateDuration(new Date(log.startTime), new Date(log.endTime));
-                          }
-                          return total;
-                        }, 0);
+                    return Object.entries(projectGroups)
+                      .flatMap(([projectKey, taskGroups]) => {
+                        // Get project info
+                        const project = projectKey !== "unassigned" ? projects[projectKey] : null;
+                        const projectName = project ? project.name : "Unassigned";
+                        const projectColor = project ? project.color : Color.SecondaryText;
 
-                        return (
-                          <List.Item
-                            key={`${dayKey}-${projectKey}-${taskKey}`}
-                            title={filterProject !== "all" || projectKey === "unassigned" 
-                              ? `${taskKey}${logs.length > 1 ? ` [x${logs.length}]` : ''}`
-                              : `${projectName} — ${taskKey}${logs.length > 1 ? ` [x${logs.length}]` : ''}`}
-                            icon={{ source: Icon.Dot, tintColor: projectColor }}
-                            accessories={[
-                              ...(getNaturalDateLabel(date) ? [{ text: getNaturalDateLabel(date) }] : []),
-                              { text: formatSimpleDate(date) },
-                              { text: formatConsistentDuration(totalMinutes) },
-                            ]}
-                            actions={
-                              <ActionPanel>
-                                <ActionPanel.Section
-                                  title={filterProject !== "all" || projectKey === "unassigned" 
-                                    ? `${taskKey}${logs.length > 1 ? ` [x${logs.length}]` : ''}`
-                                    : `${projectName} — ${taskKey}${logs.length > 1 ? ` [x${logs.length}]` : ''}`}
-                                >
-                                  <Action
-                                    title="Resume"
-                                    icon={Icon.Play}
-                                    onAction={() => {
-                                      // Get the first log's description to use for the timer
-                                      const firstLog = logs[0];
-                                      startTimer(firstLog.description || "", firstLog.projectId);
-                                    }}
-                                  />
-                                  {/* Only show Edit action if there's exactly one log in the group */}
-                                  {logs.length === 1 && (
-                                    <Action
-                                      title="Edit Time Log"
-                                      icon={Icon.Pencil}
-                                      onAction={() => push(<EditTimeLogForm entry={logs[0]} onSave={loadData} />)}
-                                    />
-                                  )}
-                                  <Action
-                                    title="Delete Time Logs"
-                                    icon={Icon.Trash}
-                                    style={Action.Style.Destructive}
-                                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                                    onAction={async () => {
-                                      if (
-                                        await confirmAlert({
-                                          title: "Delete Time Logs",
-                                          message: `Are you sure you want to delete ${logs.length} time logs?`,
-                                          primaryAction: {
-                                            title: "Delete",
-                                            style: Alert.ActionStyle.Destructive,
-                                          },
-                                        })
-                                      ) {
-                                        showToast({
-                                          style: Toast.Style.Animated,
-                                          title: "Deleting time logs...",
-                                        });
-
-                                        try {
-                                          // Delete logs one by one for better reliability
-                                          for (const log of logs) {
-                                            await deleteTimeEntry(log.id);
-                                          }
-
-                                          showToast({
-                                            style: Toast.Style.Success,
-                                            title: `${logs.length} Time Logs deleted`,
-                                          });
-                                          await loadData();
-                                        } catch (error) {
-                                          console.error("Error deleting time logs:", error);
-                                          showToast({
-                                            style: Toast.Style.Failure,
-                                            title: "Failed to delete Time Logs",
-                                          });
-                                        }
-                                      }
-                                    }}
-                                  />
-                                </ActionPanel.Section>
-
-                                <ActionPanel.Section>
-                                  <Action
-                                    title="Add Time Log"
-                                    icon={Icon.Plus}
-                                    shortcut={{ modifiers: ["cmd"], key: "n" }}
-                                    onAction={() => push(<AddTimeLogForm onSave={loadData} />)}
-                                  />
-                                  <Action
-                                    title="Switch to Detailed View"
-                                    icon={Icon.List}
-                                    shortcut={{ modifiers: ["cmd"], key: "d" }}
-                                    onAction={toggleViewMode}
-                                  />
-                                </ActionPanel.Section>
-                              </ActionPanel>
+                        // Return task groups for this project
+                        return Object.entries(taskGroups).map(([taskKey, logs]) => {
+                          // Calculate total duration for this task
+                          const totalMinutes = logs.reduce((total, log) => {
+                            if (log.endTime) {
+                              return total + calculateDuration(new Date(log.startTime), new Date(log.endTime));
                             }
-                          />
-                        );
-                      });
-                    }).flat();
+                            return total;
+                          }, 0);
+
+                          return (
+                            <List.Item
+                              key={`${dayKey}-${projectKey}-${taskKey}`}
+                              title={
+                                filterProject !== "all" || projectKey === "unassigned"
+                                  ? `${taskKey}${logs.length > 1 ? ` [x${logs.length}]` : ""}`
+                                  : `${projectName} — ${taskKey}${logs.length > 1 ? ` [x${logs.length}]` : ""}`
+                              }
+                              icon={{ source: Icon.Dot, tintColor: projectColor }}
+                              accessories={[
+                                ...(getNaturalDateLabel(date) ? [{ text: getNaturalDateLabel(date) }] : []),
+                                { text: formatSimpleDate(date) },
+                                { text: formatConsistentDuration(totalMinutes) },
+                              ]}
+                              actions={
+                                <ActionPanel>
+                                  <ActionPanel.Section
+                                    title={
+                                      filterProject !== "all" || projectKey === "unassigned"
+                                        ? `${taskKey}${logs.length > 1 ? ` [x${logs.length}]` : ""}`
+                                        : `${projectName} — ${taskKey}${logs.length > 1 ? ` [x${logs.length}]` : ""}`
+                                    }
+                                  >
+                                    <Action
+                                      title="Resume"
+                                      icon={Icon.Play}
+                                      onAction={() => {
+                                        // Get the first log's description to use for the timer
+                                        const firstLog = logs[0];
+                                        startTimer(firstLog.description || "", firstLog.projectId);
+                                      }}
+                                    />
+                                    {/* Only show Edit action if there's exactly one log in the group */}
+                                    {logs.length === 1 && (
+                                      <Action
+                                        title="Edit Time Log"
+                                        icon={Icon.Pencil}
+                                        onAction={() => push(<EditTimeLogForm entry={logs[0]} onSave={loadData} />)}
+                                      />
+                                    )}
+                                    <Action
+                                      title="Delete Time Logs"
+                                      icon={Icon.Trash}
+                                      style={Action.Style.Destructive}
+                                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                                      onAction={async () => {
+                                        if (
+                                          await confirmAlert({
+                                            title: "Delete Time Logs",
+                                            message: `Are you sure you want to delete ${logs.length} time logs?`,
+                                            primaryAction: {
+                                              title: "Delete",
+                                              style: Alert.ActionStyle.Destructive,
+                                            },
+                                          })
+                                        ) {
+                                          showToast({
+                                            style: Toast.Style.Animated,
+                                            title: "Deleting time logs...",
+                                          });
+
+                                          try {
+                                            // Delete logs one by one for better reliability
+                                            for (const log of logs) {
+                                              await deleteTimeEntry(log.id);
+                                            }
+
+                                            showToast({
+                                              style: Toast.Style.Success,
+                                              title: `${logs.length} Time Logs deleted`,
+                                            });
+                                            await loadData();
+                                          } catch (error) {
+                                            console.error("Error deleting time logs:", error);
+                                            showToast({
+                                              style: Toast.Style.Failure,
+                                              title: "Failed to delete Time Logs",
+                                            });
+                                          }
+                                        }
+                                      }}
+                                    />
+                                  </ActionPanel.Section>
+
+                                  <ActionPanel.Section>
+                                    <Action
+                                      title="Add Time Log"
+                                      icon={Icon.Plus}
+                                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                                      onAction={() => push(<AddTimeLogForm onSave={loadData} />)}
+                                    />
+                                    <Action
+                                      title="Switch to Detailed View"
+                                      icon={Icon.List}
+                                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                                      onAction={toggleViewMode}
+                                    />
+                                  </ActionPanel.Section>
+                                </ActionPanel>
+                              }
+                            />
+                          );
+                        });
+                      })
+                      .flat();
                   })
                   .flat()}
               </List.Section>
