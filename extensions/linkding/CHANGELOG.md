@@ -1,6 +1,6 @@
 # Linkding Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-03-20
 
 ### Create Bookmark
 
