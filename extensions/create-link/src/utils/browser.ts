@@ -9,8 +9,11 @@ export async function getActiveTab() {
     const tabs = await BrowserExtension.getTabs();
     const tab = tabs.find((tab) => tab.active);
     return tab;
-  } catch (error) {
-    throw new Error(`Failed to get active tab: ${error.message}`);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to get active tab: ${error.message}`);
+    } else {
+      throw new Error(`Failed to get active tab: unknown error`);
+    }
   }
-}
 }
