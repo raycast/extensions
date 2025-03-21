@@ -524,7 +524,7 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
   async function handleSubmit(values: {
     name: string;
     description: string;
-    region: string;
+    region?: string;
     addressType: string;
     subnet?: string;
     network?: string;
@@ -542,11 +542,11 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
       return;
     }
     
-    if (!values.region) {
+    if (values.addressType === "INTERNAL" && !values.region) {
       showToast({
         style: Toast.Style.Failure,
         title: "Validation Error",
-        message: "Please select a region",
+        message: "Please select a region for internal IP address",
       });
       return;
     }
@@ -562,10 +562,12 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
     
     setIsLoading(true);
     
+    const region = values.region || regions[0]; // Default to first region for external IPs
+    
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Creating IP address...",
-      message: `Creating ${values.name} in ${values.region}`
+      message: `Creating ${values.name} (${values.addressType === "EXTERNAL" ? "Global" : region})`
     });
     
     try {
@@ -573,7 +575,7 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
       
       const success = await service.createIP(
         values.name,
-        values.region,
+        region,
         values.addressType as "INTERNAL" | "EXTERNAL",
         {
           description: values.description,
@@ -651,26 +653,32 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
       />
       
       <Form.Dropdown
-        id="region"
-        title="Region"
-        placeholder="Select a region"
-      >
-        {regions.map(region => (
-          <Form.Dropdown.Item key={region} value={region} title={region} />
-        ))}
-      </Form.Dropdown>
-      
-      <Form.Dropdown
         id="addressType"
         title="Address Type"
         value={addressType}
         onChange={(value) => {
           setAddressType(value);
+          // Reset selected subnet when switching address types
+          if (value !== "INTERNAL") {
+            setSelectedSubnet("");
+          }
         }}
       >
-        <Form.Dropdown.Item value="EXTERNAL" title="External" />
-        <Form.Dropdown.Item value="INTERNAL" title="Internal" />
+        <Form.Dropdown.Item value="EXTERNAL" title="External" icon={Icon.Globe} />
+        <Form.Dropdown.Item value="INTERNAL" title="Internal" icon={Icon.ComputerChip} />
       </Form.Dropdown>
+      
+      {addressType === "INTERNAL" && (
+        <Form.Dropdown
+          id="region"
+          title="Region"
+          placeholder="Select a region"
+        >
+          {regions.map(region => (
+            <Form.Dropdown.Item key={region} value={region} title={region} />
+          ))}
+        </Form.Dropdown>
+      )}
       
       {addressType === "INTERNAL" && (
         <Form.Dropdown

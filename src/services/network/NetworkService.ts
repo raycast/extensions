@@ -400,13 +400,14 @@ export class NetworkService {
       // Build command
       const command = ["compute", "addresses", "create", name];
       
-      // Add required parameters
-      command.push(`--region=${region}`);
-      
-      // Add address type
+      // Add required parameters - use region for INTERNAL, global for EXTERNAL
       if (addressType === "INTERNAL") {
-        command.push("--subnet=" + (addressOptions.subnet || ""));
+        command.push(`--region=${region}`);
+        if (addressOptions.subnet) {
+          command.push(`--subnet=${addressOptions.subnet}`);
+        }
       } else {
+        // For EXTERNAL addresses, use --global flag instead of region
         command.push("--global");
       }
       
