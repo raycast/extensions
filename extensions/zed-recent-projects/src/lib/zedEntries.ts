@@ -84,6 +84,7 @@ function processRemoteWorkspace(workspace: RemoteWorkspace): ZedEntry | undefine
     };
   } catch (error) {
     showFailureToast(error, { title: "Error processing workspace" });
+    return undefined;
   }
 }
 
