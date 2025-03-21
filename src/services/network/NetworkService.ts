@@ -1,71 +1,70 @@
 /**
- * Network Service - Provides efficient access to Google Cloud Network functionality
+ * Network Service - Provides efficient access to Google Cloud VPC, IP, and Firewall functionality
  * Optimized for performance and user experience
  */
 
-import { exec } from "child_process";
-import { promisify } from "util";
 import { executeGcloudCommand } from "../../gcloud";
 
-const execPromise = promisify(exec);
-
-// Network Interfaces
-export interface VPCNetwork {
+// Interfaces
+export interface VPC {
   id: string;
   name: string;
   description?: string;
-  autoCreateSubnets: boolean;
-  subnetworks: string[];
-  routingMode: string;
-  mtu: number;
+  autoCreateSubnetworks: boolean;
+  subnetworkRange?: string;
   creationTimestamp: string;
-  selfLink: string;
-  isShared?: boolean;
-  sharedWithProject?: string;
-  sharedFromProject?: string;
+  routingConfig?: {
+    routingMode: string;
+  };
+  mtu?: number;
+  gatewayIPv4?: string;
 }
 
-export interface Subnetwork {
+export interface Subnet {
   id: string;
   name: string;
   network: string;
   region: string;
   ipCidrRange: string;
-  gatewayAddress: string;
   privateIpGoogleAccess: boolean;
-  secondaryIpRanges?: SecondaryIpRange[];
+  enableFlowLogs?: boolean;
+  gatewayAddress?: string;
+  secondaryIpRanges?: {
+    rangeName: string;
+    ipCidrRange: string;
+  }[];
   creationTimestamp: string;
+}
+
+export interface IPAddress {
+  id: string;
+  name: string;
+  description?: string;
+  address: string;
+  addressType: string; // "INTERNAL" or "EXTERNAL"
   purpose?: string;
-  role?: string;
-  logConfig?: LogConfig;
-}
-
-export interface SecondaryIpRange {
-  rangeName: string;
-  ipCidrRange: string;
-}
-
-export interface LogConfig {
-  enable: boolean;
-  aggregationInterval: string;
-  flowSampling: number;
-  metadata: string;
+  network?: string;
+  subnetwork?: string;
+  region?: string;
+  status: string; // "RESERVED" or "IN_USE"
+  users?: string[];
+  creationTimestamp: string;
 }
 
 export interface FirewallRule {
   id: string;
   name: string;
+  description?: string;
   network: string;
   priority: number;
-  direction: string;
-  logConfig?: { enable: boolean };
-  disabled: boolean;
+  direction: string; // "INGRESS" or "EGRESS"
   sourceRanges?: string[];
   destinationRanges?: string[];
   sourceTags?: string[];
   targetTags?: string[];
   sourceServiceAccounts?: string[];
   targetServiceAccounts?: string[];
+  disabled: boolean;
   allowed?: {
     IPProtocol: string;
     ports?: string[];
@@ -75,73 +74,27 @@ export interface FirewallRule {
     ports?: string[];
   }[];
   creationTimestamp: string;
-  description?: string;
-}
-
-export interface Route {
-  id: string;
-  name: string;
-  network: string;
-  destRange: string;
-  priority: number;
-  tags?: string[];
-  nextHopGateway?: string;
-  nextHopInstance?: string;
-  nextHopIp?: string;
-  nextHopVpnTunnel?: string;
-  nextHopIlb?: string;
-  nextHopNetwork?: string;
-  creationTimestamp: string;
-  description?: string;
-}
-
-export interface VpnGateway {
-  id: string;
-  name: string;
-  network: string;
-  region: string;
-  vpnInterfaces: VpnInterface[];
-  creationTimestamp: string;
-  description?: string;
-}
-
-export interface VpnInterface {
-  id: number;
-  ipAddress: string;
-}
-
-export interface VpnTunnel {
-  id: string;
-  name: string;
-  vpnGateway: string;
-  peerGateway: string;
-  region: string;
-  peerIp: string;
-  status: string;
-  localTrafficSelector?: string[];
-  remoteTrafficSelector?: string[];
-  creationTimestamp: string;
-  description?: string;
-  sharedSecret?: string;
-  sharedSecretHash?: string;
+  logConfig?: {
+    enable: boolean;
+  };
 }
 
 /**
- * Network Service class - provides optimized access to Network functionality
+ * Network Service class - provides optimized access to VPC, IP, and Firewall functionality
  */
 export class NetworkService {
   private gcloudPath: string;
   private projectId: string;
-  private vpcCache: Map<string, { data: VPCNetwork[]; timestamp: number }> = new Map();
-  private sharedVpcCache: Map<string, { data: VPCNetwork[]; timestamp: number }> = new Map();
-  private subnetworkCache: Map<string, { data: Subnetwork[]; timestamp: number }> = new Map();
+  private vpcCache: Map<string, { data: VPC[]; timestamp: number }> = new Map();
+  private subnetCache: Map<string, { data: Subnet[]; timestamp: number }> = new Map();
+  private ipCache: Map<string, { data: IPAddress[]; timestamp: number }> = new Map();
   private firewallCache: Map<string, { data: FirewallRule[]; timestamp: number }> = new Map();
-  private routeCache: Map<string, { data: Route[]; timestamp: number }> = new Map();
-  private vpnGatewayCache: Map<string, { data: VpnGateway[]; timestamp: number }> = new Map();
-  private vpnTunnelCache: Map<string, { data: VpnTunnel[]; timestamp: number }> = new Map();
-  private regionsCache: Map<string, { data: string[]; timestamp: number }> = new Map();
   private readonly CACHE_TTL = 300000; // 5 minutes cache TTL
   
+  // Static cache shared between instances for improved performance
+  private static regionsCache: { regions: string[], timestamp: number } | null = null;
+  private static readonly REGIONS_CACHE_TTL = 3600000; // 1 hour for regions cache
+
   constructor(gcloudPath: string, projectId: string) {
     this.gcloudPath = gcloudPath;
     this.projectId = projectId;
@@ -149,152 +102,178 @@ export class NetworkService {
 
   /**
    * Get list of VPC networks
-   * @param includeShared - Whether to include networks shared with this project
    * @returns Promise with array of VPC networks
    */
-  async getVPCNetworks(includeShared: boolean = false): Promise<VPCNetwork[]> {
-    const cacheKey = 'vpc-networks';
+  async getVPCs(): Promise<VPC[]> {
+    const cacheKey = 'vpcs';
     const cachedData = this.vpcCache.get(cacheKey);
     const now = Date.now();
     
     if (cachedData && (now - cachedData.timestamp < this.CACHE_TTL)) {
-      console.log(`Using cached VPC network data`);
-      
-      if (includeShared) {
-        const sharedNetworks = await this.getSharedVPCNetworks();
-        return [...cachedData.data, ...sharedNetworks];
-      }
-      
+      console.log(`Using cached VPC data`);
       return cachedData.data;
     }
     
     try {
-      const command = `compute networks list --project=${this.projectId} --format=json`;
+      const command = ["compute", "networks", "list", `--project=${this.projectId}`, "--format=json"];
       
-      console.log(`Executing command: ${command}`);
+      const result = await executeGcloudCommand(
+        this.gcloudPath,
+        command.join(" "),
+        undefined,
+        { timeout: 30000 }
+      );
       
-      const result = await executeGcloudCommand(this.gcloudPath, command);
-      
-      const networks: VPCNetwork[] = Array.isArray(result) ? result : [result];
+      const vpcs: VPC[] = result;
       
       // Cache the result
-      this.vpcCache.set(cacheKey, { data: networks, timestamp: now });
+      this.vpcCache.set(cacheKey, { data: vpcs, timestamp: now });
       
-      if (includeShared) {
-        const sharedNetworks = await this.getSharedVPCNetworks();
-        return [...networks, ...sharedNetworks];
-      }
-      
-      return networks;
+      return vpcs;
     } catch (error: any) {
       console.error("Error fetching VPC networks:", error);
       
       // If we have cached data, return it even if expired
       if (cachedData) {
         console.log("Returning expired cached data as fallback");
-        
-        if (includeShared) {
-          try {
-            const sharedNetworks = await this.getSharedVPCNetworks();
-            return [...cachedData.data, ...sharedNetworks];
-          } catch {
-            return cachedData.data;
-          }
-        }
-        
         return cachedData.data;
       }
       
       // Return empty array instead of throwing to prevent UI from breaking
-      console.log("No cached data available, returning empty array");
       return [];
     }
   }
-  
+
   /**
-   * Get list of shared VPC networks (networks shared with this project)
-   * @returns Promise with array of shared VPC networks
+   * Get a specific VPC network by name
+   * @param name Name of the VPC to retrieve
+   * @returns Promise with VPC if found, null otherwise
    */
-  async getSharedVPCNetworks(): Promise<VPCNetwork[]> {
-    const cacheKey = 'shared-vpc-networks';
-    const cachedData = this.sharedVpcCache.get(cacheKey);
+  async getVPC(name: string): Promise<VPC | null> {
+    try {
+      // First try to find in cache
+      const cachedVPCs = this.vpcCache.get('vpcs');
+      if (cachedVPCs) {
+        const cachedVPC = cachedVPCs.data.find(vpc => vpc.name === name);
+        if (cachedVPC) return cachedVPC;
+      }
+      
+      // If not found in cache or cache is expired, fetch directly
+      const command = ["compute", "networks", "describe", name, `--project=${this.projectId}`, "--format=json"];
+      
+      const result = await executeGcloudCommand(
+        this.gcloudPath,
+        command.join(" "),
+        undefined,
+        { skipCache: true }
+      );
+      
+      return result[0] as VPC;
+    } catch (error) {
+      console.error(`Error fetching VPC ${name}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Create a new VPC network
+   * @param name Name of the new VPC
+   * @param description Optional description
+   * @param autoCreateSubnetworks Whether to auto-create subnetworks
+   * @param subnetMode "auto" or "custom"
+   * @param mtu Optional MTU value
+   * @returns Promise with success or failure
+   */
+  async createVPC(
+    name: string, 
+    description?: string,
+    subnetMode: "auto" | "custom" = "auto",
+    mtu?: number
+  ): Promise<boolean> {
+    try {
+      // Build command
+      const command = ["compute", "networks", "create", name];
+      
+      // Add subnet mode option
+      if (subnetMode === "auto") {
+        command.push("--subnet-mode=auto");
+      } else {
+        command.push("--subnet-mode=custom");
+      }
+      
+      // Add optional parameters
+      if (description) {
+        command.push(`--description="${description}"`);
+      }
+      
+      if (mtu) {
+        command.push(`--mtu=${mtu}`);
+      }
+      
+      // Add project and format
+      command.push(`--project=${this.projectId}`);
+      command.push("--format=json");
+      
+      await executeGcloudCommand(
+        this.gcloudPath,
+        command.join(" "),
+        undefined,
+        { skipCache: true }
+      );
+      
+      // Clear the VPC cache
+      this.vpcCache.delete('vpcs');
+      
+      return true;
+    } catch (error) {
+      console.error("Error creating VPC:", error);
+      return false;
+    }
+  }
+
+  /**
+   * Get list of subnets, optionally filtered by region
+   * @param region Optional region filter
+   * @returns Promise with array of subnets
+   */
+  async getSubnets(region?: string): Promise<Subnet[]> {
+    const cacheKey = region ? `subnets:${region}` : 'subnets:all';
+    const cachedData = this.subnetCache.get(cacheKey);
     const now = Date.now();
     
     if (cachedData && (now - cachedData.timestamp < this.CACHE_TTL)) {
-      console.log(`Using cached shared VPC network data`);
+      console.log(`Using cached subnet data for ${cacheKey}`);
       return cachedData.data;
     }
     
     try {
-      // First, check if this project is a service project
-      const xpnStatusCommand = `compute shared-vpc get-host-project ${this.projectId} --format=json`;
-      console.log(`Executing command: ${xpnStatusCommand}`);
+      // Build command
+      const command = ["compute", "networks", "subnets", "list"];
       
-      try {
-        const xpnResult = await executeGcloudCommand(this.gcloudPath, xpnStatusCommand);
-        
-        if (xpnResult && xpnResult.name) {
-          const hostProject = xpnResult.name;
-          console.log(`This is a service project for host project: ${hostProject}`);
-          
-          // Get networks from the host project
-          const command = `compute networks list --project=${hostProject} --format=json`;
-          console.log(`Executing command: ${command}`);
-          
-          const result = await executeGcloudCommand(this.gcloudPath, command);
-          
-          const networks: VPCNetwork[] = Array.isArray(result) ? result : [result];
-          
-          // Mark networks as shared and add host project information
-          const sharedNetworks = networks.map(network => ({
-            ...network,
-            isShared: true,
-            sharedFromProject: hostProject
-          }));
-          
-          // Cache the result
-          this.sharedVpcCache.set(cacheKey, { data: sharedNetworks, timestamp: now });
-          
-          return sharedNetworks;
-        }
-      } catch (error) {
-        console.log("This project is not a service project or there was an error checking XPN status");
+      // Add region filter if specified
+      if (region) {
+        command.push(`--regions=${region}`);
       }
       
-      // Next, check if this project is a host project
-      const getServiceProjectsCommand = `compute shared-vpc list-associated-resources ${this.projectId} --format=json`;
-      console.log(`Executing command: ${getServiceProjectsCommand}`);
+      // Add project and format
+      command.push(`--project=${this.projectId}`);
+      command.push("--format=json");
       
-      try {
-        const serviceProjectsResult = await executeGcloudCommand(this.gcloudPath, getServiceProjectsCommand);
-        
-        if (serviceProjectsResult && serviceProjectsResult.length > 0) {
-          console.log(`This is a host project with ${serviceProjectsResult.length} service projects`);
-          
-          // Get networks from this project that are shared
-          const networks = await this.getVPCNetworks(false);
-          
-          // Mark networks as shared and add service project information
-          const sharedNetworks = networks.map(network => ({
-            ...network,
-            isShared: true,
-            sharedWithProject: serviceProjectsResult.map((sp: any) => sp.id).join(', ')
-          }));
-          
-          // Cache the result
-          this.sharedVpcCache.set(cacheKey, { data: sharedNetworks, timestamp: now });
-          
-          return sharedNetworks;
-        }
-      } catch (error) {
-        console.log("This project is not a host project or there was an error checking associated resources");
-      }
+      const result = await executeGcloudCommand(
+        this.gcloudPath,
+        command.join(" "),
+        undefined,
+        { timeout: 30000 }
+      );
       
-      // No shared VPC networks found
-      this.sharedVpcCache.set(cacheKey, { data: [], timestamp: now });
-      return [];
+      const subnets: Subnet[] = result;
+      
+      // Cache the result
+      this.subnetCache.set(cacheKey, { data: subnets, timestamp: now });
+      
+      return subnets;
     } catch (error: any) {
-      console.error("Error fetching shared VPC networks:", error);
+      console.error("Error fetching subnets:", error);
       
       // If we have cached data, return it even if expired
       if (cachedData) {
@@ -302,687 +281,377 @@ export class NetworkService {
         return cachedData.data;
       }
       
-      // Return empty array instead of throwing to prevent UI from breaking
-      console.log("No cached data available, returning empty array");
+      // Return empty array
       return [];
     }
   }
 
   /**
-   * Get details of a specific VPC network
-   * @param networkName The name of the VPC network
-   * @returns Promise with the VPC network details
+   * Get list of IP addresses, optionally filtered by region
+   * @param region Optional region filter
+   * @returns Promise with array of IP addresses
    */
-  async getVPCNetworkDetails(networkName: string): Promise<VPCNetwork | null> {
-    try {
-      const command = `compute networks describe ${networkName} --project=${this.projectId} --format=json`;
-      
-      console.log(`Executing command: ${command}`);
-      
-      const result = await executeGcloudCommand(this.gcloudPath, command);
-      
-      if (!result || result.length === 0) {
-        return null;
-      }
-      
-      return result[0];
-    } catch (error: any) {
-      console.error(`Error fetching VPC network details for ${networkName}:`, error);
-      return null;
-    }
-  }
-
-  /**
-   * List all subnetworks, optionally filtered by region
-   * @param region Optional region to filter subnetworks
-   * @returns Promise with array of subnetworks
-   */
-  async getSubnetworks(region?: string): Promise<Subnetwork[]> {
-    const cacheKey = region ? `subnetworks-${region}` : 'subnetworks';
-    const cachedData = this.subnetworkCache.get(cacheKey);
+  async getIPs(region?: string): Promise<IPAddress[]> {
+    const cacheKey = region ? `ips:${region}` : 'ips:all';
+    const cachedData = this.ipCache.get(cacheKey);
     const now = Date.now();
     
     if (cachedData && (now - cachedData.timestamp < this.CACHE_TTL)) {
-      console.log(`Using cached subnetwork data for ${cacheKey}`);
+      console.log(`Using cached IP data for ${cacheKey}`);
       return cachedData.data;
     }
     
     try {
-      const regionFlag = region ? ` --regions=${region}` : '';
-      const command = `compute networks subnets list${regionFlag} --project=${this.projectId} --format=json`;
+      // Build command
+      const command = ["compute", "addresses", "list"];
       
-      console.log(`Executing command: ${command}`);
+      // Add region filter if specified
+      if (region) {
+        command.push(`--regions=${region}`);
+      }
       
-      const result = await executeGcloudCommand(this.gcloudPath, command);
+      // Add project and format
+      command.push(`--project=${this.projectId}`);
+      command.push("--format=json");
       
-      const subnetworks: Subnetwork[] = Array.isArray(result) ? result : [result];
+      const result = await executeGcloudCommand(
+        this.gcloudPath,
+        command.join(" "),
+        undefined,
+        { timeout: 30000 }
+      );
+      
+      const ips: IPAddress[] = result;
       
       // Cache the result
-      this.subnetworkCache.set(cacheKey, { data: subnetworks, timestamp: now });
+      this.ipCache.set(cacheKey, { data: ips, timestamp: now });
       
-      return subnetworks;
+      return ips;
     } catch (error: any) {
-      console.error("Error fetching subnetworks:", error);
+      console.error("Error fetching IP addresses:", error);
       
+      // If we have cached data, return it even if expired
       if (cachedData) {
+        console.log("Returning expired cached data as fallback");
         return cachedData.data;
       }
       
+      // Return empty array
       return [];
     }
   }
 
   /**
-   * Get details of a specific subnetwork
-   * @param subnetworkName The name of the subnetwork
-   * @param region The region of the subnetwork
-   * @returns Promise with the subnetwork details
+   * Create a new IP address
+   * @param name Name of the new IP address
+   * @param region Region to create the IP in
+   * @param addressType "INTERNAL" or "EXTERNAL"
+   * @param addressOptions Additional options
+   * @returns Promise with success or failure
    */
-  async getSubnetworkDetails(subnetworkName: string, region: string): Promise<Subnetwork | null> {
+  async createIP(
+    name: string,
+    region: string,
+    addressType: "INTERNAL" | "EXTERNAL" = "EXTERNAL",
+    addressOptions: {
+      description?: string;
+      subnet?: string;
+      address?: string;
+      purpose?: string;
+    } = {}
+  ): Promise<boolean> {
     try {
-      const command = `compute networks subnets describe ${subnetworkName} --region=${region} --project=${this.projectId} --format=json`;
+      // Build command
+      const command = ["compute", "addresses", "create", name];
       
-      console.log(`Executing command: ${command}`);
+      // Add required parameters
+      command.push(`--region=${region}`);
       
-      const result = await executeGcloudCommand(this.gcloudPath, command);
-      
-      if (!result || result.length === 0) {
-        return null;
+      // Add address type
+      if (addressType === "INTERNAL") {
+        command.push("--subnet=" + (addressOptions.subnet || "default"));
       }
       
-      return result[0];
-    } catch (error: any) {
-      console.error(`Error fetching subnetwork details for ${subnetworkName}:`, error);
-      return null;
+      // Add optional parameters
+      if (addressOptions.description) {
+        command.push(`--description="${addressOptions.description}"`);
+      }
+      
+      if (addressOptions.address) {
+        command.push(`--addresses=${addressOptions.address}`);
+      }
+      
+      if (addressOptions.purpose && addressType === "INTERNAL") {
+        command.push(`--purpose=${addressOptions.purpose}`);
+      }
+      
+      // Add project and format
+      command.push(`--project=${this.projectId}`);
+      command.push("--format=json");
+      
+      await executeGcloudCommand(
+        this.gcloudPath,
+        command.join(" "),
+        undefined,
+        { skipCache: true }
+      );
+      
+      // Clear the IP cache
+      this.clearIPCache();
+      
+      return true;
+    } catch (error) {
+      console.error("Error creating IP address:", error);
+      return false;
     }
   }
 
   /**
-   * Get list of firewall rules, optionally filtered by network
-   * @param networkName Optional network to filter firewall rules
+   * Get list of firewall rules
    * @returns Promise with array of firewall rules
    */
-  async getFirewallRules(networkName?: string): Promise<FirewallRule[]> {
-    const cacheKey = networkName ? `firewall-${networkName}` : 'firewall';
+  async getFirewallRules(): Promise<FirewallRule[]> {
+    const cacheKey = 'firewalls';
     const cachedData = this.firewallCache.get(cacheKey);
     const now = Date.now();
     
     if (cachedData && (now - cachedData.timestamp < this.CACHE_TTL)) {
-      console.log(`Using cached firewall rule data for ${cacheKey}`);
+      console.log(`Using cached firewall data`);
       return cachedData.data;
     }
     
     try {
-      const command = `compute firewall-rules list --project=${this.projectId} --format=json`;
+      const command = ["compute", "firewall-rules", "list", `--project=${this.projectId}`, "--format=json"];
       
-      console.log(`Executing command: ${command}`);
+      const result = await executeGcloudCommand(
+        this.gcloudPath,
+        command.join(" "),
+        undefined,
+        { timeout: 30000 }
+      );
       
-      const result = await executeGcloudCommand(this.gcloudPath, command);
-      
-      const rules: FirewallRule[] = Array.isArray(result) ? result : [result];
-      
-      // Filter by network if provided
-      const filteredRules = networkName 
-        ? rules.filter(rule => rule.network && rule.network.includes(`/${networkName}`) || rule.network === networkName)
-        : rules;
+      const rules: FirewallRule[] = result;
       
       // Cache the result
-      this.firewallCache.set(cacheKey, { data: filteredRules, timestamp: now });
+      this.firewallCache.set(cacheKey, { data: rules, timestamp: now });
       
-      return filteredRules;
+      return rules;
     } catch (error: any) {
       console.error("Error fetching firewall rules:", error);
       
+      // If we have cached data, return it even if expired
       if (cachedData) {
+        console.log("Returning expired cached data as fallback");
         return cachedData.data;
       }
       
+      // Return empty array
       return [];
-    }
-  }
-
-  /**
-   * Get details of a specific firewall rule
-   * @param ruleName The name of the firewall rule
-   * @returns Promise with the firewall rule details
-   */
-  async getFirewallRuleDetails(ruleName: string): Promise<FirewallRule | null> {
-    try {
-      const command = `compute firewall-rules describe ${ruleName} --project=${this.projectId} --format=json`;
-      
-      console.log(`Executing command: ${command}`);
-      
-      const result = await executeGcloudCommand(this.gcloudPath, command);
-      
-      if (!result || result.length === 0) {
-        return null;
-      }
-      
-      return result[0];
-    } catch (error: any) {
-      console.error(`Error fetching firewall rule details for ${ruleName}:`, error);
-      return null;
-    }
-  }
-
-  /**
-   * Get list of routes, optionally filtered by network
-   * @param networkName Optional network to filter routes
-   * @returns Promise with array of routes
-   */
-  async getRoutes(networkName?: string): Promise<Route[]> {
-    const cacheKey = networkName ? `routes-${networkName}` : 'routes';
-    const cachedData = this.routeCache.get(cacheKey);
-    const now = Date.now();
-    
-    if (cachedData && (now - cachedData.timestamp < this.CACHE_TTL)) {
-      console.log(`Using cached route data for ${cacheKey}`);
-      return cachedData.data;
-    }
-    
-    try {
-      const command = `compute routes list --project=${this.projectId} --format=json`;
-      
-      console.log(`Executing command: ${command}`);
-      
-      const result = await executeGcloudCommand(this.gcloudPath, command);
-      
-      const routes: Route[] = Array.isArray(result) ? result : [result];
-      
-      // Filter by network if provided
-      const filteredRoutes = networkName 
-        ? routes.filter(route => route.network && route.network.includes(`/${networkName}`) || route.network === networkName)
-        : routes;
-      
-      // Cache the result
-      this.routeCache.set(cacheKey, { data: filteredRoutes, timestamp: now });
-      
-      return filteredRoutes;
-    } catch (error: any) {
-      console.error("Error fetching routes:", error);
-      
-      if (cachedData) {
-        return cachedData.data;
-      }
-      
-      return [];
-    }
-  }
-
-  /**
-   * Get list of VPN gateways, optionally filtered by region
-   * @param region Optional region to filter VPN gateways
-   * @returns Promise with array of VPN gateways
-   */
-  async getVPNGateways(region?: string): Promise<VpnGateway[]> {
-    const cacheKey = region ? `vpn-gateways-${region}` : 'vpn-gateways';
-    const cachedData = this.vpnGatewayCache.get(cacheKey);
-    const now = Date.now();
-    
-    if (cachedData && (now - cachedData.timestamp < this.CACHE_TTL)) {
-      console.log(`Using cached VPN gateway data for ${cacheKey}`);
-      return cachedData.data;
-    }
-    
-    try {
-      const regionFlag = region ? ` --regions=${region}` : '';
-      const command = `compute vpn-gateways list${regionFlag} --project=${this.projectId} --format=json`;
-      
-      console.log(`Executing command: ${command}`);
-      
-      const result = await executeGcloudCommand(this.gcloudPath, command);
-      
-      const gateways: VpnGateway[] = Array.isArray(result) ? result : (result ? [result] : []);
-      
-      // Cache the result
-      this.vpnGatewayCache.set(cacheKey, { data: gateways, timestamp: now });
-      
-      return gateways;
-    } catch (error: any) {
-      console.error("Error fetching VPN gateways:", error);
-      
-      if (cachedData) {
-        return cachedData.data;
-      }
-      
-      return [];
-    }
-  }
-
-  /**
-   * Get list of VPN tunnels, optionally filtered by region
-   * @param region Optional region to filter VPN tunnels
-   * @returns Promise with array of VPN tunnels
-   */
-  async getVPNTunnels(region?: string): Promise<VpnTunnel[]> {
-    const cacheKey = region ? `vpn-tunnels-${region}` : 'vpn-tunnels';
-    const cachedData = this.vpnTunnelCache.get(cacheKey);
-    const now = Date.now();
-    
-    if (cachedData && (now - cachedData.timestamp < this.CACHE_TTL)) {
-      console.log(`Using cached VPN tunnel data for ${cacheKey}`);
-      return cachedData.data;
-    }
-    
-    try {
-      const regionFlag = region ? ` --regions=${region}` : '';
-      const command = `compute vpn-tunnels list${regionFlag} --project=${this.projectId} --format=json`;
-      
-      console.log(`Executing command: ${command}`);
-      
-      const result = await executeGcloudCommand(this.gcloudPath, command);
-      
-      const tunnels: VpnTunnel[] = Array.isArray(result) ? result : (result ? [result] : []);
-      
-      // Cache the result
-      this.vpnTunnelCache.set(cacheKey, { data: tunnels, timestamp: now });
-      
-      return tunnels;
-    } catch (error: any) {
-      console.error("Error fetching VPN tunnels:", error);
-      
-      if (cachedData) {
-        return cachedData.data;
-      }
-      
-      return [];
-    }
-  }
-
-  /**
-   * Create a new VPC network
-   * @param name Network name
-   * @param options Additional network options
-   * @returns Promise with success boolean
-   */
-  async createVPCNetwork(name: string, options: {
-    description?: string;
-    subnetMode?: 'auto' | 'custom';
-    bgpRoutingMode?: 'regional' | 'global';
-    mtu?: number;
-  } = {}): Promise<boolean> {
-    try {
-      const { description, subnetMode, bgpRoutingMode, mtu } = options;
-      
-      let command = `compute networks create ${name}`;
-      
-      if (description) {
-        command += ` --description="${description}"`;
-      }
-      
-      if (subnetMode === 'auto') {
-        command += ` --subnet-mode=auto`;
-      } else if (subnetMode === 'custom') {
-        command += ` --subnet-mode=custom`;
-      }
-      
-      if (bgpRoutingMode) {
-        command += ` --bgp-routing-mode=${bgpRoutingMode}`;
-      }
-      
-      if (mtu) {
-        command += ` --mtu=${mtu}`;
-      }
-      
-      command += ` --project=${this.projectId}`;
-      
-      console.log(`Executing command: ${command}`);
-      
-      await executeGcloudCommand(this.gcloudPath, command);
-      
-      // Clear the cache to force a refresh
-      this.clearVPCCache();
-      
-      return true;
-    } catch (error: any) {
-      console.error(`Error creating VPC network ${name}:`, error);
-      return false;
-    }
-  }
-
-  /**
-   * Create a new subnetwork
-   * @param name Subnetwork name
-   * @param network Parent VPC network name
-   * @param region Region for the subnetwork
-   * @param ipRange CIDR range for the subnetwork
-   * @param options Additional subnetwork options
-   * @returns Promise with success boolean
-   */
-  async createSubnetwork(
-    name: string,
-    network: string,
-    region: string, 
-    ipRange: string,
-    options: {
-      description?: string;
-      privateIpGoogleAccess?: boolean;
-      secondaryIpRanges?: {name: string, range: string}[];
-      enableFlowLogs?: boolean;
-    } = {}
-  ): Promise<boolean> {
-    try {
-      const { description, privateIpGoogleAccess, secondaryIpRanges, enableFlowLogs } = options;
-      
-      let command = `compute networks subnets create ${name} --network=${network} --region=${region} --range=${ipRange}`;
-      
-      if (description) {
-        command += ` --description="${description}"`;
-      }
-      
-      if (privateIpGoogleAccess) {
-        command += ` --enable-private-ip-google-access`;
-      }
-      
-      if (secondaryIpRanges && secondaryIpRanges.length > 0) {
-        const rangeSpecs = secondaryIpRanges.map(r => `${r.name}:${r.range}`).join(',');
-        command += ` --secondary-range=${rangeSpecs}`;
-      }
-      
-      if (enableFlowLogs) {
-        command += ` --enable-flow-logs`;
-      }
-      
-      command += ` --project=${this.projectId}`;
-      
-      console.log(`Executing command: ${command}`);
-      
-      await executeGcloudCommand(this.gcloudPath, command);
-      
-      // Clear the cache to force a refresh
-      this.clearSubnetworkCache();
-      
-      return true;
-    } catch (error: any) {
-      console.error(`Error creating subnetwork ${name}:`, error);
-      return false;
     }
   }
 
   /**
    * Create a new firewall rule
-   * @param name Firewall rule name
-   * @param network Network name
-   * @param options Firewall rule options
-   * @returns Promise with success boolean
+   * @param name Name of the new firewall rule
+   * @param network Name of the network for the rule
+   * @param ruleOptions Firewall rule configuration
+   * @returns Promise with success or failure
    */
   async createFirewallRule(
     name: string,
     network: string,
-    options: {
+    ruleOptions: {
       description?: string;
-      direction?: 'ingress' | 'egress';
+      direction?: "INGRESS" | "EGRESS";
       priority?: number;
       sourceRanges?: string[];
       destinationRanges?: string[];
       sourceTags?: string[];
       targetTags?: string[];
-      allowed?: {protocol: string, ports?: string[]}[];
-      denied?: {protocol: string, ports?: string[]}[];
+      sourceServiceAccounts?: string[];
+      targetServiceAccounts?: string[];
+      allowed?: {
+        protocol: string;
+        ports?: string[];
+      }[];
+      denied?: {
+        protocol: string;
+        ports?: string[];
+      }[];
       disabled?: boolean;
-      logConfig?: boolean;
-    } = {}
+      enableLogging?: boolean;
+    }
   ): Promise<boolean> {
     try {
-      const { 
-        description, direction, priority, sourceRanges, destinationRanges,
-        sourceTags, targetTags, allowed, denied, disabled, logConfig
-      } = options;
+      // Build command
+      const command = ["compute", "firewall-rules", "create", name];
       
-      let command = `compute firewall-rules create ${name} --network=${network}`;
+      // Add required parameters
+      command.push(`--network=${network}`);
       
-      if (description) {
-        command += ` --description="${description}"`;
+      // Add optional parameters
+      if (ruleOptions.description) {
+        command.push(`--description="${ruleOptions.description}"`);
       }
       
-      if (direction) {
-        command += ` --direction=${direction}`;
+      if (ruleOptions.direction) {
+        command.push(`--direction=${ruleOptions.direction}`);
       }
       
-      if (priority !== undefined) {
-        command += ` --priority=${priority}`;
+      if (ruleOptions.priority) {
+        command.push(`--priority=${ruleOptions.priority}`);
       }
       
-      if (sourceRanges && sourceRanges.length > 0) {
-        command += ` --source-ranges=${sourceRanges.join(',')}`;
+      if (ruleOptions.sourceRanges) {
+        command.push(`--source-ranges=${ruleOptions.sourceRanges.join(',')}`);
       }
       
-      if (destinationRanges && destinationRanges.length > 0) {
-        command += ` --destination-ranges=${destinationRanges.join(',')}`;
+      if (ruleOptions.destinationRanges) {
+        command.push(`--destination-ranges=${ruleOptions.destinationRanges.join(',')}`);
       }
       
-      if (sourceTags && sourceTags.length > 0) {
-        command += ` --source-tags=${sourceTags.join(',')}`;
+      if (ruleOptions.sourceTags) {
+        command.push(`--source-tags=${ruleOptions.sourceTags.join(',')}`);
       }
       
-      if (targetTags && targetTags.length > 0) {
-        command += ` --target-tags=${targetTags.join(',')}`;
+      if (ruleOptions.targetTags) {
+        command.push(`--target-tags=${ruleOptions.targetTags.join(',')}`);
       }
       
-      if (allowed && allowed.length > 0) {
-        for (const rule of allowed) {
-          let ruleSpec = rule.protocol;
-          if (rule.ports && rule.ports.length > 0) {
-            ruleSpec += `:${rule.ports.join(',')}`;
+      if (ruleOptions.allowed) {
+        for (const allowed of ruleOptions.allowed) {
+          if (allowed.ports && allowed.ports.length > 0) {
+            command.push(`--allow=${allowed.protocol}:${allowed.ports.join(',')}`);
+          } else {
+            command.push(`--allow=${allowed.protocol}`);
           }
-          command += ` --allow=${ruleSpec}`;
         }
       }
       
-      if (denied && denied.length > 0) {
-        for (const rule of denied) {
-          let ruleSpec = rule.protocol;
-          if (rule.ports && rule.ports.length > 0) {
-            ruleSpec += `:${rule.ports.join(',')}`;
+      if (ruleOptions.denied) {
+        for (const denied of ruleOptions.denied) {
+          if (denied.ports && denied.ports.length > 0) {
+            command.push(`--deny=${denied.protocol}:${denied.ports.join(',')}`);
+          } else {
+            command.push(`--deny=${denied.protocol}`);
           }
-          command += ` --deny=${ruleSpec}`;
         }
       }
       
-      if (disabled) {
-        command += ` --disabled`;
+      if (ruleOptions.disabled) {
+        command.push('--disabled');
       }
       
-      if (logConfig) {
-        command += ` --enable-logging`;
+      if (ruleOptions.enableLogging) {
+        command.push('--enable-logging');
       }
       
-      command += ` --project=${this.projectId}`;
+      // Add project and format
+      command.push(`--project=${this.projectId}`);
+      command.push("--format=json");
       
-      console.log(`Executing command: ${command}`);
+      await executeGcloudCommand(
+        this.gcloudPath,
+        command.join(" "),
+        undefined,
+        { skipCache: true }
+      );
       
-      await executeGcloudCommand(this.gcloudPath, command);
-      
-      // Clear the cache to force a refresh
-      this.clearFirewallCache();
+      // Clear the firewall cache
+      this.firewallCache.delete('firewalls');
       
       return true;
-    } catch (error: any) {
-      console.error(`Error creating firewall rule ${name}:`, error);
+    } catch (error) {
+      console.error("Error creating firewall rule:", error);
       return false;
     }
   }
 
   /**
-   * List available regions for the project
+   * Get list of regions
    * @returns Promise with array of region names
    */
   async listRegions(): Promise<string[]> {
-    const cacheKey = 'regions';
-    const cachedData = this.regionsCache.get(cacheKey);
+    // Check static cache
     const now = Date.now();
-    
-    if (cachedData && (now - cachedData.timestamp < this.CACHE_TTL)) {
-      console.log(`Using cached region data`);
-      return cachedData.data;
+    if (NetworkService.regionsCache && (now - NetworkService.regionsCache.timestamp < NetworkService.REGIONS_CACHE_TTL)) {
+      return NetworkService.regionsCache.regions;
     }
     
     try {
-      const command = `compute regions list --project=${this.projectId} --format="value(name)"`;
+      const command = ["compute", "regions", "list", "--format=json"];
       
-      console.log(`Executing command: ${command}`);
+      const result = await executeGcloudCommand(
+        this.gcloudPath,
+        command.join(" "),
+        this.projectId,
+        { cacheTTL: NetworkService.REGIONS_CACHE_TTL }
+      );
       
-      const { stdout } = await execPromise(`${this.gcloudPath} ${command}`);
-      const regions = stdout.trim().split('\n').filter(Boolean);
+      // Extract region names from full response
+      const regions = result.map((region: any) => region.name);
       
-      // Cache the result
-      this.regionsCache.set(cacheKey, { data: regions, timestamp: now });
+      // Update static cache
+      NetworkService.regionsCache = { regions, timestamp: now };
       
       return regions;
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error fetching regions:", error);
       
-      if (cachedData) {
-        return cachedData.data;
-      }
-      
-      return [];
+      // Return empty array or static cache if available
+      return NetworkService.regionsCache ? NetworkService.regionsCache.regions : [];
     }
   }
 
   /**
-   * Delete a VPC network
-   * @param name Network name
-   * @returns Promise with success boolean
+   * Clear various caches
    */
-  async deleteVPCNetwork(name: string): Promise<boolean> {
-    try {
-      const command = `compute networks delete ${name} --project=${this.projectId} --quiet`;
-      
-      console.log(`Executing command: ${command}`);
-      
-      await executeGcloudCommand(this.gcloudPath, command);
-      
-      // Clear the cache to force a refresh
-      this.clearVPCCache();
-      
-      return true;
-    } catch (error: any) {
-      console.error(`Error deleting VPC network ${name}:`, error);
-      return false;
-    }
-  }
-
-  /**
-   * Delete a subnetwork
-   * @param name Subnetwork name
-   * @param region Region of the subnetwork
-   * @returns Promise with success boolean
-   */
-  async deleteSubnetwork(name: string, region: string): Promise<boolean> {
-    try {
-      const command = `compute networks subnets delete ${name} --region=${region} --project=${this.projectId} --quiet`;
-      
-      console.log(`Executing command: ${command}`);
-      
-      await executeGcloudCommand(this.gcloudPath, command);
-      
-      // Clear the cache to force a refresh
-      this.clearSubnetworkCache();
-      
-      return true;
-    } catch (error: any) {
-      console.error(`Error deleting subnetwork ${name}:`, error);
-      return false;
-    }
-  }
-
-  /**
-   * Delete a firewall rule
-   * @param name Firewall rule name
-   * @returns Promise with success boolean
-   */
-  async deleteFirewallRule(name: string): Promise<boolean> {
-    try {
-      const command = `compute firewall-rules delete ${name} --project=${this.projectId} --quiet`;
-      
-      console.log(`Executing command: ${command}`);
-      
-      await executeGcloudCommand(this.gcloudPath, command);
-      
-      // Clear the cache to force a refresh
-      this.clearFirewallCache();
-      
-      return true;
-    } catch (error: any) {
-      console.error(`Error deleting firewall rule ${name}:`, error);
-      return false;
-    }
-  }
-
-  // Helper methods to clear cache
   private clearVPCCache(): void {
     this.vpcCache.clear();
-    this.sharedVpcCache.clear();
   }
   
-  private clearSubnetworkCache(): void {
-    this.subnetworkCache.clear();
+  private clearSubnetCache(): void {
+    this.subnetCache.clear();
+  }
+  
+  private clearIPCache(): void {
+    this.ipCache.clear();
   }
   
   private clearFirewallCache(): void {
     this.firewallCache.clear();
   }
   
-  private clearRouteCache(): void {
-    this.routeCache.clear();
+  public clearAllCaches(): void {
+    this.clearVPCCache();
+    this.clearSubnetCache();
+    this.clearIPCache();
+    this.clearFirewallCache();
   }
   
-  private clearVPNGatewayCache(): void {
-    this.vpnGatewayCache.clear();
-  }
-  
-  private clearVPNTunnelCache(): void {
-    this.vpnTunnelCache.clear();
-  }
-  
-  // Formatting helpers
-  formatNetworkName(network: string): string {
-    if (!network) return '';
-    // Extract the network name from the URL or path
-    const parts = network.split('/');
-    return parts[parts.length - 1];
-  }
-  
-  formatRegionName(region: string): string {
-    if (!region) return '';
-    // Extract the region name from the URL or path
+  /**
+   * Format helper methods
+   */
+  formatRegion(region: string): string {
+    // Extract region name from full path
     const parts = region.split('/');
     return parts[parts.length - 1];
   }
   
-  getFirewallRuleTypeIcon(rule: FirewallRule): { source: string; tintColor: string } {
-    // Determine the icon based on rule type (ingress/egress) and allow/deny
-    let source = 'globe';
-    let tintColor = '#4285F4'; // Google Blue
-    
-    if (rule.direction === 'INGRESS') {
-      source = rule.allowed ? 'arrow-down' : 'slash-circle';
-      tintColor = rule.allowed ? '#34A853' : '#EA4335'; // Google Green : Google Red
-    } else {
-      source = rule.allowed ? 'arrow-up' : 'slash-circle'; 
-      tintColor = rule.allowed ? '#34A853' : '#EA4335'; // Google Green : Google Red
-    }
-    
-    return { source, tintColor };
+  formatNetwork(network: string): string {
+    // Extract network name from full path
+    const parts = network.split('/');
+    return parts[parts.length - 1];
   }
   
-  getVPNStatusColor(status: string): string {
-    if (!status) return '#FBBC05'; // Google Yellow
-    
-    switch (status.toUpperCase()) {
-      case 'ESTABLISHED':
-      case 'ACTIVE':
-      case 'RUNNING': 
-        return '#34A853'; // Google Green
-      case 'ESTABLISHING':
-      case 'PROVISIONING':
-        return '#FBBC05'; // Google Yellow
-      case 'FAILED':
-      case 'TERMINATED':
-        return '#EA4335'; // Google Red
-      default:
-        return '#4285F4'; // Google Blue
-    }
+  getAddressStatusColor(status: string): string {
+    const lowerStatus = status.toLowerCase();
+    if (lowerStatus === "reserved") return "green";
+    if (lowerStatus === "in_use") return "blue";
+    return "primaryText";
+  }
+  
+  getFirewallStatusColor(disabled: boolean): string {
+    return disabled ? "red" : "green";
   }
 } 

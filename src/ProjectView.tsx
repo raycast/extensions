@@ -4,7 +4,7 @@ import { StorageBucketView, IAMMembersByPrincipalView } from "./services/storage
 import { IAMView } from "./services/iam";
 import { ServiceHubView } from "./services/servicehub";
 import { ComputeInstancesView, ComputeDisksView } from "./services/compute";
-import { VPCNetworksView } from "./services/network";
+import { NetworkView, VPCView, IPAddressView, FirewallRulesView } from "./services/network";
 import { executeGcloudCommand, getProjects } from "./gcloud";
 import { CacheManager } from "./utils/CacheManager";
 
@@ -405,7 +405,79 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
       // Short delay to show the toast before navigation
       setTimeout(() => {
         loadingToast.hide();
-        push(<VPCNetworksView projectId={projectId} gcloudPath={gcloudPath} />);
+        push(<VPCView projectId={projectId} gcloudPath={gcloudPath} />);
+      }, 500);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to navigate",
+        message: error instanceof Error ? error.message : String(error)
+      });
+      setActionInProgress(null);
+    }
+  };
+
+  const viewNetworkService = async () => {
+    setActionInProgress("network");
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading Network Service...",
+        message: `Project: ${projectId}`
+      });
+      
+      // Short delay to show the toast before navigation
+      setTimeout(() => {
+        loadingToast.hide();
+        push(<NetworkView projectId={projectId} gcloudPath={gcloudPath} />);
+      }, 500);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to navigate",
+        message: error instanceof Error ? error.message : String(error)
+      });
+      setActionInProgress(null);
+    }
+  };
+
+  const viewIPAddresses = async () => {
+    setActionInProgress("ip-addresses");
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading IP Addresses...",
+        message: `Project: ${projectId}`
+      });
+      
+      // Short delay to show the toast before navigation
+      setTimeout(() => {
+        loadingToast.hide();
+        push(<IPAddressView projectId={projectId} gcloudPath={gcloudPath} />);
+      }, 500);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to navigate",
+        message: error instanceof Error ? error.message : String(error)
+      });
+      setActionInProgress(null);
+    }
+  };
+
+  const viewFirewallRules = async () => {
+    setActionInProgress("firewall-rules");
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading Firewall Rules...",
+        message: `Project: ${projectId}`
+      });
+      
+      // Short delay to show the toast before navigation
+      setTimeout(() => {
+        loadingToast.hide();
+        push(<FirewallRulesView projectId={projectId} gcloudPath={gcloudPath} />);
       }, 500);
     } catch (error) {
       showToast({
@@ -547,11 +619,28 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
                       </>
                     )}
                     {service.id === "network" && (
-                      <Action 
-                        title="View VPC Networks" 
-                        icon={Icon.Globe} 
-                        onAction={viewVPCNetworks}
-                      />
+                      <>
+                        <Action 
+                          title="Network Dashboard" 
+                          icon={Icon.AppWindow} 
+                          onAction={viewNetworkService}
+                        />
+                        <Action 
+                          title="View VPC Networks" 
+                          icon={Icon.Globe} 
+                          onAction={viewVPCNetworks}
+                        />
+                        <Action 
+                          title="View IP Addresses" 
+                          icon={Icon.Link} 
+                          onAction={viewIPAddresses}
+                        />
+                        <Action 
+                          title="View Firewall Rules" 
+                          icon={Icon.Shield} 
+                          onAction={viewFirewallRules}
+                        />
+                      </>
                     )}
                   </ActionPanel.Section>
                   <ActionPanel.Section>

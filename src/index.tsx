@@ -9,6 +9,7 @@ import ProjectView from "./ProjectView";
 import { StorageBucketView, StorageTransferView, IAMMembersView, IAMMembersByPrincipalView, StorageStatsView } from "./services/storage";
 import { IAMMembersByPrincipalView as IAMProjectMembersByPrincipalView, IAMView } from "./services/iam";
 import { ComputeInstancesView, ComputeDisksView } from "./services/compute";
+import { NetworkView, VPCView, IPAddressView, FirewallRulesView } from "./services/network";
 import { executeGcloudCommand } from "./gcloud";
 import { CacheManager, Project } from "./utils/CacheManager";
 import CachedProjectView from "./views/CachedProjectView";
@@ -369,6 +370,22 @@ export default function Command() {
 
   function viewComputeDisks(projectId: string) {
     push(<ComputeDisksView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
+  }
+
+  function viewNetworkService(projectId: string) {
+    push(<NetworkView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
+  }
+
+  function viewVPCNetworks(projectId: string) {
+    push(<VPCView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
+  }
+
+  function viewIPAddresses(projectId: string) {
+    push(<IPAddressView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
+  }
+
+  function viewFirewallRules(projectId: string) {
+    push(<FirewallRulesView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
   }
 
   function clearCache() {
