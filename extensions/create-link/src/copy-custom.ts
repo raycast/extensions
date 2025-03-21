@@ -14,13 +14,13 @@ function sanitizeUrl(url: string): string {
   }
 }
 
-function formatCustomLink(format: string, tab: BrowserExtension.Tab): string {
+function applyCustomTemplate(template: string, tab: BrowserExtension.Tab): string {
   const { url, title, id, favicon } = tab;
   const safeUrl = sanitizeUrl(url);
   const safeTitle = title || "";
   const safeFavicon = favicon || "";
 
-  return format
+  return template
     .replace(/\{url\}/g, safeUrl)
     .replace(/\{title\}/g, safeTitle)
     .replace(/\{id\}/g, String(id))
@@ -42,7 +42,7 @@ export default async function copyCustom() {
   const preferences = getPreferenceValues<CopyCustomPreferences>();
   const { customFormat } = preferences;
 
-  const customLink = formatCustomLink(customFormat, activeTab);
+  const customLink = applyCustomTemplate(customFormat, activeTab);
 
   await Clipboard.copy(customLink);
   await showHUD(`Copied HTML Link for "${activeTab.title || ""}" to clipboard`);
