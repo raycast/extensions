@@ -1,5 +1,5 @@
 import { LaunchProps, showHUD } from "@raycast/api";
-import { writeKeywords, readKeywords, KEYWORDS_FILE_PATH } from "./lib/keywords-manager";
+import { writeKeywords, readKeywords } from "./lib/keywords-manager";
 
 // Type for command arguments
 type AddKeywordArguments = {
@@ -10,7 +10,7 @@ export default async function Command(props: LaunchProps<{ arguments: AddKeyword
   try {
     const { keyword } = props.arguments;
 
-    const keywords = await readKeywords(KEYWORDS_FILE_PATH);
+    const keywords = await readKeywords();
 
     // Check if keyword already exists
     if (keywords.includes(keyword.trim())) {

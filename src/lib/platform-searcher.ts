@@ -1,21 +1,21 @@
 import { open, getPreferenceValues } from "@raycast/api";
 
-// 所有支持的平台
+// All supported platforms
 export const PLATFORMS = ["x", "v2ex", "hackernews", "reddit", "medium", "zhihu", "bilibili", "youtube"] as const;
 export type Platform = (typeof PLATFORMS)[number];
 
 /**
- * 从未使用的平台中随机选择一个平台
- * @param usedPlatforms 已使用的平台列表
- * @returns 随机选择的平台
+ * Get a random unused platform
+ * @param usedPlatforms List of used platforms
+ * @returns Randomly selected platform
  */
-export function getRandomUnusedPlatform(usedPlatforms: Platform[]): Platform {
+export function getOneUnusedPlatform(usedPlatforms: Platform[]): Platform {
   const availablePlatforms = PLATFORMS.filter((p) => !usedPlatforms.includes(p)) as Platform[];
   const randomIndex = Math.floor(Math.random() * availablePlatforms.length);
   return availablePlatforms[randomIndex];
 }
 
-// 获取用户语言设置
+// Get user language setting
 function getLanguageFilter(): string {
   const preferences = getPreferenceValues();
   const userLanguage = preferences.language as string;

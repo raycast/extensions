@@ -1,5 +1,5 @@
 import { LaunchProps, showHUD, getPreferenceValues } from "@raycast/api";
-import { searchOnPlatform, Platform, getRandomUnusedPlatform } from "./lib/platform-searcher";
+import { searchOnPlatform, Platform, getOneUnusedPlatform } from "./lib/platform-searcher";
 import { isNotEmpty, readTextWithFallback } from "./lib/utils";
 
 interface Preferences {
@@ -27,19 +27,19 @@ export default async function Command(props: LaunchProps<{ arguments: SearchArgu
       const dateString = twoMonthsAgo.toISOString().split("T")[0];
 
       // Get platforms to search
-      const selectedPlatforms = [preferences.defaultPlatform1];
+      const defaultPlatforms = [preferences.defaultPlatform1];
       if (preferences.defaultPlatform2) {
-        selectedPlatforms.push(preferences.defaultPlatform2);
+        defaultPlatforms.push(preferences.defaultPlatform2);
       }
 
-      // Search on selected platforms
-      for (const platform of selectedPlatforms) {
+      // Search on default platforms
+      for (const platform of defaultPlatforms) {
         await searchOnPlatform(platform, searchText, dateString);
       }
 
       // If random platform option is enabled, search on an additional random platform
       if (preferences.randomPlatform) {
-        const randomPlatform = getRandomUnusedPlatform(selectedPlatforms);
+        const randomPlatform = getOneUnusedPlatform(defaultPlatforms);
         await searchOnPlatform(randomPlatform, searchText, dateString);
       }
 
