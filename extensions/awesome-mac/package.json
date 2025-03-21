@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "awesome-mac-apps",
-  "title": "Awesome Mac Apps",
-  "description": "Search Awesome Mac Apps",
+  "name": "awesome-mac",
+  "title": "Awesome Mac",
+  "description": "Search Awesome Mac Things",
   "icon": "icon.png",
   "author": "ViGeng",
   "categories": [
@@ -16,7 +16,7 @@
     "app",
     "application",
     "macos",
-    "macos-apps",
+    "macos-app",
     "mac-app",
     "Store"
   ],
@@ -31,16 +31,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.11",
+    "@types/react": "19.0.12",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
