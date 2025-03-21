@@ -1,6 +1,6 @@
 import { showHUD, Clipboard } from "@raycast/api";
 import { isExtensionInstalled, getActiveTab } from "./utils/browser";
-import { generateHTML } from "./utils/copyFormat";
+import { generateHTML } from "./utils/formatter";
 
 export default async function copyHTML() {
   if (!isExtensionInstalled()) {
