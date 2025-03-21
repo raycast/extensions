@@ -1,5 +1,11 @@
-import { getHardwareInfo } from "../utils/hardware";
+import { createTool, ToolResult } from "../utils/tool";
 
-export default function Command() {
-  return getHardwareInfo("provisioning_UDID", (value) => `Your Mac's provisioning UDID is ${value}`);
+export default function tool(): Promise<ToolResult> {
+  return createTool({
+    type: "hardware",
+    property: "provisioning_UDID",
+    formatValue: (value) => `Your Mac's provisioning UDID is ${value}`,
+    errorTitle: "Failed to get provisioning UDID",
+    unknownValue: "Unknown provisioning UDID",
+  });
 }

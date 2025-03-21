@@ -1,5 +1,11 @@
-import { getHardwareInfo } from "../utils/hardware";
+import { createTool, ToolResult } from "../utils/tool";
 
-export default function Command() {
-  return getHardwareInfo("activation_lock_status", (value) => `Your Mac's activation lock status is ${value}`);
+export default function tool(): Promise<ToolResult> {
+  return createTool({
+    type: "hardware",
+    property: "activation_lock_status",
+    formatValue: (value) => `Your Mac's activation lock status is ${value}`,
+    errorTitle: "Failed to get activation lock status",
+    unknownValue: "Unknown activation lock status",
+  });
 }

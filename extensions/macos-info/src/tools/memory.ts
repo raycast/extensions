@@ -1,5 +1,11 @@
-import { getHardwareInfo } from "../utils/hardware";
+import { createTool, ToolResult } from "../utils/tool";
 
-export default function Command() {
-  return getHardwareInfo("physical_memory", (value) => `Your Mac has ${value} of physical memory`);
+export default function tool(): Promise<ToolResult> {
+  return createTool({
+    type: "hardware",
+    property: "physical_memory",
+    formatValue: (value) => `Your Mac has ${value} of physical memory`,
+    errorTitle: "Failed to get physical memory",
+    unknownValue: "Unknown physical memory",
+  });
 }

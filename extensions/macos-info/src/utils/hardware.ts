@@ -1,4 +1,7 @@
-import { execSync } from "child_process";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execAsync = promisify(exec);
 
 interface HardwareData {
   _name: string;
@@ -17,16 +20,25 @@ interface HardwareData {
 }
 
 interface SystemProfilerResponse {
-  SPHardwareDataType: [HardwareData];
+  SPHardwareDataType: HardwareData[];
 }
 
 export type HardwareProperty = keyof Omit<HardwareData, "_name">;
 
 export async function getHardwareInfo(property: HardwareProperty, formatResponse: (value: string) => string) {
   try {
-    const output = execSync("/usr/sbin/system_profiler -json SPHardwareDataType").toString();
-    const data = JSON.parse(output) as SystemProfilerResponse;
+    const { stdout } = await execAsync("/usr/sbin/system_profiler -json SPHardwareDataType");
+    const data = JSON.parse(stdout) as SystemProfilerResponse;
+
+    if (!data.SPHardwareDataType || data.SPHardwareDataType.length === 0) {
+      throw new Error("No hardware data available");
+    }
+
     const value = data.SPHardwareDataType[0][property];
+
+    if (!value) {
+      throw new Error(`No ${property} information available`);
+    }
 
     return {
       answer: formatResponse(value),
@@ -34,12 +46,9 @@ export async function getHardwareInfo(property: HardwareProperty, formatResponse
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-    const propertyName = property
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+
     return {
-      answer: `Sorry, I couldn't retrieve your ${propertyName.toLowerCase()}. Error: ${errorMessage}`,
+      answer: `Sorry, I couldn't retrieve ${property}. Error: ${errorMessage}`,
       show: true,
     };
   }

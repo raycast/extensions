@@ -1,5 +1,11 @@
-import { getHardwareInfo } from "../utils/hardware";
+import { createTool, ToolResult } from "../utils/tool";
 
-export default function Command() {
-  return getHardwareInfo("machine_model", (value) => `Your Mac's model is ${value}`);
+export default function tool(): Promise<ToolResult> {
+  return createTool({
+    type: "hardware",
+    property: "machine_model",
+    formatValue: (value) => `Your Mac's model is ${value}`,
+    errorTitle: "Failed to get machine model",
+    unknownValue: "Unknown machine model",
+  });
 }

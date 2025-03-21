@@ -1,5 +1,11 @@
-import { getSoftwareInfo } from "../utils/software";
+import { createTool, ToolResult } from "../utils/tool";
 
-export default function Command() {
-  return getSoftwareInfo("boot_volume", (value) => `Your Mac's boot volume is ${value}`);
+export default function tool(): Promise<ToolResult> {
+  return createTool({
+    type: "software",
+    property: "boot_volume",
+    formatValue: (value) => `Your Mac's boot volume is ${value}`,
+    errorTitle: "Failed to get boot volume",
+    unknownValue: "Unknown boot volume",
+  });
 }

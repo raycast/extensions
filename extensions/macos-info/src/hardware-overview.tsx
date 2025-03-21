@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
-import { useExec } from "@raycast/utils";
+import { useExec, showFailureToast } from "@raycast/utils";
 
 interface HardwareData {
   _name: string;
@@ -104,11 +104,7 @@ export default function HardwareOverview() {
         message: value,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to copy",
-        message: String(error),
-      });
+      showFailureToast({ title: "Failed to copy", message: String(error) });
     }
   };
 

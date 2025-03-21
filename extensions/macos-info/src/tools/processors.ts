@@ -1,5 +1,11 @@
-import { getHardwareInfo } from "../utils/hardware";
+import { createTool, ToolResult } from "../utils/tool";
 
-export default function Command() {
-  return getHardwareInfo("number_processors", (value) => `Your Mac has ${value} processors`);
+export default function tool(): Promise<ToolResult> {
+  return createTool({
+    type: "hardware",
+    property: "number_processors",
+    formatValue: (value) => `Your Mac has ${value} processors`,
+    errorTitle: "Failed to get processor information",
+    unknownValue: "Unknown processor information",
+  });
 }

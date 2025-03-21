@@ -1,5 +1,11 @@
-import { getHardwareInfo } from "../utils/hardware";
+import { createTool, ToolResult } from "../utils/tool";
 
-export default function Command() {
-  return getHardwareInfo("chip_type", (value) => `Your Mac has a ${value} chip`);
+export default function tool(): Promise<ToolResult> {
+  return createTool({
+    type: "hardware",
+    property: "chip_type",
+    formatValue: (value) => `Your Mac has a ${value} chip`,
+    errorTitle: "Failed to get chip type",
+    unknownValue: "Unknown chip type",
+  });
 }

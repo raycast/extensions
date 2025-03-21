@@ -1,5 +1,11 @@
-import { getSoftwareInfo } from "../utils/software";
+import { createTool, ToolResult } from "../utils/tool";
 
-export default function Command() {
-  return getSoftwareInfo("local_host_name", (value) => `Your Mac's local host name is ${value}`);
+export default function tool(): Promise<ToolResult> {
+  return createTool({
+    type: "software",
+    property: "local_host_name",
+    formatValue: (value) => `Your Mac's local host name is ${value}`,
+    errorTitle: "Failed to get local host name",
+    unknownValue: "Unknown local host name",
+  });
 }
