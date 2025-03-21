@@ -1,5 +1,5 @@
 import { LaunchProps, showHUD } from "@raycast/api";
-import { writeKeywords, readKeywords } from "./lib/keywords-manager";
+import { writeKeywords, readKeywords } from "./lib/keywordStorage";
 
 // Type for command arguments
 type AddKeywordArguments = {
@@ -18,7 +18,7 @@ export default async function Command(props: LaunchProps<{ arguments: AddKeyword
       return;
     }
 
-    // Add keyword and write to file
+    // Add keyword and write
     keywords.push(keyword.trim());
     await writeKeywords(keywords);
     await showHUD(`✅ Added keyword: ${keyword}`, { clearRootSearch: true });

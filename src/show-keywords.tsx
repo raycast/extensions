@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { readKeywords, writeKeywords } from "./lib/keywords-manager";
+import { readKeywords, writeKeywords } from "./lib/keywordStorage";
 
 export default function Command() {
   const [keywords, setKeywords] = useState<string[]>([]);

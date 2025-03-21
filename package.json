@@ -207,7 +207,7 @@
     {
       "name": "add-keyword",
       "title": "Add Keyword",
-      "description": "Add a new keyword to keywords list",
+      "description": "Add a new keyword to list",
       "mode": "no-view",
       "arguments": [
         {
@@ -221,7 +221,7 @@
     {
       "name": "show-keywords",
       "title": "Show Keywords",
-      "description": "Show keyword list and manage them",
+      "description": "Show keywords and manage them",
       "mode": "view"
     }
   ],

@@ -1,7 +1,6 @@
 import { showHUD, getPreferenceValues } from "@raycast/api";
-import { getRandomElement } from "./lib/utils";
-import { searchOnPlatform, Platform, getOneUnusedPlatform } from "./lib/platform-searcher";
-import { readKeywords } from "./lib/keywords-manager";
+import { searchOnPlatform, Platform, SEARCH_PLATFORMS } from "./lib/platformSearch";
+import { readKeywords } from "./lib/keywordStorage";
 
 interface Preferences {
   defaultPlatform1: Platform;
@@ -32,7 +31,8 @@ export default async function Command() {
     }
 
     if (preferences.randomPlatform) {
-      const randomPlatform = getOneUnusedPlatform(defaultPlatforms);
+      const availablePlatforms = SEARCH_PLATFORMS.filter((p) => !defaultPlatforms.includes(p)) as Platform[];
+      const randomPlatform = getRandomElement(availablePlatforms);
       await searchOnPlatform(randomPlatform, randomKeyword, dateString);
     }
 
@@ -40,4 +40,14 @@ export default async function Command() {
   } catch (error) {
     await showHUD("❌ Open random search failed");
   }
+}
+
+
+/**
+ * Randomly select an element from array
+ * @param array Input array
+ * @returns Randomly selected element
+ */
+function getRandomElement<T>(array: T[]): T {
+  return array[Math.floor(Math.random() * array.length)];
 }

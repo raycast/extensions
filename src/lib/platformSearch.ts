@@ -1,19 +1,9 @@
 import { open, getPreferenceValues } from "@raycast/api";
 
 // All supported platforms
-export const PLATFORMS = ["x", "v2ex", "hackernews", "reddit", "medium", "zhihu", "bilibili", "youtube"] as const;
-export type Platform = (typeof PLATFORMS)[number];
+export const SEARCH_PLATFORMS = ["x", "v2ex", "hackernews", "reddit", "medium", "zhihu", "bilibili", "youtube"] as const;
+export type Platform = (typeof SEARCH_PLATFORMS)[number];
 
-/**
- * Get a random unused platform
- * @param usedPlatforms List of used platforms
- * @returns Randomly selected platform
- */
-export function getOneUnusedPlatform(usedPlatforms: Platform[]): Platform {
-  const availablePlatforms = PLATFORMS.filter((p) => !usedPlatforms.includes(p)) as Platform[];
-  const randomIndex = Math.floor(Math.random() * availablePlatforms.length);
-  return availablePlatforms[randomIndex];
-}
 
 // Get user language setting
 function getLanguageFilter(): string {
@@ -29,7 +19,7 @@ function getLanguageFilter(): string {
  * @param date Date (only used for X platform)
  * @returns Search URL
  */
-export function getSearchUrl(platform: Platform, keyword: string, date?: string): string {
+function getSearchUrl(platform: Platform, keyword: string, date?: string): string {
   const encodedKeyword = encodeURIComponent(keyword);
 
   switch (platform) {
@@ -60,7 +50,7 @@ export function getSearchUrl(platform: Platform, keyword: string, date?: string)
  * @param url URL to open
  * @returns Promise
  */
-export async function openUrl(url: string): Promise<void> {
+async function openUrl(url: string): Promise<void> {
   await open(url);
 }
 
