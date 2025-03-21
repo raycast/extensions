@@ -1,0 +1,96 @@
+instructions: |
+  You are working with macOS system information tools. Here are some guidelines:
+  - When users ask about Mac hardware or software information, use the appropriate tool based on what they're asking for
+  - For hardware-related queries, use these tools:
+    * machine-name (for Mac's name)
+    * machine-model (for Mac's model)
+    * model-number (for model identifier)
+    * chip-type (for processor architecture)
+    * processors (for CPU information)
+    * memory (for RAM information)
+    * boot-rom (for Boot ROM version)
+    * os-loader (for OS loader version)
+    * serial-number (for hardware serial)
+    * platform-uuid (for platform identifier)
+    * provisioning-udid (for device UDID)
+    * activation-lock (for Activation Lock status)
+  - For software-related queries, use these tools:
+    * os-version (for macOS version)
+    * kernel-version (for Darwin kernel version)
+    * boot-mode (for current boot mode)
+    * boot-volume (for startup disk)
+    * secure-vm (for secure virtual memory)
+    * system-integrity (for SIP status)
+    * local-host-name (for network name)
+    * user-name (for current user)
+    * uptime (for system uptime)
+  - When users ask about multiple pieces of information, use multiple tools in sequence
+  - Always explain what each piece of information means in a user-friendly way
+  - If the information seems sensitive (like serial numbers or UUIDs), remind users to be careful about sharing it
+
+evals:
+  - input: "@macos-info What kind of chip does my Mac have?"
+    mocks:
+      chip-type: "Apple M1 Pro"
+    expected:
+      - callsTool: "chip-type"
+
+  - input: "@macos-info Tell me about my Mac's memory"
+    mocks:
+      memory: "32 GB"
+    expected:
+      - callsTool: "memory"
+
+  - input: "@macos-info What version of macOS am I running?"
+    mocks:
+      os-version: "macOS 15.3.2 (24D81)"
+    expected:
+      - callsTool: "os-version"
+
+  - input: "@macos-info Is my system secure?"
+    mocks:
+      system-integrity: "integrity_enabled"
+      secure-vm: "secure_vm_enabled"
+    expected:
+      - callsTool: 
+          name: "system-integrity"
+      - callsTool:
+          name: "secure-vm"
+
+  - input: "@macos-info Give me all information about my Mac's hardware"
+    mocks:
+      machine-name: "MacBook Pro"
+      machine-model: "MacBookPro18,3"
+      model-number: "Z37L00485TB/A"
+      chip-type: "Apple M1 Pro"
+      processors: "proc 10:8:2"
+      memory: "32 GB"
+      boot-rom: "11881.81.4"
+      os-loader: "11881.81.4"
+      serial-number: "W184LZMH9R"
+      platform-uuid: "8D64EFE3-EADB-4B11-B5C6-7C2A77B2361C"
+      provisioning-udid: "00006000-00A3B2C49F18D72C"
+      activation-lock: "activation_lock_enabled"
+    expected:
+      - callsTool: "machine-name"
+      - callsTool: "machine-model"
+      - callsTool: "model-number"
+      - callsTool: "chip-type"
+      - callsTool: "processors"
+      - callsTool: "memory"
+      - callsTool: "boot-rom"
+      - callsTool: "os-loader"
+      - callsTool: "serial-number"
+      - callsTool: "platform-uuid"
+      - callsTool: "provisioning-udid"
+      - callsTool: "activation-lock"
+
+  - input: "@macos-info What's my Mac's boot status?"
+    mocks:
+      boot-mode: "normal_boot"
+      boot-volume: "Macintosh HD"
+      boot-rom: "11881.81.4"
+    expected:
+      - callsTool: "boot-mode"
+      - callsTool: "boot-volume"
+      - callsTool: "boot-rom" 
