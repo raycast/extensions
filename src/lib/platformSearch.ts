@@ -1,9 +1,17 @@
 import { open, getPreferenceValues } from "@raycast/api";
 
 // All supported platforms
-export const SEARCH_PLATFORMS = ["x", "v2ex", "hackernews", "reddit", "medium", "zhihu", "bilibili", "youtube"] as const;
+export const SEARCH_PLATFORMS = [
+  "x",
+  "v2ex",
+  "hackernews",
+  "reddit",
+  "medium",
+  "zhihu",
+  "bilibili",
+  "youtube",
+] as const;
 export type Platform = (typeof SEARCH_PLATFORMS)[number];
-
 
 // Get user language setting
 function getLanguageFilter(): string {

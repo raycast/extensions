@@ -42,7 +42,6 @@ export default async function Command() {
   }
 }
 
-
 /**
  * Randomly select an element from array
  * @param array Input array

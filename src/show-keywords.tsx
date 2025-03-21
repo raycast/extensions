@@ -51,10 +51,7 @@ export default function Command() {
           title={keyword}
           actions={
             <ActionPanel>
-              <Action
-                title="Remove Keyword"
-                onAction={() => handleRemoveKeyword(keyword)}
-              />
+              <Action title="Remove Keyword" onAction={() => handleRemoveKeyword(keyword)} />
             </ActionPanel>
           }
         />
