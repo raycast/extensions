@@ -91,37 +91,39 @@ export function Command() {
             <EntryItem
               key={entry.uri}
               entry={entry}
-              icon={entry.is_remote ? "remote.svg" : entry.path && { fileIcon: entry.path }}
-            >
-              <Action.Open title="Open in Zed" target={entry.uri} application={zed} icon={{ fileIcon: zed.path }} />
-              {!entry.is_remote && <Action.ShowInFinder path={entry.path} />}
-              <Action
-                title="Unpin Entry"
-                icon={Icon.PinDisabled}
-                onAction={() => unpinEntry(e)}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-              />
-              {e.order > 0 ? (
-                <Action
-                  title="Move up"
-                  icon={Icon.ArrowUp}
-                  onAction={() => moveUp(e)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
-                />
-              ) : null}
-              {e.order < pinned.length - 1 ? (
-                <Action
-                  title="Move Down"
-                  icon={Icon.ArrowDown}
-                  onAction={() => moveDown(e)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
-                />
-              ) : null}
-              <RemoveActionSection
-                onRemoveEntry={() => removeAndUnpinEntry(e)}
-                onRemoveAllEntries={removeAllAndUnpinEntries}
-              />
-            </EntryItem>
+              actions={
+                <ActionPanel>
+                  <Action.Open title="Open in Zed" target={entry.uri} application={zed} icon={{ fileIcon: zed.path }} />
+                  {!entry.is_remote && <Action.ShowInFinder path={entry.path} />}
+                  <Action
+                    title="Unpin Entry"
+                    icon={Icon.PinDisabled}
+                    onAction={() => unpinEntry(e)}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                  />
+                  {e.order > 0 ? (
+                    <Action
+                      title="Move up"
+                      icon={Icon.ArrowUp}
+                      onAction={() => moveUp(e)}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                    />
+                  ) : null}
+                  {e.order < pinned.length - 1 ? (
+                    <Action
+                      title="Move Down"
+                      icon={Icon.ArrowDown}
+                      onAction={() => moveDown(e)}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                    />
+                  ) : null}
+                  <RemoveActionSection
+                    onRemoveEntry={() => removeAndUnpinEntry(e)}
+                    onRemoveAllEntries={removeAllAndUnpinEntries}
+                  />
+                </ActionPanel>
+              }
+            />
           );
         })}
       </List.Section>
@@ -141,21 +143,28 @@ export function Command() {
               <EntryItem
                 key={entry.uri}
                 entry={entry}
-                icon={entry.is_remote ? "remote.svg" : entry.path && { fileIcon: entry.path }}
-              >
-                <Action.Open title="Open in Zed" target={entry.uri} application={zed} icon={{ fileIcon: zed.path }} />
-                {!entry.is_remote && <Action.ShowInFinder path={entry.path} />}
-                <Action
-                  title="Pin Entry"
-                  icon={Icon.Pin}
-                  onAction={() => pinEntry(e)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                />
-                <RemoveActionSection
-                  onRemoveEntry={() => removeAndUnpinEntry(e)}
-                  onRemoveAllEntries={removeAllAndUnpinEntries}
-                />
-              </EntryItem>
+                actions={
+                  <ActionPanel>
+                    <Action.Open
+                      title="Open in Zed"
+                      target={entry.uri}
+                      application={zed}
+                      icon={{ fileIcon: zed.path }}
+                    />
+                    {!entry.is_remote && <Action.ShowInFinder path={entry.path} />}
+                    <Action
+                      title="Pin Entry"
+                      icon={Icon.Pin}
+                      onAction={() => pinEntry(e)}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    />
+                    <RemoveActionSection
+                      onRemoveEntry={() => removeAndUnpinEntry(e)}
+                      onRemoveAllEntries={removeAllAndUnpinEntries}
+                    />
+                  </ActionPanel>
+                }
+              />
             );
           })}
       </List.Section>
