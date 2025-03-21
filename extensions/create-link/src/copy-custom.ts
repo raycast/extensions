@@ -1,7 +1,7 @@
 import { showHUD, Clipboard, getPreferenceValues, BrowserExtension } from "@raycast/api";
 import { isExtensionInstalled, getActiveTab } from "./utils/browser";
 
-interface CopyCustomPreferences {
+interface CopyCustomFormatPreferences {
   customFormat: string;
 }
 
@@ -39,7 +39,7 @@ export default async function copyCustom() {
     return;
   }
 
-  const preferences = getPreferenceValues<CopyCustomPreferences>();
+  const preferences = getPreferenceValues<CopyCustomFormatPreferences>();
   const { customFormat } = preferences;
 
   const customLink = applyCustomTemplate(customFormat, activeTab);
