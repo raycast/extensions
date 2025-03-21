@@ -24,8 +24,7 @@
   "commands": [
     {
       "name": "searchAwesomeMac",
-      "title": "Search Awesome Mac",
-      "subtitle": "Awesome Mac Apps",
+      "title": "Search Mac Apps",
       "description": "Search Awesome Mac Apps",
       "mode": "view"
     }
