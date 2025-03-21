@@ -1,6 +1,6 @@
 # zed-recent-projects Changelog
 
-## [Enhancements] - 2025-03-21
+## [Enhancements] - {PR_MERGE_DATE}
 
 - Added remove actions for single and all recent projects
 
