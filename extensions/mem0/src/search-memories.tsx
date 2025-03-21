@@ -65,13 +65,6 @@ export default function Command() {
         message: `Found ${data.results.length} results`,
       });
 
-      // Copy results to clipboard
-      await Clipboard.copy(concatenatedMemories);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Copied to clipboard",
-        message: "Search results have been copied",
-      });
     } catch (error) {
       showFailureToast("Search failed", {
         primaryAction: {
