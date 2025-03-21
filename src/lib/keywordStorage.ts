@@ -18,7 +18,7 @@ export async function readKeywords(): Promise<string[]> {
     return Array.isArray(keywords) && keywords.length > 0 ? keywords : DEFAULT_KEYWORDS;
   } catch (error) {
     console.error("Error reading keywords from storage:", error);
-    return DEFAULT_KEYWORDS;
+    throw error;
   }
 }
 

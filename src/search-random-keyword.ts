@@ -1,4 +1,5 @@
 import { showHUD, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { searchOnPlatform, Platform, SEARCH_PLATFORMS } from "./lib/platformSearch";
 import { readKeywords } from "./lib/keywordStorage";
 
@@ -12,6 +13,7 @@ export default async function Command() {
   try {
     const preferences = getPreferenceValues<Preferences>();
     const keywords = await readKeywords();
+    if (keywords.length === 0) throw new Error("No keywords found");
     const randomKeyword = getRandomElement(keywords);
 
     // Calculate date
@@ -38,7 +40,7 @@ export default async function Command() {
 
     await showHUD(`✅ Search random keyword: ${randomKeyword}`, { clearRootSearch: true });
   } catch (error) {
-    await showHUD("❌ Open random search failed");
+    showFailureToast(error, { title: "Error searching random keyword" });
   }
 }
 

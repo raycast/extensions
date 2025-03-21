@@ -1,4 +1,5 @@
 import { open, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 // All supported platforms
 export const SEARCH_PLATFORMS = [
@@ -34,7 +35,7 @@ function getSearchUrl(platform: Platform, keyword: string, date?: string): strin
     case "x": {
       const langFilter = getLanguageFilter();
       const langParam = langFilter ? `+${langFilter}` : "";
-      return `https://x.com/search?q=${encodedKeyword}+min_replies:1+min_retweets:1${langParam}+since:${date}&src=typed_query&f=live`;
+      return `https://x.com/search?q=${encodedKeyword}+min_replies:1+min_retweets:1${langParam}${date ? `+since:${date}` : ""}&src=typed_query&f=live`;
     }
     case "v2ex":
       return `https://google.com/search?q=${encodedKeyword}+site:v2ex.com&newwindow=1&tbs=qdr:m`;
@@ -72,6 +73,6 @@ export async function searchOnPlatform(platform: Platform, keyword: string, date
   try {
     await openUrl(getSearchUrl(platform, keyword, date));
   } catch (error) {
-    console.error(`Error searching on ${platform}:`, error);
+    showFailureToast(error, { title: `Error searching on ${platform}` });
   }
 }

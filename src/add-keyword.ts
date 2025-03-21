@@ -1,5 +1,6 @@
 import { LaunchProps, showHUD } from "@raycast/api";
 import { writeKeywords, readKeywords } from "./lib/keywordStorage";
+import { showFailureToast } from "@raycast/utils";
 
 // Type for command arguments
 type AddKeywordArguments = {
@@ -8,22 +9,22 @@ type AddKeywordArguments = {
 
 export default async function Command(props: LaunchProps<{ arguments: AddKeywordArguments }>) {
   try {
-    const { keyword } = props.arguments;
+    let { keyword } = props.arguments;
+    keyword = keyword.trim();
 
     const keywords = await readKeywords();
 
     // Check if keyword already exists
-    if (keywords.includes(keyword.trim())) {
+    if (keywords.includes(keyword)) {
       await showHUD(`❎ Keyword ${keyword} already exists`);
       return;
     }
 
     // Add keyword and write
-    keywords.push(keyword.trim());
+    keywords.push(keyword);
     await writeKeywords(keywords);
     await showHUD(`✅ Added keyword: ${keyword}`, { clearRootSearch: true });
   } catch (error) {
-    console.error("Error in add-keyword:", error);
-    await showHUD("❌ Add keyword failed");
+    showFailureToast(error, { title: "Error adding keyword" });
   }
 }
