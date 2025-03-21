@@ -31,8 +31,8 @@ export default async function Command() {
     }
 
     if (preferences.randomPlatform) {
-      const availablePlatforms = SEARCH_PLATFORMS.filter((p) => !defaultPlatforms.includes(p)) as Platform[];
-      const randomPlatform = getRandomElement(availablePlatforms);
+      const unusedPlatforms = SEARCH_PLATFORMS.filter((p) => !defaultPlatforms.includes(p)) as Platform[];
+      const randomPlatform = getRandomElement(unusedPlatforms);
       await searchOnPlatform(randomPlatform, randomKeyword, dateString);
     }
 
