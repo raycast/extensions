@@ -138,10 +138,24 @@ export default function Command() {
       const apiKey = preferences.apiKey || null;
       const language = preferences.preferredLanguage || "auto";
       const endpoint = preferences.endpoint || "https://api.languagetool.org/v2/check";
+      const preferredVariants = [
+        preferences.languageVarietyEnglish,
+        preferences.languageVarietyGerman,
+        preferences.languageVarietyPortuguese,
+        preferences.languageVarietyCatalan,
+      ].filter(Boolean).filter((variant) => variant !== "-").join(",");
+
+      const level = preferences.level || "default";
 
       const params = new URLSearchParams();
       params.append("text", textToCheck);
       params.append("language", language);
+      if (preferredVariants) {
+        params.append("preferredVariants", preferredVariants);
+      }
+      if (level !== "default") {
+        params.append("level", level);
+      }
 
       const headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -354,8 +368,7 @@ export default function Command() {
         await handleCheckSpelling();
       }
 
-      const textToPaste = correctedText || text;
-      await Clipboard.paste(textToPaste);
+      await Clipboard.paste(text);
 
       showToast({
         style: Toast.Style.Success,
