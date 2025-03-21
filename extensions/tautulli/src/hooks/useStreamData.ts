@@ -18,7 +18,7 @@ export function useStreamData(stream: Stream) {
     return () => {
       clearInterval(timeIncrementInterval);
     };
-  }, [stream.state, stream.view_offset]);
+  }, [stream.state, stream.view_offset, setViewOffset]);
 
   const duration = millisecondsToTimecode(stream.duration);
   const progress = millisecondsToTimecode(viewOffset);
