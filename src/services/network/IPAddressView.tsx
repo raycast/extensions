@@ -11,7 +11,7 @@ import {
   useNavigation,
   Clipboard,
 } from "@raycast/api";
-import { NetworkService, IPAddress } from "./NetworkService";
+import { NetworkService, IPAddress, NetworkServiceError } from "./NetworkService";
 
 interface IPAddressViewProps {
   projectId: string;
@@ -603,19 +603,28 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to Create IP Address",
-          message: "An error occurred while creating the IP address"
+          message: `Could not create IP address ${values.name}. Please check the logs for details.`
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error creating IP address:", error);
       
       loadingToast.hide();
       
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error Creating IP Address",
-        message: error.message
-      });
+      // Handle NetworkServiceError specifically
+      if (error instanceof NetworkServiceError) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "IP Address Creation Failed",
+          message: error.message
+        });
+      } else {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Unexpected Error",
+          message: `Failed to create IP address: ${error instanceof Error ? error.message : String(error)}`
+        });
+      }
     } finally {
       setIsLoading(false);
     }
