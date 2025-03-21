@@ -125,6 +125,21 @@ export default function Command() {
           }
         />
       </List.Section>
+      <List.Section title="Storage">
+        <List.Item
+          icon={Icon.HardDrive}
+          title="Macintosh HD"
+          accessories={[{ text: storageInfo, tooltip: "Storage information from native Swift API" }]}
+          actions={
+            <ActionPanel>
+              <Action.Open
+                target="x-apple.systempreferences:com.apple.settings.Storage"
+                title="Open Storage Settings"
+              />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
       <List.Section title="macOS">
         <List.Item
           icon={releaseImage()}
@@ -151,21 +166,6 @@ export default function Command() {
           }
         />
       </List.Section>
-      <List.Section title="Storage">
-        <List.Item
-          icon={Icon.HardDrive}
-          title="Macintosh HD"
-          accessories={[{ text: storageInfo, tooltip: "Storage information from native Swift API" }]}
-          actions={
-            <ActionPanel>
-              <Action.Open
-                target="x-apple.systempreferences:com.apple.settings.Storage"
-                title="Open Storage Settings"
-              />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
       <List.Section title="Network">
         {networkDevices.map((device) => (
           <List.Item
@@ -175,7 +175,7 @@ export default function Command() {
             accessories={[{ text: device.ip }]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Copy IP Address" content={device.ip} />
+                <Action.CopyToClipboard title="Copy Ip Address" content={device.ip} />
               </ActionPanel>
             }
           />
