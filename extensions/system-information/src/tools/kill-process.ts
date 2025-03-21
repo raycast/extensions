@@ -17,7 +17,7 @@ interface KillProcessResult {
 /**
  * Confirmation for killing a process
  */
-export const confirmation: Tool.Confirmation<KillProcessInput> = async (input) => {
+export const confirmation: Tool.Confirmation<{ pid: string }> = async (input) => {
   const pid = input.pid;
 
   try {
