@@ -53,7 +53,7 @@ const AVAILABLE_SERVICES: Service[] = [
   },
   {
     id: "servicehub",
-    name: "ServiceHub",
+    name: "Marketplace",
     description: "Centralized service management and discovery platform",
     icon: Icon.Globe
   }
@@ -326,7 +326,7 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
     try {
       const loadingToast = await showToast({
         style: Toast.Style.Animated,
-        title: "Loading ServiceHub...",
+        title: "Loading Marketplace...",
         message: `Project: ${projectId}`
       });
       
@@ -599,7 +599,7 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
                     )}
                     {service.id === "servicehub" && (
                       <Action 
-                        title="View ServiceHub" 
+                        title="View Marketplace" 
                         icon={Icon.Globe} 
                         onAction={viewServiceHub}
                       />

@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { Detail, ActionPanel, Action, Icon, Toast, showToast, Color } from "@raycast/api";
-import { ServiceHubService, GCPService } from "../ServiceHubService";
+import { MarketplaceService, GCPService } from "../ServiceHubService";
 
 interface ServiceDetailsProps {
   service: GCPService;
-  serviceHub: ServiceHubService;
+  serviceHub: MarketplaceService;
   onServiceStatusChange: (updatedService?: GCPService) => void;
 }
 
@@ -67,6 +67,7 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
     
     try {
       setIsToggling(true);
+      setIsLoading(true);
       
       if (serviceDetails?.isEnabled) {
         showToast({
@@ -107,18 +108,18 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
       } else {
         showToast({
           style: Toast.Style.Animated,
-          title: `Enabling ${service.displayName || service.name}...`,
+          title: `Enabling ${serviceDetails?.displayName || serviceDetails?.name}...`,
         });
         
-        await serviceHub.enableService(service.name);
+        await serviceHub.enableService(serviceDetails?.name || "");
         
         // Verify the service was actually enabled
-        const isNowEnabled = await serviceHub.isServiceEnabled(service.name);
+        const isNowEnabled = await serviceHub.isServiceEnabled(serviceDetails?.name || "");
         
         if (isNowEnabled) {
           showToast({
             style: Toast.Style.Success,
-            title: `Enabled ${service.displayName || service.name}`,
+            title: `Enabled ${serviceDetails?.displayName || serviceDetails?.name}`,
           });
           
           // Update local state
@@ -136,27 +137,25 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
         } else {
           showToast({
             style: Toast.Style.Failure,
-            title: `Failed to enable ${service.displayName || service.name}`,
+            title: `Failed to enable ${serviceDetails?.displayName || serviceDetails?.name}`,
             message: "Service did not enable properly. Try again or check GCP Console."
           });
         }
       }
-      
-      // Refresh service details
-      await fetchServiceDetails();
     } catch (error) {
-      console.error(`Error toggling service status for ${service.name}:`, error);
+      console.error("Error toggling service status:", error);
       
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to update service status",
         message: error instanceof Error ? error.message : String(error),
       });
-      
-      // Notify parent component of failure
-      onServiceStatusChange();
     } finally {
       setIsToggling(false);
+      setIsLoading(false);
+      
+      // Refresh the service details to ensure we have the latest data
+      fetchServiceDetails();
     }
   }
   
@@ -180,42 +179,28 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
       return "Loading service details...";
     }
     
-    const statusEmoji = serviceDetails.isEnabled ? "✅" : "";
-    
     return `
-# ${serviceDetails.displayName || serviceDetails.name} ${statusEmoji}
+# ${serviceDetails.displayName || serviceDetails.name}
 
 ## Overview
-
-**Service Name:** \`${serviceDetails.name}\`
-**Category:** ${serviceDetails.category || "Other"}
-
 ${serviceDetails.description || "No description available."}
+
+## Technical Information
+| Property | Value |
+|----------|-------|
+| Service Name | \`${serviceDetails.name}\` |
+| Status | ${serviceDetails.isEnabled ? "Enabled" : "Not Enabled"} |
+${serviceDetails.state ? `| State | ${serviceDetails.state} |\n` : ""}| Category | ${serviceDetails.category || "Other"} |
+| Region | ${serviceDetails.region || "global"} |
 
 ${serviceDetails.dependsOn && serviceDetails.dependsOn.length > 0 ? `
 ## Dependencies
+${serviceDetails.isEnabled ? "" : "**Note:** You must enable all dependencies before this service can function properly."}
 
-This service depends on the following services:
-
-${serviceDetails.dependsOn.map(dep => `- \`${dep}\``).join("\n")}
-
-${serviceDetails.isEnabled ? "" : "⚠️ **Note:** You must enable all dependencies before this service can function properly."}
+| Service | 
+|---------|
+${serviceDetails.dependsOn.map(dep => `| \`${dep}\` |`).join("\n")}
 ` : ""}
-
-## Links
-
-${serviceDetails.documentation ? `- [Documentation](${serviceDetails.documentation})` : ""}
-${serviceDetails.console ? `- [Google Cloud Console](${serviceDetails.console})` : ""}
-
-## Actions
-
-- Use **${serviceDetails.isEnabled ? "Disable" : "Enable"} Service** to ${serviceDetails.isEnabled ? "disable" : "enable"} this service
-- Use **Refresh** to update the service information
-
-## Keyboard Shortcuts
-
-- ⌘ + E: ${serviceDetails.isEnabled ? "Disable" : "Enable"} Service
-- ⌘ + R: Refresh
     `;
   }
   
@@ -227,24 +212,40 @@ ${serviceDetails.console ? `- [Google Cloud Console](${serviceDetails.console})`
       metadata={
         serviceDetails ? (
           <Detail.Metadata>
-            {serviceDetails.isEnabled && (
-              <Detail.Metadata.Label
-                title="Status"
-                icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-              />
-            )}
+            <Detail.Metadata.Label 
+              title="Status" 
+              text={serviceDetails.isEnabled ? "Enabled" : "Not Enabled"}
+              icon={{ 
+                source: serviceDetails.isEnabled ? Icon.CheckCircle : Icon.XmarkCircle, 
+                tintColor: serviceDetails.isEnabled ? Color.Green : Color.SecondaryText 
+              }}
+            />
+            <Detail.Metadata.Separator />
+            
             <Detail.Metadata.Label title="Service Name" text={serviceDetails.name} />
             <Detail.Metadata.Label title="Category" text={serviceDetails.category || "Other"} />
             {serviceDetails.state && (
               <Detail.Metadata.Label title="State" text={serviceDetails.state} />
             )}
-            {serviceDetails.dependsOn && serviceDetails.dependsOn.length > 0 && (
-              <Detail.Metadata.TagList title="Dependencies">
-                {serviceDetails.dependsOn.map((dep, index) => (
-                  <Detail.Metadata.TagList.Item key={index} text={dep} />
-                ))}
-              </Detail.Metadata.TagList>
+            {serviceDetails.region && (
+              <Detail.Metadata.Label title="Region" text={serviceDetails.region} />
             )}
+            
+            {serviceDetails.dependsOn && serviceDetails.dependsOn.length > 0 && (
+              <>
+                <Detail.Metadata.Separator />
+                <Detail.Metadata.TagList title="Dependencies">
+                  {serviceDetails.dependsOn.map((dep, index) => (
+                    <Detail.Metadata.TagList.Item key={index} text={dep} />
+                  ))}
+                </Detail.Metadata.TagList>
+              </>
+            )}
+            
+            {(serviceDetails.documentation || serviceDetails.console) && (
+              <Detail.Metadata.Separator />
+            )}
+            
             {serviceDetails.documentation && (
               <Detail.Metadata.Link
                 title="Documentation"
@@ -252,11 +253,12 @@ ${serviceDetails.console ? `- [Google Cloud Console](${serviceDetails.console})`
                 text="View Documentation"
               />
             )}
+            
             {serviceDetails.console && (
               <Detail.Metadata.Link
-                title="Console"
+                title="Google Cloud Console"
                 target={serviceDetails.console}
-                text="Open in Google Cloud Console"
+                text="Open in Console"
               />
             )}
           </Detail.Metadata>

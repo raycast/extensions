@@ -348,16 +348,45 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
     });
   };
   
-  const createVMInstance = () => {
+  const createVMInstance = async () => {
     if (!service) {
       return;
     }
+    
+    const createdCallback = async () => {
+      // Show loading toast while refreshing
+      const refreshToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Refreshing VM instances...",
+        message: "Loading updated instance list",
+      });
+      
+      try {
+        // Refresh the instances
+        if (service) {
+          await fetchInstances(service);
+        }
+        refreshToast.hide();
+        showToast({
+          style: Toast.Style.Success,
+          title: "VM instances refreshed",
+          message: "Instance list updated",
+        });
+      } catch (error) {
+        refreshToast.hide();
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to refresh instances",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    };
     
     push(
       <CreateVMForm
         projectId={projectId}
         gcloudPath={gcloudPath}
-        onVMCreated={() => fetchInstances(service)}
+        onVMCreated={createdCallback}
       />
     );
   };

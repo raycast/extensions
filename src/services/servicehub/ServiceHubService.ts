@@ -1,5 +1,5 @@
 /**
- * ServiceHub Service - Centralizes management of Google Cloud service activation
+ * Marketplace Service - Centralizes management of Google Cloud service activation
  * Provides a unified interface for enabling and disabling GCP services
  */
 
@@ -78,7 +78,7 @@ const CORE_SERVICES = [
   "cloudresourcemanager.googleapis.com"
 ];
 
-export class ServiceHubService {
+export class MarketplaceService {
   private gcloudPath: string;
   private projectId: string;
   private cache: Map<string, { data: any; timestamp: number }> = new Map();
@@ -456,6 +456,19 @@ export class ServiceHubService {
   }
   
   /**
+   * Clear service cache
+   */
+  private clearServiceCache(): void {
+    // Clear all cache entries that start with "services:" or "service-details:"
+    for (const key of Array.from(this.cache.keys())) {
+      if (key.startsWith("services:") || key.startsWith("service-details:") || 
+          key.startsWith("enabled-services:")) {
+        this.cache.delete(key);
+      }
+    }
+  }
+  
+  /**
    * Check if a service is enabled
    */
   async isServiceEnabled(serviceName: string): Promise<boolean> {
@@ -521,18 +534,6 @@ export class ServiceHubService {
   }
   
   /**
-   * Clear service cache
-   */
-  private clearServiceCache(): void {
-    // Clear all cache entries that start with "services:" or "service-details:"
-    for (const key of this.cache.keys()) {
-      if (key.startsWith("services:") || key.startsWith("service-details:")) {
-        this.cache.delete(key);
-      }
-    }
-  }
-  
-  /**
    * Get services by category
    * @param category The category to filter by
    * @param includeDisabled Whether to include disabled services
@@ -552,4 +553,4 @@ export class ServiceHubService {
   async getAllCategories(): Promise<string[]> {
     return Object.values(GCPServiceCategory).sort();
   }
-} 
+}

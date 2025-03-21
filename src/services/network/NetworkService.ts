@@ -23,6 +23,14 @@ const EXECUTION_DEFAULTS = {
   }
 };
 
+// Error types for better error handling
+export class NetworkServiceError extends Error {
+  constructor(message: string, public readonly context: Record<string, unknown>) {
+    super(message);
+    this.name = 'NetworkServiceError';
+  }
+}
+
 // Interfaces
 export interface VPC {
   id: string;
@@ -134,6 +142,18 @@ export class NetworkService {
   }
 
   /**
+   * Helper method to handle errors consistently
+   */
+  private handleError(error: unknown, context: Record<string, unknown>): never {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Network Service Error:", {
+      message: errorMessage,
+      ...context
+    });
+    throw new NetworkServiceError(errorMessage, context);
+  }
+
+  /**
    * Get list of VPC networks
    * @returns Promise with array of VPC networks
    */
@@ -209,13 +229,12 @@ export class NetworkService {
   }
 
   /**
-   * Create a new VPC network
-   * @param name Name of the new VPC
+   * Create a VPC network
+   * @param name VPC name
    * @param description Optional description
-   * @param autoCreateSubnetworks Whether to auto-create subnetworks
-   * @param subnetMode "auto" or "custom"
-   * @param mtu Optional MTU value
-   * @returns Promise with success or failure
+   * @param subnetMode "auto" or "custom" subnet mode
+   * @param mtu Optional MTU setting
+   * @returns Promise resolving to true if successful
    */
   async createVPC(
     name: string, 
@@ -224,43 +243,39 @@ export class NetworkService {
     mtu?: number
   ): Promise<boolean> {
     try {
-      // Build command
-      const command = ["compute", "networks", "create", name];
+      // Build the command
+      let command = `compute networks create ${name}`;
       
-      // Add subnet mode option
+      // Add options
       if (subnetMode === "auto") {
-        command.push("--subnet-mode=auto");
+        command += " --subnet-mode=auto";
       } else {
-        command.push("--subnet-mode=custom");
+        command += " --subnet-mode=custom";
       }
       
-      // Add optional parameters
       if (description) {
-        command.push(`--description="${description}"`);
+        command += ` --description="${description}"`;
       }
       
       if (mtu) {
-        command.push(`--mtu=${mtu}`);
+        command += ` --mtu=${mtu}`;
       }
       
-      // Add project and format
-      command.push(`--project=${this.projectId}`);
-      command.push("--format=json");
+      // Execute the command
+      await executeGcloudCommand(this.gcloudPath, command, this.projectId);
       
-      await executeGcloudCommand(
-        this.gcloudPath,
-        command.join(" "),
-        undefined,
-        { skipCache: true }
-      );
-      
-      // Clear the VPC cache
-      this.vpcCache.delete('vpcs');
+      // Clear cache to ensure fresh data
+      this.clearVPCCache();
       
       return true;
     } catch (error) {
-      console.error("Error creating VPC:", error);
-      return false;
+      this.handleError(error, {
+        operation: "Create VPC",
+        vpcName: name,
+        subnetMode,
+        mtu,
+        projectId: this.projectId
+      });
     }
   }
 
@@ -376,11 +391,11 @@ export class NetworkService {
 
   /**
    * Create a new IP address
-   * @param name Name of the new IP address
+   * @param name IP address name
    * @param region Region to create the IP in
-   * @param addressType "INTERNAL" or "EXTERNAL"
-   * @param addressOptions Additional options
-   * @returns Promise with success or failure
+   * @param addressType Type of address (INTERNAL or EXTERNAL)
+   * @param addressOptions Additional configuration options
+   * @returns Promise resolving to true if successful
    */
   async createIP(
     name: string,
@@ -397,64 +412,61 @@ export class NetworkService {
     } = {}
   ): Promise<boolean> {
     try {
-      // Build command
-      const command = ["compute", "addresses", "create", name];
+      // Build basic command
+      let command = `compute addresses create ${name}`;
       
       // Add required parameters
-      command.push(`--region=${region}`);
+      command += ` --region=${region}`;
       
-      // Add address type
+      // Set address type
       if (addressType === "INTERNAL") {
-        command.push("--subnet=" + (addressOptions.subnet || ""));
-      } else {
-        command.push("--global");
-      }
-      
-      // Add ephemeral status
-      if (addressOptions.ephemeral) {
-        command.push("--ephemeral");
-      }
-      
-      // Add network tier for external IPs
-      if (addressType === "EXTERNAL" && addressOptions.networkTier) {
-        command.push(`--network-tier=${addressOptions.networkTier}`);
+        command += " --subnet";
+        
+        // Internal addresses require a subnet
+        if (addressOptions.subnet) {
+          command += `=${addressOptions.subnet}`;
+        } else {
+          throw new Error("Subnet is required for internal IP addresses");
+        }
       }
       
       // Add optional parameters
       if (addressOptions.description) {
-        command.push(`--description="${addressOptions.description}"`);
+        command += ` --description="${addressOptions.description}"`;
       }
       
       if (addressOptions.address) {
-        command.push(`--addresses=${addressOptions.address}`);
+        command += ` --addresses=${addressOptions.address}`;
       }
       
       if (addressOptions.purpose) {
-        command.push(`--purpose=${addressOptions.purpose}`);
+        command += ` --purpose=${addressOptions.purpose}`;
       }
       
       if (addressOptions.network) {
-        command.push(`--network=${addressOptions.network}`);
+        command += ` --network=${addressOptions.network}`;
       }
       
-      // Add project and format
-      command.push(`--project=${this.projectId}`);
-      command.push("--format=json");
+      if (addressOptions.networkTier) {
+        command += ` --network-tier=${addressOptions.networkTier}`;
+      }
       
-      await executeGcloudCommand(
-        this.gcloudPath,
-        command.join(" "),
-        undefined,
-        { skipCache: true }
-      );
+      // Execute command
+      await executeGcloudCommand(this.gcloudPath, command, this.projectId);
       
-      // Clear the IP cache
-      this.ipCache.clear();
+      // Clear IP cache
+      this.clearIPCache();
       
       return true;
     } catch (error) {
-      console.error("Error creating IP address:", error);
-      return false;
+      this.handleError(error, {
+        operation: "Create IP Address",
+        ipName: name,
+        region,
+        addressType,
+        options: addressOptions,
+        projectId: this.projectId
+      });
     }
   }
 
@@ -755,6 +767,70 @@ export class NetworkService {
     this.firewallCache.clear();
   }
   
+  /**
+   * Generate four available IP address suggestions
+   * @param addressType "INTERNAL" or "EXTERNAL"
+   * @param subnet Optional subnet for internal IPs
+   * @returns Promise with array of available IP address suggestions
+   */
+  async generateAvailableIPSuggestions(
+    addressType: "INTERNAL" | "EXTERNAL" = "EXTERNAL",
+    subnet?: string
+  ): Promise<string[]> {
+    try {
+      // For EXTERNAL addresses, suggest standard IP formats
+      if (addressType === "EXTERNAL") {
+        return [
+          "34.120." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
+          "35.186." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
+          "104.196." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
+          "130.211." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255)
+        ];
+      }
+      
+      // For INTERNAL addresses, use subnet CIDR if available
+      if (subnet) {
+        try {
+          const subnets = await this.getSubnets();
+          const targetSubnet = subnets.find(s => s.name === subnet);
+          
+          if (targetSubnet) {
+            // Parse CIDR range (e.g., "10.0.0.0/24")
+            const cidrParts = targetSubnet.ipCidrRange.split('/');
+            const baseIP = cidrParts[0];
+            const baseOctets = baseIP.split('.');
+            
+            // Generate 4 IPs in the subnet range
+            return [
+              `${baseOctets[0]}.${baseOctets[1]}.${baseOctets[2]}.${10 + Math.floor(Math.random() * 240)}`,
+              `${baseOctets[0]}.${baseOctets[1]}.${baseOctets[2]}.${50 + Math.floor(Math.random() * 200)}`,
+              `${baseOctets[0]}.${baseOctets[1]}.${baseOctets[2]}.${100 + Math.floor(Math.random() * 150)}`,
+              `${baseOctets[0]}.${baseOctets[1]}.${baseOctets[2]}.${200 + Math.floor(Math.random() * 50)}`
+            ];
+          }
+        } catch (error) {
+          console.error("Error parsing subnet range:", error);
+        }
+      }
+      
+      // Default internal IPs if subnet info not available
+      return [
+        "10.128." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
+        "10.129." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
+        "172.16." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
+        "192.168." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255)
+      ];
+    } catch (error) {
+      console.error("Error generating IP suggestions:", error);
+      return [
+        "10.0.0.10",
+        "10.0.0.20",
+        "10.0.0.30",
+        "10.0.0.40"
+      ];
+    }
+  }
+
   public clearAllCaches(): void {
     this.clearVPCCache();
     this.clearSubnetCache();
@@ -786,5 +862,27 @@ export class NetworkService {
   
   getFirewallStatusColor(disabled: boolean): string {
     return disabled ? "red" : "green";
+  }
+
+  /**
+   * Helper method to validate IP address format
+   */
+  private validateIPAddress(ip: string): boolean {
+    const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    if (!ipv4Regex.test(ip)) return false;
+    
+    const parts = ip.split('.').map(Number);
+    return parts.every(part => part >= 0 && part <= 255);
+  }
+
+  /**
+   * Helper method to validate CIDR format
+   */
+  private validateCIDR(cidr: string): boolean {
+    const [ip, prefix] = cidr.split('/');
+    if (!this.validateIPAddress(ip)) return false;
+    
+    const prefixNum = Number(prefix);
+    return !isNaN(prefixNum) && prefixNum >= 0 && prefixNum <= 32;
   }
 }

@@ -9,9 +9,11 @@ import {
   useNavigation,
   Keyboard,
   getPreferenceValues,
+  confirmAlert,
 } from "@raycast/api";
 import { executeGcloudCommand } from "../../../gcloud";
 import { ComputeService } from "../ComputeService";
+import { NetworkService, Subnet } from "../../network/NetworkService";
 import {
   getMachineTypesByFamily,
   imageProjects,
@@ -43,12 +45,14 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
   const [zones, setZones] = useState<string[]>([]);
   const [machineTypesByFamily, setMachineTypesByFamily] = useState<{ title: string; types: MachineType[] }[]>([]);
   const [networks, setNetworks] = useState<string[]>([]);
-  const [subnetworks, setSubnetworks] = useState<Record<string, string[]>>({});
+  const [subnetworks, setSubnetworks] = useState<Record<string, Subnet[]>>({});
   const [selectedNetwork, setSelectedNetwork] = useState<string>("");
+  const [selectedZone, setSelectedZone] = useState<string>("");
   const [selectedImageProject, setSelectedImageProject] = useState<string>("debian-cloud");
   const [imageFamiliesByProject, setImageFamiliesByProject] = useState<{ name: string; title: string }[]>([]);
   const [serviceAccounts, setServiceAccounts] = useState<string[]>([]);
   const [nameError, setNameError] = useState<string | undefined>();
+  const [subnetError, setSubnetError] = useState<string | undefined>();
   const [advancedMode, setAdvancedMode] = useState<boolean>(false);
   
   const { pop } = useNavigation();
@@ -63,11 +67,17 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       });
       
       try {
-        const service = new ComputeService(gcloudPath, projectId);
+        const computeService = new ComputeService(gcloudPath, projectId);
+        const networkService = new NetworkService(gcloudPath, projectId);
         
         // Fetch zones - still need to fetch these dynamically as they vary by project
-        const zonesList = await service.listZones();
+        const zonesList = await computeService.listZones();
         setZones(zonesList);
+        
+        // Set default selected zone if available
+        if (zonesList.length > 0) {
+          setSelectedZone(zonesList[0]);
+        }
         
         // Set machine types from predefined data
         setMachineTypesByFamily(getMachineTypesByFamily());
@@ -76,7 +86,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         setImageFamiliesByProject(getImageFamiliesByProject(selectedImageProject));
         
         // Fetch networks - still need to fetch these dynamically
-        const networksList = await fetchNetworks();
+        const networksList = await fetchNetworks(networkService);
         setNetworks(networksList);
         
         // Fetch service accounts - still need to fetch these dynamically
@@ -103,43 +113,35 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
     loadData();
   }, [gcloudPath, projectId]);
   
-  const fetchNetworks = async (): Promise<string[]> => {
+  const fetchNetworks = async (networkService: NetworkService): Promise<string[]> => {
     try {
-      const result = await executeGcloudCommand(
-        gcloudPath,
-        "compute networks list",
-        projectId
-      );
+      // Get VPCs using the NetworkService
+      const vpcs = await networkService.getVPCs();
+      const networkNames = vpcs.map(vpc => vpc.name);
       
       // Fetch subnets for each network
-      const subnetworksMap: Record<string, string[]> = {};
+      const subnetworksMap: Record<string, Subnet[]> = {};
       
-      for (const network of result) {
-        const networkName = network.name;
-        subnetworksMap[networkName] = await fetchSubnetworks(networkName);
+      // Get all subnets at once
+      const allSubnets = await networkService.getSubnets();
+      
+      // Group subnets by network
+      for (const vpc of vpcs) {
+        // Filter subnets by this VPC
+        const vpcSubnets = allSubnets.filter(subnet => 
+          subnet.network.includes(`/${vpc.name}`) || 
+          subnet.network === vpc.name
+        );
+        
+        subnetworksMap[vpc.name] = vpcSubnets;
       }
       
       setSubnetworks(subnetworksMap);
       
-      return result.map((net: any) => net.name);
+      return networkNames.length > 0 ? networkNames : ["default"];
     } catch (error) {
       console.error("Error fetching networks:", error);
       return ["default"];
-    }
-  };
-  
-  const fetchSubnetworks = async (network: string): Promise<string[]> => {
-    try {
-      const result = await executeGcloudCommand(
-        gcloudPath,
-        `compute networks subnets list --filter="network:${network}"`,
-        projectId
-      );
-      
-      return result.map((subnet: any) => subnet.name);
-    } catch (error) {
-      console.error(`Error fetching subnets for network ${network}:`, error);
-      return [];
     }
   };
   
@@ -159,7 +161,11 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
   };
   
   const handleZoneChange = async (newZone: string) => {
-    // No need to do anything with machine types as they're predefined
+    // Filter subnets by matching region when zone changes
+    // Extract region from zone (e.g., "us-central1-a" -> "us-central1")
+    const region = newZone.split('-').slice(0, 2).join('-');
+    console.log(`Zone changed to ${newZone}, region is ${region}`);
+    setSelectedZone(newZone);
   };
   
   const handleNetworkChange = async (newNetwork: string) => {
@@ -169,6 +175,15 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
   const handleImageProjectChange = (project: string) => {
     setSelectedImageProject(project);
     setImageFamiliesByProject(getImageFamiliesByProject(project));
+  };
+  
+  // Helper to format region names
+  const formatRegionName = (regionPath: string): string => {
+    if (!regionPath) return '';
+    // If it's a path like "https://www.googleapis.com/compute/v1/projects/project-id/regions/us-central1"
+    // Extract just the region name
+    const parts = regionPath.split('/');
+    return parts[parts.length - 1];
   };
   
   const validateName = (name: string) => {
@@ -191,6 +206,32 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       return;
     }
     
+    // Validate subnet region matches zone region
+    if (values.subnet && values.subnet !== "default" && values.zone) {
+      const selectedSubnet = subnetworks[values.network]?.find(s => s.name === values.subnet);
+      if (selectedSubnet) {
+        const subnetRegion = formatRegionName(selectedSubnet.region);
+        const zoneRegion = values.zone.split('-').slice(0, 2).join('-');
+        
+        if (subnetRegion !== zoneRegion) {
+          const confirmed = await confirmAlert({
+            title: "Region Mismatch",
+            message: `The selected subnet "${values.subnet}" is in region "${subnetRegion}" but the VM will be created in zone "${values.zone}" (region "${zoneRegion}"). This may cause the VM creation to fail. Continue anyway?`,
+            primaryAction: {
+              title: "Continue Anyway",
+            },
+            dismissAction: {
+              title: "Cancel",
+            },
+          });
+          
+          if (!confirmed) {
+            return;
+          }
+        }
+      }
+    }
+    
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Creating VM instance...",
@@ -211,6 +252,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       // Add network options
       command += ` --network=${network}`;
       if (subnet) {
+        // Use the subnet name directly - gcloud will look for the subnet in the region matching the zone
         command += ` --subnet=${subnet}`;
       }
       
@@ -293,7 +335,10 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       }
       
       // Execute the command
-      await executeGcloudCommand(gcloudPath, command, projectId, { skipCache: true });
+      await executeGcloudCommand(gcloudPath, command, projectId, { 
+        skipCache: true,
+        timeout: 120000 // Increase timeout to 120 seconds for VM creation which can take longer
+      });
       
       toast.hide();
       showToast({
@@ -302,10 +347,10 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         message: values.name,
       });
       
-      // Trigger refresh
+      // Call onVMCreated callback to refresh VM instances view
       onVMCreated();
-      
-      // Navigate back
+
+      // Navigate back to the VM instances view
       pop();
     } catch (error: any) {
       toast.hide();
@@ -478,12 +523,41 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         id="subnet"
         title="Subnetwork"
         placeholder="Select a subnetwork"
-        defaultValue={selectedNetwork && subnetworks[selectedNetwork]?.length > 0 ? subnetworks[selectedNetwork][0] : "default"}
+        defaultValue={selectedNetwork && subnetworks[selectedNetwork]?.length > 0 ? subnetworks[selectedNetwork][0].name : "default"}
       >
         {selectedNetwork && subnetworks[selectedNetwork]?.length > 0 ? (
-          subnetworks[selectedNetwork].map((subnet, index) => (
-            <Form.Dropdown.Item key={`subnet-${subnet}-${index}`} value={subnet} title={subnet} />
-          ))
+          // First show subnets in the same region as the selected zone for better UX
+          subnetworks[selectedNetwork]
+            .map((subnet, index) => {
+              // Get region from subnet path
+              const subnetRegion = formatRegionName(subnet.region);
+              // Get selected zone's region
+              const zoneRegion = selectedZone ? selectedZone.split('-').slice(0, 2).join('-') : '';
+              // Determine if this subnet is in the same region as the selected zone
+              const isMatchingRegion = !zoneRegion || subnetRegion === zoneRegion;
+              
+              return {
+                subnet,
+                subnetRegion,
+                isMatchingRegion,
+                index
+              };
+            })
+            // Sort by matching region first, then by name
+            .sort((a, b) => {
+              if (a.isMatchingRegion !== b.isMatchingRegion) {
+                return a.isMatchingRegion ? -1 : 1; // Matching regions first
+              }
+              return a.subnet.name.localeCompare(b.subnet.name); // Then alphabetically
+            })
+            .map(({ subnet, subnetRegion, isMatchingRegion, index }) => (
+              <Form.Dropdown.Item 
+                key={`subnet-${subnet.name}-${index}`} 
+                value={subnet.name} 
+                title={`${subnet.name} (${subnetRegion})${!isMatchingRegion ? ' - different region' : ''}`}
+                icon={isMatchingRegion ? Icon.Checkmark : Icon.Warning}
+              />
+            ))
         ) : (
           <Form.Dropdown.Item key="subnet-default-fallback" value="default" title="default" />
         )}
