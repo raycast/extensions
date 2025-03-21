@@ -43,7 +43,7 @@ export default async function Command(props: LaunchProps<{ arguments: SearchArgu
         await searchOnPlatform(randomPlatform, searchText, dateString);
       }
 
-      await showHUD(`✅ Search specified keyword: '${searchText}'`, { clearRootSearch: true });
+      await showHUD(`✅ Search specified keyword: ${searchText}`, { clearRootSearch: true });
     } else {
       await showHUD("❌ No search keyword provided");
     }

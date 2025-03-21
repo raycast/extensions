@@ -36,7 +36,7 @@ export default async function Command() {
       await searchOnPlatform(randomPlatform, randomKeyword, dateString);
     }
 
-    await showHUD(`✅ Search random keyword: '${randomKeyword}'`, { clearRootSearch: true });
+    await showHUD(`✅ Search random keyword: ${randomKeyword}`, { clearRootSearch: true });
   } catch (error) {
     await showHUD("❌ Open random search failed");
   }
