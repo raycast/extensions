@@ -2,7 +2,7 @@ import { ActionPanel, Action, List, showToast, Toast, useNavigation, Icon, confi
 import { useState, useEffect } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { StorageObjectsView } from "./";
+import StorageObjectsView from "./StorageObjectsView";
 import { executeGcloudCommand } from "../../gcloud";
 import BucketLifecycleView from "./BucketLifecycleView";
 import BucketIAMView from "./BucketIAMView";

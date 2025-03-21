@@ -4,6 +4,7 @@ import { StorageBucketView, IAMMembersByPrincipalView } from "./services/storage
 import { IAMView } from "./services/iam";
 import { ServiceHubView } from "./services/servicehub";
 import { ComputeInstancesView, ComputeDisksView } from "./services/compute";
+import { NetworkView, VPCView, IPAddressView, FirewallRulesView } from "./services/network";
 import { executeGcloudCommand, getProjects } from "./gcloud";
 import { CacheManager } from "./utils/CacheManager";
 
@@ -43,6 +44,12 @@ const AVAILABLE_SERVICES: Service[] = [
     name: "Compute Engine",
     description: "Virtual machines running in Google's data centers",
     icon: Icon.Desktop
+  },
+  {
+    id: "network",
+    name: "VPC Network",
+    description: "Virtual Private Cloud networks, subnets, and firewall rules",
+    icon: Icon.Network
   },
   {
     id: "servicehub",
@@ -386,6 +393,102 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
     }
   };
 
+  const viewVPCNetworks = async () => {
+    setActionInProgress("vpc-networks");
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading VPC Networks...",
+        message: `Project: ${projectId}`
+      });
+      
+      // Short delay to show the toast before navigation
+      setTimeout(() => {
+        loadingToast.hide();
+        push(<VPCView projectId={projectId} gcloudPath={gcloudPath} />);
+      }, 500);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to navigate",
+        message: error instanceof Error ? error.message : String(error)
+      });
+      setActionInProgress(null);
+    }
+  };
+
+  const viewNetworkService = async () => {
+    setActionInProgress("network");
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading Network Service...",
+        message: `Project: ${projectId}`
+      });
+      
+      // Short delay to show the toast before navigation
+      setTimeout(() => {
+        loadingToast.hide();
+        push(<NetworkView projectId={projectId} gcloudPath={gcloudPath} />);
+      }, 500);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to navigate",
+        message: error instanceof Error ? error.message : String(error)
+      });
+      setActionInProgress(null);
+    }
+  };
+
+  const viewIPAddresses = async () => {
+    setActionInProgress("ip-addresses");
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading IP Addresses...",
+        message: `Project: ${projectId}`
+      });
+      
+      // Short delay to show the toast before navigation
+      setTimeout(() => {
+        loadingToast.hide();
+        push(<IPAddressView projectId={projectId} gcloudPath={gcloudPath} />);
+      }, 500);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to navigate",
+        message: error instanceof Error ? error.message : String(error)
+      });
+      setActionInProgress(null);
+    }
+  };
+
+  const viewFirewallRules = async () => {
+    setActionInProgress("firewall-rules");
+    try {
+      const loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading Firewall Rules...",
+        message: `Project: ${projectId}`
+      });
+      
+      // Short delay to show the toast before navigation
+      setTimeout(() => {
+        loadingToast.hide();
+        push(<FirewallRulesView projectId={projectId} gcloudPath={gcloudPath} />);
+      }, 500);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to navigate",
+        message: error instanceof Error ? error.message : String(error)
+      });
+      setActionInProgress(null);
+    }
+  };
+
   const clearCache = async () => {
     setActionInProgress("clearing-cache");
     try {
@@ -512,6 +615,30 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
                           title="View Compute Disks" 
                           icon={Icon.HardDrive} 
                           onAction={viewComputeDisks}
+                        />
+                      </>
+                    )}
+                    {service.id === "network" && (
+                      <>
+                        <Action 
+                          title="Network Dashboard" 
+                          icon={Icon.AppWindow} 
+                          onAction={viewNetworkService}
+                        />
+                        <Action 
+                          title="View VPC Networks" 
+                          icon={Icon.Globe} 
+                          onAction={viewVPCNetworks}
+                        />
+                        <Action 
+                          title="View IP Addresses" 
+                          icon={Icon.Link} 
+                          onAction={viewIPAddresses}
+                        />
+                        <Action 
+                          title="View Firewall Rules" 
+                          icon={Icon.Shield} 
+                          onAction={viewFirewallRules}
                         />
                       </>
                     )}
