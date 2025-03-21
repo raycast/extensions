@@ -44,10 +44,6 @@ export default function Command() {
     setIsLoading(true);
     const url = `${config.apiUrl}/call/agent/public`;
     try {
-      console.log("Sending request to:", url, {
-        prompt: values.command,
-        chain: CHAIN,
-      });
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -67,7 +63,6 @@ export default function Command() {
       }
 
       const data = await response.json();
-      console.log("Response:", data);
 
       // Type guard to check if the response matches our interface
       if (typeof data === "object" && data !== null && "response" in data && typeof data.response === "string") {
@@ -84,7 +79,6 @@ export default function Command() {
         style: Toast.Style.Success,
       });
     } catch (error) {
-      console.error("Error details:", error);
       showToast({
         title: "Error",
         message: error instanceof Error ? error.message : "Failed to process command",

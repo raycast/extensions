@@ -36,7 +36,7 @@ const AVAILABLE_CHAINS: { value: Chain; title: string }[] = [
 ];
 
 // At the top of the file, outside the component
-let globalChain: Chain = "mode";
+let globalChain: Chain = "base";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -49,14 +49,11 @@ export default function Command() {
   // Load saved chain on mount
   useEffect(() => {
     let isSubscribed = true;
-    console.log("🔍 Loading saved chain...");
 
     LocalStorage.getItem<Chain>("lastSelectedChain").then((savedChain) => {
       if (!isSubscribed) return;
 
-      console.log("📥 Saved chain from storage:", savedChain);
       if (savedChain) {
-        console.log("✅ Setting chain to:", savedChain);
         globalChain = savedChain;
         setSelectedChain(savedChain);
       }
@@ -73,17 +70,19 @@ export default function Command() {
     if (isInitialMount.current) return;
 
     let isSubscribed = true;
-    console.log("💾 Saving chain to storage:", selectedChain);
 
     LocalStorage.setItem("lastSelectedChain", selectedChain)
       .then(() => {
         if (!isSubscribed) return;
-        console.log("✅ Chain saved successfully");
         globalChain = selectedChain;
       })
       .catch((error) => {
         if (!isSubscribed) return;
-        console.error("❌ Error saving chain:", error);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to save chain preference",
+          message: error instanceof Error ? error.message : "Unknown error occurred",
+        });
       });
 
     return () => {
@@ -111,15 +110,6 @@ export default function Command() {
     setIsLoading(true);
     const url = `${config.apiUrl}/call/agent/viem`;
     try {
-      console.log("=== API Call Details (Private Key Mode) ===");
-      console.log("🎯 Endpoint:", url);
-      console.log("📦 Payload:", {
-        prompt: values.command,
-        chain: selectedChain,
-        privateKeyProvided: !!preferences.privateKey,
-      });
-      console.log("==================");
-
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -136,16 +126,10 @@ export default function Command() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.log("❌ API Error:", {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorText,
-        });
         throw new Error(`Server error ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
-      console.log("✅ API Response:", data);
 
       // Type guard to check if the response matches our interface
       if (typeof data === "object" && data !== null && "response" in data && typeof data.response === "string") {
@@ -162,7 +146,6 @@ export default function Command() {
         style: Toast.Style.Success,
       });
     } catch (error) {
-      console.error("Error details:", error);
       showToast({
         title: "Error",
         message: error instanceof Error ? error.message : "Failed to process command",
