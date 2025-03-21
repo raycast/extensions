@@ -24,8 +24,29 @@ export default function Chat({ launchContext }) {
     });
   };
 
+  function showFailureToast(error, options = {}) {
+    return showToast({
+      style: Toast.Style.Failure,
+      title: options.title || "Error",
+      message: error instanceof Error ? error.message : String(error),
+      primaryAction: options.primaryAction,
+    });
+  }
+
   const { apiKey, defaultModel } = getPreferenceValues();
   const gemini = new Gemini(apiKey, { fetch });
+
+  let createNewChatName = (prefix = "New Chat ") => {
+    const existingChatNames = chatData.chats.map((x) => x.name);
+    const newChatNumbers = existingChatNames
+      .filter((x) => x.match(/^New Chat \d+$/))
+      .map((x) => parseInt(x.replace(prefix, "")));
+    let lowestAvailableNumber = 1;
+    while (newChatNumbers.includes(lowestAvailableNumber)) {
+      lowestAvailableNumber++;
+    }
+    return prefix + lowestAvailableNumber;
+  };
 
   let CreateChat = () => {
     const { pop } = useNavigation();
@@ -37,23 +58,20 @@ export default function Chat({ launchContext }) {
             <Action.SubmitForm
               title="Create Chat"
               onSubmit={(values) => {
-                if (!values.chatName.trim()) {
-                  toast(Toast.Style.Failure, "Chat name cannot be empty.");
-                  return;
-                }
-                if (chatData.chats.map((x) => x.name).includes(values.chatName)) {
-                  toast(Toast.Style.Failure, "Chat with that name already exists.");
+                let newName = values.chatName.trim() || createNewChatName();
+                if (chatData.chats.map((x) => x.name).includes(newName)) {
+                  showFailureToast("Chat with that name already exists.");
                 } else {
                   pop();
                   setChatData((oldData) => {
                     let newChatData = structuredClone(oldData);
                     newChatData.chats.push({
-                      name: values.chatName,
+                      name: newName,
                       creationDate: new Date(),
                       messages: [],
                       model: values.model === "default" ? defaultModel : values.model,
                     });
-                    newChatData.currentChat = values.chatName;
+                    newChatData.currentChat = newName;
 
                     return newChatData;
                   });
