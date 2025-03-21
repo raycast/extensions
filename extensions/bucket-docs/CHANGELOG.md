@@ -1,5 +1,5 @@
 # Bucket Docs Changelog
 
-## [Initial Version] - 2025-03-21
+## [Initial Version] - {PR_MERGE_DATE}
 
 Hello, world.
