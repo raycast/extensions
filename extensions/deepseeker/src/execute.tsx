@@ -1,8 +1,8 @@
 import { Clipboard, getPreferenceValues, getSelectedText, showHUD, showToast, Toast } from "@raycast/api";
-import { global_model, openai } from "./api";
+import { globalModel, openai } from "./api";
 
-const model_override = getPreferenceValues().model_execute;
-const model = model_override == "global" ? global_model : model_override;
+const modelOverride = getPreferenceValues().model_execute;
+const model = modelOverride == "global" ? globalModel : modelOverride;
 
 export default async function Command() {
   let selectedText = "";

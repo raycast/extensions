@@ -14,7 +14,9 @@
     "undefinedzack",
     "anirudhganwal06",
     "samuel_ivarsson",
-    "gaspihabif"
+    "gaspihabif",
+    "marinsokol",
+    "jose-elias-alvarez"
   ],
   "pastContributors": [
     "pomdtr"
@@ -368,7 +370,7 @@
     "@raycast/api": "^1.83.2",
     "@raycast/utils": "^1.17.0",
     "execa": "^7.0.0",
-    "node-fetch": "^3.3.2",
+    "fast-fuzzy": "^1.12.0",
     "node-stream-zip": "^1.15.0"
   },
   "devDependencies": {
