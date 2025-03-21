@@ -10,7 +10,6 @@ Keyword Roulette helps you track technology trends more efficiently. This extens
 
 - **Spin & Explore** – Let randomness guide your curiosity! Search a **random keyword** from your custom topic collection.  
 - **Customizable Topics** – Maintain a **personalized keyword list** to track trends and topics you care about.  
-- **Quick & Seamless** – Get instant results across multiple platforms with a single search.  
 
 
 ## Supported Platforms
@@ -44,18 +43,8 @@ Keyword Roulette helps you track technology trends more efficiently. This extens
 Keyword management helps you maintain a curated list of topics and tech trends that interest you:
 
 - Add keywords: Use the "Add Keyword" command to include new topics you want to track
-- Remove keywords: Use the "Remove Keyword" command to clean up outdated or irrelevant topics
-- Edit keywords: Use the "Edit Keywords" command to refine your interest collection
+- Show keywords: Use the "Show Keywords" command to show your interest collection and remove outdated topics
 
-### Search with a Specific Keyword
-
-1. Open Raycast with your shortcut
-2. Type "Search a Specified Keyword"
-3. You can:
-   - Enter a keyword directly
-   - Use selected text as the keyword
-   - Use clipboard content as the keyword
-4. The search will be performed on your configured platforms
 
 
 ## Configuration
