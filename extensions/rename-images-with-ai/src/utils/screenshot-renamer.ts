@@ -28,7 +28,7 @@ interface RenameResult {
 
 export async function renameScreenshots(filePaths: string[]): Promise<RenameResult[]> {
   // Process files in parallel with a concurrency limit based on user preferences
-  const concurrencyLimit = parseInt(preferences.batchSize || "3"); // Default to 3 if not set
+  const concurrencyLimit = Math.max(1, Number(preferences.batchSize || "3")); // Default to 3 if not set, ensure minimum of 1
   const batchResults = [];
 
   // Process files in batches
