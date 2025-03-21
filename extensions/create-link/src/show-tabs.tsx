@@ -28,15 +28,15 @@ export default function CopyPlainText() {
     initialize();
   }, []);
 
-  useEffect(() => {
-    if (!isLoading && tabs.length === 0) {
-      showHUD("No tabs found");
-    }
-  }, [tabs, isLoading]);
-
   return (
     <Suspense fallback={<List isLoading={isLoading}>Loading...</List>}>
-      {!isLoading && tabs.length === 0 ? <List.EmptyView title="No tabs found" /> : <TabList tabs={tabs} />}
+      {!isLoading && tabs.length === 0 ? (
+        <List>
+          <List.EmptyView title="No tabs found" />
+        </List>
+      ) : (
+        <TabList tabs={tabs} />
+      )}
     </Suspense>
   );
 }
