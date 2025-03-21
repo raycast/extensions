@@ -465,27 +465,34 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [addressType, setAddressType] = useState<string>("EXTERNAL");
   const [subnets, setSubnets] = useState<{ name: string; region: string }[]>([]);
+  const [vpcs, setVPCs] = useState<{ name: string }[]>([]);
   
   useEffect(() => {
-    // Fetch subnets for internal addresses
-    const fetchSubnets = async () => {
+    // Fetch subnets for internal addresses and VPCs
+    const fetchNetworkResources = async () => {
       try {
         const service = new NetworkService(gcloudPath, projectId);
-        const allSubnets = await service.getSubnets();
         
-        // Transform subnets to a more usable format
+        // Fetch subnets
+        const allSubnets = await service.getSubnets();
         const formattedSubnets = allSubnets.map(subnet => ({
           name: subnet.name,
           region: service.formatRegion(subnet.region)
         }));
-        
         setSubnets(formattedSubnets);
+        
+        // Fetch VPCs
+        const allVPCs = await service.getVPCs();
+        const formattedVPCs = allVPCs.map(vpc => ({
+          name: vpc.name
+        }));
+        setVPCs(formattedVPCs);
       } catch (error) {
-        console.error("Error fetching subnets:", error);
+        console.error("Error fetching network resources:", error);
       }
     };
     
-    fetchSubnets();
+    fetchNetworkResources();
   }, [gcloudPath, projectId]);
   
   async function handleSubmit(values: {
@@ -494,8 +501,11 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
     region: string;
     addressType: string;
     subnet?: string;
+    network?: string;
     specificAddress?: string;
     purpose?: string;
+    ephemeral?: boolean;
+    networkTier?: string;
   }) {
     if (!values.name) {
       showToast({
@@ -542,8 +552,11 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
         {
           description: values.description,
           subnet: values.subnet,
+          network: values.network,
           address: values.specificAddress,
-          purpose: values.purpose
+          purpose: values.purpose,
+          ephemeral: values.ephemeral,
+          networkTier: values.networkTier as "PREMIUM" | "STANDARD" | undefined
         }
       );
       
@@ -636,6 +649,24 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
         <Form.Dropdown.Item value="INTERNAL" title="Internal" icon={Icon.ComputerChip} />
       </Form.Dropdown>
       
+      <Form.Checkbox
+        id="ephemeral"
+        title="Temporary IP"
+        label="Create as ephemeral IP address"
+        info="Ephemeral IPs exist only for the lifetime of the resource they're assigned to"
+      />
+      
+      {addressType === "EXTERNAL" && (
+        <Form.Dropdown
+          id="networkTier"
+          title="Network Service Tier"
+          info="Premium tier offers higher performance, Standard tier is more cost-effective"
+        >
+          <Form.Dropdown.Item value="PREMIUM" title="Premium" />
+          <Form.Dropdown.Item value="STANDARD" title="Standard" />
+        </Form.Dropdown>
+      )}
+      
       {addressType === "INTERNAL" && (
         <Form.Dropdown
           id="subnet"
@@ -655,6 +686,24 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
           )}
         </Form.Dropdown>
       )}
+      
+      <Form.Dropdown
+        id="network"
+        title="VPC Network"
+        info="The VPC network to associate with this IP address"
+      >
+        {vpcs.length === 0 ? (
+          <Form.Dropdown.Item value="" title="Loading networks..." />
+        ) : (
+          vpcs.map(vpc => (
+            <Form.Dropdown.Item
+              key={vpc.name}
+              value={vpc.name}
+              title={vpc.name}
+            />
+          ))
+        )}
+      </Form.Dropdown>
       
       {addressType === "INTERNAL" && (
         <Form.Dropdown

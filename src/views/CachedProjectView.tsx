@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { CacheManager, CACHE_KEYS, Project } from "../utils/CacheManager";
 import ProjectView from "../ProjectView";
 import { executeGcloudCommand } from "../gcloud";
+import DevScreen from "./DevScreen";
 
 interface CachedProjectViewProps {
   gcloudPath: string;
@@ -336,6 +337,11 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
     }
   }
 
+  // Function to open Dev Screen
+  function openDevScreen() {
+    push(<DevScreen />);
+  }
+
   return (
     <List
       isLoading={isLoading}
@@ -520,21 +526,34 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
             />
             {onLoginWithDifferentAccount && (
               <List.Item
-                title="Login with Different Account"
-                subtitle="Switch to another Google Cloud account"
                 icon={{ source: Icon.Person, tintColor: Color.Orange }}
+                title="Login with Different Account" 
+                subtitle="Switch to another Google Cloud account"
                 actions={
                   <ActionPanel>
-                    <Action
-                      title="Switch Account"
+                    <Action 
+                      title="Switch Account" 
+                      onAction={onLoginWithDifferentAccount || (() => {})}
                       icon={Icon.Switch}
-                      shortcut={{ modifiers: ["cmd"], key: "l" }}
-                      onAction={onLoginWithDifferentAccount}
                     />
                   </ActionPanel>
                 }
               />
             )}
+            <List.Item
+              icon={{ source: Icon.Terminal, tintColor: Color.Purple }}
+              title="Dev Screen"
+              subtitle="Development Tools and Utilities"
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Open Dev Screen"
+                    icon={Icon.Terminal}
+                    onAction={openDevScreen}
+                  />
+                </ActionPanel>
+              }
+            />
           </List.Section>
         </>
       ) : (

@@ -49,7 +49,7 @@ const AVAILABLE_SERVICES: Service[] = [
     id: "network",
     name: "VPC Network",
     description: "Virtual Private Cloud networks, subnets, and firewall rules",
-    icon: Icon.Globe
+    icon: Icon.Network
   },
   {
     id: "servicehub",

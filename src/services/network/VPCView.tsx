@@ -11,6 +11,8 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { NetworkService, VPC } from "./NetworkService";
+import SubnetsView from "./SubnetsView";
+import FirewallRulesView from "./FirewallRulesView";
 
 interface VPCViewProps {
   projectId: string;
@@ -41,6 +43,9 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
         // Fetch VPCs
         const fetchedVPCs = await networkService.getVPCs();
         setVPCs(fetchedVPCs);
+        
+        // Prefetch subnets in background for faster subnet view
+        networkService.getSubnets().catch(err => console.error("Background subnet fetch error:", err));
         
         loadingToast.hide();
         
@@ -256,12 +261,27 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
                 <Action
                   title="View Subnets"
                   icon={Icon.List}
-                  // TODO: Implement subnet view navigation
+                  onAction={() => {
+                    push(
+                      <SubnetsView
+                        projectId={projectId}
+                        gcloudPath={gcloudPath}
+                        vpc={vpc}
+                      />
+                    );
+                  }}
                 />
                 <Action
                   title="View Firewall Rules"
                   icon={Icon.List}
-                  // TODO: Implement firewall rules view navigation
+                  onAction={() => {
+                    push(
+                      <FirewallRulesView
+                        projectId={projectId}
+                        gcloudPath={gcloudPath}
+                      />
+                    );
+                  }}
                 />
                 <Action
                   title="Refresh"

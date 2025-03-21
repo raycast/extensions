@@ -13,6 +13,7 @@ import { NetworkView, VPCView, IPAddressView, FirewallRulesView } from "./servic
 import { executeGcloudCommand } from "./gcloud";
 import { CacheManager, Project } from "./utils/CacheManager";
 import CachedProjectView from "./views/CachedProjectView";
+import DevScreen from "./views/DevScreen";
 
 const execPromise = promisify(exec);
 const GCLOUD_PATH = "/usr/local/bin/gcloud";
@@ -673,6 +674,11 @@ ${statusMessage}`}
     }
   }
 
+  // Function to open Dev Screen
+  function openDevScreen() {
+    push(<DevScreen />);
+  }
+
   if (error) {
     return (
       <List isLoading={false}>
@@ -753,6 +759,20 @@ ${statusMessage}`}
                     icon={Icon.Switch}
                     shortcut={{ modifiers: ["cmd"], key: "l" }}
                     onAction={loginWithDifferentAccount}
+                  />
+                </ActionPanel>
+              }
+            />
+            <List.Item
+              icon={{ source: Icon.Terminal, tintColor: Color.Purple }}
+              title="Dev Screen"
+              subtitle="Development Tools and Utilities"
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Open Dev Screen"
+                    icon={Icon.Terminal}
+                    onAction={openDevScreen}
                   />
                 </ActionPanel>
               }
