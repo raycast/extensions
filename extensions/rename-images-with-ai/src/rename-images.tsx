@@ -209,7 +209,7 @@ export default function RenameScreenshotsCommand() {
   }
 }
 
-function getStatusIcon(status: string): Icon {
+function getStatusIcon(status: ScreenshotItem['status']): Icon {
   switch (status) {
     case "pending":
       return Icon.Clock;
