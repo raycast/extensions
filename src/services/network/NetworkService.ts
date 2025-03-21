@@ -20,6 +20,9 @@ export interface VPCNetwork {
   mtu: number;
   creationTimestamp: string;
   selfLink: string;
+  isShared?: boolean;
+  sharedWithProject?: string;
+  sharedFromProject?: string;
 }
 
 export interface Subnetwork {
@@ -130,6 +133,7 @@ export class NetworkService {
   private gcloudPath: string;
   private projectId: string;
   private vpcCache: Map<string, { data: VPCNetwork[]; timestamp: number }> = new Map();
+  private sharedVpcCache: Map<string, { data: VPCNetwork[]; timestamp: number }> = new Map();
   private subnetworkCache: Map<string, { data: Subnetwork[]; timestamp: number }> = new Map();
   private firewallCache: Map<string, { data: FirewallRule[]; timestamp: number }> = new Map();
   private routeCache: Map<string, { data: Route[]; timestamp: number }> = new Map();
@@ -145,15 +149,22 @@ export class NetworkService {
 
   /**
    * Get list of VPC networks
+   * @param includeShared - Whether to include networks shared with this project
    * @returns Promise with array of VPC networks
    */
-  async getVPCNetworks(): Promise<VPCNetwork[]> {
+  async getVPCNetworks(includeShared: boolean = false): Promise<VPCNetwork[]> {
     const cacheKey = 'vpc-networks';
     const cachedData = this.vpcCache.get(cacheKey);
     const now = Date.now();
     
     if (cachedData && (now - cachedData.timestamp < this.CACHE_TTL)) {
       console.log(`Using cached VPC network data`);
+      
+      if (includeShared) {
+        const sharedNetworks = await this.getSharedVPCNetworks();
+        return [...cachedData.data, ...sharedNetworks];
+      }
+      
       return cachedData.data;
     }
     
@@ -169,9 +180,121 @@ export class NetworkService {
       // Cache the result
       this.vpcCache.set(cacheKey, { data: networks, timestamp: now });
       
+      if (includeShared) {
+        const sharedNetworks = await this.getSharedVPCNetworks();
+        return [...networks, ...sharedNetworks];
+      }
+      
       return networks;
     } catch (error: any) {
       console.error("Error fetching VPC networks:", error);
+      
+      // If we have cached data, return it even if expired
+      if (cachedData) {
+        console.log("Returning expired cached data as fallback");
+        
+        if (includeShared) {
+          try {
+            const sharedNetworks = await this.getSharedVPCNetworks();
+            return [...cachedData.data, ...sharedNetworks];
+          } catch {
+            return cachedData.data;
+          }
+        }
+        
+        return cachedData.data;
+      }
+      
+      // Return empty array instead of throwing to prevent UI from breaking
+      console.log("No cached data available, returning empty array");
+      return [];
+    }
+  }
+  
+  /**
+   * Get list of shared VPC networks (networks shared with this project)
+   * @returns Promise with array of shared VPC networks
+   */
+  async getSharedVPCNetworks(): Promise<VPCNetwork[]> {
+    const cacheKey = 'shared-vpc-networks';
+    const cachedData = this.sharedVpcCache.get(cacheKey);
+    const now = Date.now();
+    
+    if (cachedData && (now - cachedData.timestamp < this.CACHE_TTL)) {
+      console.log(`Using cached shared VPC network data`);
+      return cachedData.data;
+    }
+    
+    try {
+      // First, check if this project is a service project
+      const xpnStatusCommand = `compute shared-vpc get-host-project ${this.projectId} --format=json`;
+      console.log(`Executing command: ${xpnStatusCommand}`);
+      
+      try {
+        const xpnResult = await executeGcloudCommand(this.gcloudPath, xpnStatusCommand);
+        
+        if (xpnResult && xpnResult.name) {
+          const hostProject = xpnResult.name;
+          console.log(`This is a service project for host project: ${hostProject}`);
+          
+          // Get networks from the host project
+          const command = `compute networks list --project=${hostProject} --format=json`;
+          console.log(`Executing command: ${command}`);
+          
+          const result = await executeGcloudCommand(this.gcloudPath, command);
+          
+          const networks: VPCNetwork[] = Array.isArray(result) ? result : [result];
+          
+          // Mark networks as shared and add host project information
+          const sharedNetworks = networks.map(network => ({
+            ...network,
+            isShared: true,
+            sharedFromProject: hostProject
+          }));
+          
+          // Cache the result
+          this.sharedVpcCache.set(cacheKey, { data: sharedNetworks, timestamp: now });
+          
+          return sharedNetworks;
+        }
+      } catch (error) {
+        console.log("This project is not a service project or there was an error checking XPN status");
+      }
+      
+      // Next, check if this project is a host project
+      const getServiceProjectsCommand = `compute shared-vpc list-associated-resources ${this.projectId} --format=json`;
+      console.log(`Executing command: ${getServiceProjectsCommand}`);
+      
+      try {
+        const serviceProjectsResult = await executeGcloudCommand(this.gcloudPath, getServiceProjectsCommand);
+        
+        if (serviceProjectsResult && serviceProjectsResult.length > 0) {
+          console.log(`This is a host project with ${serviceProjectsResult.length} service projects`);
+          
+          // Get networks from this project that are shared
+          const networks = await this.getVPCNetworks(false);
+          
+          // Mark networks as shared and add service project information
+          const sharedNetworks = networks.map(network => ({
+            ...network,
+            isShared: true,
+            sharedWithProject: serviceProjectsResult.map((sp: any) => sp.id).join(', ')
+          }));
+          
+          // Cache the result
+          this.sharedVpcCache.set(cacheKey, { data: sharedNetworks, timestamp: now });
+          
+          return sharedNetworks;
+        }
+      } catch (error) {
+        console.log("This project is not a host project or there was an error checking associated resources");
+      }
+      
+      // No shared VPC networks found
+      this.sharedVpcCache.set(cacheKey, { data: [], timestamp: now });
+      return [];
+    } catch (error: any) {
+      console.error("Error fetching shared VPC networks:", error);
       
       // If we have cached data, return it even if expired
       if (cachedData) {
@@ -790,6 +913,7 @@ export class NetworkService {
   // Helper methods to clear cache
   private clearVPCCache(): void {
     this.vpcCache.clear();
+    this.sharedVpcCache.clear();
   }
   
   private clearSubnetworkCache(): void {

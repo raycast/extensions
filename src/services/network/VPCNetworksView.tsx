@@ -49,8 +49,8 @@ export default function VPCNetworksView({ projectId, gcloudPath }: VPCNetworksVi
         
         console.log(`Initializing network service for project: ${projectId}`);
         
-        // Try to fetch networks with a timeout
-        const fetchPromise = networkService.getVPCNetworks();
+        // Try to fetch networks with a timeout, including shared networks
+        const fetchPromise = networkService.getVPCNetworks(true);
         
         // Set a timeout of 30 seconds to avoid UI hanging indefinitely
         const timeoutPromise = new Promise<VPCNetwork[]>((_, reject) => {
@@ -60,7 +60,7 @@ export default function VPCNetworksView({ projectId, gcloudPath }: VPCNetworksVi
         // Race the promises - use whichever completes first
         const fetchedNetworks = await Promise.race<VPCNetwork[]>([fetchPromise, timeoutPromise]);
         
-        console.log(`Fetched ${fetchedNetworks.length} VPC networks`);
+        console.log(`Fetched ${fetchedNetworks.length} VPC networks (including shared networks)`);
         setNetworks(fetchedNetworks);
         
         loadingToast.hide();
@@ -123,7 +123,7 @@ export default function VPCNetworksView({ projectId, gcloudPath }: VPCNetworksVi
         title: "Refreshing networks...",
       });
       
-      const fetchedNetworks = await service.getVPCNetworks();
+      const fetchedNetworks = await service.getVPCNetworks(true);
       
       setNetworks(fetchedNetworks);
       
@@ -249,70 +249,139 @@ export default function VPCNetworksView({ projectId, gcloudPath }: VPCNetworksVi
 
   // Get formatted metadata for detail view
   const getNetworkMetadata = (network: VPCNetwork) => {
-    const metadata: { title: string; text: string; }[] = [
-      { title: "ID", text: network.id },
-      { title: "Name", text: network.name },
-      { title: "Auto Create Subnets", text: network.autoCreateSubnets ? "Enabled" : "Disabled" },
-      { title: "Routing Mode", text: network.routingMode || "Unknown" },
-      { title: "MTU", text: network.mtu ? network.mtu.toString() : "Unknown" },
-      { title: "Created", text: new Date(network.creationTimestamp).toLocaleString() },
+    const metadata = [
+      {
+        title: "ID",
+        value: network.id,
+      },
+      {
+        title: "Subnet Mode",
+        value: network.autoCreateSubnets ? "Auto" : "Custom",
+        icon: { source: Icon.Wand },
+      },
+      {
+        title: "Routing Mode",
+        value: network.routingMode,
+        icon: { source: Icon.Globe },
+      },
+      {
+        title: "MTU",
+        value: network.mtu.toString(),
+        icon: { source: Icon.Gauge },
+      },
+      {
+        title: "Created",
+        value: new Date(network.creationTimestamp).toLocaleString(),
+        icon: { source: Icon.Calendar },
+      },
     ];
-
-    if (network.description) {
-      metadata.push({ title: "Description", text: network.description });
+    
+    // Add shared network information if applicable
+    if (network.isShared) {
+      if (network.sharedFromProject) {
+        metadata.push({
+          title: "Shared From",
+          value: network.sharedFromProject,
+          icon: { source: Icon.Link },
+        });
+      }
+      
+      if (network.sharedWithProject) {
+        metadata.push({
+          title: "Shared With",
+          value: network.sharedWithProject,
+          icon: { source: Icon.Link },
+        });
+      }
     }
-
+    
     return metadata;
   };
 
-  // Check if there are any networks that match the search
-  const filteredNetworks = networks.filter(network => 
-    network.name.toLowerCase().includes(searchText.toLowerCase()) ||
-    (network.description && network.description.toLowerCase().includes(searchText.toLowerCase()))
-  );
+  // Filter networks based on search text
+  const filteredNetworks = networks.filter((network) => {
+    if (!searchText) return true;
+    
+    const searchTextLower = searchText.toLowerCase();
+    
+    return (
+      network.name.toLowerCase().includes(searchTextLower) ||
+      network.id.toLowerCase().includes(searchTextLower) ||
+      (network.description || "").toLowerCase().includes(searchTextLower) ||
+      (network.isShared ? "shared".includes(searchTextLower) : false) ||
+      (network.sharedFromProject || "").toLowerCase().includes(searchTextLower) ||
+      (network.sharedWithProject || "").toLowerCase().includes(searchTextLower)
+    );
+  });
 
   // Menu of actions for each network
   const getNetworkActions = (network: VPCNetwork) => (
-    <ActionPanel>
-      <ActionPanel.Section>
+    <ActionPanel title={`Actions for ${network.name}`}>
+      <ActionPanel.Section title="Network Management">
         <Action
           title="View Subnets"
           icon={Icon.List}
-          shortcut={{ modifiers: ["cmd"], key: "s" }}
           onAction={() => viewSubnetworks(network)}
         />
         <Action
           title="View Firewall Rules"
           icon={Icon.Shield}
-          shortcut={{ modifiers: ["cmd"], key: "f" }}
           onAction={() => viewFirewallRules(network)}
         />
         <Action
           title="View Routes"
           icon={Icon.Gauge}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={() => viewRoutes(network)}
         />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
         <Action
           title="Refresh Networks"
           icon={Icon.RotateClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={fetchNetworks}
+          shortcut={{ modifiers: ["cmd"], key: "r" }}
         />
         <Action
           title="Create Network"
           icon={Icon.Plus}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
           onAction={createNetwork}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+        />
+        {!network.isShared && (
+          <Action
+            title="Delete Network"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            onAction={() => deleteNetwork(network)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+          />
+        )}
+      </ActionPanel.Section>
+      
+      <ActionPanel.Section title="Clipboard Actions">
+        <Action
+          title="Copy Network Name"
+          icon={Icon.Clipboard}
+          onAction={() => {
+            Clipboard.copy(network.name);
+            showToast({
+              style: Toast.Style.Success,
+              title: "Copied to clipboard",
+              message: network.name,
+            });
+          }}
+          shortcut={{ modifiers: ["cmd"], key: "c" }}
         />
         <Action
-          title="Delete Network"
-          icon={Icon.Trash}
-          style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
-          onAction={() => deleteNetwork(network)}
+          title="Copy Network ID"
+          icon={Icon.Clipboard}
+          onAction={() => {
+            Clipboard.copy(network.id);
+            showToast({
+              style: Toast.Style.Success,
+              title: "Copied to clipboard",
+              message: network.id,
+            });
+          }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
       </ActionPanel.Section>
     </ActionPanel>
@@ -323,109 +392,73 @@ export default function VPCNetworksView({ projectId, gcloudPath }: VPCNetworksVi
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search networks..."
-      navigationTitle="VPC Networks"
-      actions={
-        <ActionPanel>
-          <Action 
-            title="Create Network" 
-            icon={Icon.Plus} 
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            onAction={createNetwork} 
-          />
-          <Action 
-            title="Refresh" 
-            icon={Icon.RotateClockwise} 
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={fetchNetworks} 
-          />
-        </ActionPanel>
-      }
+      searchBarPlaceholder="Search VPC Networks..."
+      throttle
     >
-      {filteredNetworks.length === 0 ? (
-        <List.EmptyView
-          title={searchText ? "No Matching Networks" : "No Networks Found"}
-          description={searchText ? "Try a different search term" : "Create a new VPC network to get started"}
-          icon={{ source: Icon.WifiDisabled, tintColor: Color.PrimaryText }}
-          actions={
-            <ActionPanel>
-              <Action 
-                title="Create Network" 
-                icon={Icon.Plus} 
-                onAction={createNetwork} 
-              />
-              <Action 
-                title="Refresh" 
-                icon={Icon.RotateClockwise} 
-                onAction={fetchNetworks} 
-              />
-            </ActionPanel>
-          }
-        />
-      ) : (
-        <List.Section title="VPC Networks" subtitle={`${filteredNetworks.length} networks`}>
-          {filteredNetworks.map(network => (
-            <List.Item
-              key={network.id}
-              title={network.name}
-              subtitle={network.description || ""}
-              icon={Icon.Network}
-              accessories={[
-                { 
-                  text: network.autoCreateSubnets ? "Auto Subnet" : "Custom Subnet",
-                  icon: network.autoCreateSubnets ? Icon.Check : Icon.Cog
-                },
-                { 
-                  text: `MTU: ${network.mtu || "Default"}`,
-                  icon: Icon.Gauge 
-                }
-              ]}
-              detail={
-                <List.Item.Detail
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label 
-                        title="Network Information" 
-                        icon={Icon.Network} 
-                      />
-                      {getNetworkMetadata(network).map(item => (
-                        <List.Item.Detail.Metadata.Label
-                          key={item.title}
-                          title={item.title}
-                          text={item.text}
-                        />
-                      ))}
-                      <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Label 
-                        title="Subnetworks" 
-                        icon={Icon.List} 
-                      />
-                      {network.subnetworks && network.subnetworks.length > 0 ? (
-                        network.subnetworks.map((subnet, index) => {
-                          const subnetName = subnet.split('/').pop() || subnet;
-                          return (
-                            <List.Item.Detail.Metadata.Label
-                              key={index}
-                              title={`Subnet ${index + 1}`}
-                              text={subnetName}
-                            />
-                          );
-                        })
-                      ) : (
-                        <List.Item.Detail.Metadata.Label
-                          title="No Subnetworks"
-                          text="This network has no subnetworks"
-                        />
-                      )}
-                    </List.Item.Detail.Metadata>
-                  }
-                />
+      <List.Section title="VPC Networks" subtitle={`${filteredNetworks.length} networks`}>
+        {filteredNetworks.map((network) => (
+          <List.Item
+            key={network.id}
+            title={network.name}
+            subtitle={network.description || (network.autoCreateSubnets ? "Auto Mode" : "Custom Mode")}
+            icon={network.isShared ? 
+              { source: Icon.Network } : 
+              { source: Icon.Network }}
+            accessories={[
+              { 
+                text: network.isShared ? 
+                  (network.sharedFromProject ? `Shared from ${network.sharedFromProject}` : 
+                    network.sharedWithProject ? `Shared with other projects` : "Shared VPC") : 
+                  `${network.subnetworks?.length || 0} subnet(s)`,
+                icon: network.isShared ? 
+                  { source: Icon.Link } : 
+                  { source: Icon.List }
+              },
+              { 
+                text: network.routingMode === "GLOBAL" ? "Global Routing" : "Regional Routing",
+                icon: { source: Icon.Globe }
               }
-              actions={getNetworkActions(network)}
+            ]}
+            actions={getNetworkActions(network)}
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    {getNetworkMetadata(network).map((item) => (
+                      <List.Item.Detail.Metadata.Label
+                        key={item.title}
+                        title={item.title}
+                        text={item.value}
+                        icon={item.icon}
+                      />
+                    ))}
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+          />
+        ))}
+      </List.Section>
+      
+      <List.EmptyView
+        title="No Networks Found"
+        description={searchText ? "Try a different search term" : "Create a new VPC network"}
+        icon={{ source: Icon.Network, tintColor: Color.PrimaryText }}
+        actions={
+          <ActionPanel>
+            <Action 
+              title="Create Network" 
+              icon={Icon.Plus} 
+              onAction={createNetwork} 
             />
-          ))}
-        </List.Section>
-      )}
+            <Action 
+              title="Refresh" 
+              icon={Icon.RotateClockwise} 
+              onAction={fetchNetworks} 
+            />
+          </ActionPanel>
+        }
+      />
     </List>
   );
 }
