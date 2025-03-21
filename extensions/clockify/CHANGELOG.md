@@ -1,5 +1,12 @@
 # Clockify Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- `Action` to openExtensionPreferences in invalid token view
+- Add `placeholder`s to API Key & Description
+- Add `icon`s to Start,Stop
+- Allow selecting a Tag during timer start (ref: [Issue #18009](https://github.com/raycast/extensions/issues/18009))
+
 ## [Update] - 2024-11-11
 
 - Add selection for different clockify regions

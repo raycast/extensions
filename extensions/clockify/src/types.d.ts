@@ -25,6 +25,8 @@ export interface Task {
   name: string;
 }
 
+export interface Tag extends Task {};
+
 export interface FetcherArgs {
   method?: string;
   body?: any;

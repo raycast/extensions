@@ -1,4 +1,4 @@
-import { clearLocalStorage, getLocalStorageItem, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { fetcher, validateToken } from "./utils";
 import { DataValues } from "./types";
@@ -15,14 +15,14 @@ export default function useConfig(): ConfigProps {
 
   useEffect(() => {
     if (!isValidToken) {
-      clearLocalStorage();
+      LocalStorage.clear();
       return;
     }
 
     async function getStorage() {
-      const name = await getLocalStorageItem("name");
-      const userId = await getLocalStorageItem("userId");
-      const workspaceId = await getLocalStorageItem("workspaceId");
+      const name = await LocalStorage.getItem("name");
+      const userId = await LocalStorage.getItem("userId");
+      const workspaceId = await LocalStorage.getItem("workspaceId");
 
       if (userId && workspaceId && name) {
         setData({ userId, workspaceId, name });
@@ -30,21 +30,21 @@ export default function useConfig(): ConfigProps {
       }
 
       async function fetchUser() {
-        showToast(ToastStyle.Animated, "Loading…");
+        showToast(Toast.Style.Animated, "Loading…");
 
         const { data, error } = await fetcher(`/user`);
 
         if (data) {
-          setLocalStorageItem("userId", data.id);
-          setLocalStorageItem("workspaceId", data.defaultWorkspace);
-          setLocalStorageItem("name", data.name);
+          LocalStorage.setItem("userId", data.id);
+          LocalStorage.setItem("workspaceId", data.defaultWorkspace);
+          LocalStorage.setItem("name", data.name);
           setData({ userId: data.id, workspaceId: data.defaultWorkspace, name: data.name });
-          showToast(ToastStyle.Success, "Clockify is ready");
+          showToast(Toast.Style.Success, "Clockify is ready");
         } else if (error === "Unauthorized") {
-          showToast(ToastStyle.Failure, "Invalid API Key detected");
+          showToast(Toast.Style.Failure, "Invalid API Key detected");
           setIsValidToken(false);
         } else {
-          showToast(ToastStyle.Failure, "An error ccurred");
+          showToast(Toast.Style.Failure, "An error ccurred");
         }
       }
 
