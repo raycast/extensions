@@ -272,6 +272,8 @@ export default function PullRequestActions({
     pullRequest.mergeable === MergeableState.Mergeable &&
     pullRequest.mergeStateStatus !== MergeStateStatus.Blocked;
 
+  const anyMergeActionAvailable = canMerge || pullRequest.repository.autoMergeAllowed;
+
   const viewerUser = getGitHubUser(viewer);
 
   const isAssignedToMe = pullRequest.assignees.nodes?.some((assignee) => assignee?.isViewer);
@@ -303,77 +305,79 @@ export default function PullRequestActions({
         target={<PullRequestCommits pullRequest={pullRequest} />}
       />
 
-      <ActionPanel.Section>
-        {!canMerge && !pullRequest.isInMergeQueue && (
-          <>
-            {pullRequest.autoMergeRequest && (
-              <Action
-                title="Disable Auto Merge"
-                icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                onAction={() => disableAutoMerge()}
-              />
-            )}
+      {anyMergeActionAvailable && (
+        <ActionPanel.Section>
+          {!canMerge && !pullRequest.isInMergeQueue && !pullRequest.repository.autoMergeAllowed && (
+            <>
+              {pullRequest.autoMergeRequest && (
+                <Action
+                  title="Disable Auto Merge"
+                  icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                  onAction={() => disableAutoMerge()}
+                />
+              )}
 
-            {!pullRequest.autoMergeRequest && (
-              <Action
-                title="Merge When Ready"
-                icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                onAction={() => enableAutoMerge()}
-              />
-            )}
-          </>
-        )}
+              {!pullRequest.autoMergeRequest && (
+                <Action
+                  title="Merge When Ready"
+                  icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                  onAction={() => enableAutoMerge()}
+                />
+              )}
+            </>
+          )}
 
-        {pullRequest.isMergeQueueEnabled && canMerge && !pullRequest.isInMergeQueue && (
-          <Action
-            title="Add to Merge Queue"
-            icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-            onAction={() => addPullRequestToMergeQueue()}
-          />
-        )}
-        {pullRequest.isMergeQueueEnabled && pullRequest.isInMergeQueue && (
-          <Action
-            title="Remove from Merge Queue"
-            icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-            onAction={() => removePullRequestFromMergeQueue()}
-          />
-        )}
+          {pullRequest.isMergeQueueEnabled && canMerge && !pullRequest.isInMergeQueue && (
+            <Action
+              title="Add to Merge Queue"
+              icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              onAction={() => addPullRequestToMergeQueue()}
+            />
+          )}
+          {pullRequest.isMergeQueueEnabled && pullRequest.isInMergeQueue && (
+            <Action
+              title="Remove from Merge Queue"
+              icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              onAction={() => removePullRequestFromMergeQueue()}
+            />
+          )}
 
-        {!pullRequest.isMergeQueueEnabled && canMerge ? (
-          <>
-            {pullRequest.repository.mergeCommitAllowed ? (
-              <Action
-                title="Create Merge Commit"
-                icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                onAction={() => mergePullRequest(PullRequestMergeMethod.Merge)}
-              />
-            ) : null}
+          {!pullRequest.isMergeQueueEnabled && canMerge ? (
+            <>
+              {pullRequest.repository.mergeCommitAllowed ? (
+                <Action
+                  title="Create Merge Commit"
+                  icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                  onAction={() => mergePullRequest(PullRequestMergeMethod.Merge)}
+                />
+              ) : null}
 
-            {pullRequest.repository.squashMergeAllowed ? (
-              <Action
-                title="Squash and Merge"
-                icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
-                shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
-                onAction={() => mergePullRequest(PullRequestMergeMethod.Squash)}
-              />
-            ) : null}
+              {pullRequest.repository.squashMergeAllowed ? (
+                <Action
+                  title="Squash and Merge"
+                  icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+                  shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
+                  onAction={() => mergePullRequest(PullRequestMergeMethod.Squash)}
+                />
+              ) : null}
 
-            {pullRequest.repository.rebaseMergeAllowed ? (
-              <Action
-                title="Rebase and Merge"
-                icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
-                shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
-                onAction={() => mergePullRequest(PullRequestMergeMethod.Rebase)}
-              />
-            ) : null}
-          </>
-        ) : null}
-      </ActionPanel.Section>
+              {pullRequest.repository.rebaseMergeAllowed ? (
+                <Action
+                  title="Rebase and Merge"
+                  icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+                  shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
+                  onAction={() => mergePullRequest(PullRequestMergeMethod.Rebase)}
+                />
+              ) : null}
+            </>
+          ) : null}
+        </ActionPanel.Section>
+      )}
 
       <ActionPanel.Section>
         <RequestReviewSubmenu pullRequest={pullRequest} mutate={mutate} />

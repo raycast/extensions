@@ -19508,6 +19508,8 @@ export type PullRequestParameters = {
   __typename?: "PullRequestParameters";
   /** Array of allowed merge methods. Allowed values include `merge`, `squash`, and `rebase`. At least one option must be enabled. */
   allowedMergeMethods?: Maybe<Array<PullRequestAllowedMergeMethods>>;
+  /** This field is in beta and subject to change. Automatically request review from Copilot for new pull requests, if the author has access to Copilot code review. */
+  automaticCopilotCodeReviewEnabled: Scalars["Boolean"]["output"];
   /** New, reviewable commits pushed will dismiss previous pull request review approvals. */
   dismissStaleReviewsOnPush: Scalars["Boolean"]["output"];
   /** Require an approving review in pull requests that modify files that have a designated code owner. */
@@ -19524,6 +19526,8 @@ export type PullRequestParameters = {
 export type PullRequestParametersInput = {
   /** Array of allowed merge methods. Allowed values include `merge`, `squash`, and `rebase`. At least one option must be enabled. */
   allowedMergeMethods?: InputMaybe<Array<PullRequestAllowedMergeMethods>>;
+  /** This argument is in beta and subject to change. Automatically request review from Copilot for new pull requests, if the author has access to Copilot code review. */
+  automaticCopilotCodeReviewEnabled?: InputMaybe<Scalars["Boolean"]["input"]>;
   /** New, reviewable commits pushed will dismiss previous pull request review approvals. */
   dismissStaleReviewsOnPush: Scalars["Boolean"]["input"];
   /** Require an approving review in pull requests that modify files that have a designated code owner. */
@@ -32066,6 +32070,7 @@ export type DiscussionFieldsFragment = {
     mergeCommitAllowed: boolean;
     squashMergeAllowed: boolean;
     rebaseMergeAllowed: boolean;
+    autoMergeAllowed: boolean;
     defaultBranchRef?: {
       __typename?: "Ref";
       target?:
@@ -32119,6 +32124,7 @@ export type SearchDiscussionsQuery = {
             mergeCommitAllowed: boolean;
             squashMergeAllowed: boolean;
             rebaseMergeAllowed: boolean;
+            autoMergeAllowed: boolean;
             defaultBranchRef?: {
               __typename?: "Ref";
               target?:
@@ -32173,6 +32179,7 @@ export type SearchDiscussionsQuery = {
             mergeCommitAllowed: boolean;
             squashMergeAllowed: boolean;
             rebaseMergeAllowed: boolean;
+            autoMergeAllowed: boolean;
             defaultBranchRef?: {
               __typename?: "Ref";
               target?:
@@ -32266,6 +32273,7 @@ export type IssueFieldsFragment = {
     mergeCommitAllowed: boolean;
     squashMergeAllowed: boolean;
     rebaseMergeAllowed: boolean;
+    autoMergeAllowed: boolean;
     defaultBranchRef?: {
       __typename?: "Ref";
       target?:
@@ -32395,6 +32403,7 @@ export type IssueDetailFieldsFragment = {
     mergeCommitAllowed: boolean;
     squashMergeAllowed: boolean;
     rebaseMergeAllowed: boolean;
+    autoMergeAllowed: boolean;
     defaultBranchRef?: {
       __typename?: "Ref";
       target?:
@@ -32548,6 +32557,7 @@ export type IssueDetailsQuery = {
           mergeCommitAllowed: boolean;
           squashMergeAllowed: boolean;
           rebaseMergeAllowed: boolean;
+          autoMergeAllowed: boolean;
           defaultBranchRef?: {
             __typename?: "Ref";
             target?:
@@ -32823,6 +32833,7 @@ export type SearchIssuesQuery = {
             mergeCommitAllowed: boolean;
             squashMergeAllowed: boolean;
             rebaseMergeAllowed: boolean;
+            autoMergeAllowed: boolean;
             defaultBranchRef?: {
               __typename?: "Ref";
               target?:
@@ -32958,6 +32969,7 @@ export type CreateIssueMutation = {
         mergeCommitAllowed: boolean;
         squashMergeAllowed: boolean;
         rebaseMergeAllowed: boolean;
+        autoMergeAllowed: boolean;
         defaultBranchRef?: {
           __typename?: "Ref";
           target?:
@@ -33343,6 +33355,7 @@ export type PullRequestFieldsFragment = {
     mergeCommitAllowed: boolean;
     squashMergeAllowed: boolean;
     rebaseMergeAllowed: boolean;
+    autoMergeAllowed: boolean;
     defaultBranchRef?: {
       __typename?: "Ref";
       target?:
@@ -33446,6 +33459,7 @@ export type SearchPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
+              autoMergeAllowed: boolean;
               defaultBranchRef?: {
                 __typename?: "Ref";
                 target?:
@@ -33556,6 +33570,7 @@ export type PullRequestDetailsFieldsFragment = {
     mergeCommitAllowed: boolean;
     squashMergeAllowed: boolean;
     rebaseMergeAllowed: boolean;
+    autoMergeAllowed: boolean;
     defaultBranchRef?: {
       __typename?: "Ref";
       target?:
@@ -33826,6 +33841,7 @@ export type PullRequestDetailsQuery = {
           mergeCommitAllowed: boolean;
           squashMergeAllowed: boolean;
           rebaseMergeAllowed: boolean;
+          autoMergeAllowed: boolean;
           defaultBranchRef?: {
             __typename?: "Ref";
             target?:
@@ -34582,6 +34598,7 @@ export type InitPullRequestMutation = {
         mergeCommitAllowed: boolean;
         squashMergeAllowed: boolean;
         rebaseMergeAllowed: boolean;
+        autoMergeAllowed: boolean;
         defaultBranchRef?: {
           __typename?: "Ref";
           target?:
@@ -34653,6 +34670,7 @@ export type ShortRepositoryFieldsFragment = {
   mergeCommitAllowed: boolean;
   squashMergeAllowed: boolean;
   rebaseMergeAllowed: boolean;
+  autoMergeAllowed: boolean;
   defaultBranchRef?: {
     __typename?: "Ref";
     target?:
@@ -34996,6 +35014,7 @@ export type RepositoryIssuesQuery = {
           mergeCommitAllowed: boolean;
           squashMergeAllowed: boolean;
           rebaseMergeAllowed: boolean;
+          autoMergeAllowed: boolean;
           defaultBranchRef?: {
             __typename?: "Ref";
             target?:
@@ -35197,6 +35216,7 @@ export const ShortRepositoryFieldsFragmentDoc = gql`
     mergeCommitAllowed
     squashMergeAllowed
     rebaseMergeAllowed
+    autoMergeAllowed
   }
 `;
 export const DiscussionFieldsFragmentDoc = gql`
