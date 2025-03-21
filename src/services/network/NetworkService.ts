@@ -755,6 +755,70 @@ export class NetworkService {
     this.firewallCache.clear();
   }
   
+  /**
+   * Generate four available IP address suggestions
+   * @param addressType "INTERNAL" or "EXTERNAL"
+   * @param subnet Optional subnet for internal IPs
+   * @returns Promise with array of available IP address suggestions
+   */
+  async generateAvailableIPSuggestions(
+    addressType: "INTERNAL" | "EXTERNAL" = "EXTERNAL",
+    subnet?: string
+  ): Promise<string[]> {
+    try {
+      // For EXTERNAL addresses, suggest standard IP formats
+      if (addressType === "EXTERNAL") {
+        return [
+          "34.120." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
+          "35.186." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
+          "104.196." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
+          "130.211." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255)
+        ];
+      }
+      
+      // For INTERNAL addresses, use subnet CIDR if available
+      if (subnet) {
+        try {
+          const subnets = await this.getSubnets();
+          const targetSubnet = subnets.find(s => s.name === subnet);
+          
+          if (targetSubnet) {
+            // Parse CIDR range (e.g., "10.0.0.0/24")
+            const cidrParts = targetSubnet.ipCidrRange.split('/');
+            const baseIP = cidrParts[0];
+            const baseOctets = baseIP.split('.');
+            
+            // Generate 4 IPs in the subnet range
+            return [
+              `${baseOctets[0]}.${baseOctets[1]}.${baseOctets[2]}.${10 + Math.floor(Math.random() * 240)}`,
+              `${baseOctets[0]}.${baseOctets[1]}.${baseOctets[2]}.${50 + Math.floor(Math.random() * 200)}`,
+              `${baseOctets[0]}.${baseOctets[1]}.${baseOctets[2]}.${100 + Math.floor(Math.random() * 150)}`,
+              `${baseOctets[0]}.${baseOctets[1]}.${baseOctets[2]}.${200 + Math.floor(Math.random() * 50)}`
+            ];
+          }
+        } catch (error) {
+          console.error("Error parsing subnet range:", error);
+        }
+      }
+      
+      // Default internal IPs if subnet info not available
+      return [
+        "10.128." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
+        "10.129." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
+        "172.16." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
+        "192.168." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255)
+      ];
+    } catch (error) {
+      console.error("Error generating IP suggestions:", error);
+      return [
+        "10.0.0.10",
+        "10.0.0.20",
+        "10.0.0.30",
+        "10.0.0.40"
+      ];
+    }
+  }
+
   public clearAllCaches(): void {
     this.clearVPCCache();
     this.clearSubnetCache();

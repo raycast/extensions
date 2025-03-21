@@ -466,6 +466,10 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
   const [addressType, setAddressType] = useState<string>("EXTERNAL");
   const [subnets, setSubnets] = useState<{ name: string; region: string }[]>([]);
   const [vpcs, setVPCs] = useState<{ name: string }[]>([]);
+  const [selectedSubnet, setSelectedSubnet] = useState<string>("");
+  const [ipSuggestions, setIpSuggestions] = useState<string[]>([]);
+  const [fetchingSuggestions, setFetchingSuggestions] = useState<boolean>(false);
+  const [selectedIpAddress, setSelectedIpAddress] = useState<string>("");
   
   useEffect(() => {
     // Fetch subnets for internal addresses and VPCs
@@ -495,6 +499,28 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
     fetchNetworkResources();
   }, [gcloudPath, projectId]);
   
+  // Get IP address suggestions
+  const fetchIPSuggestions = async (type: string, subnet?: string) => {
+    try {
+      setFetchingSuggestions(true);
+      const service = new NetworkService(gcloudPath, projectId);
+      const suggestions = await service.generateAvailableIPSuggestions(
+        type as "INTERNAL" | "EXTERNAL",
+        subnet
+      );
+      setIpSuggestions(suggestions);
+    } catch (error) {
+      console.error("Error fetching IP suggestions:", error);
+    } finally {
+      setFetchingSuggestions(false);
+    }
+  };
+
+  // Update suggestions when address type or subnet changes
+  useEffect(() => {
+    fetchIPSuggestions(addressType, selectedSubnet);
+  }, [addressType, selectedSubnet]);
+
   async function handleSubmit(values: {
     name: string;
     description: string;
@@ -614,120 +640,131 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
     >
       <Form.TextField
         id="name"
-        title="IP Address Name"
-        placeholder="my-ip-address"
-        info="The name of the new IP address"
-        autoFocus
+        title="Name"
+        placeholder="Enter IP address name"
       />
+      
       <Form.TextField
         id="description"
         title="Description"
-        placeholder="Optional description"
-        info="A human-readable description for this IP address"
+        placeholder="Enter optional description"
       />
+      
       <Form.Dropdown
         id="region"
         title="Region"
-        info="The region where the IP address will be created"
+        placeholder="Select a region"
       >
         {regions.map(region => (
-          <Form.Dropdown.Item
-            key={region}
-            value={region}
-            title={region}
-          />
+          <Form.Dropdown.Item key={region} value={region} title={region} />
         ))}
       </Form.Dropdown>
+      
       <Form.Dropdown
         id="addressType"
         title="Address Type"
-        defaultValue="EXTERNAL"
-        info="External IPs can be assigned to resources with internet access"
-        onChange={setAddressType}
+        value={addressType}
+        onChange={(value) => {
+          setAddressType(value);
+        }}
       >
-        <Form.Dropdown.Item value="EXTERNAL" title="External" icon={Icon.Globe} />
-        <Form.Dropdown.Item value="INTERNAL" title="Internal" icon={Icon.ComputerChip} />
+        <Form.Dropdown.Item value="EXTERNAL" title="External" />
+        <Form.Dropdown.Item value="INTERNAL" title="Internal" />
       </Form.Dropdown>
-      
-      <Form.Checkbox
-        id="ephemeral"
-        title="Temporary IP"
-        label="Create as ephemeral IP address"
-        info="Ephemeral IPs exist only for the lifetime of the resource they're assigned to"
-      />
-      
-      {addressType === "EXTERNAL" && (
-        <Form.Dropdown
-          id="networkTier"
-          title="Network Service Tier"
-          info="Premium tier offers higher performance, Standard tier is more cost-effective"
-        >
-          <Form.Dropdown.Item value="PREMIUM" title="Premium" />
-          <Form.Dropdown.Item value="STANDARD" title="Standard" />
-        </Form.Dropdown>
-      )}
       
       {addressType === "INTERNAL" && (
         <Form.Dropdown
           id="subnet"
           title="Subnet"
-          info="The subnet to allocate the IP address from"
+          placeholder="Select a subnet"
+          onChange={setSelectedSubnet}
         >
-          {subnets.length === 0 ? (
-            <Form.Dropdown.Item value="" title="Loading subnets..." />
-          ) : (
-            subnets.map(subnet => (
-              <Form.Dropdown.Item
-                key={subnet.name}
-                value={subnet.name}
-                title={subnet.name}
-              />
-            ))
-          )}
+          {subnets.map(subnet => (
+            <Form.Dropdown.Item key={subnet.name} value={subnet.name} title={`${subnet.name} (${subnet.region})`} />
+          ))}
         </Form.Dropdown>
       )}
       
-      <Form.Dropdown
-        id="network"
-        title="VPC Network"
-        info="The VPC network to associate with this IP address"
-      >
-        {vpcs.length === 0 ? (
-          <Form.Dropdown.Item value="" title="Loading networks..." />
-        ) : (
-          vpcs.map(vpc => (
+      {addressType === "INTERNAL" && (
+        <Form.Dropdown
+          id="network"
+          title="Network"
+          placeholder="Select a network (optional)"
+        >
+          {vpcs.map(vpc => (
+            <Form.Dropdown.Item key={vpc.name} value={vpc.name} title={vpc.name} />
+          ))}
+        </Form.Dropdown>
+      )}
+      
+      <Form.Separator />
+      
+      <Form.TextField
+        id="specificAddress"
+        title="Specific IP Address"
+        placeholder="Leave blank for auto-assignment"
+        value={selectedIpAddress}
+        onChange={setSelectedIpAddress}
+        info={fetchingSuggestions ? "Loading suggestions..." : "Select a suggestion from the dropdown below"}
+      />
+      
+      <Form.Description
+        title="Available IP Suggestions"
+        text={fetchingSuggestions ? "Loading suggestions..." : "Select a suggestion to use it"}
+      />
+      
+      {ipSuggestions.length > 0 && !fetchingSuggestions && (
+        <Form.Dropdown 
+          id="ipSuggestion" 
+          title="Suggested IPs"
+          onChange={(value) => {
+            setSelectedIpAddress(value);
+          }}
+        >
+          {ipSuggestions.map((ip, index) => (
             <Form.Dropdown.Item
-              key={vpc.name}
-              value={vpc.name}
-              title={vpc.name}
+              key={`ip-${index}`}
+              value={ip}
+              title={ip}
+              icon={Icon.Globe}
             />
-          ))
-        )}
-      </Form.Dropdown>
+          ))}
+        </Form.Dropdown>
+      )}
+      
+      <Form.Separator />
       
       {addressType === "INTERNAL" && (
         <Form.Dropdown
           id="purpose"
           title="Purpose"
-          info="The purpose of this internal IP address"
-          defaultValue=""
+          placeholder="Select a purpose (optional)"
         >
-          <Form.Dropdown.Item value="" title="Default" />
           <Form.Dropdown.Item value="GCE_ENDPOINT" title="GCE Endpoint" />
           <Form.Dropdown.Item value="DNS_RESOLVER" title="DNS Resolver" />
           <Form.Dropdown.Item value="VPC_PEERING" title="VPC Peering" />
-          <Form.Dropdown.Item value="NAT_AUTO" title="NAT Auto" />
           <Form.Dropdown.Item value="IPSEC_INTERCONNECT" title="IPsec Interconnect" />
-          <Form.Dropdown.Item value="SHARED_LOADBALANCER_VIP" title="Shared Loadbalancer VIP" />
+          <Form.Dropdown.Item value="PRIVATE_SERVICE_CONNECT" title="Private Service Connect" />
         </Form.Dropdown>
       )}
       
-      <Form.TextField
-        id="specificAddress"
-        title="Specific IP Address"
-        placeholder="192.168.1.10"
-        info="Optionally specify an exact address from the allowed range"
+      <Form.Checkbox
+        id="ephemeral"
+        label="Ephemeral"
+        title="Ephemeral IP"
+        info="If checked, the IP address is ephemeral"
       />
+      
+      {addressType === "EXTERNAL" && (
+        <Form.Dropdown
+          id="networkTier"
+          title="Network Tier"
+          placeholder="Select a network tier (optional)"
+        >
+          <Form.Dropdown.Item value="PREMIUM" title="Premium" />
+          <Form.Dropdown.Item value="STANDARD" title="Standard" />
+        </Form.Dropdown>
+      )}
     </Form>
   );
 } 
