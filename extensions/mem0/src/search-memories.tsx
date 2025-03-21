@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, Clipboard, Detail, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Detail, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import fetch from "node-fetch";
 import { showFailureToast } from "@raycast/utils";
@@ -64,7 +64,6 @@ export default function Command() {
         title: "Search completed",
         message: `Found ${data.results.length} results`,
       });
-
     } catch (error) {
       showFailureToast("Search failed", {
         primaryAction: {
