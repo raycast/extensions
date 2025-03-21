@@ -49,7 +49,7 @@ Gemini 1.5 Flash offers excellent image understanding at a low cost, and most ne
 
 ### Method 1: Interactive UI Method
 
-1. Open Raycast and search for "Rename Screenshots"
+1. Open Raycast and search for "Rename Images"
 2. Click "Select Screenshots" to choose the image files you want to rename
 3. Click "Rename Screenshots" to start the AI analysis and renaming process
 4. Review the results in the list view
