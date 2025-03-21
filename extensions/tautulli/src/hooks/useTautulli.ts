@@ -16,7 +16,7 @@ export default function useTautulli() {
     return () => {
       clearInterval(refetchInterval);
     };
-  }, []);
+  }, [revalidate]);
 
   const sessions = data?.response.data?.sessions ?? [];
 
