@@ -199,20 +199,6 @@
   ],
   "commands": [
     {
-      "name": "search-specified-keyword",
-      "title": "Search Specified Keyword",
-      "description": "Search a specified keyword on default platforms.",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "keyword",
-          "placeholder": "Keyword to search",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
       "name": "search-random-keyword",
       "title": "Spin Keyword Roulette",
       "description": "Pick a random keyword from the list and search it on default platforms.",
@@ -221,7 +207,7 @@
     {
       "name": "add-keyword",
       "title": "Add Keyword",
-      "description": "Add a new keyword to keywords list",
+      "description": "Add a new keyword to list",
       "mode": "no-view",
       "arguments": [
         {
@@ -233,23 +219,9 @@
       ]
     },
     {
-      "name": "remove-keyword",
-      "title": "Remove Keyword",
-      "description": "Remove a keyword from keyword list",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "keyword",
-          "placeholder": "Keyword to remove",
-          "type": "text",
-          "required": true
-        }
-      ]
-    },
-    {
-      "name": "edit-keywords",
-      "title": "Edit Keywords",
-      "description": "Edit keyword list",
+      "name": "show-keywords",
+      "title": "Show Keywords",
+      "description": "Show keywords and manage them",
       "mode": "view"
     }
   ],
