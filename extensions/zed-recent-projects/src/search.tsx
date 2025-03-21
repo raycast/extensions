@@ -54,13 +54,14 @@ export const withZed = <P extends object>(Component: ComponentType<P>) => {
 };
 
 export function Command() {
-  const zed = useContext(ZedContext).zed!;
+  const { zed } = useContext(ZedContext);
   const { entries, isLoading, error, removeEntry, removeAllEntries } = useZedRecentWorkspaces();
   const { pinnedEntries, pinEntry, unpinEntry, unpinAllEntries, moveUp, moveDown } = usePinnedEntries();
 
   const pinned = Object.values(pinnedEntries)
     .filter((e) => exists(e.uri) || e.host)
     .sort((a, b) => a.order - b.order);
+  const zedIcon = zed ? { fileIcon: zed?.path } : undefined;
 
   const removeAndUnpinEntry = async (entry: Pick<ZedEntry, "id" | "uri">) => {
     await removeEntry(entry.id);
@@ -93,7 +94,7 @@ export function Command() {
               entry={entry}
               actions={
                 <ActionPanel>
-                  <Action.Open title="Open in Zed" target={entry.uri} application={zed} icon={{ fileIcon: zed.path }} />
+                  <Action.Open title="Open in Zed" target={entry.uri} application={zed} icon={zedIcon} />
                   {!entry.is_remote && <Action.ShowInFinder path={entry.path} />}
                   <Action
                     title="Unpin Entry"
@@ -145,12 +146,7 @@ export function Command() {
                 entry={entry}
                 actions={
                   <ActionPanel>
-                    <Action.Open
-                      title="Open in Zed"
-                      target={entry.uri}
-                      application={zed}
-                      icon={{ fileIcon: zed.path }}
-                    />
+                    <Action.Open title="Open in Zed" target={entry.uri} application={zed} icon={zedIcon} />
                     {!entry.is_remote && <Action.ShowInFinder path={entry.path} />}
                     <Action
                       title="Pin Entry"
