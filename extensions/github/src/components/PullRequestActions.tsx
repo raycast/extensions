@@ -117,9 +117,6 @@ export default function PullRequestActions({
     }
   }
 
-  /**
-   * TODO: test this
-   */
   async function addPullRequestToMergeQueue() {
     try {
       await showToast({
@@ -144,9 +141,6 @@ export default function PullRequestActions({
     }
   }
 
-  /**
-   * TODO: test this
-   */
   async function removePullRequestFromMergeQueue() {
     try {
       await showToast({
