@@ -3,7 +3,7 @@ import { isExtensionInstalled, getActiveTab } from "./utils/browser";
 
 interface CopyCustomPreferences {
   customFormat: string;
-};
+}
 
 function sanitizeUrl(url: string): string {
   try {
@@ -20,7 +20,11 @@ function formatCustomLink(format: string, tab: BrowserExtension.Tab): string {
   const safeTitle = title || "";
   const safeFavicon = favicon || "";
 
-  return format.replace(/\{url\}/g, safeUrl).replace(/\{title\}/g, safeTitle).replace(/\{id\}/g, String(id)).replace(/\{favicon\}/g, safeFavicon);
+  return format
+    .replace(/\{url\}/g, safeUrl)
+    .replace(/\{title\}/g, safeTitle)
+    .replace(/\{id\}/g, String(id))
+    .replace(/\{favicon\}/g, safeFavicon);
 }
 
 export default async function copyCustom() {
