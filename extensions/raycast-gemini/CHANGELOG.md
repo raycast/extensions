@@ -3,9 +3,8 @@
 ## [Fix Create Chat Functionality] - {PR_MERGE_DATE}
 
 - 🛠️ aiChat - Fixed the issue where the "Create Chat" functionality always set the chat name to "New Chat X" instead of using the name provided by the user.
-  - Updated the `CreateChat` component to use the chat name provided by the user.
-  - Removed the `createNewChatName` function as it is no longer needed.
-  - Added validation to ensure the chat name is never blank.
+  - Updated the `CreateChat` component to use the chat name provided by the user. If the user does not provide a chat name, the `createNewChatName` function is used as a fallback.
+  - Added validation to ensure that the chat name is unique and not blank.
 
 ## [Updated Models] - 2025-03-15
 
