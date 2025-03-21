@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- Correct setup API key instructions 
+- Remove local CLI mention from extension description
+
 ## [Fix] - 2025-03-17
 
 - Fix CLI binary download hash mismatch error
