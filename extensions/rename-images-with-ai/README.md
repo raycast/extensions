@@ -28,7 +28,7 @@ The extension requires a Google Gemini API key to analyze your screenshots:
    - Create an API key (free to start)
    - Copy your API key
 
-2. Open Raycast and go to the extension settings for "Rename Tidy Titles"
+2. Open Raycast and go to the extension settings for "Rename Images with AI"
 
    - Enter your Google Gemini API key
 
