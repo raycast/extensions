@@ -296,6 +296,140 @@
           "value": "fr-FR"
         }
       ]
+    },
+    {
+      "name": "level",
+      "title": "Whether or not to use picky mode",
+      "description": "Picky mode will use more stringent rules for spell checking",
+      "type": "dropdown",
+      "required": false,
+      "default": "default",
+      "data": [
+        {
+          "title": "Default",
+          "value": "default"
+        },
+        {
+          "title": "Picky",
+          "value": "picky"
+        }
+      ]
+    },
+    {
+      "name": "languageVarietyEnglish",
+      "title": "Language Variety English",
+      "description": "Interpret English as:",
+      "type": "dropdown",
+      "required": false,
+      "default": "-",
+      "data": [
+        {
+          "title": "-",
+          "value": "-"
+        },
+        {
+          "title": "British",
+          "value": "en-GB"
+        },
+        {
+          "title": "US",
+          "value": "en-US"
+        },
+        {
+          "title": "Australian",
+          "value": "en-AU"
+        },
+        {
+          "title": "Canadian",
+          "value": "en-CA"
+        },
+        {
+          "title": "New Zealand",
+          "value": "en-NZ"
+        },
+        {
+          "title": "South African",
+          "value": "en-ZA"
+        }
+      ]
+    },
+    {
+      "name": "languageVarietyGerman",
+      "title": "Language Variety German",
+      "description": "Interpret German as:",
+      "type": "dropdown",
+      "required": false,
+      "default": "-",
+      "data": [
+        {
+          "title": "-",
+          "value": "-"
+        },
+        {
+          "title": "German (Germany)",
+          "value": "de-DE"
+        },
+        {
+          "title": "German (Austria)",
+          "value": "de-AT"
+        },
+        {
+          "title": "German (Switzerland)",
+          "value": "de-CH"
+        }
+      ]
+    },
+    {
+      "name": "languageVarietyPortuguese",
+      "title": "Language Variety Portuguese",
+      "description": "Interpret Portuguese as:",
+      "type": "dropdown",
+      "required": false,
+      "default": "-",
+      "data": [
+        {
+          "title": "-",
+          "value": "-"
+        },
+        {
+          "title": "Brazilian",
+          "value": "pt-BR"
+        },
+        {
+          "title": "Portuguese (Angola preAO)",
+          "value": "pt-AO"
+        },
+        {
+          "title": "Portuguese (Moçambique preAO)",
+          "value": "pt-MZ"
+        },
+        {
+          "title": "Portuguese (Portugal)",
+          "value": "pt-PT"
+        }
+      ]
+    },
+    {
+      "name": "languageVarietyCatalan",
+      "title": "Language Variety Catalan",
+      "description": "Interpret Catalan as:",
+      "type": "dropdown",
+      "required": false,
+      "default": "-",
+      "data": [
+        {
+          "title": "-",
+          "value": "-"
+        },
+        {
+          "title": "Catalan (Valencian)",
+          "value": "ca-ES-valencia"
+        },
+        {
+          "title": "Catalan (Balearic)",
+          "value": "ca-ES-balear"
+        }
+      ]
     }
   ],
   "dependencies": {
