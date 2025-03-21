@@ -1,6 +1,5 @@
 import { calendar_v3 } from "@googleapis/calendar";
 import { getCalendarClient, withGoogleAPIs } from "../lib/google";
-import { showFailureToast } from "@raycast/utils";
 
 type Input = {
   /**

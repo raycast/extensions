@@ -1,4 +1,3 @@
-import { showFailureToast } from "@raycast/utils";
 import { getCalendarClient, withGoogleAPIs } from "../lib/google";
 
 type Input = {
