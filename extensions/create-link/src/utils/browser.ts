@@ -14,3 +14,13 @@ export async function getActiveTab() {
     return undefined;
   }
 }
+
+export async function getTabs() {
+  try {
+    const tabs = await BrowserExtension.getTabs();
+    return tabs;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error: unknown) {
+    return [];
+  }
+}
