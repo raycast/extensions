@@ -1,6 +1,6 @@
 # JWT-Decoder Changelog
 
-## [Maintenance] - 2025-03-21
+## [Maintenance] - {PR_MERGE_DATE}
 
 - Updated dependencies
 
