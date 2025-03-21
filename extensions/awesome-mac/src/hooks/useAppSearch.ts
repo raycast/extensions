@@ -5,7 +5,6 @@ import { AppItem, fetchReadmeContent } from "../utils/parseReadme";
 function useReadmeContent() {
   // Use a stable reference for the fetch function to prevent unnecessary cache invalidation
   const fetchFunction = async () => {
-    console.log("Executing fetch function - this could be cached or fresh");
     return fetchReadmeContent();
   };
 

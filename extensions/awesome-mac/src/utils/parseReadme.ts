@@ -95,7 +95,6 @@ export async function fetchReadmeContent(): Promise<AppItem[]> {
 
           // Clean description by removing markdown icon links and other unnecessary formatting
           const cleanDescription = cleanMarkdownDescription(description);
-          console.log(cleanDescription);
           description
             .replace(/\[!?\[.*?\]\[.*?\]\]\(.*?\)/g, "") // Remove nested icon links like [![Open-Source Software][OSS Icon]](https://github.com/...)
             .replace(/\[[\w\s-]+\]\[[\w\s-]+\s*Icon\]/gi, "") // Remove icon references like [OSS Icon]
