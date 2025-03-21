@@ -233,23 +233,9 @@
       ]
     },
     {
-      "name": "remove-keyword",
-      "title": "Remove Keyword",
-      "description": "Remove a keyword from keyword list",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "keyword",
-          "placeholder": "Keyword to remove",
-          "type": "text",
-          "required": true
-        }
-      ]
-    },
-    {
-      "name": "edit-keywords",
-      "title": "Edit Keywords",
-      "description": "Edit keyword list",
+      "name": "show-keywords",
+      "title": "Show Keywords",
+      "description": "Show keyword list",
       "mode": "view"
     }
   ],
