@@ -240,7 +240,7 @@
       "type": "password",
       "required": true,
       "title": "Client ID",
-      "description": "The client_id value seen in the My Account section of a Bitwarden web vault.",
+      "description": "The client_id value seen in your Bitwarden account settings.",
       "placeholder": "client_id"
     },
     {
@@ -248,7 +248,7 @@
       "type": "password",
       "required": true,
       "title": "Client Secret",
-      "description": "The client_secret value seen in the My Account section of a Bitwarden web vault.",
+      "description": "The client_secret value seen in your Bitwarden account settings.",
       "placeholder": "client_secret"
     },
     {
