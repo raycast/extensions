@@ -19,7 +19,7 @@ const config: CodegenConfig = {
       plugins: ["typescript", "typescript-operations", "typescript-graphql-request"],
     },
   },
-  // The lint command does not expect any aditional arguments, so we pass # to ignore them
+  // The lint command does not expect any additional arguments, so we pass # to ignore them
   hooks: { afterAllFileWrite: ["ray lint --fix #"] },
 };
 

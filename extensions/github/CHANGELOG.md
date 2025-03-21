@@ -3,7 +3,7 @@
 ## [Add support for merge queues and auto-merge] - {PR_MERGE_DATE}
 
 - Adds PR actions for repositories that use merge queues
-- Adds the ability to enable auto-merge.
+- Adds the ability to enable auto-merge
 - Fix codegen lint hook
 
 ## [Add the ability to search for collaborators in the pull request actions] - 2025-03-19
