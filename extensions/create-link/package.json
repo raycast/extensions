@@ -31,6 +31,13 @@
       "subtitle": "Create Link",
       "description": "This command captures the current URL from your browser, formats it as a Markdown link, and copies it to your clipboard. This is useful for integrating links into Markdown documents or notes.",
       "mode": "no-view"
+    },
+    {
+      "name": "show-tabs",
+      "title": "Show Tabs",
+      "subtitle": "Create Link",
+      "description": "This command shows a list of tabs in your browser and allows you to copy the URL of the selected tab.",
+      "mode": "view"
     }
   ],
   "dependencies": {
