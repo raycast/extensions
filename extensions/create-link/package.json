@@ -31,6 +31,24 @@
       "subtitle": "Create Link",
       "description": "This command captures the current URL from your browser, formats it as a Markdown link, and copies it to your clipboard. This is useful for integrating links into Markdown documents or notes.",
       "mode": "no-view"
+    },
+    {
+      "name": "copy-custom",
+      "title": "Copy Link as Custom",
+      "subtitle": "Create Link",
+      "description": "This command captures the current URL from your browser, formats it as a custom link, and copies it to your clipboard. You can customize the link format to suit your needs.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "customFormat",
+          "key": "customFormat",
+          "required": true,
+          "type": "textfield",
+          "title": "Custom Link Format",
+          "description": "Enter the desired format for the custom link. Available placeholders: {url} for the URL, {title} for the page title, {id} for the tab ID, and {favicon} for the favicon URL.",
+          "default": "{url}"
+        }
+      ]
     }
   ],
   "dependencies": {
