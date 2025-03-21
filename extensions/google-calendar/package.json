@@ -138,22 +138,22 @@
     }
   ],
   "dependencies": {
-    "@googleapis/calendar": "^9.7.9",
+    "@googleapis/calendar": "^9.8.0",
     "@googleapis/people": "^3.0.9",
-    "@raycast/api": "^1.90.0",
+    "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.17.0",
     "date-fns": "^4.1.0",
     "humanize-duration": "^3.32.1",
     "nanoid": "^5.1.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/humanize-duration": "^3.27.4",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
