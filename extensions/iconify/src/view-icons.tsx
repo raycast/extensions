@@ -154,7 +154,7 @@ function Command() {
           .slice(itemsPerPage * page, itemsPerPage * (page + 1))
           .map((icon) => {
             const { id, body, width, height } = icon;
-            const svgIcon = toSvg(body, width, height, iconColor === iconColorEnum.customColor && customColor && /^#([0-9a-fA-F]{6})$/.test(customColor) ? customColor : iconColor);
+            const svgIcon = toSvg(body, width, height, iconColor === iconColorEnum.customColor && customColor && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(customColor) ? customColor : iconColor);
             const dataURIIcon = toDataURI(svgIcon);
 
             const paste = <Action.Paste title="Paste Svg String" content={svgIcon} />;
