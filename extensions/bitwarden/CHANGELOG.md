@@ -4,6 +4,7 @@
 
 - Correct setup API key instructions 
 - Remove local CLI mention from extension description
+- Mention local CLI option in README
 
 ## [Fix] - 2025-03-17
 
