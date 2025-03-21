@@ -168,7 +168,9 @@ export default function RenameScreenshotsCommand() {
   } else {
     // Results view
     return (
-      <List isLoading={isLoading}>
+      <List
+        isLoading={isLoading}
+        emptyView={<List.EmptyView title="No Screenshots" description="No screenshots have been processed yet" />}>
         {screenshots.map((item) => (
           <List.Item
             key={item.id}
