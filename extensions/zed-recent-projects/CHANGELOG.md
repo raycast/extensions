@@ -1,5 +1,9 @@
 # zed-recent-projects Changelog
 
+## [Enhancements] - 2025-03-21
+
+- Added remove actions for single and all recent projects
+
 ## [Add support for remote projects] - 2025-03-10
 
 - Added remote project support for `Search Recent Projects`.
