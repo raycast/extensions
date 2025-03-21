@@ -1,11 +1,20 @@
 import { ComponentType, createContext, useContext } from "react";
-import { List, Action, Application, getApplications, getPreferenceValues, Detail, Icon } from "@raycast/api";
+import {
+  List,
+  Action,
+  Application,
+  getApplications,
+  getPreferenceValues,
+  Detail,
+  Icon,
+  ActionPanel,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { existsSync } from "fs";
 import { URL } from "url";
 import { getEntry } from "./lib/entry";
 import { getZedBundleId, ZedBuild } from "./lib/zed";
-import { useZedRecentWorkspaces } from "./lib/zedEntries";
+import { useZedRecentWorkspaces, ZedEntry } from "./lib/zedEntries";
 import { usePinnedEntries } from "./hooks/usePinnedEntries";
 import { EntryItem } from "./components/EntryItem";
 
@@ -46,12 +55,22 @@ export const withZed = <P extends object>(Component: ComponentType<P>) => {
 
 export function Command() {
   const zed = useContext(ZedContext).zed!;
-  const { entries, isLoading, error } = useZedRecentWorkspaces();
-  const { pinnedEntries, pinEntry, unpinEntry, moveUp, moveDown } = usePinnedEntries();
+  const { entries, isLoading, error, removeEntry, removeAllEntries } = useZedRecentWorkspaces();
+  const { pinnedEntries, pinEntry, unpinEntry, unpinAllEntries, moveUp, moveDown } = usePinnedEntries();
 
   const pinned = Object.values(pinnedEntries)
     .filter((e) => exists(e.uri) || e.host)
     .sort((a, b) => a.order - b.order);
+
+  const removeAndUnpinEntry = async (entry: Pick<ZedEntry, "id" | "uri">) => {
+    await removeEntry(entry.id);
+    unpinEntry(entry);
+  };
+
+  const removeAllAndUnpinEntries = async () => {
+    await removeAllEntries();
+    unpinAllEntries();
+  };
 
   return (
     <List isLoading={isLoading}>
@@ -98,6 +117,10 @@ export function Command() {
                   shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
                 />
               ) : null}
+              <RemoveActionSection
+                onRemoveEntry={() => removeAndUnpinEntry(e)}
+                onRemoveAllEntries={removeAllAndUnpinEntries}
+              />
             </EntryItem>
           );
         })}
@@ -128,11 +151,43 @@ export function Command() {
                   onAction={() => pinEntry(e)}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                 />
+                <RemoveActionSection
+                  onRemoveEntry={() => removeAndUnpinEntry(e)}
+                  onRemoveAllEntries={removeAllAndUnpinEntries}
+                />
               </EntryItem>
             );
           })}
       </List.Section>
     </List>
+  );
+}
+
+function RemoveActionSection({
+  onRemoveEntry,
+  onRemoveAllEntries,
+}: {
+  onRemoveEntry: () => void;
+  onRemoveAllEntries: () => void;
+}) {
+  return (
+    <ActionPanel.Section>
+      <Action
+        icon={Icon.Trash}
+        title="Remove from Recent Projects"
+        style={Action.Style.Destructive}
+        onAction={() => onRemoveEntry()}
+        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      />
+
+      <Action
+        icon={Icon.Trash}
+        title="Remove All Recent Projects"
+        style={Action.Style.Destructive}
+        onAction={() => onRemoveAllEntries()}
+        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+      />
+    </ActionPanel.Section>
   );
 }
 

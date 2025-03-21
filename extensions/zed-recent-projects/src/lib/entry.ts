@@ -3,6 +3,7 @@ import tildify from "tildify";
 import { ZedEntry } from "./zedEntries";
 
 export interface Entry {
+  id: string;
   uri: string;
   path: string;
   title: string;
@@ -16,6 +17,7 @@ export function getEntry(entry: ZedEntry): Entry | null {
     const subtitle = tildify(dirname(entry.path)) + (entry.host ? " [SSH: " + entry.host + "]" : "");
 
     return {
+      id: entry.id,
       uri: entry.uri,
       path: entry.path,
       title,
