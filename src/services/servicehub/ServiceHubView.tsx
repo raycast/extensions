@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { List, ActionPanel, Action, Icon, Toast, showToast, Color, useNavigation } from "@raycast/api";
-import { ServiceHubService, GCPService } from "./ServiceHubService";
+import { MarketplaceService, GCPService } from "./ServiceHubService";
 import ServiceDetails from "./components/ServiceDetails";
 import { GCPServiceCategory } from "../../utils/gcpServices";
 
@@ -23,7 +23,7 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
   const [selectedService, setSelectedService] = useState<GCPService | null>(null);
   
   // Service initialization
-  const serviceHub = useMemo(() => new ServiceHubService(gcloudPath, projectId), [gcloudPath, projectId]);
+  const serviceHub = useMemo(() => new MarketplaceService(gcloudPath, projectId), [gcloudPath, projectId]);
   
   // Fetch categories on component mount
   useEffect(() => {
@@ -115,6 +115,7 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
   // Enable a service
   async function enableService(service: GCPService) {
     try {
+      setIsRefreshing(true);
       showToast({
         style: Toast.Style.Animated,
         title: `Enabling ${service.displayName || service.name}...`,
@@ -139,6 +140,9 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
               : s
           )
         );
+        
+        // Fetch services again to update the status
+        fetchServices();
       } else {
         showToast({
           style: Toast.Style.Failure,
@@ -154,12 +158,15 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
         title: `Failed to enable ${service.displayName || service.name}`,
         message: error instanceof Error ? error.message : String(error),
       });
+    } finally {
+      setIsRefreshing(false);
     }
   }
   
   // Disable a service
   async function disableService(service: GCPService) {
     try {
+      setIsRefreshing(true);
       showToast({
         style: Toast.Style.Animated,
         title: `Disabling ${service.displayName || service.name}...`,
@@ -184,6 +191,9 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
               : s
           )
         );
+        
+        // Fetch services again to update the status
+        fetchServices();
       } else {
         showToast({
           style: Toast.Style.Failure,
@@ -199,6 +209,8 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
         title: `Failed to disable ${service.displayName || service.name}`,
         message: error instanceof Error ? error.message : String(error),
       });
+    } finally {
+      setIsRefreshing(false);
     }
   }
   
@@ -350,10 +362,50 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
   
   // Get title for the current view
   const viewTitle = useMemo(() => {
-    if (showOnlyEnabled) return "Enabled Services";
-    if (selectedCategory !== "all") return selectedCategory;
-    return showCoreServicesOnly ? "Core Services" : "All Services";
-  }, [selectedCategory, showOnlyEnabled, showCoreServicesOnly]);
+    if (isLoading) {
+      return "Loading Services";
+    }
+    
+    if (isRefreshing) {
+      return "Refreshing Services";
+    }
+    
+    if (selectedCategory !== "all") {
+      return `${selectedCategory} Services`;
+    }
+    
+    return "Google Cloud Marketplace";
+  }, [isLoading, isRefreshing, selectedCategory]);
+  
+  // Get color for category tag
+  function getCategoryColor(category?: string): Color {
+    if (!category) return Color.SecondaryText;
+    
+    switch (category) {
+      case GCPServiceCategory.COMPUTE:
+        return Color.Blue;
+      case GCPServiceCategory.STORAGE:
+        return Color.Purple;
+      case GCPServiceCategory.DATABASE:
+        return Color.Green;
+      case GCPServiceCategory.NETWORKING:
+        return Color.Orange;
+      case GCPServiceCategory.SECURITY:
+        return Color.Red;
+      case GCPServiceCategory.ANALYTICS:
+        return Color.Yellow;
+      case GCPServiceCategory.AI_ML:
+        return Color.Magenta;
+      case GCPServiceCategory.DEVOPS:
+        return Color.Blue;
+      case GCPServiceCategory.MANAGEMENT:
+        return Color.Orange;
+      case GCPServiceCategory.SERVERLESS:
+        return Color.Green;
+      default:
+        return Color.SecondaryText;
+    }
+  }
   
   return (
     <List
@@ -361,7 +413,7 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search services..."
-      navigationTitle="Google Cloud Services"
+      navigationTitle="Marketplace"
       filtering={false}
       throttle={true}
       actions={
@@ -422,7 +474,13 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
               source: getServiceIcon(service), 
               tintColor: service.isEnabled ? Color.Blue : Color.SecondaryText 
             }}
-            accessories={service.isEnabled ? [{ icon: { source: Icon.CheckCircle, tintColor: Color.Green } }] : []}
+            accessories={[
+              service.isEnabled 
+                ? { icon: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Enabled" }
+                : { icon: { source: Icon.Circle, tintColor: Color.SecondaryText }, tooltip: "Not Enabled" },
+              { tag: service.category || "Other" },
+              service.region && service.region !== "global" ? { text: service.region } : { text: "" }
+            ]}
             actions={
               <ActionPanel>
                 <Action

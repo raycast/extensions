@@ -187,6 +187,12 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
     
     if (confirmed) {
       setIsLoading(true);
+      const deletingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Deleting bucket...",
+        message: `Bucket: ${bucketName}`,
+      });
+      
       try {
         const command = `${gcloudPath} storage buckets delete gs://${bucketName} --project=${projectId} --quiet`;
         
@@ -198,6 +204,7 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
           throw new Error(stderr);
         }
         
+        deletingToast.hide();
         showToast({
           style: Toast.Style.Success,
           title: "Bucket deleted",
@@ -208,6 +215,7 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
         fetchBuckets();
       } catch (error: any) {
         console.error("Error deleting bucket:", error);
+        deletingToast.hide();
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to delete bucket",
@@ -273,22 +281,30 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
     push(
       <Form
         navigationTitle="Create Storage Bucket"
+        isLoading={isLoading}
         actions={
           <ActionPanel>
             <Action.SubmitForm
               title="Create Bucket"
               onSubmit={(values: any) => {
+                setIsLoading(true);
+                showToast({
+                  style: Toast.Style.Animated,
+                  title: "Creating bucket...",
+                  message: `Name: ${values.name}`
+                });
+                pop();
                 createBucket({
                   name: values.name,
                   location: values.location,
                   storageClass: values.storageClass
                 });
-                pop();
               }}
             />
             <Action
               title="Cancel"
               onAction={pop}
+              shortcut={{ modifiers: ["cmd"], key: "escape" }}
             />
           </ActionPanel>
         }
@@ -299,12 +315,16 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
           placeholder="my-unique-bucket-name"
           info="Must be globally unique across all of Google Cloud"
           defaultValue={suggestedName}
+          autoFocus={true}
+          error={suggestedName ? "" : "Bucket name is required"}
+          onChange={(value) => value.length > 0 ? null : "Bucket name is required"}
         />
         
         <Form.Dropdown
           id="location"
           title="Location"
           defaultValue="us-central1"
+          info="Select the geographic location for your bucket"
         >
           <Form.Dropdown.Section title="Multi-Region">
             <Form.Dropdown.Item value="us" title="United States (us)" />
