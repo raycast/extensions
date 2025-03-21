@@ -5,13 +5,14 @@ import {
   useGetBusinessInvoices,
   useGetBusinessProductsAndServices,
 } from "./lib/wave";
-import { Business } from "./lib/types";
+import { Business, InvoiceStatus } from "./lib/types";
 import { getInvoiceStatusColor } from "./lib/utils";
 import { useCachedState, withAccessToken } from "@raycast/utils";
 import { HELP_LINKS, INVOICE_STATUSES } from "./lib/config";
 import CustomerStatement from "./lib/components/customer-statement";
 import { provider } from "./lib/oauth";
 import OpenInWave from "./lib/components/open-in-wave";
+import { useState } from "react";
 
 export default withAccessToken(provider)(ManageWave);
 
@@ -56,12 +57,16 @@ function ManageWave() {
 
 function BusinessInvoices({ business }: { business: Business }) {
   const [isShowingDetail, setIsShowingDetail] = useCachedState("details-invoices", false);
+  const [status, setStatus] = useState("");
 
   const { isLoading, data: invoices } = useGetBusinessInvoices(business.id);
   const isEmpty = !isLoading && !invoices.length;
 
   return (
-    <List isLoading={isLoading} isShowingDetail={!isEmpty && isShowingDetail} searchBarPlaceholder="Search invoice">
+    <List isLoading={isLoading} isShowingDetail={!isEmpty && isShowingDetail} searchBarPlaceholder="Search invoice" searchBarAccessory={!invoices.length ? undefined : <List.Dropdown tooltip="Status" onChange={setStatus}>
+      <List.Dropdown.Item icon={Icon.Receipt} title="All" value="" />
+      {Object.keys(INVOICE_STATUSES).map(status => <List.Dropdown.Item key={status} icon={{ source: Icon.Receipt, tintColor: getInvoiceStatusColor(status as InvoiceStatus) }} title={status} value={status} />)}
+    </List.Dropdown>}>
       {isEmpty ? (
         <List.EmptyView
           title="Get paid fast."
@@ -74,7 +79,7 @@ function BusinessInvoices({ business }: { business: Business }) {
         />
       ) : (
         <List.Section title={`Businesses / ${business.name} / Invoices`}>
-          {invoices.map((invoice) => {
+          {invoices.filter(invoice => !status || invoice.status===status).map((invoice) => {
             const title = `${invoice.title} - ${invoice.invoiceNumber}`;
             const markdown = `# ${title}
 | ${invoice.itemTitle} | ${invoice.unitTitle} | ${invoice.priceTitle} | ${invoice.amountTitle} |
@@ -84,7 +89,7 @@ ${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${ite
             return (
               <List.Item
                 key={invoice.id}
-                icon={{ source: Icon.Receipt, tintColor: getInvoiceStatusColor(invoice.status) }}
+                icon={{ source: Icon.Receipt, tintColor: getInvoiceStatusColor(invoice.status), tooltip: invoice.status }}
                 title={title}
                 subtitle={isShowingDetail ? undefined : invoice.subhead}
                 accessories={

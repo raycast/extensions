@@ -20,16 +20,17 @@ export type Business = {
   };
 };
 
-export type InvoiceStatus =
-  | "DRAFT"
-  | "OVERDUE"
-  | "OVERPAID"
-  | "PAID"
-  | "PARTIAL"
-  | "SAVED"
-  | "SENT"
-  | "UNPAID"
-  | "VIEWED";
+export enum InvoiceStatus {
+  DRAFT="DRAFT",
+  OVERDUE="OVERDUE",
+  OVERPAID="OVERPAID",
+  PAID="PAID",
+  PARTIAL="PARTIAL",
+  SAVED="SAVED",
+  SENT="SENT",
+  UNPAID="UNPAID",
+  VIEWED="VIEWED",
+}
 
 export type Invoice = {
   id: string;

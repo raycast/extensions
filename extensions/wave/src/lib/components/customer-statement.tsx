@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Customer, Edges, Invoice, Result } from "../types";
+import { Customer, Edges, Invoice, Result, InvoiceStatus } from "../types";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { Action, ActionPanel, Detail, Form, Icon, List, useNavigation } from "@raycast/api";
 import { API_URL } from "../config";
-import { queryGetCustomerOutstandingInvoicesCustomerStatement } from "../gql/queries";
+import { queryGetCustomerInvoicesCustomerStatement } from "../gql/queries";
 import { formatDate, formatMoney } from "../utils";
 import { common } from "../wave";
 
@@ -47,7 +47,7 @@ export default function CustomerStatement({
   const { isLoading } = useFetch(API_URL, {
     ...common(),
     body: JSON.stringify({
-      query: values.type === "outstanding-invoices" ? queryGetCustomerOutstandingInvoicesCustomerStatement : "",
+      query: values.type === "outstanding-invoices" ? queryGetCustomerInvoicesCustomerStatement : "",
       variables: {
         businessId,
         customerId: values.customerId,
@@ -60,7 +60,7 @@ export default function CustomerStatement({
     mapResult(result: Result<{ business: { invoices: Edges<Invoice> } }>) {
       if ("errors" in result) throw new Error(result.errors[0].message);
       return {
-        data: result.data.business.invoices.edges.map((edge) => edge.node),
+        data: result.data.business.invoices.edges.filter(edge => ![InvoiceStatus.PAID, InvoiceStatus.DRAFT, InvoiceStatus.OVERPAID].includes(edge.node.status)).map((edge) => edge.node),
       };
     },
     onData(data) {

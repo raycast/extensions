@@ -16,6 +16,8 @@ export function getInvoiceStatusColor(status: InvoiceStatus) {
     case "SAVED":
     case "VIEWED":
       return Color.Purple;
+    case "DRAFT":
+      return "#D4DDE3"
     default:
       return undefined;
   }
