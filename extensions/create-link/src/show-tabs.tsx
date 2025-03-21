@@ -36,7 +36,7 @@ export default function CopyPlainText() {
 
   return (
     <Suspense fallback={<List isLoading={isLoading}>Loading...</List>}>
-      {(  !isLoading && tabs.length === 0) ? <List.EmptyView title="No tabs found" /> : <TabList tabs={tabs} />}
+      {!isLoading && tabs.length === 0 ? <List.EmptyView title="No tabs found" /> : <TabList tabs={tabs} />}
     </Suspense>
   );
 }
