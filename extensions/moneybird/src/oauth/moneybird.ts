@@ -7,7 +7,7 @@ const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Moneybird",
   providerIcon: "extension-icon.png",
-  description: "Connect your Moneybird administration to record hours",
+  description: "Connect your Moneybird administration to Raycast and start registering time entries",
 });
 
 export const provider = new OAuthService({

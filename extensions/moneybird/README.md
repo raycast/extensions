@@ -2,16 +2,13 @@
 
 A Raycast extension that allows you to quickly manage time entries in your Moneybird administration without leaving your keyboard.
 
- > This is in active development
-
 ## Features
 
 - 🕒 Record hours with detailed information
 - ⏱️ Start timing with a single command
 - 🔄 OAuth integration with Moneybird
 - 👥 Support for multiple customers and projects
-- 📝 Add descriptions and break times
-- ✅ Mark entries as declarable
+- 📝 Add descriptions
 
 ## Prerequisites
 
@@ -34,14 +31,12 @@ Use this command to add a new time entry to your Moneybird administration. You c
 
 - Description of the work
 - Start and end date/time
-- Break time
 - Customer and project
-- Declarable status
 - Assigned user
 
 ### Start Timing
 
-Quickly mark the current time as a start point for your time entry. This command runs in the background and can be used to start tracking time which you can later complete using the "Record Hours" command.
+Quickly mark the current time as a start point for your time entry. Next time you create a time entry, it will use that as start time.
 
 ## Development
 
