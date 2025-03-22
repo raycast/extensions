@@ -91,18 +91,18 @@ export default function Command() {
               }}
               actions={
                 <ActionPanel>
-                  <Action.SubmitForm
+                  <Action.Action
                     title="Start Toggl"
-                    onSubmit={() => startTogglTimer(task, todoistProjects, meData, togglProjects, refreshTimer)}
+                    onAction={() => startTogglTimer(task, todoistProjects, meData, togglProjects, refreshTimer)}
                     icon={{ source: Icon.Clock }}
                   />
-                  <Action.SubmitForm
+                  <Action.Action
                     title="Todo Completed"
                     icon={{
                       source: Icon.CheckCircle,
                       tintColor: Color.Green,
                     }}
-                    onSubmit={() => todoCompleted(task, mutate)}
+                    onAction={() => todoCompleted(task, mutate)}
                   />
                   <Action.Push
                     title="Edit Task"
@@ -113,14 +113,14 @@ export default function Command() {
                     }}
                     target={<UpdateTaskForm mutate={mutate} task={task} />}
                   />
-                  <Action.SubmitForm
+                  <Action.Action
                     title="Summary Time Track"
                     shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
                     icon={{
                       source: Icon.Calculator,
                       tintColor: Color.Orange,
                     }}
-                    onSubmit={() => durationTask(task)}
+                    onAction={() => durationTask(task)}
                   />
                 </ActionPanel>
               }
