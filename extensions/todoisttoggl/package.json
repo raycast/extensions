@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "todoisttoggl",
-  "title": "Tracking Todoist task for toggl",
+  "name": "todoist-track-toggl",
+  "title": "todoist-track-toggl",
   "type": "module",
   "description": "A personal-use extension to improve the relation between Todoist and Toggl Track",
   "icon": "extension-icon.png",
