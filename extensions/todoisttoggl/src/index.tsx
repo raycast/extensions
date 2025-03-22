@@ -91,12 +91,12 @@ export default function Command() {
               }}
               actions={
                 <ActionPanel>
-                  <Action.Action
+                  <Action
                     title="Start Toggl"
                     onAction={() => startTogglTimer(task, todoistProjects, meData, togglProjects, refreshTimer)}
                     icon={{ source: Icon.Clock }}
                   />
-                  <Action.Action
+                  <Action
                     title="Todo Completed"
                     icon={{
                       source: Icon.CheckCircle,
@@ -113,7 +113,7 @@ export default function Command() {
                     }}
                     target={<UpdateTaskForm mutate={mutate} task={task} />}
                   />
-                  <Action.Action
+                  <Action
                     title="Summary Time Track"
                     shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
                     icon={{
