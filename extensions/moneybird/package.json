@@ -13,14 +13,12 @@
     {
       "name": "record-hours",
       "title": "New time entry",
-      "subtitle": "Add a new time entry to your administration",
       "description": "Add a new time entry to your administration",
       "mode": "view"
     },
     {
       "name": "start-timing",
       "title": "Set start time",
-      "subtitle": "Mark current time as start point for a new time entry",
       "description": "Mark current time as start point",
       "mode": "no-view"
     }
