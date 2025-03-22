@@ -11,6 +11,7 @@ import {
   FileContent,
   AccountConfiguration,
   Usage,
+  FTPAccountWithDiskInformation,
 } from "./types";
 import { showFailureToast, useFetch } from "@raycast/utils";
 
@@ -97,3 +98,7 @@ export const usGetFileContent = (dir: string, file: string) =>
     dir,
     file,
   });
+
+// FTP
+export const useListFTPAccountsWithDiskInformation = () =>
+  useUAPI<FTPAccountWithDiskInformation[]>("Ftp", "list_ftp_with_disk");

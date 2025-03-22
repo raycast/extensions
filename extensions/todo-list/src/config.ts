@@ -29,3 +29,9 @@ export const priorityDescriptions = {
   2: "mid",
   3: "high",
 };
+
+export const priorityShortInputs: Record<string, 1 | 2 | 3> = {
+  "!h": 3,
+  "!m": 2,
+  "!l": 1,
+};

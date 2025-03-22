@@ -1,5 +1,18 @@
 # Changelog
 
+## [Improvements] - 2025-03-20
+
+- Add preference for custom color
+
+## [Improvements] - 2025-03-10
+
+- Add action to copy icon data URI
+
+## [Improvements] - 2025-02-14
+
+- Add "Paste SVG File" to actions and primaryActions
+- Add "Copy SVG Name" and "Copy SVG URL" to the primary actions preference.
+
 ## [Improvements] - 2024-06-14
 
 - Add "Copy SVG File" to actions and primaryActions

@@ -1,35 +1,28 @@
 import { getPreferenceValues, showToast, Toast, Form, ActionPanel, Action, getSelectedFinderItems } from "@raycast/api";
-import { QBittorrent, RawPreference } from "qbit.js";
-import { useEffect, useRef, useState } from "react";
+import { AddTorrentOptions, QBittorrent, Preferences as QbittorrentPreferences } from "@ctrl/qbittorrent";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { readFile } from "node:fs/promises";
 
-interface Preferences {
-  address: string;
-  username: string;
-  password: string;
-  timeout: number;
-}
-
-interface Values {
+interface Values extends AddTorrentOptions {
   torrentPaths: string[];
   urls: string;
-  skip_checking: boolean;
-  paused: boolean;
-  savepath: string;
-  rename: string;
-  category: string;
-  dlLimit: string;
-  upLimit: string;
 }
 
 export default function AddTorrents() {
-  const { address, username, password } = getPreferenceValues<Preferences>();
-  const qbit = new QBittorrent(address);
+  const { address, username, password } = getPreferenceValues<Preferences.AddTorrents>();
+  const qbit = useMemo(() => {
+    return new QBittorrent({
+      baseUrl: address,
+      username,
+      password,
+    });
+  }, [address, username, password]);
 
   const torrentFilesRef = useRef<Form.TagPicker>(null);
   const torrentURLsRef = useRef<Form.TextArea>(null);
   const [selectedTorrents, setSelectedTorrents] = useState<string[]>([]);
   const [isLoading, setLoading] = useState(true);
-  const [preferences, setPreferences] = useState<RawPreference>();
+  const [preferences, setPreferences] = useState<QbittorrentPreferences>();
   const [categories, setCategories] = useState<string[]>();
 
   const prefillTorrentFilePaths = async () => {
@@ -48,12 +41,21 @@ export default function AddTorrents() {
 
   const loginAndInitPreferences = async () => {
     setLoading(true);
-    await qbit.login(username, password);
-    const preferences = await qbit.api.getPreferences();
-    const categories = await qbit.api.getCategories();
-    setPreferences(preferences);
-    setCategories(Object.keys(categories));
-    setLoading(false);
+    try {
+      await qbit.login();
+      const preferences = await qbit.getPreferences();
+      const categories = await qbit.getCategories();
+      setPreferences(preferences);
+      setCategories(Object.keys(categories));
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to connect to qBittorrent",
+        message: "Please check your Web UI settings and make sure qBittorrent is running.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -67,8 +69,9 @@ export default function AddTorrents() {
       .split(/\r?\n/)
       .map((url) => url.trim())
       .filter(Boolean);
-    const torrents = [...torrentPaths, ...urls];
-    if (!torrents.length) {
+    const localTorrents = await Promise.all(torrentPaths.map((path) => readFile(path)));
+
+    if (!localTorrents.length && !urls.length) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to submit torrents",
@@ -77,13 +80,23 @@ export default function AddTorrents() {
       return;
     }
     setLoading(true);
-    const options = Object.fromEntries(Object.entries(opts).filter(([_, value]) => value !== ""));
-    await qbit.login(username, password);
-    await qbit.api.addTorrent(torrents, options);
+    const options = Object.fromEntries(Object.entries(opts).filter(([, value]) => value !== ""));
+    await qbit.login();
+
+    await Promise.all(
+      localTorrents.map((torrent) => {
+        return qbit.addTorrent(torrent, options);
+      }),
+    );
+    await Promise.all(
+      urls.map((magnet) => {
+        return qbit.addMagnet(magnet, options);
+      }),
+    );
     setLoading(false);
     await showToast({
       style: Toast.Style.Success,
-      title: "Add torrents successfully",
+      title: "Added torrents successfully",
     });
     torrentFilesRef.current?.reset();
     torrentURLsRef.current?.reset();
@@ -124,9 +137,7 @@ export default function AddTorrents() {
       <Form.TextField title="Rename Torrent" id="rename" placeholder="Rename Torrent" />
       <Form.Dropdown id="category" title="Category" defaultValue="">
         <Form.Dropdown.Item value="" title="No Category" />
-        {categories?.map((category) => (
-          <Form.Dropdown.Item value={category} title={category} key={category} />
-        ))}
+        {categories?.map((category) => <Form.Dropdown.Item value={category} title={category} key={category} />)}
       </Form.Dropdown>
       <Form.TextField title="Limit Download Rate" id="dlLimit" placeholder="KiB/s" />
       <Form.TextField title="Limit Upload Rate" id="upLimit" placeholder="KiB/s" />

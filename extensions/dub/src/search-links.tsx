@@ -3,12 +3,15 @@ import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, 
 import { ShortLinksResponse, useShortLinks } from "@hooks/use-short-links";
 import { DUB_CO_URL } from "@utils/constants";
 import { deleteShortLink } from "@/api";
-import { MutatePromise, showFailureToast } from "@raycast/utils";
+import { MutatePromise, showFailureToast, useCachedState } from "@raycast/utils";
 import { withDubClient } from "./with-dub-client";
 import { useState } from "react";
 
 export function SearchLinks() {
   const [query, setQuery] = useState<string | undefined>(undefined);
+  const [showDetails, setShowDetails] = useCachedState<boolean>("show-details", false, {
+    cacheNamespace: "dub-search-links",
+  });
   const {
     shortLinks,
     supportsLinksTypeahead,
@@ -27,7 +30,7 @@ export function SearchLinks() {
             searchBarPlaceholder: "Search links by short link slug or destination url",
             throttle: true,
           })}
-      isShowingDetail={!isLoadingLinks && !linksError && shortLinks?.length !== 0}
+      isShowingDetail={!isLoadingLinks && !linksError && shortLinks?.length !== 0 && showDetails}
       filtering
     >
       {linksError && (
@@ -162,6 +165,12 @@ export function SearchLinks() {
                   onAction={() => deleteLink(id, mutate)}
                 />
                 <ActionPanel.Section>
+                  <Action
+                    title={showDetails ? "Hide Details" : "Show Details"}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    onAction={() => setShowDetails(!showDetails)}
+                    icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
+                  />
                   <Action.OpenInBrowser
                     title="Go to Dub.co"
                     shortcut={Keyboard.Shortcut.Common.Open}

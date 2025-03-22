@@ -1,5 +1,24 @@
 # Google Gemini Changelog
 
+## [Updated Models] - 2025-03-15
+
+- ⬆️ Upgrade the Gemini 2.0 Flash from preview to release
+- ⚠️ Add alerts to models that will be deprecated in Sep 2025
+
+## [New Command] - 2025-03-12
+
+- 🆕 New Command: Command History: now you can 📜 view your command history.
+
+## [New Command] - 2025-03-10
+
+- 🆕 New Command: Ask About Selected Screen Area
+
+## [New Models and Features] - 2025-02-24
+
+- 🤖 Update model variants
+- ⚙️ Set default model to Gemini 2.0 Flash which is already production ready
+- 🙋 Support custom model names as a supplement for listed common models.
+
 ## [Append Selected Text to Chat] - 2025-02-04
 
 - Ability to append selected text to the chat command with the `Append to Chat` command. Shortcut: `Ctrl + Shift + V`

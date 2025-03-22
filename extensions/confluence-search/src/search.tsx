@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import "./util/fetchPolyfill";
+import "cross-fetch/polyfill";
 
-import { Action, ActionPanel, List, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { AbortError } from "node-fetch";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
+import { useState } from "react";
 import { useAsyncEffect } from "use-async-effect";
 
 import {
@@ -19,12 +18,15 @@ import { Site } from "./api/site";
 import { SearchActions, SearchListItem } from "./SearchResults";
 import { useAuthorizeSite } from "./util/hooks";
 import { capitalize } from "./util/text";
+import { usePromise } from "@raycast/utils";
 
 const { searchAttachments, sort } = getPreferenceValues();
 
 export default function Command() {
   const site = useAuthorizeSite();
-  const { state, search } = useSearch(site);
+  const [searchText, setSearchText] = useState("");
+  const [spaceFilter, setSpaceFilter] = useState("");
+  const state = useSearch(site, searchText, spaceFilter);
   const [spaces, setSpaces] = useState([]) as any[];
 
   useAsyncEffect(async () => {
@@ -38,11 +40,7 @@ export default function Command() {
   const titleText = state.isRecentResults ? "Recently Viewed" : "Search Results";
 
   const spacesDropdown = (
-    <List.Dropdown
-      tooltip="Filter results"
-      storeValue={true}
-      onChange={(value) => state.spaceFilter !== value && search(state.searchText, value)}
-    >
+    <List.Dropdown tooltip="Filter results" storeValue={true} onChange={setSpaceFilter}>
       <List.Dropdown.Item key="all" title="All spaces" value="" />
       <List.Dropdown.Section title="Favourite Spaces">
         {spaces?.results?.map((space: any) => (
@@ -57,7 +55,7 @@ export default function Command() {
   return (
     <List
       isLoading={state.isLoading}
-      onSearchTextChange={(text) => search(text, state.spaceFilter)}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search Confluence..."
       throttle
       searchBarAccessory={spacesDropdown}
@@ -84,7 +82,7 @@ function GlobalSearchActionPanel({ searchState }: { searchState: SearchState }) 
   return (
     <ActionPanel.Section title={capitalize(actionTitle)}>
       <Action.OpenInBrowser
-        title={`Open ${actionTitle} in browser`}
+        title={`Open ${actionTitle} in Browser`}
         url={searchState.browserSearchUrl}
         shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
       />
@@ -92,76 +90,35 @@ function GlobalSearchActionPanel({ searchState }: { searchState: SearchState }) 
   );
 }
 
-function useSearch(site?: any) {
-  // TODO: fix type hack
-  const [state, setState] = useState<SearchState>({
-    searchText: "",
-    results: [],
-    isLoading: true,
-    isRecentResults: true,
-    spaceFilter: "",
-    browserSearchUrl: undefined,
-  });
-  const cancelRef = useRef<AbortController | null>(null);
-
-  const search = useCallback(
-    async function search(searchText: string, spaceFilter: string) {
-      cancelRef.current?.abort();
-      cancelRef.current = new AbortController();
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-      try {
-        const results = await performSearch(site, searchText, spaceFilter, cancelRef.current.signal);
-
-        setState((oldState) => ({
-          ...oldState,
-          searchText,
-          results,
-          isLoading: false,
-          isRecentResults: !searchText,
-          spaceFilter,
-          browserSearchUrl: generateBrowserUrl(site, searchText, spaceFilter),
-        }));
-      } catch (error) {
-        setState((oldState) => ({
-          ...oldState,
-          searchText,
-          isLoading: false,
-          spaceFilter,
-          browserSearchUrl: generateBrowserUrl(site, searchText, spaceFilter),
-        }));
-
-        if (error instanceof AbortError) {
-          return;
-        }
-
-        console.error("search error", error);
-        showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
-      }
+function useSearch(site?: Site, searchText = "", spaceFilter = "") {
+  const { isLoading, data = [] } = usePromise(
+    async (site, searchText, spaceFilter) => {
+      if (!site) return [];
+      const results = await performSearch(site, searchText, spaceFilter);
+      return results;
     },
-    [site, cancelRef, setState]
+    [site, searchText, spaceFilter],
+    {
+      failureToastOptions: {
+        title: "Could not perform search",
+      },
+    }
   );
 
-  useEffect(() => {
-    site && search("", "");
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, [site]);
-
-  return {
-    state: state,
-    search: search,
+  const state: SearchState = {
+    results: data,
+    isLoading,
+    isRecentResults: !searchText,
+    browserSearchUrl: !site ? undefined : generateBrowserUrl(site, searchText, spaceFilter),
   };
+  return state;
 }
 
 async function performSearch(
   site: Site,
   searchText: string,
   spaceFilter: string,
-  signal: AbortSignal
+  signal?: AbortSignal
 ): Promise<SearchResult[]> {
   const spaceKey = spaceFilter === "" ? undefined : spaceFilter;
 
@@ -178,10 +135,8 @@ async function performSearch(
 }
 
 interface SearchState {
-  searchText: string;
   results: SearchResult[];
   isLoading: boolean;
   isRecentResults: boolean;
-  spaceFilter: string;
   browserSearchUrl: undefined | string;
 }

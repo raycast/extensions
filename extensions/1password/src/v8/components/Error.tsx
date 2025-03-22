@@ -2,9 +2,10 @@ import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@ra
 import resetCache from "../../reset-cache";
 import { getCliPath, ZSH_PATH } from "../utils";
 
-const cliPath = getCliPath();
+export function Error() {
+  const cliPath = getCliPath();
 
-const ERROR = `
+  const ERROR = `
 ${cliPath ? "" : `# 1Password CLI Tool Not Configured or Installed Properly`}
 ${cliPath ? "" : `# Zsh Shell Not Configured or Installed Properly`}
 
@@ -36,7 +37,6 @@ We're here to help ensure a smooth setup process!
 
 ---`;
 
-export function Error() {
   return (
     <Detail
       markdown={ERROR}

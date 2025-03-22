@@ -1,43 +1,55 @@
 import { execSync } from "child_process";
-import * as https from "https";
-import * as tar from "tar";
-import * as fs from "fs";
 import * as crypto from "crypto";
+import * as fs from "fs";
+import * as https from "https";
+import path from "path";
 
 import { confirmAlert, environment, LocalStorage, showToast, Toast } from "@raycast/api";
+import * as tar from "tar";
 
 import runOperation from "./operations/runOperation";
 import stripEXIF from "./operations/stripEXIFOperation";
 import { ExifToolLocation } from "./utilities/enums";
 import { getSelectedImages } from "./utilities/utils";
-import path from "path";
 
 /**
  * Prompts the user to install ExifTool. If the user accepts, ExifTool is installed to the support directory.
  */
-async function installExifTool() {
+export async function installExifTool() {
+  const oldVersionExists = fs.existsSync(`${environment.supportPath}/Image-ExifTool-12.74`);
   if (
     await confirmAlert({
       title: "Install ExifTool",
-      message:
-        "ExifTool is required to strip EXIF data. Would you like to install it now?\n\nThis will use 26.2 MB of disk space.",
+      message: oldVersionExists
+        ? "A new version of ExifTool is required to strip EXIF data. Would you like to install it now?\n\nThis will use 30.2 MB of disk space."
+        : "ExifTool is required to strip EXIF data. Would you like to install it now?",
       primaryAction: {
         title: "Install",
       },
     })
   ) {
+    if (oldVersionExists) {
+      const toast = await showToast({
+        title: "Removing old version...",
+        style: Toast.Style.Animated,
+      });
+      await fs.promises.rmdir(`${environment.supportPath}/Image-ExifTool-12.74`, { recursive: true });
+      toast.title = "Old version removed";
+      toast.style = Toast.Style.Success;
+    }
+
     const toast = await showToast({
       title: "Installing ExifTool...",
       style: Toast.Style.Animated,
     });
 
     const supportPath = environment.supportPath;
-    const tarURL = "https://exiftool.org/Image-ExifTool-12.74.tar.gz";
-    const checksum = "aedb28b1427c53205ab261fa31ff3feda73e7f17a0c181453651680e5666c48a";
+    const tarURL = "https://exiftool.org/Image-ExifTool-13.21.tar.gz";
+    const checksum = "c009024d0405ddc12fb448f0d3b2acc63ed5d87d55bf1f242522f22f0a03985c";
 
     let waiting = true;
     https.get(tarURL, async (response) => {
-      const tarName = "Image-ExifTool-12.74.tar.gz";
+      const tarName = "Image-ExifTool-13.21.tar.gz";
       const tarPath = path.join(supportPath, tarName);
       const file = fs.createWriteStream(tarPath);
       response.pipe(file);
@@ -61,13 +73,17 @@ async function installExifTool() {
         file.close();
         if (valid) {
           // Extract the tarball
-          await tar.x({ file: `${supportPath}/Image-ExifTool-12.74.tar.gz`, cwd: supportPath });
+          await tar.x({
+            file: `${supportPath}/Image-ExifTool-13.21.tar.gz`,
+            cwd: supportPath,
+          });
+          await fs.promises.rename(`${supportPath}/Image-ExifTool-13.21`, `${supportPath}/exiftool`);
           await LocalStorage.setItem("exifToolLocation", ExifToolLocation.SUPPORT_DIR);
           waiting = false;
+          toast.title = "Done!";
+          toast.style = Toast.Style.Success;
         }
         await fs.promises.unlink(tarPath);
-        toast.title = "Done!";
-        toast.style = Toast.Style.Success;
       });
     });
 
@@ -82,7 +98,7 @@ async function installExifTool() {
 /**
  * Determines whether ExifTool is on the path. If not, prompts the user to install it.
  */
-async function setExifToolLocation() {
+export async function setExifToolLocation() {
   // See if ExifTool is on the path
   try {
     execSync("exiftool -ver");
@@ -97,14 +113,17 @@ async function setExifToolLocation() {
  * Gets the location of ExifTool, either on the path or in the support directory.
  * @returns The location of ExifTool, either on the path or in the support directory.
  */
-async function getExifToolLocation() {
+export async function getExifToolLocation() {
   const initialLocation = await LocalStorage.getItem("exifToolLocation");
   if (
     initialLocation !== ExifToolLocation.ON_PATH &&
-    (initialLocation !== ExifToolLocation.SUPPORT_DIR ||
-      !fs.existsSync(`${environment.supportPath}/Image-ExifTool-12.74/exiftool`))
+    (initialLocation !== ExifToolLocation.SUPPORT_DIR || !fs.existsSync(`${environment.supportPath}/exiftool/exiftool`))
   ) {
-    await setExifToolLocation();
+    if (fs.existsSync(`${environment.supportPath}/exiftool/exiftool`)) {
+      await LocalStorage.setItem("exifToolLocation", ExifToolLocation.SUPPORT_DIR);
+    } else {
+      await setExifToolLocation();
+    }
   }
 
   if (initialLocation === ExifToolLocation.ON_PATH) {

@@ -144,6 +144,14 @@ function Search() {
               <ActionPanel>
                 {m.permalink ? <Action.OpenInBrowser url={m.permalink} title="Open Message" /> : null}
 
+                {m.permalink ? (
+                  <Action.CopyToClipboard
+                    content={m.permalink}
+                    title="Copy Message URL"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  />
+                ) : null}
+
                 <ActionPanel.Section>
                   <ActionPanel.Submenu
                     title="Sort By"

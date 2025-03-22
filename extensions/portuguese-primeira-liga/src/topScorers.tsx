@@ -60,7 +60,6 @@ export default function GetTopScorers() {
                       text={getFormattedDate(ts.player.dateOfBirth)}
                     />
                     <List.Item.Detail.Metadata.Label title="Age" text={getAge(ts.player.dateOfBirth) + " years old"} />
-                    <List.Item.Detail.Metadata.Label title="Position" text={ts.player.position || "?"} />
                     <List.Item.Detail.Metadata.Label title="Penalties" text={(ts.penalties || 0).toString()} />
                   </List.Item.Detail.Metadata>
                 }
