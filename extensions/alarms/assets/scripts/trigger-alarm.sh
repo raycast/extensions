@@ -15,10 +15,50 @@ if [ -z "$alarm_id" ] || [ -z "$sound_path" ]; then
   exit 1
 fi
 
+# Improve path handling to deal with spaces
+# When called from crontab, the current directory might not be what we expect
+# Use the script location as an anchor point
+SCRIPT_PATH="$0"
+if [ ! -f "$SCRIPT_PATH" ]; then
+  # If we can't find the script directly, try resolving it from PATH
+  SCRIPT_PATH=$(which trigger-alarm.sh 2>/dev/null)
+  if [ ! -f "$SCRIPT_PATH" ]; then
+    # Last resort - try to find it in common locations
+    for dir in "${HOME}/.raycast-alarms/scripts" "${HOME}/Library/Application Support/com.raycast.macos/extensions"*"/scripts"; do
+      if [ -f "${dir}/trigger-alarm.sh" ]; then
+        SCRIPT_PATH="${dir}/trigger-alarm.sh"
+        break
+      fi
+    done
+  fi
+fi
+
+# Get script directory
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+echo "Script found at: $SCRIPT_PATH" >&2
+echo "Script directory: $SCRIPT_DIR" >&2
+
+# Load the configuration with the support path
+if [ -f "$(dirname "$SCRIPT_DIR")/config.sh" ]; then
+  . "$(dirname "$SCRIPT_DIR")/config.sh"
+fi
+
+# Configuration directory - use RAYCAST_SUPPORT_PATH if available, fallback to legacy path
+if [ -n "$RAYCAST_SUPPORT_PATH" ]; then
+  CONFIG_DIR="$RAYCAST_SUPPORT_PATH"
+else
+  # Legacy fallback
+  CONFIG_DIR="$HOME/.raycast-alarms"
+fi
+
 log() {
-  mkdir -p "$HOME/.raycast-alarms/logs"
-  echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$HOME/.raycast-alarms/logs/trigger-alarm.log"
+  mkdir -p "$CONFIG_DIR/logs"
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$CONFIG_DIR/logs/trigger-alarm.log"
 }
+
+log "Using configuration directory: $CONFIG_DIR"
+log "Script path: $SCRIPT_PATH"
+log "Alarm parameters: id=$alarm_id, title=$alarm_title, sound=$sound_path, seconds=$seconds"
 
 cleanup() {
   # Remove the active alarm file
@@ -48,11 +88,11 @@ fi
 log "Triggering alarm: ID=$alarm_id, Title=$alarm_title, Sound=$sound_path, Seconds=$seconds"
 
 # Create the active alarms directory if it doesn't exist
-mkdir -p "$HOME/.raycast-alarms/active"
+mkdir -p "$CONFIG_DIR/active"
 
 # Create a file to mark this alarm as active
-active_alarm_file="$HOME/.raycast-alarms/active/$alarm_id"
-loop_control_file="$HOME/.raycast-alarms/active/${alarm_id}_loop"
+active_alarm_file="$CONFIG_DIR/active/$alarm_id"
+loop_control_file="$CONFIG_DIR/active/${alarm_id}_loop"
 
 # If seconds parameter is provided, wait that number of seconds
 if [ -n "$seconds" ] && [ "$seconds" -gt 0 ]; then
@@ -86,7 +126,7 @@ fi
 
 # Show AppleScript popup dialog
 log "Showing popup dialog for: $alarm_title"
-POPUP_SCRIPT="$HOME/.raycast-alarms/scripts/show-alarm-popup.scpt"
+POPUP_SCRIPT="$CONFIG_DIR/scripts/show-alarm-popup.scpt"
 
 if [ -f "$POPUP_SCRIPT" ]; then
   dialog_result=$(osascript "$POPUP_SCRIPT" "$alarm_title")
@@ -102,7 +142,7 @@ if [ -f "$POPUP_SCRIPT" ]; then
     
     # Also remove the crontab entry to make this a one-time alarm
     log "Removing crontab entry for alarm $alarm_id"
-    MANAGE_SCRIPT="$HOME/.raycast-alarms/scripts/manage-crontab.sh"
+    MANAGE_SCRIPT="$CONFIG_DIR/scripts/manage-crontab.sh"
     if [ -f "$MANAGE_SCRIPT" ] && [ -x "$MANAGE_SCRIPT" ]; then
       "$MANAGE_SCRIPT" remove "$alarm_id"
       log "Crontab entry removed for alarm $alarm_id"
@@ -133,7 +173,7 @@ log "Setting auto-stop timer for 10 minutes"
     
     # Also remove the crontab entry when auto-stopped
     log "Removing crontab entry for alarm $alarm_id after auto-stop"
-    MANAGE_SCRIPT="$HOME/.raycast-alarms/scripts/manage-crontab.sh"
+    MANAGE_SCRIPT="$CONFIG_DIR/scripts/manage-crontab.sh"
     if [ -f "$MANAGE_SCRIPT" ] && [ -x "$MANAGE_SCRIPT" ]; then
       "$MANAGE_SCRIPT" remove "$alarm_id"
       log "Crontab entry removed for alarm $alarm_id"

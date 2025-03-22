@@ -27,10 +27,17 @@ echo "       Raycast Alarms Extension Installer      "
 echo "==============================================="
 echo "Building your perfect alarm system, one script at a time\n"
 
+# Get the support path from the command line argument
+SUPPORT_PATH="$1"
+if [ -z "$SUPPORT_PATH" ]; then
+  print_error "Support path not provided"
+  exit 1
+fi
+
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 print_info "Installation source: $SCRIPT_DIR"
 
-CONFIG_DIR="$HOME/.raycast-alarms"
+CONFIG_DIR="$SUPPORT_PATH"
 print_step "Creating workspace at $CONFIG_DIR"
 
 mkdir -p "$CONFIG_DIR/scripts" || { print_error "Failed to create scripts directory"; exit 1; }
@@ -63,6 +70,20 @@ print_success "Scripts copied to destination"
 chmod +x "$CONFIG_DIR/scripts/trigger-alarm.sh"
 chmod +x "$CONFIG_DIR/scripts/manage-crontab.sh"
 print_success "Scripts are now executable"
+
+# Create the configuration file that will store the support path
+# Use single quotes in the path to handle spaces properly
+echo "RAYCAST_SUPPORT_PATH='$SUPPORT_PATH'" > "$CONFIG_DIR/config.sh"
+chmod +x "$CONFIG_DIR/config.sh"
+print_success "Config file created with support path"
+
+# Test that the config file is correctly read
+TEST_READ=$(. "$CONFIG_DIR/config.sh" && echo "$RAYCAST_SUPPORT_PATH")
+if [ "$TEST_READ" = "$SUPPORT_PATH" ]; then
+  print_success "Config file test successful"
+else
+  print_warning "Config file test failed - expected '$SUPPORT_PATH', got '$TEST_READ'"
+fi
 
 if [ ! -f "$CONFIG_DIR/alarms.json" ]; then
   print_step "Initializing alarms database"

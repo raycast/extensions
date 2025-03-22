@@ -2,15 +2,23 @@
 
 # manage-crontab.sh - Script to manage crontab entries for Raycast Alarms
 
-# Add common paths for Homebrew binaries
-export PATH="$PATH:/usr/local/bin:/opt/homebrew/bin"
-
 # Script directory (for finding resources)
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 BASE_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
-# Configuration directory
-CONFIG_DIR="$HOME/.raycast-alarms"
+# Load the configuration with the support path
+if [ -f "$(dirname "$SCRIPT_DIR")/config.sh" ]; then
+  . "$(dirname "$SCRIPT_DIR")/config.sh"
+fi
+
+# Configuration directory - use RAYCAST_SUPPORT_PATH if available, fallback to legacy path
+if [ -n "$RAYCAST_SUPPORT_PATH" ]; then
+  CONFIG_DIR="$RAYCAST_SUPPORT_PATH"
+else
+  # Legacy fallback
+  CONFIG_DIR="$HOME/.raycast-alarms"
+fi
+
 ALARMS_FILE="$CONFIG_DIR/alarms.data"
 CRONTAB_MARKER="#--- RAYCAST ALARMS ---#"
 
@@ -23,6 +31,16 @@ log() {
   LOG_FILE="$CONFIG_DIR/logs/crontab-$(date +%Y%m%d).log"
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"
 }
+
+# Enhanced log function for debugging
+debug_log() {
+  log "DEBUG: $1"
+}
+
+# Log the configuration
+log "Using configuration directory: $CONFIG_DIR"
+debug_log "Script directory: $SCRIPT_DIR"
+debug_log "Using alarm data file: $ALARMS_FILE"
 
 # Initialize alarms file if it doesn't exist
 if [ ! -f "$ALARMS_FILE" ]; then
@@ -67,7 +85,7 @@ add_alarm() {
   fi
   
   # Check that trigger script exists
-  TRIGGER_SCRIPT="$HOME/.raycast-alarms/scripts/trigger-alarm.sh"
+  TRIGGER_SCRIPT="$CONFIG_DIR/scripts/trigger-alarm.sh"
   if [ ! -f "$TRIGGER_SCRIPT" ]; then
     log "ERROR: Trigger script not found at: $TRIGGER_SCRIPT"
     echo "ERROR: Trigger script not found at: $TRIGGER_SCRIPT"
@@ -84,17 +102,17 @@ add_alarm() {
     TRIGGER_SCRIPT="$FOUND_SCRIPT"
   fi
   log "Trigger script found at: $TRIGGER_SCRIPT"
+  debug_log "Trigger script is executable: $([ -x "$TRIGGER_SCRIPT" ] && echo "yes" || echo "no")"
   
   # Create the crontab entry
   # Format: minute hour day month weekday command
-  # Escape spaces in paths with backslashes
-  escaped_sound_path=$(echo "$sound_path" | sed 's/ /\\ /g')
-  escaped_script_path=$(echo "$HOME/.raycast-alarms/scripts/trigger-alarm.sh" | sed 's/ /\\ /g')
-  
+  # Properly handle paths with spaces by using single quotes for the entire command
   # Create a crontab entry with proper parameter order, pass seconds as a parameter
-  cron_entry="$minutes $hours * * * $escaped_script_path $alarm_id \"$title\" $escaped_sound_path $seconds"
+  cron_entry="$minutes $hours * * * '$TRIGGER_SCRIPT' '$alarm_id' '$title' '$sound_path' $seconds"
   
   log "Generated crontab entry: $cron_entry"
+  debug_log "Checking if TRIGGER_SCRIPT path contains spaces: $(echo "$TRIGGER_SCRIPT" | grep -c " ")"
+  debug_log "Checking if sound_path contains spaces: $(echo "$sound_path" | grep -c " ")"
   
   # Get current crontab
   crontab -l > "$CONFIG_DIR/temp_crontab" 2>/dev/null || echo "" > "$CONFIG_DIR/temp_crontab"
@@ -178,18 +196,19 @@ remove_alarm() {
   crontab -l > "$CONFIG_DIR/temp_crontab" 2>/dev/null || echo "" > "$CONFIG_DIR/temp_crontab"
   
   # Debug: Check if the alarm exists in crontab before removal
-  if grep -q "$alarm_id" "$CONFIG_DIR/temp_crontab"; then
+  if grep -q "'$alarm_id'" "$CONFIG_DIR/temp_crontab"; then
     log "Found alarm $alarm_id in crontab, proceeding with removal"
   else
     log "Warning: Alarm $alarm_id not found in crontab"
   fi
   
   # Remove the specific alarm entry
-  # The alarm ID is always the first parameter to the trigger script
-  sed -i '' "/$alarm_id /d" "$CONFIG_DIR/temp_crontab"
+  # The alarm ID is passed as the first parameter after the script path
+  # We need to match the single-quoted alarm ID
+  sed -i '' "/'$alarm_id'/d" "$CONFIG_DIR/temp_crontab"
   
   # Debug: Verify the alarm is gone
-  if grep -q "$alarm_id" "$CONFIG_DIR/temp_crontab"; then
+  if grep -q "'$alarm_id'" "$CONFIG_DIR/temp_crontab"; then
     log "ERROR: Failed to remove alarm $alarm_id from crontab"
   else
     log "Successfully removed alarm $alarm_id from crontab"

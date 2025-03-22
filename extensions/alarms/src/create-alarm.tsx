@@ -1,5 +1,5 @@
 import React from "react";
-import { Action, ActionPanel, Form, Icon, showToast, Toast, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, popToRoot, environment } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { spawn } from "child_process";
 import os from "os";
@@ -10,8 +10,8 @@ import fs from "fs";
 // Sound options and paths
 const DEFAULT_RINGTONE =
   "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Radial-EncoreInfinitum.m4r";
-const SCRIPT_PATH = path.join(os.homedir(), ".raycast-alarms", "scripts", "manage-crontab.sh");
-const LOG_PATH = path.join(os.homedir(), ".raycast-alarms", "logs", "extension.log");
+const SCRIPT_PATH = path.join(environment.supportPath, "scripts", "manage-crontab.sh");
+const LOG_PATH = path.join(environment.supportPath, "logs", "extension.log");
 
 // Helper function to log messages to a file
 const logToFile = async (message: string) => {
@@ -248,7 +248,7 @@ export default function CreateAlarm() {
 
       setIsLoading(true);
 
-      const scriptPath = `${os.homedir()}/.raycast-alarms/scripts/manage-crontab.sh`;
+      const scriptPath = path.join(environment.supportPath, "scripts", "manage-crontab.sh");
       try {
         await logToFile(`Using script path: ${scriptPath}`);
 

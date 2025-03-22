@@ -1,15 +1,14 @@
 import React from "react";
-import { List, ActionPanel, Action, Icon, showToast, Toast, launchCommand, LaunchType, Keyboard } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, launchCommand, LaunchType, Keyboard, environment } from "@raycast/api";
 import { useCallback, useState, useEffect } from "react";
 import { spawn } from "child_process";
-import os from "os";
-import { open } from "@raycast/api";
 import fs from "fs";
+import path from "path";
 import { initializeExtension } from "./utils/initialize";
 import { showFailureToast } from "@raycast/utils";
 
 // Path to the manage-crontab.sh script
-const SCRIPT_PATH = `${os.homedir()}/.raycast-alarms/scripts/manage-crontab.sh`;
+const SCRIPT_PATH = path.join(environment.supportPath, "scripts", "manage-crontab.sh");
 
 interface AlarmInfo {
   id: string;

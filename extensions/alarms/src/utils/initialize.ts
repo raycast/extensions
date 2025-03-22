@@ -42,8 +42,8 @@ const runInstallScript = async (): Promise<void> => {
     // Make sure the script is executable
     await execAsync(`chmod +x "${installScriptPath}"`);
 
-    // Run the install script
-    const { stdout, stderr } = await execAsync(`"${installScriptPath}"`);
+    // Pass environment.supportPath to the install script so it can use it
+    const { stdout, stderr } = await execAsync(`"${installScriptPath}" "${environment.supportPath}"`);
 
     if (stderr) {
       console.error(`Installation error: ${stderr}`);
