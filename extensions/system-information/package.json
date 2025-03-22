@@ -114,7 +114,7 @@
           ],
           "properties": {
             "pid": {
-              "type": "string",
+              "type": "number",
               "description": "The Process ID (PID) of the process to kill"
             }
           }
