@@ -1,0 +1,14 @@
+{
+  "name": "raycast-note-ext",
+  "version": 2,
+  "public": true,
+  "github": {
+    "enabled": true
+  },
+  "builds": [
+    { "src": "package.json", "use": "@vercel/static-build" }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+} 

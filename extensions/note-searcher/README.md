@@ -1,45 +1,90 @@
-# Note Searcher
+# Raycast Note Searcher
 
-A Raycast extension that allows you to save and search notes using semantic vector search powered by Upstash Vector.
+A Raycast extension for semantic note searching and organization, powered by Upstash Vector Database.
 
 ## Features
 
-- **Add Notes**: Quickly save text or URLs as notes directly from Raycast
-- **Semantic Search**: Find your notes with powerful vector-based semantic search
-- **URL Support**: Input containing URLs will automatically be saved as URL notes
+- **Add Notes**: Quickly add notes with automatic categorization
+- **Add Reminders**: Create reminders with date and time
+- **Add URLs**: Add web content with automatic metadata extraction
+- **Use Templates**: Create notes from predefined templates
+- **Search Notes**: Search your notes semantically
 
-## Usage
+## Commands
 
-### Adding Notes
+### Add Note
+A simple command to quickly add a note or URL. It automatically:
+- Detects if the input is a URL and extracts metadata
+- Categorizes the note based on content (travel, password, code, etc.)
+- Extracts important data (emails, dates, phone numbers)
 
-1. Type `Add Note` in Raycast and press Enter
-2. Enter your text or URL after the command
-   - For plain text: `add note > Flight number TK568234`
-   - For URLs: `add note > https://upstash.com/blog/build-your-own-mcp`
-3. A success notification will appear once the note is saved
+### Add Reminder
+Create reminders with:
+- Title and description
+- Date selection
+- Hour and minute selection
 
-### Searching Notes
+### Add URL
+A form-based interface to add a URL with:
+- Metadata extraction
+- Custom title and notes
 
-1. Type `Search Note` in Raycast and press Enter
-2. Enter your search query in the search bar
-3. Relevant notes will be displayed in the results list
-4. You can:
-   - Copy the note content to clipboard by selecting it
-   - Open URLs directly in your browser if the note is a URL
+### Use Template
+Create notes from predefined templates:
+- Shopping lists
+- Travel plans
+- Password entries
+- Contact information
+- Code snippets
+
+### Search Note
+Semantic search for your notes:
+- Find similar notes by meaning, not just keywords
+- Filter by category
+- View and copy note content
+
+## Installation
+
+### From Source
+1. Clone this repository
+2. Navigate to the project directory
+3. Install dependencies:
+   ```
+   npm install
+   ```
+4. Build and install the extension:
+   ```
+   npm run dev
+   ```
+
+### Configuration
+The extension uses [Upstash Vector](https://upstash.com/vector) for storing and searching notes. The connection is pre-configured, but you can modify the credentials in `src/utils/index.ts` if needed.
+
+## Development
+
+To contribute to this extension:
+
+1. Clone the repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Start the development server:
+   ```
+   npm run dev
+   ```
+
+## Technologies
+
+- Raycast Extensions API
+- TypeScript
+- Upstash Vector Database
 
 ## Technical Details
 
 - Uses Upstash Vector for storing and retrieving vector embeddings
 - No external LLM dependencies - uses simple text parsing and vector operations
 - Performs semantic search based on vector similarity
-
-## Development
-
-This extension is built with Raycast's extension API using TypeScript. To develop locally:
-
-1. Clone the repository
-2. Run `npm install` to install dependencies
-3. Run `npm run dev` to start in development mode
 
 ## Credits
 
