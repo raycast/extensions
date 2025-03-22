@@ -27,11 +27,7 @@ export default function Command() {
   const { me: meData } = useMe();
 
   const durationTask = async (task: Task) => {
-    if (task.commentCount > 0) {
-      sumTaskTimer(task, mutate);
-    } else {
-      showToast({ style: Toast.Style.Failure, title: "This task has not been tracked yet." });
-    }
+    sumTaskTimer(task, mutate);
   };
 
   const getTaskDuration = (task: Task) => {
