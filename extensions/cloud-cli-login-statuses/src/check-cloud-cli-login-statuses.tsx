@@ -15,6 +15,7 @@ interface CloudStatus {
 }
 
 export default function Command() {
+  const [isLoading, setIsLoading] = useState(true);
   const [statuses, setStatuses] = useState<CloudStatus[]>([
     {
       id: "aws",
@@ -45,11 +46,17 @@ export default function Command() {
 
   const checkCloudStatuses = async () => {
     try {
+      // Set global loading state
+      setIsLoading(true);
+
       // Reset loading state
       setStatuses((prevStatuses) => prevStatuses.map((status) => ({ ...status, isLoading: true })));
 
       // Run all checks concurrently
       await Promise.all([checkAwsStatus(), checkGcloudStatus(), checkAzureStatus()]);
+
+      // Clear global loading state
+      setIsLoading(false);
     } catch (error) {
       console.error("Error checking cloud statuses:", error);
       await showToast({
@@ -57,6 +64,7 @@ export default function Command() {
         title: "Failed to check cloud statuses",
         message: String(error),
       });
+      setIsLoading(false);
     }
   };
 
@@ -169,7 +177,7 @@ export default function Command() {
   };
 
   return (
-    <List isLoading={statuses.some((status) => status.isLoading)}>
+    <List isLoading={isLoading}>
       {statuses.map((status: CloudStatus) => (
         <List.Item
           key={status.id}

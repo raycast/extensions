@@ -13,6 +13,7 @@
     {
       "name": "check-cloud-cli-login-statuses",
       "title": "Check Cloud CLI Login Statuses",
+      "subtitle": "Cloud CLI Login Statuses",
       "description": "Check if you are logged in AWS, Google Cloud and Azure CLIs",
       "mode": "view"
     }
