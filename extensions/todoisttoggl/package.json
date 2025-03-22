@@ -15,6 +15,7 @@
     {
       "name": "index",
       "title": "Tracking task",
+      "subtitle": "Todoist + Toggl",
       "description": "Create task, Start & Stop timetrack, Update task, Summary Duration.",
       "mode": "view"
     }
