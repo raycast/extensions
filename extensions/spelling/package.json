@@ -20,15 +20,15 @@
   "preferences": [
     {
       "name": "apiKey",
-      "label": "Mistal API Key",
-      "description": "Enter your personal Mistral API Key",
+      "label": "API Key",
+      "description": "Enter your API Key",
       "type": "password",
       "title": "API Key",
       "required": true
     },
     {
       "name": "url",
-      "label": "LLM url",
+      "label": "LLM URL",
       "description": "Enter the URL for the LLM",
       "type": "textfield",
       "title": "URL",
@@ -36,8 +36,8 @@
     },
     {
       "name": "model",
-      "label": "LLM model",
-      "description": "Enter the Model of the LLM to use",
+      "label": "LLM Model",
+      "description": "Enter the model of the LLM to use",
       "type": "textfield",
       "title": "Model",
       "required": true
