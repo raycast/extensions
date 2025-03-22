@@ -1,5 +1,16 @@
 import React from "react";
-import { List, ActionPanel, Action, Icon, showToast, Toast, launchCommand, LaunchType, Keyboard, environment } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  launchCommand,
+  LaunchType,
+  Keyboard,
+  environment,
+} from "@raycast/api";
 import { useCallback, useState, useEffect } from "react";
 import { spawn } from "child_process";
 import fs from "fs";

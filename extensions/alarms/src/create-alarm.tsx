@@ -2,7 +2,6 @@ import React from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast, popToRoot, environment } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { spawn } from "child_process";
-import os from "os";
 import { initializeExtension } from "./utils/initialize";
 import path from "path";
 import fs from "fs";
