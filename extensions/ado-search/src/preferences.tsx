@@ -9,4 +9,14 @@ export function baseApiUrl(): string {
   return `https://dev.azure.com/${getPreferenceValues().organizationName}`;
 }
 
+export function baseApiUrlEntities(): string {
+  return `https://vssps.dev.azure.com/${getPreferenceValues().organizationName}`;
+}
+
+export function email(): string {
+  return getPreferenceValues().email;
+}
+
+export const { projectName } = getPreferenceValues();
+
 export const { organizationName } = getPreferenceValues();

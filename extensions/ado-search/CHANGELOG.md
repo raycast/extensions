@@ -1,4 +1,6 @@
 # Azure DevOps Repository Search
+## [Add PBI, PR, and pipeline search] - {PR_MERGE_DATE}
+Added PBI, PR, and pipeline search
 
 ## [Add Menu PR items] - 2025-02-17
 Added the projectfilter
