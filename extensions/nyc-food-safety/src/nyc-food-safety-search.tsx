@@ -1,6 +1,6 @@
 import { showToast, Toast, LaunchProps, Detail, Icon, Color, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 // Define the Command interface for type safety
 type CommandArguments = {
@@ -40,7 +40,9 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
 
   // Construct the SoQL query (SQL for OpenData)
   const baseUrl = "https://data.cityofnewyork.us/resource/43nn-pn8j.json";
-  const whereClause = restaurantName ? `upper(dba) LIKE upper('%25${restaurantName.trim().replace(/'/g, "''")}%25')` : "";
+  const whereClause = restaurantName
+    ? `upper(dba) LIKE upper('%25${restaurantName.trim().replace(/'/g, "''")}%25')`
+    : "";
   const apiUrl = `${baseUrl}?$where=${whereClause}&$order=inspection_date DESC&$limit=5`;
 
   const { isLoading, data, error } = useFetch<Restaurant[]>(apiUrl, {
@@ -197,6 +199,6 @@ function formatPhoneNumber(phone: string): string {
 }
 
 function formatDate(date: Date): string {
-  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-  return date.toLocaleDateString('en-US', options);
+  const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric" };
+  return date.toLocaleDateString("en-US", options);
 }
