@@ -1,5 +1,5 @@
 import { get, post, put, remove } from "@/api/togglClient";
-import type { ToggleItem } from "@/api/types";
+import type { TogglItem } from "@/api/types";
 
 export function getMyClients() {
   return get<Client[]>("/me/clients");
@@ -26,7 +26,7 @@ export function restoreClient(workspaceId: number, clientId: number, restoreAllP
 }
 
 /** @see {@link https://developers.track.toggl.com/docs/api/clients#response Toggl Api} */
-export interface Client extends ToggleItem {
+export interface Client extends TogglItem {
   archived: boolean;
   name: string;
   /** Workspace ID */

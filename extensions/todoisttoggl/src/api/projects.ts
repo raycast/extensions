@@ -1,5 +1,5 @@
 import { get, post, put, remove } from "@/api/togglClient";
-import type { ToggleItem } from "@/api/types";
+import type { TogglItem } from "@/api/types";
 
 export async function getMyProjects(): Promise<TogglProject[]> {
   return get<TogglProject[]>("/me/projects?include_archived=true");
@@ -62,7 +62,7 @@ export interface ProjectOptions {
 }
 
 /** @see {@link https://developers.track.toggl.com/docs/api/projects#response-8 Toggl Api} */
-export interface TogglProject extends ToggleItem {
+export interface TogglProject extends TogglItem {
   active: boolean;
   actual_hours: number | null;
   actual_seconds: number | null;
