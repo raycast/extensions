@@ -1,25 +1,8 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  LocalStorage,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { withAccessToken, useForm } from "@raycast/utils";
-import {
-  getContacts,
-  getAdministrationId,
-  provider,
-  getProjects,
-  getUsers,
-  createTimeEntry,
-} from "./oauth/moneybird";
-import {
-  MoneybirdApiProject,
-  MoneybirdUser,
-  MoneybirdApiCustomer,
-} from "./types/moneybird";
+import { getContacts, getAdministrationId, provider, getProjects, getUsers, createTimeEntry } from "./oauth/moneybird";
+import { MoneybirdApiProject, MoneybirdUser, MoneybirdApiCustomer } from "./types/moneybird";
 
 interface FormValues {
   description: string;
@@ -110,12 +93,11 @@ function Command() {
     async function fetchData() {
       try {
         const administrationId = await getAdministrationId();
-        const [fetchedCustomers, fetchedProjects, fetchedUsers] =
-          await Promise.all([
-            getContacts(administrationId),
-            getProjects(administrationId),
-            getUsers(administrationId),
-          ]);
+        const [fetchedCustomers, fetchedProjects, fetchedUsers] = await Promise.all([
+          getContacts(administrationId),
+          getProjects(administrationId),
+          getUsers(administrationId),
+        ]);
 
         setCustomers(fetchedCustomers);
         setProjects(fetchedProjects);
@@ -139,11 +121,7 @@ function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        title="Description"
-        placeholder="Enter description"
-        {...itemProps.description}
-      />
+      <Form.TextField title="Description" placeholder="Enter description" {...itemProps.description} />
       <Form.DatePicker
         id="startDate"
         title="Start Date"
@@ -175,33 +153,18 @@ function Command() {
         }}
       />
       <Form.Separator />
-      <Form.Dropdown
-        title="Customer"
-        isLoading={isLoading}
-        {...itemProps.customerId}
-      >
+      <Form.Dropdown title="Customer" isLoading={isLoading} {...itemProps.customerId}>
         {customers.map((customer) => (
           <Form.Dropdown.Item
             key={customer.id}
             value={customer.id}
-            title={
-              customer.company_name ||
-              `${customer.firstname} ${customer.lastname}`
-            }
+            title={customer.company_name || `${customer.firstname} ${customer.lastname}`}
           />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown
-        title="Project"
-        isLoading={isLoading}
-        {...itemProps.projectId}
-      >
+      <Form.Dropdown title="Project" isLoading={isLoading} {...itemProps.projectId}>
         {projects.map((project) => (
-          <Form.Dropdown.Item
-            key={project.id}
-            value={project.id}
-            title={project.name}
-          />
+          <Form.Dropdown.Item key={project.id} value={project.id} title={project.name} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown title="User" isLoading={isLoading} {...itemProps.userId}>
