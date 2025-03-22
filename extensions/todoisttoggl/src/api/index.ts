@@ -6,7 +6,7 @@ export {
   createProject,
   updateProject,
   deleteProject,
-  type togglProject,
+  type TogglProject,
   type ProjectOptions,
 } from "@/api/projects";
 export {

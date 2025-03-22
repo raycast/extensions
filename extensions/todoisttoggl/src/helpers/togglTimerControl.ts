@@ -1,5 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
-import { createTimeEntry, stopTimeEntry, Me, togglProject } from "@/api";
+import { createTimeEntry, stopTimeEntry, Me, TogglProject } from "@/api";
 import { Task, Project } from "@doist/todoist-api-typescript";
 import { TodoistApi } from "@doist/todoist-api-typescript";
 import { todoistApiToken } from "@/helpers/preferences";
@@ -9,7 +9,7 @@ export async function startTogglTimer(
   task: Task,
   todoistProjects: Project[] | undefined,
   togglMe: Me,
-  togglProjects: togglProject[],
+  togglProjects: TogglProject[],
   refreshTimer: () => void,
 ) {
   const currentTodoistProject = todoistProjects?.find((project) => project.id === task.projectId);

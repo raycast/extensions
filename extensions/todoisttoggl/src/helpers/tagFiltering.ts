@@ -1,10 +1,10 @@
-import { Tag, togglProject } from "@/api";
+import { Tag, TogglProject } from "@/api";
 import { Project } from "@doist/todoist-api-typescript";
 export const tagFiltering = (
   tag: Tag,
   selectProject: string | undefined,
   projects: Project[],
-  togglProjects: togglProject[],
+  togglProjects: TogglProject[],
 ) => {
   if (selectProject === undefined) return true;
   const currentProject = projects?.find((data) => data.id === selectProject);
