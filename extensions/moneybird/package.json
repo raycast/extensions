@@ -13,12 +13,14 @@
     {
       "name": "record-hours",
       "title": "New Time Entry",
+      "subtitle": "Moneybird Time Tracking",
       "description": "Add a new time entry to your administration",
       "mode": "view"
     },
     {
       "name": "start-timing",
       "title": "Mark Now as Start Time",
+      "subtitle": "Moneybird Time Tracking",
       "description": "Mark the current date and time as future start point for a new time entry",
       "mode": "no-view"
     }

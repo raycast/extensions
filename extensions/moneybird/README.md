@@ -37,16 +37,3 @@ Use this command to add a new time entry to your Moneybird administration. You c
 ### Start Timing
 
 Quickly mark the current time as a start point for your time entry. Next time you create a time entry, it will use that as start time.
-
-## Development
-
-```bash
-# Clone the repository
-git clone https://github.com/janyksteenbeek/raycast-moneybird
-
-# Install dependencies
-npm install
-
-# Start development
-npm run dev
-```

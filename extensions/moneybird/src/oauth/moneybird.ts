@@ -1,13 +1,19 @@
 import { OAuth } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
-import { MoneybirdApiCustomer, MoneybirdApiProject, MoneybirdTimeEntry, MoneybirdUser } from "../types/moneybird";
+import {
+  MoneybirdApiCustomer,
+  MoneybirdApiProject,
+  MoneybirdTimeEntry,
+  MoneybirdUser,
+} from "../types/moneybird";
 import { MoneybirdAdministration } from "../types/moneybird";
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Moneybird",
   providerIcon: "extension-icon.png",
-  description: "Connect your Moneybird administration to Raycast and start registering time entries",
+  description:
+    "Connect your Moneybird administration to Raycast and start registering time entries",
 });
 
 export const provider = new OAuthService({
@@ -22,7 +28,10 @@ export const provider = new OAuthService({
   scope: "time_entries sales_invoices settings",
 });
 
-const fetchData = async <T>(path: string, options?: RequestInit): Promise<T> => {
+const fetchData = async <T>(
+  path: string,
+  options?: RequestInit,
+): Promise<T> => {
   const accessToken = await provider.authorize();
 
   const response = await fetch(`https://moneybird.com/api/v2/${path}`, {
@@ -38,7 +47,8 @@ const fetchData = async <T>(path: string, options?: RequestInit): Promise<T> => 
 };
 
 export const getAdministrationId = async () => {
-  const administrations = await fetchData<MoneybirdAdministration[]>("administrations");
+  const administrations =
+    await fetchData<MoneybirdAdministration[]>("administrations");
 
   if (administrations.length === 0) {
     throw new Error("No administration found");
@@ -48,13 +58,17 @@ export const getAdministrationId = async () => {
 };
 
 export const getContacts = async (administrationId: string) => {
-  const customers = await fetchData<MoneybirdApiCustomer[]>(`${administrationId}/contacts`);
+  const customers = await fetchData<MoneybirdApiCustomer[]>(
+    `${administrationId}/contacts`,
+  );
 
   return customers;
 };
 
 export const getProjects = async (administrationId: string) => {
-  const projects = await fetchData<MoneybirdApiProject[]>(`${administrationId}/projects`);
+  const projects = await fetchData<MoneybirdApiProject[]>(
+    `${administrationId}/projects`,
+  );
   return projects;
 };
 
@@ -63,7 +77,10 @@ export const getUsers = async (administrationId: string) => {
   return users;
 };
 
-export const createTimeEntry = async (administrationId: string, timeEntry: MoneybirdTimeEntry) => {
+export const createTimeEntry = async (
+  administrationId: string,
+  timeEntry: MoneybirdTimeEntry,
+) => {
   const response = await fetchData(`${administrationId}/time_entries`, {
     method: "POST",
     body: JSON.stringify({ time_entry: timeEntry }),

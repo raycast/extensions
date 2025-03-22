@@ -20,14 +20,6 @@ export type MoneybirdTimeEntry = {
   user_id: string;
 };
 
-export type MoneybirdCustomer = {
-  id: string;
-  company_name: string | null;
-  firstname: string | null;
-  lastname: string | null;
-  projects: MoneybirdProject[];
-};
-
 export type MoneybirdApiCustomer = {
   id: string;
   company_name: string | null;
