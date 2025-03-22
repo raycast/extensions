@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-chrome",
+  "title": "Google Chrome",
+  "description": "Search open tabs, bookmarks and history in Google Chrome.",
+  "icon": "chrome-icon.png",
+  "author": "Codely",
+  "contributors": [
+    "bromanko",
+    "crisboarna",
+    "andreaselia",
+    "rtyke",
+    "KarolRe",
+    "Aiee",
+    "nagauta",
+    "a-laughlin",
+    "tleo19",
+    "Tarocch1",
+    "santiago_perez"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Google Chrome",
+      "description": "Open a new Google Chrome tab.",
+      "mode": "view"
+    },
+    {
+      "name": "search-tab",
+      "title": "Search Tabs",
+      "subtitle": "Google Chrome",
+      "description": "List all tabs and go to the selected.",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Google Chrome",
+      "description": "Search browser history.",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Google Chrome",
+      "description": "Search browser bookmarks.",
+      "mode": "view"
+    },
+    {
+      "name": "search-all",
+      "title": "Search All",
+      "subtitle": "Google Chrome",
+      "description": "Search browser all tabs and history,bookmarks.",
+      "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "Create New Window",
+      "subtitle": "Google Chrome",
+      "description": "Create New Window.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Find the full path to the Google Chrome Profile path via chrome://version/. If empty, the default profile will be used.",
+      "label": "Profile",
+      "default": "",
+      "name": "profilePath",
+      "required": false,
+      "title": "Profile Path",
+      "type": "textfield",
+      "placeholder": "/Users/username/Library/Application Support/Google/Chrome/Profile 1"
+    },
+    {
+      "default": false,
+      "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Chrome profile.",
+      "label": "Extract the favicon from every open tab",
+      "name": "useOriginalFavicon",
+      "required": false,
+      "title": "Favicon",
+      "type": "checkbox"
+    },
+    {
+      "data": [
+        {
+          "title": "Default(classic)",
+          "value": "default"
+        },
+        {
+          "title": "Current Profile",
+          "value": "profile_current"
+        },
+        {
+          "title": "Original Profile",
+          "value": "profile_original"
+        }
+      ],
+      "default": "default",
+      "description": "When 'Default(classic), the tab will be opened in the profile open, or topmost profile window if multiple windows are open. When 'Current Profile', the tab will be opened in the profile specified in the 'Profile' field. When 'Original Profile' it will open in original profile tab is sourced from",
+      "name": "openTabInProfile",
+      "required": false,
+      "title": "Open Tab In Profile",
+      "type": "dropdown"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.13",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.9.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "application": {
+    "application/atom+xml": { "exts": [".atom"], "description": null },
+    "application/json": { "exts": [".json", ".map", ".topojson"], "description": "JSON format" },
+    "application/ld+json": { "exts": [".jsonld"], "description": "JSON-LD format" },
+    "application/rss+xml": { "exts": [".rss"], "description": null },
+    "application/geo+json": { "exts": [".geojson"], "description": null },
+    "application/rdf+xml": { "exts": [".rdf"], "description": null },
+    "application/xml": { "exts": [".xml"], "description": "XML" },
+    "application/manifest+json": { "exts": [".webmanifest"], "description": null },
+    "application/x-web-app-manifest+json": { "exts": [".webapp"], "description": null },
+    "application/wasm": { "exts": [".wasm"], "description": null },
+    "application/vnd.ms-fontobject": { "exts": [".eot"], "description": "MS Embedded OpenType fonts" },
+    "application/octet-stream": { "exts": [".safariextz", ".bin"], "description": "Any kind of binary data" },
+    "application/x-bb-appworld": { "exts": [".bbaw"], "description": null },
+    "application/x-chrome-extension": { "exts": [".crx"], "description": null },
+    "application/x-opera-extension": { "exts": [".oex"], "description": null },
+    "application/x-xpinstall": { "exts": [".xpi"], "description": null },
+    "application/x-abiword": { "exts": [".abw"], "description": "AbiWord document" },
+    "application/x-freearc": { "exts": [".arc"], "description": "Archive document (multiple files embedded)" },
+    "application/vnd.amazon.ebook": { "exts": [".azw"], "description": "Amazon Kindle eBook format" },
+    "application/x-bzip": { "exts": [".bz"], "description": "BZip archive" },
+    "application/x-bzip2": { "exts": [".bz2"], "description": "BZip2 archive" },
+    "application/x-cdf": { "exts": [".cda"], "description": "CD audio" },
+    "application/x-csh": { "exts": [".csh"], "description": "C-Shell script" },
+    "application/msword": { "exts": [".doc"], "description": "Microsoft Word" },
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
+      "exts": [".docx"],
+      "description": "Microsoft Word (OpenXML)"
+    },
+    "application/epub+zip": { "exts": [".epub"], "description": "Electronic publication (EPUB)" },
+    "application/gzip": { "exts": [".gz"], "description": "GZip Compressed Archive" },
+    "application/java-archive": { "exts": [".jar"], "description": "Java Archive (JAR)" },
+    "application/vnd.apple.installer+xml": { "exts": [".mpkg"], "description": "Apple Installer Package" },
+    "application/vnd.oasis.opendocument.presentation": {
+      "exts": [".odp"],
+      "description": "OpenDocument presentation document"
+    },
+    "application/vnd.oasis.opendocument.spreadsheet": {
+      "exts": [".ods"],
+      "description": "OpenDocument spreadsheet document"
+    },
+    "application/vnd.oasis.opendocument.text": { "exts": [".odt"], "description": "OpenDocument text document" },
+    "application/ogg": { "exts": [".ogx"], "description": "OGG" },
+    "application/pdf": {
+      "exts": [".pdf"],
+      "description": "\n        Adobe\n        Portable Document Format\n        (PDF)\n      "
+    },
+    "application/x-httpd-php": { "exts": [".php"], "description": "Hypertext Preprocessor (Personal Home Page)" },
+    "application/vnd.ms-powerpoint": { "exts": [".ppt"], "description": "Microsoft PowerPoint" },
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": {
+      "exts": [".pptx"],
+      "description": "Microsoft PowerPoint (OpenXML)"
+    },
+    "application/vnd.rar": { "exts": [".rar"], "description": "RAR archive" },
+    "application/rtf": { "exts": [".rtf"], "description": "Rich Text Format (RTF)" },
+    "application/x-sh": { "exts": [".sh"], "description": "Bourne shell script" },
+    "application/x-tar": { "exts": [".tar"], "description": "Tape Archive (TAR)" },
+    "application/vnd.visio": { "exts": [".vsd"], "description": "Microsoft Visio" },
+    "application/xhtml+xml": { "exts": [".xhtml"], "description": "XHTML" },
+    "application/vnd.ms-excel": { "exts": [".xls"], "description": "Microsoft Excel" },
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+      "exts": [".xlsx"],
+      "description": "Microsoft Excel (OpenXML)"
+    },
+    "application/vnd.mozilla.xul+xml": { "exts": [".xul"], "description": "XUL" },
+    "application/zip": { "exts": [".zip"], "description": "ZIP archive" },
+    "application/x-7z-compressed": { "exts": [".7z"], "description": "7-zip archive" }
+  },
+  "text": {
+    "text/javascript": { "exts": [".js", ".mjs"], "description": "JavaScript module" },
+    "text/cache-manifest": { "exts": [".appcache"], "description": null },
+    "text/calendar": { "exts": [".ics"], "description": "iCalendar format" },
+    "text/markdown": { "exts": [".markdown", ".md"], "description": null },
+    "text/vcard": { "exts": [".vcard", ".vcf"], "description": null },
+    "text/vnd.rim.location.xloc": { "exts": [".xloc"], "description": null },
+    "text/vtt": { "exts": [".vtt"], "description": null },
+    "text/x-component": { "exts": [".htc"], "description": null },
+    "text/css": { "exts": [".css"], "description": "Cascading Style Sheets (CSS)" },
+    "text/csv": { "exts": [".csv"], "description": "Comma-separated values (CSV)" },
+    "text/html": { "exts": [".htm"], "description": "HyperText Markup Language (HTML)" },
+    "text/plain": { "exts": [".txt"], "description": "Text, (generally ASCII or ISO 8859-n)" }
+  },
+  "audio": {
+    "audio/mp4": { "exts": [".f4a", ".f4b", ".m4a"], "description": null },
+    "audio/ogg": { "exts": [".ogg", ".opus", ".oga"], "description": "OGG audio" },
+    "audio/aac": { "exts": [".aac"], "description": "AAC audio" },
+    "audio/midi": { "exts": [".mid"], "description": "Musical Instrument Digital Interface (MIDI)" },
+    "audio/mpeg": { "exts": [".mp3"], "description": "MP3 audio" },
+    "audio/opus": { "exts": [".opus"], "description": "Opus audio" },
+    "audio/wav": { "exts": [".wav"], "description": "Waveform Audio Format" },
+    "audio/webm": { "exts": [".weba"], "description": "WEBM audio" }
+  },
+  "image": {
+    "image/bmp": { "exts": [".bmp"], "description": "Windows OS/2 Bitmap Graphics" },
+    "image/svg+xml": { "exts": [".svg", ".svgz"], "description": "Scalable Vector Graphics (SVG)" },
+    "image/webp": { "exts": [".webp"], "description": "WEBP image" },
+    "image/x-icon": { "exts": [".cur", ".ico"], "description": null },
+    "image/heic": { "exts": [".heic"], "description": null },
+    "image/heif": { "exts": [".heif"], "description": null },
+    "image/heics": { "exts": [".heics"], "description": null },
+    "image/heifs": { "exts": [".heifs"], "description": null },
+    "image/avif": { "exts": [".avif"], "description": "AVIF image" },
+    "image/avis": { "exts": [".avis"], "description": null },
+    "image/gif": { "exts": [".gif"], "description": "Graphics Interchange Format (GIF)" },
+    "image/vnd.microsoft.icon": { "exts": [".ico"], "description": "Icon format" },
+    "image/jpeg": { "exts": [".jpeg"], "description": "JPEG images" },
+    "image/png": { "exts": [".png"], "description": "Portable Network Graphics" },
+    "image/tiff": { "exts": [".tif"], "description": "Tagged Image File Format (TIFF)" }
+  },
+  "video": {
+    "video/mp4": { "exts": [".f4p", ".m4v", ".mp4", ".f4v"], "description": "MP4 video" },
+    "video/ogg": { "exts": [".ogv"], "description": "OGG video" },
+    "video/webm": { "exts": [".webm"], "description": "WEBM video" },
+    "video/x-msvideo": { "exts": [".avi"], "description": "AVI: Audio Video Interleave" },
+    "video/mpeg": { "exts": [".mpeg"], "description": "MPEG Video" },
+    "video/mp2t": { "exts": [".ts"], "description": "MPEG transport stream" },
+    "video/3gpp": { "exts": [".3gp"], "description": "\n3GPP audio/video\n        container\n      " },
+    "video/3gpp2": { "exts": [".3g2"], "description": "\n3GPP2 audio/video\n        container\n      " }
+  },
+  "font": {
+    "font/woff": { "exts": [".woff"], "description": "Web Open Font Format (WOFF)" },
+    "font/woff2": { "exts": [".woff2"], "description": "Web Open Font Format (WOFF)" },
+    "font/ttf": { "exts": [".ttf"], "description": "TrueType Font" },
+    "font/collection": { "exts": [".ttc"], "description": null },
+    "font/otf": { "exts": [".otf"], "description": "OpenType font" }
+  }
+}

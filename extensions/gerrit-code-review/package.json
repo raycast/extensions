@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gerrit-code-review",
+  "title": "Gerrit Code Review",
+  "description": "Interact with Gerrit Code Review instances to query changes and projects",
+  "icon": "Gerrit.png",
+  "author": "vkhitrin",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "gerrit",
+    "code",
+    "review",
+    "patch",
+    "patches",
+    "changes",
+    "projects"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "query-changes",
+      "title": "Query Changes",
+      "subtitle": "Gerrit Code Review",
+      "description": "Execute query to search for changes in Gerrit",
+      "mode": "view"
+    },
+    {
+      "name": "browse-projects",
+      "title": "Browse Projects",
+      "subtitle": "Gerrit Code Review",
+      "description": "Browse projects hosted on Gerrit",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3",
+    "@raycast/utils": "^1.5.2",
+    "date-fns": "^2.30.0",
+    "node-fetch": "^3.3.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/uuid": "^9.0.1",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.24.6",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

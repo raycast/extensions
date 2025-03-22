@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "brave",
+  "title": "Brave",
+  "description": "Search open tabs, bookmarks and history in Brave.",
+  "icon": "brave-icon.png",
+  "author": "ron-myers",
+  "contributors": [
+    "Codely",
+    "crisboarna",
+    "tleo19"
+  ],
+  "categories": [
+    "Applications",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-tab",
+      "title": "New Brave Tab",
+      "subtitle": "Brave",
+      "description": "Open a new Brave tab.",
+      "mode": "view"
+    },
+    {
+      "name": "search-tab",
+      "title": "Search Brave Tabs",
+      "subtitle": "Brave",
+      "description": "List all tabs and go to the selected.",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search Brave History",
+      "subtitle": "Brave",
+      "description": "Search browser history.",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Brave Bookmarks",
+      "subtitle": "Brave",
+      "description": "Search browser bookmarks.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useOriginalFavicon",
+      "title": "Fav icon",
+      "label": "Extract the favicon from every open tab",
+      "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Brave profile.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "openTabInProfile",
+      "title": "Open Tab In Profile",
+      "type": "dropdown",
+      "required": false,
+      "description": "When 'Default(classic), the tab will be opened in the profile open, or topmost profile window if multiple windows are open. When 'Current Profile', the tab will be opened in the profile specified in the 'Profile' field. When 'Original Profile' it will open in original profile tab is sourced from",
+      "default": "default",
+      "data": [
+        {
+          "title": "Default(classic)",
+          "value": "default"
+        },
+        {
+          "title": "Current Profile",
+          "value": "profile_current"
+        },
+        {
+          "title": "Original Profile",
+          "value": "profile_original"
+        }
+      ]
+    },
+    {
+      "name": "browserOption",
+      "title": "Brave Browser Option",
+      "description": "Select the Brave Browser you want to use.",
+      "type": "dropdown",
+      "required": false,
+      "default": "default",
+      "data": [
+        {
+          "title": "Brave Browser",
+          "value": "Brave Browser"
+        },
+        {
+          "title": "Brave Browser Beta",
+          "value": "Brave Browser Beta"
+        },
+        {
+          "title": "Brave Browser Nightly",
+          "value": "Brave Browser Nightly"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.13",
+    "run-applescript": "6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.9.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

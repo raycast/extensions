@@ -1,0 +1,167 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "airpods-noise-control",
+  "title": "AirPods Noise Control",
+  "description": "Switch between Off, Transparency, Adaptive or Noise Cancellation on your AirPods. Toggle Conversation Awareness on AirPods that support it.",
+  "icon": "extension_icon.png",
+  "author": "chrahe",
+  "contributors": [
+    "hllvc"
+  ],
+  "categories": [
+    "Media",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Switch Noise Control Mode",
+      "subtitle": "Off ↔ Transparency ↔ Adaptive ↔ Noise Cancellation",
+      "description": "This command will switch Off, Transparency, Adaptive or Noise Cancellation if AirPods are connected to your device.",
+      "mode": "no-view",
+      "keywords": [
+        "airpods",
+        "noise",
+        "cancellation",
+        "transparency",
+        "isolation",
+        "anc",
+        "adaptive"
+      ],
+      "preferences": [
+        {
+          "name": "optionOne",
+          "title": "Option One 🔵",
+          "description": "First option to switch between.",
+          "type": "dropdown",
+          "default": "Noise Cancellation",
+          "data": [
+            {
+              "title": "Off",
+              "value": "Off"
+            },
+            {
+              "title": "Transparency",
+              "value": "Transparency"
+            },
+            {
+              "title": "Adaptive (only if you have)",
+              "value": "Adaptive"
+            },
+            {
+              "title": "Noise Cancellation",
+              "value": "Noise Cancellation"
+            }
+          ],
+          "required": true
+        },
+        {
+          "name": "optionTwo",
+          "title": "Option Two 🟢",
+          "description": "Second option to switch between.",
+          "type": "dropdown",
+          "default": "Transparency",
+          "data": [
+            {
+              "title": "Off",
+              "value": "Off"
+            },
+            {
+              "title": "Transparency",
+              "value": "Transparency"
+            },
+            {
+              "title": "Adaptive (only if you have)",
+              "value": "Adaptive"
+            },
+            {
+              "title": "Noise Cancellation",
+              "value": "Noise Cancellation"
+            }
+          ],
+          "required": true
+        },
+        {
+          "title": "Preview",
+          "name": "showHudNC",
+          "label": "Show HUD For Noise Control",
+          "description": "Show HUD feedback on noise control change.",
+          "type": "checkbox",
+          "default": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "toggle-conversation-awareness",
+      "title": "Toggle Conversation Awareness",
+      "subtitle": "On ↔ Off",
+      "description": "This command will toggle between Conversation Awareness (on/off) if AirPods are connected to your device.",
+      "mode": "no-view",
+      "keywords": [
+        "airpods",
+        "conversation",
+        "awareness"
+      ],
+      "preferences": [
+        {
+          "title": "Preview",
+          "name": "showHudCA",
+          "label": "Show HUD For Conversation Awareness",
+          "description": "Show HUD feedback on conversation awareness change.",
+          "type": "checkbox",
+          "default": true,
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "airpodsIndex",
+      "title": "AirPods List Position",
+      "description": "When your AirPods are connected, at which position are they listed in your Sound menu? (1, 2, 3, etc.)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "Position of your AirPods in the Sound menu (1, 2, 3, ...)"
+    },
+    {
+      "name": "ccLoc",
+      "title": "Control Center Localization",
+      "description": "What is the name of the Control Center in your language/region?",
+      "type": "textfield",
+      "required": false,
+      "default": "Control Center",
+      "placeholder": "Control Centre, Kontrollzentrum, ..."
+    },
+    {
+      "name": "soundLoc",
+      "title": "Sound Menu Localization",
+      "description": "What is the name of the Sound menu (in Control Center) in your language/region?",
+      "type": "textfield",
+      "required": false,
+      "default": "Sound",
+      "placeholder": "Sound, Ton, ..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.2",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^8.54.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.3.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

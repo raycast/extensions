@@ -1,0 +1,85 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "sourceDatabase",
+      "nullable": true,
+      "type": "string"
+    },
+    { "metadata": {}, "name": "targetA", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "intA", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "intABiologicalRole",
+      "nullable": true,
+      "type": "string"
+    },
+    { "metadata": {}, "name": "targetB", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "intB", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "intBBiologicalRole",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "speciesA",
+      "nullable": true,
+      "type": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "mnemonic",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "scientific_name",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "taxon_id",
+            "nullable": true,
+            "type": "long"
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "speciesB",
+      "nullable": true,
+      "type": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "mnemonic",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "scientific_name",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "taxon_id",
+            "nullable": true,
+            "type": "long"
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    { "metadata": {}, "name": "count", "nullable": true, "type": "long" },
+    { "metadata": {}, "name": "scoring", "nullable": true, "type": "double" }
+  ],
+  "type": "struct"
+}

@@ -1,0 +1,140 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "notion",
+  "title": "Notion",
+  "description": "The fastest way to search, create and update Notion pages.",
+  "icon": "notion-logo.png",
+  "author": "HenriChabrand",
+  "owner": "notion",
+  "access": "public",
+  "license": "MIT",
+  "contributors": [
+    "mathieudutour",
+    "metakirby5",
+    "thomaslombart",
+    "erics118",
+    "bkeys818",
+    "alexs",
+    "yakitrak",
+    "tleo19",
+    "dariuszpaluch",
+    "zsidnam",
+    "edomora97"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "create-database-page",
+      "title": "Create Database Page",
+      "subtitle": "Notion",
+      "description": "Create a page in a Notion database.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "closeAfterCreate",
+          "type": "checkbox",
+          "label": "Close Raycast after creating the page",
+          "required": false,
+          "default": false,
+          "description": "This action will be set as the primary action (⌘ + ⏎)."
+        }
+      ]
+    },
+    {
+      "name": "search-page",
+      "title": "Search Notion",
+      "description": "Search for Notion databases and pages.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "title": "Primary Action",
+          "required": false,
+          "default": "notion",
+          "data": [
+            {
+              "title": "Open in Notion",
+              "value": "notion"
+            },
+            {
+              "title": "Preview in Raycast",
+              "value": "raycast"
+            }
+          ],
+          "description": "Choose the primary action for the Notion Pages list."
+        }
+      ]
+    },
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "description": "Capture something and put it out in a Notion page.",
+      "mode": "view"
+    },
+    {
+      "description": "Append or prepend text, along with date, to a Notion page.",
+      "mode": "view",
+      "name": "add-text-to-page",
+      "subtitle": "Notion",
+      "title": "Add Text to Page",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "title": "Text",
+          "placeholder": "Text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "notion_token",
+      "type": "password",
+      "title": "Internal Integration Secret",
+      "required": false,
+      "description": "In Notion, go to Settings & members > My connections > Develop or manage integrations > New integration",
+      "placeholder": "secret_FGDeSrZNodQuaJEqWzvxcTyrPlpBHYvdLpTZykrWEu"
+    },
+    {
+      "name": "open_in",
+      "type": "appPicker",
+      "title": "Open Page in",
+      "required": false,
+      "default": "Notion",
+      "description": "Choose where to open Notion page."
+    }
+  ],
+  "dependencies": {
+    "@mozilla/readability": "^0.5.0",
+    "@notionhq/client": "^2.2.14",
+    "@raycast/api": "^1.71.3",
+    "@raycast/utils": "^1.14.0",
+    "@tryfabric/martian": "^1.2.4",
+    "date-fns": "^3.3.1",
+    "linkedom": "^0.16.8",
+    "node-fetch": "^3.3.2",
+    "notion-to-md": "^3.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.11.20",
+    "@types/react": "18.2.58",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tiktoken",
+  "title": "Tiktoken",
+  "description": "do tiktoken encode and decode",
+  "icon": "command-icon.png",
+  "author": "Envl",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "encode",
+      "title": "Encode",
+      "subtitle": "Tiktoken",
+      "description": "use tiktoken to encode selected text with default encoding",
+      "mode": "view"
+    },
+    {
+      "name": "decode",
+      "title": "Decode",
+      "subtitle": "Tiktoken",
+      "description": "use tiktoken to decode a number list with default encoding",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.1",
+    "js-tiktoken": "^1.0.8",
+    "@raycast/utils": "^1.11.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "encoding",
+      "title": "Encoding",
+      "description": "set the default encoding",
+      "required": true,
+      "type": "dropdown",
+      "default": "cl100k_base",
+      "data": [
+        {
+          "title": "gpt2",
+          "value": "gpt2"
+        },
+        {
+          "title": "r50k_base",
+          "value": "r50k_base"
+        },
+        {
+          "title": "p50k_base",
+          "value": "p50k_base"
+        },
+        {
+          "title": "p50k_edit",
+          "value": "p50k_edit"
+        },
+        {
+          "title": "cl100k_base",
+          "value": "cl100k_base"
+        }
+      ]
+    }
+  ]
+}

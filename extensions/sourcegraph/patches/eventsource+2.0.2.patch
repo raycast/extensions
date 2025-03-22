@@ -1,0 +1,15 @@
+diff --git a/node_modules/eventsource/lib/eventsource.js b/node_modules/eventsource/lib/eventsource.js
+index bd401a1..3d2f47a 100644
+--- a/node_modules/eventsource/lib/eventsource.js
++++ b/node_modules/eventsource/lib/eventsource.js
+@@ -143,6 +143,10 @@ function EventSource (url, eventSourceInitDict) {
+       options.withCredentials = eventSourceInitDict.withCredentials
+     }
+ 
++    if (eventSourceInitDict && eventSourceInitDict.agent !== undefined) {
++      options.agent = eventSourceInitDict.agent
++    }
++
+     req = (isSecure ? https : http).request(options, function (res) {
+       self.connectionInProgress = false
+       // Handle HTTP errors

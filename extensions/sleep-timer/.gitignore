@@ -1,0 +1,4 @@
+node_modules/*
+.eslintcache
+**/.DS_Store
+.vscode/

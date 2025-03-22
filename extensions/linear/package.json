@@ -1,0 +1,282 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "linear",
+  "title": "Linear",
+  "description": "Bring Linear to every corner of your Mac. Create, search, and modify your issues. Stay on top of your notifications in the menu bar.",
+  "icon": "linear-app-icon.png",
+  "owner": "linear",
+  "access": "public",
+  "author": "thomaslombart",
+  "contributors": [
+    "mathieudutour",
+    "thomas",
+    "peduarte",
+    "pernielsentikaer",
+    "clemb8",
+    "stelo",
+    "fil"
+  ],
+  "pastContributors": [
+    "mil3na"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-issue",
+      "title": "Create Issue",
+      "description": "Create and assign new issues.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "autofocusField",
+          "title": "Autofocus Field",
+          "type": "dropdown",
+          "required": false,
+          "description": "Select the field to focus automatically once the form is rendered",
+          "default": "title",
+          "data": [
+            {
+              "title": "Team",
+              "value": "teamId"
+            },
+            {
+              "title": "Title",
+              "value": "title"
+            }
+          ]
+        },
+        {
+          "name": "copyToastAction",
+          "title": "Toast Copy Action",
+          "type": "dropdown",
+          "required": false,
+          "description": "Select the copy action for the toast secondary action",
+          "default": "id",
+          "data": [
+            {
+              "title": "Copy Issue ID",
+              "value": "id"
+            },
+            {
+              "title": "Copy Issue ID as Link",
+              "value": "id-as-link"
+            },
+            {
+              "title": "Copy Issue URL",
+              "value": "url"
+            },
+            {
+              "title": "Copy Issue Title",
+              "value": "title"
+            },
+            {
+              "title": "Copy Issue Title as Link",
+              "value": "title-as-link"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "search-issues",
+      "title": "Search Issues",
+      "description": "Search issues globally in all projects.",
+      "mode": "view"
+    },
+    {
+      "name": "assigned-issues",
+      "title": "My Issues",
+      "description": "View and modify issues that are assigned to you.",
+      "mode": "view",
+      "keywords": [
+        "assigned"
+      ]
+    },
+    {
+      "name": "created-issues",
+      "title": "Created Issues",
+      "description": "View and modify issues that you have created.",
+      "mode": "view"
+    },
+    {
+      "name": "active-cycle",
+      "title": "Active Cycle",
+      "description": "View and modify issues that are in the active cycle.",
+      "mode": "view"
+    },
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "description": "Explore projects for your Linear team.",
+      "mode": "view"
+    },
+    {
+      "name": "search-documents",
+      "title": "Search Documents",
+      "description": "Explore documents for your Linear team.",
+      "mode": "view"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "description": "Create projects for your Linear team.",
+      "mode": "view"
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "description": "Read your latest Linear notifications.",
+      "mode": "view"
+    },
+    {
+      "name": "unread-notifications",
+      "title": "Unread Notifications",
+      "description": "Show unread notifications in the Menu Bar.",
+      "mode": "menu-bar",
+      "subtitle": "Linear",
+      "interval": "15m",
+      "preferences": [
+        {
+          "type": "checkbox",
+          "label": "Always Show",
+          "name": "alwaysShow",
+          "description": "Show the menu bar extra even when you don't have any unread notifications.",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-issue-for-myself",
+      "title": "Create Issue for Myself",
+      "description": "Create and assign a new issue to yourself.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "preferredTeamKey",
+          "type": "textfield",
+          "title": "Preferred Team",
+          "placeholder": "RAY",
+          "description": "Specify the Key (e.g. RAY) of the preferred team. If not specified, the first team is used.",
+          "required": false
+        },
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "description",
+          "placeholder": "Description",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "quick-add-comment-to-issue",
+      "title": "Quick Add Comment to Issue",
+      "description": "Quickly add a comment to an issue using its ID.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "comment",
+          "placeholder": "Comment",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "issueId",
+          "placeholder": "Issue ID",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "favorites",
+      "title": "Favorites",
+      "description": "Browse through your Linear favorites.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "issueCustomCopyAction",
+      "type": "textfield",
+      "title": "Issue Custom Copy Action",
+      "description": "Add a custom copy action to the issue's actions following the format you want.\nAvailable keys: {ISSUE_TITLE}, {ISSUE_ID}, {ISSUE_URL}, {ISSUE_BRANCH_NAME}\nExample: '{ISSUE_ID}: {ISSUE_TITLE} ({ISSUE_URL})'",
+      "required": false
+    },
+    {
+      "name": "limit",
+      "title": "API Issue Limit",
+      "description": "The maximum number of issues to fetch from the Linear API at once. Be careful when changing this, as too large a number can cause you to exceed your API rate limit and/or cause heap memory errors.",
+      "type": "textfield",
+      "default": "50",
+      "required": false
+    },
+    {
+      "name": "shouldHideRedundantIssues",
+      "type": "checkbox",
+      "title": "Advanced",
+      "label": "Hide Redundant Issues",
+      "description": "When enabled, the issues that are marked as Done, Canceled or Duplicate will not show up in search results.",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@linear/sdk": "^26.0.0",
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.16.0",
+    "date-fns": "^3.6.0",
+    "file-type": "^19.0.0",
+    "lodash": "^4.17.21",
+    "nanoid": "^5.0.7",
+    "node-emoji": "^2.1.3",
+    "remove-markdown": "^0.5.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/lodash": "^4.14.202",
+    "@types/node": "^22.1.0",
+    "@types/react": "^18.2.46",
+    "@types/remove-markdown": "^0.3.4",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "react": "^18.2.0",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

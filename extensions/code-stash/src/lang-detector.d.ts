@@ -1,0 +1,1 @@
+declare module "lang-detector";

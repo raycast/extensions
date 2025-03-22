@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "goodreads",
+  "title": "Goodreads",
+  "description": "Search Goodreads books, authors and more",
+  "icon": "goodreads-icon.png",
+  "author": "puneeth",
+  "categories": [
+    "Media",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-books-page",
+      "title": "Search Books",
+      "subtitle": "Goodreads",
+      "description": "Search Goodreads books by title",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-people-page",
+      "title": "Search People",
+      "subtitle": "Goodreads",
+      "description": "Search Goodreads authors by name",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "Name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.0",
+    "@raycast/utils": "^1.8.0",
+    "cheerio": "^1.0.0-rc.12",
+    "got": "^12.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

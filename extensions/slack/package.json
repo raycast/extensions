@@ -1,0 +1,127 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "slack",
+  "title": "Slack",
+  "description": "Search for chats, see unread messages, snooze notifications, and set your presence status.",
+  "icon": "slack-icon-rounded.png",
+  "author": "mommertf",
+  "contributors": [
+    "Elliot67",
+    "stelo",
+    "thomaslombart",
+    "Rob"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Open Channel",
+      "subtitle": "Slack",
+      "keywords": [
+        "search"
+      ],
+      "description": "Search for all workspace members, group chats, and channels and open them directly in your Slack app.",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Channel Metadata",
+          "label": "Display extra metadata in results",
+          "description": "Show team member's titles, time zone, and current time in Open Channel results",
+          "name": "displayExtraMetadata",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "search-messages",
+      "title": "Search Messages",
+      "subtitle": "Slack",
+      "description": "Search for Slack messages.",
+      "mode": "view"
+    },
+    {
+      "name": "open-unread-messages",
+      "title": "Open Unread Messages",
+      "subtitle": "Slack",
+      "description": "Open an overview of unread messages directly in your native Slack app.",
+      "mode": "no-view"
+    },
+    {
+      "name": "unread-messages",
+      "title": "Unread Messages",
+      "subtitle": "Slack",
+      "description": "Browse through unread messages within direct messages, channels and groups.",
+      "mode": "view"
+    },
+    {
+      "name": "set-snooze",
+      "title": "Set Snooze",
+      "subtitle": "Slack",
+      "description": "Set settings for how long you want to snooze notifications.",
+      "mode": "view"
+    },
+    {
+      "name": "set-presence",
+      "title": "Set Presence",
+      "subtitle": "Slack",
+      "description": "Let Slack decide automatically how to show your presence status or force it to be shown as offline.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "View extension's README for instructions.",
+      "name": "accessToken",
+      "placeholder": "xoxp-...",
+      "required": false,
+      "title": "Slack Access Token",
+      "type": "password"
+    },
+    {
+      "title": "Navigation",
+      "label": "Close Slack right sidebar",
+      "description": "Automatically close Slack right sidebar after navigating to a user chat",
+      "name": "closeRightSidebar",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.16.0",
+    "@slack/web-api": "^7.0.4",
+    "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.1.3",
+    "lodash": "^4.17.21",
+    "node-emoji": "^2.1.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/lodash": "^4.17.5",
+    "@types/node": "^20.8.10",
+    "@types/node-emoji": "^2.1.0",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "react": "^18.2.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "volta": {
+    "node": "18.16.0",
+    "npm": "9.6.4"
+  }
+}

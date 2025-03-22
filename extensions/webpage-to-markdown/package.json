@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "webpage-to-markdown",
+  "title": "Webpage to Markdown",
+  "description": "Convert any webpage to markdown just by providing the url.",
+  "icon": "extension-icon.png",
+  "author": "treyg",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "webpage-to-markdown",
+      "title": "Webpage to Markdown",
+      "subtitle": "Convert a webpage to markdown format",
+      "description": "Converts webpage to markdown format using Jina AI",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "Enter URL to convert",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "label": "Include Metadata",
+      "name": "includeMetadata",
+      "title": "Include Metadata",
+      "description": "Show metadata like reading time and word count in sidebar",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "label": "Add Front Matter",
+      "name": "prependFrontMatter",
+      "title": "Add Front Matter",
+      "description": "Add YAML front matter with metadata to the markdown",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "label": "Include Links Summary",
+      "name": "includeLinksSummary",
+      "title": "Include Links Summary",
+      "description": "Add a 'Links' section at the end with all article links",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "label": "Jina.ai API Key",
+      "name": "jinaApiKey",
+      "title": "Jina.ai API Key",
+      "description": "Optional: Add your Jina.ai API key to avoid rate limiting",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

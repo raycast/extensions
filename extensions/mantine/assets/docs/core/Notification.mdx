@@ -1,0 +1,44 @@
+---
+group: "mantine-core"
+package: "@mantine/core"
+title: Notification
+order: 1
+slug: /core/notification/
+category: "feedback"
+description: "Show dynamic notifications and alerts to user, part of notifications system"
+props: ["Notification"]
+import: "import { Notification } from '@mantine/core';"
+source: "mantine-core/src/components/Notification/Notification.tsx"
+docs: "core/Notification.mdx"
+styles: ["Notification"]
+---
+
+import { NotificationDemos } from "@mantine/demos";
+
+## Usage
+
+Notification is a base component for notification system.
+Build your own or use [@mantine/notifications](/others/notifications/) package.
+
+Notification component has 3 variants:
+
+- **default** – with colored line on the left
+- **icon** – line is replaced with icon
+- **loading** – icon or line are replaced with [Loader](/core/loader/)
+
+<Demo data={NotificationDemos.usage} />
+
+## Colors
+
+You can choose any color defined in [theme](/theming/extend-theme/#default-colors):
+
+<Demo data={NotificationDemos.configurator} />
+
+## Accessibility
+
+To support screen readers set close button aria-label or title with `closeButtonProps`:
+
+```tsx
+<Notification closeButtonProps={{ 'aria-label': 'Hide notification' }} />
+<Notification closeButtonProps={{ title: 'Hide notification' }} />
+```

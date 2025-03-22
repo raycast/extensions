@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "folder-search",
+  "title": "Folder Search",
+  "description": "Search for folders on your Mac",
+  "icon": "folder-search.png",
+  "keywords": [
+    "folders",
+    "search"
+  ],
+  "author": "GastroGeek",
+  "contributors": [
+    "omarshahine",
+    "fengtianze",
+    "ridemountainpig"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Folders",
+      "description": "Search for folders on your Mac",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "default": "250",
+      "description": "The maximum number of search results that Folder Search should return",
+      "name": "maxResults",
+      "required": false,
+      "title": "Maximum Results",
+      "type": "textfield"
+    },
+    {
+      "default": false,
+      "description": "Enables support for custom 'AppleScript' plugins in Folder Search. See README",
+      "label": "Enabled",
+      "name": "pluginsEnabled",
+      "required": false,
+      "title": "Plugins Enabled",
+      "type": "checkbox"
+    },
+    {
+      "default": "",
+      "description": "The Folder in which your plugins, for Folder Search, are stored",
+      "name": "pluginsFolder",
+      "required": false,
+      "title": "Plugins Folder (Absolute Path)",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.3.3",
+    "binary-split": "^1.0.5",
+    "fs-extra": "^11.1.0",
+    "run-applescript": "^6.0.0",
+    "through2-map": "^3.0.0",
+    "yup": "^0.32.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/fs-extra": "^9.0.13",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

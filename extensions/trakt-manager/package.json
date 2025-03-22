@@ -1,0 +1,80 @@
+{
+  "name": "trakt-manager",
+  "description": "Control your Trakt account directly from Raycast",
+  "author": "thesobercoder",
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "categories": [
+    "Media",
+    "Other"
+  ],
+  "commands": [
+    {
+      "name": "movies",
+      "title": "Search Movies",
+      "subtitle": "Trakt Manager",
+      "description": "Search for movies by title",
+      "mode": "view"
+    },
+    {
+      "name": "shows",
+      "title": "Search Shows",
+      "subtitle": "Trakt Manager",
+      "description": "Search for shows by title",
+      "mode": "view"
+    },
+    {
+      "name": "watchlist",
+      "title": "Watchlist",
+      "subtitle": "Trakt Manager",
+      "description": "Lists movies and shows that are in your watchlist",
+      "mode": "view"
+    },
+    {
+      "name": "up-next",
+      "title": "Up Next",
+      "subtitle": "Trakt Manager",
+      "description": "Get the list of shows that are up next",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Trakt Manager",
+      "description": "Lists movies and shows that are in your history",
+      "mode": "view"
+    },
+    {
+      "name": "refresh",
+      "title": "Refresh",
+      "subtitle": "Trakt Manager",
+      "description": "Refreshes the cache from API",
+      "mode": "no-view",
+      "interval": "6h"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.1",
+    "@raycast/utils": "^1.16.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.51.0",
+    "prettier-plugin-organize-imports": "^3.2.4",
+    "syncpack": "^12.3.2",
+    "typescript": "^5.2.2"
+  },
+  "icon": "trakt.png",
+  "license": "MIT",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "fmt": "prettier '**/*' -wu && syncpack-format",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "title": "Trakt Manager"
+}

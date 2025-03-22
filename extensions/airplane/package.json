@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "airplane",
+  "title": "Airplane",
+  "description": "Just like on iPhone, turn off the wireless features on your macOS anytime.",
+  "icon": "airplane-icon.png",
+  "author": "pradeepb28",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "wifi",
+    "bluetooth"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "turn-airplane-mode-on",
+      "title": "Turn Airplane On",
+      "description": "This command disable wireless technology such as WiFi and Bluetooth.",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-airplane-mode-off",
+      "title": "Turn Airplane Off",
+      "description": "This command enable wireless technology such as WiFi and Bluetooth.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.2",
+    "fix-path": "^4.0.0",
+    "manage-wifi": "^2.1.0",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

@@ -1,0 +1,251 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dock-tinker",
+  "title": "Dock Tinker",
+  "description": "Custom hidden preferences of Dock.",
+  "icon": "dock-tinker.png",
+  "author": "koinzhang",
+  "contributors": [
+    "garrucho"
+  ],
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-spacer-to-dock",
+      "title": "Add Spacer to Dock",
+      "subtitle": "Dock",
+      "description": "Add a movable spacer tile between icons on the Dock.",
+      "mode": "no-view",
+      "arguments": [
+      {
+        "name": "spacerStyle",
+        "type": "dropdown",
+        "required": false,
+        "placeholder": "Spacer",
+        "data": [
+          {
+            "title": "Small Spacer",
+            "value": "small-spacer-tile"
+          }
+        ]
+      }
+    ]
+    },
+    {
+      "name": "reset-dock-state",
+      "title": "Reset Dock State",
+      "subtitle": "Dock",
+      "description": "Reset Dock to initial state.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-auto-hide",
+      "title": "Toggle Auto Hide",
+      "subtitle": "Dock",
+      "description": "The Dock will automatically show and hide.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-auto-hide-delay",
+      "title": "Toggle Auto Hide Delay",
+      "subtitle": "Dock",
+      "description": "Disable Dock auto-hide time delay.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "delay",
+          "type": "dropdown",
+          "placeholder": "No Delay",
+          "data": [
+            {
+              "title": "Short Delay",
+              "value": "0.2"
+            },
+            {
+              "title": "Medium Delay",
+              "value": "1"
+            },
+            {
+              "title": "Long Delay",
+              "value": "2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "toggle-hide-animation-time",
+      "title": "Toggle Hide Animation Time",
+      "subtitle": "Dock",
+      "description": "Set Dock auto-hide animation time.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "delay",
+          "type": "dropdown",
+          "placeholder": "No Time",
+          "data": [
+            {
+              "title": "Short Time",
+              "value": "0.5"
+            },
+            {
+              "title": "Medium Time",
+              "value": "1"
+            },
+            {
+              "title": "Long Time",
+              "value": "2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "toggle-dock-orientation",
+      "title": "Toggle Dock Orientation",
+      "subtitle": "Dock",
+      "description": "Set the orientation of the Dock, including Left, Bottom, Right",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "orientation",
+          "type": "dropdown",
+          "placeholder": "Bottom",
+          "data": [
+            {
+              "title": "Left",
+              "value": "left"
+            },
+            {
+              "title": "Right",
+              "value": "right"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "toggle-dock-size",
+      "title": "Toggle Dock Size",
+      "subtitle": "Dock",
+      "description": "Set the icon size of Dock items in pixels.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "dockSize",
+          "type": "dropdown",
+          "placeholder": "default",
+          "data": [
+            {
+              "title": "12",
+              "value": "12"
+            },
+            {
+              "title": "24",
+              "value": "24"
+            },
+            {
+              "title": "36",
+              "value": "36"
+            },
+            {
+              "title": "48",
+              "value": "48"
+            },
+            {
+              "title": "60",
+              "value": "60"
+            },
+            {
+              "title": "72",
+              "value": "72"
+            },
+            {
+              "title": "84",
+              "value": "84"
+            },
+            {
+              "title": "96",
+              "value": "96"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "toggle-minimal-effect",
+      "title": "Toggle Minimal Effect",
+      "subtitle": "Dock",
+      "description": "Set the effects when the application is minimized, including Suck, Genie, Scale.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "effect",
+          "type": "dropdown",
+          "placeholder": "Genie",
+          "data": [
+            {
+              "title": "Scale",
+              "value": "scale"
+            },
+            {
+              "title": "Suck",
+              "value": "suck"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "toggle-scroll-to-open",
+      "title": "Toggle Scroll to Open",
+      "subtitle": "Dock",
+      "description": "Allows you to use the scroll up gesture to open the stack or use the same gesture on a running application to display all windows associated with that application (also known as Exposé).",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-show-hidden",
+      "title": "Toggle Show Hidden",
+      "subtitle": "Dock",
+      "description": "The icon of apps with hidden window on the Dock will be dimmed.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-show-recents",
+      "title": "Toggle Show Recents",
+      "subtitle": "Dock",
+      "description": "Show recently used apps in a separate section of the Dock.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-static-only",
+      "title": "Toggle Static Only",
+      "subtitle": "Dock",
+      "description": "The Dock will only show the icon of the currently running application.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.7.4",
+    "@types/react": "18.3.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

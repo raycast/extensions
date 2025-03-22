@@ -1,0 +1,161 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vortex",
+  "title": "Vortex",
+  "description": "The fastest way to use bitcoin on macOS",
+  "icon": "vortex.png",
+  "author": "saunter",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "nwcurl",
+      "title": "NWC connection details",
+      "description": "Your NWC wallet connection details",
+      "placeholder": "nostr+walletconnect://...",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "currency",
+      "title": "Currency",
+      "description": "You preferred currency to see amounts",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "USD",
+          "value": "USD"
+        },
+        {
+          "title": "EUR",
+          "value": "EUR"
+        },
+        {
+          "title": "GBP",
+          "value": "GBP"
+        }
+      ],
+      "required": true,
+      "default": "USD"
+    }
+  ],
+  "commands": [
+    {
+      "name": "send",
+      "title": "Send",
+      "keywords": [
+        "send",
+        "pay",
+        "wallet",
+        "invoice",
+        "lnurl",
+        "lightning"
+      ],
+      "subtitle": "Send to lightning address or pay lightning invoice",
+      "description": "Send to lightning address or pay lightning invoice",
+      "icon": "send.png",
+      "mode": "view",
+      "script": "src/Send.tsx",
+      "arguments": [
+        {
+          "name": "input",
+          "placeholder": "address or invoice",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "createinvoice",
+      "title": "Receive",
+      "keywords": [
+        "receive",
+        "invoice",
+        "wallet",
+        "lightning"
+      ],
+      "description": "Create a new lightning invoice",
+      "icon": "receive.png",
+      "mode": "view",
+      "script": "src/CreateInvoice.tsx",
+      "arguments": [
+        {
+          "name": "input",
+          "placeholder": "amount",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "listtransactions",
+      "title": "Recent Transactions",
+      "keywords": [
+        "wallet",
+        "payments",
+        "lightning",
+        "transactions"
+      ],
+      "description": "Show recent transactions",
+      "icon": "vortex.png",
+      "mode": "view",
+      "script": "src/ListTransactions.tsx"
+    },
+    {
+      "name": "redeem",
+      "title": "Redeem Sats",
+      "keywords": [
+        "redeem",
+        "lnurl",
+        "voucher",
+        "cashu",
+        "ecash",
+        "token"
+      ],
+      "description": "Redeem sats from lnurl voucher or cashu token",
+      "icon": "withdraw.png",
+      "mode": "view",
+      "script": "src/Redeem.tsx",
+      "arguments": [
+        {
+          "name": "input",
+          "placeholder": "lnurl or cashu token",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@cashu/cashu-ts": "^2.1.0",
+    "@getalby/lightning-tools": "^5.0.3",
+    "@getalby/sdk": "^3.5.1",
+    "@raycast/api": "^1.74.1",
+    "@raycast/utils": "^1.18.1",
+    "bech32": "^2.0.0",
+    "cross-fetch": "^4.0.0",
+    "qrcode": "^1.5.3",
+    "websocket-polyfill": "^0.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.11.16",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "18.2.27",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "keywords": []
+}

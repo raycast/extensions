@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "code-quarkus",
+  "title": "Code Quarkus",
+  "description": "Create new Quarkus project",
+  "icon": "quarkus.png",
+  "author": "loic_magnette",
+  "version": "0.2.0",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "code-quarkus",
+      "title": "Create Quarkus Project",
+      "description": "create a new quarkus project",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "directory",
+          "description": "The directory were the generated project should be downloaded",
+          "type": "directory",
+          "required": false,
+          "title": "Download directory"
+        }
+      ]
+    },
+    {
+      "name": "find-quarkus-extension",
+      "title": "Find Quarkus Extension",
+      "description": "find a quarkus extension",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.1",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contribution": "npx @raycast/api@latest pull-contributions"
+  }
+}

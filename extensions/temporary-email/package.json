@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "temporary-email",
+  "title": "Temporary Email",
+  "description": "Quickly and easily create a temporary email.",
+  "icon": "command-icon.png",
+  "author": "natterstefan",
+  "contributors": [
+    "JoelKlint"
+  ],
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Create a Temporary Email",
+      "description": "Create a temporary email address quickly and easily.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "mailservice",
+      "type": "dropdown",
+      "title": "Mail Service",
+      "description": "Choose your preferred mail service",
+      "default": "maildrop.cc",
+      "required": false,
+      "data": [
+        {
+          "title": "maildrop.cc",
+          "value": "maildrop.cc"
+        },
+        {
+          "title": "harakirimail.com",
+          "value": "harakirimail.com"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.31.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

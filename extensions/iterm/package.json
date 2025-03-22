@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "iterm",
+  "title": "iTerm",
+  "description": "Control iTerm with Raycast",
+  "icon": "command-icon.png",
+  "author": "ron-myers",
+  "contributors": [
+    "flops",
+    "papey",
+    "jose-elias-alvarez",
+    "luka_nola"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "new-iterm-window",
+      "title": "New iTerm Window",
+      "description": "Launch new window in iTerm",
+      "mode": "view"
+    },
+    {
+      "name": "new-iterm-tab",
+      "title": "New iTerm Tab",
+      "description": "Launch new tab in iTerm",
+      "mode": "view"
+    },
+    {
+      "name": "split-iterm-horizontally",
+      "title": "Split iTerm Horizontally",
+      "description": "Split Horizontally with Current Profile",
+      "mode": "view"
+    },
+    {
+      "name": "split-iterm-vertically",
+      "title": "Split iTerm Vertically",
+      "description": "Split Vertically with Current Profile",
+      "mode": "view"
+    },
+    {
+      "name": "edit-in-iterm",
+      "title": "Edit in iTerm",
+      "description": "Edit the selected file(s) in iTerm using $EDITOR",
+      "mode": "view"
+    },
+    {
+      "name": "open-iterm-here",
+      "title": "Open iTerm Here",
+      "description": "Open iTerm in the currently selected folder(s)",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "file-url": "^4.0.0",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wakatime",
+  "title": "Wakatime",
+  "description": "Show your Wakatime Activity Stats, Projects and Leaderboards",
+  "icon": "icon.png",
+  "author": "iammola",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "summary",
+      "subtitle": "WakaTime",
+      "title": "Show Summary",
+      "description": "Show your WakaTime Summary",
+      "mode": "view"
+    },
+    {
+      "name": "leaderboard",
+      "subtitle": "WakaTime",
+      "title": "Show Public Leaderboard",
+      "description": "Check your rank against others all around the world.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "apiKey",
+          "description": "Use your WakaTime API key to use your account",
+          "type": "password",
+          "required": false,
+          "title": "WakaTime API Key"
+        }
+      ]
+    },
+    {
+      "name": "private-leaderboards",
+      "subtitle": "WakaTime",
+      "title": "Show Private Leaderboards",
+      "description": "Show your private leaderboards",
+      "mode": "view"
+    },
+    {
+      "name": "today-summary",
+      "subtitle": "WakaTime",
+      "title": "Show Today Summary",
+      "description": "Show Today's Summary in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "required": true,
+      "title": "WakaTime API Key",
+      "type": "password",
+      "description": "Use your WakaTime API key to use your account",
+      "placeholder": "Enter your API key from https://wakatime.com/settings"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.18",
+    "date-fns": "^2.29.3",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.14.0",
+    "@types/react": "^18.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.52.0",
+    "@typescript-eslint/parser": "^5.52.0",
+    "eslint": "^8.34.0",
+    "eslint-config-prettier": "^8.6.0",
+    "prettier": "^2.8.4",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

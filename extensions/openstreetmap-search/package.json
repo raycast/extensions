@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openstreetmap-search",
+  "title": "OpenStreetMap Search",
+  "description": "Quickly open OpenStreetMaps directions, for example from your current location to your home.",
+  "icon": "openstreetmap-icon.png",
+  "author": "crisboarna",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "travel-home",
+      "title": "Travel Home",
+      "subtitle": "OpenStreetMaps",
+      "description": "Open OpenStreetMaps with directions from your current location to your home.",
+      "mode": "view"
+    },
+    {
+      "name": "travel-to",
+      "title": "Travel To",
+      "subtitle": "OpenStreetMaps",
+      "description": "Open OpenStreetMaps with directions to a destination.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Maps",
+      "subtitle": "OpenStreetMaps",
+      "description": "Find a specific place or category on OpenStreetMaps.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Location or Category",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "search location"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "homeAddress",
+      "title": "Home Address",
+      "description": "Enter your home address as you would enter it into OpenStreetMaps.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "Street Address, City, State, ZIP Code"
+    },
+    {
+      "name": "preferredMode",
+      "title": "Preferred Mode of Travel",
+      "description": "Select your default mode of travel.",
+      "type": "dropdown",
+      "required": true,
+      "default": "transit",
+      "data": [
+        {
+          "title": "🚗 Car(OSRM)",
+          "value": "fossgis_osrm_car"
+        },
+        {
+          "title": "🚗 Car(GraphHopper)",
+          "value": "graphhopper_car"
+        },
+        {
+          "title": "🚶‍♀️ Walk(OSRM)",
+          "value": "fossgis_osrm_foot"
+        },
+        {
+          "title": "🚶‍♀️ Walk(GraphHopper)",
+          "value": "graphhopper_foot"
+        },
+        {
+          "title": "🚲 Bike(OSRM)",
+          "value": "fossgis_osrm_bike"
+        },
+        {
+          "title": "🚲 Bike(GraphHopper)",
+          "value": "graphhopper_bicycle"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.11.10",
+    "@types/react": "18.0.26",
+    "@typescript-eslint/eslint-plugin": "^5.45.1",
+    "@typescript-eslint/parser": "^5.45.1",
+    "eslint": "^8.29.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.8.0",
+    "typescript": "^4.7.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

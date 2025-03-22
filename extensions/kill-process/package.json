@@ -1,0 +1,143 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kill-process",
+  "title": "Kill Process",
+  "description": "Terminate processes sorted by CPU or memory usage",
+  "icon": "icon.png",
+  "author": "rolandleth",
+  "contributors": [
+    "crazyones110",
+    "zhenpewu",
+    "Saafo",
+    "erics118",
+    "xilopaint"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Kill Process",
+      "description": "Lists all running processes, ordered by CPU or memory usage and allows killing one",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Determine whether the process path should be searched for the query or only the process name.",
+      "label": "Search Process Paths",
+      "name": "shouldSearchInPaths",
+      "required": false,
+      "default": false,
+      "title": "Filtering",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determine whether the process PID should be searched for the query or only the process name.",
+      "label": "Search Process PID",
+      "name": "shouldSearchInPid",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determine whether apps are listed before other results when filtering.",
+      "label": "Prioritize Apps",
+      "name": "shouldPrioritizeAppsWhenFiltering",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determine whether processes are sorted by CPU or memory usage.",
+      "label": "Sort by Memory Usage",
+      "name": "sortByMem",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determine whether aggregate processes belong to the same app.",
+      "label": "Aggregate Apps",
+      "name": "aggregateApps",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Show process PID info.",
+      "label": "Show PID",
+      "name": "shouldShowPID",
+      "required": false,
+      "default": false,
+      "title": "Display",
+      "type": "checkbox"
+    },
+    {
+      "description": "Show process path.",
+      "label": "Show Process Path",
+      "name": "shouldShowPath",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Close window after killing a process",
+      "label": "Close Window",
+      "name": "closeWindowAfterKill",
+      "required": false,
+      "default": true,
+      "title": "After Killing",
+      "type": "checkbox"
+    },
+    {
+      "description": "Clear search bar after killing a process",
+      "label": "Clear Search Bar",
+      "name": "clearSearchBarAfterKill",
+      "required": false,
+      "default": true,
+      "type": "checkbox"
+    },
+    {
+      "description": "Go back to root search after killing a process",
+      "label": "Go back to Root Search",
+      "name": "goToRootAfterKill",
+      "required": false,
+      "default": false,
+      "type": "checkbox"
+    },
+    {
+      "description": "Refresh duration in milliseconds (min: 1000ms; 0 to disable auto-refresh).",
+      "label": "Refresh Duration",
+      "name": "refreshDuration",
+      "required": false,
+      "title": "Refresh Duration",
+      "type": "textfield",
+      "default": "3000",
+      "placeholder": "3000"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "pretty-bytes": "^6.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.37",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
