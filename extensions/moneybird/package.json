@@ -12,14 +12,14 @@
   "commands": [
     {
       "name": "record-hours",
-      "title": "New time entry",
+      "title": "New Time Entry",
       "description": "Add a new time entry to your administration",
       "mode": "view"
     },
     {
       "name": "start-timing",
-      "title": "Set start time",
-      "description": "Mark current time as start point",
+      "title": "Mark Now as Start Time",
+      "description": "Mark the current date and time as future start point for a new time entry",
       "mode": "no-view"
     }
   ],
