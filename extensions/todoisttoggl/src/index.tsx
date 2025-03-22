@@ -20,7 +20,6 @@ export default function Command() {
 
   const { data: todoistProjects } = useGetProject();
 
-  // @todo there are currentTimer only
   const currentTime = useCurrentTime();
 
   const { projects: togglProjects } = useProjects();
