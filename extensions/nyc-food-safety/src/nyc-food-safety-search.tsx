@@ -1,5 +1,5 @@
 import { showToast, Toast, LaunchProps, Detail, Icon, Color, ActionPanel, Action } from "@raycast/api";
-import fetch from "node-fetch";
+import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
 
 // Define the Command interface for type safety
@@ -36,63 +36,38 @@ interface SearchResult {
 
 export default function Command(props: LaunchProps<{ arguments: CommandArguments }>) {
   const { restaurantName } = props.arguments;
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
 
-  useEffect(() => {
-    async function fetchData() {
-      if (!restaurantName) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Restaurant Name Required",
-          message: "Please provide a restaurant name",
-        });
-        setError("Please provide a restaurant name");
-        setIsLoading(false);
-        return;
+  // Construct the SoQL query (SQL for OpenData)
+  const baseUrl = "https://data.cityofnewyork.us/resource/43nn-pn8j.json";
+  const whereClause = restaurantName ? `upper(dba) LIKE upper('%25${restaurantName.trim().replace(/'/g, "''")}%25')` : "";
+  const apiUrl = `${baseUrl}?$where=${whereClause}&$order=inspection_date DESC&$limit=5`;
+
+  const { isLoading, data, error } = useFetch<Restaurant[]>(apiUrl, {
+    execute: !!restaurantName,
+    onData: async (data) => {
+      if (data && data.length > 0) {
+        const markdown = await generateDetailView(data);
+        const summary = await generateSummary(data);
+        setSearchResult({ data, markdown, summary });
       }
-
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        await showToast({
-          style: Toast.Style.Animated,
-          title: `Searching for ${restaurantName}...`,
-        });
-
-        const restaurants = await fetchRestaurantData(restaurantName);
-
-        if (!restaurants || restaurants.length === 0) {
-          throw new Error(`Could not find inspection data for "${restaurantName}"`);
-        }
-
-        const markdown = await generateDetailView(restaurants);
-        const summary = await generateSummary(restaurants);
-
-        setSearchResult({ data: restaurants, markdown, summary });
-      } catch (err) {
-        setError(`${err}`);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: `${err}`,
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchData();
-  }, [restaurantName]);
+    },
+    onError: (error) => {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: `${error}`,
+      });
+    },
+    keepPreviousData: false,
+  });
 
   if (isLoading) {
     return <Detail markdown="Loading..." />;
   }
 
-  if (error || !searchResult) {
-    return <Detail markdown={`Error: ${error || "No results found"}`} />;
+  if (error || !data || data.length === 0 || !searchResult) {
+    return <Detail markdown={`Error: ${error || "No results found for " + restaurantName}`} />;
   }
 
   return (
@@ -145,34 +120,6 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
       }
     />
   );
-}
-
-async function fetchRestaurantData(restaurantName: string): Promise<Restaurant[]> {
-  try {
-    // NYC OpenData API endpoint
-    const baseUrl = "https://data.cityofnewyork.us/resource/43nn-pn8j.json";
-
-    // Construct the SoQL query (SQL for OpenData)
-    const whereClause = `upper(dba) LIKE upper('%25${restaurantName.trim().replace(/'/g, "''")}%25')`;
-    const apiUrl = `${baseUrl}?$where=${whereClause}&$order=inspection_date DESC&$limit=5`;
-
-    console.log("Fetching from URL:", apiUrl); // Debug log
-
-    const response = await fetch(apiUrl);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("API Error Response:", errorText); // Debug log
-      throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
-    }
-
-    const data = (await response.json()) as Restaurant[];
-    console.log("API Response:", JSON.stringify(data, null, 2)); // Debug log
-    return data;
-  } catch (error) {
-    console.error("Fetch Error:", error); // Debug log
-    throw new Error(`Failed to fetch restaurant data: ${error}`);
-  }
 }
 
 async function generateDetailView(restaurantData: Restaurant[]): Promise<string> {
@@ -249,26 +196,7 @@ function formatPhoneNumber(phone: string): string {
   return `(${phone.slice(0, 3)}) ${phone.slice(3, 6)}-${phone.slice(6)}`;
 }
 
-// Simple date formatter function to avoid date-fns dependency
 function formatDate(date: Date): string {
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  const day = date.getDate();
-  const month = months[date.getMonth()];
-  const year = date.getFullYear();
-
-  return `${month} ${day}, ${year}`;
+  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+  return date.toLocaleDateString('en-US', options);
 }
