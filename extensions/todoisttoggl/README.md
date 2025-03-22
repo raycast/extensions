@@ -88,6 +88,6 @@ Runningタスクを``enter``<br>
 Runningタスクを``cmd + ->``<br>
 <img width="600" alt="Get duration" src="./assets/readme/get_duration.png"><br>
 
-####【計算方法】
+###【計算方法】
 - この拡張機能からTogglタイマーを開始した瞬間に、TodoistのコメントにTimerIDが追記されていきます。
 - ``cmd + ->``された瞬間に、TimerIDからTogglAPIを経由して合計時間を取得し表示します。（場合によっては処理がちょっとかかります。）
