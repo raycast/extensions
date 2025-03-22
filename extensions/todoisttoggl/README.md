@@ -54,39 +54,39 @@ Todoistのプロジェクト名の語尾に@${Toggl Project ID}をつけてく�
 例：TestProject@222222222
 ```
 Todoistアプリだとこんな感じ <br>
-<img width="600" alt="Start/Stop Time Entry Command Form" src="./assets/readme/relation_project_example.png">
+<img width="600" alt="Project example" src="./assets/readme/relation_project_example.png">
 
 ### Todoist タスクの作成
 「Create new task」を``enter``<br>
-<img width="600" alt="Start/Stop Time Entry Command Form" src="./assets/readme/create_task.png"><br>
+<img width="600" alt="Create task button" src="./assets/readme/create_task.png"><br>
 
 ``cmd + enter``タスクを作成。<br>
 ``cmd + shift + enter``タスクを作成しTogglの時間測定開始。<br>
-<img width="600" alt="Start/Stop Time Entry Command Form" src="./assets/readme/create_task_form.png"><br>
+<img width="600" alt="Create task form" src="./assets/readme/create_task_form.png"><br>
 *プロジェクトの連携がされてない場合、TogglのDefault workspaceで自動的に時間測定されます。
 
 ### Todoist タスクの更新
 任意のタスクを``cmd + e``<br>
-<img width="600" alt="Start/Stop Time Entry Command Form" src="./assets/readme/update_task.png"><br>
+<img width="600" alt="Task item" src="./assets/readme/update_task.png"><br>
 
 ``cmd + enter``タスクを更新。<br>
-<img width="600" alt="Start/Stop Time Entry Command Form" src="./assets/readme/update_task_form.png"><br>
+<img width="600" alt="Update task form" src="./assets/readme/update_task_form.png"><br>
 
 ### Todoist タスクの完了
 任意のタスクを``cmd + enter``<br>
-<img width="600" alt="Start/Stop Time Entry Command Form" src="./assets/readme/update_task.png"><br>
+<img width="600" alt="Task item" src="./assets/readme/update_task.png"><br>
 
 ### Toggl 時間測定開始
 任意のタスクを``enter``<br>
-<img width="600" alt="Start/Stop Time Entry Command Form" src="./assets/readme/update_task.png"><br>
+<img width="600" alt="Task item" src="./assets/readme/update_task.png"><br>
 
 ### Toggl 時間測定停止
 Runningタスクを``enter``<br>
-<img width="600" alt="Start/Stop Time Entry Command Form" src="./assets/readme/stop_toggl.png"><br>
+<img width="600" alt="Running task item" src="./assets/readme/stop_toggl.png"><br>
 
 ### Toggl タスクにかかった時間を計算
 Runningタスクを``cmd + ->``<br>
-<img width="600" alt="Start/Stop Time Entry Command Form" src="./assets/readme/get_duration.png"><br>
+<img width="600" alt="Get duration" src="./assets/readme/get_duration.png"><br>
 
 ####【計算方法】
 - この拡張機能からTogglタイマーを開始した瞬間に、TodoistのコメントにTimerIDが追記されていきます。
