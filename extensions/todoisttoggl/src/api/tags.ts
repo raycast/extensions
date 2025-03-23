@@ -1,5 +1,5 @@
 import { get, post, put, remove } from "@/api/togglClient";
-import type { ToggleItem } from "@/api/types";
+import type { TogglItem } from "@/api/types";
 
 export function getMyTags() {
   return get<Tag[]>("/me/tags");
@@ -18,7 +18,7 @@ export function deleteTag(workspaceId: number, tagId: number) {
 }
 
 /** @see {@link https://developers.track.toggl.com/docs/api/tags#response Toggl Api} */
-export interface Tag extends ToggleItem {
+export interface Tag extends TogglItem {
   name: string;
   workspace_id: number;
 }

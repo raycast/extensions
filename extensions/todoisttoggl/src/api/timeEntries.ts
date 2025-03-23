@@ -1,5 +1,5 @@
 import { get, post, patch, put, remove } from "@/api/togglClient";
-import type { ToggleItem } from "@/api/types";
+import type { TogglItem } from "@/api/types";
 
 export async function getMyTimeEntries<Meta extends boolean = false>({
   startDate,
@@ -83,7 +83,7 @@ export function justTimeEntry(timeEntryId: number) {
 }
 
 // https://developers.track.toggl.com/docs/api/time_entries#response
-export interface TimeEntry extends ToggleItem {
+export interface TimeEntry extends TogglItem {
   billable: boolean;
   description: string;
   /**
