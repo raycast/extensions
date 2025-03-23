@@ -1,6 +1,6 @@
 # Wave Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Enhance Customer Statement] - {PR_MERGE_DATE}
 
 - Add Invoice Status to `tooltip` of Invoice `Icon`
 - Filter Invoices by Status
