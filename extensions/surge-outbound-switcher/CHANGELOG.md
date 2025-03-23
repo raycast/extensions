@@ -1,6 +1,10 @@
 # Surge Outbound Mode Switcher Changelog
 
-## [Initial Version] - 2025-03-23
+## [Update] - 2024-03-24
+
+- Updated extension icons and screenshot
+
+## [Initial Version] - 2024-03-23
 
 - Added command to switch to Direct mode
 - Added command to switch to Proxy mode
