@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, Color, Keyboard } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, Keyboard } from "@raycast/api";
 import { Task } from "@doist/todoist-api-typescript";
 import { useGetTasks, useGetProject } from "@/hooks/todoist/useTodoist";
 import { useMe, useProjects, useRunningTimeEntry } from "./hooks/toggl";

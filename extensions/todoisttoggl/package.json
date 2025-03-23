@@ -13,7 +13,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "tracking-task",
       "title": "Tracking task",
       "subtitle": "Todoist + Toggl",
       "description": "Create task, Start & Stop timetrack, Update task, Summary Duration.",

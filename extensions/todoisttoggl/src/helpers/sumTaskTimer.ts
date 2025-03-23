@@ -17,6 +17,7 @@ export async function sumTaskTimer(task: Task, mutate: () => void) {
     if (comment.content.includes("@timerID:")) {
       const match = comment.content.match(/@timerID:(\d+)/);
       const timerId = match ? match[1] : null;
+      if (!timerId) continue;
       const timeEntry = await justTimeEntry(Number(timerId));
       const tmpDuration = timeEntry.duration;
       if (tmpDuration > 0) taskDuration += tmpDuration;
