@@ -17,7 +17,7 @@ export interface Organization extends TogglItem {
   /** Maximum number of workspaces allowed for the organization */
   max_workspaces: number;
   name: string;
-  /** Whether the requester is a the owner of the organization */
+  /** Whether the requester is the owner of the organization */
   owner: boolean;
   payment_methods?: string;
   pricing_plan_id: number;
