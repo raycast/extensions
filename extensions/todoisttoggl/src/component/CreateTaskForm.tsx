@@ -36,7 +36,7 @@ function CreateTaskForm({ mutate, refreshTimer }: { mutate: () => void; refreshT
       if (trackToggl) {
         showToast({ style: Toast.Style.Animated, title: "Starting track..." });
         const currentTodoistProject = projects?.find((project) => project.id === selectedProject);
-        const togglProjectId = currentTodoistProject?.name.indexOf("@")
+        const togglProjectId = currentTodoistProject?.name.indexOf("@") !== -1
           ? currentTodoistProject?.name.slice(currentTodoistProject?.name.indexOf("@") + 1)
           : null;
         const currentTogglProject = togglProjects.find((project) => project.id === Number(togglProjectId));

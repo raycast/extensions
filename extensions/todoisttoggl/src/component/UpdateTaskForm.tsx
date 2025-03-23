@@ -39,7 +39,7 @@ function UpdateTaskForm({ mutate, task }: { mutate: () => void; task: Task }) {
       mutate();
       navigation.pop();
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Faild to update task" });
+      showToast({ style: Toast.Style.Failure, title: "Failed to update task" });
     }
   }
   return (
