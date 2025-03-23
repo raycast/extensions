@@ -30,9 +30,6 @@ export function formatDate(date: string) {
 export function formatMoney(money: Money) {
   return money.currency.symbol + money.value;
 }
-export function uppercaseFirstChar(text: string) {
-  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-}
 export function getCustomerJoinedName(customer: Customer) {
   return !customer.firstName || !customer.lastName ? "" : `${customer.firstName} ${customer.lastName}`;
 }

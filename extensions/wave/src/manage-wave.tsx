@@ -6,7 +6,7 @@ import {
   useGetBusinessProductsAndServices,
 } from "./lib/wave";
 import { Business, InvoiceStatus } from "./lib/types";
-import { getCustomerJoinedName, getInvoiceStatusColor, uppercaseFirstChar } from "./lib/utils";
+import { getCustomerJoinedName, getInvoiceStatusColor } from "./lib/utils";
 import { useCachedState, withAccessToken } from "@raycast/utils";
 import { HELP_LINKS, INVOICE_STATUSES } from "./lib/config";
 import CustomerStatement from "./lib/components/customer-statement";
@@ -75,7 +75,7 @@ function BusinessInvoices({ business }: { business: Business }) {
               <List.Dropdown.Item
                 key={status}
                 icon={{ source: Icon.Receipt, tintColor: getInvoiceStatusColor(status as InvoiceStatus) }}
-                title={uppercaseFirstChar(status)}
+                title={status}
                 value={status}
               />
             ))}
