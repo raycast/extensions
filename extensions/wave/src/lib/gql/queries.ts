@@ -1,7 +1,7 @@
 import { NODES } from "./nodes";
 import { OBJECTS } from "./objects";
 
-export const queryGetCustomerInvoicesCustomerStatement = `
+export const queryGetCustomerOutstandingInvoicesCustomerStatement = `
     query($businessId: ID!, $customerId: ID!) {
         business(id: $businessId) {
             invoices(customerId: $customerId, sort: [INVOICE_DATE_ASC]) {
