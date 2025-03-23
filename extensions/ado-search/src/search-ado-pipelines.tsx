@@ -13,17 +13,21 @@ export default () => {
 
   return (
     <List isLoading={isLoading}>
-      {data?.value.map((pipelines) => (
-        <List.Item
-          key={pipelines.id}
-          title={pipelines.name}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="Open in Browser" url={pipelines._links.web.href} />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {!isLoading && data?.value.length === 0 ? (
+        <List.EmptyView title="No pipelines found" />
+      ) : (
+        data?.value.map((pipelines) => (
+          <List.Item
+            key={pipelines.id}
+            title={pipelines.name}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser title="Open in Browser" url={pipelines._links.web.href} />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 };

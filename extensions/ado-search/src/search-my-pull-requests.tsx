@@ -18,33 +18,37 @@ export default () => {
   );
 
   return (
-    <List isLoading={prData.isLoading}>
-      {prData?.data?.value.map((pullRequest) => {
-        const webUrl = `${baseApiUrl()}/${pullRequest.repository.project.name}/_git/${pullRequest.repository.name}/pullrequest/${pullRequest.pullRequestId}`;
-        return (
-          <List.Item
-            key={pullRequest.pullRequestId}
-            title={pullRequest.title}
-            subtitle={pullRequest.repository.name}
-            accessories={[
-              {
-                text: `${pullRequest.sourceRefName.replace("refs/heads/", "")} => ${pullRequest.targetRefName.replace("refs/heads/", "")}`,
-                icon: Icon.Code,
-              },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser title="Open in Browser" url={webUrl} />
-                <Action.CopyToClipboard
-                  title="Copy Git Remote URL"
-                  content={webUrl}
-                  shortcut={{ modifiers: ["cmd"], key: "g" }}
-                />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+    <List isLoading={prData.isLoading || entityData.isLoading}>
+      {!prData.isLoading && !entityData.isLoading && prData.data?.value.length === 0 ? (
+        <List.EmptyView title="No pull requests found" />
+      ) : (
+        prData?.data?.value.map((pullRequest) => {
+          const webUrl = `${baseApiUrl()}/${pullRequest.repository.project.name}/_git/${pullRequest.repository.name}/pullrequest/${pullRequest.pullRequestId}`;
+          return (
+            <List.Item
+              key={pullRequest.pullRequestId}
+              title={pullRequest.title}
+              subtitle={pullRequest.repository.name}
+              accessories={[
+                {
+                  text: `${pullRequest.sourceRefName.replace("refs/heads/", "")} => ${pullRequest.targetRefName.replace("refs/heads/", "")}`,
+                  icon: Icon.Code,
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser title="Open in Browser" url={webUrl} />
+                  <Action.CopyToClipboard
+                    title="Copy Web URL"
+                    content={webUrl}
+                    shortcut={{ modifiers: ["cmd"], key: "g" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })
+      )}
     </List>
   );
 };

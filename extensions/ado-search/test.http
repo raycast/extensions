@@ -35,7 +35,7 @@ Content-Type: application/json
 Authorization: Basic {{authToken}}
 
 ### Get pullrequests created by me
-GET https://dev.azure.com/{{org}}/{{{userId}}}/_apis/git/pullrequests?searchCriteria.creatorId=me&api-version=7.2-preview
+GET https://dev.azure.com/{{org}}/{{userId}}/_apis/git/pullrequests?searchCriteria.creatorId=me&api-version=7.2-preview
 Content-Type: application/json
 Authorization: Basic {{authToken}}
 

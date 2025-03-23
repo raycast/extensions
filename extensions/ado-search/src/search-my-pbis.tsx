@@ -20,7 +20,7 @@ export default () => {
     }),
   });
 
-  const workItemIds = pbiData.data?.workItems.map((item) => item.id).join(",") || "";
+  const workItemIds = pbiData.data?.workItems?.length ? pbiData.data.workItems.map((item) => item.id).join(",") : "";
 
   const workItemDetails = useFetch<AdoWorkItemDetailsResponse>(
     `${baseApiUrl()}/_apis/wit/workitems?ids=${workItemIds}&api-version=7.1`,
@@ -34,25 +34,29 @@ export default () => {
 
   return (
     <List isLoading={pbiData.isLoading || workItemDetails.isLoading}>
-      {workItemDetails?.data?.value?.map((pbi) => (
-        <List.Item
-          key={pbi.id}
-          title={pbi.fields["System.Title"] ?? "Unknown"}
-          subtitle={pbi.fields["System.State"] ?? ""}
-          accessories={[{ text: pbi.id.toString(), icon: Icon.Dot }]}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="Open in Browser" url={`${baseApiUrl()}/_workitems/edit/${pbi.id}`} />
-              <Action.CopyToClipboard
-                title="Copy Work Item URL"
-                content={`${baseApiUrl()}/_workitems/edit/${pbi.id}`}
-                icon={Icon.CopyClipboard}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {!pbiData.isLoading && !workItemDetails.isLoading && workItemDetails.data?.value.length === 0 ? (
+        <List.EmptyView title="No product backlog items found" />
+      ) : (
+        workItemDetails?.data?.value?.map((pbi) => (
+          <List.Item
+            key={pbi.id}
+            title={pbi.fields["System.Title"] ?? "Unknown"}
+            subtitle={pbi.fields["System.State"] ?? ""}
+            accessories={[{ text: pbi.id.toString(), icon: Icon.Dot }]}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser title="Open in Browser" url={`${baseApiUrl()}/_workitems/edit/${pbi.id}`} />
+                <Action.CopyToClipboard
+                  title="Copy Work Item URL"
+                  content={`${baseApiUrl()}/_workitems/edit/${pbi.id}`}
+                  icon={Icon.CopyClipboard}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 };

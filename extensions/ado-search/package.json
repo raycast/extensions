@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ado-search",
   "title": "Azure DevOps Repositories Search",
-  "description": "Search trough Azure DevOps git repositories and find open Pull Requests",
+  "description": "Search through Azure DevOps git repositories and find open Pull Requests",
   "icon": "Azure-DevOps.png",
   "author": "willem_van_lent",
   "contributors": [
@@ -24,18 +24,21 @@
       "name": "search-ado-pipelines",
       "title": "Azure DevOps Pipelines Search",
       "description": "Search and open Azure DevOps Pipelines",
+      "subtitle": "Azure DevOps",
       "mode": "view"
     },
     {
       "name": "search-my-pull-requests",
       "title": "Azure DevOps My Open Pull Requests",
       "description": "Search and open my Azure DevOps Open Pull Requests",
+      "subtitle": "Azure DevOps",
       "mode": "view"
     },
     {
       "name": "search-my-pbis",
       "title": "Azure DevOps My Open PBIs",
       "description": "Search and open my Azure DevOps PBIs",
+      "subtitle": "Azure DevOps",
       "mode": "view"
     },
     {
@@ -49,7 +52,7 @@
   ],
   "preferences": [
     {
-      "description": "The organization name of the Azure DevOps account which you will search trough",
+      "description": "The organization name of the Azure DevOps account which you will search through",
       "name": "organizationName",
       "placeholder": "myorg",
       "required": true,
@@ -57,7 +60,7 @@
       "type": "textfield"
     },
     {
-      "description": "The project name of the Azure DevOps account which you will search trough",
+      "description": "The project name of the Azure DevOps account which you will search through",
       "name": "projectName",
       "placeholder": "myproject",
       "required": true,
