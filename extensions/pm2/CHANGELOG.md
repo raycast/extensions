@@ -1,6 +1,11 @@
 # Raycast PM2
 
-## ## [Chore & Fixes] - 2024-11-21
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Upgrade pm2 to 6.0.5
+- Bump all dependencies to the latest
+
+## [Chore & Fixes] - 2024-11-21
 
 - Hide example button while loading
 - Bump all dependencies to the latest
