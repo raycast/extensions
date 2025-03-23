@@ -15,12 +15,17 @@ export async function sumTaskTimer(task: Task, mutate: () => void) {
   let taskDuration = 0;
   for (const comment of comments.results) {
     if (comment.content.includes("@timerID:")) {
-      const match = comment.content.match(/@timerID:(\d+)/);
-      const timerId = match ? match[1] : null;
-      if (!timerId) continue;
-      const timeEntry = await justTimeEntry(Number(timerId));
-      const tmpDuration = timeEntry.duration;
-      if (tmpDuration > 0) taskDuration += tmpDuration;
+      try {
+        const match = comment.content.match(/@timerID:(\d+)/);
+        const timerId = match ? match[1] : null;
+        if (!timerId) continue;
+        const timeEntry = await justTimeEntry(Number(timerId));
+        const tmpDuration = timeEntry?.duration;
+        if (tmpDuration > 0) taskDuration += tmpDuration;
+      } catch (error) {
+        console.error(error);
+        continue;
+      }
     }
   }
   if(taskDuration > 0) {
