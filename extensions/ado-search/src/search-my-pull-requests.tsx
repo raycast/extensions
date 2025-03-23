@@ -5,7 +5,7 @@ import { AdoIdentityResponse, AdoPrResponse } from "./types";
 
 export default () => {
   const entityData = useFetch<AdoIdentityResponse>(
-    `${baseApiUrlEntities()}/_apis/identities?searchFilter=MailAddress&filterValue=${email()}&api-version=7.1`,
+    `${baseApiUrlEntities()}/_apis/identities?searchFilter=MailAddress&filterValue=${email}&api-version=7.1`,
     {
       headers: { Accept: "application/json", Authorization: `Basic ${preparedPersonalAccessToken()}` },
     },
