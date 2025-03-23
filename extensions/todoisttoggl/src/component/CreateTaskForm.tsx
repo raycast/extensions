@@ -58,7 +58,7 @@ function CreateTaskForm({ mutate, refreshTimer }: { mutate: () => void; refreshT
           showToast({ style: Toast.Style.Success, title: `${taskTitle} is tracking in Toggl` });
           refreshTimer();
         } catch (error) {
-          showToast({ style: Toast.Style.Failure, title: "Faild to track in Toggl" });
+          showToast({ style: Toast.Style.Failure, title: "Failed to track in Toggl" });
         }
       }
       showToast({ style: Toast.Style.Success, title: "Create task" });

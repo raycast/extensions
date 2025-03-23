@@ -10,7 +10,7 @@ function UpdateTaskForm({ mutate, task }: { mutate: () => void; task: Task }) {
   const [taskContent, setTaskContent] = useState(task.description);
   const [priority, setPriority] = useState(task.priority.toString());
   const [dueDate] = useState<string | undefined>(undefined);
-  const navigaton = useNavigation();
+  const navigation = useNavigation();
 
   const { data: projects } = useGetProject();
 
@@ -37,7 +37,7 @@ function UpdateTaskForm({ mutate, task }: { mutate: () => void; task: Task }) {
       });
       showToast({ style: Toast.Style.Success, title: "Update task" });
       mutate();
-      navigaton.pop();
+      navigation.pop();
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Faild to update task" });
     }
