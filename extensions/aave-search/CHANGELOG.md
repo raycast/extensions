@@ -5,7 +5,7 @@
 ### Offline fallback & Fixes
 
 - Store previously fetched values for offline use
-- Fixed sorting error that was causing extension crashes. Kudos to @StErMi.
+- Fixed sorting error that was causing extension crashes. Kudos to [@StErMi](https://github.com/StErMi).
 
 ## [1.0.0] - 2024-03-21
 
