@@ -60,7 +60,11 @@ export default function CustomerStatement({
     mapResult(result: Result<{ business: { invoices: Edges<Invoice> } }>) {
       if ("errors" in result) throw new Error(result.errors[0].message);
       return {
-        data: result.data.business.invoices.edges.filter(edge => ![InvoiceStatus.PAID, InvoiceStatus.DRAFT, InvoiceStatus.OVERPAID].includes(edge.node.status)).map((edge) => edge.node),
+        data: result.data.business.invoices.edges
+          .filter(
+            (edge) => ![InvoiceStatus.PAID, InvoiceStatus.DRAFT, InvoiceStatus.OVERPAID].includes(edge.node.status),
+          )
+          .map((edge) => edge.node),
       };
     },
     onData(data) {

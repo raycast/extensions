@@ -21,15 +21,15 @@ export type Business = {
 };
 
 export enum InvoiceStatus {
-  DRAFT="DRAFT",
-  OVERDUE="OVERDUE",
-  OVERPAID="OVERPAID",
-  PAID="PAID",
-  PARTIAL="PARTIAL",
-  SAVED="SAVED",
-  SENT="SENT",
-  UNPAID="UNPAID",
-  VIEWED="VIEWED",
+  DRAFT = "DRAFT",
+  OVERDUE = "OVERDUE",
+  OVERPAID = "OVERPAID",
+  PAID = "PAID",
+  PARTIAL = "PARTIAL",
+  SAVED = "SAVED",
+  SENT = "SENT",
+  UNPAID = "UNPAID",
+  VIEWED = "VIEWED",
 }
 
 export type Invoice = {
@@ -81,6 +81,7 @@ export type Customer = {
   firstName: string | null;
   lastName: string | null;
   email: string | null;
+  phone: string | null;
   website: string | null;
   currency: {
     code: string;
