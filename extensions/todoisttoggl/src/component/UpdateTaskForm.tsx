@@ -55,7 +55,7 @@ function UpdateTaskForm({ mutate, task }: { mutate: () => void; task: Task }) {
         title="Project"
         value={selectedProject}
         onChange={setSelectedProject}
-        info={"Can`t update project."}
+        info={"Can't update project."}
       >
         <Form.Dropdown.Item
           key={selectedProject ?? ""}
