@@ -1,4 +1,4 @@
-import { showToast, Toast, ActionPanel, Action, Form, useNavigation, showFailureToast } from "@raycast/api";
+import { showToast, Toast, ActionPanel, Action, Form, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { Task } from "@doist/todoist-api-typescript";
 import { useTags, useProjects } from "@/hooks/toggl";
@@ -39,7 +39,7 @@ function UpdateTaskForm({ mutate, task }: { mutate: () => void; task: Task }) {
       mutate();
       navigation.pop();
     } catch (error) {
-      showFailureToast({ style: Toast.Style.Failure, title: "Failed to update task" });
+      showToast({ style: Toast.Style.Failure, title: "Failed to update task" });
     }
   }
   return (

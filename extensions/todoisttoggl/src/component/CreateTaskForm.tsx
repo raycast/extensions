@@ -1,4 +1,4 @@
-import { showToast, Toast, ActionPanel, Action, Form, useNavigation, showFailureToast } from "@raycast/api";
+import { showToast, Toast, ActionPanel, Action, Form, useNavigation } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { createTimeEntry } from "@/api";
 import { useState } from "react";
@@ -58,7 +58,7 @@ function CreateTaskForm({ mutate, refreshTimer }: { mutate: () => void; refreshT
           showToast({ style: Toast.Style.Success, title: `${taskTitle} is tracking in Toggl` });
           refreshTimer();
         } catch (error) {
-          showFailureToast({ style: Toast.Style.Failure, title: "Failed to track in Toggl" });
+          showToast({ style: Toast.Style.Failure, title: "Failed to track in Toggl" });
         }
       }
       showToast({ style: Toast.Style.Success, title: "Create task" });
