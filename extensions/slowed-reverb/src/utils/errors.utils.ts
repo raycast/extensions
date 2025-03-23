@@ -9,8 +9,10 @@ export type ToastType = {
 
 const CONSTANTS = {
   noSoxInstalled: "sox is not installed. please install it via homebrew",
+  soxFailed: "conversion failed. make sure sox is correctly set up",
   noSongsSelected: "no songs selected",
   noPreferenceKey: "preference setting not found",
+  conversionFailed: "conversion failed",
 };
 
 const throwError = (message: string) => {

@@ -5,23 +5,19 @@ import { soxUtils } from "../utils/sox.utils";
 
 const Init = async (currentConverter: keyof Converters) => {
   const { converters, converter } = convertersUtils;
-  const { showToastError, showToastSuccess, throwError, CONSTANTS } = errorUtils;
+  const { showToastSuccess, throwError, CONSTANTS } = errorUtils;
   const { getSelectedFilePaths } = fileUtils;
   const { command, fileNameSuffix, initialToast } = converters[currentConverter];
   const { isSoxInstalled } = soxUtils;
   const { successToast } = converters[currentConverter];
 
-  try {
-    if (!isSoxInstalled()) throwError(CONSTANTS.noSoxInstalled);
-    await showToastSuccess({ title: initialToast.title, emoji: initialToast.emoji });
+  if (!isSoxInstalled()) throwError(CONSTANTS.noSoxInstalled);
+  await showToastSuccess({ title: initialToast.title, emoji: initialToast.emoji });
 
-    const files = await getSelectedFilePaths();
-    await Promise.all(files.map((inputPath) => converter(inputPath, command, fileNameSuffix)));
+  const files = await getSelectedFilePaths();
+  await Promise.all(files.map((inputPath) => converter(inputPath, command, fileNameSuffix)));
 
-    await errorUtils.showToastSuccess({ title: successToast.title });
-  } catch (error) {
-    await showToastError(error);
-  }
+  await errorUtils.showToastSuccess({ title: successToast.title });
 };
 
 export default Init;

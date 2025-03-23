@@ -11,7 +11,7 @@ export type Converters = {
 };
 
 export type Converter = {
-  command: (args: { inputPath: string; outputPath: string; slowedSpeed?: string; nightcoreSpeed?: string }) => string;
+  command: (args: { inputPath: string; outputPath: string; slowedSpeed?: string; nightcoreSpeed?: string }) => string[];
   fileNameSuffix: "slowed" | "reverb" | "slowed-reverb" | "nightcore";
   initialToast: ToastType;
   successToast: ToastType;
@@ -19,8 +19,24 @@ export type Converter = {
 
 const converters: Converters = {
   slowed: {
-    command: ({ inputPath, outputPath, slowedSpeed }) =>
-      `-N -V1 --ignore-length -G "${inputPath}" -C 320 -r 44100 -b 24 -c 2 "${outputPath}" speed ${slowedSpeed}`,
+    command: ({ inputPath, outputPath, slowedSpeed }) => [
+      "-N",
+      "-V1",
+      "--ignore-length",
+      "-G",
+      inputPath,
+      "-C",
+      "320",
+      "-r",
+      "44100",
+      "-b",
+      "24",
+      "-c",
+      "2",
+      outputPath,
+      "speed",
+      slowedSpeed || "1.0",
+    ],
     fileNameSuffix: "slowed",
     initialToast: {
       title: "slowing down without reverb",
@@ -32,8 +48,29 @@ const converters: Converters = {
     },
   },
   reverb: {
-    command: ({ inputPath, outputPath }) =>
-      `-N -V1 --ignore-length -G "${inputPath}" -C 320 -r 44100 -b 24 -c 2 "${outputPath}" reverb 50 50 100 100 20 0`,
+    command: ({ inputPath, outputPath }) => [
+      "-N",
+      "-V1",
+      "--ignore-length",
+      "-G",
+      inputPath,
+      "-C",
+      "320",
+      "-r",
+      "44100",
+      "-b",
+      "24",
+      "-c",
+      "2",
+      outputPath,
+      "reverb",
+      "50",
+      "50",
+      "100",
+      "100",
+      "20",
+      "0",
+    ],
     fileNameSuffix: "reverb",
     initialToast: {
       title: "adding reverb",
@@ -45,8 +82,31 @@ const converters: Converters = {
     },
   },
   slowedAndReverb: {
-    command: ({ inputPath, outputPath, slowedSpeed }) =>
-      `-N -V1 --ignore-length -G "${inputPath}" -C 320 -r 44100 -b 24 -c 2 "${outputPath}" speed ${slowedSpeed} reverb 50 50 100 100 20 0`,
+    command: ({ inputPath, outputPath, slowedSpeed }) => [
+      "-N",
+      "-V1",
+      "--ignore-length",
+      "-G",
+      inputPath,
+      "-C",
+      "320",
+      "-r",
+      "44100",
+      "-b",
+      "24",
+      "-c",
+      "2",
+      outputPath,
+      "speed",
+      slowedSpeed || "1.0",
+      "reverb",
+      "50",
+      "50",
+      "100",
+      "100",
+      "20",
+      "0",
+    ],
     fileNameSuffix: "slowed-reverb",
     initialToast: {
       title: "slowing down + adding reverb",
@@ -58,8 +118,24 @@ const converters: Converters = {
     },
   },
   nightcore: {
-    command: ({ inputPath, outputPath, nightcoreSpeed }) =>
-      `-N -V1 --ignore-length -G "${inputPath}" -C 320 -r 44100 -b 24 -c 2 "${outputPath}" speed ${nightcoreSpeed}`,
+    command: ({ inputPath, outputPath, nightcoreSpeed }) => [
+      "-N",
+      "-V1",
+      "--ignore-length",
+      "-G",
+      inputPath,
+      "-C",
+      "320",
+      "-r",
+      "44100",
+      "-b",
+      "24",
+      "-c",
+      "2",
+      outputPath,
+      "speed",
+      nightcoreSpeed || "1.0",
+    ],
     fileNameSuffix: "nightcore",
     initialToast: {
       title: "converting to nightcore",
@@ -82,18 +158,20 @@ const converter = async (
   const { getAllDefaultSpeeds } = preferenceUtils;
   const speeds = getAllDefaultSpeeds();
   const outputPath = getOutputPath(inputPath, fileNameSuffix);
+  const { throwError, CONSTANTS } = errorUtils;
 
   try {
-    const command = converter({
+    const args = converter({
       inputPath,
       outputPath,
       slowedSpeed: speeds.slowed,
       nightcoreSpeed: speeds.nightcore,
     });
 
-    await executeSoxCommand(command);
+    await executeSoxCommand(args);
   } catch (error) {
     await errorUtils.showToastError(error);
+    throwError(CONSTANTS.conversionFailed);
   }
 };
 

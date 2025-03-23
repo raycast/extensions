@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execFileSync, execSync } from "child_process";
 import { errorUtils } from "./errors.utils";
 import { preferenceUtils } from "./preference.utils";
 
@@ -37,11 +37,14 @@ const getSoxPath = () => {
 
 const isSoxInstalled = () => !!getSoxPath();
 
-const executeSoxCommand = async (command: string) => {
+const executeSoxCommand = async (args: string[]) => {
+  const { throwError, CONSTANTS } = errorUtils;
+
   try {
-    execSync(`${getSoxPath()} ${command}`).toString();
+    execFileSync(getSoxPath(), args);
   } catch (error) {
     await errorUtils.showToastError(error);
+    throwError(CONSTANTS.soxFailed);
   }
 };
 
