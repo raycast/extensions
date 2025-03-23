@@ -4,4 +4,4 @@ export { default as VPCView } from "./VPCView";
 export { default as IPAddressView } from "./IPAddressView";
 export { default as FirewallRulesView } from "./FirewallRulesView";
 export { NetworkService } from "./NetworkService";
-export { default as SubnetsView } from "./SubnetsView"; 
+export { default as SubnetsView } from "./SubnetsView";

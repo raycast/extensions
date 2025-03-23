@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, Icon, Color } from "@raycast/api";
 import { useMemo } from "react";
-import { IAMPrincipal, IAMRole } from "../IAMService";
+import { IAMPrincipal } from "../IAMService";
 import { formatRoleName } from "../../../utils/iamRoles";
 
 interface IAMPrincipalListProps {
@@ -25,26 +25,30 @@ export default function IAMPrincipalList({
   onRefresh,
 }: IAMPrincipalListProps) {
   const filteredPrincipals = useMemo(() => {
-    return principals.filter(principal => {
+    return principals.filter((principal) => {
       // Filter by search text
-      if (searchText && !principal.id.toLowerCase().includes(searchText.toLowerCase()) &&
-          !principal.roles.some(role => 
+      if (
+        searchText &&
+        !principal.id.toLowerCase().includes(searchText.toLowerCase()) &&
+        !principal.roles.some(
+          (role) =>
             role.role.toLowerCase().includes(searchText.toLowerCase()) ||
-            role.title.toLowerCase().includes(searchText.toLowerCase())
-          )) {
+            role.title.toLowerCase().includes(searchText.toLowerCase()),
+        )
+      ) {
         return false;
       }
-      
+
       // Filter by principal type
       if (selectedType && principal.type !== selectedType) {
         return false;
       }
-      
+
       // Filter by service
-      if (selectedService && !principal.roles.some(role => role.role.includes(selectedService))) {
+      if (selectedService && !principal.roles.some((role) => role.role.includes(selectedService))) {
         return false;
       }
-      
+
       return true;
     });
   }, [principals, searchText, selectedType, selectedService]);
@@ -69,13 +73,13 @@ export default function IAMPrincipalList({
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search principals and roles..."
-      onSearchTextChange={text => searchText = text}
+      onSearchTextChange={(text) => (searchText = text)}
       filtering={{ keepSectionOrder: true }}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by principal type"
           value={selectedType || ""}
-          onChange={value => selectedType = value === "" ? null : value}
+          onChange={(value) => (selectedType = value === "" ? null : value)}
         >
           <List.Dropdown.Item title="All Types" value="" />
           <List.Dropdown.Item title="User" value="user" />
@@ -98,32 +102,18 @@ export default function IAMPrincipalList({
           }
         />
       ) : (
-        filteredPrincipals.map(principal => (
+        filteredPrincipals.map((principal) => (
           <List.Item
             key={principal.id}
             title={principal.displayName || principal.email || principal.id}
             subtitle={principal.type}
             icon={getPrincipalIcon(principal.type)}
-            accessories={[
-              { text: `${principal.roles.length} role${principal.roles.length !== 1 ? "s" : ""}` }
-            ]}
+            accessories={[{ text: `${principal.roles.length} role${principal.roles.length !== 1 ? "s" : ""}` }]}
             actions={
               <ActionPanel>
-                <Action
-                  title="View Principal"
-                  icon={Icon.Eye}
-                  onAction={() => onViewPrincipal(principal)}
-                />
-                <Action
-                  title="Add Role"
-                  icon={Icon.Plus}
-                  onAction={onAddRole}
-                />
-                <Action
-                  title="Refresh"
-                  icon={Icon.ArrowClockwise}
-                  onAction={onRefresh}
-                />
+                <Action title="View Principal" icon={Icon.Eye} onAction={() => onViewPrincipal(principal)} />
+                <Action title="Add Role" icon={Icon.Plus} onAction={onAddRole} />
+                <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
               </ActionPanel>
             }
             detail={
@@ -151,4 +141,4 @@ export default function IAMPrincipalList({
       )}
     </List>
   );
-} 
+}

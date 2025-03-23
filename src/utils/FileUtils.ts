@@ -5,7 +5,6 @@ import { promisify } from "util";
 
 const fsExists = promisify(fs.exists);
 const fsMkdir = promisify(fs.mkdir);
-const fsReaddir = promisify(fs.readdir);
 const fsStat = promisify(fs.stat);
 
 /**
@@ -19,9 +18,9 @@ export async function ensureDirectoryExists(dirPath: string): Promise<void> {
     if (!exists) {
       await fsMkdir(dirPath, { recursive: true });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`Error ensuring directory exists: ${dirPath}`, error);
-    throw new Error(`Failed to create directory: ${error.message}`);
+    throw new Error(`Failed to create directory: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -44,39 +43,39 @@ export function formatFileSize(bytes: number): string {
  * @returns The guessed MIME type
  */
 export function guessContentType(filename: string): string {
-  const ext = filename.split('.').pop()?.toLowerCase() || "";
-  
+  const ext = filename.split(".").pop()?.toLowerCase() || "";
+
   const contentTypeMap: Record<string, string> = {
-    "jpg": "image/jpeg",
-    "jpeg": "image/jpeg",
-    "png": "image/png",
-    "gif": "image/gif",
-    "svg": "image/svg+xml",
-    "webp": "image/webp",
-    "txt": "text/plain",
-    "html": "text/html",
-    "css": "text/css",
-    "js": "application/javascript",
-    "json": "application/json",
-    "xml": "application/xml",
-    "pdf": "application/pdf",
-    "doc": "application/msword",
-    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "xls": "application/vnd.ms-excel",
-    "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "ppt": "application/vnd.ms-powerpoint",
-    "pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    "zip": "application/zip",
-    "rar": "application/x-rar-compressed",
-    "tar": "application/x-tar",
-    "gz": "application/gzip",
-    "mp3": "audio/mpeg",
-    "mp4": "video/mp4",
-    "avi": "video/x-msvideo",
-    "mov": "video/quicktime",
-    "webm": "video/webm"
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    gif: "image/gif",
+    svg: "image/svg+xml",
+    webp: "image/webp",
+    txt: "text/plain",
+    html: "text/html",
+    css: "text/css",
+    js: "application/javascript",
+    json: "application/json",
+    xml: "application/xml",
+    pdf: "application/pdf",
+    doc: "application/msword",
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    xls: "application/vnd.ms-excel",
+    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ppt: "application/vnd.ms-powerpoint",
+    pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    zip: "application/zip",
+    rar: "application/x-rar-compressed",
+    tar: "application/x-tar",
+    gz: "application/gzip",
+    mp3: "audio/mpeg",
+    mp4: "video/mp4",
+    avi: "video/x-msvideo",
+    mov: "video/quicktime",
+    webm: "video/webm",
   };
-  
+
   return contentTypeMap[ext] || "application/octet-stream";
 }
 
@@ -96,7 +95,7 @@ export async function validateFile(filePath: string): Promise<boolean> {
       });
       return false;
     }
-    
+
     const stats = await fsStat(filePath);
     if (!stats.isFile()) {
       showToast({
@@ -106,14 +105,14 @@ export async function validateFile(filePath: string): Promise<boolean> {
       });
       return false;
     }
-    
+
     return true;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`Error validating file: ${filePath}`, error);
     showToast({
       style: Toast.Style.Failure,
       title: "Error accessing file",
-      message: error.message,
+      message: error instanceof Error ? error.message : String(error),
     });
     return false;
   }
@@ -135,11 +134,11 @@ export async function getFileInfo(filePath: string): Promise<{
   try {
     const exists = await validateFile(filePath);
     if (!exists) return null;
-    
+
     const stats = await fsStat(filePath);
     const name = path.basename(filePath);
     const extension = path.extname(filePath).slice(1).toLowerCase();
-    
+
     return {
       name,
       size: stats.size,
@@ -176,7 +175,14 @@ export function formatTimestamp(timestamp: string): string {
 export function formatGeneration(generation: string): string {
   if (!generation) return "Unknown";
   // Shorten the generation ID for display purposes
-  return generation.length > 12 ? `${generation.substring(0, 6)}...${generation.substring(generation.length - 6)}` : generation;
+  return generation.length > 12
+    ? `${generation.substring(0, 6)}...${generation.substring(generation.length - 6)}`
+    : generation;
+}
+
+interface StorageObject {
+  timeDeleted?: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -184,7 +190,7 @@ export function formatGeneration(generation: string): string {
  * @param object The storage object
  * @returns True if it's the current version
  */
-export function isCurrentVersion(object: any): boolean {
+export function isCurrentVersion(object: StorageObject): boolean {
   return object.timeDeleted === undefined;
 }
 
@@ -195,31 +201,31 @@ export function isCurrentVersion(object: any): boolean {
  */
 export function calculateAge(timestamp: string): string {
   if (!timestamp) return "Unknown";
-  
+
   try {
     const created = new Date(timestamp).getTime();
     const now = new Date().getTime();
     const diff = now - created;
-    
+
     // Convert to appropriate time unit
     const seconds = Math.floor(diff / 1000);
-    if (seconds < 60) return `${seconds} second${seconds !== 1 ? 's' : ''}`;
-    
+    if (seconds < 60) return `${seconds} second${seconds !== 1 ? "s" : ""}`;
+
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
-    
+    if (minutes < 60) return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
+
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''}`;
-    
+    if (hours < 24) return `${hours} hour${hours !== 1 ? "s" : ""}`;
+
     const days = Math.floor(hours / 24);
-    if (days < 30) return `${days} day${days !== 1 ? 's' : ''}`;
-    
+    if (days < 30) return `${days} day${days !== 1 ? "s" : ""}`;
+
     const months = Math.floor(days / 30);
-    if (months < 12) return `${months} month${months !== 1 ? 's' : ''}`;
-    
+    if (months < 12) return `${months} month${months !== 1 ? "s" : ""}`;
+
     const years = Math.floor(months / 12);
-    return `${years} year${years !== 1 ? 's' : ''}`;
+    return `${years} year${years !== 1 ? "s" : ""}`;
   } catch (e) {
     return "Unknown";
   }
-} 
+}

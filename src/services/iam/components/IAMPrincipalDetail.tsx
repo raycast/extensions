@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Detail, Icon, Color, confirmAlert, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Detail, Icon, confirmAlert, showToast, Toast } from "@raycast/api";
 import { IAMPrincipal, IAMService } from "../IAMService";
 import { formatRoleName } from "../../../utils/iamRoles";
 
@@ -9,12 +9,7 @@ interface IAMPrincipalDetailProps {
   onBack: () => void;
 }
 
-export default function IAMPrincipalDetail({
-  principal,
-  iamService,
-  onRoleRemoved,
-  onBack,
-}: IAMPrincipalDetailProps) {
+export default function IAMPrincipalDetail({ principal, iamService, onRoleRemoved, onBack }: IAMPrincipalDetailProps) {
   // Format the principal type for display
   function formatPrincipalType(type: string): string {
     switch (type) {
@@ -60,13 +55,13 @@ export default function IAMPrincipalDetail({
     if (confirmed) {
       try {
         await iamService.removeMember(role, principal.type, principal.id);
-        
+
         showToast({
           style: Toast.Style.Success,
           title: "Role removed",
           message: `Removed ${formatRoleName(role)} from ${principal.id}`,
         });
-        
+
         onRoleRemoved();
       } catch (error) {
         console.error("Error removing role:", error);
@@ -90,19 +85,27 @@ export default function IAMPrincipalDetail({
   
   ## Roles (${principal.roles.length})
   
-  ${principal.roles.map(role => `
+  ${principal.roles
+    .map(
+      (role) => `
   ### ${formatRoleName(role.role)}
   
   ${role.title}
   
   ${role.description ? `> ${role.description}` : ""}
   
-  ${role.condition ? `**Condition:** ${role.condition.title}
+  ${
+    role.condition
+      ? `**Condition:** ${role.condition.title}
   \`\`\`
   ${role.condition.expression}
   \`\`\`
-  ` : ""}
-  `).join("\n")}
+  `
+      : ""
+  }
+  `,
+    )
+    .join("\n")}
   `;
 
   return (
@@ -112,14 +115,10 @@ export default function IAMPrincipalDetail({
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action
-              title="Back"
-              icon={Icon.ArrowLeft}
-              onAction={onBack}
-            />
+            <Action title="Back" icon={Icon.ArrowLeft} onAction={onBack} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Roles">
-            {principal.roles.map(role => (
+            {principal.roles.map((role) => (
               <Action
                 key={role.role}
                 title={`Remove ${formatRoleName(role.role)}`}
@@ -132,4 +131,4 @@ export default function IAMPrincipalDetail({
       }
     />
   );
-} 
+}

@@ -1,7 +1,7 @@
-import { Form, ActionPanel, Action, useNavigation, showToast, Toast, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation, Icon } from "@raycast/api";
 import { ReactNode, useState } from "react";
 import { openFilePicker } from "./NativeFilePicker";
-import { validateFile, getFileInfo } from "./FileUtils";
+import { validateFile } from "./FileUtils";
 
 export interface FilePickerProps {
   onFilePicked: (filePath: string) => void;
@@ -62,11 +62,11 @@ export function FilePicker({
               }
             }}
           />
-          <Action 
-            title="Browse..." 
-            icon={Icon.Finder} 
+          <Action
+            title="Browse…"
+            icon={Icon.Finder}
             shortcut={{ modifiers: ["cmd"], key: "o" }}
-            onAction={handleBrowse} 
+            onAction={handleBrowse}
           />
           <Action title={cancelTitle} icon={Icon.XmarkCircle} onAction={pop} />
         </ActionPanel>
@@ -117,4 +117,4 @@ export function CloudStorageUploader({
       <Form.Description title="Destination" text={destinationInfo} />
     </FilePicker>
   );
-} 
+}

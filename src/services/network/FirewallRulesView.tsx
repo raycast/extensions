@@ -1,15 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import {
-  ActionPanel,
-  Action,
-  List,
-  Icon,
-  Color,
-  Toast,
-  showToast,
-  Form,
-  useNavigation,
-} from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation } from "@raycast/api";
 import { NetworkService, FirewallRule, VPC } from "./NetworkService";
 
 interface FirewallRulesViewProps {
@@ -35,32 +25,32 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
       const loadingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Loading firewall rules...",
-        message: "Please wait while we fetch your firewall rules"
+        message: "Please wait while we fetch your firewall rules",
       });
-      
+
       try {
         // Fetch firewall rules
         const fetchedRules = await networkService.getFirewallRules();
         setRules(fetchedRules);
-        
+
         // Fetch VPCs in the background for the create form
         fetchVPCs(networkService);
-        
+
         loadingToast.hide();
-        
+
         showToast({
           style: Toast.Style.Success,
           title: "Firewall rules loaded",
           message: `${fetchedRules.length} firewall rules found`,
         });
-      } catch (error: any) {
+      } catch (error) {
         console.error("Error initializing:", error);
         loadingToast.hide();
-        
+
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to Load Firewall Rules",
-          message: error.message,
+          message: error instanceof Error ? error.message : "Unknown error occurred",
         });
       } finally {
         setIsLoading(false);
@@ -69,12 +59,12 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
 
     initializeData();
   }, [gcloudPath, projectId]);
-  
+
   const fetchVPCs = async (networkService: NetworkService) => {
     try {
       const fetchedVPCs = await networkService.getVPCs();
       setVPCs(fetchedVPCs);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error fetching VPCs:", error);
       // Don't show error toast for VPCs, as it's not critical
     }
@@ -82,34 +72,34 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
 
   const refreshRules = useCallback(async () => {
     if (!service) return;
-    
+
     setIsLoading(true);
-    
+
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Refreshing firewall rules...",
     });
-    
+
     try {
       const fetchedRules = await service.getFirewallRules();
       setRules(fetchedRules);
-      
+
       loadingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Success,
         title: "Firewall rules refreshed",
         message: `${fetchedRules.length} firewall rules found`,
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error refreshing firewall rules:", error);
-      
+
       loadingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to Refresh Firewall Rules",
-        message: error.message,
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     } finally {
       setIsLoading(false);
@@ -117,62 +107,37 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
   }, [service]);
 
   // Filter rules based on search text
-  const filteredRules = rules.filter((rule) =>
-    rule.name.toLowerCase().includes(searchText.toLowerCase()) ||
-    (rule.description && rule.description.toLowerCase().includes(searchText.toLowerCase()))
+  const filteredRules = rules.filter(
+    (rule) =>
+      rule.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      (rule.description && rule.description.toLowerCase().includes(searchText.toLowerCase())),
   );
-  
+
   const formatNetwork = (networkPath: string) => {
     if (!service) return networkPath;
     return service.formatNetwork(networkPath);
   };
-  
+
   const formatDirection = (direction: string) => {
     return direction === "INGRESS" ? "Ingress (inbound)" : "Egress (outbound)";
   };
-  
+
   const formatCreationTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleString();
   };
-  
+
   const getDirectionIcon = (direction: string) => {
     return {
       source: direction === "INGRESS" ? Icon.ArrowDown : Icon.ArrowUp,
-      tintColor: direction === "INGRESS" ? Color.Green : Color.Orange
+      tintColor: direction === "INGRESS" ? Color.Green : Color.Orange,
     };
   };
-  
+
   const getStatusIcon = (disabled: boolean) => {
     return {
       source: Icon.Circle,
-      tintColor: disabled ? Color.Red : Color.Green
+      tintColor: disabled ? Color.Red : Color.Green,
     };
-  };
-  
-  const formatTrafficRules = (rule: FirewallRule) => {
-    const parts = [];
-    
-    if (rule.allowed && rule.allowed.length > 0) {
-      const allowedString = rule.allowed.map(a => {
-        if (a.ports && a.ports.length > 0) {
-          return `${a.IPProtocol}:${a.ports.join(',')}`;
-        }
-        return a.IPProtocol;
-      }).join(', ');
-      parts.push(`Allow: ${allowedString}`);
-    }
-    
-    if (rule.denied && rule.denied.length > 0) {
-      const deniedString = rule.denied.map(d => {
-        if (d.ports && d.ports.length > 0) {
-          return `${d.IPProtocol}:${d.ports.join(',')}`;
-        }
-        return d.IPProtocol;
-      }).join(', ');
-      parts.push(`Deny: ${deniedString}`);
-    }
-    
-    return parts.join(' | ');
   };
 
   return (
@@ -192,7 +157,7 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
             onAction={refreshRules}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
-          <Action 
+          <Action
             title="Create Firewall Rule"
             icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -201,18 +166,18 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
                 showToast({
                   style: Toast.Style.Failure,
                   title: "Cannot Create Firewall Rule",
-                  message: "Please wait for VPC networks to be loaded"
+                  message: "Please wait for VPC networks to be loaded",
                 });
                 return;
               }
-              
+
               push(
                 <CreateFirewallRuleForm
                   gcloudPath={gcloudPath}
                   projectId={projectId}
                   vpcs={vpcs}
                   onRuleCreated={refreshRules}
-                />
+                />,
               );
             }}
           />
@@ -234,26 +199,22 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
                     showToast({
                       style: Toast.Style.Failure,
                       title: "Cannot Create Firewall Rule",
-                      message: "Please wait for VPC networks to be loaded"
+                      message: "Please wait for VPC networks to be loaded",
                     });
                     return;
                   }
-                  
+
                   push(
                     <CreateFirewallRuleForm
                       gcloudPath={gcloudPath}
                       projectId={projectId}
                       vpcs={vpcs}
                       onRuleCreated={refreshRules}
-                    />
+                    />,
                   );
                 }}
               />
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                onAction={refreshRules}
-              />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refreshRules} />
             </ActionPanel>
           }
         />
@@ -264,19 +225,19 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
             title={rule.name}
             subtitle={rule.description || ""}
             accessories={[
-              { 
+              {
                 text: formatDirection(rule.direction),
                 icon: getDirectionIcon(rule.direction),
-                tooltip: "Direction"
+                tooltip: "Direction",
               },
-              { 
+              {
                 text: rule.disabled ? "Disabled" : "Enabled",
                 icon: getStatusIcon(rule.disabled),
-                tooltip: "Status"
+                tooltip: "Status",
               },
-              { 
+              {
                 text: `Priority: ${rule.priority}`,
-                tooltip: "Priority (lower number = higher priority)"
+                tooltip: "Priority (lower number = higher priority)",
               },
             ]}
             icon={{ source: Icon.Shield }}
@@ -285,95 +246,80 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Firewall Rule Details" />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Name" 
-                      text={rule.name} 
-                    />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Description" 
-                      text={rule.description || "No description"} 
-                    />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Network" 
-                      text={formatNetwork(rule.network)} 
-                    />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Priority" 
-                      text={rule.priority.toString()} 
-                    />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Status" 
-                      text={rule.disabled ? "Disabled" : "Enabled"} 
+                    <List.Item.Detail.Metadata.Label title="Name" text={rule.name} />
+                    <List.Item.Detail.Metadata.Label title="Description" text={rule.description || "No description"} />
+                    <List.Item.Detail.Metadata.Label title="Network" text={formatNetwork(rule.network)} />
+                    <List.Item.Detail.Metadata.Label title="Priority" text={rule.priority.toString()} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Status"
+                      text={rule.disabled ? "Disabled" : "Enabled"}
                       icon={getStatusIcon(rule.disabled)}
                     />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Traffic Configuration" />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Direction" 
-                      text={formatDirection(rule.direction)} 
+                    <List.Item.Detail.Metadata.Label
+                      title="Direction"
+                      text={formatDirection(rule.direction)}
                       icon={getDirectionIcon(rule.direction)}
                     />
-                    
+
                     {rule.sourceRanges && rule.sourceRanges.length > 0 && (
-                      <List.Item.Detail.Metadata.Label 
-                        title="Source Ranges" 
-                        text={rule.sourceRanges.join(", ")} 
-                      />
+                      <List.Item.Detail.Metadata.Label title="Source Ranges" text={rule.sourceRanges.join(", ")} />
                     )}
-                    
+
                     {rule.destinationRanges && rule.destinationRanges.length > 0 && (
-                      <List.Item.Detail.Metadata.Label 
-                        title="Destination Ranges" 
-                        text={rule.destinationRanges.join(", ")} 
+                      <List.Item.Detail.Metadata.Label
+                        title="Destination Ranges"
+                        text={rule.destinationRanges.join(", ")}
                       />
                     )}
-                    
+
                     {rule.sourceTags && rule.sourceTags.length > 0 && (
-                      <List.Item.Detail.Metadata.Label 
-                        title="Source Tags" 
-                        text={rule.sourceTags.join(", ")} 
-                      />
+                      <List.Item.Detail.Metadata.Label title="Source Tags" text={rule.sourceTags.join(", ")} />
                     )}
-                    
+
                     {rule.targetTags && rule.targetTags.length > 0 && (
-                      <List.Item.Detail.Metadata.Label 
-                        title="Target Tags" 
-                        text={rule.targetTags.join(", ")} 
-                      />
+                      <List.Item.Detail.Metadata.Label title="Target Tags" text={rule.targetTags.join(", ")} />
                     )}
-                    
+
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Traffic Rules" />
-                    
-                    {rule.allowed && rule.allowed.length > 0 && rule.allowed.map((allowed, index) => (
-                      <List.Item.Detail.Metadata.Label 
-                        key={`allowed-${index}`}
-                        title={`Allow ${index + 1}`} 
-                        text={allowed.ports ? `${allowed.IPProtocol}:${allowed.ports.join(", ")}` : allowed.IPProtocol} 
-                        icon={{ source: Icon.Check, tintColor: Color.Green }}
-                      />
-                    ))}
-                    
-                    {rule.denied && rule.denied.length > 0 && rule.denied.map((denied, index) => (
-                      <List.Item.Detail.Metadata.Label 
-                        key={`denied-${index}`}
-                        title={`Deny ${index + 1}`} 
-                        text={denied.ports ? `${denied.IPProtocol}:${denied.ports.join(", ")}` : denied.IPProtocol} 
-                        icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
-                      />
-                    ))}
-                    
+
+                    {rule.allowed &&
+                      rule.allowed.length > 0 &&
+                      rule.allowed.map((allowed, index) => (
+                        <List.Item.Detail.Metadata.Label
+                          key={`allowed-${index}`}
+                          title={`Allow ${index + 1}`}
+                          text={
+                            allowed.ports ? `${allowed.IPProtocol}:${allowed.ports.join(", ")}` : allowed.IPProtocol
+                          }
+                          icon={{ source: Icon.Check, tintColor: Color.Green }}
+                        />
+                      ))}
+
+                    {rule.denied &&
+                      rule.denied.length > 0 &&
+                      rule.denied.map((denied, index) => (
+                        <List.Item.Detail.Metadata.Label
+                          key={`denied-${index}`}
+                          title={`Deny ${index + 1}`}
+                          text={denied.ports ? `${denied.IPProtocol}:${denied.ports.join(", ")}` : denied.IPProtocol}
+                          icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+                        />
+                      ))}
+
                     {rule.logConfig && (
-                      <List.Item.Detail.Metadata.Label 
-                        title="Logging" 
-                        text={rule.logConfig.enable ? "Enabled" : "Disabled"} 
+                      <List.Item.Detail.Metadata.Label
+                        title="Logging"
+                        text={rule.logConfig.enable ? "Enabled" : "Disabled"}
                       />
                     )}
-                    
+
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Created" 
-                      text={formatCreationTime(rule.creationTimestamp)} 
+                    <List.Item.Detail.Metadata.Label
+                      title="Created"
+                      text={formatCreationTime(rule.creationTimestamp)}
                     />
                   </List.Item.Detail.Metadata>
                 }
@@ -387,7 +333,7 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
                   onAction={refreshRules}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                 />
-                <Action 
+                <Action
                   title="Create Firewall Rule"
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -396,18 +342,18 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
                       showToast({
                         style: Toast.Style.Failure,
                         title: "Cannot Create Firewall Rule",
-                        message: "Please wait for VPC networks to be loaded"
+                        message: "Please wait for VPC networks to be loaded",
                       });
                       return;
                     }
-                    
+
                     push(
                       <CreateFirewallRuleForm
                         gcloudPath={gcloudPath}
                         projectId={projectId}
                         vpcs={vpcs}
                         onRuleCreated={refreshRules}
-                      />
+                      />,
                     );
                   }}
                 />
@@ -427,28 +373,30 @@ interface CreateFirewallRuleFormProps {
   onRuleCreated: () => void;
 }
 
+// Define the form values interface
+interface FirewallRuleFormValues {
+  name: string;
+  description: string;
+  network: string;
+  direction: string;
+  ruleType: string;
+  priority?: string;
+  sourceRanges?: string;
+  destinationRanges?: string;
+  sourceTags?: string;
+  targetTags?: string;
+  protocol: string;
+  ports?: string;
+  disabled?: boolean;
+  enableLogging?: boolean;
+}
+
 function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: CreateFirewallRuleFormProps) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [direction, setDirection] = useState<string>("INGRESS");
-  const [ruleType, setRuleType] = useState<string>("allow");
-  
-  async function handleSubmit(values: {
-    name: string;
-    description: string;
-    network: string;
-    direction: string;
-    ruleType: string;
-    priority?: string;
-    sourceRanges?: string;
-    destinationRanges?: string;
-    sourceTags?: string;
-    targetTags?: string;
-    protocol: string;
-    ports?: string;
-    disabled?: boolean;
-    enableLogging?: boolean;
-  }) {
+
+  async function handleSubmit(values: FirewallRuleFormValues) {
     if (!values.name) {
       showToast({
         style: Toast.Style.Failure,
@@ -457,7 +405,7 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
       });
       return;
     }
-    
+
     if (!values.network) {
       showToast({
         style: Toast.Style.Failure,
@@ -466,7 +414,7 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
       });
       return;
     }
-    
+
     if (!values.protocol) {
       showToast({
         style: Toast.Style.Failure,
@@ -475,7 +423,7 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
       });
       return;
     }
-    
+
     if (values.direction === "INGRESS" && !values.sourceRanges && !values.sourceTags) {
       showToast({
         style: Toast.Style.Failure,
@@ -484,7 +432,7 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
       });
       return;
     }
-    
+
     if (values.direction === "EGRESS" && !values.destinationRanges && !values.targetTags) {
       showToast({
         style: Toast.Style.Failure,
@@ -493,92 +441,89 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
       });
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Creating firewall rule...",
-      message: `Creating ${values.name}`
+      message: `Creating ${values.name}`,
     });
-    
+
     try {
       const service = new NetworkService(gcloudPath, projectId);
-      
-      const ruleOptions: any = {
+
+      const ruleOptions: Record<string, unknown> = {
         description: values.description,
         direction: values.direction,
         priority: values.priority ? parseInt(values.priority) : undefined,
         disabled: values.disabled,
-        enableLogging: values.enableLogging
+        enableLogging: values.enableLogging,
       };
-      
+
       // Add sources and destinations based on direction
       if (values.direction === "INGRESS") {
         if (values.sourceRanges) {
-          ruleOptions.sourceRanges = values.sourceRanges.split(",").map(r => r.trim());
+          ruleOptions.sourceRanges = values.sourceRanges.split(",").map((r) => r.trim());
         }
         if (values.sourceTags) {
-          ruleOptions.sourceTags = values.sourceTags.split(",").map(t => t.trim());
+          ruleOptions.sourceTags = values.sourceTags.split(",").map((t) => t.trim());
         }
         if (values.targetTags) {
-          ruleOptions.targetTags = values.targetTags.split(",").map(t => t.trim());
+          ruleOptions.targetTags = values.targetTags.split(",").map((t) => t.trim());
         }
-      } else { // EGRESS
+      } else {
+        // EGRESS
         if (values.destinationRanges) {
-          ruleOptions.destinationRanges = values.destinationRanges.split(",").map(r => r.trim());
+          ruleOptions.destinationRanges = values.destinationRanges.split(",").map((r) => r.trim());
         }
         if (values.targetTags) {
-          ruleOptions.targetTags = values.targetTags.split(",").map(t => t.trim());
+          ruleOptions.targetTags = values.targetTags.split(",").map((t) => t.trim());
         }
       }
-      
+
       // Set up protocol and ports
       const protocolConfig = {
         protocol: values.protocol,
-        ports: values.ports ? values.ports.split(",").map(p => p.trim()) : undefined
+        ports: values.ports ? values.ports.split(",").map((p) => p.trim()) : undefined,
       };
-      
+
       // Set allowed or denied based on rule type
       if (values.ruleType === "allow") {
         ruleOptions.allowed = [protocolConfig];
       } else {
         ruleOptions.denied = [protocolConfig];
       }
-      
-      const success = await service.createFirewallRule(
-        values.name,
-        values.network,
-        ruleOptions
-      );
-      
+
+      const success = await service.createFirewallRule(values.name, values.network, ruleOptions);
+
       loadingToast.hide();
-      
+
       if (success) {
         showToast({
           style: Toast.Style.Success,
           title: "Firewall Rule Created",
-          message: `Successfully created ${values.name}`
+          message: `Successfully created ${values.name}`,
         });
-        
+
         onRuleCreated();
         pop();
       } else {
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to Create Firewall Rule",
-          message: "An error occurred while creating the firewall rule"
+          message: "An error occurred while creating the firewall rule",
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error creating firewall rule:", error);
-      
+
       loadingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: "Error Creating Firewall Rule",
-        message: error.message
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     } finally {
       setIsLoading(false);
@@ -591,11 +536,7 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Firewall Rule"
-            onSubmit={handleSubmit}
-            icon={Icon.Shield}
-          />
+          <Action.SubmitForm title="Create Firewall Rule" onSubmit={handleSubmit} icon={Icon.Shield} />
         </ActionPanel>
       }
     >
@@ -612,17 +553,9 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
         placeholder="Allow HTTP traffic"
         info="A human-readable description for this firewall rule"
       />
-      <Form.Dropdown
-        id="network"
-        title="Network"
-        info="The VPC network to which this rule applies"
-      >
-        {vpcs.map(vpc => (
-          <Form.Dropdown.Item
-            key={vpc.name}
-            value={vpc.name}
-            title={vpc.name}
-          />
+      <Form.Dropdown id="network" title="Network" info="The VPC network to which this rule applies">
+        {vpcs.map((vpc) => (
+          <Form.Dropdown.Item key={vpc.name} value={vpc.name} title={vpc.name} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown
@@ -632,18 +565,16 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
         info="Traffic direction that this rule applies to"
         onChange={setDirection}
       >
-        <Form.Dropdown.Item value="INGRESS" title="Ingress (inbound)" icon={{ source: Icon.ArrowDown, tintColor: Color.Green }} />
-        <Form.Dropdown.Item value="EGRESS" title="Egress (outbound)" icon={{ source: Icon.ArrowUp, tintColor: Color.Orange }} />
-      </Form.Dropdown>
-      <Form.Dropdown
-        id="ruleType"
-        title="Rule Type"
-        defaultValue="allow"
-        info="Whether to allow or deny matching traffic"
-        onChange={setRuleType}
-      >
-        <Form.Dropdown.Item value="allow" title="Allow" icon={{ source: Icon.Check, tintColor: Color.Green }} />
-        <Form.Dropdown.Item value="deny" title="Deny" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} />
+        <Form.Dropdown.Item
+          value="INGRESS"
+          title="Ingress (inbound)"
+          icon={{ source: Icon.ArrowDown, tintColor: Color.Green }}
+        />
+        <Form.Dropdown.Item
+          value="EGRESS"
+          title="Egress (outbound)"
+          icon={{ source: Icon.ArrowUp, tintColor: Color.Orange }}
+        />
       </Form.Dropdown>
       <Form.TextField
         id="priority"
@@ -651,7 +582,7 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
         placeholder="1000"
         info="Lower values have higher precedence (default: 1000)"
       />
-      
+
       {direction === "INGRESS" && (
         <Form.TextField
           id="sourceRanges"
@@ -660,7 +591,7 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
           info="Comma-separated source IP ranges (CIDR notation)"
         />
       )}
-      
+
       {direction === "EGRESS" && (
         <Form.TextField
           id="destinationRanges"
@@ -669,7 +600,7 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
           info="Comma-separated destination IP ranges (CIDR notation)"
         />
       )}
-      
+
       {direction === "INGRESS" && (
         <Form.TextField
           id="sourceTags"
@@ -678,20 +609,15 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
           info="Comma-separated source tags"
         />
       )}
-      
+
       <Form.TextField
         id="targetTags"
         title="Target Tags"
         placeholder="web-server,dev"
         info="Comma-separated target tags"
       />
-      
-      <Form.Dropdown
-        id="protocol"
-        title="Protocol"
-        defaultValue="tcp"
-        info="The IP protocol this rule applies to"
-      >
+
+      <Form.Dropdown id="protocol" title="Protocol" defaultValue="tcp" info="The IP protocol this rule applies to">
         <Form.Dropdown.Item value="tcp" title="TCP" />
         <Form.Dropdown.Item value="udp" title="UDP" />
         <Form.Dropdown.Item value="icmp" title="ICMP" />
@@ -700,21 +626,21 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
         <Form.Dropdown.Item value="sctp" title="SCTP" />
         <Form.Dropdown.Item value="all" title="All protocols" />
       </Form.Dropdown>
-      
+
       <Form.TextField
         id="ports"
         title="Ports"
         placeholder="80,443"
         info="Comma-separated port numbers or ranges (e.g., 80-90)"
       />
-      
+
       <Form.Checkbox
         id="disabled"
         title="Disabled"
         label="Create rule in disabled state"
         info="When disabled, the rule won't be enforced"
       />
-      
+
       <Form.Checkbox
         id="enableLogging"
         title="Enable Logging"
@@ -723,4 +649,4 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
       />
     </Form>
   );
-} 
+}

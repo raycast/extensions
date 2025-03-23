@@ -8,26 +8,29 @@ import { getAllRegions } from "../../utils/regions";
 
 // Performance optimizations
 const CACHE_TTL = {
-  SHORT: 60000,        // 1 minute
-  MEDIUM: 300000,      // 5 minutes 
-  LONG: 3600000,       // 1 hour
-  VERY_LONG: 86400000  // 24 hours
+  SHORT: 60000, // 1 minute
+  MEDIUM: 300000, // 5 minutes
+  LONG: 3600000, // 1 hour
+  VERY_LONG: 86400000, // 24 hours
 };
 
 // Command execution optimizations
 const EXECUTION_DEFAULTS = {
   TIMEOUT: {
-    LIST: 30000,      // 30 seconds for list operations
-    CREATE: 60000,    // 60 seconds for create operations
-    DELETE: 45000     // 45 seconds for delete operations
-  }
+    LIST: 30000, // 30 seconds for list operations
+    CREATE: 60000, // 60 seconds for create operations
+    DELETE: 45000, // 45 seconds for delete operations
+  },
 };
 
 // Error types for better error handling
 export class NetworkServiceError extends Error {
-  constructor(message: string, public readonly context: Record<string, unknown>) {
+  constructor(
+    message: string,
+    public readonly context: Record<string, unknown>,
+  ) {
     super(message);
-    this.name = 'NetworkServiceError';
+    this.name = "NetworkServiceError";
   }
 }
 
@@ -115,10 +118,10 @@ export class NetworkService {
   private subnetCache: Map<string, { data: Subnet[]; timestamp: number }> = new Map();
   private ipCache: Map<string, { data: IPAddress[]; timestamp: number }> = new Map();
   private firewallCache: Map<string, { data: FirewallRule[]; timestamp: number }> = new Map();
-  
+
   // Static cache for frequently accessed data
   private static regionsCache: string[] | null = null;
-  
+
   // Singleton instance for better memory management
   private static instance: NetworkService | null = null;
 
@@ -148,7 +151,7 @@ export class NetworkService {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("Network Service Error:", {
       message: errorMessage,
-      ...context
+      ...context,
     });
     throw new NetworkServiceError(errorMessage, context);
   }
@@ -158,40 +161,41 @@ export class NetworkService {
    * @returns Promise with array of VPC networks
    */
   async getVPCs(): Promise<VPC[]> {
-    const cacheKey = 'vpcs';
+    const cacheKey = "vpcs";
     const cachedData = this.vpcCache.get(cacheKey);
     const now = Date.now();
-    
-    if (cachedData && (now - cachedData.timestamp < CACHE_TTL.MEDIUM)) {
+
+    if (cachedData && now - cachedData.timestamp < CACHE_TTL.MEDIUM) {
       console.log(`Using cached VPC data`);
       return cachedData.data;
     }
-    
+
     try {
       const command = ["compute", "networks", "list", `--project=${this.projectId}`, "--format=json"];
-      
-      const result = await executeGcloudCommand(
-        this.gcloudPath,
-        command.join(" "),
-        undefined,
-        { timeout: EXECUTION_DEFAULTS.TIMEOUT.LIST }
-      );
-      
-      const vpcs: VPC[] = result;
-      
+
+      const result = await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, {
+        timeout: EXECUTION_DEFAULTS.TIMEOUT.LIST,
+      });
+
+      if (!Array.isArray(result)) {
+        throw new Error("Invalid response format from gcloud command");
+      }
+
+      const vpcs = result as VPC[];
+
       // Cache the result
       this.vpcCache.set(cacheKey, { data: vpcs, timestamp: now });
-      
+
       return vpcs;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching VPC networks:", error);
-      
+
       // If we have cached data, return it even if expired
       if (cachedData) {
         console.log("Returning expired cached data as fallback");
         return cachedData.data;
       }
-      
+
       // Return empty array instead of throwing to prevent UI from breaking
       return [];
     }
@@ -205,24 +209,23 @@ export class NetworkService {
   async getVPC(name: string): Promise<VPC | null> {
     try {
       // First try to find in cache
-      const cachedVPCs = this.vpcCache.get('vpcs');
+      const cachedVPCs = this.vpcCache.get("vpcs");
       if (cachedVPCs) {
-        const cachedVPC = cachedVPCs.data.find(vpc => vpc.name === name);
+        const cachedVPC = cachedVPCs.data.find((vpc) => vpc.name === name);
         if (cachedVPC) return cachedVPC;
       }
-      
+
       // If not found in cache or cache is expired, fetch directly
       const command = ["compute", "networks", "describe", name, `--project=${this.projectId}`, "--format=json"];
-      
-      const result = await executeGcloudCommand(
-        this.gcloudPath,
-        command.join(" "),
-        undefined,
-        { skipCache: true }
-      );
-      
+
+      const result = await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, { skipCache: true });
+
+      if (!Array.isArray(result) || result.length === 0) {
+        return null;
+      }
+
       return result[0] as VPC;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error fetching VPC ${name}:`, error);
       return null;
     }
@@ -237,36 +240,36 @@ export class NetworkService {
    * @returns Promise resolving to true if successful
    */
   async createVPC(
-    name: string, 
+    name: string,
     description?: string,
     subnetMode: "auto" | "custom" = "auto",
-    mtu?: number
+    mtu?: number,
   ): Promise<boolean> {
     try {
       // Build the command
       let command = `compute networks create ${name}`;
-      
+
       // Add options
       if (subnetMode === "auto") {
         command += " --subnet-mode=auto";
       } else {
         command += " --subnet-mode=custom";
       }
-      
+
       if (description) {
         command += ` --description="${description}"`;
       }
-      
+
       if (mtu) {
         command += ` --mtu=${mtu}`;
       }
-      
+
       // Execute the command
       await executeGcloudCommand(this.gcloudPath, command, this.projectId);
-      
+
       // Clear cache to ensure fresh data
       this.clearVPCCache();
-      
+
       return true;
     } catch (error) {
       this.handleError(error, {
@@ -274,7 +277,7 @@ export class NetworkService {
         vpcName: name,
         subnetMode,
         mtu,
-        projectId: this.projectId
+        projectId: this.projectId,
       });
     }
   }
@@ -285,50 +288,51 @@ export class NetworkService {
    * @returns Promise with array of subnets
    */
   async getSubnets(region?: string): Promise<Subnet[]> {
-    const cacheKey = region ? `subnets:${region}` : 'subnets:all';
+    const cacheKey = region ? `subnets:${region}` : "subnets:all";
     const cachedData = this.subnetCache.get(cacheKey);
     const now = Date.now();
-    
-    if (cachedData && (now - cachedData.timestamp < CACHE_TTL.SHORT)) {
+
+    if (cachedData && now - cachedData.timestamp < CACHE_TTL.SHORT) {
       console.log(`Using cached subnet data for ${cacheKey}`);
       return cachedData.data;
     }
-    
+
     try {
       // Build command
       const command = ["compute", "networks", "subnets", "list"];
-      
+
       // Add region filter if specified
       if (region) {
         command.push(`--regions=${region}`);
       }
-      
+
       // Add project and format
       command.push(`--project=${this.projectId}`);
       command.push("--format=json");
-      
-      const result = await executeGcloudCommand(
-        this.gcloudPath,
-        command.join(" "),
-        undefined,
-        { timeout: EXECUTION_DEFAULTS.TIMEOUT.LIST }
-      );
-      
-      const subnets: Subnet[] = result;
-      
+
+      const result = await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, {
+        timeout: EXECUTION_DEFAULTS.TIMEOUT.LIST,
+      });
+
+      if (!Array.isArray(result)) {
+        throw new Error("Invalid response format from gcloud command");
+      }
+
+      const subnets = result as Subnet[];
+
       // Cache the result
       this.subnetCache.set(cacheKey, { data: subnets, timestamp: now });
-      
+
       return subnets;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching subnets:", error);
-      
+
       // If we have cached data, return it even if expired
       if (cachedData) {
         console.log("Returning expired cached data as fallback");
         return cachedData.data;
       }
-      
+
       // Return empty array
       return [];
     }
@@ -340,50 +344,51 @@ export class NetworkService {
    * @returns Promise with array of IP addresses
    */
   async getIPs(region?: string): Promise<IPAddress[]> {
-    const cacheKey = region ? `ips:${region}` : 'ips:all';
+    const cacheKey = region ? `ips:${region}` : "ips:all";
     const cachedData = this.ipCache.get(cacheKey);
     const now = Date.now();
-    
-    if (cachedData && (now - cachedData.timestamp < CACHE_TTL.MEDIUM)) {
+
+    if (cachedData && now - cachedData.timestamp < CACHE_TTL.MEDIUM) {
       console.log(`Using cached IP data for ${cacheKey}`);
       return cachedData.data;
     }
-    
+
     try {
       // Build command
       const command = ["compute", "addresses", "list"];
-      
+
       // Add region filter if specified
       if (region) {
         command.push(`--regions=${region}`);
       }
-      
+
       // Add project and format
       command.push(`--project=${this.projectId}`);
       command.push("--format=json");
-      
-      const result = await executeGcloudCommand(
-        this.gcloudPath,
-        command.join(" "),
-        undefined,
-        { timeout: EXECUTION_DEFAULTS.TIMEOUT.LIST }
-      );
-      
-      const ips: IPAddress[] = result;
-      
+
+      const result = await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, {
+        timeout: EXECUTION_DEFAULTS.TIMEOUT.LIST,
+      });
+
+      if (!Array.isArray(result)) {
+        throw new Error("Invalid response format from gcloud command");
+      }
+
+      const ips = result as IPAddress[];
+
       // Cache the result
       this.ipCache.set(cacheKey, { data: ips, timestamp: now });
-      
+
       return ips;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching IP addresses:", error);
-      
+
       // If we have cached data, return it even if expired
       if (cachedData) {
         console.log("Returning expired cached data as fallback");
         return cachedData.data;
       }
-      
+
       // Return empty array
       return [];
     }
@@ -409,19 +414,19 @@ export class NetworkService {
       network?: string;
       ephemeral?: boolean;
       networkTier?: "PREMIUM" | "STANDARD";
-    } = {}
+    } = {},
   ): Promise<boolean> {
     try {
       // Build basic command
       let command = `compute addresses create ${name}`;
-      
+
       // Add required parameters
       command += ` --region=${region}`;
-      
+
       // Set address type
       if (addressType === "INTERNAL") {
         command += " --subnet";
-        
+
         // Internal addresses require a subnet
         if (addressOptions.subnet) {
           command += `=${addressOptions.subnet}`;
@@ -429,34 +434,34 @@ export class NetworkService {
           throw new Error("Subnet is required for internal IP addresses");
         }
       }
-      
+
       // Add optional parameters
       if (addressOptions.description) {
         command += ` --description="${addressOptions.description}"`;
       }
-      
+
       if (addressOptions.address) {
         command += ` --addresses=${addressOptions.address}`;
       }
-      
+
       if (addressOptions.purpose) {
         command += ` --purpose=${addressOptions.purpose}`;
       }
-      
+
       if (addressOptions.network) {
         command += ` --network=${addressOptions.network}`;
       }
-      
+
       if (addressOptions.networkTier) {
         command += ` --network-tier=${addressOptions.networkTier}`;
       }
-      
+
       // Execute command
       await executeGcloudCommand(this.gcloudPath, command, this.projectId);
-      
+
       // Clear IP cache
       this.clearIPCache();
-      
+
       return true;
     } catch (error) {
       this.handleError(error, {
@@ -465,7 +470,7 @@ export class NetworkService {
         region,
         addressType,
         options: addressOptions,
-        projectId: this.projectId
+        projectId: this.projectId,
       });
     }
   }
@@ -475,40 +480,41 @@ export class NetworkService {
    * @returns Promise with array of firewall rules
    */
   async getFirewallRules(): Promise<FirewallRule[]> {
-    const cacheKey = 'firewalls';
+    const cacheKey = "firewalls";
     const cachedData = this.firewallCache.get(cacheKey);
     const now = Date.now();
-    
-    if (cachedData && (now - cachedData.timestamp < CACHE_TTL.MEDIUM)) {
+
+    if (cachedData && now - cachedData.timestamp < CACHE_TTL.MEDIUM) {
       console.log(`Using cached firewall data`);
       return cachedData.data;
     }
-    
+
     try {
       const command = ["compute", "firewall-rules", "list", `--project=${this.projectId}`, "--format=json"];
-      
-      const result = await executeGcloudCommand(
-        this.gcloudPath,
-        command.join(" "),
-        undefined,
-        { timeout: EXECUTION_DEFAULTS.TIMEOUT.LIST }
-      );
-      
-      const rules: FirewallRule[] = result;
-      
+
+      const result = await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, {
+        timeout: EXECUTION_DEFAULTS.TIMEOUT.LIST,
+      });
+
+      if (!Array.isArray(result)) {
+        throw new Error("Invalid response format from gcloud command");
+      }
+
+      const rules = result as FirewallRule[];
+
       // Cache the result
       this.firewallCache.set(cacheKey, { data: rules, timestamp: now });
-      
+
       return rules;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching firewall rules:", error);
-      
+
       // If we have cached data, return it even if expired
       if (cachedData) {
         console.log("Returning expired cached data as fallback");
         return cachedData.data;
       }
-      
+
       // Return empty array
       return [];
     }
@@ -544,86 +550,81 @@ export class NetworkService {
       }[];
       disabled?: boolean;
       enableLogging?: boolean;
-    }
+    },
   ): Promise<boolean> {
     try {
       // Build command
       const command = ["compute", "firewall-rules", "create", name];
-      
+
       // Add required parameters
       command.push(`--network=${network}`);
-      
+
       // Add optional parameters
       if (ruleOptions.description) {
         command.push(`--description="${ruleOptions.description}"`);
       }
-      
+
       if (ruleOptions.direction) {
         command.push(`--direction=${ruleOptions.direction}`);
       }
-      
+
       if (ruleOptions.priority) {
         command.push(`--priority=${ruleOptions.priority}`);
       }
-      
+
       if (ruleOptions.sourceRanges) {
-        command.push(`--source-ranges=${ruleOptions.sourceRanges.join(',')}`);
+        command.push(`--source-ranges=${ruleOptions.sourceRanges.join(",")}`);
       }
-      
+
       if (ruleOptions.destinationRanges) {
-        command.push(`--destination-ranges=${ruleOptions.destinationRanges.join(',')}`);
+        command.push(`--destination-ranges=${ruleOptions.destinationRanges.join(",")}`);
       }
-      
+
       if (ruleOptions.sourceTags) {
-        command.push(`--source-tags=${ruleOptions.sourceTags.join(',')}`);
+        command.push(`--source-tags=${ruleOptions.sourceTags.join(",")}`);
       }
-      
+
       if (ruleOptions.targetTags) {
-        command.push(`--target-tags=${ruleOptions.targetTags.join(',')}`);
+        command.push(`--target-tags=${ruleOptions.targetTags.join(",")}`);
       }
-      
+
       if (ruleOptions.allowed) {
         for (const allowed of ruleOptions.allowed) {
           if (allowed.ports && allowed.ports.length > 0) {
-            command.push(`--allow=${allowed.protocol}:${allowed.ports.join(',')}`);
+            command.push(`--allow=${allowed.protocol}:${allowed.ports.join(",")}`);
           } else {
             command.push(`--allow=${allowed.protocol}`);
           }
         }
       }
-      
+
       if (ruleOptions.denied) {
         for (const denied of ruleOptions.denied) {
           if (denied.ports && denied.ports.length > 0) {
-            command.push(`--deny=${denied.protocol}:${denied.ports.join(',')}`);
+            command.push(`--deny=${denied.protocol}:${denied.ports.join(",")}`);
           } else {
             command.push(`--deny=${denied.protocol}`);
           }
         }
       }
-      
+
       if (ruleOptions.disabled) {
         command.push("--disabled");
       }
-      
+
       if (ruleOptions.enableLogging) {
         command.push("--enable-logging");
       }
-      
+
       // Add project and format
       command.push(`--project=${this.projectId}`);
       command.push("--format=json");
-      
-      await executeGcloudCommand(
-        this.gcloudPath,
-        command.join(" "),
-        undefined,
-        { skipCache: true }
-      );
-      
+
+      await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, { skipCache: true });
+
       // Clear the firewall cache
-      this.firewallCache.delete('firewalls');
-      
+      this.firewallCache.delete("firewalls");
+
       return true;
     } catch (error) {
       console.error("Error creating firewall rule:", error);
@@ -666,50 +667,45 @@ export class NetworkService {
     ipRange: string,
     privateGoogleAccess: boolean = false,
     enableFlowLogs: boolean = false,
-    secondaryRanges?: { rangeName: string; ipCidrRange: string }[]
+    secondaryRanges?: { rangeName: string; ipCidrRange: string }[],
   ): Promise<boolean> {
     try {
       // Build command
       const command = ["compute", "networks", "subnets", "create", name];
-      
+
       // Add required parameters
       command.push(`--network=${network}`);
       command.push(`--region=${region}`);
       command.push(`--range=${ipRange}`);
-      
+
       // Add optional parameters
       if (privateGoogleAccess) {
         command.push("--enable-private-ip-google-access");
       }
-      
+
       if (enableFlowLogs) {
         command.push("--enable-flow-logs");
       }
-      
+
       // Add secondary ranges if provided
       if (secondaryRanges && secondaryRanges.length > 0) {
         for (const range of secondaryRanges) {
           command.push(`--secondary-range=${range.rangeName}=${range.ipCidrRange}`);
         }
       }
-      
+
       // Add project and format
       command.push(`--project=${this.projectId}`);
       command.push("--format=json");
-      
-      await executeGcloudCommand(
-        this.gcloudPath,
-        command.join(" "),
-        undefined,
-        { 
-          skipCache: true,
-          timeout: EXECUTION_DEFAULTS.TIMEOUT.CREATE 
-        }
-      );
-      
+
+      await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, {
+        skipCache: true,
+        timeout: EXECUTION_DEFAULTS.TIMEOUT.CREATE,
+      });
+
       // Clear the subnet cache immediately
       this.clearSubnetCache();
-      
+
       return true;
     } catch (error) {
       console.error("Error creating subnet:", error);
@@ -724,26 +720,25 @@ export class NetworkService {
   async forceRefreshSubnets(): Promise<void> {
     // Clear subnet cache
     this.clearSubnetCache();
-    
+
     // Optionally prefetch data
     try {
       const command = ["compute", "networks", "subnets", "list", `--project=${this.projectId}`, "--format=json"];
-      
-      const result = await executeGcloudCommand(
-        this.gcloudPath,
-        command.join(" "),
-        undefined,
-        { 
-          skipCache: true,
-          timeout: EXECUTION_DEFAULTS.TIMEOUT.LIST 
-        }
-      );
-      
-      const subnets: Subnet[] = result;
-      
+
+      const result = await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, {
+        skipCache: true,
+        timeout: EXECUTION_DEFAULTS.TIMEOUT.LIST,
+      });
+
+      if (!Array.isArray(result)) {
+        throw new Error("Invalid response format from gcloud command");
+      }
+
+      const subnets = result as Subnet[];
+
       // Cache the result
-      this.subnetCache.set('subnets:all', { data: subnets, timestamp: Date.now() });
-    } catch (error) {
+      this.subnetCache.set("subnets:all", { data: subnets, timestamp: Date.now() });
+    } catch (error: unknown) {
       console.error("Error during forced subnet refresh:", error);
     }
   }
@@ -754,19 +749,19 @@ export class NetworkService {
   private clearVPCCache(): void {
     this.vpcCache.clear();
   }
-  
+
   private clearSubnetCache(): void {
     this.subnetCache.clear();
   }
-  
+
   private clearIPCache(): void {
     this.ipCache.clear();
   }
-  
+
   private clearFirewallCache(): void {
     this.firewallCache.clear();
   }
-  
+
   /**
    * Generate four available IP address suggestions
    * @param addressType "INTERNAL" or "EXTERNAL"
@@ -775,7 +770,7 @@ export class NetworkService {
    */
   async generateAvailableIPSuggestions(
     addressType: "INTERNAL" | "EXTERNAL" = "EXTERNAL",
-    subnet?: string
+    subnet?: string,
   ): Promise<string[]> {
     try {
       // For EXTERNAL addresses, suggest standard IP formats
@@ -784,50 +779,45 @@ export class NetworkService {
           "34.120." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
           "35.186." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
           "104.196." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
-          "130.211." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255)
+          "130.211." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
         ];
       }
-      
+
       // For INTERNAL addresses, use subnet CIDR if available
       if (subnet) {
         try {
           const subnets = await this.getSubnets();
-          const targetSubnet = subnets.find(s => s.name === subnet);
-          
+          const targetSubnet = subnets.find((s) => s.name === subnet);
+
           if (targetSubnet) {
             // Parse CIDR range (e.g., "10.0.0.0/24")
-            const cidrParts = targetSubnet.ipCidrRange.split('/');
+            const cidrParts = targetSubnet.ipCidrRange.split("/");
             const baseIP = cidrParts[0];
-            const baseOctets = baseIP.split('.');
-            
+            const baseOctets = baseIP.split(".");
+
             // Generate 4 IPs in the subnet range
             return [
               `${baseOctets[0]}.${baseOctets[1]}.${baseOctets[2]}.${10 + Math.floor(Math.random() * 240)}`,
               `${baseOctets[0]}.${baseOctets[1]}.${baseOctets[2]}.${50 + Math.floor(Math.random() * 200)}`,
               `${baseOctets[0]}.${baseOctets[1]}.${baseOctets[2]}.${100 + Math.floor(Math.random() * 150)}`,
-              `${baseOctets[0]}.${baseOctets[1]}.${baseOctets[2]}.${200 + Math.floor(Math.random() * 50)}`
+              `${baseOctets[0]}.${baseOctets[1]}.${baseOctets[2]}.${200 + Math.floor(Math.random() * 50)}`,
             ];
           }
         } catch (error) {
           console.error("Error parsing subnet range:", error);
         }
       }
-      
+
       // Default internal IPs if subnet info not available
       return [
         "10.128." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
         "10.129." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
         "172.16." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
-        "192.168." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255)
+        "192.168." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255),
       ];
     } catch (error) {
       console.error("Error generating IP suggestions:", error);
-      return [
-        "10.0.0.10",
-        "10.0.0.20",
-        "10.0.0.30",
-        "10.0.0.40"
-      ];
+      return ["10.0.0.10", "10.0.0.20", "10.0.0.30", "10.0.0.40"];
     }
   }
 
@@ -837,29 +827,29 @@ export class NetworkService {
     this.clearIPCache();
     this.clearFirewallCache();
   }
-  
+
   /**
    * Format helper methods
    */
   formatRegion(region: string): string {
     // Extract region name from full path
-    const parts = region.split('/');
+    const parts = region.split("/");
     return parts[parts.length - 1];
   }
-  
+
   formatNetwork(network: string): string {
     // Extract network name from full path
-    const parts = network.split('/');
+    const parts = network.split("/");
     return parts[parts.length - 1];
   }
-  
+
   getAddressStatusColor(status: string): string {
     const lowerStatus = status.toLowerCase();
     if (lowerStatus === "reserved") return "green";
     if (lowerStatus === "in_use") return "blue";
     return "primaryText";
   }
-  
+
   getFirewallStatusColor(disabled: boolean): string {
     return disabled ? "red" : "green";
   }
@@ -870,18 +860,18 @@ export class NetworkService {
   private validateIPAddress(ip: string): boolean {
     const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
     if (!ipv4Regex.test(ip)) return false;
-    
-    const parts = ip.split('.').map(Number);
-    return parts.every(part => part >= 0 && part <= 255);
+
+    const parts = ip.split(".").map(Number);
+    return parts.every((part) => part >= 0 && part <= 255);
   }
 
   /**
    * Helper method to validate CIDR format
    */
   private validateCIDR(cidr: string): boolean {
-    const [ip, prefix] = cidr.split('/');
+    const [ip, prefix] = cidr.split("/");
     if (!this.validateIPAddress(ip)) return false;
-    
+
     const prefixNum = Number(prefix);
     return !isNaN(prefixNum) && prefixNum >= 0 && prefixNum <= 32;
   }

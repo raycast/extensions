@@ -20,16 +20,15 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
   const { push } = useNavigation();
   const [showOnlyEnabled, setShowOnlyEnabled] = useState(false);
   const [showCoreServicesOnly, setShowCoreServicesOnly] = useState(true);
-  const [selectedService, setSelectedService] = useState<GCPService | null>(null);
-  
+
   // Service initialization
   const serviceHub = useMemo(() => new MarketplaceService(gcloudPath, projectId), [gcloudPath, projectId]);
-  
+
   // Fetch categories on component mount
   useEffect(() => {
     fetchCategories();
   }, []);
-  
+
   // Fetch services when category or filter changes
   useEffect(() => {
     // First load with local data for instant UI
@@ -37,7 +36,7 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
     // Then fetch from API
     fetchServices();
   }, [selectedCategory, showCoreServicesOnly]);
-  
+
   // Fetch categories
   async function fetchCategories() {
     try {
@@ -47,7 +46,7 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       console.error("Error fetching categories:", error);
     }
   }
-  
+
   // Fetch local services first for instant UI
   async function fetchLocalServices() {
     try {
@@ -55,7 +54,7 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       const options = {
         useLocalOnly: true,
         category: selectedCategory !== "all" ? selectedCategory : undefined,
-        coreServicesOnly: true
+        coreServicesOnly: true,
       };
       const servicesList = await serviceHub.listServices(options);
       setServices(servicesList);
@@ -65,38 +64,38 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       setIsLoading(false);
     }
   }
-  
+
   // Fetch services from GCP
   async function fetchServices() {
     try {
       setIsRefreshing(true);
       setError(null);
-      
+
       showToast({
         style: Toast.Style.Animated,
         title: "Loading services...",
         message: `Category: ${selectedCategory !== "all" ? selectedCategory : "All"}`,
       });
-      
+
       // Use category filter if selected
-      const options = { 
+      const options = {
         includeDisabled: true,
         category: selectedCategory !== "all" ? selectedCategory : undefined,
-        coreServicesOnly: showCoreServicesOnly
+        coreServicesOnly: showCoreServicesOnly,
       };
-      
+
       const servicesList = await serviceHub.listServices(options);
       setServices(servicesList);
-      
+
       showToast({
         style: Toast.Style.Success,
         title: `Loaded ${servicesList.length} services`,
-        message: selectedCategory !== "all" ? `Category: ${selectedCategory}` : undefined
+        message: selectedCategory !== "all" ? `Category: ${selectedCategory}` : undefined,
       });
     } catch (error) {
       console.error("Error fetching services:", error);
       setError(`Failed to fetch services: ${error instanceof Error ? error.message : String(error)}`);
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch services",
@@ -106,12 +105,12 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       setIsRefreshing(false);
     }
   }
-  
+
   // Refresh services with current filters
   function refreshServices() {
     fetchServices();
   }
-  
+
   // Enable a service
   async function enableService(service: GCPService) {
     try {
@@ -120,39 +119,35 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
         style: Toast.Style.Animated,
         title: `Enabling ${service.displayName || service.name}...`,
       });
-      
+
       await serviceHub.enableService(service.name);
-      
+
       // Check if the service is now enabled
       const isEnabled = await serviceHub.isServiceEnabled(service.name);
-      
+
       if (isEnabled) {
         showToast({
           style: Toast.Style.Success,
           title: `Enabled ${service.displayName || service.name}`,
         });
-        
+
         // Update the service in the current list
-        setServices(prevServices => 
-          prevServices.map(s => 
-            s.name === service.name 
-              ? { ...s, isEnabled: true, state: "ENABLED" } 
-              : s
-          )
+        setServices((prevServices) =>
+          prevServices.map((s) => (s.name === service.name ? { ...s, isEnabled: true, state: "ENABLED" } : s)),
         );
-        
+
         // Fetch services again to update the status
         fetchServices();
       } else {
         showToast({
           style: Toast.Style.Failure,
           title: `Failed to enable ${service.displayName || service.name}`,
-          message: "Service did not enable properly. Try again or check GCP Console."
+          message: "Service did not enable properly. Try again or check GCP Console.",
         });
       }
     } catch (error) {
       console.error(`Error enabling service ${service.name}:`, error);
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: `Failed to enable ${service.displayName || service.name}`,
@@ -162,7 +157,7 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       setIsRefreshing(false);
     }
   }
-  
+
   // Disable a service
   async function disableService(service: GCPService) {
     try {
@@ -171,39 +166,35 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
         style: Toast.Style.Animated,
         title: `Disabling ${service.displayName || service.name}...`,
       });
-      
+
       await serviceHub.disableService(service.name);
-      
+
       // Check if the service is now disabled
       const isEnabled = await serviceHub.isServiceEnabled(service.name);
-      
+
       if (!isEnabled) {
         showToast({
           style: Toast.Style.Success,
           title: `Disabled ${service.displayName || service.name}`,
         });
-        
+
         // Update the service in the current list
-        setServices(prevServices => 
-          prevServices.map(s => 
-            s.name === service.name 
-              ? { ...s, isEnabled: false, state: "DISABLED" } 
-              : s
-          )
+        setServices((prevServices) =>
+          prevServices.map((s) => (s.name === service.name ? { ...s, isEnabled: false, state: "DISABLED" } : s)),
         );
-        
+
         // Fetch services again to update the status
         fetchServices();
       } else {
         showToast({
           style: Toast.Style.Failure,
           title: `Failed to disable ${service.displayName || service.name}`,
-          message: "Service did not disable properly. Try again or check GCP Console."
+          message: "Service did not disable properly. Try again or check GCP Console.",
         });
       }
     } catch (error) {
       console.error(`Error disabling service ${service.name}:`, error);
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: `Failed to disable ${service.displayName || service.name}`,
@@ -213,36 +204,36 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       setIsRefreshing(false);
     }
   }
-  
+
   // Filter services based on search text, category, and enabled status
   const filteredServices = useMemo(() => {
     let result = [...services];
-    
+
     // Filter by search text
     if (searchText) {
       const lowerSearchText = searchText.toLowerCase();
       result = result.filter(
-        service => 
+        (service) =>
           service.name.toLowerCase().includes(lowerSearchText) ||
           (service.displayName && service.displayName.toLowerCase().includes(lowerSearchText)) ||
           (service.description && service.description.toLowerCase().includes(lowerSearchText)) ||
-          (service.category && service.category.toLowerCase().includes(lowerSearchText))
+          (service.category && service.category.toLowerCase().includes(lowerSearchText)),
       );
     }
-    
+
     // Filter by category if not "all"
     if (selectedCategory !== "all") {
-      result = result.filter(service => service.category === selectedCategory);
+      result = result.filter((service) => service.category === selectedCategory);
     }
-    
+
     // Filter by enabled status
     if (showOnlyEnabled) {
-      result = result.filter(service => service.isEnabled);
+      result = result.filter((service) => service.isEnabled);
     }
-    
+
     return result;
   }, [services, searchText, selectedCategory, showOnlyEnabled]);
-  
+
   // View service details - fetch fresh details for the selected service
   async function viewServiceDetails(service: GCPService) {
     try {
@@ -250,10 +241,10 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
         style: Toast.Style.Animated,
         title: `Loading details for ${service.displayName || service.name}...`,
       });
-      
+
       // Fetch fresh details for this specific service
       const serviceDetails = await serviceHub.getServiceDetails(service.name);
-      
+
       // Navigate to details view with fresh data
       push(
         <ServiceDetails
@@ -262,27 +253,25 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
           onServiceStatusChange={(updatedService) => {
             // Update the service in the current list
             if (updatedService) {
-              setServices(prevServices => 
-                prevServices.map(s => 
-                  s.name === updatedService.name ? updatedService : s
-                )
+              setServices((prevServices) =>
+                prevServices.map((s) => (s.name === updatedService.name ? updatedService : s)),
               );
             } else {
               // If no service provided, refresh all
               refreshServices();
             }
           }}
-        />
+        />,
       );
     } catch (error) {
       console.error(`Error fetching details for ${service.name}:`, error);
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: `Failed to load details`,
         message: error instanceof Error ? error.message : String(error),
       });
-      
+
       // Navigate to details view with existing data as fallback
       push(
         <ServiceDetails
@@ -290,20 +279,18 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
           serviceHub={serviceHub}
           onServiceStatusChange={(updatedService) => {
             if (updatedService) {
-              setServices(prevServices => 
-                prevServices.map(s => 
-                  s.name === updatedService.name ? updatedService : s
-                )
+              setServices((prevServices) =>
+                prevServices.map((s) => (s.name === updatedService.name ? updatedService : s)),
               );
             } else {
               refreshServices();
             }
           }}
-        />
+        />,
       );
     }
   }
-  
+
   // Render error state
   if (error) {
     return (
@@ -321,19 +308,11 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       </List>
     );
   }
-  
-  // Get status icon for a service
-  function getStatusIcon(service: GCPService) {
-    if (service.isEnabled) {
-      return { source: Icon.CheckCircle, tintColor: Color.Green };
-    }
-    return undefined;
-  }
-  
+
   // Get icon for a service based on category
   function getServiceIcon(service: GCPService) {
     const category = service.category || GCPServiceCategory.OTHER;
-    
+
     switch (category) {
       case GCPServiceCategory.COMPUTE:
         return Icon.Desktop;
@@ -359,61 +338,31 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
         return Icon.Circle;
     }
   }
-  
+
   // Get title for the current view
   const viewTitle = useMemo(() => {
     if (isLoading) {
       return "Loading Services";
     }
-    
+
     if (isRefreshing) {
       return "Refreshing Services";
     }
-    
+
     if (selectedCategory !== "all") {
       return `${selectedCategory} Services`;
     }
-    
+
     return "Google Cloud Marketplace";
   }, [isLoading, isRefreshing, selectedCategory]);
-  
-  // Get color for category tag
-  function getCategoryColor(category?: string): Color {
-    if (!category) return Color.SecondaryText;
-    
-    switch (category) {
-      case GCPServiceCategory.COMPUTE:
-        return Color.Blue;
-      case GCPServiceCategory.STORAGE:
-        return Color.Purple;
-      case GCPServiceCategory.DATABASE:
-        return Color.Green;
-      case GCPServiceCategory.NETWORKING:
-        return Color.Orange;
-      case GCPServiceCategory.SECURITY:
-        return Color.Red;
-      case GCPServiceCategory.ANALYTICS:
-        return Color.Yellow;
-      case GCPServiceCategory.AI_ML:
-        return Color.Magenta;
-      case GCPServiceCategory.DEVOPS:
-        return Color.Blue;
-      case GCPServiceCategory.MANAGEMENT:
-        return Color.Orange;
-      case GCPServiceCategory.SERVERLESS:
-        return Color.Green;
-      default:
-        return Color.SecondaryText;
-    }
-  }
-  
+
   return (
     <List
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search services..."
-      navigationTitle="Marketplace"
+      navigationTitle="Google Cloud Marketplace"
       filtering={false}
       throttle={true}
       actions={
@@ -447,16 +396,16 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
         >
           <List.Dropdown.Section title="Categories">
             <List.Dropdown.Item title="All Categories" value="category:all" />
-            {categories.map(category => (
+            {categories.map((category) => (
               <List.Dropdown.Item key={category} title={category} value={`category:${category}`} />
             ))}
           </List.Dropdown.Section>
-          
+
           <List.Dropdown.Section title="Status">
             <List.Dropdown.Item title="All Services" value="status:all" />
             <List.Dropdown.Item title="Enabled Services" value="status:enabled" />
           </List.Dropdown.Section>
-          
+
           <List.Dropdown.Section title="Service Type">
             <List.Dropdown.Item title="Core Services Only" value="core:true" />
             <List.Dropdown.Item title="All Services" value="core:false" />
@@ -465,33 +414,29 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       }
     >
       <List.Section title={viewTitle}>
-        {filteredServices.map(service => (
+        {filteredServices.map((service) => (
           <List.Item
             key={service.name}
             title={service.displayName || service.name}
-            subtitle={service.description ? service.description.split('.')[0] : ''}
-            icon={{ 
-              source: getServiceIcon(service), 
-              tintColor: service.isEnabled ? Color.Blue : Color.SecondaryText 
+            subtitle={service.description ? service.description.split(".")[0] : ""}
+            icon={{
+              source: getServiceIcon(service),
+              tintColor: service.isEnabled ? Color.Blue : Color.SecondaryText,
             }}
             accessories={[
-              service.isEnabled 
+              service.isEnabled
                 ? { icon: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Enabled" }
                 : { icon: { source: Icon.Circle, tintColor: Color.SecondaryText }, tooltip: "Not Enabled" },
               { tag: service.category || "Other" },
-              service.region && service.region !== "global" ? { text: service.region } : { text: "" }
+              service.region && service.region !== "global" ? { text: service.region } : { text: "" },
             ]}
             actions={
               <ActionPanel>
-                <Action
-                  title="View Details"
-                  icon={Icon.Sidebar}
-                  onAction={() => viewServiceDetails(service)}
-                />
+                <Action title="View Details" icon={Icon.Sidebar} onAction={() => viewServiceDetails(service)} />
                 <Action
                   title={service.isEnabled ? "Disable Service" : "Enable Service"}
                   icon={service.isEnabled ? Icon.XmarkCircle : Icon.CheckCircle}
-                  onAction={() => service.isEnabled ? disableService(service) : enableService(service)}
+                  onAction={() => (service.isEnabled ? disableService(service) : enableService(service))}
                 />
                 <Action
                   title="Refresh Services"
@@ -504,7 +449,7 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
           />
         ))}
       </List.Section>
-      
+
       {/* Show empty view when no services match the search */}
       {services.length > 0 && filteredServices.length === 0 && (
         <List.EmptyView
@@ -513,27 +458,23 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
           description={`No services found matching "${searchText}". Try a different search term or filter.`}
           actions={
             <ActionPanel>
-              <Action
-                title="Clear Search"
-                icon={Icon.Trash}
-                onAction={() => setSearchText("")}
-              />
-              <Action
-                title="Refresh Services"
-                icon={Icon.RotateClockwise}
-                onAction={refreshServices}
-              />
+              <Action title="Clear Search" icon={Icon.Trash} onAction={() => setSearchText("")} />
+              <Action title="Refresh Services" icon={Icon.RotateClockwise} onAction={refreshServices} />
             </ActionPanel>
           }
         />
       )}
-      
+
       {/* Show empty view when no services are available */}
       {services.length === 0 && !isLoading && !isRefreshing && (
         <List.EmptyView
           icon={Icon.QuestionMark}
           title="No services available"
-          description={selectedCategory !== "all" ? `No ${selectedCategory} services found` : "No Google Cloud services found for this project"}
+          description={
+            selectedCategory !== "all"
+              ? `No ${selectedCategory} services found`
+              : "No Google Cloud services found for this project"
+          }
           actions={
             <ActionPanel>
               <Action title="Refresh" onAction={refreshServices} icon={Icon.RotateClockwise} />
@@ -541,7 +482,7 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
           }
         />
       )}
-      
+
       {/* Show error state */}
       {error && (
         <List.EmptyView
@@ -550,16 +491,12 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
           description={error}
           actions={
             <ActionPanel>
-              <Action
-                title="Try Again"
-                icon={Icon.RotateClockwise}
-                onAction={refreshServices}
-              />
+              <Action title="Try Again" icon={Icon.RotateClockwise} onAction={refreshServices} />
             </ActionPanel>
           }
         />
       )}
-      
+
       {/* Show loading state */}
       {isLoading && services.length === 0 && !error && (
         <List.EmptyView
@@ -570,4 +507,4 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       )}
     </List>
   );
-} 
+}

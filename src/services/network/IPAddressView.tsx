@@ -1,16 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import {
-  ActionPanel,
-  Action,
-  List,
-  Icon,
-  Color,
-  Toast,
-  showToast,
-  Form,
-  useNavigation,
-  Clipboard,
-} from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation, Clipboard } from "@raycast/api";
 import { NetworkService, IPAddress, NetworkServiceError } from "./NetworkService";
 
 interface IPAddressViewProps {
@@ -37,32 +26,32 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
       const loadingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Loading IP addresses...",
-        message: "Please wait while we fetch your IP addresses"
+        message: "Please wait while we fetch your IP addresses",
       });
-      
+
       try {
         // Fetch IPs
         const fetchedIPs = await networkService.getIPs();
         setIPs(fetchedIPs);
-        
+
         // Fetch regions in the background
         fetchRegions(networkService);
-        
+
         loadingToast.hide();
-        
+
         showToast({
           style: Toast.Style.Success,
           title: "IP addresses loaded",
           message: `${fetchedIPs.length} IP addresses found`,
         });
-      } catch (error: any) {
+      } catch (error) {
         console.error("Error initializing:", error);
         loadingToast.hide();
-        
+
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to Load IP Addresses",
-          message: error.message,
+          message: error instanceof NetworkServiceError ? error.message : "Unknown error occurred",
         });
       } finally {
         setIsLoading(false);
@@ -71,12 +60,12 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
 
     initializeData();
   }, [gcloudPath, projectId]);
-  
+
   const fetchRegions = async (networkService: NetworkService) => {
     try {
       const regionsList = await networkService.listRegions();
       setRegions(regionsList);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error fetching regions:", error);
       // Don't show error toast for regions, as it's not critical
     }
@@ -84,73 +73,73 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
 
   const refreshIPs = useCallback(async () => {
     if (!service) return;
-    
+
     setIsLoading(true);
-    
+
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Refreshing IP addresses...",
-      message: selectedRegion ? `Region: ${selectedRegion}` : "All regions"
+      message: selectedRegion ? `Region: ${selectedRegion}` : "All regions",
     });
-    
+
     try {
       const fetchedIPs = await service.getIPs(selectedRegion);
       setIPs(fetchedIPs);
-      
+
       loadingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Success,
         title: "IP addresses refreshed",
         message: `${fetchedIPs.length} IP addresses found`,
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error refreshing IPs:", error);
-      
+
       loadingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to Refresh IP Addresses",
-        message: error.message,
+        message: error instanceof NetworkServiceError ? error.message : "Unknown error occurred",
       });
     } finally {
       setIsLoading(false);
     }
   }, [service, selectedRegion]);
-  
+
   const handleRegionChange = async (newRegion: string | undefined) => {
     // Convert "all" to undefined for filtering
     const regionFilter = newRegion === "all" ? undefined : newRegion;
     setSelectedRegion(regionFilter);
-    
+
     if (service) {
       try {
         setIsLoading(true);
-        
+
         const loadingToast = await showToast({
           style: Toast.Style.Animated,
           title: "Changing region...",
           message: regionFilter ? `Loading IP addresses in ${regionFilter}` : "Loading IP addresses in all regions",
         });
-        
+
         const fetchedIPs = await service.getIPs(regionFilter);
         setIPs(fetchedIPs);
-        
+
         loadingToast.hide();
-        
+
         showToast({
           style: Toast.Style.Success,
           title: "Region changed",
           message: `${fetchedIPs.length} IP addresses found in ${regionFilter || "all regions"}`,
         });
-      } catch (error: any) {
+      } catch (error) {
         console.error("Error fetching IPs:", error);
-        
+
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to Fetch IP Addresses",
-          message: error.message,
+          message: error instanceof NetworkServiceError ? error.message : "Unknown error occurred",
         });
       } finally {
         setIsLoading(false);
@@ -159,40 +148,41 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
   };
 
   // Filter IPs based on search text
-  const filteredIPs = ips.filter((ip) =>
-    ip.name.toLowerCase().includes(searchText.toLowerCase()) ||
-    ip.address.toLowerCase().includes(searchText.toLowerCase())
+  const filteredIPs = ips.filter(
+    (ip) =>
+      ip.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      ip.address.toLowerCase().includes(searchText.toLowerCase()),
   );
-  
+
   const formatAddressType = (type: string) => {
     return type === "EXTERNAL" ? "External" : "Internal";
   };
-  
+
   const formatStatus = (status: string) => {
     return status === "RESERVED" ? "Reserved" : "In Use";
   };
-  
+
   const formatCreationTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleString();
   };
-  
+
   const formatRegion = (regionPath?: string) => {
     if (!regionPath) return "Global";
-    const parts = regionPath.split('/');
+    const parts = regionPath.split("/");
     return parts[parts.length - 1];
   };
-  
+
   const getStatusIcon = (status: string) => {
     return {
       source: Icon.Circle,
-      tintColor: status === "RESERVED" ? Color.Green : Color.Blue
+      tintColor: status === "RESERVED" ? Color.Green : Color.Blue,
     };
   };
-  
+
   const getAddressTypeIcon = (type: string) => {
     return {
       source: type === "EXTERNAL" ? Icon.Globe : Icon.ComputerChip,
-      tintColor: type === "EXTERNAL" ? Color.Purple : Color.Orange
+      tintColor: type === "EXTERNAL" ? Color.Purple : Color.Orange,
     };
   };
 
@@ -215,13 +205,7 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
           {regions.length === 0 ? (
             <List.Dropdown.Item title="Loading regions..." value="loading" />
           ) : (
-            regions.map((region) => (
-              <List.Dropdown.Item
-                key={region}
-                title={region}
-                value={region}
-              />
-            ))
+            regions.map((region) => <List.Dropdown.Item key={region} title={region} value={region} />)
           )}
         </List.Dropdown>
       }
@@ -233,8 +217,8 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
             onAction={refreshIPs}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
-          <Action 
-            title="Create IP Address"
+          <Action
+            title="Create Ip Address"
             icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
             onAction={() => {
@@ -242,18 +226,18 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
                 showToast({
                   style: Toast.Style.Failure,
                   title: "Cannot Create IP Address",
-                  message: "Please wait for regions to be loaded"
+                  message: "Please wait for regions to be loaded",
                 });
                 return;
               }
-              
+
               push(
                 <CreateIPForm
                   gcloudPath={gcloudPath}
                   projectId={projectId}
                   regions={regions}
                   onIPCreated={refreshIPs}
-                />
+                />,
               );
             }}
           />
@@ -268,33 +252,29 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
           actions={
             <ActionPanel>
               <Action
-                title="Create IP Address"
+                title="Create Ip Address"
                 icon={Icon.Plus}
                 onAction={() => {
                   if (regions.length === 0) {
                     showToast({
                       style: Toast.Style.Failure,
                       title: "Cannot Create IP Address",
-                      message: "Please wait for regions to be loaded"
+                      message: "Please wait for regions to be loaded",
                     });
                     return;
                   }
-                  
+
                   push(
                     <CreateIPForm
                       gcloudPath={gcloudPath}
                       projectId={projectId}
                       regions={regions}
                       onIPCreated={refreshIPs}
-                    />
+                    />,
                   );
                 }}
               />
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                onAction={refreshIPs}
-              />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refreshIPs} />
             </ActionPanel>
           }
         />
@@ -305,19 +285,19 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
             title={ip.name}
             subtitle={ip.address}
             accessories={[
-              { 
+              {
                 text: formatAddressType(ip.addressType),
                 icon: getAddressTypeIcon(ip.addressType),
-                tooltip: "Address Type"
+                tooltip: "Address Type",
               },
-              { 
+              {
                 text: formatStatus(ip.status),
                 icon: getStatusIcon(ip.status),
-                tooltip: "Status"
+                tooltip: "Status",
               },
-              { 
+              {
                 text: formatRegion(ip.region),
-                tooltip: "Region"
+                tooltip: "Region",
               },
             ]}
             icon={{ source: Icon.Network }}
@@ -326,74 +306,42 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="IP Address Details" />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Name" 
-                      text={ip.name} 
-                    />
-                    <List.Item.Detail.Metadata.Label 
-                      title="IP Address" 
-                      text={ip.address} 
-                    />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Description" 
-                      text={ip.description || "No description"} 
-                    />
-                    <List.Item.Detail.Metadata.Label 
-                      title="ID" 
-                      text={ip.id} 
-                    />
+                    <List.Item.Detail.Metadata.Label title="Name" text={ip.name} />
+                    <List.Item.Detail.Metadata.Label title="IP Address" text={ip.address} />
+                    <List.Item.Detail.Metadata.Label title="Description" text={ip.description || "No description"} />
+                    <List.Item.Detail.Metadata.Label title="ID" text={ip.id} />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Configuration" />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Type" 
-                      text={formatAddressType(ip.addressType)} 
+                    <List.Item.Detail.Metadata.Label
+                      title="Type"
+                      text={formatAddressType(ip.addressType)}
                       icon={getAddressTypeIcon(ip.addressType)}
                     />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Status" 
-                      text={formatStatus(ip.status)} 
+                    <List.Item.Detail.Metadata.Label
+                      title="Status"
+                      text={formatStatus(ip.status)}
                       icon={getStatusIcon(ip.status)}
                     />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Region" 
-                      text={formatRegion(ip.region)} 
-                    />
-                    {ip.purpose && (
-                      <List.Item.Detail.Metadata.Label 
-                        title="Purpose" 
-                        text={ip.purpose} 
-                      />
-                    )}
+                    <List.Item.Detail.Metadata.Label title="Region" text={formatRegion(ip.region)} />
+                    {ip.purpose && <List.Item.Detail.Metadata.Label title="Purpose" text={ip.purpose} />}
                     {ip.network && (
-                      <List.Item.Detail.Metadata.Label 
-                        title="Network" 
-                        text={service?.formatNetwork(ip.network) || ip.network} 
+                      <List.Item.Detail.Metadata.Label
+                        title="Network"
+                        text={service?.formatNetwork(ip.network) || ip.network}
                       />
                     )}
-                    {ip.subnetwork && (
-                      <List.Item.Detail.Metadata.Label 
-                        title="Subnetwork" 
-                        text={ip.subnetwork} 
-                      />
-                    )}
+                    {ip.subnetwork && <List.Item.Detail.Metadata.Label title="Subnetwork" text={ip.subnetwork} />}
                     <List.Item.Detail.Metadata.Separator />
                     {ip.users && ip.users.length > 0 && (
                       <>
                         <List.Item.Detail.Metadata.Label title="Used By" />
                         {ip.users.map((user, index) => (
-                          <List.Item.Detail.Metadata.Label 
-                            key={index}
-                            title={`Resource ${index + 1}`} 
-                            text={user} 
-                          />
+                          <List.Item.Detail.Metadata.Label key={index} title={`Resource ${index + 1}`} text={user} />
                         ))}
                         <List.Item.Detail.Metadata.Separator />
                       </>
                     )}
-                    <List.Item.Detail.Metadata.Label 
-                      title="Created" 
-                      text={formatCreationTime(ip.creationTimestamp)} 
-                    />
+                    <List.Item.Detail.Metadata.Label title="Created" text={formatCreationTime(ip.creationTimestamp)} />
                   </List.Item.Detail.Metadata>
                 }
               />
@@ -401,7 +349,7 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
             actions={
               <ActionPanel>
                 <Action
-                  title="Copy IP Address"
+                  title="Copy Ip Address"
                   icon={Icon.Clipboard}
                   onAction={() => {
                     // Use Raycast clipboard API
@@ -409,7 +357,7 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
                     showToast({
                       style: Toast.Style.Success,
                       title: "Copied to clipboard",
-                      message: ip.address
+                      message: ip.address,
                     });
                   }}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
@@ -420,8 +368,8 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
                   onAction={refreshIPs}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                 />
-                <Action 
-                  title="Create IP Address"
+                <Action
+                  title="Create Ip Address"
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                   onAction={() => {
@@ -429,18 +377,18 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
                       showToast({
                         style: Toast.Style.Failure,
                         title: "Cannot Create IP Address",
-                        message: "Please wait for regions to be loaded"
+                        message: "Please wait for regions to be loaded",
                       });
                       return;
                     }
-                    
+
                     push(
                       <CreateIPForm
                         gcloudPath={gcloudPath}
                         projectId={projectId}
                         regions={regions}
                         onIPCreated={refreshIPs}
-                      />
+                      />,
                     );
                   }}
                 />
@@ -470,44 +418,41 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
   const [ipSuggestions, setIpSuggestions] = useState<string[]>([]);
   const [fetchingSuggestions, setFetchingSuggestions] = useState<boolean>(false);
   const [selectedIpAddress, setSelectedIpAddress] = useState<string>("");
-  
+
   useEffect(() => {
     // Fetch subnets for internal addresses and VPCs
     const fetchNetworkResources = async () => {
       try {
         const service = new NetworkService(gcloudPath, projectId);
-        
+
         // Fetch subnets
         const allSubnets = await service.getSubnets();
-        const formattedSubnets = allSubnets.map(subnet => ({
+        const formattedSubnets = allSubnets.map((subnet) => ({
           name: subnet.name,
-          region: service.formatRegion(subnet.region)
+          region: service.formatRegion(subnet.region),
         }));
         setSubnets(formattedSubnets);
-        
+
         // Fetch VPCs
         const allVPCs = await service.getVPCs();
-        const formattedVPCs = allVPCs.map(vpc => ({
-          name: vpc.name
+        const formattedVPCs = allVPCs.map((vpc) => ({
+          name: vpc.name,
         }));
         setVPCs(formattedVPCs);
       } catch (error) {
         console.error("Error fetching network resources:", error);
       }
     };
-    
+
     fetchNetworkResources();
   }, [gcloudPath, projectId]);
-  
+
   // Get IP address suggestions
   const fetchIPSuggestions = async (type: string, subnet?: string) => {
     try {
       setFetchingSuggestions(true);
       const service = new NetworkService(gcloudPath, projectId);
-      const suggestions = await service.generateAvailableIPSuggestions(
-        type as "INTERNAL" | "EXTERNAL",
-        subnet
-      );
+      const suggestions = await service.generateAvailableIPSuggestions(type as "INTERNAL" | "EXTERNAL", subnet);
       setIpSuggestions(suggestions);
     } catch (error) {
       console.error("Error fetching IP suggestions:", error);
@@ -541,7 +486,7 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
       });
       return;
     }
-    
+
     if (values.addressType === "INTERNAL" && !values.region) {
       showToast({
         style: Toast.Style.Failure,
@@ -550,7 +495,7 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
       });
       return;
     }
-    
+
     if (values.addressType === "INTERNAL" && !values.subnet) {
       showToast({
         style: Toast.Style.Failure,
@@ -559,70 +504,65 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
       });
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     const region = values.region || regions[0]; // Default to first region for external IPs
-    
+
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Creating IP address...",
-      message: `Creating ${values.name} (${values.addressType === "EXTERNAL" ? "Global" : region})`
+      message: `Creating ${values.name} (${values.addressType === "EXTERNAL" ? "Global" : region})`,
     });
-    
+
     try {
       const service = new NetworkService(gcloudPath, projectId);
-      
-      const success = await service.createIP(
-        values.name,
-        region,
-        values.addressType as "INTERNAL" | "EXTERNAL",
-        {
-          description: values.description,
-          subnet: values.subnet,
-          network: values.network,
-          address: values.specificAddress,
-          purpose: values.purpose,
-          ephemeral: values.ephemeral,
-          networkTier: values.networkTier as "PREMIUM" | "STANDARD" | undefined
-        }
-      );
-      
+
+      const success = await service.createIP(values.name, region, values.addressType as "INTERNAL" | "EXTERNAL", {
+        description: values.description,
+        subnet: values.subnet,
+        network: values.network,
+        address: values.specificAddress,
+        purpose: values.purpose,
+        ephemeral: values.ephemeral,
+        networkTier: values.networkTier as "PREMIUM" | "STANDARD" | undefined,
+      });
+
       loadingToast.hide();
-      
+
       if (success) {
         showToast({
           style: Toast.Style.Success,
           title: "IP Address Created",
-          message: `Successfully created ${values.name}`
+          message: `Successfully created ${values.name}`,
         });
-        
+
         onIPCreated();
         pop();
       } else {
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to Create IP Address",
-          message: `Could not create IP address ${values.name}. Please check the logs for details.`
+          message: `Could not create IP address ${values.name}. Please check the logs for details.`,
         });
       }
     } catch (error) {
       console.error("Error creating IP address:", error);
-      
+
       loadingToast.hide();
-      
+
       // Handle NetworkServiceError specifically
       if (error instanceof NetworkServiceError) {
         showToast({
           style: Toast.Style.Failure,
           title: "IP Address Creation Failed",
-          message: error.message
+          message: error.message,
         });
       } else {
         showToast({
           style: Toast.Style.Failure,
           title: "Unexpected Error",
-          message: `Failed to create IP address: ${error instanceof Error ? error.message : String(error)}`
+          message: `Failed to create IP address: ${error instanceof Error ? error.message : String(error)}`,
         });
       }
     } finally {
@@ -630,37 +570,20 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
     }
   }
 
-  // Get subnets for the selected region
-  const getRegionSubnets = (region: string) => {
-    return subnets.filter(subnet => subnet.region === region);
-  };
-
   return (
     <Form
       navigationTitle="Create IP Address"
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create IP Address"
-            onSubmit={handleSubmit}
-            icon={Icon.Network}
-          />
+          <Action.SubmitForm title="Create Ip Address" onSubmit={handleSubmit} icon={Icon.Network} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="Enter IP address name"
-      />
-      
-      <Form.TextField
-        id="description"
-        title="Description"
-        placeholder="Enter optional description"
-      />
-      
+      <Form.TextField id="name" title="Name" placeholder="Enter IP address name" />
+
+      <Form.TextField id="description" title="Description" placeholder="Enter optional description" />
+
       <Form.Dropdown
         id="addressType"
         title="Address Type"
@@ -676,46 +599,33 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
         <Form.Dropdown.Item value="EXTERNAL" title="External" icon={Icon.Globe} />
         <Form.Dropdown.Item value="INTERNAL" title="Internal" icon={Icon.ComputerChip} />
       </Form.Dropdown>
-      
+
       {addressType === "INTERNAL" && (
-        <Form.Dropdown
-          id="region"
-          title="Region"
-          placeholder="Select a region"
-        >
-          {regions.map(region => (
+        <Form.Dropdown id="region" title="Region" placeholder="Select a region">
+          {regions.map((region) => (
             <Form.Dropdown.Item key={region} value={region} title={region} />
           ))}
         </Form.Dropdown>
       )}
-      
+
       {addressType === "INTERNAL" && (
-        <Form.Dropdown
-          id="subnet"
-          title="Subnet"
-          placeholder="Select a subnet"
-          onChange={setSelectedSubnet}
-        >
-          {subnets.map(subnet => (
+        <Form.Dropdown id="subnet" title="Subnet" placeholder="Select a subnet" onChange={setSelectedSubnet}>
+          {subnets.map((subnet) => (
             <Form.Dropdown.Item key={subnet.name} value={subnet.name} title={`${subnet.name} (${subnet.region})`} />
           ))}
         </Form.Dropdown>
       )}
-      
+
       {addressType === "INTERNAL" && (
-        <Form.Dropdown
-          id="network"
-          title="Network"
-          placeholder="Select a network (optional)"
-        >
-          {vpcs.map(vpc => (
+        <Form.Dropdown id="network" title="Network" placeholder="Select a network (optional)">
+          {vpcs.map((vpc) => (
             <Form.Dropdown.Item key={vpc.name} value={vpc.name} title={vpc.name} />
           ))}
         </Form.Dropdown>
       )}
-      
+
       <Form.Separator />
-      
+
       <Form.TextField
         id="specificAddress"
         title="Specific IP Address"
@@ -724,39 +634,30 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
         onChange={setSelectedIpAddress}
         info={fetchingSuggestions ? "Loading suggestions..." : "Select a suggestion from the dropdown below"}
       />
-      
+
       <Form.Description
         title="Available IP Suggestions"
         text={fetchingSuggestions ? "Loading suggestions..." : "Select a suggestion to use it"}
       />
-      
+
       {ipSuggestions.length > 0 && !fetchingSuggestions && (
-        <Form.Dropdown 
-          id="ipSuggestion" 
+        <Form.Dropdown
+          id="ipSuggestion"
           title="Suggested IPs"
           onChange={(value) => {
             setSelectedIpAddress(value);
           }}
         >
           {ipSuggestions.map((ip, index) => (
-            <Form.Dropdown.Item
-              key={`ip-${index}`}
-              value={ip}
-              title={ip}
-              icon={Icon.Globe}
-            />
+            <Form.Dropdown.Item key={`ip-${index}`} value={ip} title={ip} icon={Icon.Globe} />
           ))}
         </Form.Dropdown>
       )}
-      
+
       <Form.Separator />
-      
+
       {addressType === "INTERNAL" && (
-        <Form.Dropdown
-          id="purpose"
-          title="Purpose"
-          placeholder="Select a purpose (optional)"
-        >
+        <Form.Dropdown id="purpose" title="Purpose" placeholder="Select a purpose (optional)">
           <Form.Dropdown.Item value="GCE_ENDPOINT" title="GCE Endpoint" />
           <Form.Dropdown.Item value="DNS_RESOLVER" title="DNS Resolver" />
           <Form.Dropdown.Item value="VPC_PEERING" title="VPC Peering" />
@@ -764,24 +665,20 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
           <Form.Dropdown.Item value="PRIVATE_SERVICE_CONNECT" title="Private Service Connect" />
         </Form.Dropdown>
       )}
-      
+
       <Form.Checkbox
         id="ephemeral"
         label="Ephemeral"
         title="Ephemeral IP"
         info="If checked, the IP address is ephemeral"
       />
-      
+
       {addressType === "EXTERNAL" && (
-        <Form.Dropdown
-          id="networkTier"
-          title="Network Tier"
-          placeholder="Select a network tier (optional)"
-        >
+        <Form.Dropdown id="networkTier" title="Network Tier" placeholder="Select a network tier (optional)">
           <Form.Dropdown.Item value="PREMIUM" title="Premium" />
           <Form.Dropdown.Item value="STANDARD" title="Standard" />
         </Form.Dropdown>
       )}
     </Form>
   );
-} 
+}

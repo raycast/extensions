@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Detail, ActionPanel, Action, Icon, Color, Form, useNavigation } from "@raycast/api";
+import { Detail, ActionPanel, Action, Icon, Form, useNavigation } from "@raycast/api";
 
 interface CodeEditorProps {
   code: string;
@@ -20,7 +20,7 @@ export function CodeEditor({
   language = "javascript",
   title = "Code Editor",
   onSave,
-  onCancel
+  onCancel,
 }: CodeEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedCode, setEditedCode] = useState(code);
@@ -49,17 +49,17 @@ export function CodeEditor({
         navigationTitle={`Edit ${title}`}
         actions={
           <ActionPanel>
-            <Action.SubmitForm 
-              title="Save" 
-              icon={Icon.Check} 
-              shortcut={{ modifiers: ["cmd"], key: "s" }} 
-              onSubmit={() => handleSave()} 
+            <Action.SubmitForm
+              title="Save"
+              icon={Icon.Check}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              onSubmit={() => handleSave()}
             />
-            <Action 
-              title="Cancel" 
-              icon={Icon.XmarkCircle} 
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} 
-              onAction={handleCancel} 
+            <Action
+              title="Cancel"
+              icon={Icon.XmarkCircle}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              onAction={handleCancel}
             />
           </ActionPanel>
         }
@@ -84,36 +84,36 @@ export function CodeEditor({
       markdown={`\`\`\`${language}\n${code}\n\`\`\``}
       actions={
         <ActionPanel>
-          <Action 
-            title="Edit" 
-            icon={Icon.Pencil} 
-            shortcut={{ modifiers: ["cmd"], key: "e" }} 
-            onAction={() => setIsEditing(true)} 
+          <Action
+            title="Edit"
+            icon={Icon.Pencil}
+            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            onAction={() => setIsEditing(true)}
           />
           {onSave && (
-            <Action 
-              title="Save" 
-              icon={Icon.Check} 
-              shortcut={{ modifiers: ["cmd"], key: "s" }} 
+            <Action
+              title="Save"
+              icon={Icon.Check}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={() => {
                 if (onSave) onSave(code);
                 pop();
-              }} 
+              }}
             />
           )}
           {onCancel && (
-            <Action 
-              title="Cancel" 
-              icon={Icon.XmarkCircle} 
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} 
+            <Action
+              title="Cancel"
+              icon={Icon.XmarkCircle}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               onAction={() => {
                 if (onCancel) onCancel();
                 pop();
-              }} 
+              }}
             />
           )}
         </ActionPanel>
       }
     />
   );
-} 
+}

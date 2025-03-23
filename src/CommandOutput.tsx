@@ -25,7 +25,7 @@ export default function CommandOutput({ command, projectId, gcloudPath }: Comman
     try {
       const fullCommand = `${gcloudPath} ${command} --project=${projectId} --format=json`;
       const { stdout } = await execPromise(fullCommand);
-      
+
       // Try to parse JSON output for better formatting
       try {
         const jsonOutput = JSON.parse(stdout);
@@ -34,18 +34,18 @@ export default function CommandOutput({ command, projectId, gcloudPath }: Comman
         // If not valid JSON, just display as is
         setOutput("```\n" + stdout + "\n```");
       }
-      
+
       showToast(Toast.Style.Success, "Command executed successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error executing command:", error);
-      setError(error.message || "Failed to execute command");
+      setError(error instanceof Error ? error.message : "Failed to execute command");
       showToast(Toast.Style.Failure, "Failed to execute command");
     } finally {
       setIsLoading(false);
     }
   }
 
-  const markdown = error 
+  const markdown = error
     ? `# Error\n\n${error}\n\n\`\`\`\n${command}\n\`\`\``
     : `# Command Output\n\n**Command:** \`${command} --project=${projectId}\`\n\n${output}`;
 
@@ -60,4 +60,4 @@ export default function CommandOutput({ command, projectId, gcloudPath }: Comman
       }
     />
   );
-} 
+}

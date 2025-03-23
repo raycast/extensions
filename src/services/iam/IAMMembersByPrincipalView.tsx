@@ -1,7 +1,20 @@
-import { ActionPanel, Action, List, showToast, Toast, useNavigation, Icon, Form, Detail, Color, confirmAlert } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+  Icon,
+  Form,
+  Detail,
+  Color,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
-import { IAMService, IAMPrincipal, IAMRole } from "./IAMService";
-import { getRoleInfo, formatRoleName } from "../../utils/iamRoles";
+import { IAMService, IAMPrincipal } from "./IAMService";
+import { formatRoleName } from "../../utils/iamRoles";
 
 interface IAMMembersByPrincipalViewProps {
   projectId: string;
@@ -10,16 +23,20 @@ interface IAMMembersByPrincipalViewProps {
   resourceType?: string; // Optional: type of resource (storage, compute, etc.)
 }
 
-export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resourceName, resourceType }: IAMMembersByPrincipalViewProps) {
+export default function IAMMembersByPrincipalView({
+  projectId,
+  gcloudPath,
+  resourceName,
+  resourceType,
+}: IAMMembersByPrincipalViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [principals, setPrincipals] = useState<IAMPrincipal[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState("");
-  const { push, pop } = useNavigation();
+  const { push } = useNavigation();
   const [debugInfo, setDebugInfo] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedService, setSelectedService] = useState<string | null>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Create IAM service instance
   const iamService = useMemo(() => new IAMService(gcloudPath, projectId), [gcloudPath, projectId]);
@@ -31,85 +48,80 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
   async function fetchIAMPolicy() {
     setIsLoading(true);
     setError(null);
-    
-    const loadingMessage = resourceName 
-      ? `Loading IAM policy for ${resourceType}: ${resourceName}...`
-      : `Loading project-level IAM policy for: ${projectId}...`;
-    
+
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Loading IAM policy...",
       message: resourceName || projectId,
     });
-    
+
     try {
       // Use the IAM service to get principals
       const principalsArray = await iamService.getIAMPrincipals(resourceType, resourceName);
-      
+
       setPrincipals(principalsArray);
-      
+
       // Generate debug info
-      const debugText = resourceName 
+      const debugText = resourceName
         ? `Fetched IAM policy for ${resourceType}: ${resourceName}\n`
         : `Fetched project-level IAM policy for: ${projectId}\n`;
-      
+
       setDebugInfo(debugText + `Found ${principalsArray.length} principals with IAM roles\n`);
-      
+
       loadingToast.hide();
       showToast({
         style: Toast.Style.Success,
         title: "IAM policy loaded",
         message: `Found ${principalsArray.length} principals`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching IAM policy:", error);
-      setError(`Failed to fetch IAM policy: ${error.message}`);
-      
+      setError(error instanceof Error ? error.message : "An unknown error occurred");
+
       loadingToast.hide();
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch IAM policy",
-        message: error.message,
+        message: error instanceof Error ? error.message : "An unknown error occurred",
       });
     } finally {
       setIsLoading(false);
-      setIsRefreshing(false);
     }
   }
-  
+
   function getMemberIcon(type: string) {
     switch (type) {
-      case 'user':
+      case "user":
         return { source: Icon.Person, tintColor: Color.Blue };
-      case 'group':
+      case "group":
         return { source: Icon.PersonCircle, tintColor: Color.Green };
-      case 'serviceAccount':
+      case "serviceAccount":
         return { source: Icon.Terminal, tintColor: Color.Orange };
-      case 'domain':
+      case "domain":
         return { source: Icon.Globe, tintColor: Color.Purple };
-      case 'allUsers':
+      case "allUsers":
         return { source: Icon.Globe, tintColor: Color.Red };
-      case 'allAuthenticatedUsers':
+      case "allAuthenticatedUsers":
         return { source: Icon.Key, tintColor: Color.Yellow };
-      case 'projectEditor':
+      case "projectEditor":
         return { source: Icon.Pencil, tintColor: Color.Blue };
-      case 'projectOwner':
+      case "projectOwner":
         return { source: Icon.Star, tintColor: Color.Orange };
-      case 'projectViewer':
+      case "projectViewer":
         return { source: Icon.Eye, tintColor: Color.Green };
       default:
         return { source: Icon.Person, tintColor: Color.PrimaryText };
     }
   }
-  
+
   function getRoleIcon(role: string) {
-    if (role.includes('admin') || role.includes('Admin')) {
+    if (role.includes("admin") || role.includes("Admin")) {
       return { source: Icon.Star, tintColor: Color.Red };
-    } else if (role.includes('owner') || role.includes('Owner')) {
+    } else if (role.includes("owner") || role.includes("Owner")) {
       return { source: Icon.Key, tintColor: Color.Orange };
-    } else if (role.includes('editor') || role.includes('Editor') || role.includes('write')) {
+    } else if (role.includes("editor") || role.includes("Editor") || role.includes("write")) {
       return { source: Icon.Pencil, tintColor: Color.Blue };
-    } else if (role.includes('viewer') || role.includes('Viewer') || role.includes('read')) {
+    } else if (role.includes("viewer") || role.includes("Viewer") || role.includes("read")) {
       return { source: Icon.Eye, tintColor: Color.Green };
     } else {
       return { source: Icon.Circle, tintColor: Color.PrimaryText };
@@ -122,42 +134,37 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
       title: "Adding member...",
       message: `${values.memberType}:${values.memberId} to ${values.role}`,
     });
-    
+
     try {
       // Use the IAM service to add a member
-      await iamService.addMember(
-        values.role, 
-        values.memberType, 
-        values.memberId, 
-        resourceType, 
-        resourceName
-      );
-      
+      await iamService.addMember(values.role, values.memberType, values.memberId, resourceType, resourceName);
+
       addingToast.hide();
       showToast({
         style: Toast.Style.Success,
         title: "Member added",
         message: `${values.memberType}:${values.memberId} to ${values.role}`,
       });
-      
+
       // Refresh the policy
-      setIsRefreshing(true);
       fetchIAMPolicy();
-    } catch (error: any) {
+    } catch (error: unknown) {
       addingToast.hide();
-      
+
       // Provide more specific error messages
-      let errorMessage = error.message;
+      let errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       let errorTitle = "Failed to add member";
-      
-      if (error.message.includes("does not exist")) {
-        errorTitle = "User not found";
-        errorMessage = `The user ${values.memberId} does not exist. Please check the email address and try again.`;
-      } else if (error.message.includes("Permission denied") || error.message.includes("403")) {
-        errorTitle = "Permission denied";
-        errorMessage = "You don't have permission to modify IAM policies for this resource.";
+
+      if (error instanceof Error) {
+        if (error.message.includes("does not exist")) {
+          errorTitle = "User not found";
+          errorMessage = `The user ${values.memberId} does not exist. Please check the email address and try again.`;
+        } else if (error.message.includes("Permission denied") || error.message.includes("403")) {
+          errorTitle = "Permission denied";
+          errorMessage = "You don't have permission to modify IAM policies for this resource.";
+        }
       }
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: errorTitle,
@@ -167,49 +174,42 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
   }
 
   async function removeMember(principal: IAMPrincipal, role: string) {
-    const options: any = {
+    const options = {
       title: "Remove Role",
       message: `Are you sure you want to remove role "${formatRoleName(role)}" from ${principal.type}:${principal.id}?`,
       icon: Icon.Trash,
       primaryAction: {
         title: "Remove",
-        style: Action.Style.Destructive,
+        style: Alert.ActionStyle.Destructive,
       },
     };
-    
+
     if (await confirmAlert(options)) {
       const removingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Removing role...",
         message: `${role} from ${principal.type}:${principal.id}`,
       });
-      
+
       try {
         // Use the IAM service to remove a member
-        await iamService.removeMember(
-          role,
-          principal.type,
-          principal.id,
-          resourceType,
-          resourceName
-        );
-        
+        await iamService.removeMember(role, principal.type, principal.id, resourceType, resourceName);
+
         removingToast.hide();
         showToast({
           style: Toast.Style.Success,
           title: "Role removed",
           message: `${role} removed from ${principal.type}:${principal.id}`,
         });
-        
+
         // Refresh the policy
-        setIsRefreshing(true);
         fetchIAMPolicy();
-      } catch (error: any) {
+      } catch (error: unknown) {
         removingToast.hide();
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to remove role",
-          message: error.message,
+          message: error instanceof Error ? error.message : "An unknown error occurred",
         });
       }
     }
@@ -220,10 +220,7 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
       <Form
         actions={
           <ActionPanel>
-            <Action.SubmitForm
-              title="Add Member"
-              onSubmit={addMember}
-            />
+            <Action.SubmitForm title="Add Member" onSubmit={addMember} />
           </ActionPanel>
         }
       >
@@ -249,7 +246,7 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
             <Form.Dropdown.Item value="roles/iam.roleAdmin" title="Role Administrator" />
           </Form.Dropdown.Section>
         </Form.Dropdown>
-        
+
         <Form.Dropdown id="memberType" title="Member Type" defaultValue="user">
           <Form.Dropdown.Item value="user" title="User" />
           <Form.Dropdown.Item value="group" title="Group" />
@@ -258,13 +255,9 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
           <Form.Dropdown.Item value="allUsers" title="All Users (Public)" />
           <Form.Dropdown.Item value="allAuthenticatedUsers" title="All Authenticated Users" />
         </Form.Dropdown>
-        
-        <Form.TextField
-          id="memberId"
-          title="Member ID"
-          placeholder="user@example.com or domain.com"
-        />
-      </Form>
+
+        <Form.TextField id="memberId" title="Member ID" placeholder="user@example.com or domain.com" />
+      </Form>,
     );
   }
 
@@ -275,27 +268,27 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
   function showPrincipalDetails(principal: IAMPrincipal) {
     // Generate markdown for the principal's details
     let markdown = `# ${principal.displayName}: ${principal.id}\n\n`;
-    
+
     markdown += `## Roles\n\n`;
-    
+
     principal.roles.forEach((role) => {
       markdown += `### ${role.title}\n\n`;
       markdown += `**Role ID:** \`${role.role}\`\n\n`;
-      
+
       if (role.description) {
         markdown += `**Description:** ${role.description}\n\n`;
       }
-      
+
       if (role.condition) {
         markdown += `**Condition:** ${role.condition.title}\n\n`;
         markdown += `\`\`\`\n${role.condition.expression}\n\`\`\`\n\n`;
-        
+
         if (role.condition.description) {
           markdown += `${role.condition.description}\n\n`;
         }
       }
     });
-    
+
     push(
       <Detail
         navigationTitle={`${principal.displayName}: ${principal.id}`}
@@ -307,9 +300,9 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label title="Roles" text={`${principal.roles.length}`} />
             {principal.roles.map((role, index) => (
-              <Detail.Metadata.Label 
+              <Detail.Metadata.Label
                 key={`role-${index}`}
-                title={role.title} 
+                title={role.title}
                 text={role.role}
                 icon={getRoleIcon(role.role)}
               />
@@ -318,16 +311,8 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
         }
         actions={
           <ActionPanel>
-            <Action
-              title="Add Role"
-              icon={Icon.Plus}
-              onAction={showAddMemberForm}
-            />
-            <Action
-              title="Refresh"
-              icon={Icon.ArrowClockwise}
-              onAction={fetchIAMPolicy}
-            />
+            <Action title="Add Role" icon={Icon.Plus} onAction={showAddMemberForm} />
+            <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchIAMPolicy} />
             <ActionPanel.Submenu
               title="Remove Role"
               icon={Icon.Trash}
@@ -345,46 +330,46 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
             </ActionPanel.Submenu>
           </ActionPanel>
         }
-      />
+      />,
     );
   }
 
   // Extract unique services from roles
   const services = useMemo(() => {
     const serviceSet = new Set<string>();
-    
-    principals.forEach(principal => {
-      principal.roles.forEach(role => {
+
+    principals.forEach((principal) => {
+      principal.roles.forEach((role) => {
         const service = getRoleService(role.role);
         if (service) {
           serviceSet.add(service);
         }
       });
     });
-    
+
     return Array.from(serviceSet).sort();
   }, [principals]);
 
   // Helper function to get service from role
   function getRoleService(role: string): string {
-    if (role.startsWith('roles/storage.')) {
-      return 'Storage';
-    } else if (role.startsWith('roles/compute.')) {
-      return 'Compute Engine';
-    } else if (role.startsWith('roles/iam.')) {
-      return 'IAM';
-    } else if (role.startsWith('roles/bigquery.')) {
-      return 'BigQuery';
-    } else if (role.startsWith('roles/container.')) {
-      return 'Kubernetes Engine';
-    } else if (role.startsWith('roles/cloudfunctions.')) {
-      return 'Cloud Functions';
-    } else if (role.startsWith('roles/run.')) {
-      return 'Cloud Run';
-    } else if (role === 'roles/owner' || role === 'roles/editor' || role === 'roles/viewer') {
-      return 'Project';
+    if (role.startsWith("roles/storage.")) {
+      return "Storage";
+    } else if (role.startsWith("roles/compute.")) {
+      return "Compute Engine";
+    } else if (role.startsWith("roles/iam.")) {
+      return "IAM";
+    } else if (role.startsWith("roles/bigquery.")) {
+      return "BigQuery";
+    } else if (role.startsWith("roles/container.")) {
+      return "Kubernetes Engine";
+    } else if (role.startsWith("roles/cloudfunctions.")) {
+      return "Cloud Functions";
+    } else if (role.startsWith("roles/run.")) {
+      return "Cloud Run";
+    } else if (role === "roles/owner" || role === "roles/editor" || role === "roles/viewer") {
+      return "Project";
     } else {
-      return 'Other';
+      return "Other";
     }
   }
 
@@ -395,40 +380,39 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
       if (selectedType && principal.type !== selectedType) {
         return false;
       }
-      
+
       // If there's a selected service, check if any roles match that service
       if (selectedService) {
-        const hasMatchingService = principal.roles.some(role => 
-          getRoleService(role.role) === selectedService
-        );
-        
+        const hasMatchingService = principal.roles.some((role) => getRoleService(role.role) === selectedService);
+
         if (!hasMatchingService) {
           return false;
         }
       }
-      
+
       // If there's search text, check if the principal or any roles match
       if (searchText) {
-        const principalMatches = 
+        const principalMatches =
           principal.id.toLowerCase().includes(searchText.toLowerCase()) ||
           principal.type.toLowerCase().includes(searchText.toLowerCase());
-        
-        const roleMatches = principal.roles.some(role => 
-          role.role.toLowerCase().includes(searchText.toLowerCase()) ||
-          role.title.toLowerCase().includes(searchText.toLowerCase()) ||
-          (role.description && role.description.toLowerCase().includes(searchText.toLowerCase()))
+
+        const roleMatches = principal.roles.some(
+          (role) =>
+            role.role.toLowerCase().includes(searchText.toLowerCase()) ||
+            role.title.toLowerCase().includes(searchText.toLowerCase()) ||
+            (role.description && role.description.toLowerCase().includes(searchText.toLowerCase())),
         );
-        
+
         return principalMatches || roleMatches;
       }
-      
+
       return true;
     });
   }, [principals, selectedType, selectedService, searchText]);
 
   // Get unique principal types for the dropdown
   const principalTypes = useMemo(() => {
-    return Array.from(new Set(principals.map(p => p.type)));
+    return Array.from(new Set(principals.map((p) => p.type)));
   }, [principals]);
 
   if (error) {
@@ -452,18 +436,10 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
       onSearchTextChange={setSearchText}
       navigationTitle={resourceName ? `IAM for ${resourceName}` : "IAM Members"}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Member Type"
-          value={selectedType || ""}
-          onChange={setSelectedType}
-        >
+        <List.Dropdown tooltip="Filter by Member Type" value={selectedType || ""} onChange={setSelectedType}>
           <List.Dropdown.Item title="All Types" value="" />
           {principalTypes.map((type) => (
-            <List.Dropdown.Item 
-              key={type} 
-              title={iamService.formatMemberType(type)} 
-              value={type} 
-            />
+            <List.Dropdown.Item key={type} title={iamService.formatMemberType(type)} value={type} />
           ))}
         </List.Dropdown>
       }
@@ -471,26 +447,18 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
       actions={
         <ActionPanel>
           <Action title="Add Member" icon={Icon.Plus} onAction={showAddMemberForm} />
-          <Action 
-            title="Refresh" 
-            icon={Icon.ArrowClockwise} 
-            onAction={fetchIAMPolicy} 
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            onAction={fetchIAMPolicy}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
           <Action title="Show Debug Info" icon={Icon.Terminal} onAction={showDebugInfo} />
           {selectedType && (
-            <Action 
-              title="Clear Type Filter" 
-              icon={Icon.XmarkCircle} 
-              onAction={() => setSelectedType(null)} 
-            />
+            <Action title="Clear Type Filter" icon={Icon.XmarkCircle} onAction={() => setSelectedType(null)} />
           )}
           {selectedService && (
-            <Action 
-              title="Clear Service Filter" 
-              icon={Icon.XmarkCircle} 
-              onAction={() => setSelectedService(null)} 
-            />
+            <Action title="Clear Service Filter" icon={Icon.XmarkCircle} onAction={() => setSelectedService(null)} />
           )}
         </ActionPanel>
       }
@@ -498,29 +466,33 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
       throttle
     >
       <List.Section title="Filter by Service" subtitle={`${services.length} services`}>
-        {services.map(service => (
+        {services.map((service) => (
           <List.Item
             key={service}
             title={service}
             subtitle=""
             icon={
-              service === 'Storage' ? { source: Icon.HardDrive, tintColor: Color.Blue } :
-              service === 'Compute Engine' ? { source: Icon.Desktop, tintColor: Color.Green } :
-              service === 'IAM' ? { source: Icon.Key, tintColor: Color.Yellow } :
-              service === 'Project' ? { source: Icon.Folder, tintColor: Color.Orange } :
-              { source: Icon.Circle, tintColor: Color.PrimaryText }
+              service === "Storage"
+                ? { source: Icon.HardDrive, tintColor: Color.Blue }
+                : service === "Compute Engine"
+                  ? { source: Icon.Desktop, tintColor: Color.Green }
+                  : service === "IAM"
+                    ? { source: Icon.Key, tintColor: Color.Yellow }
+                    : service === "Project"
+                      ? { source: Icon.Folder, tintColor: Color.Orange }
+                      : { source: Icon.Circle, tintColor: Color.PrimaryText }
             }
             accessories={[
-              { 
-                icon: selectedService === service ? Icon.Checkmark : undefined
-              }
+              {
+                icon: selectedService === service ? Icon.Checkmark : undefined,
+              },
             ]}
             actions={
               <ActionPanel>
-                <Action 
-                  title={selectedService === service ? "Clear Filter" : "Filter by this Service"} 
-                  icon={selectedService === service ? Icon.XmarkCircle : Icon.Filter} 
-                  onAction={() => setSelectedService(selectedService === service ? null : service)} 
+                <Action
+                  title={selectedService === service ? "Clear Filter" : "Filter by This Service"}
+                  icon={selectedService === service ? Icon.XmarkCircle : Icon.Filter}
+                  onAction={() => setSelectedService(selectedService === service ? null : service)}
                 />
               </ActionPanel>
             }
@@ -538,14 +510,14 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
               <Action title="Add Member" icon={Icon.Plus} onAction={showAddMemberForm} />
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchIAMPolicy} />
               {(selectedType || selectedService || searchText) && (
-                <Action 
-                  title="Clear All Filters" 
-                  icon={Icon.XmarkCircle} 
+                <Action
+                  title="Clear All Filters"
+                  icon={Icon.XmarkCircle}
                   onAction={() => {
                     setSelectedType(null);
                     setSelectedService(null);
                     setSearchText("");
-                  }} 
+                  }}
                 />
               )}
             </ActionPanel>
@@ -553,15 +525,15 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
         />
       ) : (
         principalTypes
-          .filter(type => !selectedType || type === selectedType)
-          .map(type => {
-            const typePrincipals = filteredPrincipals.filter(p => p.type === type);
+          .filter((type) => !selectedType || type === selectedType)
+          .map((type) => {
+            const typePrincipals = filteredPrincipals.filter((p) => p.type === type);
             if (typePrincipals.length === 0) return null;
-            
+
             return (
-              <List.Section 
-                key={type} 
-                title={iamService.formatMemberType(type)} 
+              <List.Section
+                key={type}
+                title={iamService.formatMemberType(type)}
                 subtitle={`${typePrincipals.length} members`}
               >
                 {typePrincipals.map((principal) => (
@@ -573,7 +545,7 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
                     accessories={[]}
                     detail={
                       <List.Item.Detail
-                        markdown={`# ${principal.displayName}: ${principal.id}\n\n## Roles\n\n${principal.roles.map(role => `- **${role.title}** (${role.role})`).join('\n\n')}`}
+                        markdown={`# ${principal.displayName}: ${principal.id}\n\n## Roles\n\n${principal.roles.map((role) => `- **${role.title}** (${role.role})`).join("\n\n")}`}
                         metadata={
                           <List.Item.Detail.Metadata>
                             <List.Item.Detail.Metadata.Label title="Type" text={principal.displayName} />
@@ -581,9 +553,9 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
                             <List.Item.Detail.Metadata.Separator />
                             <List.Item.Detail.Metadata.Label title="Roles" />
                             {principal.roles.map((role, index) => (
-                              <List.Item.Detail.Metadata.Label 
+                              <List.Item.Detail.Metadata.Label
                                 key={`role-${index}`}
-                                title={role.title} 
+                                title={role.title}
                                 text={role.role}
                                 icon={getRoleIcon(role.role)}
                               />
@@ -594,21 +566,9 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
                     }
                     actions={
                       <ActionPanel>
-                        <Action
-                          title="View Details"
-                          icon={Icon.Eye}
-                          onAction={() => showPrincipalDetails(principal)}
-                        />
-                        <Action
-                          title="Add Role"
-                          icon={Icon.Plus}
-                          onAction={showAddMemberForm}
-                        />
-                        <Action
-                          title="Refresh"
-                          icon={Icon.ArrowClockwise}
-                          onAction={fetchIAMPolicy}
-                        />
+                        <Action title="View Details" icon={Icon.Eye} onAction={() => showPrincipalDetails(principal)} />
+                        <Action title="Add Role" icon={Icon.Plus} onAction={showAddMemberForm} />
+                        <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchIAMPolicy} />
                         <ActionPanel.Submenu
                           title="Remove Role"
                           icon={Icon.Trash}
@@ -630,8 +590,9 @@ export default function IAMMembersByPrincipalView({ projectId, gcloudPath, resou
                 ))}
               </List.Section>
             );
-          }).filter(Boolean)
+          })
+          .filter(Boolean)
       )}
     </List>
   );
-} 
+}

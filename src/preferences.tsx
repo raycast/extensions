@@ -6,4 +6,4 @@ export interface Preferences {
 
 export function getPreferences(): Preferences {
   return getPreferenceValues<Preferences>();
-} 
+}

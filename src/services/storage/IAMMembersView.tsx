@@ -1,11 +1,20 @@
-import { ActionPanel, Action, List, showToast, Toast, useNavigation, Icon, Form, Detail, Color, confirmAlert } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+  Icon,
+  Form,
+  Detail,
+  Color,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
-import { exec } from "child_process";
-import { promisify } from "util";
 import { executeGcloudCommand } from "../../gcloud";
 import { getRoleInfo, formatRoleName } from "../../utils/iamRoles";
-
-const execPromise = promisify(exec);
 
 interface IAMMembersViewProps {
   projectId: string;
@@ -33,7 +42,7 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
   const [roles, setRoles] = useState<IAMRole[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState("");
-  const { push, pop } = useNavigation();
+  const { push } = useNavigation();
   const [debugInfo, setDebugInfo] = useState<string>("");
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
 
@@ -44,10 +53,10 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
   async function fetchIAMPolicy() {
     setIsLoading(true);
     setError(null);
-    
+
     let command = "";
     let debugText = "";
-    
+
     if (resourceType === "storage" && resourceName) {
       // For a specific storage bucket
       command = `storage buckets get-iam-policy gs://${resourceName} --project=${projectId}`;
@@ -57,16 +66,16 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
       command = `projects get-iam-policy ${projectId}`;
       debugText = `Fetching project-level IAM policy for: ${projectId}\n`;
     }
-    
+
     showToast({
       style: Toast.Style.Animated,
       title: "Loading IAM policy...",
       message: resourceName || projectId,
     });
-    
+
     try {
       const result = await executeGcloudCommand(gcloudPath, command);
-      
+
       if (!Array.isArray(result) || result.length === 0) {
         setError("No IAM policy found or empty result");
         setIsLoading(false);
@@ -76,9 +85,9 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
         });
         return;
       }
-      
+
       const policy = Array.isArray(result) ? result[0] : result;
-      
+
       if (!policy.bindings || !Array.isArray(policy.bindings)) {
         setError("Invalid IAM policy format: no bindings found");
         setIsLoading(false);
@@ -89,98 +98,98 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
         });
         return;
       }
-      
+
       // Process the bindings into a more organized structure
-      const processedRoles: IAMRole[] = policy.bindings.map((binding: any) => {
+      const processedRoles: IAMRole[] = policy.bindings.map((binding: { role: string; members: string[] }) => {
         const roleInfo = getRoleInfo(binding.role);
-        
+
         // Process members
         const members = binding.members.map((member: string) => {
-          const [type, id] = member.split(':');
+          const [type, id] = member.split(":");
           return {
             type,
             id,
             email: id,
-            displayName: formatMemberType(type)
+            displayName: formatMemberType(type),
           };
         });
-        
+
         return {
           role: binding.role,
           title: roleInfo.title || formatRoleName(binding.role),
           description: roleInfo.description,
-          members
+          members,
         };
       });
-      
+
       setRoles(processedRoles);
       debugText += `Found ${processedRoles.length} roles with members\n`;
-      
+
       showToast({
         style: Toast.Style.Success,
         title: "IAM policy loaded",
         message: `Found ${processedRoles.length} roles`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching IAM policy:", error);
-      setError(`Failed to fetch IAM policy: ${error.message}`);
+      setError(`Failed to fetch IAM policy: ${error instanceof Error ? error.message : String(error)}`);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch IAM policy",
-        message: error.message,
+        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setDebugInfo(debugText);
       setIsLoading(false);
     }
   }
-  
+
   function formatMemberType(type: string) {
     switch (type) {
-      case 'user':
-        return 'User';
-      case 'group':
-        return 'Group';
-      case 'serviceAccount':
-        return 'Service Account';
-      case 'domain':
-        return 'Domain';
-      case 'allUsers':
-        return 'All Users (Public)';
-      case 'allAuthenticatedUsers':
-        return 'All Authenticated Users';
+      case "user":
+        return "User";
+      case "group":
+        return "Group";
+      case "serviceAccount":
+        return "Service Account";
+      case "domain":
+        return "Domain";
+      case "allUsers":
+        return "All Users (Public)";
+      case "allAuthenticatedUsers":
+        return "All Authenticated Users";
       default:
         return type.charAt(0).toUpperCase() + type.slice(1);
     }
   }
-  
+
   function getMemberIcon(type: string) {
     switch (type) {
-      case 'user':
+      case "user":
         return { source: Icon.Person, tintColor: Color.Blue };
-      case 'group':
+      case "group":
         return { source: Icon.PersonCircle, tintColor: Color.Green };
-      case 'serviceAccount':
+      case "serviceAccount":
         return { source: Icon.Terminal, tintColor: Color.Orange };
-      case 'domain':
+      case "domain":
         return { source: Icon.Globe, tintColor: Color.Purple };
-      case 'allUsers':
+      case "allUsers":
         return { source: Icon.Globe, tintColor: Color.Red };
-      case 'allAuthenticatedUsers':
+      case "allAuthenticatedUsers":
         return { source: Icon.Key, tintColor: Color.Yellow };
       default:
         return { source: Icon.Person, tintColor: Color.PrimaryText };
     }
   }
-  
+
   function getRoleIcon(role: string) {
-    if (role.includes('admin') || role.includes('Admin')) {
+    if (role.includes("admin") || role.includes("Admin")) {
       return { source: Icon.Star, tintColor: Color.Red };
-    } else if (role.includes('owner') || role.includes('Owner')) {
+    } else if (role.includes("owner") || role.includes("Owner")) {
       return { source: Icon.Key, tintColor: Color.Orange };
-    } else if (role.includes('editor') || role.includes('Editor') || role.includes('write')) {
+    } else if (role.includes("editor") || role.includes("Editor") || role.includes("write")) {
       return { source: Icon.Pencil, tintColor: Color.Blue };
-    } else if (role.includes('viewer') || role.includes('Viewer') || role.includes('read')) {
+    } else if (role.includes("viewer") || role.includes("Viewer") || role.includes("read")) {
       return { source: Icon.Eye, tintColor: Color.Green };
     } else {
       return { source: Icon.Circle, tintColor: Color.PrimaryText };
@@ -193,7 +202,7 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
       title: "Adding member...",
       message: `${values.memberType}:${values.memberId} to ${values.role}`,
     });
-    
+
     try {
       // Validate the member ID format based on type
       if (!validateMemberId(values.memberType, values.memberId)) {
@@ -205,41 +214,43 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
         });
         return;
       }
-      
+
       let command = "";
-      
+
       if (resourceType === "storage" && resourceName) {
         command = `storage buckets add-iam-policy-binding gs://${resourceName} --member=${values.memberType}:${values.memberId} --role=${values.role} --project=${projectId}`;
       } else {
         command = `projects add-iam-policy-binding ${projectId} --member=${values.memberType}:${values.memberId} --role=${values.role}`;
       }
-      
+
       await executeGcloudCommand(gcloudPath, command);
-      
+
       addingToast.hide();
       showToast({
         style: Toast.Style.Success,
         title: "Member added",
         message: `${values.memberType}:${values.memberId} to ${values.role}`,
       });
-      
+
       // Refresh the policy
       fetchIAMPolicy();
-    } catch (error: any) {
+    } catch (error: unknown) {
       addingToast.hide();
-      
+
       // Provide more specific error messages
-      let errorMessage = error.message;
+      let errorMessage = error instanceof Error ? error.message : String(error);
       let errorTitle = "Failed to add member";
-      
-      if (error.message.includes("does not exist")) {
-        errorTitle = "User not found";
-        errorMessage = `The user ${values.memberId} does not exist. Please check the email address and try again.`;
-      } else if (error.message.includes("Permission denied") || error.message.includes("403")) {
-        errorTitle = "Permission denied";
-        errorMessage = "You don't have permission to modify IAM policies for this resource.";
+
+      if (typeof errorMessage === "string") {
+        if (errorMessage.includes("does not exist")) {
+          errorTitle = "User not found";
+          errorMessage = `The user ${values.memberId} does not exist. Please check the email address and try again.`;
+        } else if (errorMessage.includes("Permission denied") || errorMessage.includes("403")) {
+          errorTitle = "Permission denied";
+          errorMessage = "You don't have permission to modify IAM policies for this resource.";
+        }
       }
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: errorTitle,
@@ -251,73 +262,74 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
   // Helper function to validate member ID format based on type
   function validateMemberId(type: string, id: string): boolean {
     switch (type) {
-      case 'user':
+      case "user":
         // Basic email validation
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id);
-      case 'serviceAccount':
+      case "serviceAccount":
         // Service account email validation
-        return /^[a-zA-Z0-9-]+@[a-zA-Z0-9-]+\.iam\.gserviceaccount\.com$/.test(id) || 
-               /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id);
-      case 'group':
+        return (
+          /^[a-zA-Z0-9-]+@[a-zA-Z0-9-]+\.iam\.gserviceaccount\.com$/.test(id) || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id)
+        );
+      case "group":
         // Group email validation
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id);
-      case 'domain':
+      case "domain":
         // Domain validation
         return /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/.test(id);
-      case 'allUsers':
-      case 'allAuthenticatedUsers':
+      case "allUsers":
+      case "allAuthenticatedUsers":
         // These types don't have IDs
         return true;
       default:
         // For unknown types, just check it's not empty
-        return id.trim() !== '';
+        return id.trim() !== "";
     }
   }
 
   async function removeMember(role: string, memberType: string, memberId: string) {
-    const options: any = {
+    const options = {
       title: "Remove Member",
       message: `Are you sure you want to remove ${memberType}:${memberId} from ${formatRoleName(role)}?`,
       icon: Icon.Trash,
       primaryAction: {
         title: "Remove",
-        style: Action.Style.Destructive,
+        style: Alert.ActionStyle.Destructive,
       },
     };
-    
+
     if (await confirmAlert(options)) {
       const removingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Removing member...",
         message: `${memberType}:${memberId} from ${role}`,
       });
-      
+
       try {
         let command = "";
-        
+
         if (resourceType === "storage" && resourceName) {
           command = `storage buckets remove-iam-policy-binding gs://${resourceName} --member=${memberType}:${memberId} --role=${role} --project=${projectId}`;
         } else {
           command = `projects remove-iam-policy-binding ${projectId} --member=${memberType}:${memberId} --role=${role}`;
         }
-        
+
         await executeGcloudCommand(gcloudPath, command);
-        
+
         removingToast.hide();
         showToast({
           style: Toast.Style.Success,
           title: "Member removed",
           message: `${memberType}:${memberId} from ${role}`,
         });
-        
+
         // Refresh the policy
         fetchIAMPolicy();
-      } catch (error: any) {
+      } catch (error: unknown) {
         removingToast.hide();
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to remove member",
-          message: error.message,
+          message: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -328,10 +340,7 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
       <Form
         actions={
           <ActionPanel>
-            <Action.SubmitForm
-              title="Add Member"
-              onSubmit={addMember}
-            />
+            <Action.SubmitForm title="Add Member" onSubmit={addMember} />
           </ActionPanel>
         }
       >
@@ -340,7 +349,7 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
             <Form.Dropdown.Item key={role.role} value={role.role} title={role.title} />
           ))}
         </Form.Dropdown>
-        
+
         <Form.Dropdown id="memberType" title="Member Type" defaultValue="user">
           <Form.Dropdown.Item value="user" title="User" />
           <Form.Dropdown.Item value="group" title="Group" />
@@ -349,13 +358,9 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
           <Form.Dropdown.Item value="allUsers" title="All Users (Public)" />
           <Form.Dropdown.Item value="allAuthenticatedUsers" title="All Authenticated Users" />
         </Form.Dropdown>
-        
-        <Form.TextField
-          id="memberId"
-          title="Member ID"
-          placeholder="user@example.com or domain.com"
-        />
-      </Form>
+
+        <Form.TextField id="memberId" title="Member ID" placeholder="user@example.com or domain.com" />
+      </Form>,
     );
   }
 
@@ -369,22 +374,23 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
     if (selectedRole && role.role !== selectedRole) {
       return false;
     }
-    
+
     // If there's search text, check if the role or any members match
     if (searchText) {
-      const roleMatches = 
+      const roleMatches =
         role.role.toLowerCase().includes(searchText.toLowerCase()) ||
         role.title.toLowerCase().includes(searchText.toLowerCase()) ||
         (role.description && role.description.toLowerCase().includes(searchText.toLowerCase()));
-      
-      const memberMatches = role.members.some(member => 
-        member.id.toLowerCase().includes(searchText.toLowerCase()) ||
-        member.type.toLowerCase().includes(searchText.toLowerCase())
+
+      const memberMatches = role.members.some(
+        (member) =>
+          member.id.toLowerCase().includes(searchText.toLowerCase()) ||
+          member.type.toLowerCase().includes(searchText.toLowerCase()),
       );
-      
+
       return roleMatches || memberMatches;
     }
-    
+
     return true;
   });
 
@@ -408,18 +414,10 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
       onSearchTextChange={setSearchText}
       navigationTitle={resourceName ? `IAM for ${resourceName}` : "IAM Members"}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Role"
-          value={selectedRole || ""}
-          onChange={setSelectedRole}
-        >
+        <List.Dropdown tooltip="Filter by Role" value={selectedRole || ""} onChange={setSelectedRole}>
           <List.Dropdown.Item title="All Roles" value="" />
           {roles.map((role) => (
-            <List.Dropdown.Item 
-              key={role.role} 
-              title={role.title} 
-              value={role.role} 
-            />
+            <List.Dropdown.Item key={role.role} title={role.title} value={role.role} />
           ))}
         </List.Dropdown>
       }
@@ -429,21 +427,13 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
           <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchIAMPolicy} />
           <Action title="Show Debug Info" icon={Icon.Terminal} onAction={showDebugInfo} />
           {selectedRole && (
-            <Action 
-              title="Clear Role Filter" 
-              icon={Icon.XmarkCircle} 
-              onAction={() => setSelectedRole(null)} 
-            />
+            <Action title="Clear Role Filter" icon={Icon.XmarkCircle} onAction={() => setSelectedRole(null)} />
           )}
         </ActionPanel>
       }
     >
       {filteredRoles.map((role) => (
-        <List.Section 
-          key={role.role} 
-          title={role.title} 
-          subtitle={`${role.members.length} members`}
-        >
+        <List.Section key={role.role} title={role.title} subtitle={`${role.members.length} members`}>
           {role.members.map((member, index) => (
             <List.Item
               key={`${role.role}-${member.type}-${member.id}-${index}`}
@@ -451,10 +441,10 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
               subtitle={member.displayName}
               icon={getMemberIcon(member.type)}
               accessories={[
-                { 
+                {
                   icon: getRoleIcon(role.role),
-                  tooltip: role.title
-                }
+                  tooltip: role.title,
+                },
               ]}
               actions={
                 <ActionPanel>
@@ -480,4 +470,4 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
       )}
     </List>
   );
-} 
+}

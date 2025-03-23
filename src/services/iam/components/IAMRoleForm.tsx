@@ -10,27 +10,19 @@ interface IAMRoleFormProps {
   onCancel: () => void;
 }
 
-export default function IAMRoleForm({
-  projectId,
-  iamService,
-  rolesByService,
-  onRoleAdded,
-  onCancel,
-}: IAMRoleFormProps) {
+export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, onCancel }: IAMRoleFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedService, setSelectedService] = useState<string>("");
   const [availableRoles, setAvailableRoles] = useState<{ value: string; title: string }[]>([]);
-  
+
   // Update available roles when service changes
   function handleServiceChange(value: string) {
-    setSelectedService(value);
-    const service = rolesByService.find(s => s.title === value);
+    const service = rolesByService.find((s) => s.title === value);
     setAvailableRoles(service?.roles || []);
   }
-  
-  async function handleSubmit(values: { 
-    member: string; 
-    role: string; 
+
+  async function handleSubmit(values: {
+    member: string;
+    role: string;
     condition?: string;
     conditionTitle?: string;
     conditionDescription?: string;
@@ -43,21 +35,21 @@ export default function IAMRoleForm({
       });
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     // Show loading toast
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Adding role...",
       message: `Adding ${values.role} to ${values.member}`,
     });
-    
+
     try {
       // Parse member type and ID
       let memberType = "user";
       let memberId = values.member;
-      
+
       if (values.member.includes(":")) {
         const parts = values.member.split(":", 2);
         memberType = parts[0];
@@ -69,26 +61,26 @@ export default function IAMRoleForm({
         memberType = "serviceAccount";
         memberId = values.member;
       }
-      
+
       // Add the member to the role
       await iamService.addMember(values.role, memberType, memberId);
-      
+
       // Hide loading toast
       loadingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Success,
         title: "Role added successfully",
         message: `Added ${memberType}:${memberId} to ${values.role}`,
       });
-      
+
       onRoleAdded();
     } catch (error) {
       console.error("Error adding role:", error);
-      
+
       // Hide loading toast
       loadingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to add role",
@@ -98,7 +90,7 @@ export default function IAMRoleForm({
       setIsSubmitting(false);
     }
   }
-  
+
   return (
     <Form
       isLoading={isSubmitting}
@@ -115,53 +107,35 @@ export default function IAMRoleForm({
         placeholder="user:user@example.com or serviceAccount:name@project.iam.gserviceaccount.com"
         info="The principal to grant the role to"
       />
-      
-      <Form.Dropdown
-        id="service"
-        title="Service"
-        placeholder="Select a service"
-        onChange={handleServiceChange}
-      >
-        {rolesByService.map(service => (
-          <Form.Dropdown.Item
-            key={service.title}
-            value={service.title}
-            title={service.title}
-          />
+
+      <Form.Dropdown id="service" title="Service" placeholder="Select a service" onChange={handleServiceChange}>
+        {rolesByService.map((service) => (
+          <Form.Dropdown.Item key={service.title} value={service.title} title={service.title} />
         ))}
       </Form.Dropdown>
-      
-      <Form.Dropdown
-        id="role"
-        title="Role"
-        placeholder="Select a role"
-        info="The role to grant to the member"
-      >
-        {availableRoles.map(role => (
-          <Form.Dropdown.Item
-            key={role.value}
-            value={role.value}
-            title={role.title}
-          />
+
+      <Form.Dropdown id="role" title="Role" placeholder="Select a role" info="The role to grant to the member">
+        {availableRoles.map((role) => (
+          <Form.Dropdown.Item key={role.value} value={role.value} title={role.title} />
         ))}
       </Form.Dropdown>
-      
+
       <Form.Separator />
-      
+
       <Form.TextArea
         id="condition"
         title="Condition (Optional)"
         placeholder="resource.name.startsWith('projects/_/buckets/example-bucket')"
         info="CEL expression for conditional role binding"
       />
-      
+
       <Form.TextField
         id="conditionTitle"
         title="Condition Title"
         placeholder="Access to specific bucket"
         info="A title for the condition"
       />
-      
+
       <Form.TextField
         id="conditionDescription"
         title="Condition Description"
@@ -170,4 +144,4 @@ export default function IAMRoleForm({
       />
     </Form>
   );
-} 
+}

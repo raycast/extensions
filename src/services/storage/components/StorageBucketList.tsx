@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { useState } from "react";
 
 interface Bucket {
@@ -25,20 +25,21 @@ export default function StorageBucketList({
   onRefresh,
 }: StorageBucketListProps) {
   const [searchText, setSearchText] = useState("");
-  
+
   // Filter buckets based on search text
-  const filteredBuckets = buckets.filter(bucket => 
-    bucket.name.toLowerCase().includes(searchText.toLowerCase()) ||
-    bucket.location.toLowerCase().includes(searchText.toLowerCase()) ||
-    bucket.storageClass.toLowerCase().includes(searchText.toLowerCase())
+  const filteredBuckets = buckets.filter(
+    (bucket) =>
+      bucket.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      bucket.location.toLowerCase().includes(searchText.toLowerCase()) ||
+      bucket.storageClass.toLowerCase().includes(searchText.toLowerCase()),
   );
-  
+
   // Format the creation date
   function formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleDateString() + " " + date.toLocaleTimeString();
   }
-  
+
   // Get icon for storage class
   function getStorageClassIcon(storageClass: string): { source: Icon; tintColor: string } {
     switch (storageClass.toLowerCase()) {
@@ -54,7 +55,7 @@ export default function StorageBucketList({
         return { source: Icon.HardDrive, tintColor: "#4285F4" }; // Default to Google Blue
     }
   }
-  
+
   return (
     <List
       isLoading={isLoading}
@@ -81,33 +82,18 @@ export default function StorageBucketList({
           }
         />
       ) : (
-        filteredBuckets.map(bucket => (
+        filteredBuckets.map((bucket) => (
           <List.Item
             key={bucket.id}
             title={bucket.name}
             subtitle={bucket.location}
             icon={getStorageClassIcon(bucket.storageClass)}
-            accessories={[
-              { text: bucket.storageClass },
-              { text: formatDate(bucket.created), tooltip: "Created on" }
-            ]}
+            accessories={[{ text: bucket.storageClass }, { text: formatDate(bucket.created), tooltip: "Created on" }]}
             actions={
               <ActionPanel>
-                <Action
-                  title="View Bucket"
-                  icon={Icon.Eye}
-                  onAction={() => onViewBucket(bucket)}
-                />
-                <Action
-                  title="Create Bucket"
-                  icon={Icon.Plus}
-                  onAction={onCreateBucket}
-                />
-                <Action
-                  title="Refresh"
-                  icon={Icon.ArrowClockwise}
-                  onAction={onRefresh}
-                />
+                <Action title="View Bucket" icon={Icon.Eye} onAction={() => onViewBucket(bucket)} />
+                <Action title="Create Bucket" icon={Icon.Plus} onAction={onCreateBucket} />
+                <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
               </ActionPanel>
             }
           />
@@ -115,4 +101,4 @@ export default function StorageBucketList({
       )}
     </List>
   );
-} 
+}

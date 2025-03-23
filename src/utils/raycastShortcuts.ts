@@ -1,6 +1,6 @@
 /**
  * Raycast Reserved Shortcuts
- * 
+ *
  * This file tracks shortcuts that are reserved by Raycast and should not be used in custom actions.
  * Reference: https://developers.raycast.com/api-reference/keyboard
  */
@@ -41,7 +41,7 @@ export const RESERVED_SHORTCUTS: ShortcutDefinition[] = [
   { modifiers: ["cmd"], key: "f", description: "Find" },
   { modifiers: ["cmd"], key: "g", description: "Find next" },
   { modifiers: ["cmd", "shift"], key: "g", description: "Find previous" },
-  
+
   // Editing
   { modifiers: ["cmd"], key: "a", description: "Select all" },
   { modifiers: ["cmd"], key: "c", description: "Copy" },
@@ -49,12 +49,12 @@ export const RESERVED_SHORTCUTS: ShortcutDefinition[] = [
   { modifiers: ["cmd"], key: "x", description: "Cut" },
   { modifiers: ["cmd"], key: "z", description: "Undo" },
   { modifiers: ["cmd", "shift"], key: "z", description: "Redo" },
-  
+
   // View
   { modifiers: ["cmd"], key: "+", description: "Zoom in" },
   { modifiers: ["cmd"], key: "-", description: "Zoom out" },
   { modifiers: ["cmd"], key: "0", description: "Reset zoom" },
-  
+
   // Extensions
   { modifiers: ["cmd"], key: "p", description: "Open command palette" },
   { modifiers: ["cmd"], key: "k", description: "Search" },
@@ -65,13 +65,13 @@ export const RESERVED_SHORTCUTS: ShortcutDefinition[] = [
   { modifiers: ["cmd"], key: "r", description: "Refresh" },
   { modifiers: ["cmd"], key: "e", description: "Edit" },
   { modifiers: ["cmd"], key: "s", description: "Save" },
-  
+
   // List Navigation
   { modifiers: ["cmd"], key: "arrowUp", description: "Move to top" },
   { modifiers: ["cmd"], key: "arrowDown", description: "Move to bottom" },
   { modifiers: ["opt"], key: "arrowUp", description: "Move up 5 items" },
   { modifiers: ["opt"], key: "arrowDown", description: "Move down 5 items" },
-  
+
   // Form Navigation
   { modifiers: ["cmd"], key: "return", description: "Submit form" },
   { modifiers: ["cmd"], key: "escape", description: "Cancel" },
@@ -85,10 +85,10 @@ export const RESERVED_SHORTCUTS: ShortcutDefinition[] = [
  */
 export function isReservedShortcut(modifiers: Keyboard.KeyModifier[], key: Keyboard.KeyEquivalent): boolean {
   return RESERVED_SHORTCUTS.some(
-    shortcut => 
-      shortcut.key === key && 
-      shortcut.modifiers.length === modifiers.length && 
-      shortcut.modifiers.every(mod => modifiers.includes(mod))
+    (shortcut) =>
+      shortcut.key === key &&
+      shortcut.modifiers.length === modifiers.length &&
+      shortcut.modifiers.every((mod) => modifiers.includes(mod)),
   );
 }
 
@@ -111,7 +111,7 @@ export const CONTEXTUAL_SHORTCUTS: ContextualShortcuts = {
     VIEW_DETAILS: { modifiers: ["cmd"], key: "i", description: "View project details" },
     SWITCH: { modifiers: ["cmd"], key: "s", description: "Switch project" },
   },
-  
+
   // Bucket view shortcuts
   BUCKET: {
     CREATE: { modifiers: ["cmd"], key: "n", description: "Create new bucket" },
@@ -119,7 +119,7 @@ export const CONTEXTUAL_SHORTCUTS: ContextualShortcuts = {
     VIEW_IAM: { modifiers: ["cmd"], key: "i", description: "View IAM permissions" },
     VIEW_LIFECYCLE: { modifiers: ["cmd"], key: "l", description: "View lifecycle rules" },
   },
-  
+
   // Object view shortcuts
   OBJECT: {
     CREATE: { modifiers: ["cmd"], key: "n", description: "Create/upload new object" },
@@ -127,14 +127,14 @@ export const CONTEXTUAL_SHORTCUTS: ContextualShortcuts = {
     VIEW_DETAILS: { modifiers: ["cmd"], key: "i", description: "View object details" },
     COPY_URL: { modifiers: ["cmd"], key: "u", description: "Copy object URL" },
   },
-  
+
   // IAM view shortcuts
   IAM: {
     ADD_MEMBER: { modifiers: ["cmd"], key: "n", description: "Add new IAM member" },
     SWITCH_VIEW: { modifiers: ["cmd"], key: "v", description: "Switch IAM view" },
     FILTER: { modifiers: ["cmd"], key: "f", description: "Filter IAM members" },
   },
-  
+
   // Compute view shortcuts
   COMPUTE: {
     CREATE: { modifiers: ["cmd"], key: "n", description: "Create new instance" },
@@ -163,7 +163,10 @@ export function getContextualShortcut(context: string, action: string): Shortcut
  * @param shortcut The full shortcut definition
  * @returns A valid shortcut object for the Action component
  */
-export function getActionShortcut(shortcut: ShortcutDefinition): { modifiers: Keyboard.KeyModifier[], key: Keyboard.KeyEquivalent } {
+export function getActionShortcut(shortcut: ShortcutDefinition): {
+  modifiers: Keyboard.KeyModifier[];
+  key: Keyboard.KeyEquivalent;
+} {
   const { modifiers, key } = shortcut;
   return { modifiers, key };
 }
@@ -175,27 +178,27 @@ export function getActionShortcut(shortcut: ShortcutDefinition): { modifiers: Ke
 export const SAFE_SHORTCUTS = {
   // Add actions
   ADD: { modifiers: ["cmd", "shift"], key: "n", description: "Add new item" },
-  
+
   // View actions
   VIEW: { modifiers: ["cmd", "shift"], key: "v", description: "View item" },
-  
+
   // Edit actions
   EDIT: { modifiers: ["cmd", "shift"], key: "e", description: "Edit item" },
-  
+
   // Delete actions
   DELETE: { modifiers: ["cmd", "shift"], key: "backspace", description: "Delete item" },
-  
+
   // Refresh actions
   REFRESH: { modifiers: ["cmd", "shift"], key: "r", description: "Refresh" },
-  
+
   // Cancel actions
   CANCEL: { modifiers: ["cmd", "shift"], key: "c", description: "Cancel" },
-  
+
   // IAM specific actions
   IAM_VIEW: { modifiers: ["cmd", "shift"], key: "i", description: "View IAM permissions" },
   IAM_ADD: { modifiers: ["cmd", "shift"], key: "n", description: "Add IAM member" },
-  
+
   // Storage specific actions
   STORAGE_VIEW: { modifiers: ["cmd", "shift"], key: "s", description: "View storage" },
   STORAGE_LIFECYCLE: { modifiers: ["cmd", "shift"], key: "l", description: "View lifecycle" },
-}; 
+};

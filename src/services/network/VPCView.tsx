@@ -1,15 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import {
-  ActionPanel,
-  Action,
-  List,
-  Icon,
-  Color,
-  Toast,
-  showToast,
-  Form,
-  useNavigation,
-} from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation } from "@raycast/api";
 import { NetworkService, VPC } from "./NetworkService";
 import SubnetsView from "./SubnetsView";
 import FirewallRulesView from "./FirewallRulesView";
@@ -36,32 +26,32 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
       const loadingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Loading VPC networks...",
-        message: "Please wait while we fetch your VPC networks"
+        message: "Please wait while we fetch your VPC networks",
       });
-      
+
       try {
         // Fetch VPCs
         const fetchedVPCs = await networkService.getVPCs();
         setVPCs(fetchedVPCs);
-        
+
         // Prefetch subnets in background for faster subnet view
-        networkService.getSubnets().catch(err => console.error("Background subnet fetch error:", err));
-        
+        networkService.getSubnets().catch((err) => console.error("Background subnet fetch error:", err));
+
         loadingToast.hide();
-        
+
         showToast({
           style: Toast.Style.Success,
           title: "VPCs loaded",
           message: `${fetchedVPCs.length} VPC networks found`,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error initializing:", error);
         loadingToast.hide();
-        
+
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to Load VPCs",
-          message: error.message,
+          message: error instanceof Error ? error.message : String(error),
         });
       } finally {
         setIsLoading(false);
@@ -73,34 +63,34 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
 
   const refreshVPCs = useCallback(async () => {
     if (!service) return;
-    
+
     setIsLoading(true);
-    
+
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Refreshing VPC networks...",
     });
-    
+
     try {
       const fetchedVPCs = await service.getVPCs();
       setVPCs(fetchedVPCs);
-      
+
       loadingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Success,
         title: "VPCs refreshed",
         message: `${fetchedVPCs.length} VPC networks found`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error refreshing VPCs:", error);
-      
+
       loadingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to Refresh VPCs",
-        message: error.message,
+        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsLoading(false);
@@ -108,27 +98,25 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
   }, [service]);
 
   // Filter VPCs based on search text
-  const filteredVPCs = vpcs.filter((vpc) =>
-    vpc.name.toLowerCase().includes(searchText.toLowerCase())
-  );
-  
+  const filteredVPCs = vpcs.filter((vpc) => vpc.name.toLowerCase().includes(searchText.toLowerCase()));
+
   const formatSubnetMode = (autoCreateSubnetworks: boolean) => {
     return autoCreateSubnetworks ? "Auto mode" : "Custom mode";
   };
-  
+
   const formatCreationTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleString();
   };
-  
+
   const formatRoutingMode = (vpc: VPC) => {
     if (!vpc.routingConfig || !vpc.routingConfig.routingMode) return "Regional";
     return vpc.routingConfig.routingMode === "REGIONAL" ? "Regional" : "Global";
   };
-  
+
   const getSubnetModeIcon = (autoCreateSubnetworks: boolean) => {
     return {
       source: Icon.Network,
-      tintColor: autoCreateSubnetworks ? Color.Green : Color.Orange
+      tintColor: autoCreateSubnetworks ? Color.Green : Color.Orange,
     };
   };
 
@@ -149,18 +137,12 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
             onAction={refreshVPCs}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
-          <Action 
-            title="Create VPC Network"
+          <Action
+            title="Create Vpc Network"
             icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
             onAction={() => {
-              push(
-                <CreateVPCForm
-                  gcloudPath={gcloudPath}
-                  projectId={projectId}
-                  onVPCCreated={refreshVPCs}
-                />
-              );
+              push(<CreateVPCForm gcloudPath={gcloudPath} projectId={projectId} onVPCCreated={refreshVPCs} />);
             }}
           />
         </ActionPanel>
@@ -174,23 +156,13 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
           actions={
             <ActionPanel>
               <Action
-                title="Create VPC Network"
+                title="Create Vpc Network"
                 icon={Icon.Plus}
                 onAction={() => {
-                  push(
-                    <CreateVPCForm
-                      gcloudPath={gcloudPath}
-                      projectId={projectId}
-                      onVPCCreated={refreshVPCs}
-                    />
-                  );
+                  push(<CreateVPCForm gcloudPath={gcloudPath} projectId={projectId} onVPCCreated={refreshVPCs} />);
                 }}
               />
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                onAction={refreshVPCs}
-              />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refreshVPCs} />
             </ActionPanel>
           }
         />
@@ -201,9 +173,9 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
             title={vpc.name}
             subtitle={vpc.description || ""}
             accessories={[
-              { 
+              {
                 text: formatSubnetMode(vpc.autoCreateSubnetworks),
-                icon: getSubnetModeIcon(vpc.autoCreateSubnetworks)
+                icon: getSubnetModeIcon(vpc.autoCreateSubnetworks),
               },
               { text: formatRoutingMode(vpc) },
               { text: `MTU: ${vpc.mtu || "Default"}` },
@@ -214,44 +186,21 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Network Details" />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Name" 
-                      text={vpc.name} 
-                    />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Description" 
-                      text={vpc.description || "No description"} 
-                    />
-                    <List.Item.Detail.Metadata.Label 
-                      title="ID" 
-                      text={vpc.id} 
-                    />
+                    <List.Item.Detail.Metadata.Label title="Name" text={vpc.name} />
+                    <List.Item.Detail.Metadata.Label title="Description" text={vpc.description || "No description"} />
+                    <List.Item.Detail.Metadata.Label title="ID" text={vpc.id} />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Network Configuration" />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Subnet Mode" 
-                      text={formatSubnetMode(vpc.autoCreateSubnetworks)} 
+                    <List.Item.Detail.Metadata.Label
+                      title="Subnet Mode"
+                      text={formatSubnetMode(vpc.autoCreateSubnetworks)}
                       icon={getSubnetModeIcon(vpc.autoCreateSubnetworks)}
                     />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Routing Mode" 
-                      text={formatRoutingMode(vpc)} 
-                    />
-                    <List.Item.Detail.Metadata.Label 
-                      title="MTU" 
-                      text={vpc.mtu?.toString() || "Default"} 
-                    />
-                    {vpc.gatewayIPv4 && (
-                      <List.Item.Detail.Metadata.Label 
-                        title="Gateway IPv4" 
-                        text={vpc.gatewayIPv4} 
-                      />
-                    )}
+                    <List.Item.Detail.Metadata.Label title="Routing Mode" text={formatRoutingMode(vpc)} />
+                    <List.Item.Detail.Metadata.Label title="MTU" text={vpc.mtu?.toString() || "Default"} />
+                    {vpc.gatewayIPv4 && <List.Item.Detail.Metadata.Label title="Gateway IPv4" text={vpc.gatewayIPv4} />}
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label 
-                      title="Created" 
-                      text={formatCreationTime(vpc.creationTimestamp)} 
-                    />
+                    <List.Item.Detail.Metadata.Label title="Created" text={formatCreationTime(vpc.creationTimestamp)} />
                   </List.Item.Detail.Metadata>
                 }
               />
@@ -262,25 +211,14 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
                   title="View Subnets"
                   icon={Icon.List}
                   onAction={() => {
-                    push(
-                      <SubnetsView
-                        projectId={projectId}
-                        gcloudPath={gcloudPath}
-                        vpc={vpc}
-                      />
-                    );
+                    push(<SubnetsView projectId={projectId} gcloudPath={gcloudPath} vpc={vpc} />);
                   }}
                 />
                 <Action
                   title="View Firewall Rules"
                   icon={Icon.List}
                   onAction={() => {
-                    push(
-                      <FirewallRulesView
-                        projectId={projectId}
-                        gcloudPath={gcloudPath}
-                      />
-                    );
+                    push(<FirewallRulesView projectId={projectId} gcloudPath={gcloudPath} />);
                   }}
                 />
                 <Action
@@ -289,18 +227,12 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
                   onAction={refreshVPCs}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                 />
-                <Action 
-                  title="Create VPC Network"
+                <Action
+                  title="Create Vpc Network"
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                   onAction={() => {
-                    push(
-                      <CreateVPCForm
-                        gcloudPath={gcloudPath}
-                        projectId={projectId}
-                        onVPCCreated={refreshVPCs}
-                      />
-                    );
+                    push(<CreateVPCForm gcloudPath={gcloudPath} projectId={projectId} onVPCCreated={refreshVPCs} />);
                   }}
                 />
               </ActionPanel>
@@ -321,13 +253,8 @@ interface CreateVPCFormProps {
 function CreateVPCForm({ gcloudPath, projectId, onVPCCreated }: CreateVPCFormProps) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  
-  async function handleSubmit(values: {
-    name: string;
-    description: string;
-    subnetMode: string;
-    mtu: string;
-  }) {
+
+  async function handleSubmit(values: { name: string; description: string; subnetMode: string; mtu: string }) {
     if (!values.name) {
       showToast({
         style: Toast.Style.Failure,
@@ -336,52 +263,52 @@ function CreateVPCForm({ gcloudPath, projectId, onVPCCreated }: CreateVPCFormPro
       });
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Creating VPC network...",
-      message: `Creating ${values.name}`
+      message: `Creating ${values.name}`,
     });
-    
+
     try {
       const service = new NetworkService(gcloudPath, projectId);
-      
+
       const success = await service.createVPC(
         values.name,
         values.description,
         values.subnetMode as "auto" | "custom",
-        values.mtu ? parseInt(values.mtu) : undefined
+        values.mtu ? parseInt(values.mtu) : undefined,
       );
-      
+
       loadingToast.hide();
-      
+
       if (success) {
         showToast({
           style: Toast.Style.Success,
           title: "VPC Network Created",
-          message: `Successfully created ${values.name}`
+          message: `Successfully created ${values.name}`,
         });
-        
+
         onVPCCreated();
         pop();
       } else {
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to Create VPC",
-          message: "An error occurred while creating the VPC network"
+          message: "An error occurred while creating the VPC network",
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error creating VPC:", error);
-      
+
       loadingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: "Error Creating VPC",
-        message: error.message
+        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsLoading(false);
@@ -394,11 +321,7 @@ function CreateVPCForm({ gcloudPath, projectId, onVPCCreated }: CreateVPCFormPro
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create VPC Network"
-            onSubmit={handleSubmit}
-            icon={Icon.Network}
-          />
+          <Action.SubmitForm title="Create Vpc Network" onSubmit={handleSubmit} icon={Icon.Network} />
         </ActionPanel>
       }
     >
@@ -432,4 +355,4 @@ function CreateVPCForm({ gcloudPath, projectId, onVPCCreated }: CreateVPCFormPro
       />
     </Form>
   );
-} 
+}

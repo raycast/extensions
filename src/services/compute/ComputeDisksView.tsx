@@ -1,14 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import {
-  ActionPanel,
-  Action,
-  List,
-  Icon,
-  Color,
-  Toast,
-  showToast,
-} from "@raycast/api";
-import { executeGcloudCommand } from "../../gcloud";
+import { ActionPanel, Action, List, Icon, Color, Toast, showToast } from "@raycast/api";
 import { ComputeService, Disk } from "./ComputeService";
 
 interface ComputeDisksViewProps {
@@ -34,33 +25,33 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
       const loadingToast = showToast({
         style: Toast.Style.Animated,
         title: "Loading Compute Engine disks...",
-        message: "Please wait while we fetch your disks"
+        message: "Please wait while we fetch your disks",
       });
-      
+
       try {
         // Fetch disks immediately - don't set loading state right away
         // which allows rendering a loading state with empty list as fallback
         const fetchedDisks = await computeService.getDisks();
         setDisks(fetchedDisks);
-        
+
         // Then fetch zones in the background
         fetchZones(computeService);
-        
-        loadingToast.then(toast => toast.hide());
-        
+
+        loadingToast.then((toast) => toast.hide());
+
         showToast({
           style: Toast.Style.Success,
           title: "Disks loaded",
           message: `${fetchedDisks.length} disks found`,
         });
-      } catch (error: any) {
+      } catch (error: Error | unknown) {
         console.error("Error initializing:", error);
-        loadingToast.then(toast => toast.hide());
-        
+        loadingToast.then((toast) => toast.hide());
+
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to Load Disks",
-          message: error.message,
+          message: error instanceof Error ? error.message : String(error),
         });
       } finally {
         setIsLoading(false);
@@ -69,12 +60,12 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
 
     initializeData();
   }, [gcloudPath, projectId]);
-  
+
   const fetchZones = async (computeService: ComputeService) => {
     try {
       const zonesList = await computeService.listZones();
       setZones(zonesList);
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       console.error("Error fetching zones:", error);
       // Don't show error toast for zones, as it's not critical
     }
@@ -82,33 +73,33 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
 
   const fetchDisks = async (computeService: ComputeService) => {
     setIsLoading(true);
-    
+
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Loading disks...",
       message: selectedZone ? `Zone: ${selectedZone}` : "All zones",
     });
-    
+
     try {
       const fetchedDisks = await computeService.getDisks(selectedZone);
       setDisks(fetchedDisks);
-      
+
       loadingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Success,
         title: "Disks loaded",
         message: `${fetchedDisks.length} disks found`,
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       console.error("Error fetching disks:", error);
-      
+
       loadingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to Fetch Disks",
-        message: error.message,
+        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsLoading(false);
@@ -124,34 +115,34 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
     // Convert "all" to undefined for filtering
     const zoneFilter = newZone === "all" ? undefined : newZone;
     setSelectedZone(zoneFilter);
-    
+
     if (service) {
       try {
         setIsLoading(true);
-        
+
         const loadingToast = await showToast({
           style: Toast.Style.Animated,
           title: "Changing zone...",
           message: zoneFilter ? `Loading disks in ${zoneFilter}` : "Loading disks in all zones",
         });
-        
+
         const fetchedDisks = await service.getDisks(zoneFilter);
         setDisks(fetchedDisks);
-        
+
         loadingToast.hide();
-        
+
         showToast({
           style: Toast.Style.Success,
           title: "Zone changed",
           message: `${fetchedDisks.length} disks found in ${zoneFilter || "all zones"}`,
         });
-      } catch (error: any) {
+      } catch (error: Error | unknown) {
         console.error("Error fetching disks:", error);
-        
+
         showToast({
           style: Toast.Style.Failure,
-          title: "Failed to Fetch Disks",
-          message: error.message,
+          title: "Zone changed failed",
+          message: error instanceof Error ? error.message : String(error),
         });
       } finally {
         setIsLoading(false);
@@ -160,9 +151,7 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
   };
 
   // Filter disks based on search text
-  const filteredDisks = disks.filter((disk) =>
-    disk.name.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const filteredDisks = disks.filter((disk) => disk.name.toLowerCase().includes(searchText.toLowerCase()));
 
   const getStatusColor = (status: string) => {
     const lowerStatus = status.toLowerCase();
@@ -177,24 +166,26 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
 
   const formatZone = (zone: string) => {
     // Extract zone name from full path
-    const parts = zone.split('/');
+    const parts = zone.split("/");
     return parts[parts.length - 1];
   };
 
   const formatDiskType = (type: string) => {
     // Extract disk type from full path
-    const parts = type.split('/');
+    const parts = type.split("/");
     return parts[parts.length - 1];
   };
 
   const getAttachedToText = (users?: string[]) => {
     if (!users || users.length === 0) return "Not attached";
-    
+
     // Extract instance names from full paths
-    return users.map(user => {
-      const parts = user.split('/');
-      return parts[parts.length - 1];
-    }).join(", ");
+    return users
+      .map((user) => {
+        const parts = user.split("/");
+        return parts[parts.length - 1];
+      })
+      .join(", ");
   };
 
   return (
@@ -216,13 +207,7 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
           {zones.length === 0 ? (
             <List.Dropdown.Item title="Loading zones..." value="loading" />
           ) : (
-            zones.map((zone) => (
-              <List.Dropdown.Item
-                key={zone}
-                title={zone}
-                value={zone}
-              />
-            ))
+            zones.map((zone) => <List.Dropdown.Item key={zone} title={zone} value={zone} />)
           )}
         </List.Dropdown>
       }
@@ -242,7 +227,11 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
             accessories={[
               { text: formatDiskSize(disk.sizeGb), tooltip: "Size" },
               { text: formatZone(disk.zone), tooltip: "Zone" },
-              { text: disk.status, tooltip: "Status", icon: { source: Icon.Circle, tintColor: getStatusColor(disk.status) } },
+              {
+                text: disk.status,
+                tooltip: "Status",
+                icon: { source: Icon.Circle, tintColor: getStatusColor(disk.status) },
+              },
             ]}
             icon={{ source: Icon.Document }}
             detail={
@@ -255,11 +244,17 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
                     <List.Item.Detail.Metadata.Label title="Zone" text={formatZone(disk.zone)} />
                     <List.Item.Detail.Metadata.Label title="Status" text={disk.status} />
                     <List.Item.Detail.Metadata.Label title="Type" text={formatDiskType(disk.type)} />
-                    <List.Item.Detail.Metadata.Label title="Created" text={new Date(disk.creationTimestamp).toLocaleString()} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Created"
+                      text={new Date(disk.creationTimestamp).toLocaleString()}
+                    />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Attached To" text={getAttachedToText(disk.users)} />
                     {disk.sourceImage && (
-                      <List.Item.Detail.Metadata.Label title="Source Image" text={disk.sourceImage.split('/').pop() || ""} />
+                      <List.Item.Detail.Metadata.Label
+                        title="Source Image"
+                        text={disk.sourceImage.split("/").pop() || ""}
+                      />
                     )}
                     {disk.description && (
                       <List.Item.Detail.Metadata.Label title="Description" text={disk.description} />
@@ -294,4 +289,4 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
       )}
     </List>
   );
-} 
+}

@@ -22,15 +22,15 @@ export default function CreateBucketForm({
 }: CreateBucketFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedName, setSuggestedName] = useState(generateUniqueBucketName("storage"));
-  
+
   // Generate a new suggested name
   function regenerateName() {
     setSuggestedName(generateUniqueBucketName("storage"));
   }
-  
-  async function handleSubmit(values: { 
-    name: string; 
-    location: string; 
+
+  async function handleSubmit(values: {
+    name: string;
+    location: string;
     storageClass: string;
     publicAccess: boolean;
     uniformAccess: boolean;
@@ -42,35 +42,35 @@ export default function CreateBucketForm({
       });
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Build the command with all options
       let command = `${gcloudPath} storage buckets create gs://${values.name} --project=${projectId} --location=${values.location} --default-storage-class=${values.storageClass}`;
-      
+
       // Add optional flags
       if (values.publicAccess) {
         command += " --public-access";
       }
-      
+
       if (values.uniformAccess) {
         command += " --uniform-bucket-level-access";
       }
-      
+
       // Execute the command
-      const { stdout, stderr } = await execPromise(command);
-      
+      const { stderr } = await execPromise(command);
+
       if (stderr && stderr.includes("ERROR")) {
         throw new Error(stderr);
       }
-      
+
       showToast({
         style: Toast.Style.Success,
         title: "Bucket created successfully",
         message: `Created bucket: ${values.name}`,
       });
-      
+
       onBucketCreated();
     } catch (error) {
       console.error("Error creating bucket:", error);
@@ -83,7 +83,7 @@ export default function CreateBucketForm({
       setIsSubmitting(false);
     }
   }
-  
+
   return (
     <Form
       isLoading={isSubmitting}
@@ -102,12 +102,8 @@ export default function CreateBucketForm({
         info="Must be globally unique across all of Google Cloud"
         defaultValue={suggestedName}
       />
-      
-      <Form.Dropdown
-        id="location"
-        title="Location"
-        defaultValue="us-central1"
-      >
+
+      <Form.Dropdown id="location" title="Location" defaultValue="us-central1">
         <Form.Dropdown.Section title="Multi-Region">
           <Form.Dropdown.Item value="us" title="United States (us)" />
           <Form.Dropdown.Item value="eu" title="European Union (eu)" />
@@ -121,7 +117,7 @@ export default function CreateBucketForm({
           <Form.Dropdown.Item value="asia-east1" title="Taiwan (asia-east1)" />
         </Form.Dropdown.Section>
       </Form.Dropdown>
-      
+
       <Form.Dropdown
         id="storageClass"
         title="Storage Class"
@@ -133,14 +129,14 @@ export default function CreateBucketForm({
         <Form.Dropdown.Item value="COLDLINE" title="Coldline" />
         <Form.Dropdown.Item value="ARCHIVE" title="Archive" />
       </Form.Dropdown>
-      
+
       <Form.Checkbox
         id="uniformAccess"
         label="Uniform Bucket-Level Access"
         defaultValue={true}
         info="Use IAM permissions instead of ACLs (recommended)"
       />
-      
+
       <Form.Checkbox
         id="publicAccess"
         label="Public Access"
@@ -149,4 +145,4 @@ export default function CreateBucketForm({
       />
     </Form>
   );
-} 
+}

@@ -1,23 +1,11 @@
 import { useState, useEffect } from "react";
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-  useNavigation,
-  Keyboard,
-  getPreferenceValues,
-  confirmAlert,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, useNavigation, confirmAlert } from "@raycast/api";
 import { executeGcloudCommand } from "../../../gcloud";
 import { ComputeService } from "../ComputeService";
 import { NetworkService, Subnet } from "../../network/NetworkService";
 import {
   getMachineTypesByFamily,
   imageProjects,
-  imageFamilies,
   getImageFamiliesByProject,
   diskTypes,
 } from "../../../utils/computeResources";
@@ -33,11 +21,9 @@ interface MachineType {
   description: string;
 }
 
-interface DiskImage {
-  name: string;
-  project: string;
-  family?: string;
-  description?: string;
+interface ServiceAccountResponse {
+  email: string;
+  // Add other properties if needed
 }
 
 export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: CreateVMFormProps) {
@@ -52,11 +38,10 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
   const [imageFamiliesByProject, setImageFamiliesByProject] = useState<{ name: string; title: string }[]>([]);
   const [serviceAccounts, setServiceAccounts] = useState<string[]>([]);
   const [nameError, setNameError] = useState<string | undefined>();
-  const [subnetError, setSubnetError] = useState<string | undefined>();
   const [advancedMode, setAdvancedMode] = useState<boolean>(false);
-  
+
   const { pop } = useNavigation();
-  
+
   // Initialize data on component mount
   useEffect(() => {
     const loadData = async () => {
@@ -65,109 +50,104 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         style: Toast.Style.Animated,
         title: "Loading resources...",
       });
-      
+
       try {
         const computeService = new ComputeService(gcloudPath, projectId);
         const networkService = new NetworkService(gcloudPath, projectId);
-        
+
         // Fetch zones - still need to fetch these dynamically as they vary by project
         const zonesList = await computeService.listZones();
         setZones(zonesList);
-        
+
         // Set default selected zone if available
         if (zonesList.length > 0) {
           setSelectedZone(zonesList[0]);
         }
-        
+
         // Set machine types from predefined data
         setMachineTypesByFamily(getMachineTypesByFamily());
-        
+
         // Set initial image families based on default image project
         setImageFamiliesByProject(getImageFamiliesByProject(selectedImageProject));
-        
+
         // Fetch networks - still need to fetch these dynamically
         const networksList = await fetchNetworks(networkService);
         setNetworks(networksList);
-        
+
         // Fetch service accounts - still need to fetch these dynamically
         const serviceAccountsList = await fetchServiceAccounts();
         setServiceAccounts(serviceAccountsList);
-        
+
         setIsLoading(false);
         toast.hide();
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error loading resources:", error);
         toast.hide();
-        
+
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to load resources",
-          message: error.message,
+          message: error instanceof Error ? error.message : "An unknown error occurred",
         });
-        
+
         // Load with default values instead of failing
         setIsLoading(false);
       }
     };
-    
+
     loadData();
   }, [gcloudPath, projectId]);
-  
+
   const fetchNetworks = async (networkService: NetworkService): Promise<string[]> => {
     try {
       // Get VPCs using the NetworkService
       const vpcs = await networkService.getVPCs();
-      const networkNames = vpcs.map(vpc => vpc.name);
-      
+      const networkNames = vpcs.map((vpc) => vpc.name);
+
       // Fetch subnets for each network
       const subnetworksMap: Record<string, Subnet[]> = {};
-      
+
       // Get all subnets at once
       const allSubnets = await networkService.getSubnets();
-      
+
       // Group subnets by network
       for (const vpc of vpcs) {
         // Filter subnets by this VPC
-        const vpcSubnets = allSubnets.filter(subnet => 
-          subnet.network.includes(`/${vpc.name}`) || 
-          subnet.network === vpc.name
+        const vpcSubnets = allSubnets.filter(
+          (subnet) => subnet.network.includes(`/${vpc.name}`) || subnet.network === vpc.name,
         );
-        
+
         subnetworksMap[vpc.name] = vpcSubnets;
       }
-      
+
       setSubnetworks(subnetworksMap);
-      
+
       return networkNames.length > 0 ? networkNames : ["default"];
     } catch (error) {
       console.error("Error fetching networks:", error);
       return ["default"];
     }
   };
-  
+
   const fetchServiceAccounts = async (): Promise<string[]> => {
     try {
-      const result = await executeGcloudCommand(
-        gcloudPath,
-        "iam service-accounts list",
-        projectId
-      );
-      
-      return result.map((sa: any) => sa.email);
+      const result = await executeGcloudCommand(gcloudPath, "iam service-accounts list", projectId);
+      const serviceAccounts = result as ServiceAccountResponse[];
+      return serviceAccounts.map((sa) => sa.email);
     } catch (error) {
       console.error("Error fetching service accounts:", error);
       return [];
     }
   };
-  
+
   const handleZoneChange = async (newZone: string) => {
     // Filter subnets by matching region when zone changes
     // Extract region from zone (e.g., "us-central1-a" -> "us-central1")
-    const region = newZone.split('-').slice(0, 2).join('-');
+    const region = newZone.split("-").slice(0, 2).join("-");
     console.log(`Zone changed to ${newZone}, region is ${region}`);
     setSelectedZone(newZone);
   };
-  
+
   const handleNetworkChange = async (newNetwork: string) => {
     setSelectedNetwork(newNetwork);
   };
@@ -176,43 +156,44 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
     setSelectedImageProject(project);
     setImageFamiliesByProject(getImageFamiliesByProject(project));
   };
-  
+
   // Helper to format region names
   const formatRegionName = (regionPath: string): string => {
-    if (!regionPath) return '';
+    if (!regionPath) return "";
     // If it's a path like "https://www.googleapis.com/compute/v1/projects/project-id/regions/us-central1"
     // Extract just the region name
-    const parts = regionPath.split('/');
+    const parts = regionPath.split("/");
     return parts[parts.length - 1];
   };
-  
+
   const validateName = (name: string) => {
     if (!name) {
       setNameError("Name is required");
       return false;
     }
-    
+
     if (!/^[a-z]([-a-z0-9]*[a-z0-9])?$/.test(name)) {
-      setNameError("Name must start with a letter, can contain lowercase letters, numbers, and hyphens, and must end with a letter or number");
+      setNameError(
+        "Name must start with a letter, can contain lowercase letters, numbers, and hyphens, and must end with a letter or number",
+      );
       return false;
     }
-    
+
     setNameError(undefined);
     return true;
   };
-  
+
   const handleSubmit = async (values: Record<string, string>) => {
     if (!validateName(values.name)) {
       return;
     }
-    
-    // Validate subnet region matches zone region
+
     if (values.subnet && values.subnet !== "default" && values.zone) {
-      const selectedSubnet = subnetworks[values.network]?.find(s => s.name === values.subnet);
+      const selectedSubnet = subnetworks[values.network]?.find((s) => s.name === values.subnet);
       if (selectedSubnet) {
         const subnetRegion = formatRegionName(selectedSubnet.region);
-        const zoneRegion = values.zone.split('-').slice(0, 2).join('-');
-        
+        const zoneRegion = values.zone.split("-").slice(0, 2).join("-");
+
         if (subnetRegion !== zoneRegion) {
           const confirmed = await confirmAlert({
             title: "Region Mismatch",
@@ -224,152 +205,152 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
               title: "Cancel",
             },
           });
-          
+
           if (!confirmed) {
             return;
           }
         }
       }
     }
-    
+
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Creating VM instance...",
       message: values.name,
     });
-    
+
     try {
       // Sanitize values to prevent null
       const network = values.network === "null" || !values.network ? "default" : values.network;
       const subnet = values.subnet === "null" ? "" : values.subnet;
-      
+
       // Build the command
       let command = `compute instances create ${values.name} --zone=${values.zone} --machine-type=${values.machineType}`;
-      
+
       // Add boot disk options
       command += ` --image-project=${values.imageProject} --image-family=${values.imageFamily}`;
-      
+
       // Add network options
       command += ` --network=${network}`;
       if (subnet) {
         // Use the subnet name directly - gcloud will look for the subnet in the region matching the zone
         command += ` --subnet=${subnet}`;
       }
-      
+
       // Add public IP option
       if (values.externalIP === "none") {
         command += " --no-address";
       }
-      
+
       // Add boot disk type
       if (values.bootDiskType) {
         command += ` --boot-disk-type=${values.bootDiskType}`;
       }
-      
+
       // Add boot disk size
       if (values.bootDiskSize) {
         command += ` --boot-disk-size=${values.bootDiskSize}GB`;
       }
-      
+
       // Add service account
       if (values.serviceAccount) {
         command += ` --service-account=${values.serviceAccount}`;
       }
-      
+
       // Add metadata
       if (values.metadata) {
         command += ` --metadata=${values.metadata}`;
       }
-      
+
       // Add advanced options
       if (advancedMode) {
         // Add tags
         if (values.tags) {
           command += ` --tags=${values.tags}`;
         }
-        
+
         // Add custom machine type
         if (values.customCores && values.customMemory && values.machineType === "custom") {
           command += ` --custom-cpu=${values.customCores} --custom-memory=${values.customMemory}`;
         }
-        
+
         // Add preemptible option
         if (values.preemptible === "true") {
           command += " --preemptible";
         }
-        
+
         // Add spot option
         if (values.spot === "true") {
           command += " --spot";
         }
-        
+
         // Add maintenance policy
         if (values.onHostMaintenance) {
           command += ` --maintenance-policy=${values.onHostMaintenance}`;
         }
-        
+
         // Add disk auto-delete option
         if (values.bootDiskAutoDelete === "false") {
           command += " --no-boot-disk-auto-delete";
         }
-        
+
         // Add min CPU platform
         if (values.minCpuPlatform) {
           command += ` --min-cpu-platform=${values.minCpuPlatform}`;
         }
-        
+
         // Add scopes
         if (values.scopes) {
           command += ` --scopes=${values.scopes}`;
         }
-        
+
         // Add startup script
         if (values.startupScript) {
           command += ` --metadata-from-file startup-script=${values.startupScript}`;
         }
-        
+
         // Add reservation
         if (values.reservation) {
           command += ` --reservation=${values.reservation}`;
         }
       }
-      
+
       // Execute the command
-      await executeGcloudCommand(gcloudPath, command, projectId, { 
+      await executeGcloudCommand(gcloudPath, command, projectId, {
         skipCache: true,
-        timeout: 120000 // Increase timeout to 120 seconds for VM creation which can take longer
+        timeout: 120000, // Increase timeout to 120 seconds for VM creation which can take longer
       });
-      
+
       toast.hide();
       showToast({
         style: Toast.Style.Success,
         title: "VM instance created",
         message: values.name,
       });
-      
+
       // Call onVMCreated callback to refresh VM instances view
       onVMCreated();
 
       // Navigate back to the VM instances view
       pop();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.hide();
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to create VM instance",
-        message: error.message,
+        message: error instanceof Error ? error.message : "An unknown error occurred",
       });
     }
   };
-  
+
   return (
     <Form
       isLoading={isLoading}
       navigationTitle="Create VM Instance"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create VM Instance" onSubmit={handleSubmit} icon={Icon.Plus} />
+          <Action.SubmitForm title="Create Vm Instance" onSubmit={handleSubmit} icon={Icon.Plus} />
           <Action
             title={advancedMode ? "Simple Mode" : "Advanced Mode"}
             icon={advancedMode ? Icon.List : Icon.Cog}
@@ -380,7 +361,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       }
     >
       <Form.Description text="Create a new Compute Engine virtual machine instance" />
-      
+
       {/* Basic settings */}
       <Form.TextField
         id="name"
@@ -390,24 +371,22 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         error={nameError}
         onChange={(value) => validateName(value)}
       />
-      
-      <Form.Dropdown
-        id="zone"
-        title="Zone"
-        placeholder="Select a zone"
-        onChange={handleZoneChange}
-      >
+
+      <Form.Dropdown id="zone" title="Zone" placeholder="Select a zone" onChange={handleZoneChange}>
         {zones.map((zone) => (
           <Form.Dropdown.Item key={`zone-${zone}`} value={zone} title={zone} />
         ))}
       </Form.Dropdown>
-      
+
       <Form.Dropdown
         id="machineType"
         title="Machine Type"
         placeholder="Select a machine type"
-        defaultValue={machineTypesByFamily.length > 0 && machineTypesByFamily[0].types.length > 0 ? 
-          machineTypesByFamily[0].types[0].name : undefined}
+        defaultValue={
+          machineTypesByFamily.length > 0 && machineTypesByFamily[0].types.length > 0
+            ? machineTypesByFamily[0].types[0].name
+            : undefined
+        }
       >
         {machineTypesByFamily.map((family) => (
           <Form.Dropdown.Section key={family.title} title={family.title}>
@@ -422,7 +401,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
         ))}
         {advancedMode && <Form.Dropdown.Item key="mt-custom" value="custom" title="Custom" />}
       </Form.Dropdown>
-      
+
       {advancedMode && (
         <>
           <Form.TextField
@@ -431,7 +410,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
             placeholder="Number of CPU cores (1-96)"
             info="Required for custom machine type"
           />
-          
+
           <Form.TextField
             id="customMemory"
             title="Custom Memory (MiB)"
@@ -440,11 +419,11 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
           />
         </>
       )}
-      
+
       {/* Boot Disk Configuration */}
       <Form.Separator />
       <Form.Description title="Boot Disk" text="Configure the boot disk for this instance" />
-      
+
       <Form.Dropdown
         id="imageProject"
         title="Image Project"
@@ -456,7 +435,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
           <Form.Dropdown.Item key={`imgp-${project.name}`} value={project.name} title={project.title} />
         ))}
       </Form.Dropdown>
-      
+
       <Form.Dropdown
         id="imageFamily"
         title="Image Family"
@@ -467,63 +446,41 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
           <Form.Dropdown.Item key={`imgf-${family.name}`} value={family.name} title={family.title} />
         ))}
       </Form.Dropdown>
-      
-      <Form.Dropdown
-        id="bootDiskType"
-        title="Boot Disk Type"
-        defaultValue="pd-balanced"
-      >
+
+      <Form.Dropdown id="bootDiskType" title="Boot Disk Type" defaultValue="pd-balanced">
         {diskTypes.map((diskType) => (
-          <Form.Dropdown.Item 
-            key={`disk-${diskType.name}`} 
-            value={diskType.name} 
-            title={diskType.title} 
-          />
+          <Form.Dropdown.Item key={`disk-${diskType.name}`} value={diskType.name} title={diskType.title} />
         ))}
       </Form.Dropdown>
-      
-      <Form.TextField
-        id="bootDiskSize"
-        title="Boot Disk Size (GB)"
-        placeholder="Size in GB"
-        defaultValue="10"
-      />
-      
+
+      <Form.TextField id="bootDiskSize" title="Boot Disk Size (GB)" placeholder="Size in GB" defaultValue="10" />
+
       {advancedMode && (
-        <Form.Dropdown
-          id="bootDiskAutoDelete"
-          title="Auto Delete Boot Disk"
-          defaultValue="true"
-        >
+        <Form.Dropdown id="bootDiskAutoDelete" title="Auto Delete Boot Disk" defaultValue="true">
           <Form.Dropdown.Item key="delete-true" value="true" title="Yes" />
           <Form.Dropdown.Item key="delete-false" value="false" title="No" />
         </Form.Dropdown>
       )}
-      
+
       {/* Network settings */}
       <Form.Separator />
       <Form.Description title="Network" text="Configure network settings for this instance" />
-      
-      <Form.Dropdown
-        id="network"
-        title="Network"
-        defaultValue="default"
-        onChange={handleNetworkChange}
-      >
+
+      <Form.Dropdown id="network" title="Network" defaultValue="default" onChange={handleNetworkChange}>
         {networks.length > 0 ? (
-          networks.map((network) => (
-            <Form.Dropdown.Item key={`network-${network}`} value={network} title={network} />
-          ))
+          networks.map((network) => <Form.Dropdown.Item key={`network-${network}`} value={network} title={network} />)
         ) : (
           <Form.Dropdown.Item key="network-default" value="default" title="default" />
         )}
       </Form.Dropdown>
-      
+
       <Form.Dropdown
         id="subnet"
         title="Subnetwork"
         placeholder="Select a subnetwork"
-        defaultValue={selectedNetwork && subnetworks[selectedNetwork]?.length > 0 ? subnetworks[selectedNetwork][0].name : "default"}
+        defaultValue={
+          selectedNetwork && subnetworks[selectedNetwork]?.length > 0 ? subnetworks[selectedNetwork][0].name : "default"
+        }
       >
         {selectedNetwork && subnetworks[selectedNetwork]?.length > 0 ? (
           // First show subnets in the same region as the selected zone for better UX
@@ -532,15 +489,15 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
               // Get region from subnet path
               const subnetRegion = formatRegionName(subnet.region);
               // Get selected zone's region
-              const zoneRegion = selectedZone ? selectedZone.split('-').slice(0, 2).join('-') : '';
+              const zoneRegion = selectedZone ? selectedZone.split("-").slice(0, 2).join("-") : "";
               // Determine if this subnet is in the same region as the selected zone
               const isMatchingRegion = !zoneRegion || subnetRegion === zoneRegion;
-              
+
               return {
                 subnet,
                 subnetRegion,
                 isMatchingRegion,
-                index
+                index,
               };
             })
             // Sort by matching region first, then by name
@@ -551,10 +508,10 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
               return a.subnet.name.localeCompare(b.subnet.name); // Then alphabetically
             })
             .map(({ subnet, subnetRegion, isMatchingRegion, index }) => (
-              <Form.Dropdown.Item 
-                key={`subnet-${subnet.name}-${index}`} 
-                value={subnet.name} 
-                title={`${subnet.name} (${subnetRegion})${!isMatchingRegion ? ' - different region' : ''}`}
+              <Form.Dropdown.Item
+                key={`subnet-${subnet.name}-${index}`}
+                value={subnet.name}
+                title={`${subnet.name} (${subnetRegion})${!isMatchingRegion ? " - different region" : ""}`}
                 icon={isMatchingRegion ? Icon.Checkmark : Icon.Warning}
               />
             ))
@@ -562,20 +519,16 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
           <Form.Dropdown.Item key="subnet-default-fallback" value="default" title="default" />
         )}
       </Form.Dropdown>
-      
-      <Form.Dropdown
-        id="externalIP"
-        title="External IP"
-        defaultValue="auto"
-      >
+
+      <Form.Dropdown id="externalIP" title="External IP" defaultValue="auto">
         <Form.Dropdown.Item key="ip-auto" value="auto" title="Automatic (ephemeral)" />
         <Form.Dropdown.Item key="ip-none" value="none" title="None (private instance)" />
       </Form.Dropdown>
-      
+
       {/* Service Account */}
       <Form.Separator />
       <Form.Description title="Identity" text="Configure identity and access control" />
-      
+
       <Form.Dropdown
         id="serviceAccount"
         title="Service Account"
@@ -587,7 +540,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
           <Form.Dropdown.Item key={`sa-${sa}`} value={sa} title={sa} />
         ))}
       </Form.Dropdown>
-      
+
       {advancedMode && (
         <>
           <Form.TextField
@@ -599,66 +552,50 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
           />
         </>
       )}
-      
+
       {/* Additional settings in advanced mode */}
       {advancedMode && (
         <>
           <Form.Separator />
           <Form.Description title="Additional Settings" text="Configure advanced VM options" />
-          
+
           <Form.TextField
             id="tags"
             title="Network Tags"
             placeholder="Comma-separated list of tags"
             info="Example: http-server,https-server"
           />
-          
+
           <Form.TextField
             id="metadata"
             title="Metadata"
             placeholder="Key=value,key=value format"
             info="Example: enable-oslogin=true,serial-port-enable=true"
           />
-          
-          <Form.Dropdown
-            id="preemptible"
-            title="Preemptible VM"
-            defaultValue="false"
-          >
+
+          <Form.Dropdown id="preemptible" title="Preemptible VM" defaultValue="false">
             <Form.Dropdown.Item key="preempt-false" value="false" title="No" />
             <Form.Dropdown.Item key="preempt-true" value="true" title="Yes" />
           </Form.Dropdown>
-          
-          <Form.Dropdown
-            id="spot"
-            title="Spot VM"
-            defaultValue="false"
-          >
+
+          <Form.Dropdown id="spot" title="Spot VM" defaultValue="false">
             <Form.Dropdown.Item key="spot-false" value="false" title="No" />
             <Form.Dropdown.Item key="spot-true" value="true" title="Yes" />
           </Form.Dropdown>
-          
-          <Form.Dropdown
-            id="onHostMaintenance"
-            title="On Host Maintenance"
-            defaultValue="MIGRATE"
-          >
+
+          <Form.Dropdown id="onHostMaintenance" title="On Host Maintenance" defaultValue="MIGRATE">
             <Form.Dropdown.Item key="maint-MIGRATE" value="MIGRATE" title="Migrate VM instance" />
             <Form.Dropdown.Item key="maint-TERMINATE" value="TERMINATE" title="Terminate VM instance" />
           </Form.Dropdown>
-          
-          <Form.TextField
-            id="minCpuPlatform"
-            title="Minimum CPU Platform"
-            placeholder="Example: Intel Cascade Lake"
-          />
-          
+
+          <Form.TextField id="minCpuPlatform" title="Minimum CPU Platform" placeholder="Example: Intel Cascade Lake" />
+
           <Form.TextField
             id="startupScript"
             title="Startup Script File Path"
             placeholder="Local file path to startup script"
           />
-          
+
           <Form.TextField
             id="reservation"
             title="Reservation"
@@ -669,4 +606,4 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       )}
     </Form>
   );
-} 
+}

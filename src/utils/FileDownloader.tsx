@@ -27,7 +27,7 @@ export function FileDownloader({
 }: FileDownloadProps) {
   const { pop } = useNavigation();
   const [downloadPath, setDownloadPath] = useState<string>(join(defaultLocation, fileName));
-  
+
   const handleBrowse = async () => {
     const savePath = await openSaveDialog({
       prompt: "Save file as",
@@ -51,10 +51,10 @@ export function FileDownloader({
             shortcut={{ modifiers: ["cmd"], key: "enter" }}
             onSubmit={async (values) => {
               const path = values.downloadPath || downloadPath;
-              
+
               // Ensure the directory exists
               try {
-                const dirPath = path.substring(0, path.lastIndexOf('/'));
+                const dirPath = path.substring(0, path.lastIndexOf("/"));
                 await ensureDirectoryExists(dirPath);
               } catch (error) {
                 showToast({
@@ -64,13 +64,13 @@ export function FileDownloader({
                 });
                 return;
               }
-              
+
               const downloadingToast = await showToast({
                 style: Toast.Style.Animated,
                 title: "Downloading...",
                 message: `To: ${path}`,
               });
-              
+
               try {
                 await onDownload(path);
                 downloadingToast.hide();
@@ -80,21 +80,21 @@ export function FileDownloader({
                   message: path,
                 });
                 pop();
-              } catch (error: any) {
+              } catch (error: unknown) {
                 downloadingToast.hide();
                 showToast({
                   style: Toast.Style.Failure,
                   title: "Download failed",
-                  message: error.message,
+                  message: error instanceof Error ? error.message : String(error),
                 });
               }
             }}
           />
-          <Action 
-            title="Browse..." 
-            icon={Icon.Finder} 
+          <Action
+            title="Browse…"
+            icon={Icon.Finder}
             shortcut={{ modifiers: ["cmd"], key: "o" }}
-            onAction={handleBrowse} 
+            onAction={handleBrowse}
           />
           <Action title="Cancel" icon={Icon.XmarkCircle} onAction={pop} />
         </ActionPanel>
@@ -113,10 +113,7 @@ export function FileDownloader({
         title="Options"
         text="You can either enter a download path or click 'Browse...' to select a location using the native save dialog."
       />
-      <Form.Description
-        title="File Information"
-        text={`Filename: ${fileName}`}
-      />
+      <Form.Description title="File Information" text={`Filename: ${fileName}`} />
       {children}
     </Form>
   );
@@ -139,15 +136,8 @@ export function CloudStorageDownloader({
   title?: string;
 }) {
   return (
-    <FileDownloader
-      onDownload={onDownload}
-      fileName={fileName}
-      title={title}
-    >
-      <Form.Description
-        title="Source"
-        text={`Bucket: ${bucketName}\nObject: ${objectName}`}
-      />
+    <FileDownloader onDownload={onDownload} fileName={fileName} title={title}>
+      <Form.Description title="Source" text={`Bucket: ${bucketName}\nObject: ${objectName}`} />
     </FileDownloader>
   );
-} 
+}

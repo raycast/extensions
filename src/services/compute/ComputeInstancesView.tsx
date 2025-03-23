@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import {
   ActionPanel,
   Action,
@@ -26,7 +26,6 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
   const [instances, setInstances] = useState<ComputeInstance[]>([]);
   const [selectedZone, setSelectedZone] = useState<string | undefined>(undefined);
   const [zones, setZones] = useState<string[]>([]);
-  const [searchText, setSearchText] = useState<string>("");
   const [service, setService] = useState<ComputeService | null>(null);
   const { push } = useNavigation();
 
@@ -40,40 +39,40 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       const loadingToast = showToast({
         style: Toast.Style.Animated,
         title: "Loading Compute Engine instances...",
-        message: "Please wait while we fetch your instances"
+        message: "Please wait while we fetch your instances",
       });
-      
+
       try {
         // Set loading state immediately to show user something is happening
         setIsLoading(true);
-        
+
         console.log(`Initializing compute service for project: ${projectId}`);
-        
+
         // Try to fetch instances with a timeout
         const fetchPromise = computeService.getInstances();
-        
+
         // Set a timeout of 30 seconds to avoid UI hanging indefinitely
         const timeoutPromise = new Promise<ComputeInstance[]>((_, reject) => {
           setTimeout(() => reject(new Error("Fetch timeout - service may be unavailable")), 30000);
         });
-        
+
         // Race the promises - use whichever completes first
         const fetchedInstances = await Promise.race<ComputeInstance[]>([fetchPromise, timeoutPromise]);
-        
+
         console.log(`Fetched ${fetchedInstances.length} compute instances`);
         setInstances(fetchedInstances);
-        
+
         // Then fetch zones in the background
         fetchZones(computeService);
-        
-        loadingToast.then(toast => toast.hide());
-        
+
+        loadingToast.then((toast) => toast.hide());
+
         if (fetchedInstances.length === 0) {
           // If no instances found, show a more informative message
           showToast({
             style: Toast.Style.Success,
             title: "No instances found",
-            message: "This project has no Compute Engine instances"
+            message: "This project has no Compute Engine instances",
           });
         } else {
           showToast({
@@ -82,18 +81,18 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
             message: `${fetchedInstances.length} instances found`,
           });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error initializing:", error);
-        loadingToast.then(toast => toast.hide());
-        
+        loadingToast.then((toast) => toast.hide());
+
         // Show more informative error message based on error type
-        if (error.message.includes("timeout")) {
+        if (error instanceof Error && error.message.includes("timeout")) {
           showToast({
             style: Toast.Style.Failure,
             title: "Request Timed Out",
             message: "Try again or check your connection",
           });
-        } else if (error.message.includes("Authentication")) {
+        } else if (error instanceof Error && error.message.includes("Authentication")) {
           showToast({
             style: Toast.Style.Failure,
             title: "Authentication Error",
@@ -104,14 +103,14 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
           showToast({
             style: Toast.Style.Failure,
             title: "Failed to load instances",
-            message: error.message,
+            message: error instanceof Error ? error.message : "An unknown error occurred",
           });
         }
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     initializeData();
   }, [gcloudPath, projectId]);
 
@@ -124,87 +123,87 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       // Don't show errors for background fetches to avoid overwhelming the user
     }
   };
-  
+
   const fetchInstances = async (computeService: ComputeService) => {
     try {
       setIsLoading(true);
-      
+
       const fetchingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Refreshing instances...",
       });
-      
+
       // Fetch instances based on selected zone or all zones
       const fetchedInstances = await computeService.getInstances(selectedZone);
-      
+
       setInstances(fetchedInstances);
-      
+
       fetchingToast.hide();
-      
+
       // Show toast with number of instances found
       showToast({
         style: Toast.Style.Success,
         title: "Instances refreshed",
         message: `${fetchedInstances.length} instances found`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching instances:", error);
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to refresh instances",
-        message: error.message,
+        message: error instanceof Error ? error.message : "An unknown error occurred",
       });
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   const handleZoneChange = async (newZone: string | undefined) => {
     if (newZone === selectedZone) {
       return; // No change
     }
-    
+
     setSelectedZone(newZone);
-    
+
     if (!service) {
       return;
     }
-    
+
     try {
       setIsLoading(true);
-      
+
       const fetchingToast = await showToast({
         style: Toast.Style.Animated,
         title: newZone ? `Loading instances in ${newZone}...` : "Loading instances in all zones...",
       });
-      
+
       // Fetch instances based on selected zone or all zones
       const fetchedInstances = await service.getInstances(newZone);
-      
+
       setInstances(fetchedInstances);
-      
+
       fetchingToast.hide();
-      
+
       // Show toast with number of instances found
       showToast({
         style: Toast.Style.Success,
         title: "Instances loaded",
         message: `${fetchedInstances.length} instances found`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching instances:", error);
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to load instances",
-        message: error.message,
+        message: error instanceof Error ? error.message : "An unknown error occurred",
       });
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   const startInstance = async (instance: ComputeInstance) => {
     if (!service) {
       showToast({
@@ -214,11 +213,11 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       });
       return;
     }
-    
+
     try {
       const zone = service.formatZone(instance.zone);
       const name = instance.name;
-      
+
       const confirmationResponse = await confirmAlert({
         title: "Start Instance",
         message: `Are you sure you want to start the instance ${name}?`,
@@ -227,40 +226,40 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
           style: Alert.ActionStyle.Default,
         },
       });
-      
+
       if (!confirmationResponse) {
         return;
       }
-      
+
       const startingToast = await showToast({
         style: Toast.Style.Animated,
         title: `Starting instance ${name}...`,
         message: `Zone: ${zone}`,
       });
-      
+
       await service.startInstance(name, zone);
-      
+
       startingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Success,
         title: "Instance started",
         message: `${name} is starting. It may take a few moments to be ready.`,
       });
-      
+
       // Refresh instances after a short delay to allow the status to update
       setTimeout(() => fetchInstances(service), 3000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error starting instance:", error);
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to start instance",
-        message: error.message,
+        message: error instanceof Error ? error.message : "An unknown error occurred",
       });
     }
   };
-  
+
   const stopInstance = async (instance: ComputeInstance) => {
     if (!service) {
       showToast({
@@ -270,11 +269,11 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       });
       return;
     }
-    
+
     try {
       const zone = service.formatZone(instance.zone);
       const name = instance.name;
-      
+
       const confirmationResponse = await confirmAlert({
         title: "Stop Instance",
         message: `Are you sure you want to stop the instance ${name}?`,
@@ -283,63 +282,63 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
           style: Alert.ActionStyle.Destructive,
         },
       });
-      
+
       if (!confirmationResponse) {
         return;
       }
-      
+
       const stoppingToast = await showToast({
         style: Toast.Style.Animated,
         title: `Stopping instance ${name}...`,
         message: `Zone: ${zone}`,
       });
-      
+
       await service.stopInstance(name, zone);
-      
+
       stoppingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Success,
         title: "Instance stopped",
         message: `${name} is stopping. It may take a few moments to stop completely.`,
       });
-      
+
       // Refresh instances after a short delay to allow the status to update
       setTimeout(() => fetchInstances(service), 3000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error stopping instance:", error);
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to stop instance",
-        message: error.message,
+        message: error instanceof Error ? error.message : "An unknown error occurred",
       });
     }
   };
-  
+
   const viewInstanceDetails = (instance: ComputeInstance) => {
     if (!service) {
       return;
     }
-    
+
     push(
       <ComputeInstanceDetailView
         instance={instance}
         service={service}
         onRefresh={() => fetchInstances(service)}
         projectId={projectId}
-      />
+      />,
     );
   };
-  
+
   const copyConnectionCommand = (instance: ComputeInstance) => {
     if (!service) {
       return;
     }
-    
-    const zone = service.formatZone(instance.zone).split('/').pop() || "";
+
+    const zone = service.formatZone(instance.zone).split("/").pop() || "";
     const command = `gcloud compute ssh --zone="${zone}" "${instance.name}" --project="${projectId}"`;
-    
+
     Clipboard.copy(command);
     showToast({
       style: Toast.Style.Success,
@@ -347,12 +346,12 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       message: "Paste in your terminal to connect",
     });
   };
-  
+
   const createVMInstance = async () => {
     if (!service) {
       return;
     }
-    
+
     const createdCallback = async () => {
       // Show loading toast while refreshing
       const refreshToast = await showToast({
@@ -360,7 +359,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         title: "Refreshing VM instances...",
         message: "Loading updated instance list",
       });
-      
+
       try {
         // Refresh the instances
         if (service) {
@@ -381,14 +380,8 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         });
       }
     };
-    
-    push(
-      <CreateVMForm
-        projectId={projectId}
-        gcloudPath={gcloudPath}
-        onVMCreated={createdCallback}
-      />
-    );
+
+    push(<CreateVMForm projectId={projectId} gcloudPath={gcloudPath} onVMCreated={createdCallback} />);
   };
 
   const getStatusIcon = (status: string) => {
@@ -407,7 +400,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search VM instances..."
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={() => {}}
       filtering={{ keepSectionOrder: true }}
       navigationTitle="Compute Engine Instances"
       searchBarAccessory={
@@ -429,11 +422,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         icon={{ source: "https://cloud.google.com/compute/images/logo_compute_black.svg" }}
         actions={
           <ActionPanel>
-            <Action
-              title="Create VM Instance"
-              icon={Icon.Plus}
-              onAction={createVMInstance}
-            />
+            <Action title="Create Vm Instance" icon={Icon.Plus} onAction={createVMInstance} />
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}
@@ -444,13 +433,16 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         }
       />
       {service && (
-        <List.Section title="VM Instances" subtitle={instances.length > 0 ? `${instances.length} instances` : undefined}>
+        <List.Section
+          title="VM Instances"
+          subtitle={instances.length > 0 ? `${instances.length} instances` : undefined}
+        >
           {instances.map((instance) => {
             const zone = service.formatZone(instance.zone);
             const machineType = service.formatMachineType(instance.machineType);
             const networkIP = instance.networkInterfaces?.[0]?.networkIP || "No IP";
             const externalIP = instance.networkInterfaces?.[0]?.accessConfigs?.[0]?.natIP || "No external IP";
-            
+
             return (
               <List.Item
                 key={instance.id}
@@ -496,7 +488,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
                     </ActionPanel.Section>
                     <ActionPanel.Section title="Management">
                       <Action
-                        title="Create VM Instance"
+                        title="Create Vm Instance"
                         icon={Icon.Plus}
                         onAction={createVMInstance}
                         shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -517,4 +509,4 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       )}
     </List>
   );
-} 
+}

@@ -1,13 +1,26 @@
 import { ActionPanel, Action, List, Icon, useNavigation, showToast, Toast, Color, Cache } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { CacheManager, CACHE_KEYS, Project } from "../utils/CacheManager";
+import { CacheManager, Project } from "../utils/CacheManager";
 import ProjectView from "../ProjectView";
 import { executeGcloudCommand } from "../gcloud";
-import DevScreen from "./DevScreen";
 
 interface CachedProjectViewProps {
   gcloudPath: string;
   onLoginWithDifferentAccount?: () => void;
+}
+
+interface GCloudProject {
+  projectId: string;
+  name: string;
+  projectNumber: string;
+  createTime: string;
+}
+
+interface ProjectDetails {
+  projectId: string;
+  name: string;
+  projectNumber: string;
+  createTime: string;
 }
 
 // Create a navigation cache instance
@@ -18,12 +31,10 @@ const settingsCache = new Cache({ namespace: "settings" });
 export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAccount }: CachedProjectViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [cachedProject, setCachedProject] = useState<{ projectId: string; timestamp: number } | null>(null);
-  const [projectDetails, setProjectDetails] = useState<any>(null);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projectDetails, setProjectDetails] = useState<ProjectDetails | null>(null);
   const [recentlyUsedProjects, setRecentlyUsedProjects] = useState<Project[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [shouldNavigate, setShouldNavigate] = useState<{action: string; projectId?: string} | null>(null);
-  const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+  const [shouldNavigate, setShouldNavigate] = useState<{ action: string; projectId?: string } | null>(null);
   const [cacheLimit, setCacheLimit] = useState<number>(1);
   const [authCacheDuration, setAuthCacheDuration] = useState<number>(24);
   const { pop, push } = useNavigation();
@@ -35,16 +46,16 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
       const loadingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Loading cached project...",
-        message: "Retrieving your last used project"
+        message: "Retrieving your last used project",
       });
-      
+
       // Get current cache limit
       const limit = CacheManager.getCacheLimit();
       setCacheLimit(limit);
-      
+
       // Ensure recently used projects list respects the cache limit
       CacheManager.syncRecentlyUsedProjectsWithCacheLimit();
-      
+
       // Get cached project
       const cached = CacheManager.getSelectedProject();
       setCachedProject(cached);
@@ -58,50 +69,46 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
               projectId: details.id,
               name: details.name,
               projectNumber: details.projectNumber,
-              createTime: details.createTime
+              createTime: details.createTime,
             });
           }
         } catch (error) {
           console.error("Error fetching cached project details:", error);
         }
       }
-      
+
       // Get exactly the number of recently used projects that matches the cache limit
       const recentProjects = await CacheManager.getRecentlyUsedProjectsWithDetails(gcloudPath);
       console.log("Fetched recent projects:", recentProjects);
-      
+
       // Ensure we show exactly the number of projects configured in the cache limit
       setRecentlyUsedProjects(recentProjects.slice(0, limit));
-      
+
       // Get all projects to keep them cached for when user selects "Browse All Projects"
       try {
-        const result = await executeGcloudCommand(
-          gcloudPath,
-          "projects list --format=json"
-        );
-        if (result && result.length > 0) {
-          const allProjects = result.map((project: any) => ({
+        const result = await executeGcloudCommand(gcloudPath, "projects list --format=json");
+        if (Array.isArray(result) && result.length > 0) {
+          const allProjects = result.map((project: GCloudProject) => ({
             id: project.projectId,
             name: project.name || project.projectId,
             projectNumber: project.projectNumber || "",
-            createTime: project.createTime || new Date().toISOString()
+            createTime: project.createTime || new Date().toISOString(),
           }));
           CacheManager.saveProjectsList(allProjects);
-          setProjects(allProjects);
         }
       } catch (error) {
         console.error("Error fetching all projects:", error);
       }
-      
+
       loadingToast.hide();
     } catch (error) {
       console.error("Error initializing cached project view:", error);
       setError("Failed to load cached project");
-      
+
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to load cached project",
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsLoading(false);
@@ -119,7 +126,7 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
     if (cachedLimit) {
       setCacheLimit(parseInt(cachedLimit, 10));
     }
-    
+
     // Load auth cache duration setting
     const cachedAuthDuration = settingsCache.get("auth-cache-duration");
     if (cachedAuthDuration) {
@@ -131,42 +138,40 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
   useEffect(() => {
     if (!shouldNavigate) return;
 
-    setActionInProgress(shouldNavigate.action);
-    
     const performNavigation = async () => {
       try {
         let loadingToast: Toast | null = null;
-        
+
         if (shouldNavigate.action === "continue" && cachedProject) {
-          if (!cachedProject.projectId || typeof cachedProject.projectId !== 'string') {
+          if (!cachedProject.projectId || typeof cachedProject.projectId !== "string") {
             throw new Error("Invalid cached project ID");
           }
-          
+
           loadingToast = await showToast({
             style: Toast.Style.Animated,
             title: "Opening project...",
-            message: cachedProject.projectId
+            message: cachedProject.projectId,
           });
-          
+
           // Short delay to show the toast before navigation
           setTimeout(() => {
             loadingToast?.hide();
             push(<ProjectView projectId={cachedProject.projectId} gcloudPath={gcloudPath} />);
           }, 500);
         } else if (shouldNavigate.action === "select" && shouldNavigate.projectId) {
-          if (!shouldNavigate.projectId || typeof shouldNavigate.projectId !== 'string') {
+          if (!shouldNavigate.projectId || typeof shouldNavigate.projectId !== "string") {
             throw new Error("Invalid project ID for selection");
           }
-          
+
           loadingToast = await showToast({
             style: Toast.Style.Animated,
             title: "Selecting project...",
-            message: shouldNavigate.projectId
+            message: shouldNavigate.projectId,
           });
-          
+
           console.log("Saving selected project:", shouldNavigate.projectId);
           CacheManager.saveSelectedProject(shouldNavigate.projectId);
-          
+
           // Short delay to show the toast before navigation
           setTimeout(() => {
             loadingToast?.hide();
@@ -176,9 +181,9 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
           loadingToast = await showToast({
             style: Toast.Style.Animated,
             title: "Loading projects list...",
-            message: "Preparing project selection view"
+            message: "Preparing project selection view",
           });
-          
+
           // Short delay to show the toast before navigation
           setTimeout(() => {
             loadingToast?.hide();
@@ -188,37 +193,35 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
           loadingToast = await showToast({
             style: Toast.Style.Animated,
             title: "Clearing cache...",
-            message: "Removing all cached data"
+            message: "Removing all cached data",
           });
-          
+
           CacheManager.clearAllCaches();
-          
+
           loadingToast.hide();
-          
+
           showToast({
             style: Toast.Style.Success,
             title: "Cache cleared",
-            message: "All cached data has been cleared"
+            message: "All cached data has been cleared",
           });
-          
+
           navigationCache.set("showProjectsList", "true");
           pop();
         }
       } catch (error) {
         console.error("Error during navigation:", error);
-        
+
         showToast({
           style: Toast.Style.Failure,
           title: "Navigation failed",
-          message: error instanceof Error ? error.message : String(error)
+          message: error instanceof Error ? error.message : String(error),
         });
-      } finally {
-        setActionInProgress(null);
       }
     };
-    
+
     performNavigation();
-    
+
     // Reset navigation state
     setShouldNavigate(null);
   }, [shouldNavigate, cachedProject, gcloudPath, push, pop]);
@@ -236,110 +239,99 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
   }
 
   function selectProject(projectId: string) {
-    if (!projectId || typeof projectId !== 'string') {
+    if (!projectId || typeof projectId !== "string") {
       console.error("Invalid project ID:", projectId);
       showToast({
         style: Toast.Style.Failure,
         title: "Invalid project ID",
-        message: "Cannot select project with invalid ID"
+        message: "Cannot select project with invalid ID",
       });
       return;
     }
-    
+
     console.log("Selecting project:", projectId);
     setShouldNavigate({ action: "select", projectId });
   }
 
   // Configuration update functions
   async function updateCacheLimit(limit: number) {
-    setActionInProgress("updating-cache-limit");
     try {
       const loadingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Updating cache settings...",
-        message: `Setting project cache limit to ${limit}`
+        message: `Setting project cache limit to ${limit}`,
       });
-      
+
       // Update the state
       setCacheLimit(limit);
-      
+
       // Store the setting in the settings cache
       settingsCache.set("cache-limit", limit.toString());
-      
+
       // Get current recently used projects
       const recentlyUsedIds = CacheManager.getRecentlyUsedProjects();
-      
+
       // If currently selected project isn't in the list, add it (ensures active project is always cached)
       if (cachedProject && !recentlyUsedIds.includes(cachedProject.projectId)) {
         recentlyUsedIds.unshift(cachedProject.projectId);
       }
-      
+
       // Trim the list to the new limit
       const trimmedRecentlyUsed = recentlyUsedIds.slice(0, limit);
-      
+
       // Save updated list and refresh local state
       CacheManager.saveRecentlyUsedProjects(trimmedRecentlyUsed);
-      
+
       loadingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Success,
         title: "Cache settings updated",
-        message: `Project cache limit set to ${limit}`
+        message: `Project cache limit set to ${limit}`,
       });
-      
+
       // Refresh the view to ensure everything is in sync
       initialize();
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to update cache settings",
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       });
-    } finally {
-      setActionInProgress(null);
     }
   }
-  
+
   async function updateAuthCacheDuration(hours: number) {
-    setActionInProgress("updating-auth-cache");
     try {
       const loadingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Updating auth cache settings...",
-        message: `Setting auth cache duration to ${hours} hours`
+        message: `Setting auth cache duration to ${hours} hours`,
       });
-      
+
       // Update the auth cache duration
       CacheManager.updateAuthCacheDuration(hours);
-      
+
       // Update local state
       setAuthCacheDuration(hours);
-      
+
       // Store the setting in the settings cache
       settingsCache.set("auth-cache-duration", hours.toString());
-      
+
       loadingToast.hide();
-      
+
       showToast({
         style: Toast.Style.Success,
         title: "Auth cache settings updated",
-        message: `Auth cache duration set to ${hours} hours`
+        message: `Auth cache duration set to ${hours} hours`,
       });
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to update auth cache settings",
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       });
-    } finally {
-      setActionInProgress(null);
     }
-  }
-
-  // Function to open Dev Screen
-  function openDevScreen() {
-    push(<DevScreen />);
   }
 
   return (
@@ -354,8 +346,11 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
           subtitle={projectDetails?.name || cachedProject?.projectId}
           icon={{ source: Icon.ArrowRight, tintColor: Color.Green }}
           accessories={[
-            { text: `Last used: ${cachedProject ? new Date(cachedProject.timestamp).toLocaleDateString() : ""}`, icon: Icon.Clock },
-            { text: cachedProject?.projectId }
+            {
+              text: `Last used: ${cachedProject ? new Date(cachedProject.timestamp).toLocaleDateString() : ""}`,
+              icon: Icon.Clock,
+            },
+            { text: cachedProject?.projectId },
           ]}
           actions={
             <ActionPanel>
@@ -396,7 +391,7 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
           }
         />
       </List.Section>
-      
+
       {error ? (
         <List.EmptyView
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
@@ -404,11 +399,7 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
           description={error}
           actions={
             <ActionPanel>
-              <Action
-                title="Clear Cache and Retry"
-                onAction={clearAllCache}
-                icon={Icon.RotateClockwise}
-              />
+              <Action title="Clear Cache and Retry" onAction={clearAllCache} icon={Icon.RotateClockwise} />
             </ActionPanel>
           }
         />
@@ -423,10 +414,10 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
                   subtitle={project.id}
                   icon={{ source: Icon.Clock, tintColor: Color.Blue }}
                   accessories={[
-                    { 
-                      text: index === 0 ? "Last used" : index === 1 ? "Previously used" : "Used earlier", 
-                      icon: Icon.Clock 
-                    }
+                    {
+                      text: index === 0 ? "Last used" : index === 1 ? "Previously used" : "Used earlier",
+                      icon: Icon.Clock,
+                    },
                   ]}
                   actions={
                     <ActionPanel>
@@ -435,18 +426,14 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
                         icon={Icon.Forward}
                         onAction={() => selectProject(project.id)}
                       />
-                      <Action
-                        title="Browse All Projects"
-                        icon={Icon.List}
-                        onAction={selectNewProject}
-                      />
+                      <Action title="Browse All Projects" icon={Icon.List} onAction={selectNewProject} />
                     </ActionPanel>
                   }
                 />
               ))}
             </List.Section>
           )}
-          
+
           <List.Section title="Options">
             <List.Item
               title="Browse All Projects"
@@ -454,23 +441,19 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
               icon={{ source: Icon.List, tintColor: Color.Blue }}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Browse All Projects"
-                    icon={Icon.List}
-                    onAction={selectNewProject}
-                  />
+                  <Action title="Browse All Projects" icon={Icon.List} onAction={selectNewProject} />
                 </ActionPanel>
               }
             />
           </List.Section>
-          
+
           <List.Section title="Configuration" subtitle="Customize your experience">
             <List.Item
               title="Cache Settings"
               subtitle="Configure how many projects to cache"
               icon={{ source: Icon.Gear, tintColor: Color.Purple }}
               accessories={[
-                { text: `Currently: ${cacheLimit} project${cacheLimit > 1 ? 's' : ''}`, icon: Icon.Bookmark }
+                { text: `Currently: ${cacheLimit} project${cacheLimit > 1 ? "s" : ""}`, icon: Icon.Bookmark },
               ]}
               actions={
                 <ActionPanel>
@@ -496,9 +479,7 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
               title="Auth Cache Duration"
               subtitle="How long to cache authentication status"
               icon={{ source: Icon.Key, tintColor: Color.Yellow }}
-              accessories={[
-                { text: `Currently: ${authCacheDuration} hours`, icon: Icon.Clock }
-              ]}
+              accessories={[{ text: `Currently: ${authCacheDuration} hours`, icon: Icon.Clock }]}
               actions={
                 <ActionPanel>
                   <Action
@@ -527,12 +508,12 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
             {onLoginWithDifferentAccount && (
               <List.Item
                 icon={{ source: Icon.Person, tintColor: Color.Orange }}
-                title="Login with Different Account" 
+                title="Login with Different Account"
                 subtitle="Switch to another Google Cloud account"
                 actions={
                   <ActionPanel>
-                    <Action 
-                      title="Switch Account" 
+                    <Action
+                      title="Switch Account"
                       onAction={onLoginWithDifferentAccount || (() => {})}
                       icon={Icon.Switch}
                     />
@@ -540,20 +521,6 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
                 }
               />
             )}
-            <List.Item
-              icon={{ source: Icon.Terminal, tintColor: Color.Purple }}
-              title="Dev Screen"
-              subtitle="Development Tools and Utilities"
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Open Dev Screen"
-                    icon={Icon.Terminal}
-                    onAction={openDevScreen}
-                  />
-                </ActionPanel>
-              }
-            />
           </List.Section>
         </>
       ) : (
@@ -563,11 +530,7 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
           description="You haven't selected a Google Cloud project yet"
           actions={
             <ActionPanel>
-              <Action
-                title="Browse Projects"
-                onAction={selectNewProject}
-                icon={Icon.List}
-              />
+              <Action title="Browse Projects" onAction={selectNewProject} icon={Icon.List} />
             </ActionPanel>
           }
         />
