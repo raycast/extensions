@@ -14,7 +14,7 @@ export function updateProject(workspaceId: number, projectId: number, options: P
 }
 
 export function deleteProject(workspaceId: number, projectId: number, deletionMode: "delete" | "unassign") {
-  return remove(`/workspaces/${workspaceId}/projects/${projectId}?teDeletionMode=${deletionMode}`);
+  return remove(`/workspaces/${workspaceId}/projects/${projectId}?DeletionMode=${deletionMode}`);
 }
 
 export interface ProjectOptions {
