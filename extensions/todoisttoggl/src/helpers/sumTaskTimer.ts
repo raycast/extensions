@@ -28,7 +28,7 @@ export async function sumTaskTimer(task: Task, mutate: () => void) {
       }
     }
   }
-  if(taskDuration > 0) {
+  if (taskDuration > 0) {
     await todoistApi.updateTask(task.id, { duration: taskDuration, durationUnit: "minute" });
   } else {
     showToast({ style: Toast.Style.Failure, title: "This task has not been tracked yet." });

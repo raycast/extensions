@@ -26,6 +26,10 @@ async function togglFetch<T>(method: string, endpoint: string, body?: unknown): 
     body: body ? JSON.stringify(body) : undefined,
   });
   if (!res.ok) {
+    if (res.status == 429) {
+      await delay(1000);
+      return await togglFetch(method, endpoint, body);
+    }
     let msg = `${res.status} ${res.statusText}`;
     const text = (await res.text()) as string;
     if (text) msg += ", " + text;
@@ -35,6 +39,8 @@ async function togglFetch<T>(method: string, endpoint: string, body?: unknown): 
     const json = (await res.json()) as T | null;
     if (json !== null) return json;
   } catch (error) {
-    throw error;
+    if (!(error instanceof SyntaxError)) throw error;
   }
 }
+
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
