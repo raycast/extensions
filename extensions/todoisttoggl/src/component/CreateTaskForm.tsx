@@ -12,7 +12,7 @@ function CreateTaskForm({ mutate, refreshTimer }: { mutate: () => void; refreshT
   const [taskContent, setTaskContent] = useState("");
   const [priority, setPriority] = useState("1");
   const [dueDate] = useState<string | undefined>(undefined);
-  const navigaton = useNavigation();
+  const navigation = useNavigation();
 
   const { data: projects, isLoading: isLoadingProjects } = useGetProject();
   const { data: labels } = useGetLabels();
@@ -63,7 +63,7 @@ function CreateTaskForm({ mutate, refreshTimer }: { mutate: () => void; refreshT
       }
       showToast({ style: Toast.Style.Success, title: "Create task" });
       mutate();
-      navigaton.pop();
+      navigation.pop();
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Failed to create task" });
     }
