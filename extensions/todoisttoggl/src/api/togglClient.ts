@@ -39,6 +39,7 @@ async function togglFetch<T>(method: string, endpoint: string, body?: unknown): 
     const json = (await res.json()) as T | null;
     if (json !== null) return json;
   } catch (error) {
+    console.error(error);
     if (!(error instanceof SyntaxError)) throw error;
   }
 }
