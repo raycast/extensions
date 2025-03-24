@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast, Color } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, Color, environment } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { execa } from "execa";
 import path from "path";
@@ -7,7 +7,7 @@ import os from "os";
 interface CloudStatus {
   id: string;
   name: string;
-  icon: { source: Icon; tintColor?: Color };
+  icon: { source: string };
   isLoggedIn: boolean;
   isLoading: boolean;
   error?: string;
@@ -20,25 +20,44 @@ export default function Command() {
     {
       id: "aws",
       name: "AWS",
-      icon: { source: Icon.Cloud, tintColor: Color.Orange },
+      icon: {
+        source: environment.appearance === "dark" ? "Amazon Web Services-dark.svg" : "Amazon Web Services-light.svg",
+      },
       isLoggedIn: false,
       isLoading: true,
     },
     {
       id: "gcloud",
       name: "Google Cloud",
-      icon: { source: Icon.Cloud, tintColor: Color.Blue },
+      icon: { source: "Google.svg" },
       isLoggedIn: false,
       isLoading: true,
     },
     {
       id: "azure",
       name: "Azure",
-      icon: { source: Icon.Cloud, tintColor: Color.Purple },
+      icon: { source: "Microsoft Azure.svg" },
       isLoggedIn: false,
       isLoading: true,
     },
   ]);
+
+  // Update AWS icon when appearance changes
+  useEffect(() => {
+    setStatuses((prevStatuses) =>
+      prevStatuses.map((status) =>
+        status.id === "aws"
+          ? {
+              ...status,
+              icon: {
+                source:
+                  environment.appearance === "dark" ? "Amazon Web Services-dark.svg" : "Amazon Web Services-light.svg",
+              },
+            }
+          : status,
+      ),
+    );
+  }, [environment.appearance]);
 
   useEffect(() => {
     checkCloudStatuses();
