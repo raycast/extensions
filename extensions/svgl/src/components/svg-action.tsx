@@ -9,7 +9,7 @@ import CopyWordmarkSvgActions from "./actions/copy-wordmark-svg-actions";
 import CopySvgUrlActions from "./actions/copy-svg-url-actions";
 import CopyWordmarkSvgUrlAction from "./actions/copy-wordmark-svg-url-actions";
 import SvgInfoActions from "./actions/svg-info-actions";
-import { Svg } from "../type";
+import { Svg, SvgActionKey } from "../type";
 import PinSvgAction from "./actions/pin-svg-action";
 
 interface SvgActionProps {
@@ -18,14 +18,14 @@ interface SvgActionProps {
 }
 
 interface Preferences {
-  svgDefaultAction: string;
+  svgDefaultAction: SvgActionKey;
 }
 
 const SvgAction = ({ svg, category }: SvgActionProps) => {
   const preferences = getPreferenceValues<Preferences>();
   const { svgDefaultAction } = preferences;
 
-  const actionSections = {
+  const actionSections: Record<SvgActionKey, JSX.Element> = {
     copySvg: (
       <ActionPanel.Section title="Copy SVG" key="copySvg">
         <CopySvgActions svg={svg} />
@@ -83,10 +83,12 @@ const SvgAction = ({ svg, category }: SvgActionProps) => {
     ),
   };
 
-  const orderedKeys = Object.keys(actionSections);
-  const reorderedKeys = [svgDefaultAction, ...orderedKeys.filter((key) => key !== svgDefaultAction)];
+  const orderedKeys = Object.keys(actionSections) as SvgActionKey[];
+  const reorderedKeys: SvgActionKey[] = orderedKeys.includes(svgDefaultAction)
+    ? [svgDefaultAction, ...orderedKeys.filter((key) => key !== svgDefaultAction)]
+    : orderedKeys;
 
-  return <ActionPanel>{reorderedKeys.map((key) => actionSections[key as keyof typeof actionSections])}</ActionPanel>;
+  return <ActionPanel>{reorderedKeys.map((key) => actionSections[key])}</ActionPanel>;
 };
 
 export default SvgAction;
