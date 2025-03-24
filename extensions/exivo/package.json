@@ -5,7 +5,6 @@
   "description": "Use dormakaba exivo api to unlock doors.",
   "icon": "extension-icon.png",
   "author": "Michi-2124",
-  "owner": "codeunity-gmbh",
   "categories": [
     "Security"
   ],
