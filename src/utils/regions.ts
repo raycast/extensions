@@ -4,10 +4,10 @@
  */
 
 export interface GCPRegion {
-  name: string;
-  description: string;
-  tier: "premium" | "standard";
-  continent: "na" | "eu" | "asia" | "au" | "sa" | "africa" | "me";
+  readonly name: string;
+  readonly description: string;
+  readonly tier: "premium" | "standard";
+  readonly continent: "na" | "eu" | "asia" | "au" | "sa" | "africa" | "me";
 }
 
 export const GCP_REGIONS: GCPRegion[] = [
@@ -67,6 +67,15 @@ export const GCP_REGIONS: GCPRegion[] = [
 ];
 
 /**
+ * Normalize region name for consistent lookup
+ * @param name Region name to normalize
+ * @returns Normalized region name (trimmed, lowercase)
+ */
+function normalizeRegionName(name: string): string {
+  return name.trim().toLowerCase();
+}
+
+/**
  * Get all GCP regions
  * @returns Array of region names
  */
@@ -93,9 +102,11 @@ export function getPremiumRegions(): GCPRegion[] {
 
 /**
  * Get region details by name
- * @param name Region name
+ * @param name Region name (case-insensitive, whitespace-tolerant)
  * @returns Region details or undefined if not found
  */
 export function getRegionByName(name: string): GCPRegion | undefined {
-  return GCP_REGIONS.find((region) => region.name === name);
+  if (!name) return undefined;
+  const normalizedName = normalizeRegionName(name);
+  return GCP_REGIONS.find((region) => normalizeRegionName(region.name) === normalizedName);
 }

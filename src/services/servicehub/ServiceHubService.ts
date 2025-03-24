@@ -1,5 +1,5 @@
 /**
- * Marketplace Service - Centralizes management of Google Cloud service activation
+ * ServiceHub Service - Centralizes management of Google Cloud service activation
  * Provides a unified interface for enabling and disabling GCP services
  */
 
@@ -13,7 +13,7 @@ export interface GCPService {
   isEnabled: boolean;
   state?: string;
   dependsOn?: string[];
-  category?: string;
+  category?: GCPServiceCategory;
   documentation?: string;
   console?: string;
   region?: string;
@@ -28,7 +28,7 @@ export interface ServiceListOptions {
   limit?: number;
   pageSize?: number;
   includeDisabled?: boolean;
-  category?: string;
+  category?: GCPServiceCategory;
   useLocalOnly?: boolean;
   coreServicesOnly?: boolean;
 }
@@ -78,7 +78,7 @@ const CORE_SERVICES = [
   "cloudresourcemanager.googleapis.com",
 ];
 
-export class MarketplaceService {
+export class ServiceHubService {
   private gcloudPath: string;
   private projectId: string;
   private cache: Map<string, { data: unknown; timestamp: number }> = new Map();
@@ -280,7 +280,7 @@ export class MarketplaceService {
   /**
    * Get local services without API call
    */
-  private getLocalServices(category?: string, coreServicesOnly?: boolean): GCPService[] {
+  private getLocalServices(category?: GCPServiceCategory, coreServicesOnly?: boolean): GCPService[] {
     let allPredefinedServices = getAllServices();
 
     // Filter to core services if requested
@@ -541,20 +541,25 @@ export class MarketplaceService {
    * Get services by category
    * @param category The category to filter by
    * @param includeDisabled Whether to include disabled services
+   * @param coreServicesOnly Whether to only include core services
    * @returns Array of services in the specified category
    */
-  async getServicesByCategory(category: string, includeDisabled: boolean = true): Promise<GCPService[]> {
+  async getServicesByCategory(
+    category: GCPServiceCategory,
+    includeDisabled: boolean = true,
+    coreServicesOnly: boolean = false,
+  ): Promise<GCPService[]> {
     return this.listServices({
       category,
       includeDisabled,
-      coreServicesOnly: true,
+      coreServicesOnly,
     });
   }
 
   /**
    * Get all available categories
    */
-  async getAllCategories(): Promise<string[]> {
+  async getAllCategories(): Promise<GCPServiceCategory[]> {
     return Object.values(GCPServiceCategory).sort();
   }
 }

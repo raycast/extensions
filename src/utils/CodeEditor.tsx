@@ -33,20 +33,20 @@ export function CodeEditor({
     }
   }, [code, isEditing]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (onSave) {
-      onSave(editedCode);
+      await onSave(editedCode);
     } else {
       onChange(editedCode);
     }
     setIsEditing(false);
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     setEditedCode(code);
     setIsEditing(false);
     if (onCancel) {
-      onCancel();
+      await onCancel();
     }
   };
 
@@ -61,7 +61,7 @@ export function CodeEditor({
               title="Save"
               icon={Icon.Check}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
-              onSubmit={() => handleSave()}
+              onSubmit={handleSave}
             />
             <Action
               title="Cancel"
@@ -103,8 +103,8 @@ export function CodeEditor({
               title="Save"
               icon={Icon.Check}
               shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-              onAction={() => {
-                if (onSave) onSave(editedCode);
+              onAction={async () => {
+                if (onSave) await onSave(editedCode);
                 pop();
               }}
             />
@@ -114,8 +114,8 @@ export function CodeEditor({
               title="Cancel"
               icon={Icon.XmarkCircle}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-              onAction={() => {
-                if (onCancel) onCancel();
+              onAction={async () => {
+                if (onCancel) await onCancel();
                 setEditedCode(code); // Reset to original code on cancel
                 pop();
               }}

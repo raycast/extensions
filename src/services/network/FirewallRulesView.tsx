@@ -143,15 +143,18 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
   };
 
   const handleCreateFirewallRule = useCallback(() => {
+    if (!service) {
+      showFailureToast("Network service is not initialized");
+      return;
+    }
+
     if (vpcs.length === 0) {
       showFailureToast("Please wait for VPC networks to be loaded");
       return;
     }
 
-    push(
-      <CreateFirewallRuleForm gcloudPath={gcloudPath} projectId={projectId} vpcs={vpcs} onRuleCreated={refreshRules} />,
-    );
-  }, [gcloudPath, projectId, vpcs, refreshRules, push]);
+    push(<CreateFirewallRuleForm vpcs={vpcs} onRuleCreated={refreshRules} service={service} />);
+  }, [gcloudPath, projectId, vpcs, refreshRules, push, service]);
 
   return (
     <List
@@ -322,10 +325,9 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
 }
 
 interface CreateFirewallRuleFormProps {
-  gcloudPath: string;
-  projectId: string;
   vpcs: VPC[];
   onRuleCreated: () => void;
+  service: NetworkService;
 }
 
 interface FirewallRuleFormValues {
@@ -360,10 +362,11 @@ interface FirewallRuleOptions {
   denied?: { protocol: string; ports?: string[] }[];
 }
 
-function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: CreateFirewallRuleFormProps) {
+function CreateFirewallRuleForm({ vpcs, onRuleCreated, service }: CreateFirewallRuleFormProps) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [direction, setDirection] = useState<string>("INGRESS");
+  const [protocol, setProtocol] = useState<string>("tcp");
 
   async function handleSubmit(values: FirewallRuleFormValues) {
     if (!values.name) {
@@ -400,8 +403,6 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
     });
 
     try {
-      const service = new NetworkService(gcloudPath, projectId);
-
       const ruleOptions: FirewallRuleOptions = {
         description: values.description,
         direction: values.direction as "INGRESS" | "EGRESS",
@@ -575,7 +576,14 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
         info="Comma-separated target tags"
       />
 
-      <Form.Dropdown id="protocol" title="Protocol" defaultValue="tcp" info="The IP protocol this rule applies to">
+      <Form.Dropdown
+        id="protocol"
+        title="Protocol"
+        defaultValue="tcp"
+        value={protocol}
+        onChange={setProtocol}
+        info="The IP protocol this rule applies to"
+      >
         <Form.Dropdown.Item value="tcp" title="TCP" />
         <Form.Dropdown.Item value="udp" title="UDP" />
         <Form.Dropdown.Item value="icmp" title="ICMP" />
@@ -589,7 +597,12 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
         id="ports"
         title="Ports"
         placeholder="80,443"
-        info="Comma-separated port numbers or ranges (e.g., 80-90)"
+        info={
+          protocol === "all"
+            ? "Ports cannot be specified when all protocols are selected"
+            : "Comma-separated port numbers or ranges (e.g., 80-90)"
+        }
+        error={protocol === "all" ? "Ports are not applicable when all protocols are selected" : undefined}
       />
 
       <Form.Checkbox

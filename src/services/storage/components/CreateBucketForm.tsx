@@ -62,7 +62,6 @@ export default function CreateBucketForm({
   function handleNameChange(name: string) {
     const validation = validateBucketName(name);
     setNameError(validation.error);
-    return validation.error;
   }
 
   async function handleSubmit(values: {

@@ -54,11 +54,21 @@ export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, o
     conditionTitle?: string;
     conditionDescription?: string;
   }) {
-    if (!values.member?.trim() || !values.role) {
+    // Validate required fields
+    const missingFields = [];
+    if (!values.member?.trim()) missingFields.push("Member");
+    if (!values.role?.trim()) missingFields.push("Role");
+
+    // Validate condition title is provided if condition exists
+    if (values.condition?.trim() && !values.conditionTitle?.trim()) {
+      missingFields.push("Condition Title");
+    }
+
+    if (missingFields.length > 0) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Missing required fields",
-        message: "Please fill in all required fields",
+        title: "Missing Required Fields",
+        message: `Please fill in: ${missingFields.join(", ")}`,
       });
       return;
     }
@@ -151,12 +161,12 @@ export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, o
         id="conditionTitle"
         title="Condition Title"
         placeholder="Access to specific bucket"
-        info="A title for the condition"
+        info="Required if condition is provided. Used to identify and manage the condition."
       />
 
       <Form.TextField
         id="conditionDescription"
-        title="Condition Description"
+        title="Condition Description (Optional)"
         placeholder="Grants access only to the specified bucket"
         info="A description of the condition"
       />

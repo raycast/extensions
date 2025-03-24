@@ -16,25 +16,32 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Initialize service with provided gcloudPath and projectId
+    const abortController = new AbortController();
     const networkService = new NetworkService(gcloudPath, projectId);
 
-    // Validate that we can access the network service
     const validateAccess = async () => {
       try {
-        // Try to fetch VPCs as a test
+        if (abortController.signal.aborted) return;
         await networkService.getVPCs();
       } catch (error) {
-        console.error("Error validating network access:", error);
-        showFailureToast(error, {
-          title: "Network Service Error",
-        });
+        if (!abortController.signal.aborted) {
+          console.error("Error validating network access:", error);
+          showFailureToast(error, {
+            title: "Network Service Error",
+          });
+        }
       } finally {
-        setIsLoading(false);
+        if (!abortController.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
 
     validateAccess();
+
+    return () => {
+      abortController.abort();
+    };
   }, [gcloudPath, projectId]);
 
   return (

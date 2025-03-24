@@ -13,13 +13,6 @@ A lightweight Raycast extension for managing Google Cloud resources efficiently.
 - **Compute Engine**: Create and manage virtual machines and persistent disks
 - **Network Services**: Manage VPC networks, subnets, IP addresses, and firewall rules
 
-## Screenshots
-
-
-[Project Selection](./assets/homescreen.png)
-[Services View](./assets/services.png)
-[IAM Management](./assets/iam.png)
-
 ## Prerequisites
 
 - [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) installed on your machine

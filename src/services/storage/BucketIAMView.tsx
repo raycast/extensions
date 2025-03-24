@@ -28,6 +28,10 @@ interface BucketIAMViewProps {
   bucketName: string;
 }
 
+// Cache TTL constants (in milliseconds)
+const CACHE_TTL = 900000; // 15 minutes
+const CACHE_TTL_DETAILS = 1800000; // 30 minutes
+
 interface IAMBinding {
   role: string;
   members: string[];
@@ -74,8 +78,26 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
   // Cache stored in a ref to persist between renders
   const cache = useRef<Map<string, CacheEntry>>(new Map());
 
+  // Function to clean expired cache entries
+  function cleanExpiredCache() {
+    const now = Date.now();
+    for (const [key, entry] of cache.current.entries()) {
+      // Check if entry has expired based on its type
+      const isDetailsEntry = key.startsWith("service-details:");
+      const ttl = isDetailsEntry ? CACHE_TTL_DETAILS : CACHE_TTL;
+
+      if (now - entry.timestamp > ttl) {
+        cache.current.delete(key);
+      }
+    }
+  }
+
   // Function to invalidate cache entries matching a pattern
   function invalidateCache(pattern: RegExp) {
+    // Clean expired entries first
+    cleanExpiredCache();
+
+    // Then invalidate matching entries
     for (const key of Array.from(cache.current.keys())) {
       if (pattern.test(key)) {
         cache.current.delete(key);
@@ -86,6 +108,9 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
   // Optimized command execution with caching
   async function executeCommand(gcloudPath: string, command: string, options: CommandOptions = {}) {
     const { projectId, formatJson = true, quiet = false, retries = 0 } = options;
+
+    // Clean expired cache entries before checking cache
+    cleanExpiredCache();
 
     // Build the full command
     const projectFlag = projectId ? ` --project=${projectId}` : "";
@@ -99,7 +124,16 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
     const cachedEntry = cache.current.get(cacheKey);
 
     if (cachedEntry) {
-      return cachedEntry.data;
+      // Verify the entry hasn't expired
+      const isDetailsEntry = cacheKey.startsWith("service-details:");
+      const ttl = isDetailsEntry ? CACHE_TTL_DETAILS : CACHE_TTL;
+
+      if (Date.now() - cachedEntry.timestamp <= ttl) {
+        return cachedEntry.data;
+      } else {
+        // Entry has expired, remove it
+        cache.current.delete(cacheKey);
+      }
     }
 
     try {
@@ -206,6 +240,21 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
   useEffect(() => {
     fetchIAMPolicy();
   }, [fetchIAMPolicy]);
+
+  // Add cache cleanup on component mount and unmount
+  useEffect(() => {
+    // Clean expired entries on mount
+    cleanExpiredCache();
+
+    // Set up periodic cache cleanup
+    const cleanupInterval = setInterval(cleanExpiredCache, CACHE_TTL / 2);
+
+    // Cleanup on unmount
+    return () => {
+      clearInterval(cleanupInterval);
+      cache.current.clear();
+    };
+  }, []);
 
   async function addBinding() {
     push(
@@ -369,33 +418,69 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
       }
 
       // Create a temporary JSON file with the updated policy
-      const tempFilePath = path.join(os.tmpdir(), `iam-policy-${bucketName}-${Date.now()}.json`);
+      let tempFilePath = "";
+      try {
+        // Generate unique temp file path
+        tempFilePath = path.join(os.tmpdir(), `iam-policy-${bucketName}-${Date.now()}.json`);
 
-      fs.writeFileSync(tempFilePath, JSON.stringify(updatedPolicy, null, 2));
+        // Write policy to temp file
+        fs.writeFileSync(tempFilePath, JSON.stringify(updatedPolicy, null, 2));
 
-      // Update the bucket with the new IAM policy
-      await executeCommand(gcloudPath, `storage buckets set-iam-policy gs://${bucketName} ${tempFilePath}`, {
-        projectId,
-        formatJson: false,
-        quiet: true,
-      });
+        // Update the bucket with the new IAM policy
+        await executeCommand(gcloudPath, `storage buckets set-iam-policy gs://${bucketName} ${tempFilePath}`, {
+          projectId,
+          formatJson: false,
+          quiet: true,
+        });
 
-      // Clean up the temporary file
-      fs.unlinkSync(tempFilePath);
+        creatingToast.hide();
+        showToast({
+          style: Toast.Style.Success,
+          title: "IAM binding added successfully",
+          message: `Role "${formValues.role}" granted to ${memberString}`,
+        });
 
-      creatingToast.hide();
-      showToast({
-        style: Toast.Style.Success,
-        title: "IAM binding added successfully",
-        message: `Role "${formValues.role}" granted to ${memberString}`,
-      });
+        // Invalidate the cache
+        invalidateCache(new RegExp(`gs://${bucketName}`));
 
-      // Invalidate the cache
-      invalidateCache(new RegExp(`gs://${bucketName}`));
+        // Refresh the policy and go back to the list view
+        pop();
+        fetchIAMPolicy();
+      } catch (error) {
+        creatingToast.hide();
+        console.error("Error adding IAM binding:", error);
 
-      // Refresh the policy and go back to the list view
-      pop();
-      fetchIAMPolicy();
+        // Provide more specific error messages
+        let errorMessage = String(error);
+        let errorTitle = "Failed to add IAM binding";
+
+        if (errorMessage.includes("ENOSPC")) {
+          errorTitle = "Disk space error";
+          errorMessage = "Not enough disk space to create temporary policy file.";
+        } else if (errorMessage.includes("EACCES")) {
+          errorTitle = "Permission denied";
+          errorMessage = "Cannot write temporary policy file. Check folder permissions.";
+        } else if (errorMessage.includes("does not exist")) {
+          errorTitle = "User not found";
+          errorMessage = `The user ${formValues.member} does not exist. Please check the email address and try again.`;
+        } else if (errorMessage.includes("Permission denied") || errorMessage.includes("403")) {
+          errorTitle = "Permission denied";
+          errorMessage = "You don't have permission to modify IAM policies for this bucket.";
+        }
+
+        showFailureToast({ title: errorTitle, message: errorMessage });
+      } finally {
+        // Clean up the temporary file if it exists
+        if (tempFilePath) {
+          try {
+            if (fs.existsSync(tempFilePath)) {
+              fs.unlinkSync(tempFilePath);
+            }
+          } catch (cleanupError) {
+            console.error("Error cleaning up temporary file:", cleanupError);
+          }
+        }
+      }
     } catch (error) {
       creatingToast.hide();
       console.error("Error adding IAM binding:", error);
@@ -483,32 +568,65 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
             }
 
             // Create a temporary JSON file with the updated policy
-            const tempFilePath = path.join(os.tmpdir(), `iam-policy-${bucketName}-${Date.now()}.json`);
+            let tempFilePath = "";
+            try {
+              // Generate unique temp file path
+              tempFilePath = path.join(os.tmpdir(), `iam-policy-${bucketName}-${Date.now()}.json`);
 
-            fs.writeFileSync(tempFilePath, JSON.stringify(updatedPolicy, null, 2));
+              // Write policy to temp file
+              fs.writeFileSync(tempFilePath, JSON.stringify(updatedPolicy, null, 2));
 
-            // Update the bucket with the new IAM policy
-            await executeCommand(gcloudPath, `storage buckets set-iam-policy gs://${bucketName} ${tempFilePath}`, {
-              projectId,
-              formatJson: false,
-              quiet: true,
-            });
+              // Update the bucket with the new IAM policy
+              await executeCommand(gcloudPath, `storage buckets set-iam-policy gs://${bucketName} ${tempFilePath}`, {
+                projectId,
+                formatJson: false,
+                quiet: true,
+              });
 
-            // Clean up the temporary file
-            fs.unlinkSync(tempFilePath);
+              removingToast.hide();
+              showToast({
+                style: Toast.Style.Success,
+                title: "IAM binding removed successfully",
+                message: `Role "${role}" removed from ${member}`,
+              });
 
-            removingToast.hide();
-            showToast({
-              style: Toast.Style.Success,
-              title: "IAM binding removed successfully",
-              message: `Role "${role}" removed from ${member}`,
-            });
+              // Invalidate the cache
+              invalidateCache(new RegExp(`gs://${bucketName}`));
 
-            // Invalidate the cache
-            invalidateCache(new RegExp(`gs://${bucketName}`));
+              // Refresh the policy
+              fetchIAMPolicy();
+            } catch (error) {
+              removingToast.hide();
+              console.error("Error removing IAM binding:", error);
 
-            // Refresh the policy
-            fetchIAMPolicy();
+              // Provide more user-friendly error messages for common errors
+              let errorMessage = String(error);
+              let errorTitle = "Failed to remove IAM binding";
+
+              if (errorMessage.includes("ENOSPC")) {
+                errorTitle = "Disk space error";
+                errorMessage = "Not enough disk space to create temporary policy file.";
+              } else if (errorMessage.includes("EACCES")) {
+                errorTitle = "Permission denied";
+                errorMessage = "Cannot write temporary policy file. Check folder permissions.";
+              } else if (errorMessage.includes("Permission denied") || errorMessage.includes("403")) {
+                errorTitle = "Permission denied";
+                errorMessage = "You don't have permission to modify this bucket's IAM policy.";
+              }
+
+              showFailureToast({ title: errorTitle, message: errorMessage });
+            } finally {
+              // Clean up the temporary file if it exists
+              if (tempFilePath) {
+                try {
+                  if (fs.existsSync(tempFilePath)) {
+                    fs.unlinkSync(tempFilePath);
+                  }
+                } catch (cleanupError) {
+                  console.error("Error cleaning up temporary file:", cleanupError);
+                }
+              }
+            }
           } else {
             throw new Error(`Member "${member}" not found in role "${role}"`);
           }
