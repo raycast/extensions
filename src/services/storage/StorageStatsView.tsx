@@ -206,11 +206,8 @@ export default function StorageStatsView({ projectId, gcloudPath, bucketName }: 
       loadingToast.hide();
       const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
       console.error("Error analyzing storage:", err);
-      setError(`Failed to analyze storage: ${errorMessage}`);
-      showFailureToast("Failed to analyze storage", {
-        title: "Failed to analyze storage",
-        message: errorMessage,
-      });
+      setError(errorMessage);
+      showFailureToast(err instanceof Error ? err.message : "An unknown error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -374,20 +371,12 @@ export default function StorageStatsView({ projectId, gcloudPath, bucketName }: 
     );
   }
 
-  if (isLoading || !stats) {
-    return (
-      <Detail
-        markdown="# Loading Storage Statistics...\n\nAnalyzing your storage usage. This may take a moment."
-        isLoading={true}
-      />
-    );
-  }
-
   return (
     <List
       navigationTitle={`Storage Statistics ${bucketName ? `- ${bucketName}` : ""}`}
       searchBarPlaceholder="Search storage statistics..."
       isShowingDetail
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action
@@ -400,158 +389,170 @@ export default function StorageStatsView({ projectId, gcloudPath, bucketName }: 
         </ActionPanel>
       }
     >
-      <List.Section title="Overview">
-        <List.Item
-          title="Storage Summary"
-          subtitle={`${stats.objectCount} objects, ${formatBytes(stats.totalSize)}`}
-          icon={Icon.Document}
-          detail={
-            <List.Item.Detail
-              markdown={generateStorageOverview()}
-              metadata={
-                <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="Total Objects" text={stats.objectCount.toString()} />
-                  <List.Item.Detail.Metadata.Label title="Total Size" text={formatBytes(stats.totalSize)} />
-                  <List.Item.Detail.Metadata.Label
-                    title="Average Size"
-                    text={formatBytes(stats.objectCount > 0 ? stats.totalSize / stats.objectCount : 0)}
-                  />
-                  <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Storage Classes"
-                    text={Object.keys(stats.storageClassDistribution).length.toString()}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Regions"
-                    text={Object.keys(stats.regionDistribution).length.toString()}
-                  />
-                </List.Item.Detail.Metadata>
-              }
-            />
-          }
-        />
-      </List.Section>
-
-      <List.Section title="Storage Classes">
-        {Object.entries(stats.storageClassDistribution).map(([storageClass, count]) => {
-          const percentage = stats.objectCount > 0 ? ((count / stats.objectCount) * 100).toFixed(1) : "0";
-          return (
+      {stats && (
+        <>
+          <List.Section title="Overview">
             <List.Item
-              key={`storage-class-${storageClass}`}
-              title={storageClass}
-              subtitle={`${count} objects (${percentage}%)`}
-              icon={getStorageClassIcon(storageClass)}
+              title="Storage Summary"
+              subtitle={`${stats.objectCount} objects, ${formatBytes(stats.totalSize)}`}
+              icon={Icon.Document}
               detail={
                 <List.Item.Detail
-                  markdown={generateStorageClassChart()}
+                  markdown={generateStorageOverview()}
                   metadata={
                     <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label title="Storage Class Distribution" />
-                      {Object.entries(stats.storageClassDistribution).map(([sc, cnt]) => (
-                        <List.Item.Detail.Metadata.Label
-                          key={`meta-sc-${sc}`}
-                          title={sc}
-                          text={`${cnt} (${stats.objectCount > 0 ? ((cnt / stats.objectCount) * 100).toFixed(1) : "0"}%)`}
-                          icon={{ source: Icon.Circle, tintColor: getStorageClassColor(sc) }}
-                        />
-                      ))}
-                    </List.Item.Detail.Metadata>
-                  }
-                />
-              }
-            />
-          );
-        })}
-      </List.Section>
-
-      <List.Section title="Regions">
-        {Object.entries(stats.regionDistribution).map(([region, count]) => {
-          const percentage = stats.objectCount > 0 ? ((count / stats.objectCount) * 100).toFixed(1) : "0";
-          return (
-            <List.Item
-              key={`region-${region}`}
-              title={region}
-              subtitle={`${count} objects (${percentage}%)`}
-              icon={getRegionIcon(region)}
-              detail={
-                <List.Item.Detail
-                  markdown={generateRegionChart()}
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label title="Region Distribution" />
-                      {Object.entries(stats.regionDistribution).map(([reg, cnt]) => (
-                        <List.Item.Detail.Metadata.Label
-                          key={`meta-reg-${reg}`}
-                          title={reg}
-                          text={`${cnt} (${stats.objectCount > 0 ? ((cnt / stats.objectCount) * 100).toFixed(1) : "0"}%)`}
-                        />
-                      ))}
-                    </List.Item.Detail.Metadata>
-                  }
-                />
-              }
-            />
-          );
-        })}
-      </List.Section>
-
-      <List.Section title="Largest Objects">
-        {stats.largestObjects.map((obj, index) => (
-          <List.Item
-            key={`large-${index}`}
-            title={obj.name}
-            subtitle={formatBytes(obj.size)}
-            icon={getStorageClassIcon(obj.storageClass)}
-            accessories={[{ text: obj.storageClass }, { text: new Date(obj.updated).toLocaleDateString() }]}
-            detail={
-              <List.Item.Detail
-                markdown={generateLargestObjectsList()}
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Object Details" />
-                    <List.Item.Detail.Metadata.Label title="Name" text={obj.name} />
-                    <List.Item.Detail.Metadata.Label title="Size" text={formatBytes(obj.size)} />
-                    <List.Item.Detail.Metadata.Label title="Storage Class" text={obj.storageClass} />
-                    <List.Item.Detail.Metadata.Label
-                      title="Last Updated"
-                      text={new Date(obj.updated).toLocaleString()}
-                    />
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
-          />
-        ))}
-      </List.Section>
-
-      <List.Section title="Recently Modified">
-        {stats.recentlyModified.map((obj, index) => (
-          <List.Item
-            key={`recent-${index}`}
-            title={obj.name}
-            subtitle={new Date(obj.updated).toLocaleString()}
-            icon={Icon.Clock}
-            accessories={[{ text: formatBytes(obj.size) }]}
-            detail={
-              <List.Item.Detail
-                markdown={generateRecentlyModifiedList()}
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Recently Modified Objects" />
-                    {stats.recentlyModified.map((o, i) => (
+                      <List.Item.Detail.Metadata.Label title="Total Objects" text={stats.objectCount.toString()} />
+                      <List.Item.Detail.Metadata.Label title="Total Size" text={formatBytes(stats.totalSize)} />
                       <List.Item.Detail.Metadata.Label
-                        key={`meta-recent-${i}`}
-                        title={o.name}
-                        text={`${formatBytes(o.size)} | ${new Date(o.updated).toLocaleString()}`}
+                        title="Average Size"
+                        text={formatBytes(stats.objectCount > 0 ? stats.totalSize / stats.objectCount : 0)}
                       />
-                    ))}
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
-          />
-        ))}
-      </List.Section>
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label
+                        title="Storage Classes"
+                        text={Object.keys(stats.storageClassDistribution).length.toString()}
+                      />
+                      <List.Item.Detail.Metadata.Label
+                        title="Regions"
+                        text={Object.keys(stats.regionDistribution).length.toString()}
+                      />
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
+            />
+          </List.Section>
+
+          {Object.keys(stats.storageClassDistribution).length > 0 && (
+            <List.Section title="Storage Classes">
+              {Object.entries(stats.storageClassDistribution).map(([storageClass, count]) => {
+                const percentage = stats.objectCount > 0 ? ((count / stats.objectCount) * 100).toFixed(1) : "0";
+                return (
+                  <List.Item
+                    key={`storage-class-${storageClass}`}
+                    title={storageClass}
+                    subtitle={`${count} objects (${percentage}%)`}
+                    icon={getStorageClassIcon(storageClass)}
+                    detail={
+                      <List.Item.Detail
+                        markdown={generateStorageClassChart()}
+                        metadata={
+                          <List.Item.Detail.Metadata>
+                            <List.Item.Detail.Metadata.Label title="Storage Class Distribution" />
+                            {Object.entries(stats.storageClassDistribution).map(([sc, cnt]) => (
+                              <List.Item.Detail.Metadata.Label
+                                key={`meta-sc-${sc}`}
+                                title={sc}
+                                text={`${cnt} (${stats.objectCount > 0 ? ((cnt / stats.objectCount) * 100).toFixed(1) : "0"}%)`}
+                                icon={{ source: Icon.Circle, tintColor: getStorageClassColor(sc) }}
+                              />
+                            ))}
+                          </List.Item.Detail.Metadata>
+                        }
+                      />
+                    }
+                  />
+                );
+              })}
+            </List.Section>
+          )}
+
+          {Object.keys(stats.regionDistribution).length > 0 && (
+            <List.Section title="Regions">
+              {Object.entries(stats.regionDistribution).map(([region, count]) => {
+                const percentage = stats.objectCount > 0 ? ((count / stats.objectCount) * 100).toFixed(1) : "0";
+                return (
+                  <List.Item
+                    key={`region-${region}`}
+                    title={region}
+                    subtitle={`${count} objects (${percentage}%)`}
+                    icon={getRegionIcon(region)}
+                    detail={
+                      <List.Item.Detail
+                        markdown={generateRegionChart()}
+                        metadata={
+                          <List.Item.Detail.Metadata>
+                            <List.Item.Detail.Metadata.Label title="Region Distribution" />
+                            {Object.entries(stats.regionDistribution).map(([reg, cnt]) => (
+                              <List.Item.Detail.Metadata.Label
+                                key={`meta-reg-${reg}`}
+                                title={reg}
+                                text={`${cnt} (${stats.objectCount > 0 ? ((cnt / stats.objectCount) * 100).toFixed(1) : "0"}%)`}
+                              />
+                            ))}
+                          </List.Item.Detail.Metadata>
+                        }
+                      />
+                    }
+                  />
+                );
+              })}
+            </List.Section>
+          )}
+
+          {stats.largestObjects.length > 0 && (
+            <List.Section title="Largest Objects">
+              {stats.largestObjects.map((obj, index) => (
+                <List.Item
+                  key={`large-${index}`}
+                  title={obj.name}
+                  subtitle={formatBytes(obj.size)}
+                  icon={getStorageClassIcon(obj.storageClass)}
+                  accessories={[{ text: obj.storageClass }, { text: new Date(obj.updated).toLocaleDateString() }]}
+                  detail={
+                    <List.Item.Detail
+                      markdown={generateLargestObjectsList()}
+                      metadata={
+                        <List.Item.Detail.Metadata>
+                          <List.Item.Detail.Metadata.Label title="Object Details" />
+                          <List.Item.Detail.Metadata.Label title="Name" text={obj.name} />
+                          <List.Item.Detail.Metadata.Label title="Size" text={formatBytes(obj.size)} />
+                          <List.Item.Detail.Metadata.Label title="Storage Class" text={obj.storageClass} />
+                          <List.Item.Detail.Metadata.Label
+                            title="Last Updated"
+                            text={new Date(obj.updated).toLocaleString()}
+                          />
+                        </List.Item.Detail.Metadata>
+                      }
+                    />
+                  }
+                />
+              ))}
+            </List.Section>
+          )}
+
+          {stats.recentlyModified.length > 0 && (
+            <List.Section title="Recently Modified">
+              {stats.recentlyModified.map((obj, index) => (
+                <List.Item
+                  key={`recent-${index}`}
+                  title={obj.name}
+                  subtitle={new Date(obj.updated).toLocaleString()}
+                  icon={Icon.Clock}
+                  accessories={[{ text: formatBytes(obj.size) }]}
+                  detail={
+                    <List.Item.Detail
+                      markdown={generateRecentlyModifiedList()}
+                      metadata={
+                        <List.Item.Detail.Metadata>
+                          <List.Item.Detail.Metadata.Label title="Recently Modified Objects" />
+                          {stats.recentlyModified.map((o, i) => (
+                            <List.Item.Detail.Metadata.Label
+                              key={`meta-recent-${i}`}
+                              title={o.name}
+                              text={`${formatBytes(o.size)} | ${new Date(o.updated).toLocaleString()}`}
+                            />
+                          ))}
+                        </List.Item.Detail.Metadata>
+                      }
+                    />
+                  }
+                />
+              ))}
+            </List.Section>
+          )}
+        </>
+      )}
     </List>
   );
 }

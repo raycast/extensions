@@ -328,7 +328,6 @@ interface CreateFirewallRuleFormProps {
   onRuleCreated: () => void;
 }
 
-// Define the form values interface
 interface FirewallRuleFormValues {
   name: string;
   description: string;
@@ -344,6 +343,21 @@ interface FirewallRuleFormValues {
   ports?: string;
   disabled?: boolean;
   enableLogging?: boolean;
+}
+
+// Interface for creating rules (matches NetworkService.createFirewallRule)
+interface FirewallRuleOptions {
+  description?: string;
+  direction: "INGRESS" | "EGRESS";
+  priority?: number;
+  disabled?: boolean;
+  enableLogging?: boolean;
+  sourceRanges?: string[];
+  sourceTags?: string[];
+  targetTags?: string[];
+  destinationRanges?: string[];
+  allowed?: { protocol: string; ports?: string[] }[];
+  denied?: { protocol: string; ports?: string[] }[];
 }
 
 function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: CreateFirewallRuleFormProps) {
@@ -388,9 +402,9 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
     try {
       const service = new NetworkService(gcloudPath, projectId);
 
-      const ruleOptions: Record<string, unknown> = {
+      const ruleOptions: FirewallRuleOptions = {
         description: values.description,
-        direction: values.direction,
+        direction: values.direction as "INGRESS" | "EGRESS",
         priority: values.priority ? parseInt(values.priority) : undefined,
         disabled: values.disabled,
         enableLogging: values.enableLogging,
@@ -435,14 +449,18 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
       loadingToast.hide();
 
       if (success) {
-        showToast({
-          style: Toast.Style.Success,
-          title: "Firewall Rule Created",
-          message: `Successfully created ${values.name}`,
-        });
-
-        onRuleCreated();
-        pop();
+        try {
+          await onRuleCreated();
+          showToast({
+            style: Toast.Style.Success,
+            title: "Firewall Rule Created",
+            message: `Successfully created ${values.name}`,
+          });
+          pop();
+        } catch (error) {
+          console.error("Error refreshing rules:", error);
+          showFailureToast("Rule was created but the list couldn't be refreshed. Please refresh manually.");
+        }
       } else {
         showToast({
           style: Toast.Style.Failure,

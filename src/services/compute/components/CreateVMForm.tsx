@@ -39,6 +39,11 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
   const [serviceAccounts, setServiceAccounts] = useState<string[]>([]);
   const [nameError, setNameError] = useState<string | undefined>();
   const [advancedMode, setAdvancedMode] = useState<boolean>(false);
+  const [formValues, setFormValues] = useState<Record<string, string>>({
+    machineType: "",
+    customCores: "",
+    customMemory: "",
+  });
 
   const { pop } = useNavigation();
 
@@ -153,6 +158,18 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
     setImageFamiliesByProject(getImageFamiliesByProject(project));
   };
 
+  const handleMachineTypeChange = (value: string) => {
+    setFormValues((prev) => ({ ...prev, machineType: value }));
+  };
+
+  const handleCustomCoresChange = (value: string) => {
+    setFormValues((prev) => ({ ...prev, customCores: value }));
+  };
+
+  const handleCustomMemoryChange = (value: string) => {
+    setFormValues((prev) => ({ ...prev, customMemory: value }));
+  };
+
   // Helper to format region names
   const formatRegionName = (regionPath: string): string => {
     if (!regionPath) return "";
@@ -170,7 +187,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
 
     if (!/^[a-z]([-a-z0-9]*[a-z0-9])?$/.test(name)) {
       setNameError(
-        "Name must start with a letter, can contain lowercase letters, numbers, and hyphens, and must end with a letter or number",
+        "Name must start with a letter, contain only lowercase letters, numbers, and hyphens, and must end with a letter or number",
       );
       return false;
     }
@@ -179,8 +196,42 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
     return true;
   };
 
+  const validateCustomMachineType = (values: Record<string, string>): boolean => {
+    if (values.machineType !== "custom") {
+      return true;
+    }
+
+    // Validate cores
+    const cores = parseInt(values.customCores || "0", 10);
+    if (isNaN(cores) || cores < 1 || cores > 96) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid CPU Cores",
+        message: "CPU cores must be between 1 and 96",
+      });
+      return false;
+    }
+
+    // Validate memory
+    const memory = parseInt(values.customMemory || "0", 10);
+    if (isNaN(memory) || memory < 256 || memory % 256 !== 0) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid Memory",
+        message: "Memory must be a multiple of 256 MiB",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (values: Record<string, string>) => {
     if (!validateName(values.name)) {
+      return;
+    }
+
+    if (!validateCustomMachineType(values)) {
       return;
     }
 
@@ -267,7 +318,9 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
 
         // Add custom machine type
         if (values.customCores && values.customMemory && values.machineType === "custom") {
-          command += ` --custom-cpu=${values.customCores} --custom-memory=${values.customMemory}`;
+          const cores = parseInt(values.customCores, 10);
+          const memory = parseInt(values.customMemory, 10);
+          command += ` --custom-cpu=${cores} --custom-memory=${memory}`;
         }
 
         // Add preemptible option
@@ -383,6 +436,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
             ? machineTypesByFamily[0].types[0].name
             : undefined
         }
+        onChange={handleMachineTypeChange}
       >
         {machineTypesByFamily.map((family) => (
           <Form.Dropdown.Section key={family.title} title={family.title}>
@@ -405,6 +459,16 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
             title="Custom CPU Cores"
             placeholder="Number of CPU cores (1-96)"
             info="Required for custom machine type"
+            error={
+              formValues.machineType === "custom" && formValues.customCores
+                ? !/^\d+$/.test(formValues.customCores) ||
+                  parseInt(formValues.customCores) < 1 ||
+                  parseInt(formValues.customCores) > 96
+                  ? "CPU cores must be between 1 and 96"
+                  : undefined
+                : undefined
+            }
+            onChange={handleCustomCoresChange}
           />
 
           <Form.TextField
@@ -412,6 +476,16 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
             title="Custom Memory (MiB)"
             placeholder="Memory in MiB (must be multiple of 256)"
             info="Required for custom machine type"
+            error={
+              formValues.machineType === "custom" && formValues.customMemory
+                ? !/^\d+$/.test(formValues.customMemory) ||
+                  parseInt(formValues.customMemory) < 256 ||
+                  parseInt(formValues.customMemory) % 256 !== 0
+                  ? "Memory must be a multiple of 256 MiB"
+                  : undefined
+                : undefined
+            }
+            onChange={handleCustomMemoryChange}
           />
         </>
       )}

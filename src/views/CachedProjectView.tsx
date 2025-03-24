@@ -90,6 +90,12 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
         }
       } catch (error) {
         console.error("Error fetching all projects:", error);
+        // Show warning toast about Browse All Projects functionality being affected
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Warning: Projects List Not Available",
+          message: "Browse All Projects functionality may be limited. Please try again later.",
+        });
       }
 
       loadingToast.hide();
@@ -424,7 +430,7 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
             <List.Section title={`Recently Used Projects (${recentlyUsedProjects.length}/${cacheLimit})`}>
               {recentlyUsedProjects.map((project, index) => (
                 <List.Item
-                  key={`recent-${project.id}-${index}`}
+                  key={project.id}
                   title={project.name || project.id}
                   subtitle={project.id}
                   icon={{ source: Icon.Clock, tintColor: Color.Blue }}

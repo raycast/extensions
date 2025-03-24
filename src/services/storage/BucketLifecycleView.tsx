@@ -15,6 +15,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
 import fs from "fs";
+import { showFailureToast } from "@raycast/utils";
 
 const execPromise = promisify(exec);
 
@@ -196,12 +197,7 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
       }
 
       setError(`${errorTitle}: ${errorMessage}`);
-
-      showToast({
-        style: Toast.Style.Failure,
-        title: errorTitle,
-        message: errorMessage,
-      });
+      showFailureToast({ title: errorTitle, message: errorMessage });
     } finally {
       setIsLoading(false);
     }
@@ -284,11 +280,7 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
           errorMessage = "You don't have permission to modify this bucket's lifecycle configuration.";
         }
 
-        showToast({
-          style: Toast.Style.Failure,
-          title: errorTitle,
-          message: errorMessage,
-        });
+        showFailureToast({ title: errorTitle, message: errorMessage });
       }
     }
   }
@@ -389,6 +381,19 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
         }
       }
 
+      // Validate createdBefore date format if provided
+      if (formValues.createdBefore) {
+        const dateRegex = /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$/;
+        if (!dateRegex.test(formValues.createdBefore)) {
+          throw new Error("Created Before date must be in YYYY-MM-DD format");
+        }
+        // Validate if it's a valid date (e.g., not 2023-02-31)
+        const date = new Date(formValues.createdBefore);
+        if (isNaN(date.getTime())) {
+          throw new Error("Created Before must be a valid date");
+        }
+      }
+
       // Build the rule object
       const rule: LifecycleRule = {
         id: formValues.id || `rule-${Date.now()}`,
@@ -473,11 +478,7 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
         errorMessage = "You don't have permission to modify this bucket's lifecycle configuration.";
       }
 
-      showToast({
-        style: Toast.Style.Failure,
-        title: errorTitle,
-        message: errorMessage,
-      });
+      showFailureToast({ title: errorTitle, message: errorMessage });
     }
   }
 

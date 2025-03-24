@@ -36,13 +36,14 @@ export default function CommandOutput({ command, projectId, gcloudPath }: Comman
         setOutput("```\n" + stdout + "\n```");
       }
 
-      showToast(Toast.Style.Success, "Command executed successfully");
-    } catch (error: unknown) {
+      showToast({ style: Toast.Style.Success, title: "Command executed successfully" });
+    } catch (err) {
+      const error = err as Error;
       showFailureToast({
         title: "Failed to execute command",
-        message: error instanceof Error ? error.message : undefined,
+        message: error.message,
       });
-      setError(error instanceof Error ? error.message : "Failed to execute command");
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }

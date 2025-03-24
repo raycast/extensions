@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Detail, ActionPanel, Action, Icon, Toast, showToast, Color } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { MarketplaceService, GCPService } from "../ServiceHubService";
 
 interface ServiceDetailsProps {
@@ -45,13 +46,10 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
       }
     } catch (error) {
       console.error(`Error fetching details for service ${service.name}:`, error);
-
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to fetch service details",
         message: error instanceof Error ? error.message : String(error),
       });
-
       // Use the service data we already have
       setServiceDetails(service);
     } finally {
@@ -60,13 +58,13 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
   }
 
   async function toggleServiceStatus() {
-    if (isToggling) return;
+    if (isToggling || !serviceDetails) return;
 
     try {
       setIsToggling(true);
       setIsLoading(true);
 
-      if (serviceDetails?.isEnabled) {
+      if (serviceDetails.isEnabled) {
         showToast({
           style: Toast.Style.Animated,
           title: `Disabling ${serviceDetails.displayName || serviceDetails.name}...`,
@@ -84,17 +82,15 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
           });
 
           // Update local state
-          if (serviceDetails) {
-            const updatedService = {
-              ...serviceDetails,
-              isEnabled: false,
-              state: "DISABLED",
-            };
-            setServiceDetails(updatedService);
+          const updatedService = {
+            ...serviceDetails,
+            isEnabled: false,
+            state: "DISABLED",
+          };
+          setServiceDetails(updatedService);
 
-            // Notify parent component with updated service
-            onServiceStatusChange(updatedService);
-          }
+          // Notify parent component with updated service
+          onServiceStatusChange(updatedService);
         } else {
           showToast({
             style: Toast.Style.Failure,
@@ -102,7 +98,7 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
             message: "Service did not disable properly. Try again or check GCP Console.",
           });
         }
-      } else if (serviceDetails) {
+      } else {
         showToast({
           style: Toast.Style.Animated,
           title: `Enabling ${serviceDetails.displayName || serviceDetails.name}...`,
@@ -120,7 +116,7 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
           });
 
           // Update local state
-          const updatedService: GCPService = {
+          const updatedService = {
             ...serviceDetails,
             isEnabled: true,
             state: "ENABLED",
@@ -136,18 +132,10 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
             message: "Service did not enable properly. Try again or check GCP Console.",
           });
         }
-      } else {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Cannot enable service",
-          message: "Service details are not available",
-        });
       }
     } catch (error) {
       console.error("Error toggling service status:", error);
-
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to update service status",
         message: error instanceof Error ? error.message : String(error),
       });
@@ -177,7 +165,12 @@ ${serviceDetails.description || "No description available."}
 |----------|-------|
 | Service Name | \`${serviceDetails.name}\` |
 | Status | ${serviceDetails.isEnabled ? "Enabled" : "Not Enabled"} |
-${serviceDetails.state ? `| State | ${serviceDetails.state} |\n` : ""}| Category | ${serviceDetails.category || "Other"} |
+${
+  serviceDetails.state
+    ? `| State | ${serviceDetails.state} |
+`
+    : ""
+}| Category | ${serviceDetails.category || "Other"} |
 | Region | ${serviceDetails.region || "global"} |
 
 ${

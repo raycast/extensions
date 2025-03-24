@@ -1,4 +1,5 @@
-import { showToast, Toast, Detail } from "@raycast/api";
+import { Detail } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect } from "react";
 
 interface IAMMembersByPrincipalViewProps {
@@ -11,8 +12,7 @@ interface IAMMembersByPrincipalViewProps {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function IAMMembersByPrincipalView(_: IAMMembersByPrincipalViewProps) {
   useEffect(() => {
-    showToast({
-      style: Toast.Style.Failure,
+    showFailureToast({
       title: "Not implemented",
       message: "This view is under development",
     });

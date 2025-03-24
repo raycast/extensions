@@ -364,6 +364,11 @@ function CreateSubnetForm({ gcloudPath, projectId, vpc, onSubnetCreated }: Creat
       return;
     }
 
+    if (!values.ipRange) {
+      showFailureToast("IP Range is required");
+      return;
+    }
+
     // Validate primary IP range
     const ipRangeValidation = isValidCIDR(values.ipRange);
     if (!ipRangeValidation.valid) {
@@ -456,7 +461,12 @@ function CreateSubnetForm({ gcloudPath, projectId, vpc, onSubnetCreated }: Creat
         info="The name of the new subnet"
         autoFocus
       />
-      <Form.Dropdown id="region" title="Region" info="The region where the subnet will be created">
+      <Form.Dropdown
+        id="region"
+        title="Region"
+        info="The region where the subnet will be created"
+        defaultValue={regions[0]}
+      >
         {regions.map((region) => (
           <Form.Dropdown.Item key={region} value={region} title={formatRegionForDropdown(region)} />
         ))}

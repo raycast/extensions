@@ -109,13 +109,13 @@ export const CONTEXTUAL_SHORTCUTS: ContextualShortcuts = {
   PROJECT: {
     CREATE: { modifiers: ["cmd", "shift"], key: "n", description: "Create new project" },
     VIEW_DETAILS: { modifiers: ["cmd", "shift"], key: "i", description: "View project details" },
-    SWITCH: { modifiers: ["cmd"], key: "s", description: "Switch project" },
+    SWITCH: { modifiers: ["cmd", "shift"], key: "s", description: "Switch project" },
   },
 
   // Bucket view shortcuts
   BUCKET: {
     CREATE: { modifiers: ["cmd", "shift"], key: "n", description: "Create new bucket" },
-    VIEW_OBJECTS: { modifiers: ["cmd"], key: "o", description: "View objects" },
+    VIEW_OBJECTS: { modifiers: ["cmd", "shift"], key: "o", description: "View objects" },
     VIEW_IAM: { modifiers: ["cmd", "shift"], key: "i", description: "View IAM permissions" },
     VIEW_LIFECYCLE: { modifiers: ["cmd"], key: "l", description: "View lifecycle rules" },
   },
@@ -138,9 +138,9 @@ export const CONTEXTUAL_SHORTCUTS: ContextualShortcuts = {
   // Compute view shortcuts
   COMPUTE: {
     CREATE: { modifiers: ["cmd", "shift"], key: "n", description: "Create new instance" },
-    START: { modifiers: ["cmd"], key: "s", description: "Start instance" },
+    START: { modifiers: ["cmd", "shift"], key: "s", description: "Start instance" },
     STOP: { modifiers: ["cmd", "shift"], key: "p", description: "Stop instance" },
-    CONNECT: { modifiers: ["cmd"], key: "c", description: "Connect to instance" },
+    CONNECT: { modifiers: ["cmd", "shift"], key: "t", description: "Connect to instance" },
   },
 };
 
@@ -170,35 +170,3 @@ export function getActionShortcut(shortcut: ShortcutDefinition): {
   const { modifiers, key } = shortcut;
   return { modifiers, key };
 }
-
-/**
- * Legacy safe shortcuts (kept for backward compatibility)
- * @deprecated Use CONTEXTUAL_SHORTCUTS instead
- */
-export const SAFE_SHORTCUTS = {
-  // Add actions
-  ADD: { modifiers: ["cmd", "shift"], key: "n", description: "Add new item" },
-
-  // View actions
-  VIEW: { modifiers: ["cmd", "shift"], key: "v", description: "View item" },
-
-  // Edit actions
-  EDIT: { modifiers: ["cmd", "shift"], key: "e", description: "Edit item" },
-
-  // Delete actions
-  DELETE: { modifiers: ["cmd", "shift"], key: "backspace", description: "Delete item" },
-
-  // Refresh actions
-  REFRESH: { modifiers: ["cmd", "shift"], key: "r", description: "Refresh" },
-
-  // Cancel actions
-  CANCEL: { modifiers: ["cmd", "shift"], key: "c", description: "Cancel" },
-
-  // IAM specific actions
-  IAM_VIEW: { modifiers: ["cmd", "shift"], key: "i", description: "View IAM permissions" },
-  IAM_ADD: { modifiers: ["cmd", "shift"], key: "n", description: "Add IAM member" },
-
-  // Storage specific actions
-  STORAGE_VIEW: { modifiers: ["cmd", "shift"], key: "s", description: "View storage" },
-  STORAGE_LIFECYCLE: { modifiers: ["cmd", "shift"], key: "l", description: "View lifecycle" },
-};

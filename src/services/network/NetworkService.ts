@@ -220,11 +220,12 @@ export class NetworkService {
 
       const result = await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, { skipCache: true });
 
-      if (!Array.isArray(result) || result.length === 0) {
+      // The describe command returns a single object, not an array
+      if (!result || typeof result !== "object") {
         return null;
       }
 
-      return result[0] as VPC;
+      return result as VPC;
     } catch (error: unknown) {
       console.error(`Error fetching VPC ${name}:`, error);
       return null;

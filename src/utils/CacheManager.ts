@@ -414,7 +414,10 @@ export class CacheManager {
     for (const id of recentlyUsedIds) {
       if (projectsMap.has(id)) {
         // Use the cached project
-        recentProjects.push(projectsMap.get(id)!);
+        const project = projectsMap.get(id);
+        if (project) {
+          recentProjects.push(project);
+        }
       } else {
         // Fetch project details directly
         const projectDetails = await CacheManager.getProjectDetails(id, gcloudPath);

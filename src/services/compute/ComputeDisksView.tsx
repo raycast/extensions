@@ -189,7 +189,6 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search disks..."
       navigationTitle="Compute Engine Disks"
-      filtering={false}
       throttle
       searchBarAccessory={
         <List.Dropdown
@@ -215,7 +214,7 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
       ) : (
         filteredDisks.map((disk) => (
           <List.Item
-            key={disk.id || disk.name}
+            key={`${disk.name}-${disk.zone}`}
             title={disk.name}
             subtitle={formatDiskType(disk.type)}
             accessories={[

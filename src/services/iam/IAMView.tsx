@@ -65,7 +65,7 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
 
   useEffect(() => {
     fetchIAMPolicy();
-  }, []);
+  }, [iamService]);
 
   async function fetchIAMPolicy() {
     setIsLoading(true);
@@ -719,9 +719,7 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
                   <List.Item
                     key={`${principal.type}-${principal.id}`}
                     title={principal.id || principal.type}
-                    subtitle=""
                     icon={getMemberIcon(principal.type)}
-                    accessories={[]}
                     detail={
                       <List.Item.Detail
                         metadata={

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Detail, ActionPanel, Action, Icon, Form, useNavigation } from "@raycast/api";
 
 interface CodeEditorProps {
@@ -25,6 +25,13 @@ export function CodeEditor({
   const [isEditing, setIsEditing] = useState(false);
   const [editedCode, setEditedCode] = useState(code);
   const { pop } = useNavigation();
+
+  // Keep editedCode in sync with code prop changes when not editing
+  useEffect(() => {
+    if (!isEditing) {
+      setEditedCode(code);
+    }
+  }, [code, isEditing]);
 
   const handleSave = () => {
     if (onSave) {
@@ -82,7 +89,7 @@ export function CodeEditor({
   return (
     <Detail
       navigationTitle={title}
-      markdown={`\`\`\`${language}\n${code}\n\`\`\``}
+      markdown={`\`\`\`${language}\n${editedCode}\n\`\`\``}
       actions={
         <ActionPanel>
           <Action
@@ -97,7 +104,7 @@ export function CodeEditor({
               icon={Icon.Check}
               shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
               onAction={() => {
-                if (onSave) onSave(code);
+                if (onSave) onSave(editedCode);
                 pop();
               }}
             />
@@ -109,6 +116,7 @@ export function CodeEditor({
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               onAction={() => {
                 if (onCancel) onCancel();
+                setEditedCode(code); // Reset to original code on cancel
                 pop();
               }}
             />

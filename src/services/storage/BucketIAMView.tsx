@@ -11,11 +11,13 @@ import {
   useNavigation,
   Form,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
 import fs from "fs";
 import os from "os";
+import path from "path";
 import { formatRoleName, getRoleInfo } from "../../utils/iamRoles";
 
 const execPromise = promisify(exec);
@@ -194,11 +196,7 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
 
       setError(`${errorTitle}: ${errorMessage}`);
 
-      showToast({
-        style: Toast.Style.Failure,
-        title: errorTitle,
-        message: errorMessage,
-      });
+      showFailureToast({ title: errorTitle, message: errorMessage });
     } finally {
       setIsLoading(false);
     }
@@ -371,7 +369,7 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
       }
 
       // Create a temporary JSON file with the updated policy
-      const tempFilePath = `${os.tmpdir()}/iam-policy-${bucketName}-${Date.now()}.json`;
+      const tempFilePath = path.join(os.tmpdir(), `iam-policy-${bucketName}-${Date.now()}.json`);
 
       fs.writeFileSync(tempFilePath, JSON.stringify(updatedPolicy, null, 2));
 
@@ -400,6 +398,7 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
       fetchIAMPolicy();
     } catch (error) {
       creatingToast.hide();
+      console.error("Error adding IAM binding:", error);
 
       // Provide more specific error messages
       let errorMessage = String(error);
@@ -413,12 +412,7 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
         errorMessage = "You don't have permission to modify IAM policies for this bucket.";
       }
 
-      showToast({
-        style: Toast.Style.Failure,
-        title: errorTitle,
-        message: errorMessage,
-      });
-      console.error("Error adding IAM binding:", error);
+      showFailureToast({ title: errorTitle, message: errorMessage });
     }
   }
 
@@ -489,7 +483,7 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
             }
 
             // Create a temporary JSON file with the updated policy
-            const tempFilePath = `${os.tmpdir()}/iam-policy-${bucketName}-${Date.now()}.json`;
+            const tempFilePath = path.join(os.tmpdir(), `iam-policy-${bucketName}-${Date.now()}.json`);
 
             fs.writeFileSync(tempFilePath, JSON.stringify(updatedPolicy, null, 2));
 
@@ -534,11 +528,7 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
           errorMessage = "You don't have permission to modify this bucket's IAM policy.";
         }
 
-        showToast({
-          style: Toast.Style.Failure,
-          title: errorTitle,
-          message: errorMessage,
-        });
+        showFailureToast({ title: errorTitle, message: errorMessage });
       }
     }
   }

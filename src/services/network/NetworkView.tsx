@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, List, Icon, useNavigation, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import VPCView from "./VPCView";
 import IPAddressView from "./IPAddressView";
 import FirewallRulesView from "./FirewallRulesView";
-import { NetworkService, NetworkServiceError } from "./NetworkService";
+import { NetworkService } from "./NetworkService";
 
 interface NetworkViewProps {
   projectId: string;
@@ -23,16 +24,12 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
       try {
         // Try to fetch VPCs as a test
         await networkService.getVPCs();
-        setIsLoading(false);
       } catch (error) {
         console.error("Error validating network access:", error);
-
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast(error, {
           title: "Network Service Error",
-          message: error instanceof NetworkServiceError ? error.message : "Unknown error occurred",
         });
-
+      } finally {
         setIsLoading(false);
       }
     };

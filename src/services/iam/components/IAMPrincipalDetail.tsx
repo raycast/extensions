@@ -65,20 +65,23 @@ export default function IAMPrincipalDetail({ principal, iamService, onRoleRemove
         });
 
         onRoleRemoved();
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("Error removing role:", error);
-        showFailureToast(error);
+        showFailureToast({
+          title: "Failed to Remove Role",
+          message: error instanceof Error ? error.message : "An unknown error occurred",
+        });
       }
     }
   }
 
   // Generate markdown content for the detail view
   const markdown = `
-  # ${principal.displayName || principal.email || principal.id}
+  # ${principal.displayName || principal.email || principal.id || "Unknown Principal"}
   
   ${getPrincipalIcon(principal.type)} **${formatPrincipalType(principal.type)}**
   
-  **ID:** \`${principal.id}\`
+  **ID:** \`${principal.id || "N/A"}\`
   ${principal.email ? `**Email:** ${principal.email}` : ""}
   
   ## Roles (${principal.roles.length})
@@ -109,7 +112,7 @@ export default function IAMPrincipalDetail({ principal, iamService, onRoleRemove
   return (
     <Detail
       markdown={markdown}
-      navigationTitle={`IAM Principal: ${principal.displayName || principal.email || principal.id}`}
+      navigationTitle={`IAM Principal: ${principal.displayName || principal.email || principal.id || "Unknown Principal"}`}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

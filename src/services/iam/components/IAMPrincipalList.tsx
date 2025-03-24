@@ -33,11 +33,11 @@ export default function IAMPrincipalList({
       // Filter by search text
       if (
         searchText &&
-        !principal.id.toLowerCase().includes(searchText.toLowerCase()) &&
+        !principal.id.toLowerCase().includes(searchText.trim().toLowerCase()) &&
         !principal.roles.some(
           (role) =>
-            role.role.toLowerCase().includes(searchText.toLowerCase()) ||
-            role.title.toLowerCase().includes(searchText.toLowerCase()),
+            role.role.toLowerCase().includes(searchText.trim().toLowerCase()) ||
+            role.title.toLowerCase().includes(searchText.trim().toLowerCase()),
         )
       ) {
         return false;

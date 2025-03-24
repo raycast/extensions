@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { List, ActionPanel, Action, Icon, Toast, showToast, Color, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { MarketplaceService, GCPService } from "./ServiceHubService";
 import ServiceDetails from "./components/ServiceDetails";
 import { GCPServiceCategory } from "../../utils/gcpServices";
@@ -86,11 +87,8 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
     } catch (error) {
       console.error("Error fetching services:", error);
       setError(`Failed to fetch services: ${error instanceof Error ? error.message : String(error)}`);
-
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Failed to fetch services",
-        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsRefreshing(false);
@@ -128,19 +126,14 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
           prevServices.map((s) => (s.name === service.name ? { ...s, isEnabled: true, state: "ENABLED" } : s)),
         );
       } else {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast("Service did not enable properly. Try again or check GCP Console.", {
           title: `Failed to enable ${service.displayName || service.name}`,
-          message: "Service did not enable properly. Try again or check GCP Console.",
         });
       }
     } catch (error) {
       console.error(`Error enabling service ${service.name}:`, error);
-
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: `Failed to enable ${service.displayName || service.name}`,
-        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsRefreshing(false);
@@ -172,19 +165,14 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
           prevServices.map((s) => (s.name === service.name ? { ...s, isEnabled: false, state: "DISABLED" } : s)),
         );
       } else {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast("Service did not disable properly. Try again or check GCP Console.", {
           title: `Failed to disable ${service.displayName || service.name}`,
-          message: "Service did not disable properly. Try again or check GCP Console.",
         });
       }
     } catch (error) {
       console.error(`Error disabling service ${service.name}:`, error);
-
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: `Failed to disable ${service.displayName || service.name}`,
-        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsRefreshing(false);
@@ -251,11 +239,8 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       );
     } catch (error) {
       console.error(`Error fetching details for ${service.name}:`, error);
-
-      showToast({
-        style: Toast.Style.Failure,
-        title: `Failed to load details`,
-        message: error instanceof Error ? error.message : String(error),
+      showFailureToast(error, {
+        title: "Failed to load details",
       });
 
       // Navigate to details view with existing data as fallback

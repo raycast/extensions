@@ -101,9 +101,6 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
     }
   }, [service]);
 
-  // Filter VPCs based on search text
-  const filteredVPCs = vpcs.filter((vpc) => vpc.name.toLowerCase().includes(searchText.toLowerCase()));
-
   const formatSubnetMode = (autoCreateSubnetworks: boolean) => {
     return autoCreateSubnetworks ? "Auto mode" : "Custom mode";
   };
@@ -131,7 +128,7 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search VPC networks..."
       navigationTitle="VPC Networks"
-      filtering={false}
+      filtering={true}
       throttle
       actions={
         <ActionPanel>
@@ -160,7 +157,7 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
         </ActionPanel>
       }
     >
-      {filteredVPCs.length === 0 && !isLoading ? (
+      {vpcs.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No VPC Networks Found"
           description={searchText ? "Try a different search term" : "Click the + button to create a new VPC network"}
@@ -187,7 +184,7 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
           }
         />
       ) : (
-        filteredVPCs.map((vpc) => (
+        vpcs.map((vpc) => (
           <List.Item
             key={vpc.id || vpc.name}
             title={vpc.name}
@@ -263,8 +260,8 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
                     );
                   }}
                 />
-                <Action title="Copy to Clipboard" icon={Icon.CopyClipboard} onAction={() => Clipboard.copy(vpc.name)} />
-                <Action title="Copy to Clipboard" icon={Icon.CopyClipboard} onAction={() => Clipboard.copy(vpc.id)} />
+                <Action title="Copy Name" icon={Icon.CopyClipboard} onAction={() => Clipboard.copy(vpc.name)} />
+                <Action title="Copy Id" icon={Icon.CopyClipboard} onAction={() => Clipboard.copy(vpc.id)} />
               </ActionPanel>
             }
           />
@@ -291,6 +288,20 @@ function CreateVPCForm({ service, onVPCCreated }: CreateVPCFormProps) {
       return;
     }
 
+    // Validate MTU if provided
+    let mtuValue: number | undefined;
+    if (values.mtu) {
+      if (!/^\d+$/.test(values.mtu)) {
+        showFailureToast("MTU must be a valid number");
+        return;
+      }
+      mtuValue = parseInt(values.mtu);
+      if (isNaN(mtuValue) || mtuValue < 1300 || mtuValue > 8896) {
+        showFailureToast("MTU must be between 1300 and 8896");
+        return;
+      }
+    }
+
     setIsLoading(true);
 
     const loadingToast = await showToast({
@@ -304,7 +315,7 @@ function CreateVPCForm({ service, onVPCCreated }: CreateVPCFormProps) {
         values.name,
         values.description,
         values.subnetMode as "auto" | "custom",
-        values.mtu ? parseInt(values.mtu) : undefined,
+        mtuValue,
       );
 
       loadingToast.hide();

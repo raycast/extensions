@@ -155,7 +155,6 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
   }
 
   async function createBucket(values: { name: string; location: string; storageClass: string }) {
-    setIsLoading(true);
     try {
       // Build the command with all options
       const command = `${gcloudPath} storage buckets create gs://${values.name} --project=${projectId} --location=${values.location} --default-storage-class=${values.storageClass}`;
@@ -182,8 +181,6 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
         title: "Failed to create bucket",
         message: error instanceof Error ? error.message : String(error),
       });
-    } finally {
-      setIsLoading(false);
     }
   }
 
@@ -296,15 +293,19 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
           <ActionPanel>
             <Action.SubmitForm
               title="Create Bucket"
-              onSubmit={(values: { name: string; location: string; storageClass: string }) => {
-                setIsLoading(true);
-                showToast({
-                  style: Toast.Style.Animated,
-                  title: "Creating bucket...",
-                  message: `Name: ${values.name}`,
-                });
-                pop();
-                createBucket(values);
+              onSubmit={async (values: { name: string; location: string; storageClass: string }) => {
+                try {
+                  setIsLoading(true);
+                  showToast({
+                    style: Toast.Style.Animated,
+                    title: "Creating bucket...",
+                    message: `Name: ${values.name}`,
+                  });
+                  pop();
+                  await createBucket(values);
+                } finally {
+                  setIsLoading(false);
+                }
               }}
             />
             <Action title="Cancel" onAction={pop} shortcut={{ modifiers: ["cmd"], key: "escape" }} />

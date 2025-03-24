@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
 import { promisify } from "util";
@@ -94,8 +94,7 @@ export async function validateFile(filePath: string): Promise<boolean> {
     const stats = await fsStat(filePath);
 
     if (!stats.isFile()) {
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Not a file",
         message: `"${filePath}" is not a file.`,
       });
@@ -105,15 +104,13 @@ export async function validateFile(filePath: string): Promise<boolean> {
     return true;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "File not found",
         message: `The file "${filePath}" does not exist.`,
       });
     } else {
       console.error(`Error validating file: ${filePath}`, error);
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Error accessing file",
         message: error instanceof Error ? error.message : String(error),
       });

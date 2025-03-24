@@ -1,5 +1,6 @@
 import { exec } from "child_process";
 import { promisify } from "util";
+import { showFailureToast } from "@raycast/utils";
 import { Project } from "./utils/CacheManager";
 
 // Extend the Project type to make createTime optional
@@ -17,6 +18,7 @@ interface CommandCacheEntry<T> {
 // Global cache for command results to reduce API calls
 const commandCache = new Map<string, CommandCacheEntry<unknown>>();
 const COMMAND_CACHE_TTL = 600000; // 10 minutes cache TTL
+const PROJECTS_CACHE_TTL = 1800000; // 30 minutes cache TTL
 const pendingRequests = new Map<string, Promise<unknown>>();
 
 /**
@@ -40,10 +42,18 @@ export async function executeGcloudCommand(
 ) {
   // Validate inputs
   if (!gcloudPath || typeof gcloudPath !== "string") {
+    showFailureToast({
+      title: "Invalid Configuration",
+      message: "Invalid gcloud path: must be a non-empty string",
+    });
     throw new Error("Invalid gcloud path: must be a non-empty string");
   }
 
   if (!command || typeof command !== "string") {
+    showFailureToast({
+      title: "Invalid Command",
+      message: "Command must be a non-empty string",
+    });
     throw new Error("Invalid command: must be a non-empty string");
   }
 
@@ -59,9 +69,9 @@ export async function executeGcloudCommand(
     const cacheKey = fullCommand;
 
     // Check for pending requests for the same command to avoid duplicate API calls
-    if (pendingRequests.has(cacheKey)) {
-      // console.log(`Reusing pending request for: ${fullCommand}`);
-      return pendingRequests.get(cacheKey);
+    const pendingRequest = pendingRequests.get(cacheKey);
+    if (pendingRequest) {
+      return pendingRequest;
     }
 
     // Check cache unless explicitly told to skip it
@@ -97,6 +107,10 @@ export async function executeGcloudCommand(
     if (error instanceof Error && "stderr" in error) {
       console.error(`Command stderr: ${(error as { stderr: string }).stderr}`);
     }
+    showFailureToast({
+      title: "Command Execution Failed",
+      message: error instanceof Error ? error.message : "An unknown error occurred",
+    });
     throw error;
   }
 }
@@ -126,6 +140,10 @@ async function executeCommand(
         stderr.includes("requires authentication") ||
         stderr.includes("login required")
       ) {
+        showFailureToast({
+          title: "Authentication Error",
+          message: "Please re-authenticate with Google Cloud",
+        });
         throw new Error("Authentication error: Please re-authenticate with Google Cloud");
       }
 
@@ -135,6 +153,10 @@ async function executeCommand(
         stderr.includes("project ID not specified") ||
         stderr.includes("project does not exist")
       ) {
+        showFailureToast({
+          title: "Project Error",
+          message: "The specified project was not found or is invalid",
+        });
         throw new Error("Project error: The specified project was not found or is invalid");
       }
     }
@@ -158,6 +180,10 @@ async function executeCommand(
     } catch (error) {
       console.error(`Error parsing JSON: ${error}`);
       console.error(`Raw output: ${stdout.substring(0, 200)}...`); // Show first 200 chars
+      showFailureToast({
+        title: "Parse Error",
+        message: `Failed to parse command output as JSON: ${error instanceof Error ? error.message : String(error)}`,
+      });
       throw new Error(`Failed to parse command output as JSON: ${error}`);
     }
   } catch (error: unknown) {
@@ -170,6 +196,10 @@ async function executeCommand(
       return executeCommand(fullCommand, cacheKey, maxRetries, currentRetry + 1);
     }
 
+    showFailureToast({
+      title: "Command Failed",
+      message: error instanceof Error ? error.message : "An unknown error occurred",
+    });
     throw error;
   }
 }
@@ -215,6 +245,10 @@ interface RawGCloudProject {
 
 export async function getProjects(gcloudPath: string): Promise<Project[]> {
   if (!gcloudPath || typeof gcloudPath !== "string") {
+    showFailureToast({
+      title: "Invalid Configuration",
+      message: "Invalid gcloud path: must be a non-empty string",
+    });
     throw new Error("Invalid gcloud path: must be a non-empty string");
   }
 
@@ -225,7 +259,7 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
     const now = Date.now();
 
     // Use a longer TTL for projects list (30 minutes)
-    if (cachedResult && now - cachedResult.timestamp < 1800000) {
+    if (cachedResult && now - cachedResult.timestamp < PROJECTS_CACHE_TTL) {
       // console.log("Using cached projects list");
       return cachedResult.result as Project[];
     }
@@ -274,6 +308,10 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
     return mappedProjects;
   } catch (error: unknown) {
     console.error("Error fetching projects:", error);
+    showFailureToast({
+      title: "Failed to Fetch Projects",
+      message: error instanceof Error ? error.message : "An unknown error occurred",
+    });
     throw error;
   }
 }

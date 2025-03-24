@@ -528,9 +528,15 @@ export function formatServiceName(serviceName: string): string {
 /**
  * Get all services in a specific category
  * @param category The category to filter by
- * @returns Array of services in the specified category
+ * @returns Array of services in the specified category, or empty array if category is invalid
  */
 export function getServicesByCategory(category: GCPServiceCategory): GCPServiceInfo[] {
+  // Verify the category exists in the enum
+  if (!Object.values(GCPServiceCategory).includes(category)) {
+    console.warn(`Invalid service category: ${category}`);
+    return [];
+  }
+
   return Object.values(predefinedServices).filter((service) => service.category === category);
 }
 

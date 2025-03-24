@@ -1,4 +1,5 @@
 import { Form, ActionPanel, Action, useNavigation, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ReactNode, useState } from "react";
 import { openFilePicker } from "./NativeFilePicker";
 import { validateFile } from "./FileUtils";
@@ -32,13 +33,53 @@ export function FilePicker({
   const [filePath, setFilePath] = useState<string>("");
 
   const handleBrowse = async () => {
-    const selectedPath = await openFilePicker({
-      prompt: "Select a file",
-      allowedFileTypes: allowedFileTypes,
-    });
+    try {
+      const selectedPath = await openFilePicker({
+        prompt: "Select a file",
+        allowedFileTypes: allowedFileTypes,
+      });
 
-    if (selectedPath && typeof selectedPath === "string") {
-      setFilePath(selectedPath);
+      if (selectedPath && typeof selectedPath === "string") {
+        setFilePath(selectedPath);
+      } else if (selectedPath !== undefined) {
+        // Only show error if the picker wasn't cancelled (undefined)
+        await showFailureToast({
+          title: "Invalid Selection",
+          message: "Please select a valid file",
+        });
+      }
+    } catch (error) {
+      console.error("Error opening file picker:", error);
+      await showFailureToast({
+        title: "File Picker Error",
+        message: error instanceof Error ? error.message : "Failed to open file picker",
+      });
+    }
+  };
+
+  const handleSubmit = async (values: { filePath: string }) => {
+    if (!values.filePath) {
+      await showFailureToast({
+        title: "No File Selected",
+        message: "Please select a file or enter a valid file path",
+      });
+      return;
+    }
+
+    try {
+      // Validate the file before proceeding
+      const isValid = await validateFile(values.filePath);
+      if (isValid) {
+        onFilePicked(values.filePath);
+        pop();
+      }
+      // Note: validateFile already shows appropriate error toasts if validation fails
+    } catch (error) {
+      console.error("Error validating file:", error);
+      await showFailureToast({
+        title: "Validation Error",
+        message: error instanceof Error ? error.message : "Failed to validate file",
+      });
     }
   };
 
@@ -51,16 +92,7 @@ export function FilePicker({
             title={submitTitle}
             icon={submitTitle.toLowerCase().includes("upload") ? Icon.Upload : Icon.Check}
             shortcut={{ modifiers: ["cmd"], key: "enter" }}
-            onSubmit={async (values) => {
-              if (values.filePath) {
-                // Validate the file before proceeding
-                const isValid = await validateFile(values.filePath);
-                if (isValid) {
-                  onFilePicked(values.filePath);
-                  pop();
-                }
-              }
-            }}
+            onSubmit={handleSubmit}
           />
           <Action
             title="Browse…"

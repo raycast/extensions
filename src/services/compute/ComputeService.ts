@@ -4,6 +4,7 @@
  */
 
 import { executeGcloudCommand } from "../../gcloud";
+import { showFailureToast } from "@raycast/utils";
 
 // Interfaces
 export interface ComputeInstance {
@@ -232,7 +233,11 @@ export class ComputeService {
       const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
       return result ? (result as ComputeInstance) : null;
     } catch (error: unknown) {
-      throw new Error(`Failed to fetch compute instance: ${error instanceof Error ? error.message : "Unknown error"}`);
+      showFailureToast({
+        title: "Failed to Fetch Instance",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+      return null;
     }
   }
 
@@ -392,7 +397,11 @@ export class ComputeService {
       this.clearCache("instances");
       return true;
     } catch (error: unknown) {
-      throw new Error(`Failed to start compute instance: ${error instanceof Error ? error.message : "Unknown error"}`);
+      showFailureToast({
+        title: "Failed to Start Instance",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+      return false;
     }
   }
 
@@ -409,7 +418,11 @@ export class ComputeService {
       this.clearCache("instances");
       return true;
     } catch (error: unknown) {
-      throw new Error(`Failed to stop compute instance: ${error instanceof Error ? error.message : "Unknown error"}`);
+      showFailureToast({
+        title: "Failed to Stop Instance",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+      return false;
     }
   }
 

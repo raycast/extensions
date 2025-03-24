@@ -271,7 +271,7 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
       const component = <ViewComponent {...props} />;
 
       // Hide the loading toast before navigation
-      activeToast.hide();
+      await activeToast?.hide();
       activeToast = null;
 
       // Perform the navigation

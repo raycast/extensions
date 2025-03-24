@@ -38,11 +38,13 @@ function parseMemberString(memberString: string): MemberTypeInfo {
 export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, onCancel }: IAMRoleFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [availableRoles, setAvailableRoles] = useState<{ value: string; title: string }[]>([]);
+  const [selectedRole, setSelectedRole] = useState<string>("");
 
   // Update available roles when service changes
   function handleServiceChange(value: string) {
     const service = rolesByService.find((s) => s.title === value);
     setAvailableRoles(service?.roles || []);
+    setSelectedRole(""); // Reset role selection when service changes
   }
 
   async function handleSubmit(values: {
@@ -52,7 +54,7 @@ export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, o
     conditionTitle?: string;
     conditionDescription?: string;
   }) {
-    if (!values.member || !values.role) {
+    if (!values.member?.trim() || !values.role) {
       showToast({
         style: Toast.Style.Failure,
         title: "Missing required fields",
@@ -123,7 +125,14 @@ export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, o
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown id="role" title="Role" placeholder="Select a role" info="The role to grant to the member">
+      <Form.Dropdown
+        id="role"
+        title="Role"
+        value={selectedRole}
+        onChange={setSelectedRole}
+        placeholder="Select a role"
+        info="The role to grant to the member"
+      >
         {availableRoles.map((role) => (
           <Form.Dropdown.Item key={role.value} value={role.value} title={role.title} />
         ))}

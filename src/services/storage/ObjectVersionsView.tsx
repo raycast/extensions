@@ -200,7 +200,6 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
           title: "No versions found",
           message: `Object "${objectName}" has no versions or versioning is not enabled`,
         });
-        setIsLoading(false);
         return;
       }
 

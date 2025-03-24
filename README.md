@@ -16,9 +16,9 @@ A lightweight Raycast extension for managing Google Cloud resources efficiently.
 ## Screenshots
 
 
-[Project Selection](assets/homescreen.png)
-[Services View](assets/services.png)
-[IAM Management ](assets/iam.png)
+[Project Selection](./assets/homescreen.png)
+[Services View](./assets/services.png)
+[IAM Management](./assets/iam.png)
 
 ## Prerequisites
 
@@ -27,10 +27,9 @@ A lightweight Raycast extension for managing Google Cloud resources efficiently.
 
 ## Installation
 
-1. Clone this repository
-2. Navigate to the directory
-3. Run `npm install` to install dependencies
-4. Run `npm run dev` to start the development server in Raycast
+1. Open Raycast
+2. Search for "G-Cloud"
+3. Click "Install" to add the extension
 
 ## Configuration
 

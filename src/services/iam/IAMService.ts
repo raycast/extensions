@@ -4,6 +4,7 @@
  */
 
 import { executeGcloudCommand } from "../../gcloud";
+import { showFailureToast } from "@raycast/utils";
 import { getRoleInfo as getGCPRoleInfo, formatRoleName as formatGCPRoleName } from "../../utils/iamRoles";
 
 interface GCPServiceAccount {
@@ -118,12 +119,20 @@ export class IAMService {
       const result = await executeGcloudCommand(this.gcloudPath, command);
 
       if (!Array.isArray(result) || result.length === 0) {
+        showFailureToast({
+          title: "IAM Policy Error",
+          message: "No IAM policy found or empty result",
+        });
         throw new Error("No IAM policy found or empty result");
       }
 
       const policy = Array.isArray(result) ? result[0] : result;
 
       if (!policy.bindings || !Array.isArray(policy.bindings)) {
+        showFailureToast({
+          title: "Invalid IAM Policy",
+          message: "Invalid policy format: no bindings found",
+        });
         throw new Error("Invalid IAM policy format: no bindings found");
       }
 
@@ -133,7 +142,11 @@ export class IAMService {
       return policy;
     } catch (error: unknown) {
       console.error("Error fetching IAM policy:", error);
-      throw new Error(`Failed to fetch IAM policy: ${error instanceof Error ? error.message : "Unknown error"}`);
+      showFailureToast({
+        title: "Failed to Fetch IAM Policy",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+      throw error;
     }
   }
 
@@ -165,6 +178,10 @@ export class IAMService {
 
           const principal = principalsMap.get(principalKey);
           if (!principal) {
+            showFailureToast({
+              title: "IAM Principal Error",
+              message: `Failed to get principal for ${principalKey}`,
+            });
             throw new Error(`Failed to get principal for ${principalKey} - this should never happen`);
           }
 
@@ -191,7 +208,11 @@ export class IAMService {
       return principalsArray;
     } catch (error: unknown) {
       console.error("Error getting IAM principals:", error);
-      throw new Error(`Failed to get IAM principals: ${error instanceof Error ? error.message : "Unknown error"}`);
+      showFailureToast({
+        title: "Failed to Get IAM Principals",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+      throw error;
     }
   }
 
@@ -207,6 +228,10 @@ export class IAMService {
   ): Promise<void> {
     // Validate the member ID format
     if (!this.validateMemberId(memberType, memberId)) {
+      showFailureToast({
+        title: "Invalid Member ID",
+        message: `Invalid format for ${memberType}: ${memberId}`,
+      });
       throw new Error(`Invalid member ID format for ${memberType}`);
     }
 
@@ -228,7 +253,11 @@ export class IAMService {
       this.policyCache.delete(cacheKey);
     } catch (error: unknown) {
       console.error("Error adding member:", error);
-      throw new Error(`Failed to add member: ${error instanceof Error ? error.message : "Unknown error"}`);
+      showFailureToast({
+        title: "Failed to Add Member",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+      throw error;
     }
   }
 
@@ -244,6 +273,10 @@ export class IAMService {
   ): Promise<void> {
     // Validate the member ID format
     if (!this.validateMemberId(memberType, memberId)) {
+      showFailureToast({
+        title: "Invalid Member ID",
+        message: `Invalid format for ${memberType}: ${memberId}`,
+      });
       throw new Error(`Invalid member ID format for ${memberType}`);
     }
 
@@ -265,7 +298,11 @@ export class IAMService {
       this.policyCache.delete(cacheKey);
     } catch (error: unknown) {
       console.error("Error removing member:", error);
-      throw new Error(`Failed to remove member: ${error instanceof Error ? error.message : "Unknown error"}`);
+      showFailureToast({
+        title: "Failed to Remove Member",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+      throw error;
     }
   }
 
@@ -278,6 +315,10 @@ export class IAMService {
       const result = await executeGcloudCommand(this.gcloudPath, command);
 
       if (!Array.isArray(result)) {
+        showFailureToast({
+          title: "Invalid Response",
+          message: "Expected array of service accounts",
+        });
         throw new Error("Invalid response format: expected array of service accounts");
       }
 
@@ -291,7 +332,11 @@ export class IAMService {
       }));
     } catch (error: unknown) {
       console.error("Error getting service accounts:", error);
-      throw new Error(`Failed to get service accounts: ${error instanceof Error ? error.message : "Unknown error"}`);
+      showFailureToast({
+        title: "Failed to Get Service Accounts",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+      throw error;
     }
   }
 
@@ -423,7 +468,11 @@ export class IAMService {
       return result[0] || {};
     } catch (error: unknown) {
       console.error("Error creating group:", error);
-      throw new Error(`Failed to create group: ${error instanceof Error ? error.message : "Unknown error"}`);
+      showFailureToast({
+        title: "Failed to Create Group",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+      throw error;
     }
   }
 
