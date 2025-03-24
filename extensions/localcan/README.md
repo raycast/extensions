@@ -1,3 +1,0 @@
-# LocalCan
-
-List domains

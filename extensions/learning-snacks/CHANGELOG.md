@@ -1,3 +1,0 @@
-# Learning Snacks Changelog
-
-## [Initial Version] - 2025-03-10

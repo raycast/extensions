@@ -1,5 +1,0 @@
-{
-  "root": true,
-  "plugins": ["react-hooks"],
-  "extends": ["@raycast"]
-}

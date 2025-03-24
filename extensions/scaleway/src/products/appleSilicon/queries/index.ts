@@ -1,1 +1,0 @@
-export { useAllZoneServersQuery } from './useServersQuery'
