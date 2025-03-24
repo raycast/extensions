@@ -143,7 +143,10 @@ export default function Command() {
         preferences.languageVarietyGerman,
         preferences.languageVarietyPortuguese,
         preferences.languageVarietyCatalan,
-      ].filter(Boolean).filter((variant) => variant !== "-").join(",");
+      ]
+        .filter(Boolean)
+        .filter((variant) => variant !== "-")
+        .join(",");
 
       const level = preferences.level || "default";
 
