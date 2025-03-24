@@ -1591,6 +1591,7 @@
 /extensions/slack-templated-message                                 @koh-sh
 /extensions/slackmojis                                              @timoransky
 /extensions/sleep-timer                                             @dtmzr @ThatNerdSquared @pernielsentikaer @ridemountainpig
+/extensions/slowed-reverb                                           @neontomo
 /extensions/slugify                                                 @unreadablename @xmok
 /extensions/sm-ms                                                   @koinzhang
 /extensions/smallweb                                                @pomdtr
