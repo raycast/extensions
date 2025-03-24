@@ -30,10 +30,6 @@ async function togglFetch<T>(method: string, endpoint: string, body?: unknown): 
       await delay(1000);
       return await togglFetch(method, endpoint, body);
     }
-    let msg = `${res.status} ${res.statusText}`;
-    const text = (await res.text()) as string;
-    if (text) msg += ", " + text;
-    throw new Error(msg);
   }
   try {
     const json = (await res.json()) as T | null;
