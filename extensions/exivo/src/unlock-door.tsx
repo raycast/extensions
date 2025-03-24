@@ -1,6 +1,6 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
 
-import { OpenPreferences } from "./components/OpenPreferences";
+import { OpenPreferencesView } from "./components/OpenPreferencesView";
 import { useExivoClient } from "./hooks/useExivoClient";
 import { ExivoPreferences } from "./types/ExivoPreferences";
 import { getDoorModeTitle } from "./utils";
@@ -10,8 +10,8 @@ export default function Command() {
   const { data: components, isLoading: loadingComponents, revalidate: revalidateComponents } = getExivoComponents();
 
   const preferences = getPreferenceValues<ExivoPreferences>();
-  if (!preferences.clientId || !preferences.clientSecret) {
-    return OpenPreferences();
+  if (!preferences.clientId || !preferences.clientSecret || !preferences.siteId) {
+    return <OpenPreferencesView />;
   }
 
   return (
@@ -36,18 +36,14 @@ export default function Command() {
                   {exivoComponent.mode === "normal" ? (
                     <Action
                       onAction={() => {
-                        setMode(exivoComponent.id, "open").then(() => {
-                          revalidateComponents();
-                        });
+                        setMode(exivoComponent.id, "open", revalidateComponents);
                       }}
                       title="Activate Permanent Open Mode"
                     />
                   ) : (
                     <Action
                       onAction={() => {
-                        setMode(exivoComponent.id, "normal").then(() => {
-                          revalidateComponents();
-                        });
+                        setMode(exivoComponent.id, "normal", revalidateComponents);
                       }}
                       title="Activate Normal Mode"
                     />

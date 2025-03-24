@@ -1,4 +1,4 @@
-export type AccesLogComponent = {
+export type AccessLogComponent = {
   identifier: string;
   labelling: string | null;
   id: string;
@@ -6,7 +6,7 @@ export type AccesLogComponent = {
 };
 
 export type AccessLogItemData = {
-  component: AccesLogComponent;
+  component: AccessLogComponent;
   apiIdentifier?: string;
   medium?: {
     id: string;

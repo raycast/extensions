@@ -2,7 +2,7 @@ import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/a
 
 import { useEffect, useState } from "react";
 import { AccessLogDetails } from "./components/AccessLogDetails";
-import { OpenPreferences } from "./components/OpenPreferences";
+import { OpenPreferencesView } from "./components/OpenPreferencesView";
 import { useExivoClient } from "./hooks/useExivoClient";
 import { ExivoPreferences } from "./types/ExivoPreferences";
 import { ComponentGroupedAccessLog, groupByComponent } from "./utils/accesslogData";
@@ -14,8 +14,8 @@ export default function Command() {
   const { data, isLoading } = useExivoClient().getAccessLogs();
 
   const preferences = getPreferenceValues<ExivoPreferences>();
-  if (!preferences.clientId || !preferences.clientSecret) {
-    return OpenPreferences();
+  if (!preferences.clientId || !preferences.clientSecret || !preferences.siteId) {
+    return <OpenPreferencesView />;
   }
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function Command() {
               key={component}
               icon={Icon.ArrowRightCircle}
               title={component}
-              subtitle={`${componentGroups[component].length.toFixed(0)} items`}
+              subtitle={`${componentGroups[component].length} items`}
               detail={
                 <ActionPanel>
                   <Action.Push

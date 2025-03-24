@@ -1,4 +1,6 @@
-export const getDoorModeTitle = (mode: "open" | "normal" | "closed") => {
+import { ExivoComponentMode } from "./types/ExivoComponent";
+
+export const getDoorModeTitle = (mode: ExivoComponentMode) => {
   switch (mode) {
     case "open":
       return "Permanent Open";
@@ -6,7 +8,5 @@ export const getDoorModeTitle = (mode: "open" | "normal" | "closed") => {
       return "Normal";
     case "closed":
       return "Locked";
-    default:
-      return "Unknown";
   }
 };

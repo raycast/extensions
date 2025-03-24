@@ -6,5 +6,7 @@ export type ExivoComponent = {
   accessZones: string[];
   templateIdentifier: string;
   ready: boolean;
-  mode: "open" | "normal" | "closed";
+  readonly mode: ExivoComponentMode;
 };
+
+export type ExivoComponentMode = "open" | "normal" | "closed";

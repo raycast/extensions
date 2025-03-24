@@ -14,12 +14,14 @@
     {
       "name": "unlock-door",
       "title": "Unlock Door",
+      "subtitle": "Exivo",
       "description": "Unlock your dormakaba doors using exivo.",
       "mode": "view"
     },
     {
       "name": "access-log",
       "title": "View Access Log",
+      "subtitle": "Exivo",
       "description": "Access log for your dormakaba components using exivo.",
       "mode": "view"
     }
