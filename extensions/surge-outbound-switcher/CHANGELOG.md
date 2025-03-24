@@ -4,7 +4,7 @@
 
 - Updated extension icons and screenshot
 
-## [Initial Version] - 2024-03-23
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Added command to switch to Direct mode
 - Added command to switch to Proxy mode
