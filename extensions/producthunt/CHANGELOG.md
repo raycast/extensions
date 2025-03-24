@@ -1,6 +1,6 @@
 # Product Hunt Changelog
 
-## [1.3] - {PR_MERGE_DATE}
+## [1.3] - 2025-03-24
 
 ### Changed
 
