@@ -366,7 +366,24 @@ export async function setSurgeOutboundMode(mode: "Direct" | "Global" | "Rule"): 
   } catch (error) {
     // Handle errors and show failure notification
     console.error(`🔴 Error setting to ${outboundModes[mode].name} mode:`, error);
-    await showFailureToast(error, { title: "Set failed" });
+
+    // 将错误转换为字符串，检查是否包含无法找到图标的错误信息
+    const errorStr = String(error);
+
+    // 检查错误是否与找不到 Surge 图标相关
+    if (
+      errorStr.includes("Could not find Surge menu bar icon in menu bar 2") ||
+      errorStr.includes("Unable to locate Surge in menu bar")
+    ) {
+      // 当无法找到 Surge 图标时显示特定提示
+      await showHUD("🟡 Activate Surge Menu once after launch");
+
+      // 重置图标位置缓存，以便下次尝试重新搜索
+      surgeIconCache = { menuBarIndex: null, itemIndex: null, timestamp: 0 };
+    } else {
+      // 其他错误处理
+      await showFailureToast(error, { title: "Set failed" });
+    }
   }
 }
 
