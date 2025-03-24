@@ -8,8 +8,4 @@ Feel free to contribute if you'd like to, I'll improve on some things later on. 
 
 Stay healthy!
 
-![pollenflug 1](metadata/pollenflug-1.png)
-![pollenflug 2](metadata/pollenflug-2.png)
-![pollenflug 3](metadata/pollenflug-3.png)
-
-Background image by _alexjones_ on unsplash.com
+Background image by _alexjones_ on [Unsplash ](https://unsplash.com/de/fotos/makrofotografie-von-weissblattrigen-bluten-ZAoR6t7mvoM).
