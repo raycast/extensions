@@ -26,7 +26,7 @@
           "description": "Default action for the SVG",
           "required": false,
           "type": "dropdown",
-          "defaultValue": "copySVG",
+          "defaultValue": "copySvg",
           "data": [
             {
               "value": "copySvg",
