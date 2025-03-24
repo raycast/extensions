@@ -1,26 +1,27 @@
 import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
-import { showFailureToast, useCachedState, usePromise } from "@raycast/utils";
+import { useCachedState, usePromise } from "@raycast/utils";
 import fetch from "node-fetch";
 import { getLocation, locations } from "./locations";
 import { handlePin, usePinned } from "./pin";
 import { Day, DayDict, Location, Pollenflug, PollenflugApiData, PollenflugItem } from "./types";
+import { getEnglishName } from "./pollen-names";
 
 function getPollenDisplay(value: string): { color: Color; value: string } {
   switch (value) {
     case "0":
-      return { color: Color.Green, value: "Keine" };
+      return { color: Color.Green, value: "None" };
     case "0-1":
-      return { color: Color.Green, value: "Sehr niedrig" };
+      return { color: Color.Green, value: "None to Low" };
     case "1":
-      return { color: Color.Yellow, value: "Niedrig" };
+      return { color: Color.Yellow, value: "Low" };
     case "1-2":
-      return { color: Color.Orange, value: "Mäßig" };
+      return { color: Color.Yellow, value: "Low to Medium" };
     case "2":
-      return { color: Color.Red, value: "Hoch" };
+      return { color: Color.Orange, value: "Medium" };
     case "2-3":
-      return { color: Color.Red, value: "Sehr Hoch" };
+      return { color: Color.Red, value: "Medium to High" };
     case "3":
-      return { color: Color.Magenta, value: "Maximal" };
+      return { color: Color.Red, value: "High" };
     default:
       console.log("Unknown value:", value);
       return { color: Color.SecondaryText, value: "Unknown Value" };
@@ -28,16 +29,11 @@ function getPollenDisplay(value: string): { color: Color; value: string } {
 }
 
 async function fetchPollenflugData(): Promise<PollenflugApiData | null> {
-  try {
-    const response = await fetch("https://opendata.dwd.de/climate_environment/health/alerts/s31fg.json");
-    const result: PollenflugApiData = (await response.json()) as PollenflugApiData;
-    LocalStorage.setItem("pollenflug_data", JSON.stringify(result));
-    LocalStorage.setItem("pollenflug_data_last_update", new Date().toISOString());
-    return result;
-  } catch (error) {
-    showFailureToast("Failed to fetch pollen data");
-    return null;
-  }
+  const response = await fetch("https://opendata.dwd.de/climate_environment/health/alerts/s31fg.json");
+  const result: PollenflugApiData = (await response.json()) as PollenflugApiData;
+  LocalStorage.setItem("pollenflug_data", JSON.stringify(result));
+  LocalStorage.setItem("pollenflug_data_last_update", new Date().toISOString());
+  return result;
 }
 
 function usePollenflug(location: Location): {
@@ -46,13 +42,12 @@ function usePollenflug(location: Location): {
   revalidate: () => Promise<PollenflugApiData | null>;
 } {
   const { data, isLoading, revalidate } = usePromise(async () => {
-    const cached = await LocalStorage.getItem("pollenflug_data")
-      .then((value) => (value ? (JSON.parse(value?.toString()) as PollenflugApiData) : null))
-      .catch(() => null);
-    const lastUpdate = await LocalStorage.getItem("pollenflug_data_last_update")
-      .then((value) => (value ? new Date(value?.toString()) : null))
-      .catch(() => null);
-
+    const cached = await LocalStorage.getItem("pollenflug_data").then((value) =>
+      value ? (JSON.parse(value?.toString()) as PollenflugApiData) : null,
+    );
+    const lastUpdate = await LocalStorage.getItem("pollenflug_data_last_update").then((value) =>
+      value ? new Date(value?.toString()) : null,
+    );
     const nextUpdate = cached ? new Date(cached.next_update.replace(" Uhr", "")) : null;
 
     if (cached && lastUpdate && nextUpdate && new Date() < nextUpdate) {
@@ -120,7 +115,7 @@ export default function Command() {
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
-          title="Revalidate"
+          title={`Revalidate`}
           icon={Icon.ArrowClockwise}
           onAction={() => revalidate()}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
@@ -181,12 +176,12 @@ function PollenflugListItem({
   return (
     <List.Item
       key={item.name}
-      title={item.name}
-      accessories={[{ tag: getPollenDisplay(item[day]) }]}
+      title={getEnglishName(item.name)}
+      accessories={[{ tag: getPollenDisplay(item[day]) }, {}]}
       actions={
         <ActionPanel>
           <Action
-            title={`${isPinned ? "Unpin" : "Pin"} ${item.name}`}
+            title={`${isPinned ? "Unpin" : "Pin"} ${getEnglishName(item.name)}`}
             icon={Icon.Pin}
             onAction={() => handlePin(item.name).then((pinned) => setPinned(pinned))}
           />
