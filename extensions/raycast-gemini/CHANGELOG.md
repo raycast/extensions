@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Fix Create Chat Functionality] - {PR_MERGE_DATE}
+## [Fix Create Chat Functionality] - 2025-03-24
 
 - 🛠️ aiChat - Fixed the issue where the "Create Chat" functionality always set the chat name to "New Chat X" instead of using the name provided by the user.
   - Updated the `CreateChat` component to use the chat name provided by the user. If the user does not provide a chat name, the `createNewChatName` function is used as a fallback.
