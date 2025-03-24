@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="metadata/surge-outbound-switcher-1.png" alt="surge-outbound-switcher">
+  <img src="assets/screenshot1.png" alt="surge-outbound-switcher">
 </div>
 &nbsp;
 
@@ -13,7 +13,7 @@ This extension uses AppleScript to communicate with Surge, providing the followi
 
 - One-click switch to Direct mode
 - One-click switch to Global Proxy mode
-- One-click switch to Rule-Based Proxy mode
+- One-click switch to Rule-based Proxy mode
 
 ## Usage
 
@@ -21,7 +21,8 @@ Search for the following commands in Raycast:
 
 - `Set to Direct`
 - `Set to Global`
-- `Set to Rule-Based`
+- `Set to Rule-based`
+- `Set Outbound Mode`
 
 ## Requirements
 
@@ -30,4 +31,5 @@ Search for the following commands in Raycast:
 
 ## Notes
 
-Make sure to authorize Raycast to control Surge application using AppleScript.
+- Make sure to authorize Raycast to control Surge application using AppleScript.
+- Make sure manually activate the Surge menu once after launch.
