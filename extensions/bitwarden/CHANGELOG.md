@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2025-03-24
 
 - Correct setup API key instructions 
 - Remove local CLI mention from extension description
