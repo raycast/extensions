@@ -1,5 +1,5 @@
 import { showHUD } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 /**
  * Executes an AppleScript to switch Surge outbound mode
@@ -158,7 +158,7 @@ export async function switchSurgeOutboundMode(mode: "Direct" | "Proxy" | "Rule")
     await showHUD(`🌐 Switched to ${getModeName(mode)} Mode`);
   } catch (error) {
     console.error(`🔴 Error switching to ${mode} mode:`, error);
-    await showFailureToast("Switch failed", error);
+    await showFailureToast(error, { title: "Switch failed" });
   }
 }
 

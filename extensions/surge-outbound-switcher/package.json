@@ -4,6 +4,7 @@
   "title": "Surge Outbound Switcher",
   "description": "Instantly switch Surge's outbound mode without using HTTP API",
   "icon": "extension-icon.png",
+  "screenshots": "assets/screenshot.png",
   "author": "the3ash",
   "categories": [
     "Web",
@@ -21,7 +22,7 @@
       "icon": "extension-icon-d.png"
     },
     {
-      "name": "set-to-proxy",
+      "name": "set-to-global",
       "title": "Set to Global",
       "subtitle": "Surge",
       "description": "Set Surge's outbound mode to Global",
@@ -29,10 +30,10 @@
       "icon": "extension-icon-g.png"
     },
     {
-      "name": "set-to-rule",
-      "title": "Set to Rule-Based",
+      "name": "set-to-rule-based",
+      "title": "Set to Rule-based",
       "subtitle": "Surge",
-      "description": "Set Surge's outbound mode to Rule-Based",
+      "description": "Set Surge's outbound mode to Rule-based",
       "mode": "no-view",
       "icon": "extension-icon-r.png"
     }

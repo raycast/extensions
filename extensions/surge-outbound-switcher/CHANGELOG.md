@@ -2,6 +2,16 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
+- Fix TypeScript error: Cannot find name 'showFailureToast'
+- Fix screenshot path and configuration
+- Fix global mode name
+
+## [Update] - {PR_MERGE_DATE}
+
+- Fix
+
+## [Update] - {PR_MERGE_DATE}
+
 - Updated extension icons and screenshot
 
 ## [Initial Version] - {PR_MERGE_DATE}
