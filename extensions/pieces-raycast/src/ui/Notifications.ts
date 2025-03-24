@@ -1,5 +1,6 @@
-import { Keyboard, showHUD, showToast, open, Toast } from "@raycast/api";
+import { Keyboard, showHUD, showToast, Toast } from "@raycast/api";
 import launchRuntime from "../utils/launchRuntime";
+import BrowserUrl from "../utils/BrowserUrl";
 
 export default class Notifications {
   private static instance: Notifications;
@@ -30,7 +31,7 @@ export default class Notifications {
         title: "Contact Support",
         shortcut: Keyboard.Shortcut.Common.OpenWith,
         onAction: () => {
-          open("https://docs.pieces.app/support");
+          BrowserUrl.open("https://docs.pieces.app/products/support");
         },
       },
       style: Toast.Style.Failure,
@@ -45,7 +46,7 @@ export default class Notifications {
         title: "Contact Support",
         shortcut: Keyboard.Shortcut.Common.Open,
         onAction: () => {
-          open("https://docs.pieces.app/support");
+          BrowserUrl.open("https://docs.pieces.app/products/support");
         },
       },
     });

@@ -1,5 +1,9 @@
 # Pieces for Raycast Changelog
 
+## [0.4.0] - 2025-03-24
+
+- Updates links to Pieces documentation
+
 ## [0.3.0] - 2025-02-27
 
 - Fixes website link color contrast in search results
