@@ -170,7 +170,7 @@ export default function Command() {
                 {
                   tag: {
                     value: `${getWorkDays(employee.startDate, employee.endDate)} Werktage`,
-                    color: Color.Black,
+                    color: Color.Orange,
                   },
                 },
                 {
@@ -284,7 +284,7 @@ export default function Command() {
                   {
                     tag: {
                       value: `${getWorkDays(employee.startDate, employee.endDate)} Werktage`,
-                      color: Color.Black,
+                      color: Color.Orange,
                     },
                   },
                   {
