@@ -70,6 +70,7 @@ export default function Command() {
                                   tintColor: color,
                                 }}
                                 title={`#${run.pipelineRunId} ${formatTime(run.startTime)}`}
+                                keywords={[run.pipelineRunId.toString(), run.status.toLowerCase().toString()]}
                                 subtitle={duration}
                                 actions={
                                   <ActionPanel>

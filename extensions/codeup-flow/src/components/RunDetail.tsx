@@ -97,7 +97,7 @@ export const RunDetail: FC<{
       markdown={logDetail}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Link title={`ID`} text={`${run.pipelineRunId}`} target={target} />
+          <List.Item.Detail.Metadata.Link title={`ID`} text={`#${run.pipelineRunId}`} target={target} />
           <List.Item.Detail.Metadata.Label title={`Trigger`} text={triggerMessage} />
           <List.Item.Detail.Metadata.Label title={`Commit`} text={commitTitle} />
           <List.Item.Detail.Metadata.Label title={`Start Time`} text={formatDate(run.startTime)} />
