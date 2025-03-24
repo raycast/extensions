@@ -101,6 +101,7 @@
 /extensions/authy                                                   @guga4ka @gdsmith @pernielsentikaer @LitoMore
 /extensions/auto-quit-app                                           @koinzhang @alejandrot96
 /extensions/avatar                                                  @koinzhang @madza91
+/extensions/awesome-mac                                             @ViGeng
 /extensions/axios-docs                                              @denizyoldas @xmok
 /extensions/background-sounds                                       @sebdanielsson @awerks
 /extensions/backstage                                               @yukukotani
@@ -1008,6 +1009,7 @@
 /extensions/microsoft-edge                                          @KartikKumarSahoo @bromanko @crisboarna @xmok
 /extensions/microsoft-teams                                         @svenwiegand
 /extensions/microsoft-teams-calling                                 @svenwiegand
+/extensions/midas                                                   @sunosuporno
 /extensions/midjourney                                              @CarterMcAlister
 /extensions/migadu                                                  @xmok @LBBO
 /extensions/mikrus                                                  @tkowalski29
@@ -1311,7 +1313,7 @@
 /extensions/privatebin                                              @sedlacek-martin
 /extensions/privileges                                              @ph00lt0 @riesinger
 /extensions/productboard                                            @honzatmn @xmok
-/extensions/producthunt                                             @ragnorc @pernielsentikaer @Arrows78 @marcmagn1
+/extensions/producthunt                                             @ragnorc @pernielsentikaer @Arrows78 @marcmagn1 @chrismessina
 /extensions/productlane                                             @scopsy @pernielsentikaer @DanielHougaard
 /extensions/project-companion                                       @maximedaraize
 /extensions/projects                                                @ajaypremshankar
@@ -1384,7 +1386,7 @@
 /extensions/raycast-diki                                            @blazejkustra
 /extensions/raycast-explorer                                        @thomaslombart @EvanZhouDev @mil3na @xilopaint @samuelkraft @abnershang @zayadur
 /extensions/raycast-fly                                             @devuo
-/extensions/raycast-gemini                                          @EvanZhouDev @ridemountainpig @d0zingcat @ViGeng @anwarulislam
+/extensions/raycast-gemini                                          @EvanZhouDev @ridemountainpig @d0zingcat @ViGeng @anwarulislam @DanielFitzsimmons
 /extensions/raycast-google-palm                                     @EvanZhouDev
 /extensions/raycast-ia-writer                                       @xvvhang
 /extensions/raycast-icons                                           @PitNikola @peduarte @xilopaint
