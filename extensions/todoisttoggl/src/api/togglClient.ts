@@ -31,13 +31,8 @@ async function togglFetch<T>(method: string, endpoint: string, body?: unknown): 
       return await togglFetch(method, endpoint, body);
     }
   }
-  try {
-    const json = (await res.json()) as T | null;
-    if (json !== null) return json;
-  } catch (error) {
-    console.error(error);
-    if (!(error instanceof SyntaxError)) throw error;
-  }
+  const json = (await res.json()) as T | null;
+  if (json !== null) return json;
 }
 
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
