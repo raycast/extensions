@@ -156,7 +156,8 @@ export function CreateEditShortcutForm(props: Props) {
     onSubmit: async (values) => {
       const keysResult = parseKeySequence(values.keySequenceInput);
       if (keysResult.status !== "success") {
-        throw new Error(keysResult.error);
+        await showFailureToast(keysResult.error);
+        return;
       }
 
       const newShortcut: MenuBarShortcut = {

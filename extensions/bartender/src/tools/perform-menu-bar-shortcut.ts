@@ -16,8 +16,7 @@ type Input = {
  *
  * IMPORTANT: First run search-menu-bar-shortcuts tool to get a valid searchResult.
  */
-
-export default async function tool(input: Input): Promise<Result<void>> {
+export default async function performMenuBarShortcutTool(input: Input): Promise<Result<void>> {
   const { searchResult } = input;
 
   if (!searchResult) {

@@ -64,7 +64,7 @@ type PinnedResult = {
 
 export function usePinned(cacheKey: string): PinnedResult {
   if (!cacheKey) {
-    console.warn("Empty cacheKey provided to usePinned. This will cause issues.");
+    throw new Error("Empty cacheKey provided to usePinned");
   }
 
   const [items, setItems] = useCachedState<string[]>(cacheKey, [], {
@@ -99,6 +99,7 @@ export function usePinned(cacheKey: string): PinnedResult {
       setItems((previousItems) => {
         const index = previousItems.indexOf(oldItem);
         if (index === -1) return previousItems;
+        if (previousItems.includes(newItem)) return previousItems;
 
         const newItems = [...previousItems];
         newItems[index] = newItem;

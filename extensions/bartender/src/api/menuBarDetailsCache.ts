@@ -123,7 +123,7 @@ async function resolveMenuBarDetailWithCache(menuBarString: string): Promise<Men
 
   const cacheAndReturn = (data: MenuBarDetail): MenuBarDetail => {
     const timestampedEntry: TimestampedCacheEntry<MenuBarDetail> = {
-      timestamp: Date.now(),
+      timestamp: now,
       data,
     };
     menuBarDetailCache.set(cacheKey, JSON.stringify(timestampedEntry));

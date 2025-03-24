@@ -6,19 +6,17 @@ export function useSearchCommandPreferencesValidation() {
 
   useEffect(() => {
     if (primaryAction === secondaryAction) {
-      (async () => {
-        await showToast({
-          title: "Primary and Secondary Actions Configuration Invalid",
-          style: Toast.Style.Failure,
-          message:
-            "The primary and secondary actions are set to the same value. " +
-            "Please change one of them in the preferences.",
-          primaryAction: {
-            title: "Open Preferences",
-            onAction: () => openCommandPreferences(),
-          },
-        });
-      })();
+      showToast({
+        title: "Primary and Secondary Actions Configuration Invalid",
+        style: Toast.Style.Failure,
+        message:
+          "The primary and secondary actions are set to the same value. " +
+          "Please change one of them in the preferences.",
+        primaryAction: {
+          title: "Open Preferences",
+          onAction: () => openCommandPreferences(),
+        },
+      }).then();
     }
   }, [primaryAction, secondaryAction]);
   return { primaryAction, secondaryAction };

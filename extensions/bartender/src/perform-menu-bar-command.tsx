@@ -91,7 +91,12 @@ export default async function Command({
   }
   if (result) {
     if (runLastCommandWhenNoContext) {
-      await LocalStorage.setItem(LAST_COMMAND_KEY, JSON.stringify(command));
+      try {
+        await LocalStorage.setItem(LAST_COMMAND_KEY, JSON.stringify(command));
+      } catch (e) {
+        console.error("Failed to store last command:", e);
+        // Ignore the error, as we don't want to block the command execution
+      }
     }
   }
 }

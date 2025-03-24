@@ -28,7 +28,7 @@ function MenuBarQuickLinkAction({ actionType, menuBarClick }: { actionType: Acti
       title={`Create ${displayName} Quick Link`}
       icon={Icon.Link}
       quicklink={{
-        name: `${displayName} ${menuBarClick.name}`,
+        name: `${displayName} ${menuBarClick.name || menuBarClick.menuBarId}`,
         link: createDeeplink({
           type: DeeplinkType.Extension,
           command: "perform-menu-bar-command",
@@ -179,11 +179,9 @@ export default function Command() {
 
   useEffect(() => {
     if (error) {
-      (async () => {
-        await showFailureToast(error, {
-          title: "Failed to load menu bar items",
-        });
-      })();
+      showFailureToast(error, {
+        title: "Failed to load menu bar items",
+      }).then();
     }
   }, [error]);
 

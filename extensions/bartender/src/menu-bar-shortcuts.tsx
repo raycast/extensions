@@ -27,38 +27,36 @@ function useValidateDelayPreferences() {
     getPreferenceValues<Preferences.MenuBarShortcuts>();
 
   useEffect(() => {
-    (async () => {
-      const errors: string[] = [];
+    const errors: string[] = [];
 
-      function validateDelay(value: string, name: string) {
-        const parsed = parseInt(value, 10);
+    function validateDelay(value: string, name: string) {
+      const parsed = parseInt(value, 10);
 
-        if (isNaN(parsed) || parsed < 0) {
-          errors.push(`${name} needs to be greater than or equal to zero. Current value: "${value}"`);
-        } else if (value.trim() !== parsed.toString()) {
-          errors.push(
-            `${name} should only contain whole numbers (no decimals, letters, or symbols). Current value: "${value}"`,
-          );
-        }
+      if (isNaN(parsed) || parsed < 0) {
+        errors.push(`${name} needs to be greater than or equal to zero. Current value: "${value}"`);
+      } else if (value.trim() !== parsed.toString()) {
+        errors.push(
+          `${name} should only contain whole numbers (no decimals, letters, or symbols). Current value: "${value}"`,
+        );
       }
+    }
 
-      validateDelay(keyPressDelayStr, "Keypress Delay");
-      validateDelay(clickDelayStr, "Click Delay");
+    validateDelay(keyPressDelayStr, "Keypress Delay");
+    validateDelay(clickDelayStr, "Click Delay");
 
-      if (errors.length > 0) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Settings Need Adjustment",
-          message: errors.join("\n"),
-          primaryAction: {
-            title: "Open Preferences",
-            onAction: () => {
-              openCommandPreferences();
-            },
+    if (errors.length > 0) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Settings Need Adjustment",
+        message: errors.join("\n"),
+        primaryAction: {
+          title: "Open Preferences",
+          onAction: () => {
+            openCommandPreferences().then();
           },
-        });
-      }
-    })();
+        },
+      }).then();
+    }
   }, [keyPressDelayStr, clickDelayStr]);
 }
 
