@@ -39,7 +39,7 @@ function Command() {
   const { data: products, isLoading } = useProducts();
 
   return (
-    <List isShowingDetail={true} isLoading={isLoading} selectedItemId={products && products.featured[0].id}>
+    <List isShowingDetail isLoading={isLoading} selectedItemId={products && products.featured[0].id}>
       <CheckoutItem />
 
       {products && (
@@ -62,13 +62,13 @@ function Command() {
 
 export default withAccessToken(provider)(() => withQc(<Command />));
 
-function BrewItem(props: { brew: Brew, first?: boolean }) {
+function BrewItem(props: { brew: Brew; first?: boolean }) {
   const isSubscription = props.brew.subscription === "required";
   const subItem = useSubItem();
   const nav = useNavigation();
   const subscriptions = useSubscriptions();
   const cart = useCart();
-  const setItem = useSetItem()
+  const setItem = useSetItem();
 
   const subtTitle = useMemo(() => {
     if (props.brew.subTitle.includes("|")) return props.brew.subTitle.split(" | ")[0];
@@ -83,7 +83,7 @@ function BrewItem(props: { brew: Brew, first?: boolean }) {
 
   const quantity = useMemo(() => {
     if (!cart.data?.items?.length) return 0;
-    const item = cart.data.items.find(i => i.productVariantID === props.brew.varId);
+    const item = cart.data.items.find((i) => i.productVariantID === props.brew.varId);
     return item?.quantity || 0;
   }, [cart.data?.items, props.brew.varId]);
 
@@ -102,17 +102,18 @@ function BrewItem(props: { brew: Brew, first?: boolean }) {
       icon={{ source: "product.svg", tintColor: props.brew.color }}
       actions={
         <ActionPanel>
-          {(isSubscription && !isSubscribed) ? (
-            <Action title="Subscribe"
-              onAction={startSub} />
+          {isSubscription && !isSubscribed ? (
+            <Action title="Subscribe" onAction={startSub} />
           ) : (
             <>
-              <Action title="Add to Cart"
+              <Action
+                title="Add to Cart"
                 shortcut={{ key: "arrowRight", modifiers: [] }}
-                onAction={() => setItem.mutateAsync({ id: props.brew.id, operation: 'add' })} />
+                onAction={() => setItem.mutateAsync({ id: props.brew.id, operation: "add" })}
+              />
               <Action
                 title="Remove from Cart"
-                onAction={() => setItem.mutateAsync({ id: props.brew.id, operation: 'remove' })}
+                onAction={() => setItem.mutateAsync({ id: props.brew.id, operation: "remove" })}
                 shortcut={{ key: "arrowLeft", modifiers: [] }}
               />
             </>
@@ -121,7 +122,7 @@ function BrewItem(props: { brew: Brew, first?: boolean }) {
       }
     />
   );
-};
+}
 
 const CheckoutItem = () => {
   const cart = useCart();
@@ -136,7 +137,7 @@ const CheckoutItem = () => {
     const count = cart.data.items.reduce((c, n) => c + n.quantity, 0);
 
     const items = `${count} item${count > 1 ? "s" : ""}`;
-    const price = `$${(cart.data.subtotal / 100).toFixed(0)}`;  // Display in dollars
+    const price = `$${(cart.data.subtotal / 100).toFixed(0)}`; // Display in dollars
 
     return `${items} - ${price}`;
   }, [cart.data?.items, cart.data?.subtotal]);
@@ -186,10 +187,12 @@ const Address = () => {
             !isLoading ? (
               <ActionPanel>
                 <Action
-                  title="Set Address" onAction={async () => {
-                    setAddress.mutate(a.id)
-                    nav.push(withQc(<Cards />))
-                  }} />
+                  title="Set Address"
+                  onAction={async () => {
+                    setAddress.mutate(a.id);
+                    nav.push(withQc(<Cards />));
+                  }}
+                />
                 <Action
                   title="Remove Address"
                   onAction={() => removeAddress.mutate(a.id)}
@@ -406,7 +409,14 @@ const Confirm = () => {
   return (
     <Detail
       isLoading={loading || convertCart.isPending}
-      markdown={renderConfirm({ loading, card: card.data, items: cart.data.items, address: address.data, brews: products.data?.all, cart: cart.data })}
+      markdown={renderConfirm({
+        loading,
+        card: card.data,
+        items: cart.data.items,
+        address: address.data,
+        brews: products.data?.all,
+        cart: cart.data,
+      })}
       actions={
         <ActionPanel>
           <Action title="Order!" onAction={() => doOrder()} />

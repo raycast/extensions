@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import Terminal from "@terminaldotshop/sdk";
 import { config } from "./config";
 
+type Environment = "dev" | "production";
+
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Terminal",
@@ -19,7 +21,7 @@ export const provider = new OAuthService({
 });
 
 const makeTerminal = (token: string) =>
-  new Terminal({ environment: config.env as any, appId: "raycast", bearerToken: token });
+  new Terminal({ environment: config.env as Environment, appId: "raycast", bearerToken: token });
 
 export const useTerminal = () => {
   const { token } = getAccessToken();

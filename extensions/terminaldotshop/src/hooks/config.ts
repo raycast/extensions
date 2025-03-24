@@ -1,6 +1,6 @@
-// check if vite dev mode
+import { environment } from "@raycast/api";
 
-export const config = true
+export const config = environment.isDevelopment
   ? {
       env: "dev",
       auth: {
