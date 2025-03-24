@@ -37,7 +37,7 @@ ${ssl.publickey}`;
         <ActionPanel>
           {ssl && (
             <>
-              <Action.CopyToClipboard title="Copy Entire SSL Bundle" content={markdown} />
+              <Action.CopyToClipboard title="Copy Entire Ssl Bundle" content={markdown} />
               <Action.CopyToClipboard title="Copy Intermediate Certificate" content={ssl.intermediatecertificate} />
               <Action.CopyToClipboard title="Copy Certificate Chain" content={ssl.certificatechain} />
               <Action.CopyToClipboard title="Copy Private Key" content={ssl.privatekey} />
@@ -46,7 +46,7 @@ ${ssl.publickey}`;
           )}
           <ActionPanel.Section>
             <Action.OpenInBrowser
-              title="Go to API Reference"
+              title="Go to Api Reference"
               url={`${API_DOCS_URL}SSL%20Retrieve%20Bundle%20by%20Domain`}
             />
           </ActionPanel.Section>

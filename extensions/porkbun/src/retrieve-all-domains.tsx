@@ -43,7 +43,7 @@ export default function RetrieveAllDomains() {
               if (filter === "status_active") return item.status === "ACTIVE";
               else if (filter === "status_null") return !item.status;
               else if (filter.includes("tld_")) return item.tld === filter.slice(4);
-            })
+            }),
       );
     })();
   }, [domains, filter, searchText]);
@@ -59,7 +59,7 @@ export default function RetrieveAllDomains() {
           <Action icon={Icon.Redo} title="Reload Domains" onAction={callApi} />
           <Action.OpenInBrowser
             icon={Icon.Globe}
-            title="Go to API Reference"
+            title="Go to Api Reference"
             url={`${API_DOCS_URL}Domain%20List%20All`}
           />
         </ActionPanel>
@@ -118,9 +118,9 @@ export default function RetrieveAllDomains() {
                     icon={Icon.Forward}
                     target={<GetURLForwardingComponent domain={item.domain} />}
                   />
-                  <ActionPanel.Submenu title="Go To" icon={Icon.ArrowRight}>
+                  <ActionPanel.Submenu title="Go to" icon={Icon.ArrowRight}>
                     <Action
-                      title="Retrieve DNS Records"
+                      title="Retrieve Dns Records"
                       icon={Icon.Text}
                       onAction={() =>
                         launchCommand({
@@ -131,7 +131,7 @@ export default function RetrieveAllDomains() {
                       }
                     />
                     <Action
-                      title="Delete DNS Record"
+                      title="Delete Dns Record"
                       icon={Icon.DeleteDocument}
                       onAction={() =>
                         launchCommand({
@@ -142,7 +142,7 @@ export default function RetrieveAllDomains() {
                       }
                     />
                     <Action
-                      title="Create DNS Record"
+                      title="Create Dns Record"
                       icon={Icon.Plus}
                       onAction={() =>
                         launchCommand({
@@ -153,7 +153,7 @@ export default function RetrieveAllDomains() {
                       }
                     />
                     <Action
-                      title="Edit DNS Record"
+                      title="Edit Dns Record"
                       icon={Icon.Pencil}
                       onAction={() =>
                         launchCommand({
@@ -164,7 +164,7 @@ export default function RetrieveAllDomains() {
                       }
                     />
                     <Action
-                      title="Retrieve SSL Bundle"
+                      title="Retrieve Ssl Bundle"
                       icon={Icon.Lock}
                       onAction={async () =>
                         await launchCommand({
@@ -179,7 +179,7 @@ export default function RetrieveAllDomains() {
                   <ActionPanel.Section>
                     <Action.OpenInBrowser
                       icon={Icon.Globe}
-                      title="Go to API Reference"
+                      title="Go to Api Reference"
                       url={`${API_DOCS_URL}Domain%20List%20All`}
                     />
                   </ActionPanel.Section>
