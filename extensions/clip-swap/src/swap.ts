@@ -1,21 +1,18 @@
 import { Clipboard, getSelectedText } from "@raycast/api";
 
 export default async function Swap() {
-  const selectedText = await getSelectedText();
-  const clipboardContent = await Clipboard.readText();
+  try {
+    const selectedText = await getSelectedText();
+    const clipboardContent = await Clipboard.readText();
 
-  if (selectedText) {
-    console.debug("copying", selectedText);
-    await Clipboard.copy(selectedText);
-    console.debug("copied");
-  }
+    if (selectedText) {
+      await Clipboard.copy(selectedText);
+    }
 
-  if (clipboardContent) {
-    console.debug("pasting", clipboardContent);
-    await Clipboard.paste(clipboardContent);
-    console.debug("pasted");
+    if (clipboardContent) {
+      await Clipboard.paste(clipboardContent);
+    }
+  } catch {
+    // Noop when anything fails to match typical copy/paste behaviour
   }
 }
-
-1234;
-12346789;
