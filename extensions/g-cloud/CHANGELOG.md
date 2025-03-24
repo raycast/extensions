@@ -8,7 +8,7 @@
 - Added error recovery and retry mechanisms
 - Small Bug Fixes
 
-## [0.1.28] - 2024-07-10
+## [0.1.28] - {PR_MERGE_DATE}
 - Initial release
 - Google Cloud IAM management features
 - Cloud Storage management features
