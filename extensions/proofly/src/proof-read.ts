@@ -35,7 +35,6 @@ export default async function Command() {
       prompt: `Please fix any grammar, spelling, or punctuation errors in the following text while preserving the original meaning and style:\n\n${selectedText}`,
       max_tokens: 1000,
     });
-
     const correctedText = response.choices[0]?.text?.trimStart();
 
     if (!correctedText) {
@@ -44,11 +43,9 @@ export default async function Command() {
 
     // Copy the corrected text back to clipboard
     await Clipboard.paste(correctedText);
-
     await showToast({
       style: Toast.Style.Success,
-      title: "Text corrected",
-      message: "The corrected text has been pasted",
+      title: "Done",
     });
   } catch (error) {
     console.error("Error:", error);
