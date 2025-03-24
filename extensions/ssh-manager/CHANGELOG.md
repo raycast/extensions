@@ -2,7 +2,8 @@
 
 ## [Improvements] - {PR_MERGE_DATE}
 
-- ⚠️ Add Confirmation Dialog to Delete Connections
+- ⚠️ Add Confirmation Dialog to Delete Connectionssd
+- 📦 Bump all dependencies to the latest
 
 ## [New Feature and Improvements] - 2025-02-27
 
@@ -39,7 +40,7 @@
 
 - Fixed a bug where a connection with a remote command did not work properly while saving.
 
-## [Modify hosts from  ~/.ssh/config] - 2023-09-20
+## [Modify hosts from ~/.ssh/config] - 2023-09-20
 
 - This change adds the ability to view/modify ssh hosts from ~/.ssh/config file in addition to localStorage
 
