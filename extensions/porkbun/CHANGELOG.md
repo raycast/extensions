@@ -1,6 +1,6 @@
 # Porkbun Changelog
 
-## [Domain Pricing Enhancements] - {PR_MERGE_DATE}
+## [Domain Pricing Enhancements] - 2025-03-24
 
 - `Domain Pricing` command would sometimes return invalid JSON and crash (ref: [Issue #18072](https://github.com/raycast/extensions/issues/18072))
 - `Domain Pricing` now shows "specialType" of domain (if exists)
