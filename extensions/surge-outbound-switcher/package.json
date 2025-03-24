@@ -4,7 +4,10 @@
   "title": "Surge Outbound Switcher",
   "description": "Instantly switch Surge's outbound mode without using HTTP API",
   "icon": "extension-icon.png",
-  "screenshots": "assets/screenshot.png",
+  "screenshots": [
+    "assets/screenshot1.png",
+    "assets/screenshot2.png"
+  ],
   "author": "the3ash",
   "categories": [
     "Web",
