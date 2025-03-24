@@ -1,16 +1,28 @@
-# ProductHunt Changelog
+# Product Hunt Changelog
 
-## [✨ AI Enhancements] - 2025-02-21
+## [1.3] - 2025-03-24
 
- ## [Update] - 2025-01-30
+### Changed
 
- - Added AI tool
+- Updated icons for light and dark themes
+- Fixed typos
+- Updated package.json
 
- ## [Update] - 2024-07-24
+## [1.2] - 2025-02-21
 
- - Added app description
+### Added
 
- ## [Update] - 2023-09-01
+- ✨ AI Enhancements: Added AI tool
 
- - Added so results are cached
- - Added new icons
+## [1.1] - 2024-07-24
+
+### Added
+
+- Added app description
+
+## [1.0] - 2023-09-01
+
+### Added
+
+- Added result caching
+- Added new icons

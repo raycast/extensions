@@ -4,7 +4,7 @@ import { OBJECTS } from "./objects";
 export const queryGetCustomerOutstandingInvoicesCustomerStatement = `
     query($businessId: ID!, $customerId: ID!) {
         business(id: $businessId) {
-            invoices(customerId: $customerId, status: OVERDUE, sort: [INVOICE_DATE_ASC]) {
+            invoices(customerId: $customerId, sort: [INVOICE_DATE_ASC]) {
                 edges {
                     node {
                         ${NODES.Invoice}

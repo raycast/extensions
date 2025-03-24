@@ -57,7 +57,7 @@ const JwtView = () => {
 
     const detail = !!showDetail && <List.Item.Detail markdown={markdown.join("\n\n")} />;
 
-    const selectionChange = (id?: string | undefined) => {
+    const selectionChange = (id?: string | null) => {
       const parts = id ? id.split(".") : [];
       setSelected({ type: parts[0] ?? "", value: parts[1] ?? "" });
     };

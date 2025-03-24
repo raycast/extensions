@@ -1,3 +1,3 @@
-# ProductHunt
+# Product Hunt
 
-List the latest hunts from the frontpage of ProductHunt with ease, direclty from Raycast.
+Show the featured launches trending today on Product Hunt directly from Raycast.
