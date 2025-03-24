@@ -1,13 +1,14 @@
 import { showToast, Toast } from "@raycast/api";
+import Papa from "papaparse";
 
+import mysql, { RowDataPacket, TypeCast } from "mysql2/promise";
+import { types as pgTypes, Pool, PoolConfig } from "pg";
 import { SQL, SQLStatement } from "sql-template-strings";
 import dedent from "string-dedent";
-import { Pool, types as pgTypes } from "pg";
-import mysql, { RowDataPacket, TypeCast } from "mysql2/promise";
 import { notifyError } from "./raycast";
 import { apiClient, NATURAL_LANGUAGE_SEARCH } from "./search-database";
 import { useGlobalState } from "./state";
-import { ColumnInfo, Json, TableInfo } from "./types";
+import { ColumnInfo, Json, launchContext, TableInfo } from "./types";
 import { ellipsisReviver, generateRandomId, getDatabaseConnectionType, sleep } from "./utils";
 
 // process.title = "Spiceblow";
@@ -22,9 +23,15 @@ void [pgTypes.builtins.TIME, pgTypes.builtins.TIMETZ].forEach((type) => {
   pgTypes.setTypeParser(type, (val) => val);
 });
 
-let postgresPool = new Pool({
-  connectionString: useGlobalState.getState().connectionString,
+const postgresPoolOptions: PoolConfig = {
   max: 3,
+};
+let postgresPool = new Pool({
+  ...postgresPoolOptions,
+  connectionString: useGlobalState.getState().connectionString,
+});
+postgresPool.on("connect", () => {
+  console.log("Acquired connection from pool");
 });
 
 // Ensure connections are released on process exit
@@ -61,13 +68,16 @@ const typeCast: TypeCast = function (field, next) {
   return next();
 };
 
-let mysqlPool = mysql.createPool({
-  uri: useGlobalState.getState().connectionString,
+const mysqlPoolOptions: mysql.PoolOptions = {
   typeCast,
   connectionLimit: 3,
+};
+let mysqlPool = mysql.createPool({
+  ...mysqlPoolOptions,
+  uri: useGlobalState.getState().connectionString,
 });
 
-let databaseType: "postgres" | "mysql" =
+export let databaseType: "postgres" | "mysql" =
   getDatabaseConnectionType(useGlobalState.getState().connectionString) || "postgres";
 useGlobalState.subscribe((state) => {
   const type = getDatabaseConnectionType(state.connectionString);
@@ -75,16 +85,18 @@ useGlobalState.subscribe((state) => {
     databaseType = "postgres";
     postgresPool.end();
     postgresPool = new Pool({
+      ...postgresPoolOptions,
       connectionString: state.connectionString,
-      max: 3,
+    });
+    postgresPool.on("connect", () => {
+      console.log("Acquired connection from pool");
     });
   } else if (type === "mysql") {
     databaseType = "mysql";
     mysqlPool.end();
     mysqlPool = mysql.createPool({
+      ...mysqlPoolOptions,
       uri: state.connectionString,
-      typeCast,
-      connectionLimit: 3,
     });
   }
 });
@@ -114,6 +126,7 @@ export async function checkConnection(connectionString: string, databaseType: "p
       }
       await pool.connect();
       connectionOk = true;
+      pool.end();
       return true;
     } catch (error) {
       console.error("Error connecting to PostgreSQL database:", error);
@@ -134,7 +147,7 @@ export async function checkConnection(connectionString: string, databaseType: "p
         return true;
       }
       await pool.getConnection();
-
+      pool.end();
       connectionOk = true;
       return true;
     } catch (error) {
@@ -147,6 +160,7 @@ export async function checkConnection(connectionString: string, databaseType: "p
     }
   }
 }
+
 export function renderColumnValue(col: ColumnInfo, value: Json) {
   if (value == null) {
     return "";
@@ -238,10 +252,10 @@ export function isSearchableColumn(col: ColumnInfo) {
 }
 
 export type GenerateSearchConditionParams = {
-  searchText: string;
+  searchText?: string;
   tableInfo?: TableInfo;
-  searchField: string;
-  signal: AbortSignal;
+  searchField?: string;
+  signal?: AbortSignal;
   schema?: string;
   query?: string;
   namespace: string;
@@ -267,8 +281,11 @@ async function generateSearchCondition({
   }
   // throttle search slower than default Raycast throttle
   // if user types fast (less than 200ms on each keystroke) you only wait 200ms for the query, otherwise wait more
-  await sleep(timesAborted ? 400 : 200);
-  if (signal.aborted) {
+  // do not wait if query is from a link click
+  if (launchContext?.searchText !== searchText) {
+    await sleep(timesAborted ? 400 : 200);
+  }
+  if (signal?.aborted) {
     timesAborted += 1;
     return;
   }
@@ -371,16 +388,18 @@ export type SearchTableRowsOrCustomQueryParams = Omit<
   table?: string;
   page: number;
   pageSize?: number;
-  signal: AbortSignal;
+  signal?: AbortSignal;
+  descending?: boolean;
 };
 
 interface GenerateOrderByParams {
   tableInfo?: TableInfo;
   tableName: string;
   schema: string;
+  descending?: boolean;
 }
 
-function generateOrderByClause({ tableInfo, tableName, schema }: GenerateOrderByParams): string {
+function generateOrderByClause({ tableInfo, descending, tableName, schema }: GenerateOrderByParams): string {
   const creationDateColumns = [
     "created_at",
     "createdAt",
@@ -398,16 +417,55 @@ function generateOrderByClause({ tableInfo, tableName, schema }: GenerateOrderBy
     "modification_date",
   ];
 
-  const column = tableInfo?.columns.find((col) => creationDateColumns.includes(col.columnName.toLowerCase()));
+  const postgresSortableTypes = [
+    pgTypes.builtins.TIMESTAMP,
+    pgTypes.builtins.DATE,
+    pgTypes.builtins.TIMESTAMPTZ,
+    pgTypes.builtins.TIME,
+    pgTypes.builtins.TIMETZ,
+    pgTypes.builtins.INT4,
+    pgTypes.builtins.INT8,
+    pgTypes.builtins.NUMERIC,
+    pgTypes.builtins.FLOAT4,
+    pgTypes.builtins.FLOAT8,
+    pgTypes.builtins.INT2,
+  ];
+  const mysqlSortableTypes = [
+    mysql.Types.DATETIME,
+    mysql.Types.TIMESTAMP,
+    mysql.Types.DATE,
+    mysql.Types.TIME,
+    mysql.Types.DECIMAL,
+    mysql.Types.FLOAT,
+    mysql.Types.DOUBLE,
+    mysql.Types.INT24,
+  ];
+
+  const column = tableInfo?.columns.find((col) => {
+    const lowerCaseColumnName = col.columnName.toLowerCase();
+    if (!creationDateColumns.includes(lowerCaseColumnName)) return false;
+    console.log(
+      `Checking sortable type for column ${col.columnName} with type ID ${col.typeId} in ${databaseType} database`,
+    );
+    if (databaseType === "postgres" && !postgresSortableTypes.includes(col.typeId)) {
+      console.log(`Column ${col.columnName} is not a sortable type in Postgres.`);
+      return false;
+    }
+    if (databaseType === "mysql" && !mysqlSortableTypes.includes(col.typeId)) {
+      console.log(`Column ${col.columnName} is not a sortable type in MySQL.`);
+      return false;
+    }
+    return true;
+  });
 
   if (!column) {
     return "";
   }
 
   if (databaseType === "postgres") {
-    return `ORDER BY "${schema}"."${tableName}"."${column.columnName}" DESC`;
+    return `ORDER BY "${schema}"."${tableName}"."${column.columnName}" ${descending ? "DESC" : "ASC"}`;
   } else {
-    return `ORDER BY \`${schema}\`.\`${tableName}\`.\`${column.columnName}\` DESC`;
+    return `ORDER BY \`${schema}\`.\`${tableName}\`.\`${column.columnName}\` ${descending ? "DESC" : "ASC"}`;
   }
 }
 
@@ -417,6 +475,7 @@ export async function searchTableRowsOrCustomQuery({
   pageSize = 10,
   query,
   signal,
+  descending = true,
   ...rest
 }: SearchTableRowsOrCustomQueryParams): Promise<{
   hasMore: boolean;
@@ -428,7 +487,7 @@ export async function searchTableRowsOrCustomQuery({
   const previousOutputs = [] as GenerateSearchConditionParams["previousOutputs"];
   let output;
   while (previousOutputs.length <= 3) {
-    let finalQuery: string;
+    let finalQuery: string = "";
     try {
       const offset = page * pageSize;
 
@@ -466,13 +525,13 @@ export async function searchTableRowsOrCustomQuery({
         finalQuery += ` ${searchCondition.sql}`;
       } else if (table) {
         const [schema, tableName] = table.split(".");
-        const orderBy = generateOrderByClause({ schema, tableName, tableInfo: rest.tableInfo });
+        const orderBy = generateOrderByClause({ descending, schema, tableName, tableInfo: rest.tableInfo });
         finalQuery += " " + orderBy;
       }
 
       finalQuery += databaseType === "postgres" ? ` LIMIT $1 OFFSET $2;` : ` LIMIT ? OFFSET ?;`;
 
-      if (signal.aborted) {
+      if (signal?.aborted) {
         return {
           hasMore: false,
           data: [],
@@ -523,6 +582,7 @@ export async function searchTableRowsOrCustomQuery({
         throw error;
       } else {
         console.error("Error in searchTableRowsOrCustomQuery:", error);
+        console.error(finalQuery);
         if (rest.searchField !== NATURAL_LANGUAGE_SEARCH) {
           throw error;
         }
@@ -636,6 +696,23 @@ function validateTableInfo(tableInfo: TableInfo) {
       throw new Error("Column has no typeId");
     }
   }
+  for (const relation of tableInfo.relations || []) {
+    if (!relation.direction) {
+      throw new Error("Relation has no direction");
+    }
+    if (!relation.foreignSchema) {
+      throw new Error("Relation has no foreign schema");
+    }
+    if (!relation.foreignTable) {
+      throw new Error("Relation has no foreign table");
+    }
+    if (!relation.columnNames?.length) {
+      throw new Error("Relation has no column names");
+    }
+    if (!relation.foreignColumnNames?.length) {
+      throw new Error("Relation has no foreign column names");
+    }
+  }
   return tableInfo;
 
   // const primaryKeyColumns = tableInfo.columns.filter((col) => col.isPrimaryKey);
@@ -643,8 +720,8 @@ function validateTableInfo(tableInfo: TableInfo) {
   //   throw new Error("Table has no primary key");
   // }
 }
-
 export async function getTableInfo({ table }: { table: string }) {
+  console.log(`getting table info for ${table}`);
   if (databaseType === "postgres") {
     const [schemaName, tableName] = table.split(".");
 
@@ -674,7 +751,64 @@ export async function getTableInfo({ table }: { table: string }) {
         AND a.attnum > 0 AND NOT a.attisdropped
       ORDER BY a.attnum;
     `;
-    const columnResult = await postgresPool.query(columnQuery, [`"${schemaName}"."${tableName}"`]);
+
+    // Get related tables (both foreign keys and references)
+    const relationsQuery = `
+      WITH RECURSIVE fk_tree AS (
+        -- Outbound foreign keys (direct)
+        SELECT 
+          'outbound' as direction,
+          c.conname as constraint_name,
+          nf.nspname as foreign_schema,
+          cf.relname as foreign_table,
+          ARRAY[a.attname]::text[] as column_names,
+          ARRAY[af.attname]::text[] as foreign_column_names
+        FROM pg_constraint c
+        JOIN pg_class cp ON c.conrelid = cp.oid
+        JOIN pg_namespace np ON cp.relnamespace = np.oid
+        JOIN pg_class cf ON c.confrelid = cf.oid
+        JOIN pg_namespace nf ON cf.relnamespace = nf.oid
+        JOIN pg_attribute a ON a.attrelid = cp.oid AND a.attnum = ANY(c.conkey)
+        JOIN pg_attribute af ON af.attrelid = cf.oid AND af.attnum = ANY(c.confkey)
+        WHERE c.contype = 'f'
+          AND cp.relname = $1 
+          AND np.nspname = $2
+
+        UNION ALL
+
+        -- Inbound foreign keys (reverse)
+        SELECT 
+          'inbound' as direction,
+          c.conname as constraint_name,
+          np.nspname as foreign_schema,
+          cp.relname as foreign_table,
+          ARRAY[af.attname]::text[] as column_names,
+          ARRAY[a.attname]::text[] as foreign_column_names
+        FROM pg_constraint c
+        JOIN pg_class cp ON c.conrelid = cp.oid
+        JOIN pg_namespace np ON cp.relnamespace = np.oid
+        JOIN pg_class cf ON c.confrelid = cf.oid
+        JOIN pg_namespace nf ON cf.relnamespace = nf.oid
+        JOIN pg_attribute a ON a.attrelid = cp.oid AND a.attnum = ANY(c.conkey)
+        JOIN pg_attribute af ON af.attrelid = cf.oid AND af.attnum = ANY(c.confkey)
+        WHERE c.contype = 'f'
+          AND cf.relname = $1
+          AND nf.nspname = $2
+      )
+      SELECT
+        direction,
+        constraint_name,
+        foreign_schema,
+        foreign_table,
+        column_names,
+        foreign_column_names
+      FROM fk_tree;
+    `;
+
+    const [columnResult, relationsResult] = await Promise.all([
+      postgresPool.query(columnQuery, [`"${schemaName}"."${tableName}"`]),
+      postgresPool.query(relationsQuery, [tableName, schemaName]),
+    ]);
 
     // Combine all information
     const tableInfo = validateTableInfo({
@@ -694,6 +828,14 @@ export async function getTableInfo({ table }: { table: string }) {
           enumValues: col.enum_values || null,
         };
       }),
+      relations: relationsResult.rows.map((rel) => ({
+        direction: rel.direction,
+        constraintName: rel.constraint_name,
+        foreignSchema: rel.foreign_schema,
+        foreignTable: rel.foreign_table,
+        columnNames: rel.column_names,
+        foreignColumnNames: rel.foreign_column_names,
+      })),
     });
 
     return tableInfo;
@@ -715,11 +857,42 @@ export async function getTableInfo({ table }: { table: string }) {
       ORDER BY c.ordinal_position;
     `;
 
-    const [columns] = await mysqlPool.query<RowDataPacket[]>(columnQuery, [databaseName, tableName]);
+    // Query to get related tables
+    const relationsQuery = `
+      SELECT 
+        'outbound' as direction,
+        kcu.constraint_name,
+        kcu.referenced_table_schema as foreign_schema,
+        kcu.referenced_table_name as foreign_table,
+        GROUP_CONCAT(kcu.column_name) as column_names,
+        GROUP_CONCAT(kcu.referenced_column_name) as foreign_column_names
+      FROM information_schema.key_column_usage kcu
+      WHERE kcu.table_schema = ? 
+        AND kcu.table_name = ?
+        AND kcu.referenced_table_name IS NOT NULL
+      GROUP BY kcu.constraint_name, kcu.referenced_table_schema, kcu.referenced_table_name
+      UNION ALL
+      SELECT 
+        'inbound' as direction,
+        kcu.constraint_name,
+        kcu.table_schema as foreign_schema,
+        kcu.table_name as foreign_table,
+        GROUP_CONCAT(kcu.referenced_column_name) as column_names,
+        GROUP_CONCAT(kcu.column_name) as foreign_column_names
+      FROM information_schema.key_column_usage kcu
+      WHERE kcu.referenced_table_schema = ?
+        AND kcu.referenced_table_name = ?
+        AND kcu.referenced_table_name IS NOT NULL
+      GROUP BY kcu.constraint_name, kcu.table_schema, kcu.table_name;
+    `;
+
+    const [[columns], [relations]] = await Promise.all([
+      mysqlPool.query<RowDataPacket[]>(columnQuery, [databaseName, tableName]),
+      mysqlPool.query<RowDataPacket[]>(relationsQuery, [databaseName, tableName, databaseName, tableName]),
+    ]);
 
     const tableInfo = validateTableInfo({
       columns: columns.map((col) => {
-        // Parse enum values directly from column_type if it's an enum
         const enumValues =
           col.data_type === "enum" && col.column_type
             ? col.column_type
@@ -741,6 +914,14 @@ export async function getTableInfo({ table }: { table: string }) {
           enumValues,
         };
       }),
+      relations: relations.map((rel) => ({
+        direction: rel.direction,
+        constraintName: rel.constraint_name,
+        foreignSchema: rel.foreign_schema,
+        foreignTable: rel.foreign_table,
+        columnNames: rel.column_names?.split?.(","),
+        foreignColumnNames: rel.foreign_column_names?.split?.(","),
+      })),
     });
 
     return tableInfo;
@@ -1534,11 +1715,66 @@ export async function countRows({ table, query }: { table?: string; query?: stri
   }
 }
 
-function quote(columnName: string) {
+export function quote(columnName: string) {
   if (databaseType === "postgres") {
     return `"${columnName}"`;
   } else if (databaseType === "mysql") {
     return `\`${columnName}\``;
   }
   return columnName;
+}
+
+export function exportToCsv({ rows, includeHeader = true }: { rows: Json[]; includeHeader?: boolean }): string {
+  return Papa.unparse(rows, {
+    // quotes: true,
+    header: includeHeader,
+    quoteChar: '"',
+    delimiter: ",",
+    skipEmptyLines: true,
+  });
+}
+
+export function renderColumnValueForCsv(col: ColumnInfo, value: Json) {
+  if (value == null) {
+    return value;
+  }
+  let text = String(value);
+  // console.log(JSON.stringify(col, null, 2));
+  if (databaseType === "postgres") {
+    if (col.typeId === pgTypes.builtins.BYTEA) {
+      text = "";
+    } else if (col.typeId === pgTypes.builtins.JSON || col.typeId === pgTypes.builtins.JSONB) {
+      text = JSON.stringify(value);
+    } else if (col.typeId === pgTypes.builtins.XML) {
+      // TODO: XML
+      text = "";
+    } else if (col.typeId === pgTypes.builtins.TSVECTOR) {
+      text = JSON.stringify(value);
+    } else if (col.typeId === pgTypes.builtins.INTERVAL) {
+      text = String(value);
+    } else {
+      text = String(value);
+    }
+  } else {
+    if (
+      col.typeId === mysql.Types.BLOB ||
+      col.typeId === mysql.Types.TINY_BLOB ||
+      col.typeId === mysql.Types.MEDIUM_BLOB ||
+      col.typeId === mysql.Types.LONG_BLOB
+    ) {
+      if (typeof value === "string") {
+        text = value;
+      } else {
+        text = "";
+      }
+    } else if (col.typeId === mysql.Types.JSON) {
+      text = JSON.stringify(value);
+    } else {
+      text = String(value);
+    }
+  }
+  if (text?.startsWith("[object Object]")) {
+    text = JSON.stringify(text, null, 2);
+  }
+  return text;
 }

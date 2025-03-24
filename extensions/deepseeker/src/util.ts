@@ -2,11 +2,17 @@ import { encode } from "@nem035/gpt-3-encoder";
 import { closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
-function escapeStringForAppleScript(str: string) {
+/**
+ * Escapes special characters in a string for use in AppleScript
+ */
+function escapeStringForAppleScript(str: string): string {
   return str.replace(/[\\"]/g, "\\$&");
 }
 
-export async function sentToSideNote(content: string) {
+/**
+ * Sends content to SideNotes application
+ */
+export async function sendToSideNote(content: string): Promise<void> {
   const applescript = `
   tell application "SideNotes"
     set f to first folder
@@ -16,49 +22,74 @@ export async function sentToSideNote(content: string) {
   await runAppleScriptSilently(applescript);
 }
 
-function naiveRound(num: number, decimalPlaces = 0) {
-  const p = Math.pow(10, decimalPlaces);
-  return Math.round(num * p) / p;
+/**
+ * Rounds a number to specified decimal places
+ */
+function naiveRound(num: number, decimalPlaces = 0): number {
+  const multiplier = Math.pow(10, decimalPlaces);
+  return Math.round(num * multiplier) / multiplier;
 }
 
-export function countToken(content: string) {
+/**
+ * Counts tokens in a string using GPT-3 encoder
+ */
+export function countToken(content: string): number {
   return encode(content).length;
 }
 
-// get priceoutput, priceinput from preference
-const input_price = getPreferenceValues().priceinput || 0.27;
-const output_price = getPreferenceValues().priceoutput || 1.1;
+const { priceinput, priceoutput } = getPreferenceValues();
 
-export function estimatePrice(prompt_token: number, output_token: number, model: string) {
-  // price is per 1M tokens in dollars, but we are measuring in cents. Hence the denominator is 10,000
-  // from : https://openai.com/api/pricing/
-  //
-  let price = 0;
-  if (model == "gpt-3.5-turbo") {
-    price = (prompt_token * 0.5 + output_token * 1.5) / 10000;
-  } else if (model == "gpt-4-turbo") {
-    price = (prompt_token * 10.0 + output_token * 30.0) / 10000;
-  } else if (model == "gpt-4") {
-    price = (prompt_token * 30.0 + output_token * 60.0) / 10000;
-  } else if (model == "gpt-4o-mini") {
-    price = (prompt_token * 0.15 + output_token * 0.6) / 10000;
-  } else if (model == "gpt-4o") {
-    price = (prompt_token * 5.0 + output_token * 15.0) / 10000;
-  } else if (model == "deepseek-reasoner") {
-    price = (prompt_token * 2.0 + output_token * 2.5) / 10000;
-  } else if (model == "deepseek-chat") {
-    price = (prompt_token * input_price + output_token * output_price) / 10000;
-    // * there is a tmeporary discount for deepseek-chat, we ignore it for now
-    // * there is cache discount for deepseek-chat, we ignore it
-    // so your actual price may be lower than this
-    // https://api-docs.deepseek.com/quick_start/pricing
-  } else {
-    return -1;
-  }
-  return naiveRound(price, 3);
+/**
+ * Price configuration for different models ($ per million tokens)
+ */
+const prices: Record<string, { in: number; out: number }> = {
+  "gpt-3.5-turbo": { in: 0.5, out: 1.5 },
+  "gpt-4-turbo": { in: 10, out: 30 },
+  "gpt-4": { in: 30, out: 60 },
+  "gpt-4o-mini": { in: 0.15, out: 0.6 },
+  "gpt-4o": { in: 5, out: 15 },
+  "deepseek-reasoner": { in: 0.55, out: 2.19 },
+  "deepseek-chat": { in: 0.27, out: 1.1 },
+};
+
+/**
+ * Type guard for valid positive numbers
+ */
+function isValidNumber(value: unknown): value is number {
+  return typeof value === "number" && !Number.isNaN(value) && value > 0;
 }
 
-export async function runAppleScriptSilently(appleScript: string) {
+/**
+ * Calculates cost based on input/output tokens and their respective prices
+ */
+function calculateCost(tokenInput: number, tokenOutput: number, priceInput: number, priceOutput: number): number {
+  const cost = (tokenInput * priceInput + tokenOutput * priceOutput) / 10000;
+  return naiveRound(cost, 3);
+}
+
+/**
+ * Estimates price for a model based on token usage
+ */
+export function estimatePrice(promptTokens: number, outputTokens: number, model: string): number {
+  if (isValidNumber(+priceinput) && isValidNumber(+priceoutput)) {
+    return calculateCost(promptTokens, outputTokens, priceinput, priceoutput);
+  }
+
+  if (model in prices) {
+    return calculateCost(promptTokens, outputTokens, prices[model].in, prices[model].out);
+  }
+
+  return -1;
+}
+
+/**
+ * Runs AppleScript silently by closing the main window first
+ */
+export async function runAppleScriptSilently(appleScript: string): Promise<void> {
   await closeMainWindow();
-  await runAppleScript(appleScript);
+  try {
+    await runAppleScript(appleScript);
+  } catch (error) {
+    console.error("Failed to run AppleScript:", error);
+  }
 }

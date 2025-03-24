@@ -47,3 +47,7 @@ spike
 github-spark
 anytype
 dub
+e2b
+firecrawl
+resend
+exa

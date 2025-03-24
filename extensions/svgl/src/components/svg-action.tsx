@@ -4,6 +4,7 @@ import CopyVueComponentActions from "./actions/copy-vue-component-actions";
 import CopySvelteComponentActions from "./actions/copy-svelte-component-actions";
 import CopyAngularComponentActions from "./actions/copy-angular-component-actions";
 import CopySvgActions from "./actions/copy-svg-actions";
+import CopySvgFileActions from "./actions/copy-svg-file-actions";
 import CopyWordmarkSvgActions from "./actions/copy-wordmark-svg-actions";
 import CopySvgUrlActions from "./actions/copy-svg-url-actions";
 import CopyWordmarkSvgUrlAction from "./actions/copy-wordmark-svg-url-actions";
@@ -21,6 +22,9 @@ const SvgAction = ({ svg, category }: SvgActionProps) => {
     <ActionPanel>
       <ActionPanel.Section title="Copy SVG">
         <CopySvgActions svg={svg} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Copy SVG File">
+        <CopySvgFileActions svg={svg} />
       </ActionPanel.Section>
       <ActionPanel.Section title="Copy SVG Wordmark">
         <CopyWordmarkSvgActions svg={svg} />

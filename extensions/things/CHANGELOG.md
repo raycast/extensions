@@ -1,5 +1,7 @@
 # Things Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Focus Input Fields] - 2024-10-25
 
 - Add shortcuts to focus the input fields in both the `Add New To-Do` and `Add New Project` commands.

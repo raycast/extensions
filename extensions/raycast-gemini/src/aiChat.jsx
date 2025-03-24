@@ -13,7 +13,7 @@ import {
 import { useState, useEffect } from "react";
 import Gemini from "gemini-ai";
 import fetch from "node-fetch";
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, getSelectedText } from "@raycast/api";
 
 export default function Chat({ launchContext }) {
   let toast = async (style, title, message) => {
@@ -32,7 +32,6 @@ export default function Chat({ launchContext }) {
     const newChatNumbers = existingChatNames
       .filter((x) => x.match(/^New Chat \d+$/))
       .map((x) => parseInt(x.replace(prefix, "")));
-    console.log(newChatNumbers);
     let lowestAvailableNumber = 1;
     while (newChatNumbers.includes(lowestAvailableNumber)) {
       lowestAvailableNumber++;
@@ -222,6 +221,19 @@ export default function Chat({ launchContext }) {
             }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
           />
+          <Action
+            icon={Icon.Clipboard}
+            title="Append Selected Text"
+            onAction={async () => {
+              try {
+                const selectedText = await getSelectedText();
+                setSearchText((oldText) => oldText + selectedText);
+              } catch (error) {
+                toast(Toast.Style.Failure, "Could not get the selected text");
+              }
+            }}
+            shortcut={{ modifiers: ["ctrl", "shift"], key: "v" }}
+          />
         </ActionPanel.Section>
         <ActionPanel.Section title="Danger zone">
           <Action
@@ -292,13 +304,11 @@ export default function Chat({ launchContext }) {
 
         if (getChat(newData.currentChat, newData.chats).messages[0]?.finished === false) {
           let currentChat = getChat(newData.currentChat, newData.chats);
-          console.log(currentChat);
           let aiChat = gemini.createChat({
             model: "gemini-1.5-pro-latest",
             messages: currentChat.messages.map((x) => [x.prompt, x.answer]),
           });
           currentChat.messages[0].answer = "";
-          console.log(toast);
           toast(Toast.Style.Animated, "Regenerating Last Message");
           (async () => {
             try {

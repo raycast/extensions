@@ -5,7 +5,7 @@ import { kindName, entryTtile, entrySubtitle, capitalize } from "./lib/utils";
 
 export default function ExploreContent() {
   const { isLoading, data } = getContentTypes();
-  const { host } = getPreferenceValues<Preferences>();
+  const { host } = getPreferenceValues();
 
   return (
     <List isLoading={isLoading}>
@@ -42,7 +42,7 @@ export default function ExploreContent() {
 }
 
 function Entries({ contentType }: { contentType: ContentType }) {
-  const { host } = getPreferenceValues<Preferences>();
+  const { host } = getPreferenceValues();
   const { data, isLoading } = getEntries(contentType.route);
 
   return (

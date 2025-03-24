@@ -1,6 +1,6 @@
 # Folder Search
 
-Search for folders on your Mac
+Search for folders on your Mac and move items into folders quickly
 
 ## Plugins
 

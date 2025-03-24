@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "solidtime",
+  "title": "Solidtime",
+  "description": "Manage your clients, projects and time entries for Solidtime",
+  "icon": "solidtime.png",
+  "author": "cupcakearmy",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-time",
+      "title": "Manage Time Entries",
+      "description": "Manage your time entries",
+      "mode": "view"
+    },
+    {
+      "name": "manage-clients",
+      "title": "Manage Clients",
+      "description": "Manage your clients",
+      "mode": "view"
+    },
+    {
+      "name": "manage-projects",
+      "title": "Manage Projects",
+      "description": "Manage your projects",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Solidtime API Key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "onTimeEntryAction",
+      "description": "What should happen after a time entry is started or stopped",
+      "type": "dropdown",
+      "title": "Window behaviour on Time Entry action",
+      "default": "close",
+      "required": false,
+      "data": [
+        {
+          "title": "Close",
+          "value": "close"
+        },
+        {
+          "title": "Stay",
+          "value": "stay"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.17.0",
+    "@tanstack/react-query": "^5.66.9",
+    "@zodios/core": "^10.9.6",
+    "dayjs": "^1.11.13",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

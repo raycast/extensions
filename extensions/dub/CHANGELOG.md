@@ -1,5 +1,10 @@
 # Dub Link Shortener Changelog
 
+## [Improvements] - 2025-03-12
+
+- Add a toggle to show/hide details in the search links command
+- Keep previous data when fetching short links
+
 ## [Typeahead Support] - 2024-12-04
 
 - Add typeahead support for short links to load more that 100 links [#14198](https://github.com/raycast/extensions/issues/14198)

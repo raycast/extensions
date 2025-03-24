@@ -1,6 +1,6 @@
 # DeepSeeker - DeepSeek Quick Actions
 
-DeepSeek LLM is a powerful yet cheap LLM. DeepSeeker is a Raycast extension that allows you to perform one-shot actions with DeepSeek using Raycast.
+DeepSeek is a powerful yet cheap LLM. This extension provides quick actions to interact with DeepSeek API. It allows you to quickly ask questions, summarize text, and more. It's a great tool for students, researchers, and anyone who needs quick answers.
 
 While [ChatGPT Quick Actions](https://www.raycast.com/alanzchen/chatgpt-quick-actions) is built for ChatGPT, DeepSeeker is built for DeepSeek. For now, it tries to obey `Multiple Simple` phylosophy. In the future, it tries to provide `more flexibility` for individual various needs.
 
@@ -19,29 +19,40 @@ Enjoy using DeepSeeker! 🚀
 
 ## Features
 
+| Command             | Function                                                     | Use Selected Text? |
+| ------------------- | ------------------------------------------------------------ | ------------------ |
+| **Ask on Selected** | Ask questions or instruct on the selected text               | ✅                  |
+| **Ask LLM**         | Ask questions using pure user query input                    | ❌                  |
+| **Summarize**       | Summarize the selected text                                  | ✅                  |
+| **Fix**             | Fix the selected text typo and grammar-wise                  | ✅                  |
+| **Rephrase**        | Rephrase and improve the writing of the selected text        | ✅                  |
+| **Translate**       | Auto translate selected text into target language as setting | ✅                  |
+| **What**            | Give a brief explanation of the selected text                | ✅                  |
+| **Why**             | Give a brief explanation of the selected declaration         | ✅                  |
+| **History**         | Browse all interaction histories                             | ❌                  |
+
 - [x] 🚀 Results Stream in real time
 - [x] ⌘ Supports custom keybinding for each action
 - [x] 📄 Custom prompt for each action
 - [x] 💸 Set token price in settings
 - [x] 🌐 Support Translate and Looking Up Words
 - [x] 🎨 Multiple models support (Deepseek, OpenAI, Gemini)
-- [ ] 🔍 Fix Fallback Feature, e.g., ASK LLM
-- [ ] Fix notes
-- [ ] Interaction with Zoo using deeplinks?
-- [ ] 📦 More flexibility for personal needs
-  - [ ] Prompt zoo
-  - [ ] Choose proopt when running the command
-- [ ] 💬 Conversation Chat mode
+- [x] 📜 Support Histories (ATTENTION: do not rely on it for important data!)
 
-> This extension is built highly inspired by [ChatGPT Quick Actions](https://www.raycast.com/alanzchen/chatgpt-quick-actions) by [Alan Chen](https://www.raycast.com/alanzchen).
+## Bugs / TODOs / Known Issues
+
+- The stream output is blinking when the result is updated. It should be caused by the Raycast react use effect. The API should be called only once.
+- Github Models seem to have issues with stream output. DeepSeek and Google Gemini models are working fine.
 
 ## Metadatas
 
 <details>
 <summary>Wallpaper & Examples</summary>
 
-The wallpaper for the Screenshots is the https://misc-assets.raycast.com/wallpapers/blue_distortion_2.heic
+The wallpaper for the Screenshots is the <https://misc-assets.raycast.com/wallpapers/blue_distortion_2.heic>
 
 All the examples have been generated on [Elon Musk's Wikipedia page 1st Paragraph](https://en.wikipedia.org/wiki/Elon_Musk)
 
 </details>
+
+> This extension is built highly inspired by [ChatGPT Quick Actions](https://www.raycast.com/alanzchen/chatgpt-quick-actions) by [Alan Chen](https://www.raycast.com/alanzchen).

@@ -1,4 +1,4 @@
-import { Application, Icon, Action } from "@raycast/api";
+import { Action, type Application, Icon } from "@raycast/api";
 import type { File, Node } from "../types";
 
 export function OpenPageAction(props: {

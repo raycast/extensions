@@ -1,5 +1,11 @@
 # AdGuard Home Raycast Extension Changelog
 
+## [1.1.2] - 2025-02-05
+
+- Fixed disable protection status icon
+- Updated extension title to use proper case
+- Optimize status rendering
+
 ## [1.1.1] - 2025-01-29
 
 - Added countdown timer for snooze status

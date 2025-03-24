@@ -1,7 +1,8 @@
 import { V1Endpoints } from "@kubernetes/client-node";
-import { ResourceList } from "./components/resource-list";
+import { ResourceList } from "./components/ResourceList";
 import { KubernetesContextProvider } from "./states/context";
 import { KubernetesNamespaceProvider } from "./states/namespace";
+import { kubernetesObjectAge } from "./utils/duration";
 
 export default function Command() {
   return (
@@ -34,7 +35,7 @@ function matchEndpoint(endpoint: V1Endpoints, searchText: string): boolean {
 }
 
 function renderEndpointFields(endpoint: V1Endpoints) {
-  return [endpointEndpoints(endpoint)];
+  return [endpointEndpoints(endpoint), `Age: ${kubernetesObjectAge(endpoint)}`];
 }
 
 function endpointEndpoints(endpoint: V1Endpoints) {

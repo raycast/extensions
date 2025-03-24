@@ -1,5 +1,11 @@
 # NBA Game Viewer Changelog
 
+## [Improvements] - 2025-01-31
+
+- Added play-by-play view for completed and in-progress games.
+- Added details view for games list.
+- Added scoreboard for completed and in-progress games.
+
 ## [Fixes] - 2024-10-28
 
 - Removed year from standings to default to current season.
