@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -13,6 +14,33 @@ interface CreateBucketFormProps {
   generateUniqueBucketName: (purpose?: string) => string;
 }
 
+function validateBucketName(name: string): { isValid: boolean; error?: string } {
+  if (!name) {
+    return { isValid: false, error: "Bucket name is required" };
+  }
+
+  if (name.length < 3 || name.length > 63) {
+    return { isValid: false, error: "Bucket name must be between 3 and 63 characters" };
+  }
+
+  if (!/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(name)) {
+    return {
+      isValid: false,
+      error: "Bucket name must contain only lowercase letters, numbers, and hyphens, and must start and end with a letter or number",
+    };
+  }
+
+  if (name.includes("..") || name.includes("-.") || name.includes(".-")) {
+    return { isValid: false, error: "Bucket name cannot contain consecutive dots or mix of dots and hyphens" };
+  }
+
+  if (name.includes("goog") || name.includes("google")) {
+    return { isValid: false, error: "Bucket name cannot contain 'goog' or 'google'" };
+  }
+
+  return { isValid: true };
+}
+
 export default function CreateBucketForm({
   projectId,
   gcloudPath,
@@ -22,10 +50,18 @@ export default function CreateBucketForm({
 }: CreateBucketFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedName, setSuggestedName] = useState(generateUniqueBucketName("storage"));
+  const [nameError, setNameError] = useState<string | undefined>();
 
   // Generate a new suggested name
   function regenerateName() {
     setSuggestedName(generateUniqueBucketName("storage"));
+    setNameError(undefined);
+  }
+
+  function handleNameChange(name: string) {
+    const validation = validateBucketName(name);
+    setNameError(validation.error);
+    return validation.error;
   }
 
   async function handleSubmit(values: {
@@ -35,10 +71,11 @@ export default function CreateBucketForm({
     publicAccess: boolean;
     uniformAccess: boolean;
   }) {
-    if (!values.name) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Bucket name is required",
+    const validation = validateBucketName(values.name);
+    if (!validation.isValid) {
+      showFailureToast("Validation Error", {
+        title: "Invalid Bucket Name",
+        message: validation.error || "Please check bucket name requirements",
       });
       return;
     }
@@ -74,10 +111,9 @@ export default function CreateBucketForm({
       onBucketCreated();
     } catch (error) {
       console.error("Error creating bucket:", error);
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast("Failed to create bucket", {
         title: "Failed to create bucket",
-        message: String(error),
+        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsSubmitting(false);
@@ -99,8 +135,10 @@ export default function CreateBucketForm({
         id="name"
         title="Bucket Name"
         placeholder="my-unique-bucket-name"
-        info="Must be globally unique across all of Google Cloud"
+        info="Must be globally unique, lowercase, 3-63 characters, using only letters, numbers, and hyphens"
         defaultValue={suggestedName}
+        error={nameError}
+        onChange={handleNameChange}
       />
 
       <Form.Dropdown id="location" title="Location" defaultValue="us-central1">

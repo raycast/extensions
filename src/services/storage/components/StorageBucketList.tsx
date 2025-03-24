@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 interface Bucket {
   id: string;
@@ -17,6 +17,25 @@ interface StorageBucketListProps {
   onRefresh: () => void;
 }
 
+interface BucketActionsProps {
+  bucket?: Bucket;
+  onViewBucket?: (bucket: Bucket) => void;
+  onCreateBucket: () => void;
+  onRefresh: () => void;
+}
+
+function BucketActions({ bucket, onViewBucket, onCreateBucket, onRefresh }: BucketActionsProps) {
+  return (
+    <ActionPanel>
+      {bucket && onViewBucket && (
+        <Action title="View Bucket" icon={Icon.Eye} onAction={() => onViewBucket(bucket)} />
+      )}
+      <Action title="Create Bucket" icon={Icon.Plus} onAction={onCreateBucket} />
+      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
+    </ActionPanel>
+  );
+}
+
 export default function StorageBucketList({
   buckets,
   isLoading,
@@ -26,12 +45,15 @@ export default function StorageBucketList({
 }: StorageBucketListProps) {
   const [searchText, setSearchText] = useState("");
 
-  // Filter buckets based on search text
-  const filteredBuckets = buckets.filter(
-    (bucket) =>
-      bucket.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      bucket.location.toLowerCase().includes(searchText.toLowerCase()) ||
-      bucket.storageClass.toLowerCase().includes(searchText.toLowerCase()),
+  // Memoize filtered buckets calculation
+  const filteredBuckets = useMemo(() => 
+    buckets.filter(
+      (bucket) =>
+        bucket.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        bucket.location.toLowerCase().includes(searchText.toLowerCase()) ||
+        bucket.storageClass.toLowerCase().includes(searchText.toLowerCase()),
+    ),
+    [buckets, searchText] // Only recalculate when buckets or searchText changes
   );
 
   // Format the creation date
@@ -62,24 +84,14 @@ export default function StorageBucketList({
       searchBarPlaceholder="Search buckets..."
       onSearchTextChange={setSearchText}
       navigationTitle="Storage Buckets"
-      actions={
-        <ActionPanel>
-          <Action title="Create Bucket" icon={Icon.Plus} onAction={onCreateBucket} />
-          <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
-        </ActionPanel>
-      }
+      actions={<BucketActions onCreateBucket={onCreateBucket} onRefresh={onRefresh} />}
     >
       {filteredBuckets.length === 0 ? (
         <List.EmptyView
           title="No buckets found"
           description={searchText ? "Try a different search term" : "Create a bucket to get started"}
           icon={{ source: Icon.Box }}
-          actions={
-            <ActionPanel>
-              <Action title="Create Bucket" icon={Icon.Plus} onAction={onCreateBucket} />
-              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
-            </ActionPanel>
-          }
+          actions={<BucketActions onCreateBucket={onCreateBucket} onRefresh={onRefresh} />}
         />
       ) : (
         filteredBuckets.map((bucket) => (
@@ -90,11 +102,12 @@ export default function StorageBucketList({
             icon={getStorageClassIcon(bucket.storageClass)}
             accessories={[{ text: bucket.storageClass }, { text: formatDate(bucket.created), tooltip: "Created on" }]}
             actions={
-              <ActionPanel>
-                <Action title="View Bucket" icon={Icon.Eye} onAction={() => onViewBucket(bucket)} />
-                <Action title="Create Bucket" icon={Icon.Plus} onAction={onCreateBucket} />
-                <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
-              </ActionPanel>
+              <BucketActions
+                bucket={bucket}
+                onViewBucket={onViewBucket}
+                onCreateBucket={onCreateBucket}
+                onRefresh={onRefresh}
+              />
             }
           />
         ))

@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActionPanel, Action, List, Icon, Color, Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ComputeService, Disk } from "./ComputeService";
 
 interface ComputeDisksViewProps {
@@ -47,9 +48,7 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
       } catch (error: Error | unknown) {
         console.error("Error initializing:", error);
         loadingToast.then((toast) => toast.hide());
-
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "Failed to Load Disks",
           message: error instanceof Error ? error.message : String(error),
         });
@@ -93,11 +92,8 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
       });
     } catch (error: Error | unknown) {
       console.error("Error fetching disks:", error);
-
       loadingToast.hide();
-
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to Fetch Disks",
         message: error instanceof Error ? error.message : String(error),
       });
@@ -138,10 +134,8 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
         });
       } catch (error: Error | unknown) {
         console.error("Error fetching disks:", error);
-
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Zone changed failed",
+        showFailureToast({
+          title: "Zone Change Failed",
           message: error instanceof Error ? error.message : String(error),
         });
       } finally {

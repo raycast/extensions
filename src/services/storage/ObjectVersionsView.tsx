@@ -10,7 +10,7 @@ import {
   Color,
   useNavigation,
 } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
 import {
@@ -81,20 +81,31 @@ interface AccessoryItem {
 // Define cache result type
 type CacheResult = ApiObjectVersion[] | string | null;
 
+// Add a helper function to safely parse size
+function parseSizeToNumber(size: string | undefined): number {
+  if (!size) return 0;
+  try {
+    const parsed = parseInt(size, 10);
+    return isNaN(parsed) ? 0 : parsed;
+  } catch {
+    return 0;
+  }
+}
+
 export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, objectName }: ObjectVersionsViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [versions, setVersions] = useState<ObjectVersion[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { push, pop } = useNavigation();
 
-  // Cache for storing results to avoid repeated API calls
-  const cache = new Map<string, CacheResult>();
+  // Move cache into useRef to persist between renders
+  const cacheRef = useRef(new Map<string, CacheResult>());
 
   // Function to invalidate cache entries matching a pattern
   function invalidateCache(pattern: RegExp) {
-    for (const key of cache.keys()) {
+    for (const key of cacheRef.current.keys()) {
       if (pattern.test(key)) {
-        cache.delete(key);
+        cacheRef.current.delete(key);
       }
     }
   }
@@ -119,14 +130,13 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
 
     const fullCommand = `${gcloudPath} ${command}${projectFlag}${formatFlag}${quietFlag}`;
 
-    // Check cache first
+    // Check cache first using cacheRef
     const cacheKey = fullCommand;
-    if (cache.has(cacheKey)) {
-      return cache.get(cacheKey);
+    if (cacheRef.current.has(cacheKey)) {
+      return cacheRef.current.get(cacheKey);
     }
 
     try {
-      console.log(`Executing command: ${fullCommand}`);
       const { stdout, stderr } = await execPromise(fullCommand);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -143,13 +153,12 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
 
       const result = JSON.parse(stdout);
 
-      // Cache the result
-      cache.set(cacheKey, result);
+      // Cache the result using cacheRef
+      cacheRef.current.set(cacheKey, result);
 
       return result;
     } catch (error) {
       if (retries > 0) {
-        console.log(`Retrying command (${retries} attempts left): ${fullCommand}`);
         return executeCommand(gcloudPath, command, {
           projectId,
           formatJson,
@@ -199,7 +208,7 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
         return {
           id: version.id || `${version.name}-${version.generation}`,
           generation: version.generation || "Unknown",
-          size: formatFileSize(version.size ? parseInt(version.size) : 0),
+          size: formatFileSize(parseSizeToNumber(version.size)),
           updated: version.updated || version.timeCreated || new Date().toISOString(),
           timeCreated: version.timeCreated || version.updated || new Date().toISOString(),
           isCurrent: isCurrentVersion(version),
@@ -215,7 +224,9 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
 
       // Sort versions by generation (newest first)
       formattedVersions.sort((a: ObjectVersion, b: ObjectVersion) => {
-        return parseInt(b.generation) - parseInt(a.generation);
+        const genA = parseInt(a.generation, 10) || 0;
+        const genB = parseInt(b.generation, 10) || 0;
+        return genB - genA;
       });
 
       setVersions(formattedVersions);
@@ -446,7 +457,7 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
               <Action
                 title="Restore Version"
                 icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                 onAction={() => restoreVersion(version.generation)}
               />
             )}
@@ -523,7 +534,12 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
                 onAction={fetchVersions}
               />
-              <Action title="Back" icon={Icon.ArrowLeft} shortcut={{ modifiers: ["cmd"], key: "b" }} onAction={pop} />
+              <Action 
+                title="Back" 
+                icon={Icon.ArrowLeft} 
+                shortcut={{ modifiers: ["cmd"], key: "b" }} 
+                onAction={pop} 
+              />
             </ActionPanel>
           }
         />
@@ -562,7 +578,7 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
                     <Action
                       title="Restore Version"
                       icon={Icon.ArrowClockwise}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                       onAction={() => restoreVersion(version.generation)}
                     />
                   )}

@@ -71,7 +71,7 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
     try {
       const command = `${gcloudPath} storage objects list gs://${bucketName} --project=${projectId} --format=json`;
 
-      console.log(`Executing list command: ${command}`);
+      // console.log(`Executing list command: ${command}`);
       const { stdout, stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -161,7 +161,7 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
       try {
         const command = `${gcloudPath} storage rm gs://${bucketName}/${objectName} --project=${projectId} --quiet`;
 
-        console.log(`Executing delete command: ${command}`);
+        // console.log(`Executing delete command: ${command}`);
         const { stderr } = await execPromise(command);
 
         if (stderr && stderr.includes("ERROR")) {
@@ -200,7 +200,6 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function performDownload(objectName: string, downloadPath?: string) {
     if (downloadPath) {
       // If downloadPath is provided, download directly to that path
@@ -214,7 +213,6 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
         // Use the correct command: gcloud storage cp for copying files from buckets
         const command = `${gcloudPath} storage cp gs://${bucketName}/${objectName} ${downloadPath} --project=${projectId}`;
 
-        console.log(`Executing download command: ${command}`);
         const { stderr } = await execPromise(command);
 
         if (stderr && stderr.includes("ERROR")) {
@@ -227,8 +225,6 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
           title: "Download complete",
           message: `Saved to ${downloadPath}`,
         });
-
-        return;
       } catch (error: unknown) {
         downloadingToast.hide();
         console.error("Error downloading object:", error);
@@ -255,8 +251,6 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
           title: errorTitle,
           message: errorMessage,
         });
-
-        throw error;
       }
     } else {
       // If no downloadPath is provided, show the download picker
@@ -292,7 +286,7 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
       // Use the correct command: gcloud storage cp for copying files to buckets
       const command = `${gcloudPath} storage cp ${filePath} gs://${bucketName}/${fileInfo.name} --project=${projectId}`;
 
-      console.log(`Executing upload command: ${command}`);
+      // console.log(`Executing upload command: ${command}`);
       const { stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -359,7 +353,7 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
       const tempDownloadPath = join(homedir(), "Downloads", safeFileName);
       const command = `${gcloudPath} storage cp gs://${bucketName}/${objectName} ${tempDownloadPath} --project=${projectId}`;
 
-      console.log(`Executing download command: ${command}`);
+      // console.log(`Executing download command: ${command}`);
       const { stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -426,7 +420,7 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
     try {
       const command = `${gcloudPath} storage objects describe gs://${bucketName}/${objectName} --project=${projectId} --format=json`;
 
-      console.log(`Executing describe command: ${command}`);
+      // console.log(`Executing describe command: ${command}`);
       const { stdout, stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {

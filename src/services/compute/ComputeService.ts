@@ -114,13 +114,10 @@ export class ComputeService {
     const now = Date.now();
 
     if (cachedData && now - cachedData.timestamp < this.CACHE_TTL) {
-      console.log(`Using cached instance data for ${cacheKey}`);
       return cachedData.data;
     }
 
     try {
-      // If requesting all instances and we have some zones cached with instances,
-      // return a combined cache while we refresh in the background
       if (!zone && this.hasCachedZoneInstances()) {
         const combinedInstances = this.getCombinedCachedInstances();
         if (combinedInstances.length > 0) {
@@ -129,70 +126,25 @@ export class ComputeService {
         }
       }
 
-      // Build the command - following the same pattern as the storage service
       const command = zone
-        ? `${this.gcloudPath} compute instances list --zone=${zone} --project=${this.projectId} --format=json`
-        : `${this.gcloudPath} compute instances list --project=${this.projectId} --format=json`;
+        ? `compute instances list --zone=${zone}`
+        : `compute instances list`;
 
-      console.log(`Executing direct command: ${command}`);
+      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
 
-      // Set a timeout of 30 seconds
-      const timeoutPromise = new Promise<ComputeInstance[]>((_, reject) => {
-        setTimeout(() => reject(new Error("Command timed out after 30s")), 30000);
-      });
-
-      // Execute the command directly, without going through executeGcloudCommand
-      const execPromiseWithTimeout = Promise.race([
-        execPromise(command, { maxBuffer: 10 * 1024 * 1024 }),
-        timeoutPromise,
-      ]);
-
-      // Wait for the command to complete
-      const { stdout, stderr } = (await execPromiseWithTimeout) as { stdout: string; stderr: string };
-
-      // Handle errors
-      if (stderr && stderr.trim() !== "") {
-        console.warn(`Command produced stderr: ${stderr}`);
-
-        // Check for common errors
-        if (stderr.includes("not authorized") || stderr.includes("not authenticated")) {
-          throw new Error("Authentication error: Please re-authenticate with Google Cloud");
-        }
-
-        if (stderr.includes("project not found") || stderr.includes("project ID not specified")) {
-          throw new Error("Project error: The specified project was not found or is invalid");
-        }
-      }
-
-      // Handle empty output
-      if (!stdout || stdout.trim() === "") {
-        console.log("Command returned empty output, treating as empty array");
+      if (!result) {
         const emptyInstances: ComputeInstance[] = [];
         this.vmCache.set(cacheKey, { data: emptyInstances, timestamp: now });
         return emptyInstances;
       }
 
-      // Parse the JSON response
-      const instanceList = JSON.parse(stdout);
-      const instances: ComputeInstance[] = Array.isArray(instanceList) ? instanceList : [instanceList];
-
-      console.log(`Successfully fetched ${instances.length} instances`);
-
-      // Cache the result
+      const instances = Array.isArray(result) ? result : [result];
       this.vmCache.set(cacheKey, { data: instances, timestamp: now });
-
       return instances;
     } catch (error: unknown) {
-      console.error("Error fetching compute instances:", error);
-
-      // If we have cached data, return it even if expired
       if (cachedData) {
-        console.log("Returning expired cached data as fallback");
         return cachedData.data;
       }
-
-      // Return empty array instead of throwing to prevent UI from breaking
-      console.log("No cached data available, returning empty array");
       return [];
     }
   }
@@ -236,31 +188,18 @@ export class ComputeService {
    */
   private async refreshInstancesInBackground(): Promise<void> {
     try {
-      const command = `${this.gcloudPath} compute instances list --project=${this.projectId} --format=json`;
-      console.log(`Executing background refresh command: ${command}`);
+      const command = `compute instances list`;
+      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
 
-      const { stdout, stderr } = await execPromise(command, { maxBuffer: 10 * 1024 * 1024 });
-
-      if (stderr && stderr.trim() !== "") {
-        console.warn(`Background command produced stderr: ${stderr}`);
-      }
-
-      if (!stdout || stdout.trim() === "") {
-        console.log("Background command returned empty output");
+      if (!result) {
         this.vmCache.set("instances:all", { data: [], timestamp: Date.now() });
         return;
       }
 
-      // Parse the JSON response
-      const instanceList = JSON.parse(stdout);
-      const instances: ComputeInstance[] = Array.isArray(instanceList) ? instanceList : [instanceList];
-
-      // Update cache
+      const instances = Array.isArray(result) ? result : [result];
       this.vmCache.set("instances:all", { data: instances, timestamp: Date.now() });
-
-      console.log(`Background refresh completed with ${instances.length} instances`);
     } catch (error) {
-      console.error("Background refresh of instances failed:", error);
+      // Silently fail for background refresh
     }
   }
 
@@ -295,13 +234,10 @@ export class ComputeService {
 
     // If not found in cache, fetch directly
     try {
-      const command = `compute instances describe ${name} --zone=${zone} --format=json`;
-
-      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId, { cacheTTL: this.CACHE_TTL });
-
+      const command = `compute instances describe ${name} --zone=${zone}`;
+      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
       return result ? (result as ComputeInstance) : null;
     } catch (error: unknown) {
-      console.error(`Error fetching compute instance ${name}:`, error);
       throw new Error(`Failed to fetch compute instance: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   }
@@ -314,25 +250,10 @@ export class ComputeService {
    */
   async getDisk(name: string, zone: string): Promise<Disk | null> {
     try {
-      const command = `${this.gcloudPath} compute disks describe ${name} --zone=${zone} --project=${this.projectId} --format=json`;
-      console.log(`Executing direct command: ${command}`);
-
-      const { stdout, stderr } = await execPromise(command, { maxBuffer: 10 * 1024 * 1024 });
-
-      if (stderr && stderr.trim() !== "") {
-        console.warn(`Command produced stderr: ${stderr}`);
-        if (stderr.includes("not found")) {
-          return null;
-        }
-      }
-
-      if (!stdout || stdout.trim() === "") {
-        return null;
-      }
-
-      return JSON.parse(stdout) as Disk;
+      const command = `compute disks describe ${name} --zone=${zone} --format=json`;
+      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
+      return result ? (result as Disk) : null;
     } catch (error: unknown) {
-      console.error(`Error fetching compute disk ${name}:`, error);
       return null;
     }
   }
@@ -342,37 +263,23 @@ export class ComputeService {
    * @returns Promise with array of zone names
    */
   async listZones(): Promise<string[]> {
-    // Check static cache first
     const now = Date.now();
     if (ComputeService.zonesCache && now - ComputeService.zonesCache.timestamp < ComputeService.ZONES_CACHE_TTL) {
-      console.log("Using cached zones data");
       return ComputeService.zonesCache.zones;
     }
 
     try {
-      const command = `${this.gcloudPath} compute zones list --project=${this.projectId} --format=json`;
-      console.log(`Executing direct command: ${command}`);
-
-      const { stdout, stderr } = await execPromise(command, { maxBuffer: 10 * 1024 * 1024 });
-
-      if (stderr && stderr.trim() !== "") {
-        console.warn(`Command produced stderr: ${stderr}`);
-      }
-
-      if (!stdout || stdout.trim() === "") {
+      const command = `compute zones list`;
+      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
+      
+      if (!result) {
         return [];
       }
 
-      const zonesList = JSON.parse(stdout);
-      const zones = Array.isArray(zonesList) ? zonesList.map((zone) => zone.name) : [];
-
-      // Update static cache
+      const zones = Array.isArray(result) ? result.map((zone) => zone.name) : [];
       ComputeService.zonesCache = { zones, timestamp: now };
-
       return zones;
     } catch (error: unknown) {
-      console.error("Error fetching zones:", error);
-      // If there's an error but we have cached data, return it even if expired
       if (ComputeService.zonesCache) {
         return ComputeService.zonesCache.zones;
       }
@@ -391,13 +298,10 @@ export class ComputeService {
     const now = Date.now();
 
     if (cachedData && now - cachedData.timestamp < this.CACHE_TTL) {
-      console.log(`Using cached disk data for ${cacheKey}`);
       return cachedData.data;
     }
 
     try {
-      // If requesting all disks and we have some zones cached with disks,
-      // return a combined cache while we refresh in the background
       if (!zone && this.hasCachedZoneDisks()) {
         const combinedDisks = this.getCombinedCachedDisks();
         if (combinedDisks.length > 0) {
@@ -406,48 +310,25 @@ export class ComputeService {
         }
       }
 
-      // Build the command - following the same pattern as the storage service
       const command = zone
-        ? `${this.gcloudPath} compute disks list --zone=${zone} --project=${this.projectId} --format=json`
-        : `${this.gcloudPath} compute disks list --project=${this.projectId} --format=json`;
+        ? `compute disks list --zone=${zone}`
+        : `compute disks list`;
 
-      console.log(`Executing direct command: ${command}`);
+      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
 
-      const { stdout, stderr } = await execPromise(command, { maxBuffer: 10 * 1024 * 1024 });
-
-      // Handle errors
-      if (stderr && stderr.trim() !== "") {
-        console.warn(`Command produced stderr: ${stderr}`);
-      }
-
-      // Handle empty output
-      if (!stdout || stdout.trim() === "") {
-        console.log("Command returned empty output, treating as empty array");
+      if (!result) {
         const emptyDisks: Disk[] = [];
         this.diskCache.set(cacheKey, { data: emptyDisks, timestamp: now });
         return emptyDisks;
       }
 
-      // Parse the JSON response
-      const diskList = JSON.parse(stdout);
-      const disks: Disk[] = Array.isArray(diskList) ? diskList : [diskList];
-
-      console.log(`Successfully fetched ${disks.length} disks`);
-
-      // Cache the result
+      const disks = Array.isArray(result) ? result : [result];
       this.diskCache.set(cacheKey, { data: disks, timestamp: now });
-
       return disks;
     } catch (error: unknown) {
-      console.error("Error fetching compute disks:", error);
-
-      // If we have cached data, return it even if expired
       if (cachedData) {
-        console.log("Returning expired cached data as fallback");
         return cachedData.data;
       }
-
-      // Return empty array instead of throwing
       return [];
     }
   }
@@ -491,31 +372,18 @@ export class ComputeService {
    */
   private async refreshDisksInBackground(): Promise<void> {
     try {
-      const command = `${this.gcloudPath} compute disks list --project=${this.projectId} --format=json`;
-      console.log(`Executing background refresh command: ${command}`);
+      const command = `compute disks list`;
+      const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
 
-      const { stdout, stderr } = await execPromise(command, { maxBuffer: 10 * 1024 * 1024 });
-
-      if (stderr && stderr.trim() !== "") {
-        console.warn(`Background command produced stderr: ${stderr}`);
-      }
-
-      if (!stdout || stdout.trim() === "") {
-        console.log("Background command returned empty output");
+      if (!result) {
         this.diskCache.set("disks:all", { data: [], timestamp: Date.now() });
         return;
       }
 
-      // Parse the JSON response
-      const diskList = JSON.parse(stdout);
-      const disks: Disk[] = Array.isArray(diskList) ? diskList : [diskList];
-
-      // Update cache
+      const disks = Array.isArray(result) ? result : [result];
       this.diskCache.set("disks:all", { data: disks, timestamp: Date.now() });
-
-      console.log(`Background refresh completed with ${disks.length} disks`);
     } catch (error) {
-      console.error("Background refresh of disks failed:", error);
+      // Silently fail for background refresh
     }
   }
 
@@ -527,24 +395,11 @@ export class ComputeService {
    */
   async startInstance(name: string, zone: string): Promise<boolean> {
     try {
-      const command = `${this.gcloudPath} compute instances start ${name} --zone=${zone} --project=${this.projectId} --format=json`;
-      console.log(`Executing direct command: ${command}`);
-
-      const { stderr } = await execPromise(command, { maxBuffer: 10 * 1024 * 1024 });
-
-      if (stderr && stderr.trim() !== "") {
-        console.warn(`Command produced stderr: ${stderr}`);
-        if (stderr.includes("ERROR")) {
-          throw new Error(stderr);
-        }
-      }
-
-      // Clear cache to reflect updated state
-      this.clearInstanceCache();
-
+      const command = `compute instances start ${name} --zone=${zone}`;
+      await executeGcloudCommand(this.gcloudPath, command, this.projectId);
+      this.clearCache("instances");
       return true;
     } catch (error: unknown) {
-      console.error(`Error starting compute instance ${name}:`, error);
       throw new Error(`Failed to start compute instance: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   }
@@ -557,40 +412,25 @@ export class ComputeService {
    */
   async stopInstance(name: string, zone: string): Promise<boolean> {
     try {
-      const command = `${this.gcloudPath} compute instances stop ${name} --zone=${zone} --project=${this.projectId} --format=json`;
-      console.log(`Executing direct command: ${command}`);
-
-      const { stderr } = await execPromise(command, { maxBuffer: 10 * 1024 * 1024 });
-
-      if (stderr && stderr.trim() !== "") {
-        console.warn(`Command produced stderr: ${stderr}`);
-        if (stderr.includes("ERROR")) {
-          throw new Error(stderr);
-        }
-      }
-
-      // Clear cache to reflect updated state
-      this.clearInstanceCache();
-
+      const command = `compute instances stop ${name} --zone=${zone}`;
+      await executeGcloudCommand(this.gcloudPath, command, this.projectId);
+      this.clearCache("instances");
       return true;
     } catch (error: unknown) {
-      console.error(`Error stopping compute instance ${name}:`, error);
       throw new Error(`Failed to stop compute instance: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   }
 
   /**
-   * Clear instance cache when operations modify the state
+   * Clear cache for a specific resource type
+   * @param type The type of resource cache to clear ("instances" or "disks")
    */
-  private clearInstanceCache(): void {
-    this.vmCache.clear();
-  }
-
-  /**
-   * Clear disk cache when operations modify the state
-   */
-  private clearDiskCache(): void {
-    this.diskCache.clear();
+  private clearCache(type: "instances" | "disks"): void {
+    if (type === "instances") {
+      this.vmCache.clear();
+    } else {
+      this.diskCache.clear();
+    }
   }
 
   /**

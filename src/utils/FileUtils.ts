@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { promisify } from "util";
 
-const fsExists = promisify(fs.exists);
+const fsAccess = promisify(fs.access);
 const fsMkdir = promisify(fs.mkdir);
 const fsStat = promisify(fs.stat);
 
@@ -14,13 +14,15 @@ const fsStat = promisify(fs.stat);
  */
 export async function ensureDirectoryExists(dirPath: string): Promise<void> {
   try {
-    const exists = await fsExists(dirPath);
-    if (!exists) {
+    await fsAccess(dirPath, fs.constants.F_OK);
+  } catch (error) {
+    // Directory doesn't exist or isn't accessible, try to create it
+    try {
       await fsMkdir(dirPath, { recursive: true });
+    } catch (mkdirError: unknown) {
+      console.error(`Error creating directory: ${dirPath}`, mkdirError);
+      throw new Error(`Failed to create directory: ${mkdirError instanceof Error ? mkdirError.message : String(mkdirError)}`);
     }
-  } catch (error: unknown) {
-    console.error(`Error ensuring directory exists: ${dirPath}`, error);
-    throw new Error(`Failed to create directory: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -86,17 +88,9 @@ export function guessContentType(filename: string): string {
  */
 export async function validateFile(filePath: string): Promise<boolean> {
   try {
-    const exists = await fsExists(filePath);
-    if (!exists) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "File not found",
-        message: `The file "${filePath}" does not exist.`,
-      });
-      return false;
-    }
-
+    await fsAccess(filePath, fs.constants.F_OK | fs.constants.R_OK);
     const stats = await fsStat(filePath);
+    
     if (!stats.isFile()) {
       showToast({
         style: Toast.Style.Failure,
@@ -107,13 +101,21 @@ export async function validateFile(filePath: string): Promise<boolean> {
     }
 
     return true;
-  } catch (error: unknown) {
-    console.error(`Error validating file: ${filePath}`, error);
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Error accessing file",
-      message: error instanceof Error ? error.message : String(error),
-    });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "File not found",
+        message: `The file "${filePath}" does not exist.`,
+      });
+    } else {
+      console.error(`Error validating file: ${filePath}`, error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error accessing file",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
     return false;
   }
 }
@@ -132,8 +134,8 @@ export async function getFileInfo(filePath: string): Promise<{
   lastModified: Date;
 } | null> {
   try {
-    const exists = await validateFile(filePath);
-    if (!exists) return null;
+    const isValid = await validateFile(filePath);
+    if (!isValid) return null;
 
     const stats = await fsStat(filePath);
     const name = path.basename(filePath);

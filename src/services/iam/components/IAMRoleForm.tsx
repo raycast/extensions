@@ -1,13 +1,38 @@
 import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { IAMService } from "../IAMService";
 
 interface IAMRoleFormProps {
-  projectId: string;
   iamService: IAMService;
   rolesByService: { title: string; roles: { value: string; title: string }[] }[];
   onRoleAdded: () => void;
   onCancel: () => void;
+}
+
+interface MemberTypeInfo {
+  type: string;
+  id: string;
+}
+
+/**
+ * Parses a member string to determine the member type and ID.
+ * Format can be either:
+ * - "type:id" (e.g. "user:alice@example.com")
+ * - "email@domain.com" (treated as user)
+ * - "name" (treated as serviceAccount)
+ */
+function parseMemberString(memberString: string): MemberTypeInfo {
+  if (memberString.includes(":")) {
+    const [type, id] = memberString.split(":", 2);
+    return { type, id };
+  }
+  
+  if (memberString.includes("@")) {
+    return { type: "user", id: memberString };
+  }
+  
+  return { type: "serviceAccount", id: memberString };
 }
 
 export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, onCancel }: IAMRoleFormProps) {
@@ -46,21 +71,7 @@ export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, o
     });
 
     try {
-      // Parse member type and ID
-      let memberType = "user";
-      let memberId = values.member;
-
-      if (values.member.includes(":")) {
-        const parts = values.member.split(":", 2);
-        memberType = parts[0];
-        memberId = parts[1];
-      } else if (values.member.includes("@")) {
-        memberType = "user";
-        memberId = values.member;
-      } else {
-        memberType = "serviceAccount";
-        memberId = values.member;
-      }
+      const { type: memberType, id: memberId } = parseMemberString(values.member);
 
       // Add the member to the role
       await iamService.addMember(values.role, memberType, memberId);
@@ -81,10 +92,8 @@ export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, o
       // Hide loading toast
       loadingToast.hide();
 
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to add role",
-        message: String(error),
+      showFailureToast(error, {
+        title: "Failed to add role"
       });
     } finally {
       setIsSubmitting(false);

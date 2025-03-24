@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { NetworkService, Subnet, VPC } from "./NetworkService";
 import { getAllRegions, getRegionByName } from "../../utils/regions";
 
@@ -266,6 +267,74 @@ export default function SubnetsView({ projectId, gcloudPath, vpc }: SubnetsViewP
   );
 }
 
+// Add CIDR validation regex and helper functions at the top level
+const CIDR_REGEX = /^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/;
+
+function isValidCIDR(cidr: string): { valid: boolean; error?: string } {
+  if (!cidr) {
+    return { valid: false, error: "CIDR range cannot be empty" };
+  }
+
+  if (!CIDR_REGEX.test(cidr)) {
+    return { valid: false, error: "Invalid CIDR format. Expected format: xxx.xxx.xxx.xxx/xx" };
+  }
+  
+  // Validate IP portion
+  const [ip, prefix] = cidr.split("/");
+  const octets = ip.split(".").map(Number);
+  
+  if (octets.some(octet => isNaN(octet) || octet < 0 || octet > 255)) {
+    return { valid: false, error: "IP address octets must be between 0 and 255" };
+  }
+  
+  // Validate prefix length
+  const prefixNum = Number(prefix);
+  if (isNaN(prefixNum) || prefixNum < 0 || prefixNum > 32) {
+    return { valid: false, error: "Network prefix must be between 0 and 32" };
+  }
+
+  return { valid: true };
+}
+
+// Add helper function for secondary range validation
+function validateSecondaryRanges(input: string): { valid: boolean; ranges?: { rangeName: string; ipCidrRange: string }[]; error?: string } {
+  if (!input.trim()) return { valid: true, ranges: undefined };
+
+  try {
+    const ranges = input.split(",").map(range => {
+      const [name, cidr] = range.split(":");
+      
+      if (!name || !cidr) {
+        throw new Error(`Invalid format for range "${range}". Expected "name:cidr"`);
+      }
+
+      const trimmedName = name.trim();
+      const trimmedCIDR = cidr.trim();
+
+      if (!trimmedName) {
+        throw new Error("Range name cannot be empty");
+      }
+
+      const cidrValidation = isValidCIDR(trimmedCIDR);
+      if (!cidrValidation.valid) {
+        throw new Error(`Invalid CIDR for range "${trimmedName}": ${cidrValidation.error}`);
+      }
+
+      return {
+        rangeName: trimmedName,
+        ipCidrRange: trimmedCIDR,
+      };
+    });
+
+    return { valid: true, ranges };
+  } catch (error) {
+    return { 
+      valid: false, 
+      error: error instanceof Error ? error.message : "Invalid secondary range format" 
+    };
+  }
+}
+
 interface CreateSubnetFormProps {
   gcloudPath: string;
   projectId: string;
@@ -284,24 +353,27 @@ function CreateSubnetForm({ gcloudPath, projectId, vpc, onSubnetCreated }: Creat
     ipRange: string;
     privateGoogleAccess: boolean;
     enableFlowLogs: boolean;
-    secondaryRanges?: string; // Format: "name1:cidr1,name2:cidr2"
+    secondaryRanges?: string;
   }) {
     if (!values.name) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Validation Error",
-        message: "Please enter a subnet name",
-      });
+      showFailureToast("Please enter a subnet name");
       return;
     }
 
-    if (!values.ipRange || !values.ipRange.includes("/")) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Validation Error",
-        message: "Please enter a valid IP range (e.g., 10.0.0.0/24)",
-      });
+    // Validate primary IP range
+    const ipRangeValidation = isValidCIDR(values.ipRange);
+    if (!ipRangeValidation.valid) {
+      showFailureToast(ipRangeValidation.error || "Invalid IP range format");
       return;
+    }
+
+    // Validate secondary ranges if provided
+    if (values.secondaryRanges) {
+      const validation = validateSecondaryRanges(values.secondaryRanges);
+      if (!validation.valid) {
+        showFailureToast(validation.error || "Invalid secondary range format");
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -315,13 +387,10 @@ function CreateSubnetForm({ gcloudPath, projectId, vpc, onSubnetCreated }: Creat
     try {
       const service = new NetworkService(gcloudPath, projectId);
 
-      // Parse secondary ranges
-      const secondaryRanges = values.secondaryRanges
-        ? values.secondaryRanges.split(",").map((range) => {
-            const [name, cidr] = range.split(":");
-            return { rangeName: name.trim(), ipCidrRange: cidr.trim() };
-          })
-        : undefined;
+      // Use validated secondary ranges
+      const { ranges: secondaryRanges } = values.secondaryRanges 
+        ? validateSecondaryRanges(values.secondaryRanges)
+        : { ranges: undefined };
 
       const success = await service.createSubnet(
         values.name,
@@ -333,40 +402,29 @@ function CreateSubnetForm({ gcloudPath, projectId, vpc, onSubnetCreated }: Creat
         secondaryRanges,
       );
 
-      loadingToast.hide();
-
-      if (success) {
-        showToast({
-          style: Toast.Style.Success,
-          title: "Subnet Created",
-          message: `Successfully created ${values.name} in ${values.region}`,
-        });
-
-        // Force clear the subnet cache
-        await service.forceRefreshSubnets();
-
-        // Add a slight delay before refreshing to ensure the subnet is available
-        setTimeout(() => {
-          onSubnetCreated();
-          pop();
-        }, 2000);
-      } else {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to Create Subnet",
-          message: "An error occurred while creating the subnet",
-        });
+      if (!success) {
+        loadingToast.hide();
+        showFailureToast("Failed to create subnet");
+        return;
       }
+
+      // Force refresh subnets to ensure we have the latest data
+      await service.forceRefreshSubnets();
+      
+      loadingToast.hide();
+      showToast({
+        style: Toast.Style.Success,
+        title: "Subnet Created",
+        message: `Successfully created ${values.name} in ${values.region}`,
+      });
+
+      // Update parent component and close form
+      onSubnetCreated();
+      pop();
     } catch (error: unknown) {
       console.error("Error creating subnet:", error);
-
       loadingToast.hide();
-
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error Creating Subnet",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      showFailureToast(error instanceof Error ? error.message : "Failed to create subnet");
     } finally {
       setIsLoading(false);
     }

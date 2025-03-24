@@ -7,7 +7,7 @@ export interface GCPRegion {
   name: string;
   description: string;
   tier: "premium" | "standard";
-  continent: "na" | "eu" | "asia" | "au" | "sa" | "africa";
+  continent: "na" | "eu" | "asia" | "au" | "sa" | "africa" | "me";
 }
 
 export const GCP_REGIONS: GCPRegion[] = [
@@ -58,9 +58,9 @@ export const GCP_REGIONS: GCPRegion[] = [
   { name: "australia-southeast2", description: "Melbourne, Australia", tier: "standard", continent: "au" },
 
   // Middle East
-  { name: "me-west1", description: "Tel Aviv, Israel", tier: "standard", continent: "asia" },
-  { name: "me-central1", description: "Doha, Qatar", tier: "standard", continent: "asia" },
-  { name: "me-central2", description: "Dammam, Saudi Arabia", tier: "standard", continent: "asia" },
+  { name: "me-west1", description: "Tel Aviv, Israel", tier: "standard", continent: "me" },
+  { name: "me-central1", description: "Doha, Qatar", tier: "standard", continent: "me" },
+  { name: "me-central2", description: "Dammam, Saudi Arabia", tier: "standard", continent: "me" },
 
   // Africa
   { name: "africa-south1", description: "Johannesburg, South Africa", tier: "standard", continent: "africa" },

@@ -163,7 +163,11 @@ export class IAMService {
             });
           }
 
-          const principal = principalsMap.get(principalKey)!;
+          const principal = principalsMap.get(principalKey);
+          if (!principal) {
+            throw new Error(`Failed to get principal for ${principalKey} - this should never happen`);
+          }
+
           const roleInfo = this.getRoleInfo(binding.role);
 
           principal.roles.push({
@@ -238,6 +242,11 @@ export class IAMService {
     resourceType?: string,
     resourceName?: string,
   ): Promise<void> {
+    // Validate the member ID format
+    if (!this.validateMemberId(memberType, memberId)) {
+      throw new Error(`Invalid member ID format for ${memberType}`);
+    }
+
     let command = "";
 
     if (resourceType === "storage" && resourceName) {
@@ -269,7 +278,7 @@ export class IAMService {
       const result = await executeGcloudCommand(this.gcloudPath, command);
 
       if (!Array.isArray(result)) {
-        return [];
+        throw new Error("Invalid response format: expected array of service accounts");
       }
 
       return result.map((sa: GCPServiceAccount) => ({

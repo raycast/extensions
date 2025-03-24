@@ -102,42 +102,46 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
             message: "Service did not disable properly. Try again or check GCP Console.",
           });
         }
-      } else {
+      } else if (serviceDetails) {
         showToast({
           style: Toast.Style.Animated,
-          title: `Enabling ${serviceDetails?.displayName || serviceDetails?.name}...`,
+          title: `Enabling ${serviceDetails.displayName || serviceDetails.name}...`,
         });
 
-        await serviceHub.enableService(serviceDetails?.name || "");
+        await serviceHub.enableService(serviceDetails.name);
 
         // Verify the service was actually enabled
-        const isNowEnabled = await serviceHub.isServiceEnabled(serviceDetails?.name || "");
+        const isNowEnabled = await serviceHub.isServiceEnabled(serviceDetails.name);
 
         if (isNowEnabled) {
           showToast({
             style: Toast.Style.Success,
-            title: `Enabled ${serviceDetails?.displayName || serviceDetails?.name}`,
+            title: `Enabled ${serviceDetails.displayName || serviceDetails.name}`,
           });
 
           // Update local state
-          if (serviceDetails) {
-            const updatedService = {
-              ...serviceDetails,
-              isEnabled: true,
-              state: "ENABLED",
-            };
-            setServiceDetails(updatedService);
+          const updatedService: GCPService = {
+            ...serviceDetails,
+            isEnabled: true,
+            state: "ENABLED",
+          };
+          setServiceDetails(updatedService);
 
-            // Notify parent component with updated service
-            onServiceStatusChange(updatedService);
-          }
+          // Notify parent component with updated service
+          onServiceStatusChange(updatedService);
         } else {
           showToast({
             style: Toast.Style.Failure,
-            title: `Failed to enable ${serviceDetails?.displayName || serviceDetails?.name}`,
+            title: `Failed to enable ${serviceDetails.displayName || serviceDetails.name}`,
             message: "Service did not enable properly. Try again or check GCP Console.",
           });
         }
+      } else {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Cannot enable service",
+          message: "Service details are not available",
+        });
       }
     } catch (error) {
       console.error("Error toggling service status:", error);
@@ -218,8 +222,8 @@ ${serviceDetails.dependsOn.map((dep) => `| \`${dep}\` |`).join("\n")}
               <>
                 <Detail.Metadata.Separator />
                 <Detail.Metadata.TagList title="Dependencies">
-                  {serviceDetails.dependsOn.map((dep, index) => (
-                    <Detail.Metadata.TagList.Item key={index} text={dep} />
+                  {serviceDetails.dependsOn.map((dep) => (
+                    <Detail.Metadata.TagList.Item key={dep} text={dep} />
                   ))}
                 </Detail.Metadata.TagList>
               </>

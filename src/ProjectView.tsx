@@ -1,7 +1,7 @@
 import { ActionPanel, Action, List, Icon, useNavigation, Cache, showToast, Toast, Color } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
-import { StorageBucketView, IAMMembersByPrincipalView } from "./services/storage";
-import { IAMView } from "./services/iam";
+import { StorageBucketView } from "./services/storage";
+import { IAMView, IAMMembersByPrincipalView } from "./services/iam";
 import { ServiceHubView } from "./services/servicehub";
 import { ComputeInstancesView, ComputeDisksView } from "./services/compute";
 import { NetworkView, VPCView, IPAddressView, FirewallRulesView } from "./services/network";
@@ -10,6 +10,16 @@ import { CacheManager, Project } from "./utils/CacheManager";
 
 // Create a cache instance for project details
 const cache = new Cache({ namespace: "project-details" });
+
+// Cache duration constants
+const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+interface BaseViewProps {
+  projectId: string;
+  gcloudPath: string;
+  resourceName?: string;
+  resourceType?: string;
+}
 
 interface ProjectViewProps {
   projectId: string;
@@ -137,7 +147,6 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
         message: selectedProjectId,
       });
 
-      console.log("Saving selected project:", selectedProjectId);
       // Save to cache
       CacheManager.saveSelectedProject(selectedProjectId);
 
@@ -182,7 +191,7 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
       const timestamp = parseInt(timestampStr, 10);
 
       // Check if cache is not expired
-      if (Date.now() - timestamp <= 24 * 60 * 60 * 1000) {
+      if (Date.now() - timestamp <= ONE_DAY_IN_MS) {
         // 24 hours
         try {
           // Update the selected project in the global cache to ensure recently used list is updated
@@ -240,245 +249,85 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
     fetchProjectDetails();
   }, [fetchProjectDetails]);
 
-  const viewStorageBuckets = async () => {
-    setActionInProgress("storage");
+  // Helper function for navigation
+  const navigateToView = async <P extends BaseViewProps>(
+    actionKey: string,
+    title: string,
+    ViewComponent: React.ComponentType<P>,
+    props: P
+  ) => {
+    let activeToast: Toast | null = null;
+    setActionInProgress(actionKey);
+
     try {
-      const loadingToast = await showToast({
+      // Show loading toast
+      activeToast = await showToast({
         style: Toast.Style.Animated,
-        title: "Loading Storage Buckets...",
-        message: `Project: ${projectId}`,
+        title: title,
+        message: `Project: ${props.projectId}`,
       });
 
-      // Short delay to show the toast before navigation
-      setTimeout(() => {
-        loadingToast.hide();
-        push(<StorageBucketView projectId={projectId} gcloudPath={gcloudPath} />);
-      }, 500);
+      // Prepare the component to navigate to
+      const component = <ViewComponent {...props} />;
+
+      // Hide the loading toast before navigation
+      activeToast.hide();
+      activeToast = null;
+
+      // Perform the navigation
+      await push(component);
     } catch (error) {
+      // Handle navigation error
+      console.error("Navigation error:", error);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to navigate",
         message: error instanceof Error ? error.message : String(error),
       });
+    } finally {
+      // Ensure toast is hidden and action state is cleared
+      if (activeToast) {
+        activeToast.hide();
+      }
       setActionInProgress(null);
     }
   };
 
-  const viewIAMPermissions = async () => {
-    setActionInProgress("iam-permissions");
-    try {
-      const loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Loading IAM Permissions...",
-        message: `Project: ${projectId}`,
-      });
+  const viewStorageBuckets = () =>
+    navigateToView("storage", "Loading Storage Buckets...", StorageBucketView, { projectId, gcloudPath });
 
-      // Short delay to show the toast before navigation
-      setTimeout(() => {
-        loadingToast.hide();
-        push(<IAMMembersByPrincipalView projectId={projectId} gcloudPath={gcloudPath} />);
-      }, 500);
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to navigate",
-        message: error instanceof Error ? error.message : String(error),
-      });
-      setActionInProgress(null);
-    }
-  };
+  const viewIAMPermissions = () =>
+    navigateToView("iam-permissions", "Loading IAM Permissions...", IAMMembersByPrincipalView, {
+      projectId,
+      gcloudPath,
+    });
 
-  const viewIAMService = async () => {
-    setActionInProgress("iam-service");
-    try {
-      const loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Loading IAM Service...",
-        message: `Project: ${projectId}`,
-      });
+  const viewIAMService = () =>
+    navigateToView("iam-service", "Loading IAM Service...", IAMView, { projectId, gcloudPath });
 
-      // Short delay to show the toast before navigation
-      setTimeout(() => {
-        loadingToast.hide();
-        push(<IAMView projectId={projectId} gcloudPath={gcloudPath} />);
-      }, 500);
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to navigate",
-        message: error instanceof Error ? error.message : String(error),
-      });
-      setActionInProgress(null);
-    }
-  };
+  const viewServiceHub = () =>
+    navigateToView("servicehub", "Loading Marketplace...", ServiceHubView, { projectId, gcloudPath });
 
-  const viewServiceHub = async () => {
-    setActionInProgress("servicehub");
-    try {
-      const loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Loading Marketplace...",
-        message: `Project: ${projectId}`,
-      });
+  const viewComputeInstances = () =>
+    navigateToView("compute-instances", "Loading Compute Instances...", ComputeInstancesView, {
+      projectId,
+      gcloudPath,
+    });
 
-      // Short delay to show the toast before navigation
-      setTimeout(() => {
-        loadingToast.hide();
-        push(<ServiceHubView projectId={projectId} gcloudPath={gcloudPath} />);
-      }, 500);
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to navigate",
-        message: error instanceof Error ? error.message : String(error),
-      });
-      setActionInProgress(null);
-    }
-  };
+  const viewComputeDisks = () =>
+    navigateToView("compute-disks", "Loading Compute Disks...", ComputeDisksView, { projectId, gcloudPath });
 
-  const viewComputeInstances = async () => {
-    setActionInProgress("compute-instances");
-    try {
-      const loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Loading Compute Instances...",
-        message: `Project: ${projectId}`,
-      });
+  const viewVPCNetworks = () =>
+    navigateToView("vpc-networks", "Loading VPC Networks...", VPCView, { projectId, gcloudPath });
 
-      // Short delay to show the toast before navigation
-      setTimeout(() => {
-        loadingToast.hide();
-        push(<ComputeInstancesView projectId={projectId} gcloudPath={gcloudPath} />);
-      }, 500);
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to navigate",
-        message: error instanceof Error ? error.message : String(error),
-      });
-      setActionInProgress(null);
-    }
-  };
+  const viewNetworkService = () =>
+    navigateToView("network", "Loading Network Service...", NetworkView, { projectId, gcloudPath });
 
-  const viewComputeDisks = async () => {
-    setActionInProgress("compute-disks");
-    try {
-      const loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Loading Compute Disks...",
-        message: `Project: ${projectId}`,
-      });
+  const viewIPAddresses = () =>
+    navigateToView("ip-addresses", "Loading IP Addresses...", IPAddressView, { projectId, gcloudPath });
 
-      // Short delay to show the toast before navigation
-      setTimeout(() => {
-        loadingToast.hide();
-        push(<ComputeDisksView projectId={projectId} gcloudPath={gcloudPath} />);
-      }, 500);
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to navigate",
-        message: error instanceof Error ? error.message : String(error),
-      });
-      setActionInProgress(null);
-    }
-  };
-
-  const viewVPCNetworks = async () => {
-    setActionInProgress("vpc-networks");
-    try {
-      const loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Loading VPC Networks...",
-        message: `Project: ${projectId}`,
-      });
-
-      // Short delay to show the toast before navigation
-      setTimeout(() => {
-        loadingToast.hide();
-        push(<VPCView projectId={projectId} gcloudPath={gcloudPath} />);
-      }, 500);
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to navigate",
-        message: error instanceof Error ? error.message : String(error),
-      });
-      setActionInProgress(null);
-    }
-  };
-
-  const viewNetworkService = async () => {
-    setActionInProgress("network");
-    try {
-      const loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Loading Network Service...",
-        message: `Project: ${projectId}`,
-      });
-
-      // Short delay to show the toast before navigation
-      setTimeout(() => {
-        loadingToast.hide();
-        push(<NetworkView projectId={projectId} gcloudPath={gcloudPath} />);
-      }, 500);
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to navigate",
-        message: error instanceof Error ? error.message : String(error),
-      });
-      setActionInProgress(null);
-    }
-  };
-
-  const viewIPAddresses = async () => {
-    setActionInProgress("ip-addresses");
-    try {
-      const loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Loading IP Addresses...",
-        message: `Project: ${projectId}`,
-      });
-
-      // Short delay to show the toast before navigation
-      setTimeout(() => {
-        loadingToast.hide();
-        push(<IPAddressView projectId={projectId} gcloudPath={gcloudPath} />);
-      }, 500);
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to navigate",
-        message: error instanceof Error ? error.message : String(error),
-      });
-      setActionInProgress(null);
-    }
-  };
-
-  const viewFirewallRules = async () => {
-    setActionInProgress("firewall-rules");
-    try {
-      const loadingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Loading Firewall Rules...",
-        message: `Project: ${projectId}`,
-      });
-
-      // Short delay to show the toast before navigation
-      setTimeout(() => {
-        loadingToast.hide();
-        push(<FirewallRulesView projectId={projectId} gcloudPath={gcloudPath} />);
-      }, 500);
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to navigate",
-        message: error instanceof Error ? error.message : String(error),
-      });
-      setActionInProgress(null);
-    }
-  };
+  const viewFirewallRules = () =>
+    navigateToView("firewall-rules", "Loading Firewall Rules...", FirewallRulesView, { projectId, gcloudPath });
 
   const clearCache = async () => {
     setActionInProgress("clearing-cache");
@@ -624,7 +473,6 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
                     icon={Icon.Forward}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                     onAction={() => {
-                      console.log("Selecting project:", project.id, project);
                       selectProject(project.id);
                     }}
                   />

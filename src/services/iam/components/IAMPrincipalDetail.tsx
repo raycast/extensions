@@ -1,6 +1,7 @@
-import { ActionPanel, Action, Detail, Icon, confirmAlert, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Detail, Icon, confirmAlert, showToast, Toast, Alert } from "@raycast/api";
 import { IAMPrincipal, IAMService } from "../IAMService";
 import { formatRoleName } from "../../../utils/iamRoles";
+import { showFailureToast } from "@raycast/utils";
 
 interface IAMPrincipalDetailProps {
   principal: IAMPrincipal;
@@ -49,6 +50,7 @@ export default function IAMPrincipalDetail({ principal, iamService, onRoleRemove
       message: `Are you sure you want to remove the role "${formatRoleName(role)}" from ${principal.id}?`,
       primaryAction: {
         title: "Remove",
+        style: Alert.ActionStyle.Destructive,
       },
     });
 
@@ -65,11 +67,7 @@ export default function IAMPrincipalDetail({ principal, iamService, onRoleRemove
         onRoleRemoved();
       } catch (error) {
         console.error("Error removing role:", error);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to remove role",
-          message: String(error),
-        });
+        showFailureToast(error);
       }
     }
   }
@@ -123,6 +121,7 @@ export default function IAMPrincipalDetail({ principal, iamService, onRoleRemove
                 key={role.role}
                 title={`Remove ${formatRoleName(role.role)}`}
                 icon={Icon.Trash}
+                style={Action.Style.Destructive}
                 onAction={() => handleRemoveRole(role.role)}
               />
             ))}

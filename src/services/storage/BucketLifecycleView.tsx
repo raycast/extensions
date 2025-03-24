@@ -11,7 +11,7 @@ import {
   useNavigation,
   Form,
 } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
 import fs from "fs";
@@ -68,14 +68,14 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
   const [error, setError] = useState<string | null>(null);
   const { push, pop } = useNavigation();
 
-  // Cache for storing results to avoid repeated API calls
-  const cache = new Map<string, unknown>();
+  // Cache stored in a ref to persist between renders
+  const cache = useRef<Map<string, unknown>>(new Map());
 
   // Function to invalidate cache entries matching a pattern
   function invalidateCache(pattern: RegExp) {
-    for (const key of cache.keys()) {
+    for (const key of Array.from(cache.current.keys())) {
       if (pattern.test(key)) {
-        cache.delete(key);
+        cache.current.delete(key);
       }
     }
   }
@@ -93,12 +93,11 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
 
     // Check cache first
     const cacheKey = fullCommand;
-    if (cache.has(cacheKey)) {
-      return cache.get(cacheKey);
+    if (cache.current.has(cacheKey)) {
+      return cache.current.get(cacheKey);
     }
 
     try {
-      console.log(`Executing command: ${fullCommand}`);
       const { stdout, stderr } = await execPromise(fullCommand);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -116,12 +115,11 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
       const result = JSON.parse(stdout);
 
       // Cache the result
-      cache.set(cacheKey, result);
+      cache.current.set(cacheKey, result);
 
       return result;
     } catch (error) {
       if (retries > 0) {
-        console.log(`Retrying command (${retries} attempts left): ${fullCommand}`);
         return executeCommand(gcloudPath, command, {
           projectId,
           formatJson,
@@ -340,7 +338,12 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
         </Form.Dropdown>
         <Form.Separator />
         <Form.Description title="Condition" text="At least one condition must be specified" />
-        <Form.TextField id="age" title="Age (days)" placeholder="30" info="Number of days since object creation" />
+        <Form.TextField 
+          id="age" 
+          title="Age (days)" 
+          placeholder="30" 
+          info="Number of days since object creation (must be a positive number)"
+        />
         <Form.TextField
           id="createdBefore"
           title="Created Before"
@@ -378,6 +381,14 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
     });
 
     try {
+      // Validate age if provided
+      if (formValues.age) {
+        const age = parseInt(formValues.age);
+        if (isNaN(age) || age <= 0) {
+          throw new Error("Age must be a positive number");
+        }
+      }
+
       // Build the rule object
       const rule: LifecycleRule = {
         id: formValues.id || `rule-${Date.now()}`,

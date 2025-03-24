@@ -141,10 +141,6 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
   };
 
   const handleZoneChange = async (newZone: string) => {
-    // Filter subnets by matching region when zone changes
-    // Extract region from zone (e.g., "us-central1-a" -> "us-central1")
-    const region = newZone.split("-").slice(0, 2).join("-");
-    console.log(`Zone changed to ${newZone}, region is ${region}`);
     setSelectedZone(newZone);
   };
 

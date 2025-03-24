@@ -9,18 +9,11 @@ interface CachedProjectViewProps {
   onLoginWithDifferentAccount?: () => void;
 }
 
-interface GCloudProject {
-  projectId: string;
-  name: string;
-  projectNumber: string;
-  createTime: string;
-}
-
 interface ProjectDetails {
   projectId: string;
   name: string;
   projectNumber: string;
-  createTime: string;
+  createTime?: string;
 }
 
 // Create a navigation cache instance
@@ -39,7 +32,6 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
   const [authCacheDuration, setAuthCacheDuration] = useState<number>(24);
   const { pop, push } = useNavigation();
 
-  // Define initialize function that can be called from anywhere in the component
   async function initialize() {
     setIsLoading(true);
     try {
@@ -79,7 +71,7 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
 
       // Get exactly the number of recently used projects that matches the cache limit
       const recentProjects = await CacheManager.getRecentlyUsedProjectsWithDetails(gcloudPath);
-      console.log("Fetched recent projects:", recentProjects);
+      // console.log("Fetched recent projects:", recentProjects);
 
       // Ensure we show exactly the number of projects configured in the cache limit
       setRecentlyUsedProjects(recentProjects.slice(0, limit));
@@ -88,7 +80,7 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
       try {
         const result = await executeGcloudCommand(gcloudPath, "projects list --format=json");
         if (Array.isArray(result) && result.length > 0) {
-          const allProjects = result.map((project: GCloudProject) => ({
+          const allProjects = result.map((project: ProjectDetails) => ({
             id: project.projectId,
             name: project.name || project.projectId,
             projectNumber: project.projectNumber || "",
@@ -138,59 +130,67 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
   useEffect(() => {
     if (!shouldNavigate) return;
 
+    let isActive = true; // Track if the effect is still active
+    let navigationTimeout: NodeJS.Timeout;
+    let activeToast: Toast | null = null;
+
     const performNavigation = async () => {
       try {
-        let loadingToast: Toast | null = null;
-
         if (shouldNavigate.action === "continue" && cachedProject) {
-          if (!cachedProject.projectId || typeof cachedProject.projectId !== "string") {
+          if (typeof cachedProject.projectId !== "string") {
             throw new Error("Invalid cached project ID");
           }
 
-          loadingToast = await showToast({
+          activeToast = await showToast({
             style: Toast.Style.Animated,
             title: "Opening project...",
             message: cachedProject.projectId,
           });
 
-          // Short delay to show the toast before navigation
-          setTimeout(() => {
-            loadingToast?.hide();
-            push(<ProjectView projectId={cachedProject.projectId} gcloudPath={gcloudPath} />);
+          // Ensure the component is still mounted before navigating
+          navigationTimeout = setTimeout(() => {
+            if (isActive) {
+              activeToast?.hide();
+              push(<ProjectView projectId={cachedProject.projectId} gcloudPath={gcloudPath} />);
+            }
           }, 500);
         } else if (shouldNavigate.action === "select" && shouldNavigate.projectId) {
-          if (!shouldNavigate.projectId || typeof shouldNavigate.projectId !== "string") {
+          if (typeof shouldNavigate.projectId !== "string") {
             throw new Error("Invalid project ID for selection");
           }
 
-          loadingToast = await showToast({
+          activeToast = await showToast({
             style: Toast.Style.Animated,
             title: "Selecting project...",
             message: shouldNavigate.projectId,
           });
 
-          console.log("Saving selected project:", shouldNavigate.projectId);
+          // console.log("Saving selected project:", shouldNavigate.projectId);
           CacheManager.saveSelectedProject(shouldNavigate.projectId);
 
-          // Short delay to show the toast before navigation
-          setTimeout(() => {
-            loadingToast?.hide();
-            push(<ProjectView projectId={shouldNavigate.projectId || ""} gcloudPath={gcloudPath} />);
+          // Ensure the component is still mounted before navigating
+          navigationTimeout = setTimeout(() => {
+            if (isActive) {
+              activeToast?.hide();
+              push(<ProjectView projectId={shouldNavigate.projectId || ""} gcloudPath={gcloudPath} />);
+            }
           }, 500);
         } else if (shouldNavigate.action === "new") {
-          loadingToast = await showToast({
+          activeToast = await showToast({
             style: Toast.Style.Animated,
             title: "Loading projects list...",
             message: "Preparing project selection view",
           });
 
-          // Short delay to show the toast before navigation
-          setTimeout(() => {
-            loadingToast?.hide();
-            push(<ProjectView projectId="" gcloudPath={gcloudPath} />);
+          // Ensure the component is still mounted before navigating
+          navigationTimeout = setTimeout(() => {
+            if (isActive) {
+              activeToast?.hide();
+              push(<ProjectView projectId="" gcloudPath={gcloudPath} />);
+            }
           }, 500);
         } else if (shouldNavigate.action === "clear") {
-          loadingToast = await showToast({
+          activeToast = await showToast({
             style: Toast.Style.Animated,
             title: "Clearing cache...",
             message: "Removing all cached data",
@@ -198,29 +198,44 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
 
           CacheManager.clearAllCaches();
 
-          loadingToast.hide();
+          if (isActive) {
+            activeToast.hide();
 
-          showToast({
-            style: Toast.Style.Success,
-            title: "Cache cleared",
-            message: "All cached data has been cleared",
-          });
+            showToast({
+              style: Toast.Style.Success,
+              title: "Cache cleared",
+              message: "All cached data has been cleared",
+            });
 
-          navigationCache.set("showProjectsList", "true");
-          pop();
+            navigationCache.set("showProjectsList", "true");
+            pop();
+          }
         }
       } catch (error) {
         console.error("Error during navigation:", error);
 
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Navigation failed",
-          message: error instanceof Error ? error.message : String(error),
-        });
+        if (isActive) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Navigation failed",
+            message: error instanceof Error ? error.message : String(error),
+          });
+        }
       }
     };
 
     performNavigation();
+
+    // Cleanup function to handle unmounting or new navigation
+    return () => {
+      isActive = false;
+      if (navigationTimeout) {
+        clearTimeout(navigationTimeout);
+      }
+      if (activeToast) {
+        activeToast.hide();
+      }
+    };
 
     // Reset navigation state
     setShouldNavigate(null);
@@ -249,7 +264,7 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
       return;
     }
 
-    console.log("Selecting project:", projectId);
+    // console.log("Selecting project:", projectId);
     setShouldNavigate({ action: "select", projectId });
   }
 
@@ -512,11 +527,7 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
                 subtitle="Switch to another Google Cloud account"
                 actions={
                   <ActionPanel>
-                    <Action
-                      title="Switch Account"
-                      onAction={onLoginWithDifferentAccount || (() => {})}
-                      icon={Icon.Switch}
-                    />
+                    <Action title="Switch Account" onAction={onLoginWithDifferentAccount} icon={Icon.Switch} />
                   </ActionPanel>
                 }
               />

@@ -1,4 +1,5 @@
 import { ActionPanel, Action, List, showToast, Toast, useNavigation, Icon, Detail, Color } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { executeGcloudCommand } from "../../gcloud";
 
@@ -206,8 +207,7 @@ export default function StorageStatsView({ projectId, gcloudPath, bucketName }: 
       const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
       console.error("Error analyzing storage:", err);
       setError(`Failed to analyze storage: ${errorMessage}`);
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast("Failed to analyze storage", {
         title: "Failed to analyze storage",
         message: errorMessage,
       });

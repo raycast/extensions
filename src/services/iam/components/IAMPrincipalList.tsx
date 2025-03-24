@@ -12,6 +12,8 @@ interface IAMPrincipalListProps {
   onViewPrincipal: (principal: IAMPrincipal) => void;
   onAddRole: () => void;
   onRefresh: () => void;
+  onSearchTextChange: (text: string) => void;
+  onTypeChange: (type: string) => void;
 }
 
 export default function IAMPrincipalList({
@@ -23,6 +25,8 @@ export default function IAMPrincipalList({
   onViewPrincipal,
   onAddRole,
   onRefresh,
+  onSearchTextChange,
+  onTypeChange,
 }: IAMPrincipalListProps) {
   const filteredPrincipals = useMemo(() => {
     return principals.filter((principal) => {
@@ -73,13 +77,13 @@ export default function IAMPrincipalList({
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search principals and roles..."
-      onSearchTextChange={(text) => (searchText = text)}
+      onSearchTextChange={onSearchTextChange}
       filtering={{ keepSectionOrder: true }}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by principal type"
           value={selectedType || ""}
-          onChange={(value) => (selectedType = value === "" ? null : value)}
+          onChange={onTypeChange}
         >
           <List.Dropdown.Item title="All Types" value="" />
           <List.Dropdown.Item title="User" value="user" />
@@ -125,9 +129,9 @@ export default function IAMPrincipalList({
                     <List.Item.Detail.Metadata.Label title="Email" text={principal.email || "N/A"} />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Roles" />
-                    {principal.roles.map((role, index) => (
+                    {principal.roles.map((role) => (
                       <List.Item.Detail.Metadata.Label
-                        key={index}
+                        key={role.role}
                         title={formatRoleName(role.role)}
                         text={role.title}
                       />

@@ -166,7 +166,7 @@ export class NetworkService {
     const now = Date.now();
 
     if (cachedData && now - cachedData.timestamp < CACHE_TTL.MEDIUM) {
-      console.log(`Using cached VPC data`);
+      // console.log(`Using cached VPC data`);
       return cachedData.data;
     }
 
@@ -192,7 +192,7 @@ export class NetworkService {
 
       // If we have cached data, return it even if expired
       if (cachedData) {
-        console.log("Returning expired cached data as fallback");
+        // console.log("Returning expired cached data as fallback");
         return cachedData.data;
       }
 
@@ -293,7 +293,7 @@ export class NetworkService {
     const now = Date.now();
 
     if (cachedData && now - cachedData.timestamp < CACHE_TTL.SHORT) {
-      console.log(`Using cached subnet data for ${cacheKey}`);
+      // console.log(`Using cached subnet data for ${cacheKey}`);
       return cachedData.data;
     }
 
@@ -329,7 +329,7 @@ export class NetworkService {
 
       // If we have cached data, return it even if expired
       if (cachedData) {
-        console.log("Returning expired cached data as fallback");
+        // console.log("Returning expired cached data as fallback");
         return cachedData.data;
       }
 
@@ -349,7 +349,7 @@ export class NetworkService {
     const now = Date.now();
 
     if (cachedData && now - cachedData.timestamp < CACHE_TTL.MEDIUM) {
-      console.log(`Using cached IP data for ${cacheKey}`);
+      // console.log(`Using cached IP data for ${cacheKey}`);
       return cachedData.data;
     }
 
@@ -385,7 +385,7 @@ export class NetworkService {
 
       // If we have cached data, return it even if expired
       if (cachedData) {
-        console.log("Returning expired cached data as fallback");
+        // console.log("Returning expired cached data as fallback");
         return cachedData.data;
       }
 
@@ -485,7 +485,7 @@ export class NetworkService {
     const now = Date.now();
 
     if (cachedData && now - cachedData.timestamp < CACHE_TTL.MEDIUM) {
-      console.log(`Using cached firewall data`);
+      // console.log(`Using cached firewall data`);
       return cachedData.data;
     }
 
@@ -511,7 +511,7 @@ export class NetworkService {
 
       // If we have cached data, return it even if expired
       if (cachedData) {
-        console.log("Returning expired cached data as fallback");
+        // console.log("Returning expired cached data as fallback");
         return cachedData.data;
       }
 
@@ -627,8 +627,13 @@ export class NetworkService {
 
       return true;
     } catch (error) {
-      console.error("Error creating firewall rule:", error);
-      return false;
+      this.handleError(error, {
+        operation: "Create Firewall Rule",
+        ruleName: name,
+        network,
+        options: ruleOptions,
+        projectId: this.projectId,
+      });
     }
   }
 
@@ -708,8 +713,19 @@ export class NetworkService {
 
       return true;
     } catch (error) {
-      console.error("Error creating subnet:", error);
-      return false;
+      this.handleError(error, {
+        operation: "Create Subnet",
+        subnetName: name,
+        network,
+        region,
+        ipRange,
+        options: {
+          privateGoogleAccess,
+          enableFlowLogs,
+          secondaryRanges,
+        },
+        projectId: this.projectId,
+      });
     }
   }
 

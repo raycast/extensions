@@ -1,10 +1,11 @@
 import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
 import { homedir } from "os";
-import { join } from "path";
+import { join, dirname } from "path";
 import { ReactNode, useState } from "react";
 import { openSaveDialog } from "./NativeFilePicker";
 import { ensureDirectoryExists } from "./FileUtils";
 import { Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export interface FileDownloadProps {
   onDownload: (downloadPath: string) => Promise<void>;
@@ -52,15 +53,22 @@ export function FileDownloader({
             onSubmit={async (values) => {
               const path = values.downloadPath || downloadPath;
 
+              if (!path) {
+                await showFailureToast({
+                  title: "Invalid Path",
+                  message: "Please specify a valid download path"
+                });
+                return;
+              }
+
               // Ensure the directory exists
               try {
-                const dirPath = path.substring(0, path.lastIndexOf("/"));
+                const dirPath = dirname(path);
                 await ensureDirectoryExists(dirPath);
               } catch (error) {
-                showToast({
-                  style: Toast.Style.Failure,
+                await showFailureToast({
                   title: "Directory Error",
-                  message: "Could not create or access the download directory",
+                  message: "Could not create or access the download directory"
                 });
                 return;
               }
@@ -82,10 +90,9 @@ export function FileDownloader({
                 pop();
               } catch (error: unknown) {
                 downloadingToast.hide();
-                showToast({
-                  style: Toast.Style.Failure,
+                await showFailureToast({
                   title: "Download failed",
-                  message: error instanceof Error ? error.message : String(error),
+                  message: error instanceof Error ? error.message : String(error)
                 });
               }
             }}

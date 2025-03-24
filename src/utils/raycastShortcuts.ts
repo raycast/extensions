@@ -96,7 +96,7 @@ export function isReservedShortcut(modifiers: Keyboard.KeyModifier[], key: Keybo
  * Common safe shortcuts that can be used across different contexts
  */
 export const COMMON_SHORTCUTS = {
-  REFRESH: { modifiers: ["cmd"], key: "r", description: "Refresh" },
+  REFRESH: { modifiers: ["cmd", "shift"], key: "r", description: "Refresh" },
   CANCEL: { modifiers: ["cmd", "shift"], key: "c", description: "Cancel" },
   DELETE: { modifiers: ["cmd", "shift"], key: "backspace", description: "Delete item" },
 };
@@ -107,39 +107,39 @@ export const COMMON_SHORTCUTS = {
 export const CONTEXTUAL_SHORTCUTS: ContextualShortcuts = {
   // Project view shortcuts
   PROJECT: {
-    CREATE: { modifiers: ["cmd"], key: "n", description: "Create new project" },
-    VIEW_DETAILS: { modifiers: ["cmd"], key: "i", description: "View project details" },
+    CREATE: { modifiers: ["cmd", "shift"], key: "n", description: "Create new project" },
+    VIEW_DETAILS: { modifiers: ["cmd", "shift"], key: "i", description: "View project details" },
     SWITCH: { modifiers: ["cmd"], key: "s", description: "Switch project" },
   },
 
   // Bucket view shortcuts
   BUCKET: {
-    CREATE: { modifiers: ["cmd"], key: "n", description: "Create new bucket" },
+    CREATE: { modifiers: ["cmd", "shift"], key: "n", description: "Create new bucket" },
     VIEW_OBJECTS: { modifiers: ["cmd"], key: "o", description: "View objects" },
-    VIEW_IAM: { modifiers: ["cmd"], key: "i", description: "View IAM permissions" },
+    VIEW_IAM: { modifiers: ["cmd", "shift"], key: "i", description: "View IAM permissions" },
     VIEW_LIFECYCLE: { modifiers: ["cmd"], key: "l", description: "View lifecycle rules" },
   },
 
   // Object view shortcuts
   OBJECT: {
-    CREATE: { modifiers: ["cmd"], key: "n", description: "Create/upload new object" },
+    CREATE: { modifiers: ["cmd", "shift"], key: "n", description: "Create/upload new object" },
     DOWNLOAD: { modifiers: ["cmd"], key: "d", description: "Download object" },
-    VIEW_DETAILS: { modifiers: ["cmd"], key: "i", description: "View object details" },
+    VIEW_DETAILS: { modifiers: ["cmd", "shift"], key: "i", description: "View object details" },
     COPY_URL: { modifiers: ["cmd"], key: "u", description: "Copy object URL" },
   },
 
   // IAM view shortcuts
   IAM: {
-    ADD_MEMBER: { modifiers: ["cmd"], key: "n", description: "Add new IAM member" },
+    ADD_MEMBER: { modifiers: ["cmd", "shift"], key: "n", description: "Add new IAM member" },
     SWITCH_VIEW: { modifiers: ["cmd"], key: "v", description: "Switch IAM view" },
-    FILTER: { modifiers: ["cmd"], key: "f", description: "Filter IAM members" },
+    FILTER: { modifiers: ["cmd", "shift"], key: "f", description: "Filter IAM members" },
   },
 
   // Compute view shortcuts
   COMPUTE: {
-    CREATE: { modifiers: ["cmd"], key: "n", description: "Create new instance" },
+    CREATE: { modifiers: ["cmd", "shift"], key: "n", description: "Create new instance" },
     START: { modifiers: ["cmd"], key: "s", description: "Start instance" },
-    STOP: { modifiers: ["cmd"], key: "p", description: "Stop instance" },
+    STOP: { modifiers: ["cmd", "shift"], key: "p", description: "Stop instance" },
     CONNECT: { modifiers: ["cmd"], key: "c", description: "Connect to instance" },
   },
 };

@@ -274,7 +274,7 @@ export default function Command() {
 
   async function authenticate() {
     try {
-      console.log("Starting Google Cloud authentication process");
+      // console.log("Starting Google Cloud authentication process");
 
       // Show a dedicated authentication view that will handle the process
       push(
@@ -448,7 +448,7 @@ export default function Command() {
     });
 
     try {
-      console.log("Revoking all existing credentials");
+      // console.log("Revoking all existing credentials");
       // Force new authentication - first revoke all existing credentials
       await execPromise(`${GCLOUD_PATH} auth revoke --all --quiet`);
       revokingToast.hide();
@@ -581,7 +581,6 @@ export default function Command() {
               <List.Item
                 key={project.id}
                 title={project.name}
-                subtitle=""
                 icon={{
                   source: preferences.projectId === project.id ? Icon.CheckCircle : Icon.Circle,
                   tintColor: preferences.projectId === project.id ? Color.Green : Color.SecondaryText,
@@ -595,7 +594,7 @@ export default function Command() {
                 ]}
                 detail={
                   <List.Item.Detail
-                    markdown={`# ${project.name}\n\n**Project ID:** ${project.id}\n\n**Project Number:** ${project.projectNumber}\n\n**Created:** ${new Date(project.createTime).toLocaleString()}`}
+                    markdown={`# ${project.name}\n\n**Project ID:** ${project.id}\n\n**Project Number:** ${project.projectNumber}\n\n**Created:** ${new Date(project.createTime || Date.now()).toLocaleString()}`}
                     metadata={
                       <List.Item.Detail.Metadata>
                         <List.Item.Detail.Metadata.Label title="Project Name" text={project.name} />
@@ -604,7 +603,7 @@ export default function Command() {
                         <List.Item.Detail.Metadata.Label title="Project Number" text={project.projectNumber} />
                         <List.Item.Detail.Metadata.Label
                           title="Created"
-                          text={new Date(project.createTime).toLocaleString()}
+                          text={new Date(project.createTime || Date.now()).toLocaleString()}
                         />
                         {preferences.projectId === project.id && (
                           <>

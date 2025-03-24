@@ -336,6 +336,9 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
   }
 
   function showAddMemberForm() {
+    // Get the first available role as default, or storage.objectViewer if no roles available yet
+    const defaultRole = roles.length > 0 ? roles[0].role : "roles/storage.objectViewer";
+
     push(
       <Form
         actions={
@@ -344,7 +347,7 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
           </ActionPanel>
         }
       >
-        <Form.Dropdown id="role" title="Role" defaultValue="">
+        <Form.Dropdown id="role" title="Role" defaultValue={defaultRole}>
           {roles.map((role) => (
             <Form.Dropdown.Item key={role.role} value={role.role} title={role.title} />
           ))}

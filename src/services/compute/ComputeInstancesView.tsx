@@ -24,6 +24,8 @@ interface ComputeInstancesViewProps {
 export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeInstancesViewProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [instances, setInstances] = useState<ComputeInstance[]>([]);
+  const [filteredInstances, setFilteredInstances] = useState<ComputeInstance[]>([]);
+  const [searchText, setSearchText] = useState<string>("");
   const [selectedZone, setSelectedZone] = useState<string | undefined>(undefined);
   const [zones, setZones] = useState<string[]>([]);
   const [service, setService] = useState<ComputeService | null>(null);
@@ -46,8 +48,6 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         // Set loading state immediately to show user something is happening
         setIsLoading(true);
 
-        console.log(`Initializing compute service for project: ${projectId}`);
-
         // Try to fetch instances with a timeout
         const fetchPromise = computeService.getInstances();
 
@@ -59,7 +59,6 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         // Race the promises - use whichever completes first
         const fetchedInstances = await Promise.race<ComputeInstance[]>([fetchPromise, timeoutPromise]);
 
-        console.log(`Fetched ${fetchedInstances.length} compute instances`);
         setInstances(fetchedInstances);
 
         // Then fetch zones in the background
@@ -113,6 +112,22 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
 
     initializeData();
   }, [gcloudPath, projectId]);
+
+  useEffect(() => {
+    // Filter instances whenever searchText or instances change
+    const filtered = instances.filter((instance) => {
+      const searchLower = searchText.toLowerCase();
+      return (
+        instance.name.toLowerCase().includes(searchLower) ||
+        instance.status.toLowerCase().includes(searchLower) ||
+        service?.formatZone(instance.zone).toLowerCase().includes(searchLower) ||
+        service?.formatMachineType(instance.machineType).toLowerCase().includes(searchLower) ||
+        instance.networkInterfaces?.[0]?.networkIP?.toLowerCase().includes(searchLower) ||
+        instance.networkInterfaces?.[0]?.accessConfigs?.[0]?.natIP?.toLowerCase().includes(searchLower)
+      );
+    });
+    setFilteredInstances(filtered);
+  }, [searchText, instances]);
 
   const fetchZones = async (computeService: ComputeService) => {
     try {
@@ -362,9 +377,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
 
       try {
         // Refresh the instances
-        if (service) {
-          await fetchInstances(service);
-        }
+        await fetchInstances(service);
         refreshToast.hide();
         showToast({
           style: Toast.Style.Success,
@@ -400,7 +413,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search VM instances..."
-      onSearchTextChange={() => {}}
+      onSearchTextChange={setSearchText}
       filtering={{ keepSectionOrder: true }}
       navigationTitle="Compute Engine Instances"
       searchBarAccessory={
@@ -422,7 +435,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         icon={{ source: "https://cloud.google.com/compute/images/logo_compute_black.svg" }}
         actions={
           <ActionPanel>
-            <Action title="Create Vm Instance" icon={Icon.Plus} onAction={createVMInstance} />
+            <Action title="Create VM Instance" icon={Icon.Plus} onAction={createVMInstance} />
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}
@@ -435,9 +448,9 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       {service && (
         <List.Section
           title="VM Instances"
-          subtitle={instances.length > 0 ? `${instances.length} instances` : undefined}
+          subtitle={filteredInstances.length > 0 ? `${filteredInstances.length} instances` : undefined}
         >
-          {instances.map((instance) => {
+          {filteredInstances.map((instance) => {
             const zone = service.formatZone(instance.zone);
             const machineType = service.formatMachineType(instance.machineType);
             const networkIP = instance.networkInterfaces?.[0]?.networkIP || "No IP";

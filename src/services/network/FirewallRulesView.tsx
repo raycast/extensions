@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { NetworkService, FirewallRule, VPC } from "./NetworkService";
 
 interface FirewallRulesViewProps {
@@ -46,12 +47,7 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
       } catch (error) {
         console.error("Error initializing:", error);
         loadingToast.hide();
-
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to Load Firewall Rules",
-          message: error instanceof Error ? error.message : "Unknown error occurred",
-        });
+        showFailureToast(error instanceof Error ? error.message : "Failed to load firewall rules");
       } finally {
         setIsLoading(false);
       }
@@ -64,9 +60,21 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
     try {
       const fetchedVPCs = await networkService.getVPCs();
       setVPCs(fetchedVPCs);
+      
+      if (fetchedVPCs.length === 0) {
+        showToast({
+          style: Toast.Style.Animated,
+          title: "No VPC Networks Found",
+          message: "You'll need at least one VPC network to create firewall rules",
+        });
+      }
     } catch (error) {
       console.error("Error fetching VPCs:", error);
-      // Don't show error toast for VPCs, as it's not critical
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Load VPC Networks",
+        message: "This will affect your ability to create new firewall rules. Try refreshing.",
+      });
     }
   };
 
@@ -93,14 +101,8 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
       });
     } catch (error) {
       console.error("Error refreshing firewall rules:", error);
-
       loadingToast.hide();
-
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Refresh Firewall Rules",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
+      showFailureToast(error instanceof Error ? error.message : "Failed to refresh firewall rules");
     } finally {
       setIsLoading(false);
     }
@@ -140,6 +142,22 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
     };
   };
 
+  const handleCreateFirewallRule = useCallback(() => {
+    if (vpcs.length === 0) {
+      showFailureToast("Please wait for VPC networks to be loaded");
+      return;
+    }
+
+    push(
+      <CreateFirewallRuleForm
+        gcloudPath={gcloudPath}
+        projectId={projectId}
+        vpcs={vpcs}
+        onRuleCreated={refreshRules}
+      />,
+    );
+  }, [gcloudPath, projectId, vpcs, refreshRules, push]);
+
   return (
     <List
       isLoading={isLoading}
@@ -161,25 +179,7 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
             title="Create Firewall Rule"
             icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
-            onAction={() => {
-              if (vpcs.length === 0) {
-                showToast({
-                  style: Toast.Style.Failure,
-                  title: "Cannot Create Firewall Rule",
-                  message: "Please wait for VPC networks to be loaded",
-                });
-                return;
-              }
-
-              push(
-                <CreateFirewallRuleForm
-                  gcloudPath={gcloudPath}
-                  projectId={projectId}
-                  vpcs={vpcs}
-                  onRuleCreated={refreshRules}
-                />,
-              );
-            }}
+            onAction={handleCreateFirewallRule}
           />
         </ActionPanel>
       }
@@ -194,25 +194,7 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
               <Action
                 title="Create Firewall Rule"
                 icon={Icon.Plus}
-                onAction={() => {
-                  if (vpcs.length === 0) {
-                    showToast({
-                      style: Toast.Style.Failure,
-                      title: "Cannot Create Firewall Rule",
-                      message: "Please wait for VPC networks to be loaded",
-                    });
-                    return;
-                  }
-
-                  push(
-                    <CreateFirewallRuleForm
-                      gcloudPath={gcloudPath}
-                      projectId={projectId}
-                      vpcs={vpcs}
-                      onRuleCreated={refreshRules}
-                    />,
-                  );
-                }}
+                onAction={handleCreateFirewallRule}
               />
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refreshRules} />
             </ActionPanel>
@@ -337,25 +319,7 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
                   title="Create Firewall Rule"
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  onAction={() => {
-                    if (vpcs.length === 0) {
-                      showToast({
-                        style: Toast.Style.Failure,
-                        title: "Cannot Create Firewall Rule",
-                        message: "Please wait for VPC networks to be loaded",
-                      });
-                      return;
-                    }
-
-                    push(
-                      <CreateFirewallRuleForm
-                        gcloudPath={gcloudPath}
-                        projectId={projectId}
-                        vpcs={vpcs}
-                        onRuleCreated={refreshRules}
-                      />,
-                    );
-                  }}
+                  onAction={handleCreateFirewallRule}
                 />
               </ActionPanel>
             }
@@ -398,47 +362,27 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
 
   async function handleSubmit(values: FirewallRuleFormValues) {
     if (!values.name) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Validation Error",
-        message: "Please enter a rule name",
-      });
+      showFailureToast("Please enter a rule name");
       return;
     }
 
     if (!values.network) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Validation Error",
-        message: "Please select a network",
-      });
+      showFailureToast("Please select a network");
       return;
     }
 
     if (!values.protocol) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Validation Error",
-        message: "Please select a protocol",
-      });
+      showFailureToast("Please select a protocol");
       return;
     }
 
     if (values.direction === "INGRESS" && !values.sourceRanges && !values.sourceTags) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Validation Error",
-        message: "Please specify source ranges or source tags for ingress rules",
-      });
+      showFailureToast("Please specify source ranges or source tags for ingress rules");
       return;
     }
 
     if (values.direction === "EGRESS" && !values.destinationRanges && !values.targetTags) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Validation Error",
-        message: "Please specify destination ranges or target tags for egress rules",
-      });
+      showFailureToast("Please specify destination ranges or target tags for egress rules");
       return;
     }
 
@@ -517,14 +461,8 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
       }
     } catch (error) {
       console.error("Error creating firewall rule:", error);
-
       loadingToast.hide();
-
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error Creating Firewall Rule",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
+      showFailureToast(error instanceof Error ? error.message : "Failed to create firewall rule");
     } finally {
       setIsLoading(false);
     }
@@ -576,6 +514,25 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
           icon={{ source: Icon.ArrowUp, tintColor: Color.Orange }}
         />
       </Form.Dropdown>
+
+      <Form.Dropdown
+        id="ruleType"
+        title="Rule Type"
+        defaultValue="allow"
+        info="Whether to allow or deny matching traffic"
+      >
+        <Form.Dropdown.Item
+          value="allow"
+          title="Allow"
+          icon={{ source: Icon.Check, tintColor: Color.Green }}
+        />
+        <Form.Dropdown.Item
+          value="deny"
+          title="Deny"
+          icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+        />
+      </Form.Dropdown>
+
       <Form.TextField
         id="priority"
         title="Priority"

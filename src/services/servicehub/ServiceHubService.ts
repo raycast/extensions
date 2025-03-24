@@ -208,13 +208,13 @@ export class MarketplaceService {
       // On error, try to return cached data even if expired
       const cachedData = this.cache.get(cacheKey);
       if (cachedData) {
-        console.log("Returning expired cached data due to error");
+        // console.log("Returning expired cached data due to error");
         return cachedData.data as GCPService[];
       }
 
       // If no cached data, return predefined services as fallback
       if (error instanceof Error && error.message.includes("maxBuffer")) {
-        console.log("Buffer exceeded, falling back to predefined services");
+        // console.log("Buffer exceeded, falling back to predefined services");
         return this.getLocalServices(options.category, options.coreServicesOnly);
       }
 
@@ -271,7 +271,7 @@ export class MarketplaceService {
       this.cache.set(cacheKey, { data: enabledServices, timestamp: now });
 
       return enabledServices;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error getting enabled services:", error);
       return [];
     }
@@ -437,7 +437,7 @@ export class MarketplaceService {
       // Try to return cached data even if expired
       const cachedData = this.cache.get(cacheKey);
       if (cachedData) {
-        console.log("Returning expired cached data due to error");
+        // console.log("Returning expired cached data due to error");
         return cachedData.data as GCPService;
       }
 
@@ -529,7 +529,9 @@ export class MarketplaceService {
         // If still no cached data, try to get fresh details
         const serviceDetails = await this.getServiceDetails(serviceName);
         return serviceDetails.isEnabled;
-      } catch {
+      } catch (error: unknown) {
+        console.error(`Error getting service details for ${serviceName} during fallback:`, error);
+        // Return false as a safe default when all attempts to check service status fail
         return false;
       }
     }

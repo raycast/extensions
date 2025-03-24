@@ -13,6 +13,7 @@ import {
 } from "@raycast/api";
 import { ComputeService, ComputeInstance } from "./ComputeService";
 import { useMemo, useCallback } from "react";
+import { showFailureToast } from "@raycast/utils";
 
 interface ComputeInstanceDetailViewProps {
   instance: ComputeInstance;
@@ -26,7 +27,7 @@ export default function ComputeInstanceDetailView({
   service,
   onRefresh,
   projectId,
-}: ComputeInstanceDetailViewProps) {
+}: ComputeInstanceDetailViewProps): JSX.Element {
   const zone = service.formatZone(instance.zone);
   const machineType = service.formatMachineType(instance.machineType);
 
@@ -248,7 +249,7 @@ export default function ComputeInstanceDetailView({
   }, [instance.networkInterfaces]);
 
   const copyInternalIP = useCallback(() => {
-    const internalIP = instance.networkInterfaces[0].networkIP;
+    const internalIP = instance.networkInterfaces[0]?.networkIP;
     Clipboard.copy(internalIP);
     showToast({
       style: Toast.Style.Success,
@@ -266,7 +267,6 @@ export default function ComputeInstanceDetailView({
       });
 
       await service.startInstance(instance.name, zone);
-
       loadingToast.hide();
 
       showToast({
@@ -275,15 +275,11 @@ export default function ComputeInstanceDetailView({
         message: "The instance should be running soon",
       });
 
-      // Refresh and pop back to list
       await onRefresh();
       popToRoot();
-    } catch (error: Error | unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: `Failed to Start ${instance.name}`,
-        message: errorMessage,
+    } catch (error) {
+      showFailureToast(error, {
+        title: `Failed to Start ${instance.name}`
       });
     }
   }, [instance.name, zone, service, onRefresh]);
@@ -308,7 +304,6 @@ export default function ComputeInstanceDetailView({
       });
 
       await service.stopInstance(instance.name, zone);
-
       loadingToast.hide();
 
       showToast({
@@ -317,28 +312,25 @@ export default function ComputeInstanceDetailView({
         message: "The instance has been stopped",
       });
 
-      // Refresh and pop back to list
       await onRefresh();
       popToRoot();
-    } catch (error: Error | unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: `Failed to Stop ${instance.name}`,
-        message: errorMessage,
+    } catch (error) {
+      showFailureToast(error, {
+        title: `Failed to Stop ${instance.name}`
       });
     }
   }, [instance.name, zone, service, onRefresh]);
 
   const copyConnectionCommand = useCallback(() => {
     const zoneName = zone.split("/").pop() || zone;
-    const command = `gcloud compute ssh --zone="${zoneName}" "${instance.name}" --project="${projectId || instance.id.split("/")[1]}"`;
-
+    const projectName = projectId || instance.id?.split("/")?.[1] || "";
+    const command = `gcloud compute ssh --zone="${zoneName}" "${instance.name}" --project="${projectName}"`;
+    
     Clipboard.copy(command);
     showToast({
       style: Toast.Style.Success,
       title: "Connection command copied",
-      message: "Paste in your terminal to connect",
+      message: "Paste in your terminal to connect"
     });
   }, [instance, zone, projectId]);
 
@@ -346,6 +338,43 @@ export default function ComputeInstanceDetailView({
     <Detail
       markdown={markdown}
       navigationTitle={`Instance: ${instance.name}`}
+      metadata={
+        <Detail.Metadata>
+          {/* Status */}
+          {statusInfo}
+
+          <Detail.Metadata.Separator />
+
+          {/* Basic Information */}
+          <Detail.Metadata.Label title="Machine Type" text={machineType} icon={{ source: Icon.Desktop }} />
+          <Detail.Metadata.Label title="Zone" text={zone} icon={{ source: Icon.Globe }} />
+          <Detail.Metadata.Label title="CPU Platform" text={instance.cpuPlatform} icon={{ source: Icon.Terminal }} />
+          <Detail.Metadata.Label
+            title="Created"
+            text={new Date(instance.creationTimestamp).toLocaleString()}
+            icon={{ source: Icon.Calendar }}
+          />
+
+          <Detail.Metadata.Separator />
+
+          {/* Network Information */}
+          <Detail.Metadata.Label title="Network Interfaces" icon={{ source: Icon.Network }} />
+          {networkInterfaces}
+
+          {/* External IPs (shown separately for cleaner UI) */}
+          {externalIPs}
+
+          <Detail.Metadata.Separator />
+
+          {/* Disks Information */}
+          <Detail.Metadata.Label title="Disks" icon={{ source: Icon.HardDrive }} />
+          {disksInfo}
+
+          {/* Tags and Labels sections */}
+          {tagsSection}
+          {labelsSection}
+        </Detail.Metadata>
+      }
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Instance Actions">
@@ -400,43 +429,6 @@ export default function ComputeInstanceDetailView({
             )}
           </ActionPanel.Section>
         </ActionPanel>
-      }
-      metadata={
-        <Detail.Metadata>
-          {/* Status */}
-          {statusInfo}
-
-          <Detail.Metadata.Separator />
-
-          {/* Basic Information */}
-          <Detail.Metadata.Label title="Machine Type" text={machineType} icon={{ source: Icon.Desktop }} />
-          <Detail.Metadata.Label title="Zone" text={zone} icon={{ source: Icon.Globe }} />
-          <Detail.Metadata.Label title="CPU Platform" text={instance.cpuPlatform} icon={{ source: Icon.Terminal }} />
-          <Detail.Metadata.Label
-            title="Created"
-            text={new Date(instance.creationTimestamp).toLocaleString()}
-            icon={{ source: Icon.Calendar }}
-          />
-
-          <Detail.Metadata.Separator />
-
-          {/* Network Information */}
-          <Detail.Metadata.Label title="Network Interfaces" icon={{ source: Icon.Network }} />
-          {networkInterfaces}
-
-          {/* External IPs (shown separately for cleaner UI) */}
-          {externalIPs}
-
-          <Detail.Metadata.Separator />
-
-          {/* Disks Information */}
-          <Detail.Metadata.Label title="Disks" icon={{ source: Icon.HardDrive }} />
-          {disksInfo}
-
-          {/* Tags and Labels sections */}
-          {tagsSection}
-          {labelsSection}
-        </Detail.Metadata>
       }
     />
   );

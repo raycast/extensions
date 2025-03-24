@@ -13,6 +13,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { IAMService, IAMPrincipal, IAMRole } from "./IAMService";
+import { showFailureToast } from "@raycast/utils";
 import { predefinedRoles } from "../../utils/iamRoles";
 
 interface IAMViewProps {
@@ -97,11 +98,7 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
         loadingToast.hide();
       }
 
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch IAM policy",
-        message: String(error),
-      });
+      showFailureToast(error);
     } finally {
       setIsLoading(false);
     }
@@ -212,15 +209,8 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                   fetchIAMPolicy();
                 } catch (error) {
                   console.error("Error adding member:", error);
-
-                  // Hide loading toast
                   loadingToast.hide();
-
-                  showToast({
-                    style: Toast.Style.Failure,
-                    title: "Failed to add member",
-                    message: String(error),
-                  });
+                  showFailureToast(error);
                 } finally {
                   setIsLoading(false);
                 }
@@ -329,15 +319,8 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                   fetchIAMPolicy();
                 } catch (error) {
                   console.error("Error creating group:", error);
-
-                  // Hide loading toast
                   loadingToast.hide();
-
-                  showToast({
-                    style: Toast.Style.Failure,
-                    title: "Failed to create group",
-                    message: String(error),
-                  });
+                  showFailureToast(error);
                 } finally {
                   setIsLoading(false);
                 }
@@ -407,15 +390,8 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
         fetchIAMPolicy();
       } catch (error) {
         console.error("Error removing member:", error);
-
-        // Hide loading toast
         loadingToast.hide();
-
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to remove member",
-          message: String(error),
-        });
+        showFailureToast(error);
       } finally {
         setIsLoading(false);
       }
@@ -576,15 +552,8 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
                   fetchIAMPolicy();
                 } catch (error) {
                   console.error("Error adding role:", error);
-
-                  // Hide loading toast
                   loadingToast.hide();
-
-                  showToast({
-                    style: Toast.Style.Failure,
-                    title: "Failed to add role",
-                    message: String(error),
-                  });
+                  showFailureToast(error);
                 } finally {
                   setIsLoading(false);
                 }

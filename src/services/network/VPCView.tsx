@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { NetworkService, VPC } from "./NetworkService";
 import SubnetsView from "./SubnetsView";
 import FirewallRulesView from "./FirewallRulesView";
@@ -35,7 +36,10 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
         setVPCs(fetchedVPCs);
 
         // Prefetch subnets in background for faster subnet view
-        networkService.getSubnets().catch((err) => console.error("Background subnet fetch error:", err));
+        networkService.getSubnets().catch((error) => {
+          console.error("Background subnet fetch error:", error);
+          showFailureToast("Failed to prefetch subnets - subnet view may load slower");
+        });
 
         loadingToast.hide();
 
@@ -138,11 +142,19 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
           <Action
-            title="Create Vpc Network"
+            title="Create VPC Network"
             icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
             onAction={() => {
-              push(<CreateVPCForm gcloudPath={gcloudPath} projectId={projectId} onVPCCreated={refreshVPCs} />);
+              if (!service) return;
+              push(
+                <CreateVPCForm
+                  service={service}
+                  gcloudPath={gcloudPath}
+                  projectId={projectId}
+                  onVPCCreated={refreshVPCs}
+                />,
+              );
             }}
           />
         </ActionPanel>
@@ -156,10 +168,18 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
           actions={
             <ActionPanel>
               <Action
-                title="Create Vpc Network"
+                title="Create VPC Network"
                 icon={Icon.Plus}
                 onAction={() => {
-                  push(<CreateVPCForm gcloudPath={gcloudPath} projectId={projectId} onVPCCreated={refreshVPCs} />);
+                  if (!service) return;
+                  push(
+                    <CreateVPCForm
+                      service={service}
+                      gcloudPath={gcloudPath}
+                      projectId={projectId}
+                      onVPCCreated={refreshVPCs}
+                    />,
+                  );
                 }}
               />
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refreshVPCs} />
@@ -228,11 +248,19 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                 />
                 <Action
-                  title="Create Vpc Network"
+                  title="Create VPC Network"
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                   onAction={() => {
-                    push(<CreateVPCForm gcloudPath={gcloudPath} projectId={projectId} onVPCCreated={refreshVPCs} />);
+                    if (!service) return;
+                    push(
+                      <CreateVPCForm
+                        service={service}
+                        gcloudPath={gcloudPath}
+                        projectId={projectId}
+                        onVPCCreated={refreshVPCs}
+                      />,
+                    );
                   }}
                 />
               </ActionPanel>
@@ -248,19 +276,16 @@ interface CreateVPCFormProps {
   gcloudPath: string;
   projectId: string;
   onVPCCreated: () => void;
+  service: NetworkService;
 }
 
-function CreateVPCForm({ gcloudPath, projectId, onVPCCreated }: CreateVPCFormProps) {
+function CreateVPCForm({ service, onVPCCreated }: CreateVPCFormProps) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   async function handleSubmit(values: { name: string; description: string; subnetMode: string; mtu: string }) {
     if (!values.name) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Validation Error",
-        message: "Please enter a network name",
-      });
+      showFailureToast("Please enter a network name");
       return;
     }
 
@@ -273,8 +298,6 @@ function CreateVPCForm({ gcloudPath, projectId, onVPCCreated }: CreateVPCFormPro
     });
 
     try {
-      const service = new NetworkService(gcloudPath, projectId);
-
       const success = await service.createVPC(
         values.name,
         values.description,
@@ -294,22 +317,12 @@ function CreateVPCForm({ gcloudPath, projectId, onVPCCreated }: CreateVPCFormPro
         onVPCCreated();
         pop();
       } else {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to Create VPC",
-          message: "An error occurred while creating the VPC network",
-        });
+        showFailureToast("An error occurred while creating the VPC network");
       }
     } catch (error: unknown) {
       console.error("Error creating VPC:", error);
-
       loadingToast.hide();
-
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error Creating VPC",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      showFailureToast(error instanceof Error ? error.message : "Failed to create VPC network");
     } finally {
       setIsLoading(false);
     }

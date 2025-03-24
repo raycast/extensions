@@ -127,7 +127,12 @@ export default function IAMMembersByPrincipalView({
             });
           }
 
-          const principal = principalsMap.get(principalKey)!;
+          const principal = principalsMap.get(principalKey);
+          if (!principal) {
+            console.error(`Failed to get/create principal for key: ${principalKey}`);
+            continue;
+          }
+
           principal.roles.push({
             role: binding.role,
             title: roleInfo.title || formatRoleName(binding.role),
@@ -147,7 +152,8 @@ export default function IAMMembersByPrincipalView({
       });
 
       setPrincipals(principalsArray);
-      setDebugInfo(debugText + `Found ${principalsArray.length} principals with IAM roles\n`);
+      const updatedDebugText = debugText + `Found ${principalsArray.length} principals with IAM roles\n`;
+      setDebugInfo(updatedDebugText);
 
       showToast({
         style: Toast.Style.Success,
@@ -156,14 +162,16 @@ export default function IAMMembersByPrincipalView({
       });
     } catch (error: unknown) {
       console.error("Error fetching IAM policy:", error);
-      setError(`Failed to fetch IAM policy: ${error instanceof Error ? error.message : String(error)}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorDebugText = debugText + `Error: ${errorMessage}\n`;
+      setDebugInfo(errorDebugText);
+      setError(`Failed to fetch IAM policy: ${errorMessage}`);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch IAM policy",
-        message: error instanceof Error ? error.message : String(error),
+        message: errorMessage,
       });
     } finally {
-      setDebugInfo(debugText);
       setIsLoading(false);
     }
   }
@@ -425,190 +433,8 @@ export default function IAMMembersByPrincipalView({
     principal.roles.forEach((role) => {
       markdown += `### ${role.title}\n\n`;
       markdown += `**Role ID:** \`${role.role}\`\n\n`;
-
-      if (role.description) {
-        markdown += `**Description:** ${role.description}\n\n`;
-      }
-
-      if (role.condition) {
-        markdown += `**Condition:** ${role.condition.title}\n\n`;
-        markdown += `\`\`\`\n${role.condition.expression}\n\`\`\`\n\n`;
-
-        if (role.condition.description) {
-          markdown += `${role.condition.description}\n\n`;
-        }
-      }
     });
 
-    push(
-      <Detail
-        navigationTitle={`${principal.displayName}: ${principal.id}`}
-        markdown={markdown}
-        metadata={
-          <Detail.Metadata>
-            <Detail.Metadata.Label title="Type" text={principal.displayName} />
-            <Detail.Metadata.Label title="ID" text={principal.id} />
-            <Detail.Metadata.Separator />
-            <Detail.Metadata.Label title="Roles" text={`${principal.roles.length}`} />
-            {principal.roles.map((role, index) => (
-              <Detail.Metadata.Label
-                key={`role-${index}`}
-                title={role.title}
-                text={role.role}
-                icon={getRoleIcon(role.role)}
-              />
-            ))}
-          </Detail.Metadata>
-        }
-        actions={
-          <ActionPanel>
-            <Action title="Add Role" icon={Icon.Plus} onAction={showAddMemberForm} />
-            <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchIAMPolicy} />
-          </ActionPanel>
-        }
-      />,
-    );
+    push(<Detail markdown={markdown} />);
   }
-
-  // Filter principals based on search text and selected type
-  const filteredPrincipals = principals.filter((principal) => {
-    // If there's a selected type and this principal doesn't match, filter it out
-    if (selectedType && principal.type !== selectedType) {
-      return false;
-    }
-
-    // If there's search text, check if the principal or any roles match
-    if (searchText) {
-      const principalMatches =
-        principal.id.toLowerCase().includes(searchText.toLowerCase()) ||
-        principal.type.toLowerCase().includes(searchText.toLowerCase());
-
-      const roleMatches = principal.roles.some(
-        (role) =>
-          role.role.toLowerCase().includes(searchText.toLowerCase()) ||
-          role.title.toLowerCase().includes(searchText.toLowerCase()) ||
-          (role.description && role.description.toLowerCase().includes(searchText.toLowerCase())),
-      );
-
-      return principalMatches || roleMatches;
-    }
-
-    return true;
-  });
-
-  // Get unique principal types for the dropdown
-  const principalTypes = Array.from(new Set(principals.map((p) => p.type)));
-
-  if (error) {
-    return (
-      <Detail
-        markdown={`# Error\n\n${error}`}
-        actions={
-          <ActionPanel>
-            <Action title="Retry" onAction={fetchIAMPolicy} />
-          </ActionPanel>
-        }
-      />
-    );
-  }
-
-  return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search members or roles..."
-      onSearchTextChange={setSearchText}
-      navigationTitle={resourceName ? `IAM for ${resourceName}` : "IAM Members"}
-      searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Member Type" value={selectedType || ""} onChange={setSelectedType}>
-          <List.Dropdown.Item title="All Types" value="" />
-          {principalTypes.map((type) => (
-            <List.Dropdown.Item key={type} title={formatMemberType(type)} value={type} />
-          ))}
-        </List.Dropdown>
-      }
-      actions={
-        <ActionPanel>
-          <Action title="Add Member" icon={Icon.Plus} onAction={showAddMemberForm} />
-          <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchIAMPolicy} />
-          <Action title="Show Debug Info" icon={Icon.Terminal} onAction={showDebugInfo} />
-          {selectedType && (
-            <Action title="Clear Type Filter" icon={Icon.XmarkCircle} onAction={() => setSelectedType(null)} />
-          )}
-        </ActionPanel>
-      }
-    >
-      {filteredPrincipals.length === 0 && !isLoading ? (
-        <List.EmptyView
-          title="No IAM Members Found"
-          description={searchText ? "Try a different search term" : "Add a member to get started"}
-          icon={{ source: Icon.Person }}
-        />
-      ) : (
-        principalTypes
-          .filter((type) => !selectedType || type === selectedType)
-          .map((type) => {
-            const typePrincipals = filteredPrincipals.filter((p) => p.type === type);
-            if (typePrincipals.length === 0) return null;
-
-            return (
-              <List.Section key={type} title={formatMemberType(type)} subtitle={`${typePrincipals.length} members`}>
-                {typePrincipals.map((principal) => (
-                  <List.Item
-                    key={`${principal.type}-${principal.id}`}
-                    title={principal.id || principal.type}
-                    subtitle={`${principal.roles.length} roles`}
-                    icon={getMemberIcon(principal.type)}
-                    accessories={[{ text: `${principal.roles.length} roles` }]}
-                    detail={
-                      <List.Item.Detail
-                        markdown={`# ${principal.displayName}: ${principal.id}\n\n## Roles\n\n${principal.roles.map((role) => `- **${role.title}** (${role.role})`).join("\n\n")}`}
-                        metadata={
-                          <List.Item.Detail.Metadata>
-                            <List.Item.Detail.Metadata.Label title="Type" text={principal.displayName} />
-                            <List.Item.Detail.Metadata.Label title="ID" text={principal.id} />
-                            <List.Item.Detail.Metadata.Separator />
-                            <List.Item.Detail.Metadata.Label title="Roles" />
-                            {principal.roles.map((role, index) => (
-                              <List.Item.Detail.Metadata.Label
-                                key={`role-${index}`}
-                                title={role.title}
-                                text={role.role}
-                                icon={getRoleIcon(role.role)}
-                              />
-                            ))}
-                          </List.Item.Detail.Metadata>
-                        }
-                      />
-                    }
-                    actions={
-                      <ActionPanel>
-                        <Action title="View Details" icon={Icon.Eye} onAction={() => showPrincipalDetails(principal)} />
-                        <Action title="Add Role" icon={Icon.Plus} onAction={showAddMemberForm} />
-                        <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchIAMPolicy} />
-                        <ActionPanel.Submenu
-                          title="Remove Role"
-                          icon={Icon.Trash}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                        >
-                          {principal.roles.map((role) => (
-                            <Action
-                              key={role.role}
-                              title={role.title}
-                              icon={getRoleIcon(role.role)}
-                              style={Action.Style.Destructive}
-                              onAction={() => removeMember(principal, role.role)}
-                            />
-                          ))}
-                        </ActionPanel.Submenu>
-                      </ActionPanel>
-                    }
-                  />
-                ))}
-              </List.Section>
-            );
-          })
-          .filter(Boolean)
-      )}
-    </List>
-  );
 }

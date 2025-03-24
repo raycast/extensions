@@ -38,3 +38,13 @@ raycast-env.d.ts
 compiled_raycast_swift
 original_*.tsx
 DevScreen.tsx
+src/services/compute/README.md
+src/services/iam/README.md
+src/services/network/README.md
+src/services/servicehub/README.md
+src/services/storage/README.md
+
+
+
+
+helper_documentation

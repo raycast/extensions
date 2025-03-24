@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Detail, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -18,7 +19,7 @@ export default function CommandOutput({ command, projectId, gcloudPath }: Comman
 
   useEffect(() => {
     executeCommand();
-  }, []);
+  }, [command, projectId, gcloudPath]);
 
   async function executeCommand() {
     setIsLoading(true);
@@ -37,9 +38,11 @@ export default function CommandOutput({ command, projectId, gcloudPath }: Comman
 
       showToast(Toast.Style.Success, "Command executed successfully");
     } catch (error: unknown) {
-      console.error("Error executing command:", error);
+      showFailureToast({
+        title: "Failed to execute command",
+        message: error instanceof Error ? error.message : undefined,
+      });
       setError(error instanceof Error ? error.message : "Failed to execute command");
-      showToast(Toast.Style.Failure, "Failed to execute command");
     } finally {
       setIsLoading(false);
     }

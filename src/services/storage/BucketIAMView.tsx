@@ -11,10 +11,11 @@ import {
   useNavigation,
   Form,
 } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
 import fs from "fs";
+import os from "os";
 import { formatRoleName, getRoleInfo } from "../../utils/iamRoles";
 
 const execPromise = promisify(exec);
@@ -57,20 +58,25 @@ interface FormValues {
   conditionExpression: string;
 }
 
+interface CacheEntry {
+  data: unknown;
+  timestamp: number;
+}
+
 export default function BucketIAMView({ projectId, gcloudPath, bucketName }: BucketIAMViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [policy, setPolicy] = useState<IAMPolicy | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { push, pop } = useNavigation();
 
-  // Cache for storing results to avoid repeated API calls
-  const cache = new Map<string, unknown>();
+  // Cache stored in a ref to persist between renders
+  const cache = useRef<Map<string, CacheEntry>>(new Map());
 
   // Function to invalidate cache entries matching a pattern
   function invalidateCache(pattern: RegExp) {
-    for (const key of cache.keys()) {
+    for (const key of Array.from(cache.current.keys())) {
       if (pattern.test(key)) {
-        cache.delete(key);
+        cache.current.delete(key);
       }
     }
   }
@@ -88,12 +94,13 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
 
     // Check cache first
     const cacheKey = fullCommand;
-    if (cache.has(cacheKey)) {
-      return cache.get(cacheKey);
+    const cachedEntry = cache.current.get(cacheKey);
+    
+    if (cachedEntry) {
+      return cachedEntry.data;
     }
 
     try {
-      console.log(`Executing command: ${fullCommand}`);
       const { stdout, stderr } = await execPromise(fullCommand);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -110,13 +117,12 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
 
       const result = JSON.parse(stdout);
 
-      // Cache the result
-      cache.set(cacheKey, result);
+      // Cache the result with timestamp
+      cache.current.set(cacheKey, { data: result, timestamp: Date.now() });
 
       return result;
     } catch (error) {
       if (retries > 0) {
-        console.log(`Retrying command (${retries} attempts left): ${fullCommand}`);
         return executeCommand(gcloudPath, command, {
           projectId,
           formatJson,
@@ -365,7 +371,7 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
       }
 
       // Create a temporary JSON file with the updated policy
-      const tempFilePath = `/tmp/iam-policy-${bucketName}-${Date.now()}.json`;
+      const tempFilePath = `${os.tmpdir()}/iam-policy-${bucketName}-${Date.now()}.json`;
 
       fs.writeFileSync(tempFilePath, JSON.stringify(updatedPolicy, null, 2));
 
@@ -483,7 +489,7 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
             }
 
             // Create a temporary JSON file with the updated policy
-            const tempFilePath = `/tmp/iam-policy-${bucketName}-${Date.now()}.json`;
+            const tempFilePath = `${os.tmpdir()}/iam-policy-${bucketName}-${Date.now()}.json`;
 
             fs.writeFileSync(tempFilePath, JSON.stringify(updatedPolicy, null, 2));
 

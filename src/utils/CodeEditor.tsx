@@ -27,9 +27,10 @@ export function CodeEditor({
   const { pop } = useNavigation();
 
   const handleSave = () => {
-    onChange(editedCode);
     if (onSave) {
       onSave(editedCode);
+    } else {
+      onChange(editedCode);
     }
     setIsEditing(false);
   };
@@ -94,7 +95,7 @@ export function CodeEditor({
             <Action
               title="Save"
               icon={Icon.Check}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
               onAction={() => {
                 if (onSave) onSave(code);
                 pop();

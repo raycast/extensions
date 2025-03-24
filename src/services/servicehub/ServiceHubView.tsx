@@ -4,7 +4,7 @@ import { MarketplaceService, GCPService } from "./ServiceHubService";
 import ServiceDetails from "./components/ServiceDetails";
 import { GCPServiceCategory } from "../../utils/gcpServices";
 
-interface ViewProps {
+export interface ViewProps {
   projectId: string;
   gcloudPath: string;
 }
@@ -31,9 +31,6 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
 
   // Fetch services when category or filter changes
   useEffect(() => {
-    // First load with local data for instant UI
-    fetchLocalServices();
-    // Then fetch from API
     fetchServices();
   }, [selectedCategory, showCoreServicesOnly]);
 
@@ -47,49 +44,43 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
     }
   }
 
-  // Fetch local services first for instant UI
-  async function fetchLocalServices() {
-    try {
-      setIsLoading(true);
-      const options = {
-        useLocalOnly: true,
-        category: selectedCategory !== "all" ? selectedCategory : undefined,
-        coreServicesOnly: true,
-      };
-      const servicesList = await serviceHub.listServices(options);
-      setServices(servicesList);
-    } catch (error) {
-      console.error("Error fetching local services:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  // Fetch services from GCP
+  // Fetch services with optimistic local data
   async function fetchServices() {
     try {
-      setIsRefreshing(true);
+      setIsLoading(true);
       setError(null);
 
+      // First load local data for instant UI feedback
+      const localOptions = {
+        useLocalOnly: true,
+        category: selectedCategory !== "all" ? selectedCategory : undefined,
+        coreServicesOnly: showCoreServicesOnly,
+      };
+      
+      const localServices = await serviceHub.listServices(localOptions);
+      setServices(localServices);
+      setIsLoading(false);
+      
+      // Then fetch from API
+      setIsRefreshing(true);
       showToast({
         style: Toast.Style.Animated,
         title: "Loading services...",
         message: `Category: ${selectedCategory !== "all" ? selectedCategory : "All"}`,
       });
 
-      // Use category filter if selected
-      const options = {
+      const apiOptions = {
         includeDisabled: true,
         category: selectedCategory !== "all" ? selectedCategory : undefined,
         coreServicesOnly: showCoreServicesOnly,
       };
 
-      const servicesList = await serviceHub.listServices(options);
-      setServices(servicesList);
+      const apiServices = await serviceHub.listServices(apiOptions);
+      setServices(apiServices);
 
       showToast({
         style: Toast.Style.Success,
-        title: `Loaded ${servicesList.length} services`,
+        title: `Loaded ${apiServices.length} services`,
         message: selectedCategory !== "all" ? `Category: ${selectedCategory}` : undefined,
       });
     } catch (error) {
@@ -103,6 +94,7 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       });
     } finally {
       setIsRefreshing(false);
+      setIsLoading(false);
     }
   }
 
@@ -135,9 +127,6 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
         setServices((prevServices) =>
           prevServices.map((s) => (s.name === service.name ? { ...s, isEnabled: true, state: "ENABLED" } : s)),
         );
-
-        // Fetch services again to update the status
-        fetchServices();
       } else {
         showToast({
           style: Toast.Style.Failure,
@@ -182,9 +171,6 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
         setServices((prevServices) =>
           prevServices.map((s) => (s.name === service.name ? { ...s, isEnabled: false, state: "DISABLED" } : s)),
         );
-
-        // Fetch services again to update the status
-        fetchServices();
       } else {
         showToast({
           style: Toast.Style.Failure,

@@ -13,14 +13,6 @@ A lightweight Raycast extension for managing Google Cloud resources efficiently.
 - **Compute Engine**: Create and manage virtual machines and persistent disks
 - **Network Services**: Manage VPC networks, subnets, IP addresses, and firewall rules
 
-## Recent Improvements
-
-- **Storage Enhancements**: Improved bucket deletion with progress indication
-- **VM Creation Workflow**: Added VM creation with subnet integration and region validation
-- **Network Resource Management**: New service for managing VPC and network resources
-- **Reliability Improvements**: Better error handling, timeout management, and validation
-- **UI Enhancements**: More informative dropdowns with region compatibility indicators
-
 ## Screenshots
 
 
@@ -48,22 +40,6 @@ You can configure the path to your gcloud CLI and caching options in the extensi
 2. Click "Preferences" in the action panel
 3. Set the path to your gcloud CLI (default is "gcloud")
 4. Configure cache settings to your preference
-
-## Documentation
-
-For detailed information about this extension, see the documentation in the `docs` directory:
-
-- [Caching System](docs/CACHING_SYSTEM.md)
-- [Project Structure](docs/PROJECT_STRUCTURE.md)
-- [Keyboard Shortcuts](docs/SHORTCUTS.md)
-
-## Service Documentation
-
-- [Compute Engine Service](src/services/compute/README.md)
-- [Network Service](src/services/network/README.md)
-- [Storage Service](src/services/storage/README.md)
-- [IAM Service](src/services/iam/README.md)
-- [Service Hub](src/services/servicehub/README.md)
 
 ## License
 

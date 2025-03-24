@@ -2,6 +2,11 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { Project } from "./utils/CacheManager";
 
+// Extend the Project type to make createTime optional
+interface GCloudProject extends Omit<Project, "createTime"> {
+  createTime?: string;
+}
+
 const execPromise = promisify(exec);
 
 interface CommandCacheEntry<T> {
@@ -55,7 +60,7 @@ export async function executeGcloudCommand(
 
     // Check for pending requests for the same command to avoid duplicate API calls
     if (pendingRequests.has(cacheKey)) {
-      console.log(`Reusing pending request for: ${fullCommand}`);
+      // console.log(`Reusing pending request for: ${fullCommand}`);
       return pendingRequests.get(cacheKey);
     }
 
@@ -65,7 +70,7 @@ export async function executeGcloudCommand(
       const now = Date.now();
 
       if (cachedResult && now - cachedResult.timestamp < cacheTTL) {
-        console.log(`Using cached result for: ${fullCommand}`);
+        // console.log(`Using cached result for: ${fullCommand}`);
         return cachedResult.result;
       }
     }
@@ -106,7 +111,7 @@ async function executeCommand(
   currentRetry: number = 0,
 ): Promise<unknown> {
   try {
-    console.log(`Executing command: ${fullCommand}`);
+    // console.log(`Executing command: ${fullCommand}`);
 
     // Increase maxBuffer to handle large outputs (10MB)
     const { stdout, stderr } = await execPromise(fullCommand, { maxBuffer: 10 * 1024 * 1024 });
@@ -135,7 +140,7 @@ async function executeCommand(
     }
 
     if (!stdout || stdout.trim() === "") {
-      console.log("Command returned empty output, treating as empty array result");
+      // console.log("Command returned empty output, treating as empty array result");
 
       // Store empty array in cache
       commandCache.set(cacheKey, { result: [], timestamp: Date.now() });
@@ -158,7 +163,7 @@ async function executeCommand(
   } catch (error: unknown) {
     // Retry on error if we haven't exceeded max retries
     if (currentRetry < maxRetries) {
-      console.log(`Retrying command (attempt ${currentRetry + 1}/${maxRetries}): ${fullCommand}`);
+      // console.log(`Retrying command (attempt ${currentRetry + 1}/${maxRetries}): ${fullCommand}`);
       // Exponential backoff: wait longer between retries
       const backoffMs = 1000 * Math.pow(2, currentRetry);
       await new Promise((resolve) => setTimeout(resolve, backoffMs));
@@ -221,7 +226,7 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
 
     // Use a longer TTL for projects list (30 minutes)
     if (cachedResult && now - cachedResult.timestamp < 1800000) {
-      console.log("Using cached projects list");
+      // console.log("Using cached projects list");
       return cachedResult.result as Project[];
     }
 
@@ -229,7 +234,7 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
     const { stdout } = await execPromise(`${gcloudPath} projects list --format=json`);
 
     if (!stdout || stdout.trim() === "") {
-      console.log("No projects found or empty response");
+      // console.log("No projects found or empty response");
       return [];
     }
 
@@ -247,7 +252,7 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
     }
 
     const mappedProjects = projects
-      .map((project: RawGCloudProject): Project | null => {
+      .map((project: RawGCloudProject): GCloudProject | null => {
         // Validate project object to ensure it has required fields
         if (!project || !project.projectId) {
           console.warn("Skipping invalid project:", project);
@@ -258,10 +263,10 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
           id: project.projectId,
           name: project.name || project.projectId,
           projectNumber: project.projectNumber || "",
-          createTime: project.createTime || new Date().toISOString(),
+          createTime: project.createTime,
         };
       })
-      .filter((project): project is Project => project !== null); // Type guard to remove nulls
+      .filter((project): project is GCloudProject => project !== null); // Type guard to remove nulls
 
     // Cache the result
     commandCache.set(cacheKey, { result: mappedProjects, timestamp: now });

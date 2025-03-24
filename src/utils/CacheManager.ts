@@ -34,7 +34,7 @@ export interface Project {
   id: string;
   name: string;
   projectNumber: string;
-  createTime: string;
+  createTime?: string;
 }
 
 export interface CachedAuth {
@@ -151,10 +151,6 @@ export class CacheManager {
 
     // Save the updated list
     cache.set(CACHE_KEYS.RECENTLY_USED_PROJECTS, JSON.stringify(recentlyUsed));
-
-    // Log for debugging purposes
-    console.log("Updated recently used projects:", recentlyUsed);
-    console.log("Current cache limit:", cacheLimit);
 
     // Save to preferences file to ensure persistence
     try {
@@ -444,8 +440,6 @@ export class CacheManager {
     if (recentlyUsedIds.length > cacheLimit) {
       const trimmedList = recentlyUsedIds.slice(0, cacheLimit);
       CacheManager.saveRecentlyUsedProjects(trimmedList);
-
-      console.log(`Synced recently used projects with cache limit (${cacheLimit}):`, trimmedList);
     }
   }
 }

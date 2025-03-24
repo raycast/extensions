@@ -15,6 +15,7 @@ import {
 import { useState, useEffect, useMemo } from "react";
 import { IAMService, IAMPrincipal } from "./IAMService";
 import { formatRoleName } from "../../utils/iamRoles";
+import { showFailureToast } from "@raycast/utils";
 
 interface IAMMembersByPrincipalViewProps {
   projectId: string;
@@ -43,7 +44,7 @@ export default function IAMMembersByPrincipalView({
 
   useEffect(() => {
     fetchIAMPolicy();
-  }, []);
+  }, [projectId, gcloudPath]);
 
   async function fetchIAMPolicy() {
     setIsLoading(true);
@@ -77,13 +78,8 @@ export default function IAMMembersByPrincipalView({
     } catch (error: unknown) {
       console.error("Error fetching IAM policy:", error);
       setError(error instanceof Error ? error.message : "An unknown error occurred");
-
       loadingToast.hide();
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch IAM policy",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
-      });
+      showFailureToast(error instanceof Error ? error.message : "Failed to fetch IAM policy");
     } finally {
       setIsLoading(false);
     }
@@ -129,6 +125,15 @@ export default function IAMMembersByPrincipalView({
   }
 
   async function addMember(values: { role: string; memberType: string; memberId: string }) {
+    if (!values.role) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Validation Error",
+        message: "Please select a role",
+      });
+      return;
+    }
+
     const addingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Adding member...",
@@ -150,26 +155,12 @@ export default function IAMMembersByPrincipalView({
       fetchIAMPolicy();
     } catch (error: unknown) {
       addingToast.hide();
-
-      // Provide more specific error messages
-      let errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-      let errorTitle = "Failed to add member";
-
-      if (error instanceof Error) {
-        if (error.message.includes("does not exist")) {
-          errorTitle = "User not found";
-          errorMessage = `The user ${values.memberId} does not exist. Please check the email address and try again.`;
-        } else if (error.message.includes("Permission denied") || error.message.includes("403")) {
-          errorTitle = "Permission denied";
-          errorMessage = "You don't have permission to modify IAM policies for this resource.";
-        }
-      }
-
-      showToast({
-        style: Toast.Style.Failure,
-        title: errorTitle,
-        message: errorMessage,
-      });
+      const errorMessage = error instanceof Error && error.message.includes("does not exist")
+        ? `The user ${values.memberId} does not exist. Please check the email address and try again.`
+        : error instanceof Error && (error.message.includes("Permission denied") || error.message.includes("403"))
+        ? "You don't have permission to modify IAM policies for this resource."
+        : error instanceof Error ? error.message : "Failed to add member";
+      showFailureToast(errorMessage);
     }
   }
 
@@ -206,11 +197,7 @@ export default function IAMMembersByPrincipalView({
         fetchIAMPolicy();
       } catch (error: unknown) {
         removingToast.hide();
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to remove role",
-          message: error instanceof Error ? error.message : "An unknown error occurred",
-        });
+        showFailureToast(error instanceof Error ? error.message : "Failed to remove role");
       }
     }
   }
@@ -224,7 +211,7 @@ export default function IAMMembersByPrincipalView({
           </ActionPanel>
         }
       >
-        <Form.Dropdown id="role" title="Role" defaultValue="">
+        <Form.Dropdown id="role" title="Role" defaultValue="roles/viewer">
           <Form.Dropdown.Item value="roles/owner" title="Owner" />
           <Form.Dropdown.Item value="roles/editor" title="Editor" />
           <Form.Dropdown.Item value="roles/viewer" title="Viewer" />
