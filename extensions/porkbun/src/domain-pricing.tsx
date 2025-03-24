@@ -125,7 +125,7 @@ export default function DomainPricing() {
                 <ActionPanel.Section>
                   <Action.OpenInBrowser
                     icon={Icon.Globe}
-                    title="Go to Api Reference"
+                    title="Go to API Reference"
                     url={`${API_DOCS_URL}Domain%20Pricing`}
                   />
                 </ActionPanel.Section>
