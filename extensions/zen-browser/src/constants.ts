@@ -19,7 +19,7 @@ export const DownloadText = `
   [Click here](https://zen-browser.app/download) if you want to download manually.
 
   > **Note:** If Zen Browser is already installed but you're seeing this message,
-  > you may need to adjust the profile configuration in the exention settings. You
+  > you may need to adjust the profile configuration in the extension settings. You
   > can find your profile names by visiting \`about:profiles\` in Zen Browser.
 
   [![Zen Browser](${ZEN_BROWSER_LOGO})]()
