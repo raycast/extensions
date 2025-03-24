@@ -158,7 +158,7 @@ export async function switchSurgeOutboundMode(mode: "Direct" | "Proxy" | "Rule")
     await showHUD(`🌐 Switched to ${getModeName(mode)} Mode`);
   } catch (error) {
     console.error(`🔴 Error switching to ${mode} mode:`, error);
-    await showHUD(`🔴 Switch failed: ${error}`);
+    await showFailureToast("Switch failed", error);
   }
 }
 
