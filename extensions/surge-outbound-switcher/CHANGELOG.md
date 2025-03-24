@@ -2,6 +2,12 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
+- Refactor code structure for better performance
+- Add error messages
+- Update screenshots
+
+## [Update] - {PR_MERGE_DATE}
+
 - Fix TypeScript error: Cannot find name 'showFailureToast'
 - Fix screenshot path and configuration
 - Fix global mode name
