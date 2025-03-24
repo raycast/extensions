@@ -1,6 +1,6 @@
 # Awesome Mac Applications Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-03-24
 
 Initial release of Awesome Mac:
     - 🔍 Search through thousands of high-quality Mac applications
