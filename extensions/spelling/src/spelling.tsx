@@ -1,6 +1,7 @@
 import "react";
 import { getSelectedText, Clipboard, showToast, Toast } from "@raycast/api";
 import { fixSpelling } from "./ai";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function () {
   try {
@@ -10,6 +11,6 @@ export default async function () {
     await Clipboard.paste(fixed);
     await showToast(Toast.Style.Success, "Success", "Text was corrected");
   } catch (error) {
-    await showToast(Toast.Style.Failure, "Failed to process text", String(error));
+    await showFailureToast(error, { title: "Failed to process text" });
   }
 }
