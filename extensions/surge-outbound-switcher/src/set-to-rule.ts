@@ -1,5 +1,10 @@
 import { switchSurgeOutboundMode } from "./utils";
 
 export default async function main() {
-  await switchSurgeOutboundMode("Rule");
+  try {
+    await switchSurgeOutboundMode("Rule");
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
