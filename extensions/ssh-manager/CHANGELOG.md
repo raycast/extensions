@@ -1,5 +1,9 @@
 # ssh-manager Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- ⚠️ Add Confirmation Dialog to Delete Connections
+
 ## [New Feature and Improvements] - 2025-02-27
 
 - 📋 Add `Copy Connection String`
