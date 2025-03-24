@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Support Commas in Filters] - {PR_MERGE-DATE}
+
+Add support for commas in filter strings.
+
 ## [Added contributors] - 2025-03-15
 
 ## [Removal of Deadline Feature for Non-Premium Users] - 2025-02-28
