@@ -1,4 +1,4 @@
-# zed-recent-projects Changelog
+#  Zed Recent Projects Changelog
 
 ## [Enhancements] - {PR_MERGE_DATE}
 
