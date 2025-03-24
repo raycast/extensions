@@ -14,6 +14,14 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "set-outbound-mode",
+      "title": "Set Outbound Mode",
+      "subtitle": "Surge",
+      "description": "Set Surge's outbound mode",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
       "name": "set-to-direct",
       "title": "Set to Direct",
       "subtitle": "Surge",

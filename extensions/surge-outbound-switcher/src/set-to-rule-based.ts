@@ -1,8 +1,8 @@
-import { switchSurgeOutboundMode } from "./utils";
+import { setSurgeOutboundMode } from "./utils";
 
 export default async function main() {
   try {
-    await switchSurgeOutboundMode("Rule");
+    await setSurgeOutboundMode("Rule");
   } catch (error) {
     console.error(error);
     throw error;

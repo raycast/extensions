@@ -1,5 +1,5 @@
-import { switchSurgeOutboundMode } from "./utils";
+import { setSurgeOutboundMode } from "./utils";
 
 export default async function main() {
-  await switchSurgeOutboundMode("Proxy");
+  await setSurgeOutboundMode("Global");
 }
