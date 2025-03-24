@@ -23,8 +23,8 @@
   "dependencies": {
     "@doist/todoist-api-typescript": "^4.0.0-alpha.3",
     "@electron/get": "^3.1.0",
-    "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.12.5",
     "dayjs": "^1.11.13",
     "electron": "^34.2.0",
     "node-fetch": "^3.3.2",
@@ -38,7 +38,6 @@
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "react": "^18.3.1",
-    "react-devtools": "^5.2.0",
     "react-dom": "^18.3.1",
     "typescript": "^5.4.5"
   },
