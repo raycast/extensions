@@ -11,7 +11,7 @@ export const SEARCH_ENGINE: { [key: string]: string } = {
 const ZEN_BROWSER_LOGO = "https://cdn.jsdelivr.net/gh/zen-browser/branding/Main%20icons/SVG/zen-black.svg";
 
 export const DownloadText = `
-  # 🚨Error: Zen Browser browser is not installed
+  # 🚨Error: Zen Browser is not installed
 
   ## This extension depends on Zen browser. You must install it to continue.
 
