@@ -1,6 +1,6 @@
 # Surge Outbound Mode Switcher Changelog
 
-## [Update] - 2024-03-24
+## [Update] - {PR_MERGE_DATE}
 
 - Updated extension icons and screenshot
 
