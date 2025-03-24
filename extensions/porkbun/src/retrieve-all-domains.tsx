@@ -59,7 +59,7 @@ export default function RetrieveAllDomains() {
           <Action icon={Icon.Redo} title="Reload Domains" onAction={callApi} />
           <Action.OpenInBrowser
             icon={Icon.Globe}
-            title="Go to Api Reference"
+            title="Go to API Reference"
             url={`${API_DOCS_URL}Domain%20List%20All`}
           />
         </ActionPanel>
@@ -120,7 +120,7 @@ export default function RetrieveAllDomains() {
                   />
                   <ActionPanel.Submenu title="Go to" icon={Icon.ArrowRight}>
                     <Action
-                      title="Retrieve Dns Records"
+                      title="Retrieve DNS Records"
                       icon={Icon.Text}
                       onAction={() =>
                         launchCommand({
@@ -131,7 +131,7 @@ export default function RetrieveAllDomains() {
                       }
                     />
                     <Action
-                      title="Delete Dns Record"
+                      title="Delete DNS Record"
                       icon={Icon.DeleteDocument}
                       onAction={() =>
                         launchCommand({
@@ -142,7 +142,7 @@ export default function RetrieveAllDomains() {
                       }
                     />
                     <Action
-                      title="Create Dns Record"
+                      title="Create DNS Record"
                       icon={Icon.Plus}
                       onAction={() =>
                         launchCommand({
@@ -153,7 +153,7 @@ export default function RetrieveAllDomains() {
                       }
                     />
                     <Action
-                      title="Edit Dns Record"
+                      title="Edit DNS Record"
                       icon={Icon.Pencil}
                       onAction={() =>
                         launchCommand({
@@ -164,7 +164,7 @@ export default function RetrieveAllDomains() {
                       }
                     />
                     <Action
-                      title="Retrieve Ssl Bundle"
+                      title="Retrieve SSL Bundle"
                       icon={Icon.Lock}
                       onAction={async () =>
                         await launchCommand({
@@ -179,7 +179,7 @@ export default function RetrieveAllDomains() {
                   <ActionPanel.Section>
                     <Action.OpenInBrowser
                       icon={Icon.Globe}
-                      title="Go to Api Reference"
+                      title="Go to API Reference"
                       url={`${API_DOCS_URL}Domain%20List%20All`}
                     />
                   </ActionPanel.Section>

@@ -29,11 +29,12 @@ export default function DomainPricing() {
       toast.message = `Fetched ${result.pricing && Object.keys(result.pricing).length + " "}domains`;
       setDomainPricing(result.pricing);
       setUpdatedOn(new Date());
-      setIsLoading(false);
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "ERROR";
       toast.message = `${error}`;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -95,7 +96,7 @@ export default function DomainPricing() {
       actions={
         <ActionPanel>
           {!isLoading && <Action icon={Icon.Redo} title="Reload Domain Pricing" onAction={callApi} />}
-          <Action.OpenInBrowser icon={Icon.Globe} title="Go to Api Reference" url={`${API_DOCS_URL}Domain%20Pricing`} />
+          <Action.OpenInBrowser icon={Icon.Globe} title="Go to API Reference" url={`${API_DOCS_URL}Domain%20Pricing`} />
         </ActionPanel>
       }
       searchBarPlaceholder="Search domain by name"
