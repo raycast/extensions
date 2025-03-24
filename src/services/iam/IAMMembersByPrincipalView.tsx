@@ -155,11 +155,14 @@ export default function IAMMembersByPrincipalView({
       fetchIAMPolicy();
     } catch (error: unknown) {
       addingToast.hide();
-      const errorMessage = error instanceof Error && error.message.includes("does not exist")
-        ? `The user ${values.memberId} does not exist. Please check the email address and try again.`
-        : error instanceof Error && (error.message.includes("Permission denied") || error.message.includes("403"))
-        ? "You don't have permission to modify IAM policies for this resource."
-        : error instanceof Error ? error.message : "Failed to add member";
+      const errorMessage =
+        error instanceof Error && error.message.includes("does not exist")
+          ? `The user ${values.memberId} does not exist. Please check the email address and try again.`
+          : error instanceof Error && (error.message.includes("Permission denied") || error.message.includes("403"))
+            ? "You don't have permission to modify IAM policies for this resource."
+            : error instanceof Error
+              ? error.message
+              : "Failed to add member";
       showFailureToast(errorMessage);
     }
   }

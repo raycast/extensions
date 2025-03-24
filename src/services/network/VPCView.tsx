@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation, Clipboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { NetworkService, VPC } from "./NetworkService";
 import SubnetsView from "./SubnetsView";
@@ -142,7 +142,7 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
           <Action
-            title="Create VPC Network"
+            title="Create Vpc Network"
             icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
             onAction={() => {
@@ -168,7 +168,7 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
           actions={
             <ActionPanel>
               <Action
-                title="Create VPC Network"
+                title="Create Vpc Network"
                 icon={Icon.Plus}
                 onAction={() => {
                   if (!service) return;
@@ -248,7 +248,7 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                 />
                 <Action
-                  title="Create VPC Network"
+                  title="Create Vpc Network"
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                   onAction={() => {
@@ -263,6 +263,8 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
                     );
                   }}
                 />
+                <Action title="Copy to Clipboard" icon={Icon.CopyClipboard} onAction={() => Clipboard.copy(vpc.name)} />
+                <Action title="Copy to Clipboard" icon={Icon.CopyClipboard} onAction={() => Clipboard.copy(vpc.id)} />
               </ActionPanel>
             }
           />

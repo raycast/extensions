@@ -411,18 +411,14 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
               <ActionPanel>
                 <ActionPanel.Section title="Bucket Actions">
                   <Action title="View Objects" icon={Icon.List} onAction={() => viewBucketObjects(bucket.name)} />
-                  <Action 
-                    title="View IAM Permissions (Storage)" 
-                    icon={Icon.Key} 
-                    onAction={() => viewBucketIAM(bucket.name)} 
-                  />
-                  <Action 
-                    title="View IAM Members (Storage)" 
-                    icon={Icon.Person} 
-                    onAction={() => viewIAMMembers()} 
-                  />
                   <Action
-                    title="View IAM Members by Principal (Storage)"
+                    title="View Iam Permissions (storage)"
+                    icon={Icon.Key}
+                    onAction={() => viewBucketIAM(bucket.name)}
+                  />
+                  <Action title="View Iam Members (storage)" icon={Icon.Person} onAction={() => viewIAMMembers()} />
+                  <Action
+                    title="View Iam Members by Principal (storage)"
                     icon={Icon.PersonCircle}
                     onAction={() => viewIAMMembersByPrincipal()}
                   />
@@ -431,11 +427,7 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
                     icon={Icon.Calendar}
                     onAction={() => viewBucketLifecycle(bucket.name)}
                   />
-                  <Action 
-                    title="View Statistics" 
-                    icon={Icon.BarChart} 
-                    onAction={() => viewBucketStats(bucket.name)} 
-                  />
+                  <Action title="View Statistics" icon={Icon.BarChart} onAction={() => viewBucketStats(bucket.name)} />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Management">
                   <Action title="Create Bucket" icon={Icon.Plus} onAction={showCreateBucketForm} />

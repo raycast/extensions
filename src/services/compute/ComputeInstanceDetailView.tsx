@@ -279,7 +279,7 @@ export default function ComputeInstanceDetailView({
       popToRoot();
     } catch (error) {
       showFailureToast(error, {
-        title: `Failed to Start ${instance.name}`
+        title: `Failed to Start ${instance.name}`,
       });
     }
   }, [instance.name, zone, service, onRefresh]);
@@ -316,7 +316,7 @@ export default function ComputeInstanceDetailView({
       popToRoot();
     } catch (error) {
       showFailureToast(error, {
-        title: `Failed to Stop ${instance.name}`
+        title: `Failed to Stop ${instance.name}`,
       });
     }
   }, [instance.name, zone, service, onRefresh]);
@@ -325,12 +325,12 @@ export default function ComputeInstanceDetailView({
     const zoneName = zone.split("/").pop() || zone;
     const projectName = projectId || instance.id?.split("/")?.[1] || "";
     const command = `gcloud compute ssh --zone="${zoneName}" "${instance.name}" --project="${projectName}"`;
-    
+
     Clipboard.copy(command);
     showToast({
       style: Toast.Style.Success,
       title: "Connection command copied",
-      message: "Paste in your terminal to connect"
+      message: "Paste in your terminal to connect",
     });
   }, [instance, zone, projectId]);
 

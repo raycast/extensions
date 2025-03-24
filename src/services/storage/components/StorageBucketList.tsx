@@ -27,9 +27,7 @@ interface BucketActionsProps {
 function BucketActions({ bucket, onViewBucket, onCreateBucket, onRefresh }: BucketActionsProps) {
   return (
     <ActionPanel>
-      {bucket && onViewBucket && (
-        <Action title="View Bucket" icon={Icon.Eye} onAction={() => onViewBucket(bucket)} />
-      )}
+      {bucket && onViewBucket && <Action title="View Bucket" icon={Icon.Eye} onAction={() => onViewBucket(bucket)} />}
       <Action title="Create Bucket" icon={Icon.Plus} onAction={onCreateBucket} />
       <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
     </ActionPanel>
@@ -46,14 +44,15 @@ export default function StorageBucketList({
   const [searchText, setSearchText] = useState("");
 
   // Memoize filtered buckets calculation
-  const filteredBuckets = useMemo(() => 
-    buckets.filter(
-      (bucket) =>
-        bucket.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        bucket.location.toLowerCase().includes(searchText.toLowerCase()) ||
-        bucket.storageClass.toLowerCase().includes(searchText.toLowerCase()),
-    ),
-    [buckets, searchText] // Only recalculate when buckets or searchText changes
+  const filteredBuckets = useMemo(
+    () =>
+      buckets.filter(
+        (bucket) =>
+          bucket.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          bucket.location.toLowerCase().includes(searchText.toLowerCase()) ||
+          bucket.storageClass.toLowerCase().includes(searchText.toLowerCase()),
+      ),
+    [buckets, searchText], // Only recalculate when buckets or searchText changes
   );
 
   // Format the creation date

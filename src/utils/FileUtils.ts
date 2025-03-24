@@ -21,7 +21,9 @@ export async function ensureDirectoryExists(dirPath: string): Promise<void> {
       await fsMkdir(dirPath, { recursive: true });
     } catch (mkdirError: unknown) {
       console.error(`Error creating directory: ${dirPath}`, mkdirError);
-      throw new Error(`Failed to create directory: ${mkdirError instanceof Error ? mkdirError.message : String(mkdirError)}`);
+      throw new Error(
+        `Failed to create directory: ${mkdirError instanceof Error ? mkdirError.message : String(mkdirError)}`,
+      );
     }
   }
 }
@@ -90,7 +92,7 @@ export async function validateFile(filePath: string): Promise<boolean> {
   try {
     await fsAccess(filePath, fs.constants.F_OK | fs.constants.R_OK);
     const stats = await fsStat(filePath);
-    
+
     if (!stats.isFile()) {
       showToast({
         style: Toast.Style.Failure,
@@ -102,7 +104,7 @@ export async function validateFile(filePath: string): Promise<boolean> {
 
     return true;
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       showToast({
         style: Toast.Style.Failure,
         title: "File not found",

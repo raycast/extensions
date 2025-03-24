@@ -27,11 +27,11 @@ function parseMemberString(memberString: string): MemberTypeInfo {
     const [type, id] = memberString.split(":", 2);
     return { type, id };
   }
-  
+
   if (memberString.includes("@")) {
     return { type: "user", id: memberString };
   }
-  
+
   return { type: "serviceAccount", id: memberString };
 }
 
@@ -93,7 +93,7 @@ export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, o
       loadingToast.hide();
 
       showFailureToast(error, {
-        title: "Failed to add role"
+        title: "Failed to add role",
       });
     } finally {
       setIsSubmitting(false);

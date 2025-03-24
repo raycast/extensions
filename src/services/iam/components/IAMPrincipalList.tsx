@@ -80,11 +80,7 @@ export default function IAMPrincipalList({
       onSearchTextChange={onSearchTextChange}
       filtering={{ keepSectionOrder: true }}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by principal type"
-          value={selectedType || ""}
-          onChange={onTypeChange}
-        >
+        <List.Dropdown tooltip="Filter by principal type" value={selectedType || ""} onChange={onTypeChange}>
           <List.Dropdown.Item title="All Types" value="" />
           <List.Dropdown.Item title="User" value="user" />
           <List.Dropdown.Item title="Service Account" value="serviceAccount" />

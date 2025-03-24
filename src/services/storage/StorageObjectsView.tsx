@@ -200,6 +200,7 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function performDownload(objectName: string, downloadPath?: string) {
     if (downloadPath) {
       // If downloadPath is provided, download directly to that path

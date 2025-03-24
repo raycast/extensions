@@ -95,7 +95,7 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
     // Check cache first
     const cacheKey = fullCommand;
     const cachedEntry = cache.current.get(cacheKey);
-    
+
     if (cachedEntry) {
       return cachedEntry.data;
     }

@@ -60,7 +60,7 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
     try {
       const fetchedVPCs = await networkService.getVPCs();
       setVPCs(fetchedVPCs);
-      
+
       if (fetchedVPCs.length === 0) {
         showToast({
           style: Toast.Style.Animated,
@@ -149,12 +149,7 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
     }
 
     push(
-      <CreateFirewallRuleForm
-        gcloudPath={gcloudPath}
-        projectId={projectId}
-        vpcs={vpcs}
-        onRuleCreated={refreshRules}
-      />,
+      <CreateFirewallRuleForm gcloudPath={gcloudPath} projectId={projectId} vpcs={vpcs} onRuleCreated={refreshRules} />,
     );
   }, [gcloudPath, projectId, vpcs, refreshRules, push]);
 
@@ -191,11 +186,7 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
           icon={{ source: Icon.Shield }}
           actions={
             <ActionPanel>
-              <Action
-                title="Create Firewall Rule"
-                icon={Icon.Plus}
-                onAction={handleCreateFirewallRule}
-              />
+              <Action title="Create Firewall Rule" icon={Icon.Plus} onAction={handleCreateFirewallRule} />
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refreshRules} />
             </ActionPanel>
           }
@@ -521,16 +512,8 @@ function CreateFirewallRuleForm({ gcloudPath, projectId, vpcs, onRuleCreated }: 
         defaultValue="allow"
         info="Whether to allow or deny matching traffic"
       >
-        <Form.Dropdown.Item
-          value="allow"
-          title="Allow"
-          icon={{ source: Icon.Check, tintColor: Color.Green }}
-        />
-        <Form.Dropdown.Item
-          value="deny"
-          title="Deny"
-          icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
-        />
+        <Form.Dropdown.Item value="allow" title="Allow" icon={{ source: Icon.Check, tintColor: Color.Green }} />
+        <Form.Dropdown.Item value="deny" title="Deny" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} />
       </Form.Dropdown>
 
       <Form.TextField

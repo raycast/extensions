@@ -338,10 +338,10 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
         </Form.Dropdown>
         <Form.Separator />
         <Form.Description title="Condition" text="At least one condition must be specified" />
-        <Form.TextField 
-          id="age" 
-          title="Age (days)" 
-          placeholder="30" 
+        <Form.TextField
+          id="age"
+          title="Age (days)"
+          placeholder="30"
           info="Number of days since object creation (must be a positive number)"
         />
         <Form.TextField

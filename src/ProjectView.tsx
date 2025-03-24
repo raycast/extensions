@@ -254,7 +254,7 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
     actionKey: string,
     title: string,
     ViewComponent: React.ComponentType<P>,
-    props: P
+    props: P,
   ) => {
     let activeToast: Toast | null = null;
     setActionInProgress(actionKey);

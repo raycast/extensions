@@ -534,12 +534,7 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
                 onAction={fetchVersions}
               />
-              <Action 
-                title="Back" 
-                icon={Icon.ArrowLeft} 
-                shortcut={{ modifiers: ["cmd"], key: "b" }} 
-                onAction={pop} 
-              />
+              <Action title="Back" icon={Icon.ArrowLeft} shortcut={{ modifiers: ["cmd"], key: "b" }} onAction={pop} />
             </ActionPanel>
           }
         />

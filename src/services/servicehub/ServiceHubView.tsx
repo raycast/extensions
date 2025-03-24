@@ -56,11 +56,11 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
         category: selectedCategory !== "all" ? selectedCategory : undefined,
         coreServicesOnly: showCoreServicesOnly,
       };
-      
+
       const localServices = await serviceHub.listServices(localOptions);
       setServices(localServices);
       setIsLoading(false);
-      
+
       // Then fetch from API
       setIsRefreshing(true);
       showToast({

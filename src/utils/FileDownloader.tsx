@@ -56,7 +56,7 @@ export function FileDownloader({
               if (!path) {
                 await showFailureToast({
                   title: "Invalid Path",
-                  message: "Please specify a valid download path"
+                  message: "Please specify a valid download path",
                 });
                 return;
               }
@@ -68,7 +68,7 @@ export function FileDownloader({
               } catch (error) {
                 await showFailureToast({
                   title: "Directory Error",
-                  message: "Could not create or access the download directory"
+                  message: "Could not create or access the download directory",
                 });
                 return;
               }
@@ -92,7 +92,7 @@ export function FileDownloader({
                 downloadingToast.hide();
                 await showFailureToast({
                   title: "Download failed",
-                  message: error instanceof Error ? error.message : String(error)
+                  message: error instanceof Error ? error.message : String(error),
                 });
               }
             }}

@@ -26,7 +26,8 @@ function validateBucketName(name: string): { isValid: boolean; error?: string } 
   if (!/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(name)) {
     return {
       isValid: false,
-      error: "Bucket name must contain only lowercase letters, numbers, and hyphens, and must start and end with a letter or number",
+      error:
+        "Bucket name must contain only lowercase letters, numbers, and hyphens, and must start and end with a letter or number",
     };
   }
 

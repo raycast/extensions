@@ -51,7 +51,7 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
           actions={
             <ActionPanel>
               <Action
-                title="Open VPC Networks"
+                title="Open Vpc Networks"
                 icon={Icon.Network}
                 onAction={() => {
                   push(<VPCView projectId={projectId} gcloudPath={gcloudPath} />);
@@ -71,7 +71,7 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
           actions={
             <ActionPanel>
               <Action
-                title="Open IP Addresses"
+                title="Open Ip Addresses"
                 icon={Icon.Globe}
                 onAction={() => {
                   push(<IPAddressView projectId={projectId} gcloudPath={gcloudPath} />);

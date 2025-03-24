@@ -435,7 +435,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         icon={{ source: "https://cloud.google.com/compute/images/logo_compute_black.svg" }}
         actions={
           <ActionPanel>
-            <Action title="Create VM Instance" icon={Icon.Plus} onAction={createVMInstance} />
+            <Action title="Create Vm Instance" icon={Icon.Plus} onAction={createVMInstance} />
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}
@@ -513,6 +513,11 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
                         shortcut={{ modifiers: ["cmd"], key: "r" }}
                       />
                     </ActionPanel.Section>
+                    <Action
+                      title="Copy to Clipboard"
+                      icon={Icon.CopyClipboard}
+                      onAction={() => Clipboard.copy(instance.name)}
+                    />
                   </ActionPanel>
                 }
               />

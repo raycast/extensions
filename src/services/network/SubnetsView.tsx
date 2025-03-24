@@ -278,15 +278,15 @@ function isValidCIDR(cidr: string): { valid: boolean; error?: string } {
   if (!CIDR_REGEX.test(cidr)) {
     return { valid: false, error: "Invalid CIDR format. Expected format: xxx.xxx.xxx.xxx/xx" };
   }
-  
+
   // Validate IP portion
   const [ip, prefix] = cidr.split("/");
   const octets = ip.split(".").map(Number);
-  
-  if (octets.some(octet => isNaN(octet) || octet < 0 || octet > 255)) {
+
+  if (octets.some((octet) => isNaN(octet) || octet < 0 || octet > 255)) {
     return { valid: false, error: "IP address octets must be between 0 and 255" };
   }
-  
+
   // Validate prefix length
   const prefixNum = Number(prefix);
   if (isNaN(prefixNum) || prefixNum < 0 || prefixNum > 32) {
@@ -297,13 +297,17 @@ function isValidCIDR(cidr: string): { valid: boolean; error?: string } {
 }
 
 // Add helper function for secondary range validation
-function validateSecondaryRanges(input: string): { valid: boolean; ranges?: { rangeName: string; ipCidrRange: string }[]; error?: string } {
+function validateSecondaryRanges(input: string): {
+  valid: boolean;
+  ranges?: { rangeName: string; ipCidrRange: string }[];
+  error?: string;
+} {
   if (!input.trim()) return { valid: true, ranges: undefined };
 
   try {
-    const ranges = input.split(",").map(range => {
+    const ranges = input.split(",").map((range) => {
       const [name, cidr] = range.split(":");
-      
+
       if (!name || !cidr) {
         throw new Error(`Invalid format for range "${range}". Expected "name:cidr"`);
       }
@@ -328,9 +332,9 @@ function validateSecondaryRanges(input: string): { valid: boolean; ranges?: { ra
 
     return { valid: true, ranges };
   } catch (error) {
-    return { 
-      valid: false, 
-      error: error instanceof Error ? error.message : "Invalid secondary range format" 
+    return {
+      valid: false,
+      error: error instanceof Error ? error.message : "Invalid secondary range format",
     };
   }
 }
@@ -388,7 +392,7 @@ function CreateSubnetForm({ gcloudPath, projectId, vpc, onSubnetCreated }: Creat
       const service = new NetworkService(gcloudPath, projectId);
 
       // Use validated secondary ranges
-      const { ranges: secondaryRanges } = values.secondaryRanges 
+      const { ranges: secondaryRanges } = values.secondaryRanges
         ? validateSecondaryRanges(values.secondaryRanges)
         : { ranges: undefined };
 
@@ -410,7 +414,7 @@ function CreateSubnetForm({ gcloudPath, projectId, vpc, onSubnetCreated }: Creat
 
       // Force refresh subnets to ensure we have the latest data
       await service.forceRefreshSubnets();
-      
+
       loadingToast.hide();
       showToast({
         style: Toast.Style.Success,

@@ -4,10 +4,6 @@
  */
 
 import { executeGcloudCommand } from "../../gcloud";
-import { exec } from "child_process";
-import { promisify } from "util";
-
-const execPromise = promisify(exec);
 
 // Interfaces
 export interface ComputeInstance {
@@ -126,9 +122,7 @@ export class ComputeService {
         }
       }
 
-      const command = zone
-        ? `compute instances list --zone=${zone}`
-        : `compute instances list`;
+      const command = zone ? `compute instances list --zone=${zone}` : `compute instances list`;
 
       const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
 
@@ -271,7 +265,7 @@ export class ComputeService {
     try {
       const command = `compute zones list`;
       const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
-      
+
       if (!result) {
         return [];
       }
@@ -310,9 +304,7 @@ export class ComputeService {
         }
       }
 
-      const command = zone
-        ? `compute disks list --zone=${zone}`
-        : `compute disks list`;
+      const command = zone ? `compute disks list --zone=${zone}` : `compute disks list`;
 
       const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
 

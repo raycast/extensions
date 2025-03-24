@@ -203,7 +203,7 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
           <Action
-            title="Create IP Address"
+            title="Create Ip Address"
             icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
             onAction={() => {
@@ -334,18 +334,9 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
             actions={
               <ActionPanel>
                 <Action
-                  title="Copy Ip Address"
-                  icon={Icon.Clipboard}
-                  onAction={() => {
-                    // Use Raycast clipboard API
-                    Clipboard.copy(ip.address);
-                    showToast({
-                      style: Toast.Style.Success,
-                      title: "Copied to clipboard",
-                      message: ip.address,
-                    });
-                  }}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  title="Copy to Clipboard"
+                  icon={Icon.CopyClipboard}
+                  onAction={() => Clipboard.copy(ip.address)}
                 />
                 <Action
                   title="Refresh"
@@ -489,15 +480,20 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
     try {
       const service = new NetworkService(gcloudPath, projectId);
 
-      const success = await service.createIP(values.name, values.region, values.addressType as "INTERNAL" | "EXTERNAL", {
-        description: values.description,
-        subnet: values.subnet,
-        network: values.network,
-        address: values.specificAddress,
-        purpose: values.purpose,
-        ephemeral: values.ephemeral,
-        networkTier: values.networkTier as "PREMIUM" | "STANDARD" | undefined,
-      });
+      const success = await service.createIP(
+        values.name,
+        values.region,
+        values.addressType as "INTERNAL" | "EXTERNAL",
+        {
+          description: values.description,
+          subnet: values.subnet,
+          network: values.network,
+          address: values.specificAddress,
+          purpose: values.purpose,
+          ephemeral: values.ephemeral,
+          networkTier: values.networkTier as "PREMIUM" | "STANDARD" | undefined,
+        },
+      );
 
       loadingToast.hide();
 
@@ -520,7 +516,11 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
     } catch (error) {
       console.error("Error creating IP address:", error);
       loadingToast.hide();
-      showFailureToast(error instanceof NetworkServiceError ? error.message : `Failed to create IP address: ${error instanceof Error ? error.message : String(error)}`);
+      showFailureToast(
+        error instanceof NetworkServiceError
+          ? error.message
+          : `Failed to create IP address: ${error instanceof Error ? error.message : String(error)}`,
+      );
     } finally {
       setIsLoading(false);
     }
