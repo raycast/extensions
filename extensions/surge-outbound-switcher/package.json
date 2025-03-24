@@ -15,6 +15,7 @@
     {
       "name": "set-to-direct",
       "title": "Set to Direct",
+      "subtitle": "Surge",
       "description": "Set Surge's outbound mode to Direct",
       "mode": "no-view",
       "icon": "extension-icon-d.png"
@@ -22,6 +23,7 @@
     {
       "name": "set-to-proxy",
       "title": "Set to Global",
+      "subtitle": "Surge",
       "description": "Set Surge's outbound mode to Global",
       "mode": "no-view",
       "icon": "extension-icon-g.png"
@@ -29,6 +31,7 @@
     {
       "name": "set-to-rule",
       "title": "Set to Rule-Based",
+      "subtitle": "Surge",
       "description": "Set Surge's outbound mode to Rule-Based",
       "mode": "no-view",
       "icon": "extension-icon-r.png"
