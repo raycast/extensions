@@ -30,7 +30,7 @@ export const Course = (props: { course: course }) => {
               target={
                 <List>
                   {props.course.assignments.map((assignment: assignment) => (
-                    <Assignment key={assignment.id} {...assignment} />
+                    <Assignment key={assignment.id} assignment={assignment} />
                   ))}
                 </List>
               }
@@ -41,7 +41,7 @@ export const Course = (props: { course: course }) => {
               target={
                 <List>
                   {props.course.announcements.map((announcement: announcement) => (
-                    <Announcement key={announcement.id} {...announcement} />
+                    <Announcement key={announcement.id} announcement={announcement} />
                   ))}
                 </List>
               }

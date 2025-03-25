@@ -52,14 +52,16 @@ export default function main() {
           <List.Section title="Assignments">
             {!isLoading &&
               courses.map((course: course) =>
-                course.assignments?.map((assignment: assignment) => <Assignment key={assignment.id} {...assignment} />),
+                course.assignments?.map((assignment: assignment) => (
+                  <Assignment key={assignment.id} assignment={assignment} />
+                )),
               )}
           </List.Section>
           <List.Section title="Announcements">
             {!isLoading &&
               courses.map((course: course) =>
                 course.announcements?.map((announcement: announcement) => (
-                  <Announcement key={announcement.id} {...announcement} />
+                  <Announcement key={announcement.id} announcement={announcement} />
                 )),
               )}
           </List.Section>

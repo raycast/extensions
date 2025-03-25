@@ -89,35 +89,37 @@ export default function main() {
                   feedItem.custom_type == "announcement" ? (
                     <Announcement
                       key={feedItem.custom_object.id}
-                      {...feedItem.announcement}
-                      course_color={
-                        courses.filter((course: course) => course.id == feedItem.custom_object.course_id)[0].color
-                      }
+                      announcement={{
+                        ...feedItem.announcement,
+                        course_color: courses.filter(
+                          (course: course) => course.id == feedItem.custom_object.course_id,
+                        )[0].color,
+                      }}
                     />
                   ) : feedItem.custom_type == "assignment" ? (
                     <Assignment
-                      submitted={feedItem.submission.submitted}
                       key={feedItem.custom_object.id}
-                      special_missing={feedItem.submission.missing}
-                      course_color={
-                        courses.filter((course: course) => course.id == feedItem.custom_object.course_id)[0].color
-                      }
-                      {...feedItem.assignment}
+                      assignment={{
+                        ...feedItem.assignment,
+                        submitted: feedItem.submission.submitted,
+                        special_missing: feedItem.submission.missing,
+                        course_color: courses.filter(
+                          (course: course) => course.id == feedItem.custom_object.course_id,
+                        )[0].color,
+                      }}
                     />
                   ) : (
-                    (() => {
-                      return (
-                        <Quiz
-                          submitted={feedItem.submission.submitted}
-                          key={feedItem.custom_object.id}
-                          special_missing={feedItem.submission.missing}
-                          course_color={
-                            courses.filter((course: course) => course.id == feedItem.custom_object.course_id)[0].color
-                          }
-                          {...feedItem.quiz}
-                        />
-                      );
-                    })()
+                    <Quiz
+                      key={feedItem.custom_object.id}
+                      quiz={{
+                        ...feedItem.quiz,
+                        submitted: feedItem.submission.submitted,
+                        special_missing: feedItem.submission.missing,
+                        course_color: courses.filter(
+                          (course: course) => course.id == feedItem.custom_object.course_id,
+                        )[0].color,
+                      }}
+                    />
                   ),
                 )}
             </List.Section>

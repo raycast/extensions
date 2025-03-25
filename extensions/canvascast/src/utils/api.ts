@@ -76,7 +76,7 @@ export const getCourses = async (json, config?: getCoursesConfig): Promise<cours
               name: assignment.name,
               id: assignment.id,
               description: `# ${assignment.name}\n\n${convertHTMLToMD(assignment.description)}`,
-              pretty_date: getFormattedDate(assignment.due_at),
+              pretty_date: "Due by " + getFormattedTime(assignment.due_at),
               date: new Date(assignment.due_at),
               course: course.name,
               course_id: course.id,
