@@ -63,6 +63,19 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
       .map(([, service]) => service);
   }, []);
 
+  // Helper function to extract service from role name
+  const getRoleService = (role: string): string => {
+    if (role.startsWith("roles/")) {
+      const parts = role.split("/")[1].split(".");
+      if (parts.length > 1) {
+        return parts[0]; // Return the service part (e.g., "storage" from "storage.admin")
+      } else {
+        return "project"; // For basic roles like roles/owner, roles/editor
+      }
+    }
+    return "custom"; // For custom roles
+  };
+
   useEffect(() => {
     fetchIAMPolicy();
   }, [iamService]);
@@ -130,9 +143,9 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
         return false;
       }
 
-      // Filter by service
-      if (selectedService && !principal.roles.some((role) => role.role.includes(selectedService))) {
-        return false;
+      // Filter by service using exact service matching
+      if (selectedService) {
+        return principal.roles.some((role) => getRoleService(role.role) === selectedService.toLowerCase());
       }
 
       return true;

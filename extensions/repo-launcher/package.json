@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "repo-launcher",
+  "title": "Repo Launcher",
+  "description": "Launch code repositories in various applications and on GitHub.com, targeted primarily at developers.",
+  "icon": "extension_icon.png",
+  "author": "gksander",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Launch Repo",
+      "description": "Launch a software repository in various applications or open on GitHub.com.",
+      "mode": "view"
+    },
+    {
+      "name": "settings",
+      "title": "Launch Repo: Settings",
+      "description": "Configure the extension.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.10.1",
+    "nanoid": "^5.0.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

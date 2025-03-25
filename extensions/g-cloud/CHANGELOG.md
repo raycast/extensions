@@ -1,4 +1,4 @@
-# G-Cloud  Changelog
+# G-Cloud Changelog
 
 ## [0.1.29] - {PR_MERGE_DATE}
 - Initial release

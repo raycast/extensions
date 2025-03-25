@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-arcade",
+  "title": "Raycast Arcade",
+  "description": "Play simple and fun ASCII games in Raycast!",
+  "icon": "raycast-arcade.png",
+  "author": "EvanZhouDev",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "tetris",
+      "title": "Tetris",
+      "description": "Play classic Tetris!",
+      "mode": "view",
+      "icon": "tetris.png"
+    },
+    {
+      "name": "dino",
+      "title": "Chrome Dino",
+      "description": "Play the Chrome Dino game!",
+      "mode": "view",
+      "icon": "dinosaur.png"
+    },
+    {
+      "name": "wordle",
+      "title": "Wordle",
+      "description": "Play Wordle!",
+      "mode": "view",
+      "icon": "wordle.png"
+    },
+    {
+      "name": "snake",
+      "title": "Snake",
+      "description": "Play classic Snake!",
+      "mode": "view",
+      "icon": "snake.png"
+    },
+    {
+      "name": "game2048",
+      "title": "2048",
+      "description": "Play classic 2048!",
+      "mode": "view",
+      "icon": "2048.png"
+    },
+    {
+      "name": "search",
+      "title": "Search Games",
+      "description": "Search for the Raycast Arcade games, all in one place.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.0",
+    "@raycast/utils": "^1.9.0",
+    "sound-play": "^1.1.0",
+    "svg64": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^3.0.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

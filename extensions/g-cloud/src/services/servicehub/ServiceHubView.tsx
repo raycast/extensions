@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { List, ActionPanel, Action, Icon, Toast, showToast, Color, useNavigation } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { MarketplaceService, GCPService } from "./ServiceHubService";
+import { ServiceHubService, GCPService } from "./ServiceHubService";
 import ServiceDetails from "./components/ServiceDetails";
 import { GCPServiceCategory } from "../../utils/gcpServices";
 
@@ -16,14 +16,14 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<GCPServiceCategory | "all">("all");
+  const [categories, setCategories] = useState<GCPServiceCategory[]>([]);
   const { push } = useNavigation();
   const [showOnlyEnabled, setShowOnlyEnabled] = useState(false);
   const [showCoreServicesOnly, setShowCoreServicesOnly] = useState(true);
 
   // Service initialization
-  const serviceHub = useMemo(() => new MarketplaceService(gcloudPath, projectId), [gcloudPath, projectId]);
+  const serviceHub = useMemo(() => new ServiceHubService(gcloudPath, projectId), [gcloudPath, projectId]);
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -33,15 +33,21 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
   // Fetch services when category or filter changes
   useEffect(() => {
     fetchServices();
-  }, [selectedCategory, showCoreServicesOnly]);
+  }, [selectedCategory, showCoreServicesOnly, showOnlyEnabled]);
 
   // Fetch categories
   async function fetchCategories() {
     try {
       const allCategories = await serviceHub.getAllCategories();
-      setCategories(["all", ...allCategories]);
+      setCategories(allCategories);
+      setError(null); // Clear any previous errors
     } catch (error) {
       console.error("Error fetching categories:", error);
+      const errorMessage = `Failed to load service categories: ${error instanceof Error ? error.message : String(error)}`;
+      setError(errorMessage);
+      showFailureToast(error, {
+        title: "Failed to load service categories",
+      });
     }
   }
 
@@ -353,7 +359,7 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
             if (value === "category:all") {
               setSelectedCategory("all");
             } else if (value.startsWith("category:")) {
-              setSelectedCategory(value.replace("category:", ""));
+              setSelectedCategory(value.replace("category:", "") as GCPServiceCategory);
             } else if (value === "status:enabled") {
               setShowOnlyEnabled(true);
             } else if (value === "status:all") {

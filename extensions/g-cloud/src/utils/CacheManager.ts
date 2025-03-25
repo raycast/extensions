@@ -1,4 +1,5 @@
 import { Cache } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import { homedir } from "os";
 import { join } from "path";
@@ -166,6 +167,9 @@ export class CacheManager {
       );
     } catch (error) {
       console.error("Failed to save project to preferences file:", error);
+      showFailureToast("Failed to save project preferences", {
+        message: error instanceof Error ? error.message : "Unknown error occurred while saving preferences",
+      });
     }
   }
 
@@ -208,6 +212,9 @@ export class CacheManager {
       }
     } catch (error) {
       console.error("Failed to load project from preferences file:", error);
+      showFailureToast("Failed to load project preferences", {
+        message: error instanceof Error ? error.message : "Unknown error occurred while loading preferences",
+      });
     }
 
     return null;
@@ -224,6 +231,9 @@ export class CacheManager {
         return JSON.parse(recentlyUsedStr);
       } catch (error) {
         console.error("Failed to parse recently used projects:", error);
+        showFailureToast("Failed to parse recently used projects", {
+          message: error instanceof Error ? error.message : "Invalid data format in cache",
+        });
       }
     }
 
@@ -239,6 +249,9 @@ export class CacheManager {
       }
     } catch (error) {
       console.error("Failed to load recently used projects from preferences file:", error);
+      showFailureToast("Failed to load recently used projects", {
+        message: error instanceof Error ? error.message : "Unknown error occurred while loading preferences",
+      });
     }
 
     return [];
@@ -330,6 +343,9 @@ export class CacheManager {
   static async getProjectDetails(projectId: string, gcloudPath: string): Promise<Project | null> {
     if (!projectId || typeof projectId !== "string" || !gcloudPath) {
       console.error("Invalid parameters in getProjectDetails:", { projectId, gcloudPath });
+      showFailureToast("Invalid parameters", {
+        message: "Project ID and gcloud path are required",
+      });
       return null;
     }
 
@@ -354,33 +370,50 @@ export class CacheManager {
             };
           } catch (error) {
             console.error("Error parsing cached project details:", error);
+            showFailureToast("Cache error", {
+              message: "Failed to parse cached project details",
+            });
           }
         }
       }
 
       // If not in cache or expired, fetch from API
-      // Import the executeGcloudCommand function dynamically to avoid circular dependency
-      const { executeGcloudCommand } = await import("../gcloud");
-      const result = await executeGcloudCommand(gcloudPath, `projects describe ${projectId}`);
+      try {
+        // Import the executeGcloudCommand function dynamically to avoid circular dependency
+        const { executeGcloudCommand } = await import("../gcloud");
+        const result = await executeGcloudCommand(gcloudPath, `projects describe ${projectId}`);
 
-      if (result && Array.isArray(result) && result.length > 0) {
-        const projectDetails = result[0];
+        if (result && Array.isArray(result) && result.length > 0) {
+          const projectDetails = result[0];
 
-        // Cache the result
-        projectCache.set(`project-${projectId}`, JSON.stringify(projectDetails));
-        projectCache.set(`project-${projectId}-timestamp`, Date.now().toString());
+          // Cache the result
+          projectCache.set(`project-${projectId}`, JSON.stringify(projectDetails));
+          projectCache.set(`project-${projectId}-timestamp`, Date.now().toString());
 
-        return {
-          id: projectDetails.projectId,
-          name: projectDetails.name || projectDetails.projectId,
-          projectNumber: projectDetails.projectNumber || "",
-          createTime: projectDetails.createTime || new Date().toISOString(),
-        };
+          return {
+            id: projectDetails.projectId,
+            name: projectDetails.name || projectDetails.projectId,
+            projectNumber: projectDetails.projectNumber || "",
+            createTime: projectDetails.createTime || new Date().toISOString(),
+          };
+        }
+
+        showFailureToast("Project not found", {
+          message: `No details found for project: ${projectId}`,
+        });
+        return null;
+      } catch (error) {
+        console.error("Error executing gcloud command:", error);
+        showFailureToast("Failed to fetch project details", {
+          message: error instanceof Error ? error.message : "Unknown error occurred while fetching project details",
+        });
+        return null;
       }
-
-      return null;
     } catch (error) {
-      console.error("Error fetching project details:", error);
+      console.error("Error in getProjectDetails:", error);
+      showFailureToast("Failed to get project details", {
+        message: error instanceof Error ? error.message : "Unknown error occurred",
+      });
       return null;
     }
   }
@@ -389,45 +422,69 @@ export class CacheManager {
    * Get all projects with detailed information for the recently used project IDs
    */
   static async getRecentlyUsedProjectsWithDetails(gcloudPath: string): Promise<Project[]> {
-    // Get the recently used project IDs
-    const recentlyUsedIds = CacheManager.getRecentlyUsedProjects();
-
-    if (!recentlyUsedIds.length) {
+    if (!gcloudPath) {
+      showFailureToast("Invalid parameters", {
+        message: "gcloud path is required",
+      });
       return [];
     }
 
-    // Get all projects from cache
-    const cachedProjects = CacheManager.getProjectsList();
-    const projectsMap = new Map<string, Project>();
+    try {
+      // Get the recently used project IDs
+      const recentlyUsedIds = CacheManager.getRecentlyUsedProjects();
 
-    if (cachedProjects) {
-      // Create a map for quick lookup
-      cachedProjects.projects.forEach((project) => {
-        projectsMap.set(project.id, project);
-      });
-    }
+      if (!recentlyUsedIds.length) {
+        return [];
+      }
 
-    // Collect all recently used projects
-    const recentProjects: Project[] = [];
+      // Get all projects from cache
+      const cachedProjects = CacheManager.getProjectsList();
+      const projectsMap = new Map<string, Project>();
 
-    // Try to get each recently used project from the map or fetch it directly
-    for (const id of recentlyUsedIds) {
-      if (projectsMap.has(id)) {
-        // Use the cached project
-        const project = projectsMap.get(id);
-        if (project) {
-          recentProjects.push(project);
-        }
-      } else {
-        // Fetch project details directly
-        const projectDetails = await CacheManager.getProjectDetails(id, gcloudPath);
-        if (projectDetails) {
-          recentProjects.push(projectDetails);
+      if (cachedProjects) {
+        // Create a map for quick lookup
+        cachedProjects.projects.forEach((project) => {
+          projectsMap.set(project.id, project);
+        });
+      }
+
+      // Collect all recently used projects
+      const recentProjects: Project[] = [];
+
+      // Try to get each recently used project from the map or fetch it directly
+      for (const id of recentlyUsedIds) {
+        if (projectsMap.has(id)) {
+          // Use the cached project
+          const project = projectsMap.get(id);
+          if (project) {
+            recentProjects.push(project);
+          }
+        } else {
+          try {
+            // Fetch project details directly
+            const projectDetails = await CacheManager.getProjectDetails(id, gcloudPath);
+            if (projectDetails) {
+              recentProjects.push(projectDetails);
+            }
+          } catch (error) {
+            console.error(`Error fetching details for project ${id}:`, error);
+            showFailureToast(`Failed to fetch details for project ${id}`, {
+              message: error instanceof Error ? error.message : "Unknown error occurred",
+            });
+            // Continue with other projects even if one fails
+            continue;
+          }
         }
       }
-    }
 
-    return recentProjects;
+      return recentProjects;
+    } catch (error) {
+      console.error("Error getting recently used projects:", error);
+      showFailureToast("Failed to get recently used projects", {
+        message: error instanceof Error ? error.message : "Unknown error occurred",
+      });
+      return [];
+    }
   }
 
   /**

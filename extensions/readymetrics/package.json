@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "readymetrics",
+  "title": "Ready",
+  "description": "Lists upcoming and past check-ins in Ready",
+  "icon": "readymetrics-icon.png",
+  "access": "public",
+  "author": "cfeigenbutz",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list",
+      "title": "List Check-ins",
+      "subtitle": "Ready",
+      "description": "Show upcoming and past check-ins in Ready.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Ready API key.",
+      "link": "https://ready.app",
+      "placeholder": "Enter your Ready API key."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.1",
+    "axios": "^0.27.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

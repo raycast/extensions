@@ -9,6 +9,7 @@ import {
   getImageFamiliesByProject,
   diskTypes,
 } from "../../../utils/computeResources";
+import { showFailureToast } from "@raycast/utils";
 
 interface CreateVMFormProps {
   projectId: string;
@@ -88,13 +89,10 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       } catch (error: unknown) {
         console.error("Error loading resources:", error);
         toast.hide();
-
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "Failed to load resources",
           message: error instanceof Error ? error.message : "An unknown error occurred",
         });
-
         // Load with default values instead of failing
         setIsLoading(false);
       }
@@ -204,8 +202,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
     // Validate cores
     const cores = parseInt(values.customCores || "0", 10);
     if (isNaN(cores) || cores < 1 || cores > 96) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Invalid CPU Cores",
         message: "CPU cores must be between 1 and 96",
       });
@@ -215,8 +212,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
     // Validate memory
     const memory = parseInt(values.customMemory || "0", 10);
     if (isNaN(memory) || memory < 256 || memory % 256 !== 0) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Invalid Memory",
         message: "Memory must be a multiple of 256 MiB",
       });
@@ -384,9 +380,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       pop();
     } catch (error: unknown) {
       toast.hide();
-
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to create VM instance",
         message: error instanceof Error ? error.message : "An unknown error occurred",
       });

@@ -31,9 +31,11 @@ export function FilePicker({
 }: FilePickerProps) {
   const { pop } = useNavigation();
   const [filePath, setFilePath] = useState<string>("");
+  const [error, setError] = useState<string | undefined>();
 
   const handleBrowse = async () => {
     try {
+      setError(undefined);
       const selectedPath = await openFilePicker({
         prompt: "Select a file",
         allowedFileTypes: allowedFileTypes,
@@ -42,7 +44,7 @@ export function FilePicker({
       if (selectedPath && typeof selectedPath === "string") {
         setFilePath(selectedPath);
       } else if (selectedPath !== undefined) {
-        // Only show error if the picker wasn't cancelled (undefined)
+        setError("Please select a valid file");
         await showFailureToast({
           title: "Invalid Selection",
           message: "Please select a valid file",
@@ -50,6 +52,7 @@ export function FilePicker({
       }
     } catch (error) {
       console.error("Error opening file picker:", error);
+      setError("Failed to open file picker");
       await showFailureToast({
         title: "File Picker Error",
         message: error instanceof Error ? error.message : "Failed to open file picker",
@@ -59,6 +62,7 @@ export function FilePicker({
 
   const handleSubmit = async (values: { filePath: string }) => {
     if (!values.filePath) {
+      setError("Please select a file or enter a valid file path");
       await showFailureToast({
         title: "No File Selected",
         message: "Please select a file or enter a valid file path",
@@ -67,15 +71,18 @@ export function FilePicker({
     }
 
     try {
+      setError(undefined);
       // Validate the file before proceeding
       const isValid = await validateFile(values.filePath);
       if (isValid) {
         onFilePicked(values.filePath);
         pop();
+      } else {
+        setError("Invalid file path or file type");
       }
-      // Note: validateFile already shows appropriate error toasts if validation fails
     } catch (error) {
       console.error("Error validating file:", error);
+      setError(error instanceof Error ? error.message : "Failed to validate file");
       await showFailureToast({
         title: "Validation Error",
         message: error instanceof Error ? error.message : "Failed to validate file",
@@ -109,8 +116,12 @@ export function FilePicker({
         title="File Path"
         placeholder={placeholder}
         info={info}
+        error={error}
         value={filePath}
-        onChange={setFilePath}
+        onChange={(newValue) => {
+          setFilePath(newValue);
+          setError(undefined);
+        }}
         autoFocus
       />
       <Form.Description

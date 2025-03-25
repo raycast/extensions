@@ -1,0 +1,286 @@
+{
+  "symbols": [
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Alex",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Elliott",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Harvey",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Sam",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Sebastian",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Shane",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Abigail",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Emily",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Leah",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Maru",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Penny",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Caroline",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Clint",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Demetrius",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Dwarf",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Evelyn",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "George",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Gus",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Haley",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Jas",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Jodi",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Kent",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Krobus",
+      "searchTerms": [
+
+      ]
+    },      {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Leo",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Lewis",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Linus",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Marnie",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Pam",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Pierre",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Robin",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Sandy",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Vincent",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Willy",
+      "searchTerms": [
+
+      ]
+    },
+    {
+      "symbol": "􀈂",
+      "categories": ["npc"],
+      "name": "Wizard",
+      "searchTerms": [
+
+      ]
+    }
+
+
+    
+
+  ],
+  "categories": [
+    {
+      "name": "npc",
+      "title": "npc",
+      "symbol": "profile"
+    }
+  ]
+}

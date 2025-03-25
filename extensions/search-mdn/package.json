@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-mdn",
+  "title": "Search MDN",
+  "description": "Search MDN Web Docs",
+  "icon": "icon.png",
+  "author": "krzysztofzuraw",
+  "contributors": [
+    "OBQun",
+    "k8scat",
+    "j3lte",
+    "stelo"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Web",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Web Docs",
+      "subtitle": "MDN",
+      "description": "Search MDN Web Docs",
+      "mode": "view",
+      "preferences": [
+        {
+          "type": "dropdown",
+          "title": "Preferred Action",
+          "data": [
+            {
+              "title": "Read Document",
+              "value": "read"
+            },
+            {
+              "title": "Open in Browser",
+              "value": "open"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            }
+          ],
+          "required": false,
+          "default": "read",
+          "name": "preferredAction",
+          "description": "Choose what you want to do with the result first"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.16.0",
+    "gray-matter": "^4.0.3",
+    "node-fetch": "^3.3.2",
+    "url-join": "^5.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "^20.14.2",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

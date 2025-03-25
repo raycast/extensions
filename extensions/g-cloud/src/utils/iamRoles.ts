@@ -1237,37 +1237,77 @@ export function getRoleInfo(roleName: string): IAMRoleInfo {
 
 /**
  * Format a role name to be more readable
+ * Handles edge cases like malformed roles, multiple dots, or empty parts
  * @param role The role name (e.g., "roles/storage.legacyObjectOwner")
  * @returns Formatted role name (e.g., "Storage Legacy Object Owner")
  */
 export function formatRoleName(role: string): string {
+  if (!role) {
+    return "Unknown Role";
+  }
+
   // Remove the "roles/" prefix if present
   const roleName = role.replace(/^roles\//, "");
 
-  // Split by dots and capitalize each part
-  return roleName
-    .split(".")
-    .map((part) =>
-      part
-        .split(/(?=[A-Z])/) // Split on capital letters
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" "),
-    )
+  // Handle empty role name after prefix removal
+  if (!roleName) {
+    return "Unknown Role";
+  }
+
+  // Split by dots and handle multiple dots
+  const parts = roleName.split(".").filter(Boolean);
+
+  // If no valid parts found
+  if (parts.length === 0) {
+    return "Unknown Role";
+  }
+
+  // Process each part
+  return parts
+    .map((part) => {
+      if (!part.trim()) {
+        return "";
+      }
+      // Split on capital letters and handle consecutive capitals
+      return part
+        .trim()
+        .split(/(?=[A-Z])/)
+        .map((word) => {
+          if (!word) return "";
+          return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        })
+        .filter(Boolean)
+        .join(" ");
+    })
+    .filter(Boolean)
     .join(" - ");
 }
 
 /**
  * Extract the service name from a role
+ * Handles edge cases like malformed roles or missing service names
  * @param role The role name (e.g., "roles/storage.legacyObjectOwner")
  * @returns Service name (e.g., "Storage")
  */
 export function getRoleService(role: string): string {
-  const baseName = role.split("/").pop() || role;
-  const parts = baseName.split(".");
+  if (!role) {
+    return "Other";
+  }
 
-  if (parts.length > 1) {
-    const service = parts[0];
-    return service.charAt(0).toUpperCase() + service.slice(1);
+  // Get the part after the last slash or the whole string
+  const baseName = role.split("/").pop() || role;
+
+  // Split by dot and get the first non-empty part
+  const parts = baseName.split(".").filter(Boolean);
+
+  if (parts.length > 0 && parts[0]) {
+    const service = parts[0].trim();
+    // Handle empty or invalid service names
+    if (!service) {
+      return "Other";
+    }
+    // Properly capitalize service name
+    return service.charAt(0).toUpperCase() + service.slice(1).toLowerCase();
   }
 
   return "Other";

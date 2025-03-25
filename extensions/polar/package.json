@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "polar",
+  "title": "Polar",
+  "description": "Manage all your Polar products, sales & analytics",
+  "icon": "command-icon.png",
+  "author": "emilwidlund",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "orders",
+      "title": "View Recent Orders",
+      "subtitle": "Polar",
+      "description": "View your last incoming orders",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "subscriptions",
+      "title": "View Subscriptions",
+      "subtitle": "Polar",
+      "description": "View your active subscriptions",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "customers",
+      "title": "View Customers",
+      "subtitle": "Polar",
+      "description": "View your customers",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@polar-sh/sdk": "^0.19.2",
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.18.1",
+    "@tanstack/react-query": "^5.62.3",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "eslint-plugin-react": "^7.37.2",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "typescript-eslint": "^8.18.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

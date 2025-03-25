@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "terraform-doc",
+  "title": "Terraform Doc",
+  "description": "Quickly access Terraform resources",
+  "icon": "extension_icon.png",
+  "author": "shopping-jaws",
+  "contributors": [
+    "b-per"
+  ],
+  "categories": [
+    "Web",
+    "Developer Tools",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list_providers",
+      "title": "Terraform Doc",
+      "subtitle": "Terraform",
+      "description": "Easy search terraform resource documentation",
+      "mode": "view"
+    },
+    {
+      "name": "list_history",
+      "title": "Terraform Doc History",
+      "subtitle": "Terraform",
+      "description": "History of accessing terraform resource documentation",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.63.0",
+    "@raycast/utils": "^1.10.1",
+    "node-fetch": "^3.3.2",
+    "vitest": "^1.0.4",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test:watch": "vitest",
+    "test": "vitest run"
+  }
+}

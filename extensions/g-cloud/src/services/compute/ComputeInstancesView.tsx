@@ -432,7 +432,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       <List.EmptyView
         title="No VM instances found"
         description={isLoading ? "Loading instances..." : "No VM instances found in the selected zone"}
-        icon={{ source: "https://cloud.google.com/compute/images/logo_compute_black.svg" }}
+        icon={{ source: Icon.Desktop, tintColor: Color.Blue }}
         actions={
           <ActionPanel>
             <Action title="Create Vm Instance" icon={Icon.Plus} onAction={createVMInstance} />

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "polymarket",
+  "title": "Polymarket",
+  "description": "Search and view top markets on Polymarket",
+  "icon": "polymarket.png",
+  "author": "Osprey",
+  "categories": [
+    "News",
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "top-markets",
+      "title": "Top Markets",
+      "description": "Shows top markets by 24h volume",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.6",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/node-fetch": "^2.6.11",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

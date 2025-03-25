@@ -12,7 +12,7 @@ import {
   confirmAlert,
   Alert,
 } from "@raycast/api";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { IAMService, IAMPrincipal } from "./IAMService";
 import { formatRoleName } from "../../utils/iamRoles";
 import { showFailureToast } from "@raycast/utils";
@@ -42,48 +42,59 @@ export default function IAMMembersByPrincipalView({
   // Create IAM service instance
   const iamService = useMemo(() => new IAMService(gcloudPath, projectId), [gcloudPath, projectId]);
 
+  const fetchIAMPolicy = useCallback(
+    async (shouldShowToast = false) => {
+      setIsLoading(true);
+      setError(null);
+
+      let loadingToast: Toast | undefined;
+      if (shouldShowToast) {
+        loadingToast = await showToast({
+          style: Toast.Style.Animated,
+          title: "Loading IAM policy...",
+          message: resourceName || projectId,
+        });
+      }
+
+      try {
+        // Use the IAM service to get principals
+        const principalsArray = await iamService.getIAMPrincipals(resourceType, resourceName);
+
+        setPrincipals(principalsArray);
+
+        // Generate debug info
+        const debugText = resourceName
+          ? `Fetched IAM policy for ${resourceType}: ${resourceName}\n`
+          : `Fetched project-level IAM policy for: ${projectId}\n`;
+
+        setDebugInfo(debugText + `Found ${principalsArray.length} principals with IAM roles\n`);
+
+        if (loadingToast) {
+          loadingToast.hide();
+          showToast({
+            style: Toast.Style.Success,
+            title: "IAM policy loaded",
+            message: `Found ${principalsArray.length} principals`,
+          });
+        }
+      } catch (error: unknown) {
+        console.error("Error fetching IAM policy:", error);
+        setError(error instanceof Error ? error.message : "An unknown error occurred");
+        if (loadingToast) {
+          loadingToast.hide();
+          showFailureToast(error instanceof Error ? error.message : "Failed to fetch IAM policy");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [iamService, projectId, resourceName, resourceType],
+  );
+
   useEffect(() => {
-    fetchIAMPolicy();
-  }, [projectId, gcloudPath]);
-
-  async function fetchIAMPolicy() {
-    setIsLoading(true);
-    setError(null);
-
-    const loadingToast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Loading IAM policy...",
-      message: resourceName || projectId,
-    });
-
-    try {
-      // Use the IAM service to get principals
-      const principalsArray = await iamService.getIAMPrincipals(resourceType, resourceName);
-
-      setPrincipals(principalsArray);
-
-      // Generate debug info
-      const debugText = resourceName
-        ? `Fetched IAM policy for ${resourceType}: ${resourceName}\n`
-        : `Fetched project-level IAM policy for: ${projectId}\n`;
-
-      setDebugInfo(debugText + `Found ${principalsArray.length} principals with IAM roles\n`);
-
-      loadingToast.hide();
-      showToast({
-        style: Toast.Style.Success,
-        title: "IAM policy loaded",
-        message: `Found ${principalsArray.length} principals`,
-      });
-    } catch (error: unknown) {
-      console.error("Error fetching IAM policy:", error);
-      setError(error instanceof Error ? error.message : "An unknown error occurred");
-      loadingToast.hide();
-      showFailureToast(error instanceof Error ? error.message : "Failed to fetch IAM policy");
-    } finally {
-      setIsLoading(false);
-    }
-  }
+    // Only show toast on first mount
+    fetchIAMPolicy(true);
+  }, [fetchIAMPolicy]);
 
   function getMemberIcon(type: string) {
     switch (type) {

@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wise-accounts",
+  "title": "Wise Accounts",
+  "description": "View Wise Profiles, Balances, and Transactions",
+  "icon": "command-icon.png",
+  "author": "robsel118",
+  "contributors": [
+    "imvasen"
+  ],
+  "categories": [
+    "Productivity",
+    "Finance"
+  ],
+  "preferences": [
+    {
+      "key": "wiseReadApiToken",
+      "name": "wiseReadApiToken",
+      "title": "Wise API Key",
+      "label": "Wise API Key",
+      "description": "Get your API key (READ ONLY ACCESS) from https://wise.com/settings/",
+      "type": "password",
+      "defaultValue": "",
+      "required": false
+    },
+    {
+      "key": "mainProfileId",
+      "name": "mainProfileId",
+      "title": "Main Profile ID",
+      "label": "Main Profile ID",
+      "description": "Define the main profile ID to be used for the balance Menu Bar",
+      "type": "textfield",
+      "defaultValue": "",
+      "required": false
+    },
+    {
+      "key": "displayEmptyBalances",
+      "name": "displayEmptyBalances",
+      "title": "Display Empty Balances",
+      "label": "Display balances with 0 amount",
+      "description": "Display balances with 0 amount",
+      "type": "checkbox",
+      "defaultValue": false,
+      "required": false
+    }
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "get-profiles",
+      "title": "Get Profiles",
+      "subtitle": "Wise",
+      "description": "Get all profiles related to the account",
+      "mode": "view"
+    },
+    {
+      "name": "get-balances",
+      "title": "Get Balances",
+      "description": "Get all balances of a profile",
+      "subtitle": "Wise",
+      "arguments": [
+        {
+          "name": "profileId",
+          "type": "text",
+          "placeholder": "Profile ID",
+          "description": "The profile ID to get the balances from",
+          "required": false
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "get-transactions",
+      "title": "Get Transactions",
+      "description": "Get all transactions of a profile",
+      "subtitle": "Wise",
+      "arguments": [
+        {
+          "name": "profileId",
+          "type": "text",
+          "placeholder": "Profile ID",
+          "description": "The profile ID to get the balances from",
+          "required": false
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "display-balances",
+      "title": "Display Balances and Today's Transactions",
+      "subtitle": "Wise",
+      "description": "Display Balances and Today's Transactions",
+      "keywords": [
+        "wise",
+        "balance",
+        "payments"
+      ],
+      "arguments": [
+        {
+          "name": "profileId",
+          "type": "text",
+          "placeholder": "Profile ID",
+          "description": "The profile ID to get the balances from",
+          "required": false
+        }
+      ],
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.1",
+    "@raycast/utils": "^1.10.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

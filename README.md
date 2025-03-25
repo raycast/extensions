@@ -1,43 +1,3 @@
-<<<<<<< HEAD
-# G-Cloud
-
-A lightweight Raycast extension for managing Google Cloud resources efficiently. Access and control your GCP projects, services, IAM, storage, and more—all without leaving Raycast.
-
-## Features
-
-- **Project Management**: Quick access to all your Google Cloud projects
-- **Project Caching**: Fast switching between frequently used projects
-- **IAM Management**: View and modify permissions for users, groups, and service accounts
-- **Storage Management**: Browse and manage buckets, objects, and lifecycle rules
-- **Service Hub**: Enable, disable, and manage Google Cloud services
-- **Command Caching**: Improved performance through intelligent caching
-- **Compute Engine**: Create and manage virtual machines and persistent disks
-- **Network Services**: Manage VPC networks, subnets, IP addresses, and firewall rules
-
-## Prerequisites
-
-- [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) installed on your machine
-- A Google Cloud account with at least one project
-
-## Installation
-
-1. Open Raycast
-2. Search for "G-Cloud"
-3. Click "Install" to add the extension
-
-## Configuration
-
-You can configure the path to your gcloud CLI and caching options in the extension preferences:
-
-1. Open Raycast and search for "Google Cloud"
-2. Click "Preferences" in the action panel
-3. Set the path to your gcloud CLI (default is "gcloud")
-4. Configure cache settings to your preference
-
-## License
-
-MIT
-=======
 <p align="center">
   <img src="images/store-logo.webp" height="128">
   <h1 align="center">Raycast Extensions</h1>
@@ -69,4 +29,3 @@ Raycast wouldn't be where it is without the feedback from our community, so we w
 ## Community
 
 Join our [Slack community](https://raycast.com/community) to share your extension, debug nasty bugs or simply get to know like-minded folks.
->>>>>>> origin-ext/ext/g-cloud

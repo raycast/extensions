@@ -280,6 +280,7 @@ export class NetworkService {
         mtu,
         projectId: this.projectId,
       });
+      return false;
     }
   }
 
@@ -473,6 +474,7 @@ export class NetworkService {
         options: addressOptions,
         projectId: this.projectId,
       });
+      return false;
     }
   }
 
@@ -635,6 +637,7 @@ export class NetworkService {
         options: ruleOptions,
         projectId: this.projectId,
       });
+      return false;
     }
   }
 
@@ -727,6 +730,7 @@ export class NetworkService {
         },
         projectId: this.projectId,
       });
+      return false;
     }
   }
 

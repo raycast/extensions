@@ -186,7 +186,7 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
       ) : (
         vpcs.map((vpc) => (
           <List.Item
-            key={vpc.id || vpc.name}
+            key={`${vpc.id}-${vpc.name}-${vpc.creationTimestamp}`}
             title={vpc.name}
             subtitle={vpc.description || ""}
             accessories={[

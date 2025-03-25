@@ -15,6 +15,10 @@ interface CommandCacheEntry<T> {
   timestamp: number;
 }
 
+interface TimeoutPromise extends Promise<never> {
+  timeoutId?: NodeJS.Timeout;
+}
+
 // Global cache for command results to reduce API calls
 const commandCache = new Map<string, CommandCacheEntry<unknown>>();
 const COMMAND_CACHE_TTL = 600000; // 10 minutes cache TTL
@@ -86,18 +90,26 @@ export async function executeGcloudCommand(
     }
 
     // Create a promise for this request with timeout
-    const requestPromise = Promise.race([
-      executeCommand(fullCommand, cacheKey, maxRetries),
-      new Promise((_, reject) => {
-        setTimeout(() => reject(new Error(`Command timed out after ${timeout}ms: ${fullCommand}`)), timeout);
-      }),
-    ]);
+    const timeoutPromise = new Promise((_, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error(`Command timed out after ${timeout}ms: ${fullCommand}`));
+      }, timeout);
+      // Store the timeout ID on the promise for cleanup
+      (timeoutPromise as TimeoutPromise).timeoutId = timeoutId;
+    }) as TimeoutPromise;
+
+    const requestPromise = Promise.race([executeCommand(fullCommand, cacheKey, maxRetries), timeoutPromise]);
 
     // Store the promise so parallel calls can use it
     pendingRequests.set(cacheKey, requestPromise);
 
     try {
-      return await requestPromise;
+      const result = await requestPromise;
+      // Clear the timeout if the command completed successfully
+      if (timeoutPromise.timeoutId) {
+        clearTimeout(timeoutPromise.timeoutId);
+      }
+      return result;
     } finally {
       // Clean up the pending request
       pendingRequests.delete(cacheKey);
@@ -171,7 +183,18 @@ async function executeCommand(
 
     try {
       const result = JSON.parse(stdout);
-      const parsedResult = Array.isArray(result) ? result : [result];
+
+      // Determine if we expect an array based on the command
+      const expectsArray =
+        fullCommand.includes("list") || fullCommand.endsWith("--format=json") || Array.isArray(result);
+
+      if (expectsArray && !Array.isArray(result)) {
+        console.error("Expected array result but received:", typeof result);
+        throw new Error("Command returned unexpected format: expected array but got " + typeof result);
+      }
+
+      // Only wrap in array if it's a describe command or similar that returns a single object
+      const parsedResult = expectsArray ? result : [result];
 
       // Store in cache
       commandCache.set(cacheKey, { result: parsedResult, timestamp: Date.now() });

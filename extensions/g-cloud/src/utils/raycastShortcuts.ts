@@ -117,13 +117,13 @@ export const CONTEXTUAL_SHORTCUTS: ContextualShortcuts = {
     CREATE: { modifiers: ["cmd", "shift"], key: "n", description: "Create new bucket" },
     VIEW_OBJECTS: { modifiers: ["cmd", "shift"], key: "o", description: "View objects" },
     VIEW_IAM: { modifiers: ["cmd", "shift"], key: "i", description: "View IAM permissions" },
-    VIEW_LIFECYCLE: { modifiers: ["cmd"], key: "l", description: "View lifecycle rules" },
+    VIEW_LIFECYCLE: { modifiers: ["cmd", "shift"], key: "l", description: "View lifecycle rules" },
   },
 
   // Object view shortcuts
   OBJECT: {
     CREATE: { modifiers: ["cmd", "shift"], key: "n", description: "Create/upload new object" },
-    DOWNLOAD: { modifiers: ["cmd"], key: "d", description: "Download object" },
+    DOWNLOAD: { modifiers: ["cmd", "shift"], key: "d", description: "Download object" },
     VIEW_DETAILS: { modifiers: ["cmd", "shift"], key: "i", description: "View object details" },
     COPY_URL: { modifiers: ["cmd"], key: "u", description: "Copy object URL" },
   },

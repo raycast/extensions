@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vim-bro",
+  "title": "Vim Bro - Search Vim Commands",
+  "description": "Search Vim commands",
+  "icon": "vim.png",
+  "author": "ajaypremshankar",
+  "contributors": [
+    "pernielsentikaer",
+    "talk2dc",
+    "zayadur"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Documentation"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Commands",
+      "subtitle": "Vim",
+      "description": "Search Vim commands",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.30.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

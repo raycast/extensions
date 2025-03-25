@@ -285,6 +285,11 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
   function showCreateBucketForm() {
     const suggestedName = generateUniqueBucketName();
 
+    // Validation function for bucket name
+    const validateBucketName = (value: string) => {
+      return value.length > 0 ? "" : "Bucket name is required";
+    };
+
     push(
       <Form
         navigationTitle="Create Storage Bucket"
@@ -319,8 +324,8 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
           info="Must be globally unique across all of Google Cloud"
           defaultValue={suggestedName}
           autoFocus={true}
-          error={suggestedName ? "" : "Bucket name is required"}
-          onChange={(value) => (value.length > 0 ? null : "Bucket name is required")}
+          error={validateBucketName(suggestedName)}
+          onChange={validateBucketName}
         />
 
         <Form.Dropdown
@@ -380,6 +385,7 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
       isLoading={isLoading}
       searchBarPlaceholder="Search buckets..."
       navigationTitle="Browse Buckets"
+      isShowingDetail
       actions={
         <ActionPanel>
           <Action title="Create Bucket" icon={Icon.Plus} onAction={showCreateBucketForm} />
@@ -408,6 +414,20 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
             subtitle={bucket.location}
             icon={getStorageClassIcon(bucket.storageClass)}
             accessories={[{ text: bucket.storageClass }, { text: formatDate(bucket.created), tooltip: "Created on" }]}
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Bucket Name" text={bucket.name} />
+                    <List.Item.Detail.Metadata.Label title="Location" text={bucket.location} />
+                    <List.Item.Detail.Metadata.Label title="Storage Class" text={bucket.storageClass} />
+                    <List.Item.Detail.Metadata.Label title="Created" text={formatDate(bucket.created)} />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label title="Full Path" text={`gs://${bucket.name}`} />
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Bucket Actions">

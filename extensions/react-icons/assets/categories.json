@@ -1,0 +1,110 @@
+[
+  {
+    "id": "react-icons/ai",
+    "title": "Ant Design Icons"
+  },
+  {
+    "id": "react-icons/bs",
+    "title": "Bootstrap Icons"
+  },
+  {
+    "id": "react-icons/bi",
+    "title": "BoxIcons"
+  },
+  {
+    "id": "react-icons/ci",
+    "title": "Circum Icons"
+  },
+  {
+    "id": "react-icons/di",
+    "title": "Devicons"
+  },
+  {
+    "id": "react-icons/fi",
+    "title": "Feather"
+  },
+  {
+    "id": "react-icons/fc",
+    "title": "Flat Color Icons"
+  },
+  {
+    "id": "react-icons/fa",
+    "title": "Font Awesome"
+  },
+  {
+    "id": "react-icons/gi",
+    "title": "Game Icons"
+  },
+  {
+    "id": "react-icons/go",
+    "title": "Github Octicons Icons"
+  },
+  {
+    "id": "react-icons/gr",
+    "title": "Grommet-Icons"
+  },
+  {
+    "id": "react-icons/hi",
+    "title": "Heroicons"
+  },
+  {
+    "id": "react-icons/hi2",
+    "title": "Heroicons 2"
+  },
+  {
+    "id": "react-icons/im",
+    "title": "IcoMoon Free"
+  },
+  {
+    "id": "react-icons/io",
+    "title": "Ionicons 4"
+  },
+  {
+    "id": "react-icons/io5",
+    "title": "Ionicons 5"
+  },
+  {
+    "id": "react-icons/md",
+    "title": "Material Design Icons"
+  },
+  {
+    "id": "react-icons/rx",
+    "title": "Radix Icons"
+  },
+  {
+    "id": "react-icons/ri",
+    "title": "Remix Icons"
+  },
+  {
+    "id": "react-icons/si",
+    "title": "Simple Icons"
+  },
+  {
+    "id": "react-icons/sl",
+    "title": "Simple Line Icons"
+  },
+  {
+    "id": "react-icons/tb",
+    "title": "Tabler Icons"
+  },
+  {
+    "id": "react-icons/tfi",
+    "title": "Themify Icons"
+  },
+  {
+    "id": "react-icons/ti",
+    "title": "Typicons"
+  },
+  {
+    "id": "react-icons/vsc",
+    "title": "VS Code Icons"
+  },
+  {
+    "id": "react-icons/wi",
+    "title": "Weather Icons"
+  },
+  {
+    "id": "react-icons/cg",
+    "title": "css.gg"
+  }
+]

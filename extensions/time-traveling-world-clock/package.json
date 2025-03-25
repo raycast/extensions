@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "world-clock",
+  "title": "Time-Traveling World Clock",
+  "description": "A world clock that enables you to scrub across time and see the corresponding time across various cities.",
+  "icon": "icon-command.png",
+  "author": "marky",
+  "contributors": [
+    "iwex",
+    "ridemountainpig"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "World Clock",
+      "description": "Display times from around the world.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "city-timezones": "^1.2.2",
+    "country-flag-icons": "^1.5.13"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "showUtc",
+      "description": "Show UTC time in the list",
+      "type": "checkbox",
+      "required": false,
+      "title": "UTC",
+      "label": "Show UTC time in the list"
+    },
+    {
+      "name": "twentyFourFormat",
+      "description": "Show time in 24-hour format",
+      "type": "checkbox",
+      "required": false,
+      "title": "24-hour Format",
+      "label": "Show time in 24-hour format"
+    }
+  ]
+}
