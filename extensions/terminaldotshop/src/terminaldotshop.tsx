@@ -108,22 +108,25 @@ function BrewItem(props: { brew: Brew; first?: boolean }) {
       actions={
         <ActionPanel>
           {isSubscription && !isSubscribed ? (
-            <Action title="Subscribe" onAction={startSub} />
+            <Action title="Subscribe" icon={Icon.CheckRosette} onAction={startSub} />
           ) : (
             <>
               <Action
                 title="Add to Cart"
+                icon={Icon.Plus}
                 shortcut={{ key: "arrowRight", modifiers: [] }}
                 onAction={() => setItem.mutateAsync({ id: props.brew.id, operation: "add" })}
               />
               <Action
                 title="Remove from Cart"
+                icon={Icon.Minus}
                 onAction={() => setItem.mutateAsync({ id: props.brew.id, operation: "remove" })}
                 shortcut={{ key: "arrowLeft", modifiers: [] }}
               />
               {cart.data.items.length > 0 ? (
                 <Action
                   title="Checkout"
+                  icon={Icon.Cart}
                   onAction={() => startCheckout()}
                   shortcut={{ key: "return", modifiers: ["cmd"] }}
                 />
