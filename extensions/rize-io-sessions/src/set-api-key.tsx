@@ -35,7 +35,7 @@ export default function SetApiKeyCommand() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save Api Key" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save API Key" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
