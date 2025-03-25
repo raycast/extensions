@@ -47,7 +47,6 @@ export default function TasksList({ evernoteDB }: TasksListProps) {
     return permissionView;
   }
 
-  console.log(data);
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search tasks...">
       {(data || []).map((item) => (
