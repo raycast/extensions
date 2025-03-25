@@ -43,7 +43,12 @@ export const checkApi = async () => {
     .get();
 };
 
-export const getCourses = async (json: any, config?: any): Promise<course[]> => {
+interface getCoursesConfig {
+  noAssignments?: boolean;
+  noAnnouncements?: boolean;
+}
+
+export const getCourses = async (json: any, config?: getCoursesConfig): Promise<course[]> => {
   const favorites = await api.users.self.favorites.courses
     .searchParams({
       state: "available",
