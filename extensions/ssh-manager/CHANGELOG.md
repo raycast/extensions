@@ -1,6 +1,6 @@
 # ssh-manager Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-03-25
 
 - ⚠️ Add Confirmation Dialog to Delete Connectionssd
 - 📦 Bump all dependencies to the latest
