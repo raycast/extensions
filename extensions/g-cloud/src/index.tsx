@@ -7,6 +7,7 @@ import { StorageBucketView, StorageStatsView } from "./services/storage";
 import { ComputeInstancesView, ComputeDisksView } from "./services/compute";
 import { CacheManager, Project } from "./utils/CacheManager";
 import CachedProjectView from "./views/CachedProjectView";
+import { authenticateWithBrowser } from "./gcloud";
 
 const execPromise = promisify(exec);
 const GCLOUD_PATH = "/usr/local/bin/gcloud";
@@ -26,7 +27,7 @@ export default function Command() {
   const [preferences, setPreferences] = useState<Preferences>({});
   const [showCachedProjectView, setShowCachedProjectView] = useState(false);
   const [shouldNavigateToProject, setShouldNavigateToProject] = useState<string | null>(null);
-  const { push } = useNavigation();
+  const { push, pop } = useNavigation();
 
   // Handle navigation to project with useEffect
   useEffect(() => {
@@ -274,15 +275,16 @@ export default function Command() {
 
   async function authenticate() {
     try {
-      // console.log("Starting Google Cloud authentication process");
-
       // Show a dedicated authentication view that will handle the process
       push(
         <AuthenticationView
           gcloudPath={GCLOUD_PATH}
           onAuthenticated={() => {
             setIsAuthenticated(true);
-            fetchProjects();
+            // Fetch projects with silent=false to show loading indicators
+            fetchProjects(false);
+            // Cache auth status immediately - use an empty string as account until we get the real one
+            CacheManager.saveAuthStatus(true, "");
           }}
         />,
       );
@@ -387,49 +389,52 @@ export default function Command() {
   }
 
   function AuthenticationView({ gcloudPath, onAuthenticated }: AuthenticationViewProps) {
-    const [verificationCode, setVerificationCode] = useState("");
     const [error, setError] = useState<string | null>(null);
+    const [isAuthenticating, setIsAuthenticating] = useState(false);
 
-    async function submitVerificationCode() {
-      if (!verificationCode.trim()) {
-        setError("Please enter the verification code");
-        return;
-      }
-
+    async function startAuthentication() {
+      setIsAuthenticating(true);
+      setError(null);
       try {
-        await execPromise(`printf "${verificationCode}" | ${gcloudPath} auth login --no-launch-browser`);
+        await authenticateWithBrowser(gcloudPath);
+        // Call onAuthenticated and then pop the authentication view to return to projects
         onAuthenticated();
+        // Use setTimeout to ensure the onAuthenticated effects have been applied
+        setTimeout(() => pop(), 500);
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        setError(`Failed to verify code: ${errorMessage}`);
+        setError(`Failed to authenticate: ${errorMessage}`);
+      } finally {
+        setIsAuthenticating(false);
       }
     }
 
+    // Start authentication automatically when the component mounts
+    useEffect(() => {
+      startAuthentication();
+    }, []);
+
     return (
       <Form
+        isLoading={isAuthenticating}
         actions={
           <ActionPanel>
             <Action
-              title="Submit Code"
-              icon={Icon.CheckCircle}
+              title="Authenticate with Browser"
+              icon={Icon.Globe}
               shortcut={{ modifiers: ["cmd"], key: "return" }}
-              onAction={submitVerificationCode}
+              onAction={startAuthentication}
             />
           </ActionPanel>
         }
       >
         <Form.Description
           title="Google Cloud Authentication"
-          text={error || "Enter the verification code from Google"}
-        />
-        <Form.TextField
-          id="verificationCode"
-          title="Verification Code"
-          placeholder="Enter code from Google"
-          value={verificationCode}
-          onChange={setVerificationCode}
-          error={error || undefined}
-          autoFocus
+          text={
+            isAuthenticating
+              ? "Authentication in progress..."
+              : error || "Click the button below to authenticate with your Google account in the browser"
+          }
         />
       </Form>
     );
@@ -448,7 +453,6 @@ export default function Command() {
     });
 
     try {
-      // console.log("Revoking all existing credentials");
       // Force new authentication - first revoke all existing credentials
       await execPromise(`${GCLOUD_PATH} auth revoke --all --quiet`);
       revokingToast.hide();
@@ -463,7 +467,10 @@ export default function Command() {
             CacheManager.clearProjectCache();
             // Reset state and navigation
             setShowCachedProjectView(false);
-            fetchProjects();
+            // Fetch projects with silent=false to show loading indicators
+            fetchProjects(false);
+            // Cache auth status immediately with empty account
+            CacheManager.saveAuthStatus(true, "");
           }}
         />,
       );
