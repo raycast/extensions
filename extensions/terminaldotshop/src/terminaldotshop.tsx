@@ -92,6 +92,11 @@ function BrewItem(props: { brew: Brew; first?: boolean }) {
     nav.push(withQc(<Address />));
   };
 
+  const startCheckout = () => {
+    subItem.setSubItem(null);
+    nav.push(withQc(<Address />));
+  };
+
   return (
     <List.Item
       id={props.brew.id}
@@ -116,6 +121,7 @@ function BrewItem(props: { brew: Brew; first?: boolean }) {
                 onAction={() => setItem.mutateAsync({ id: props.brew.id, operation: "remove" })}
                 shortcut={{ key: "arrowLeft", modifiers: [] }}
               />
+              {cart.data.items.length > 0 ? <Action title="Checkout" onAction={() => startCheckout()} shortcut={{ key: "return", modifiers: ["cmd"] }} /> : <></>}
             </>
           )}
         </ActionPanel>
