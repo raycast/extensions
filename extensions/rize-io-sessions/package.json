@@ -3,7 +3,6 @@
   "name": "rize-io-sessions",
   "title": "Rize.io Sessions",
   "description": "Raycast extension for managing Rize.io sessions (start, stop, extend).",
-  "main": "index.js",
   "icon": "black-orb.png",
   "author": "sdquinn",
   "categories": [
