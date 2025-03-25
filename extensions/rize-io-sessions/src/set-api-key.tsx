@@ -49,6 +49,7 @@ export default function SetApiKeyCommand() {
         title="API Key"
         placeholder="Paste your Rize.io API key here"
         info="You can find your API key in your Rize.io account settings"
+        password
       />
     </Form>
   );
