@@ -50,15 +50,20 @@ export const ModuleItem = (props: {
             <Action
               title="Download File"
               onAction={() => {
-                open(`https://${preferences.domain}/courses/${props.id}/files/${props.item.content_id}/download?download_frd=1`, { background: true }).then(() => {
-                  showToast(Toast.Style.Success, "Download Started");
-                }).catch((error) => {
-                  showToast({
-                    title: "Download Failed",
-                    message: error.message,
-                    style: Toast.Style.Failure,
+                open(
+                  `https://${preferences.domain}/courses/${props.id}/files/${props.item.content_id}/download?download_frd=1`,
+                  { background: true },
+                )
+                  .then(() => {
+                    showToast(Toast.Style.Success, "Download Started");
+                  })
+                  .catch((error) => {
+                    showToast({
+                      title: "Download Failed",
+                      message: error.message,
+                      style: Toast.Style.Failure,
+                    });
                   });
-                });
                 addToRecent(props.id, props.item);
               }}
               icon={{ source: Icon.Download }}

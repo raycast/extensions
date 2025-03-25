@@ -220,7 +220,7 @@ export const getDatedFeed = async (courses: course[]): Promise<datefeed[]> => {
       items: dates[date].items.sort(
         (a, b) =>
           a?.custom_object?.course?.localeCompare(b?.custom_object?.course) ||
-          a?.custom_object?.date - b?.custom_object?.date
+          a?.custom_object?.date - b?.custom_object?.date,
       ),
       pretty_date: getFormattedFriendlyDate(dates[date].date),
     });

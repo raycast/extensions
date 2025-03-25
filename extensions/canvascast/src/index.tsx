@@ -45,7 +45,7 @@ export default function main() {
           <List.Section title="Assignments">
             {!isLoading &&
               courses.map((course: course) =>
-                course.assignments?.map((assignment: assignment) => <Assignment key={assignment.id} {...assignment} />)
+                course.assignments?.map((assignment: assignment) => <Assignment key={assignment.id} {...assignment} />),
               )}
           </List.Section>
           <List.Section title="Announcements">
@@ -53,7 +53,7 @@ export default function main() {
               courses.map((course: course) =>
                 course.announcements?.map((announcement: announcement) => (
                   <Announcement key={announcement.id} {...announcement} />
-                ))
+                )),
               )}
           </List.Section>
         </React.Fragment>
