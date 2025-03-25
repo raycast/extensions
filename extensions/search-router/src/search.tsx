@@ -6,7 +6,7 @@ import { getDefaultSearchEngine } from "./data/cache";
 
 export default async function search(props: LaunchProps<{ arguments: { query: string }; fallbackText?: string }>) {
   try {
-    const query = (props.arguments.query ?? props.fallbackText) as string;
+    let query = (props.arguments.query ?? props.fallbackText) as string;
     const match = query.trim().match(/!(\S+)/i);
     const searchEngineKey = match?.[1]?.toLowerCase();
 
@@ -19,6 +19,18 @@ export default async function search(props: LaunchProps<{ arguments: { query: st
         title: `Search engine not found: ${searchEngineKey}`,
       });
       return;
+    }
+
+    snap: if (query.includes("@")) {
+      const match = query.match(/@(\S+)/i);
+      const snapCandidate = match?.[1]?.toLowerCase();
+      if (!snapCandidate) break snap;
+
+      const searchEngine = searchEngines.find((engine) => engine.t === snapCandidate);
+      if (!searchEngine) break snap;
+
+      query = query.replace(/@\S+\s*/i, "").trim();
+      query += ` site:${searchEngine.ad || searchEngine.d}`;
     }
 
     const cleanQuery = query.replace(/!\S+\s*/i, "").trim();

@@ -9,6 +9,7 @@ Search Router lets you search specific websites from Raycast using shortcuts by 
 - `!g cats` searches Google for "cats"
 - `!w cats` searches Wikipedia for "cats"
 - `Help me fix my code !t3` uses t3.chat to ask AI to fix your code
+- `markdown parser @gh` searches for "markdown parser" specifically within Github's domain (site:github.com)
 - And many more! See all available bangs in [Kagi Bang Explorer](https://kbe.smaertness.net)
 
 > **Pro Tip:** ✨ For the best experience, set up Search Router as a [Fallback Command](https://manual.raycast.com/fallback-commands) in Raycast. This allows you to use bangs directly from the main Raycast search without having to first open the extension!
@@ -21,6 +22,7 @@ Type your query with an optional bang prefix/suffix:
 
 - With search engine: `!yt funny videos` searches YouTube
 - Without search engine: `funny videos` uses your default search engine
+- Site-specific search: `funny videos @yt` searches for "funny videos" only within YouTube's domain
 
 ### Browse Search Engines 🧭
 
@@ -43,6 +45,7 @@ Contributions welcome! Submit a pull request to add more search engines or impro
 This extension uses search engine definitions from [Kagi's bangs repository](https://github.com/kagisearch/bangs). Here's how to add or update search engines:
 
 1. To add a new search engine:
+
    - Fork [Kagi's bangs repository](https://github.com/kagisearch/bangs)
    - Add your search engine definition following their schema
    - Submit a PR to Kagi's repository
