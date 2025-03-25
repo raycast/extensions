@@ -1,0 +1,29 @@
+import { showFailureToast } from "@raycast/utils";
+import { Alert } from "../types/alert";
+import apiClient from "../utils/constants";
+
+export class AlertsService {
+  public static async fetchAlerts(): Promise<Alert[]> {
+    try {
+      console.log("Fetching alerts at", new Date().toISOString());
+      const response = await apiClient.get("/alerts");
+      console.log(response.data);
+      return response.data?.data;
+    } catch (error) {
+      console.error("Error fetching alerts:", error);
+      await showFailureToast(error, { title: "Error fetching alerts." });
+      throw error;
+    }
+  }
+
+  public static async markAllAsRead(): Promise<boolean> {
+    try {
+      const response = await apiClient.patch("/alerts", { read: true });
+      return response.status >= 200 && response.status < 300;
+    } catch (error) {
+      console.error("Error marking alerts as read:", error);
+      await showFailureToast(error, { title: "Error marking alerts as read." });
+      throw error;
+    }
+  }
+}
