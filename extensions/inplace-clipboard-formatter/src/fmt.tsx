@@ -6,7 +6,7 @@ export default function Command() {
   return (
     <List>
       <List.Item
-        title="Format Json"
+        title="Format JSON"
         icon="📄"
         actions={
           <ActionPanel>
