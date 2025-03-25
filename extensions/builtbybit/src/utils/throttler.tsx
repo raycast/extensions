@@ -7,7 +7,6 @@ class Throttler {
 
   private writeLastRetry: number;
   private writeLastRequest: number;
-  private rateLimitResetTime: number;
 
   /**
    * Initializes a new instance of the Throttler class.
@@ -18,7 +17,6 @@ class Throttler {
 
     this.writeLastRetry = 0;
     this.writeLastRequest = Date.now();
-    this.rateLimitResetTime = 0;
   }
 
   /**
@@ -74,11 +72,11 @@ class Throttler {
    * @param retryAfter - Retry-After header value in seconds
    */
   handleRateLimitResponse(retryAfter?: number): void {
-    const resetTime = retryAfter ? Date.now() + retryAfter * 1000 : Date.now() + 5 * 60 * 1000; // Default to 5 minutes if no header
+    const now = Date.now();
+    const resetTime = retryAfter ? now + retryAfter * 1000 : now + 5 * 60 * 1000; // Default to 5 minutes if no header
 
-    this.rateLimitResetTime = resetTime;
-    this.readLastRetry = resetTime - Date.now();
-    this.writeLastRetry = resetTime - Date.now();
+    this.readLastRetry = resetTime - now;
+    this.writeLastRetry = resetTime - now;
   }
 
   /**
@@ -96,7 +94,6 @@ class Throttler {
         continue;
       } else if (write) {
         stall = false;
-        continue;
       }
 
       if (await this.stallForHelper(this.readLastRetry, this.readLastRequest, time)) {

@@ -1,8 +1,8 @@
 export interface Alert {
   caused_member_id: number;
   content_type: string;
-  content_id: number;
-  alert_type: string;
+  content_id: ContentType | string;
+  alert_type: AlertType | string;
   alert_date: number;
   username?: string;
   read?: boolean;

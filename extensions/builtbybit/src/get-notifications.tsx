@@ -119,13 +119,16 @@ export default function Command() {
       isLoading={isLoading}
     >
       <MenuBarExtra.Section title={unreadCount > 0 ? "Notifications" : "No Unread Notifications"}>
-        {enrichedAlerts.map((alert, index) => (
+        {enrichedAlerts.map((alert) => (
           <MenuBarExtra.Item
-            key={index}
+            key={alert.content_id}
             title={getAlertMessage(alert)}
             onAction={() => {
               open(getContentUrl(alert));
-              alert.read = true;
+              const updatedAlerts = enrichedAlerts.map((a) =>
+                a.content_id === alert.content_id ? { ...a, read: true } : a,
+              );
+              setEnrichedAlerts(updatedAlerts);
               revalidate();
             }}
             subtitle={formatRelativeDate(alert.alert_date)}

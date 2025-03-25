@@ -9,7 +9,8 @@ import {
   ActionPanel,
   Action,
 } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { showFailureToast, useFetch } from "@raycast/utils";
+import { API_BASE_URL } from "./utils/constants";
 
 const preferences = getPreferenceValues<PreferenceValues>();
 
@@ -17,18 +18,16 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.GetRes
   const apiKey = preferences.apiKey;
   const userId = props.arguments.authorId;
 
-  const { data, isLoading, error } = useFetch<ResourceSearchResult[]>(
-    `https://api.builtbybit.com/v1/resources/authors/${userId}`,
-    {
-      headers: { Authorization: `Private ${apiKey}`, "Content-Type": "application/json" },
-      parseResponse: parseFetchResponse,
-    },
-  );
+  const { data, isLoading, error } = useFetch<ResourceSearchResult[]>(`${API_BASE_URL}/resources/authors/${userId}`, {
+    headers: { Authorization: `Private ${apiKey}`, "Content-Type": "application/json" },
+    parseResponse: parseFetchResponse,
+  });
 
   // Error handling
   if (error) {
     const errorMessage = error instanceof Error ? error!.message : "An unknown error occurred";
-    return <Detail markdown={`# Error\n${errorMessage}`} />;
+    console.error(errorMessage);
+    return showFailureToast(error, { title: "Failed to fetch resources", message: errorMessage });
   }
 
   // Loading state
@@ -43,7 +42,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.GetRes
 
   // Render resources
   return (
-    <List isLoading={isLoading}>
+    <List>
       {data.map((resource) => (
         <List.Item
           key={resource.resource_id}
@@ -65,15 +64,15 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.GetRes
             <ActionPanel>
               <Action.OpenInBrowser
                 title="View Resource"
-                url={`https://www.builtbybit.org/resources/${resource.resource_id}/`}
+                url={`https://www.builtbybit.com/resources/${resource.resource_id}/`}
               />
               <Action.CopyToClipboard
                 title="Copy Link"
-                content={`https://www.builtbybit.org/resources/${resource.resource_id}/`}
+                content={`https://www.builtbybit.com/resources/${resource.resource_id}/`}
               />
               <Action.OpenInBrowser
                 title="Edit"
-                url={`https://www.builtbybit.org/resources/${resource.resource_id}/edit`}
+                url={`https://www.builtbybit.com/resources/${resource.resource_id}/edit`}
                 icon={Icon.Pencil}
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
               />
@@ -106,8 +105,8 @@ async function parseFetchResponse(response: Response) {
         }
       | { error: { code: string; message: string } };
 
-    if (!response.ok || "error" in json) {
-      throw new Error("error" in json ? json.error.message : response.statusText);
+    if ("error" in json) {
+      throw new Error(json.error.message);
     }
 
     // Ensure we're handling an array of resources

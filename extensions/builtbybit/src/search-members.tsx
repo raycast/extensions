@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  getPreferenceValues,
-  Icon,
-  launchCommand,
-  LaunchProps,
-  LaunchType,
-  PreferenceValues,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon, LaunchProps, PreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { API_BASE_URL } from "./utils/constants";
 
@@ -93,19 +83,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
         actions={
           <ActionPanel title="BuiltByBit">
             <Action.OpenInBrowser url={`https://www.builtbybit.com/members/${member.member_id}`} />
-            {member.resource_count > 0 ? (
-              <Action
-                title="View Resources"
-                // FIX ME
-                onAction={() =>
-                  launchCommand({
-                    name: "get-resources",
-                    type: LaunchType.UserInitiated,
-                    context: { authorId: member.member_id },
-                  })
-                }
-              />
-            ) : null}
             <Action.CopyToClipboard
               title="Copy Profile Link"
               content={`https://www.builtbybit.com/members/${member.username}.${member.member_id}`}
@@ -128,7 +105,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
               />
               <Action.OpenInBrowser
                 icon={Icon.Ticket}
-                url={`https://www.builtbybit.com/tickets/queue?$creator_id=${member.member_id}`}
+                url={`https://www.builtbybit.com/tickets/queue?creator_id=${member.member_id}`}
                 title="View Tickets"
                 shortcut={{ modifiers: ["cmd"], key: "t" }}
               />

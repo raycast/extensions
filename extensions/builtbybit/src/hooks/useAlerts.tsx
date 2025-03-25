@@ -3,7 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import { getPreferenceValues, Cache } from "@raycast/api";
 import axios from "axios";
 import { Alert } from "../types/alert";
-import { CACHE_NAMESPACE } from "../utils/constants";
+import { API_BASE_URL, CACHE_NAMESPACE } from "../utils/constants";
 import Throttler from "../utils/throttler";
 import { UserUtils } from "../utils/userUtils";
 
@@ -45,7 +45,7 @@ export function useAlerts(refreshKey: number) {
     try {
       await throttler.stallIfRequired(false);
 
-      const response = await axios.get("https://api.builtbybit.com/v1/alerts", {
+      const response = await axios.get(API_BASE_URL, {
         headers: { Authorization: `Private ${apiKey}` },
       });
 

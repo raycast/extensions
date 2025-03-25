@@ -33,7 +33,7 @@ export class CacheWithTTL {
     });
   }
 
-  async set<T>(key: string, data: T): Promise<void> {
+  set<T>(key: string, data: T): void {
     const item: CachedItem<T> = {
       data,
       timestamp: Date.now(),

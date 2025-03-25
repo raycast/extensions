@@ -70,6 +70,12 @@ export class UserUtils {
         throw new Error("No user found");
       }
 
+      if (!memberData.data || !memberData.data.username) {
+        console.error("Invalid member data:", memberData);
+        await showFailureToast("User not found", { title: "User not found" });
+        throw new Error("No user found");
+      }
+
       await userCache.set(cacheKey, memberData);
       return memberData;
     } catch (error: unknown) {
@@ -84,7 +90,7 @@ export class UserUtils {
         error.response.status === 429
       ) {
         const retryAfter = (error.response as { headers?: { "retry-after"?: string } }).headers?.["retry-after"];
-        throttler.handleRateLimitResponse(retryAfter ? parseInt(retryAfter) : undefined);
+        throttler.handleRateLimitResponse(retryAfter ? parseInt(retryAfter) : 300000); // 5 minutes
       }
       throw error;
     }
@@ -116,13 +122,23 @@ export class UserUtils {
   }
 
   public static async usernameToId(username: string): Promise<string> {
-    const memberData = await this.fetchUserData(username, "username");
-    return memberData.data.member_id.toString();
+    try {
+      const memberData = await this.fetchUserData(username, "username");
+      return memberData.data.member_id.toString();
+    } catch (error) {
+      console.error("Error in usernameToId:", error);
+      return "Unknown User";
+    }
   }
 
   public static async getMemberById(userId: number | string): Promise<Member> {
-    const memberData = await this.fetchUserData(userId.toString(), "userID");
-    return memberData.data;
+    try {
+      const memberData = await this.fetchUserData(userId.toString(), "userID");
+      return memberData.data;
+    } catch (error) {
+      console.error("Error in getMemberById:", error);
+      throw error;
+    }
   }
 
   public static async getMemberByDiscordId(discordId: number | string): Promise<Member> {

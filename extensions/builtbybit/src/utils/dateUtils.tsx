@@ -10,6 +10,7 @@ export function formatRelativeDate(timestamp: number): string {
   if (differenceInMinutes < 1440) return `${Math.floor(differenceInMinutes / 60)} hours ago`;
 
   if (differenceInMinutes <= 8640) {
+    // 6 days in minutes
     return new Intl.DateTimeFormat("en-US", {
       weekday: "long",
       hour: "numeric",

@@ -51,6 +51,7 @@
     {
       "name": "get-resources",
       "title": "Fetch Resources by Author",
+      "subtitle": "BuiltByBit",
       "description": "Fetch all authored resources by a specific user",
       "mode": "view",
       "arguments": [
@@ -66,6 +67,7 @@
     {
       "name": "generic-search",
       "title": "Search BuiltByBit",
+      "subtitle": "BuiltByBit",
       "description": "Search BuiltByBit",
       "mode": "no-view",
       "arguments": [

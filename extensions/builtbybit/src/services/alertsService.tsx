@@ -19,7 +19,7 @@ export class AlertsService {
   public static async markAllAsRead(): Promise<boolean> {
     try {
       const response = await apiClient.patch("/alerts", { read: true });
-      return response.status >= 200 && response.status < 300;
+      return response.status == 200;
     } catch (error) {
       console.error("Error marking alerts as read:", error);
       await showFailureToast(error, { title: "Error marking alerts as read." });
