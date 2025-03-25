@@ -1,56 +1,97 @@
-# Rize Sessions Raycast Extension
+# Rize.io Raycast Extension
 
-## 📌 Overview
+## Overview
 
-This Raycast extension allows you to easily manage your Rize sessions directly from Raycast. You can:
+Rize.io Raycast Extension is a powerful productivity tool that allows you to manage your Rize.io sessions directly from Raycast. Track your focus time, meetings, and breaks with ease and precision.
 
-- **Start a new session**
-- **Stop an existing session**
-- **Extend the current session**
+## Features
 
-## 🔧 Installation
+### Session Management
+- Start sessions with customizable duration
+- Choose between Focus, Meeting, and Break session types
+- Set optional session descriptions
 
-### Command Line
+### Key Capabilities
+- Quick session tracking
+- Flexible duration selection
+- Seamless integration with Rize.io
 
-1. Clone the repository:
+## Prerequisites
 
-```
-git clone <your-repo-url>
-```
+- [Raycast](https://www.raycast.com/) installed
+- An active [Rize.io](https://rize.io) account
+- Rize.io API key
 
-2. Install dependencies:
+## Installation
 
-```
-npm install
-```
+1. Open Raycast
+2. Navigate to Extensions
+3. Search for "Rize.io Sessions"
+4. Click "Install"
 
-3. Link the extension to Raycast:
+## Configuration
 
-```
-raycast link
-```
+### API Key Setup
+1. Open the extension
+2. Select "Set Rize.io API Key" command
+3. Enter your Rize.io API key
 
-## 🚀 Usage
+## Commands
 
-### Commands
+### Start Session
+- Quickly start a new session
+- Select session type (Focus, Meeting, Break)
+- Choose custom duration
+- Add optional description
 
-- `Start Session`: Start a new session.
-- `Stop Session`: Stop the current session.
-- `Extend Session`: Extend the current session by a specified amount of time.
+### Stop Session
+- Immediately end the current session
 
-### Authentication
+### Extend Session
+- Extend your current session
+- Select from predefined duration options
 
-The first time you use the extension, you will be prompted to enter your Rize authentication token. This token will be stored for future use, so you only have to enter it once.
+## Session Types
 
-#### Obtaining Your Rize Access Token
+### Focus Session
+- Ideal for deep work and concentration
+- Default duration: 30 minutes
+- Customizable length
 
-To obtain your Rize Access Token, log into your Rize account and navigate to the **API** section under **Settings**. Follow the instructions provided there to generate your custom API token. For more information, refer to the [Rize Changelog](https://rize.canny.io/changelog/release-152-new-feature-custom-api).
+### Meeting Session
+- Track time spent in meetings
+- Default duration: 1 hour
+- Customizable length
 
-## 📄 License
+### Break Session
+- Monitor and manage break times
+- Default duration: 15 minutes
+- Customizable length
 
-This extension is licensed under the MIT License.
+## Troubleshooting
 
-## 💡 Credits
+- Ensure your API key is correctly entered
+- Check your internet connection
+- Verify Rize.io account status
 
-Created by a Rize user. **This is not an official Rize extension.**
+## Privacy & Security
 
+- API key is securely stored using Raycast's local storage
+- No additional data is collected or stored
+
+## Support
+
+- [GitHub Issues](https://github.com/sdquinn/rize-io-for-raycast/issues)
+- [Rize.io Support](https://rize.io/support)
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+MIT License
+
+## Disclaimer
+
+This extension is not officially affiliated with Rize.io and is a community-developed tool.
