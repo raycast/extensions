@@ -1,5 +1,9 @@
 #  Zed Recent Projects Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fix remove recent remote projects
+
 ## [Enhancements] - 2025-03-24
 
 - Added remove actions for single and all recent projects
