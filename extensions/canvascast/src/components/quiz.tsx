@@ -92,8 +92,8 @@ export const Quiz = (props: quiz) => {
                 ...(apiAssignment?.submission?.submitted_at
                   ? { icon: Icons.Completed, tooltip: "Submitted" }
                   : props.special_missing
-                  ? { icon: Icons.Missing, tooltip: "Missing" }
-                  : {}),
+                    ? { icon: Icons.Missing, tooltip: "Missing" }
+                    : {}),
               },
             ]
           : [{ text: props.pretty_date, icon: Icon.Calendar }]

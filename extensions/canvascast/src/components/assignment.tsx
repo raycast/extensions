@@ -1,9 +1,8 @@
-import { List, Detail, Action, ActionPanel, Icon, Color, getPreferenceValues, Clipboard } from "@raycast/api";
+import { List, Detail, Action, ActionPanel, Icon, Color, getPreferenceValues } from "@raycast/api";
 import { assignment, Preferences } from "../utils/types";
 import { Icons, convertHTMLToMD } from "../utils/utils";
 import { useEffect, useState } from "react";
 import { api } from "../utils/api";
-import fetch from "node-fetch";
 
 export const Assignment = (props: assignment) => {
   const preferences: Preferences = getPreferenceValues();
@@ -33,7 +32,7 @@ export const Assignment = (props: assignment) => {
             target={
               <Detail
                 markdown={`# ${apiAssignment.name}\n\n${convertHTMLToMD(
-                  apiAssignment.description ?? "No additional details were added for this assignment."
+                  apiAssignment.description ?? "No additional details were added for this assignment.",
                 )}`}
                 actions={
                   <ActionPanel>
@@ -121,8 +120,8 @@ export const Assignment = (props: assignment) => {
                 ...(apiAssignment?.submission?.submitted_at
                   ? { icon: Icons.Completed, tooltip: "Submitted" }
                   : props.special_missing
-                  ? { icon: Icons.Missing, tooltip: "Missing" }
-                  : {}),
+                    ? { icon: Icons.Missing, tooltip: "Missing" }
+                    : {}),
               },
             ]
           : [{ text: props.pretty_date, icon: Icon.Calendar }]

@@ -6,6 +6,7 @@ export interface course {
   id: number;
   color: Color;
   assignments: assignment[];
+  announcements: announcement[];
 }
 
 export interface assignment {
@@ -63,10 +64,9 @@ export interface moduleitem {
   id: string;
   name: string;
   type: string;
-  url: string;
+  url?: string;
   passcode?: string;
   content_id?: string;
-  download?: string;
 }
 
 export interface Preferences {
