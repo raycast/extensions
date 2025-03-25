@@ -95,7 +95,7 @@ export const renderOrder = (props: {
   if (!items || !address || !brews) return "*There was an error loading up your order :(*";
 
   return `
-# Order #${indexId} *(zero indexed btw)*
+# Order Placed
 
 ---
 
