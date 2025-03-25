@@ -15,10 +15,15 @@ export const Modules = (props: { id: number; url: string }) => {
   const { refreshModuleItems, recentItems, pinnedItems } = useModuleStore();
 
   useEffect(() => {
-    getModules(props.id).then((modules) => {
-      setModules(modules);
-      setIsLoading(false);
-    });
+    getModules(props.id)
+      .then((modules) => {
+        setModules(modules);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setModules(undefined);
+        setIsLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -46,8 +51,8 @@ export const Modules = (props: { id: number; url: string }) => {
       )}
       {modules !== undefined ? (
         modules.map((module: modulesection, index: number) => (
-          <List.Section title={module.name} key={index}>
-            {module.items?.map((item: moduleitem, index: number) => <ModuleItem key={index} {...props} item={item} />)}
+          <List.Section key={index} title={module.name}>
+            {module.items?.map((item: moduleitem) => <ModuleItem key={item.id} {...props} item={item} />)}
           </List.Section>
         ))
       ) : (

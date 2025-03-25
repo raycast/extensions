@@ -84,15 +84,19 @@ export const checkIsBottomPinned = (key: number, id: string): boolean => {
 export const moveUpPinnedItem = (key: number, id: string | undefined) => {
   const pinned = getPinneds(key);
   const index = pinned.findIndex((i) => i.id === id);
-  pinned.splice(index - 1, 2, pinned[index], pinned[index - 1]);
-  cache.set(`${key}-pinned-moduleitems`, JSON.stringify(pinned));
+  if (index > 0) {
+    pinned.splice(index - 1, 2, pinned[index], pinned[index - 1]);
+    cache.set(`${key}-pinned-moduleitems`, JSON.stringify(pinned));
+  }
 };
 
 export const moveDownPinnedItem = (key: number, id: string | undefined) => {
   const pinned = getPinneds(key);
   const index = pinned.findIndex((i) => i.id === id);
-  pinned.splice(index, 2, pinned[index + 1], pinned[index]);
-  cache.set(`${key}-pinned-moduleitems`, JSON.stringify(pinned));
+  if (index < pinned.length - 1) {
+    pinned.splice(index, 2, pinned[index + 1], pinned[index]);
+    cache.set(`${key}-pinned-moduleitems`, JSON.stringify(pinned));
+  }
 };
 
 interface ModuleStore {
