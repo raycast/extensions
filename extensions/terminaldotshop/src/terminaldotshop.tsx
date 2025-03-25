@@ -91,12 +91,6 @@ function BrewItem(props: { brew: Brew; first?: boolean }) {
     if (props.brew.subscription) return "Membership";
   }, [props.brew.subTitle, props.brew.subscription]);
 
-  const isSubscribed = useMemo(() => {
-    if (!subscriptions.data || !subscriptions.data.length) return false;
-
-    return !!subscriptions.data.find((i) => i.productVariantID === props.brew.varId);
-  }, [subscriptions.data, props.brew.varId]);
-
   const quantity = useMemo(() => {
     if (!cart.data?.items?.length) return 0;
     const item = cart.data.items.find((i) => i.productVariantID === props.brew.varId);
