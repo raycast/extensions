@@ -63,9 +63,8 @@ function SendMessage({ recipient }: SendMessageProps) {
         values.scheduledTime > now
           ? `Message scheduled to ${recipientTitle} for ${values.scheduledTime.toLocaleString()}`
           : `Message to ${recipientTitle} sent successfully`,
-          {popToRootType: PopToRootType.Immediate}
+        { popToRootType: PopToRootType.Immediate },
       );
-
     } catch (error) {
       handleError(error);
     }
