@@ -81,7 +81,7 @@ Rize.io Raycast Extension is a powerful productivity tool that allows you to man
 
 ## Support
 
-- [GitHub Issues](https://github.com/sdquinn/rize-io-for-raycast/issues)
+- [GitHub Issues](https://github.com/raycast/extensions/issues)
 - [Rize.io Support](https://rize.io/support)
 
 ## Contributing
