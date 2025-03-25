@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ngrok",
+  "title": "Ngrok",
+  "description": "Serve Web Apps with one command\n\nngrok is a simplified API-first ingress-as-a-service that adds connectivity, security, and observability to your apps in one line",
+  "icon": "command-icon.png",
+  "author": "ubinatus",
+  "categories": [
+    "Developer Tools",
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Tunnels",
+      "subtitle": "ngrok",
+      "description": "Put a localhost port on the internet.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "ngrokAuthToken",
+          "title": "ngrok Auth Token",
+          "description": "Token used to authenticate the ngrok agent",
+          "type": "password",
+          "required": true
+        },
+        {
+          "name": "ngrokApiKey",
+          "title": "ngrok API Key",
+          "description": "Token used to access ngrok API",
+          "type": "password",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.12.5",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.11.20",
+    "@types/react": "^18.2.58",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

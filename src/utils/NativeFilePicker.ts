@@ -70,11 +70,11 @@ function parseMultipleFilePaths(output: string): string[] {
   if (!output.trim()) {
     return [];
   }
-  
+
   // Split on our custom delimiter and filter out any empty strings
   return output
     .split("###PATH_SEPARATOR###")
-    .map(path => path.trim())
+    .map((path) => path.trim())
     .filter(Boolean);
 }
 

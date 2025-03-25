@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "omg-lol",
+  "title": "omg.lol",
+  "description": "Create, read, and update data in your omg.lol account.",
+  "icon": "omg.lol.png",
+  "author": "danpalmer",
+  "contributors": [
+    "rknightuk"
+  ],
+  "categories": [
+    "Communication",
+    "Fun",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-paste",
+      "title": "Create Paste",
+      "subtitle": "omg.lol",
+      "description": "Create a new paste in your omg.lol pastebin with a given title and content.",
+      "mode": "view",
+      "icon": "pastebin.png"
+    },
+    {
+      "name": "create-paste-clipboard",
+      "title": "Create Paste from Clipboard",
+      "subtitle": "omg.lol",
+      "description": "Create a new paste in your omg.lol pastebin with the current clipboard content and a random title.",
+      "mode": "no-view",
+      "icon": "pastebin.png"
+    },
+    {
+      "name": "view-pastebin",
+      "title": "View Pastebin",
+      "subtitle": "omg.lol",
+      "description": "View items in your omg.lol pastebin, and copy or delete them.",
+      "mode": "view",
+      "icon": "pastebin.png"
+    },
+    {
+      "name": "create-purl",
+      "title": "Create PURL",
+      "subtitle": "omg.lol",
+      "description": "Create a new PURL in your omg.lol account.",
+      "mode": "view",
+      "icon": "purl.png"
+    },
+    {
+      "name": "view-purls",
+      "title": "View PURLs",
+      "subtitle": "omg.lol",
+      "description": "View PURLs in your omg.lol account.",
+      "mode": "view",
+      "icon": "purl.png"
+    },
+    {
+      "name": "create-status",
+      "title": "Create a New Status",
+      "description": "Create a new status with an emoji and status",
+      "subtitle": "omg.lol",
+      "mode": "view",
+      "icon": "status.png"
+    },
+    {
+      "name": "view-statuses",
+      "title": "View Statuses",
+      "description": "View statuses in your omg.lol account",
+      "subtitle": "omg.lol",
+      "mode": "view",
+      "icon": "status.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "username",
+      "required": false,
+      "title": "Override username",
+      "description": "The omg.lol account name to use. If not specified, the earliest name in your omg.lol account will be used.",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.10.1",
+    "node-fetch": "^3.3.2",
+    "unicode-emoji": "^2.5.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

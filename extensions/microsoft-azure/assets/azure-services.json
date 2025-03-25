@@ -1,0 +1,2721 @@
+{
+    "General": [
+        {
+            "name": "All resources",
+            "href": "#blade/HubsExtension/BrowseAllResourcesBlade/resourceType/Microsoft.Resources%2Fresources",
+            "icon": "./icons/All resources.png"
+        },
+        {
+            "name": "Recent",
+            "href": "#blade/HubsExtension/RecentResources.ReactView",
+            "icon": "./icons/Recent.png"
+        },
+        {
+            "name": "Management groups",
+            "href": "#blade/Microsoft_Azure_ManagementGroups/ManagementGroupBrowseBlade",
+            "icon": "./icons/Management groups.png"
+        },
+        {
+            "name": "Subscriptions",
+            "href": "#blade/Microsoft_Azure_Billing/SubscriptionsBlade",
+            "icon": "./icons/Subscriptions.png"
+        },
+        {
+            "name": "Resource groups",
+            "href": "#blade/HubsExtension/BrowseResourceGroupBlade/resourceType/Microsoft.Resources%2Fsubscriptions%2FresourceGroups",
+            "icon": "./icons/Resource groups.png"
+        },
+        {
+            "name": "Cost Management + Billing",
+            "href": "#blade/Microsoft_Azure_GTM/ModernBillingMenuBlade",
+            "icon": "./icons/Cost Management + Billing.png"
+        },
+        {
+            "name": "Marketplace",
+            "href": "#blade/Microsoft_Azure_Marketplace/GalleryMenuBlade/selectedMenuItemId/home",
+            "icon": "./icons/Marketplace.png"
+        },
+        {
+            "name": "Help + support",
+            "href": "#blade/Microsoft_Azure_Support/HelpAndSupportBlade",
+            "icon": "./icons/Help + support.png"
+        },
+        {
+            "name": "Service Health",
+            "href": "#blade/Microsoft_Azure_Health/AzureHealthBrowseBlade",
+            "icon": "./icons/Service Health.png"
+        },
+        {
+            "name": "Templates",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Gallery%2Fmyareas%2Fgalleryitems",
+            "icon": "./icons/Templates.png"
+        },
+        {
+            "name": "Tags",
+            "href": "#blade/HubsExtension/TagsBlade",
+            "icon": "./icons/Tags.png"
+        },
+        {
+            "name": "What's new",
+            "href": "#blade/HubsExtension/WhatsNewBlade",
+            "icon": "./icons/What's new.png"
+        },
+        {
+            "name": "Quickstart Center",
+            "href": "#blade/Microsoft_Azure_Resources/QuickstartCenterBlade",
+            "icon": "./icons/Quickstart Center.png"
+        },
+        {
+            "name": "Shared dashboards",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Portal%2Fdashboards",
+            "icon": "./icons/Shared dashboards.png"
+        },
+        {
+            "name": "Free services",
+            "href": "#blade/Microsoft_Azure_Billing/FreeServicesBlade",
+            "icon": "./icons/Free services.png"
+        },
+        {
+            "name": "Reservations",
+            "href": "#blade/Microsoft_Azure_Reservations/ReservationsBrowseBlade/productType/Reservations",
+            "icon": "./icons/Reservations.png"
+        },
+        {
+            "name": "Resource Explorer",
+            "href": "#blade/HubsExtension/ArmExplorerBlade",
+            "icon": "./icons/Resource Explorer.png"
+        },
+        {
+            "name": "Preview features",
+            "href": "#blade/Microsoft_Azure_Resources/PreviewFeaturesBlade",
+            "icon": "./icons/Preview features.png"
+        }
+    ],
+    "Compute": [
+        {
+            "name": "Virtual machines",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2FVirtualMachines",
+            "icon": "./icons/Virtual machines.png"
+        },
+        {
+            "name": "Virtual machines (classic)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ClassicCompute%2FVirtualMachines",
+            "icon": "./icons/Virtual machines (classic).png"
+        },
+        {
+            "name": "Virtual machine scale sets",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2FvirtualMachineScaleSets",
+            "icon": "./icons/Virtual machine scale sets.png"
+        },
+        {
+            "name": "Function App",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Web%2Fsites/kind/functionapp",
+            "icon": "./icons/Function App.png"
+        },
+        {
+            "name": "App Services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Web%2Fsites",
+            "icon": "./icons/App Services.png"
+        },
+        {
+            "name": "Container instances",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ContainerInstance%2FcontainerGroups",
+            "icon": "./icons/Container instances.png"
+        },
+        {
+            "name": "Batch accounts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Batch%2FbatchAccounts",
+            "icon": "./icons/Batch accounts.png"
+        },
+        {
+            "name": "Service Fabric clusters",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ServiceFabric%2Fclusters",
+            "icon": "./icons/Service Fabric clusters.png"
+        },
+        {
+            "name": "Cloud services (classic)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/microsoft.classicCompute%2FdomainNames",
+            "icon": "./icons/Cloud services (classic).png"
+        },
+        {
+            "name": "Kubernetes services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ContainerService%2FmanagedClusters",
+            "icon": "./icons/Kubernetes services.png"
+        },
+        {
+            "name": "Availability sets",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2FavailabilitySets",
+            "icon": "./icons/Availability sets.png"
+        },
+        {
+            "name": "Disks (classic)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ClassicStorage%2FstorageAccounts%2Fdisks",
+            "icon": "./icons/Disks (classic).png"
+        },
+        {
+            "name": "OS images (classic)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ClassicStorage%2FstorageAccounts%2Fosimages",
+            "icon": "./icons/OS images (classic).png"
+        },
+        {
+            "name": "VM images (classic)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ClassicStorage%2FstorageAccounts%2Fvmimages",
+            "icon": "./icons/VM images (classic).png"
+        },
+        {
+            "name": "Citrix Virtual Desktops Essentials",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Citrix.Services%2FXenDesktopEssentials",
+            "icon": "./icons/Citrix Virtual Desktops Essentials.png"
+        },
+        {
+            "name": "Citrix Virtual Apps Essentials",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Citrix.Services%2FXenAppEssentials",
+            "icon": "./icons/Citrix Virtual Apps Essentials.png"
+        },
+        {
+            "name": "SAP HANA on Azure",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HanaOnAzure%2FhanaInstances",
+            "icon": "./icons/SAP HANA on Azure.png"
+        },
+        {
+            "name": "Proximity placement groups",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2FProximityPlacementGroups",
+            "icon": "./icons/Proximity placement groups.png"
+        },
+        {
+            "name": "Hosts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2Fhostgroups%2Fhosts",
+            "icon": "./icons/Hosts.png"
+        },
+        {
+            "name": "Host groups",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2Fhostgroups",
+            "icon": "./icons/Host groups.png"
+        },
+        {
+            "name": "Azure Spring Apps",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AppPlatform%2FSpring",
+            "icon": "./icons/Azure Spring Apps.png"
+        },
+        {
+            "name": "Application groups",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DesktopVirtualization%2FApplicationGroups",
+            "icon": "./icons/Application groups.png"
+        },
+        {
+            "name": "Maintenance Configurations",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Maintenance%2FmaintenanceConfigurations",
+            "icon": "./icons/Maintenance Configurations.png"
+        },
+        {
+            "name": "Workspaces",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DesktopVirtualization%2FWorkspaces",
+            "icon": "./icons/Workspaces.png"
+        },
+        {
+            "name": "Container Apps",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.App%2FcontainerApps",
+            "icon": "./icons/Container Apps.png"
+        }
+    ],
+    "Networking": [
+        {
+            "name": "Virtual networks",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FvirtualNetworks",
+            "icon": "./icons/Virtual networks.png"
+        },
+        {
+            "name": "Azure Synapse Analytics (private link hubs)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Synapse%2FprivateLinkHubs",
+            "icon": "./icons/Azure Synapse Analytics (private link hubs).png"
+        },
+        {
+            "name": "Load balancers",
+            "href": "#blade/Microsoft_Azure_Network/LoadBalancingHubMenuBlade/loadBalancers",
+            "icon": "./icons/Load balancers.png"
+        },
+        {
+            "name": "Front Door and CDN profiles",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/microsoft.cdn%2Fprofiles",
+            "icon": "./icons/Front Door and CDN profiles.png"
+        },
+        {
+            "name": "Network Watcher",
+            "href": "#blade/Microsoft_Azure_Network/NetworkWatcherMenuBlade",
+            "icon": "./icons/Network Watcher.png"
+        },
+        {
+            "name": "Network security groups",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FNetworkSecurityGroups",
+            "icon": "./icons/Network security groups.png"
+        },
+        {
+            "name": "Network interfaces",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2Fnetworkinterfaces",
+            "icon": "./icons/Network interfaces.png"
+        },
+        {
+            "name": "Public IP addresses",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FPublicIpAddresses",
+            "icon": "./icons/Public IP addresses.png"
+        },
+        {
+            "name": "Public IP Prefixes",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FpublicIpPrefixes",
+            "icon": "./icons/Public IP Prefixes.png"
+        },
+        {
+            "name": "Route tables",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FrouteTables",
+            "icon": "./icons/Route tables.png"
+        },
+        {
+            "name": "Application security groups",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FapplicationSecurityGroups",
+            "icon": "./icons/Application security groups.png"
+        },
+        {
+            "name": "DDoS protection plans",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FddosProtectionPlans",
+            "icon": "./icons/DDoS protection plans.png"
+        },
+        {
+            "name": "Service endpoint policies",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FserviceEndpointPolicies",
+            "icon": "./icons/Service endpoint policies.png"
+        },
+        {
+            "name": "Private DNS zones",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FprivateDnsZones",
+            "icon": "./icons/Private DNS zones.png"
+        },
+        {
+            "name": "Web Application Firewall policies (WAF)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FFrontDoorWebApplicationFirewallPolicies",
+            "icon": "./icons/Web Application Firewall policies (WAF).png"
+        },
+        {
+            "name": "Private Link",
+            "href": "#blade/Microsoft_Azure_Network/PrivateLinkCenterBlade",
+            "icon": "./icons/Private Link.png"
+        },
+        {
+            "name": "Virtual WANs",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FvirtualWans",
+            "icon": "./icons/Virtual WANs.png"
+        },
+        {
+            "name": "Bastions",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FbastionHosts",
+            "icon": "./icons/Bastions.png"
+        },
+        {
+            "name": "DNS zones",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FdnsZones",
+            "icon": "./icons/DNS zones.png"
+        },
+        {
+            "name": "Traffic Manager profiles",
+            "href": "#blade/Microsoft_Azure_Network/LoadBalancingHubMenuBlade/TrafficManagers",
+            "icon": "./icons/Traffic Manager profiles.png"
+        },
+        {
+            "name": "Application gateways",
+            "href": "#blade/Microsoft_Azure_Network/LoadBalancingHubMenuBlade/applicationgateways",
+            "icon": "./icons/Application gateways.png"
+        },
+        {
+            "name": "NAT gateways",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FnatGateways",
+            "icon": "./icons/NAT gateways.png"
+        },
+        {
+            "name": "IP Groups",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FipGroups",
+            "icon": "./icons/IP Groups.png"
+        },
+        {
+            "name": "Firewall Manager",
+            "href": "#blade/Microsoft_Azure_HybridNetworking/FirewallManagerMenuBlade",
+            "icon": "./icons/Firewall Manager.png"
+        },
+        {
+            "name": "Firewall Policies",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FfirewallPolicies",
+            "icon": "./icons/Firewall Policies.png"
+        },
+        {
+            "name": "Firewalls",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FazureFirewalls",
+            "icon": "./icons/Firewalls.png"
+        },
+        {
+            "name": "Connections",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2Fconnections",
+            "icon": "./icons/Connections.png"
+        },
+        {
+            "name": "Local network gateways",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2Flocalnetworkgateways",
+            "icon": "./icons/Local network gateways.png"
+        },
+        {
+            "name": "Virtual network gateways",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FvirtualNetworkGateways",
+            "icon": "./icons/Virtual network gateways.png"
+        },
+        {
+            "name": "Route Servers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FvirtualHubs/kind/RouteServer",
+            "icon": "./icons/Route Servers.png"
+        },
+        {
+            "name": "Network security groups (classic)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ClassicNetwork%2FnetworkSecurityGroups",
+            "icon": "./icons/Network security groups (classic).png"
+        },
+        {
+            "name": "Virtual networks (classic)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ClassicNetwork%2FvirtualNetworks",
+            "icon": "./icons/Virtual networks (classic).png"
+        },
+        {
+            "name": "Reserved IP addresses (classic)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ClassicNetwork%2FreservedIps",
+            "icon": "./icons/Reserved IP addresses (classic).png"
+        },
+        {
+            "name": "Load balancing - help me choose",
+            "href": "#blade/Microsoft_Azure_Network/LoadBalancingHubMenuBlade",
+            "icon": "./icons/Load balancing - help me choose.png"
+        }
+    ],
+    "Storage": [
+        {
+            "name": "Storage accounts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Storage%2FStorageAccounts",
+            "icon": "./icons/Storage accounts.png"
+        },
+        {
+            "name": "Storage accounts (classic)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ClassicStorage%2FStorageAccounts",
+            "icon": "./icons/Storage accounts (classic).png"
+        },
+        {
+            "name": "Recovery Services vaults",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.RecoveryServices%2Fvaults",
+            "icon": "./icons/Recovery Services vaults.png"
+        },
+        {
+            "name": "StorSimple Device Managers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.StorSimple%2FManagers",
+            "icon": "./icons/StorSimple Device Managers.png"
+        },
+        {
+            "name": "Data Lake Storage Gen1",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataLakeStore%2Faccounts",
+            "icon": "./icons/Data Lake Storage Gen1.png"
+        },
+        {
+            "name": "StorSimple Data Managers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HybridData%2FdataManagers",
+            "icon": "./icons/StorSimple Data Managers.png"
+        },
+        {
+            "name": "Storage Sync Services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.StorageSync%2FstorageSyncServices",
+            "icon": "./icons/Storage Sync Services.png"
+        },
+        {
+            "name": "Azure Stack Edge   Data Box Gateway",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataBoxEdge%2FdataBoxEdgeDevices",
+            "icon": "./icons/Azure Stack Edge   Data Box Gateway.png"
+        },
+        {
+            "name": "Azure Stack Edge",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataBoxEdge%2FdataBoxEdgeDevices/kind/azurestackedge",
+            "icon": "./icons/Azure Stack Edge.png"
+        },
+        {
+            "name": "Azure Data Box Gateway",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataBoxEdge%2FdataBoxEdgeDevices/kind/azuredataboxgateway",
+            "icon": "./icons/Azure Data Box Gateway.png"
+        },
+        {
+            "name": "Azure Data Box",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataBox%2Fjobs",
+            "icon": "./icons/Azure Data Box.png"
+        },
+        {
+            "name": "Azure NetApp Files",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.NetApp%2FnetAppAccounts",
+            "icon": "./icons/Azure NetApp Files.png"
+        },
+        {
+            "name": "Data Shares",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataShare%2Faccounts",
+            "icon": "./icons/Data Shares.png"
+        },
+        {
+            "name": "Data Share Invitations",
+            "href": "#blade/Microsoft_Azure_DataShare/InvitationsBrowseBlade",
+            "icon": "./icons/Data Share Invitations.png"
+        },
+        {
+            "name": "HPC caches",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.StorageCache%2Fcaches",
+            "icon": "./icons/HPC caches.png"
+        }
+    ],
+    "Web": [
+        {
+            "name": "App Services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Web%2Fsites",
+            "icon": "./icons/App Services.png"
+        },
+        {
+            "name": "API Management services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ApiManagement%2Fservice",
+            "icon": "./icons/API Management services.png"
+        },
+        {
+            "name": "Front Door and CDN profiles",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/microsoft.cdn%2Fprofiles",
+            "icon": "./icons/Front Door and CDN profiles.png"
+        },
+        {
+            "name": "Cognitive Search",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/AppliedAIHub/CognitiveSearch",
+            "icon": "./icons/Cognitive Search.png"
+        },
+        {
+            "name": "Notification Hubs",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.NotificationHubs%2Fnamespaces%2FnotificationHubs",
+            "icon": "./icons/Notification Hubs.png"
+        },
+        {
+            "name": "Notification Hub Namespaces",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.NotificationHubs%2Fnamespaces",
+            "icon": "./icons/Notification Hub Namespaces.png"
+        },
+        {
+            "name": "App Service plans",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Web%2FserverFarms",
+            "icon": "./icons/App Service plans.png"
+        },
+        {
+            "name": "App Service Environments",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Web%2FHostingEnvironments",
+            "icon": "./icons/App Service Environments.png"
+        },
+        {
+            "name": "App Service Certificates",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.CertificateRegistration%2FcertificateOrders",
+            "icon": "./icons/App Service Certificates.png"
+        },
+        {
+            "name": "App Service Domains",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DomainRegistration%2Fdomains",
+            "icon": "./icons/App Service Domains.png"
+        },
+        {
+            "name": "Media Services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/microsoft.media%2Fmediaservices",
+            "icon": "./icons/Media Services.png"
+        },
+        {
+            "name": "SignalR",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.SignalRService%2FSignalR",
+            "icon": "./icons/SignalR.png"
+        },
+        {
+            "name": "Power Platform",
+            "href": "#blade/Microsoft_Azure_PowerPlatform/PowerPlatformBlade",
+            "icon": "./icons/Power Platform.png"
+        },
+        {
+            "name": "Azure Spring Apps",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AppPlatform%2FSpring",
+            "icon": "./icons/Azure Spring Apps.png"
+        },
+        {
+            "name": "API Connections",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Web%2Fconnections",
+            "icon": "./icons/API Connections.png"
+        },
+        {
+            "name": "Static Web Apps",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Web%2FStaticSites",
+            "icon": "./icons/Static Web Apps.png"
+        }
+    ],
+    "Mobile": [
+        {
+            "name": "App Services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Web%2Fsites",
+            "icon": "./icons/App Services.png"
+        },
+        {
+            "name": "Notification Hubs",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.NotificationHubs%2Fnamespaces%2FnotificationHubs",
+            "icon": "./icons/Notification Hubs.png"
+        },
+        {
+            "name": "Power Platform",
+            "href": "#blade/Microsoft_Azure_PowerPlatform/PowerPlatformBlade",
+            "icon": "./icons/Power Platform.png"
+        }
+    ],
+    "Containers": [
+        {
+            "name": "Container instances",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ContainerInstance%2FcontainerGroups",
+            "icon": "./icons/Container instances.png"
+        },
+        {
+            "name": "Kubernetes services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ContainerService%2FmanagedClusters",
+            "icon": "./icons/Kubernetes services.png"
+        },
+        {
+            "name": "Container registries",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ContainerRegistry%2Fregistries",
+            "icon": "./icons/Container registries.png"
+        },
+        {
+            "name": "Batch accounts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Batch%2FbatchAccounts",
+            "icon": "./icons/Batch accounts.png"
+        },
+        {
+            "name": "Service Fabric clusters",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ServiceFabric%2Fclusters",
+            "icon": "./icons/Service Fabric clusters.png"
+        },
+        {
+            "name": "App Services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Web%2Fsites",
+            "icon": "./icons/App Services.png"
+        },
+        {
+            "name": "Azure Red Hat OpenShift",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.RedHatOpenShift%2FOpenShiftClusters",
+            "icon": "./icons/Azure Red Hat OpenShift.png"
+        }
+    ],
+    "Databases": [
+        {
+            "name": "Azure Cosmos DB",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DocumentDb%2FdatabaseAccounts",
+            "icon": "./icons/Azure Cosmos DB.png"
+        },
+        {
+            "name": "Azure Cosmos DB for MongoDB",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DocumentDb%2FdatabaseAccounts/kind/MongoDB",
+            "icon": "./icons/Azure Cosmos DB for MongoDB.png"
+        },
+        {
+            "name": "Azure SQL",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Sql%2Fazuresql",
+            "icon": "./icons/Azure SQL.png"
+        },
+        {
+            "name": "SQL databases",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Sql%2Fservers%2Fdatabases",
+            "icon": "./icons/SQL databases.png"
+        },
+        {
+            "name": "Azure Database for MySQL servers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DBforMySQL%2Fservers",
+            "icon": "./icons/Azure Database for MySQL servers.png"
+        },
+        {
+            "name": "Azure Database for PostgreSQL servers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DBforPostgreSQL%2Fservers",
+            "icon": "./icons/Azure Database for PostgreSQL servers.png"
+        },
+        {
+            "name": "Azure Database for MariaDB servers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DBforMariaDB%2Fservers",
+            "icon": "./icons/Azure Database for MariaDB servers.png"
+        },
+        {
+            "name": "SQL servers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Sql%2Fservers",
+            "icon": "./icons/SQL servers.png"
+        },
+        {
+            "name": "Dedicated SQL pools (formerly SQL DW)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Sql%2Fservers%2Fdatabases/kind/v12.0%2Cuser%2Cdatawarehouse",
+            "icon": "./icons/Dedicated SQL pools (formerly SQL DW).png"
+        },
+        {
+            "name": "Azure Synapse Analytics",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Synapse%2Fworkspaces",
+            "icon": "./icons/Azure Synapse Analytics.png"
+        },
+        {
+            "name": "Azure Database Migration Services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataMigration%2Fservices",
+            "icon": "./icons/Azure Database Migration Services.png"
+        },
+        {
+            "name": "Azure Cache for Redis",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Cache%2FRedis",
+            "icon": "./icons/Azure Cache for Redis.png"
+        },
+        {
+            "name": "SQL Server stretch databases",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Sql%2Fservers%2Fdatabases/kind/v12.0%2Cuser%2Cstretch",
+            "icon": "./icons/SQL Server stretch databases.png"
+        },
+        {
+            "name": "Data factories",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataFactory%2FdataFactories",
+            "icon": "./icons/Data factories.png"
+        },
+        {
+            "name": "SQL elastic pools",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Sql%2Fservers%2Felasticpools",
+            "icon": "./icons/SQL elastic pools.png"
+        },
+        {
+            "name": "Virtual clusters",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Sql%2FvirtualClusters",
+            "icon": "./icons/Virtual clusters.png"
+        },
+        {
+            "name": "Managed databases",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Sql%2FmanagedInstances%2Fdatabases",
+            "icon": "./icons/Managed databases.png"
+        },
+        {
+            "name": "Elastic Job agents",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Sql%2Fservers%2FjobAgents",
+            "icon": "./icons/Elastic Job agents.png"
+        },
+        {
+            "name": "SQL managed instances",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Sql%2FmanagedInstances",
+            "icon": "./icons/SQL managed instances.png"
+        },
+        {
+            "name": "SQL virtual machines",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.SqlVirtualMachine%2FSqlVirtualMachines",
+            "icon": "./icons/SQL virtual machines.png"
+        }
+    ],
+    "Analytics": [
+        {
+            "name": "Azure Synapse Analytics",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Synapse%2Fworkspaces",
+            "icon": "./icons/Azure Synapse Analytics.png"
+        },
+        {
+            "name": "Azure Synapse Analytics (private link hubs)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Synapse%2FprivateLinkHubs",
+            "icon": "./icons/Azure Synapse Analytics (private link hubs).png"
+        },
+        {
+            "name": "Azure Databricks",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Databricks%2Fworkspaces",
+            "icon": "./icons/Azure Databricks.png"
+        },
+        {
+            "name": "HDInsight clusters",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HDInsight%2Fclusters",
+            "icon": "./icons/HDInsight clusters.png"
+        },
+        {
+            "name": "Data factories",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataFactory%2FdataFactories",
+            "icon": "./icons/Data factories.png"
+        },
+        {
+            "name": "Power BI Embedded",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.PowerBIDedicated%2Fcapacities",
+            "icon": "./icons/Power BI Embedded.png"
+        },
+        {
+            "name": "Stream Analytics jobs",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.StreamAnalytics%2FStreamingJobs",
+            "icon": "./icons/Stream Analytics jobs.png"
+        },
+        {
+            "name": "Data Lake Analytics",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataLakeAnalytics%2Faccounts",
+            "icon": "./icons/Data Lake Analytics.png"
+        },
+        {
+            "name": "Analysis Services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AnalysisServices%2Fservers",
+            "icon": "./icons/Analysis Services.png"
+        },
+        {
+            "name": "Event Hubs",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.EventHub%2Fnamespaces",
+            "icon": "./icons/Event Hubs.png"
+        },
+        {
+            "name": "Event Hubs Clusters",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.EventHub%2Fclusters",
+            "icon": "./icons/Event Hubs Clusters.png"
+        },
+        {
+            "name": "Log Analytics workspaces",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.OperationalInsights%2Fworkspaces",
+            "icon": "./icons/Log Analytics workspaces.png"
+        },
+        {
+            "name": "Data Lake Storage Gen1",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataLakeStore%2Faccounts",
+            "icon": "./icons/Data Lake Storage Gen1.png"
+        },
+        {
+            "name": "Azure Data Explorer Clusters",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Kusto%2Fclusters",
+            "icon": "./icons/Azure Data Explorer Clusters.png"
+        },
+        {
+            "name": "Power Platform",
+            "href": "#blade/Microsoft_Azure_PowerPlatform/PowerPlatformBlade",
+            "icon": "./icons/Power Platform.png"
+        }
+    ],
+    "AI + Machine Learning": [
+        {
+            "name": "Azure Synapse Analytics",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Synapse%2Fworkspaces",
+            "icon": "./icons/Azure Synapse Analytics.png"
+        },
+        {
+            "name": "Bot Services",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/AppliedAIHub/BotServices",
+            "icon": "./icons/Bot Services.png"
+        },
+        {
+            "name": "Cognitive Services",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/CognitiveServicesHub",
+            "icon": "./icons/Cognitive Services.png"
+        },
+        {
+            "name": "Applied AI services",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/AppliedAIHub",
+            "icon": "./icons/Applied AI services.png"
+        },
+        {
+            "name": "Anomaly detectors",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/AnomalyDetector",
+            "icon": "./icons/Anomaly detectors.png"
+        },
+        {
+            "name": "Cognitive services multi-service account",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/AllInOne",
+            "icon": "./icons/Cognitive services multi-service account.png"
+        },
+        {
+            "name": "Computer vision",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/ComputerVision",
+            "icon": "./icons/Computer vision.png"
+        },
+        {
+            "name": "Content moderators",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/ContentModerator",
+            "icon": "./icons/Content moderators.png"
+        },
+        {
+            "name": "Custom vision",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/CustomVision",
+            "icon": "./icons/Custom vision.png"
+        },
+        {
+            "name": "Face APIs",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/Face",
+            "icon": "./icons/Face APIs.png"
+        },
+        {
+            "name": "Form recognizers",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/AppliedAIHub/FormRecognizer",
+            "icon": "./icons/Form recognizers.png"
+        },
+        {
+            "name": "Immersive readers",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/AppliedAIHub/ImmersiveReader",
+            "icon": "./icons/Immersive readers.png"
+        },
+        {
+            "name": "Language understanding",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/LUIS",
+            "icon": "./icons/Language understanding.png"
+        },
+        {
+            "name": "Metrics advisors",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/AppliedAIHub/MetricsAdvisor",
+            "icon": "./icons/Metrics advisors.png"
+        },
+        {
+            "name": "Personalizers",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/Personalizer",
+            "icon": "./icons/Personalizers.png"
+        },
+        {
+            "name": "QnA makers",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/QnAMaker",
+            "icon": "./icons/QnA makers.png"
+        },
+        {
+            "name": "Cognitive Search",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/AppliedAIHub/CognitiveSearch",
+            "icon": "./icons/Cognitive Search.png"
+        },
+        {
+            "name": "Speech services",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/SpeechServices",
+            "icon": "./icons/Speech services.png"
+        },
+        {
+            "name": "Language",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/TextAnalytics",
+            "icon": "./icons/Language.png"
+        },
+        {
+            "name": "Translators",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/TextTranslation",
+            "icon": "./icons/Translators.png"
+        },
+        {
+            "name": "Azure Machine Learning",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.MachineLearningServices%2Fworkspaces",
+            "icon": "./icons/Azure Machine Learning.png"
+        },
+        {
+            "name": "Machine Learning Studio (classic) web services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.MachineLearning%2FwebServices",
+            "icon": "./icons/Machine Learning Studio (classic) web services.png"
+        },
+        {
+            "name": "Machine Learning Studio (classic) workspaces",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.MachineLearning%2Fworkspaces",
+            "icon": "./icons/Machine Learning Studio (classic) workspaces.png"
+        },
+        {
+            "name": "Genomics accounts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Genomics%2Faccounts",
+            "icon": "./icons/Genomics accounts.png"
+        },
+        {
+            "name": "Machine Learning Studio (classic) web service plans",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.MachineLearning%2FcommitmentPlans",
+            "icon": "./icons/Machine Learning Studio (classic) web service plans.png"
+        },
+        {
+            "name": "Bonsai",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AutonomousSystems%2Fworkspaces",
+            "icon": "./icons/Bonsai.png"
+        }
+    ],
+    "Internet of Things": [
+        {
+            "name": "IoT Hub",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Devices%2FIotHubs",
+            "icon": "./icons/IoT Hub.png"
+        },
+        {
+            "name": "Azure IoT Hub Device Provisioning Services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Devices%2FProvisioningServices",
+            "icon": "./icons/Azure IoT Hub Device Provisioning Services.png"
+        },
+        {
+            "name": "IoT Central Applications",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.IoTCentral%2FIoTApps",
+            "icon": "./icons/IoT Central Applications.png"
+        },
+        {
+            "name": "Function App",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Web%2Fsites/kind/functionapp",
+            "icon": "./icons/Function App.png"
+        },
+        {
+            "name": "Event Grid Subscriptions",
+            "href": "#blade/Microsoft_Azure_EventGrid/ListEventSubscriptionsFromSubscriberBlade",
+            "icon": "./icons/Event Grid Subscriptions.png"
+        },
+        {
+            "name": "Time Series Insights environments",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.TimeSeriesInsights%2Fenvironments",
+            "icon": "./icons/Time Series Insights environments.png"
+        },
+        {
+            "name": "Time Series Insights event sources",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.TimeSeriesInsights%2Fenvironments%2Feventsources",
+            "icon": "./icons/Time Series Insights event sources.png"
+        },
+        {
+            "name": "Time Series Insights reference data sets",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.TimeSeriesInsights%2Fenvironments%2FreferenceDataSets",
+            "icon": "./icons/Time Series Insights reference data sets.png"
+        },
+        {
+            "name": "Time Series Insights access policies",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.TimeSeriesInsights%2Fenvironments%2Faccesspolicies",
+            "icon": "./icons/Time Series Insights access policies.png"
+        },
+        {
+            "name": "Stream Analytics jobs",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.StreamAnalytics%2FStreamingJobs",
+            "icon": "./icons/Stream Analytics jobs.png"
+        },
+        {
+            "name": "Azure Cosmos DB",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DocumentDb%2FdatabaseAccounts",
+            "icon": "./icons/Azure Cosmos DB.png"
+        },
+        {
+            "name": "Azure Cosmos DB for MongoDB",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DocumentDb%2FdatabaseAccounts/kind/MongoDB",
+            "icon": "./icons/Azure Cosmos DB for MongoDB.png"
+        },
+        {
+            "name": "Logic apps",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Logic%2Fworkflows",
+            "icon": "./icons/Logic apps.png"
+        },
+        {
+            "name": "Machine Learning Studio (classic) workspaces",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.MachineLearning%2Fworkspaces",
+            "icon": "./icons/Machine Learning Studio (classic) workspaces.png"
+        },
+        {
+            "name": "Machine Learning Studio (classic) web services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.MachineLearning%2FwebServices",
+            "icon": "./icons/Machine Learning Studio (classic) web services.png"
+        },
+        {
+            "name": "Machine Learning Studio (classic) web service plans",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.MachineLearning%2FcommitmentPlans",
+            "icon": "./icons/Machine Learning Studio (classic) web service plans.png"
+        },
+        {
+            "name": "Event Hubs",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.EventHub%2Fnamespaces",
+            "icon": "./icons/Event Hubs.png"
+        },
+        {
+            "name": "Event Hubs Clusters",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.EventHub%2Fclusters",
+            "icon": "./icons/Event Hubs Clusters.png"
+        },
+        {
+            "name": "Notification Hubs",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.NotificationHubs%2Fnamespaces%2FnotificationHubs",
+            "icon": "./icons/Notification Hubs.png"
+        },
+        {
+            "name": "Notification Hub Namespaces",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.NotificationHubs%2Fnamespaces",
+            "icon": "./icons/Notification Hub Namespaces.png"
+        },
+        {
+            "name": "Azure Maps Accounts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Maps%2Faccounts",
+            "icon": "./icons/Azure Maps Accounts.png"
+        },
+        {
+            "name": "Windows 10 IoT Core Services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.WindowsIoT%2FDeviceServices",
+            "icon": "./icons/Windows 10 IoT Core Services.png"
+        },
+        {
+            "name": "Azure Stack Edge   Data Box Gateway",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataBoxEdge%2FdataBoxEdgeDevices",
+            "icon": "./icons/Azure Stack Edge   Data Box Gateway.png"
+        },
+        {
+            "name": "Azure Stack Edge",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataBoxEdge%2FdataBoxEdgeDevices/kind/AzureStackEdge",
+            "icon": "./icons/Azure Stack Edge.png"
+        },
+        {
+            "name": "Azure Data Box Gateway",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataBoxEdge%2FdataBoxEdgeDevices/kind/AzureDataBoxGateway",
+            "icon": "./icons/Azure Data Box Gateway.png"
+        }
+    ],
+    "Mixed Reality": [
+        {
+            "name": "Spatial Anchors Accounts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.MixedReality%2FspatialAnchorsAccounts",
+            "icon": "./icons/Spatial Anchors Accounts.png"
+        },
+        {
+            "name": "Remote Rendering Accounts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.MixedReality%2FremoteRenderingAccounts",
+            "icon": "./icons/Remote Rendering Accounts.png"
+        }
+    ],
+    "Integration": [
+        {
+            "name": "Logic apps",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Logic%2Fworkflows",
+            "icon": "./icons/Logic apps.png"
+        },
+        {
+            "name": "Service Bus",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ServiceBus%2Fnamespaces",
+            "icon": "./icons/Service Bus.png"
+        },
+        {
+            "name": "API Management services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ApiManagement%2Fservice",
+            "icon": "./icons/API Management services.png"
+        },
+        {
+            "name": "Event Grid Subscriptions",
+            "href": "#blade/Microsoft_Azure_EventGrid/ListEventSubscriptionsFromSubscriberBlade",
+            "icon": "./icons/Event Grid Subscriptions.png"
+        },
+        {
+            "name": "Event Grid Topics",
+            "href": "#blade/Microsoft_Azure_EventGrid/EventGridCentralMenuBlade/topics",
+            "icon": "./icons/Event Grid Topics.png"
+        },
+        {
+            "name": "Event Grid Domains",
+            "href": "#blade/Microsoft_Azure_EventGrid/EventGridCentralMenuBlade/domains",
+            "icon": "./icons/Event Grid Domains.png"
+        },
+        {
+            "name": "Data factories",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataFactory%2FdataFactories",
+            "icon": "./icons/Data factories.png"
+        },
+        {
+            "name": "Data Catalog",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataCatalog%2Fcatalogs",
+            "icon": "./icons/Data Catalog.png"
+        },
+        {
+            "name": "SQL Server stretch databases",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Sql%2Fservers%2Fdatabases/kind/v12.0%2Cuser%2Cstretch",
+            "icon": "./icons/SQL Server stretch databases.png"
+        },
+        {
+            "name": "StorSimple Device Managers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.StorSimple%2FManagers",
+            "icon": "./icons/StorSimple Device Managers.png"
+        },
+        {
+            "name": "Relays",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Relay%2Fnamespaces",
+            "icon": "./icons/Relays.png"
+        },
+        {
+            "name": "Integration accounts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Logic%2FintegrationAccounts",
+            "icon": "./icons/Integration accounts.png"
+        },
+        {
+            "name": "Logic Apps Custom Connector",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Web%2FcustomApis",
+            "icon": "./icons/Logic Apps Custom Connector.png"
+        },
+        {
+            "name": "Integration Service Environments",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Logic%2FintegrationServiceEnvironments",
+            "icon": "./icons/Integration Service Environments.png"
+        },
+        {
+            "name": "Azure Stack Edge   Data Box Gateway",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataBoxEdge%2FdataBoxEdgeDevices",
+            "icon": "./icons/Azure Stack Edge   Data Box Gateway.png"
+        },
+        {
+            "name": "Azure Stack Edge",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataBoxEdge%2FdataBoxEdgeDevices/kind/AzureStackEdge",
+            "icon": "./icons/Azure Stack Edge.png"
+        },
+        {
+            "name": "Azure Data Box Gateway",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataBoxEdge%2FdataBoxEdgeDevices/kind/AzureDataBoxGateway",
+            "icon": "./icons/Azure Data Box Gateway.png"
+        },
+        {
+            "name": "App Configuration",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AppConfiguration%2FconfigurationStores",
+            "icon": "./icons/App Configuration.png"
+        },
+        {
+            "name": "Azure API for FHIR",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HealthcareApis%2Fservices",
+            "icon": "./icons/Azure API for FHIR.png"
+        },
+        {
+            "name": "SaaS (classic)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.SaaS%2Fsaasresources",
+            "icon": "./icons/SaaS (classic).png"
+        },
+        {
+            "name": "Power Platform",
+            "href": "#blade/Microsoft_Azure_PowerPlatform/PowerPlatformBlade",
+            "icon": "./icons/Power Platform.png"
+        },
+        {
+            "name": "API Connections",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Web%2Fconnections",
+            "icon": "./icons/API Connections.png"
+        },
+        {
+            "name": "Event Grid System Topics",
+            "href": "#blade/Microsoft_Azure_EventGrid/EventGridCentralMenuBlade/system_topics",
+            "icon": "./icons/Event Grid System Topics.png"
+        },
+        {
+            "name": "Event Grid Partner Registrations",
+            "href": "#blade/Microsoft_Azure_EventGrid/EventGridCentralMenuBlade/partner_registrations",
+            "icon": "./icons/Event Grid Partner Registrations.png"
+        },
+        {
+            "name": "Event Grid Partner Namespaces",
+            "href": "#blade/Microsoft_Azure_EventGrid/EventGridCentralMenuBlade/partner_namespaces",
+            "icon": "./icons/Event Grid Partner Namespaces.png"
+        },
+        {
+            "name": "Event Grid Partner Topics",
+            "href": "#blade/Microsoft_Azure_EventGrid/EventGridCentralMenuBlade/partner_topics",
+            "icon": "./icons/Event Grid Partner Topics.png"
+        }
+    ],
+    "Identity": [
+        {
+            "name": "Azure Active Directory",
+            "href": "#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade",
+            "icon": "./icons/Azure Active Directory.png"
+        },
+        {
+            "name": "Azure AD B2C",
+            "href": "#blade/Microsoft_AAD_B2CAdmin/TenantManagementMenuBlade",
+            "icon": "./icons/Azure AD B2C.png"
+        },
+        {
+            "name": "Azure AD Domain Services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AAD%2FdomainServices",
+            "icon": "./icons/Azure AD Domain Services.png"
+        },
+        {
+            "name": "Azure Information Protection",
+            "href": "#blade/Microsoft_Azure_InformationProtection/DataClassGroupEditBlade",
+            "icon": "./icons/Azure Information Protection.png"
+        },
+        {
+            "name": "Groups",
+            "href": "#blade/Microsoft_AAD_IAM/GroupsManagementMenuBlade",
+            "icon": "./icons/Groups.png"
+        },
+        {
+            "name": "Users",
+            "href": "#blade/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade",
+            "icon": "./icons/Users.png"
+        },
+        {
+            "name": "Azure AD Connect Health",
+            "href": "#blade/Microsoft_Azure_ADHybridHealth/AadHealthMenuBlade",
+            "icon": "./icons/Azure AD Connect Health.png"
+        },
+        {
+            "name": "Enterprise applications",
+            "href": "#blade/Microsoft_AAD_IAM/StartboardApplicationsMenuBlade",
+            "icon": "./icons/Enterprise applications.png"
+        },
+        {
+            "name": "Identity Governance",
+            "href": "#blade/Microsoft_AAD_ERM/DashboardBlade",
+            "icon": "./icons/Identity Governance.png"
+        },
+        {
+            "name": "Managed Identities",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ManagedIdentity%2FuserAssignedIdentities",
+            "icon": "./icons/Managed Identities.png"
+        },
+        {
+            "name": "Azure AD Privileged Identity Management",
+            "href": "#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+            "icon": "./icons/Azure AD Privileged Identity Management.png"
+        },
+        {
+            "name": "Azure AD Security",
+            "href": "#blade/Microsoft_AAD_IAM/SecurityMenuBlade",
+            "icon": "./icons/Azure AD Security.png"
+        },
+        {
+            "name": "Azure AD Identity Protection",
+            "href": "#blade/Microsoft_AAD_IAM/IdentityProtectionMenuBlade",
+            "icon": "./icons/Azure AD Identity Protection.png"
+        },
+        {
+            "name": "User settings",
+            "href": "#blade/Microsoft_AAD_IAM/DirectoryUserSettingsBladeV2",
+            "icon": "./icons/User settings.png"
+        },
+        {
+            "name": "AD Connect",
+            "href": "#blade/Microsoft_AAD_IAM/DirectoriesADConnectBlade",
+            "icon": "./icons/AD Connect.png"
+        },
+        {
+            "name": "App proxy",
+            "href": "#blade/Microsoft_AAD_IAM/AppProxyOverviewBlade",
+            "icon": "./icons/App proxy.png"
+        },
+        {
+            "name": "Security",
+            "href": "#blade/Microsoft_AAD_IAM/SecurityMenuBlade",
+            "icon": "./icons/Security.png"
+        },
+        {
+            "name": "Tenant properties",
+            "href": "#blade/Microsoft_AAD_IAM/TenantPropertiesBlade",
+            "icon": "./icons/Tenant properties.png"
+        },
+        {
+            "name": "Administrative units",
+            "href": "#blade/Microsoft_AAD_IAM/AdminUnitManagementBlade",
+            "icon": "./icons/Administrative units.png"
+        },
+        {
+            "name": "Azure AD roles and administrators",
+            "href": "#blade/Microsoft_AAD_IAM/AllRolesBlade",
+            "icon": "./icons/Azure AD roles and administrators.png"
+        },
+        {
+            "name": "Create custom Azure AD roles",
+            "href": "#blade/Microsoft_AAD_IAM/CreateCustomRoleBlade",
+            "icon": "./icons/Create custom Azure AD roles.png"
+        },
+        {
+            "name": "External Identities",
+            "href": "#blade/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade",
+            "icon": "./icons/External Identities.png"
+        }
+    ],
+    "Security": [
+        {
+            "name": "Azure Synapse Analytics (private link hubs)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Synapse%2FprivateLinkHubs",
+            "icon": "./icons/Azure Synapse Analytics (private link hubs).png"
+        },
+        {
+            "name": "Microsoft Defender for Cloud",
+            "href": "#blade/Microsoft_Azure_Security/SecurityMenuBlade",
+            "icon": "./icons/Microsoft Defender for Cloud.png"
+        },
+        {
+            "name": "Key vaults",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.KeyVault%2Fvaults",
+            "icon": "./icons/Key vaults.png"
+        },
+        {
+            "name": "Azure Information Protection",
+            "href": "#blade/Microsoft_Azure_InformationProtection/DataClassGroupEditBlade",
+            "icon": "./icons/Azure Information Protection.png"
+        },
+        {
+            "name": "Azure Active Directory",
+            "href": "#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade",
+            "icon": "./icons/Azure Active Directory.png"
+        },
+        {
+            "name": "Application security groups",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FapplicationSecurityGroups",
+            "icon": "./icons/Application security groups.png"
+        },
+        {
+            "name": "Microsoft Sentinel",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/microsoft.securityinsightsarg%2Fsentinel",
+            "icon": "./icons/Microsoft Sentinel.png"
+        },
+        {
+            "name": "Extended Security Updates",
+            "href": "#blade/Microsoft_Windows_ExtendedSecurityUpdates/ESUManagerMenuBlade",
+            "icon": "./icons/Extended Security Updates.png"
+        },
+        {
+            "name": "Azure AD Security",
+            "href": "#blade/Microsoft_AAD_IAM/SecurityMenuBlade",
+            "icon": "./icons/Azure AD Security.png"
+        },
+        {
+            "name": "Azure AD Identity Protection",
+            "href": "#blade/Microsoft_AAD_IAM/IdentityProtectionMenuBlade",
+            "icon": "./icons/Azure AD Identity Protection.png"
+        },
+        {
+            "name": "Azure AD Identity Secure Score",
+            "href": "#blade/Microsoft_AAD_IAM/IdentitySecureScoreV2Blade",
+            "icon": "./icons/Azure AD Identity Secure Score.png"
+        },
+        {
+            "name": "Azure AD Authentication methods",
+            "href": "#blade/Microsoft_AAD_IAM/AuthenticationMethodsMenuBlade",
+            "icon": "./icons/Azure AD Authentication methods.png"
+        },
+        {
+            "name": "Multifactor authentication",
+            "href": "#blade/Microsoft_AAD_IAM/MultifactorAuthenticationMenuBlade",
+            "icon": "./icons/Multifactor authentication.png"
+        },
+        {
+            "name": "Azure AD Risky users",
+            "href": "#blade/Microsoft_AAD_IAM/RiskyUsersBlade",
+            "icon": "./icons/Azure AD Risky users.png"
+        },
+        {
+            "name": "Azure AD Risky sign-ins",
+            "href": "#blade/Microsoft_AAD_IAM/RiskySignInsBlade",
+            "icon": "./icons/Azure AD Risky sign-ins.png"
+        },
+        {
+            "name": "Azure AD Risk detections",
+            "href": "#blade/Microsoft_AAD_IAM/RiskDetectionsBlade",
+            "icon": "./icons/Azure AD Risk detections.png"
+        },
+        {
+            "name": "Azure AD Named locations",
+            "href": "#blade/Microsoft_AAD_IAM/NamedNetworksWithCountryBlade",
+            "icon": "./icons/Azure AD Named locations.png"
+        },
+        {
+            "name": "Azure AD Password protection",
+            "href": "#blade/Microsoft_AAD_IAM/PasswordProtectionBlade",
+            "icon": "./icons/Azure AD Password protection.png"
+        },
+        {
+            "name": "Azure AD Privileged Identity Management",
+            "href": "#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+            "icon": "./icons/Azure AD Privileged Identity Management.png"
+        },
+        {
+            "name": "User settings",
+            "href": "#blade/Microsoft_AAD_IAM/DirectoryUserSettingsBladeV2",
+            "icon": "./icons/User settings.png"
+        },
+        {
+            "name": "Microsoft Defender for IoT",
+            "href": "#blade/Microsoft_Azure_IoT_Defender/IoTDefenderDashboard",
+            "icon": "./icons/Microsoft Defender for IoT.png"
+        },
+        {
+            "name": "ScanX Management",
+            "href": "#blade/ScanX_Management/ScanXManagementMenu",
+            "icon": "./icons/ScanX Management.png"
+        },
+        {
+            "name": "Microsoft Defender EASM",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Easm%2Fworkspaces",
+            "icon": "./icons/Microsoft Defender EASM.png"
+        }
+    ],
+    "DevOps": [
+        {
+            "name": "DevOps Starter",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/microsoft.visualstudio%2Faccount%2Fproject",
+            "icon": "./icons/DevOps Starter.png"
+        },
+        {
+            "name": "Azure DevOps organizations",
+            "href": "#blade/AzureTfsExtension/OrganizationsTemplateBlade",
+            "icon": "./icons/Azure DevOps organizations.png"
+        },
+        {
+            "name": "Application Insights",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/microsoft.insights%2Fcomponents",
+            "icon": "./icons/Application Insights.png"
+        },
+        {
+            "name": "DevTest Labs",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DevTestLab%2Flabs",
+            "icon": "./icons/DevTest Labs.png"
+        },
+        {
+            "name": "API Management services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ApiManagement%2Fservice",
+            "icon": "./icons/API Management services.png"
+        },
+        {
+            "name": "Lab accounts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.LabServices%2FlabAccounts",
+            "icon": "./icons/Lab accounts.png"
+        },
+        {
+            "name": "API Connections",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Web%2Fconnections",
+            "icon": "./icons/API Connections.png"
+        },
+        {
+            "name": "Change Analysis",
+            "href": "#blade/Microsoft_Azure_ChangeAnalysis/ChangeAnalysisBaseBlade",
+            "icon": "./icons/Change Analysis.png"
+        }
+    ],
+    "Migration": [
+        {
+            "name": "Azure Migrate",
+            "href": "#blade/Microsoft_Azure_Migrate/AmhResourceMenuBlade",
+            "icon": "./icons/Azure Migrate.png"
+        },
+        {
+            "name": "Recovery Services vaults",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.RecoveryServices%2Fvaults",
+            "icon": "./icons/Recovery Services vaults.png"
+        },
+        {
+            "name": "Azure Database Migration Services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataMigration%2Fservices",
+            "icon": "./icons/Azure Database Migration Services.png"
+        },
+        {
+            "name": "Cost Management + Billing",
+            "href": "#blade/Microsoft_Azure_GTM/ModernBillingMenuBlade",
+            "icon": "./icons/Cost Management + Billing.png"
+        },
+        {
+            "name": "Azure Data Box",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataBox%2Fjobs",
+            "icon": "./icons/Azure Data Box.png"
+        },
+        {
+            "name": "Azure Stack Edge   Data Box Gateway",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataBoxEdge%2FdataBoxEdgeDevices",
+            "icon": "./icons/Azure Stack Edge   Data Box Gateway.png"
+        },
+        {
+            "name": "Azure Stack Edge",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataBoxEdge%2FdataBoxEdgeDevices/kind/AzureStackEdge",
+            "icon": "./icons/Azure Stack Edge.png"
+        },
+        {
+            "name": "Azure Data Box Gateway",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataBoxEdge%2FdataBoxEdgeDevices/kind/AzureDataBoxGateway",
+            "icon": "./icons/Azure Data Box Gateway.png"
+        }
+    ],
+    "Monitor": [
+        {
+            "name": "Monitor",
+            "href": "#blade/Microsoft_Azure_Monitoring/AzureMonitoringBrowseBlade",
+            "icon": "./icons/Monitor.png"
+        },
+        {
+            "name": "Metrics",
+            "href": "#blade/Microsoft_Azure_Monitoring/AzureMonitoringBrowseBlade/metrics",
+            "icon": "./icons/Metrics.png"
+        },
+        {
+            "name": "Autoscale",
+            "href": "#blade/Microsoft_Azure_Monitoring/AzureMonitoringBrowseBlade/autoscale",
+            "icon": "./icons/Autoscale.png"
+        },
+        {
+            "name": "Application Insights",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/microsoft.insights%2Fcomponents",
+            "icon": "./icons/Application Insights.png"
+        },
+        {
+            "name": "Activity log",
+            "href": "#blade/Microsoft_Azure_Monitoring/AzureMonitoringBrowseBlade/activityLog",
+            "icon": "./icons/Activity log.png"
+        },
+        {
+            "name": "Log Analytics workspaces",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.OperationalInsights%2Fworkspaces",
+            "icon": "./icons/Log Analytics workspaces.png"
+        },
+        {
+            "name": "Network Watcher",
+            "href": "#blade/Microsoft_Azure_Network/NetworkWatcherMenuBlade",
+            "icon": "./icons/Network Watcher.png"
+        },
+        {
+            "name": "Azure Workbooks",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/microsoft.insights%2Fworkbooks",
+            "icon": "./icons/Azure Workbooks.png"
+        },
+        {
+            "name": "Diagnostic settings",
+            "href": "#blade/Microsoft_Azure_Monitoring/AzureMonitoringBrowseBlade/diagnosticsLogs",
+            "icon": "./icons/Diagnostic settings.png"
+        },
+        {
+            "name": "Change Analysis",
+            "href": "#blade/Microsoft_Azure_ChangeAnalysis/ChangeAnalysisBaseBlade",
+            "icon": "./icons/Change Analysis.png"
+        }
+    ],
+    "Management and Governance": [
+        {
+            "name": "Advisor",
+            "href": "#blade/Microsoft_Azure_Expert/AdvisorMenuBlade",
+            "icon": "./icons/Advisor.png"
+        },
+        {
+            "name": "Recovery Services vaults",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.RecoveryServices%2Fvaults",
+            "icon": "./icons/Recovery Services vaults.png"
+        },
+        {
+            "name": "Azure Arc",
+            "href": "#blade/Microsoft_Azure_HybridCompute/AzureArcCenterBlade",
+            "icon": "./icons/Azure Arc.png"
+        },
+        {
+            "name": "Cost Management + Billing",
+            "href": "#blade/Microsoft_Azure_GTM/ModernBillingMenuBlade",
+            "icon": "./icons/Cost Management + Billing.png"
+        },
+        {
+            "name": "Servers - Azure Arc",
+            "href": "#blade/Microsoft_Azure_HybridCompute/AzureArcCenterBlade/servers",
+            "icon": "./icons/Servers - Azure Arc.png"
+        },
+        {
+            "name": "Policy",
+            "href": "#blade/Microsoft_Azure_Policy/PolicyMenuBlade",
+            "icon": "./icons/Policy.png"
+        },
+        {
+            "name": "Blueprints",
+            "href": "#blade/Microsoft_Azure_Policy/BlueprintsMenuBlade",
+            "icon": "./icons/Blueprints.png"
+        },
+        {
+            "name": "Resource Graph Explorer",
+            "href": "#blade/HubsExtension/ArgQueryBlade",
+            "icon": "./icons/Resource Graph Explorer.png"
+        },
+        {
+            "name": "Automation Accounts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Automation%2FAutomationAccounts",
+            "icon": "./icons/Automation Accounts.png"
+        },
+        {
+            "name": "Managed Desktop",
+            "href": "#blade/Microsoft_EMM_ModernWorkplace/LandingBlade",
+            "icon": "./icons/Managed Desktop.png"
+        },
+        {
+            "name": "Service providers",
+            "href": "#blade/Microsoft_Azure_CustomerHub/ServiceProvidersBladeV2",
+            "icon": "./icons/Service providers.png"
+        },
+        {
+            "name": "My customers",
+            "href": "#blade/Microsoft_Azure_CustomerHub/MyCustomersBladeV2",
+            "icon": "./icons/My customers.png"
+        },
+        {
+            "name": "Service catalog managed application definitions",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Solutions%2FapplicationDefinitions",
+            "icon": "./icons/Service catalog managed application definitions.png"
+        },
+        {
+            "name": "Managed applications",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Solutions%2Fapplications",
+            "icon": "./icons/Managed applications.png"
+        },
+        {
+            "name": "Managed applications center",
+            "href": "#blade/HubsExtension/AssetMenuBlade/assetName/ApplicationsHub/extensionName/Microsoft_Azure_Appliance",
+            "icon": "./icons/Managed applications center.png"
+        },
+        {
+            "name": "Customer Lockbox for Microsoft Azure",
+            "href": "#blade/Microsoft_Azure_Lockbox/LockboxMenu",
+            "icon": "./icons/Customer Lockbox for Microsoft Azure.png"
+        },
+        {
+            "name": "Education",
+            "href": "#blade/Microsoft_Azure_Education/EducationMenuBlade",
+            "icon": "./icons/Education.png"
+        },
+        {
+            "name": "Management groups",
+            "href": "#blade/Microsoft_Azure_ManagementGroups/ManagementGroupBrowseBlade",
+            "icon": "./icons/Management groups.png"
+        },
+        {
+            "name": "Resource Graph queries",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.resourcegraph%2Fqueries",
+            "icon": "./icons/Resource Graph queries.png"
+        },
+        {
+            "name": "Solutions",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.OperationsManagement%2Fsolutions",
+            "icon": "./icons/Solutions.png"
+        },
+        {
+            "name": "Operation log (classic)",
+            "href": "#blade/Microsoft_Azure_Resources/OperationLogsBlade",
+            "icon": "./icons/Operation log (classic).png"
+        },
+        {
+            "name": "Diagnostic settings",
+            "href": "#blade/Microsoft_Azure_Monitoring/AzureMonitoringBrowseBlade/diagnosticsLogs",
+            "icon": "./icons/Diagnostic settings.png"
+        },
+        {
+            "name": "Azure Lighthouse",
+            "href": "#blade/Microsoft_Azure_CustomerHub/LighthouseBlade",
+            "icon": "./icons/Azure Lighthouse.png"
+        },
+        {
+            "name": "Rollouts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DeploymentManager%2FRollouts",
+            "icon": "./icons/Rollouts.png"
+        },
+        {
+            "name": "Change Analysis",
+            "href": "#blade/Microsoft_Azure_ChangeAnalysis/ChangeAnalysisBaseBlade",
+            "icon": "./icons/Change Analysis.png"
+        },
+        {
+            "name": "Universal Print",
+            "href": "#blade/Universal_Print/MainMenuBlade",
+            "icon": "./icons/Universal Print.png"
+        },
+        {
+            "name": "Automanage",
+            "href": "#blade/Microsoft_Azure_AutoManagedVirtualMachines/AutomanageMenuBlade",
+            "icon": "./icons/Automanage.png"
+        }
+    ],
+    "Intune": [
+        {
+            "name": "Intune",
+            "href": "https://endpoint.microsoft.com",
+            "icon": "./icons/Intune.png"
+        },
+        {
+            "name": "Intune for Education",
+            "href": "https://intuneeducation.portal.azure.com",
+            "icon": "./icons/Intune for Education.png"
+        },
+        {
+            "name": "Devices",
+            "href": "#blade/Microsoft_Intune_Devices/DeviceEntryBlade",
+            "icon": "./icons/Devices.png"
+        },
+        {
+            "name": "Security Baselines",
+            "href": "#blade/Microsoft_Intune_Workflows/SecurityBaselineMenu",
+            "icon": "./icons/Security Baselines.png"
+        }
+    ],
+    "Hybrid + multicloud": [
+        {
+            "name": "Azure Arc",
+            "href": "#blade/Microsoft_Azure_HybridCompute/AzureArcCenterBlade",
+            "icon": "./icons/Azure Arc.png"
+        },
+        {
+            "name": "Microsoft Sentinel",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/microsoft.securityinsightsarg%2Fsentinel",
+            "icon": "./icons/Microsoft Sentinel.png"
+        },
+        {
+            "name": "Azure Stack HCI",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AzureStackHCI%2Fclusters",
+            "icon": "./icons/Azure Stack HCI.png"
+        },
+        {
+            "name": "Microsoft Defender for Cloud",
+            "href": "#blade/Microsoft_Azure_Security/SecurityMenuBlade",
+            "icon": "./icons/Microsoft Defender for Cloud.png"
+        },
+        {
+            "name": "Azure Active Directory",
+            "href": "#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade",
+            "icon": "./icons/Azure Active Directory.png"
+        },
+        {
+            "name": "Azure SQL",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Sql%2Fazuresql",
+            "icon": "./icons/Azure SQL.png"
+        },
+        {
+            "name": "DevOps Starter",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/microsoft.visualstudio%2Faccount%2Fproject",
+            "icon": "./icons/DevOps Starter.png"
+        },
+        {
+            "name": "Custom locations",
+            "href": "#blade/Microsoft_Azure_HybridCompute/AzureArcCenterBlade/customLocations",
+            "icon": "./icons/Custom locations.png"
+        },
+        {
+            "name": "Azure Arc data controllers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AzureArcData%2FdataControllers",
+            "icon": "./icons/Azure Arc data controllers.png"
+        },
+        {
+            "name": "Azure Arc Private Link Scopes",
+            "href": "#blade/Microsoft_Azure_HybridCompute/AzureArcCenterBlade/privateLinkScopes",
+            "icon": "./icons/Azure Arc Private Link Scopes.png"
+        },
+        {
+            "name": "Servers - Azure Arc",
+            "href": "#blade/Microsoft_Azure_HybridCompute/AzureArcCenterBlade/servers",
+            "icon": "./icons/Servers - Azure Arc.png"
+        },
+        {
+            "name": "PostgreSQL servers - Azure Arc",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AzureArcData%2FpostgresInstances",
+            "icon": "./icons/PostgreSQL servers - Azure Arc.png"
+        },
+        {
+            "name": "Kubernetes - Azure Arc",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Kubernetes%2FconnectedClusters",
+            "icon": "./icons/Kubernetes - Azure Arc.png"
+        },
+        {
+            "name": "SQL Server - Azure Arc",
+            "href": "#blade/Microsoft_Azure_HybridCompute/AzureArcCenterBlade/sqlServers",
+            "icon": "./icons/SQL Server - Azure Arc.png"
+        },
+        {
+            "name": "SQL managed instances - Azure Arc",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AzureArcData%2FsqlManagedInstances",
+            "icon": "./icons/SQL managed instances - Azure Arc.png"
+        }
+    ],
+    "Other": [
+        {
+            "name": "Access Connector for Azure Databricks",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Databricks%2FaccessConnectors",
+            "icon": "./icons/Access Connector for Azure Databricks.png"
+        },
+        {
+            "name": "Alerts",
+            "href": "#blade/Microsoft_Azure_Monitoring/AzureMonitoringBrowseBlade/alertsV2",
+            "icon": "./icons/Alerts.png"
+        },
+        {
+            "name": "API Playground",
+            "href": "#blade/Microsoft_Azure_Resources/ArmPlayground",
+            "icon": "./icons/API Playground.png"
+        },
+        {
+            "name": "App Compliance Automation Tool for Microsoft 365",
+            "href": "#blade/Microsoft_Azure_AppComplianceAutomation/AcatMenuBlade",
+            "icon": "./icons/App Compliance Automation Tool for Microsoft 365.png"
+        },
+        {
+            "name": "App registrations",
+            "href": "#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade",
+            "icon": "./icons/App registrations.png"
+        },
+        {
+            "name": "Application server instances for SAP solutions",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Workloads%2FsapVirtualInstances%2FapplicationInstances",
+            "icon": "./icons/Application server instances for SAP solutions.png"
+        },
+        {
+            "name": "Audit Logs",
+            "href": "#blade/Microsoft_AAD_IAM/AuditEventsV2PillsBlade",
+            "icon": "./icons/Audit Logs.png"
+        },
+        {
+            "name": "Azure AD Authentication Strengths",
+            "href": "#blade/Microsoft_AAD_IAM/AuthStrengths.ReactView",
+            "icon": "./icons/Azure AD Authentication Strengths.png"
+        },
+        {
+            "name": "Azure AD Conditional Access",
+            "href": "#blade/Microsoft_AAD_ConditionalAccess/ConditionalAccessBlade",
+            "icon": "./icons/Azure AD Conditional Access.png"
+        },
+        {
+            "name": "Azure AD Risky workload identities",
+            "href": "#blade/Microsoft_AAD_IAM/RiskyServicePrincipalsBlade",
+            "icon": "./icons/Azure AD Risky workload identities.png"
+        },
+        {
+            "name": "Azure Center for SAP solutions",
+            "href": "#blade/HubsExtension/AssetMenuBlade/assetName/SAPOnAzure/extensionName/Microsoft_Azure_SAPManagement",
+            "icon": "./icons/Azure Center for SAP solutions.png"
+        },
+        {
+            "name": "Azure compute galleries",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2Fgalleries",
+            "icon": "./icons/Azure compute galleries.png"
+        },
+        {
+            "name": "Azure Cosmos DB for PostgreSQL Cluster",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DBforPostgreSQL%2FserverGroupsv2",
+            "icon": "./icons/Azure Cosmos DB for PostgreSQL Cluster.png"
+        },
+        {
+            "name": "Azure Database for MySQL flexible servers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DBforMySQL%2FflexibleServers",
+            "icon": "./icons/Azure Database for MySQL flexible servers.png"
+        },
+        {
+            "name": "Azure Database for PostgreSQL flexible servers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DBforPostgreSQL%2FflexibleServers",
+            "icon": "./icons/Azure Database for PostgreSQL flexible servers.png"
+        },
+        {
+            "name": "Azure Database Migration Projects",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataMigration%2Fservices%2Fprojects",
+            "icon": "./icons/Azure Database Migration Projects.png"
+        },
+        {
+            "name": "Azure Deployment Environments",
+            "href": "#blade/Microsoft_Azure_DevCenter/EnvironmentsMenuBlade",
+            "icon": "./icons/Azure Deployment Environments.png"
+        },
+        {
+            "name": "Azure Digital Twins",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DigitalTwins%2FdigitalTwinsInstances",
+            "icon": "./icons/Azure Digital Twins.png"
+        },
+        {
+            "name": "Azure Edge Hardware Center",
+            "href": "#blade/Microsoft_Azure_EdgeOrder/BrowseMenuBlade",
+            "icon": "./icons/Azure Edge Hardware Center.png"
+        },
+        {
+            "name": "Azure Health Bot",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HealthBot%2FhealthBots",
+            "icon": "./icons/Azure Health Bot.png"
+        },
+        {
+            "name": "Azure Lab Services",
+            "href": "#blade/HubsExtension/AssetMenuBlade/assetName/LabServices/extensionName/Microsoft_Azure_ManagedLab",
+            "icon": "./icons/Azure Lab Services.png"
+        },
+        {
+            "name": "Azure Load Testing",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.LoadTestService%2FLoadTests",
+            "icon": "./icons/Azure Load Testing.png"
+        },
+        {
+            "name": "Azure Managed Grafana",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Dashboard%2Fgrafana",
+            "icon": "./icons/Azure Managed Grafana.png"
+        },
+        {
+            "name": "Azure Managed Instance for Apache Cassandra",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DocumentDB%2FcassandraClusters",
+            "icon": "./icons/Azure Managed Instance for Apache Cassandra.png"
+        },
+        {
+            "name": "Azure Maps Creator Resources",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Maps%2Faccounts%2Fcreators",
+            "icon": "./icons/Azure Maps Creator Resources.png"
+        },
+        {
+            "name": "Azure Monitor Private Link Scopes",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Insights%2FprivateLinkScopes",
+            "icon": "./icons/Azure Monitor Private Link Scopes.png"
+        },
+        {
+            "name": "Azure Monitor workspaces",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/microsoft.monitor%2Faccounts",
+            "icon": "./icons/Azure Monitor workspaces.png"
+        },
+        {
+            "name": "Azure Monitors for SAP solutions",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Workloads%2Fmonitors",
+            "icon": "./icons/Azure Monitors for SAP solutions.png"
+        },
+        {
+            "name": "Azure Monitors for SAP Solutions (classic)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HanaOnAzure%2FsapMonitors",
+            "icon": "./icons/Azure Monitors for SAP Solutions (classic).png"
+        },
+        {
+            "name": "Azure Native Dynatrace Service",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Dynatrace.Observability%2Fmonitors",
+            "icon": "./icons/Azure Native Dynatrace Service.png"
+        },
+        {
+            "name": "Azure Network Function Manager - Devices",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HybridNetwork%2Fdevices",
+            "icon": "./icons/Azure Network Function Manager - Devices.png"
+        },
+        {
+            "name": "Azure Network Function Manager - Network Functions",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HybridNetwork%2FnetworkFunctions",
+            "icon": "./icons/Azure Network Function Manager - Network Functions.png"
+        },
+        {
+            "name": "Azure Network Function Manager - Vendors",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HybridNetwork%2Fvendors",
+            "icon": "./icons/Azure Network Function Manager - Vendors.png"
+        },
+        {
+            "name": "Azure OpenAI",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/OpenAI",
+            "icon": "./icons/Azure OpenAI.png"
+        },
+        {
+            "name": "Azure Orbital",
+            "href": "#blade/HubsExtension/AssetMenuBlade/assetName/AzureOrbital/extensionName/Microsoft_Azure_Orbital",
+            "icon": "./icons/Azure Orbital.png"
+        },
+        {
+            "name": "Azure Percept Studio",
+            "href": "#blade/AzureEdgeDevices/Main",
+            "icon": "./icons/Azure Percept Studio.png"
+        },
+        {
+            "name": "Azure Resource Mover",
+            "href": "#blade/Microsoft_Azure_ResourceMove/RmResourceMenuHubBlade",
+            "icon": "./icons/Azure Resource Mover.png"
+        },
+        {
+            "name": "Azure Video Indexer",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.VideoIndexer%2Faccounts",
+            "icon": "./icons/Azure Video Indexer.png"
+        },
+        {
+            "name": "Azure Virtual Desktop",
+            "href": "#blade/Microsoft_Azure_WVD/WvdManagerMenuBlade",
+            "icon": "./icons/Azure Virtual Desktop.png"
+        },
+        {
+            "name": "Azure VMware Solution",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AVS%2FprivateClouds",
+            "icon": "./icons/Azure VMware Solution.png"
+        },
+        {
+            "name": "B2C Tenants",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AzureActiveDirectory%2Fb2cDirectories",
+            "icon": "./icons/B2C Tenants.png"
+        },
+        {
+            "name": "Backup center",
+            "href": "#blade/Microsoft_Azure_DataProtection/BackupCenterMenuBlade",
+            "icon": "./icons/Backup center.png"
+        },
+        {
+            "name": "Backup Items",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.RecoveryServices%2Fvaults%2FbackupFabrics%2FprotectionContainers%2FprotectedItems",
+            "icon": "./icons/Backup Items.png"
+        },
+        {
+            "name": "Backup vaults",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataProtection%2FBackupVaults",
+            "icon": "./icons/Backup vaults.png"
+        },
+        {
+            "name": "BareMetal Instances",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.BareMetalInfrastructure%2FbareMetalInstances",
+            "icon": "./icons/BareMetal Instances.png"
+        },
+        {
+            "name": "Bing Resources",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Bing%2Faccounts",
+            "icon": "./icons/Bing Resources.png"
+        },
+        {
+            "name": "BitLocker Keys",
+            "href": "#blade/Microsoft_AAD_Devices/BitlockerKeysListBlade",
+            "icon": "./icons/BitLocker Keys.png"
+        },
+        {
+            "name": "Budgets",
+            "href": "#blade/Microsoft_Azure_CostManagement/Menu/open/budgets/openedBy/AzurePortal",
+            "icon": "./icons/Budgets.png"
+        },
+        {
+            "name": "Bulk Operations",
+            "href": "#blade/Microsoft_AAD_IAM/TasksListBlade",
+            "icon": "./icons/Bulk Operations.png"
+        },
+        {
+            "name": "Capacity Reservation Groups",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2FcapacityReservationGroups",
+            "icon": "./icons/Capacity Reservation Groups.png"
+        },
+        {
+            "name": "Central services instances for SAP solutions",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Workloads%2FsapVirtualInstances%2FcentralInstances",
+            "icon": "./icons/Central services instances for SAP solutions.png"
+        },
+        {
+            "name": "Chaos Experiments",
+            "href": "#blade/Microsoft_Azure_Chaos/ChaosStudioMenuBlade/defaultMenuItem/chaosExperiment",
+            "icon": "./icons/Chaos Experiments.png"
+        },
+        {
+            "name": "Chaos Studio",
+            "href": "#blade/Microsoft_Azure_Chaos/ChaosStudioMenuBlade",
+            "icon": "./icons/Chaos Studio.png"
+        },
+        {
+            "name": "Cloud Access Routers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Orbital%2FcloudAccessRouters",
+            "icon": "./icons/Cloud Access Routers.png"
+        },
+        {
+            "name": "Cloud Access Terminals",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Orbital%2Fterminals",
+            "icon": "./icons/Cloud Access Terminals.png"
+        },
+        {
+            "name": "Cloud services (extended support)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2FcloudServices",
+            "icon": "./icons/Cloud services (extended support).png"
+        },
+        {
+            "name": "Communication Services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Communication%2FCommunicationServices",
+            "icon": "./icons/Communication Services.png"
+        },
+        {
+            "name": "Confidential Ledgers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ConfidentialLedger%2Fledgers",
+            "icon": "./icons/Confidential Ledgers.png"
+        },
+        {
+            "name": "Confluent organizations",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Confluent%2Forganizations",
+            "icon": "./icons/Confluent organizations.png"
+        },
+        {
+            "name": "Connected Cache Resources",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ConnectedCache%2FcacheNodes",
+            "icon": "./icons/Connected Cache Resources.png"
+        },
+        {
+            "name": "Connected Cache Resources",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ConnectedCache%2FenterpriseCustomers",
+            "icon": "./icons/Connected Cache Resources.png"
+        },
+        {
+            "name": "Connected Cache Resources",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ConnectedCache%2FispCustomers",
+            "icon": "./icons/Connected Cache Resources.png"
+        },
+        {
+            "name": "Contact Profiles",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Orbital%2FcontactProfiles",
+            "icon": "./icons/Contact Profiles.png"
+        },
+        {
+            "name": "Container Apps Environments",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.App%2FmanagedEnvironments",
+            "icon": "./icons/Container Apps Environments.png"
+        },
+        {
+            "name": "Cost alerts",
+            "href": "#blade/Microsoft_Azure_CostManagement/Menu/open/costalerts/openedBy/AzurePortal",
+            "icon": "./icons/Cost alerts.png"
+        },
+        {
+            "name": "Cost analysis (preview)",
+            "href": "#blade/Microsoft_Azure_CostManagement/Menu/open/costanalysisv3/openedBy/AzurePortal",
+            "icon": "./icons/Cost analysis (preview).png"
+        },
+        {
+            "name": "Cost exports",
+            "href": "#blade/Microsoft_Azure_CostManagement/Menu/open/exports/openedBy/AzurePortal",
+            "icon": "./icons/Cost exports.png"
+        },
+        {
+            "name": "Cost Management",
+            "href": "#blade/Microsoft_Azure_CostManagement/Menu/openedBy/AzurePortal",
+            "icon": "./icons/Cost Management.png"
+        },
+        {
+            "name": "Custom IP Prefixes",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FcustomIpPrefixes",
+            "icon": "./icons/Custom IP Prefixes.png"
+        },
+        {
+            "name": "Database instances for SAP solutions",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Workloads%2FsapVirtualInstances%2FdatabaseInstances",
+            "icon": "./icons/Database instances for SAP solutions.png"
+        },
+        {
+            "name": "Datadog - An Azure Native ISV Service",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Datadog%2Fmonitors",
+            "icon": "./icons/Datadog - An Azure Native ISV Service.png"
+        },
+        {
+            "name": "Deleted Groups",
+            "href": "#blade/Microsoft_AAD_IAM/DeletedGroupsListV2Blade",
+            "icon": "./icons/Deleted Groups.png"
+        },
+        {
+            "name": "Deleted Users",
+            "href": "#blade/Microsoft_AAD_UsersAndTenants/DeletedUsersList.ReactView",
+            "icon": "./icons/Deleted Users.png"
+        },
+        {
+            "name": "Deploy a custom template",
+            "href": "#create/Microsoft.Template",
+            "icon": "./icons/Deploy a custom template.png"
+        },
+        {
+            "name": "Deployment Scripts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Resources%2FdeploymentScripts",
+            "icon": "./icons/Deployment Scripts.png"
+        },
+        {
+            "name": "Dev centers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DevCenter%2Fdevcenters",
+            "icon": "./icons/Dev centers.png"
+        },
+        {
+            "name": "Device Update for IoT Hubs",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DeviceUpdate%2FAccounts",
+            "icon": "./icons/Device Update for IoT Hubs.png"
+        },
+        {
+            "name": "Devices",
+            "href": "#blade/Microsoft_Intune_MTM/DeviceCompliance.ReactView",
+            "icon": "./icons/Devices.png"
+        },
+        {
+            "name": "Diagnostic settings",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/microsoft.eventhub%2Fnamespaces%2Fproviders%2Fdiagnosticsettings",
+            "icon": "./icons/Diagnostic settings.png"
+        },
+        {
+            "name": "DICOM service",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HealthcareApis%2Fworkspaces%2Fdicomservices",
+            "icon": "./icons/DICOM service.png"
+        },
+        {
+            "name": "Disk Accesses",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2FdiskAccesses",
+            "icon": "./icons/Disk Accesses.png"
+        },
+        {
+            "name": "Disk Encryption Sets",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2FdiskEncryptionSets",
+            "icon": "./icons/Disk Encryption Sets.png"
+        },
+        {
+            "name": "Disk Pools",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.StoragePool%2FdiskPools",
+            "icon": "./icons/Disk Pools.png"
+        },
+        {
+            "name": "Disks",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2Fdisks",
+            "icon": "./icons/Disks.png"
+        },
+        {
+            "name": "DNS forwarding rulesets",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FdnsForwardingRulesets",
+            "icon": "./icons/DNS forwarding rulesets.png"
+        },
+        {
+            "name": "DNS private resolvers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FdnsResolvers",
+            "icon": "./icons/DNS private resolvers.png"
+        },
+        {
+            "name": "Domain Names",
+            "href": "#blade/Microsoft_AAD_IAM/DomainsListBlade",
+            "icon": "./icons/Domain Names.png"
+        },
+        {
+            "name": "Elastic SANs",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ElasticSan%2Felasticsans",
+            "icon": "./icons/Elastic SANs.png"
+        },
+        {
+            "name": "Elasticsearch (Elastic Cloud)",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Elastic%2Fmonitors",
+            "icon": "./icons/Elasticsearch (Elastic Cloud).png"
+        },
+        {
+            "name": "Email Communication Services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Communication%2FEmailServices",
+            "icon": "./icons/Email Communication Services.png"
+        },
+        {
+            "name": "ESRP Scan",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AzureScan%2FscanningAccounts",
+            "icon": "./icons/ESRP Scan.png"
+        },
+        {
+            "name": "Event Grid",
+            "href": "#blade/Microsoft_Azure_EventGrid/EventGridCentralMenuBlade",
+            "icon": "./icons/Event Grid.png"
+        },
+        {
+            "name": "Event Grid Partner Configurations",
+            "href": "#blade/Microsoft_Azure_EventGrid/EventGridCentralMenuBlade/partner_configs",
+            "icon": "./icons/Event Grid Partner Configurations.png"
+        },
+        {
+            "name": "Event Grid Partner Destinations",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.EventGrid%2FpartnerDestinations",
+            "icon": "./icons/Event Grid Partner Destinations.png"
+        },
+        {
+            "name": "ExpressRoute circuits",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FexpressRouteCircuits",
+            "icon": "./icons/ExpressRoute circuits.png"
+        },
+        {
+            "name": "ExpressRoute Direct",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FexpressRoutePorts",
+            "icon": "./icons/ExpressRoute Direct.png"
+        },
+        {
+            "name": "ExpressRoute traffic collectors",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.NetworkFunction%2FazureTrafficCollectors",
+            "icon": "./icons/ExpressRoute traffic collectors.png"
+        },
+        {
+            "name": "Feature Previews",
+            "href": "#blade/Microsoft_AAD_IAM/FeaturePreviewsListBlade",
+            "icon": "./icons/Feature Previews.png"
+        },
+        {
+            "name": "FHIR service",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HealthcareApis%2Fworkspaces%2Ffhirservices",
+            "icon": "./icons/FHIR service.png"
+        },
+        {
+            "name": "Fluid Relay",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.FluidRelay%2FfluidRelayServers",
+            "icon": "./icons/Fluid Relay.png"
+        },
+        {
+            "name": "Group Settings",
+            "href": "#blade/Microsoft_AAD_IAM/GroupGeneralSettingsBlade",
+            "icon": "./icons/Group Settings.png"
+        },
+        {
+            "name": "Guest Assignments",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2FvirtualMachines%2Fproviders%2FguestConfigurationAssignments",
+            "icon": "./icons/Guest Assignments.png"
+        },
+        {
+            "name": "Guest Usages",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AzureActiveDirectory%2FguestUsages",
+            "icon": "./icons/Guest Usages.png"
+        },
+        {
+            "name": "Health Data Services workspace",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HealthcareApis%2Fworkspaces",
+            "icon": "./icons/Health Data Services workspace.png"
+        },
+        {
+            "name": "Health decision supports",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/HealthDecisionSupport",
+            "icon": "./icons/Health decision supports.png"
+        },
+        {
+            "name": "Host pools",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DesktopVirtualization%2FHostPools",
+            "icon": "./icons/Host pools.png"
+        },
+        {
+            "name": "Image templates",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.VirtualMachineImages%2FimageTemplates",
+            "icon": "./icons/Image templates.png"
+        },
+        {
+            "name": "Images",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2Fimages",
+            "icon": "./icons/Images.png"
+        },
+        {
+            "name": "Import export jobs",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ImportExport%2Fjobs",
+            "icon": "./icons/Import export jobs.png"
+        },
+        {
+            "name": "Instance pools",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Sql%2FinstancePools",
+            "icon": "./icons/Instance pools.png"
+        },
+        {
+            "name": "Intelligent Recommendations Accounts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.RecommendationsService%2Faccounts",
+            "icon": "./icons/Intelligent Recommendations Accounts.png"
+        },
+        {
+            "name": "Internet Analyzer profiles",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FNetworkExperimentProfiles",
+            "icon": "./icons/Internet Analyzer profiles.png"
+        },
+        {
+            "name": "Kubernetes fleet manager",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/microsoft.containerservice%2Ffleets",
+            "icon": "./icons/Kubernetes fleet manager.png"
+        },
+        {
+            "name": "Lab plans",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.LabServices%2FlabPlans",
+            "icon": "./icons/Lab plans.png"
+        },
+        {
+            "name": "Labs",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.LabServices%2Flabs",
+            "icon": "./icons/Labs.png"
+        },
+        {
+            "name": "Licenses",
+            "href": "#blade/Microsoft_AAD_IAM/LicensesMenuBlade",
+            "icon": "./icons/Licenses.png"
+        },
+        {
+            "name": "LiveData Migrators",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Wandisco.Fusion%2Fmigrators",
+            "icon": "./icons/LiveData Migrators.png"
+        },
+        {
+            "name": "Log Analytics query packs",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.OperationalInsights%2Fquerypacks",
+            "icon": "./icons/Log Analytics query packs.png"
+        },
+        {
+            "name": "Managed CCF Apps",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ConfidentialLedger%2FManagedCCFs",
+            "icon": "./icons/Managed CCF Apps.png"
+        },
+        {
+            "name": "Managed Prometheus",
+            "href": "#blade/Microsoft_Azure_Monitoring/AzureMonitoringBrowseBlade/prometheus",
+            "icon": "./icons/Managed Prometheus.png"
+        },
+        {
+            "name": "MedTech service",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HealthcareApis%2Fworkspaces%2Fiotconnectors",
+            "icon": "./icons/MedTech service.png"
+        },
+        {
+            "name": "Mesh VPNs",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.NetworkFunction%2FmeshVpns",
+            "icon": "./icons/Mesh VPNs.png"
+        },
+        {
+            "name": "Microsoft Dev Box",
+            "href": "#blade/Microsoft_Azure_DevCenter/DevCenterMenuBlade",
+            "icon": "./icons/Microsoft Dev Box.png"
+        },
+        {
+            "name": "Microsoft Purview accounts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Purview%2FAccounts",
+            "icon": "./icons/Microsoft Purview accounts.png"
+        },
+        {
+            "name": "Microsoft.Network express route gateways",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FexpressRouteGateways",
+            "icon": "./icons/Microsoft.Network express route gateways.png"
+        },
+        {
+            "name": "Mobile Networks",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.MobileNetwork%2FmobileNetworks",
+            "icon": "./icons/Mobile Networks.png"
+        },
+        {
+            "name": "Mobility (MDM and MAM)",
+            "href": "#blade/Microsoft_AAD_IAM/MdmAppsListBlade",
+            "icon": "./icons/Mobility (MDM and MAM).png"
+        },
+        {
+            "name": "My Cases & Support",
+            "href": "#blade/VLCentral_CaseManagement/Home.ReactView",
+            "icon": "./icons/My Cases & Support.png"
+        },
+        {
+            "name": "Network connections",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DevCenter%2Fnetworkconnections",
+            "icon": "./icons/Network connections.png"
+        },
+        {
+            "name": "Network Managers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FnetworkManagers",
+            "icon": "./icons/Network Managers.png"
+        },
+        {
+            "name": "Network Security Perimeters",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FnetworkSecurityPerimeters",
+            "icon": "./icons/Network Security Perimeters.png"
+        },
+        {
+            "name": "NGINXaaS",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/NGINX.NGINXPLUS%2FnginxDeployments",
+            "icon": "./icons/NGINXaaS.png"
+        },
+        {
+            "name": "Object Anchors Accounts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.MixedReality%2FobjectAnchorsAccounts",
+            "icon": "./icons/Object Anchors Accounts.png"
+        },
+        {
+            "name": "Object Understanding Accounts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.MixedReality%2FobjectUnderstandingAccounts",
+            "icon": "./icons/Object Understanding Accounts.png"
+        },
+        {
+            "name": "On-premises data gateways",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Web%2FconnectionGateways",
+            "icon": "./icons/On-premises data gateways.png"
+        },
+        {
+            "name": "Password Reset",
+            "href": "#blade/Microsoft_AAD_IAM/PasswordResetMenuBlade",
+            "icon": "./icons/Password Reset.png"
+        },
+        {
+            "name": "Peering Services",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Peering%2FpeeringServices",
+            "icon": "./icons/Peering Services.png"
+        },
+        {
+            "name": "Peerings",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Peering%2Fpeerings",
+            "icon": "./icons/Peerings.png"
+        },
+        {
+            "name": "Private endpoints",
+            "href": "#blade/Microsoft_Azure_Network/PrivateLinkCenterBlade/privateendpoints",
+            "icon": "./icons/Private endpoints.png"
+        },
+        {
+            "name": "Private link services",
+            "href": "#blade/Microsoft_Azure_Network/PrivateLinkCenterBlade/privatelinkservices",
+            "icon": "./icons/Private link services.png"
+        },
+        {
+            "name": "Projects",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DevCenter%2Fprojects",
+            "icon": "./icons/Projects.png"
+        },
+        {
+            "name": "Quantum Workspaces",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Quantum%2FWorkspaces",
+            "icon": "./icons/Quantum Workspaces.png"
+        },
+        {
+            "name": "Quotas",
+            "href": "#blade/Microsoft_Azure_Capacity/QuotaMenuBlade",
+            "icon": "./icons/Quotas.png"
+        },
+        {
+            "name": "Resource bridges",
+            "href": "#blade/Microsoft_Azure_HybridCompute/AzureArcCenterBlade/resourceBridges",
+            "icon": "./icons/Resource bridges.png"
+        },
+        {
+            "name": "Resource changes",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Resources%2FresourceChanges",
+            "icon": "./icons/Resource changes.png"
+        },
+        {
+            "name": "Resource Guards",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DataProtection%2FresourceGuards",
+            "icon": "./icons/Resource Guards.png"
+        },
+        {
+            "name": "Resource management private links",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Authorization%2FresourceManagementPrivateLinks",
+            "icon": "./icons/Resource management private links.png"
+        },
+        {
+            "name": "Restore Point Collections",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2FrestorePointCollections",
+            "icon": "./icons/Restore Point Collections.png"
+        },
+        {
+            "name": "Route filters",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Network%2FrouteFilters",
+            "icon": "./icons/Route filters.png"
+        },
+        {
+            "name": "SaaS",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.SaaS%2Fresources",
+            "icon": "./icons/SaaS.png"
+        },
+        {
+            "name": "Savings plans",
+            "href": "#blade/Microsoft_Azure_Reservations/ReservationsBrowseBlade/productType/SavingsPlan",
+            "icon": "./icons/Savings plans.png"
+        },
+        {
+            "name": "Scaling plans",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.DesktopVirtualization%2FScalingPlans",
+            "icon": "./icons/Scaling plans.png"
+        },
+        {
+            "name": "SCOM managed instances",
+            "href": "#blade/HubsExtension/AssetMenuBlade/assetName/Aquila/extensionName/Microsoft_Azure_OperationsMgr",
+            "icon": "./icons/SCOM managed instances.png"
+        },
+        {
+            "name": "SCVMM management servers",
+            "href": "#blade/Microsoft_Azure_HybridCompute/AzureArcCenterBlade/scVmmManagementServer",
+            "icon": "./icons/SCVMM management servers.png"
+        },
+        {
+            "name": "SDWAN Controllers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Orbital%2FsdwanControllers",
+            "icon": "./icons/SDWAN Controllers.png"
+        },
+        {
+            "name": "Service Fabric managed clusters",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ServiceFabric%2Fmanagedclusters",
+            "icon": "./icons/Service Fabric managed clusters.png"
+        },
+        {
+            "name": "Service health",
+            "href": "#blade/Microsoft_Intune_MTM/ServiceHealth.ReactView",
+            "icon": "./icons/Service health.png"
+        },
+        {
+            "name": "Services Hub Connectors",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ServicesHub%2Fconnectors",
+            "icon": "./icons/Services Hub Connectors.png"
+        },
+        {
+            "name": "Sign-in Logs",
+            "href": "#blade/Microsoft_AAD_IAM/SignInEventsV3Blade",
+            "icon": "./icons/Sign-in Logs.png"
+        },
+        {
+            "name": "Snapshots",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2Fsnapshots",
+            "icon": "./icons/Snapshots.png"
+        },
+        {
+            "name": "Spacecrafts",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Orbital%2Fspacecrafts",
+            "icon": "./icons/Spacecrafts.png"
+        },
+        {
+            "name": "SQL Server databases - Azure Arc",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AzureArcData%2FSqlServerInstances%2FDatabases",
+            "icon": "./icons/SQL Server databases - Azure Arc.png"
+        },
+        {
+            "name": "SSH keys",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2FsshPublicKeys",
+            "icon": "./icons/SSH keys.png"
+        },
+        {
+            "name": "Storage browser",
+            "href": "#blade/Microsoft_Azure_Storage/StorageBrowserAccountPicker",
+            "icon": "./icons/Storage browser.png"
+        },
+        {
+            "name": "Storage movers",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.StorageMover%2FstorageMovers",
+            "icon": "./icons/Storage movers.png"
+        },
+        {
+            "name": "Stream Analytics clusters",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.StreamAnalytics%2Fclusters",
+            "icon": "./icons/Stream Analytics clusters.png"
+        },
+        {
+            "name": "Targets Management",
+            "href": "#blade/Microsoft_Azure_Chaos/ChaosStudioMenuBlade/defaultMenuItem/targetsManagement",
+            "icon": "./icons/Targets Management.png"
+        },
+        {
+            "name": "Template specs",
+            "href": "#blade/Microsoft_Azure_TemplateSpecs/TemplatesListBlade",
+            "icon": "./icons/Template specs.png"
+        },
+        {
+            "name": "Test Base for Microsoft 365",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.TestBase%2FtestbaseAccounts",
+            "icon": "./icons/Test Base for Microsoft 365.png"
+        },
+        {
+            "name": "Threat management",
+            "href": "#blade/Microsoft_Intune_MTM/Antivirus.ReactView",
+            "icon": "./icons/Threat management.png"
+        },
+        {
+            "name": "Update management center (Preview)",
+            "href": "#blade/Microsoft_Azure_Automation/UpdateCenterMenuBlade",
+            "icon": "./icons/Update management center (Preview).png"
+        },
+        {
+            "name": "User privacy",
+            "href": "#blade/Microsoft_Azure_Resources/UserPrivacyMenuBlade",
+            "icon": "./icons/User privacy.png"
+        },
+        {
+            "name": "Users",
+            "href": "#blade/Microsoft_Intune_MTM/Users.ReactView",
+            "icon": "./icons/Users.png"
+        },
+        {
+            "name": "Verified ID",
+            "href": "#blade/Microsoft_AAD_DecentralizedIdentity/InitialMenuBlade",
+            "icon": "./icons/Verified ID.png"
+        },
+        {
+            "name": "Video Analyzers",
+            "href": "#blade/Microsoft_Azure_ProjectOxford/AppliedAIHub/VideoAnalyzer",
+            "icon": "./icons/Video Analyzers.png"
+        },
+        {
+            "name": "Virtual Instances for SAP solutions",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Workloads%2FsapVirtualInstances",
+            "icon": "./icons/Virtual Instances for SAP solutions.png"
+        },
+        {
+            "name": "Virtual Network Managers",
+            "href": "#blade/HubsExtension/AssetMenuBlade/assetName/VirtualNetworkManager/extensionName/Microsoft_Azure_ManagedNetwork",
+            "icon": "./icons/Virtual Network Managers.png"
+        },
+        {
+            "name": "Virtual Network Terminal Access Points",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/microsoft.network%2Fvirtualnetworktaps",
+            "icon": "./icons/Virtual Network Terminal Access Points.png"
+        },
+        {
+            "name": "Virtual Visits Builder",
+            "href": "#blade/Microsoft_Azure_VirtualVisitsBuilder/SampleBuilder.ReactView",
+            "icon": "./icons/Virtual Visits Builder.png"
+        },
+        {
+            "name": "VM application definitions",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2Fgalleries%2Fapplications",
+            "icon": "./icons/VM application definitions.png"
+        },
+        {
+            "name": "VM application versions",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2Fgalleries%2Fapplications%2Fversions",
+            "icon": "./icons/VM application versions.png"
+        },
+        {
+            "name": "VM image definitions",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2Fgalleries%2Fimages",
+            "icon": "./icons/VM image definitions.png"
+        },
+        {
+            "name": "VM image versions",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Compute%2Fgalleries%2Fimages%2Fversions",
+            "icon": "./icons/VM image versions.png"
+        },
+        {
+            "name": "VMware vCenters",
+            "href": "#blade/Microsoft_Azure_HybridCompute/AzureArcCenterBlade/vCenter",
+            "icon": "./icons/VMware vCenters.png"
+        },
+        {
+            "name": "Web PubSub Service",
+            "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.SignalRService%2FWebPubSub",
+            "icon": "./icons/Web PubSub Service.png"
+        },
+        {
+            "name": "Workload Identities",
+            "href": "#blade/Microsoft_Azure_ManagedServiceIdentity/WorkloadIdentitiesBlade",
+            "icon": "./icons/Workload Identities.png"
+        }
+    ]
+}

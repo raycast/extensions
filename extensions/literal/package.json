@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "literal",
+  "title": "Literal",
+  "description": "Track and edit your reading progress from your command bar",
+  "icon": "command-icon.png",
+  "author": "OkanBilal",
+  "categories": [
+    "Web",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "literal",
+      "title": "Search Books",
+      "subtitle": "Literal",
+      "description": "Search your literal books by status",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Enter your email for literal",
+      "placeholder": "Enter your email for literal",
+      "name": "email",
+      "required": true,
+      "title": "Email",
+      "type": "textfield"
+    },
+    {
+      "description": "Enter your password for literal",
+      "placeholder": "Enter your password for literal",
+      "name": "password",
+      "required": true,
+      "title": "Password",
+      "type": "password"
+    }
+  ],
+  "dependencies": {
+    "@apollo/client": "^3.9.9",
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.14.1",
+    "cross-fetch": "^4.0.0",
+    "graphql": "^16.8.1",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.17.0",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

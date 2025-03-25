@@ -1,0 +1,376 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chatgpt",
+  "title": "ChatGPT",
+  "description": "Interact with OpenAI's ChatGPT directly from your command bar",
+  "icon": "icon.png",
+  "author": "abielzulio",
+  "contributors": [
+    "erodactyl",
+    "pernielsentikaer",
+    "shichongrui",
+    "timolins",
+    "cruelmoney",
+    "sykuang",
+    "thanhlongb",
+    "k8scat",
+    "Nauxscript",
+    "lin",
+    "leeonfield",
+    "husniadil",
+    "luckykong",
+    "smilemachine",
+    "iamEvan",
+    "alex925"
+  ],
+  "pastContributors": [
+    "pomdtr",
+    "Lemon"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Web",
+    "Fun",
+    "Finance",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Ask Question",
+      "subtitle": "ChatGPT",
+      "description": "Ask ChatGPT via Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "saved",
+      "title": "Saved Answers",
+      "subtitle": "ChatGPT",
+      "description": "Collection of your saved answer",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "ChatGPT",
+      "description": "Collection of your recent answer",
+      "mode": "view"
+    },
+    {
+      "name": "conversation",
+      "title": "Conversations",
+      "subtitle": "ChatGPT",
+      "description": "Collection of your recent conversation",
+      "mode": "view"
+    },
+    {
+      "name": "model",
+      "title": "Models",
+      "subtitle": "ChatGPT",
+      "description": "Collection of your custom and default model",
+      "mode": "view"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize Website",
+      "subtitle": "ChatGPT",
+      "description": "Summarize Website and YouTube video",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "promptTemplate",
+          "description": "Template support {{content}} tag, and it will replace with the content",
+          "type": "file",
+          "title": "Prompt template for the website",
+          "required": false
+        },
+        {
+          "name": "promptTemplate2",
+          "description": "Template support {{content}} tag, and it will replace with the video transcript",
+          "type": "file",
+          "title": "Prompt template for the YouTube",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ask-selected-image",
+      "title": "Ask Selected Image",
+      "description": "Template with a plain detail view",
+      "mode": "view",
+      "icon": "vision.png",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": false,
+          "placeholder": "What is it?"
+        }
+      ]
+    },
+    {
+      "name": "ask-clipboard-image",
+      "title": "Ask Clipboard Image",
+      "description": "Template with a plain detail view",
+      "mode": "view",
+      "icon": "vision.png",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": false,
+          "placeholder": "What is it?"
+        }
+      ]
+    },
+    {
+      "name": "create-ai-command",
+      "title": "Create AI Command",
+      "description": "Create new quick AI command",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "search-ai-command",
+      "title": "Search AI Command",
+      "description": "Search AI commands",
+      "mode": "view",
+      "icon": "icon.png"
+    }
+  ],
+  "keywords": [
+    "chat",
+    "gpt",
+    "openai",
+    "vision"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "label": "Open AI API Key",
+      "description": "Enter your personal Open AI API Key",
+      "type": "password",
+      "title": "API Key",
+      "required": true
+    },
+    {
+      "name": "useStream",
+      "label": "Enable streaming completions",
+      "description": "Stream the completions of the generated answer",
+      "type": "checkbox",
+      "title": "Stream Completion",
+      "default": true,
+      "required": true
+    },
+    {
+      "name": "isAutoSaveConversation",
+      "label": "Enable auto-save conversation",
+      "description": "Auto-save every conversation that you had with the model",
+      "type": "checkbox",
+      "title": "Auto-save Conversation",
+      "default": true,
+      "required": true
+    },
+    {
+      "name": "isHistoryPaused",
+      "label": "Enable pause history",
+      "description": "Pause the history of the conversation",
+      "type": "checkbox",
+      "title": "Pause History",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "isAutoLoadText",
+      "label": "Enable auto-load selected text",
+      "description": "Load selected text from your frontmost application to the question bar automatically",
+      "type": "checkbox",
+      "title": "Auto-load Text",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "isAutoFullInput",
+      "label": "Enable full text input initially",
+      "description": "Use full text input form when asking question for the first time",
+      "type": "checkbox",
+      "title": "Use Full Text Input",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "isAutoTTS",
+      "label": "Enable text-to-speech for every response",
+      "description": "Enable auto TTS everytime you get a generated answer",
+      "type": "checkbox",
+      "title": "Text-to-Speech",
+      "required": false,
+      "default": false
+    },
+    {
+      "default": false,
+      "description": "Enable custom model names without selecting from the model API",
+      "label": "Enable custom model name",
+      "name": "isCustomModel",
+      "required": false,
+      "title": "Custom model",
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Change the OpenAI's default API endpoint to custom endpoint",
+      "label": "Change API Endpoint",
+      "name": "useApiEndpoint",
+      "required": false,
+      "title": "Use API Endpoint",
+      "type": "checkbox"
+    },
+    {
+      "description": "Custom API endpoint",
+      "name": "apiEndpoint",
+      "required": false,
+      "title": "API Endpoint",
+      "placeholder": "https://api.openai.com/v1",
+      "type": "textfield"
+    },
+    {
+      "default": false,
+      "description": "Change the default vision model",
+      "label": "Change Vision Model",
+      "name": "useVisionModel",
+      "required": false,
+      "title": "Change Vision Model",
+      "type": "checkbox"
+    },
+    {
+      "description": "Custom Vision Model Name",
+      "name": "visionModelName",
+      "required": false,
+      "title": "Vision Model Name",
+      "placeholder": "gpt-4o",
+      "type": "textfield"
+    },
+    {
+      "name": "useProxy",
+      "label": "Enable proxy for each request",
+      "description": "Each request will be passed through the proxy",
+      "type": "checkbox",
+      "title": "Use Proxy",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "proxyProtocol",
+      "description": "Each request will be passed through the proxy",
+      "type": "dropdown",
+      "title": "Proxy Protocol",
+      "data": [
+        {
+          "title": "HTTP",
+          "value": "http"
+        },
+        {
+          "title": "HTTPs",
+          "value": "https"
+        },
+        {
+          "title": "Socks4",
+          "value": "socks4"
+        },
+        {
+          "title": "Socks5",
+          "value": "socks5"
+        }
+      ],
+      "required": false,
+      "default": "http"
+    },
+    {
+      "name": "proxyHost",
+      "description": "Server address of the proxy",
+      "type": "textfield",
+      "title": "Proxy Host",
+      "required": false
+    },
+    {
+      "name": "proxyPort",
+      "description": "Server port of the proxy",
+      "type": "textfield",
+      "title": "Proxy Port",
+      "required": false
+    },
+    {
+      "name": "proxyUsername",
+      "description": "Leave empty if doesn't have",
+      "type": "textfield",
+      "title": "Proxy Username",
+      "required": false
+    },
+    {
+      "name": "proxyPassword",
+      "description": "Leave empty if doesn't have",
+      "type": "password",
+      "title": "Proxy Password",
+      "required": false
+    },
+    {
+      "name": "useAzure",
+      "label": "Use Azure OpenAI",
+      "description": "Use Azure OPENAI rather than OPENAI",
+      "type": "checkbox",
+      "title": "Use Azure OpenAI",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "azureEndpoint",
+      "description": "Leave empty if you are not using Azure OpenAI",
+      "type": "textfield",
+      "title": "Azure Endpoint",
+      "required": false
+    },
+    {
+      "name": "azureDeployment",
+      "description": "Leave empty if you are not using Azure OpenAI",
+      "type": "textfield",
+      "title": "Azure Deployment",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@nem035/gpt-3-encoder": "^1.1.7",
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1",
+    "@types/uuid": "^10.0.0",
+    "cross-fetch": "^4.1.0",
+    "csv-parse": "^5.6.0",
+    "image-meta": "^0.2.1",
+    "moment": "^2.30.1",
+    "openai": "^4.77.0",
+    "plist": "^3.1.0",
+    "proxy-agent": "^6.5.0",
+    "run-applescript": "^7.0.0",
+    "say": "^0.16.0",
+    "uuid": "^9.0.0",
+    "youtube-transcript": "^1.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/plist": "^3.0.5",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "pull": "ray pull-contributions"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gather",
+  "title": "Gather",
+  "description": "Control Gather from Raycast",
+  "icon": "command-icon.png",
+  "author": "yannglt",
+  "version": "1.0.1",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-availability-status",
+      "title": "Toggle Availability Status",
+      "subtitle": "Gather",
+      "description": "Toggle your vailability status in Gather",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-camera",
+      "title": "Toggle Camera",
+      "subtitle": "Gather",
+      "description": "Toggle your camera in Gather",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-microphone",
+      "title": "Toggle Microphone",
+      "subtitle": "Gather",
+      "description": "Toggle your microphone in Gather",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-afk",
+      "title": "Toggle Away From Keyboard",
+      "subtitle": "Gather",
+      "description": "Toggle your camera, microphone and availability status in Gather",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.1",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

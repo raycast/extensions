@@ -1,0 +1,359 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open-folders",
+  "title": "Open Folders",
+  "description": "Open your common files and folders quickly!",
+  "icon": "extension-icon.png",
+  "author": "timothy_boye",
+  "contributors": [
+    "Undolog"
+  ],
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "listFolders",
+      "title": "List User Folders",
+      "icon": "extension-icon-grid.png",
+      "description": "List of folders in the user home directory, excluding dot folders.",
+      "mode": "view",
+      "preferences": [
+        {
+          "required": false,
+          "name": "homedir",
+          "title": "User Directory",
+          "type": "directory",
+          "description": "Sets directory for viewing sub folders of.",
+          "default": "~/"
+        },
+        {
+          "required": false,
+          "name": "layout",
+          "title": "User Folders Layout",
+          "type": "dropdown",
+          "description": "Select the layout of the List User Folders screen.",
+          "data": [
+            {
+              "title": "Grid 3",
+              "value": "3"
+            },
+            {
+              "title": "Grid 4",
+              "value": "4"
+            },
+            {
+              "title": "Grid 5",
+              "value": "5"
+            },
+            {
+              "title": "Grid 6",
+              "value": "6"
+            },
+            {
+              "title": "Grid 7",
+              "value": "7"
+            },
+            {
+              "title": "Grid 8",
+              "value": "8"
+            },
+            {
+              "title": "List",
+              "value": "List"
+            }
+          ],
+          "default": "5"
+        }
+      ]
+    },
+    {
+      "name": "listDownloads",
+      "title": "List Downloads",
+      "icon": "extension-icon-grid.png",
+      "description": "List files in downloads folder by creation date.",
+      "mode": "view",
+      "preferences": [
+        {
+          "required": false,
+          "name": "downloadedFilesdir",
+          "title": "Downloads Directory",
+          "type": "directory",
+          "description": "Sets directory to view contained files of.",
+          "default": "~/Downloads"
+        },
+        {
+          "required": false,
+          "name": "layout",
+          "title": "Downloaded Files Layout",
+          "type": "dropdown",
+          "description": "Select the layout of the List Downloads screen.",
+          "data": [
+            {
+              "title": "Grid 3",
+              "value": "3"
+            },
+            {
+              "title": "Grid 4",
+              "value": "4"
+            },
+            {
+              "title": "Grid 5",
+              "value": "5"
+            },
+            {
+              "title": "Grid 6",
+              "value": "6"
+            },
+            {
+              "title": "Grid 7",
+              "value": "7"
+            },
+            {
+              "title": "Grid 8",
+              "value": "8"
+            },
+            {
+              "title": "List",
+              "value": "List"
+            }
+          ],
+          "default": "5"
+        }
+      ]
+    },
+    {
+      "name": "fileSpeedDial",
+      "title": "Open File Speed Dial",
+      "icon": "extension-icon-grid.png",
+      "description": "Speed Dial of user selected files to open.",
+      "mode": "view",
+      "preferences": [
+        {
+          "required": true,
+          "name": "fileOne",
+          "title": "File 1",
+          "type": "file",
+          "description": "Sets file for speed dial 1."
+        },
+        {
+          "required": false,
+          "name": "fileTwo",
+          "title": "File 2",
+          "type": "file",
+          "description": "Sets file for speed dial 2."
+        },
+        {
+          "required": false,
+          "name": "fileThree",
+          "title": "File 3",
+          "type": "file",
+          "description": "Sets file for speed dial 3."
+        },
+        {
+          "required": false,
+          "name": "fileFour",
+          "title": "File 4",
+          "type": "file",
+          "description": "Sets file for speed dial 4."
+        },
+        {
+          "required": false,
+          "name": "fileFive",
+          "title": "File 5",
+          "type": "file",
+          "description": "Sets file for speed dial 5."
+        },
+        {
+          "required": false,
+          "name": "fileSix",
+          "title": "File 6",
+          "type": "file",
+          "description": "Sets file for speed dial 6."
+        },
+        {
+          "required": false,
+          "name": "fileSeven",
+          "title": "File 7",
+          "type": "file",
+          "description": "Sets file for speed dial 7."
+        },
+        {
+          "required": false,
+          "name": "fileEight",
+          "title": "File 8",
+          "type": "file",
+          "description": "Sets file for speed dial 8."
+        }
+      ]
+    },
+    {
+      "name": "folderSpeedDial",
+      "title": "Open Folder Speed Dial",
+      "icon": "extension-icon-grid.png",
+      "description": "Speed Dial of user selected folders to open.",
+      "mode": "view",
+      "preferences": [
+        {
+          "required": true,
+          "name": "dirOne",
+          "title": "Folder 1",
+          "type": "directory",
+          "description": "Sets directory for speed dial 1."
+        },
+        {
+          "required": false,
+          "name": "dirTwo",
+          "title": "Folder 2",
+          "type": "directory",
+          "description": "Sets directory for speed dial 2."
+        },
+        {
+          "required": false,
+          "name": "dirThree",
+          "title": "Folder 3",
+          "type": "directory",
+          "description": "Sets directory for speed dial 3."
+        },
+        {
+          "required": false,
+          "name": "dirFour",
+          "title": "Folder 4",
+          "type": "directory",
+          "description": "Sets directory for speed dial 4."
+        },
+        {
+          "required": false,
+          "name": "dirFive",
+          "title": "Folder 5",
+          "type": "directory",
+          "description": "Sets directory for speed dial 5."
+        },
+        {
+          "required": false,
+          "name": "dirSix",
+          "title": "Folder 6",
+          "type": "directory",
+          "description": "Sets directory for speed dial 6."
+        },
+        {
+          "required": false,
+          "name": "dirSeven",
+          "title": "Folder 7",
+          "type": "directory",
+          "description": "Sets directory for speed dial 7."
+        },
+        {
+          "required": false,
+          "name": "dirEight",
+          "title": "Folder 8",
+          "type": "directory",
+          "description": "Sets directory for speed dial 8."
+        }
+      ]
+    },
+    {
+      "name": "mostRecent",
+      "title": "Open Most Recent Download",
+      "subtitle": "Finder",
+      "description": "Open most recently created file in Downloads directory.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "required": false,
+          "name": "downloadsdir",
+          "title": "Downloads Directory",
+          "type": "directory",
+          "description": "Sets the directory to open the most recent file from.",
+          "default": "~/Downloads"
+        }
+      ]
+    },
+    {
+      "name": "downloads",
+      "title": "Open Downloads Folder",
+      "description": "Open Downloads folder.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "required": false,
+          "name": "downloadsdir",
+          "title": "Downloads Directory",
+          "type": "directory",
+          "description": "Sets the directory to open.",
+          "default": "~/Downloads"
+        }
+      ]
+    },
+    {
+      "name": "documents",
+      "title": "Open Documents Folder",
+      "description": "Open Documents folder.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "required": false,
+          "name": "documentsdir",
+          "title": "Documents Directory",
+          "type": "directory",
+          "description": "Sets the directory to open.",
+          "default": "~/Documents"
+        }
+      ]
+    },
+    {
+      "name": "desktop",
+      "title": "Open Desktop Folder",
+      "description": "Open Desktop folder.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "required": false,
+          "name": "desktopdir",
+          "title": "Desktop Directory",
+          "type": "directory",
+          "description": "Sets the directory to open.",
+          "default": "~/Desktop"
+        }
+      ]
+    },
+    {
+      "name": "projects",
+      "title": "Open Projects Folder",
+      "description": "Open Projects folder.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "required": true,
+          "name": "projectsdir",
+          "title": "Projects Directory",
+          "type": "directory",
+          "description": "Sets the directory to open."
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.12.7",
+    "@types/react": "18.3.1",
+    "react-devtools": "^4.28.4",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "background-sounds",
+  "title": "Background Sounds",
+  "description": "Toggle macOS background sounds on and off.",
+  "icon": "icon.png",
+  "author": "SebDanielsson",
+  "contributors": [
+    "awerks"
+  ],
+  "categories": [
+    "Media",
+    "Fun",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle",
+      "title": "Toggle Background Sound",
+      "description": "Start and stop background sound.",
+      "mode": "no-view"
+    },
+    {
+      "name": "customize",
+      "title": "Change Sound & Volume",
+      "description": "Choose which background sound to play and set the volume.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.71.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/utils": "1.14.0",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

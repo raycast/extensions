@@ -1,0 +1,143 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "focus",
+  "title": "Focus - Website Blocker for Mac",
+  "description": "Raycast extension for Focus app",
+  "icon": "focus-icon.png",
+  "author": "ernest",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-focus",
+      "title": "Start Focus Session",
+      "subtitle": "Focus",
+      "description": "Quickly start Focus with default or single profile",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-focus-with-profile",
+      "title": "Start Focus Session with Profile",
+      "subtitle": "Focus",
+      "description": "Start Focus by selecting a profile",
+      "mode": "view"
+    },
+    {
+      "name": "start-focus-25",
+      "title": "Start Focus Session - 25 Minutes",
+      "subtitle": "Focus",
+      "description": "Start a 25 minutes focus session.",
+      "keywords": [
+        "start"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "start-focus-custom",
+      "title": "Start Focus Session - Custom Duration",
+      "subtitle": "Focus",
+      "description": "Start a focus session with custom duration",
+      "keywords": [
+        "start",
+        "custom-focus"
+      ],
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "hours",
+          "placeholder": "Hours",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "minutes",
+          "placeholder": "Minutes",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "take-break-5",
+      "title": "Break",
+      "subtitle": "Focus",
+      "description": "Take a 5 minutes break",
+      "keywords": [
+        "break"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "take-break-custom",
+      "title": "Break - Custom Duration",
+      "subtitle": "Focus",
+      "description": "Take a break with custom duration",
+      "keywords": [
+        "break",
+        "custom-break"
+      ],
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "minutes",
+          "placeholder": "Minutes",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "stop-break",
+      "title": "End Break",
+      "subtitle": "Focus",
+      "description": "Stop break and continue the current focus session.",
+      "keywords": [
+        "stop-break"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-focus",
+      "title": "Stop Focus Session",
+      "subtitle": "Focus",
+      "description": "Stop the current focus session",
+      "keywords": [
+        "stop",
+        "unfocus"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "open-preferences",
+      "title": "Open Focus Preferences",
+      "subtitle": "Focus",
+      "description": "Open the Focus app Preferences",
+      "keywords": [
+        "preferences",
+        "settings"
+      ],
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.0",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.8.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "carbon-code-screenshot-for-raycast",
+  "title": "Carbon Screenshot for Raycast",
+  "description": "Uses the carbon.now.sh to create beautiful screenshot you can share online or with your team",
+  "icon": "icon.png",
+  "author": "adelowo",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Create Carbon Screenshot",
+      "description": "Create screenshots you can share",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "paste",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "description": "Let the extension automatically post your most recent text from the Clipboard",
+      "label": "Paste from clipboard automatically",
+      "title": "Paste from Clipboard"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.1",
+    "execa": "^6.1.0",
+    "puppeteer": "^19.4.1",
+    "ulid": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "postinstall": "node node_modules/puppeteer/install.js"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "elm-search",
+  "title": "Elm Search",
+  "description": "Search Elm packages by name, type, author or module",
+  "icon": "command-icon.png",
+  "author": "HenriqueBuss",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "nameSearch",
+      "title": "Search Package Name",
+      "subtitle": "Elm",
+      "description": "Search packages by name and open them in the official package website or on the dark mode version of it",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "theme",
+          "type": "dropdown",
+          "title": "Theme",
+          "description": "If you choose the dark theme, packages will be opened in https://dark.elm.dmy.fr instead of the usual https://package.elm-lang.org",
+          "default": "light",
+          "required": false,
+          "data": [
+            {
+              "title": "Light",
+              "value": "light"
+            },
+            {
+              "title": "Dark",
+              "value": "dark"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "typeSearch",
+      "title": "Search Types",
+      "subtitle": "Elm",
+      "description": "Search packages by type, author, module and package name. Uses https://klaftertief.github.io/elm-search",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.0",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "git-buddy",
+  "title": "Git Buddy",
+  "description": "An opinionated, AI-powered Git assistant for commit messages, PR descriptions, and branch management tasks.",
+  "icon": "command-icon.png",
+  "author": "gianfranco",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "write-commit-message",
+      "title": "Write Commit Message",
+      "description": "Write a commit message for the current branch.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "commit-message-ai-model",
+          "title": "AI Model",
+          "description": "The AI model to use for generating commit messages.",
+          "type": "dropdown",
+          "required": false,
+          "default": "Anthropic_Claude_Sonnet",
+          "data": [
+            {
+              "title": "GPT-4o",
+              "value": "OpenAI_GPT4o"
+            },
+            {
+              "title": "GPT-4 Turbo",
+              "value": "OpenAI_GPT4-turbo"
+            },
+            {
+              "title": "Claude 3 Haiku",
+              "value": "Anthropic_Claude_Haiku"
+            },
+            {
+              "title": "Mixtral 8×7B",
+              "value": "MixtraL_8x7B"
+            },
+            {
+              "title": "Claude 3.5 Sonnet",
+              "value": "Anthropic_Claude_Sonnet"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "write-pr-description",
+      "title": "Write PR Description",
+      "description": "Write a pull request description for the current branch.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "pr-description-ai-model",
+          "title": "AI Model",
+          "description": "The AI model to use for generating PR descriptions.",
+          "type": "dropdown",
+          "required": false,
+          "default": "Anthropic_Claude_Sonnet",
+          "data": [
+            {
+              "title": "GPT-4o",
+              "value": "OpenAI_GPT4o"
+            },
+            {
+              "title": "GPT-4 Turbo",
+              "value": "OpenAI_GPT4-turbo"
+            },
+            {
+              "title": "Claude 3 Opus",
+              "value": "Anthropic_Claude_Opus"
+            },
+            {
+              "title": "Mixtral 8×7B",
+              "value": "MixtraL_8x7B"
+            },
+            {
+              "title": "Claude 3.5 Sonnet",
+              "value": "Anthropic_Claude_Sonnet"
+            }
+          ]
+        },
+        {
+          "name": "default-base-branch",
+          "title": "Default Base Branch",
+          "description": "Default PR base branch. Change by using the List Branches command.",
+          "type": "textfield",
+          "required": true,
+          "default": "main"
+        }
+      ]
+    },
+    {
+      "name": "list-branches",
+      "title": "List Branches",
+      "description": "List all branches in the current repository.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "repo-path",
+      "title": "Repository path",
+      "description": "E.g. ~/Documents/Raycast/branch-buddy",
+      "type": "directory",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "any-website-search",
+  "title": "Universal Website Search",
+  "description": "Search any site on the web",
+  "icon": "search-icon.png",
+  "author": "bert",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-any-site",
+      "title": "Search Websites",
+      "description": "Select the site-to-search from the dropdown, enter your search term, and choose from the list of search suggestions. Use the \"Manage sites\" action to add, edit, or delete saved sites.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "searchSuggestionsProvider",
+      "label": "Search Suggestions",
+      "title": "Search Suggestions",
+      "type": "dropdown",
+      "default": "ddg",
+      "required": false,
+      "description": "The search engine to fetch search suggestions from, or none if you don't want search suggestions",
+      "data": [
+        {
+          "title": "None (no suggestions)",
+          "value": "__NONE__"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "ddg"
+        },
+        {
+          "title": "Google",
+          "value": "google"
+        }
+      ]
+    },
+    {
+      "name": "prefillFromClipboard",
+      "title": "Other Settings",
+      "label": "Prefill search from clipboard",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "Whether to pre-fill the search field with the text on the clipboard, if any"
+    },
+    {
+      "name": "interpretDdgBangs",
+      "label": "Strip DuckDuckGo's \"bangs\" for search suggestions",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "If enabled, if the selected search site's URL looks like it's DuckDuckGo and the query starts with a \"bang\" (https://duckduckgo.com/bang), then the bang will be removed when fetching search suggestions. Tl;dr you probably want this disabled if getting search suggestions from DuckDuckGo and enabled otherwise. See the README for more info."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^1.4.8",
+    "he": "^1.2.0",
+    "node-fetch": "^3.2.10",
+    "uuid": "^9.0.0",
+    "xmlhttprequest": "^1.8.0"
+  },
+  "devDependencies": {
+    "@types/he": "^1.1.2",
+    "@types/uuid": "^8.3.4",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dub",
+  "title": "Dub",
+  "description": "Dub is the open-source link management platform for modern marketing teams. This extension allows you to shorten and retrieve your Dub links directly inside Raycast.",
+  "icon": "command-icon.png",
+  "author": "quuu",
+  "owner": "dubinc",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Data",
+    "Applications",
+    "Web"
+  ],
+  "contributors": [
+    "stelo",
+    "steventey",
+    "devkiran",
+    "alexs"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "shorten-link",
+      "title": "Shorten Link",
+      "description": "Shorten links from arguments, clipboard or selection with dub.co using workspaces, custom domains, tags etc.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text"
+        },
+        {
+          "name": "key",
+          "placeholder": "Key",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "search-links",
+      "title": "Search Links",
+      "description": "Search shortened links with dub.co in different workspaces",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.61.2",
+    "@raycast/utils": "^1.16.0",
+    "dub": "^0.46.2",
+    "undici": "^6.19.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

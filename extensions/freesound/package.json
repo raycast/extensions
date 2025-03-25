@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "freesound",
+  "title": "Freesound",
+  "description": "Search the Freesound Library",
+  "icon": "command-icon.png",
+  "author": "j3lte",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-sound",
+      "title": "Search Sound",
+      "subtitle": "Freesound",
+      "description": "Search a sound on Freesound",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Get your API key from https://freesound.org/apiv2/apply/",
+      "type": "password",
+      "placeholder": "Use value from \"Client secret/Api key\"",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.15.0",
+    "@wcj/html-to-markdown": "^2.1.0",
+    "cross-fetch": "^4.0.0",
+    "execa": "^9.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.1",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx -y @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clash",
+  "title": "Clash",
+  "description": "Monitor your Clash with Raycast. Including Proxies, Connections, Rules and Logs data, and support backends switch.",
+  "icon": "dashboard.png",
+  "author": "Go2SheeP",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Dashboard",
+      "description": "List Clash dashboard items",
+      "mode": "view"
+    },
+    {
+      "name": "mode",
+      "title": "Mode",
+      "description": "Switch Clash Proxy Mode",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.31.0",
+    "node-fetch": "^3.1.0",
+    "ws": "^8.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/ws": "^8.2.2",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

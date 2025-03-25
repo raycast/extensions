@@ -1,0 +1,3 @@
+# Error handling
+
+In this chapter, we will explore various error handling techniques provided by Cairo, which not only allow you to address potential issues in your code, but also make it easier to create programs that are adaptable and maintainable. By examining different approaches to managing errors, such as pattern matching with the Result enum, using the ? operator for more ergonomic error propagation, and employing the unwrap or expect methods for handling recoverable errors, you'll gain a deeper understanding of Cairo's error handling features. These concepts are crucial for building robust applications that can effectively handle unexpected situations, ensuring your code is ready for production.

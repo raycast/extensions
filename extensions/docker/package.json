@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "docker",
+  "title": "Docker",
+  "description": "Manage Docker with Raycast",
+  "icon": "docker-icon.png",
+  "author": "priithaamer",
+  "contributors": [
+    "gebeto",
+    "BalliAsghar",
+    "stelo",
+    "noblecloud",
+    "sebastiankranz",
+    "kosha"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "container_list",
+      "title": "Manage Containers",
+      "subtitle": "Docker",
+      "description": "List All Docker Containers",
+      "mode": "view"
+    },
+    {
+      "name": "projects_list",
+      "title": "Manage Compose Projects",
+      "subtitle": "Docker",
+      "description": "Manage Docker Compose Projects",
+      "mode": "view"
+    },
+    {
+      "name": "image_list",
+      "title": "Manage Images",
+      "subtitle": "Docker",
+      "description": "List Installed Docker images",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Path to Docker socket",
+      "name": "socketPath",
+      "placeholder": "/var/run/docker.sock",
+      "required": false,
+      "title": "Socket path",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@priithaamer/dockerode": "^3.3.1-priithaamer.1",
+    "@raycast/api": "^1.89.1",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "eslint": "^8.57.1",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
