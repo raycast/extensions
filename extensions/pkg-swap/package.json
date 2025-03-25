@@ -20,27 +20,21 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "swap",
-      "title": "Swap",
-      "description": "Convert to your default package manager",
-      "mode": "no-view"
-    },
-    {
       "name": "pnpm",
       "title": "Swap pnpm",
-      "description": "Convert to pnpm",
+      "description": "Convert npm to pnpm",
       "mode": "no-view"
     },
     {
       "name": "bun",
       "title": "Swap bun",
-      "description": "Convert to bun",
+      "description": "Convert npm to bun",
       "mode": "no-view"
     },
     {
       "name": "yarn",
       "title": "Swap yarn",
-      "description": "Convert to yarn",
+      "description": "Convert npmto yarn",
       "mode": "no-view"
     }
   ],
