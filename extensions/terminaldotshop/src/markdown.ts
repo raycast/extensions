@@ -124,17 +124,7 @@ ${items
           .toFixed(0)
   } |
 | Shipping | $${order?.amount.shipping ? order.amount.shipping / 100 : "0"} |
-| **Total** | **$${
-    order?.amount?.shipping && order?.amount?.subtotal
-      ? ((order.amount.shipping + order.amount.subtotal) / 100).toFixed(0)
-      : (
-          items.reduce((total, item) => {
-            const brew = brews.find((b) => b.varId === item.productVariantID);
-            if (!brew) return total;
-            return total + (item.quantity * brew.price) / 100;
-          }, 0) + 10
-        ).toFixed(0)
-  }** |
+| **Total** | **$${(order!.amount.shipping + order!.amount.subtotal) / 100}** |
 
 ---
 
