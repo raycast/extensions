@@ -187,10 +187,15 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
 export const execFilePromise = util.promisify(execFile);
 
 async function deleteEntryById(id: string) {
-  const deleteQuery = `DELETE FROM workspaces WHERE workspace_id = '${id}'`;
+  const deleteQuery = `
+DELETE FROM ssh_projects WHERE id = (
+  SELECT ssh_project_id FROM workspaces WHERE workspace_id = ${id}
+);
+DELETE FROM workspaces WHERE workspace_id = ${id}
+`;
   await execFilePromise("sqlite3", [getPath(), deleteQuery]);
 }
 
 async function deleteAllWorkspaces() {
-  await execFilePromise("sqlite3", [getPath(), "DELETE FROM workspaces"]);
+  await execFilePromise("sqlite3", [getPath(), "DELETE FROM ssh_projects;DELETE FROM workspaces;"]);
 }
