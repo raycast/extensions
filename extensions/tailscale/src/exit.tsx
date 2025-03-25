@@ -1,15 +1,23 @@
-import { ActionPanel, List, Action, popToRoot, closeMainWindow, Image, Icon } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Icon, Image, List, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
-  StatusResponse,
-  getStatus,
-  getDevices,
-  tailscale,
-  sortDevices,
-  ErrorDetails,
-  getErrorDetails,
-  Device,
+    Device,
+    ErrorDetails,
+    getDevices,
+    getErrorDetails,
+    getStatus,
+    sortDevices,
+    StatusResponse,
+    tailscale,
 } from "./shared";
+
+function getCountryFlag(name: string): string {
+  const countryCode = name.substring(0, 2).toUpperCase();
+  if (countryCode.match(/^[A-Z]{2}$/)) {
+    return String.fromCodePoint(...[...countryCode].map(c => 0x1F1A5 + c.charCodeAt(0)));
+  }
+  return "";
+}
 
 function loadExitNodes(status: StatusResponse) {
   const devices = getDevices(status);
@@ -47,7 +55,7 @@ export default function ExitNodeList() {
           setIsActive(true);
         }
       } catch (error) {
-        setError(getErrorDetails(error, "Couldn’t load exit nodes."));
+        setError(getErrorDetails(error, "Couldn't load exit nodes."));
       }
     }
     fetch();
@@ -72,7 +80,7 @@ export default function ExitNodeList() {
           )}
           {exitNodes?.map((exitNode) => (
             <List.Item
-              title={exitNode.name}
+              title={`${getCountryFlag(exitNode.name)} ${exitNode.name}`}
               subtitle={exitNode.ipv4 + "    " + exitNode.os}
               key={exitNode.key}
               icon={
