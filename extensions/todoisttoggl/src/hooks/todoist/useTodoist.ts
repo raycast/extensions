@@ -17,7 +17,7 @@ export function useGetProject() {
     },
     [],
     {
-      initialData: null,
+      initialData: [],
     },
   );
   return { isLoading, data };
@@ -36,7 +36,7 @@ export function useGetTasks() {
     },
     [],
     {
-      initialData: null,
+      initialData: [],
     },
   );
   return { isLoading, data, mutate };
@@ -55,7 +55,7 @@ export function useGetLabels() {
     },
     [],
     {
-      initialData: null,
+      initialData: [],
     },
   );
   return { isLoading, data, mutate };
