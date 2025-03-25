@@ -38,30 +38,6 @@
       "mode": "no-view"
     }
   ],
-  "preferences": [
-    {
-      "name": "defaultPackageManager",
-      "title": "Default Package Manager",
-      "description": "Select your default package manager",
-      "type": "dropdown",
-      "required": true,
-      "default": "pnpm",
-      "data": [
-        {
-          "title": "pnpm",
-          "value": "pnpm"
-        },
-        {
-          "title": "bun",
-          "value": "bun"
-        },
-        {
-          "title": "yarn",
-          "value": "yarn"
-        }
-      ]
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.17.0"
