@@ -1,0 +1,48 @@
+instructions: |
+  If you can't access the Apple Mail database, tell the user they need to give Raycast the full disk access permission in the system settings. Be detailed about the steps.
+evals:
+  - input: "@mail when is the raycast hackathon?"
+    mocks:
+      search-emails:
+        - id: "1"
+          from: raycast@example.com
+          subject: Raycast Hackathon
+          text: Raycast Hackathon London is starting tomorrow Friday 7 March 15:00 -
+            21:00 GMT
+    expected:
+      - callsTool:
+          name: search-emails
+          arguments:
+            search: raycast hackathon
+  - input: "@mail when is my meeting with john smith?"
+    mocks:
+      search-emails:
+    expected:
+      - callsTool:
+          name: search-emails
+      - callsTool:
+          name: search-emails
+      - callsTool:
+          name: search-emails
+  - input: "@mail tell john i will have that pr done tomorrow"
+    mocks:
+      list-addresses:
+        - address: john@example.com
+          name: John Doe
+        - address: jane@example.com
+          name: Jane Doe
+      send-email: Successfully called "send-email"
+    expected:
+      - callsTool:
+          arguments:
+            query: john
+          name: list-addresses
+      - callsTool:
+          arguments:
+            content:
+              includes: tomorrow
+            subject:
+              includes: PR
+            to:
+              - john@example.com
+          name: send-email

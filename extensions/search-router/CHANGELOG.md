@@ -1,5 +1,10 @@
 # Search Router Changelog
 
+## [Fixes & Bits] - 2025-03-25
+
+- Migrated bangs to [Kagi's Bang](https://help.kagi.com/kagi/features/bangs.html) from DuckDuckGo's Bang
+- Now supports `!chatgpt` for chatgpt and `!ppx` for perplexity and more
+
 ## [New Additions] - 2025-03-15
 
 - Added support for opening root domain when search query is empty
