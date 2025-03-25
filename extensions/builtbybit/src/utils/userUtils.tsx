@@ -27,7 +27,6 @@ export class UserUtils {
 
     const cachedData = await userCache.get<{ result: string; data: Member }>(cacheKey, CACHE_TTL.LONG);
     if (cachedData) {
-      console.log("Using cached member data for", cachedData.data.username);
       return cachedData;
     }
 
@@ -53,7 +52,6 @@ export class UserUtils {
       const retryAfter = response.headers?.["retry-after"];
       if (retryAfter) {
         throttler.handleRateLimitResponse(parseInt(retryAfter));
-        console.log("Rate limited, waiting for", retryAfter, "seconds");
       }
 
       if (!response.data || !response.data.data) {

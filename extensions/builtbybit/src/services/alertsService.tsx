@@ -5,9 +5,7 @@ import apiClient from "../utils/constants";
 export class AlertsService {
   public static async fetchAlerts(): Promise<Alert[]> {
     try {
-      console.log("Fetching alerts at", new Date().toISOString());
       const response = await apiClient.get("/alerts");
-      console.log(response.data);
       return response.data?.data;
     } catch (error) {
       console.error("Error fetching alerts:", error);

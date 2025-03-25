@@ -88,7 +88,6 @@ export default function Command() {
   };
 
   const handleDebug = async () => {
-    console.log("Debug", alertResponse);
     await Clipboard.copy(JSON.stringify(alertResponse, null, 2));
     await showToast(Toast.Style.Success, "Debug information copied to clipboard. Please send this to Geek");
   };

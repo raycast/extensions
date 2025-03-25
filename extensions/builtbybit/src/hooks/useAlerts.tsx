@@ -26,10 +26,6 @@ export function useAlerts(refreshKey: number) {
   const shouldFetchRef = useRef(refreshKey !== 0);
 
   const fetchAlerts = useCallback(async () => {
-    console.log(`Fetch Alerts Called at ${new Date().toISOString()}`);
-    console.log(`Current RefreshKey: ${refreshKey}`);
-    console.log(`Should Fetch: ${shouldFetchRef.current}`);
-
     // Ensure we're still mounted and not rate limited
     if (!mountedRef.current || throttler.isRateLimited(false) || !shouldFetchRef.current) {
       console.warn("Fetch skipped");
@@ -51,9 +47,6 @@ export function useAlerts(refreshKey: number) {
 
       // Check if we're still mounted before processing
       if (!mountedRef.current) return;
-
-      console.log("Fetched alerts data:", response.data);
-
       if (response.data && response.data.result === "success") {
         const fetchedAlerts = response.data.data;
 
@@ -75,7 +68,6 @@ export function useAlerts(refreshKey: number) {
               // Only fetch username if not already present
               if (!alert.username) {
                 const username = await UserUtils.idToUsername(alert.caused_member_id.toString());
-                console.log(`Fetched username for member ID ${alert.caused_member_id}: ${username}`);
                 return {
                   ...alert,
                   username: username || "A user",
