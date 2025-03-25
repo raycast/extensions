@@ -1,4 +1,16 @@
-import { Action, ActionPanel, closeMainWindow, Detail, Form, Icon, Image, List, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Detail,
+  environment,
+  Form,
+  Icon,
+  Image,
+  Keyboard,
+  List,
+  useNavigation,
+} from "@raycast/api";
 import { Brew, useProducts } from "./hooks/items";
 import {
   useCart,
@@ -39,7 +51,12 @@ function Command() {
   const { data: products, isLoading } = useProducts();
 
   return (
-    <List isShowingDetail isLoading={isLoading} selectedItemId={products && products.featured[0].id}>
+    <List
+      isShowingDetail
+      isLoading={isLoading}
+      searchBarPlaceholder="Add your favorite brew to cart"
+      selectedItemId={products && products.featured[0].id}
+    >
       <CheckoutItem />
 
       {products && (
@@ -103,21 +120,21 @@ function BrewItem(props: { brew: Brew; first?: boolean }) {
       case "artisan":
         return { source: "product-laravel-artisan.png" };
       case "cron":
-        return { source: "product-cron.png", };
+        return { source: "product-cron.png" };
       case "flow":
-        return { source: "product-raycast-flow.png", };
+        return { source: "product-raycast-flow.png" };
       case "dark mode":
-        return { source: "product-dark-mode.png", };
+        return { source: "product-dark-mode.png" };
       case "[object Object]":
-        return { source: "product-object.png", };
+        return { source: "product-object.png" };
       case "segfault":
-        return { source: "product-segfault.png", };
+        return { source: "product-segfault.png" };
       case "404":
-        return { source: "product-404.png", };
+        return { source: "product-404.png" };
       default:
         return { source: "product.svg", tintColor: props.brew.color };
     }
-  })()
+  })();
 
   return (
     <List.Item
@@ -194,8 +211,18 @@ const CheckoutItem = () => {
       detail={<List.Item.Detail markdown={renderCart(cart.data, products.data?.all)} />}
       actions={
         <ActionPanel>
-          {cart.data.items.length > 0 ? <Action title="Checkout" onAction={() => startCheckout()} /> : <></>}
-          <Action title="Clear" shortcut={{ key: "r", modifiers: ["cmd"] }} onAction={clearCart.mutate} />
+          {cart.data.items.length > 0 && (
+            <>
+              <Action title="Checkout" icon={Icon.Cart} onAction={() => startCheckout()} />
+              <Action
+                title="Clear"
+                shortcut={Keyboard.Shortcut.Common.Remove}
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                onAction={clearCart.mutate}
+              />
+            </>
+          )}
         </ActionPanel>
       }
     />
@@ -214,7 +241,12 @@ const Address = () => {
   const isLoading = cart.isLoading || addresses.isLoading || setAddress.isPending || removeAddress.isPending;
 
   return (
-    <List isLoading={isLoading} isShowingDetail={true}>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search for an address"
+      isShowingDetail={true}
+      navigationTitle="Terminal.Shop - Delivery Addresses"
+    >
       {addresses.data.map((a) => (
         <List.Item
           key={a.id}
@@ -235,7 +267,8 @@ const Address = () => {
                 <Action
                   title="Remove Address"
                   onAction={() => removeAddress.mutate(a.id)}
-                  shortcut={{ key: "r", modifiers: ["cmd"] }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  style={Action.Style.Destructive}
                 />
               </ActionPanel>
             ) : (
@@ -249,10 +282,10 @@ const Address = () => {
         <List.Item
           title={"New delivery address"}
           icon={{ source: Icon.PlusCircle, tintColor: TERMINAL_COLOR }}
-          detail={<List.Item.Detail markdown={`# **Add an address**\n\n\`<Enter>\` to add`} />}
+          detail={<List.Item.Detail markdown={`# **Add an address**\n\n\`<Enter>\` to add a new address`} />}
           actions={
             <ActionPanel>
-              <Action.Push title="Create Address" target={withQc(<CreateAddress />)} />
+              <Action.Push title="Create Address" icon={Icon.House} target={withQc(<CreateAddress />)} />
             </ActionPanel>
           }
         />
@@ -286,6 +319,7 @@ const CreateAddress = () => {
   return (
     <Form
       isLoading={create.isPending}
+      navigationTitle="Terminal.Shop - Create Address"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
@@ -293,8 +327,8 @@ const CreateAddress = () => {
       }
     >
       <Form.TextField title="Name" {...itemProps.name} />
-      <Form.TextField title="Address line 1" {...itemProps.street1} />
-      <Form.TextField title="Address line 2" {...itemProps.street2} />
+      <Form.TextField title="Address Line 1" {...itemProps.street1} />
+      <Form.TextField title="Address Line 2" {...itemProps.street2} />
       <Form.TextField title="City" {...itemProps.city} />
       <Form.TextField title="Zip Code" {...itemProps.zip} />
       <Form.TextField title="Phone Number" {...itemProps.phone} />
@@ -337,7 +371,8 @@ const Cards = () => {
                 <Action
                   title="Remove Card"
                   onAction={() => removeCard.mutate(c.id)}
-                  shortcut={{ key: "r", modifiers: ["cmd"] }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  style={Action.Style.Destructive}
                 />
               </ActionPanel>
             ) : (
@@ -397,6 +432,7 @@ const CreateCard = () => {
   return (
     <Form
       isLoading={createCard.isPending}
+      navigationTitle="Terminal.Shop - Create Card"
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} />
@@ -406,7 +442,7 @@ const CreateCard = () => {
       <Form.TextField title="Card Holder's Name" {...itemProps.name} />
       <Form.PasswordField title="Card Number" {...itemProps.number} />
       <Form.Dropdown title="Expiry Month" {...itemProps.exp_month}>
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => (
+        {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
           <Form.Dropdown.Item value={n.toString()} title={n.toString().padStart(2, "0")} />
         ))}
       </Form.Dropdown>

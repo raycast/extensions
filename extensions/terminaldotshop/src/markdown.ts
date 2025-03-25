@@ -19,7 +19,7 @@ export const renderCart = (cart: Terminal.Cart, brews?: Brew[]) => {
   if (cart.items.length === 0) {
     return `*Cart is empty*
 
-\`<Enter>\` to buy\t\`<cmd-r>\` to clear
+\`<Enter>\` to buy\t\`<ctrl-x>\` to clear
 `;
   }
 
@@ -36,7 +36,7 @@ export const renderCart = (cart: Terminal.Cart, brews?: Brew[]) => {
 |------|----------|------|
 ${itemsTableRows}
 
-\`<Enter>\` to buy\t\`<cmd-r>\` to clear
+\`<Enter>\` to buy\t\`<ctrl-x>\` to clear
 `;
 };
 
@@ -51,7 +51,7 @@ ${address.phone ? "📞 " + address.phone : ""}
 \`\`\`
 
 \`<Enter>\` to ${selected ? "continue" : "select"}
-\`<cmd-r>\` to remove
+\`<ctrl-x>\` to remove
 `;
 };
 
@@ -65,7 +65,7 @@ Expires: ${card.expiration}
 \`\`\`
 
 \`<Enter>\` to ${selected ? "continue" : "select"}
-\`<cmd-r>\` to remove
+\`<ctrl-x>\` to remove
 `;
 };
 
