@@ -70,12 +70,6 @@ export class UserUtils {
         throw new Error("No user found");
       }
 
-      if (!memberData.data || !memberData.data.username) {
-        console.error("Invalid member data:", memberData);
-        await showFailureToast("User not found", { title: "User not found" });
-        throw new Error("No user found");
-      }
-
       await userCache.set(cacheKey, memberData);
       return memberData;
     } catch (error: unknown) {

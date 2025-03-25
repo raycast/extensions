@@ -25,7 +25,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.GetRes
 
   // Error handling
   if (error) {
-    const errorMessage = error instanceof Error ? error!.message : "An unknown error occurred";
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     console.error(errorMessage);
     return showFailureToast(error, { title: "Failed to fetch resources", message: errorMessage });
   }
@@ -121,7 +121,10 @@ async function parseFetchResponse(response: Response) {
       currency: resource.currency,
     })) as ResourceSearchResult[];
   } catch (error) {
-    throw new Error(`Failed to parse response: ${error}`);
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Failed to parse response: ${String(error)}`);
   }
 }
 

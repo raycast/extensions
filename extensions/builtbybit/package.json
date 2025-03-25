@@ -15,7 +15,7 @@
       "name": "search-members",
       "title": "Members Search",
       "subtitle": "BuiltByBit",
-      "description": "Search Members",
+      "description": "Search Members on BuiltByBit by Username, User ID, or Discord ID",
       "mode": "view",
       "arguments": [
         {

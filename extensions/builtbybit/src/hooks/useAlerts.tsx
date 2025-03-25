@@ -45,7 +45,7 @@ export function useAlerts(refreshKey: number) {
     try {
       await throttler.stallIfRequired(false);
 
-      const response = await axios.get(API_BASE_URL, {
+      const response = await axios.get(`${API_BASE_URL}/alerts`, {
         headers: { Authorization: `Private ${apiKey}` },
       });
 
@@ -96,7 +96,9 @@ export function useAlerts(refreshKey: number) {
         const fetchedAlertIds = new Set(fetchedAlerts.map((alert: Alert) => alert.content_id));
 
         // Filter and update alerts
-        const updatedAlerts = alertsWithUsernames.filter((alert) => fetchedAlertIds.has(alert.content_id));
+        const updatedAlerts = alertsWithUsernames.filter(
+          (alert) => alert.content_id && fetchedAlertIds.has(alert.content_id),
+        );
 
         // Update cache and state
         cache.set(CACHE_NAMESPACE.ALERTS, JSON.stringify(updatedAlerts));
