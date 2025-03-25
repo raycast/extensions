@@ -13,7 +13,7 @@ export default function ClearApiKeyCommand() {
       actions={
         <ActionPanel>
           <Action
-            title="Clear Api Key"
+            title="Clear API Key"
             onAction={handleClearApiKey}
             style={Action.Style.Destructive}
           />
