@@ -1,5 +1,11 @@
 # Delivery Tracker Changelog
 
+## [Allow FedEx and UPS Offline Tracking] - {PR_MERGE_DATE}
+
+Offline tracking of FedEx and UPS deliveries are now allowed.
+
+Dependencies have been updated.
+
 ## [Prevent Duplicate Deliveries] - 2025-03-17
 
 Duplicate deliveries are no longer allowed to be added.
