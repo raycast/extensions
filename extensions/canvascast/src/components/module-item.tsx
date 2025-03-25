@@ -56,6 +56,7 @@ export const ModuleItem = (props: {
                 )
                   .then(() => {
                     showToast(Toast.Style.Success, "Download Started");
+                    addToRecent(props.id, props.item);
                   })
                   .catch((error) => {
                     showToast({
@@ -64,7 +65,6 @@ export const ModuleItem = (props: {
                       style: Toast.Style.Failure,
                     });
                   });
-                addToRecent(props.id, props.item);
               }}
               icon={{ source: Icon.Download }}
             />
