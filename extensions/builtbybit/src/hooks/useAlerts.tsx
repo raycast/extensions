@@ -3,7 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import { getPreferenceValues, Cache } from "@raycast/api";
 import axios from "axios";
 import { Alert } from "../types/alert";
-import { ALERTS_CACHE_KEY } from "../utils/constants";
+import { CACHE_NAMESPACE } from "../utils/constants";
 import Throttler from "../utils/throttler";
 import { UserUtils } from "../utils/userUtils";
 
@@ -14,7 +14,7 @@ const cache = new Cache();
 export function useAlerts(refreshKey: number) {
   const getCachedAlerts = () => {
     try {
-      return JSON.parse(cache.get(ALERTS_CACHE_KEY) || "[]");
+      return JSON.parse(cache.get(CACHE_NAMESPACE.ALERTS) || "[]");
     } catch {
       return [];
     }
@@ -59,7 +59,7 @@ export function useAlerts(refreshKey: number) {
 
         // If no alerts, clear the cache
         if (fetchedAlerts.length === 0) {
-          cache.remove(ALERTS_CACHE_KEY);
+          cache.remove(CACHE_NAMESPACE.ALERTS);
 
           if (mountedRef.current) {
             setAlerts([]);
@@ -74,7 +74,7 @@ export function useAlerts(refreshKey: number) {
             try {
               // Only fetch username if not already present
               if (!alert.username) {
-                const username = await UserUtils.IDToUsername(alert.caused_member_id.toString());
+                const username = await UserUtils.idToUsername(alert.caused_member_id.toString());
                 console.log(`Fetched username for member ID ${alert.caused_member_id}: ${username}`);
                 return {
                   ...alert,
@@ -99,7 +99,7 @@ export function useAlerts(refreshKey: number) {
         const updatedAlerts = alertsWithUsernames.filter((alert) => fetchedAlertIds.has(alert.content_id));
 
         // Update cache and state
-        cache.set(ALERTS_CACHE_KEY, JSON.stringify(updatedAlerts));
+        cache.set(CACHE_NAMESPACE.ALERTS, JSON.stringify(updatedAlerts));
 
         // Only update state if still mounted
         if (mountedRef.current) {
@@ -141,7 +141,7 @@ export function useAlerts(refreshKey: number) {
     isLoading,
     setAlerts: (newAlerts: Alert[]) => {
       // Update both state and cache when setting alerts
-      cache.set(ALERTS_CACHE_KEY, JSON.stringify(newAlerts));
+      cache.set(CACHE_NAMESPACE.ALERTS, JSON.stringify(newAlerts));
       setAlerts(newAlerts);
     },
     cache,
