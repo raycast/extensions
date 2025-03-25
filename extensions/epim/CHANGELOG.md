@@ -1,6 +1,6 @@
 # Entra PIM Role Changelog
 
-## [Active Assignments indicator] - {PR_MERGE_DATE}
+## [Active Assignments indicator] - 2025-03-25
 - Add Option to see active assignments
 
 
