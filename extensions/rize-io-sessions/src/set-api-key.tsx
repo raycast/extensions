@@ -4,6 +4,7 @@ import { storeApiKey, validateApiKey } from "./api-key";
 
 export default function SetApiKeyCommand() {
   const handleSubmit = async (values: { apiKey: string }) => {
+    const trimmedApiKey = values.apiKey.trim();
     try {
       // Validate the API key before storing
       const isValid = await validateApiKey(values.apiKey);
