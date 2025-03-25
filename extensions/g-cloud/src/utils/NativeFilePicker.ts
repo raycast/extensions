@@ -126,7 +126,7 @@ tell application "System Events"
     repeat with aFile in theFile
       set end of pathList to POSIX path of aFile
     end repeat
-    set filePath to (do shell script "printf '%s' \"" & (pathList as text) & "\"" without altering line endings)
+    set filePath to (do shell script "printf '%s' '" & (pathList as text) & "'" without altering line endings)
     set filePath to my replaceText(filePath, ", ", "###PATH_SEPARATOR###")
   else
     set filePath to POSIX path of theFile
