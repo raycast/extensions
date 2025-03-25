@@ -1,4 +1,4 @@
-import { Action, ActionPanel, closeMainWindow, Detail, Form, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Detail, Form, Icon, Image, List, useNavigation } from "@raycast/api";
 import { Brew, useProducts } from "./hooks/items";
 import {
   useCart,
@@ -97,6 +97,28 @@ function BrewItem(props: { brew: Brew; first?: boolean }) {
     nav.push(withQc(<Address />));
   };
 
+  const icon: Image = (() => {
+    console.log(props.brew.title);
+    switch (props.brew.title) {
+      case "artisan":
+        return { source: "product-laravel-artisan.png" };
+      case "cron":
+        return { source: "product-cron.png", };
+      case "flow":
+        return { source: "product-raycast-flow.png", };
+      case "dark mode":
+        return { source: "product-dark-mode.png", };
+      case "[object Object]":
+        return { source: "product-object.png", };
+      case "segfault":
+        return { source: "product-segfault.png", };
+      case "404":
+        return { source: "product-404.png", };
+      default:
+        return { source: "product.svg", tintColor: props.brew.color };
+    }
+  })()
+
   return (
     <List.Item
       id={props.brew.id}
@@ -104,10 +126,10 @@ function BrewItem(props: { brew: Brew; first?: boolean }) {
       title={props.brew.title}
       subtitle={subtTitle}
       detail={<List.Item.Detail markdown={renderBrew(props.brew, quantity)} />}
-      icon={{ source: "product.svg", tintColor: props.brew.color }}
+      icon={icon}
       actions={
         <ActionPanel>
-          {isSubscription && !isSubscribed ? (
+          {isSubscription ? (
             <Action title="Subscribe" icon={Icon.CheckRosette} onAction={startSub} />
           ) : (
             <>
