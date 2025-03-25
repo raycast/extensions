@@ -88,20 +88,12 @@ export default function StartSessionCommand() {
         const storedApiKey = await getApiKey();
 
         if (!storedApiKey) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "API Key Missing",
-            message: "Please set up your Rize.io API key in extension settings",
-          });
+          await showFailureToast("API Key Missing", "Please set up your Rize.io API key in extension settings");
         }
 
         setApiKey(storedApiKey);
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error Retrieving API Key",
-          message: error instanceof Error ? error.message : String(error),
-        });
+        await showFailureToast("Error Retrieving API Key", error instanceof Error ? error.message : String(error));
       }
     }
 
