@@ -134,11 +134,7 @@ export default function StopSessionCommand() {
           headers: error.response?.headers,
         });
 
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Stop Session Failed",
-          message: `Error ${error.response?.status}: ${error.response?.data?.message || "Unable to stop session"}`,
-        });
+        await showFailureToast("Stop Session Failed", `Error ${error.response?.status}: ${error.response?.data?.message || "Unable to stop session"}`);
       } else {
         await showToast({
           style: Toast.Style.Failure,
