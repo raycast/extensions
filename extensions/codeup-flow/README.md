@@ -1,12 +1,11 @@
 # Codeup flow status
 
-## Development
+Raycast extension to show the status on [Codeup Flow](https://flow.aliyun.com/ "Aliyun Codeup Flow").
 
-```bash
-npm install # (raycast does not support pnpm)
-
-npm run dev
-```
+## Features
+- Displays pipeline list with status
+- View detailed pipeline run information and logs
+- Quick navigation to Codeup Flow pipeline pages
 
 ## Setup preferences
 
