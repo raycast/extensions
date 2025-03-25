@@ -74,11 +74,7 @@ export async function storeApiKey(apiKey: string): Promise<boolean> {
       return false;
     }
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Error Storing API Key",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast("Error Storing API Key", error instanceof Error ? error.message : String(error));
     return false;
   }
 }
