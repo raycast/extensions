@@ -12,13 +12,18 @@ export interface Pipeline {
   modifierAccountId: string | null;
   creatorAccountId: string;
   updateTime: number | null;
-  groupId: number;
+  groupId: number; // 0 则是未分组
   envName: string | null;
   envId: string | null;
   tagList: null;
   pipelineConfigId: null;
   creator: Creator;
   modifier: null;
+}
+
+export interface PipelineGroup {
+  name: string;
+  id: number;
 }
 
 export type Status = "SUCCESS" | "FAIL" | "RUNNING" | "CANCELED";
