@@ -1,6 +1,6 @@
 # Search Router Changelog
 
-## [Fixes & Bits] - {PR_MERGE_DATE}
+## [Fixes & Bits] - 2025-03-25
 
 - Migrated bangs to [Kagi's Bang](https://help.kagi.com/kagi/features/bangs.html) from DuckDuckGo's Bang
 - Now supports `!chatgpt` for chatgpt and `!ppx` for perplexity and more
