@@ -2,6 +2,10 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
+- Optimize cache time for first search
+
+## [Update] - {PR_MERGE_DATE}
+
 - Refactor code structure for better performance
 - Add error messages
 - Update screenshots

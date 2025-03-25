@@ -76,7 +76,7 @@ const RETRY_CONFIG = {
 };
 
 // Icon search failure cache validity period (milliseconds)
-const ICON_FAILURE_CACHE_VALIDITY_MS = 30000; // 30 seconds without repeating search
+const ICON_FAILURE_CACHE_VALIDITY_MS = 3000;
 
 /**
  * Calculate adaptive cache validity period based on usage frequency
