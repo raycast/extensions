@@ -12,8 +12,8 @@ export async function validateApiKey(apiKey: string): Promise<boolean> {
       {
         query: `
           query ValidateUser {
-            me {
-              id
+            currentUser {
+              name
               email
             }
           }
@@ -35,7 +35,7 @@ export async function validateApiKey(apiKey: string): Promise<boolean> {
     }
 
     // Check if user data is returned
-    const userData = response.data.data.me;
+    const userData = response.data.data.currentUser;
     return !!userData;
   } catch (error) {
     console.error("API Key validation failed:", error);

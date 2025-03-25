@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { getApiKey } from "./api-key";
 
