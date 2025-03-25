@@ -13,7 +13,7 @@
     {
       "name": "fmt",
       "title": "Format",
-      "description": "format your data in json/xml format",
+      "description": "Format your data in json/xml format",
       "mode": "view"
     }
   ],
