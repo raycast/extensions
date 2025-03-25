@@ -45,7 +45,6 @@ Contributions welcome! Submit a pull request to add more search engines or impro
 This extension uses search engine definitions from [Kagi's bangs repository](https://github.com/kagisearch/bangs). Here's how to add or update search engines:
 
 1. To add a new search engine:
-
    - Fork [Kagi's bangs repository](https://github.com/kagisearch/bangs)
    - Add your search engine definition following their schema
    - Submit a PR to Kagi's repository
