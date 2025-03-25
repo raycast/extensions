@@ -1,6 +1,6 @@
 # Notis Changelog
 
-## [Fixes & Bits] - {PR_MERGE_DATE}
+## [Fixes & Bits] - 2025-03-25
 - Fix the timeout on long requests
 
 ## [Fixes & Bits] - 2025-03-19
