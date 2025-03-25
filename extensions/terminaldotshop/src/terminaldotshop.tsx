@@ -3,7 +3,6 @@ import {
   ActionPanel,
   closeMainWindow,
   Detail,
-  environment,
   Form,
   Icon,
   Image,
