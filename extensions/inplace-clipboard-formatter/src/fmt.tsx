@@ -15,7 +15,7 @@ export default function Command() {
         }
       />
       <List.Item
-        title="Format Xml"
+        title="Format XML"
         icon="📄"
         actions={
           <ActionPanel>
