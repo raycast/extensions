@@ -6,12 +6,9 @@ import { getDefaultSearchEngine } from "./data/cache";
 
 export default async function search(props: LaunchProps<{ arguments: { query: string }; fallbackText?: string }>) {
   try {
-    let query = (props.arguments.query ?? props.fallbackText) as string;
-    const match = query.trim().match(/!(\S+)/i);
-    const searchEngineKey = match?.[1]?.toLowerCase();
+    const rawQuery = (props.arguments.query ?? props.fallbackText) as string;
 
-    const searchEngine =
-      (searchEngineKey && searchEngines.find((engine) => engine.t === searchEngineKey)) || getDefaultSearchEngine();
+    const { searchEngine, cleanQuery, searchEngineKey } = processQuery(rawQuery);
 
     if (!searchEngine) {
       await showToast({
@@ -21,19 +18,6 @@ export default async function search(props: LaunchProps<{ arguments: { query: st
       return;
     }
 
-    snap: if (query.includes("@")) {
-      const match = query.match(/@(\S+)/i);
-      const snapCandidate = match?.[1]?.toLowerCase();
-      if (!snapCandidate) break snap;
-
-      const searchEngine = searchEngines.find((engine) => engine.t === snapCandidate);
-      if (!searchEngine) break snap;
-
-      query = query.replace(/@\S+\s*/i, "").trim();
-      query += ` site:${searchEngine.ad || searchEngine.d}`;
-    }
-
-    const cleanQuery = query.replace(/!\S+\s*/i, "").trim();
     if (!cleanQuery) {
       const url = new URL(searchEngine.u);
       await open(url.origin);
@@ -45,4 +29,34 @@ export default async function search(props: LaunchProps<{ arguments: { query: st
   } catch (error) {
     await showFailureToast(error);
   }
+}
+
+function findSearchEngine(key?: string) {
+  if (!key) return null;
+  return searchEngines.find((engine) => engine.t === key.toLowerCase());
+}
+
+function processQuery(rawQuery: string) {
+  let query = rawQuery.trim();
+
+  const searchEngineKeyMatch = query.match(/!(\S+)/i);
+  const searchEngineKey = searchEngineKeyMatch?.[1]?.toLowerCase();
+  const searchEngine = findSearchEngine(searchEngineKey) || getDefaultSearchEngine();
+
+  if (query.includes("@")) {
+    const siteMatch = query.match(/@(\S+)/i);
+    const siteKey = siteMatch?.[1]?.toLowerCase();
+
+    if (siteKey) {
+      const siteEngine = findSearchEngine(siteKey);
+      if (siteEngine) {
+        query = query.replace(/@\S+\s*/i, "").trim();
+        query += ` site:${siteEngine.ad || siteEngine.d}`;
+      }
+    }
+  }
+
+  const cleanQuery = query.replace(/!\S+\s*/i, "").trim();
+
+  return { searchEngine, cleanQuery, searchEngineKey };
 }
