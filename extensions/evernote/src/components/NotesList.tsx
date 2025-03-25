@@ -44,7 +44,6 @@ export default function NotesList({ evernoteDB }: NotesListProps) {
     return permissionView;
   }
 
-  console.log(data);
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search notes...">
       {(data || []).map((item) => (
