@@ -3,10 +3,9 @@ import { useTerminal } from "./auth";
 import { useCart } from "./cart";
 import Terminal from "@terminaldotshop/sdk";
 import Stripe from "stripe";
+import { config } from "./config";
 
-const stripe = new Stripe(
-  "pk_test_51OrLKuDgGJQx1Mr6CNDnGNukgQwBonSSToYC8VcmE7qBk2YEad8UuitmY54Pqp0tuZCrk8PNP9cEKVYHvuLcjsnv007CKDgOew",
-);
+const stripe = new Stripe(config().stripe);
 
 const cardsOptions = (terminal: Terminal) => {
   return queryOptions({
