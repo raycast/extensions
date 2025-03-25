@@ -19,7 +19,7 @@ export default function Command() {
         icon="📄"
         actions={
           <ActionPanel>
-            <Action title="Format Xml" onAction={() => formatClipboard("xml")} />
+            <Action title="Format XML" onAction={() => formatClipboard("xml")} />
           </ActionPanel>
         }
       />
