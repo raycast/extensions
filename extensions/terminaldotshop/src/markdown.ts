@@ -87,10 +87,8 @@ export const renderOrder = (props: {
   brews?: Brew[];
   order?: Terminal.Order;
 }) => {
-  const { loading, brews, items, address, index, order } = props;
+  const { loading, brews, items, address, order } = props;
   if (loading) return `# **Preparing your order...**`;
-
-  const indexId = String(index).padStart(3, "0");
 
   if (!items || !address || !brews) return "*There was an error loading up your order :(*";
 

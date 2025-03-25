@@ -82,7 +82,6 @@ function BrewItem(props: { brew: Brew; first?: boolean }) {
   const isSubscription = props.brew.subscription === "required";
   const subItem = useSubItem();
   const nav = useNavigation();
-  const subscriptions = useSubscriptions();
   const cart = useCart();
   const setItem = useSetItem();
 
