@@ -51,6 +51,6 @@ async function formatClipboard(format: "json" | "xml") {
 
     await closeMainWindow();
   } catch (error) {
-    await showToast({ style: Toast.Style.Failure, title: "Formatting failed", message: String(error) });
+    await showFailureToast(error);
   }
 }
