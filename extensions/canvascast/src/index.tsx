@@ -14,25 +14,32 @@ export default function main() {
   const [error, setError] = useState(Error.INVALID_API_KEY);
 
   useEffect(() => {
-    checkApi().then((json) => {
-      if (json.status == "unauthenticated" || !(json instanceof Array)) {
-        setError(Error.INVALID_API_KEY);
-        setCourses(undefined);
-        setIsLoading(false);
-      } else {
-        getCourses(json)
-          .then((courses) => {
+    (async () => {
+      try {
+        const json = await checkApi();
+        if (json.status === "unauthenticated" || !(json instanceof Array)) {
+          setError(Error.INVALID_API_KEY);
+          setCourses(undefined);
+          setIsLoading(false);
+        } else {
+          try {
+            const courses = await getCourses(json);
             setCourses(courses);
             setIsLoading(false);
-          })
-          .catch((error) => {
+          } catch (error) {
             console.error(error);
             setError(Error.INVALID_DOMAIN);
             setCourses(undefined);
             setIsLoading(false);
-          });
+          }
+        }
+      } catch (error) {
+        console.error(error);
+        setError(Error.INVALID_API_KEY);
+        setCourses(undefined);
+        setIsLoading(false);
       }
-    });
+    })();
   }, []);
 
   return (
@@ -40,7 +47,7 @@ export default function main() {
       {courses !== undefined ? (
         <React.Fragment>
           <List.Section title="Courses">
-            {!isLoading && courses.map((course, index) => <Course key={index} course={course} />)}
+            {!isLoading && courses.map((course) => <Course key={course.id} course={course} />)}
           </List.Section>
           <List.Section title="Assignments">
             {!isLoading &&
