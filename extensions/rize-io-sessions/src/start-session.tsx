@@ -72,7 +72,13 @@ export default function StartSessionCommand() {
       (type) => type.value === selectedType,
     );
     if (selectedSessionType) {
-      setDuration(selectedSessionType.defaultLength);
+      // If the current duration is not the default for this session type, keep the current duration
+      const defaultLength = selectedSessionType.defaultLength;
+      setDuration((prevDuration) =>
+        DURATION_OPTIONS.some((option) => option.value === prevDuration)
+          ? prevDuration
+          : defaultLength,
+      );
     }
   }, [selectedType]);
 
@@ -240,13 +246,13 @@ export default function StartSessionCommand() {
       <Form.Dropdown
         id="duration"
         title="Session Duration"
-        value={duration}
+        value={duration.toString()}
         onChange={(newDuration) => setDuration(Number(newDuration))}
       >
         {DURATION_OPTIONS.map((option) => (
           <Form.Dropdown.Item
             key={option.value}
-            value={option.value}
+            value={option.value.toString()}
             title={option.label}
           />
         ))}
