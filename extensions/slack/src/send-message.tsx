@@ -108,4 +108,5 @@ function SendMessage({ recipient }: SendMessageProps) {
   );
 }
 
+export { SendMessage };
 export default withSlackClient(SendMessage);

@@ -3,7 +3,7 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { format, formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import * as emoji from "node-emoji";
-import SendMessage from "./send-message";
+import { SendMessage } from "./send-message";
 
 import { withSlackClient } from "./shared/withSlackClient";
 import { getSlackWebClient } from "./shared/client/WebClient";
