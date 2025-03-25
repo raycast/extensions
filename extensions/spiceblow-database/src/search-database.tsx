@@ -1,3 +1,6 @@
+import fs from "fs";
+import kebabCase from "kebab-case";
+
 import {
   Action,
   ActionPanel,
@@ -14,7 +17,8 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { FormValidation, useForm, usePromise, withAccessToken } from "@raycast/utils";
+
+import { createDeeplink, DeeplinkType, FormValidation, useForm, usePromise, withAccessToken } from "@raycast/utils";
 import { fetch } from "undici";
 
 import { getAvatarIcon, OAuthService, useCachedPromise } from "@raycast/utils";
@@ -45,7 +49,17 @@ import React from "react";
 import { SQLStatement } from "sql-template-strings";
 import { renderColumnValue } from "./database.js";
 import { useGlobalState } from "./state";
-import { CustomQuery, CustomQueryType, GraphData, Json, StoredDatabase, TableInfo, TimeSeriesItem } from "./types";
+import {
+  CustomQuery,
+  CustomQueryType,
+  GraphData,
+  Json,
+  launchContext,
+  StoredDatabase,
+  TableInfo,
+  TimeSeriesItem,
+  type LaunchContext,
+} from "./types";
 
 const pageSize = 20;
 const freeRequestsCount = 50;
@@ -114,18 +128,20 @@ function BuyLicense() {
 
 const searchFilterCache = new Cache();
 
-function useSearchFilter(id: string) {
+function useSearchFilter(id: string, defaultOne = "") {
   const [searchText, setSearchText] = useState(() => {
-    return searchFilterCache.get(id) || "";
+    return defaultOne || searchFilterCache.get(id) || "";
   });
   useEffect(() => {
-    searchFilterCache.set(id, searchText);
-  }, [searchText, id]);
+    if (searchText !== defaultOne) {
+      searchFilterCache.set(id, searchText);
+    }
+  }, [searchText, id, defaultOne]);
   return { searchText, setSearchText };
 }
 
 function SearchTable({ table }: { table: string }) {
-  const { searchText, setSearchText } = useSearchFilter(table);
+  const { searchText, setSearchText } = useSearchFilter(table, launchContext?.searchText);
   const currentConnectionString = useGlobalState((x) => x.connectionString);
 
   const tableInfoData = useCachedPromise(
@@ -143,7 +159,7 @@ function SearchTable({ table }: { table: string }) {
 
   const tableInfo = tableInfoData.data?.tableInfo;
   const schema = tableInfoData.data?.schema;
-
+  const [isLoading, setIsLoading] = useState(false);
   const { searchField, dropdown } = useTableFiltering({ tableInfo: tableInfo });
 
   const rows = useCachedPromise(
@@ -214,11 +230,13 @@ function SearchTable({ table }: { table: string }) {
     );
   };
 
+  const [, tableName] = table.split(".");
+
   return (
     <List
       pagination={{ hasMore: false, onLoadMore() {}, ...rows.pagination, pageSize }}
       searchText={searchText}
-      isLoading={rows.isLoading || tableInfoData.isLoading}
+      isLoading={isLoading || rows.isLoading || tableInfoData.isLoading}
       onSearchTextChange={setSearchText}
       isShowingDetail
       searchBarAccessory={dropdown}
@@ -239,7 +257,11 @@ function SearchTable({ table }: { table: string }) {
             key={primaryKeyValue}
             title={primaryKeyValue}
             icon={selectedRows.length > 0 ? { source: isSelected ? Icon.CheckCircle : Icon.Circle } : undefined}
-            detail={<List.Item.Detail metadata={tableInfo && <RowMetadata tableInfo={tableInfo} row={row} />} />}
+            detail={
+              <List.Item.Detail
+                metadata={tableInfo && <RowMetadata tableName={tableName} tableInfo={tableInfo} row={row} />}
+              />
+            }
             actions={
               <ActionPanel>
                 {selectedRows.length > 0 && (
@@ -274,6 +296,7 @@ function SearchTable({ table }: { table: string }) {
                   />
                 )}
                 <CountAction table={table} />
+                <ExportToCsvAction tableInfo={tableInfo!} setIsLoading={setIsLoading} table={table} />
                 <RunTransactionQueries />
               </ActionPanel>
             }
@@ -295,6 +318,85 @@ function CountAction({ table, query }: { table?: string; query?: string }) {
   };
 
   return <Action title="Count Rows" icon={Icon.List} onAction={handleCount} />;
+}
+
+function ExportToCsvAction({
+  table = "",
+  setIsLoading,
+  query = "",
+  tableInfo,
+}: {
+  table?: string;
+  setIsLoading: (loading: boolean) => void;
+  query?: string;
+  tableInfo: TableInfo;
+}) {
+  const handleExport = async () => {
+    setIsLoading(true);
+    try {
+      const databases = JSON.parse((await LocalStorage.getItem("databases")) || "[]");
+      const currentConnectionString = useGlobalState.getState().connectionString;
+      const currentDb = databases.find((db) => db.connectionString === currentConnectionString);
+      const dbName = currentDb?.name || "";
+      const tempFile = `/tmp/export-${dbName ? `${kebabCase(dbName)}-` : ""}${table ? `${kebabCase(table)}-` : ""}${Date.now()}.csv`;
+
+      let page = 0;
+      let hasMore = true;
+      const pageSize = 3000;
+      let isFirstPage = true;
+      let totalRows = 0;
+      while (hasMore) {
+        console.log(`fetching page ${page}`);
+        showToast({
+          style: Toast.Style.Animated,
+          title: `Fetching page ${page + 1}...`,
+        });
+        const { data: rows, hasMore: moreRows } = await databaseFunctions.searchTableRowsOrCustomQuery({
+          table,
+          query,
+          page,
+          pageSize,
+        });
+
+        totalRows += rows.length;
+
+        // Convert all values to CSV-friendly strings
+        for (const row of rows) {
+          for (const column of tableInfo?.columns || []) {
+            row[column.columnName] = databaseFunctions.renderColumnValueForCsv(column, row[column.columnName]);
+          }
+        }
+        // Generate CSV for this batch, only include headers on first page
+        const csvChunk = databaseFunctions.exportToCsv({
+          rows,
+          includeHeader: isFirstPage,
+        });
+
+        // Append to file (or write if first page)
+        await fs.promises.writeFile(tempFile, csvChunk + "\n", { flag: isFirstPage ? "w" : "a" });
+
+        hasMore = moreRows;
+        page++;
+        isFirstPage = false;
+      }
+      console.log(`fetched ${totalRows} rows`);
+
+      const file = tempFile;
+      await Clipboard.copy({ file });
+      showToast({ style: Toast.Style.Success, title: "CSV file copied to clipboard" });
+    } catch (error) {
+      console.error("Error exporting to CSV:", error);
+      showToast({ style: Toast.Style.Failure, title: "Failed to export CSV", message: String(error) });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <Action title="Export as Csv File" icon={Icon.Download} onAction={() => handleExport()} />
+    </>
+  );
 }
 
 function NoRowsActions({ revalidate, tableInfo }: { revalidate: () => void; tableInfo: TableInfo }) {
@@ -520,6 +622,7 @@ function SearchCustomQuery(args: CustomQuery & { revalidate: () => void }) {
     Array.isArray(x.selectedRows) ? x.selectedRows.filter((row) => currentRowIds.has(row)) : [],
   );
 
+  const [isLoading, setIsLoading] = useState(false);
   const handleDeleteSelectedRows = async (tableName?: string) => {
     const deleteQueries = (
       await Promise.all(
@@ -561,7 +664,7 @@ function SearchCustomQuery(args: CustomQuery & { revalidate: () => void }) {
   return (
     <List
       pagination={{ hasMore: false, onLoadMore() {}, ...rows.pagination, pageSize }}
-      isLoading={rows.isLoading}
+      isLoading={isLoading || rows.isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       isShowingDetail
@@ -583,7 +686,11 @@ function SearchCustomQuery(args: CustomQuery & { revalidate: () => void }) {
             key={primaryKeyValue + index}
             title={primaryKeyValue || " "}
             icon={selectedRows.length > 0 ? { source: isSelected ? Icon.CheckCircle : Icon.Circle } : undefined}
-            detail={<List.Item.Detail metadata={tableInfo && <RowMetadata tableInfo={tableInfo} row={row} />} />}
+            detail={
+              <List.Item.Detail
+                metadata={tableInfo && <RowMetadata tableName={"query"} tableInfo={tableInfo} row={row} />}
+              />
+            }
             actions={
               <ActionPanel>
                 {selectedRows.length > 0 && (
@@ -633,6 +740,7 @@ function SearchCustomQuery(args: CustomQuery & { revalidate: () => void }) {
                 )}
 
                 <CountAction query={query} />
+                <ExportToCsvAction tableInfo={tableInfo} setIsLoading={setIsLoading} query={query} />
                 {tables.map((tableName) => (
                   <Action
                     key={tableName}
@@ -685,8 +793,7 @@ function SearchCustomQuery(args: CustomQuery & { revalidate: () => void }) {
     </List>
   );
 }
-
-function RowMetadata({ tableInfo, row }: { tableInfo: TableInfo; row: Json }) {
+function RowMetadata({ tableName, tableInfo, row }: { tableName: string; tableInfo: TableInfo; row: Json }) {
   return (
     <List.Item.Detail.Metadata>
       {tableInfo?.columns?.map((col, idx) => {
@@ -723,6 +830,35 @@ function RowMetadata({ tableInfo, row }: { tableInfo: TableInfo; row: Json }) {
           <Fragment key={idx}>
             {item}
             {!isLast && <List.Item.Detail.Metadata.Separator key={`${idx}-separator`} />}
+          </Fragment>
+        );
+      })}
+
+      {tableInfo?.relations?.map((relation, idx) => {
+        return (
+          <Fragment key={`relation-${idx}`}>
+            <List.Item.Detail.Metadata.Separator />
+            <List.Item.Detail.Metadata.Link
+              title={`${relation.foreignTable}`}
+              text={relation.columnNames
+                .map((col, i) => `${tableName}.${col} → ${relation.foreignTable}.${relation.foreignColumnNames[i]}`)
+                .join(", ")}
+              target={createDeeplink({
+                extensionName: "spiceblow-database",
+                context: {
+                  searchText: relation.foreignColumnNames
+                    .map((field, i) => {
+                      const value = String(row[relation.columnNames[i]]);
+                      return `${field} is ${value}`;
+                    })
+                    .join(" and "),
+                  schemaTable: `${relation.foreignSchema}.${relation.foreignTable}`,
+                  view: "search-table",
+                } satisfies LaunchContext,
+                type: DeeplinkType.Extension,
+                command: "search-database",
+              })}
+            />
           </Fragment>
         );
       })}
@@ -1733,6 +1869,7 @@ function DatabasesDropdown() {
           );
           return;
         }
+
         setConnectionString(newValue);
       }}
     >
@@ -1899,6 +2036,10 @@ const Command = ({ draftValues: draftValuesArg }: LaunchProps<{ draftValues?: Ne
 
   if (!connectionString) {
     return <List isLoading={true} />;
+  }
+
+  if (launchContext?.view === "search-table") {
+    return <SearchTable table={launchContext.schemaTable} />;
   }
 
   return <SearchTables key={connectionString} />;

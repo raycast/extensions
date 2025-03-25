@@ -49,11 +49,12 @@ The latest release of this extension is published to [`extensions/sourcegraph` i
 To make a release, set up a clone of the [Raycast extensions repository](https://github.com/raycast/extensions) and create a new branch:
 
 ```sh
+export RAYCAST_FORK="git@github.com:$REPO.git"
 export RAYCAST_EXTENSIONS_DIR="../../raycast/extensions"
 mkdir -p $RAYCAST_EXTENSIONS_DIR
 cd $RAYCAST_EXTENSIONS_DIR
 
-git clone --no-checkout --filter=blob:none $FORK .
+git clone --no-checkout --filter=blob:none $RAYCAST_FORK .
 git sparse-checkout init --cone
 git sparse-checkout set extensions/sourcegraph
 git checkout main

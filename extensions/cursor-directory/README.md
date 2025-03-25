@@ -12,7 +12,7 @@ Cursor Directory is a powerful Raycast extension that seamlessly integrates with
 
 - **Fuzzy Search**: Quickly find cursor rules based on their titles.
 - **Detailed View**: Examine cursor rules, including author information and full rule content.
-- **One-Click Application**: Easily copy and apply cursor rules to your project's `.cursorrules` file.
+- **One-Click Application**: Easily copy and create cursor rules to your project's `.cursor/rules` folder for Cursor v0.45 or `.cursorrules` for Cursor below v0.45.
 - **Starring System**: Save up to 10 favorite cursor rules for quick access.
 - **Local Modification**: Export and edit cursor rules as Markdown files within Cursor.
 - **YouTube Videos**: Access curated Cursor-related YouTube videos directly from the extension.

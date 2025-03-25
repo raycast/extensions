@@ -1,6 +1,6 @@
 import { apiFetch } from "../helpers/api";
 import { apiEndpoints } from "../helpers/constants";
-import { mapObject } from "../helpers/mappers/objects";
+import { mapObject } from "../mappers/objects";
 import { SpaceObject } from "../helpers/schemas";
 
 export async function getObject(

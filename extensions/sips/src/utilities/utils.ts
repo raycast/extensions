@@ -5,7 +5,6 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 14:48:00
- * Last modified  : 2024-06-26 21:37:46
  */
 
 import { execSync } from "child_process";
@@ -23,12 +22,12 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-
-import { Direction, ImageInputSource, ImageResultHandling } from "./enums";
-import { copyImagesAtPathsToClipboard, getClipboardImages } from "./clipboard";
-import { ExtensionPreferences } from "./preferences";
-import { getAVIFEncPaths } from "./avif";
 import { runAppleScript } from "@raycast/utils";
+
+import { getAVIFEncPaths } from "./avif";
+import { copyImagesAtPathsToClipboard, getClipboardImages } from "./clipboard";
+import { Direction, ImageInputSource, ImageResultHandling } from "./enums";
+import { mkdir } from "fs/promises";
 
 /**
  * Gets currently selected images in Finder.
@@ -195,7 +194,7 @@ const getSelectedNeoFinderImages = async (): Promise<string> => {
         else if (theSelection count) is equal to 1 then
           repeat with imageType in imageTypes
             if (kind of the first item of theSelection) contains imageType then
-              if (finder path of theSelection) is not missing value then
+              if (finder path of item 1 of theSelection) is not missing value then
                 return the finder path of theSelection
                 exit repeat
               end if
@@ -301,14 +300,21 @@ export const addItemToRemove = async (item: string) => {
  * @param extension The extension of the file
  * @returns A promise resolving to the path of the temporary file.
  */
-// export const scopedTempFile = async (name: string, extension: string) => {
-//   const tempPath = path.join(os.tmpdir(), `${name}.${extension}`);
-//   await addItemToRemove(tempPath);
-//   return tempPath;
-// };
-
 export const getScopedTempFile = async (name: string, extension: string) => {
   const tempPath = path.join(os.tmpdir(), `${name}.${extension}`);
+  return {
+    path: tempPath,
+    [Symbol.asyncDispose]: async () => {
+      if (fs.existsSync(tempPath)) {
+        await fs.promises.rm(tempPath, { recursive: true });
+      }
+    },
+  };
+};
+
+export const getScopedTempDirectory = async (name: string) => {
+  const tempPath = path.join(os.tmpdir(), name);
+  await mkdir(tempPath, { recursive: true });
   return {
     path: tempPath,
     [Symbol.asyncDispose]: async () => {
@@ -344,7 +350,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
   const selectedImages: string[] = [];
 
   // Get name of preferred file manager
-  const extensionPreferences = getPreferenceValues<ExtensionPreferences>();
+  const extensionPreferences = getPreferenceValues<Preferences>();
   const inputMethod = extensionPreferences.inputMethod;
   let inputMethodError = false;
 
@@ -358,7 +364,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
       }
     } catch (error) {
       // Error getting images from clipboard, fall back to Finder/Path Finder
-      console.error("Couldn't get images from clipboard");
+      console.error(`Couldn't get images from clipboard: ${error}`);
       inputMethodError = true;
     }
   }
@@ -366,9 +372,9 @@ export const getSelectedImages = async (): Promise<string[]> => {
   // Get name of frontmost application
   let activeApp = inputMethod;
   try {
-    activeApp = (await getFrontmostApplication()).name;
-  } catch {
-    console.error("Couldn't get frontmost application");
+    activeApp = (await getFrontmostApplication()).name as typeof inputMethod;
+  } catch (error) {
+    console.error(`Couldn't get frontmost application: ${error}`);
   }
 
   // Attempt to get selected images from Path Finder
@@ -386,7 +392,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
     }
   } catch (error) {
     // Error getting images from Path Finder, fall back to Finder
-    console.error("Couldn't get images from Path Finder");
+    console.error(`Couldn't get images from Path Finder: ${error}`);
     inputMethodError = true;
   }
 
@@ -405,7 +411,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
     }
   } catch (error) {
     // Error getting images from NeoFinder, fall back to Finder
-    console.error("Couldn't get images from NeoFinder");
+    console.error(`Couldn't get images from NeoFinder: ${error}`);
     inputMethodError = true;
   }
 
@@ -424,7 +430,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
     }
   } catch (error) {
     // Error getting images from HoudahSpot, fall back to Finder
-    console.error("Couldn't get images from HoudahSpot");
+    console.error(`Couldn't get images from HoudahSpot: ${error}`);
     inputMethodError = true;
   }
 
@@ -454,11 +460,11 @@ export const moveImageResultsToFinalDestination = async (imagePaths: string[]) =
   let activeApp = "Finder";
   try {
     activeApp = (await getFrontmostApplication()).name;
-  } catch {
-    console.error("Couldn't get frontmost application");
+  } catch (error) {
+    console.error(`Couldn't get frontmost application: : ${error}`);
   }
 
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   // Handle the result per the user's preference
   if (preferences.imageResultHandling == ImageResultHandling.CopyToClipboard) {
     await copyImagesAtPathsToClipboard(imagePaths);
@@ -512,7 +518,7 @@ export const getWebPBinaryPath = async () => {
  * @returns A promise resolving to the path of the resulting image.
  */
 export const execSIPSCommandOnWebP = async (command: string, webpPath: string): Promise<string> => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   await using tmpFile = await getScopedTempFile("tmp", "png");
   const newPath = (await getDestinationPaths([webpPath]))[0];
 
@@ -531,7 +537,7 @@ export const execSIPSCommandOnWebP = async (command: string, webpPath: string): 
  * @param avifPath The path of the AVIF image.
  */
 export const execSIPSCommandOnAVIF = async (command: string, avifPath: string): Promise<string> => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   await using tmpFile = await getScopedTempFile("tmp", "png");
   const newPath = (await getDestinationPaths([avifPath]))[0];
 
@@ -600,7 +606,7 @@ export const convertSVG = async (targetType: string, svgPath: string, newPath: s
  * @param newPathBase The folder to place the resulting images in.
  */
 export const convertPDF = async (targetType: string, pdfPath: string, newPathBase: string) => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
 
   let repType = "NSPNGFileType";
   if (targetType == "JPEG") {
@@ -696,7 +702,7 @@ export const convertPDF = async (targetType: string, pdfPath: string, newPathBas
  * @param degrees The amount to rotate each page by. Must be a multiple of 90.
  */
 export const rotatePDF = async (pdfPath: string, degrees: number): Promise<string> => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
 
   let newPath = pdfPath;
   if (preferences.imageResultHandling == ImageResultHandling.SaveToDownloads) {
@@ -746,7 +752,7 @@ export const rotatePDF = async (pdfPath: string, degrees: number): Promise<strin
  * @param direction The direction to flip. Must be a valid {@link Direction}.
  */
 export const flipPDF = async (pdfPath: string, direction: Direction) => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
 
   let newPath = pdfPath;
   if (preferences.imageResultHandling == ImageResultHandling.SaveToDownloads) {
@@ -817,7 +823,7 @@ export const flipPDF = async (pdfPath: string, direction: Direction) => {
  * @returns The destination path for the image.
  */
 export const getImageDestination = (originalPath: string, targetExtension?: string): string => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
 
   // Decompose the original path into its components
   const originalExtension = path.extname(originalPath);
@@ -953,39 +959,53 @@ export const getMenubarOwningApplication = async () => {
  *
  * @returns The current directory of the file manager.
  */
-export const getCurrentDirectory = async () => {
+export const getCurrentDirectory = async (itemPath: string) => {
   // Get name of frontmost application
   let activeApp = "Finder";
   try {
     activeApp = await getMenubarOwningApplication();
-  } catch {
-    console.error("Couldn't get frontmost application");
+  } catch (error) {
+    console.error(`Couldn't get frontmost application: ${error}`);
   }
 
   // Attempt to get current directory of Path Finder
   try {
     if (activeApp == "Path Finder") {
       return runAppleScript(`tell application "Path Finder"
-          if 1 ≤ (count finder windows) then
-            get POSIX path of (target of finder window 1)
-          else
-            get POSIX path of desktop
-          end if
-        end tell`);
+        if 1 ≤ (count finder windows) then
+          try
+          get POSIX path of (target of finder window 1)
+          on error message number -1728
+            -- Folder is nonstandard, use container of selection
+            tell application "System Events"
+              set itemPath to POSIX file "${itemPath}" as alias
+              return POSIX path of container of itemPath
+            end tell
+          end try
+        else
+          get POSIX path of desktop
+        end if
+      end tell`);
     }
   } catch (error) {
     // Error getting directory of Path Finder, fall back to Finder
-    console.error("Couldn't get current directory of Path Finder");
+    console.error(`Couldn't get current directory of Path Finder: ${error}`);
   }
 
   // Fallback to getting current directory from Finder
   return runAppleScript(`tell application "Finder"
-      if 1 <= (count Finder windows) then
-        get POSIX path of (target of window 1 as alias)
-      else
-        get POSIX path of (desktop as alias)
-      end if
-    end tell`);
+    if 1 ≤ (count Finder windows) then
+      try
+        return POSIX path of (target of window 1 as alias)
+      on error message number -1700
+        -- Folder is nonstandard, use container of selection
+        set itemPath to POSIX file "${itemPath}" as alias
+        return POSIX path of (container of itemPath as alias)
+      end try
+    else
+      return POSIX path of (desktop as alias)
+    end if
+  end tell`);
 };
 
 /**
@@ -1001,8 +1021,8 @@ export const getDestinationPaths = async (
   generated = false,
   newExtension: string | undefined = undefined,
 ): Promise<string[]> => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  const currentDirectory = await getCurrentDirectory();
+  const preferences = getPreferenceValues<Preferences>();
+  const currentDirectory = await getCurrentDirectory(originalPaths[0]);
   return originalPaths.map((imgPath) => {
     let newPath = imgPath;
     if (preferences.imageResultHandling == ImageResultHandling.SaveToDownloads) {
@@ -1032,7 +1052,7 @@ export const getDestinationPaths = async (
       while (fs.existsSync(newPath)) {
         newPath = path.join(
           path.dirname(newPath),
-          path.basename(newPath, path.extname(newPath)) + ` (${iter})${path.extname(newPath)}`,
+          path.basename(newPath, path.extname(newPath)) + `-${iter}${path.extname(newPath)}`,
         );
         iter++;
       }
@@ -1043,17 +1063,16 @@ export const getDestinationPaths = async (
 
 /**
  * Shows or updates a toast to display the given error, and logs the error to the console.
- *
  * @param title The title of the toast.
  * @param error The error to show.
  * @param toast The toast to update.
  */
-export const showErrorToast = async (title: string, error: Error, toast?: Toast) => {
+export const showErrorToast = async (title: string, error: Error, toast?: Toast, messageText?: string) => {
   console.error(error);
   if (!toast) {
     toast = await showToast({
       title: title,
-      message: error.message,
+      message: messageText ?? error.message,
       style: Toast.Style.Failure,
       primaryAction: {
         title: "Copy Error",
@@ -1064,7 +1083,7 @@ export const showErrorToast = async (title: string, error: Error, toast?: Toast)
     });
   } else {
     toast.title = title;
-    toast.message = error.message;
+    toast.message = messageText ?? error.message;
     toast.style = Toast.Style.Failure;
     toast.primaryAction = {
       title: "Copy Error",
@@ -1073,4 +1092,39 @@ export const showErrorToast = async (title: string, error: Error, toast?: Toast)
       },
     };
   }
+};
+
+/**
+ * Extracts the RGB and alpha values from a hex color. The default alpha value is 255 (FF).
+ * @param hex The 6- or 8-digit hex color to extract values from. The hash is optional.
+ * @returns An object.
+ */
+export const hexToRGBA = (hex: string) => {
+  const hexWithoutHash = hex.replace("#", "");
+  const hexWithoutAlpha = hexWithoutHash.slice(0, 6);
+  const alpha = hexWithoutHash.slice(6, 8);
+  const hex16 = parseInt(hexWithoutAlpha, 16);
+  const red = (hex16 >> 16) & 255;
+  const green = (hex16 >> 8) & 255;
+  const blue = hex16 & 255;
+  return {
+    red,
+    green,
+    blue,
+    alpha: alpha ? parseInt(alpha, 16) : 255,
+  };
+};
+
+export const expandTilde = (filePath: string) => {
+  const homedir = os.homedir();
+  if (filePath.startsWith("~")) {
+    return filePath.replace(/^~(?=$|\/|\\)/, homedir);
+  }
+
+  const regex = /(\/Users\/.*?)\/.*/;
+  const match = filePath.match(regex);
+  if (match) {
+    return filePath.replace(match[1], homedir);
+  }
+  return filePath;
 };

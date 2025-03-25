@@ -1,0 +1,9682 @@
+[
+  {
+    "id": "365",
+    "name": "ABBADIA LARIANA"
+  },
+  {
+    "id": "366",
+    "name": "ABBASANTA"
+  },
+  {
+    "id": "367",
+    "name": "ABBIATEGRASSO"
+  },
+  {
+    "id": "368",
+    "name": "ACATE"
+  },
+  {
+    "id": "369",
+    "name": "ACCIANO"
+  },
+  {
+    "id": "370",
+    "name": "ACERRA"
+  },
+  {
+    "id": "371",
+    "name": "ACIREALE"
+  },
+  {
+    "id": "372",
+    "name": "ACQUA ACETOSA"
+  },
+  {
+    "id": "1",
+    "name": "ACQUAFREDDA"
+  },
+  {
+    "id": "373",
+    "name": "ACQUAMELA"
+  },
+  {
+    "id": "374",
+    "name": "ACQUANEGRA CREMONESE"
+  },
+  {
+    "id": "2",
+    "name": "ACQUAPPESA"
+  },
+  {
+    "id": "5453",
+    "name": "ACQUASPARTA"
+  },
+  {
+    "id": "376",
+    "name": "ACQUAVIVA CASTELTERMINI"
+  },
+  {
+    "id": "377",
+    "name": "ACQUAVIVA DELLE FONTI"
+  },
+  {
+    "id": "2499",
+    "name": "ACQUEDOLCI-S.FRATELLO"
+  },
+  {
+    "id": "188",
+    "name": "ACQUI TERME"
+  },
+  {
+    "id": "378",
+    "name": "ADRIA"
+  },
+  {
+    "id": "4",
+    "name": "AFRICO NUOVO"
+  },
+  {
+    "id": "379",
+    "name": "AGLIANO CASTELNUOVO CALCEA"
+  },
+  {
+    "id": "3252",
+    "name": "AGOGNATE"
+  },
+  {
+    "id": "383",
+    "name": "AGRIGENTO BASSA"
+  },
+  {
+    "id": "384",
+    "name": "AGRIGENTO CENTRALE"
+  },
+  {
+    "id": "5",
+    "name": "AGROPOLI CASTELLABATE"
+  },
+  {
+    "id": "386",
+    "name": "AIELLI"
+  },
+  {
+    "id": "387",
+    "name": "AIRASCA"
+  },
+  {
+    "id": "189",
+    "name": "AIROLE"
+  },
+  {
+    "id": "388",
+    "name": "AIRUNO"
+  },
+  {
+    "id": "389",
+    "name": "ALA"
+  },
+  {
+    "id": "390",
+    "name": "ALANNO"
+  },
+  {
+    "id": "391",
+    "name": "ALANO FENER VALDOBBIADENE"
+  },
+  {
+    "id": "190",
+    "name": "ALASSIO"
+  },
+  {
+    "id": "392",
+    "name": "ALBA"
+  },
+  {
+    "id": "393",
+    "name": "ALBA ADRIATICA-NERETO-CONTROGUERRA"
+  },
+  {
+    "id": "394",
+    "name": "ALBACINA"
+  },
+  {
+    "id": "779",
+    "name": "ALBAIRATE-VERMEZZO"
+  },
+  {
+    "id": "395",
+    "name": "ALBANO DI LUCANIA"
+  },
+  {
+    "id": "396",
+    "name": "ALBANO LAZIALE"
+  },
+  {
+    "id": "397",
+    "name": "ALBANO S.ALESSANDRO"
+  },
+  {
+    "id": "398",
+    "name": "ALBANOVA"
+  },
+  {
+    "id": "399",
+    "name": "ALBAREDO"
+  },
+  {
+    "id": "401",
+    "name": "ALBATE-TRECALLO"
+  },
+  {
+    "id": "191",
+    "name": "ALBENGA"
+  },
+  {
+    "id": "404",
+    "name": "ALBINIA"
+  },
+  {
+    "id": "192",
+    "name": "ALBISOLA"
+  },
+  {
+    "id": "405",
+    "name": "ALBIZZATE SOLBIATE ARNO"
+  },
+  {
+    "id": "406",
+    "name": "ALBONESE"
+  },
+  {
+    "id": "407",
+    "name": "ALBUZZANO"
+  },
+  {
+    "id": "409",
+    "name": "ALCAMO DIRAMAZIONE"
+  },
+  {
+    "id": "410",
+    "name": "ALCANTARA"
+  },
+  {
+    "id": "193",
+    "name": "ALESSANDRIA"
+  },
+  {
+    "id": "411",
+    "name": "ALFEDENA-SCONTRONE"
+  },
+  {
+    "id": "412",
+    "name": "ALFONSINE"
+  },
+  {
+    "id": "413",
+    "name": "ALI' TERME"
+  },
+  {
+    "id": "414",
+    "name": "ALICE BELCOLLE"
+  },
+  {
+    "id": "415",
+    "name": "ALLERONA-CASTEL VISCARDO"
+  },
+  {
+    "id": "416",
+    "name": "ALPIGNANO"
+  },
+  {
+    "id": "418",
+    "name": "ALTAMURA"
+  },
+  {
+    "id": "196",
+    "name": "ALTARE"
+  },
+  {
+    "id": "419",
+    "name": "ALTAVILLA IRPINA"
+  },
+  {
+    "id": "420",
+    "name": "ALTAVILLA MILICIA"
+  },
+  {
+    "id": "421",
+    "name": "ALTAVILLA TAVERNELLE"
+  },
+  {
+    "id": "422",
+    "name": "ALTOPASCIO"
+  },
+  {
+    "id": "423",
+    "name": "ALVIANO"
+  },
+  {
+    "id": "8",
+    "name": "AMANTEA"
+  },
+  {
+    "id": "424",
+    "name": "AMBIVERE MAPELLO"
+  },
+  {
+    "id": "9",
+    "name": "AMENDOLARA ORIOLO"
+  },
+  {
+    "id": "427",
+    "name": "AMOROSI MELIZZANO"
+  },
+  {
+    "id": "428",
+    "name": "ANAGNI-FIUGGI"
+  },
+  {
+    "id": "429",
+    "name": "ANCONA"
+  },
+  {
+    "id": "1096",
+    "name": "ANCONA STADIO"
+  },
+  {
+    "id": "3473",
+    "name": "ANCONA TORRETTE"
+  },
+  {
+    "id": "3365",
+    "name": "ANCONETTA"
+  },
+  {
+    "id": "4503",
+    "name": "ANDORA"
+  },
+  {
+    "id": "431",
+    "name": "ANGRI"
+  },
+  {
+    "id": "432",
+    "name": "ANGUILLARA"
+  },
+  {
+    "id": "1310",
+    "name": "ANNA'"
+  },
+  {
+    "id": "3466",
+    "name": "ANNONE VENETO"
+  },
+  {
+    "id": "434",
+    "name": "ANTIGNANO"
+  },
+  {
+    "id": "435",
+    "name": "ANTRODOCO BORGO VELINO"
+  },
+  {
+    "id": "436",
+    "name": "ANTRODOCO CENTRO"
+  },
+  {
+    "id": "437",
+    "name": "ANVERSA-VILLALAGO-SCANNO"
+  },
+  {
+    "id": "438",
+    "name": "ANZANO DEL PARCO"
+  },
+  {
+    "id": "439",
+    "name": "ANZIO"
+  },
+  {
+    "id": "440",
+    "name": "ANZIO COLONIA"
+  },
+  {
+    "id": "441",
+    "name": "ANZOLA DELL'EMILIA"
+  },
+  {
+    "id": "442",
+    "name": "AOSTA"
+  },
+  {
+    "id": "3501",
+    "name": "AOSTA ISTITUTO"
+  },
+  {
+    "id": "3502",
+    "name": "AOSTA VIALE EUROPA"
+  },
+  {
+    "id": "443",
+    "name": "APICE S.ARCANGELO BONITO"
+  },
+  {
+    "id": "3428",
+    "name": "APPIANO"
+  },
+  {
+    "id": "444",
+    "name": "APRICENA"
+  },
+  {
+    "id": "445",
+    "name": "APRILIA"
+  },
+  {
+    "id": "448",
+    "name": "ARAGONA CALDARE"
+  },
+  {
+    "id": "449",
+    "name": "ARBIA"
+  },
+  {
+    "id": "2110",
+    "name": "ARBOSTELLA"
+  },
+  {
+    "id": "450",
+    "name": "ARCE"
+  },
+  {
+    "id": "3594",
+    "name": "ARCENE"
+  },
+  {
+    "id": "451",
+    "name": "ARCISATE"
+  },
+  {
+    "id": "452",
+    "name": "ARCOLA"
+  },
+  {
+    "id": "453",
+    "name": "ARCORE"
+  },
+  {
+    "id": "455",
+    "name": "ARDENNO MASINO"
+  },
+  {
+    "id": "10",
+    "name": "ARDORE"
+  },
+  {
+    "id": "2115",
+    "name": "ARECHI"
+  },
+  {
+    "id": "457",
+    "name": "ARENA PO"
+  },
+  {
+    "id": "198",
+    "name": "ARENZANO"
+  },
+  {
+    "id": "458",
+    "name": "AREZZO"
+  },
+  {
+    "id": "459",
+    "name": "ARGENTA"
+  },
+  {
+    "id": "460",
+    "name": "ARIANO IRPINO"
+  },
+  {
+    "id": "461",
+    "name": "ARONA"
+  },
+  {
+    "id": "462",
+    "name": "ARPINO"
+  },
+  {
+    "id": "463",
+    "name": "ARQUA'"
+  },
+  {
+    "id": "199",
+    "name": "ARQUATA SCRIVIA"
+  },
+  {
+    "id": "464",
+    "name": "ARSOLI"
+  },
+  {
+    "id": "465",
+    "name": "ARTEGNA"
+  },
+  {
+    "id": "466",
+    "name": "ARVIER"
+  },
+  {
+    "id": "11",
+    "name": "ASCEA"
+  },
+  {
+    "id": "467",
+    "name": "ASCIANO"
+  },
+  {
+    "id": "468",
+    "name": "ASCIANO MONTE OLIVETO MAGGIORE"
+  },
+  {
+    "id": "469",
+    "name": "ASCOLI PICENO"
+  },
+  {
+    "id": "470",
+    "name": "ASCOLI SATRIANO"
+  },
+  {
+    "id": "472",
+    "name": "ASOLA"
+  },
+  {
+    "id": "473",
+    "name": "ASSEMINI"
+  },
+  {
+    "id": "3052",
+    "name": "ASSEMINI CARMINE"
+  },
+  {
+    "id": "3051",
+    "name": "ASSEMINI S.LUCIA"
+  },
+  {
+    "id": "474",
+    "name": "ASSISI"
+  },
+  {
+    "id": "475",
+    "name": "ASTI"
+  },
+  {
+    "id": "476",
+    "name": "ATTIGLIANO-BOMARZO"
+  },
+  {
+    "id": "480",
+    "name": "AUGUSTA"
+  },
+  {
+    "id": "3587",
+    "name": "AULLA LUNIGIANA"
+  },
+  {
+    "id": "483",
+    "name": "AVELLINO"
+  },
+  {
+    "id": "484",
+    "name": "AVERSA"
+  },
+  {
+    "id": "485",
+    "name": "AVEZZANO"
+  },
+  {
+    "id": "486",
+    "name": "AVIANO"
+  },
+  {
+    "id": "487",
+    "name": "AVIGLIANA"
+  },
+  {
+    "id": "488",
+    "name": "AVIGLIANO LUCANIA"
+  },
+  {
+    "id": "489",
+    "name": "AVIO"
+  },
+  {
+    "id": "490",
+    "name": "AVISE"
+  },
+  {
+    "id": "491",
+    "name": "AVOLA"
+  },
+  {
+    "id": "564",
+    "name": "BADESSE"
+  },
+  {
+    "id": "565",
+    "name": "BADIA POLESINE"
+  },
+  {
+    "id": "12",
+    "name": "BADOLATO"
+  },
+  {
+    "id": "566",
+    "name": "BAGHERIA"
+  },
+  {
+    "id": "567",
+    "name": "BAGNACAVALLO"
+  },
+  {
+    "id": "13",
+    "name": "BAGNARA"
+  },
+  {
+    "id": "568",
+    "name": "BAGNARIA ARSA"
+  },
+  {
+    "id": "569",
+    "name": "BAGNASCO"
+  },
+  {
+    "id": "570",
+    "name": "BAGNI DI LUCCA"
+  },
+  {
+    "id": "572",
+    "name": "BAGNI DI TIVOLI"
+  },
+  {
+    "id": "573",
+    "name": "BAGNOLI AGNANO TERME"
+  },
+  {
+    "id": "576",
+    "name": "BAGNOLO MELLA"
+  },
+  {
+    "id": "577",
+    "name": "BAIANO DI SPOLETO"
+  },
+  {
+    "id": "5043",
+    "name": "BALANGERO"
+  },
+  {
+    "id": "5439",
+    "name": "BALANZANO"
+  },
+  {
+    "id": "578",
+    "name": "BALDICHIERI-TIGLIOLE"
+  },
+  {
+    "id": "579",
+    "name": "BALESTRATE"
+  },
+  {
+    "id": "580",
+    "name": "BALSORANO"
+  },
+  {
+    "id": "3348",
+    "name": "BALVANO RICIGLIANO"
+  },
+  {
+    "id": "581",
+    "name": "BALZOLA"
+  },
+  {
+    "id": "583",
+    "name": "BANDITO"
+  },
+  {
+    "id": "584",
+    "name": "BARAGIANO-RUOTI"
+  },
+  {
+    "id": "585",
+    "name": "BARANELLO"
+  },
+  {
+    "id": "587",
+    "name": "BARBERINO DI VAL D'ELSA"
+  },
+  {
+    "id": "588",
+    "name": "BARBIANELLO"
+  },
+  {
+    "id": "589",
+    "name": "BARBIANO"
+  },
+  {
+    "id": "591",
+    "name": "BARCELLONA-CASTROREALE"
+  },
+  {
+    "id": "593",
+    "name": "BARDONECCHIA"
+  },
+  {
+    "id": "594",
+    "name": "BARGA GALLICANO"
+  },
+  {
+    "id": "595",
+    "name": "BARI CENTRALE"
+  },
+  {
+    "id": "3234",
+    "name": "BARI LOSETO"
+  },
+  {
+    "id": "555",
+    "name": "BARI PALESE MACCHIE"
+  },
+  {
+    "id": "557",
+    "name": "BARI PARCO SUD"
+  },
+  {
+    "id": "3233",
+    "name": "BARI S.RITA"
+  },
+  {
+    "id": "560",
+    "name": "BARI S.SPIRITO"
+  },
+  {
+    "id": "562",
+    "name": "BARI TORRE A MARE"
+  },
+  {
+    "id": "2699",
+    "name": "BARI TORRE QUETTA"
+  },
+  {
+    "id": "2468",
+    "name": "BARI VILLAGGIO DEL LAVORATORE"
+  },
+  {
+    "id": "563",
+    "name": "BARI ZONA INDUSTRIALE"
+  },
+  {
+    "id": "596",
+    "name": "BARICETTA"
+  },
+  {
+    "id": "597",
+    "name": "BARILE"
+  },
+  {
+    "id": "598",
+    "name": "BARLETTA"
+  },
+  {
+    "id": "599",
+    "name": "BARONISSI"
+  },
+  {
+    "id": "601",
+    "name": "BASILIANO"
+  },
+  {
+    "id": "602",
+    "name": "BASSANO DEL GRAPPA"
+  },
+  {
+    "id": "604",
+    "name": "BASSANO ROMANO"
+  },
+  {
+    "id": "605",
+    "name": "BASTIA"
+  },
+  {
+    "id": "608",
+    "name": "BATTAGLIA TERME"
+  },
+  {
+    "id": "14",
+    "name": "BATTIPAGLIA"
+  },
+  {
+    "id": "5420",
+    "name": "BAUCCA-GARAVELLE"
+  },
+  {
+    "id": "610",
+    "name": "BAVENO"
+  },
+  {
+    "id": "611",
+    "name": "BAZZANA"
+  },
+  {
+    "id": "3179",
+    "name": "BAZZANO"
+  },
+  {
+    "id": "612",
+    "name": "BEAULARD"
+  },
+  {
+    "id": "613",
+    "name": "BEFFI"
+  },
+  {
+    "id": "614",
+    "name": "BEINETTE"
+  },
+  {
+    "id": "615",
+    "name": "BELGIOIOSO"
+  },
+  {
+    "id": "616",
+    "name": "BELGIRATE"
+  },
+  {
+    "id": "617",
+    "name": "BELLA MURO"
+  },
+  {
+    "id": "618",
+    "name": "BELLANO TARTAVALLE TERME"
+  },
+  {
+    "id": "619",
+    "name": "BELLANTE RIPATTONE"
+  },
+  {
+    "id": "620",
+    "name": "BELLARIA"
+  },
+  {
+    "id": "623",
+    "name": "BELLINZAGO"
+  },
+  {
+    "id": "624",
+    "name": "BELLISIO SOLFARE"
+  },
+  {
+    "id": "625",
+    "name": "BELLUNO"
+  },
+  {
+    "id": "15",
+    "name": "BELMONTE CALABRO"
+  },
+  {
+    "id": "16",
+    "name": "BELVEDERE MARITTIMO"
+  },
+  {
+    "id": "626",
+    "name": "BENEVENTO"
+  },
+  {
+    "id": "628",
+    "name": "BENEVENTO ARCO TRAIANO"
+  },
+  {
+    "id": "670",
+    "name": "BENEVENTO PORTA RUFINA"
+  },
+  {
+    "id": "629",
+    "name": "BERCETO"
+  },
+  {
+    "id": "630",
+    "name": "BERCHIDDA"
+  },
+  {
+    "id": "631",
+    "name": "BERGAMASCO"
+  },
+  {
+    "id": "632",
+    "name": "BERGAMO"
+  },
+  {
+    "id": "3183",
+    "name": "BERGAMO OSPEDALE"
+  },
+  {
+    "id": "633",
+    "name": "BERNALDA"
+  },
+  {
+    "id": "634",
+    "name": "BESANA"
+  },
+  {
+    "id": "635",
+    "name": "BESNATE"
+  },
+  {
+    "id": "636",
+    "name": "BESOZZO"
+  },
+  {
+    "id": "200",
+    "name": "BEVERA"
+  },
+  {
+    "id": "638",
+    "name": "BEVILACQUA"
+  },
+  {
+    "id": "639",
+    "name": "BIAGIONI LAGACCI"
+  },
+  {
+    "id": "17",
+    "name": "BIANCO"
+  },
+  {
+    "id": "640",
+    "name": "BIANZE'"
+  },
+  {
+    "id": "641",
+    "name": "BIANZONE"
+  },
+  {
+    "id": "642",
+    "name": "BIASSONO-LESMO PARCO"
+  },
+  {
+    "id": "646",
+    "name": "BIBIANA"
+  },
+  {
+    "id": "647",
+    "name": "BICOCCA"
+  },
+  {
+    "id": "649",
+    "name": "BIELLA S.PAOLO"
+  },
+  {
+    "id": "650",
+    "name": "BIFORCO"
+  },
+  {
+    "id": "652",
+    "name": "BISCEGLIE"
+  },
+  {
+    "id": "653",
+    "name": "BISTAGNO"
+  },
+  {
+    "id": "654",
+    "name": "BISUSCHIO-VIGGIU'"
+  },
+  {
+    "id": "655",
+    "name": "BITETTO PALO DEL COLLE"
+  },
+  {
+    "id": "3235",
+    "name": "BITRITTO"
+  },
+  {
+    "id": "520",
+    "name": "BIVIO D'AURISINA"
+  },
+  {
+    "id": "213",
+    "name": "BOGLIASCO"
+  },
+  {
+    "id": "681",
+    "name": "BOIANO"
+  },
+  {
+    "id": "682",
+    "name": "BOLGHERI"
+  },
+  {
+    "id": "672",
+    "name": "BOLOGNA BORGO PANIGALE"
+  },
+  {
+    "id": "942",
+    "name": "BOLOGNA C.LE/AV"
+  },
+  {
+    "id": "683",
+    "name": "BOLOGNA CENTRALE"
+  },
+  {
+    "id": "673",
+    "name": "BOLOGNA CORTICELLA"
+  },
+  {
+    "id": "1249",
+    "name": "BOLOGNA FIERE"
+  },
+  {
+    "id": "1709",
+    "name": "BOLOGNA MAZZINI"
+  },
+  {
+    "id": "679",
+    "name": "BOLOGNA S.RUFFILLO"
+  },
+  {
+    "id": "2003",
+    "name": "BOLOGNA S.VITALE"
+  },
+  {
+    "id": "685",
+    "name": "BOLZANO"
+  },
+  {
+    "id": "1966",
+    "name": "BOLZANO CASANOVA"
+  },
+  {
+    "id": "686",
+    "name": "BOLZANO NOVARESE"
+  },
+  {
+    "id": "687",
+    "name": "BOLZANO SUD"
+  },
+  {
+    "id": "214",
+    "name": "BONASSOLA"
+  },
+  {
+    "id": "689",
+    "name": "BONEFRO S.CROCE"
+  },
+  {
+    "id": "690",
+    "name": "BONFERRARO"
+  },
+  {
+    "id": "691",
+    "name": "BONORVA"
+  },
+  {
+    "id": "215",
+    "name": "BORDIGHERA"
+  },
+  {
+    "id": "5035",
+    "name": "BORGARO"
+  },
+  {
+    "id": "693",
+    "name": "BORGHETTO PARMENSE"
+  },
+  {
+    "id": "216",
+    "name": "BORGHETTO S.SPIRITO"
+  },
+  {
+    "id": "694",
+    "name": "BORGHETTO SULL'ADIGE"
+  },
+  {
+    "id": "217",
+    "name": "BORGIO VEREZZI"
+  },
+  {
+    "id": "695",
+    "name": "BORGO"
+  },
+  {
+    "id": "696",
+    "name": "BORGO A BUGGIANO"
+  },
+  {
+    "id": "697",
+    "name": "BORGO A MOZZANO"
+  },
+  {
+    "id": "218",
+    "name": "BORGO FORNARI PER VOLTAGGIO"
+  },
+  {
+    "id": "698",
+    "name": "BORGO LAVEZZARO"
+  },
+  {
+    "id": "699",
+    "name": "BORGO REVEL"
+  },
+  {
+    "id": "700",
+    "name": "BORGO S.DALMAZZO"
+  },
+  {
+    "id": "701",
+    "name": "BORGO S.LORENZO"
+  },
+  {
+    "id": "702",
+    "name": "BORGO S.LORENZO RIMORELLI"
+  },
+  {
+    "id": "703",
+    "name": "BORGO S.MARTINO"
+  },
+  {
+    "id": "704",
+    "name": "BORGO TICINO"
+  },
+  {
+    "id": "705",
+    "name": "BORGO VAL DI TARO"
+  },
+  {
+    "id": "706",
+    "name": "BORGO VALSUGANA CENTRO"
+  },
+  {
+    "id": "3503",
+    "name": "BORGO VALSUGANA EST"
+  },
+  {
+    "id": "707",
+    "name": "BORGO VERCELLI"
+  },
+  {
+    "id": "1547",
+    "name": "BORGOCHIESANUOVA"
+  },
+  {
+    "id": "709",
+    "name": "BORGOFRANCO"
+  },
+  {
+    "id": "710",
+    "name": "BORGOLOMBARDO"
+  },
+  {
+    "id": "711",
+    "name": "BORGOMANERO"
+  },
+  {
+    "id": "712",
+    "name": "BORGONE"
+  },
+  {
+    "id": "713",
+    "name": "BORGONUOVO"
+  },
+  {
+    "id": "714",
+    "name": "BORGORATTO"
+  },
+  {
+    "id": "715",
+    "name": "BORGOSESIA"
+  },
+  {
+    "id": "716",
+    "name": "BORORE"
+  },
+  {
+    "id": "717",
+    "name": "BOSCHI S.ANNA"
+  },
+  {
+    "id": "5023",
+    "name": "BOSCONERO"
+  },
+  {
+    "id": "21",
+    "name": "BOTRICELLO"
+  },
+  {
+    "id": "22",
+    "name": "BOVA MARINA"
+  },
+  {
+    "id": "23",
+    "name": "BOVALINO"
+  },
+  {
+    "id": "722",
+    "name": "BOVINO DELICETO"
+  },
+  {
+    "id": "724",
+    "name": "BOVOLONE"
+  },
+  {
+    "id": "725",
+    "name": "BOZZOLO"
+  },
+  {
+    "id": "727",
+    "name": "BRA"
+  },
+  {
+    "id": "728",
+    "name": "BRACCIANO"
+  },
+  {
+    "id": "3437",
+    "name": "BRAGNO"
+  },
+  {
+    "id": "24",
+    "name": "BRANCALEONE"
+  },
+  {
+    "id": "729",
+    "name": "BRANDIZZO"
+  },
+  {
+    "id": "730",
+    "name": "BREIL SUR ROYA"
+  },
+  {
+    "id": "731",
+    "name": "BRENNA-ALZATE"
+  },
+  {
+    "id": "732",
+    "name": "BRENNERO"
+  },
+  {
+    "id": "734",
+    "name": "BRESCIA"
+  },
+  {
+    "id": "736",
+    "name": "BRESSANA ARGINE"
+  },
+  {
+    "id": "737",
+    "name": "BRESSANA BOTTARONE"
+  },
+  {
+    "id": "738",
+    "name": "BRESSANONE"
+  },
+  {
+    "id": "25",
+    "name": "BRIATICO"
+  },
+  {
+    "id": "740",
+    "name": "BRICHERASIO"
+  },
+  {
+    "id": "741",
+    "name": "BRINDISI"
+  },
+  {
+    "id": "2723",
+    "name": "BRINDISI CITTADELLA DELLA RICERCA"
+  },
+  {
+    "id": "2786",
+    "name": "BRINDISI PERRINO"
+  },
+  {
+    "id": "743",
+    "name": "BRIONA"
+  },
+  {
+    "id": "744",
+    "name": "BRISIGHELLA"
+  },
+  {
+    "id": "745",
+    "name": "BROLO FICARRA"
+  },
+  {
+    "id": "746",
+    "name": "BRONI"
+  },
+  {
+    "id": "747",
+    "name": "BRONZOLO"
+  },
+  {
+    "id": "748",
+    "name": "BROZOLO"
+  },
+  {
+    "id": "750",
+    "name": "BRUCOLI"
+  },
+  {
+    "id": "751",
+    "name": "BRUNICO"
+  },
+  {
+    "id": "1967",
+    "name": "BRUNICO NORD"
+  },
+  {
+    "id": "752",
+    "name": "BRUNO"
+  },
+  {
+    "id": "753",
+    "name": "BRUZOLO DI SUSA"
+  },
+  {
+    "id": "754",
+    "name": "BUCCINO S.GREGORIO MAGNO"
+  },
+  {
+    "id": "755",
+    "name": "BUCINE"
+  },
+  {
+    "id": "756",
+    "name": "BUDOIA POLCENIGO"
+  },
+  {
+    "id": "757",
+    "name": "BUGNARA"
+  },
+  {
+    "id": "758",
+    "name": "BUONCONVENTO"
+  },
+  {
+    "id": "760",
+    "name": "BURONZO"
+  },
+  {
+    "id": "2386",
+    "name": "BUSA DI VIGONZA"
+  },
+  {
+    "id": "219",
+    "name": "BUSALLA"
+  },
+  {
+    "id": "761",
+    "name": "BUSCA"
+  },
+  {
+    "id": "762",
+    "name": "BUSCHE LENTIAI MEL"
+  },
+  {
+    "id": "763",
+    "name": "BUSSETO"
+  },
+  {
+    "id": "764",
+    "name": "BUSSI"
+  },
+  {
+    "id": "765",
+    "name": "BUSSOLENO"
+  },
+  {
+    "id": "766",
+    "name": "BUSTO ARSIZIO"
+  },
+  {
+    "id": "768",
+    "name": "BUTTAFAVA"
+  },
+  {
+    "id": "769",
+    "name": "BUTTAPIETRA"
+  },
+  {
+    "id": "770",
+    "name": "BUTTRIO"
+  },
+  {
+    "id": "778",
+    "name": "CA` DI BOSCHETTI"
+  },
+  {
+    "id": "785",
+    "name": "CADEO"
+  },
+  {
+    "id": "787",
+    "name": "CAGLIARI"
+  },
+  {
+    "id": "788",
+    "name": "CAGLIARI ELMAS"
+  },
+  {
+    "id": "3164",
+    "name": "CAGLIARI S.GILLA"
+  },
+  {
+    "id": "790",
+    "name": "CAIRO MONTENOTTE"
+  },
+  {
+    "id": "791",
+    "name": "CALA SABINA"
+  },
+  {
+    "id": "792",
+    "name": "CALALZO PIEVE CADORE CORTINA"
+  },
+  {
+    "id": "793",
+    "name": "CALAMANDRANA"
+  },
+  {
+    "id": "794",
+    "name": "CALATABIANO"
+  },
+  {
+    "id": "795",
+    "name": "CALATAFIMI"
+  },
+  {
+    "id": "797",
+    "name": "CALCERANICA"
+  },
+  {
+    "id": "801",
+    "name": "CALDE'"
+  },
+  {
+    "id": "3537",
+    "name": "CALDERARA-BARGELLINO"
+  },
+  {
+    "id": "803",
+    "name": "CALDONAZZO"
+  },
+  {
+    "id": "804",
+    "name": "CALENZANO"
+  },
+  {
+    "id": "807",
+    "name": "CALOLZIOCORTE OLGINATE"
+  },
+  {
+    "id": "26",
+    "name": "CALOPEZZATI"
+  },
+  {
+    "id": "809",
+    "name": "CALTAGIRONE"
+  },
+  {
+    "id": "772",
+    "name": "CALTANISSETTA CENTRALE"
+  },
+  {
+    "id": "773",
+    "name": "CALTANISSETTA XIRBI"
+  },
+  {
+    "id": "810",
+    "name": "CALTIGNAGA"
+  },
+  {
+    "id": "811",
+    "name": "CALUSCO"
+  },
+  {
+    "id": "812",
+    "name": "CALUSO"
+  },
+  {
+    "id": "813",
+    "name": "CALVISANO"
+  },
+  {
+    "id": "814",
+    "name": "CAMAIORE LIDO CAPEZZANO"
+  },
+  {
+    "id": "817",
+    "name": "CAMBIANO SANTENA"
+  },
+  {
+    "id": "2439",
+    "name": "CAMERANO ASPIO"
+  },
+  {
+    "id": "818",
+    "name": "CAMMARATA S.GIOVANNI GEMINI"
+  },
+  {
+    "id": "819",
+    "name": "CAMNAGO-LENTATE"
+  },
+  {
+    "id": "221",
+    "name": "CAMOGLI S.FRUTTUOSO"
+  },
+  {
+    "id": "820",
+    "name": "CAMPAGNA SERRE PERSANO"
+  },
+  {
+    "id": "822",
+    "name": "CAMPELLO SUL CLITUNNO"
+  },
+  {
+    "id": "823",
+    "name": "CAMPIGLIA MARITTIMA"
+  },
+  {
+    "id": "2174",
+    "name": "CAMPO DI CARNE"
+  },
+  {
+    "id": "824",
+    "name": "CAMPO DI GIOVE"
+  },
+  {
+    "id": "771",
+    "name": "CAMPO DI GIOVE-MONTE MAIELLA"
+  },
+  {
+    "id": "826",
+    "name": "CAMPO DI TRENS"
+  },
+  {
+    "id": "222",
+    "name": "CAMPO LIGURE-MASONE"
+  },
+  {
+    "id": "827",
+    "name": "CAMPOBASSO"
+  },
+  {
+    "id": "828",
+    "name": "CAMPOBELLO DI MAZARA"
+  },
+  {
+    "id": "829",
+    "name": "CAMPOBELLO RAVANUSA"
+  },
+  {
+    "id": "831",
+    "name": "CAMPODARSEGO"
+  },
+  {
+    "id": "832",
+    "name": "CAMPOFELICE"
+  },
+  {
+    "id": "833",
+    "name": "CAMPOFRANCO"
+  },
+  {
+    "id": "835",
+    "name": "CAMPOLEONE"
+  },
+  {
+    "id": "836",
+    "name": "CAMPOLIETO MONACILIONI"
+  },
+  {
+    "id": "838",
+    "name": "CAMPOMARINO"
+  },
+  {
+    "id": "3421",
+    "name": "CAMPOMIGLIAIO"
+  },
+  {
+    "id": "27",
+    "name": "CAMPORA S.GIOVANNI SERRA AIELLO"
+  },
+  {
+    "id": "840",
+    "name": "CAMPORGIANO"
+  },
+  {
+    "id": "842",
+    "name": "CAMPOSAMPIERO"
+  },
+  {
+    "id": "843",
+    "name": "CAMPOSANTO"
+  },
+  {
+    "id": "844",
+    "name": "CAMUCIA CORTONA"
+  },
+  {
+    "id": "845",
+    "name": "CANARO"
+  },
+  {
+    "id": "847",
+    "name": "CANCELLIERA"
+  },
+  {
+    "id": "848",
+    "name": "CANCELLO"
+  },
+  {
+    "id": "849",
+    "name": "CANCELLO ARNONE"
+  },
+  {
+    "id": "852",
+    "name": "CANDELO"
+  },
+  {
+    "id": "853",
+    "name": "CANDIA CANAVESE"
+  },
+  {
+    "id": "854",
+    "name": "CANDIA LOMELLINA"
+  },
+  {
+    "id": "856",
+    "name": "CANDIOLO"
+  },
+  {
+    "id": "858",
+    "name": "CANEGRATE"
+  },
+  {
+    "id": "859",
+    "name": "CANELLI"
+  },
+  {
+    "id": "860",
+    "name": "CANETRA"
+  },
+  {
+    "id": "861",
+    "name": "CANICATTI'"
+  },
+  {
+    "id": "863",
+    "name": "CANISTRO"
+  },
+  {
+    "id": "865",
+    "name": "CANNE DELLA BATTAGLIA"
+  },
+  {
+    "id": "866",
+    "name": "CANNETO SULL'OGLIO"
+  },
+  {
+    "id": "867",
+    "name": "CANNIZZARO"
+  },
+  {
+    "id": "868",
+    "name": "CANOSA DI PUGLIA"
+  },
+  {
+    "id": "5422",
+    "name": "CANOSCIO"
+  },
+  {
+    "id": "3181",
+    "name": "CANSANO"
+  },
+  {
+    "id": "3256",
+    "name": "CANSANO SCAVI DI OCRITICUM"
+  },
+  {
+    "id": "2974",
+    "name": "CANTELLO GAGGIOLO"
+  },
+  {
+    "id": "872",
+    "name": "CANTU'"
+  },
+  {
+    "id": "873",
+    "name": "CANTU'-CERMENATE"
+  },
+  {
+    "id": "874",
+    "name": "CAORSO"
+  },
+  {
+    "id": "28",
+    "name": "CAPACCIO ROCCADASPIDE"
+  },
+  {
+    "id": "3224",
+    "name": "CAPACI"
+  },
+  {
+    "id": "876",
+    "name": "CAPALBIO"
+  },
+  {
+    "id": "877",
+    "name": "CAPANNELLE"
+  },
+  {
+    "id": "878",
+    "name": "CAPISTRELLO"
+  },
+  {
+    "id": "30",
+    "name": "CAPO BONIFATI"
+  },
+  {
+    "id": "879",
+    "name": "CAPO D'ORLANDO-NASO"
+  },
+  {
+    "id": "31",
+    "name": "CAPO SPARTIVENTO"
+  },
+  {
+    "id": "880",
+    "name": "CAPOCROCE"
+  },
+  {
+    "id": "882",
+    "name": "CAPPELLE-MAGLIANO"
+  },
+  {
+    "id": "883",
+    "name": "CAPRALBA"
+  },
+  {
+    "id": "884",
+    "name": "CAPRANICA-SUTRI"
+  },
+  {
+    "id": "886",
+    "name": "CAPRIATI AL VOLTURNO"
+  },
+  {
+    "id": "888",
+    "name": "CAPRIVA"
+  },
+  {
+    "id": "889",
+    "name": "CAPUA"
+  },
+  {
+    "id": "891",
+    "name": "CARATE-CALO'"
+  },
+  {
+    "id": "892",
+    "name": "CARAVAGGIO"
+  },
+  {
+    "id": "893",
+    "name": "CARBONA"
+  },
+  {
+    "id": "968",
+    "name": "CARBONIA SERBARIU"
+  },
+  {
+    "id": "894",
+    "name": "CARBONIA STATO"
+  },
+  {
+    "id": "898",
+    "name": "CARENTINO"
+  },
+  {
+    "id": "34",
+    "name": "CARIATI"
+  },
+  {
+    "id": "899",
+    "name": "CARIMATE"
+  },
+  {
+    "id": "900",
+    "name": "CARINI"
+  },
+  {
+    "id": "3442",
+    "name": "CARINI TORRE CIACHEA"
+  },
+  {
+    "id": "902",
+    "name": "CARMAGNOLA"
+  },
+  {
+    "id": "904",
+    "name": "CARMIGNANO DI BRENTA"
+  },
+  {
+    "id": "905",
+    "name": "CARNATE USMATE"
+  },
+  {
+    "id": "906",
+    "name": "CARNIA"
+  },
+  {
+    "id": "908",
+    "name": "CARONIA"
+  },
+  {
+    "id": "909",
+    "name": "CAROVIGNO"
+  },
+  {
+    "id": "910",
+    "name": "CAROVILLI-ROCCASICURA"
+  },
+  {
+    "id": "911",
+    "name": "CARPANE'-VALSTAGNA"
+  },
+  {
+    "id": "912",
+    "name": "CARPI"
+  },
+  {
+    "id": "913",
+    "name": "CARPIGNANO SESIA"
+  },
+  {
+    "id": "914",
+    "name": "CARPINONE"
+  },
+  {
+    "id": "915",
+    "name": "CARRARA AVENZA"
+  },
+  {
+    "id": "916",
+    "name": "CARRITO-ORTONA"
+  },
+  {
+    "id": "918",
+    "name": "CARRUBA"
+  },
+  {
+    "id": "919",
+    "name": "CARSOLI"
+  },
+  {
+    "id": "921",
+    "name": "CASABIANCA"
+  },
+  {
+    "id": "922",
+    "name": "CASACALENDA GUARDIALFIERA"
+  },
+  {
+    "id": "924",
+    "name": "CASALBORDINO POLLUTRI"
+  },
+  {
+    "id": "926",
+    "name": "CASALBUTTANO"
+  },
+  {
+    "id": "927",
+    "name": "CASALE MONFERRATO"
+  },
+  {
+    "id": "929",
+    "name": "CASALECCHIO DI RENO"
+  },
+  {
+    "id": "3506",
+    "name": "CASALECCHIO GARIBALDI"
+  },
+  {
+    "id": "930",
+    "name": "CASALEGGIO"
+  },
+  {
+    "id": "932",
+    "name": "CASALETTO VAPRIO"
+  },
+  {
+    "id": "934",
+    "name": "CASALMAGGIORE"
+  },
+  {
+    "id": "935",
+    "name": "CASALNUOVO"
+  },
+  {
+    "id": "937",
+    "name": "CASALPUSTERLENGO"
+  },
+  {
+    "id": "938",
+    "name": "CASARSA"
+  },
+  {
+    "id": "939",
+    "name": "CASCINA"
+  },
+  {
+    "id": "5036",
+    "name": "CASELLE TORINESE"
+  },
+  {
+    "id": "945",
+    "name": "CASERTA"
+  },
+  {
+    "id": "946",
+    "name": "CASINO DI TERRA"
+  },
+  {
+    "id": "947",
+    "name": "CASLETTO-ROGENO"
+  },
+  {
+    "id": "948",
+    "name": "CASORATE SEMPIONE"
+  },
+  {
+    "id": "949",
+    "name": "CASORIA-AFRAGOLA"
+  },
+  {
+    "id": "950",
+    "name": "CASSAGO-NIBIONNO-BULCIAGO"
+  },
+  {
+    "id": "951",
+    "name": "CASSANO D'ADDA"
+  },
+  {
+    "id": "954",
+    "name": "CASSINE"
+  },
+  {
+    "id": "955",
+    "name": "CASSINO"
+  },
+  {
+    "id": "956",
+    "name": "CASSOLA"
+  },
+  {
+    "id": "959",
+    "name": "CASTAGNARO"
+  },
+  {
+    "id": "960",
+    "name": "CASTAGNETO CARDUCCI-DONORATICO"
+  },
+  {
+    "id": "961",
+    "name": "CASTAGNO"
+  },
+  {
+    "id": "962",
+    "name": "CASTAGNOLE DELLE LANZE"
+  },
+  {
+    "id": "964",
+    "name": "CASTEGGIO"
+  },
+  {
+    "id": "967",
+    "name": "CASTEL D'ARIO"
+  },
+  {
+    "id": "969",
+    "name": "CASTEL DI SANGRO"
+  },
+  {
+    "id": "970",
+    "name": "CASTEL GANDOLFO"
+  },
+  {
+    "id": "971",
+    "name": "CASTEL LAGOPESOLE"
+  },
+  {
+    "id": "972",
+    "name": "CASTEL MADAMA"
+  },
+  {
+    "id": "973",
+    "name": "CASTEL S.ANGELO"
+  },
+  {
+    "id": "974",
+    "name": "CASTEL S.GIORGIO ROCCAPIEMONTE"
+  },
+  {
+    "id": "975",
+    "name": "CASTEL S.GIOVANNI"
+  },
+  {
+    "id": "976",
+    "name": "CASTEL S.PIETRO TERME"
+  },
+  {
+    "id": "978",
+    "name": "CASTELBOLOGNESE-RIOLO TERME"
+  },
+  {
+    "id": "980",
+    "name": "CASTELDACCIA"
+  },
+  {
+    "id": "981",
+    "name": "CASTELDARNE"
+  },
+  {
+    "id": "3505",
+    "name": "CASTELDEBOLE"
+  },
+  {
+    "id": "982",
+    "name": "CASTELFERRETTI-FALCONARA AEROPORTO"
+  },
+  {
+    "id": "983",
+    "name": "CASTELFIORENTINO"
+  },
+  {
+    "id": "985",
+    "name": "CASTELFRANCO EMILIA"
+  },
+  {
+    "id": "987",
+    "name": "CASTELFRANCO VENETO"
+  },
+  {
+    "id": "988",
+    "name": "CASTELGUELFO"
+  },
+  {
+    "id": "989",
+    "name": "CASTELL'ALFERO"
+  },
+  {
+    "id": "991",
+    "name": "CASTELLALTO CANZANO"
+  },
+  {
+    "id": "958",
+    "name": "CASTELLAMMARE DEL GOLFO"
+  },
+  {
+    "id": "992",
+    "name": "CASTELLAMMARE DI STABIA"
+  },
+  {
+    "id": "993",
+    "name": "CASTELLANETA"
+  },
+  {
+    "id": "994",
+    "name": "CASTELLANETA MARINA"
+  },
+  {
+    "id": "997",
+    "name": "CASTELLEONE"
+  },
+  {
+    "id": "999",
+    "name": "CASTELLETTO TICINO"
+  },
+  {
+    "id": "1000",
+    "name": "CASTELLINA IN CHIANTI-MONTERIGGIONI"
+  },
+  {
+    "id": "1004",
+    "name": "CASTELLO D'ANNONE"
+  },
+  {
+    "id": "957",
+    "name": "CASTELLO DI GODEGO"
+  },
+  {
+    "id": "1005",
+    "name": "CASTELLUCCHIO"
+  },
+  {
+    "id": "1007",
+    "name": "CASTELMAGGIORE"
+  },
+  {
+    "id": "1009",
+    "name": "CASTELNUOVO BELBO"
+  },
+  {
+    "id": "1010",
+    "name": "CASTELNUOVO BERARDENGA"
+  },
+  {
+    "id": "1011",
+    "name": "CASTELNUOVO DEL GARDA"
+  },
+  {
+    "id": "1012",
+    "name": "CASTELNUOVO DI GARFAGNANA"
+  },
+  {
+    "id": "1013",
+    "name": "CASTELPLANIO CUPRAMONTANA"
+  },
+  {
+    "id": "1014",
+    "name": "CASTELRAIMONDO CAMERINO"
+  },
+  {
+    "id": "1015",
+    "name": "CASTELROSSO"
+  },
+  {
+    "id": "1016",
+    "name": "CASTELVECCHIO PASCOLI"
+  },
+  {
+    "id": "1018",
+    "name": "CASTELVETRANO"
+  },
+  {
+    "id": "1019",
+    "name": "CASTELVETRO"
+  },
+  {
+    "id": "1020",
+    "name": "CASTIGLION DEL LAGO"
+  },
+  {
+    "id": "1021",
+    "name": "CASTIGLION FIORENTINO"
+  },
+  {
+    "id": "1022",
+    "name": "CASTIGLIONCELLO"
+  },
+  {
+    "id": "38",
+    "name": "CASTIGLIONE COSENTINO"
+  },
+  {
+    "id": "1025",
+    "name": "CASTIONE ANDEVENNO"
+  },
+  {
+    "id": "1026",
+    "name": "CASTIONE DEI MARCHESI"
+  },
+  {
+    "id": "1027",
+    "name": "CASTRO-POFI-VALLECORSA"
+  },
+  {
+    "id": "1029",
+    "name": "CASTRONNO"
+  },
+  {
+    "id": "1031",
+    "name": "CATANIA ACQUICELLA"
+  },
+  {
+    "id": "3209",
+    "name": "CATANIA AEROPORTO FONTANAROSSA"
+  },
+  {
+    "id": "1032",
+    "name": "CATANIA CENTRALE"
+  },
+  {
+    "id": "39",
+    "name": "CATANZARO"
+  },
+  {
+    "id": "40",
+    "name": "CATANZARO LIDO"
+  },
+  {
+    "id": "1034",
+    "name": "CATENANUOVA-CENTURIPE"
+  },
+  {
+    "id": "1035",
+    "name": "CATTOLICA S.GIOVANNI GABICCE"
+  },
+  {
+    "id": "41",
+    "name": "CAULONIA"
+  },
+  {
+    "id": "1037",
+    "name": "CAVA CARBONARA"
+  },
+  {
+    "id": "1038",
+    "name": "CAVA DEI TIRRENI"
+  },
+  {
+    "id": "1040",
+    "name": "CAVA TIGOZZI"
+  },
+  {
+    "id": "1041",
+    "name": "CAVAGNOLO BRUSASCO"
+  },
+  {
+    "id": "1042",
+    "name": "CAVALLEGGERI AOSTA"
+  },
+  {
+    "id": "1043",
+    "name": "CAVALLERMAGGIORE"
+  },
+  {
+    "id": "1044",
+    "name": "CAVANELLA D'ADIGE"
+  },
+  {
+    "id": "1046",
+    "name": "CAVARIA OGGIONA IERAGO"
+  },
+  {
+    "id": "1047",
+    "name": "CAVAZZALE"
+  },
+  {
+    "id": "227",
+    "name": "CAVI"
+  },
+  {
+    "id": "1049",
+    "name": "CECCANO"
+  },
+  {
+    "id": "1050",
+    "name": "CECCHINA"
+  },
+  {
+    "id": "1051",
+    "name": "CECINA"
+  },
+  {
+    "id": "1053",
+    "name": "CEFALU'"
+  },
+  {
+    "id": "1054",
+    "name": "CEGGIA"
+  },
+  {
+    "id": "1055",
+    "name": "CELANO-OVINDOLI"
+  },
+  {
+    "id": "228",
+    "name": "CELLE"
+  },
+  {
+    "id": "42",
+    "name": "CELLE BULGHERIA ROCCAGLORIOSA"
+  },
+  {
+    "id": "1056",
+    "name": "CENGIO"
+  },
+  {
+    "id": "1057",
+    "name": "CENTALLO"
+  },
+  {
+    "id": "43",
+    "name": "CENTOLA-PALINURO-MARINA DI CAMEROTA"
+  },
+  {
+    "id": "1058",
+    "name": "CEPRANO-FALVATERRA"
+  },
+  {
+    "id": "5416",
+    "name": "CERBARA"
+  },
+  {
+    "id": "1061",
+    "name": "CERCHIO"
+  },
+  {
+    "id": "1062",
+    "name": "CERDA"
+  },
+  {
+    "id": "1063",
+    "name": "CEREA"
+  },
+  {
+    "id": "1064",
+    "name": "CEREGNANO"
+  },
+  {
+    "id": "229",
+    "name": "CERIALE"
+  },
+  {
+    "id": "1065",
+    "name": "CERIGNOLA CAMPAGNA"
+  },
+  {
+    "id": "1066",
+    "name": "CERNUSCO-MERATE"
+  },
+  {
+    "id": "5444",
+    "name": "CERQUETO"
+  },
+  {
+    "id": "1067",
+    "name": "CERRETO D'ESI"
+  },
+  {
+    "id": "1068",
+    "name": "CERTALDO"
+  },
+  {
+    "id": "1069",
+    "name": "CERTOSA DI PAVIA"
+  },
+  {
+    "id": "1072",
+    "name": "CERVIA-MILANO MARITTIMA"
+  },
+  {
+    "id": "1073",
+    "name": "CERVIGNANO-AQUILEIA-GRADO"
+  },
+  {
+    "id": "780",
+    "name": "CESANO BOSCONE"
+  },
+  {
+    "id": "1075",
+    "name": "CESANO DI ROMA"
+  },
+  {
+    "id": "1077",
+    "name": "CESENA"
+  },
+  {
+    "id": "1078",
+    "name": "CESENATICO"
+  },
+  {
+    "id": "5267",
+    "name": "CESI"
+  },
+  {
+    "id": "44",
+    "name": "CETRARO"
+  },
+  {
+    "id": "1079",
+    "name": "CEVA"
+  },
+  {
+    "id": "1081",
+    "name": "CHATILLON-SAINT-VINCENT"
+  },
+  {
+    "id": "1083",
+    "name": "CHIANCHE CEPPALONI"
+  },
+  {
+    "id": "1084",
+    "name": "CHIARAVALLE"
+  },
+  {
+    "id": "1085",
+    "name": "CHIARI"
+  },
+  {
+    "id": "1087",
+    "name": "CHIASSO"
+  },
+  {
+    "id": "231",
+    "name": "CHIAVARI"
+  },
+  {
+    "id": "1089",
+    "name": "CHIAVENNA"
+  },
+  {
+    "id": "1090",
+    "name": "CHIERI"
+  },
+  {
+    "id": "1091",
+    "name": "CHIETI"
+  },
+  {
+    "id": "2663",
+    "name": "CHIETI-MADONNA DELLE PIANE"
+  },
+  {
+    "id": "1092",
+    "name": "CHIEUTI SERRACAPRIOLA"
+  },
+  {
+    "id": "1093",
+    "name": "CHIGNOLO PO"
+  },
+  {
+    "id": "1094",
+    "name": "CHIOGGIA"
+  },
+  {
+    "id": "1095",
+    "name": "CHIOMONTE"
+  },
+  {
+    "id": "1099",
+    "name": "CHIUDUNO"
+  },
+  {
+    "id": "1100",
+    "name": "CHIURO"
+  },
+  {
+    "id": "1101",
+    "name": "CHIUSA"
+  },
+  {
+    "id": "1103",
+    "name": "CHIUSANO COSSOMBRATO"
+  },
+  {
+    "id": "1104",
+    "name": "CHIUSI-CHIANCIANO TERME"
+  },
+  {
+    "id": "1105",
+    "name": "CHIVASSO"
+  },
+  {
+    "id": "1106",
+    "name": "CIAMPINO"
+  },
+  {
+    "id": "1110",
+    "name": "CINISI TERRASINI"
+  },
+  {
+    "id": "5039",
+    "name": "CIRIE'"
+  },
+  {
+    "id": "46",
+    "name": "CIRO'"
+  },
+  {
+    "id": "1111",
+    "name": "CISANO CAPRINO BERGAMASCO"
+  },
+  {
+    "id": "1112",
+    "name": "CISMON DEL GRAPPA"
+  },
+  {
+    "id": "1113",
+    "name": "CISTERNA DI LATINA"
+  },
+  {
+    "id": "1114",
+    "name": "CISTERNINO"
+  },
+  {
+    "id": "5419",
+    "name": "CITTA' DI CASTELLO"
+  },
+  {
+    "id": "5418",
+    "name": "CITTA` DI CASTELLO - FORNACE"
+  },
+  {
+    "id": "5417",
+    "name": "CITTA` DI CASTELLO - ZONA INDUSTRIALE"
+  },
+  {
+    "id": "1117",
+    "name": "CITTADELLA"
+  },
+  {
+    "id": "1118",
+    "name": "CITTADUCALE"
+  },
+  {
+    "id": "1119",
+    "name": "CIVATE"
+  },
+  {
+    "id": "799",
+    "name": "CIVIDATE-CALCIO"
+  },
+  {
+    "id": "1120",
+    "name": "CIVITA CASTELLANA-MAGLIANO"
+  },
+  {
+    "id": "1121",
+    "name": "CIVITA D'ANTINO-MORINO"
+  },
+  {
+    "id": "1122",
+    "name": "CIVITANOVA MARCHE-MONTEGRANARO"
+  },
+  {
+    "id": "1123",
+    "name": "CIVITAVECCHIA"
+  },
+  {
+    "id": "1124",
+    "name": "CIVITELLA PAGANICO"
+  },
+  {
+    "id": "1125",
+    "name": "CIVITELLA ROVETO"
+  },
+  {
+    "id": "1127",
+    "name": "CLASSE"
+  },
+  {
+    "id": "1128",
+    "name": "COCCAGLIO"
+  },
+  {
+    "id": "1129",
+    "name": "COCCONATO"
+  },
+  {
+    "id": "1130",
+    "name": "COCULLO"
+  },
+  {
+    "id": "1134",
+    "name": "CODOGNO"
+  },
+  {
+    "id": "1135",
+    "name": "CODOLA"
+  },
+  {
+    "id": "1136",
+    "name": "CODROIPO"
+  },
+  {
+    "id": "232",
+    "name": "COGOLETO"
+  },
+  {
+    "id": "1138",
+    "name": "COLFELICE"
+  },
+  {
+    "id": "1139",
+    "name": "COLICO"
+  },
+  {
+    "id": "1140",
+    "name": "COLLARMELE"
+  },
+  {
+    "id": "1141",
+    "name": "COLLE ISARCO"
+  },
+  {
+    "id": "1142",
+    "name": "COLLE MATTIA"
+  },
+  {
+    "id": "1144",
+    "name": "COLLECCHIO"
+  },
+  {
+    "id": "1145",
+    "name": "COLLEFERRO-SEGNI-PALIANO"
+  },
+  {
+    "id": "1146",
+    "name": "COLLEGNO"
+  },
+  {
+    "id": "5450",
+    "name": "COLLEVALENZA R.R."
+  },
+  {
+    "id": "1148",
+    "name": "COLLEVECCHIO-POGGIO SOMMAVILLA"
+  },
+  {
+    "id": "2333",
+    "name": "COLLI DEL TRONTO"
+  },
+  {
+    "id": "1149",
+    "name": "COLLI DI MONTE BOVE"
+  },
+  {
+    "id": "1151",
+    "name": "COLOGNE"
+  },
+  {
+    "id": "1152",
+    "name": "COLONNA GALLERIA"
+  },
+  {
+    "id": "1153",
+    "name": "COLORNO"
+  },
+  {
+    "id": "1154",
+    "name": "COMIGNAGO"
+  },
+  {
+    "id": "1155",
+    "name": "COMISO"
+  },
+  {
+    "id": "3222",
+    "name": "COMO CAMERLATA"
+  },
+  {
+    "id": "1158",
+    "name": "COMO S.GIOVANNI"
+  },
+  {
+    "id": "1159",
+    "name": "COMPIOBBI"
+  },
+  {
+    "id": "1160",
+    "name": "COMPRE S.VINCENZO"
+  },
+  {
+    "id": "48",
+    "name": "CONDOFURI"
+  },
+  {
+    "id": "1162",
+    "name": "CONDOVE-CHIUSA S.MICHELE"
+  },
+  {
+    "id": "1163",
+    "name": "CONEGLIANO"
+  },
+  {
+    "id": "1166",
+    "name": "CONSELICE"
+  },
+  {
+    "id": "1167",
+    "name": "CONTEA LONDA"
+  },
+  {
+    "id": "1168",
+    "name": "CONTESSE"
+  },
+  {
+    "id": "1169",
+    "name": "CONTIGLIANO"
+  },
+  {
+    "id": "1170",
+    "name": "CONTURSI TERME"
+  },
+  {
+    "id": "1174",
+    "name": "CORBETTA-S.STEFANO TICINO"
+  },
+  {
+    "id": "1175",
+    "name": "CORBEZZI"
+  },
+  {
+    "id": "1178",
+    "name": "CORDOVADO SESTO"
+  },
+  {
+    "id": "49",
+    "name": "CORIGLIANO CALABRO"
+  },
+  {
+    "id": "1180",
+    "name": "CORMONS"
+  },
+  {
+    "id": "233",
+    "name": "CORNIGLIA"
+  },
+  {
+    "id": "1182",
+    "name": "CORNINO"
+  },
+  {
+    "id": "1183",
+    "name": "CORNUDA"
+  },
+  {
+    "id": "1184",
+    "name": "CORONELLA"
+  },
+  {
+    "id": "1185",
+    "name": "CORRIDONIA MOGLIANO"
+  },
+  {
+    "id": "1186",
+    "name": "CORSANO"
+  },
+  {
+    "id": "1187",
+    "name": "CORSICO"
+  },
+  {
+    "id": "1188",
+    "name": "CORTEOLONA"
+  },
+  {
+    "id": "50",
+    "name": "COSENZA"
+  },
+  {
+    "id": "1189",
+    "name": "COSIO TRAONA"
+  },
+  {
+    "id": "1190",
+    "name": "COSSATO"
+  },
+  {
+    "id": "1192",
+    "name": "COSTA"
+  },
+  {
+    "id": "1193",
+    "name": "COSTA MASNAGA"
+  },
+  {
+    "id": "1194",
+    "name": "COSTIGLIOLE (MOTTA DI)"
+  },
+  {
+    "id": "1195",
+    "name": "COSTIGLIOLE D`ASTI"
+  },
+  {
+    "id": "1196",
+    "name": "COSTIGLIOLE SALUZZO"
+  },
+  {
+    "id": "1197",
+    "name": "COTIGNOLA"
+  },
+  {
+    "id": "1201",
+    "name": "CREMA"
+  },
+  {
+    "id": "1202",
+    "name": "CREMONA"
+  },
+  {
+    "id": "1203",
+    "name": "CRESCENTINO"
+  },
+  {
+    "id": "1204",
+    "name": "CRESPINO DEL LAMONE"
+  },
+  {
+    "id": "1205",
+    "name": "CRESSA FONTANETO"
+  },
+  {
+    "id": "1206",
+    "name": "CREVALCORE"
+  },
+  {
+    "id": "51",
+    "name": "CROPANI"
+  },
+  {
+    "id": "52",
+    "name": "CROTONE"
+  },
+  {
+    "id": "53",
+    "name": "CRUCOLI"
+  },
+  {
+    "id": "1208",
+    "name": "CUCCIAGO"
+  },
+  {
+    "id": "1211",
+    "name": "CUNEO"
+  },
+  {
+    "id": "1212",
+    "name": "CUNEO GESSO"
+  },
+  {
+    "id": "1213",
+    "name": "CUNICO SCANDELUZZA"
+  },
+  {
+    "id": "1214",
+    "name": "CUPONE"
+  },
+  {
+    "id": "1215",
+    "name": "CUPRAMARITTIMA"
+  },
+  {
+    "id": "1216",
+    "name": "CUREGGIO"
+  },
+  {
+    "id": "54",
+    "name": "CURINGA"
+  },
+  {
+    "id": "1217",
+    "name": "CUSANO"
+  },
+  {
+    "id": "55",
+    "name": "CUTRO"
+  },
+  {
+    "id": "1218",
+    "name": "CUZZAGO (MI)"
+  },
+  {
+    "id": "3208",
+    "name": "CUZZAGO (NO)"
+  },
+  {
+    "id": "1223",
+    "name": "DECIMOMANNU"
+  },
+  {
+    "id": "1224",
+    "name": "DEGO"
+  },
+  {
+    "id": "234",
+    "name": "DEIVA MARINA"
+  },
+  {
+    "id": "1225",
+    "name": "DELEBIO"
+  },
+  {
+    "id": "1227",
+    "name": "DERBY"
+  },
+  {
+    "id": "5441",
+    "name": "DERUTA"
+  },
+  {
+    "id": "1228",
+    "name": "DERVIO"
+  },
+  {
+    "id": "1229",
+    "name": "DESENZANO DEL GARDA-SIRMIONE"
+  },
+  {
+    "id": "1230",
+    "name": "DESIO"
+  },
+  {
+    "id": "56",
+    "name": "DIAMANTE BUONVICINO"
+  },
+  {
+    "id": "4502",
+    "name": "DIANO"
+  },
+  {
+    "id": "1240",
+    "name": "DICOMANO"
+  },
+  {
+    "id": "1241",
+    "name": "DIECIMO-PESCAGLIA"
+  },
+  {
+    "id": "1246",
+    "name": "DITTAINO"
+  },
+  {
+    "id": "1247",
+    "name": "DOBBIACO"
+  },
+  {
+    "id": "1251",
+    "name": "DOLO"
+  },
+  {
+    "id": "1252",
+    "name": "DOMEGLIARA-S.AMBROGIO"
+  },
+  {
+    "id": "1253",
+    "name": "DOMODOSSOLA"
+  },
+  {
+    "id": "1255",
+    "name": "DONNAFUGATA"
+  },
+  {
+    "id": "1256",
+    "name": "DONNAS"
+  },
+  {
+    "id": "1258",
+    "name": "DORIO"
+  },
+  {
+    "id": "1259",
+    "name": "DORMELLETTO"
+  },
+  {
+    "id": "1260",
+    "name": "DORMELLETTO PAESE"
+  },
+  {
+    "id": "1261",
+    "name": "DOSSOBUONO"
+  },
+  {
+    "id": "1263",
+    "name": "DUBINO"
+  },
+  {
+    "id": "3199",
+    "name": "DUCA D'AOSTA"
+  },
+  {
+    "id": "1265",
+    "name": "DUEVILLE"
+  },
+  {
+    "id": "3513",
+    "name": "DUOMO VIA VERNIERI"
+  },
+  {
+    "id": "1266",
+    "name": "EBOLI"
+  },
+  {
+    "id": "1267",
+    "name": "ECA NASAGO`"
+  },
+  {
+    "id": "1268",
+    "name": "EGNA-TERMENO"
+  },
+  {
+    "id": "1270",
+    "name": "ELLERA CORCIANO"
+  },
+  {
+    "id": "1048",
+    "name": "ELMAS AEROPORTO"
+  },
+  {
+    "id": "1271",
+    "name": "EMPOLI"
+  },
+  {
+    "id": "1272",
+    "name": "ENAS"
+  },
+  {
+    "id": "1273",
+    "name": "ENNA"
+  },
+  {
+    "id": "1275",
+    "name": "EQUI TERME"
+  },
+  {
+    "id": "1276",
+    "name": "ESTE"
+  },
+  {
+    "id": "2288",
+    "name": "EUROPA PES"
+  },
+  {
+    "id": "1281",
+    "name": "FABRIANO"
+  },
+  {
+    "id": "1282",
+    "name": "FABRIANO CA' MAIANO"
+  },
+  {
+    "id": "1284",
+    "name": "FABRO-FICULLE"
+  },
+  {
+    "id": "1286",
+    "name": "FAE'-FORTOGNA"
+  },
+  {
+    "id": "1285",
+    "name": "FAENZA"
+  },
+  {
+    "id": "3405",
+    "name": "FAGARE'"
+  },
+  {
+    "id": "1287",
+    "name": "FAGNANO CAMPANA"
+  },
+  {
+    "id": "1288",
+    "name": "FALCIANO-MONDRAGONE-CARINOLA"
+  },
+  {
+    "id": "1289",
+    "name": "FALCONARA"
+  },
+  {
+    "id": "1291",
+    "name": "FALCONARA MARITTIMA"
+  },
+  {
+    "id": "3577",
+    "name": "FALCONARA STADIO"
+  },
+  {
+    "id": "1292",
+    "name": "FALCONE"
+  },
+  {
+    "id": "59",
+    "name": "FALERNA"
+  },
+  {
+    "id": "5442",
+    "name": "FANCIULLATA"
+  },
+  {
+    "id": "1293",
+    "name": "FANNA-CAVASSO"
+  },
+  {
+    "id": "1294",
+    "name": "FANO"
+  },
+  {
+    "id": "1295",
+    "name": "FANZOLO"
+  },
+  {
+    "id": "1296",
+    "name": "FARA"
+  },
+  {
+    "id": "1297",
+    "name": "FARA SABINA-MONTELIBRETTI"
+  },
+  {
+    "id": "1299",
+    "name": "FASANO"
+  },
+  {
+    "id": "60",
+    "name": "FAVAZZINA"
+  },
+  {
+    "id": "1302",
+    "name": "FEDERICO"
+  },
+  {
+    "id": "1303",
+    "name": "FELEGARA-S.ANDREA BAGNI"
+  },
+  {
+    "id": "5024",
+    "name": "FELETTO"
+  },
+  {
+    "id": "1304",
+    "name": "FELIZZANO"
+  },
+  {
+    "id": "1306",
+    "name": "FELTRE"
+  },
+  {
+    "id": "1307",
+    "name": "FERENTINO-SUPINO"
+  },
+  {
+    "id": "1308",
+    "name": "FERRANDINA SCALO-MATERA"
+  },
+  {
+    "id": "237",
+    "name": "FERRANIA"
+  },
+  {
+    "id": "1309",
+    "name": "FERRARA"
+  },
+  {
+    "id": "1311",
+    "name": "FERRERA LOMELLINA"
+  },
+  {
+    "id": "62",
+    "name": "FERRUZZANO"
+  },
+  {
+    "id": "644",
+    "name": "FICARAZZI"
+  },
+  {
+    "id": "3351",
+    "name": "FIDENE"
+  },
+  {
+    "id": "1317",
+    "name": "FIDENZA"
+  },
+  {
+    "id": "1318",
+    "name": "FIERA"
+  },
+  {
+    "id": "4040",
+    "name": "FIERA DI ROMA"
+  },
+  {
+    "id": "3415",
+    "name": "FIESOLE CALDINE"
+  },
+  {
+    "id": "1319",
+    "name": "FIGLINE VALDARNO"
+  },
+  {
+    "id": "1320",
+    "name": "FILATTIERA"
+  },
+  {
+    "id": "1322",
+    "name": "FILIANO"
+  },
+  {
+    "id": "238",
+    "name": "FINALE LIGURE MARINA"
+  },
+  {
+    "id": "1324",
+    "name": "FIORENZUOLA"
+  },
+  {
+    "id": "1312",
+    "name": "FIRENZE CAMPO MARTE"
+  },
+  {
+    "id": "1314",
+    "name": "FIRENZE CASTELLO"
+  },
+  {
+    "id": "1315",
+    "name": "FIRENZE RIFREDI"
+  },
+  {
+    "id": "3369",
+    "name": "FIRENZE ROVEZZANO"
+  },
+  {
+    "id": "1325",
+    "name": "FIRENZE SANTA MARIA NOVELLA"
+  },
+  {
+    "id": "1316",
+    "name": "FIRENZE STATUTO"
+  },
+  {
+    "id": "1326",
+    "name": "FISCIANO"
+  },
+  {
+    "id": "3151",
+    "name": "FIUMARA GAZZI"
+  },
+  {
+    "id": "63",
+    "name": "FIUMEFREDDO BRUZIO"
+  },
+  {
+    "id": "1328",
+    "name": "FIUMEFREDDO DI SICILIA"
+  },
+  {
+    "id": "1329",
+    "name": "FIUMELATTE"
+  },
+  {
+    "id": "1330",
+    "name": "FIUMETORTO"
+  },
+  {
+    "id": "1327",
+    "name": "FIUMICINO AEROPORTO"
+  },
+  {
+    "id": "1333",
+    "name": "FIVIZZANO ROMETTA-SOLIERA"
+  },
+  {
+    "id": "1332",
+    "name": "FIVIZZANO-GASSANO"
+  },
+  {
+    "id": "1334",
+    "name": "FOGGIA"
+  },
+  {
+    "id": "1335",
+    "name": "FOGNANO"
+  },
+  {
+    "id": "1336",
+    "name": "FOLIGNO"
+  },
+  {
+    "id": "1337",
+    "name": "FOLLONICA"
+  },
+  {
+    "id": "1338",
+    "name": "FONDI-SPERLONGA"
+  },
+  {
+    "id": "1339",
+    "name": "FONTAN SAORGE"
+  },
+  {
+    "id": "1341",
+    "name": "FONTANA LIRI"
+  },
+  {
+    "id": "1340",
+    "name": "FONTANA LIRI INFERIORE"
+  },
+  {
+    "id": "1342",
+    "name": "FONTANAFREDDA"
+  },
+  {
+    "id": "1343",
+    "name": "FONTANAROSA-CERVARO"
+  },
+  {
+    "id": "4087",
+    "name": "FONTANE BIANCHE"
+  },
+  {
+    "id": "1344",
+    "name": "FONTANETTO PO"
+  },
+  {
+    "id": "1345",
+    "name": "FONTANIVA"
+  },
+  {
+    "id": "1346",
+    "name": "FONTECCHIO"
+  },
+  {
+    "id": "1348",
+    "name": "FORENZA"
+  },
+  {
+    "id": "1349",
+    "name": "FORGARIA BAGNI ANDUINS"
+  },
+  {
+    "id": "1350",
+    "name": "FORLI'"
+  },
+  {
+    "id": "1351",
+    "name": "FORLIMPOPOLI-BERTINORO"
+  },
+  {
+    "id": "1352",
+    "name": "FORMIA-GAETA"
+  },
+  {
+    "id": "1353",
+    "name": "FORNACI DI BARGA"
+  },
+  {
+    "id": "1354",
+    "name": "FORNOVO"
+  },
+  {
+    "id": "1355",
+    "name": "FORTE DEI MARMI-SERAVEZZA-QUERCETA"
+  },
+  {
+    "id": "1356",
+    "name": "FORTEZZA"
+  },
+  {
+    "id": "1357",
+    "name": "FOSCIANDORA-CESERANA"
+  },
+  {
+    "id": "1359",
+    "name": "FOSSACESIA-TORINO DI SANGRO"
+  },
+  {
+    "id": "1360",
+    "name": "FOSSALTA DI PIAVE"
+  },
+  {
+    "id": "1362",
+    "name": "FOSSANO"
+  },
+  {
+    "id": "1363",
+    "name": "FOSSATO DI VICO GUBBIO"
+  },
+  {
+    "id": "1364",
+    "name": "FRAGNETO MONFORTE"
+  },
+  {
+    "id": "239",
+    "name": "FRAMURA"
+  },
+  {
+    "id": "1367",
+    "name": "FRANCAVILLA AL MARE"
+  },
+  {
+    "id": "64",
+    "name": "FRANCAVILLA ANGITOLA-FILADELFIA"
+  },
+  {
+    "id": "1366",
+    "name": "FRANCAVILLA FONTANA"
+  },
+  {
+    "id": "1369",
+    "name": "FRANCIOSA"
+  },
+  {
+    "id": "1370",
+    "name": "FRASCATI"
+  },
+  {
+    "id": "3349",
+    "name": "FRASSO"
+  },
+  {
+    "id": "1371",
+    "name": "FRASSO TELESINO-DUGENTA"
+  },
+  {
+    "id": "1372",
+    "name": "FRATTA"
+  },
+  {
+    "id": "5446",
+    "name": "FRATTA TODINA"
+  },
+  {
+    "id": "1373",
+    "name": "FRATTAMAGGIORE-GRUMO"
+  },
+  {
+    "id": "1375",
+    "name": "FRATTE"
+  },
+  {
+    "id": "1376",
+    "name": "FRATTE CENTRO"
+  },
+  {
+    "id": "5143",
+    "name": "FRATTE VILLA COMUNALE"
+  },
+  {
+    "id": "1377",
+    "name": "FROSINONE"
+  },
+  {
+    "id": "240",
+    "name": "FRUGAROLO BOSCOMARENGO"
+  },
+  {
+    "id": "3518",
+    "name": "FUNO CENTERGROSS"
+  },
+  {
+    "id": "5454",
+    "name": "FURAPANE"
+  },
+  {
+    "id": "1381",
+    "name": "FURCI"
+  },
+  {
+    "id": "65",
+    "name": "FUSCALDO"
+  },
+  {
+    "id": "1386",
+    "name": "GAGGIANO"
+  },
+  {
+    "id": "3162",
+    "name": "GAGGIO PORTA EST"
+  },
+  {
+    "id": "1388",
+    "name": "GAGLIOLE"
+  },
+  {
+    "id": "1389",
+    "name": "GAIBANELLA"
+  },
+  {
+    "id": "1390",
+    "name": "GAIFANA"
+  },
+  {
+    "id": "1391",
+    "name": "GALATI"
+  },
+  {
+    "id": "1393",
+    "name": "GALLARATE"
+  },
+  {
+    "id": "1396",
+    "name": "GALLESE IN TEVERINA"
+  },
+  {
+    "id": "1397",
+    "name": "GALLIERA"
+  },
+  {
+    "id": "1398",
+    "name": "GALLIERA VENETA TOMBOLO"
+  },
+  {
+    "id": "1401",
+    "name": "GAMBETTOLA"
+  },
+  {
+    "id": "1402",
+    "name": "GAMBOLO'-REMONDO'"
+  },
+  {
+    "id": "1404",
+    "name": "GARBAGNA"
+  },
+  {
+    "id": "1405",
+    "name": "GARESSIO"
+  },
+  {
+    "id": "3504",
+    "name": "GARGAZZONE"
+  },
+  {
+    "id": "1407",
+    "name": "GARLASCO"
+  },
+  {
+    "id": "1408",
+    "name": "GATTEO A MARE"
+  },
+  {
+    "id": "1409",
+    "name": "GATTINARA"
+  },
+  {
+    "id": "1410",
+    "name": "GAVIGNANO SABINO"
+  },
+  {
+    "id": "1411",
+    "name": "GAVORRANO"
+  },
+  {
+    "id": "1413",
+    "name": "GAZZADA SCHIANNO MORAZZONE"
+  },
+  {
+    "id": "1414",
+    "name": "GAZZO DI BIGARELLO"
+  },
+  {
+    "id": "1415",
+    "name": "GAZZO PIEVE S.GIACOMO"
+  },
+  {
+    "id": "1416",
+    "name": "GELA"
+  },
+  {
+    "id": "1417",
+    "name": "GELA-ANIC"
+  },
+  {
+    "id": "2380",
+    "name": "GEMELLI"
+  },
+  {
+    "id": "1419",
+    "name": "GEMONA DEL FRIULI"
+  },
+  {
+    "id": "1420",
+    "name": "GENGA S.VITTORE TERME"
+  },
+  {
+    "id": "242",
+    "name": "GENOVA ACQUASANTA"
+  },
+  {
+    "id": "243",
+    "name": "GENOVA BOLZANETO"
+  },
+  {
+    "id": "244",
+    "name": "GENOVA BORZOLI"
+  },
+  {
+    "id": "245",
+    "name": "GENOVA BRIGNOLE"
+  },
+  {
+    "id": "248",
+    "name": "GENOVA CORNIGLIANO"
+  },
+  {
+    "id": "249",
+    "name": "GENOVA COSTA DI SESTRI PONENTE"
+  },
+  {
+    "id": "251",
+    "name": "GENOVA GRANARA"
+  },
+  {
+    "id": "254",
+    "name": "GENOVA NERVI"
+  },
+  {
+    "id": "256",
+    "name": "GENOVA PEGLI"
+  },
+  {
+    "id": "257",
+    "name": "GENOVA PIAZZA PRINCIPE"
+  },
+  {
+    "id": "255",
+    "name": "GENOVA PIAZZA PRINCIPE SOTTERRANEA"
+  },
+  {
+    "id": "258",
+    "name": "GENOVA PONTEDECIMO"
+  },
+  {
+    "id": "259",
+    "name": "GENOVA PRA"
+  },
+  {
+    "id": "260",
+    "name": "GENOVA QUARTO DEI MILLE"
+  },
+  {
+    "id": "261",
+    "name": "GENOVA QUINTO AL MARE"
+  },
+  {
+    "id": "262",
+    "name": "GENOVA RIVAROLO"
+  },
+  {
+    "id": "204",
+    "name": "GENOVA S.BIAGIO"
+  },
+  {
+    "id": "263",
+    "name": "GENOVA SAMPIERDARENA"
+  },
+  {
+    "id": "266",
+    "name": "GENOVA SESTRI PONENTE AEROPORTO"
+  },
+  {
+    "id": "267",
+    "name": "GENOVA STURLA"
+  },
+  {
+    "id": "269",
+    "name": "GENOVA VESIMA"
+  },
+  {
+    "id": "203",
+    "name": "GENOVA VIA DI FRANCIA"
+  },
+  {
+    "id": "270",
+    "name": "GENOVA VOLTRI"
+  },
+  {
+    "id": "5045",
+    "name": "GERMAGNANO"
+  },
+  {
+    "id": "1425",
+    "name": "GHEDI"
+  },
+  {
+    "id": "1426",
+    "name": "GHEMME"
+  },
+  {
+    "id": "1427",
+    "name": "GHISLARENGO"
+  },
+  {
+    "id": "1428",
+    "name": "GHIVIZZANO-COREGLIA"
+  },
+  {
+    "id": "1429",
+    "name": "GIACHERY"
+  },
+  {
+    "id": "1430",
+    "name": "GIAMPILIERI"
+  },
+  {
+    "id": "1431",
+    "name": "GIAROLE"
+  },
+  {
+    "id": "1432",
+    "name": "GIARRE RIPOSTO"
+  },
+  {
+    "id": "1433",
+    "name": "GIAVE"
+  },
+  {
+    "id": "1434",
+    "name": "GINOSA"
+  },
+  {
+    "id": "1435",
+    "name": "GIOIA DEL COLLE"
+  },
+  {
+    "id": "67",
+    "name": "GIOIA TAURO"
+  },
+  {
+    "id": "68",
+    "name": "GIOIOSA JONICA"
+  },
+  {
+    "id": "1436",
+    "name": "GIOJOSA MAREA"
+  },
+  {
+    "id": "1437",
+    "name": "GIOVINAZZO"
+  },
+  {
+    "id": "1438",
+    "name": "GIUGLIANO QUALIANO"
+  },
+  {
+    "id": "1439",
+    "name": "GIULIANOVA"
+  },
+  {
+    "id": "69",
+    "name": "GIZZERIA LIDO"
+  },
+  {
+    "id": "1442",
+    "name": "GLORIE"
+  },
+  {
+    "id": "1443",
+    "name": "GODO"
+  },
+  {
+    "id": "1383",
+    "name": "GOLFO ARANCI"
+  },
+  {
+    "id": "1444",
+    "name": "GONZAGA-REGGIOLO"
+  },
+  {
+    "id": "3408",
+    "name": "GORGO AL MONTICANO"
+  },
+  {
+    "id": "1445",
+    "name": "GORIANO SICOLI"
+  },
+  {
+    "id": "1446",
+    "name": "GORIZIA CENTRALE"
+  },
+  {
+    "id": "1447",
+    "name": "GOZZANO"
+  },
+  {
+    "id": "1451",
+    "name": "GRAGNOLA"
+  },
+  {
+    "id": "1452",
+    "name": "GRAMMICHELE"
+  },
+  {
+    "id": "1453",
+    "name": "GRANAIOLO"
+  },
+  {
+    "id": "1454",
+    "name": "GRANAROLO FAENTINO"
+  },
+  {
+    "id": "1456",
+    "name": "GRASSANO-GARAGUSO-TRICARICO"
+  },
+  {
+    "id": "1457",
+    "name": "GRAVELLONA TOCE"
+  },
+  {
+    "id": "1458",
+    "name": "GRAVINA IN PUGLIA"
+  },
+  {
+    "id": "1459",
+    "name": "GRECCIO"
+  },
+  {
+    "id": "1460",
+    "name": "GRICIGNANO-TEVEROLA"
+  },
+  {
+    "id": "1462",
+    "name": "GRIGNASCO"
+  },
+  {
+    "id": "1463",
+    "name": "GRIGNO"
+  },
+  {
+    "id": "1464",
+    "name": "GRISIGNANO DI ZOCCO"
+  },
+  {
+    "id": "70",
+    "name": "GRISOLIA S.MARIA"
+  },
+  {
+    "id": "1465",
+    "name": "GRIZZANA"
+  },
+  {
+    "id": "1467",
+    "name": "GROPELLO CAIROLI"
+  },
+  {
+    "id": "1468",
+    "name": "GROSSETO"
+  },
+  {
+    "id": "1469",
+    "name": "GROTTAGLIE"
+  },
+  {
+    "id": "1470",
+    "name": "GROTTAMMARE"
+  },
+  {
+    "id": "1471",
+    "name": "GROTTE"
+  },
+  {
+    "id": "1472",
+    "name": "GROTTE S.STEFANO"
+  },
+  {
+    "id": "3166",
+    "name": "GRUGLIASCO"
+  },
+  {
+    "id": "1473",
+    "name": "GRUMELLO DEL MONTE"
+  },
+  {
+    "id": "1474",
+    "name": "GRUMO APPULA"
+  },
+  {
+    "id": "1475",
+    "name": "GUALDO TADINO"
+  },
+  {
+    "id": "71",
+    "name": "GUARDAVALLE"
+  },
+  {
+    "id": "1384",
+    "name": "GUARDIA MANGANO S.VENERINA"
+  },
+  {
+    "id": "72",
+    "name": "GUARDIA PIEMONTESE TERME"
+  },
+  {
+    "id": "1481",
+    "name": "GUIDONIA-MONTECELIO-S.ANGELO"
+  },
+  {
+    "id": "1482",
+    "name": "HONE-BARD"
+  },
+  {
+    "id": "1483",
+    "name": "IGEA MARINA"
+  },
+  {
+    "id": "1484",
+    "name": "IGLESIAS"
+  },
+  {
+    "id": "1485",
+    "name": "IL NETO"
+  },
+  {
+    "id": "5447",
+    "name": "ILCI-PIAN DEI MORI"
+  },
+  {
+    "id": "1487",
+    "name": "IMOLA"
+  },
+  {
+    "id": "4501",
+    "name": "IMPERIA"
+  },
+  {
+    "id": "1488",
+    "name": "INCISA"
+  },
+  {
+    "id": "1489",
+    "name": "INCISA SCAPACCINO"
+  },
+  {
+    "id": "1490",
+    "name": "INCORONATA"
+  },
+  {
+    "id": "1492",
+    "name": "INDUNO OLONA"
+  },
+  {
+    "id": "3427",
+    "name": "IPOGEO DEGLI OTTAVI"
+  },
+  {
+    "id": "1497",
+    "name": "ISERNIA"
+  },
+  {
+    "id": "1499",
+    "name": "ISOLA D`ASTI"
+  },
+  {
+    "id": "274",
+    "name": "ISOLA DEL CANTONE"
+  },
+  {
+    "id": "1501",
+    "name": "ISOLA DELLA SCALA"
+  },
+  {
+    "id": "1500",
+    "name": "ISOLA DELLE FEMMINE"
+  },
+  {
+    "id": "1502",
+    "name": "ISOLA LIRI"
+  },
+  {
+    "id": "1503",
+    "name": "ISOLETTA-S.GIOVANNI INCARICO"
+  },
+  {
+    "id": "1504",
+    "name": "ISPICA"
+  },
+  {
+    "id": "1506",
+    "name": "ISTRANA"
+  },
+  {
+    "id": "1507",
+    "name": "ITRI"
+  },
+  {
+    "id": "1508",
+    "name": "IVREA"
+  },
+  {
+    "id": "1509",
+    "name": "JESI"
+  },
+  {
+    "id": "74",
+    "name": "JOPPOLO"
+  },
+  {
+    "id": "1510",
+    "name": "L'AQUILA"
+  },
+  {
+    "id": "3174",
+    "name": "L'AQUILA CAMPO DI PILE"
+  },
+  {
+    "id": "2917",
+    "name": "L'AQUILA S.GREGORIO"
+  },
+  {
+    "id": "2901",
+    "name": "L'AQUILA SASSA NUCLEO SVILUPPO"
+  },
+  {
+    "id": "1511",
+    "name": "LA BRIGUE"
+  },
+  {
+    "id": "5413",
+    "name": "LA DOGANA"
+  },
+  {
+    "id": "1512",
+    "name": "LA FIORA"
+  },
+  {
+    "id": "1513",
+    "name": "LA GIUSTINIANA"
+  },
+  {
+    "id": "4043",
+    "name": "LA RUSTICA CITTA'"
+  },
+  {
+    "id": "1515",
+    "name": "LA RUSTICA UIR"
+  },
+  {
+    "id": "1516",
+    "name": "LA SALLE"
+  },
+  {
+    "id": "275",
+    "name": "LA SPEZIA CENTRALE"
+  },
+  {
+    "id": "1517",
+    "name": "LA SPEZIA MIGLIARINA"
+  },
+  {
+    "id": "1519",
+    "name": "LA STORTA"
+  },
+  {
+    "id": "1520",
+    "name": "LABICO"
+  },
+  {
+    "id": "1521",
+    "name": "LABRO MOGGIO"
+  },
+  {
+    "id": "1071",
+    "name": "LADISPOLI-CERVETERI"
+  },
+  {
+    "id": "276",
+    "name": "LAIGUEGLIA"
+  },
+  {
+    "id": "1525",
+    "name": "LAIVES"
+  },
+  {
+    "id": "1526",
+    "name": "LAMA"
+  },
+  {
+    "id": "1527",
+    "name": "LAMA DI RENO"
+  },
+  {
+    "id": "1528",
+    "name": "LAMBRINIA"
+  },
+  {
+    "id": "75",
+    "name": "LAMEZIA TERME CENTRALE"
+  },
+  {
+    "id": "76",
+    "name": "LAMEZIA TERME NICASTRO"
+  },
+  {
+    "id": "77",
+    "name": "LAMEZIA TERME SAMBIASE"
+  },
+  {
+    "id": "1529",
+    "name": "LANA-POSTAL"
+  },
+  {
+    "id": "1530",
+    "name": "LANCENIGO"
+  },
+  {
+    "id": "1531",
+    "name": "LANUVIO"
+  },
+  {
+    "id": "1532",
+    "name": "LANZARA FIMIANI"
+  },
+  {
+    "id": "5044",
+    "name": "LANZO TORINESE"
+  },
+  {
+    "id": "1534",
+    "name": "LARINO"
+  },
+  {
+    "id": "2865",
+    "name": "LASCARI"
+  },
+  {
+    "id": "4031",
+    "name": "LASTRA A SIGNA"
+  },
+  {
+    "id": "1537",
+    "name": "LATERINA"
+  },
+  {
+    "id": "1538",
+    "name": "LATIANO"
+  },
+  {
+    "id": "1539",
+    "name": "LATINA"
+  },
+  {
+    "id": "1540",
+    "name": "LATISANA LIGNANO-BIBIONE"
+  },
+  {
+    "id": "1541",
+    "name": "LAURIANO"
+  },
+  {
+    "id": "277",
+    "name": "LAVAGNA"
+  },
+  {
+    "id": "1542",
+    "name": "LAVENO MOMBELLO"
+  },
+  {
+    "id": "1543",
+    "name": "LAVEZZOLA"
+  },
+  {
+    "id": "1545",
+    "name": "LAVIS"
+  },
+  {
+    "id": "3449",
+    "name": "LE CURE"
+  },
+  {
+    "id": "3534",
+    "name": "LE PIAGGE"
+  },
+  {
+    "id": "1549",
+    "name": "LECCE"
+  },
+  {
+    "id": "1550",
+    "name": "LECCO"
+  },
+  {
+    "id": "1551",
+    "name": "LECCO MAGGIANICO"
+  },
+  {
+    "id": "1552",
+    "name": "LEGGIUNO MONVALLE"
+  },
+  {
+    "id": "1553",
+    "name": "LEGNAGO"
+  },
+  {
+    "id": "1554",
+    "name": "LEGNANO"
+  },
+  {
+    "id": "1555",
+    "name": "LENDINARA"
+  },
+  {
+    "id": "1557",
+    "name": "LENTINI"
+  },
+  {
+    "id": "1558",
+    "name": "LENTINI DIRAMAZIONE"
+  },
+  {
+    "id": "2154",
+    "name": "LEONFORTE-PIRATO"
+  },
+  {
+    "id": "2595",
+    "name": "LERCARA DIRAMAZIONE"
+  },
+  {
+    "id": "1561",
+    "name": "LERINO"
+  },
+  {
+    "id": "1562",
+    "name": "LESA"
+  },
+  {
+    "id": "1563",
+    "name": "LESEGNO"
+  },
+  {
+    "id": "1565",
+    "name": "LESMO"
+  },
+  {
+    "id": "1566",
+    "name": "LETOJANNI"
+  },
+  {
+    "id": "1567",
+    "name": "LEVADA"
+  },
+  {
+    "id": "278",
+    "name": "LEVANTO"
+  },
+  {
+    "id": "895",
+    "name": "LEVATA"
+  },
+  {
+    "id": "3595",
+    "name": "LEVATE"
+  },
+  {
+    "id": "1568",
+    "name": "LEVICO TERME"
+  },
+  {
+    "id": "1572",
+    "name": "LICATA"
+  },
+  {
+    "id": "1573",
+    "name": "LIDO DI CLASSE-LIDO DI SAVIO"
+  },
+  {
+    "id": "1574",
+    "name": "LIDO DI LAVINIO"
+  },
+  {
+    "id": "1575",
+    "name": "LIERNA"
+  },
+  {
+    "id": "1576",
+    "name": "LIMONE"
+  },
+  {
+    "id": "1580",
+    "name": "LISON"
+  },
+  {
+    "id": "1581",
+    "name": "LISSONE-MUGGIO'"
+  },
+  {
+    "id": "1582",
+    "name": "LIVORNO CENTRALE"
+  },
+  {
+    "id": "1570",
+    "name": "LIVORNO FERRARIS"
+  },
+  {
+    "id": "279",
+    "name": "LOANO"
+  },
+  {
+    "id": "1583",
+    "name": "LOCATE TRIULZI"
+  },
+  {
+    "id": "78",
+    "name": "LOCRI"
+  },
+  {
+    "id": "1584",
+    "name": "LODI"
+  },
+  {
+    "id": "2326",
+    "name": "LOLLI"
+  },
+  {
+    "id": "1585",
+    "name": "LOMELLO"
+  },
+  {
+    "id": "1586",
+    "name": "LONATO"
+  },
+  {
+    "id": "1587",
+    "name": "LONGARONE ZOLDO"
+  },
+  {
+    "id": "79",
+    "name": "LONGOBARDI"
+  },
+  {
+    "id": "1588",
+    "name": "LONIGO"
+  },
+  {
+    "id": "1589",
+    "name": "LOREO"
+  },
+  {
+    "id": "1590",
+    "name": "LORETO"
+  },
+  {
+    "id": "1591",
+    "name": "LUCCA"
+  },
+  {
+    "id": "1592",
+    "name": "LUGO"
+  },
+  {
+    "id": "1593",
+    "name": "LUINO"
+  },
+  {
+    "id": "1594",
+    "name": "LUMIGNACCO"
+  },
+  {
+    "id": "1597",
+    "name": "LUNGHEZZA"
+  },
+  {
+    "id": "1598",
+    "name": "LUNI"
+  },
+  {
+    "id": "1600",
+    "name": "LUSERNA S. GIOVANNI"
+  },
+  {
+    "id": "1602",
+    "name": "MACCARESE-FREGENE"
+  },
+  {
+    "id": "1603",
+    "name": "MACERATA"
+  },
+  {
+    "id": "3576",
+    "name": "MACERATA FONTESCODELLA"
+  },
+  {
+    "id": "3206",
+    "name": "MACERATA UNIVERSITA'"
+  },
+  {
+    "id": "1605",
+    "name": "MACHERIO SOVICO"
+  },
+  {
+    "id": "1604",
+    "name": "MACHERIO-CANONICA"
+  },
+  {
+    "id": "1606",
+    "name": "MACOMER"
+  },
+  {
+    "id": "1608",
+    "name": "MADDALONI INFERIORE"
+  },
+  {
+    "id": "1609",
+    "name": "MADDALONI SUPERIORE"
+  },
+  {
+    "id": "3372",
+    "name": "MADIGNANO"
+  },
+  {
+    "id": "1614",
+    "name": "MADONNA DEL PILONE"
+  },
+  {
+    "id": "1617",
+    "name": "MAERNE DI MARTELLAGO"
+  },
+  {
+    "id": "1618",
+    "name": "MAGENTA"
+  },
+  {
+    "id": "1619",
+    "name": "MAGIONE"
+  },
+  {
+    "id": "1620",
+    "name": "MAGLIANA"
+  },
+  {
+    "id": "1621",
+    "name": "MAGLIANO CRAVA MOROZZO"
+  },
+  {
+    "id": "1623",
+    "name": "MAGRE'-CORTACCIA"
+  },
+  {
+    "id": "1626",
+    "name": "MALEO"
+  },
+  {
+    "id": "1628",
+    "name": "MALTIGNANO DEL TRONTO"
+  },
+  {
+    "id": "280",
+    "name": "MANAROLA"
+  },
+  {
+    "id": "80",
+    "name": "MANDATORICCIO CAMPANA"
+  },
+  {
+    "id": "1632",
+    "name": "MANDELLO DEL LARIO"
+  },
+  {
+    "id": "1634",
+    "name": "MANERBIO"
+  },
+  {
+    "id": "1635",
+    "name": "MANFREDONIA"
+  },
+  {
+    "id": "3171",
+    "name": "MANFREDONIA OVEST"
+  },
+  {
+    "id": "1636",
+    "name": "MANIAGO"
+  },
+  {
+    "id": "1637",
+    "name": "MANOPPELLO"
+  },
+  {
+    "id": "1638",
+    "name": "MANTA"
+  },
+  {
+    "id": "1639",
+    "name": "MANTOVA"
+  },
+  {
+    "id": "1744",
+    "name": "MANTOVA FRASSINE"
+  },
+  {
+    "id": "1640",
+    "name": "MANZANO"
+  },
+  {
+    "id": "1641",
+    "name": "MANZIANA-CANALE MONTERANO"
+  },
+  {
+    "id": "1643",
+    "name": "MARANO TICINO"
+  },
+  {
+    "id": "1642",
+    "name": "MARANO VICENTINO"
+  },
+  {
+    "id": "81",
+    "name": "MARATEA"
+  },
+  {
+    "id": "1644",
+    "name": "MARAUSA"
+  },
+  {
+    "id": "1645",
+    "name": "MARCARIA"
+  },
+  {
+    "id": "2026",
+    "name": "MARCELLINA-PALOMBARA"
+  },
+  {
+    "id": "82",
+    "name": "MARCELLINA-VERBICARO-ORSOMARSO"
+  },
+  {
+    "id": "83",
+    "name": "MARCELLINARA"
+  },
+  {
+    "id": "1647",
+    "name": "MARCIANISE"
+  },
+  {
+    "id": "554",
+    "name": "MARCONI"
+  },
+  {
+    "id": "1648",
+    "name": "MARECHIARO"
+  },
+  {
+    "id": "2313",
+    "name": "MAREDOLCE"
+  },
+  {
+    "id": "1649",
+    "name": "MARGARITA"
+  },
+  {
+    "id": "1650",
+    "name": "MARIANOPOLI"
+  },
+  {
+    "id": "1652",
+    "name": "MARINA DI CERVETERI"
+  },
+  {
+    "id": "85",
+    "name": "MARINA DI MARATEA"
+  },
+  {
+    "id": "86",
+    "name": "MARINA DI S.LORENZO"
+  },
+  {
+    "id": "1653",
+    "name": "MARINELLA"
+  },
+  {
+    "id": "1654",
+    "name": "MARINO DEL TRONTO-FOLIGNANO"
+  },
+  {
+    "id": "1655",
+    "name": "MARINO LAZIALE"
+  },
+  {
+    "id": "1658",
+    "name": "MARMORE"
+  },
+  {
+    "id": "1659",
+    "name": "MAROTTA-MONDOLFO"
+  },
+  {
+    "id": "1660",
+    "name": "MARRADI-PALAZZUOLO SUL SENIO"
+  },
+  {
+    "id": "1661",
+    "name": "MARRUBIU-TERRALBA-ARBOREA"
+  },
+  {
+    "id": "1662",
+    "name": "MARSALA"
+  },
+  {
+    "id": "5445",
+    "name": "MARSCIANO"
+  },
+  {
+    "id": "3250",
+    "name": "MARTINSICURO"
+  },
+  {
+    "id": "1664",
+    "name": "MARZABOTTO"
+  },
+  {
+    "id": "1666",
+    "name": "MARZOCCA"
+  },
+  {
+    "id": "1667",
+    "name": "MASCALI"
+  },
+  {
+    "id": "1670",
+    "name": "MASSA CENTRO"
+  },
+  {
+    "id": "5452",
+    "name": "MASSA MARTANA"
+  },
+  {
+    "id": "1673",
+    "name": "MASSAFRA"
+  },
+  {
+    "id": "1674",
+    "name": "MASSALOMBARDA"
+  },
+  {
+    "id": "1675",
+    "name": "MASSAROSA BOZZANO"
+  },
+  {
+    "id": "1677",
+    "name": "MATELICA"
+  },
+  {
+    "id": "5042",
+    "name": "MATHI"
+  },
+  {
+    "id": "1679",
+    "name": "MATRICE-MONTAGANO-S.GIOVANNI IN GALDO"
+  },
+  {
+    "id": "1681",
+    "name": "MAZARA DEL VALLO"
+  },
+  {
+    "id": "1682",
+    "name": "MEDE"
+  },
+  {
+    "id": "1683",
+    "name": "MEDESANO"
+  },
+  {
+    "id": "1684",
+    "name": "MEDUNO"
+  },
+  {
+    "id": "1686",
+    "name": "MEINA"
+  },
+  {
+    "id": "1687",
+    "name": "MELANO MARISCHIO"
+  },
+  {
+    "id": "282",
+    "name": "MELE"
+  },
+  {
+    "id": "1688",
+    "name": "MELEGNANO"
+  },
+  {
+    "id": "1689",
+    "name": "MELFI"
+  },
+  {
+    "id": "87",
+    "name": "MELITO DI PORTO SALVO"
+  },
+  {
+    "id": "1690",
+    "name": "MELZO"
+  },
+  {
+    "id": "1691",
+    "name": "MEOLO"
+  },
+  {
+    "id": "1692",
+    "name": "MERANA"
+  },
+  {
+    "id": "1693",
+    "name": "MERANO"
+  },
+  {
+    "id": "1694",
+    "name": "MERANO-MAIA BASSA"
+  },
+  {
+    "id": "2083",
+    "name": "MERCATELLO"
+  },
+  {
+    "id": "1695",
+    "name": "MERCATO S.SEVERINO"
+  },
+  {
+    "id": "1696",
+    "name": "MERCENASCO"
+  },
+  {
+    "id": "1697",
+    "name": "MERGOZZO"
+  },
+  {
+    "id": "1699",
+    "name": "MESAGNE"
+  },
+  {
+    "id": "1700",
+    "name": "MESSINA CENTRALE"
+  },
+  {
+    "id": "1703",
+    "name": "MESTRINO"
+  },
+  {
+    "id": "88",
+    "name": "METAPONTO"
+  },
+  {
+    "id": "1704",
+    "name": "MEZZANI RONDANI"
+  },
+  {
+    "id": "1705",
+    "name": "MEZZANO"
+  },
+  {
+    "id": "1706",
+    "name": "MEZZOCORONA"
+  },
+  {
+    "id": "1727",
+    "name": "MIGNANO MONTE LUNGO"
+  },
+  {
+    "id": "1728",
+    "name": "MILANO CENTRALE"
+  },
+  {
+    "id": "1708",
+    "name": "MILANO CERTOSA"
+  },
+  {
+    "id": "3468",
+    "name": "MILANO DATEO"
+  },
+  {
+    "id": "3169",
+    "name": "MILANO FORLANINI"
+  },
+  {
+    "id": "1711",
+    "name": "MILANO GRECO PIRELLI"
+  },
+  {
+    "id": "1712",
+    "name": "MILANO LAMBRATE"
+  },
+  {
+    "id": "1713",
+    "name": "MILANO LANCETTI"
+  },
+  {
+    "id": "1715",
+    "name": "MILANO PORTA GARIBALDI"
+  },
+  {
+    "id": "1714",
+    "name": "MILANO PORTA GARIBALDI SOTTERRANEA"
+  },
+  {
+    "id": "1716",
+    "name": "MILANO PORTA GENOVA"
+  },
+  {
+    "id": "1717",
+    "name": "MILANO PORTA ROMANA"
+  },
+  {
+    "id": "1723",
+    "name": "MILANO PORTA VENEZIA"
+  },
+  {
+    "id": "1718",
+    "name": "MILANO PORTA VITTORIA"
+  },
+  {
+    "id": "1719",
+    "name": "MILANO REPUBBLICA"
+  },
+  {
+    "id": "1720",
+    "name": "MILANO ROGOREDO"
+  },
+  {
+    "id": "58",
+    "name": "MILANO ROMOLO"
+  },
+  {
+    "id": "1721",
+    "name": "MILANO S.CRISTOFORO"
+  },
+  {
+    "id": "3251",
+    "name": "MILANO TIBALDI UNIVERSITA' BOCCONI"
+  },
+  {
+    "id": "3099",
+    "name": "MILANO VILLAPIZZONE"
+  },
+  {
+    "id": "1729",
+    "name": "MILAZZO"
+  },
+  {
+    "id": "89",
+    "name": "MILETO"
+  },
+  {
+    "id": "3152",
+    "name": "MILI MARINA"
+  },
+  {
+    "id": "1730",
+    "name": "MILITELLO"
+  },
+  {
+    "id": "1735",
+    "name": "MINERVINO MURGE"
+  },
+  {
+    "id": "1736",
+    "name": "MINTURNO-SCAURI"
+  },
+  {
+    "id": "1737",
+    "name": "MINUCCIANO-PIEVE-CASOLA"
+  },
+  {
+    "id": "1738",
+    "name": "MIRA MIRANO"
+  },
+  {
+    "id": "1739",
+    "name": "MIRADOLO TERME"
+  },
+  {
+    "id": "1740",
+    "name": "MIRAMARE"
+  },
+  {
+    "id": "1741",
+    "name": "MIRANDOLA"
+  },
+  {
+    "id": "90",
+    "name": "MIRTO CROSIA"
+  },
+  {
+    "id": "1743",
+    "name": "MISANO ADRIATICO"
+  },
+  {
+    "id": "1745",
+    "name": "MODANE"
+  },
+  {
+    "id": "1746",
+    "name": "MODANE FOURNEAUX"
+  },
+  {
+    "id": "1747",
+    "name": "MODENA"
+  },
+  {
+    "id": "1748",
+    "name": "MODICA"
+  },
+  {
+    "id": "3197",
+    "name": "MODUGNO"
+  },
+  {
+    "id": "1753",
+    "name": "MOGLIANO VENETO"
+  },
+  {
+    "id": "1754",
+    "name": "MOIANA"
+  },
+  {
+    "id": "1756",
+    "name": "MOLA DI BARI"
+  },
+  {
+    "id": "284",
+    "name": "MOLARE"
+  },
+  {
+    "id": "1757",
+    "name": "MOLFETTA"
+  },
+  {
+    "id": "1758",
+    "name": "MOLINA-CASTELVECCHIO SUBEQUO"
+  },
+  {
+    "id": "1760",
+    "name": "MOLINO DEL PALLONE"
+  },
+  {
+    "id": "1761",
+    "name": "MOLTENO"
+  },
+  {
+    "id": "1762",
+    "name": "MOMBALDONE-ROCCAVERANO"
+  },
+  {
+    "id": "1763",
+    "name": "MOMBARUZZO"
+  },
+  {
+    "id": "1764",
+    "name": "MOMO"
+  },
+  {
+    "id": "91",
+    "name": "MONASTERACE-STILO"
+  },
+  {
+    "id": "1765",
+    "name": "MONCALIERI"
+  },
+  {
+    "id": "2637",
+    "name": "MONCALIERI SANGONE"
+  },
+  {
+    "id": "1766",
+    "name": "MONCALVO"
+  },
+  {
+    "id": "1769",
+    "name": "MONDOVI`"
+  },
+  {
+    "id": "285",
+    "name": "MONEGLIA"
+  },
+  {
+    "id": "1770",
+    "name": "MONFALCONE"
+  },
+  {
+    "id": "1771",
+    "name": "MONGARDINO"
+  },
+  {
+    "id": "92",
+    "name": "MONGRASSANO-CERVICATI"
+  },
+  {
+    "id": "1773",
+    "name": "MONGUELFO-VALLE DI CASIES"
+  },
+  {
+    "id": "1774",
+    "name": "MONOPOLI"
+  },
+  {
+    "id": "1448",
+    "name": "MONSAMPOLO DEL TRONTO"
+  },
+  {
+    "id": "1776",
+    "name": "MONSELICE"
+  },
+  {
+    "id": "1777",
+    "name": "MONTAGNANA"
+  },
+  {
+    "id": "1778",
+    "name": "MONTAGUTO PANNI"
+  },
+  {
+    "id": "1779",
+    "name": "MONTALE AGLIANA"
+  },
+  {
+    "id": "1781",
+    "name": "MONTALTO DI CASTRO"
+  },
+  {
+    "id": "1784",
+    "name": "MONTANARO"
+  },
+  {
+    "id": "1787",
+    "name": "MONTE ANTICO"
+  },
+  {
+    "id": "1790",
+    "name": "MONTE S.BIAGIO-TERRACINA MARE"
+  },
+  {
+    "id": "1791",
+    "name": "MONTEBELLO"
+  },
+  {
+    "id": "1792",
+    "name": "MONTEBELLUNA"
+  },
+  {
+    "id": "1793",
+    "name": "MONTECALVO-BUONALBERGO-CASALBORE"
+  },
+  {
+    "id": "1794",
+    "name": "MONTECARLO S.SALVATORE"
+  },
+  {
+    "id": "1795",
+    "name": "MONTECAROTTO-CASTELBELLINO"
+  },
+  {
+    "id": "5426",
+    "name": "MONTECASTELLI"
+  },
+  {
+    "id": "5425",
+    "name": "MONTECASTELLI PONTE TEVERE"
+  },
+  {
+    "id": "5455",
+    "name": "MONTECASTRILLI"
+  },
+  {
+    "id": "1796",
+    "name": "MONTECATINI CENTRO"
+  },
+  {
+    "id": "1797",
+    "name": "MONTECATINI TERME-MONSUMMANO"
+  },
+  {
+    "id": "1798",
+    "name": "MONTECHIARO D`ASTI"
+  },
+  {
+    "id": "1799",
+    "name": "MONTECHIARO DENICE"
+  },
+  {
+    "id": "5429",
+    "name": "MONTECORONA"
+  },
+  {
+    "id": "1800",
+    "name": "MONTECORVINO"
+  },
+  {
+    "id": "1801",
+    "name": "MONTECOSARO"
+  },
+  {
+    "id": "1803",
+    "name": "MONTEFIASCONE"
+  },
+  {
+    "id": "1804",
+    "name": "MONTEFREDANE"
+  },
+  {
+    "id": "94",
+    "name": "MONTEGIORDANO"
+  },
+  {
+    "id": "1805",
+    "name": "MONTEGROSSO"
+  },
+  {
+    "id": "1808",
+    "name": "MONTELLO GORLAGO"
+  },
+  {
+    "id": "1809",
+    "name": "MONTELUPO CAPRAIA"
+  },
+  {
+    "id": "1810",
+    "name": "MONTEMAGGIORE BELSITO"
+  },
+  {
+    "id": "1812",
+    "name": "MONTEMARCIANO"
+  },
+  {
+    "id": "1814",
+    "name": "MONTENERO PETACCIATO"
+  },
+  {
+    "id": "95",
+    "name": "MONTEPAONE-MONTAURO"
+  },
+  {
+    "id": "1816",
+    "name": "MONTEPESCALI"
+  },
+  {
+    "id": "1817",
+    "name": "MONTEPRANDONE"
+  },
+  {
+    "id": "1818",
+    "name": "MONTEPULCIANO"
+  },
+  {
+    "id": "1819",
+    "name": "MONTEREALE VALCELLINA"
+  },
+  {
+    "id": "1821",
+    "name": "MONTERONI D'ARBIA"
+  },
+  {
+    "id": "286",
+    "name": "MONTEROSSO"
+  },
+  {
+    "id": "1823",
+    "name": "MONTEROSSO MARCHE"
+  },
+  {
+    "id": "1824",
+    "name": "MONTEROTONDO-MENTANA"
+  },
+  {
+    "id": "1825",
+    "name": "MONTESANTO"
+  },
+  {
+    "id": "1826",
+    "name": "MONTESILVANO"
+  },
+  {
+    "id": "1827",
+    "name": "MONTEU DA PO"
+  },
+  {
+    "id": "1828",
+    "name": "MONTEVARCHI TERRANUOVA"
+  },
+  {
+    "id": "1830",
+    "name": "MONTI TELTI"
+  },
+  {
+    "id": "1832",
+    "name": "MONTICELLI D'ONGINA"
+  },
+  {
+    "id": "1833",
+    "name": "MONTICELLO D`ALBA"
+  },
+  {
+    "id": "1834",
+    "name": "MONTIGLIO MURISENGO"
+  },
+  {
+    "id": "1835",
+    "name": "MONTIRONE"
+  },
+  {
+    "id": "1837",
+    "name": "MONTORO FORINO"
+  },
+  {
+    "id": "1838",
+    "name": "MONTORO SUPERIORE"
+  },
+  {
+    "id": "1839",
+    "name": "MONTORSI"
+  },
+  {
+    "id": "1841",
+    "name": "MONZA"
+  },
+  {
+    "id": "1842",
+    "name": "MONZA SOBBORGHI"
+  },
+  {
+    "id": "1843",
+    "name": "MONZONE-MONTE DEI BIANCHI-ISOLANO"
+  },
+  {
+    "id": "1844",
+    "name": "MONZUNO-VADO"
+  },
+  {
+    "id": "1845",
+    "name": "MORANO SUL PO"
+  },
+  {
+    "id": "1846",
+    "name": "MORBEGNO"
+  },
+  {
+    "id": "1848",
+    "name": "MORENGO BARIANO"
+  },
+  {
+    "id": "1851",
+    "name": "MORGEX"
+  },
+  {
+    "id": "1852",
+    "name": "MORI"
+  },
+  {
+    "id": "1853",
+    "name": "MORNAGO CIMBRO"
+  },
+  {
+    "id": "1854",
+    "name": "MOROLO"
+  },
+  {
+    "id": "1856",
+    "name": "MORREA-CASTRONOVO-RENDINARA"
+  },
+  {
+    "id": "1857",
+    "name": "MORROVALLE MONTE S.GIUSTO"
+  },
+  {
+    "id": "1858",
+    "name": "MORTARA"
+  },
+  {
+    "id": "1859",
+    "name": "MOSCIANO S.ANGELO"
+  },
+  {
+    "id": "1860",
+    "name": "MOSSA"
+  },
+  {
+    "id": "3409",
+    "name": "MOTTA DI LIVENZA"
+  },
+  {
+    "id": "1862",
+    "name": "MOTTA S.ANASTASIA"
+  },
+  {
+    "id": "1863",
+    "name": "MOTTA S.DAMIANO"
+  },
+  {
+    "id": "96",
+    "name": "MOTTA S.GIOVANNI LAZZARO"
+  },
+  {
+    "id": "2317",
+    "name": "MOZIA-BIRGI"
+  },
+  {
+    "id": "1865",
+    "name": "MOZZECANE"
+  },
+  {
+    "id": "287",
+    "name": "MULINETTI"
+  },
+  {
+    "id": "1868",
+    "name": "MURATELLA"
+  },
+  {
+    "id": "1869",
+    "name": "MURLO"
+  },
+  {
+    "id": "783",
+    "name": "MUSIANO-PIAN DI MACINA"
+  },
+  {
+    "id": "1871",
+    "name": "MUSSOTTO"
+  },
+  {
+    "id": "1872",
+    "name": "MUZZANA DEL TURGNANO"
+  },
+  {
+    "id": "4020",
+    "name": "NAPOLI AFRAGOLA"
+  },
+  {
+    "id": "1873",
+    "name": "NAPOLI CAMPI FLEGREI"
+  },
+  {
+    "id": "1888",
+    "name": "NAPOLI CENTRALE"
+  },
+  {
+    "id": "1874",
+    "name": "NAPOLI GIANTURCO"
+  },
+  {
+    "id": "1876",
+    "name": "NAPOLI MERGELLINA"
+  },
+  {
+    "id": "1877",
+    "name": "NAPOLI MONTESANTO"
+  },
+  {
+    "id": "1878",
+    "name": "NAPOLI PIAZZA AMEDEO"
+  },
+  {
+    "id": "1879",
+    "name": "NAPOLI PIAZZA CAVOUR"
+  },
+  {
+    "id": "1880",
+    "name": "NAPOLI PIAZZA GARIBALDI"
+  },
+  {
+    "id": "1881",
+    "name": "NAPOLI PIAZZA LEOPARDI"
+  },
+  {
+    "id": "1882",
+    "name": "NAPOLI S.GIOVANNI BARRA"
+  },
+  {
+    "id": "1889",
+    "name": "NARNI AMELIA"
+  },
+  {
+    "id": "1893",
+    "name": "NAVACCHIO"
+  },
+  {
+    "id": "1894",
+    "name": "NEIVE"
+  },
+  {
+    "id": "2775",
+    "name": "NEPEZZANO-PIANO D'ACCIO"
+  },
+  {
+    "id": "1895",
+    "name": "NERA MONTORO"
+  },
+  {
+    "id": "1896",
+    "name": "NETTUNO"
+  },
+  {
+    "id": "1897",
+    "name": "NIBBIA"
+  },
+  {
+    "id": "5427",
+    "name": "NICCONE"
+  },
+  {
+    "id": "1898",
+    "name": "NICHELINO"
+  },
+  {
+    "id": "1899",
+    "name": "NICORVO"
+  },
+  {
+    "id": "97",
+    "name": "NICOTERA"
+  },
+  {
+    "id": "1901",
+    "name": "NISCEMI"
+  },
+  {
+    "id": "1902",
+    "name": "NIZZA DI SICILIA"
+  },
+  {
+    "id": "1903",
+    "name": "NIZZA MONFERRATO"
+  },
+  {
+    "id": "1904",
+    "name": "NOALE-SCORZE'"
+  },
+  {
+    "id": "1905",
+    "name": "NOCERA INFERIORE"
+  },
+  {
+    "id": "1906",
+    "name": "NOCERA INFERIORE MERCATO"
+  },
+  {
+    "id": "1907",
+    "name": "NOCERA SUPERIORE"
+  },
+  {
+    "id": "98",
+    "name": "NOCERA TIRINESE"
+  },
+  {
+    "id": "1908",
+    "name": "NOCERA UMBRA"
+  },
+  {
+    "id": "1909",
+    "name": "NOCETO"
+  },
+  {
+    "id": "1910",
+    "name": "NOGARA"
+  },
+  {
+    "id": "1911",
+    "name": "NOLA"
+  },
+  {
+    "id": "5040",
+    "name": "NOLE"
+  },
+  {
+    "id": "1912",
+    "name": "NONE"
+  },
+  {
+    "id": "1913",
+    "name": "NOTARESCO"
+  },
+  {
+    "id": "1914",
+    "name": "NOTO"
+  },
+  {
+    "id": "99",
+    "name": "NOVA SIRI ROTONDELLA"
+  },
+  {
+    "id": "1917",
+    "name": "NOVARA"
+  },
+  {
+    "id": "1918",
+    "name": "NOVARA-MONTALBANO-FURNARI"
+  },
+  {
+    "id": "1919",
+    "name": "NOVATE-MEZZOLA"
+  },
+  {
+    "id": "288",
+    "name": "NOVI LIGURE"
+  },
+  {
+    "id": "1922",
+    "name": "NOZZANO"
+  },
+  {
+    "id": "1923",
+    "name": "NUCETTO"
+  },
+  {
+    "id": "1924",
+    "name": "NUOVO SALARIO"
+  },
+  {
+    "id": "1925",
+    "name": "NUS"
+  },
+  {
+    "id": "1927",
+    "name": "OCCHIOBELLO"
+  },
+  {
+    "id": "3407",
+    "name": "ODERZO"
+  },
+  {
+    "id": "1929",
+    "name": "OFFIDA CASTEL DI LAMA"
+  },
+  {
+    "id": "1930",
+    "name": "OGGIONO"
+  },
+  {
+    "id": "2278",
+    "name": "OGNINA PES"
+  },
+  {
+    "id": "1931",
+    "name": "OLBIA"
+  },
+  {
+    "id": "3231",
+    "name": "OLBIA TERRANOVA"
+  },
+  {
+    "id": "1933",
+    "name": "OLCENENGO"
+  },
+  {
+    "id": "1934",
+    "name": "OLCIO"
+  },
+  {
+    "id": "1935",
+    "name": "OLEGGIO"
+  },
+  {
+    "id": "1936",
+    "name": "OLEVANO"
+  },
+  {
+    "id": "3426",
+    "name": "OLGIATA"
+  },
+  {
+    "id": "1937",
+    "name": "OLGIATE-CALCO-BRIVIO"
+  },
+  {
+    "id": "1939",
+    "name": "OLIVERI TINDARI"
+  },
+  {
+    "id": "290",
+    "name": "OLIVETTA S.MICHELE"
+  },
+  {
+    "id": "1940",
+    "name": "OLMENETA"
+  },
+  {
+    "id": "3403",
+    "name": "OLMI SPERCENIGO"
+  },
+  {
+    "id": "1941",
+    "name": "OMEGNA"
+  },
+  {
+    "id": "1942",
+    "name": "OMEGNA-CRUSINALLO"
+  },
+  {
+    "id": "101",
+    "name": "OMIGNANO SALENTO"
+  },
+  {
+    "id": "1943",
+    "name": "ORA"
+  },
+  {
+    "id": "1944",
+    "name": "ORBETELLO-MONTE ARGENTARIO"
+  },
+  {
+    "id": "1946",
+    "name": "ORDONA"
+  },
+  {
+    "id": "1947",
+    "name": "ORIA"
+  },
+  {
+    "id": "1948",
+    "name": "ORICOLA-PERETO"
+  },
+  {
+    "id": "1949",
+    "name": "ORIO LITTA"
+  },
+  {
+    "id": "1950",
+    "name": "ORIOLO"
+  },
+  {
+    "id": "1952",
+    "name": "ORISTANO"
+  },
+  {
+    "id": "1953",
+    "name": "ORMEA"
+  },
+  {
+    "id": "1954",
+    "name": "ORNAVASSO"
+  },
+  {
+    "id": "3520",
+    "name": "ORSA"
+  },
+  {
+    "id": "1955",
+    "name": "ORSAGO"
+  },
+  {
+    "id": "1956",
+    "name": "ORSARA DI PUGLIA"
+  },
+  {
+    "id": "1957",
+    "name": "ORTA MIASINO"
+  },
+  {
+    "id": "1958",
+    "name": "ORTANOVA"
+  },
+  {
+    "id": "1959",
+    "name": "ORTE"
+  },
+  {
+    "id": "1960",
+    "name": "ORTONA"
+  },
+  {
+    "id": "1961",
+    "name": "ORVIETO"
+  },
+  {
+    "id": "1962",
+    "name": "OSCHIRI"
+  },
+  {
+    "id": "1963",
+    "name": "OSIMO CASTELFIDARDO"
+  },
+  {
+    "id": "1964",
+    "name": "OSNAGO"
+  },
+  {
+    "id": "1965",
+    "name": "OSOPPO"
+  },
+  {
+    "id": "1968",
+    "name": "OSPEDALETTO EUGANEO"
+  },
+  {
+    "id": "1969",
+    "name": "OSPEDALETTO LODIGIANO"
+  },
+  {
+    "id": "1972",
+    "name": "OSPITALE DI CADORE"
+  },
+  {
+    "id": "1973",
+    "name": "OSPITALETTO MANTOVANO"
+  },
+  {
+    "id": "1974",
+    "name": "OSPITALETTO TRAVAGLIATO"
+  },
+  {
+    "id": "1210",
+    "name": "OSTERIA NUOVA"
+  },
+  {
+    "id": "1976",
+    "name": "OSTIA PARMENSE"
+  },
+  {
+    "id": "1977",
+    "name": "OSTIGLIA"
+  },
+  {
+    "id": "1978",
+    "name": "OSTUNI"
+  },
+  {
+    "id": "1979",
+    "name": "OTTAVIA"
+  },
+  {
+    "id": "1981",
+    "name": "OULX CESANA CLAVIERE SESTRIERE"
+  },
+  {
+    "id": "292",
+    "name": "OVADA"
+  },
+  {
+    "id": "1982",
+    "name": "OVIGLIO"
+  },
+  {
+    "id": "1983",
+    "name": "OZIERI CHILIVANI"
+  },
+  {
+    "id": "3516",
+    "name": "OZZANO DELL'EMILIA"
+  },
+  {
+    "id": "1985",
+    "name": "OZZANO MONFERRATO"
+  },
+  {
+    "id": "1986",
+    "name": "OZZANO TARO"
+  },
+  {
+    "id": "1994",
+    "name": "PABILLONIS"
+  },
+  {
+    "id": "1995",
+    "name": "PACE DEL MELA"
+  },
+  {
+    "id": "1996",
+    "name": "PACECO"
+  },
+  {
+    "id": "1998",
+    "name": "PADERNO ROBBIATE"
+  },
+  {
+    "id": "1999",
+    "name": "PADIGLIONE"
+  },
+  {
+    "id": "2000",
+    "name": "PADOVA"
+  },
+  {
+    "id": "2004",
+    "name": "PADULI SUL CALORE"
+  },
+  {
+    "id": "2005",
+    "name": "PAESE"
+  },
+  {
+    "id": "2006",
+    "name": "PAESE CASTAGNOLE"
+  },
+  {
+    "id": "104",
+    "name": "PAESTUM"
+  },
+  {
+    "id": "2007",
+    "name": "PAGANI"
+  },
+  {
+    "id": "2008",
+    "name": "PAGANICA"
+  },
+  {
+    "id": "2009",
+    "name": "PALAGIANELLO"
+  },
+  {
+    "id": "2010",
+    "name": "PALAGIANO CHIATONA"
+  },
+  {
+    "id": "2011",
+    "name": "PALAGIANO MOTTOLA"
+  },
+  {
+    "id": "5431",
+    "name": "PALAZZACCIA"
+  },
+  {
+    "id": "3462",
+    "name": "PALAZZO REALE-ORLEANS"
+  },
+  {
+    "id": "2014",
+    "name": "PALAZZOLO DELLO STELLA"
+  },
+  {
+    "id": "2015",
+    "name": "PALAZZOLO SULL'OGLIO"
+  },
+  {
+    "id": "2016",
+    "name": "PALAZZOLO VERCELLESE"
+  },
+  {
+    "id": "2017",
+    "name": "PALENA"
+  },
+  {
+    "id": "3463",
+    "name": "PALERMO AEROPORTO"
+  },
+  {
+    "id": "1990",
+    "name": "PALERMO BRANCACCIO"
+  },
+  {
+    "id": "897",
+    "name": "PALERMO CARDILLO"
+  },
+  {
+    "id": "2018",
+    "name": "PALERMO CENTRALE"
+  },
+  {
+    "id": "3176",
+    "name": "PALERMO DE GASPERI"
+  },
+  {
+    "id": "1368",
+    "name": "PALERMO FRANCIA"
+  },
+  {
+    "id": "2332",
+    "name": "PALERMO GUADAGNA"
+  },
+  {
+    "id": "2804",
+    "name": "PALERMO LA MALFA"
+  },
+  {
+    "id": "3259",
+    "name": "PALERMO LIBERTA'"
+  },
+  {
+    "id": "1992",
+    "name": "PALERMO NOTARBARTOLO"
+  },
+  {
+    "id": "2531",
+    "name": "PALERMO S.LORENZO"
+  },
+  {
+    "id": "3177",
+    "name": "PALERMO SFERRACAVALLO"
+  },
+  {
+    "id": "2871",
+    "name": "PALERMO TOMMASO NATALE"
+  },
+  {
+    "id": "3033",
+    "name": "PALERMO VESPRI"
+  },
+  {
+    "id": "2019",
+    "name": "PALESTRO"
+  },
+  {
+    "id": "2020",
+    "name": "PALIDANO"
+  },
+  {
+    "id": "105",
+    "name": "PALIZZI"
+  },
+  {
+    "id": "2021",
+    "name": "PALLANZENO"
+  },
+  {
+    "id": "2023",
+    "name": "PALMA S.GENNARO"
+  },
+  {
+    "id": "2024",
+    "name": "PALMANOVA"
+  },
+  {
+    "id": "106",
+    "name": "PALMI"
+  },
+  {
+    "id": "4042",
+    "name": "PALMIRO TOGLIATTI"
+  },
+  {
+    "id": "2027",
+    "name": "PALOMBINA"
+  },
+  {
+    "id": "2031",
+    "name": "PANTANELLA"
+  },
+  {
+    "id": "2032",
+    "name": "PANTIERE DI CASTELBELLINO"
+  },
+  {
+    "id": "107",
+    "name": "PAOLA"
+  },
+  {
+    "id": "5443",
+    "name": "PAPIANO"
+  },
+  {
+    "id": "2033",
+    "name": "PARABIAGO"
+  },
+  {
+    "id": "3401",
+    "name": "PARATICO SARNICO"
+  },
+  {
+    "id": "4026",
+    "name": "PARCO LEONARDO"
+  },
+  {
+    "id": "108",
+    "name": "PARGHELIA"
+  },
+  {
+    "id": "2035",
+    "name": "PARMA"
+  },
+  {
+    "id": "2036",
+    "name": "PARONA LOMELLINA"
+  },
+  {
+    "id": "2037",
+    "name": "PARTINICO"
+  },
+  {
+    "id": "2038",
+    "name": "PASSIGNANO SUL TRASIMENO"
+  },
+  {
+    "id": "2082",
+    "name": "PASTENA"
+  },
+  {
+    "id": "2040",
+    "name": "PATERNO-S.PELINO"
+  },
+  {
+    "id": "2044",
+    "name": "PATTI-S.PIERO PATTI"
+  },
+  {
+    "id": "2045",
+    "name": "PAULILATINO"
+  },
+  {
+    "id": "2046",
+    "name": "PAVIA"
+  },
+  {
+    "id": "2301",
+    "name": "PAVIA PORTA GARIBALDI"
+  },
+  {
+    "id": "2047",
+    "name": "PAVONA"
+  },
+  {
+    "id": "802",
+    "name": "PC CALDIERO"
+  },
+  {
+    "id": "1250",
+    "name": "PC DOLCE'"
+  },
+  {
+    "id": "2067",
+    "name": "PC MEANA"
+  },
+  {
+    "id": "2080",
+    "name": "PEDASO"
+  },
+  {
+    "id": "2081",
+    "name": "PEDEROBBA CAVASO POSSAGNO"
+  },
+  {
+    "id": "2084",
+    "name": "PELLEZZANO"
+  },
+  {
+    "id": "2085",
+    "name": "PENANGO"
+  },
+  {
+    "id": "2086",
+    "name": "PERAROLO DI CADORE"
+  },
+  {
+    "id": "723",
+    "name": "PERCA-PLAN DE CORONES"
+  },
+  {
+    "id": "2088",
+    "name": "PERGINE"
+  },
+  {
+    "id": "2089",
+    "name": "PERGOLA"
+  },
+  {
+    "id": "2090",
+    "name": "PERI"
+  },
+  {
+    "id": "2092",
+    "name": "PERUGIA"
+  },
+  {
+    "id": "4084",
+    "name": "PERUGIA CAPITINI"
+  },
+  {
+    "id": "5458",
+    "name": "PERUGIA PALLOTTA"
+  },
+  {
+    "id": "2093",
+    "name": "PERUGIA PONTE S.GIOVANNI"
+  },
+  {
+    "id": "5459",
+    "name": "PERUGIA S.ANNA"
+  },
+  {
+    "id": "3474",
+    "name": "PERUGIA SILVESTRINI "
+  },
+  {
+    "id": "3475",
+    "name": "PERUGIA UNIVERSITA'"
+  },
+  {
+    "id": "2094",
+    "name": "PESARO"
+  },
+  {
+    "id": "2096",
+    "name": "PESCARA"
+  },
+  {
+    "id": "2097",
+    "name": "PESCARA PORTA NUOVA"
+  },
+  {
+    "id": "47",
+    "name": "PESCARA S.MARCO"
+  },
+  {
+    "id": "3057",
+    "name": "PESCARA TRIBUNALE"
+  },
+  {
+    "id": "2099",
+    "name": "PESCHIERA DEL GARDA"
+  },
+  {
+    "id": "2100",
+    "name": "PESCIA"
+  },
+  {
+    "id": "2101",
+    "name": "PESCINA"
+  },
+  {
+    "id": "2102",
+    "name": "PESCOCANALE"
+  },
+  {
+    "id": "2103",
+    "name": "PESCOLANCIANO-CHIAUCI"
+  },
+  {
+    "id": "2105",
+    "name": "PESSIONE"
+  },
+  {
+    "id": "2106",
+    "name": "PETROSINO STRASATTI"
+  },
+  {
+    "id": "2107",
+    "name": "PETTENASCO"
+  },
+  {
+    "id": "2109",
+    "name": "PETTORANO SUL GIZIO"
+  },
+  {
+    "id": "2111",
+    "name": "PIACENZA"
+  },
+  {
+    "id": "2112",
+    "name": "PIADENA"
+  },
+  {
+    "id": "3414",
+    "name": "PIAN DEL MUGNONE"
+  },
+  {
+    "id": "5448",
+    "name": "PIAN DI PORTO"
+  },
+  {
+    "id": "3523",
+    "name": "PIAN DI VENOLA"
+  },
+  {
+    "id": "2116",
+    "name": "PIANA"
+  },
+  {
+    "id": "2117",
+    "name": "PIANA BELLA DI MONTELIBRETTI"
+  },
+  {
+    "id": "2120",
+    "name": "PIANEROTTOLO D'ARIANO"
+  },
+  {
+    "id": "2121",
+    "name": "PIANFEI"
+  },
+  {
+    "id": "2123",
+    "name": "PIANO D'ORTA BOLOGNANO"
+  },
+  {
+    "id": "294",
+    "name": "PIANO ORIZZONTALE DEI GIOVI"
+  },
+  {
+    "id": "2125",
+    "name": "PIANORO"
+  },
+  {
+    "id": "2126",
+    "name": "PIANZANO"
+  },
+  {
+    "id": "2127",
+    "name": "PIAZZA AL SERCHIO"
+  },
+  {
+    "id": "2283",
+    "name": "PICANELLO"
+  },
+  {
+    "id": "2129",
+    "name": "PICERNO"
+  },
+  {
+    "id": "3450",
+    "name": "PIEDIMONTE-VILLA S.LUCIA-AQUINO"
+  },
+  {
+    "id": "2131",
+    "name": "PIEDIMULERA"
+  },
+  {
+    "id": "5430",
+    "name": "PIERANTONIO"
+  },
+  {
+    "id": "295",
+    "name": "PIETRA LIGURE"
+  },
+  {
+    "id": "296",
+    "name": "PIETRABISSARA"
+  },
+  {
+    "id": "2133",
+    "name": "PIETRAGALLA"
+  },
+  {
+    "id": "2134",
+    "name": "PIETRARSA-S.GIORGIO A CREMANO"
+  },
+  {
+    "id": "2135",
+    "name": "PIETRASANTA"
+  },
+  {
+    "id": "2137",
+    "name": "PIETRELCINA"
+  },
+  {
+    "id": "2138",
+    "name": "PIEVE ALBIGNOLA"
+  },
+  {
+    "id": "1749",
+    "name": "PIEVE EMANUELE"
+  },
+  {
+    "id": "297",
+    "name": "PIEVE LIGURE"
+  },
+  {
+    "id": "3350",
+    "name": "PIEVE VERGONTE"
+  },
+  {
+    "id": "2141",
+    "name": "PIEVETTA"
+  },
+  {
+    "id": "2142",
+    "name": "PIGNATARO MAGGIORE"
+  },
+  {
+    "id": "2143",
+    "name": "PINAROLO PO"
+  },
+  {
+    "id": "2144",
+    "name": "PINEROLO"
+  },
+  {
+    "id": "29",
+    "name": "PINEROLO OLIMPICA"
+  },
+  {
+    "id": "2145",
+    "name": "PINETO ATRI"
+  },
+  {
+    "id": "2146",
+    "name": "PINZANO"
+  },
+  {
+    "id": "2147",
+    "name": "PIOLTELLO LIMITO"
+  },
+  {
+    "id": "2148",
+    "name": "PIOMBINO"
+  },
+  {
+    "id": "2149",
+    "name": "PIOMBINO DESE"
+  },
+  {
+    "id": "2150",
+    "name": "PIOMBINO MARITTIMA"
+  },
+  {
+    "id": "2151",
+    "name": "PIONA"
+  },
+  {
+    "id": "2152",
+    "name": "PIOPPE DI SALVARO"
+  },
+  {
+    "id": "3439",
+    "name": "PIRAINETO"
+  },
+  {
+    "id": "2156",
+    "name": "PISA CENTRALE"
+  },
+  {
+    "id": "2157",
+    "name": "PISA/BINARI PISA S.ROSSORE"
+  },
+  {
+    "id": "5270",
+    "name": "PISCILLE"
+  },
+  {
+    "id": "2158",
+    "name": "PISCINA DI PINEROLO"
+  },
+  {
+    "id": "111",
+    "name": "PISCIOTTA PALINURO"
+  },
+  {
+    "id": "2160",
+    "name": "PISTICCI"
+  },
+  {
+    "id": "2161",
+    "name": "PISTOIA"
+  },
+  {
+    "id": "2162",
+    "name": "PISTOIA OVEST"
+  },
+  {
+    "id": "2163",
+    "name": "PITECCIO"
+  },
+  {
+    "id": "1596",
+    "name": "PIZZALE-LUNGAVILLA"
+  },
+  {
+    "id": "2164",
+    "name": "PIZZIGHETTONE"
+  },
+  {
+    "id": "112",
+    "name": "PIZZO"
+  },
+  {
+    "id": "2166",
+    "name": "PLOAGHE"
+  },
+  {
+    "id": "1080",
+    "name": "PM CHAMBAVE"
+  },
+  {
+    "id": "57",
+    "name": "PM ECCELLENTE"
+  },
+  {
+    "id": "61",
+    "name": "PM FEROLETO ANTICO PIANOPOLI"
+  },
+  {
+    "id": "66",
+    "name": "PM GABELLA GRANDE"
+  },
+  {
+    "id": "73",
+    "name": "PM ISOLA CAPO RIZZUTO"
+  },
+  {
+    "id": "1505",
+    "name": "PM ISPRA"
+  },
+  {
+    "id": "93",
+    "name": "PM MONTALTO ROSE"
+  },
+  {
+    "id": "1836",
+    "name": "PM MONTJOVET"
+  },
+  {
+    "id": "2306",
+    "name": "PM QUART"
+  },
+  {
+    "id": "147",
+    "name": "PM S.LEONARDO DI CUTRO"
+  },
+  {
+    "id": "148",
+    "name": "PM S.MAURO LA BRUCA"
+  },
+  {
+    "id": "168",
+    "name": "PM THURIO"
+  },
+  {
+    "id": "2186",
+    "name": "POCAPAGLIA"
+  },
+  {
+    "id": "2187",
+    "name": "POGGIBONSI-S.GIMIGNANO"
+  },
+  {
+    "id": "2189",
+    "name": "POGGIO FIDONI"
+  },
+  {
+    "id": "2190",
+    "name": "POGGIO IMPERIALE"
+  },
+  {
+    "id": "2191",
+    "name": "POGGIO MIRTETO"
+  },
+  {
+    "id": "2192",
+    "name": "POGGIO RENATICO"
+  },
+  {
+    "id": "2193",
+    "name": "POGGIO RUSCO"
+  },
+  {
+    "id": "2188",
+    "name": "POGGIO-CAREGGINE-VAGLI"
+  },
+  {
+    "id": "2195",
+    "name": "POGGIRIDENTI-TRESIVIO-PIATEDA"
+  },
+  {
+    "id": "2197",
+    "name": "POLESELLA"
+  },
+  {
+    "id": "113",
+    "name": "POLICASTRO BUSSENTINO"
+  },
+  {
+    "id": "114",
+    "name": "POLICORO TURSI"
+  },
+  {
+    "id": "2198",
+    "name": "POLIGNANO A MARE"
+  },
+  {
+    "id": "2199",
+    "name": "POLLENZA"
+  },
+  {
+    "id": "2200",
+    "name": "POLLINA-S.MAURO CASTELVERDE"
+  },
+  {
+    "id": "2202",
+    "name": "POMEZIA-S.PALOMBA"
+  },
+  {
+    "id": "2203",
+    "name": "POMPEI"
+  },
+  {
+    "id": "2204",
+    "name": "PONT-SAINT-MARTIN"
+  },
+  {
+    "id": "2205",
+    "name": "PONTASSIEVE"
+  },
+  {
+    "id": "2206",
+    "name": "PONTE A ELSA"
+  },
+  {
+    "id": "2207",
+    "name": "PONTE A MORIANO"
+  },
+  {
+    "id": "2208",
+    "name": "PONTE A TRESSA"
+  },
+  {
+    "id": "2209",
+    "name": "PONTE ALBANITO"
+  },
+  {
+    "id": "2210",
+    "name": "PONTE CASALDUNI"
+  },
+  {
+    "id": "2211",
+    "name": "PONTE D'ADDA"
+  },
+  {
+    "id": "2212",
+    "name": "PONTE D'ADIGE"
+  },
+  {
+    "id": "2213",
+    "name": "PONTE DELLA VENTURINA"
+  },
+  {
+    "id": "2297",
+    "name": "PONTE DI NONA"
+  },
+  {
+    "id": "3406",
+    "name": "PONTE DI PIAVE"
+  },
+  {
+    "id": "5268",
+    "name": "PONTE FELCINO"
+  },
+  {
+    "id": "2215",
+    "name": "PONTE GALERIA"
+  },
+  {
+    "id": "2216",
+    "name": "PONTE GARDENA-LAION"
+  },
+  {
+    "id": "2217",
+    "name": "PONTE GINORI"
+  },
+  {
+    "id": "2218",
+    "name": "PONTE IN VALTELLINA"
+  },
+  {
+    "id": "2219",
+    "name": "PONTE NELLE ALPI POLPET"
+  },
+  {
+    "id": "5434",
+    "name": "PONTE PATTOLI"
+  },
+  {
+    "id": "2221",
+    "name": "PONTE S.CONO"
+  },
+  {
+    "id": "2222",
+    "name": "PONTE S.MARCO-CALCINATO"
+  },
+  {
+    "id": "2223",
+    "name": "PONTE S.PIETRO"
+  },
+  {
+    "id": "3153",
+    "name": "PONTE S.STEFANO"
+  },
+  {
+    "id": "3154",
+    "name": "PONTE SCHIAVO"
+  },
+  {
+    "id": "5438",
+    "name": "PONTE VALLECEPPI"
+  },
+  {
+    "id": "2224",
+    "name": "PONTEBBA"
+  },
+  {
+    "id": "2225",
+    "name": "PONTECAGNANO"
+  },
+  {
+    "id": "2226",
+    "name": "PONTECCHIO MARCONI"
+  },
+  {
+    "id": "2228",
+    "name": "PONTECURONE"
+  },
+  {
+    "id": "2229",
+    "name": "PONTEDERA CASCIANA TERME"
+  },
+  {
+    "id": "2230",
+    "name": "PONTELAGOSCURO"
+  },
+  {
+    "id": "2232",
+    "name": "PONTENURE"
+  },
+  {
+    "id": "298",
+    "name": "PONTETTO"
+  },
+  {
+    "id": "2233",
+    "name": "PONTI"
+  },
+  {
+    "id": "2234",
+    "name": "PONTICINO"
+  },
+  {
+    "id": "2235",
+    "name": "PONTIDA"
+  },
+  {
+    "id": "2236",
+    "name": "PONTREMOLI"
+  },
+  {
+    "id": "2240",
+    "name": "POPOLANO DI MARRADI"
+  },
+  {
+    "id": "2241",
+    "name": "POPOLI VITTORITO"
+  },
+  {
+    "id": "2242",
+    "name": "POPULONIA"
+  },
+  {
+    "id": "2243",
+    "name": "PORCARI"
+  },
+  {
+    "id": "2244",
+    "name": "PORDENONE"
+  },
+  {
+    "id": "2245",
+    "name": "PORRETTA  TERME"
+  },
+  {
+    "id": "2246",
+    "name": "PORTACOMARO"
+  },
+  {
+    "id": "2247",
+    "name": "PORTICI-ERCOLANO"
+  },
+  {
+    "id": "2250",
+    "name": "PORTO CERESIO"
+  },
+  {
+    "id": "2251",
+    "name": "PORTO D'ASCOLI"
+  },
+  {
+    "id": "2252",
+    "name": "PORTO DI VASTO"
+  },
+  {
+    "id": "2253",
+    "name": "PORTO EMPEDOCLE"
+  },
+  {
+    "id": "3230",
+    "name": "PORTO EMPEDOCLE SUCCURSALE"
+  },
+  {
+    "id": "2254",
+    "name": "PORTO RECANATI"
+  },
+  {
+    "id": "2255",
+    "name": "PORTO S.ELPIDIO"
+  },
+  {
+    "id": "2256",
+    "name": "PORTO S.GIORGIO FERMO"
+  },
+  {
+    "id": "2257",
+    "name": "PORTO TORRES"
+  },
+  {
+    "id": "2258",
+    "name": "PORTO TORRES MARITTIMA"
+  },
+  {
+    "id": "2260",
+    "name": "PORTO VALTRAVAGLIA"
+  },
+  {
+    "id": "2261",
+    "name": "PORTOGRUARO CAORLE"
+  },
+  {
+    "id": "2262",
+    "name": "PORTOMAGGIORE"
+  },
+  {
+    "id": "2264",
+    "name": "POSSIDENTE"
+  },
+  {
+    "id": "2265",
+    "name": "POSTIOMA"
+  },
+  {
+    "id": "2266",
+    "name": "POTENZA CENTRALE"
+  },
+  {
+    "id": "2267",
+    "name": "POTENZA MACCHIA ROMANA"
+  },
+  {
+    "id": "2070",
+    "name": "POTENZA PICENA MONTELUPONE"
+  },
+  {
+    "id": "2268",
+    "name": "POTENZA SUPERIORE"
+  },
+  {
+    "id": "426",
+    "name": "POTENZA UNIVERSITA'"
+  },
+  {
+    "id": "2270",
+    "name": "POVO-MESIANO"
+  },
+  {
+    "id": "2271",
+    "name": "POZZALLO"
+  },
+  {
+    "id": "300",
+    "name": "POZZOLO FORMIGARO"
+  },
+  {
+    "id": "2272",
+    "name": "POZZUOLI SOLFATARA"
+  },
+  {
+    "id": "380",
+    "name": "POZZUOLO MARTESANA"
+  },
+  {
+    "id": "2273",
+    "name": "PRACCHIA"
+  },
+  {
+    "id": "115",
+    "name": "PRAJA AJETA TORTORA"
+  },
+  {
+    "id": "301",
+    "name": "PRASCO CREMOLINO"
+  },
+  {
+    "id": "2275",
+    "name": "PRATA CAMPORTACCIO"
+  },
+  {
+    "id": "2276",
+    "name": "PRATA PRATOLA"
+  },
+  {
+    "id": "2277",
+    "name": "PRATIGNONE"
+  },
+  {
+    "id": "356",
+    "name": "PRATO BORGONUOVO"
+  },
+  {
+    "id": "2279",
+    "name": "PRATO CENTRALE"
+  },
+  {
+    "id": "2280",
+    "name": "PRATO PORTA AL SERRAGLIO"
+  },
+  {
+    "id": "2281",
+    "name": "PRATO SESIA"
+  },
+  {
+    "id": "2285",
+    "name": "PRATOLA PELIGNA"
+  },
+  {
+    "id": "2284",
+    "name": "PRATOLA PELIGNA SUPERIORE"
+  },
+  {
+    "id": "2286",
+    "name": "PRE'-SAINT-DIDIER"
+  },
+  {
+    "id": "2287",
+    "name": "PREGANZIOL"
+  },
+  {
+    "id": "381",
+    "name": "PREGNANA MILANESE"
+  },
+  {
+    "id": "2290",
+    "name": "PREMOSELLO CHIOVENDA"
+  },
+  {
+    "id": "5437",
+    "name": "PRETOLA"
+  },
+  {
+    "id": "2291",
+    "name": "PREZZA"
+  },
+  {
+    "id": "2292",
+    "name": "PRIMOLANO"
+  },
+  {
+    "id": "2293",
+    "name": "PRIOLA"
+  },
+  {
+    "id": "2294",
+    "name": "PRIOLO MELILLI"
+  },
+  {
+    "id": "2298",
+    "name": "PRIVERNO FOSSANOVA"
+  },
+  {
+    "id": "2305",
+    "name": "QUARONA"
+  },
+  {
+    "id": "2308",
+    "name": "QUARTO D'ALTINO"
+  },
+  {
+    "id": "2309",
+    "name": "QUARTO DI MARANO"
+  },
+  {
+    "id": "4033",
+    "name": "QUATTRO VENTI"
+  },
+  {
+    "id": "1243",
+    "name": "QUATTRO VILLE"
+  },
+  {
+    "id": "2310",
+    "name": "QUERCIANELLA-SONNINO"
+  },
+  {
+    "id": "2311",
+    "name": "QUERO VAS"
+  },
+  {
+    "id": "304",
+    "name": "QUILIANO-VADO LIGURE"
+  },
+  {
+    "id": "2314",
+    "name": "RACALMUTO"
+  },
+  {
+    "id": "2315",
+    "name": "RACCONIGI"
+  },
+  {
+    "id": "2318",
+    "name": "RAGUSA"
+  },
+  {
+    "id": "2319",
+    "name": "RAGUSA IBLA"
+  },
+  {
+    "id": "2320",
+    "name": "RAIANO"
+  },
+  {
+    "id": "5435",
+    "name": "RAMAZZANO"
+  },
+  {
+    "id": "5424",
+    "name": "RANCHI"
+  },
+  {
+    "id": "305",
+    "name": "RAPALLO"
+  },
+  {
+    "id": "2323",
+    "name": "RAPOLANO TERME"
+  },
+  {
+    "id": "3521",
+    "name": "RASTIGNANO"
+  },
+  {
+    "id": "2327",
+    "name": "RAVENNA"
+  },
+  {
+    "id": "2329",
+    "name": "RECALE"
+  },
+  {
+    "id": "306",
+    "name": "RECCO"
+  },
+  {
+    "id": "2330",
+    "name": "REDIPUGLIA"
+  },
+  {
+    "id": "1305",
+    "name": "REGGIO CALABRIA AEROPORTO"
+  },
+  {
+    "id": "119",
+    "name": "REGGIO DI CALABRIA ARCHI"
+  },
+  {
+    "id": "120",
+    "name": "REGGIO DI CALABRIA BOCALE"
+  },
+  {
+    "id": "121",
+    "name": "REGGIO DI CALABRIA CATONA"
+  },
+  {
+    "id": "116",
+    "name": "REGGIO DI CALABRIA CENTRALE"
+  },
+  {
+    "id": "122",
+    "name": "REGGIO DI CALABRIA GALLICO"
+  },
+  {
+    "id": "123",
+    "name": "REGGIO DI CALABRIA LIDO"
+  },
+  {
+    "id": "124",
+    "name": "REGGIO DI CALABRIA OMECA"
+  },
+  {
+    "id": "125",
+    "name": "REGGIO DI CALABRIA PELLARO"
+  },
+  {
+    "id": "2693",
+    "name": "REGGIO DI CALABRIA PENTIMELE"
+  },
+  {
+    "id": "126",
+    "name": "REGGIO DI CALABRIA S.CATERINA"
+  },
+  {
+    "id": "127",
+    "name": "REGGIO DI CALABRIA S.GREGORIO"
+  },
+  {
+    "id": "2331",
+    "name": "REGGIO EMILIA"
+  },
+  {
+    "id": "4054",
+    "name": "REGGIO EMILIA AV MEDIOPADANA"
+  },
+  {
+    "id": "2335",
+    "name": "REMEDELLO SOPRA"
+  },
+  {
+    "id": "2336",
+    "name": "REMEDELLO SOTTO"
+  },
+  {
+    "id": "2337",
+    "name": "RENATE-VEDUGGIO"
+  },
+  {
+    "id": "2338",
+    "name": "RESANA"
+  },
+  {
+    "id": "2345",
+    "name": "RHO"
+  },
+  {
+    "id": "3098",
+    "name": "RHO FIERA"
+  },
+  {
+    "id": "128",
+    "name": "RIACE"
+  },
+  {
+    "id": "2349",
+    "name": "RIARDO-PIETRAMELARA"
+  },
+  {
+    "id": "129",
+    "name": "RICADI-CAPO VATICANO"
+  },
+  {
+    "id": "2350",
+    "name": "RICCIONE"
+  },
+  {
+    "id": "2351",
+    "name": "RIDOTTI-COLLEPIANO"
+  },
+  {
+    "id": "2352",
+    "name": "RIETI"
+  },
+  {
+    "id": "2354",
+    "name": "RIGNANO SULL'ARNO REGGELLO"
+  },
+  {
+    "id": "2355",
+    "name": "RIGOLI"
+  },
+  {
+    "id": "2356",
+    "name": "RIGOMAGNO"
+  },
+  {
+    "id": "307",
+    "name": "RIGOROSO"
+  },
+  {
+    "id": "2358",
+    "name": "RIMINI"
+  },
+  {
+    "id": "2346",
+    "name": "RIMINI MIRAMARE"
+  },
+  {
+    "id": "2347",
+    "name": "RIMINI TORRE PEDRERA"
+  },
+  {
+    "id": "2348",
+    "name": "RIMINI VISERBA"
+  },
+  {
+    "id": "3522",
+    "name": "RIMINIFIERA"
+  },
+  {
+    "id": "2359",
+    "name": "RIO DI PUSTERIA"
+  },
+  {
+    "id": "2361",
+    "name": "RIOLA"
+  },
+  {
+    "id": "309",
+    "name": "RIOMAGGIORE"
+  },
+  {
+    "id": "2362",
+    "name": "RIONERO ATELLA RIPACANDIDA"
+  },
+  {
+    "id": "2363",
+    "name": "RIPABOTTONI S.ELIA"
+  },
+  {
+    "id": "2364",
+    "name": "RIPAFRATTA"
+  },
+  {
+    "id": "2367",
+    "name": "RIPARBELLA"
+  },
+  {
+    "id": "2368",
+    "name": "RISANO"
+  },
+  {
+    "id": "310",
+    "name": "RIVA TRIGOSO"
+  },
+  {
+    "id": "311",
+    "name": "RIVALTA SCRIVIA"
+  },
+  {
+    "id": "5025",
+    "name": "RIVAROLO"
+  },
+  {
+    "id": "2373",
+    "name": "RIVISONDOLI-PESCOCOSTANZO"
+  },
+  {
+    "id": "2391",
+    "name": "ROBBIO"
+  },
+  {
+    "id": "2392",
+    "name": "ROBECCO-PONTEVICO"
+  },
+  {
+    "id": "2393",
+    "name": "ROBILANTE"
+  },
+  {
+    "id": "2394",
+    "name": "ROCCA D'EVANDRO-S.VITTORE"
+  },
+  {
+    "id": "2395",
+    "name": "ROCCA DI CORNO"
+  },
+  {
+    "id": "2396",
+    "name": "ROCCA DI FONDI"
+  },
+  {
+    "id": "130",
+    "name": "ROCCA IMPERIALE"
+  },
+  {
+    "id": "2397",
+    "name": "ROCCA RAVINDOLA"
+  },
+  {
+    "id": "131",
+    "name": "ROCCABERNARDA"
+  },
+  {
+    "id": "2400",
+    "name": "ROCCALUMERA MANDANICI"
+  },
+  {
+    "id": "2402",
+    "name": "ROCCAPALUMBA-ALIA"
+  },
+  {
+    "id": "2404",
+    "name": "ROCCARASO"
+  },
+  {
+    "id": "2405",
+    "name": "ROCCASECCA"
+  },
+  {
+    "id": "2406",
+    "name": "ROCCASTRADA"
+  },
+  {
+    "id": "2408",
+    "name": "ROCCAVIONE"
+  },
+  {
+    "id": "2409",
+    "name": "ROCCAVIVI"
+  },
+  {
+    "id": "1244",
+    "name": "ROCCELLA"
+  },
+  {
+    "id": "132",
+    "name": "ROCCELLA JONICA"
+  },
+  {
+    "id": "2410",
+    "name": "ROCCHETTA CAIRO"
+  },
+  {
+    "id": "2411",
+    "name": "ROCCHETTA S.ANTONIO-LACEDONIA"
+  },
+  {
+    "id": "2412",
+    "name": "ROCCHETTA TANARO-CERRO"
+  },
+  {
+    "id": "2413",
+    "name": "RODALLO"
+  },
+  {
+    "id": "2415",
+    "name": "ROLO NOVI FABBRICO"
+  },
+  {
+    "id": "2374",
+    "name": "ROMA AURELIA"
+  },
+  {
+    "id": "2375",
+    "name": "ROMA BALDUINA"
+  },
+  {
+    "id": "2377",
+    "name": "ROMA MONTE MARIO"
+  },
+  {
+    "id": "3411",
+    "name": "ROMA NOMENTANA LL"
+  },
+  {
+    "id": "2378",
+    "name": "ROMA NOMENTANA LM"
+  },
+  {
+    "id": "2379",
+    "name": "ROMA OSTIENSE"
+  },
+  {
+    "id": "2381",
+    "name": "ROMA PRENESTINA"
+  },
+  {
+    "id": "2382",
+    "name": "ROMA S.FILIPPO NERI"
+  },
+  {
+    "id": "2383",
+    "name": "ROMA S.PIETRO"
+  },
+  {
+    "id": "2416",
+    "name": "ROMA TERMINI"
+  },
+  {
+    "id": "2385",
+    "name": "ROMA TIBURTINA"
+  },
+  {
+    "id": "2387",
+    "name": "ROMA TRASTEVERE"
+  },
+  {
+    "id": "2388",
+    "name": "ROMA TUSCOLANA"
+  },
+  {
+    "id": "2417",
+    "name": "ROMAGNANO SESIA"
+  },
+  {
+    "id": "2418",
+    "name": "ROMAGNANO-VIETRI-SALVITELLE"
+  },
+  {
+    "id": "2419",
+    "name": "ROMANO"
+  },
+  {
+    "id": "2420",
+    "name": "ROMANORE"
+  },
+  {
+    "id": "2421",
+    "name": "ROMETTA MESSINESE"
+  },
+  {
+    "id": "2423",
+    "name": "RONCEGNO BAGNI-MARTER"
+  },
+  {
+    "id": "2424",
+    "name": "RONCHI DEI LEGIONARI NORD"
+  },
+  {
+    "id": "313",
+    "name": "RONCO SCRIVIA"
+  },
+  {
+    "id": "2427",
+    "name": "RONTA"
+  },
+  {
+    "id": "2428",
+    "name": "ROSA'"
+  },
+  {
+    "id": "133",
+    "name": "ROSARNO"
+  },
+  {
+    "id": "134",
+    "name": "ROSETO CAPO SPULICO"
+  },
+  {
+    "id": "2429",
+    "name": "ROSETO DEGLI ABRUZZI"
+  },
+  {
+    "id": "2430",
+    "name": "ROSIGNANO"
+  },
+  {
+    "id": "2431",
+    "name": "ROSOLINA"
+  },
+  {
+    "id": "2432",
+    "name": "ROSOLINI"
+  },
+  {
+    "id": "135",
+    "name": "ROSSANO"
+  },
+  {
+    "id": "2433",
+    "name": "ROSSANO VENETO"
+  },
+  {
+    "id": "314",
+    "name": "ROSSIGLIONE"
+  },
+  {
+    "id": "2434",
+    "name": "ROSTA"
+  },
+  {
+    "id": "2435",
+    "name": "ROTTOFRENO"
+  },
+  {
+    "id": "2436",
+    "name": "ROVASENDA"
+  },
+  {
+    "id": "3509",
+    "name": "ROVASENDA ALTA"
+  },
+  {
+    "id": "2437",
+    "name": "ROVATO"
+  },
+  {
+    "id": "2438",
+    "name": "ROVERBELLA"
+  },
+  {
+    "id": "2440",
+    "name": "ROVERETO"
+  },
+  {
+    "id": "2443",
+    "name": "ROVIANO"
+  },
+  {
+    "id": "2444",
+    "name": "ROVIGLIANO"
+  },
+  {
+    "id": "2445",
+    "name": "ROVIGO"
+  },
+  {
+    "id": "2448",
+    "name": "RUBIERA"
+  },
+  {
+    "id": "2449",
+    "name": "RUDALZA"
+  },
+  {
+    "id": "2451",
+    "name": "RUFINA"
+  },
+  {
+    "id": "2452",
+    "name": "RUSSI"
+  },
+  {
+    "id": "2453",
+    "name": "S.AGAPITO LONGANO"
+  },
+  {
+    "id": "2454",
+    "name": "S.AGATA DI MILITELLO"
+  },
+  {
+    "id": "2455",
+    "name": "S.AGATA SUL SANTERNO"
+  },
+  {
+    "id": "2456",
+    "name": "S.ALESSIO SICULO-FORZA D'AGRO'"
+  },
+  {
+    "id": "2457",
+    "name": "S.AMBROGIO"
+  },
+  {
+    "id": "138",
+    "name": "S.ANDREA DELLO JONIO"
+  },
+  {
+    "id": "2460",
+    "name": "S.ANNA DI CHIOGGIA"
+  },
+  {
+    "id": "2461",
+    "name": "S.ANNA ROBELLA"
+  },
+  {
+    "id": "2462",
+    "name": "S.ANTIMO-S.ARPINO"
+  },
+  {
+    "id": "2463",
+    "name": "S.ANTONINO DI SALUGGIA"
+  },
+  {
+    "id": "2464",
+    "name": "S.ANTONINO VAIE"
+  },
+  {
+    "id": "2465",
+    "name": "S.ANTONIO MANTOVANO"
+  },
+  {
+    "id": "5433",
+    "name": "S.BARTOLOMEO-RESINA"
+  },
+  {
+    "id": "2469",
+    "name": "S.BENEDETTO DEL TRONTO"
+  },
+  {
+    "id": "2470",
+    "name": "S.BENEDETTO SAMBRO-CASTIGLIONE PEPOLI"
+  },
+  {
+    "id": "5022",
+    "name": "S.BENIGNO"
+  },
+  {
+    "id": "2473",
+    "name": "S.BIAGIO"
+  },
+  {
+    "id": "3404",
+    "name": "S.BIAGIO DI CALLALTA"
+  },
+  {
+    "id": "2474",
+    "name": "S.BONIFACIO"
+  },
+  {
+    "id": "2475",
+    "name": "S.CANDIDO"
+  },
+  {
+    "id": "2476",
+    "name": "S.CASSIANO"
+  },
+  {
+    "id": "2477",
+    "name": "S.CASSIANO VALCHIAVENNA"
+  },
+  {
+    "id": "2478",
+    "name": "S.CATALDO"
+  },
+  {
+    "id": "140",
+    "name": "S.CATERINA DELLO JONIO"
+  },
+  {
+    "id": "2479",
+    "name": "S.CLAUDIO"
+  },
+  {
+    "id": "2481",
+    "name": "S.CRISTINA E BISSONE"
+  },
+  {
+    "id": "2480",
+    "name": "S.CRISTOFORO AL LAGO-ISCHIA"
+  },
+  {
+    "id": "2482",
+    "name": "S.CROCE DEL LAGO"
+  },
+  {
+    "id": "2485",
+    "name": "S.DAMIANO D'ASTI"
+  },
+  {
+    "id": "2486",
+    "name": "S.DEMETRIO DE' VESTINI"
+  },
+  {
+    "id": "151",
+    "name": "S.DOMENICA"
+  },
+  {
+    "id": "2489",
+    "name": "S.DONA' DI PIAVE-JESOLO"
+  },
+  {
+    "id": "2487",
+    "name": "S.DONATO MILANESE"
+  },
+  {
+    "id": "2490",
+    "name": "S.DONNINO BADIA"
+  },
+  {
+    "id": "2491",
+    "name": "S.ELENA-ESTE"
+  },
+  {
+    "id": "2492",
+    "name": "S.ELLERO"
+  },
+  {
+    "id": "2494",
+    "name": "S.EUROSIA"
+  },
+  {
+    "id": "2495",
+    "name": "S.FELICE SUL PANARO"
+  },
+  {
+    "id": "2496",
+    "name": "S.FILIPPO"
+  },
+  {
+    "id": "2498",
+    "name": "S.FLAVIA-SOLUNTO-PORTICELLO"
+  },
+  {
+    "id": "2500",
+    "name": "S.FREDIANO A SETTIMO"
+  },
+  {
+    "id": "2501",
+    "name": "S.GAVINO"
+  },
+  {
+    "id": "3431",
+    "name": "S.GENNARO"
+  },
+  {
+    "id": "2502",
+    "name": "S.GERMANO VERCELLESE"
+  },
+  {
+    "id": "2504",
+    "name": "S.GIACOMO DI TEGLIO"
+  },
+  {
+    "id": "2505",
+    "name": "S.GIORGIO"
+  },
+  {
+    "id": "2506",
+    "name": "S.GIORGIO CASALE"
+  },
+  {
+    "id": "2508",
+    "name": "S.GIORGIO DELLE PERTICHE"
+  },
+  {
+    "id": "2507",
+    "name": "S.GIORGIO DI NOGARO"
+  },
+  {
+    "id": "2510",
+    "name": "S.GIORGIO DI PIANO"
+  },
+  {
+    "id": "2515",
+    "name": "S.GIOVANNI AL NATISONE"
+  },
+  {
+    "id": "3562",
+    "name": "S.GIOVANNI DI CASARSA"
+  },
+  {
+    "id": "2513",
+    "name": "S.GIOVANNI IN CROCE"
+  },
+  {
+    "id": "2516",
+    "name": "S.GIOVANNI IN PERSICETO"
+  },
+  {
+    "id": "2517",
+    "name": "S.GIOVANNI VALDARNO"
+  },
+  {
+    "id": "2518",
+    "name": "S.GIULETTA"
+  },
+  {
+    "id": "2520",
+    "name": "S.GIULIANO MILANESE"
+  },
+  {
+    "id": "2521",
+    "name": "S.GIULIANO PIACENTINO"
+  },
+  {
+    "id": "2522",
+    "name": "S.GIULIANO PIEMONTE"
+  },
+  {
+    "id": "2523",
+    "name": "S.GIULIANO TERME"
+  },
+  {
+    "id": "318",
+    "name": "S.GIUSEPPE DI CAIRO"
+  },
+  {
+    "id": "2525",
+    "name": "S.GIUSTINA-CESIO"
+  },
+  {
+    "id": "5414",
+    "name": "S.GIUSTINO"
+  },
+  {
+    "id": "2526",
+    "name": "S.ILARIO D'ENZA"
+  },
+  {
+    "id": "3069",
+    "name": "S.LAZZARO DI SAVENA"
+  },
+  {
+    "id": "2529",
+    "name": "S.LIBERATO"
+  },
+  {
+    "id": "3091",
+    "name": "S.LORENZO"
+  },
+  {
+    "id": "2530",
+    "name": "S.LORENZO MAGGIORE"
+  },
+  {
+    "id": "142",
+    "name": "S.LUCIDO MARINA"
+  },
+  {
+    "id": "2535",
+    "name": "S.MARCELLINO FRIGNANO"
+  },
+  {
+    "id": "2536",
+    "name": "S.MARCO D'ALUNZIO-TORRENOVA"
+  },
+  {
+    "id": "143",
+    "name": "S.MARCO ROGGIANO"
+  },
+  {
+    "id": "3412",
+    "name": "S.MARCO VECCHIO"
+  },
+  {
+    "id": "315",
+    "name": "S.MARGHERITA LIGURE PORTOFINO"
+  },
+  {
+    "id": "2538",
+    "name": "S.MARIA CAPUA VETERE"
+  },
+  {
+    "id": "2540",
+    "name": "S.MARIA DELLE MOLE"
+  },
+  {
+    "id": "2542",
+    "name": "S.MARIA LA BRUNA"
+  },
+  {
+    "id": "2541",
+    "name": "S.MARIA LA LONGA"
+  },
+  {
+    "id": "2544",
+    "name": "S.MARINELLA"
+  },
+  {
+    "id": "2545",
+    "name": "S.MARINO"
+  },
+  {
+    "id": "2546",
+    "name": "S.MARTINO AL CIMINO"
+  },
+  {
+    "id": "2548",
+    "name": "S.MARTINO BUONALBERGO"
+  },
+  {
+    "id": "1039",
+    "name": "S.MARTINO CAVA"
+  },
+  {
+    "id": "2549",
+    "name": "S.MARTINO DI LUPARI"
+  },
+  {
+    "id": "5440",
+    "name": "S.MARTINO IN CAMPO"
+  },
+  {
+    "id": "2550",
+    "name": "S.MARTINO IN GATTARA"
+  },
+  {
+    "id": "5038",
+    "name": "S.MAURIZIO CANAVESE"
+  },
+  {
+    "id": "3207",
+    "name": "S.MICHELE"
+  },
+  {
+    "id": "2556",
+    "name": "S.MICHELE DI SERINO"
+  },
+  {
+    "id": "2557",
+    "name": "S.MICHELE IN BOSCO"
+  },
+  {
+    "id": "2558",
+    "name": "S.MINIATO FUCECCHIO"
+  },
+  {
+    "id": "2559",
+    "name": "S.MOMME'"
+  },
+  {
+    "id": "2560",
+    "name": "S.NAZARIO"
+  },
+  {
+    "id": "2561",
+    "name": "S.NICOLA TONNARA"
+  },
+  {
+    "id": "2564",
+    "name": "S.NICOLO"
+  },
+  {
+    "id": "2568",
+    "name": "S.PAOLO SOLBRITO"
+  },
+  {
+    "id": "2569",
+    "name": "S.PATRIZIO"
+  },
+  {
+    "id": "3377",
+    "name": "S.PIERO A SIEVE"
+  },
+  {
+    "id": "145",
+    "name": "S.PIETRO A MAIDA-MAIDA"
+  },
+  {
+    "id": "2571",
+    "name": "S.PIETRO A VICO"
+  },
+  {
+    "id": "2572",
+    "name": "S.PIETRO AVELLANA-CAPRACOTTA"
+  },
+  {
+    "id": "2573",
+    "name": "S.PIETRO BERBENNO"
+  },
+  {
+    "id": "2574",
+    "name": "S.PIETRO IN CASALE"
+  },
+  {
+    "id": "2575",
+    "name": "S.PIETRO IN GU'"
+  },
+  {
+    "id": "2576",
+    "name": "S.PIETRO VERNOTICO"
+  },
+  {
+    "id": "2580",
+    "name": "S.ROMANO-MONTOPOLI-S.CROCE"
+  },
+  {
+    "id": "2581",
+    "name": "S.SEBASTIANO PO"
+  },
+  {
+    "id": "2582",
+    "name": "S.SEVERA"
+  },
+  {
+    "id": "2583",
+    "name": "S.SEVERINO MARCHE"
+  },
+  {
+    "id": "2584",
+    "name": "S.SEVERO"
+  },
+  {
+    "id": "2587",
+    "name": "S.STEFANO BELBO"
+  },
+  {
+    "id": "2588",
+    "name": "S.STEFANO DI CAMASTRA-MISTRETTA"
+  },
+  {
+    "id": "2590",
+    "name": "S.STEFANO DI MAGRA"
+  },
+  {
+    "id": "2589",
+    "name": "S.STEFANO LODIGIANO"
+  },
+  {
+    "id": "2591",
+    "name": "S.STEFANO UDINESE"
+  },
+  {
+    "id": "2592",
+    "name": "S.STINO DI LIVENZA"
+  },
+  {
+    "id": "2593",
+    "name": "S.TERESA DI RIVA"
+  },
+  {
+    "id": "2594",
+    "name": "S.TERESA LONGARINI"
+  },
+  {
+    "id": "4080",
+    "name": "S.TROVASO"
+  },
+  {
+    "id": "2597",
+    "name": "S.VINCENZO"
+  },
+  {
+    "id": "2598",
+    "name": "S.VINCENZO VALLE ROVETO"
+  },
+  {
+    "id": "2599",
+    "name": "S.VITO AL TAGLIAMENTO"
+  },
+  {
+    "id": "2600",
+    "name": "S.VITO DEI NORMANNI"
+  },
+  {
+    "id": "2601",
+    "name": "S.VITO LANCIANO"
+  },
+  {
+    "id": "2602",
+    "name": "S.VITTORIA"
+  },
+  {
+    "id": "2603",
+    "name": "S.ZENO FOLZANO"
+  },
+  {
+    "id": "2604",
+    "name": "S.ZENONE AL LAMBRO"
+  },
+  {
+    "id": "2605",
+    "name": "SACILE"
+  },
+  {
+    "id": "2606",
+    "name": "SACILE S.LIBERALE"
+  },
+  {
+    "id": "2607",
+    "name": "SAGRADO"
+  },
+  {
+    "id": "2609",
+    "name": "SAINT-PIERRE"
+  },
+  {
+    "id": "3380",
+    "name": "SAIRANO"
+  },
+  {
+    "id": "2611",
+    "name": "SAIRANO ZINASCO"
+  },
+  {
+    "id": "2612",
+    "name": "SALA AL BARRO-GALBIATE"
+  },
+  {
+    "id": "2613",
+    "name": "SALANDRA-GROTTOLE"
+  },
+  {
+    "id": "2614",
+    "name": "SALBERTRAND"
+  },
+  {
+    "id": "2615",
+    "name": "SALE LANGHE"
+  },
+  {
+    "id": "2616",
+    "name": "SALEMI GIBELLINA"
+  },
+  {
+    "id": "2617",
+    "name": "SALERNO"
+  },
+  {
+    "id": "2618",
+    "name": "SALERNO IRNO"
+  },
+  {
+    "id": "2619",
+    "name": "SALETTO"
+  },
+  {
+    "id": "2620",
+    "name": "SALICETO"
+  },
+  {
+    "id": "146",
+    "name": "SALINE DI REGGIO"
+  },
+  {
+    "id": "2621",
+    "name": "SALONE"
+  },
+  {
+    "id": "2622",
+    "name": "SALORNO"
+  },
+  {
+    "id": "2623",
+    "name": "SALSOMAGGIORE TERME"
+  },
+  {
+    "id": "2624",
+    "name": "SALUGGIA"
+  },
+  {
+    "id": "2625",
+    "name": "SALUSSOLA"
+  },
+  {
+    "id": "2626",
+    "name": "SALUZZO"
+  },
+  {
+    "id": "2629",
+    "name": "SALZANO ROBEGANO"
+  },
+  {
+    "id": "2630",
+    "name": "SAMASSI SERRENTI"
+  },
+  {
+    "id": "2631",
+    "name": "SAMOGGIA"
+  },
+  {
+    "id": "2632",
+    "name": "SAMOLACO"
+  },
+  {
+    "id": "2633",
+    "name": "SAMPIERI"
+  },
+  {
+    "id": "5451",
+    "name": "SAN FAUSTINO-CASIGLIANO"
+  },
+  {
+    "id": "3155",
+    "name": "SAN PAOLO"
+  },
+  {
+    "id": "3200",
+    "name": "SAN POLO MATESE"
+  },
+  {
+    "id": "2634",
+    "name": "SANDIGLIANO"
+  },
+  {
+    "id": "2635",
+    "name": "SANFRE`"
+  },
+  {
+    "id": "5456",
+    "name": "SANGEMINI"
+  },
+  {
+    "id": "2636",
+    "name": "SANGIANO"
+  },
+  {
+    "id": "2638",
+    "name": "SANGUINETTO"
+  },
+  {
+    "id": "2639",
+    "name": "SANLURI STATO"
+  },
+  {
+    "id": "2640",
+    "name": "SANNAZZARO"
+  },
+  {
+    "id": "320",
+    "name": "SANREMO"
+  },
+  {
+    "id": "5421",
+    "name": "SANSECONDO"
+  },
+  {
+    "id": "5460",
+    "name": "SANSEPOLCRO"
+  },
+  {
+    "id": "2466",
+    "name": "SANTARCANGELO DI ROMAGNA"
+  },
+  {
+    "id": "2644",
+    "name": "SANTE MARIE"
+  },
+  {
+    "id": "2646",
+    "name": "SANTERAMO"
+  },
+  {
+    "id": "2647",
+    "name": "SANTHIA'"
+  },
+  {
+    "id": "2648",
+    "name": "SANTOPADRE"
+  },
+  {
+    "id": "322",
+    "name": "SANTUARIO"
+  },
+  {
+    "id": "153",
+    "name": "SAPRI"
+  },
+  {
+    "id": "2651",
+    "name": "SARMATO"
+  },
+  {
+    "id": "2652",
+    "name": "SARNO"
+  },
+  {
+    "id": "2654",
+    "name": "SARRE"
+  },
+  {
+    "id": "2655",
+    "name": "SARTIRANA"
+  },
+  {
+    "id": "2656",
+    "name": "SARZANA"
+  },
+  {
+    "id": "2657",
+    "name": "SASSA TORNIMPARTE"
+  },
+  {
+    "id": "2658",
+    "name": "SASSARI"
+  },
+  {
+    "id": "2660",
+    "name": "SASSO MARCONI"
+  },
+  {
+    "id": "2661",
+    "name": "SASSOFERRATO ARCEVIA"
+  },
+  {
+    "id": "2662",
+    "name": "SASSONE"
+  },
+  {
+    "id": "2664",
+    "name": "SAVIGLIANO"
+  },
+  {
+    "id": "2665",
+    "name": "SAVIGNANO GRECI"
+  },
+  {
+    "id": "2666",
+    "name": "SAVIGNANO SUL RUBICONE"
+  },
+  {
+    "id": "323",
+    "name": "SAVONA"
+  },
+  {
+    "id": "2668",
+    "name": "SCAFA S.VALENTINO-CARAMANICO TERME"
+  },
+  {
+    "id": "2669",
+    "name": "SCAFATI"
+  },
+  {
+    "id": "154",
+    "name": "SCALEA S.DOMENICA TALAO"
+  },
+  {
+    "id": "2672",
+    "name": "SCALETTA ZANCLEA"
+  },
+  {
+    "id": "155",
+    "name": "SCANZANO JONICO-MONTALBANO JONICO"
+  },
+  {
+    "id": "2676",
+    "name": "SCARLINO"
+  },
+  {
+    "id": "3560",
+    "name": "SCERNE DI PINETO"
+  },
+  {
+    "id": "2678",
+    "name": "SCHIO"
+  },
+  {
+    "id": "2681",
+    "name": "SCICLI"
+  },
+  {
+    "id": "156",
+    "name": "SCILLA"
+  },
+  {
+    "id": "3438",
+    "name": "SCOPETI"
+  },
+  {
+    "id": "2683",
+    "name": "SCORCETOLI"
+  },
+  {
+    "id": "2684",
+    "name": "SCORDIA"
+  },
+  {
+    "id": "2685",
+    "name": "SCURCOLA MARSICANA"
+  },
+  {
+    "id": "2686",
+    "name": "SECUGNAGO"
+  },
+  {
+    "id": "2687",
+    "name": "SEDICO BRIBANO"
+  },
+  {
+    "id": "2688",
+    "name": "SEGESTA TEMPIO"
+  },
+  {
+    "id": "3507",
+    "name": "SEGRATE"
+  },
+  {
+    "id": "5415",
+    "name": "SELCI LAMA"
+  },
+  {
+    "id": "2689",
+    "name": "SELLA DI CORNO"
+  },
+  {
+    "id": "157",
+    "name": "SELLIA MARINA"
+  },
+  {
+    "id": "2694",
+    "name": "SENIGALLIA"
+  },
+  {
+    "id": "2696",
+    "name": "SEREGNO"
+  },
+  {
+    "id": "4041",
+    "name": "SERENISSIMA"
+  },
+  {
+    "id": "2697",
+    "name": "SERIATE"
+  },
+  {
+    "id": "2698",
+    "name": "SERINO"
+  },
+  {
+    "id": "2700",
+    "name": "SERRA S.QUIRICO"
+  },
+  {
+    "id": "2701",
+    "name": "SERRADIFALCO"
+  },
+  {
+    "id": "2702",
+    "name": "SERRALUNGA CERESETO"
+  },
+  {
+    "id": "2703",
+    "name": "SERRAMANNA NURAMINIS"
+  },
+  {
+    "id": "2707",
+    "name": "SERRAVALLE ALL'ADIGE"
+  },
+  {
+    "id": "2705",
+    "name": "SERRAVALLE D'ASTI"
+  },
+  {
+    "id": "2706",
+    "name": "SERRAVALLE PISTOIESE"
+  },
+  {
+    "id": "326",
+    "name": "SERRAVALLE SCRIVIA"
+  },
+  {
+    "id": "2710",
+    "name": "SESSA AURUNCA-ROCCAMONFINA"
+  },
+  {
+    "id": "2711",
+    "name": "SESSANO DEL MOLISE"
+  },
+  {
+    "id": "2713",
+    "name": "SESTO CALENDE"
+  },
+  {
+    "id": "2714",
+    "name": "SESTO CAMPANO"
+  },
+  {
+    "id": "2715",
+    "name": "SESTO FIORENTINO"
+  },
+  {
+    "id": "2716",
+    "name": "SESTO S.GIOVANNI"
+  },
+  {
+    "id": "327",
+    "name": "SESTRI LEVANTE"
+  },
+  {
+    "id": "2717",
+    "name": "SETTEBAGNI"
+  },
+  {
+    "id": "2718",
+    "name": "SETTEQUERCE"
+  },
+  {
+    "id": "2719",
+    "name": "SETTIME CINAGLIO MOMBARONE"
+  },
+  {
+    "id": "2720",
+    "name": "SETTIMO"
+  },
+  {
+    "id": "158",
+    "name": "SETTINGIANO"
+  },
+  {
+    "id": "2722",
+    "name": "SEVEGLIANO"
+  },
+  {
+    "id": "2724",
+    "name": "SEZZADIO"
+  },
+  {
+    "id": "2725",
+    "name": "SEZZE ROMANO"
+  },
+  {
+    "id": "2727",
+    "name": "SGURGOLA"
+  },
+  {
+    "id": "159",
+    "name": "SIBARI"
+  },
+  {
+    "id": "2728",
+    "name": "SICIGNANO DEGLI ALBURNI"
+  },
+  {
+    "id": "160",
+    "name": "SIDERNO"
+  },
+  {
+    "id": "2729",
+    "name": "SIECI"
+  },
+  {
+    "id": "2730",
+    "name": "SIENA"
+  },
+  {
+    "id": "2731",
+    "name": "SIENA ZONA INDUSTRIALE"
+  },
+  {
+    "id": "2732",
+    "name": "SIGNA"
+  },
+  {
+    "id": "2734",
+    "name": "SILIQUA"
+  },
+  {
+    "id": "2735",
+    "name": "SILLA"
+  },
+  {
+    "id": "2736",
+    "name": "SILLAVENGO"
+  },
+  {
+    "id": "2737",
+    "name": "SILVI"
+  },
+  {
+    "id": "161",
+    "name": "SIMERI CRICHI"
+  },
+  {
+    "id": "2738",
+    "name": "SINALUNGA"
+  },
+  {
+    "id": "2739",
+    "name": "SIPICCIANO"
+  },
+  {
+    "id": "2740",
+    "name": "SIPICCIANO S.NICOLA"
+  },
+  {
+    "id": "2741",
+    "name": "SIPONTO"
+  },
+  {
+    "id": "2742",
+    "name": "SIRACUSA"
+  },
+  {
+    "id": "2744",
+    "name": "SISTIANA-VISOGLIANO"
+  },
+  {
+    "id": "2745",
+    "name": "SIZZANO"
+  },
+  {
+    "id": "2747",
+    "name": "SOFFRATTA"
+  },
+  {
+    "id": "2748",
+    "name": "SOLAGNA"
+  },
+  {
+    "id": "2749",
+    "name": "SOLAROLO"
+  },
+  {
+    "id": "2750",
+    "name": "SOLARUSSA"
+  },
+  {
+    "id": "2751",
+    "name": "SOLERO"
+  },
+  {
+    "id": "5432",
+    "name": "SOLFAGNANO-PARLESCA"
+  },
+  {
+    "id": "2753",
+    "name": "SOLIGNANO"
+  },
+  {
+    "id": "2754",
+    "name": "SOLOFRA"
+  },
+  {
+    "id": "2756",
+    "name": "SOLOPACA"
+  },
+  {
+    "id": "2757",
+    "name": "SOMMA LOMBARDO"
+  },
+  {
+    "id": "2759",
+    "name": "SOMMARIVA DEL BOSCO"
+  },
+  {
+    "id": "2760",
+    "name": "SONDRIO"
+  },
+  {
+    "id": "2761",
+    "name": "SORA"
+  },
+  {
+    "id": "2763",
+    "name": "SORESINA"
+  },
+  {
+    "id": "2764",
+    "name": "SORGENTI DEL PESCHIERA"
+  },
+  {
+    "id": "328",
+    "name": "SORI"
+  },
+  {
+    "id": "162",
+    "name": "SOVERATO"
+  },
+  {
+    "id": "651",
+    "name": "SPADAFORA"
+  },
+  {
+    "id": "2766",
+    "name": "SPAGNUOLA"
+  },
+  {
+    "id": "2768",
+    "name": "SPARANISE"
+  },
+  {
+    "id": "2770",
+    "name": "SPELLO"
+  },
+  {
+    "id": "163",
+    "name": "SPEZZANO ALBANESE TERME"
+  },
+  {
+    "id": "2771",
+    "name": "SPIGNO"
+  },
+  {
+    "id": "2772",
+    "name": "SPINAZZOLA"
+  },
+  {
+    "id": "4083",
+    "name": "SPINEA"
+  },
+  {
+    "id": "2773",
+    "name": "SPINETOLI COLLI"
+  },
+  {
+    "id": "2441",
+    "name": "SPINETOLI VILLA S.PIO X"
+  },
+  {
+    "id": "2774",
+    "name": "SPINETTA"
+  },
+  {
+    "id": "2776",
+    "name": "SPOLETO"
+  },
+  {
+    "id": "329",
+    "name": "SPOTORNO NOLI"
+  },
+  {
+    "id": "2778",
+    "name": "SPRESIANO"
+  },
+  {
+    "id": "164",
+    "name": "SQUILLACE"
+  },
+  {
+    "id": "2779",
+    "name": "SQUINZANO"
+  },
+  {
+    "id": "2780",
+    "name": "ST.DALMAS DE TENDE"
+  },
+  {
+    "id": "85099",
+    "name": "STABIO"
+  },
+  {
+    "id": "2784",
+    "name": "STANGHELLA"
+  },
+  {
+    "id": "2785",
+    "name": "STAZIONE PER L'ALPAGO"
+  },
+  {
+    "id": "3596",
+    "name": "STEZZANO"
+  },
+  {
+    "id": "2787",
+    "name": "STICCIANO"
+  },
+  {
+    "id": "2788",
+    "name": "STIMIGLIANO"
+  },
+  {
+    "id": "2789",
+    "name": "STRADA CASALE"
+  },
+  {
+    "id": "2790",
+    "name": "STRADELLA"
+  },
+  {
+    "id": "2791",
+    "name": "STRAMBINO"
+  },
+  {
+    "id": "2792",
+    "name": "STRASSOLDO"
+  },
+  {
+    "id": "2793",
+    "name": "STRESA"
+  },
+  {
+    "id": "2794",
+    "name": "STREVI"
+  },
+  {
+    "id": "2795",
+    "name": "STRIGNO"
+  },
+  {
+    "id": "165",
+    "name": "STRONGOLI"
+  },
+  {
+    "id": "2797",
+    "name": "SU CANALE"
+  },
+  {
+    "id": "2798",
+    "name": "SULMONA"
+  },
+  {
+    "id": "3550",
+    "name": "SULMONA S.RUFINA"
+  },
+  {
+    "id": "2799",
+    "name": "SULMONA-INTRODACQUA"
+  },
+  {
+    "id": "2800",
+    "name": "SUNO"
+  },
+  {
+    "id": "2801",
+    "name": "SUSA"
+  },
+  {
+    "id": "2802",
+    "name": "SUSEGANA"
+  },
+  {
+    "id": "2803",
+    "name": "SUZZARA"
+  },
+  {
+    "id": "331",
+    "name": "TAGGIA ARMA"
+  },
+  {
+    "id": "2805",
+    "name": "TAGLIACOZZO"
+  },
+  {
+    "id": "2807",
+    "name": "TAINO ANGERA"
+  },
+  {
+    "id": "2808",
+    "name": "TALAMONA"
+  },
+  {
+    "id": "2809",
+    "name": "TALAMONE"
+  },
+  {
+    "id": "2810",
+    "name": "TAORMINA-GIARDINI"
+  },
+  {
+    "id": "2811",
+    "name": "TARANTO"
+  },
+  {
+    "id": "2812",
+    "name": "TARCENTO"
+  },
+  {
+    "id": "2813",
+    "name": "TARGIA"
+  },
+  {
+    "id": "2815",
+    "name": "TARQUINIA"
+  },
+  {
+    "id": "166",
+    "name": "TARSIA"
+  },
+  {
+    "id": "3443",
+    "name": "TARVISIO BOSCOVERDE"
+  },
+  {
+    "id": "2818",
+    "name": "TASSIGNANO-CAPANNORI"
+  },
+  {
+    "id": "2820",
+    "name": "TAVAZZANO"
+  },
+  {
+    "id": "2822",
+    "name": "TEANO"
+  },
+  {
+    "id": "2823",
+    "name": "TEGLIO VENETO"
+  },
+  {
+    "id": "2825",
+    "name": "TELESE CERRETO"
+  },
+  {
+    "id": "3461",
+    "name": "TEMPIO DI VULCANO"
+  },
+  {
+    "id": "2826",
+    "name": "TENDE"
+  },
+  {
+    "id": "2827",
+    "name": "TERAMO"
+  },
+  {
+    "id": "2828",
+    "name": "TERLANO-ANDRIANO"
+  },
+  {
+    "id": "2829",
+    "name": "TERME EUGANEE-ABANO-MONTEGROTTO"
+  },
+  {
+    "id": "2830",
+    "name": "TERME VIGLIATORE"
+  },
+  {
+    "id": "2831",
+    "name": "TERMINI IMERESE"
+  },
+  {
+    "id": "2832",
+    "name": "TERMOLI"
+  },
+  {
+    "id": "2833",
+    "name": "TERNATE VARANO BORGHI"
+  },
+  {
+    "id": "2834",
+    "name": "TERNI"
+  },
+  {
+    "id": "5457",
+    "name": "TERNI BORGO RIVO"
+  },
+  {
+    "id": "2835",
+    "name": "TERNI COSPEA"
+  },
+  {
+    "id": "2836",
+    "name": "TERNO"
+  },
+  {
+    "id": "2837",
+    "name": "TERONTOLA CORTONA"
+  },
+  {
+    "id": "2838",
+    "name": "TERRACINA"
+  },
+  {
+    "id": "2842",
+    "name": "TERRENOVE"
+  },
+  {
+    "id": "2845",
+    "name": "TERZO MONTABONE"
+  },
+  {
+    "id": "2846",
+    "name": "TEZZE DI GRIGNO"
+  },
+  {
+    "id": "2847",
+    "name": "THIENE"
+  },
+  {
+    "id": "2849",
+    "name": "TIONE DEGLI ABRUZZI"
+  },
+  {
+    "id": "2850",
+    "name": "TIRANO"
+  },
+  {
+    "id": "2852",
+    "name": "TITO"
+  },
+  {
+    "id": "2853",
+    "name": "TIVOLI"
+  },
+  {
+    "id": "2867",
+    "name": "TOCCO CASTIGLIONE"
+  },
+  {
+    "id": "5449",
+    "name": "TODI PONTE NAIA"
+  },
+  {
+    "id": "5386",
+    "name": "TODI PONTE RIO"
+  },
+  {
+    "id": "2868",
+    "name": "TOLENTINO"
+  },
+  {
+    "id": "2869",
+    "name": "TOLLO CANOSA SANNITA"
+  },
+  {
+    "id": "2872",
+    "name": "TONCO ALFIANO"
+  },
+  {
+    "id": "2873",
+    "name": "TOR SAPIENZA"
+  },
+  {
+    "id": "3430",
+    "name": "TOR VERGATA"
+  },
+  {
+    "id": "2874",
+    "name": "TORA PRESENZANO"
+  },
+  {
+    "id": "169",
+    "name": "TORANO LATTARICO"
+  },
+  {
+    "id": "5037",
+    "name": "TORINO AEROPORTO DI CASELLE"
+  },
+  {
+    "id": "5388",
+    "name": "TORINO CORSO GROSSETO"
+  },
+  {
+    "id": "2855",
+    "name": "TORINO LINGOTTO"
+  },
+  {
+    "id": "2876",
+    "name": "TORINO PORTA NUOVA"
+  },
+  {
+    "id": "3163",
+    "name": "TORINO PORTA SUSA"
+  },
+  {
+    "id": "194",
+    "name": "TORINO REBAUDENGO FOSSATA"
+  },
+  {
+    "id": "2864",
+    "name": "TORINO STURA"
+  },
+  {
+    "id": "2878",
+    "name": "TORRAZZA PIEMONTE"
+  },
+  {
+    "id": "2879",
+    "name": "TORRE ANNUNZIATA CENTRALE"
+  },
+  {
+    "id": "2880",
+    "name": "TORRE ANNUNZIATA CITTA'"
+  },
+  {
+    "id": "2881",
+    "name": "TORRE DE' PICENARDI"
+  },
+  {
+    "id": "2882",
+    "name": "TORRE DEI PASSERI"
+  },
+  {
+    "id": "2883",
+    "name": "TORRE DEL GRECO"
+  },
+  {
+    "id": "2884",
+    "name": "TORRE DEL LAGO PUCCINI"
+  },
+  {
+    "id": "2886",
+    "name": "TORRE IN PIETRA-PALIDORO"
+  },
+  {
+    "id": "171",
+    "name": "TORRE MELISSA"
+  },
+  {
+    "id": "172",
+    "name": "TORRE ORSAIA"
+  },
+  {
+    "id": "2887",
+    "name": "TORRE PELLICE"
+  },
+  {
+    "id": "2889",
+    "name": "TORREBERETTI"
+  },
+  {
+    "id": "688",
+    "name": "TORREGROTTA"
+  },
+  {
+    "id": "173",
+    "name": "TORREMEZZO DI FALCONARA"
+  },
+  {
+    "id": "2892",
+    "name": "TORRICELLA"
+  },
+  {
+    "id": "2893",
+    "name": "TORRICOLA"
+  },
+  {
+    "id": "2894",
+    "name": "TORRILE S.POLO"
+  },
+  {
+    "id": "2079",
+    "name": "TORRIONE"
+  },
+  {
+    "id": "2895",
+    "name": "TORRITA DI SIENA"
+  },
+  {
+    "id": "332",
+    "name": "TORTONA"
+  },
+  {
+    "id": "2897",
+    "name": "TORTORETO LIDO"
+  },
+  {
+    "id": "174",
+    "name": "TOSCANO"
+  },
+  {
+    "id": "2900",
+    "name": "TRABIA"
+  },
+  {
+    "id": "3165",
+    "name": "TRACCIA"
+  },
+  {
+    "id": "2902",
+    "name": "TRANI"
+  },
+  {
+    "id": "2903",
+    "name": "TRAPANI"
+  },
+  {
+    "id": "2904",
+    "name": "TRAPPA"
+  },
+  {
+    "id": "2905",
+    "name": "TRAPPETO"
+  },
+  {
+    "id": "2906",
+    "name": "TRAVEDONA BIANDRONNO"
+  },
+  {
+    "id": "2907",
+    "name": "TRAVESIO"
+  },
+  {
+    "id": "2908",
+    "name": "TRE CROCI"
+  },
+  {
+    "id": "2140",
+    "name": "TREBASELEGHE"
+  },
+  {
+    "id": "5412",
+    "name": "TREBBIO"
+  },
+  {
+    "id": "175",
+    "name": "TREBISACCE"
+  },
+  {
+    "id": "2909",
+    "name": "TRECATE"
+  },
+  {
+    "id": "2910",
+    "name": "TRECELLA"
+  },
+  {
+    "id": "2911",
+    "name": "TREMESTIERI"
+  },
+  {
+    "id": "2912",
+    "name": "TRENTO"
+  },
+  {
+    "id": "4079",
+    "name": "TRENTO S.BARTOLAMEO"
+  },
+  {
+    "id": "4030",
+    "name": "TRENTO S.CHIARA"
+  },
+  {
+    "id": "2914",
+    "name": "TREPUZZI"
+  },
+  {
+    "id": "2916",
+    "name": "TRESENDA-APRICA-TEGLIO"
+  },
+  {
+    "id": "5423",
+    "name": "TRESTINA"
+  },
+  {
+    "id": "2918",
+    "name": "TREVI"
+  },
+  {
+    "id": "2919",
+    "name": "TREVIGLIO"
+  },
+  {
+    "id": "2920",
+    "name": "TREVIGLIO OVEST"
+  },
+  {
+    "id": "2921",
+    "name": "TREVIGNANO SIGNORESSA"
+  },
+  {
+    "id": "2922",
+    "name": "TREVISO CENTRALE"
+  },
+  {
+    "id": "2923",
+    "name": "TREZZANO SUL NAVIGLIO"
+  },
+  {
+    "id": "2924",
+    "name": "TRICESIMO-S.PELAGIO"
+  },
+  {
+    "id": "3182",
+    "name": "TRIESTE AIRPORT"
+  },
+  {
+    "id": "2925",
+    "name": "TRIESTE CENTRALE"
+  },
+  {
+    "id": "2927",
+    "name": "TRINITA' BENE VAGIENNA"
+  },
+  {
+    "id": "2926",
+    "name": "TRINITAPOLI-S.FERDINANDO DI PUGLIA"
+  },
+  {
+    "id": "2928",
+    "name": "TRINO VERCELLESE"
+  },
+  {
+    "id": "2930",
+    "name": "TRIUGGIO-PONTE ALBIATE"
+  },
+  {
+    "id": "2931",
+    "name": "TRIVIGNO"
+  },
+  {
+    "id": "2932",
+    "name": "TROFARELLO"
+  },
+  {
+    "id": "2934",
+    "name": "TROMELLO"
+  },
+  {
+    "id": "2935",
+    "name": "TRONZANO"
+  },
+  {
+    "id": "176",
+    "name": "TROPEA"
+  },
+  {
+    "id": "2948",
+    "name": "TUFO"
+  },
+  {
+    "id": "2949",
+    "name": "TUORO SUL TRASIMENO"
+  },
+  {
+    "id": "2950",
+    "name": "TUSA"
+  },
+  {
+    "id": "2956",
+    "name": "UDINE"
+  },
+  {
+    "id": "2958",
+    "name": "UGOVIZZA VALBRUNA"
+  },
+  {
+    "id": "5428",
+    "name": "UMBERTIDE"
+  },
+  {
+    "id": "2960",
+    "name": "URAS MOGORO"
+  },
+  {
+    "id": "2961",
+    "name": "URBISAGLIA SFORZACOSTA"
+  },
+  {
+    "id": "2964",
+    "name": "VADA"
+  },
+  {
+    "id": "3420",
+    "name": "VAGLIA"
+  },
+  {
+    "id": "2966",
+    "name": "VAIANO"
+  },
+  {
+    "id": "3158",
+    "name": "VAIO OSPEDALE"
+  },
+  {
+    "id": "2967",
+    "name": "VAIRANO-CAIANELLO"
+  },
+  {
+    "id": "385",
+    "name": "VAL D'ALA"
+  },
+  {
+    "id": "2970",
+    "name": "VALDAORA-ANTERSELVA"
+  },
+  {
+    "id": "2973",
+    "name": "VALENZA"
+  },
+  {
+    "id": "3429",
+    "name": "VALLE AURELIA"
+  },
+  {
+    "id": "1631",
+    "name": "VALLE DELL'ANIENE-MANDELA-SAMBUCI"
+  },
+  {
+    "id": "2975",
+    "name": "VALLE DI MADDALONI"
+  },
+  {
+    "id": "2977",
+    "name": "VALLE DI MERCATO S.SEVERINO"
+  },
+  {
+    "id": "2976",
+    "name": "VALLE LOMELLINA"
+  },
+  {
+    "id": "337",
+    "name": "VALLECROSIA"
+  },
+  {
+    "id": "2978",
+    "name": "VALLEDOLMO"
+  },
+  {
+    "id": "2980",
+    "name": "VALLELUNGA"
+  },
+  {
+    "id": "177",
+    "name": "VALLO DELLA LUCANIA-CASTELNUOVO"
+  },
+  {
+    "id": "2981",
+    "name": "VALMADONNA"
+  },
+  {
+    "id": "2982",
+    "name": "VALMADRERA"
+  },
+  {
+    "id": "2983",
+    "name": "VALMONTONE"
+  },
+  {
+    "id": "2985",
+    "name": "VALTOPINA"
+  },
+  {
+    "id": "2986",
+    "name": "VANDOIES"
+  },
+  {
+    "id": "2987",
+    "name": "VANZAGO POGLIANO"
+  },
+  {
+    "id": "2989",
+    "name": "VAPRIO D'AGOGNA"
+  },
+  {
+    "id": "2990",
+    "name": "VARALLO POMBIA"
+  },
+  {
+    "id": "2991",
+    "name": "VARALLO SESIA"
+  },
+  {
+    "id": "2992",
+    "name": "VARANO"
+  },
+  {
+    "id": "338",
+    "name": "VARAZZE"
+  },
+  {
+    "id": "2993",
+    "name": "VARENNA ESINO"
+  },
+  {
+    "id": "2994",
+    "name": "VARESE"
+  },
+  {
+    "id": "2995",
+    "name": "VARIGNANA"
+  },
+  {
+    "id": "2998",
+    "name": "VASTO S.SALVO"
+  },
+  {
+    "id": "2999",
+    "name": "VASTOGIRARDI"
+  },
+  {
+    "id": "3006",
+    "name": "VELLETRI"
+  },
+  {
+    "id": "3007",
+    "name": "VENAFRO"
+  },
+  {
+    "id": "5034",
+    "name": "VENARIA REALE REGGIA"
+  },
+  {
+    "id": "5033",
+    "name": "VENARIA REALE RIGOLA STADIO"
+  },
+  {
+    "id": "3000",
+    "name": "VENEZIA CARPENEDO"
+  },
+  {
+    "id": "3002",
+    "name": "VENEZIA MESTRE"
+  },
+  {
+    "id": "1867",
+    "name": "VENEZIA MESTRE GAZZERA"
+  },
+  {
+    "id": "3538",
+    "name": "VENEZIA MESTRE OSPEDALE"
+  },
+  {
+    "id": "3004",
+    "name": "VENEZIA PORTO MARGHERA"
+  },
+  {
+    "id": "3009",
+    "name": "VENEZIA S.LUCIA"
+  },
+  {
+    "id": "339",
+    "name": "VENTIMIGLIA"
+  },
+  {
+    "id": "3011",
+    "name": "VENZONE"
+  },
+  {
+    "id": "3012",
+    "name": "VERBANIA-PALLANZA"
+  },
+  {
+    "id": "3013",
+    "name": "VERCEIA"
+  },
+  {
+    "id": "3014",
+    "name": "VERCELLI"
+  },
+  {
+    "id": "3015",
+    "name": "VERCURAGO S.GIROLAMO"
+  },
+  {
+    "id": "3016",
+    "name": "VERDELLO DALMINE"
+  },
+  {
+    "id": "3017",
+    "name": "VERGATO"
+  },
+  {
+    "id": "3018",
+    "name": "VERGIATE"
+  },
+  {
+    "id": "3019",
+    "name": "VERGNASCO"
+  },
+  {
+    "id": "3020",
+    "name": "VERNANTE"
+  },
+  {
+    "id": "341",
+    "name": "VERNAZZA"
+  },
+  {
+    "id": "3021",
+    "name": "VERNIO MONTEPIANO CANTAGALLO"
+  },
+  {
+    "id": "3022",
+    "name": "VEROLANUOVA"
+  },
+  {
+    "id": "3023",
+    "name": "VEROLENGO"
+  },
+  {
+    "id": "3025",
+    "name": "VERONA PORTA NUOVA"
+  },
+  {
+    "id": "3027",
+    "name": "VERONA PORTA VESCOVO"
+  },
+  {
+    "id": "3030",
+    "name": "VERRES"
+  },
+  {
+    "id": "3031",
+    "name": "VERZUOLO"
+  },
+  {
+    "id": "3032",
+    "name": "VESPOLATE"
+  },
+  {
+    "id": "3034",
+    "name": "VETRALLA"
+  },
+  {
+    "id": "3035",
+    "name": "VEZZANO LIGURE"
+  },
+  {
+    "id": "3038",
+    "name": "VIADANA BRESCIANA"
+  },
+  {
+    "id": "3039",
+    "name": "VIAREGGIO"
+  },
+  {
+    "id": "178",
+    "name": "VIBO MARINA"
+  },
+  {
+    "id": "179",
+    "name": "VIBO VALENTIA-PIZZO"
+  },
+  {
+    "id": "3042",
+    "name": "VICCHIO"
+  },
+  {
+    "id": "3043",
+    "name": "VICENZA"
+  },
+  {
+    "id": "3045",
+    "name": "VICOFERTILE"
+  },
+  {
+    "id": "3046",
+    "name": "VICOFORTE S.MICHELE"
+  },
+  {
+    "id": "3047",
+    "name": "VICOVARO"
+  },
+  {
+    "id": "3048",
+    "name": "VIDALENGO"
+  },
+  {
+    "id": "3049",
+    "name": "VIETRI SUL MARE-AMALFI"
+  },
+  {
+    "id": "3050",
+    "name": "VIEVOLA"
+  },
+  {
+    "id": "3053",
+    "name": "VIGEVANO"
+  },
+  {
+    "id": "3054",
+    "name": "VIGLIANO CANDELO"
+  },
+  {
+    "id": "3056",
+    "name": "VIGLIANO D'ASTI"
+  },
+  {
+    "id": "2627",
+    "name": "VIGNA CLARA PES"
+  },
+  {
+    "id": "3058",
+    "name": "VIGNA DI VALLE"
+  },
+  {
+    "id": "3059",
+    "name": "VIGNALE"
+  },
+  {
+    "id": "3060",
+    "name": "VIGNALE RIOTORTO"
+  },
+  {
+    "id": "3061",
+    "name": "VIGNATE"
+  },
+  {
+    "id": "3062",
+    "name": "VIGODARZERE"
+  },
+  {
+    "id": "3064",
+    "name": "VIGONZA PIANIGA"
+  },
+  {
+    "id": "3065",
+    "name": "VILLA BONELLI"
+  },
+  {
+    "id": "3068",
+    "name": "VILLA CLAUDIA"
+  },
+  {
+    "id": "3070",
+    "name": "VILLA DEL CONTE"
+  },
+  {
+    "id": "3071",
+    "name": "VILLA DI TIRANO"
+  },
+  {
+    "id": "3072",
+    "name": "VILLA LITERNO"
+  },
+  {
+    "id": "3073",
+    "name": "VILLA OPICINA"
+  },
+  {
+    "id": "5436",
+    "name": "VILLA PITIGNANO"
+  },
+  {
+    "id": "3074",
+    "name": "VILLA RAVERIO"
+  },
+  {
+    "id": "183",
+    "name": "VILLA S.GIOVANNI"
+  },
+  {
+    "id": "182",
+    "name": "VILLA S.GIOVANNI CANNITELLO"
+  },
+  {
+    "id": "3076",
+    "name": "VILLA S.MICHELE"
+  },
+  {
+    "id": "3077",
+    "name": "VILLA S.SEBASTIANO"
+  },
+  {
+    "id": "3079",
+    "name": "VILLABARTOLOMEA"
+  },
+  {
+    "id": "3080",
+    "name": "VILLABASSA-BRAIES-VAL DI BRAIES"
+  },
+  {
+    "id": "3083",
+    "name": "VILLADOSSOLA"
+  },
+  {
+    "id": "3087",
+    "name": "VILLAFRANCA DI VERONA"
+  },
+  {
+    "id": "3089",
+    "name": "VILLAFRANCA TIRRENA-SAPONARA"
+  },
+  {
+    "id": "3085",
+    "name": "VILLAFRANCA-BAGNONE"
+  },
+  {
+    "id": "3086",
+    "name": "VILLAFRANCA-CANTARANA"
+  },
+  {
+    "id": "3090",
+    "name": "VILLALBA"
+  },
+  {
+    "id": "3092",
+    "name": "VILLAMAGGIORE"
+  },
+  {
+    "id": "3093",
+    "name": "VILLAMASSARGIA DOMUSNOVAS"
+  },
+  {
+    "id": "5041",
+    "name": "VILLANOVA CANAVESE-GROSSO"
+  },
+  {
+    "id": "3094",
+    "name": "VILLANOVA D'ARDA"
+  },
+  {
+    "id": "3095",
+    "name": "VILLANOVA D'ARDENGHI"
+  },
+  {
+    "id": "3096",
+    "name": "VILLANOVA D'ASTI"
+  },
+  {
+    "id": "3097",
+    "name": "VILLANOVA DI REGGIOLO"
+  },
+  {
+    "id": "184",
+    "name": "VILLAPIANA LIDO"
+  },
+  {
+    "id": "185",
+    "name": "VILLAPIANA TORRE CERCHIARA"
+  },
+  {
+    "id": "3100",
+    "name": "VILLAROSA"
+  },
+  {
+    "id": "3101",
+    "name": "VILLASANTA PARCO"
+  },
+  {
+    "id": "3102",
+    "name": "VILLASOR"
+  },
+  {
+    "id": "3103",
+    "name": "VILLASPECIOSA UTA"
+  },
+  {
+    "id": "3104",
+    "name": "VILLASTELLONE"
+  },
+  {
+    "id": "3105",
+    "name": "VILLAVERLA MONTECCHIO"
+  },
+  {
+    "id": "3106",
+    "name": "VILLAZZANO"
+  },
+  {
+    "id": "3107",
+    "name": "VILLENEUVE"
+  },
+  {
+    "id": "3108",
+    "name": "VILLETTA"
+  },
+  {
+    "id": "3109",
+    "name": "VILLETTA MALAGNINO"
+  },
+  {
+    "id": "3110",
+    "name": "VILLETTA S.ROMANO"
+  },
+  {
+    "id": "3111",
+    "name": "VILPIANO-NALLES"
+  },
+  {
+    "id": "3112",
+    "name": "VINCHIATURO"
+  },
+  {
+    "id": "3113",
+    "name": "VIPITENO-VAL DI VIZZE"
+  },
+  {
+    "id": "3114",
+    "name": "VISANO"
+  },
+  {
+    "id": "343",
+    "name": "VISONE"
+  },
+  {
+    "id": "3115",
+    "name": "VITERBO PORTA FIORENTINA"
+  },
+  {
+    "id": "3116",
+    "name": "VITERBO PORTA ROMANA"
+  },
+  {
+    "id": "3117",
+    "name": "VITTORIA"
+  },
+  {
+    "id": "3118",
+    "name": "VITTORIO VENETO"
+  },
+  {
+    "id": "3119",
+    "name": "VITTUONE ARLUNO"
+  },
+  {
+    "id": "3120",
+    "name": "VITULANO FOGLIANISE"
+  },
+  {
+    "id": "3122",
+    "name": "VIZZINI-LICODIA"
+  },
+  {
+    "id": "3123",
+    "name": "VOGHERA"
+  },
+  {
+    "id": "3125",
+    "name": "VOGOGNA OSSOLA"
+  },
+  {
+    "id": "5021",
+    "name": "VOLPIANO"
+  },
+  {
+    "id": "3126",
+    "name": "VOLTANA"
+  },
+  {
+    "id": "3127",
+    "name": "VOLTERRA SALINE-POMARANCE"
+  },
+  {
+    "id": "3129",
+    "name": "ZAGAROLO"
+  },
+  {
+    "id": "3130",
+    "name": "ZAMBRA"
+  },
+  {
+    "id": "187",
+    "name": "ZAMBRONE"
+  },
+  {
+    "id": "3131",
+    "name": "ZAPPULLA"
+  },
+  {
+    "id": "3134",
+    "name": "ZINASCO NUOVO"
+  },
+  {
+    "id": "344",
+    "name": "ZOAGLI"
+  }
+]

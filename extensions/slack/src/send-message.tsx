@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, showHUD, PopToRootType } from "@raycast/api";
 import { User, useChannels } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 import { getSlackWebClient } from "./shared/client/WebClient";
@@ -19,7 +19,6 @@ const selectRecipient = "SELECT_RECIPIENT";
 
 function SendMessage({ recipient }: SendMessageProps) {
   const { data: channels, isLoading } = useChannels();
-  const { pop } = useNavigation();
 
   async function handleSubmit(values: FormValues) {
     const [recipientId, recipientTitle] = values.recipient.split("|");
@@ -60,15 +59,13 @@ function SendMessage({ recipient }: SendMessageProps) {
         await client.chat.postMessage(messageParams);
       }
 
-      await showToast({
-        style: Toast.Style.Success,
-        title:
-          values.scheduledTime > now
-            ? `Message scheduled to ${recipientTitle} for ${values.scheduledTime.toLocaleString()}`
-            : `Message to ${recipientTitle} sent successfully`,
-      });
+      await showHUD(
+        values.scheduledTime > now
+          ? `Message scheduled to ${recipientTitle} for ${values.scheduledTime.toLocaleString()}`
+          : `Message to ${recipientTitle} sent successfully`,
+          {popToRootType: PopToRootType.Immediate}
+      );
 
-      pop();
     } catch (error) {
       handleError(error);
     }

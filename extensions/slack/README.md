@@ -19,14 +19,17 @@ If you don't want to log in through OAuth, you can use an access token instead. 
 5. Copy and paste the following manifest (Select `YAML`):  
    _Feel free to exclude permission scope groups - see comments - if you don't want to have the full experience of this extension._
 
-   ```
-   display_information:
-     name: Raycast - Slack
-   oauth_config:
-     scopes:
-       user:
-         # Command: Search & Unread Messages & Set Presence
-         - users:read
+    ```
+    display_information:
+      name: Raycast - Slack
+    oauth_config:
+      scopes:
+        user:
+          # Command: Search Messages
+          - search:read
+
+          # Command: Search & Unread Messages & Set Presence
+          - users:read
 
          # Command: Search & Unread Messages
          - channels:read

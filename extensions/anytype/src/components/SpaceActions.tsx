@@ -10,12 +10,12 @@ type SpaceActionsProps = {
 
 export default function SpaceActions({ space, mutate }: SpaceActionsProps) {
   const spaceUrl = `anytype://main/object/_blank_/spaceId/${space.id}`;
-  const chatUrl = `anytype://main/chat/_blank_/spaceId/${space.id}`;
+  const chatUrl = `anytype://main/chat/${space.workspace_object_id}/spaceId/${space.id}`;
 
   async function handleCopyLink() {
     await Clipboard.copy(spaceUrl);
     await showToast({
-      title: "Link Copied",
+      title: "Link copied",
       message: "The space link has been copied to your clipboard",
       style: Toast.Style.Success,
     });

@@ -24,6 +24,14 @@ ListComponent.Item = ({ children, title, subtitle, accessories, actions }: any) 
   </div>
 );
 
+// Add Section as a property
+ListComponent.Section = ({ children, title }: { children: React.ReactNode; title?: string }) => (
+  <div data-testid="list-section" data-title={title}>
+    {title && <div data-testid="section-title">{title}</div>}
+    {children}
+  </div>
+);
+
 ListComponent.Dropdown = {
   Item: ({ title }: { title: string }) => <div>{title}</div>
 };
@@ -36,7 +44,13 @@ export const ActionPanel = ({ children }: { children: React.ReactNode }) => (
 
 // Create a component for Action
 const ActionComponent = ({ title, onAction, icon, style }: any) => (
-  <button onClick={onAction} title={title} data-icon={icon} data-style={style}>
+  <button 
+    role="button"
+    onClick={onAction} 
+    title={title} 
+    data-icon={icon} 
+    data-style={style}
+  >
     {title}
   </button>
 );

@@ -1,6 +1,18 @@
 # Changelog
 
-## [Bug fixes] - 2024-12-19
+## [Branding updates and workspaces](https://github.com/raycast/extensions/pull/16793) - 2025-02-03
+
+- **search**: We've updated colors throughout the extension to match Sourcegraph's refreshed branding.
+- **doc**: [Sourcegraph workspaces](https://workspaces.sourcegraph.com) are a new, easy way to get started with using Sourcegraph for Raycast to search your private code - we've added a few links throughout the extension and our setup docs.
+
+## [New logo](https://github.com/raycast/extensions/pull/16697) - 2025-01-29
+
+- **all**: Sourcegraph got a new logo! All extension and command icons have been updated.
+- **doc**: Updated documentation to indicate [Sourcegraph workspaces](https://workspaces.sourcegraph.com) compatibility.
+- **batch-changes**: The Batch Changes command is now disabled by default.
+- **notebooks**: The Notebook command is now disabled by default.
+
+## [Bug fixes](https://github.com/raycast/extensions/pull/15956) - 2024-12-19
 
 - **search**: Fix some issues where results do not reset when a search returns no results or fails.
 

@@ -1,0 +1,65 @@
+node_modules/
+.DS_Store
+dist/
+*.log
+.env
+.env.local
+docs/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+.history/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+build/
+coverage/
+.raycast-swift-build/
+
+# Local development files
+.env.*
+!.env.example
+
+# Cache directories
+.cache/
+.npm/
+
+# Test files
+*.test.js.snap
+__snapshots__/
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Raycast specific
+.raycast-debug.log
+extension-diagnostics.txt
+raycast-env.d.ts
+
+# Project specific
+.cursor/
+.cursorrules
+*.local.ts
+*.local.tsx
+*.local.json
+
+# API keys and secrets
+*.key
+*.pem
+.env.development
+.env.production

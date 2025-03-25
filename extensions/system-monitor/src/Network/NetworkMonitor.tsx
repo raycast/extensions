@@ -91,7 +91,7 @@ export default function NetworkMonitor() {
           }
         />
       }
-      actions={<Actions />}
+      actions={<Actions radioButtonNumber={5} />}
     />
   );
 }

@@ -1,9 +1,9 @@
+import { Action, ActionPanel, Color, Icon, Keyboard, List, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { OmniFocusTask } from "./lib/types/task";
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast, open, Keyboard } from "@raycast/api";
 import { listTasks } from "./lib/api/list-tasks";
-import { deleteTask } from "./lib/api/delete-task";
-import { completeTask } from "./lib/api/complete.task";
+import { OmniFocusTask } from "./lib/types/task";
+import { useValidateRequirements } from "./lib/utils/useValidateRequirements";
+import { useTaskActions } from "./lib/hooks/use-task-actions";
 
 function getAccessories(task: OmniFocusTask): List.Item.Accessory[] {
   const accessories: List.Item.Accessory[] = [];
@@ -43,20 +43,59 @@ function getAccessories(task: OmniFocusTask): List.Item.Accessory[] {
 export default function ListInboxTasks() {
   const [tasks, setTasks] = useState<OmniFocusTask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { loading, check, error } = useValidateRequirements();
+  const [requirementError, setRequirementError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
 
-  const fetchTasks = async () => {
+  const fetchTasks = async (initialFetch = false) => {
     setIsLoading(true);
-    const newTasks = await listTasks();
-    setTasks(newTasks);
-    setIsLoading(false);
+    try {
+      const newTasks = await listTasks();
+      setTasks(newTasks);
+    } catch {
+      if (initialFetch) {
+        setApiError("An error occurred while getting your inbox tasks.");
+      } else {
+        await showToast({
+          title: "An error occurred while refreshing your inbox tasks.",
+          style: Toast.Style.Failure,
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  const { actionComplete, actionDelete } = useTaskActions(fetchTasks);
+
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    if (!loading) {
+      if (check) {
+        fetchTasks(true);
+      } else {
+        setRequirementError(error);
+      }
+    }
+  }, [loading, check, error]);
+
+  if (requirementError) {
+    return (
+      <List>
+        <List.EmptyView title={requirementError} icon={Icon.Plug} />
+      </List>
+    );
+  }
+
+  if (apiError) {
+    return (
+      <List>
+        <List.EmptyView title={apiError} icon={Icon.SpeechBubbleImportant} />
+      </List>
+    );
+  }
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={loading || isLoading}>
       {tasks.length === 0 && <List.EmptyView title="No tasks in inbox" />}
       {tasks.length > 0 &&
         tasks.map((t) => {
@@ -72,12 +111,7 @@ export default function ListInboxTasks() {
                   <Action
                     title="Complete"
                     onAction={async () => {
-                      await completeTask(t.id);
-                      await showToast({
-                        title: "Task completed!",
-                        style: Toast.Style.Success,
-                      });
-                      await fetchTasks();
+                      await actionComplete(t.id);
                     }}
                     icon={Icon.CheckCircle}
                   />
@@ -85,12 +119,7 @@ export default function ListInboxTasks() {
                     title="Delete"
                     style={Action.Style.Destructive}
                     onAction={async () => {
-                      await deleteTask(t.id);
-                      await showToast({
-                        title: "Task deleted!",
-                        style: Toast.Style.Success,
-                      });
-                      await fetchTasks();
+                      await actionDelete(t.id);
                     }}
                     icon={Icon.Trash}
                     shortcut={Keyboard.Shortcut.Common.Remove}

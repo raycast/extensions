@@ -1,6 +1,5 @@
-import { CoreV1Api, V1Namespace } from "@kubernetes/client-node";
-import { listNamespaces } from "./api/coreV1";
-import { ResourceList } from "./components/resource-list";
+import { V1Namespace } from "@kubernetes/client-node";
+import { ResourceList } from "./components/ResourceList";
 import { KubernetesContextProvider } from "./states/context";
 import { KubernetesNamespaceProvider } from "./states/namespace";
 import { kubernetesObjectAge } from "./utils/duration";
@@ -11,10 +10,8 @@ export default function Command() {
       <KubernetesNamespaceProvider>
         <ResourceList
           apiVersion="v1"
-          kind="Namespaces"
+          kind="Namespace"
           namespaced={false}
-          apiClientType={CoreV1Api}
-          listResources={listNamespaces}
           matchResource={matchNamespace}
           renderFields={renderNamespaceFields}
         />

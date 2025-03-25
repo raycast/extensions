@@ -1,6 +1,5 @@
-import { CoreV1Api, V1Node } from "@kubernetes/client-node";
-import { listNodes } from "./api/coreV1";
-import { ResourceList } from "./components/resource-list";
+import { V1Node } from "@kubernetes/client-node";
+import { ResourceList } from "./components/ResourceList";
 import { KubernetesContextProvider } from "./states/context";
 import { KubernetesNamespaceProvider } from "./states/namespace";
 import { kubernetesObjectAge } from "./utils/duration";
@@ -11,10 +10,8 @@ export default function Command() {
       <KubernetesNamespaceProvider>
         <ResourceList
           apiVersion="v1"
-          kind="Nodes"
+          kind="Node"
           namespaced={false}
-          apiClientType={CoreV1Api}
-          listResources={listNodes}
           matchResource={matchNode}
           renderFields={renderNodeFields}
         />

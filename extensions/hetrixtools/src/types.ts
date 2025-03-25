@@ -85,6 +85,13 @@ export type BlacklistMonitor = {
   last_check: number;
 };
 
+export type ContactList = {
+  id: string;
+  name: string;
+  default: boolean;
+  email: string[];
+};
+
 export type SuccessResponse<T> = {
   meta: {
     total: number;

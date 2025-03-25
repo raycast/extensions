@@ -89,48 +89,51 @@ function isValidUrl(url: string): boolean {
 async function findLighthousePath(
   preferences: Preferences
 ): Promise<string | null> {
+  // First check preferences path if set
   if (preferences.lighthousePath) {
     const expandedPath = expandHomeDir(preferences.lighthousePath);
     try {
       await nodeFs.access(expandedPath, nodeFs.constants.X_OK);
       return expandedPath;
     } catch (error) {
-      console.error('Invalid Lighthouse path:', error);
+      // Silently continue if preference path is invalid
     }
   }
 
-  const localLighthousePath = nodePath.join(
-    __dirname,
-    'node_modules',
-    '.bin',
-    'lighthouse'
-  );
-
-  try {
-    await nodeFs.access(localLighthousePath, nodeFs.constants.X_OK);
-    return localLighthousePath;
-  } catch (error) {
-    console.error('Local Lighthouse CLI not found:', error);
-  }
-
+  // Define all potential paths
   const potentialPaths = [
-    '/opt/homebrew/bin/lighthouse', // Homebrew path
-    '/usr/local/bin/lighthouse', // Typical npm global install path
-    '/usr/bin/lighthouse', // Another common path
+    // Global CLI paths first (most likely to exist)
+    '/opt/homebrew/bin/lighthouse',
+    '/usr/local/bin/lighthouse',
+    '/usr/bin/lighthouse',
     `${nodeOs.homedir()}/.npm-global/bin/lighthouse`,
-    nodePath.join(nodeOs.homedir(), '.npm', 'bin', 'lighthouse'),
-    nodePath.join(nodeOs.homedir(), 'node_modules', '.bin', 'lighthouse'),
+
+    // Then check CLI index.js files
+    '/opt/homebrew/lib/node_modules/lighthouse/cli/index.js',
+    '/usr/local/lib/node_modules/lighthouse/cli/index.js',
+    '/usr/lib/node_modules/lighthouse/cli/index.js',
+    `${nodeOs.homedir()}/.npm-global/lib/node_modules/lighthouse/cli/index.js`,
+    nodePath.join(
+      nodeOs.homedir(),
+      '.npm/lib/node_modules/lighthouse/cli/index.js'
+    ),
+
+    // Local installation paths (least likely)
+    nodePath.join(__dirname, 'node_modules', '.bin', 'lighthouse'),
+    nodePath.join(__dirname, 'node_modules', 'lighthouse', 'cli', 'index.js'),
   ];
 
+  // Try all paths silently
   for (const potentialPath of potentialPaths) {
     try {
       await nodeFs.access(potentialPath, nodeFs.constants.X_OK);
       return potentialPath;
-    } catch (error) {
-      // Continue searching
+    } catch {
+      // Silently continue to next path
     }
   }
 
+  // Try using 'which' command as last resort
   try {
     const { stdout } = await execPromise('which lighthouse');
     const path = stdout.trim();
@@ -138,11 +141,20 @@ async function findLighthousePath(
       await nodeFs.access(path, nodeFs.constants.X_OK);
       return path;
     }
-  } catch (error) {
-    console.error('Lighthouse not found in PATH:', error);
+  } catch {
+    // Silently handle which command failure
   }
 
-  return null;
+  // If no path is found but we know lighthouse is installed globally,
+  // return just 'lighthouse' as a fallback
+  try {
+    await execPromise('lighthouse --version');
+    return 'lighthouse';
+  } catch {
+    // Only log error if we truly can't find lighthouse anywhere
+    console.error('Lighthouse not found in system');
+    return null;
+  }
 }
 
 // Lighthouse Report View Component
@@ -309,7 +321,7 @@ export default function Command() {
         if (foundPath) {
           setLighthousePath(foundPath);
         } else {
-          console.error('Lighthouse CLI not found.');
+          //console.error('Lighthouse CLI not found.');
         }
       };
       findPath();

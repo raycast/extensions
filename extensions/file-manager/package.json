@@ -8,7 +8,8 @@
   "contributors": [
     "BalliAsghar",
     "urwrstkn8mare",
-    "fengtianze"
+    "fengtianze",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [
@@ -52,6 +53,14 @@
       "label": "Show Dotfiles",
       "name": "showDots",
       "required": true,
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Show hidden files",
+      "label": "Show Hidden Files",
+      "name": "showHiddenFiles",
+      "required": false,
       "type": "checkbox"
     },
     {

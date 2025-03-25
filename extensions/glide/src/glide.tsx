@@ -1,5 +1,5 @@
 import { ActionPanel, Detail, List, Action, Icon, Cache, Color, getPreferenceValues } from "@raycast/api";
-import { useLocalStorage, usePromise } from "@raycast/utils";
+import { useCachedPromise, useLocalStorage, usePromise } from "@raycast/utils";
 import { getApp, getApps } from "./utils";
 import { useState } from "react";
 
@@ -55,7 +55,7 @@ export function DetailApp({ appId, appName }: { appId: string; appName?: string 
 }
 
 const cache = new Cache();
-async function cacheHelper<T>(promise: () => Promise<T>, key: string): Promise<T> {
+export async function cacheHelper<T>(promise: () => Promise<T>, key: string): Promise<T> {
   const data = cache.get(key) as string;
   // console.log("raw data", data);
   if (data) {
@@ -68,11 +68,14 @@ async function cacheHelper<T>(promise: () => Promise<T>, key: string): Promise<T
   return result;
 }
 import { Image } from "@raycast/api";
+import { CommandGrid } from "./grid";
 
-export default function Command() {
+function CommandList() {
   const preferences = getPreferenceValues<Preferences>();
 
-  const { isLoading, data } = usePromise(() => cacheHelper(() => getApps(preferences.apiKey), "apps"));
+  const { isLoading, data } = useCachedPromise(async () => {
+    return await getApps(preferences.apiKey);
+  }, []);
   // const { isLoading, data, revalidate } = usePromise(() => getApps());
   const favoritesLocalStorage = useLocalStorage<string[]>("favorites", []);
 
@@ -171,4 +174,14 @@ export default function Command() {
       })}
     </List>
   );
+}
+
+export default function Command() {
+  const preferences = getPreferenceValues<Preferences>();
+
+  if (preferences.view === "list") {
+    return <CommandList />;
+  }
+
+  return <CommandGrid />;
 }

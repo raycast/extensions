@@ -1,5 +1,5 @@
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
-import { useEffect, useState, useRef } from "react";
+import { List, open, closeMainWindow, PopToRootType } from "@raycast/api";
+import { useEffect, useRef } from "react";
 import { deployProject } from "../utils/deploy";
 
 interface DeployingProps {
@@ -7,15 +7,15 @@ interface DeployingProps {
 }
 
 export default function Deploying({ deployProjectPath }: DeployingProps) {
-  const [deployResult, setDeployResult] = useState<string>("");
   const hasLogged = useRef(false);
 
   useEffect(() => {
     async function deploy() {
       if (!hasLogged.current) {
         hasLogged.current = true;
-        const result = await deployProject(deployProjectPath);
-        setDeployResult(result);
+        const uploadURL = await deployProject(deployProjectPath);
+        open(uploadURL);
+        await closeMainWindow({ popToRootType: PopToRootType.Immediate, clearRootSearch: true });
       }
     }
 
@@ -23,15 +23,7 @@ export default function Deploying({ deployProjectPath }: DeployingProps) {
   }, []);
 
   return (
-    <List
-      actions={
-        <ActionPanel>
-          {deployResult.length > 0 && (
-            <Action.OpenInBrowser title="Open Dashboard" url={deployResult} icon={Icon.AppWindow} />
-          )}
-        </ActionPanel>
-      }
-    >
+    <List>
       <List.EmptyView
         icon={{
           source: {

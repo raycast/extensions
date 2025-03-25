@@ -73,12 +73,11 @@ export default function ListAPIKeys() {
               <OpenInNeon route="settings/api-keys" />
               {/* eslint-disable-next-line @raycast/prefer-title-case */}
               <Action.Push icon={Icon.Plus} title="Create API Key" target={<CreateAPIKey onCreate={revalidate} />} />
-              {/* eslint-disable-next-line @raycast/prefer-title-case */}
-              {/* eslint-disable-next-line @raycast/prefer-title-case */}
               <Action
                 shortcut={Keyboard.Shortcut.Common.Remove}
                 icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
-                title="Revoke Api Key"
+                // eslint-disable-next-line @raycast/prefer-title-case
+                title="Revoke API Key"
                 onAction={() => confirmAndRevoke(key.id)}
               />
             </ActionPanel>

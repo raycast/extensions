@@ -33,6 +33,12 @@
       "title": "Blacklist Monitors",
       "description": "Get Blacklist Monitors and their details",
       "mode": "view"
+    },
+    {
+      "name": "contact-lists",
+      "title": "Contact Lists",
+      "description": "Get Contact Lists and their details",
+      "mode": "view"
     }
   ],
   "dependencies": {
