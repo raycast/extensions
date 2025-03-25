@@ -1,6 +1,6 @@
 # Aave Search Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2025-03-25
 
 ### Offline fallback & Fixes
 
