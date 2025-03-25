@@ -4,6 +4,7 @@ import { clearApiKey } from "./api-key";
 export default function ClearApiKeyCommand() {
   const handleClearApiKey = async () => {
     await clearApiKey();
+    await showToast({ title: "API key cleared successfully" });
   };
 
   return (
