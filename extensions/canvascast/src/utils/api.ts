@@ -48,7 +48,7 @@ interface getCoursesConfig {
   noAnnouncements?: boolean;
 }
 
-export const getCourses = async (json: any, config?: getCoursesConfig): Promise<course[]> => {
+export const getCourses = async (json, config?: getCoursesConfig): Promise<course[]> => {
   const favorites = await api.users.self.favorites.courses
     .searchParams({
       state: "available",
