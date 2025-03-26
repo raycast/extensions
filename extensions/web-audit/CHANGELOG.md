@@ -1,6 +1,6 @@
 # Web Audit Changelog
 
-## [Added Copy to Clipboard Functionality] - {PR_MERGE_DATE}
+## [Added Copy to Clipboard Functionality] - 2025-03-26
 
 - Added ability to copy page title & description to clipboard
 - Swapped `node-fetch` package for Node.js native Fetch API
