@@ -1,5 +1,10 @@
 # DeepSeeker - Quick Actions Changelog
 
+## [New Features] - {PR_MERGE_DATE}
+
+- 🤖 Now Ask LLM command supports [fallback](https://manual.raycast.com/fallback-commands)  
+- 🔧 Refactor preference getting logic
+
 ## [March Update - Code Refactor] - 2025-03-11
 
 - 📏 **Obey** case naming convention
