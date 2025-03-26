@@ -7,6 +7,10 @@ const execPromise = util.promisify(exec);
 const filePath = environment.assetsPath + "/" + Date.now() + ".png";
 const command = "/usr/sbin/screencapture -i " + filePath;
 export default async function takeScreenshot() {
-  await execPromise(command);
+  try {
+    await execPromise(command);
+  } catch (e) {
+    console.error(e);
+  }
   return filePath;
 }
