@@ -17,6 +17,7 @@ export const npmCommands: NpmCommandMapping[] = [
   // Handle the difference between "npm install" and "npm install <pkg>"
   { command: "installAll", regex: /\bnpm install\b(?!\s+[\w@/-])/g }, // npm install with no args
   { command: "installPkg", regex: /\bnpm install\s+([\w@-][^\s]*)/g }, // npm install <pkg>
+  { command: "installPkg", regex: /\bnpm i\s+([\w@-][^\s]*)/g }, // npm i <pkg>
   { command: "run", regex: /\bnpm run\b/g },
   { command: "exec", regex: /\bnpm exec\b/g },
   { command: "uninstall", regex: /\bnpm uninstall\b/g },
