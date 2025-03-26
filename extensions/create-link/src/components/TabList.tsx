@@ -15,7 +15,7 @@ export default function TabList({ tabs }: { tabs: BrowserExtension.Tab[] }) {
   const getCopyText = (format: CopyFormatType, tab: BrowserExtension.Tab) => {
     switch (format) {
       case "html":
-        return generateHTML(tab.title || "", tab.url);
+        return generateHTML(tab);
       case "markdown":
         return generateMarkdown(tab.title || "", tab.url);
       case "plaintext":
