@@ -1,10 +1,32 @@
-import { List, BrowserExtension, Color, Icon, Action, ActionPanel } from "@raycast/api";
+import { List, BrowserExtension, Color, Icon, Action, ActionPanel, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import { generateHTML, generateMarkdown, generateCustomTemplate } from "../utils/formatter";
+
+interface defaultCopyActionPreferences {
+  defaultCopyFormat: "html" | "markdown" | "plaintext" | "custom";
+}
+type CopyFormatType = defaultCopyActionPreferences["defaultCopyFormat"];
 
 export default function TabList({ tabs }: { tabs: BrowserExtension.Tab[] }) {
   const domains = [...new Set(tabs.map((tab) => new URL(tab.url).hostname))];
   const [selectedDomain, setSelectedDomain] = useState("");
+  const defaultCopyAction = getPreferenceValues<defaultCopyActionPreferences>().defaultCopyFormat;
+
+  const getCopyText = (format: CopyFormatType, tab: BrowserExtension.Tab) => {
+    switch (format) {
+      case "html":
+        return generateHTML(tab.title || "", tab.url);
+      case "markdown":
+        return generateMarkdown(tab.title || "", tab.url);
+      case "plaintext":
+        return tab.url;
+      case "custom":
+        return generateCustomTemplate(tab);
+      default:
+        console.debug("Unknown defaultCopyAction: " + format);
+        return tab.url;
+    }
+  };
 
   const filteredTabs = selectedDomain ? tabs.filter((tab) => new URL(tab.url).hostname === selectedDomain) : tabs;
   return (
@@ -35,6 +57,11 @@ export default function TabList({ tabs }: { tabs: BrowserExtension.Tab[] }) {
           accessories={tab.active ? [{ text: { value: "Active", color: Color.Green } }] : []}
           actions={
             <ActionPanel title={"Copy Action"}>
+              <Action.CopyToClipboard
+                title={`Copy as ${defaultCopyAction}`}
+                content={getCopyText(defaultCopyAction, tab)}
+                icon={Icon.TextCursor}
+              />
               <Action.CopyToClipboard
                 // eslint-disable-next-line @raycast/prefer-title-case
                 title="Copy as HTML"
