@@ -102,17 +102,17 @@
   ],
   "tools": [
     {
-      "title": "Slack Channels",
+      "title": "Get Channels",
       "name": "get-channels",
       "description": "Lists all channels in the Slack team"
     },
     {
-      "title": "Slack Channel History",
+      "title": "Get Channel History",
       "name": "get-channel-history",
       "description": "Fetches a channel's history of messages and events."
     },
     {
-      "title": "Slack Users",
+      "title": "Get Users",
       "name": "get-users",
       "description": "List all users in the Slack team"
     },
