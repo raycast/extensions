@@ -1,6 +1,6 @@
 # Terminal Shop Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-03-26
 
 Fixed a validation bug in the zipcode field that prevented users from placing an order.
 
