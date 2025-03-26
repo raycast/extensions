@@ -72,6 +72,13 @@
       "subtitle": "Slack",
       "description": "Let Slack decide automatically how to show your presence status or force it to be shown as offline.",
       "mode": "view"
+    },
+    {
+      "name": "search-emojis",
+      "title": "Search Emojis",
+      "subtitle": "Slack",
+      "description": "Search custom emojis in your Slack team.",
+      "mode": "view"
     }
   ],
   "preferences": [
