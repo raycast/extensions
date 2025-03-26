@@ -7,24 +7,17 @@ import {
   showToast,
   Icon,
   Color,
-  getPreferenceValues,
   openCommandPreferences,
 } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { Alias, Data } from "./types";
 import aliasesJSON from "./alias.json";
+import { maxRecent, maxPins, isPinColored, showTypeIcon } from "./preferences";
 
 const cache = new Cache();
 
 export default function Command() {
   const [showDetails, setShowDetails] = useCachedState("show-details", false);
-
-  // Preferences
-  const preferences = getPreferenceValues();
-  const maxRecent = Number(preferences.MaxRecent);
-  const maxPins = Number(preferences.MaxPins);
-  const isPinColored = preferences.IconPinColored;
-  const showTypeIcon = preferences.ShowTypeIcon;
 
   // Colors for type
   const typeColor = { show: Color.Green, default: Color.Blue, delete: Color.Red };
