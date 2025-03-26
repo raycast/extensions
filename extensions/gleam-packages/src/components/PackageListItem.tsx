@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import DocsList from "./DocsList";
 import { Package } from "../types";
+import { JSX } from "react";
 
 type PackageListItemProps = {
   pkg: Package;
