@@ -14,8 +14,7 @@ export default async function copyHTML() {
     return;
   }
 
-  const { url, title } = activeTab;
-  const htmlLink = generateHTML(title || "", url);
+  const htmlLink = generateHTML(activeTab);
   await Clipboard.copy(htmlLink);
-  await showHUD(`Copied HTML Link for "${title || ""}" to clipboard`);
+  await showHUD(`Copied HTML Link for "${activeTab.title || ""}" to clipboard`);
 }
