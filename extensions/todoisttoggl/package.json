@@ -2,7 +2,6 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "todoist-track-toggl",
   "title": "Todoist-track-Toggl",
-  "type": "module",
   "description": "A personal-use extension to improve the relation between Todoist and Toggl Track",
   "icon": "extension-icon.png",
   "author": "hayuse",
@@ -25,6 +24,7 @@
     "@electron/get": "^3.1.0",
     "@raycast/api": "^1.59.0",
     "@raycast/utils": "^1.12.5",
+    "@types/react-dom": "^18.2.7",
     "dayjs": "^1.11.13",
     "electron": "^34.2.0",
     "node-fetch": "^3.3.2",
@@ -34,11 +34,11 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
+    "@types/react": "^18.2.14",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "typescript": "^5.4.5"
   },
   "scripts": {
