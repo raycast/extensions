@@ -12,7 +12,7 @@ export default async function takeScreenshot() {
   try {
     await execPromise(command);
   } catch (e) {
-    showFailureToast(e, { title: "Failed to capture screenshot" });
+    await showFailureToast(e, { title: "Failed to capture screenshot" });
   }
 
   return filePath;
