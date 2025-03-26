@@ -191,6 +191,7 @@ function Comments({ comments }: { comments: NoteComment[] }) {
       {noteComments.map((comment: NoteComment) => {
         return (
           <List.Item
+            key={comment.id}
             title={comment.content}
             actions={
               <ActionPanel>

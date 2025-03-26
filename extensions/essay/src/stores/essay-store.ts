@@ -1,7 +1,6 @@
-import { getPreferenceValues } from "@raycast/api";
 import { create } from "zustand";
 import { Essay } from "../types";
-import got from "got";
+import api from "../libs/api";
 
 interface EssayState {
   createEssay: ({ content }: { content: string }) => Promise<Essay>;
@@ -11,49 +10,25 @@ interface EssayState {
 
 const useEssayStore = create<EssayState>(() => ({
   createEssay: async ({ content }) => {
-    const preferences = getPreferenceValues<Preferences>();
-    const resp = await got
-      .post(`${preferences.apiUrl}/essays`, {
-        responseType: "json",
-        headers: {
-          Authorization: `Bearer ${preferences.apiKey}`,
-        },
-        json: {
-          content,
-        },
-      })
-      .json();
+    const { data } = await api.post("/essays", {
+      content,
+    });
     return {
-      id: resp.id,
+      id: data.id,
       content,
     };
   },
   updateEssay: async ({ id, content }) => {
-    const preferences = getPreferenceValues<Preferences>();
-    await got
-      .put(`${preferences.apiUrl}/essays/${id}`, {
-        responseType: "json",
-        headers: {
-          Authorization: `Bearer ${preferences.apiKey}`,
-        },
-        json: {
-          content,
-        },
-      })
-      .json();
+    await api.put(`/essays/${id}`, {
+      content,
+    });
     return {
       id,
       content,
     };
   },
   deleteEssay: async (id) => {
-    const preferences = getPreferenceValues<Preferences>();
-    await got.delete(`${preferences.apiUrl}/essays/${id}`, {
-      responseType: "json",
-      headers: {
-        Authorization: `Bearer ${preferences.apiKey}`,
-      },
-    });
+    await api.delete(`/essays/${id}`);
   },
 }));
 

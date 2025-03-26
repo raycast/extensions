@@ -18,15 +18,6 @@
       "type": "password",
       "required": true,
       "placeholder": "Essay API Key"
-    },
-    {
-      "name": "apiUrl",
-      "title": "API Endpoint",
-      "description": "Please do not modify the default values without special reason.",
-      "type": "textfield",
-      "required": true,
-      "default": "https://api.essay.ink",
-      "placeholder": "https://api.essay.ink"
     }
   ],
   "commands": [
@@ -55,8 +46,8 @@
   "dependencies": {
     "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.17.0",
+    "axios": "^1.8.4",
     "dayjs": "^1.11.13",
-    "got": "^14.4.6",
     "lodash": "^4.17.21",
     "zustand": "^5.0.3"
   },

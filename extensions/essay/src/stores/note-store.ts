@@ -1,9 +1,7 @@
 import { withCache } from "@raycast/utils";
 import { create } from "zustand";
 import { Note, NoteComment, NoteFolder, PageMeta } from "../types";
-import { getPreferenceValues } from "@raycast/api";
-// @ts-expect-error: The type declarations of module 'got' could not be found.
-import got from "got";
+import api from "../libs/api";
 
 interface NoteState {
   isFolderDirty: boolean;
@@ -26,54 +24,31 @@ const useNoteStore = create<NoteState>((set, get) => ({
   notes: [],
   folders: [],
   fetchNotes: async ({ page, limit, keyword }: { page?: number; limit?: number; keyword?: string }) => {
-    const preferences = getPreferenceValues<Preferences>();
     const params = new URLSearchParams();
     if (page) params.append("page", page.toString());
     if (limit) params.append("limit", limit.toString());
     if (keyword) params.append("keyword", keyword);
-    const resp = await got
-      .get(`${preferences.apiUrl}/notes?${params.toString()}`, {
-        responseType: "json",
-        headers: {
-          Authorization: `Bearer ${preferences.apiKey}`,
-        },
-      })
-      .json();
+    const { data } = await api.get(`/notes?${params.toString()}`);
     set((state) => {
       if (!keyword) {
         const noteMap = new Map(state.notes.map((note) => [note.id, note]));
-        resp.data.forEach((note: Note) => noteMap.set(note.id, note));
+        data.data.forEach((note: Note) => noteMap.set(note.id, note));
         return { notes: Array.from(noteMap.values()) };
       } else {
-        return { notes: resp.data };
+        return { notes: data };
       }
     });
-    return resp;
+    return data;
   },
   deleteNote: async (noteId: string) => {
-    const preferences = getPreferenceValues<Preferences>();
-    await got.delete(`${preferences.apiUrl}/notes/${noteId}`, {
-      responseType: "json",
-      headers: {
-        Authorization: `Bearer ${preferences.apiKey}`,
-      },
-    });
+    await api.delete(`/notes/${noteId}`);
     set((state) => ({ notes: state.notes.filter((note) => note.id !== noteId) }));
   },
   createNote: async ({ content, folderId }: { content: string; folderId?: string | null }) => {
-    const preferences = getPreferenceValues<Preferences>();
-    const data = await got
-      .post(`${preferences.apiUrl}/notes`, {
-        responseType: "json",
-        json: {
-          content: content,
-          folderId: folderId || null,
-        },
-        headers: {
-          Authorization: `Bearer ${preferences.apiKey}`,
-        },
-      })
-      .json();
+    const { data } = await api.post("/notes", {
+      content: content,
+      folderId: folderId || null,
+    });
     const note: Note = {
       id: data.id,
       content,
@@ -85,15 +60,9 @@ const useNoteStore = create<NoteState>((set, get) => ({
     return note;
   },
   updateNote: async (note: { id: string; content?: string; folderId?: string | null }) => {
-    const preferences = getPreferenceValues<Preferences>();
-    await got.put(`${preferences.apiUrl}/notes/${note.id}`, {
-      json: {
-        content: note.content,
-        folderId: note.folderId || null,
-      },
-      headers: {
-        Authorization: `Bearer ${preferences.apiKey}`,
-      },
+    await api.put(`notes/${note.id}`, {
+      content: note.content,
+      folderId: note.folderId || null,
     });
     const updated = {
       ...note,
@@ -111,36 +80,20 @@ const useNoteStore = create<NoteState>((set, get) => ({
     return updated;
   },
   fetchFolders: async ({ maxAge } = { maxAge: 0 }) => {
-    const preferences = getPreferenceValues<Preferences>();
     const fetch = async () => {
-      return await got
-        .get(`${preferences.apiUrl}/note-folders`, {
-          responseType: "json",
-          headers: {
-            Authorization: `Bearer ${preferences.apiKey}`,
-          },
-        })
-        .json();
+      const { data } = await api.get("/note-folders");
+      return data;
     };
     const fetcher = withCache(fetch, { maxAge });
-    const folders = maxAge ? await fetcher() : await fetch();
-    set({ folders });
-    return folders;
+    const data = maxAge ? await fetcher() : await fetch();
+    set({ folders: data });
+    return data;
   },
   createComment: async ({ noteId, content }: { noteId: string; content: string }) => {
-    const preferences = getPreferenceValues<Preferences>();
-    const data = await got
-      .post(`${preferences.apiUrl}/note-comments`, {
-        responseType: "json",
-        json: {
-          content: content,
-          noteId: noteId,
-        },
-        headers: {
-          Authorization: `Bearer ${preferences.apiKey}`,
-        },
-      })
-      .json();
+    const { data } = await api.post(`/note-comments`, {
+      content: content,
+      noteId: noteId,
+    });
     const comment = { id: data.id, note_id: noteId, content, created_at: new Date() };
     set((state: NoteState) => ({
       notes: state.notes.map((n) => {
@@ -153,13 +106,7 @@ const useNoteStore = create<NoteState>((set, get) => ({
     return comment;
   },
   deleteComment: async (commentId: number) => {
-    const preferences = getPreferenceValues<Preferences>();
-    await got.delete(`${preferences.apiUrl}/note-comments/${commentId}`, {
-      responseType: "json",
-      headers: {
-        Authorization: `Bearer ${preferences.apiKey}`,
-      },
-    });
+    await api.delete(`/note-comments/${commentId}`);
     set((state: NoteState) => ({
       notes: state.notes.map((n) => {
         return { ...n, comments: n.comments?.filter((c) => c.id !== commentId) };

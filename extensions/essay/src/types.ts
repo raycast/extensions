@@ -1,6 +1,5 @@
 export interface Preferences {
   apiKey: string;
-  apiUrl: string;
 }
 
 export interface Essay {

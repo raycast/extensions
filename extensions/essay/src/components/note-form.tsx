@@ -49,6 +49,7 @@ export function NoteForm({ note }: { note: Note }) {
       setFolderId(note.folder?.id || "");
       setTimeout(() => setFolderId(note.folder?.id || ""), ASSIGN_DELAY);
     } catch (err: unknown) {
+      console.error(err);
       showFailureToast(err, { title: "Fetch folders failed, please check your API key, API endpoint and try again." });
     } finally {
       setFolderLoading(false);

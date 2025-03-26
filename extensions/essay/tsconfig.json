@@ -3,8 +3,9 @@
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
     "lib": ["ES2023"],
-    "module": "commonjs",
+    "module": "NodeNext",
     "target": "ES2023",
+    "moduleResolution":"nodenext",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
