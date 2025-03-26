@@ -65,24 +65,24 @@ export default function TabList({ tabs }: { tabs: BrowserExtension.Tab[] }) {
               <Action.CopyToClipboard
                 // eslint-disable-next-line @raycast/prefer-title-case
                 title="Copy as HTML"
-                content={generateHTML(tab.title || "", tab.url)}
+                content={getCopyText("html", tab)}
                 icon={Icon.TextCursor}
               />
               <Action.CopyToClipboard
                 title="Copy as Markdown"
-                content={generateMarkdown(tab.title || "", tab.url)}
+                content={getCopyText("markdown", tab)}
                 shortcut={{ modifiers: ["opt"], key: "enter" }}
                 icon={Icon.TextCursor}
               />
               <Action.CopyToClipboard
                 title="Copy as Plain Text"
-                content={tab.url}
+                content={getCopyText("plaintext", tab)}
                 shortcut={{ modifiers: ["ctrl"], key: "enter" }}
                 icon={Icon.TextCursor}
               />
               <Action.CopyToClipboard
                 title="Copy as Custom"
-                content={generateCustomTemplate(tab)}
+                content={getCopyText("custom", tab)}
                 shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
                 icon={Icon.TextCursor}
               />
