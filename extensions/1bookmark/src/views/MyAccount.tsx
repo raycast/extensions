@@ -1,17 +1,17 @@
 import { Action, Cache, ActionPanel, Icon, List, useNavigation, confirmAlert, Alert } from "@raycast/api";
 import { trpc } from "@/utils/trpc.util";
 import { CachedQueryClientProvider } from "@/components/CachedQueryClientProvider";
-import { sessionTokenAtom } from "@/states/session-token.state";
-import { useAtom } from "jotai";
+import { useCachedState } from "@raycast/utils";
 import { EditProfileNameForm } from "./EditProfileNameForm";
 import { useSortedSpaces } from "../hooks/use-sorted-spaces.hook";
+import { useMe } from "../hooks/use-me.hook";
 
-const cache = new Cache();
+export const cache = new Cache();
 
 const Body = () => {
-  const { data, isLoading, refetch } = trpc.user.me.useQuery();
+  const { data, isLoading, refetch } = useMe();
   const { pop } = useNavigation();
-  const [, setSessionToken] = useAtom(sessionTokenAtom);
+  const [, setSessionToken] = useCachedState("session-token", "");
   const utils = trpc.useUtils();
   const spaces = useSortedSpaces(data?.associatedSpaces);
 
@@ -57,9 +57,10 @@ const Body = () => {
                   if (!confirm) return;
 
                   utils.user.me.reset();
-                  utils.user.me.invalidate();
+                  utils.bookmark.listAll.reset();
                   cache.clear();
                   setSessionToken("");
+                  cache.set("signOutTime", new Date().toISOString());
                   pop();
                 }}
               />

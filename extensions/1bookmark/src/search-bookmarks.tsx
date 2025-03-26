@@ -1,46 +1,32 @@
-import { List, Cache, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
-import { useAtom } from "jotai";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { sessionTokenAtom } from "@/states/session-token.state";
+import { useCallback, useMemo, useState } from "react";
+
 import { Spaces } from "./views/SpacesView";
 import { BookmarkItem } from "./components/BookmarkItem";
 import { BookmarkFilter } from "./components/BookmarkFilter";
 import { LoginView } from "./views/LoginView";
 import { useMe } from "./hooks/use-me.hook";
-import { useBookmarks } from "./hooks/use-bookmarks.hook";
+import { useMyBookmarks } from "./hooks/use-bookmarks.hook";
 import { usePrepareBookmarkSearch } from "./hooks/use-prepare-bookmark-search.hook";
 import { useBookmarkSearch } from "./hooks/use-bookmark-search.hook";
 import { RequiredActions } from "./components/BookmarkItemActionPanel";
-
-const cache = new Cache();
+import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
 
 export function Body() {
-  const [sessionToken] = useAtom(sessionTokenAtom);
-  const me = useMe(sessionToken);
+  const me = useMe();
   const [keyword, setKeyword] = useState("");
 
   const spaceIds = useMemo(() => {
-    return me?.data?.associatedSpaces.map((s) => s.id) || [];
-  }, [me.data]);
+    return me.data?.associatedSpaces.map((s) => s.id) || [];
+  }, [me.data?.associatedSpaces]);
 
-  const {
-    data,
-    isFetching,
-    isFetched,
-    refetch: refetchBookmarks,
-  } = useBookmarks({
-    sessionToken,
-    spaceIds,
-    me: me.data,
-  });
+  const { data, isFetching, isFetched, refetch: refetchBookmarks } = useMyBookmarks();
 
   const refetch = useCallback(() => {
     refetchBookmarks();
     me.refetch();
-    setAfter1Sec(false);
-    setTimeout(() => setAfter1Sec(true), 1000);
-  }, [refetchBookmarks]);
+  }, [refetchBookmarks, me.refetch]);
 
   const selectedTags = useMemo(() => {
     if (!me.data) return [];
@@ -64,20 +50,7 @@ export function Body() {
     searchData,
   });
 
-  const [after1Sec, setAfter1Sec] = useState(false);
-  useEffect(() => {
-    // If this is not here, LoginView will briefly appear.
-    setTimeout(() => setAfter1Sec(true), 1000);
-  }, []);
-
-  const loggedOutStatus = !sessionToken && after1Sec;
-  useEffect(() => {
-    // Clear data when logged out.
-    if (loggedOutStatus) {
-      cache.remove("me");
-      cache.remove("bookmarks");
-    }
-  }, [loggedOutStatus]);
+  const { loggedOutStatus } = useLoggedOutStatus();
 
   if (loggedOutStatus) {
     return <LoginView />;
