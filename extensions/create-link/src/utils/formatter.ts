@@ -13,7 +13,8 @@ function sanitizeUrl(url: string): string {
   try {
     new URL(url);
     return url;
-  } catch {
+  } catch (error: unknown) {
+    console.debug(error);
     return "about:blank";
   }
 }
@@ -60,8 +61,8 @@ export function generateCustomTemplate(tab: BrowserExtension.Tab) {
     const { customFormat } = preferences;
 
     return applyCustomTemplate(customFormat, tab);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error: unknown) {
+    console.debug(error);
     return "";
   }
 }
