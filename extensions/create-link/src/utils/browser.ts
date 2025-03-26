@@ -9,8 +9,8 @@ export async function getActiveTab() {
     const tabs = await BrowserExtension.getTabs();
     const tab = tabs.find((tab) => tab.active);
     return tab;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error: unknown) {
+    console.debug(error);
     return undefined;
   }
 }
@@ -19,8 +19,8 @@ export async function getTabs() {
   try {
     const tabs = await BrowserExtension.getTabs();
     return tabs;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error: unknown) {
+    console.debug(error);
     return [];
   }
 }
