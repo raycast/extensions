@@ -17,12 +17,8 @@ interface SvgActionProps {
   category: string;
 }
 
-interface Preferences {
-  svgDefaultAction: SvgActionKey;
-}
-
 const SvgAction = ({ svg, category }: SvgActionProps) => {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Index>();
   const { svgDefaultAction } = preferences;
 
   const actionSections: Record<SvgActionKey, JSX.Element> = {
