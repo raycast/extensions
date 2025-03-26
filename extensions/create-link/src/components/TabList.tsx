@@ -17,7 +17,7 @@ export default function TabList({ tabs }: { tabs: BrowserExtension.Tab[] }) {
       case "html":
         return generateHTML(tab);
       case "markdown":
-        return generateMarkdown(tab.title || "", tab.url);
+        return generateMarkdown(tab);
       case "plaintext":
         return tab.url;
       case "custom":
