@@ -58,6 +58,32 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "defaultCopyFormat",
+          "key": "defaultCopyFormat",
+          "required": true,
+          "type": "dropdown",
+          "title": "Default Copy Format",
+          "description": "Select the default action to perform when a tab is selected.",
+          "data": [
+            {
+              "title": "HTML",
+              "value": "html"
+            },
+            {
+              "title": "Markdown",
+              "value": "markdown"
+            },
+            {
+              "title": "Plain Text",
+              "value": "plainText"
+            },
+            {
+              "title": "Custom",
+              "value": "custom"
+            }
+          ]
+        },
+        {
           "name": "customFormat",
           "key": "customFormat",
           "required": false,
