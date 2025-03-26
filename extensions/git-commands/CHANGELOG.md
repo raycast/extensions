@@ -1,5 +1,7 @@
 # Git Commands Changelog
 
+## [✨ AI Enhancements] - 2025-03-26
+
 ## [Improved search and use Git documentation] - 2024-06-29
 
 - Now you can find single words without having to type hyphens or other characters. Example: for `rebase auto` you will see `git pull --rebase --autostash`, ...
