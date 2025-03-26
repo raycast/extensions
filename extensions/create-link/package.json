@@ -55,7 +55,18 @@
       "title": "Show Tabs",
       "subtitle": "Create Link",
       "description": "This command shows a list of tabs in your browser and allows you to copy the URL of the selected tab.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "customFormat",
+          "key": "customFormat",
+          "required": false,
+          "type": "textfield",
+          "title": "Custom Link Format",
+          "description": "Enter the desired format for the custom link. Available placeholders: {url} for the URL, {title} for the page title, {id} for the tab ID, and {favicon} for the favicon URL.",
+          "default": "{url}"
+        }
+      ]
     }
   ],
   "dependencies": {
