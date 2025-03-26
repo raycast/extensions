@@ -1,4 +1,5 @@
-import { BrowserExtension, getPreferenceValues } from "@raycast/api";
+import { BrowserExtension, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 function sanitizeForHtml(text: string): string {
   return text
@@ -59,6 +60,19 @@ export function generateCustomTemplate(tab: BrowserExtension.Tab) {
   try {
     const preferences = getPreferenceValues<CopyCustomFormatPreferences>();
     const { customFormat } = preferences;
+
+    if (!customFormat || customFormat.trim() === "") {
+      showFailureToast("No custom format defined, Please set a custom format in the extension settings.", {
+        title: "No custom format defined",
+        primaryAction: {
+          title: "Open Extension Settings",
+          onAction: () => {
+            openExtensionPreferences();
+          },
+        }
+      });
+      return "";
+    }
 
     return applyCustomTemplate(customFormat, tab);
   } catch (error: unknown) {
