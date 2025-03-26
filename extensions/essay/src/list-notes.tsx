@@ -21,7 +21,7 @@ export default function Command() {
           message: "Note deleted",
         });
       } catch (err: unknown) {
-        showFailureToast(err, { title: "Fail to delete note, please check your API key and try again." });
+        showFailureToast(err, { title: "Fail to delete note, please check your API key, API endpoint and try again." });
       }
     },
     [deleteNote],
@@ -66,16 +66,12 @@ export default function Command() {
         ></List.EmptyView>
       ) : (
         notes?.map((note: Note) => {
-          let title = note.content.substring(0, 20);
-          if (note.content.length > 20) {
-            title += "...";
-          }
           return (
             <List.Item
               key={note.id}
               title={note.content.substring(0, 50)}
               actions={
-                <ActionPanel title={title}>
+                <ActionPanel>
                   <Action.Push icon={Icon.Pencil} title="Edit" target={<NoteForm note={note} />} />
                   <Action.Push icon={Icon.PlusCircle} title="New Comment" target={<CommentForm note={note} />} />
                   {(note.comments?.length || 0) > 0 && (
@@ -85,6 +81,11 @@ export default function Command() {
                       target={<Comments comments={note.comments as NoteComment[]} />}
                     />
                   )}
+                  <Action.OpenInBrowser
+                    icon={Icon.Globe}
+                    title="Open in Browser"
+                    url={`https://www.essay.ink/i/notes`}
+                  />
                   <Action
                     icon={Icon.Trash}
                     title="Delete"
@@ -113,7 +114,7 @@ export default function Command() {
                         return (
                           <List.Item.Detail.Metadata.Label
                             key={comment.id}
-                            title={getRelativeTime(comment.created_at)}
+                            title={getRelativeTime(comment.created_at.toString())}
                             text={comment.content}
                           />
                         );
@@ -144,7 +145,7 @@ function CommentForm({ note }: { note: Note }) {
         });
         pop();
       } catch (err: unknown) {
-        showFailureToast(err, { title: "Fail to add comment, please check your API key and try again." });
+        showFailureToast(err, { title: "Fail to add comment, please check your API key, API endpoint and try again." });
       }
     },
     validation: {
@@ -178,7 +179,9 @@ function Comments({ comments }: { comments: NoteComment[] }) {
         });
         setNoteComments((prev) => prev.filter((c) => c.id !== commentId));
       } catch (err: unknown) {
-        showFailureToast(err, { title: "Fail to delete comment, please check your API key and try again." });
+        showFailureToast(err, {
+          title: "Fail to delete comment, please check your API key, API endpoint and try again.",
+        });
       }
     },
     [deleteComment],

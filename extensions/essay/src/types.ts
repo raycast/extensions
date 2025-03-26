@@ -1,5 +1,6 @@
 export interface Preferences {
   apiKey: string;
+  apiUrl: string;
 }
 
 export interface Essay {
@@ -16,7 +17,6 @@ export interface PageMeta {
 export interface NoteFolder {
   id: string;
   name: string;
-  user_id: string;
   created_at: Date;
 }
 
@@ -24,7 +24,7 @@ export interface NoteComment {
   id: number;
   note_id: string;
   content: string;
-  created_at: string;
+  created_at: Date;
 }
 
 export interface Note {

@@ -18,7 +18,7 @@ export function NoteDetail({ note }: { note: Note }) {
         });
         popToRoot();
       } catch (err: unknown) {
-        showFailureToast(err, { title: "Fail to delete note, please check your API key and try again." });
+        showFailureToast(err, { title: "Fail to delete note, please check your API key, API endpoint and try again." });
       }
     },
     [deleteNote],
@@ -32,7 +32,7 @@ export function NoteDetail({ note }: { note: Note }) {
         </Detail.Metadata>
       }
       actions={
-        <ActionPanel title={note.content.substring(0, 20)}>
+        <ActionPanel>
           <Action.Push icon={Icon.Pencil} title="Edit" target={<NoteForm note={note} />} />
           <Action
             icon={Icon.Trash}

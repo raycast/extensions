@@ -32,7 +32,9 @@ export default function EssayForm({ essay }: { essay: Essay }) {
       });
       push(<EssayDetail essay={updated} />);
     } catch (error: unknown) {
-      showFailureToast(error, { title: "Failed to update essay, please check your API key and try again." });
+      showFailureToast(error, {
+        title: "Failed to update essay, please check your API key, API endpoint and try again.",
+      });
     } finally {
       setLoading(false);
     }

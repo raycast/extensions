@@ -18,7 +18,9 @@ export function EssayDetail({ essay }: { essay: Essay }) {
         });
         popToRoot();
       } catch (err: unknown) {
-        showFailureToast(err, { title: "Fail to delete essay, please check your API key and try again." });
+        showFailureToast(err, {
+          title: "Fail to delete essay, please check your API key, API endpoint and try again.",
+        });
       }
     },
     [deleteEssay],
@@ -27,7 +29,7 @@ export function EssayDetail({ essay }: { essay: Essay }) {
     <Detail
       markdown={essay.content}
       actions={
-        <ActionPanel title={essay.content.substring(0, 20)}>
+        <ActionPanel>
           <Action.OpenInBrowser
             icon={Icon.Globe}
             title="Open in Browser"

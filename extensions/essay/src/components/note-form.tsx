@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import useNoteStore from "../stores/note-store";
 import { Note, NoteFolder } from "../types";
 
+const ASSIGN_DELAY = 300;
+
 export interface NoteFormValues {
   content: string;
   folder_id: string;
@@ -12,6 +14,7 @@ export interface NoteFormValues {
 export function NoteForm({ note }: { note: Note }) {
   const { pop } = useNavigation();
   const [folderLoading, setFolderLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [content, setContent] = useState(note.content);
   const [folderId, setFolderId] = useState("");
   const folders = useNoteStore((state) => state.folders);
@@ -20,6 +23,7 @@ export function NoteForm({ note }: { note: Note }) {
   const { handleSubmit } = useForm<NoteFormValues>({
     async onSubmit(values) {
       try {
+        setLoading(true);
         await updateNote({ ...values, id: note.id });
         showToast({
           style: Toast.Style.Success,
@@ -28,7 +32,9 @@ export function NoteForm({ note }: { note: Note }) {
         });
         pop();
       } catch (err: unknown) {
-        showFailureToast(err, { title: "Fail to save note, please check your API key and try again." });
+        showFailureToast(err, { title: "Fail to save note, please check your API key, API endpoint and try again." });
+      } finally {
+        setLoading(false);
       }
     },
     validation: {
@@ -40,8 +46,10 @@ export function NoteForm({ note }: { note: Note }) {
     try {
       setFolderLoading(true);
       await fetchFolders({ maxAge: 10 * 60 * 1000 }); // Cache for 10 minutes
+      setFolderId(note.folder?.id || "");
+      setTimeout(() => setFolderId(note.folder?.id || ""), ASSIGN_DELAY);
     } catch (err: unknown) {
-      showFailureToast(err, { title: "Fetch folders failed, please check your API key and try again." });
+      showFailureToast(err, { title: "Fetch folders failed, please check your API key, API endpoint and try again." });
     } finally {
       setFolderLoading(false);
     }
@@ -49,21 +57,11 @@ export function NoteForm({ note }: { note: Note }) {
 
   useEffect(() => {
     loadFolders();
-    setContent(note.content);
-    return () => {
-      setContent("");
-    };
-  }, [note.content]);
-
-  useEffect(() => {
-    setTimeout(() => setFolderId(note.folder?.id || ""), 300);
-    return () => {
-      setFolderId("");
-    };
-  }, [note.folder?.id, folders]);
+  }, []);
 
   return (
     <Form
+      isLoading={folderLoading || loading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
@@ -73,7 +71,6 @@ export function NoteForm({ note }: { note: Note }) {
       <Form.TextArea enableMarkdown id="content" title="Note" value={content} onChange={(val) => setContent(val)} />
       <Form.Dropdown
         id="folderId"
-        isLoading={folderLoading}
         title="Folder"
         value={folderId}
         onChange={(val) => {

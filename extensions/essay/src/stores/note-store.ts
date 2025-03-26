@@ -2,8 +2,7 @@ import { withCache } from "@raycast/utils";
 import { create } from "zustand";
 import { Note, NoteComment, NoteFolder, PageMeta } from "../types";
 import { getPreferenceValues } from "@raycast/api";
-import { ENDPOINT } from "../settings";
-// @ts-expect-error got is not a module
+// @ts-expect-error: The type declarations of module 'got' could not be found.
 import got from "got";
 
 interface NoteState {
@@ -33,7 +32,7 @@ const useNoteStore = create<NoteState>((set, get) => ({
     if (limit) params.append("limit", limit.toString());
     if (keyword) params.append("keyword", keyword);
     const resp = await got
-      .get(`${ENDPOINT}/notes?${params.toString()}`, {
+      .get(`${preferences.apiUrl}/notes?${params.toString()}`, {
         responseType: "json",
         headers: {
           Authorization: `Bearer ${preferences.apiKey}`,
@@ -53,7 +52,7 @@ const useNoteStore = create<NoteState>((set, get) => ({
   },
   deleteNote: async (noteId: string) => {
     const preferences = getPreferenceValues<Preferences>();
-    await got.delete(`${ENDPOINT}/notes/${noteId}`, {
+    await got.delete(`${preferences.apiUrl}/notes/${noteId}`, {
       responseType: "json",
       headers: {
         Authorization: `Bearer ${preferences.apiKey}`,
@@ -64,7 +63,7 @@ const useNoteStore = create<NoteState>((set, get) => ({
   createNote: async ({ content, folderId }: { content: string; folderId?: string | null }) => {
     const preferences = getPreferenceValues<Preferences>();
     const data = await got
-      .post(`${ENDPOINT}/notes`, {
+      .post(`${preferences.apiUrl}/notes`, {
         responseType: "json",
         json: {
           content: content,
@@ -87,7 +86,7 @@ const useNoteStore = create<NoteState>((set, get) => ({
   },
   updateNote: async (note: { id: string; content?: string; folderId?: string | null }) => {
     const preferences = getPreferenceValues<Preferences>();
-    await got.put(`${ENDPOINT}/notes/${note.id}`, {
+    await got.put(`${preferences.apiUrl}/notes/${note.id}`, {
       json: {
         content: note.content,
         folderId: note.folderId || null,
@@ -115,7 +114,7 @@ const useNoteStore = create<NoteState>((set, get) => ({
     const preferences = getPreferenceValues<Preferences>();
     const fetch = async () => {
       return await got
-        .get(`${ENDPOINT}/note-folders`, {
+        .get(`${preferences.apiUrl}/note-folders`, {
           responseType: "json",
           headers: {
             Authorization: `Bearer ${preferences.apiKey}`,
@@ -131,7 +130,7 @@ const useNoteStore = create<NoteState>((set, get) => ({
   createComment: async ({ noteId, content }: { noteId: string; content: string }) => {
     const preferences = getPreferenceValues<Preferences>();
     const data = await got
-      .post(`${ENDPOINT}/note-comments`, {
+      .post(`${preferences.apiUrl}/note-comments`, {
         responseType: "json",
         json: {
           content: content,
@@ -142,7 +141,7 @@ const useNoteStore = create<NoteState>((set, get) => ({
         },
       })
       .json();
-    const comment = { id: data.id, note_id: noteId, content, created_at: new Date().toString() };
+    const comment = { id: data.id, note_id: noteId, content, created_at: new Date() };
     set((state: NoteState) => ({
       notes: state.notes.map((n) => {
         if (n.id === noteId) {
@@ -155,7 +154,7 @@ const useNoteStore = create<NoteState>((set, get) => ({
   },
   deleteComment: async (commentId: number) => {
     const preferences = getPreferenceValues<Preferences>();
-    await got.delete(`${ENDPOINT}/note-comments/${commentId}`, {
+    await got.delete(`${preferences.apiUrl}/note-comments/${commentId}`, {
       responseType: "json",
       headers: {
         Authorization: `Bearer ${preferences.apiKey}`,

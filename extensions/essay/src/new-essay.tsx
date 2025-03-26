@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, LaunchProps, useNavigation } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, LaunchProps, useNavigation, Icon } from "@raycast/api";
 import useEssayStore from "./stores/essay-store";
 import { showFailureToast } from "@raycast/utils";
 import { EssayDetail } from "./components/essay-detail";
@@ -31,7 +31,9 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
       });
       push(<EssayDetail essay={essay} />);
     } catch (error: unknown) {
-      showFailureToast(error, { title: "Failed to publish essay, please check your API key and try again." });
+      showFailureToast(error, {
+        title: "Failed to publish essay, please check your API key, API endpoint and try again.",
+      });
     } finally {
       setLoading(false);
     }
@@ -44,6 +46,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.OpenInBrowser icon={Icon.Globe} title="Write in Browser" url={`https://www.essay.ink/compose`} />
         </ActionPanel>
       }
     >

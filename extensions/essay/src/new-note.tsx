@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, LaunchProps, useNavigation } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, LaunchProps, useNavigation, Icon } from "@raycast/api";
 import useNoteStore from "./stores/note-store";
 import { useState, useEffect } from "react";
 import { useForm, FormValidation, showFailureToast } from "@raycast/utils";
@@ -23,7 +23,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
       setFolderLoading(true);
       await fetchFolders({ maxAge: 10 * 60 * 1000 }); // Cache for 10 minutes
     } catch (err: unknown) {
-      showFailureToast(err, { title: "Fetch folders failed, please check your API key and try again." });
+      showFailureToast(err, { title: "Fetch folders failed, please check your API key, API endpoint and try again." });
     } finally {
       setFolderLoading(false);
     }
@@ -45,7 +45,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
         });
         push(<NoteDetail note={note} />);
       } catch (err: unknown) {
-        showFailureToast(err, { title: "Fail to create note, please check your API key and try again." });
+        showFailureToast(err, { title: "Fail to create note, please check your API key, API endpoint and try again." });
       } finally {
         setLoading(false);
       }
@@ -62,18 +62,21 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.OpenInBrowser
+            icon={Icon.Globe}
+            title="Write in Browser"
+            url={`https://www.essay.ink/i/notes/compose`}
+          />
         </ActionPanel>
       }
     >
       <Form.TextArea enableMarkdown id="content" title="Note" defaultValue={draftValues?.content} />
-      {folders.length > 0 && (
-        <Form.Dropdown id="folderId" title="Folder" defaultValue={draftValues?.folderId || ""}>
-          {folders.map((folder: NoteFolder) => {
-            return <Form.Dropdown.Item key={folder.id} value={folder.id} title={folder.name} />;
-          })}
-          <Form.Dropdown.Item value="" title="Uncategorized" />
-        </Form.Dropdown>
-      )}
+      <Form.Dropdown id="folderId" title="Folder" defaultValue={draftValues?.folderId || ""}>
+        {folders.map((folder: NoteFolder) => {
+          return <Form.Dropdown.Item key={folder.id} value={folder.id} title={folder.name} />;
+        })}
+        <Form.Dropdown.Item value="" title="Uncategorized" />
+      </Form.Dropdown>
     </Form>
   );
 }
