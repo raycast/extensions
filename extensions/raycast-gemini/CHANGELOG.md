@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [New Model and Code Improvements] - {PR_MERGE_DATE}
+## [New Model and Code Improvements] - 2025-03-26
 
 - 🆕 New Model: Gemini 2.5 Pro Experimental
 - 🛠️ Code Improvements: show error messages, and add new error code handling
