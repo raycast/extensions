@@ -69,7 +69,6 @@ export const useCart = () => {
     queryFn: () =>
       terminal.cart.get().then((r) => {
         return r.data;
-        return r.data;
       }),
     initialData: {
       subtotal: 0,
@@ -149,8 +148,6 @@ export const useSetItem = () => {
         cartItem = { subtotal: 0, quantity: 0, id: brew.id, productVariantID: brew.varId } as Terminal.Cart.Item;
       }
 
-      const otherItems = previousCart.items.filter((i) => i.productVariantID !== brew.varId);
-
       // Calculate new quantity and subtotal adjustment based on operation
       let newQuantity = cartItem.quantity;
       let subtotalAdjustment = 0;
@@ -163,10 +160,19 @@ export const useSetItem = () => {
         subtotalAdjustment = -brew.price;
       }
 
+      // Don't update items with zero quantity to avoid flickering
+      const updatedItems = previousCart.items
+        .filter((i) => i.productVariantID !== brew.varId || newQuantity > 0)
+        .map((i) => (i.productVariantID === brew.varId ? { ...cartItem, quantity: newQuantity } : i));
+
+      if (newQuantity > 0 && !updatedItems.some((i) => i.productVariantID === brew.varId)) {
+        updatedItems.push({ ...cartItem, quantity: newQuantity });
+      }
+
       // Optimistically update the cart
       qc.setQueryData(["cart"], {
         ...previousCart,
-        items: [...otherItems, { ...cartItem, quantity: newQuantity }],
+        items: updatedItems,
         subtotal: previousCart.subtotal + subtotalAdjustment,
       });
 
@@ -212,14 +218,21 @@ export const useClearCart = () => {
       const items = cart.items.filter((i) => i.quantity > 0);
       if (!items.length) return;
 
-      const prom = Promise.all(items.map((i) => terminal.cart.setItem({ ...i, quantity: 0 }).then((r) => r.data)));
+      // Optimistically update the cart to empty before making API calls
       qc.setQueryData(["cart"], {
         ...cart,
         subtotal: 0,
         items: [],
       });
 
-      await prom;
+      // Send API requests in parallel
+      await Promise.all(
+        items.map((i) =>
+          terminal.cart.setItem({ productVariantID: i.productVariantID, quantity: 0 }).then((r) => r.data),
+        ),
+      );
+
+      // Only refetch after all API calls are complete
       await refetch();
     },
   });

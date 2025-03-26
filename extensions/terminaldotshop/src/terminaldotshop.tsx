@@ -56,7 +56,7 @@ function Command() {
       searchBarPlaceholder="Add your favorite brew to cart"
       selectedItemId={products && products.featured[0].id}
     >
-      <CheckoutItem />
+      <CheckoutItem isLoading={isLoading} />
 
       {products && (
         <>
@@ -148,12 +148,14 @@ function BrewItem(props: { brew: Brew; first?: boolean }) {
                 shortcut={{ key: "arrowRight", modifiers: [] }}
                 onAction={() => setItem.mutateAsync({ id: props.brew.id, operation: "add" })}
               />
-              <Action
-                title="Remove from Cart"
-                icon={Icon.Minus}
-                onAction={() => setItem.mutateAsync({ id: props.brew.id, operation: "remove" })}
-                shortcut={{ key: "arrowLeft", modifiers: [] }}
-              />
+              {quantity > 0 && (
+                <Action
+                  title="Remove from Cart"
+                  icon={Icon.Minus}
+                  onAction={() => setItem.mutateAsync({ id: props.brew.id, operation: "remove" })}
+                  shortcut={{ key: "arrowLeft", modifiers: [] }}
+                />
+              )}
               {cart.data.items.length > 0 ? (
                 <Action
                   title="Checkout"
@@ -172,7 +174,7 @@ function BrewItem(props: { brew: Brew; first?: boolean }) {
   );
 }
 
-const CheckoutItem = () => {
+const CheckoutItem = ({ isLoading: productsLoading }: { isLoading?: boolean }) => {
   const cart = useCart();
   const clearCart = useClearCart();
   const products = useProducts();
@@ -180,15 +182,20 @@ const CheckoutItem = () => {
   const subItem = useSubItem();
 
   const subTitle = useMemo(() => {
-    if (!cart.data?.items.length) return "";
+    if (productsLoading) return "";
+    if (!cart.data?.items || cart.data.items.length === 0) return "Cart is empty";
 
-    const count = cart.data.items.reduce((c, n) => c + n.quantity, 0);
+    const validItems = cart.data.items.filter((item) => item.quantity > 0);
+    if (validItems.length === 0) return "Cart is empty";
+
+    const count = validItems.reduce((c, n) => c + n.quantity, 0);
+    if (count === 0) return "Cart is empty";
 
     const items = `${count} item${count > 1 ? "s" : ""}`;
     const price = `$${(cart.data.subtotal / 100).toFixed(0)}`; // Display in dollars
 
     return `${items} - ${price}`;
-  }, [cart.data?.items, cart.data?.subtotal]);
+  }, [cart.data?.items, cart.data?.subtotal, productsLoading]);
 
   const startCheckout = () => {
     subItem.setSubItem(null);
@@ -203,7 +210,7 @@ const CheckoutItem = () => {
       detail={<List.Item.Detail markdown={renderCart(cart.data, products.data?.all)} />}
       actions={
         <ActionPanel>
-          {cart.data.items.length > 0 && (
+          {cart.data.items.some((item) => item.quantity > 0) && (
             <>
               <Action title="Checkout" icon={Icon.Cart} onAction={() => startCheckout()} />
               <Action
