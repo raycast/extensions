@@ -25,7 +25,15 @@ async function getChannelHistory(input: {
     throw new Error(messages.error);
   }
 
-  return messages.messages;
+  return messages.messages?.map((message) => ({
+    id: message.ts,
+    text: message.text,
+    user: message.user,
+    timestamp: message.ts,
+    topic: message.topic,
+    purpose: message.purpose,
+    username: message.username,
+  }));
 }
 
 export default withSlackClient(getChannelHistory);
