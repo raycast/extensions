@@ -6,7 +6,7 @@ import { FormValidation, useForm } from "@raycast/utils";
 import useNoteStore from "./stores/note-store";
 import { debounce } from "lodash";
 import { Note, NoteComment } from "./types";
-import { NoteForm } from "./components/note-form";
+import { NoteForm, NoteFormValues } from "./components/note-form";
 
 export default function Command() {
   const { fetchNotes, deleteNote } = useNoteStore();
