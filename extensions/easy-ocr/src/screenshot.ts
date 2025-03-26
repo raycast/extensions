@@ -9,8 +9,9 @@ const command = "/usr/sbin/screencapture -i " + filePath;
 export default async function takeScreenshot() {
   try {
     await execPromise(command);
-  } catch (e) {
-    console.error(e);
-  }
+import { environment } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import util from "util";
+import { exec } from "child_process";
   return filePath;
 }
