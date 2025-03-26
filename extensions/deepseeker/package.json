@@ -527,7 +527,7 @@
       ]
     },
     {
-      "name": "custom_action_a",
+      "name": "custom_a",
       "title": "Custom Action A",
       "description": "Ask LLM Model based on a custom prompt",
       "mode": "view",
@@ -585,7 +585,7 @@
       ]
     },
     {
-      "name": "custom_action_b",
+      "name": "custom_b",
       "title": "Custom Action B",
       "description": "Ask LLM Model based on a custom prompt",
       "mode": "view",
