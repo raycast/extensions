@@ -1,6 +1,6 @@
 # Search Router Changelog
 
-## [Feature & Improvements] - {PR_MERGE_DATE}
+## [Feature & Improvements] - 2025-03-26
 
 - Added fuzzy search to "Browse Search Engines" for better search engine discovery
 - Improved search experience with weighted results based on shortcut, name, and domain
