@@ -60,7 +60,7 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
               setMarkdown((markdown) => markdown + x);
             }
           } catch (streamError) {
-            console.error('Error in stream callback:', streamError);
+            console.error("Error in stream callback:", streamError);
             showToast({
               style: Toast.Style.Failure,
               title: "Response Failed",
