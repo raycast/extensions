@@ -33,7 +33,8 @@ function sanitizeForMarkdown(text: string): string {
   return text.replace(/([[\]()"`*_{}\\#+\-.!])/g, "\\$1");
 }
 
-export function generateMarkdown(title: string, url: string): string {
+export function generateMarkdown(tab: BrowserExtension.Tab): string {
+  const { title, url } = tab;
   const safeTitle = sanitizeForMarkdown(title || "");
   const safeUrl = sanitizeUrl(url);
   const markdownLink = `[${safeTitle}](${safeUrl})`;
