@@ -14,8 +14,7 @@ export default async function copyMarkdown() {
     return;
   }
 
-  const { url, title } = activeTab;
-  const markdownLink = generateMarkdown(title || "", url);
+  const markdownLink = generateMarkdown(activeTab);
   await Clipboard.copy(markdownLink);
-  await showHUD(`Copied Markdown link for "${title || ""}" to clipboard`);
+  await showHUD(`Copied Markdown link for "${activeTab.title || ""}" to clipboard`);
 }
