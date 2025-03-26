@@ -120,6 +120,11 @@
       "title": "Set Status",
       "name": "set-status",
       "description": "Set or unset the status of the current user"
+    },
+    {
+      "title": "Get Emojis",
+      "name": "get-emojis",
+      "description": "List all custom emojis in the Slack team"
     }
   ],
   "ai": {
