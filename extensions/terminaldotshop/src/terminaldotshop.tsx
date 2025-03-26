@@ -298,12 +298,7 @@ const CreateAddress = () => {
       name: FormValidation.Required,
       street1: FormValidation.Required,
       city: FormValidation.Required,
-      zip: (val) => {
-        const error = "Must be a 5 zip code.";
-        if (!val) return error;
-        if (val.length !== 5) return error;
-        if (Number.isNaN(Number(val))) return error;
-      },
+      zip: FormValidation.Required,
       country: FormValidation.Required,
     },
   });
