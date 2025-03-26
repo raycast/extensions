@@ -20,7 +20,8 @@ function sanitizeUrl(url: string): string {
   }
 }
 
-export function generateHTML(title: string, url: string): string {
+export function generateHTML(tab: BrowserExtension.Tab): string {
+  const { title, url } = tab;
   const safeTitle = sanitizeForHtml(title || "");
   const safeUrl = sanitizeUrl(url);
   const htmlLink = `<a href="${safeUrl}">${safeTitle}</a>`;
