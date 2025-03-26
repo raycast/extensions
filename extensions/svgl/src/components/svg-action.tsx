@@ -80,8 +80,8 @@ const SvgAction = ({ svg, category }: SvgActionProps) => {
   };
 
   const orderedKeys = Object.keys(actionSections) as SvgActionKey[];
-  const reorderedKeys: SvgActionKey[] = orderedKeys.includes(svgDefaultAction)
-    ? [svgDefaultAction, ...orderedKeys.filter((key) => key !== svgDefaultAction)]
+  const reorderedKeys: SvgActionKey[] = orderedKeys.includes(svgDefaultAction ?? "copySvg")
+    ? [svgDefaultAction ?? "copySvg", ...orderedKeys.filter((key) => key !== svgDefaultAction)]
     : orderedKeys;
 
   return <ActionPanel>{reorderedKeys.map((key) => actionSections[key])}</ActionPanel>;
