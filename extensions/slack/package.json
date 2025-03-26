@@ -46,6 +46,34 @@
       "mode": "view"
     },
     {
+      "name": "get-message",
+      "title": "Get Message",
+      "subtitle": "Slack",
+      "description": "Retrieve a specific Slack message by its channel ID and timestamp.",
+      "mode": "view"
+    },
+    {
+      "name": "get-thread-messages",
+      "title": "Get Thread Messages",
+      "subtitle": "Slack",
+      "description": "Retrieve all messages in a Slack thread by its channel ID and thread timestamp.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "channelId",
+          "placeholder": "Channel ID",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "threadTs",
+          "placeholder": "Thread Timestamp",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "open-unread-messages",
       "title": "Open Unread Messages",
       "subtitle": "Slack",

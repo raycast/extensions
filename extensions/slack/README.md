@@ -4,6 +4,8 @@ This Raycast extension is the perfect companion for Slack users. It allows you t
 
 - Quickly open Slack channels
 - Search for messages
+- Get specific messages by ID
+- View thread messages
 - See unread messages,
 - Snooze notifications
 - Set your presence status
@@ -55,6 +57,10 @@ If you don't want to log in through OAuth, you can use an access token instead. 
           # Command: Set Snooze
           - dnd:read
           - dnd:write
+          
+          # Command: Get Message & Get Thread Messages
+          - conversations.history
+          - conversations.replies
     settings:
       org_deploy_enabled: false
       socket_mode_enabled: false
@@ -65,3 +71,19 @@ If you don't want to log in through OAuth, you can use an access token instead. 
 7. Press `Install to Workspace`
 8. Get your personal access token from `Features -> OAuth & Permissions` (section `OAuth Tokens for Your Workspace`).  
    Your personal access token will start with `xoxp-`.
+   
+## New Features
+
+### Get Message
+
+Retrieve a specific Slack message by providing:
+- Channel ID: The ID of the channel containing the message (e.g., C12345678)
+- Message Timestamp: The timestamp of the message to retrieve (e.g., 1234567890.123456)
+
+### Get Thread Messages
+
+Retrieve all messages in a Slack thread by providing:
+- Channel ID: The ID of the channel containing the thread
+- Thread Timestamp: The timestamp of the parent message in the thread
+
+You can also access this feature directly from the "Get Message" command when viewing a message that has replies.

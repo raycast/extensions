@@ -35,6 +35,14 @@ export interface Message {
   message: string;
   senderId: string;
 }
+
+export interface ThreadMessage extends Message {
+  ts: string;
+  threadTs: string;
+  replyCount?: number;
+  replyUsersCount?: number;
+}
+
 export interface UnreadChannelInfo {
   conversationId: string;
   messageHistory: Message[];
@@ -294,5 +302,64 @@ export class SlackClient {
     const id = authResponse.user_id;
     const username = authResponse.user;
     return { id, username };
+  }
+
+  public static async getMessage(channelId: string, messageTs: string): Promise<ThreadMessage | null> {
+    const slackWebClient = getSlackWebClient();
+
+    try {
+      const result = await slackWebClient.conversations.history({
+        channel: channelId,
+        latest: messageTs,
+        limit: 1,
+        inclusive: true,
+      });
+
+      if (!result.messages || result.messages.length === 0) {
+        return null;
+      }
+
+      const message = result.messages[0];
+      return {
+        receivedAt: message.ts ? new Date(parseFloat(message.ts) * 1000) : new Date(),
+        message: message.text || "",
+        senderId: message.user || message.bot_id || "",
+        ts: message.ts || "",
+        threadTs: message.thread_ts || message.ts || "",
+        replyCount: message.reply_count,
+        replyUsersCount: message.reply_users_count,
+      };
+    } catch (error) {
+      console.error("Error getting message:", error);
+      throw error;
+    }
+  }
+
+  public static async getThreadMessages(channelId: string, threadTs: string): Promise<ThreadMessage[]> {
+    const slackWebClient = getSlackWebClient();
+
+    try {
+      const result = await slackWebClient.conversations.replies({
+        channel: channelId,
+        ts: threadTs,
+      });
+
+      if (!result.messages) {
+        return [];
+      }
+
+      return result.messages.map((message) => ({
+        receivedAt: message.ts ? new Date(parseFloat(message.ts) * 1000) : new Date(),
+        message: message.text || "",
+        senderId: message.user || message.bot_id || "",
+        ts: message.ts || "",
+        threadTs: message.thread_ts || message.ts || "",
+        replyCount: message.reply_count,
+        replyUsersCount: message.reply_users_count,
+      }));
+    } catch (error) {
+      console.error("Error getting thread messages:", error);
+      throw error;
+    }
   }
 }
