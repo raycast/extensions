@@ -1,0 +1,59 @@
+import { Form, ActionPanel, Action, showToast, Toast, LaunchProps, useNavigation } from "@raycast/api";
+import useEssayStore from "./stores/essay-store";
+import { showFailureToast } from "@raycast/utils";
+import { EssayDetail } from "./components/essay-detail";
+import { useState } from "react";
+
+type Values = {
+  content: string;
+};
+
+export default function Command(props: LaunchProps<{ draftValues: Values }>) {
+  const { draftValues } = props;
+  const [loading, setLoading] = useState(false);
+  const { createEssay } = useEssayStore();
+  const { push } = useNavigation();
+  async function handleSubmit(values: Values) {
+    try {
+      if (values.content.trim().length === 0) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Essay content cannot be empty",
+        });
+        return;
+      }
+      setLoading(true);
+      const essay = await createEssay({ content: values.content });
+      showToast({
+        style: Toast.Style.Success,
+        title: "Success!",
+        message: "Essay published",
+      });
+      push(<EssayDetail essay={essay} />);
+    } catch (error: unknown) {
+      showFailureToast(error, { title: "Failed to publish essay, please check your API key and try again." });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Form
+      isLoading={loading}
+      enableDrafts
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextArea
+        enableMarkdown
+        id="content"
+        title="Essay"
+        placeholder="Here begins..."
+        defaultValue={draftValues?.content}
+      />
+    </Form>
+  );
+}

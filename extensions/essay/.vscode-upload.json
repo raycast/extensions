@@ -1,0 +1,21 @@
+[{
+    "name":"",
+    "host": "",
+    "port": 22,
+    "username": "",
+    "password": "",
+    "remotePath": "",
+    "localPath": "",
+    "disable": false,
+    "private_key": "~/.ssh/id_rsa"
+},{
+    "name":"",
+    "host": "",
+    "port": 22,
+    "username": "",
+    "password": "",
+    "remotePath": "",
+    "localPath": "",
+    "disable": false,
+    "private_key": "~/.ssh/id_rsa"
+}]
