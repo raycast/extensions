@@ -69,7 +69,7 @@ export function generateCustomTemplate(tab: BrowserExtension.Tab) {
           onAction: () => {
             openExtensionPreferences();
           },
-        }
+        },
       });
       return "";
     }
