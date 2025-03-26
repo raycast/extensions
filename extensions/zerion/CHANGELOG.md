@@ -1,5 +1,7 @@
 # Zerion Changelog
 
+## [Zerion AI Extension] - {PR_MERGE_DATE}
+
 ## [Zerion Client] - 2024-12-20
 - View wallet portfolio
 - Search tokens, addresses or domains
