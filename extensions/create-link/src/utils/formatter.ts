@@ -1,3 +1,5 @@
+import { BrowserExtension, getPreferenceValues } from "@raycast/api";
+
 function sanitizeForHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
@@ -33,4 +35,33 @@ export function generateMarkdown(title: string, url: string): string {
   const safeUrl = sanitizeUrl(url);
   const markdownLink = `[${safeTitle}](${safeUrl})`;
   return markdownLink;
+}
+
+interface CopyCustomFormatPreferences {
+  customFormat: string;
+}
+
+function applyCustomTemplate(template: string, tab: BrowserExtension.Tab): string {
+  const { url, title, id, favicon } = tab;
+  const safeUrl = sanitizeUrl(url);
+  const safeTitle = title || "";
+  const safeFavicon = favicon || "";
+
+  return template
+    .replace(/\{url\}/g, safeUrl)
+    .replace(/\{title\}/g, safeTitle)
+    .replace(/\{id\}/g, String(id))
+    .replace(/\{favicon\}/g, safeFavicon);
+}
+
+export function generateCustomTemplate(tab: BrowserExtension.Tab) {
+  try {
+    const preferences = getPreferenceValues<CopyCustomFormatPreferences>();
+    const { customFormat } = preferences;
+
+    return applyCustomTemplate(customFormat, tab);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error: unknown) {
+    return "";
+  }
 }
