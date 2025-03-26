@@ -1,10 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 import ResultView from "./common";
 
-const prompt = getPreferenceValues().prompt_fix;
-const modelOverride = getPreferenceValues().model_fix;
+const { prompt_fix, model_fix } = getPreferenceValues();
 const toastTitle = "Fixing...";
 
 export default function Fix() {
-  return ResultView(prompt, modelOverride, toastTitle, true);
+  return ResultView(prompt_fix, model_fix, toastTitle, true);
 }
