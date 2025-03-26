@@ -9,6 +9,8 @@ type PackageListItemProps = {
 };
 
 export default function PackageListItem({ pkg, refreshAction }: PackageListItemProps) {
+  const url = `https://hexdocs.pm/${pkg.name}/`;
+
   return (
     <List.Item
       key={pkg.name}
@@ -20,13 +22,13 @@ export default function PackageListItem({ pkg, refreshAction }: PackageListItemP
           <Action.Push
             title="Show Package"
             icon={Icon.AppWindowSidebarLeft}
-            target={<DocsList packageName={pkg.name} url={`https://hexdocs.pm/${pkg.name}/`} />}
+            target={<DocsList packageName={pkg.name} url={url} />}
           />
-          <Action.OpenInBrowser title="Open in Browser" url={`https://hexdocs.pm/${pkg.name}/`} />
+          <Action.OpenInBrowser title="Open in Browser" url={url} />
           <Action.CopyToClipboard
             title="Copy Link"
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            content={`https://hexdocs.pm/${pkg.name}/`}
+            content={url}
           />
           <ActionPanel.Section>{refreshAction}</ActionPanel.Section>
         </ActionPanel>
