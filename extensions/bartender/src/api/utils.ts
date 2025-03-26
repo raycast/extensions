@@ -1,3 +1,4 @@
+import * as fs from "node:fs";
 import { Result } from "../types";
 
 export function createResultFromAppleScriptError(error: unknown, defaultMessage: string): Result<never> {
@@ -15,4 +16,14 @@ export function createResultFromAppleScriptError(error: unknown, defaultMessage:
     status: "error",
     error: error instanceof Error ? error.message : defaultMessage,
   };
+}
+
+export function getTellApplication() {
+  const setappPaths = ["/Applications/Setapp/Bartender.app", "~/Applications/Setapp/Bartender.app"];
+  for (const path of setappPaths) {
+    if (fs.existsSync(path)) {
+      return `tell application "Bartender"`;
+    }
+  }
+  return `tell application "Bartender 5"`;
 }
