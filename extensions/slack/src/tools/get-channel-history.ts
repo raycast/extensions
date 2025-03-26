@@ -31,7 +31,7 @@ async function getChannelHistory(input: {
     text: message.text,
     user: message.user,
     ts: message.ts,
-    date: message.ts ? new Date(parseInt(message.ts) * 1000).toISOString() : undefined,
+    date: message.ts ? new Date(parseInt(message.ts, 10) * 1000).toISOString() : undefined,
   }));
 
 
