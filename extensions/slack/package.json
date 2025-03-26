@@ -113,6 +113,16 @@
       "title": "Set Status",
       "name": "set-status",
       "description": "Set or unset the status of the current user"
+    },
+    {
+      "title": "Get Message",
+      "name": "get-message",
+      "description": "Retrieve a specific Slack message by its channel ID and timestamp"
+    },
+    {
+      "title": "Get Thread Messages",
+      "name": "get-thread-messages",
+      "description": "Retrieve all messages in a Slack thread by its channel ID and thread timestamp"
     }
   ],
   "ai": {
@@ -146,6 +156,78 @@
         ],
         "mocks": {
           "get-channels": []
+        }
+      },
+      {
+        "input": "@slack get the message with timestamp 1234567890.123456 from channel C12345678",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-message",
+              "arguments": {
+                "channelId": "C12345678",
+                "messageTs": "1234567890.123456"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-message": {
+            "success": true,
+            "message": {
+              "text": "This is a test message",
+              "sender": "U12345678",
+              "timestamp": "1234567890.123456",
+              "threadTs": "1234567890.123456",
+              "replyCount": 2,
+              "receivedAt": "2025-03-26T12:34:56.789Z"
+            }
+          }
+        }
+      },
+      {
+        "input": "@slack get all messages in the thread with timestamp 1234567890.123456 in channel C12345678",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-thread-messages",
+              "arguments": {
+                "channelId": "C12345678",
+                "threadTs": "1234567890.123456"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-thread-messages": {
+            "success": true,
+            "messages": [
+              {
+                "text": "This is the parent message",
+                "sender": "U12345678",
+                "timestamp": "1234567890.123456",
+                "threadTs": "1234567890.123456",
+                "replyCount": 2,
+                "receivedAt": "2025-03-26T12:34:56.789Z"
+              },
+              {
+                "text": "This is a reply",
+                "sender": "U87654321",
+                "timestamp": "1234567890.123457",
+                "threadTs": "1234567890.123456",
+                "receivedAt": "2025-03-26T12:35:56.789Z"
+              }
+            ],
+            "count": 2,
+            "parentMessage": {
+              "text": "This is the parent message",
+              "sender": "U12345678",
+              "timestamp": "1234567890.123456",
+              "threadTs": "1234567890.123456",
+              "replyCount": 2,
+              "receivedAt": "2025-03-26T12:34:56.789Z"
+            }
+          }
         }
       }
     ]
