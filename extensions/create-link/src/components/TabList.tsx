@@ -1,6 +1,6 @@
 import { List, BrowserExtension, Color, Icon, Action, ActionPanel } from "@raycast/api";
 import { useState } from "react";
-import { generateHTML, generateMarkdown } from "../utils/formatter";
+import { generateHTML, generateMarkdown, generateCustomTemplate } from "../utils/formatter";
 
 export default function TabList({ tabs }: { tabs: BrowserExtension.Tab[] }) {
   const domains = [...new Set(tabs.map((tab) => new URL(tab.url).hostname))];
@@ -39,19 +39,24 @@ export default function TabList({ tabs }: { tabs: BrowserExtension.Tab[] }) {
                 // eslint-disable-next-line @raycast/prefer-title-case
                 title="Copy as HTML"
                 content={generateHTML(tab.title || "", tab.url)}
-                shortcut={{ modifiers: ["cmd"], key: "h" }}
                 icon={Icon.TextCursor}
               />
               <Action.CopyToClipboard
                 title="Copy as Markdown"
                 content={generateMarkdown(tab.title || "", tab.url)}
-                shortcut={{ modifiers: ["cmd"], key: "m" }}
+                shortcut={{ modifiers: ["opt"], key: "enter" }}
                 icon={Icon.TextCursor}
               />
               <Action.CopyToClipboard
                 title="Copy as Plain Text"
                 content={tab.url}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                shortcut={{ modifiers: ["ctrl"], key: "enter" }}
+                icon={Icon.TextCursor}
+              />
+              <Action.CopyToClipboard
+                title="Copy as Custom"
+                content={generateCustomTemplate(tab)}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
                 icon={Icon.TextCursor}
               />
             </ActionPanel>
