@@ -151,7 +151,7 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.87.0",
+    "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.18.0",
     "@slack/web-api": "^7.0.4",
     "date-fns": "^3.6.0",
@@ -162,12 +162,13 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/lodash": "^4.17.5",
-    "@types/node": "^20.8.10",
+    "@types/node": "^22.13.10",
     "@types/node-emoji": "^2.1.0",
-    "@types/react": "^18.2.27",
+    "@types/react": "^19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.2",
     "react": "^18.2.0",
+    "react-devtools": "^6.1.1",
     "typescript": "^5.4.5"
   },
   "scripts": {
