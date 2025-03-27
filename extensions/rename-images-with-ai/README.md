@@ -2,18 +2,18 @@
 
 ![Rename Images with AI](assets/extension-icon.png)
 
-AI-powered images and screenshots renaming extension that intelligently names files based on their content.
+AI-powered images and screenshots renaming extension that intelligently names images based on their content.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/raycast/extensions/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/raycast/extensions/pulls)
 
 ## Features
 
-- **AI-Powered Naming**: Uses Google Gemini to analyze your screenshots and create descriptive, meaningful filenames
-- **Batch Processing**: Select multiple screenshots at once to rename them all in one go
-- **Finder Integration**: Directly rename multiple files selected in Finder
+- **AI-Powered Naming**: Uses Google Gemini to analyze your screenshots or images and create descriptive, meaningful filenames
+- **Batch Processing**: Select multiple screenshots or images at once to rename them all in one go
+- **Finder Integration**: Directly rename multiple images selected in Finder
 - **User-Friendly UI**: Simple interface with clear feedback on the renaming process
-- **Adjustable Batch Size**: Control how many files are processed simultaneously
+- **Adjustable Batch Size**: Control how many images are processed simultaneously
 
 ## Getting Started
 
@@ -29,7 +29,7 @@ The extension requires a Google Gemini API key to analyze your screenshots:
 
    - Enter your Google Gemini API key
 
-3. Optional: Adjust batch size to control how many files are processed at once
+3. Optional: Adjust batch size to control how many images are processed at once
 
 ## How It Works
 
@@ -47,18 +47,18 @@ Gemini 1.5 Flash offers excellent image understanding at a low cost, and most ne
 ### Method 1: Interactive UI Method
 
 1. Open Raycast and search for "Rename Images"
-2. Click "Select Screenshots" to choose the image files you want to rename
-3. Click "Rename Screenshots" to start the AI analysis and renaming process
+2. Click "Select Images" to choose the image files you want to rename
+3. Click "Rename Images" to start the AI analysis and renaming process
 4. Review the results in the list view
 
 ### Method 2: Instant Rename (Recommended)
 
-1. Select screenshot files in Finder
-2. Open Raycast and search for "rename" (or "Rename Selected Files")
-3. Press Enter - files will be renamed instantly without additional steps
+1. Select images or screenshots in Finder
+2. Open Raycast and search for "rename" (or "Rename Selected Images")
+3. Press Enter - images will be renamed instantly without additional steps
 4. A toast notification will confirm when renaming is complete
 
-The Instant Rename method is perfect for quickly renaming files with a single command while you continue working.
+The Instant Rename method is perfect for quickly renaming images with a single command while you continue working.
 
 ## Examples
 
@@ -96,8 +96,8 @@ If you encounter rate limit errors:
 ### General Troubleshooting
 
 - **Processing Large Batches**: Try renaming in smaller batches by reducing the batch size in preferences
-- **File Permission Issues**: Make sure Raycast has permission to access and modify the files
-- **File Selection Issues**: If files aren't being detected, make sure you've selected them in Finder first
+- **File Permission Issues**: Make sure Raycast has permission to access and modify the files or images
+- **File Selection Issues**: If images aren't being detected, make sure you've selected them in Finder first
 
 ## License
 

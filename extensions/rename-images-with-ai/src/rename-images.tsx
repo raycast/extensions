@@ -143,8 +143,8 @@ export default function RenameScreenshotsCommand() {
       <Form
         actions={
           <ActionPanel>
-            <Action title="Select Screenshots" onAction={selectFiles} icon={Icon.Image} />
-            {selectedFiles.length > 0 && <Action title="Rename Screenshots" onAction={handleRename} icon={Icon.Text} />}
+            <Action title="Select Images" onAction={selectFiles} icon={Icon.Image} />
+            {selectedFiles.length > 0 && <Action title="Rename Images" onAction={handleRename} icon={Icon.Text} />}
           </ActionPanel>
         }
       >
@@ -153,9 +153,9 @@ export default function RenameScreenshotsCommand() {
           text={
             selectedFiles.length > 0
               ? `${selectedFiles.length} file(s) selected: ${selectedFiles
-                  .map((file) => path.basename(file))
-                  .join(", ")}`
-              : "No files selected - click 'Select Screenshots' to choose files"
+                .map((file) => path.basename(file))
+                .join(", ")}`
+              : "No images selected - click 'Select Images' to choose images"
           }
         />
         <Form.Description
