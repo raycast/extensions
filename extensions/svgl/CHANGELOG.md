@@ -1,6 +1,6 @@
 # svgl Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-03-27
 
 - Added a default action preference that allows users to choose the default action when selecting an SVG.
 
