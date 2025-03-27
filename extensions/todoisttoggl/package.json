@@ -22,9 +22,8 @@
   "dependencies": {
     "@doist/todoist-api-typescript": "^4.0.0-alpha.3",
     "@electron/get": "^3.1.0",
-    "@raycast/api": "^1.59.0",
-    "@raycast/utils": "^1.12.5",
-    "@types/react-dom": "^18.2.7",
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
     "dayjs": "^1.11.13",
     "electron": "^34.2.0",
     "node-fetch": "^3.3.2",
@@ -34,11 +33,12 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "^18.2.14",
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "typescript": "^5.4.5"
   },
   "scripts": {
