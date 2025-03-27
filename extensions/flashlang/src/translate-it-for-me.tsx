@@ -209,7 +209,7 @@ export default function TranslateItForMe() {
               />
             </ActionPanel>
           }
-          detail={<List.Item.Detail markdown={` ${"> " + item.vocabulary} \n ${item.translation}`} />}
+          detail={<List.Item.Detail markdown={`> ${item.vocabulary}` + `\n ${history[item.vocabulary]}`} />}
         />
       );
     },
@@ -221,10 +221,18 @@ export default function TranslateItForMe() {
       isShowingDetail
       isLoading={isLoadingHistory || isAiLoading || isLoading}
       searchBarPlaceholder="Search or type new word to translate..."
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={(text) => {
+        if (!isAiLoading) {
+          setSearchText(text);
+        }
+      }}
       searchText={searchText}
       selectedItemId={selectedItemId}
-      onSelectionChange={(itemId) => setSelectedItemId(itemId || "")}
+      onSelectionChange={(itemId) => {
+        if (!isAiLoading) {
+          setSelectedItemId(itemId || "");
+        }
+      }}
       throttle
       actions={
         <ActionPanel>
