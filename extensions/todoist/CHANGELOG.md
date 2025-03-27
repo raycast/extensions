@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Support Commas in Filters] - {PR_MERGE-DATE}
+
+Add support for commas in filter strings.
+
 ## [Added Inbox View in Menu Bar] - {PR MERGE DATE}
 
 Added a new option for Inbox in View under Menu Bar Tasks.
