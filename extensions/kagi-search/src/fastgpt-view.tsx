@@ -39,6 +39,8 @@ export default function FastGPTView(props: FastGPTViewProps) {
       }
     }
     fetchFastGPTAnswer();
+
+    return () => controller.abort();
   }, [props.query, apiKey]);
 
   const markdown = `
