@@ -34,6 +34,7 @@ export enum VSCodeBuild {
   Cursor = "Cursor",
   Positron = "Positron",
   Trae = "Trae",
+  TraeCN = "Trae CN",
   VSCodium = "VSCodium",
   VSCodiumInsiders = "VSCodium - Insiders",
   Windsurf = "Windsurf",

@@ -35,6 +35,10 @@ export declare const userRouter: import("@trpc/server/unstable-core-do-not-impor
         output: {
             associatedSpaces: {
                 myTags: string[];
+                myRole: import(".prisma/client").$Enums.TeamRole;
+                myImage: string | null;
+                myNickname: string | null;
+                myAuthEmail: string | null;
                 tags: {
                     description: string | null;
                     spaceId: string;

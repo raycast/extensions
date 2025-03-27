@@ -1,5 +1,5 @@
 import { Color } from "@raycast/api";
-import { InvoiceStatus, Money } from "./types";
+import { Customer, InvoiceStatus, Money } from "./types";
 
 export function getInvoiceStatusColor(status: InvoiceStatus) {
   switch (status) {
@@ -16,6 +16,8 @@ export function getInvoiceStatusColor(status: InvoiceStatus) {
     case "SAVED":
     case "VIEWED":
       return Color.Purple;
+    case "DRAFT":
+      return "#D4DDE3";
     default:
       return undefined;
   }
@@ -27,4 +29,7 @@ export function formatDate(date: string) {
 }
 export function formatMoney(money: Money) {
   return money.currency.symbol + money.value;
+}
+export function getCustomerJoinedName(customer: Customer) {
+  return !customer.firstName || !customer.lastName ? "" : `${customer.firstName} ${customer.lastName}`;
 }

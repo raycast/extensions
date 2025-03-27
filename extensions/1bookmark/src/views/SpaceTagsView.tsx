@@ -41,7 +41,9 @@ export const Body = (props: { spaceId: string }) => {
         <List.Item
           key={tag.name}
           title={tag.name}
-          icon={tag.space.image || ""}
+          // TODO: Subscribed check icon
+          icon={Icon.Tag}
+          accessories={[{ text: tag.space.name, icon: tag.space.image }]}
           actions={<SpaceTagItemActionPanel spaceId={spaceId} tagName={tag.name} refetch={refetch} />}
         />
       ))}

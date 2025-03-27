@@ -1,6 +1,5 @@
 import { List, Cache, ActionPanel, Action, Icon } from "@raycast/api";
 import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
-import { trpc } from "@/utils/trpc.util";
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { sessionTokenAtom } from "@/states/session-token.state";
@@ -10,16 +9,16 @@ import { BookmarkFilter } from "./components/BookmarkFilter";
 import { LoginView } from "./views/LoginView";
 import { useMe } from "./hooks/use-me.hook";
 import { useBookmarks } from "./hooks/use-bookmarks.hook";
-import { Bookmark } from "./types";
-import { useBookmarkSearches } from "./hooks/use-bookmark-searchs.hook";
+import { usePrepareBookmarkSearch } from "./hooks/use-prepare-bookmark-search.hook";
+import { useBookmarkSearch } from "./hooks/use-bookmark-search.hook";
 import { RequiredActions } from "./components/BookmarkItemActionPanel";
 
 const cache = new Cache();
 
 export function Body() {
-  const [sessionToken, setSessionToken] = useAtom(sessionTokenAtom);
-  const trpcUtils = trpc.useUtils();
+  const [sessionToken] = useAtom(sessionTokenAtom);
   const me = useMe(sessionToken);
+  const [keyword, setKeyword] = useState("");
 
   const spaceIds = useMemo(() => {
     return me?.data?.associatedSpaces.map((s) => s.id) || [];
@@ -43,33 +42,6 @@ export function Body() {
     setTimeout(() => setAfter1Sec(true), 1000);
   }, [refetchBookmarks]);
 
-  const [after1Sec, setAfter1Sec] = useState(false);
-
-  useEffect(() => {
-    // If this is not here, LoginView will briefly appear.
-    setTimeout(() => setAfter1Sec(true), 1000);
-  }, []);
-
-  useEffect(() => {
-    if (!me.error) return;
-
-    // Login failed maybe due to token expiration.
-    // Clear sessionToken and send to LoginView.
-    setSessionToken("");
-  }, [me.error, setSessionToken]);
-
-  useEffect(() => {
-    // Clear data when logging out.
-    if (sessionToken) return;
-    if (!me.data && !data) return;
-    if (!after1Sec) return;
-
-    cache.remove("me");
-    cache.remove("bookmarks");
-  }, [sessionToken, trpcUtils, spaceIds, me.data, data, after1Sec]);
-
-  const [keyword, setKeyword] = useState("");
-
   const selectedTags = useMemo(() => {
     if (!me.data) return [];
 
@@ -78,42 +50,36 @@ export function Body() {
     });
   }, [me.data]);
 
-  const { searchInTags, searchInUntagged, taggedBookmarks, untaggedBookmarks } = useBookmarkSearches({
+  // Prepare bookmark data for fuzzysort search
+  // The prepare operation is performed only once if the data doesn't change
+  const searchData = usePrepareBookmarkSearch({
     data,
     selectedTags,
   });
 
-  const { filteredTaggedList, filteredUntaggedList } = useMemo(() => {
-    if (!searchInTags || !searchInUntagged || keyword === "") {
-      return {
-        filteredTaggedList: taggedBookmarks,
-        filteredUntaggedList: untaggedBookmarks,
-      };
+  // Perform actual search using prepared data
+  // Search results are updated whenever the keyword changes
+  const { filteredTaggedList, filteredUntaggedList } = useBookmarkSearch({
+    keyword,
+    searchData,
+  });
+
+  const [after1Sec, setAfter1Sec] = useState(false);
+  useEffect(() => {
+    // If this is not here, LoginView will briefly appear.
+    setTimeout(() => setAfter1Sec(true), 1000);
+  }, []);
+
+  const loggedOutStatus = !sessionToken && after1Sec;
+  useEffect(() => {
+    // Clear data when logged out.
+    if (loggedOutStatus) {
+      cache.remove("me");
+      cache.remove("bookmarks");
     }
+  }, [loggedOutStatus]);
 
-    if (keyword.startsWith("#")) {
-      return {
-        filteredTaggedList: searchInTags.search(`slack ${keyword}`, {
-          prefix: true,
-          combineWith: "AND",
-        }) as unknown as Bookmark[],
-        filteredUntaggedList: searchInUntagged.search(`slack ${keyword}`, {
-          prefix: true,
-          combineWith: "AND",
-        }) as unknown as Bookmark[],
-      };
-    }
-
-    return {
-      filteredTaggedList: searchInTags.search(keyword, { prefix: true, combineWith: "AND" }) as unknown as Bookmark[],
-      filteredUntaggedList: searchInUntagged.search(keyword, {
-        prefix: true,
-        combineWith: "AND",
-      }) as unknown as Bookmark[],
-    };
-  }, [searchInTags, searchInUntagged, keyword, taggedBookmarks, untaggedBookmarks]);
-
-  if (!sessionToken && after1Sec) {
+  if (loggedOutStatus) {
     return <LoginView />;
   }
 

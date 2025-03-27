@@ -31,9 +31,11 @@ export default function SetRating() {
 
   return (
     <List isLoading={!track}>
-      {ratings.map((rating) => (
-        <List.Item key={rating} title={rating.toString()} icon={Icon.Star} actions={<Actions value={rating} />} />
-      ))}
+      <List.Section title={track ? `${track.name} - ${track.artist}` : undefined}>
+        {ratings.map((rating) => (
+          <List.Item key={rating} title={rating.toString()} icon={Icon.Star} actions={<Actions value={rating} />} />
+        ))}
+      </List.Section>
     </List>
   );
 }

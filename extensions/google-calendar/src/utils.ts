@@ -1,4 +1,4 @@
-import { environment, getPreferenceValues, Cache } from "@raycast/api";
+import { environment, getPreferenceValues } from "@raycast/api";
 
 const SIGNATURE = "Created with <a href='https://raycast.com'>Raycast</a>";
 
@@ -111,46 +111,23 @@ export function isInternal() {
   return environment.supportPath.includes("com.raycast.macos.internal");
 }
 
-/**
- * Wraps a function with caching functionality using LocalStorage
- *
- * @param fn - The async function to cache results from
- * @param options - Optional configuration for the cache behavior
- * @param options.key - Custom cache key (defaults to stringified function)
- * @param options.validate - Optional validation function for cached data
- * @param options.maxAge - Maximum age of cached data in milliseconds
- * @returns The result of the function, either from cache or fresh execution
- *
- * @example
- * ```ts
- * const data = await withCache(
- *   async () => fetchExpensiveData(),
- *   { maxAge: 5 * 60 * 1000 } // Cache for 5 minutes
- * );
- * ```
- */
-export async function withCache<T>(
-  fn: () => Promise<T>,
-  options?: { key?: string; validate?: (data: T) => boolean; maxAge?: number },
-): Promise<T> {
-  const cache = new Cache();
-  const key = options?.key ?? fn.toString();
-  const cached = cache.get(key);
-  if (cached) {
-    const { data, timestamp } = JSON.parse(cached);
-    const isExpired = options?.maxAge && Date.now() - timestamp > options.maxAge;
-    if (!isExpired && (!options?.validate || options.validate(data))) {
-      return data;
-    }
-  }
+export function toISO8601WithTimezoneOffset(date = new Date()) {
+  const offsetMinutes = date.getTimezoneOffset();
+  const offsetHours = Math.abs(Math.floor(offsetMinutes / 60));
+  const offsetMins = Math.abs(offsetMinutes % 60);
+  const sign = offsetMinutes <= 0 ? "+" : "-"; // Note: getTimezoneOffset returns inverse of standard notation
+  const timezoneOffset = `${sign}${offsetHours.toString().padStart(2, "0")}:${offsetMins.toString().padStart(2, "0")}`;
+  return date.toISOString().replace("Z", timezoneOffset);
+}
 
-  const result = await fn();
-  cache.set(
-    key,
-    JSON.stringify({
-      data: result,
-      timestamp: Date.now(),
-    }),
-  );
-  return result;
+export function toHumanReadableTime(date = new Date()) {
+  return date.toLocaleString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZoneName: "short",
+  });
 }

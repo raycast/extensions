@@ -18,7 +18,63 @@
       "name": "index",
       "title": "Search SVG Logos",
       "description": "Search SVG logos via svgl",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "svgDefaultAction",
+          "title": "SVG default Action",
+          "description": "Default action for the SVG",
+          "required": false,
+          "type": "dropdown",
+          "defaultValue": "copySvg",
+          "data": [
+            {
+              "value": "copySvg",
+              "title": "Copy SVG"
+            },
+            {
+              "value": "copySvgFile",
+              "title": "Copy SVG File"
+            },
+            {
+              "value": "copySvgWordmark",
+              "title": "Copy SVG Wordmark"
+            },
+            {
+              "value": "copyReactComponent",
+              "title": "Copy React Component"
+            },
+            {
+              "value": "copyVueComponent",
+              "title": "Copy Vue Component"
+            },
+            {
+              "value": "copySvelteComponent",
+              "title": "Copy Svelte Component"
+            },
+            {
+              "value": "copyAngularComponent",
+              "title": "Copy Angular Component"
+            },
+            {
+              "value": "copySvgUrl",
+              "title": "Copy SVG URL"
+            },
+            {
+              "value": "copySvgWordmarkUrl",
+              "title": "Copy SVG Wordmark URL"
+            },
+            {
+              "value": "operation",
+              "title": "Operation"
+            },
+            {
+              "value": "svgInfo",
+              "title": "SVG Info"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "request",

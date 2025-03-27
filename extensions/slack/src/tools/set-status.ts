@@ -1,4 +1,4 @@
-import { getSlackWebClient } from "../shared/client/WebClient";
+import { getSlackWebClient, slack } from "../shared/client/WebClient";
 import { withSlackClient } from "../shared/withSlackClient";
 
 type Input = {
@@ -20,6 +20,8 @@ type Input = {
   duration?: number;
 };
 
+let retried = false;
+
 async function setStatus(input: Input) {
   const slackWebClient = getSlackWebClient();
 
@@ -32,6 +34,11 @@ async function setStatus(input: Input) {
   });
 
   if (res.error) {
+    if (res.error?.includes("missing_scope") && !retried) {
+      retried = true;
+      await slack.client.removeTokens();
+      return withSlackClient(setStatus)(input);
+    }
     throw new Error(res.error);
   }
 
