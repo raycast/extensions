@@ -69,7 +69,7 @@ export default function Command() {
                     <ActionPanel.Item
                       title="Open in Browser"
                       onAction={async () => {
-                        item.description = "Open " + item.url.split("/")[2] + "in Browser";
+                        item.description = "Open " + item.url.split("/")[2] + " in Browser";
                         await addHistory(item);
                         await open(item.url);
                         await closeMainWindow();
