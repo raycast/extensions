@@ -26,5 +26,5 @@ interface IUpsertHost {
   name: string;
   folder: string;
   content: string;
-  url?: String;
+  url?: string;
 }
