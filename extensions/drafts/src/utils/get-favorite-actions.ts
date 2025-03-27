@@ -12,7 +12,7 @@ export async function getFavoriteActions(withInputOnly?: boolean) {
     if (!favoriteMap.has(action.uuid)) {
       return false;
     } else if (withInputOnly) {
-      return favoriteMap.get(action.uuid) == withInputOnly;
+      return favoriteMap.get(action.uuid) === withInputOnly;
     } else {
       return true;
     }

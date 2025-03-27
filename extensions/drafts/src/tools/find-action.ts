@@ -8,8 +8,8 @@ type Input = {
 };
 
 export default async function (input: Input) {
-  let actions = await getAllActions();
-  actions = actions.filter((action) => action.name === input.searchTerm);
+  const actions = await getAllActions();
+  const filteredActions = actions.filter((action) => action.name === input.searchTerm);
 
-  return actions;
+  return filteredActions;
 }
