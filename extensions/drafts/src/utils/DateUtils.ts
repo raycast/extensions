@@ -1,5 +1,5 @@
 export const formatDate = (dateString: number | null): string => {
-  if (!dateString) return "No Date";
+  if (dateString === null) return "No Date";
   try {
     // seconds to milliseconds conversion
     const date = new Date(dateString * 1000);

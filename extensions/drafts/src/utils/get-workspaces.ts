@@ -99,5 +99,4 @@ export async function getWorkspaces() {
   }
 
   return Array.from(uniqueWorkspacesMap.values());
-  return workspaces;
 }
