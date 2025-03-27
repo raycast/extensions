@@ -1,11 +1,11 @@
 // src/translation-history.tsx
 import { useCallback, useEffect, useState, useMemo } from "react";
-import { List, Action, ActionPanel, Icon, AI } from "@raycast/api";
-import { getSelection } from "./utils";
+import { List, Action, ActionPanel, Icon, AI, getPreferenceValues } from "@raycast/api";
+import { readContent } from "./utils";
 import { useAI } from "@raycast/utils";
 import { translateVocabularyPrompt } from "./utils/prompts";
 import useLanguageList from "./utils/useLanguageList";
-import { getSearchHistory, upsertSearchHistory } from "./utils/searchHistory";
+import { getSearchHistory, upsertSearchHistory, removeFromSearchHistory } from "./utils/searchHistory";
 import { addToFlashcards, removeFromFlashcards, getFlashcards, FlashcardRecord } from "./utils/flashcards";
 import FuzzySearch from "fuzzy-search";
 
@@ -30,15 +30,23 @@ export default function TranslateItForMe() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
+  // Add this state to track current translation
+  const [currentTranslatingWord, setCurrentTranslatingWord] = useState<string>("");
+
   useEffect(() => {
     const readSelectedText = async () => {
       try {
-        const selectedText = await getSelection();
+        const preferences = getPreferenceValues<Preferences>();
+        const preferredSource = preferences.source;
+
+        const selectedText = await readContent(preferredSource);
         const existingHistory = await getSearchHistory();
+        setHistory({ ...existingHistory, [selectedText]: "" });
         setSearchText(selectedText);
-        setHistory((prevHistory) => ({ ...prevHistory, [selectedText]: "" }));
+
+        // don't generate prompt if the word is already in the history
         if (selectedText && !existingHistory[selectedText]) {
-          onPerformSearch(selectedText);
+          generatePromptByText(selectedText);
         }
       } catch (error) {
         console.error("Failed to read selected text:", error);
@@ -85,14 +93,21 @@ export default function TranslateItForMe() {
     fetchFlashcards();
   }, []);
 
-  const onPerformSearch = useCallback(
+  const generatePromptByText = useCallback(
     async (vocabulary: string = "") => {
       const promptString = await translateVocabularyPrompt(vocabulary || searchText, languageOptions);
       setPromptString(promptString || "");
       setSearchText(vocabulary);
+      setCurrentTranslatingWord(vocabulary || searchText); // Track what we're translating
     },
     [searchText, languageOptions],
   );
+
+  const generatePromptBySearchText = useCallback(async () => {
+    const promptString = await translateVocabularyPrompt(searchText, languageOptions);
+    setPromptString(promptString || "");
+    setCurrentTranslatingWord(searchText); // Track what we're translating
+  }, [searchText, languageOptions]);
 
   // Get AI translation if no history exists
   const {
@@ -110,23 +125,40 @@ export default function TranslateItForMe() {
       await upsertSearchHistory(vocabulary, "");
       const updatedHistory = await getSearchHistory();
       setHistory(updatedHistory);
-      onPerformSearch(vocabulary);
+      generatePromptByText(vocabulary);
       revalidate();
     },
     [languageOptions, searchText],
   );
 
-  // Save new translation to history
+  // Modify the save effect to use currentTranslatingWord
   useEffect(() => {
-    if (searchText && aiTranslation) {
-      const saveTranslation = async () => {
-        await upsertSearchHistory(searchText, aiTranslation);
+    if (currentTranslatingWord && aiTranslation) {
+      setHistory((prevHistory) => ({ ...prevHistory, [currentTranslatingWord]: aiTranslation }));
+      if (!isAiLoading && aiTranslation) {
+        upsertSearchHistory(currentTranslatingWord, aiTranslation);
+        setCurrentTranslatingWord("");
+      }
+    }
+  }, [aiTranslation, currentTranslatingWord, isAiLoading]);
+
+  const handleRemoveFromHistory = useCallback(
+    async (vocabulary: string) => {
+      try {
+        if (searchText === vocabulary) {
+          setSearchText("");
+          setSelectedItemId("");
+        }
+
+        await removeFromSearchHistory(vocabulary);
         const updatedHistory = await getSearchHistory();
         setHistory(updatedHistory);
-      };
-      saveTranslation();
-    }
-  }, [aiTranslation, searchText]);
+      } catch (error) {
+        console.error("Failed to remove from history:", error);
+      }
+    },
+    [searchText],
+  );
 
   const historyEntries = useMemo<[string, string][]>(() => {
     const entries = Object.entries(history).map(([word, translation]) => ({
@@ -146,13 +178,10 @@ export default function TranslateItForMe() {
 
   const handleAddToFlashcard = useCallback(
     async (vocabulary: string) => {
-      console.log("vocabulary :", vocabulary);
       try {
         const translation = history[vocabulary];
-        console.log("translation :", translation);
         if (translation) {
           const updatedFlashcards = await addToFlashcards(vocabulary, translation);
-          console.log("updatedFlashcards :", updatedFlashcards);
           setFlashcards(updatedFlashcards);
         }
       } catch (error) {
@@ -207,13 +236,19 @@ export default function TranslateItForMe() {
                 onAction={() => handleRefreshTranslation(item.vocabulary)}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
               />
+              <Action
+                title="Remove from History"
+                onAction={() => handleRemoveFromHistory(item.vocabulary)}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+                style={Action.Style.Destructive}
+              />
             </ActionPanel>
           }
           detail={<List.Item.Detail markdown={`> ${item.vocabulary}` + `\n ${history[item.vocabulary]}`} />}
         />
       );
     },
-    [flashcards, handleAddToFlashcard, handleRefreshTranslation],
+    [flashcards, handleAddToFlashcard, handleRefreshTranslation, handleRemoveFromFlashcards, handleRemoveFromHistory],
   );
 
   return (
@@ -222,9 +257,9 @@ export default function TranslateItForMe() {
       isLoading={isLoadingHistory || isAiLoading || isLoading}
       searchBarPlaceholder="Search or type new word to translate..."
       onSearchTextChange={(text) => {
-        if (!isAiLoading) {
-          setSearchText(text);
-        }
+        // if (!isAiLoading) {
+        setSearchText(text.trim());
+        // }
       }}
       searchText={searchText}
       selectedItemId={selectedItemId}
@@ -236,7 +271,7 @@ export default function TranslateItForMe() {
       throttle
       actions={
         <ActionPanel>
-          <Action title="Translate" onAction={onPerformSearch} />
+          <Action title="Translate" onAction={generatePromptBySearchText} />
         </ActionPanel>
       }
     >

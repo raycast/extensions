@@ -3,7 +3,7 @@
   "name": "flashlang",
   "title": "Flashlang",
   "description": "Learn a language with AI model and make vocabulary you searched into flash cards.",
-  "icon": "extension-icon.png",
+  "icon": "flashlang-brand-icon.png",
   "author": "moojing",
   "categories": [
     "Communication",
@@ -38,6 +38,26 @@
       "name": "translate-the-vocabulary",
       "title": "Translate the Vocabulary",
       "description": "Translate the vocabulary you input based on the language setting you've set."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "source",
+      "type": "dropdown",
+      "title": "Preferred Source",
+      "description": "Choose a preferred text source. If no text is selected, clipboard is used.",
+      "data": [
+        {
+          "title": "Selected",
+          "value": "selected"
+        },
+        {
+          "title": "Clipboard",
+          "value": "clipboard"
+        }
+      ],
+      "default": "selected",
+      "required": false
     }
   ],
   "dependencies": {

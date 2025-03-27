@@ -15,11 +15,12 @@ export async function getSelection() {
   }
 }
 
-export async function readContent(preferredSource: string) {
+export async function readContent(preferredSource: string = "selected") {
   const clipboard = await Clipboard.readText();
   const selected = await getSelection();
 
   if (preferredSource === "clipboard") {
+    Clipboard.clear();
     if (clipboard) return clipboard;
     if (selected) return selected;
   } else {
