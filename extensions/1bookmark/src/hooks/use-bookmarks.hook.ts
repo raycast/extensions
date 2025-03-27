@@ -42,7 +42,7 @@ export const useMyBookmarks = () => {
     if (!r.data) return;
 
     setCached(r.data);
-  }, [r.data]);
+  }, [r.data, setCached]);
 
   return r;
 };

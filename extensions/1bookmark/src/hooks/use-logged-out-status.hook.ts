@@ -10,6 +10,8 @@ export const useLoggedOutStatus = () => {
   const [, setBookmarks] = useCachedState<RouterOutputs["bookmark"]["listAll"] | null>("my-bookmarks", null);
   const [, setTags] = useCachedState<RouterOutputs["tag"]["list"] | null>("tags", null);
   const [after1Sec, setAfter1Sec] = useState(sessionToken ? true : false);
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const cleared = useRef(false);
 
   const trpcUtils = trpc.useUtils();
 
@@ -22,7 +24,7 @@ export const useLoggedOutStatus = () => {
   }, []);
 
   const loggedOutStatus = !sessionToken && after1Sec;
-  const cleared = useRef(false);
+
   useEffect(() => {
     // Clear data when logged out.
     if (sessionToken) {
@@ -44,9 +46,13 @@ export const useLoggedOutStatus = () => {
       if (signOutTime) {
         const now = new Date();
         const signOutDate = new Date(signOutTime);
+
         if (now.getTime() - signOutDate.getTime() < 1000) {
           setAfter1Sec(false);
-          setTimeout(() => setAfter1Sec(true), 1000);
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+          }
+          timeoutRef.current = setTimeout(() => setAfter1Sec(true), 1000);
         }
       }
     }
