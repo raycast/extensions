@@ -40,6 +40,7 @@ export async function simpleTranslate(text: string, options: LanguageCodeSet): P
       from: options.langFrom,
       to: options.langTo[0],
       raw: true,
+      proxy: options.proxy,
     });
 
     return {
@@ -77,12 +78,14 @@ export async function doubleWayTranslate(text: string, options: LanguageCodeSet)
     const translated1 = await simpleTranslate(text, {
       langFrom: options.langFrom,
       langTo: options.langTo,
+      proxy: options.proxy,
     });
 
     if (translated1?.langFrom) {
       const translated2 = await simpleTranslate(translated1.translatedText, {
         langFrom: options.langTo[0],
         langTo: [translated1.langFrom],
+        proxy: options.proxy,
       });
 
       return [translated1, translated2];
@@ -94,10 +97,12 @@ export async function doubleWayTranslate(text: string, options: LanguageCodeSet)
       simpleTranslate(text, {
         langFrom: options.langFrom,
         langTo: options.langTo,
+        proxy: options.proxy,
       }),
       simpleTranslate(text, {
         langFrom: options.langTo[0],
         langTo: [options.langFrom],
+        proxy: options.proxy,
       }),
     ]);
   }

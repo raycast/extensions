@@ -102,3 +102,8 @@ export const useTargetLanguages = () => {
 
   return [targetLanguages, setTargetLanguages] as const;
 };
+
+export const useProxy = () => {
+  const preferences = usePreferences();
+  return preferences.proxy;
+};

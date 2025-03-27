@@ -18,7 +18,8 @@
     "pernielsentikaer",
     "rasitayaz",
     "popalay",
-    "litomore"
+    "litomore",
+    "ChanningKuo"
   ],
   "license": "MIT",
   "commands": [
@@ -963,10 +964,17 @@
           "value": "paste"
         }
       ]
+    },
+    {
+      "name": "proxy",
+      "title": "Default Proxy",
+      "description": "Use function through the proxy.",
+      "type": "textfield",
+      "required": false
     }
   ],
   "dependencies": {
-    "@iamtraction/google-translate": "^2.0.1",
+    "@iamtraction/google-translate": "github:channingkuo/google-translate",
     "@raycast/api": "^1.47.3",
     "@raycast/utils": "^1.4.16",
     "google-tts-api": "^2.0.2"
