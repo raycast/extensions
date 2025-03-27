@@ -1,15 +1,18 @@
-import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, Toast } from "@raycast/api";
 import { useFetch, usePromise } from "@raycast/utils";
-import { Pipeline, PipelineGroup, Run, Status } from "./types";
+import { Pipeline, PipelineGroup, Run } from "./types";
 import { YUNXIAO_HEADERS, DOMAIN, ORGANIZATION_ID, STATUS_TO_COLOR_MAP } from "./constants";
 import { RunsList } from "./components";
 import { formatDate, formatRelativeTime } from "./utils";
 import { Fragment } from "react/jsx-runtime";
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { fetchPipelineRuns } from "./apis";
 
 export type PipelineWithRuns = Pipeline & { runs: Run[] };
 
 export default function Command() {
+  const [runsPatch, setRunsPatch] = useState<Record<number, Run[]>>({});
+
   const { data: pipelineList, isLoading: listLoading } = useFetch<Pipeline[]>(
     `${DOMAIN}/oapi/v1/flow/organizations/${ORGANIZATION_ID}/pipelines`,
     {
@@ -26,19 +29,16 @@ export default function Command() {
 
   const [showAbsoluteTime, setShowAbsoluteTime] = useState(false);
 
-  const { isLoading: runsLoading, data: pipelines } = usePromise(
+  const { isLoading: runsLoading, data: _pipelines } = usePromise(
     async (list: Pipeline[] | undefined) => {
       if (!list) {
         return [];
       }
 
-      const promises = list.map((pipeline) =>
-        fetch(`${DOMAIN}/oapi/v1/flow/organizations/${ORGANIZATION_ID}/pipelines/${pipeline.id}/runs`, {
-          headers: YUNXIAO_HEADERS,
-        }).then((response) => response.json() as Promise<Run[]>),
-      );
+      const promises = list.map((pipeline) => fetchPipelineRuns(pipeline.id));
 
       const runsData = await Promise.all(promises);
+
       return list.map(
         (basicInfo, index) =>
           ({
@@ -50,6 +50,77 @@ export default function Command() {
     [pipelineList],
   );
 
+  const fetchRunsInterval = useCallback(async (pipelineId: number) => {
+    const data = await fetchPipelineRuns(pipelineId);
+
+    setRunsPatch((prev) => ({
+      ...prev,
+      [pipelineId]: data,
+    }));
+
+    if (data.find((run) => run.status === "RUNNING" || run.status === "WAITING")) {
+      setTimeout(() => {
+        fetchRunsInterval(pipelineId);
+      }, 2000);
+    }
+  }, []);
+
+  const pipelines = useMemo(() => {
+    if (!_pipelines) {
+      return [];
+    }
+
+    return _pipelines.map((pipeline) => {
+      return {
+        ...pipeline,
+        runs: runsPatch[pipeline.id] || pipeline.runs,
+      };
+    });
+  }, [_pipelines, runsPatch]);
+
+  const runPipeline = useCallback(
+    async (pipelineId: number, name: string) => {
+      await showToast({
+        title: `Running pipeline ${name}`,
+        style: Toast.Style.Animated,
+      });
+
+      try {
+        const result = await fetch(
+          `${DOMAIN}/oapi/v1/flow/organizations/${ORGANIZATION_ID}/pipelines/${pipelineId}/runs`,
+          {
+            method: "POST",
+            headers: YUNXIAO_HEADERS,
+          },
+        );
+
+        if (!result.ok) {
+          throw new Error(`${result.statusText} (${result.status})`);
+        }
+
+        const data = await result.json();
+
+        await showToast({
+          title: `#${data} is running`,
+          style: Toast.Style.Success,
+        });
+      } catch (error) {
+        await showToast({
+          title: `Failed to run ${name}`,
+          message: error instanceof Error ? error.message : "Unknown error",
+          style: Toast.Style.Failure,
+        });
+      }
+
+      setTimeout(() => {
+        fetchRunsInterval(pipelineId);
+      }, 1000);
+    },
+    [fetchRunsInterval],
+  );
+
+  useEffect(() => {}, []);
+
   const organizedPipelines = organizePipelinesByGroup(pipelines, pipelineGroups);
 
   return (
@@ -60,10 +131,7 @@ export default function Command() {
         return (
           <Section key={groupId} {...(groupName ? { title: groupName } : {})}>
             {pipelinesInGroup.map((pipeline) => {
-              const { icon, color } = STATUS_TO_COLOR_MAP[pipeline.runs[0]?.status as Status] || {
-                icon: "",
-                color: "",
-              };
+              const { icon, color } = STATUS_TO_COLOR_MAP[pipeline.runs[0]?.status || "RUNNING"] ?? {};
 
               return (
                 <List.Item
@@ -82,6 +150,12 @@ export default function Command() {
                     <ActionPanel>
                       <Action.Push title="Show Runs" icon={Icon.List} target={<RunsList pipeline={pipeline} />} />
                       <Action.OpenInBrowser url={`https://flow.aliyun.com/pipelines/${pipeline.id}/current`} />
+                      <Action
+                        title="Run Pipeline"
+                        icon={Icon.Play}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        onAction={() => runPipeline(pipeline.id, pipeline.name)}
+                      />
                       <Action
                         title={showAbsoluteTime ? "Show Relative Time" : "Show Absolute Time"}
                         icon={showAbsoluteTime ? Icon.Clock : Icon.Clock}

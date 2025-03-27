@@ -11,5 +11,10 @@ View the pipeline status of [Aliyun Flow](https://www.aliyun.com/product/yunxiao
 ## Setup
 
 - Organization ID: [account-devops.aliyun.com/settings/joinedOrganizations](https://account-devops.aliyun.com/settings/joinedOrganizations)
+
 - Personal Access Token: [account-devops.aliyun.com/settings/personalAccessToken](https://account-devops.aliyun.com/settings/personalAccessToken)
-- Requires `Read Only` permission for `Pipeline`
+
+- Token permissions
+
+    - `Read Only` permission for `Pipeline & Pipeline Group`
+    - `Read/Write` permission for `Pipeline Instance`

@@ -26,7 +26,7 @@ export interface PipelineGroup {
   id: number;
 }
 
-export type Status = "SUCCESS" | "FAIL" | "RUNNING" | "CANCELED";
+export type Status = "SUCCESS" | "FAIL" | "RUNNING" | "CANCELED" | "WAITING";
 
 export interface Run {
   status: Status;

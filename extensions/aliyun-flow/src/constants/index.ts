@@ -4,7 +4,7 @@ import { Status } from "../types";
 export const DOMAIN = "https://openapi-rdc.aliyuncs.com";
 export const ORGANIZATION_ID = getPreferenceValues().organization_id;
 
-export const YUNXIAO_TOKEN = getPreferenceValues().access_token;
+export const YUNXIAO_TOKEN = getPreferenceValues().yunxiao_token;
 
 export const STATUS_TO_COLOR_MAP: Record<Status, { color?: string; icon: Image.Source }> = {
   SUCCESS: {
@@ -19,6 +19,7 @@ export const STATUS_TO_COLOR_MAP: Record<Status, { color?: string; icon: Image.S
     },
   },
   CANCELED: { color: "#666687", icon: Icon.CircleDisabled },
+  WAITING: { color: "#666687", icon: Icon.Clock },
 };
 
 export type StatusFilter = "ALL" | Status;
