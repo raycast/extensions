@@ -24,7 +24,14 @@ interface DraftsAction {
 }
 
 function AddAction(props: { defaultTitle?: string; onCreate: (action: DraftsAction) => void }) {
-  return <Action.Push icon={Icon.Plus} title="Add Action" target={<AddActionForm onCreate={props.onCreate} />} />;
+  return (
+    <Action.Push
+      icon={Icon.Plus}
+      title="Add Action"
+      shortcut={{ modifiers: ["opt"], key: "a" }}
+      target={<AddActionForm onCreate={props.onCreate} />}
+    />
+  );
 }
 
 function RunActionWithoutInput(props: { onOpen: () => void }) {
@@ -58,7 +65,14 @@ function RunActionWithInput(action: DraftsAction) {
 }
 
 function RemoveAction(props: { onDelete: () => void }) {
-  return <Action icon={Icon.Trash} title="Remove Action" onAction={props.onDelete} />;
+  return (
+    <Action
+      icon={Icon.Trash}
+      title="Remove Action"
+      shortcut={{ modifiers: ["opt"], key: "d" }}
+      onAction={props.onDelete}
+    />
+  );
 }
 
 function AddActionForm(props: { onCreate: (action: DraftsAction) => void }) {
@@ -165,7 +179,7 @@ export default function Command() {
       return (
         <Action.CreateQuicklink
           quicklink={{
-            link: CallbackBasUrls.RUN_ACTION + "action=" + encodeURIComponent(action.actionName) + "&text={text}",
+            link: CallbackBasUrls.CREATE_DRAFT + "action=" + encodeURIComponent(action.actionName) + "&text={text}",
           }}
           icon={Icon.Link}
           title={'Create Quicklink to run Action "' + action.actionName + '"'}
@@ -174,7 +188,7 @@ export default function Command() {
     } else {
       return (
         <Action.CreateQuicklink
-          quicklink={{ link: CallbackBasUrls.RUN_ACTION + "action=" + encodeURIComponent(action.actionName) }}
+          quicklink={{ link: CallbackBasUrls.CREATE_DRAFT + "action=" + encodeURIComponent(action.actionName) }}
           icon={Icon.Link}
           title={'Create Quicklink to run Action "' + action.actionName + '"'}
         />

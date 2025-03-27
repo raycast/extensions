@@ -135,24 +135,47 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "create-draft",
+      "title": "Create Draft",
+      "description": "Create a new note in Drafts."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@drafts create a new weekly planning note listing all dates of this week as heading",
+        "mocks": {
+          "create-draft": "Successfully called \"create-draft\""
+        },
+        "expected": [
+          {
+            "callsTool": "create-draft"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.79.0",
+    "@raycast/api": "^1.93.0",
     "@raycast/utils": "1.17.0",
     "open": "^8.4.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^20.8.10",
+    "@types/node": "^20.17.21",
     "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
     "prettier": "^2.6.2",
     "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
