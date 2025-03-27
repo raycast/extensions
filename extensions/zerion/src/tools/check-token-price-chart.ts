@@ -1,4 +1,5 @@
 import { getZpiHeaders, ZPI_URL } from "../shared/api";
+import { handleError } from "../shared/utils";
 
 interface Input {
   /**
@@ -10,29 +11,33 @@ interface Input {
   /**
    * Time period until now that we want to check the price points
    * optional parameter
-   * '1h' | '1d' | '1w' | '1m' | '1y' | 'max';
    * check the last year price by default
    */
-  period?: string;
+  period?: "1h" | "1d" | "1w" | "1m" | "1y" | "max";
 }
 
 /**
  * this tool returns the historical price of a token as an array of pair [timestamp, price]
  */
-export default async function (input: Input) {
-  const response = await fetch(`${ZPI_URL}asset/get-fungible-chart/v1`, {
-    method: "POST",
-    headers: getZpiHeaders(),
-    body: JSON.stringify({
-      fungibleId: input.tokenId,
-      currency: "usd",
-      addresses: [],
-      period: input.period,
-    }),
-  });
-  const chartPointsRaw = await response.json();
-  return chartPointsRaw.data.points.map((item: { timestamp: string; value: number; extra: null }) => [
-    item.timestamp,
-    item.value,
-  ]);
+export default async function (input: Input): Promise<[string, number][]> {
+  try {
+    const response = await fetch(`${ZPI_URL}asset/get-fungible-chart/v1`, {
+      method: "POST",
+      headers: getZpiHeaders(),
+      body: JSON.stringify({
+        fungibleId: input.tokenId,
+        currency: "usd",
+        addresses: [],
+        period: input.period,
+      }),
+    });
+    const chartPointsRaw = await response.json();
+    return chartPointsRaw.data.points.map((item: { timestamp: string; value: number; extra: null }) => [
+      item.timestamp,
+      item.value,
+    ]);
+  } catch (error) {
+    handleError({ title: "Failed to fetch token price chart", error });
+    return [];
+  }
 }

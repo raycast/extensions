@@ -1,29 +1,30 @@
 import { open } from "@raycast/api";
+import { handleError } from "../shared/utils";
 
 interface Input {
   /**
    * Chain ID of the network
    * example: ethereum, polygon, zero
    */
-  chain: string;
+  chain?: string;
   /**
    * Token ID of the token to sell
    */
-  sellTokenId: string;
+  sellTokenId?: string;
   /**
    * Token ID of the token to buy
    */
-  buyTokenId: string;
+  buyTokenId?: string;
   /**
    * Amount to receive
    * example 12.2
    */
-  receiveAmount: number;
+  receiveAmount?: number;
   /**
    * Amount to spend
    * example: 100
    */
-  spendAmount: number;
+  spendAmount?: number;
 }
 
 /**
@@ -36,13 +37,21 @@ interface Input {
  * Suggest user to open the link in a browser after generating it
  */
 export default async function (input: Input) {
-  const urlParams = new URLSearchParams({
-    chainInput: input.chain,
-    spendTokenInput: input.sellTokenId,
-    receiveTokenInput: input.buyTokenId,
-    receiveInput: input.receiveAmount.toString(),
-    spendInput: input.spendAmount.toString(),
-  });
-  const link = `https://app.zerion.io/swap?${urlParams.toString()}`;
-  return open(link);
+  try {
+    if (!input.sellTokenId && !input.buyTokenId) {
+      throw new Error("At least one of sellTokenId or buyTokenId must be provided");
+    }
+
+    const urlParams = new URLSearchParams({
+      chainInput: input.chain || "",
+      spendTokenInput: input.sellTokenId || "",
+      receiveTokenInput: input.buyTokenId || "",
+      receiveInput: input.receiveAmount?.toString() || "",
+      spendInput: input.spendAmount?.toString() || "",
+    });
+    const link = `https://app.zerion.io/swap?${urlParams.toString()}`;
+    await open(link);
+  } catch (error) {
+    await handleError({ title: "Failed to open Zerion Swap Form", error });
+  }
 }

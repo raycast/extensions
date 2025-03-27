@@ -147,7 +147,7 @@
     {
       "name": "search-blockchain",
       "title": "Search Token Info",
-      "description": "Search token breif info by the symbol, name or the address. This tool will return the list of the best matches. It is ususlly better to use the first item from the list"
+      "description": "Search token short info by the symbol, name or the address. This tool will return the list of the best matches. It is usually better to use the first item from the list"
     },
     {
       "name": "check-token-price-chart",
@@ -202,32 +202,28 @@
         ]
       },
       {
-        "input": "@zerion Send 200 usdc to test.zerion.eth",
+        "input": "@zerion Send 200 USDT to test.zerion.eth",
         "mocks": {
-          "search-blockchain": {
-            "dapps": [],
-            "wallets": [],
-            "fungibles": [
-              {
-                "symbol": "USDC",
-                "id": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                "name": "USD Coin"
-              },
-              {
-                "symbol": "USDT",
-                "id": "0xdac17f958d2ee523a2206206994597c13d831ec7",
-                "name": "Tether USD"
-              }
-            ]
-          },
-          "create-a-send-link": []
+          "search-blockchain": [
+            {
+              "symbol": "USDC",
+              "id": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+              "name": "USD Coin"
+            },
+            {
+              "symbol": "USDT",
+              "id": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+              "name": "Tether USD"
+            }
+          ],
+          "create-a-send-link": {}
         },
         "expected": [
           {
             "callsTool": {
               "name": "search-blockchain",
               "arguments": {
-                "query": "usdc"
+                "query": "USDT"
               }
             }
           },
@@ -236,8 +232,8 @@
               "name": "create-a-send-link",
               "arguments": {
                 "sendAmount": 200,
-                "sendTokenId": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                "recepient": "test.zerion.eth"
+                "sendTokenId": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+                "recipient": "test.zerion.eth"
               }
             }
           }
