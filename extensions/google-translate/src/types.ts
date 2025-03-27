@@ -10,5 +10,5 @@ export type TranslatePreferences = {
   lang1: LanguageCode;
   lang2: LanguageCode;
   autoInput: boolean;
-  proxy: string;
+  proxy?: string;
 };
