@@ -156,7 +156,7 @@ function BrewItem(props: { brew: Brew; first?: boolean }) {
                   shortcut={{ key: "arrowLeft", modifiers: [] }}
                 />
               )}
-              {cart.data.items.length > 0 ? (
+              {cart.data.items.some((item) => item.quantity > 0) ? (
                 <Action
                   title="Checkout"
                   icon={Icon.Cart}
@@ -189,7 +189,6 @@ const CheckoutItem = ({ isLoading: productsLoading }: { isLoading?: boolean }) =
     if (validItems.length === 0) return "Cart is empty";
 
     const count = validItems.reduce((c, n) => c + n.quantity, 0);
-    if (count === 0) return "Cart is empty";
 
     const items = `${count} item${count > 1 ? "s" : ""}`;
     const price = `$${(cart.data.subtotal / 100).toFixed(0)}`; // Display in dollars
