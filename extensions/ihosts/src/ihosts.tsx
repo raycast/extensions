@@ -141,7 +141,6 @@ export default function Command() {
           target.url = host.url?.toString();
           target.isRemote = host.url?.length? true: false;
           target.content = await getContentFromUrl(target.url);
-          console.log(`target.content: ${target.content}`);
         }
         
       } else {
