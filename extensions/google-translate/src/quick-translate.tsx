@@ -8,7 +8,7 @@ import { LanguageCode } from "./languages";
 export default function QuickTranslate(): ReactElement {
   const [sourceLanguage] = useSourceLanguage();
   const [targetLanguages] = useTargetLanguages();
-  const proxy = useProxy();
+  const { proxy } = usePreferences();
   const [isShowingDetail, setIsShowingDetail] = useState(true);
   const [text, setText] = useTextState();
   const debouncedText = useDebouncedValue(text, 500).trim();
