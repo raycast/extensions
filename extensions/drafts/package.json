@@ -226,7 +226,7 @@
       {
         "input": "@drafts open my workspace INBOX",
         "mocks": {
-          "create-draft": "Successfully called \"open-workspace\""
+          "open-workspace": "Successfully called \"open-workspace\""
         },
         "expected": [
           {
@@ -242,7 +242,7 @@
       {
         "input": "@drafts run process INBOX action",
         "mocks": {
-          "create-draft": "Successfully called \"run-action\""
+          "run-action": "Successfully called \"run-action\""
         },
         "expected": [
           {
