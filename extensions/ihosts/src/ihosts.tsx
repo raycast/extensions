@@ -139,7 +139,7 @@ export default function Command() {
         
         if (host.url && host.url?.match(/^https?:\/\//)) {
           target.url = host.url?.toString();
-          target.isRemote = host.url?.length? true: false;
+          target.isRemote = Boolean(host.url?.length);
           target.content = await getContentFromUrl(target.url);
         }
         
