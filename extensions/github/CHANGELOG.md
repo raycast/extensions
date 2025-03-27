@@ -1,9 +1,12 @@
 # GitHub Changelog
 
-
 ## [Add repository blacklist for my-issues] - {PR_MERGE_DATE}
 
 - Add preference to my-issues command to remove issues from specific repositories.
+
+## [Add the ability to search for collaborators in the pull request actions] - 2025-03-19
+
+- Add the ability to search for collaborators in the pull request actions, instead of just showing the first 25.
 
 ## [Add repository filtering for menu bar commands] - 2025-03-11
 

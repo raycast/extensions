@@ -11,7 +11,7 @@ enum primaryActionEnum {
 
 enum iconColorEnum {
   default = "currentColor",
-  white = "#ffffff",
+  customColor = "customColor",
 }
 
 export { primaryActionEnum, iconColorEnum };

@@ -1,5 +1,16 @@
 # 1bookmark Changelog
 
+## [Improve Search UX] - 2025-03-19
+
+- 0.7.0
+- 💻 Replace search library from `minisearch` to `fuzzysort`. So fuzzy search is now more accurate.
+
+## [New Command: Import Bookmarks] - 2025-03-14
+
+- 0.6.0
+- 📱 **Import Bookmarks** command added. It supports importing bookmarks from browsers.
+  Thanks to **Browser Bookmarks** contributors. Many codes from that extension are reused.
+
 ## [Sign In UX Improvement] - 2025-03-04
 
 - 0.5.1

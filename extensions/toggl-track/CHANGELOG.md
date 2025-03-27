@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [Enhancements] - 2025-03-17
+
+- Add preferences to show/hide clients, projects, tasks, and tags in the time entry form
+
 ## [New Feature] - 2025-02-05
 
 - Add ability to update time entry start and stop date
