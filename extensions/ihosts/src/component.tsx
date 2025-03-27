@@ -371,7 +371,6 @@ function UpsertHost(props: {
     return true;
   }
 
-
   async function submit() {
     if (!validName()) {
       return;
@@ -433,7 +432,8 @@ function UpsertHost(props: {
         value={isRemote}
         onChange={(value) => {
           updateIsRemoteState(value);
-        }}></Form.Checkbox>
+        }}
+      ></Form.Checkbox>
 
       {isRemote && (
         <>
@@ -447,8 +447,8 @@ function UpsertHost(props: {
               updateUrlInputState(value);
               dropFetchErrorIfNeeded();
             }}
-          /> 
-          <Form.Description text="Enter the URL to fetch host content" /> 
+          />
+          <Form.Description text="Enter the URL to fetch host content" />
         </>
       )}
       {!props.isEdit && (

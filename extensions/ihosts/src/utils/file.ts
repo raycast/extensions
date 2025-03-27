@@ -24,14 +24,14 @@ export function getContentFromFile(path: string): string {
 export function getContentFromUrl(url: string): Promise<string> {
   return new Promise((resolve, reject) => {
     get(url, (res) => {
-      let data = '';
-      res.on('data', (chunk) => {
+      let data = "";
+      res.on("data", (chunk) => {
         data += chunk;
       });
-      res.on('end', () => {
+      res.on("end", () => {
         resolve(data);
       });
-    }).on('error', (err) => {
+    }).on("error", (err) => {
       reject(err);
     });
   });

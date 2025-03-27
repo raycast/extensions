@@ -2,7 +2,13 @@ import { Color, Icon, LocalStorage, MenuBarExtra, showHUD } from "@raycast/api";
 import { getItemIcon } from "./component";
 import { HostFolderMode, HostInactiveByFolderTip, State, SystemHostHashKey } from "./const";
 import { getHostCommonsCache, saveHostCommons } from "./utils/common";
-import { checkSysHostAccess, getContentFromUrl, getSysHostAccess, getSysHostFileHash, writeSysHostFile } from "./utils/file";
+import {
+  checkSysHostAccess,
+  getContentFromUrl,
+  getSysHostAccess,
+  getSysHostFileHash,
+  writeSysHostFile,
+} from "./utils/file";
 import { useEffect, useState } from "react";
 import { once } from "node:events";
 

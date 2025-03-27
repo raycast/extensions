@@ -10,7 +10,14 @@ import {
 } from "./component";
 import { HostFolderMode, State, SystemHostBackupKey, SystemHostFilePath, SystemHostHashKey } from "./const";
 import { backupHostFile, getHostCommons, isFirstTime, removeBackup, saveHostCommons } from "./utils/common";
-import { checkSysHostAccess, getContentFromUrl, getShowHost, getSysHostFile, getSysHostFileHash, writeSysHostFile } from "./utils/file";
+import {
+  checkSysHostAccess,
+  getContentFromUrl,
+  getShowHost,
+  getSysHostFile,
+  getSysHostFileHash,
+  writeSysHostFile,
+} from "./utils/file";
 import { v4 as uuidv4 } from "uuid";
 
 export default function Command() {
@@ -136,13 +143,12 @@ export default function Command() {
         if (!target) return;
         target.name = host.name;
         target.content = host.content;
-        
+
         if (host.url && host.url?.match(/^https?:\/\//)) {
           target.url = host.url?.toString();
           target.isRemote = Boolean(host.url?.length);
           target.content = await getContentFromUrl(target.url);
         }
-        
       } else {
         let folder: IHostCommon | undefined;
         if (host.folder !== "-1") {
@@ -153,7 +159,7 @@ export default function Command() {
           id: uuidv4(),
           name: host.name,
           isFolder: false,
-          isRemote: host.url?.length ? true: false,
+          isRemote: host.url?.length ? true : false,
           state: State.Enable,
           content: host.content,
           ctime: new Date().getTime(),
@@ -165,7 +171,6 @@ export default function Command() {
           hostItem.isRemote = true;
           hostItem.content = await getContentFromUrl(hostItem.url);
         }
-
 
         if (folder && folder.mode === HostFolderMode.Single && folder.hosts?.find((h) => h.state === State.Enable)) {
           hostItem.state = State.Disable;
@@ -216,7 +221,7 @@ export default function Command() {
       if (!target) return;
       const state = target.state === State.Enable ? State.Disable : State.Enable;
       target.state = state;
-      if (target.isRemote && target.url?.match(/https?:\/\//) &&  target.state === State.Enable) {
+      if (target.isRemote && target.url?.match(/https?:\/\//) && target.state === State.Enable) {
         target.content = await getContentFromUrl(target.url);
       }
       if (target.isFolder) {
