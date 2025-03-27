@@ -1,4 +1,4 @@
-export const CallbackBasUrls = {
+export const CallbackBaseUrls = {
   CREATE_DRAFT: "drafts://x-callback-url/create?",
   OPEN_DRAFT: "drafts://x-callback-url/open?",
   RUN_ACTION: "drafts://x-callback-url/runAction?",
@@ -6,6 +6,16 @@ export const CallbackBasUrls = {
   APPEND_TO_DRAFT: "drafts://x-callback-url/append?",
   PREPEND_TO_DRAFT: "drafts://x-callback-url/prepend?",
   DICTATE: "drafts://x-callback-url/dictate?",
+};
+
+export const AppBaseUrls = {
+  CREATE_DRAFT: "drafts://create?",
+  OPEN_DRAFT: "drafts://open?",
+  RUN_ACTION: "drafts://runAction?",
+  OPEN_WORKSPACE: "drafts://workspace?",
+  APPEND_TO_DRAFT: "drafts://append?",
+  PREPEND_TO_DRAFT: "drafts://prepend?",
+  DICTATE: "drafts://dictate?",
 };
 
 export const AppInstallCheckDefines = {
@@ -63,10 +73,6 @@ export const QuicklinkDefinitions: QuickLinkDefinition[] = [
     mdDescription: "open the dictation window",
     link: "drafts://x-callback-url/dictate?",
   },
-  // {
-  //     name: "",
-  //     buttonDescription: "",
-  //     mdDescription: "",
-  //     link: "",
-  // },
 ];
+
+export const DataBasePath = "~/Library/Group Containers/GTFQ98J4YG.com.agiletortoise.Drafts/DraftStore.sqlite";

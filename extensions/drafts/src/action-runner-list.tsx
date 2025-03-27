@@ -15,7 +15,7 @@ import Style = Toast.Style;
 import open from "open";
 import { LocalStorage } from "@raycast/api";
 import { CallbackUrl } from "./utils/CallbackUrlUtils";
-import { CallbackBasUrls } from "./utils/Defines";
+import { CallbackBaseUrls } from "./utils/Defines";
 import { checkAppInstallation } from "./utils/ApplicationInstalledCheck";
 
 interface DraftsAction {
@@ -24,7 +24,14 @@ interface DraftsAction {
 }
 
 function AddAction(props: { defaultTitle?: string; onCreate: (action: DraftsAction) => void }) {
-  return <Action.Push icon={Icon.Plus} title="Add Action" target={<AddActionForm onCreate={props.onCreate} />} />;
+  return (
+    <Action.Push
+      icon={Icon.Plus}
+      title="Add Action"
+      shortcut={{ modifiers: ["opt"], key: "a" }}
+      target={<AddActionForm onCreate={props.onCreate} />}
+    />
+  );
 }
 
 function RunActionWithoutInput(props: { onOpen: () => void }) {
@@ -37,7 +44,7 @@ interface CommandForm {
 
 function RunActionWithInput(action: DraftsAction) {
   async function handleRunAction(values: CommandForm) {
-    const callbackUrl = new CallbackUrl(CallbackBasUrls.CREATE_DRAFT);
+    const callbackUrl = new CallbackUrl(CallbackBaseUrls.CREATE_DRAFT);
     callbackUrl.addParam({ name: "text", value: values.content });
     callbackUrl.addParam({ name: "action", value: action.actionName });
     callbackUrl.openCallbackUrl();
@@ -58,7 +65,14 @@ function RunActionWithInput(action: DraftsAction) {
 }
 
 function RemoveAction(props: { onDelete: () => void }) {
-  return <Action icon={Icon.Trash} title="Remove Action" onAction={props.onDelete} />;
+  return (
+    <Action
+      icon={Icon.Trash}
+      title="Remove Action"
+      shortcut={{ modifiers: ["opt"], key: "d" }}
+      onAction={props.onDelete}
+    />
+  );
 }
 
 function AddActionForm(props: { onCreate: (action: DraftsAction) => void }) {
@@ -165,7 +179,7 @@ export default function Command() {
       return (
         <Action.CreateQuicklink
           quicklink={{
-            link: CallbackBasUrls.RUN_ACTION + "action=" + encodeURIComponent(action.actionName) + "&text={text}",
+            link: CallbackBaseUrls.RUN_ACTION + "action=" + encodeURIComponent(action.actionName) + "&text={text}",
           }}
           icon={Icon.Link}
           title={'Create Quicklink to run Action "' + action.actionName + '"'}
@@ -174,7 +188,7 @@ export default function Command() {
     } else {
       return (
         <Action.CreateQuicklink
-          quicklink={{ link: CallbackBasUrls.RUN_ACTION + "action=" + encodeURIComponent(action.actionName) }}
+          quicklink={{ link: CallbackBaseUrls.RUN_ACTION + "action=" + encodeURIComponent(action.actionName) }}
           icon={Icon.Link}
           title={'Create Quicklink to run Action "' + action.actionName + '"'}
         />
@@ -202,6 +216,11 @@ export default function Command() {
         title="No (matching) Actions Configured!"
         description="Configure Actions you want to run from Raycast"
         icon="⚙️"
+      />
+      <List.Item
+        title="Deprecated Command"
+        subtitle="Please use the Command 'Find Drafts Action' or 'Find Latest Drafts Action' instead."
+        icon={Icon.Warning}
       />
       {actions.map((action, index) => (
         <List.Item
