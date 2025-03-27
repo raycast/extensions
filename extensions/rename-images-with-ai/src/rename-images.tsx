@@ -153,8 +153,8 @@ export default function RenameScreenshotsCommand() {
           text={
             selectedFiles.length > 0
               ? `${selectedFiles.length} file(s) selected: ${selectedFiles
-                .map((file) => path.basename(file))
-                .join(", ")}`
+                  .map((file) => path.basename(file))
+                  .join(", ")}`
               : "No images selected - click 'Select Images' to choose images"
           }
         />
