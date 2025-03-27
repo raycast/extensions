@@ -60,7 +60,7 @@ async function renameScreenshot(filePath: string): Promise<RenameResult> {
       };
     } catch (error) {
       // If file exists, add timestamp and retry
-      if (error.code === 'EEXIST') {
+      if (error && typeof error === "object" && "code" in error && error.code === "EEXIST") {
         const timestamp = Date.now();
         const newUniqueFilePath = path.join(directory, `${newFileName}_${timestamp}${extension}`);
         await fs.rename(filePath, newUniqueFilePath);

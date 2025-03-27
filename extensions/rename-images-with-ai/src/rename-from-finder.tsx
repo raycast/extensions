@@ -40,7 +40,11 @@ export default async function RenameFromFinder() {
     });
   } catch (error) {
     console.error("Error in rename-from-finder:", error);
-    await showFailureToast("Error Renaming Files", error instanceof Error ? error.message : "Unknown error");
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Error Renaming Files",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
   } finally {
     // Ensure Raycast is closed/returned to root
     await popToRoot();

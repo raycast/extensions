@@ -30,15 +30,15 @@
     },
     {
       "name": "rename-from-finder",
-      "title": "Rename Selected Files",
-      "subtitle": "Rename Multiple Files",
-      "description": "Instantly rename multiple files selected in Finder using AI",
+      "title": "Rename Selected Images",
+      "subtitle": "Rename Multiple Images",
+      "description": "Instantly rename multiple images selected in Finder using AI",
       "mode": "no-view",
       "keywords": [
         "rename",
         "instant",
         "quick",
-        "files",
+        "images",
         "selected",
         "ai"
       ]

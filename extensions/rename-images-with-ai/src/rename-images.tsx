@@ -168,48 +168,56 @@ export default function RenameScreenshotsCommand() {
   } else {
     // Results view
     return (
-      <List
-        isLoading={isLoading}
-        emptyView={<List.EmptyView title="No Screenshots" description="No screenshots have been processed yet" />}>
-        {screenshots.map((item) => (
-          <List.Item
-            key={item.id}
-            title={item.newName || item.name}
-            subtitle={item.status === "success" ? "Renamed successfully" : item.status}
-            icon={getStatusIcon(item.status)}
-            accessories={[{ text: item.status === "success" ? "✓" : item.status === "error" ? "✗" : "⋯" }]}
-            actions={
-              <ActionPanel>
-                {item.status === "success" && (
-                  <>
+      <List isLoading={isLoading}>
+        {screenshots.length === 0 ? (
+          <List.EmptyView title="No Screenshots" description="No screenshots have been processed yet" />
+        ) : (
+          screenshots.map((item) => (
+            <List.Item
+              key={item.id}
+              title={item.newName || item.name}
+              subtitle={item.status === "success" ? "Renamed successfully" : item.status}
+              icon={getStatusIcon(item.status)}
+              accessories={[{ text: item.status === "success" ? "✓" : item.status === "error" ? "✗" : "⋯" }]}
+              actions={
+                <ActionPanel>
+                  {item.status === "success" && (
+                    <>
+                      <Action
+                        title="Open File"
+                        icon={Icon.Eye}
+                        onAction={() =>
+                          open(item.newName ? path.join(path.dirname(item.path), item.newName) : item.path)
+                        }
+                      />
+                      <Action
+                        title="Show in Finder"
+                        icon={Icon.Finder}
+                        onAction={() =>
+                          showInFinder(item.newName ? path.join(path.dirname(item.path), item.newName) : item.path)
+                        }
+                      />
+                    </>
+                  )}
+                  {item.status === "error" && (
                     <Action
-                      title="Open File"
-                      icon={Icon.Eye}
-                      onAction={() => open(item.newName ? path.join(path.dirname(item.path), item.newName) : item.path)}
-                    />
-                    <Action
-                      title="Show in Finder"
+                      title="Show Original in Finder"
                       icon={Icon.Finder}
-                      onAction={() =>
-                        showInFinder(item.newName ? path.join(path.dirname(item.path), item.newName) : item.path)
-                      }
+                      onAction={() => showInFinder(item.path)}
                     />
-                  </>
-                )}
-                {item.status === "error" && (
-                  <Action title="Show Original in Finder" icon={Icon.Finder} onAction={() => showInFinder(item.path)} />
-                )}
-                <Action title="Return to Selection" icon={Icon.ArrowLeft} onAction={() => setIsSelectionMode(true)} />
-              </ActionPanel>
-            }
-          />
-        ))}
+                  )}
+                  <Action title="Return to Selection" icon={Icon.ArrowLeft} onAction={() => setIsSelectionMode(true)} />
+                </ActionPanel>
+              }
+            />
+          ))
+        )}
       </List>
     );
   }
 }
 
-function getStatusIcon(status: ScreenshotItem['status']): Icon {
+function getStatusIcon(status: ScreenshotItem["status"]): Icon {
   switch (status) {
     case "pending":
       return Icon.Clock;
