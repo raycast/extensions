@@ -1,18 +1,24 @@
-import { List, Icon, Action, ActionPanel } from "@raycast/api";
+import { List, Icon, Action, ActionPanel, showToast, Toast } from "@raycast/api";
 
 import { MessageList } from "./message-list";
 import { Account, Mailbox } from "../types";
 import { titleCase } from "../utils";
 import { MailIcon } from "../utils/presets";
 import { sortMailboxes } from "../utils/mailbox";
+import { Cache } from "../utils/cache";
+import { useMemo } from "react";
 
 export type MailboxListProps = Account;
 
 export const MailboxList = (props: MailboxListProps) => {
   const { id, name, fullName, email, mailboxes, numUnread } = props;
+  const defaultAccount = Cache.getDefaultAccount();
+  const isDefault = defaultAccount?.id === id;
 
   const unreadMessages =
     numUnread === 0 ? "No Unread Messages" : `${numUnread} Unread Message${numUnread === 1 ? "" : "s"}`;
+
+  const sortedMailboxes = useMemo(() => mailboxes.toSorted(sortMailboxes), [mailboxes]);
 
   return (
     <List.Item
@@ -20,12 +26,25 @@ export const MailboxList = (props: MailboxListProps) => {
       title={name}
       subtitle={email}
       icon={numUnread > 0 ? MailIcon.Unread : MailIcon.Read}
-      accessories={[{ text: fullName, icon: Icon.PersonCircle }, { text: unreadMessages }]}
+      accessories={[
+        { text: fullName, icon: Icon.PersonCircle },
+        { text: unreadMessages },
+        ...(isDefault ? [{ text: "Default", icon: Icon.Star }] : []),
+      ]}
       actions={
         <ActionPanel>
-          {mailboxes.sort(sortMailboxes).map((mailbox) => (
+          {sortedMailboxes.map((mailbox) => (
             <MailboxAction key={mailbox.name} account={props} mailbox={mailbox} />
           ))}
+
+          <Action
+            title="Set as Default"
+            icon={Icon.Star}
+            onAction={() => {
+              Cache.setDefaultAccount(id);
+              showToast({ title: `Set ${name} as default`, style: Toast.Style.Success });
+            }}
+          />
         </ActionPanel>
       }
     />

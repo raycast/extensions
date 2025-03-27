@@ -159,6 +159,10 @@
           "type": "dropdown",
           "data": [
             {
+              "title": "Inbox",
+              "value": "inbox"
+            },
+            {
               "title": "Today",
               "value": "today"
             },
