@@ -63,7 +63,7 @@
     {
       "name": "adb-uninstall",
       "title": "Uninstall",
-      "description": "Uninstall an app",
+      "description": "Uninstall an app using its package name",
       "mode": "no-view",
       "disabledByDefault": true,
       "arguments": [
