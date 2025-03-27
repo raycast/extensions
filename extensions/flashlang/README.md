@@ -13,7 +13,8 @@ then review your flashcards regularly to improve retention.
 3. Start translating words by either:
    - Using clipboard content
    - Selecting text directly
-4. Review your flashcards regularly to improve retention
+4. You can refresh the content by using `Refresh` command
+5. Review your flashcards regularly to improve retention
 
 ## Usage
 
