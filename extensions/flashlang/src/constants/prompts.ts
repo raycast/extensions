@@ -5,8 +5,10 @@ export const translationPrompt = `
   no need to mention the name of the native language, 
   and then again, explain the meaning of the word in detail with [[nativeLanguage]] as a professional translator with 1000 years of experience.
 
+
   If it's already in [[nativeLanguage]], translate it into English.
   If it's not in [[nativeLanguage]],explain it in the language of [[vocabulary]] first, then explain it into [[nativeLanguage]].
+  If the [[vocabulary]] seems not to be a word, just guess what it might be, and let me know there might be a typo.
 
   If this word has different meanings,
   please list them separately and provide example sentences with the original text and translations.
