@@ -7,13 +7,8 @@ import {
   oauthService,
 } from "./api/fabricClient";
 
-type CreationValues = {
-  url: string;
-  comment: string;
-};
-
 function CreateBookmark() {
-  const { handleSubmit, itemProps, reset } = useForm<CreationValues>({
+  const { handleSubmit, itemProps, reset } = useForm<CreateBookmarkParams>({
     async onSubmit(values: CreateBookmarkParams) {
       const toast = await showToast({
         style: Toast.Style.Animated,

@@ -7,13 +7,8 @@ import {
   oauthService,
 } from "./api/fabricClient";
 
-type CreationValues = {
-  name: string;
-  content: string;
-};
-
-function CreateNote() {
-  const { handleSubmit, itemProps, reset } = useForm<CreationValues>({
+function CreateNotepad() {
+  const { handleSubmit, itemProps, reset } = useForm<CreateNotepadParams>({
     async onSubmit(values: CreateNotepadParams) {
       const toast = await showToast({
         style: Toast.Style.Animated,
@@ -66,4 +61,4 @@ function CreateNote() {
   );
 }
 
-export default withAccessToken(oauthService)(CreateNote);
+export default withAccessToken(oauthService)(CreateNotepad);

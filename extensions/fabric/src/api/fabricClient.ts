@@ -3,13 +3,13 @@ import fetch from "node-fetch";
 import * as Y from "yjs";
 import sanitizeHtml from "sanitize-html";
 import { marked } from "marked";
-import { getSchema } from "@tiptap/core";
+import { getSchema, Extension } from "@tiptap/core";
 import { generateJSON } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "tiptap-markdown";
 import { prosemirrorJSONToYDoc } from "y-prosemirror";
-import { OAuth } from "@raycast/api";
-import { getAccessToken, OAuthService } from "@raycast/utils";
+import { OAuth, showToast, Toast } from "@raycast/api";
+import { getAccessToken, OAuthService, showFailureToast } from "@raycast/utils";
 
 import { CLIENT_ID, URL_API, URL_APP } from "../config";
 
@@ -129,7 +129,16 @@ class FabricClient {
     body,
     expectedStatusCodes = [200],
   }: APIRequestOptions) {
-    const { token } = await getAccessToken();
+    let token;
+    try {
+      token = (await getAccessToken()).token;
+    } catch (error) {
+      showFailureToast(error, {
+        title: "Failed to get access token",
+      });
+      return;
+    }
+
     const response = await fetch(`${this.endpoint}${path}`, {
       method,
       headers: {
@@ -143,9 +152,11 @@ class FabricClient {
     });
 
     if (!expectedStatusCodes.includes(response.status)) {
-      const body = await response.text();
-
-      throw new Error(`Request failed with status ${response.status}: ${body}`);
+      showToast({
+        style: Toast.Style.Failure,
+        title: `Request failed with status ${response.status}`,
+      });
+      return;
     }
 
     return response;
@@ -161,6 +172,10 @@ class FabricClient {
       }),
       expectedStatusCodes: [200],
     });
+
+    if (!response) {
+      return [];
+    }
 
     const body = (await response.json()) as { resources: Resource[] };
     return body.resources;
@@ -185,6 +200,10 @@ class FabricClient {
       }),
       expectedStatusCodes: [200],
     });
+
+    if (!response) {
+      return [];
+    }
 
     const body = (await response.json()) as { hits: Resource[] };
     return body.hits;
@@ -222,7 +241,7 @@ class FabricClient {
 
   private async createYDocFromMarkdown(md: string): Promise<Uint8Array> {
     const html = sanitizeHtml(await marked.parse(md));
-    const extensions: any[] = [
+    const extensions: Extension[] = [
       StarterKit.configure({
         codeBlock: false,
         history: false,
@@ -260,10 +279,6 @@ export const oauthService = new OAuthService({
 });
 
 export function getFabricClient(): FabricClient {
-  if (!fabricClient) {
-    throw new Error("Fabric client not initialized");
-  }
-
   return fabricClient;
 }
 

@@ -1,4 +1,4 @@
-# Fabric #
+# Fabric
 
 Quickly search and create in Fabric's intelligent workspace
 
@@ -16,7 +16,7 @@ This extension brings Fabric's capabilities directly into Raycast, allowing you 
 
 <br><br>
 
-## Extension features ##
+## Extension features
 
 <br>
 
@@ -28,7 +28,7 @@ This extension brings Fabric's capabilities directly into Raycast, allowing you 
 
 <br><br>
 
-## Why Fabric? ##
+## Why Fabric?
 
 <br>
 
@@ -52,7 +52,7 @@ This extension integrates Fabric's core functionality into your Raycast workflow
 
 <br><br>
 
-## Get started ##
+## Get started
 
 <br>
 

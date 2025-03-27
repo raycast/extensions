@@ -19,18 +19,21 @@
     {
       "name": "search-fabric",
       "title": "Search Fabric",
+      "subtitle": "Fabric",
       "description": "Searches for an item on Fabric.",
       "mode": "view"
     },
     {
       "name": "create-notepad",
       "title": "Create Note",
+      "subtitle": "Fabric",
       "description": "Creates a note on Fabric.",
       "mode": "view"
     },
     {
       "name": "create-bookmark",
       "title": "Create Bookmark",
+      "subtitle": "Fabric",
       "description": "Creates a bookmark on Fabric.",
       "mode": "view"
     }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List } from "@raycast/api";
 import { withAccessToken, showFailureToast } from "@raycast/utils";
 
 import {
@@ -91,12 +91,7 @@ const apiFilter = async (searchQuery: SearchQuery): Promise<SearchResponse> => {
 };
 
 function Search() {
-  const emptyList: {
-    id: string;
-    name: string;
-    description: string;
-    icon: string;
-  }[] = [];
+  const emptyList: SearchResult[] = [];
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState<SearchQuery>({ text: "" });
   const [filteredList, filterList] = useState(emptyList);
@@ -110,9 +105,8 @@ function Search() {
         if (aborted) return;
 
         if (result.status === "error") {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to fetch items: request error",
+          showFailureToast(result.error, {
+            title: "Failed to fetch items: unknown error",
           });
           return;
         }

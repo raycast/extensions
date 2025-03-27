@@ -23,13 +23,11 @@ export function getKindIcon(kind: Kind | null) {
         source: "icons/kind/file.svg",
         tintColor,
       };
-      break;
     case null:
       return {
         source: "icons/kind/all.svg",
         tintColor,
       };
-      break;
     default:
       return {
         source: `icons/kind/${kind}.svg`,
