@@ -1,4 +1,4 @@
-import translate from "@iamtraction/google-translate";
+import { translate } from "../vendor/@iamtraction-translate/src/index";
 import * as googleTTS from "google-tts-api";
 import * as os from "os";
 import * as path from "path";
