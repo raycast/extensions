@@ -140,18 +140,18 @@
   "dependencies": {
     "@googleapis/calendar": "^9.8.0",
     "@googleapis/people": "^3.0.9",
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.94.2",
+    "@raycast/utils": "^1.19.1",
     "date-fns": "^4.1.0",
     "humanize-duration": "^3.32.1",
-    "nanoid": "^5.1.2"
+    "nanoid": "^5.1.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/humanize-duration": "^3.27.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^9.23.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
