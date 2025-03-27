@@ -1,6 +1,6 @@
 import querystring from "querystring";
 import { request, ProxyAgent } from "undici";
-import { TranslateOption, TranslateResponse } from "../typings/types";
+import { TranslateOption, TranslateResponse } from "./types";
 import { isSupported, getISOCode } from "./languages";
 import { tokenGenerator } from "./tokenGenerator";
 
