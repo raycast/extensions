@@ -5,7 +5,12 @@
   "description": "Send notifications to your devices using ntfy.sh",
   "icon": "ntfy.png",
   "author": "wesleycoder",
-  "categories": ["Productivity", "Communication", "Web", "Developer Tools"],
+  "categories": [
+    "Productivity",
+    "Communication",
+    "Web",
+    "Developer Tools"
+  ],
   "license": "MIT",
   "scripts": {
     "build": "ray build -o dist",
@@ -32,13 +37,13 @@
         {
           "name": "url",
           "type": "text",
-          "placeholder": "url",
+          "placeholder": "URL",
           "required": false
         },
         {
           "name": "topic",
           "type": "text",
-          "placeholder": "topic",
+          "placeholder": "Topic",
           "required": false
         }
       ]
@@ -74,13 +79,14 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.94.2",
-    "eslint": "^9.23.0",
-    "prettier": "^3.5.3"
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.13",
+    "@types/node": "22.13.14",
     "@types/react": "19.0.12",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   }
 }
