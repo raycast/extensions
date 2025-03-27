@@ -14,8 +14,13 @@ export function AppPicker({ configs }: AppPickerProps) {
     try {
       setIsLoading(true);
       await showToast({ style: Toast.Style.Animated, title: `Restarting ${config.name}` });
-      await restartApp(config.bundleId, config.delay);
-      await showToast({ style: Toast.Style.Success, title: `Restarted ${config.name}` });
+      // Use the first app in the apps array for now
+      if (config.apps && config.apps.length > 0) {
+        await restartApp(config.apps[0].bundleId, config.apps[0].startupArgs);
+        await showToast({ style: Toast.Style.Success, title: `Restarted ${config.name}` });
+      } else {
+        throw new Error("No apps defined for this configuration");
+      }
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -33,8 +38,8 @@ export function AppPicker({ configs }: AppPickerProps) {
         <List.Item
           key={config.id}
           title={config.name}
-          subtitle={`Delay: ${config.delay}ms`}
-          accessories={[{ text: config.bundleId }]}
+          subtitle={config.apps && config.apps.length > 0 ? `App: ${config.apps[0].bundleId}` : "No apps configured"}
+          accessories={[{ text: config.apps && config.apps.length > 0 ? config.apps[0].bundleId : "No bundleId" }]}
           actions={
             <ActionPanel>
               <Action title="Restart App" icon={Icon.ArrowClockwise} onAction={() => handleRestart(config)} />
