@@ -7,7 +7,7 @@ import { State, SystemHostHashKey } from "./const";
 export default async function Command() {
     const hostCommonsState = getHostCommonsCache();
     let hostContents = "# iHost\n";
-    hostCommonsState.forEach(async (item) => {
+    for (const item of hostCommonsState) {
         if (item.isRemote && item.url?.match(/https?:\/\//) && item.state === State.Enable) {
             item.content = await getContentFromUrl(item.url);
         }
