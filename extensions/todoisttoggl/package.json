@@ -21,11 +21,11 @@
   ],
   "dependencies": {
     "@doist/todoist-api-typescript": "^4.0.0-alpha.3",
-    "@electron/get": "^3.1.0",
+    "@electron/get": "^4.0.0",
     "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.19.1",
     "dayjs": "^1.11.13",
-    "electron": "^34.2.0",
+    "electron": "^35.1.0",
     "node-fetch": "^3.3.2",
     "rimraf": "^6.0.1",
     "uuid": "^11.1.0"
