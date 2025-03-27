@@ -967,8 +967,8 @@
     },
     {
       "name": "proxy",
-      "title": "Default Proxy",
-      "description": "Use function through the proxy.",
+      "title": "HTTP Proxy URL",
+      "description": "HTTP proxy URL to use for translation requests (e.g. http://proxy.example.com:8080)",
       "type": "textfield",
       "required": false
     }
