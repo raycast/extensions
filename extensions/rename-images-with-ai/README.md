@@ -1,6 +1,11 @@
-# Rename Images with AI - Raycast Extension
+# Rename Images with AI
 
-A Raycast extension that uses AI to intelligently rename screenshot and image files based on their content.
+![Rename Images with AI](assets/extension-icon.png)
+
+AI-powered images and screenshots renaming extension that intelligently names files based on their content.
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/raycast/extensions/blob/main/LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/raycast/extensions/pulls)
 
 ## Features
 
@@ -10,15 +15,7 @@ A Raycast extension that uses AI to intelligently rename screenshot and image fi
 - **User-Friendly UI**: Simple interface with clear feedback on the renaming process
 - **Adjustable Batch Size**: Control how many files are processed simultaneously
 
-## Installation
-
-1. Make sure you have [Raycast](https://raycast.com/) installed
-2. Clone this repository
-3. Open the directory in your terminal
-4. Run `npm install` to install dependencies
-5. Run `npm run dev` to start the development server and install the extension in Raycast
-
-## Configuration
+## Getting Started
 
 The extension requires a Google Gemini API key to analyze your screenshots:
 
