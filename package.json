@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "paystack",
+  "title": "Paystack",
+  "description": "Manage your Paystack account effortlessly in Raycast—check balances, search transactions, generate links, issue refunds, and track revenue—all from your keyboard.",
+  "icon": "extension-icon.png",
+  "author": "dominuskelvin",
+  "categories": [
+    "Developer Tools",
+    "Finance",
+    "Productivity",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-balance",
+      "title": "Check Balance",
+      "subtitle": "View your current Paystack account balance instantly.",
+      "description": "Fetch your latest account balance in NGN or other currencies. Quickly copy the balance for sharing or record-keeping.",
+      "mode": "view"
+    },
+    {
+      "name": "search-transactions",
+      "title": "Search Transactions",
+      "subtitle": "Look up transactions by email, reference, or date.",
+      "description": "Easily search your Paystack transaction history using an email, transaction reference, or status filter. Open details in the Paystack dashboard if needed.",
+      "mode": "view"
+    },
+    {
+      "name": "generate-payment-links",
+      "title": "Generate Payment Links",
+      "subtitle": "Create and copy Paystack payment links in seconds.",
+      "description": "Generate a new Paystack payment link instantly, copy it to your clipboard, and share it with customers—all from Raycast.",
+      "mode": "no-view"
+    },
+    {
+      "name": "issue-refunds",
+      "title": "Issue Refunds",
+      "subtitle": "Process refunds quickly with a single command.",
+      "description": "Find a transaction and refund it directly through Raycast. A confirmation step ensures you don’t issue refunds by mistake.",
+      "mode": "view"
+    },
+    {
+      "name": "daily-revenue-summary",
+      "title": "Daily Revenue Summary",
+      "subtitle": "Track today’s total revenue at a glance.",
+      "description": "See how much you've earned today in real-time. Get quick insights into your revenue without logging into Paystack.",
+      "mode": "view"
+    },
+    {
+      "name": "customer-insights",
+      "title": "Customer Insights",
+      "subtitle": "Retrieve customer details and transaction history.",
+      "description": "Search for a customer using their email and view their transaction history, lifetime value, and other key insights.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
