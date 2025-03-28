@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Detail, ActionPanel, Action, LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { FlashcardRecord, getFlashcards } from "./utils/flashcards";
 
 export default function ReviewFlashcard() {
