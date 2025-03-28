@@ -9,7 +9,8 @@ export default function AccountPicker({ onPick }: { onPick: (account: AccountsIt
   function onPickAccount(accId: string) {
     if (!accounts) return;
 
-    const acc = accounts.find((acc) => acc.id === accId) as AccountsItem;
+    const acc = accounts.find((acc) => acc.id === accId);
+    if (!acc) return;
     onPick(acc);
   }
 
