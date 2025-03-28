@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Support Commas in Filters] - {PR_MERGE-DATE}
+## [Support Commas in Filters] - {PR_MERGE_DATE}
 
 Add support for commas in filter strings.
 
