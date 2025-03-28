@@ -20,7 +20,9 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
 
   const { data } = useCachedPromise(
     async (search) => {
-      const queries = search.split(",").map((part: string) => part.trim());
+      const queries = search.split(",")
+        .map((part: string) => part.trim())
+        .filter((q: string) => q.length > 0);
       const sections = await Promise.all(
         queries.map(async (q: string) => {
           const tasks = await getFilterTasks(q);
