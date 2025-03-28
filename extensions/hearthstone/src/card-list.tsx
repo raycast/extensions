@@ -1,152 +1,152 @@
-import { Action, ActionPanel, Grid, Icon, showToast } from "@raycast/api"
-import { showFailureToast } from "@raycast/utils"
-import { useEffect, useState } from "react"
-import { CardDetailView } from "./components/card-detail-view"
-import { getDefaultCardImageLanguage } from "./preferences"
-import { Card, ClassName } from "./types/types"
-import { getLocalCardData } from "./utils/utils"
+import { Action, ActionPanel, Grid, Icon, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { CardDetailView } from "./components/card-detail-view";
+import { getDefaultCardImageLanguage } from "./preferences";
+import { Card, ClassName } from "./types/types";
+import { getLocalCardData } from "./utils/utils";
 
 export default function CardListCommand() {
-  const [cards, setCards] = useState<Card[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [searchByCost, setSearchByCost] = useState<string>("all")
-  const [language, setLanguage] = useState<"enUS" | "zhCN">(getDefaultCardImageLanguage())
-  const [searchByClass, setSearchByClass] = useState<string>("all")
-  const [searchBySet, setSearchBySet] = useState<string>("all")
-  const [allCardData, setAllCardData] = useState<Card[]>([])
-  const [uniqueSets, setUniqueSets] = useState<string[]>(["all"])
+  const [cards, setCards] = useState<Card[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchByCost, setSearchByCost] = useState<string>("all");
+  const [language, setLanguage] = useState<"enUS" | "zhCN">(getDefaultCardImageLanguage());
+  const [searchByClass, setSearchByClass] = useState<string>("all");
+  const [searchBySet, setSearchBySet] = useState<string>("all");
+  const [allCardData, setAllCardData] = useState<Card[]>([]);
+  const [uniqueSets, setUniqueSets] = useState<string[]>(["all"]);
 
   // For paging and loading more
-  const [visibleCount, setVisibleCount] = useState(10)
-  const [filteredCards, setFilteredCards] = useState<Card[]>([])
-  const [hasMoreCards, setHasMoreCards] = useState(false)
+  const [visibleCount, setVisibleCount] = useState(10);
+  const [filteredCards, setFilteredCards] = useState<Card[]>([]);
+  const [hasMoreCards, setHasMoreCards] = useState(false);
 
-  const INITIAL_PAGE_SIZE = 10
-  const LOAD_MORE_SIZE = 10
+  const INITIAL_PAGE_SIZE = 10;
+  const LOAD_MORE_SIZE = 10;
 
-  const classes = ["all", ...Object.values(ClassName), "NEUTRAL"]
+  const classes = ["all", ...Object.values(ClassName), "NEUTRAL"];
 
   useEffect(() => {
     const loadAllCardData = async () => {
       try {
-        setIsLoading(true)
-        const data = await getLocalCardData(language)
+        setIsLoading(true);
+        const data = await getLocalCardData(language);
 
-        setAllCardData(data)
+        setAllCardData(data);
 
         // Extract unique card set
         const cardSets = data
           .map((card: Card) => card.set)
-          .filter((set: string | undefined): set is string => typeof set === "string" && set.length > 0)
+          .filter((set: string | undefined): set is string => typeof set === "string" && set.length > 0);
 
-        const uniqueSetValues = ["all", ...Array.from(new Set<string>(cardSets))]
-        setUniqueSets(uniqueSetValues)
+        const uniqueSetValues = ["all", ...Array.from(new Set<string>(cardSets))];
+        setUniqueSets(uniqueSetValues);
 
         // Load only collectible cards
-        const collectibleCards = data.filter((card: Card) => card.collectible)
-        setFilteredCards(collectibleCards)
-        setCards(collectibleCards.slice(0, INITIAL_PAGE_SIZE))
-        setHasMoreCards(collectibleCards.length > INITIAL_PAGE_SIZE)
+        const collectibleCards = data.filter((card: Card) => card.collectible);
+        setFilteredCards(collectibleCards);
+        setCards(collectibleCards.slice(0, INITIAL_PAGE_SIZE));
+        setHasMoreCards(collectibleCards.length > INITIAL_PAGE_SIZE);
 
-        setIsLoading(false)
+        setIsLoading(false);
       } catch (error) {
-        showFailureToast(error, { title: "Error loading card data" })
+        showFailureToast(error, { title: "Error loading card data" });
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    loadAllCardData()
-  }, [language])
+    loadAllCardData();
+  }, [language]);
 
   // Handling filter changes
   useEffect(() => {
-    if (allCardData.length === 0) return
+    if (allCardData.length === 0) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      let newFilteredCards = allCardData.filter((card: Card) => card.collectible)
+      let newFilteredCards = allCardData.filter((card: Card) => card.collectible);
 
       if (searchTerm) {
         newFilteredCards = newFilteredCards.filter((card) =>
           card.name.toLowerCase().includes(searchTerm.toLowerCase()),
-        )
+        );
       }
 
       if (searchByCost !== "all") {
         newFilteredCards = newFilteredCards.filter((card) => {
           // Handle the case where card.cost may be undefined
-          const cost = card.cost ?? 0
+          const cost = card.cost ?? 0;
 
           if (searchByCost === ">10") {
-            return cost > 10
+            return cost > 10;
           }
-          return cost === parseInt(searchByCost, 10)
-        })
+          return cost === parseInt(searchByCost, 10);
+        });
       }
 
       if (searchByClass !== "all") {
         newFilteredCards = newFilteredCards.filter((card) => {
           if (searchByClass === "NEUTRAL") {
-            return card.cardClass === "NEUTRAL"
+            return card.cardClass === "NEUTRAL";
           }
-          return card.cardClass?.toUpperCase() === searchByClass.toUpperCase()
-        })
+          return card.cardClass?.toUpperCase() === searchByClass.toUpperCase();
+        });
       }
 
       if (searchBySet !== "all") {
-        newFilteredCards = newFilteredCards.filter((card) => card.set === searchBySet)
+        newFilteredCards = newFilteredCards.filter((card) => card.set === searchBySet);
       }
 
-      setFilteredCards(newFilteredCards)
+      setFilteredCards(newFilteredCards);
 
       // Reset visible count and display initial cards
-      setVisibleCount(INITIAL_PAGE_SIZE)
-      setCards(newFilteredCards.slice(0, INITIAL_PAGE_SIZE))
-      setHasMoreCards(newFilteredCards.length > INITIAL_PAGE_SIZE)
+      setVisibleCount(INITIAL_PAGE_SIZE);
+      setCards(newFilteredCards.slice(0, INITIAL_PAGE_SIZE));
+      setHasMoreCards(newFilteredCards.length > INITIAL_PAGE_SIZE);
     } catch (error) {
-      showFailureToast(error, { title: "Error applying filters" })
+      showFailureToast(error, { title: "Error applying filters" });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [allCardData, searchTerm, searchByCost, searchByClass, searchBySet])
+  }, [allCardData, searchTerm, searchByCost, searchByClass, searchBySet]);
 
   const handleFilterChange = (value: string) => {
-    const parts = value.split("_")
-    const newLanguage = parts[0] as "enUS" | "zhCN"
-    const filterType = parts[1]
-    const filterValue = parts.slice(2).join("_")
+    const parts = value.split("_");
+    const newLanguage = parts[0] as "enUS" | "zhCN";
+    const filterType = parts[1];
+    const filterValue = parts.slice(2).join("_");
 
     if (newLanguage !== language) {
-      setLanguage(newLanguage)
-      return
+      setLanguage(newLanguage);
+      return;
     }
 
     switch (filterType) {
       case "cost":
-        setSearchByCost(filterValue)
-        break
+        setSearchByCost(filterValue);
+        break;
       case "class":
-        setSearchByClass(filterValue)
-        break
+        setSearchByClass(filterValue);
+        break;
       case "set":
-        setSearchBySet(filterValue)
-        break
+        setSearchBySet(filterValue);
+        break;
     }
-  }
+  };
 
   // Load more cards (do not close window)
   const loadMoreCards = () => {
     if (hasMoreCards && !isLoading) {
-      const newVisibleCount = visibleCount + LOAD_MORE_SIZE
-      setVisibleCount(newVisibleCount)
-      setCards(filteredCards.slice(0, newVisibleCount))
-      setHasMoreCards(filteredCards.length > newVisibleCount)
-      showToast({ title: "Load More...", message: "More cards loaded" })
+      const newVisibleCount = visibleCount + LOAD_MORE_SIZE;
+      setVisibleCount(newVisibleCount);
+      setCards(filteredCards.slice(0, newVisibleCount));
+      setHasMoreCards(filteredCards.length > newVisibleCount);
+      showToast({ title: "Load More...", message: "More cards loaded" });
     }
-  }
+  };
 
   return (
     <Grid
@@ -156,11 +156,7 @@ export default function CardListCommand() {
       searchText={searchTerm}
       onSearchTextChange={setSearchTerm}
       searchBarAccessory={
-        <Grid.Dropdown 
-          tooltip="Select Filters" 
-          onChange={handleFilterChange}
-          defaultValue={`${language}_lang_`}
-        >
+        <Grid.Dropdown tooltip="Select Filters" onChange={handleFilterChange} defaultValue={`${language}_lang_`}>
           <Grid.Dropdown.Section title="Language">
             <Grid.Dropdown.Item title="English" value={`enUS_lang_`} />
             <Grid.Dropdown.Item title="Chinese" value={`zhCN_lang_`} />
@@ -205,8 +201,8 @@ export default function CardListCommand() {
               icon={Icon.Download}
               shortcut={{ modifiers: ["cmd"], key: "enter" }}
               onAction={() => {
-                loadMoreCards()
-                return { keepWindowOpen: true }
+                loadMoreCards();
+                return { keepWindowOpen: true };
               }}
             />
           </ActionPanel>
@@ -263,8 +259,8 @@ export default function CardListCommand() {
                     icon={Icon.Download}
                     shortcut={{ modifiers: ["cmd"], key: "enter" }}
                     onAction={() => {
-                      loadMoreCards()
-                      return { keepWindowOpen: true }
+                      loadMoreCards();
+                      return { keepWindowOpen: true };
                     }}
                   />
                 )}
@@ -276,5 +272,5 @@ export default function CardListCommand() {
 
       {/* Remove the separate "Load More Cards" grid item */}
     </Grid>
-  )
+  );
 }
