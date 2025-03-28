@@ -253,7 +253,7 @@ export default function TranslateItForMe() {
               />
             </ActionPanel>
           }
-          detail={<List.Item.Detail markdown={`> ${item.vocabulary}` + `\n ${history[item.vocabulary]}`} />}
+          detail={<List.Item.Detail markdown={`> ${item.vocabulary}` + `\n ${history[item.vocabulary] || ""}`} />}
         />
       );
     },
