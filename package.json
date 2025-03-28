@@ -58,17 +58,19 @@
   ],
   "preferences": [
     {
-      "name": "paystack_live_api_key",
+      "name": "live-secret-key",
       "type": "password",
-      "title": "Paystack Live API Key",
-      "description": "Enter your Paystack live API key to enable secure access to your account.",
+      "title": "Live Secret Key",
+      "placeholder": "sk_live_1234567890",
+      "description": "Enter your Paystack live secret key to enable secure access to your account.",
       "required": true
     },
     {
-      "name": "paystack_test_api_key",
+      "name": "test-secret-key",
       "type": "password",
-      "title": "Paystack Test API Key",
-      "description": "Enter your Paystack test API key to enable secure access to your test environment.",
+      "title": "Test Secret Key",
+      "placeholder": "sk_test_1234567890",
+      "description": "Enter your Paystack test secret key to enable secure access to your test environment.",
       "required": true
     }
   ],
