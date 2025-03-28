@@ -53,21 +53,19 @@ export async function getSearchResults(
 
   const results: SearchResult[] = [firstResult];
 
-  json[1].map((item: string, i: number) => {
+  json[1].forEach((item: string, i: number) => {
     const result = {
       id: randomId(),
       query: item,
       description: `Search Kagi for '${item}'`,
       url: `https://kagi.com/search?token=${token}&q=${encodeURIComponent(item)}`,
     };
-
     // Apply the same conditional logic to the other results
     if (result.query.includes("!")) {
       result.description = "Use a Kagi bang with: " + item;
     } else if (result.query.includes("?")) {
       result.description = "Ask FastGPT: " + item;
     }
-
     results[i + 1] = result;
   });
 

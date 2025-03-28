@@ -21,10 +21,11 @@ export default function FastGPTView(props: FastGPTViewProps) {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const controller = new AbortController();
+
     async function fetchFastGPTAnswer() {
       try {
         setIsLoading(true);
-        const controller = new AbortController();
         const result = await searchWithFastGPT(props.query, apiKey, controller.signal);
 
         if (result) {
