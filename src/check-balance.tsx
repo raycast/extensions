@@ -15,7 +15,7 @@ const preferences = getPreferenceValues<Preferences>();
 
 export default function Command() {
   const formatCurrency = useCurrencyFormatter();
-  const mode = preferences.mode === "live" ? "🟢 Live Mode" : "🟡 Test Mode";
+  const mode = preferences.mode === "live" ? "🟢 Live" : "🔴 Test";
   const { get, isLoading } = usePaystack();
   interface Balance {
     currency: string;
@@ -67,6 +67,20 @@ export default function Command() {
               <ActionPanel.Section title="Dashboard Mode">
                 <Action onAction={openExtensionPreferences} title={mode} />
               </ActionPanel.Section>
+              <Action.OpenInBrowser
+                url={`https://dashboard.paystack.com/#/dashboard?currency=${balance.currency}`}
+                shortcut={{
+                  modifiers: ["cmd"],
+                  key: "o",
+                }}
+                title="Open in Dashboard"
+              />
+
+              <Action.CopyToClipboard
+                title="Copy Balance"
+                content={formatCurrency(balance.balance, balance.currency)}
+                shortcut={{ modifiers: ["cmd"], key: "c" }}
+              />
             </ActionPanel>
           }
         />
