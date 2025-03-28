@@ -1,6 +1,4 @@
 {
   "printWidth": 120,
-  "singleQuote": true,
-  "trailingComma": "es5",
-  "quoteProps": "as-needed"
+  "singleQuote": true
 }
