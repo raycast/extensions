@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { useForm, FormValidation, showFailureToast } from "@raycast/utils";
 import { DEFAULT_DIRECTORY, DEFAULT_PORT, getProcesses, startServer, stopServer } from "./util";
 import { useState } from "react";
 
@@ -19,7 +19,7 @@ export default function Command() {
   const preferences = getPreferenceValues();
   const defaultPort = preferences.port || DEFAULT_PORT;
   const defaultDirectory = preferences.directory || DEFAULT_DIRECTORY;
-  const currentPort = command.replace(/.*-m http\.server (\d+) --directory .*/, "$1");
+  const currentPort = command.replace(/.*-m http\.server (\d+) .*/, "$1");
   const currentDirectory = command.replace(/.*--directory (.+)/, "$1");
 
   const [targetUrl, setTargetUrl] = useState(proc.length > 0 ? "http://localhost:" + currentPort : "");
@@ -39,9 +39,7 @@ export default function Command() {
           toast.title = "Success";
           toast.message = "Simple HTTP stopped";
         } catch (error) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Error";
-          toast.message = String(error);
+          showFailureToast(error, { title: "Error", message: String(error) });
           return;
         }
       } else {

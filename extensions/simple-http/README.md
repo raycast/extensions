@@ -41,7 +41,7 @@ This command will show the current status of the HTTP server (Running or Not Run
 
 ### 1. `Default Port`
 
-You can set the default port to use when serving a directory. The default port is `8080`.
+You can set the default port to use when serving a directory. The default port is `8000`.
 
 ### 2. `Default Directory`
 
