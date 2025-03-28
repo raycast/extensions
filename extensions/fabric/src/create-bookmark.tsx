@@ -1,14 +1,15 @@
 import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useForm, FormValidation, withAccessToken } from "@raycast/utils";
 
-import {
-  CreateBookmarkParams,
-  getFabricClient,
-  oauthService,
-} from "./api/fabricClient";
+import { CreateBookmarkParams, getFabricClient, oauthService } from "./api/fabricClient";
+
+type CreationValues = {
+  url: string;
+  comment: string;
+};
 
 function CreateBookmark() {
-  const { handleSubmit, itemProps, reset } = useForm<CreateBookmarkParams>({
+  const { handleSubmit, itemProps, reset } = useForm<CreationValues>({
     async onSubmit(values: CreateBookmarkParams) {
       const toast = await showToast({
         style: Toast.Style.Animated,
@@ -44,16 +45,8 @@ function CreateBookmark() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        title="Link"
-        placeholder="Type or paste a link..."
-        {...itemProps.url}
-      />
-      <Form.TextArea
-        title="Comment"
-        placeholder="Say something about it (optional)"
-        {...itemProps.comment}
-      />
+      <Form.TextField title="Link" placeholder="Type or paste a link..." {...itemProps.url} />
+      <Form.TextArea title="Comment" placeholder="Say something about it (optional)" {...itemProps.comment} />
     </Form>
   );
 }

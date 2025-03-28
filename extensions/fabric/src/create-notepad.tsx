@@ -1,14 +1,15 @@
 import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useForm, FormValidation, withAccessToken } from "@raycast/utils";
 
-import {
-  CreateNotepadParams,
-  getFabricClient,
-  oauthService,
-} from "./api/fabricClient";
+import { CreateNotepadParams, getFabricClient, oauthService } from "./api/fabricClient";
 
-function CreateNotepad() {
-  const { handleSubmit, itemProps, reset } = useForm<CreateNotepadParams>({
+type CreationValues = {
+  name: string;
+  content: string;
+};
+
+function CreateNote() {
+  const { handleSubmit, itemProps, reset } = useForm<CreationValues>({
     async onSubmit(values: CreateNotepadParams) {
       const toast = await showToast({
         style: Toast.Style.Animated,
@@ -44,11 +45,7 @@ function CreateNotepad() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        title="Title"
-        placeholder="Untitled note"
-        {...itemProps.name}
-      />
+      <Form.TextField title="Title" placeholder="Untitled note" {...itemProps.name} />
       <Form.TextArea
         title="Content"
         info="Supports markdown syntax."
@@ -61,4 +58,4 @@ function CreateNotepad() {
   );
 }
 
-export default withAccessToken(oauthService)(CreateNotepad);
+export default withAccessToken(oauthService)(CreateNote);

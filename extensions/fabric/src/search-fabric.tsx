@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, List } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { withAccessToken, showFailureToast } from "@raycast/utils";
 
-import {
-  getFabricClient,
-  Kind,
-  Resource,
-  SearchQuery,
-  oauthService,
-} from "./api/fabricClient";
+import { getFabricClient, Kind, Resource, SearchQuery, oauthService } from "./api/fabricClient";
 import { getKindIcon, removeHtml } from "./utils";
 import { URL_APP, ICON_FALLBACK } from "./config";
 
@@ -62,9 +56,7 @@ const apiFilter = async (searchQuery: SearchQuery): Promise<SearchResponse> => {
 
     let description = "";
     if (item.kind === Kind.NOTEPAD) {
-      description = item.data.preview?.content
-        ? removeHtml(item.data.preview.content)
-        : "";
+      description = item.data.preview?.content ? removeHtml(item.data.preview.content) : "";
     } else if (item.kind === Kind.BOOKMARK || item.kind === Kind.HIGHLIGHT) {
       description = item.data.webpage?.description || "";
     }
@@ -91,7 +83,12 @@ const apiFilter = async (searchQuery: SearchQuery): Promise<SearchResponse> => {
 };
 
 function Search() {
-  const emptyList: SearchResult[] = [];
+  const emptyList: {
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+  }[] = [];
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState<SearchQuery>({ text: "" });
   const [filteredList, filterList] = useState(emptyList);
@@ -105,8 +102,9 @@ function Search() {
         if (aborted) return;
 
         if (result.status === "error") {
-          showFailureToast(result.error, {
-            title: "Failed to fetch items: unknown error",
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to fetch items: request error",
           });
           return;
         }
@@ -134,35 +132,21 @@ function Search() {
   const kindDropdown = (
     <List.Dropdown
       tooltip="Filter Items by Kind"
-      onChange={(kind: string) =>
-        setSearchQuery({ ...searchQuery, kind: kind as Kind })
-      }
+      onChange={(kind: string) => setSearchQuery({ ...searchQuery, kind: kind as Kind })}
     >
       <List.Dropdown.Section>
-        <List.Dropdown.Item
-          title="Any kind"
-          value=""
-          key=""
-          icon={getKindIcon(null)}
-        />
+        <List.Dropdown.Item title="Any kind" value="" key="" icon={getKindIcon(null)} />
       </List.Dropdown.Section>
 
       {KINDS.map(([kind, kindTitle]) => (
-        <List.Dropdown.Item
-          title={kindTitle}
-          value={kind}
-          key={kind}
-          icon={getKindIcon(kind)}
-        />
+        <List.Dropdown.Item title={kindTitle} value={kind} key={kind} icon={getKindIcon(kind)} />
       ))}
     </List.Dropdown>
   );
 
   return (
     <List
-      onSearchTextChange={(text: string) =>
-        setSearchQuery({ ...searchQuery, text })
-      }
+      onSearchTextChange={(text: string) => setSearchQuery({ ...searchQuery, text })}
       searchBarAccessory={kindDropdown}
       isLoading={isLoading}
     >
@@ -174,9 +158,7 @@ function Search() {
           subtitle={item.description}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                url={`${URL_APP}/home?expandedFdocId=${item.id}`}
-              />
+              <Action.OpenInBrowser url={`${URL_APP}/home?expandedFdocId=${item.id}`} />
             </ActionPanel>
           }
         />

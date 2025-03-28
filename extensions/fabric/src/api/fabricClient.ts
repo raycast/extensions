@@ -3,13 +3,13 @@ import fetch from "node-fetch";
 import * as Y from "yjs";
 import sanitizeHtml from "sanitize-html";
 import { marked } from "marked";
-import { getSchema, Extension } from "@tiptap/core";
+import { getSchema } from "@tiptap/core";
 import { generateJSON } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "tiptap-markdown";
 import { prosemirrorJSONToYDoc } from "y-prosemirror";
-import { OAuth, showToast, Toast } from "@raycast/api";
-import { getAccessToken, OAuthService, showFailureToast } from "@raycast/utils";
+import { OAuth } from "@raycast/api";
+import { getAccessToken, OAuthService } from "@raycast/utils";
 
 import { CLIENT_ID, URL_API, URL_APP } from "../config";
 
@@ -123,40 +123,21 @@ class FabricClient {
     this.endpoint = endpoint;
   }
 
-  private async request({
-    path,
-    method,
-    body,
-    expectedStatusCodes = [200],
-  }: APIRequestOptions) {
-    let token;
-    try {
-      token = (await getAccessToken()).token;
-    } catch (error) {
-      showFailureToast(error, {
-        title: "Failed to get access token",
-      });
-      return;
-    }
-
+  private async request({ path, method, body, expectedStatusCodes = [200] }: APIRequestOptions) {
+    const { token } = await getAccessToken();
     const response = await fetch(`${this.endpoint}${path}`, {
       method,
       headers: {
-        "Content-Type":
-          body instanceof Buffer
-            ? "application/octet-stream"
-            : "application/json",
+        "Content-Type": body instanceof Buffer ? "application/octet-stream" : "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: body instanceof Buffer ? body : JSON.stringify(body),
     });
 
     if (!expectedStatusCodes.includes(response.status)) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: `Request failed with status ${response.status}`,
-      });
-      return;
+      const body = await response.text();
+
+      throw new Error(`Request failed with status ${response.status}: ${body}`);
     }
 
     return response;
@@ -172,10 +153,6 @@ class FabricClient {
       }),
       expectedStatusCodes: [200],
     });
-
-    if (!response) {
-      return [];
-    }
 
     const body = (await response.json()) as { resources: Resource[] };
     return body.resources;
@@ -200,10 +177,6 @@ class FabricClient {
       }),
       expectedStatusCodes: [200],
     });
-
-    if (!response) {
-      return [];
-    }
 
     const body = (await response.json()) as { hits: Resource[] };
     return body.hits;
@@ -241,7 +214,7 @@ class FabricClient {
 
   private async createYDocFromMarkdown(md: string): Promise<Uint8Array> {
     const html = sanitizeHtml(await marked.parse(md));
-    const extensions: Extension[] = [
+    const extensions: any[] = [
       StarterKit.configure({
         codeBlock: false,
         history: false,
@@ -279,6 +252,10 @@ export const oauthService = new OAuthService({
 });
 
 export function getFabricClient(): FabricClient {
+  if (!fabricClient) {
+    throw new Error("Fabric client not initialized");
+  }
+
   return fabricClient;
 }
 
