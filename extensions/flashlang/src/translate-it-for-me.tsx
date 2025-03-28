@@ -171,6 +171,12 @@ export default function TranslateItForMe() {
 
     if (!searchText) return entries.map(({ word, translation }) => [word, translation]);
 
+    // Create a new entry if searchText doesn't exist in history
+    const hasExactMatch = entries.some((entry) => entry.word === searchText);
+    if (!hasExactMatch && searchText.trim()) {
+      entries.unshift({ word: searchText, translation: "" });
+    }
+
     const searcher = new FuzzySearch(entries, ["word"], {
       caseSensitive: false,
       sort: true,
@@ -260,9 +266,16 @@ export default function TranslateItForMe() {
       isLoading={isLoadingHistory || isAiLoading || isLoading}
       searchBarPlaceholder="Search or type new word to translate..."
       onSearchTextChange={(text) => {
-        // if (!isAiLoading) {
-        setSearchText(text.trim());
-        // }
+        const trimmedText = text.trim();
+        setSearchText(trimmedText);
+
+        // Auto-select the matching entry
+        if (trimmedText) {
+          const exactMatch = Object.keys(history).find((word) => word === trimmedText);
+          setSelectedItemId(exactMatch || trimmedText);
+        } else {
+          setSelectedItemId("");
+        }
       }}
       searchText={searchText}
       selectedItemId={selectedItemId}
