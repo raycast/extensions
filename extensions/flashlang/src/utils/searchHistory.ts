@@ -6,18 +6,6 @@ export interface TranslationHistory {
   [key: string]: string;
 }
 
-export async function addToSearchHistory(vocabulary: string, translation: string): Promise<void> {
-  try {
-    const existingHistory = await LocalStorage.getItem(HISTORY_KEY);
-    const history: TranslationHistory = existingHistory ? JSON.parse(existingHistory as string) : {};
-
-    history[vocabulary] = translation;
-    await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-  } catch (error) {
-    console.error("Failed to add to search history:", error);
-  }
-}
-
 export async function removeFromSearchHistory(vocabulary: string): Promise<void> {
   try {
     const existingHistory = await LocalStorage.getItem(HISTORY_KEY);
