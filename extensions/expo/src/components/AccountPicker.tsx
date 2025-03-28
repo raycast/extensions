@@ -1,31 +1,33 @@
 import { List } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { AccountsItem } from "../lib/types/users-types.types";
-import { getAccounts } from "../lib/utils";
+import useAuth from "../hooks/useAuth";
 
 export default function AccountPicker({ onPick }: { onPick: (account: AccountsItem) => void }) {
-  const [accounts, setAccounts] = useState<AccountsItem[]>([]);
+  const { accounts } = useAuth();
 
   function onPickAccount(accId: string) {
+    if (!accounts) return;
+
     const acc = accounts.find((acc) => acc.id === accId) as AccountsItem;
     onPick(acc);
   }
 
   useEffect(() => {
-    async function init() {
-      const userAccounts = await getAccounts();
-      console.log({ userAccounts });
-      setAccounts(userAccounts);
-      onPick(userAccounts[0]);
+    if (accounts) {
+      onPick(accounts[0]);
     }
-    init();
-  }, []);
+  }, [accounts]);
   return (
     <List.Dropdown tooltip="Account" storeValue onChange={onPickAccount}>
       <List.Dropdown.Section title="Account">
-        {accounts.map((acc) => (
-          <List.Dropdown.Item key={acc.id} title={acc.name} value={acc.id} />
-        ))}
+        {accounts && (
+          <>
+            {accounts.map((acc) => (
+              <List.Dropdown.Item key={acc.id} title={acc.name} value={acc.id} />
+            ))}
+          </>
+        )}
       </List.Dropdown.Section>
     </List.Dropdown>
   );

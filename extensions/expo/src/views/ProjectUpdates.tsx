@@ -1,20 +1,21 @@
 import { showToast, Toast, List, Icon, ActionPanel, Action, ImageMask, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useEffect } from "react";
 import { BASE_URL } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
-import { getAuthHeaders, humanDateTime } from "../lib/utils";
+import { humanDateTime, isObjectEmpty } from "../lib/utils";
 import { ProjectUpdate, ProjectUpdatesResponse } from "../lib/types/project-updates.types";
 import UpdateGroup from "./UpdateDetails";
+import useAuth from "../hooks/useAuth";
+import { Project } from "../lib/types/projects.types";
 
-export default function ProjectBuilds({ appFullName }: { appFullName: string }) {
-  const [headers, setHeaders] = useState<Record<string, string> | null>(null);
+export default function ProjectBuilds({ project }: { project: Project }) {
+  const { authHeaders } = useAuth();
 
   const ProjectUpdatesPayload = JSON.stringify([
     {
       operationName: "UpdatesPaginated",
       variables: {
-        fullName: appFullName,
+        fullName: project.fullName,
         first: 30,
       },
       query:
@@ -25,8 +26,8 @@ export default function ProjectBuilds({ appFullName }: { appFullName: string }) 
   const { isLoading, data } = useFetch(BASE_URL, {
     body: ProjectUpdatesPayload,
     method: "post",
-    headers: headers || {},
-    execute: headers === null ? false : true,
+    headers: authHeaders,
+    execute: !isObjectEmpty(authHeaders),
     parseResponse: async (resp) => {
       const data = (await resp.json()) as ProjectUpdatesResponse;
       if ("errors" in data) {
@@ -48,14 +49,6 @@ export default function ProjectBuilds({ appFullName }: { appFullName: string }) 
     initialData: [],
   });
 
-  useEffect(() => {
-    async function fetchHeaders() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    fetchHeaders();
-  }, []);
-
   function getExpoLink(activity: ProjectUpdate) {
     const link = `https://expo.dev/accounts/${activity.app.ownerAccount?.name}/projects/${activity.app.name}/${activity.__typename}s/${activity.id}`;
     return link.toLowerCase();
@@ -63,7 +56,7 @@ export default function ProjectBuilds({ appFullName }: { appFullName: string }) 
 
   return (
     <List isLoading={isLoading} navigationTitle="Updates">
-      {data ? (
+      {data && data.length > 0 ? (
         <>
           {data.map((update) => (
             <List.Item

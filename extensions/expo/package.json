@@ -11,13 +11,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "login",
-      "title": "Login",
-      "subtitle": "Expo login",
-      "description": "Login to your expo account",
-      "mode": "view"
-    },
-    {
       "name": "manage-projects",
       "title": "Manage Projects",
       "subtitle": "Expo projects",
@@ -35,6 +28,13 @@
       "name": "manage-envs",
       "title": "Environment Variables",
       "description": "View, Create, Edit and Delete environment variables",
+      "mode": "view"
+    },
+    {
+      "name": "login",
+      "title": "Login",
+      "subtitle": "Expo login",
+      "description": "Login to your expo account",
       "mode": "view"
     }
   ],

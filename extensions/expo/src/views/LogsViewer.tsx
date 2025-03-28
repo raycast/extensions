@@ -19,7 +19,7 @@ export default function LogsViewer({ logFiles }: { logFiles: string[] }) {
 
   return (
     <List isLoading={isLoading} navigationTitle="Logs" isShowingDetail>
-      {data ? (
+      {data && data.length > 0 ? (
         <>
           {data.map((group) => (
             <List.Item

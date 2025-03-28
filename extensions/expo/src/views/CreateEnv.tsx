@@ -2,10 +2,9 @@ import { showToast, Toast, Form, ActionPanel, Action, useNavigation, Icon } from
 import { useForm, FormValidation } from "@raycast/utils";
 import axios, { AxiosRequestConfig } from "axios";
 import { EditAppleDeviceNameResponse } from "../lib/types/apple-devices.types";
-import { useEffect, useState } from "react";
-import { getAuthHeaders } from "../lib/utils";
 import { BASE_URL } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
+import useAuth from "../hooks/useAuth";
 
 interface CreateEnvPayload {
   name: string;
@@ -14,7 +13,7 @@ interface CreateEnvPayload {
   environments: Array<"DEVELOPMENT" | "PREVIEW" | "PRODUCTION">;
 }
 export default function CreateEnv({ refreshEnvs }: { refreshEnvs: () => void }) {
-  const [headers, setHeaders] = useState<Record<string, string>>({});
+  const { authHeaders } = useAuth();
   const { pop } = useNavigation();
 
   const { handleSubmit } = useForm<CreateEnvPayload>({
@@ -23,7 +22,7 @@ export default function CreateEnv({ refreshEnvs }: { refreshEnvs: () => void }) 
         method: "post",
         maxBodyLength: Infinity,
         url: BASE_URL,
-        headers,
+        headers: authHeaders,
         data: JSON.stringify([
           {
             operationName: "CreateBulkEnvironmentVariableForApp",
@@ -82,14 +81,6 @@ export default function CreateEnv({ refreshEnvs }: { refreshEnvs: () => void }) 
       environments: FormValidation.Required,
     },
   });
-
-  useEffect(() => {
-    async function fetchHeaders() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    fetchHeaders();
-  }, []);
 
   return (
     <Form
