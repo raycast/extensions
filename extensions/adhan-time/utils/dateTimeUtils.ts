@@ -111,7 +111,9 @@ export function findCurrentAndNextPrayer(timings: Prayer[]): { currentPrayer: Pr
 
   const upcomingTimings = sortedPrayersAndCutoffs.slice(currentPrayerIndex + 1);
 
-  const nextPrayer = upcomingTimings.find((p) => p.cutOffFor === currentPrayer.name) || upcomingTimings[0];
+  const nextPrayer = upcomingTimings.length > 0
+    ? (upcomingTimings.find((p) => p.cutOffFor === currentPrayer.name) || upcomingTimings[0])
+    : null;
 
   return { currentPrayer, nextPrayer };
 }
