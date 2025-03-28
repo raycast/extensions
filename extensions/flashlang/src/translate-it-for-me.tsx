@@ -41,7 +41,10 @@ export default function TranslateItForMe() {
 
         const selectedText = await readContent(preferredSource);
         const existingHistory = await getSearchHistory();
-        setHistory({ ...existingHistory, [selectedText]: "" });
+        setHistory({
+          ...existingHistory,
+          [selectedText]: existingHistory[selectedText] ?? "",
+        });
         setSearchText(selectedText);
 
         // don't generate prompt if the word is already in the history
