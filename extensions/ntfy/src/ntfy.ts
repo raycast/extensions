@@ -1,18 +1,6 @@
 import { Toast, closeMainWindow, getPreferenceValues, getSelectedText, showToast } from '@raycast/api';
 import { showFailureToast } from '@raycast/utils';
 
-type Arguments = {
-  url?: string;
-  message?: string;
-  topic?: string;
-};
-
-type Preferences = {
-  defaultTopic: string;
-  defaultServer: string;
-  cache: boolean;
-};
-
 type Action = {
   action: 'http' | 'view' | 'broadcast';
   label: string;
@@ -92,7 +80,7 @@ const parseMessage = async ({ url, message }: { url?: string; message?: string }
   };
 };
 
-export default async function main(props: { arguments: Arguments }) {
+export default async function main(props: { arguments: Arguments.Ntfy }) {
   try {
     const { defaultTopic, cache, defaultServer } = getPreferenceValues<Preferences>();
     const topic = props.arguments.topic || defaultTopic;
