@@ -3,6 +3,7 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { format, formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import * as emoji from "node-emoji";
+import { SendMessage } from "./send-message";
 
 import { withSlackClient } from "./shared/withSlackClient";
 import { getSlackWebClient } from "./shared/client/WebClient";
@@ -151,6 +152,15 @@ function Search() {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                 ) : null}
+
+                {user && (
+                  <Action.Push
+                    title={`Message ${user.name}`}
+                    icon={Icon.Message}
+                    target={<SendMessage recipient={user?.id} />}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                  />
+                )}
 
                 <ActionPanel.Section>
                   <ActionPanel.Submenu
