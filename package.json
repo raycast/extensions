@@ -58,7 +58,7 @@
   ],
   "preferences": [
     {
-      "name": "live-secret-key",
+      "name": "liveSecretKey",
       "type": "password",
       "title": "Live Secret Key",
       "placeholder": "sk_live_1234567890",
@@ -66,11 +66,29 @@
       "required": true
     },
     {
-      "name": "test-secret-key",
+      "name": "testSecretKey",
       "type": "password",
       "title": "Test Secret Key",
       "placeholder": "sk_test_1234567890",
       "description": "Enter your Paystack test secret key to enable secure access to your test environment.",
+      "required": true
+    },
+    {
+      "name": "mode",
+      "type": "dropdown",
+      "title": "Dashboard Mode",
+      "description": "Set paystack dashboard mode to either live or test.",
+      "default": "live",
+      "data": [
+        {
+          "value": "live",
+          "title": "Live"
+        },
+        {
+          "value": "test",
+          "title": "Test"
+        }
+      ],
       "required": true
     }
   ],

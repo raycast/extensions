@@ -1,5 +1,76 @@
-import { Detail } from "@raycast/api";
+import {
+  showToast,
+  Toast,
+  List,
+  getPreferenceValues,
+  ActionPanel,
+  Action,
+  openExtensionPreferences,
+} from "@raycast/api";
+import { useEffect, useState } from "react";
+import { usePaystack } from "./hooks/paystack";
+import { useCurrencyFormatter } from "./hooks/currency";
+
+const preferences = getPreferenceValues<Preferences>();
 
 export default function Command() {
-  return <Detail markdown="# Hello World" />;
+  const formatCurrency = useCurrencyFormatter();
+  const mode = preferences.mode === "live" ? "🟢 Live Mode" : "🟡 Test Mode";
+  const { get, isLoading } = usePaystack();
+  interface Balance {
+    currency: string;
+    balance: number;
+  }
+
+  const [balances, setBalance] = useState<Array<Balance>>([]);
+
+  useEffect(() => {
+    async function getBalance() {
+      try {
+        const balance = (await get("/balance")) as {
+          status: boolean;
+          message: string;
+          data: { currency: string; balance: number }[];
+        };
+        if (balance.status) {
+          showToast({ style: Toast.Style.Success, title: "Balances fetched successfully!" });
+        }
+        setBalance(balance.data);
+      } catch (error) {
+        console.error("Error fetching balance:", error);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error fetching balance",
+          message: (error as Error).message,
+        });
+        setBalance([]);
+      }
+    }
+    getBalance();
+  }, []);
+
+  useEffect(() => {
+    if (isLoading) {
+      showToast({ style: Toast.Style.Animated, title: "Loading balances..." });
+    }
+  }, [isLoading]);
+
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder="Search balances...">
+      {balances.map((balance, index) => (
+        <List.Item
+          key={index}
+          title={formatCurrency(balance.balance, balance.currency)}
+          subtitle={balance.currency}
+          actions={
+            <ActionPanel>
+              <ActionPanel.Section title="Dashboard Mode">
+                <Action onAction={openExtensionPreferences} title={mode} />
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
 }
