@@ -4,7 +4,7 @@
 
 Add support for commas in filter strings.
 
-## [Added Inbox View in Menu Bar] - {PR MERGE DATE}
+## [Added Inbox View in Menu Bar] - 2025-03-25
 
 Added a new option for Inbox in View under Menu Bar Tasks.
 
