@@ -1,18 +1,35 @@
-import { apiFetch } from "../helpers/api";
-import { apiEndpoints } from "../helpers/constants";
 import { mapObject } from "../mappers/objects";
-import { SpaceObject } from "../helpers/schemas";
+import { mapType } from "../mappers/types";
+import { RawSpaceObject, SpaceObject } from "../models";
+import { apiEndpoints, apiFetch, getIconWithFallback } from "../utils";
 
 export async function getObject(
   spaceId: string,
-  object_id: string,
+  objectId: string,
 ): Promise<{
   object: SpaceObject | null;
 }> {
-  const { url, method } = apiEndpoints.getObject(spaceId, object_id);
-  const response = await apiFetch<{ object: SpaceObject }>(url, { method: method });
+  const { url, method } = apiEndpoints.getObject(spaceId, objectId);
+  const response = await apiFetch<{ object: RawSpaceObject }>(url, { method: method });
+  return {
+    object: response ? await mapObject(response.payload.object) : null,
+  };
+}
+
+export async function getObjectWithoutMappedDetails(spaceId: string, objectId: string): Promise<SpaceObject | null> {
+  const { url, method } = apiEndpoints.getObject(spaceId, objectId);
+  const response = await apiFetch<{ object: RawSpaceObject }>(url, { method });
+  if (!response) {
+    return null;
+  }
+
+  const { object } = response.payload;
+  const icon = await getIconWithFallback(object.icon, object.layout, object.type);
 
   return {
-    object: response ? await mapObject(response.object) : null,
+    ...object,
+    icon,
+    name: object.name || "Untitled",
+    type: await mapType(object.type),
   };
 }

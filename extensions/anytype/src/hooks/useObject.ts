@@ -1,5 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getObject } from "../api/getObject";
+import { getObject } from "../api";
 
 export function useObject(spaceId: string, objectId: string) {
   const { data, error, isLoading, mutate } = useCachedPromise(

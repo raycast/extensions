@@ -1,11 +1,10 @@
-import { List, Image, Toast, showToast } from "@raycast/api";
-import { useState, useEffect, useMemo } from "react";
-import SpaceListItem from "./components/SpaceListItem";
-import { useSpaces } from "./hooks/useSpaces";
-import { getMembers } from "./api/getMembers";
-import { pluralize } from "./helpers/strings";
-import EmptyView from "./components/EmptyView";
-import EnsureAuthenticated from "./components/EnsureAuthenticated";
+import { Icon, List, Toast, showToast } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
+import { getMembers } from "./api";
+import { EmptyViewSpace, EnsureAuthenticated, SpaceListItem } from "./components";
+import { usePinnedSpaces, useSpaces } from "./hooks";
+import { Space } from "./models";
+import { defaultTintColor, pluralize } from "./utils";
 
 const searchPlaceholder = "Search spaces...";
 
@@ -19,6 +18,7 @@ export default function Command() {
 
 function BrowseSpaces() {
   const { spaces, spacesError, mutateSpaces, isLoadingSpaces, spacesPagination } = useSpaces();
+  const { pinnedSpaces, pinnedSpacesError, isLoadingPinnedSpaces, mutatePinnedSpaces } = usePinnedSpaces();
   const [searchText, setSearchText] = useState("");
   const [membersData, setMembersData] = useState<{ [spaceId: string]: number }>({});
 
@@ -61,36 +61,81 @@ function BrowseSpaces() {
     }
   }, [spacesError]);
 
+  useEffect(() => {
+    if (pinnedSpacesError) {
+      showToast(Toast.Style.Failure, "Failed to fetch pinned spaces", pinnedSpacesError.message);
+    }
+  }, [pinnedSpacesError]);
+
   const filteredSpaces = spaces?.filter((space) => space.name.toLowerCase().includes(searchText.toLowerCase()));
+  const pinnedFiltered = pinnedSpaces
+    ?.map((pin) => filteredSpaces.find((space) => space.id === pin.id))
+    .filter(Boolean) as Space[];
+  const regularFiltered = filteredSpaces?.filter((space) => !pinnedFiltered?.includes(space));
 
   return (
     <List
-      isLoading={isLoadingSpaces || isLoadingMembers}
+      isLoading={isLoadingSpaces || isLoadingMembers || isLoadingPinnedSpaces}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={searchPlaceholder}
       pagination={spacesPagination}
     >
-      {filteredSpaces?.length ? (
-        <List.Section
-          title={searchText ? "Search Results" : "All Spaces"}
-          subtitle={pluralize(filteredSpaces.length, "space", { withNumber: true })}
-        >
-          {filteredSpaces.map((space) => {
+      {pinnedFiltered.length > 0 && (
+        <List.Section title="Pinned" subtitle={pluralize(pinnedFiltered.length, "space", { withNumber: true })}>
+          {pinnedFiltered.map((space) => {
             const memberCount = membersData[space.id] || 0;
-
             return (
               <SpaceListItem
-                space={space}
                 key={space.id}
-                icon={{ source: space.icon, mask: Image.Mask.RoundedRectangle }}
-                memberCount={memberCount}
-                mutate={mutateSpaces}
+                space={space}
+                icon={space.icon}
+                accessories={[
+                  { icon: Icon.Star, tooltip: "Pinned" },
+                  {
+                    icon: { source: "icons/type/person-circle.svg", tintColor: defaultTintColor },
+                    text: memberCount.toString(),
+                    tooltip: `Members: ${memberCount}`,
+                  },
+                ]}
+                mutate={[mutateSpaces, mutatePinnedSpaces]}
+                isPinned={true}
+              />
+            );
+          })}
+        </List.Section>
+      )}
+      {regularFiltered.length > 0 ? (
+        <List.Section
+          title={searchText ? "Search Results" : "All Spaces"}
+          subtitle={pluralize(regularFiltered.length, "space", { withNumber: true })}
+        >
+          {regularFiltered.map((space) => {
+            const memberCount = membersData[space.id] || 0;
+            return (
+              <SpaceListItem
+                key={space.id}
+                space={space}
+                icon={space.icon}
+                accessories={[
+                  {
+                    icon: { source: "icons/type/person-circle.svg", tintColor: defaultTintColor },
+                    text: memberCount.toString(),
+                    tooltip: `Members: ${memberCount}`,
+                  },
+                ]}
+                mutate={[mutateSpaces, mutatePinnedSpaces]}
+                isPinned={false}
               />
             );
           })}
         </List.Section>
       ) : (
-        <EmptyView title="No Spaces Found" />
+        <EmptyViewSpace
+          title="No spaces found"
+          contextValues={{
+            name: searchText,
+          }}
+        />
       )}
     </List>
   );
