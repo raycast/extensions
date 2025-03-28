@@ -19,9 +19,9 @@ Raycast provides 3 types of templates:
 <details>
 <summary>Renders a simple Hello World from a markdown string. </summary>
 
-![Detail Template Render](../.gitbook/assets/detail-template.webp)
+![Detail Template Render](../../.gitbook/assets/detail-template.webp)
 {% hint style="info" %}
-See the [API Reference](../api-reference/user-interface/detail.md) for more information about customization.
+See the [API Reference](../../api-reference/user-interface/detail.md) for more information about customization.
 {% endhint %}
 
 </details>
@@ -31,9 +31,9 @@ See the [API Reference](../api-reference/user-interface/detail.md) for more info
 <details>
 <summary>Renders a form that showcases all available form elements.</summary>
 
-![Submit Form Template Render](../.gitbook/assets/form-template.webp)
+![Submit Form Template Render](../../.gitbook/assets/form-template.webp)
 {% hint style="info" %}
-See the [API Reference](../api-reference/user-interface/form.md) for more information about customization.
+See the [API Reference](../../api-reference/user-interface/form.md) for more information about customization.
 {% endhint %}
 
 </details>
@@ -45,11 +45,11 @@ See the [API Reference](../api-reference/user-interface/form.md) for more inform
 <summary>Renders a grid of Icons available from Raycast.</summary>
 Defaults to a large grid, but provides a selection menu to change the size.
 
-![Grid Template Render](../.gitbook/assets/grid-template.webp)
+![Grid Template Render](../../.gitbook/assets/grid-template.webp)
 {% hint style="info" %}
-See the [API Reference](../api-reference/user-interface/grid.md) for more information about customization.
+See the [API Reference](../../api-reference/user-interface/grid.md) for more information about customization.
 
-See here for information about [Icons](../api-reference/user-interface/icons-and-images.md).
+See here for information about [Icons](../../api-reference/user-interface/icons-and-images.md).
 {% endhint %}
 
 </details>
@@ -59,9 +59,9 @@ See here for information about [Icons](../api-reference/user-interface/icons-and
 <details>
 <summary>Renders a list of options. When an option is selected, a Detail view is displayed.</summary>
 
-![List and Detail Template Render](../.gitbook/assets/list-detail-template.webp)
+![List and Detail Template Render](../../.gitbook/assets/list-detail-template.webp)
 {% hint style="info" %}
-See the [API Reference](../api-reference/user-interface/list.md) for more information about customization.
+See the [API Reference](../../api-reference/user-interface/list.md) for more information about customization.
 {% endhint %}
 
 </details>
@@ -71,25 +71,25 @@ See the [API Reference](../api-reference/user-interface/list.md) for more inform
 <details>
 <summary>Adds a simple Menu Bar Extra with a menu.</summary>
 
-![Menu Bar Extra Template Render](../.gitbook/assets/menu-bar-template.webp)
+![Menu Bar Extra Template Render](../../.gitbook/assets/menu-bar-template.webp)
 {% hint style="info" %}
-See the [API Reference](../api-reference/menu-bar-commands.md) for more information about customization.
+See the [API Reference](../../api-reference/menu-bar-commands.md) for more information about customization.
 {% endhint %}
 
 </details>
 
 ### Run Script
 
-A example of a no-view command which shows a simple [HUD](../api-reference/feedback/hud.md).
+A example of a no-view command which shows a simple [HUD](../../api-reference/feedback/hud.md).
 
 ### Show List
 
 <details>
 <summary>Renders a static list with each entry containing an icon, title, subtitle, and accessory.</summary>
 
-![List Template Render](../.gitbook/assets/list-template.webp)
+![List Template Render](../../.gitbook/assets/list-template.webp)
 {% hint style="info" %}
-See the [API Reference](../api-reference/user-interface/list.md) for more information about customization.
+See the [API Reference](../../api-reference/user-interface/list.md) for more information about customization.
 {% endhint %}
 
 </details>
@@ -98,7 +98,7 @@ See the [API Reference](../api-reference/user-interface/list.md) for more inform
 
 <details>
 <summary>Renders a dynamic and searchable list of NPM packages. The command fetches new items as the search is updated by the user.</summary>
-![Typeahead Results Template Render](../.gitbook/assets/typeahead-results-template.webp)
+![Typeahead Results Template Render](../../.gitbook/assets/typeahead-results-template.webp)
 
 </details>
 
@@ -107,7 +107,7 @@ See the [API Reference](../api-reference/user-interface/list.md) for more inform
 <details>
 <summary>Renders the output of an AI call in a Detail view.</summary>
 
-![AI Template Render](../.gitbook/assets/ai-template.webp)
+![AI Template Render](../../.gitbook/assets/ai-template.webp)
 
 </details>
 
@@ -117,9 +117,9 @@ See the [API Reference](../api-reference/user-interface/list.md) for more inform
 
 <summary>A simple tool which asks for confirmation before executing.</summary>
 
-![Tool with Confirmation Template Render](../.gitbook/assets/tool-with-confirmation-template.webp)
+![Tool with Confirmation Template Render](../../.gitbook/assets/tool-with-confirmation-template.webp)
 {% hint style="info" %}
-See the [API Reference](../api-reference/tool.md) for more information about customization.
+See the [API Reference](../../api-reference/tool.md) for more information about customization.
 {% endhint %}
 
 </details>
