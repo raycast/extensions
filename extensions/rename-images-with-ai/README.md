@@ -2,7 +2,7 @@
 
 ![Rename Images with AI](assets/extension-icon.png)
 
-AI-powered images and screenshots renaming extension that intelligently names images based on their content.
+AI-powered images and screenshots renaming extension that uses Google Gemini's vision to intelligently rename images based on their content.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/raycast/extensions/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/raycast/extensions/pulls)
@@ -10,6 +10,7 @@ AI-powered images and screenshots renaming extension that intelligently names im
 ## Features
 
 - **AI-Powered Naming**: Uses Google Gemini to analyze your screenshots or images and create descriptive, meaningful filenames
+- **Cost-Effective**: Gemini offers a great balance of performance and cost, with generous free quotas for personal use
 - **Batch Processing**: Select multiple screenshots or images at once to rename them all in one go
 - **Finder Integration**: Directly rename multiple images selected in Finder
 - **User-Friendly UI**: Simple interface with clear feedback on the renaming process
