@@ -8,7 +8,12 @@ export default async () => {
   await closeMainWindow();
   const savePath = join(environment.supportPath, "capture.png");
 
-  execSync(`/usr/sbin/screencapture -i '${savePath}'`);
+  try {
+    execSync(`/usr/sbin/screencapture -i '${savePath}'`);
+  } catch (error) {
+    await showHUD("❌ Failed to capture screenshot");
+    return;
+  }
   // 检查文件是否存在
   if (!fs.existsSync(savePath)) {
     await showHUD("❌ Screenshot failed");
