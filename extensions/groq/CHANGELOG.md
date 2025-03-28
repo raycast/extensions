@@ -1,5 +1,13 @@
 # Groq Changelog
 
+## [Updated Models] - {PR_MERGE_DATE}
+
+- Removed deprecated `Mixtral 8x7B 32k`
+- Added `DeepSeek R1 32B 128K`
+- Added `Qwen 2.5 32B 128K`
+- Added `Qwen 2.5 Coder 32B 128K`
+- Added `Mistral Saba 24B 32K`
+
 ## [Updated Models] - 2025-02-09
 
 - Removed depreacted `Gemma 7B 8k`
