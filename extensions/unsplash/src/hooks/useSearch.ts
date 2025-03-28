@@ -1,95 +1,51 @@
-import { showToast, Toast } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
-import { AbortError } from "node-fetch";
 import { apiRequest } from "@/functions/apiRequest";
+import { useCachedPromise } from "@raycast/utils";
 
 export const useSearch = <T extends "collections" | "photos">(
+  query: string,
   type: T,
   orientation: "all" | "landscape" | "portrait" | "squarish"
 ) => {
-  const [state, setState] = useState<SearchState<T>>({ results: [], isLoading: true });
-  const [lastSearch, setLastSearch] = useState("");
-  const cancelRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    search("");
-
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (lastSearch === "") return;
-    search(lastSearch);
-  }, [orientation]);
-
-  const search = async (searchText: string) => {
-    cancelRef.current?.abort();
-    cancelRef.current = new AbortController();
-
-    try {
-      if (searchText === "") {
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: false,
-        }));
-
-        return;
+  const { isLoading, data, pagination } = useCachedPromise(
+    (searchText: string, orientation: "all" | "landscape" | "portrait" | "squarish") => async (options: { page: number }) => {
+      if (!searchText) return {
+        data: [],
+        hasMore: false
       }
-
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-
-      const { errors, results } = (await performSearch({
-        signal: cancelRef.current?.signal,
-
-        // Text
+      
+      const { errors, results, total_pages } = await performSearch({
         searchText,
-
-        // Options
         options: {
+          page: options.page + 1,
           orientation,
           type: type || "photos",
         },
-      })) as {
-        errors?: string[];
-        results: T extends "collections" ? CollectionResult[] : SearchResult[];
-      };
+      })
+      if (errors?.length) throw new Error();
 
-      if (errors?.length) {
-        showToast(Toast.Style.Failure, `Failed to fetch ${type}.`, errors?.join("\n"));
+      return {
+        data: results,
+        hasMore: options.page < total_pages
       }
 
-      setLastSearch(searchText);
-
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: false,
-        results: results || [],
-      }));
-    } catch (error) {
-      if (error instanceof AbortError) {
-        return;
+    }, [query, orientation], {
+      initialData: [],
+      failureToastOptions: {
+        title: `Failed to fetch ${type}.`
       }
-
-      showToast(Toast.Style.Failure, "Could not perform search", String(error));
     }
-  };
+  )
 
   return {
-    state,
-    search,
+    state: { results: data, isLoading, pagination }
   };
 };
 
 // Perform Search
 interface PerformSearchProps {
-  signal: AbortSignal;
   searchText: string;
   options: {
+    page: number;
     orientation: "all" | "landscape" | "portrait" | "squarish";
     type: "photos" | "collections";
   };
@@ -101,26 +57,23 @@ type SearchOrCollectionResult<T extends PerformSearchProps> = T extends { option
 
 export const performSearch = async <T extends PerformSearchProps>({
   searchText,
-  options,
-  signal,
-}: PerformSearchProps): Promise<{ errors?: string[]; results: SearchOrCollectionResult<T> }> => {
+  options
+}: PerformSearchProps): Promise<{ errors?: string[]; results: SearchOrCollectionResult<T>, total_pages: number }> => {
   const searchParams = new URLSearchParams({
-    page: "1",
+    page: options.page.toString(),
     query: searchText,
     per_page: "30",
   });
 
   if (options.orientation !== "all") searchParams.append("orientation", options.orientation);
 
-  const { errors, results } = await apiRequest<{ errors?: string[]; results: SearchOrCollectionResult<T> }>(
+  const { errors, results, total_pages } = await apiRequest<{ errors?: string[]; results: SearchOrCollectionResult<T>, total_pages: number }>(
     `/search/${options.type}?${searchParams.toString()}`,
-    {
-      signal,
-    }
   );
 
   return {
     results,
+    total_pages,
     errors,
   };
 };

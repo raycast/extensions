@@ -1,5 +1,10 @@
 # Unsplash Changelog
 
+## [Add Pagination to Search] - {PR_MERGE_DATE}
+
+- Added pagination to "Search Images"
+- Modernize extension: caching + clean up deps
+
 ## [Chore] - 2024-09-02
 
 - Added missing contributor

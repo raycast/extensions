@@ -1,5 +1,5 @@
 import { showToast, Toast, environment, getPreferenceValues, showHUD } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { existsSync } from "fs";
 import { resolveHome } from "./utils";
 

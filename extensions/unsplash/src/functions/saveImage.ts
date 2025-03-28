@@ -1,5 +1,5 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 interface SaveImageProps {
   url: string;
