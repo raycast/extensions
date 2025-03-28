@@ -20,7 +20,7 @@ export async function readContent(preferredSource: string = "selected") {
   const selected = await getSelection();
 
   if (preferredSource === "clipboard") {
-    Clipboard.clear();
+    await Clipboard.clear();
     if (clipboard) return clipboard;
     if (selected) return selected;
   } else {
