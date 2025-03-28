@@ -1,4 +1,4 @@
-import { Toast, closeMainWindow, getPreferenceValues, getSelectedText, showToast } from '@raycast/api';
+import { closeMainWindow, getPreferenceValues, getSelectedText, showToast, Toast } from '@raycast/api';
 import { showFailureToast } from '@raycast/utils';
 
 type Action = {
@@ -24,7 +24,10 @@ type Message = {
   };
 };
 
-const parseMessage = async ({ url, message }: { url?: string; message?: string }, topic: string): Promise<Message> => {
+const parseMessage = async (
+  { url = '', message = '' }: { url?: string; message?: string },
+  topic: string,
+): Promise<Message> => {
   const selectedText = await getSelectedText().catch(() => '');
   const normalizedUrl = url?.startsWith('http') ? url : `https://${url}`;
   const isUrl = URL.canParse(normalizedUrl || message || selectedText.trim());
