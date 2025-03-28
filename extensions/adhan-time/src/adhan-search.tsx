@@ -1,31 +1,25 @@
-import { List, ActionPanel, Action, openExtensionPreferences, Color } from "@raycast/api";
-import { convertHours, parseCountdown, sortPrayers } from "../utils/timeUtils";
+import { List, ActionPanel, Action, openExtensionPreferences, Color, getPreferenceValues } from "@raycast/api";
+import { calculateMinutesUntil, formatPrayerTime } from "../utils/dateTimeUtils";
 import { usePrayerTimes } from "../utils/usePrayerTimes";
-import { getPrayerProperties } from "../utils/prayersProperties";
 
 export default function Command() {
-  const { isLoading, prayers, currentPrayer, countdown, userPreference } = usePrayerTimes();
-
-  // Sort prayers to have the current prayer displayed first
-  const sortedPrayers = prayers ? sortPrayers(prayers, currentPrayer) : [];
+  const { isLoading, currentPeriod, countdown } = usePrayerTimes();
+  const userPreference = getPreferenceValues();
 
   return (
     <List isLoading={isLoading} navigationTitle="Prayer Name" searchBarPlaceholder="Search by prayer name">
-      {sortedPrayers.map(([key, value]) => {
-        const properties = getPrayerProperties(key);
-        if (!properties) return null;
-
-        const isCurrent = key === currentPrayer?.current && properties.isPrayer;
-        const isNext = key === currentPrayer?.next;
-        const timeLeftInMinutes = isCurrent ? parseCountdown(countdown) : 0;
+      {currentPeriod?.sortedTimings.map((prayer) => {
+        const isCurrent = prayer.name === currentPeriod.current.name && prayer.type === "prayer";
+        const isNext = prayer.name === currentPeriod.next.name;
+        const timeLeftInMinutes = isCurrent ? calculateMinutesUntil(currentPeriod.next.time) : 0;
         const color = timeLeftInMinutes > 30 ? Color.Green : timeLeftInMinutes > 10 ? Color.Orange : Color.Red;
-        const icon = isCurrent ? { source: properties.icon, tintColor: color } : properties.icon;
-        const prayerTime = userPreference.twelve_hours_system ? convertHours(value) : value;
+        const icon = isCurrent ? { source: prayer.icon, tintColor: color } : prayer.icon;
+        const prayerTime = formatPrayerTime(prayer.time, userPreference.twelve_hours_system);
 
         return (
           <List.Item
-            key={key}
-            title={properties.name}
+            key={prayer.name}
+            title={prayer.title}
             subtitle={prayerTime}
             icon={icon}
             accessories={
@@ -38,7 +32,7 @@ export default function Command() {
             keywords={isCurrent ? ["Current"] : isNext ? ["Next"] : []}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Copy to Clipboard" content={`${properties.name} time, ${prayerTime}`} />
+                <Action.CopyToClipboard title="Copy to Clipboard" content={`${prayer.title} time, ${prayerTime}`} />
                 <Action
                   shortcut={{ modifiers: ["opt"], key: "," }}
                   onAction={() => openExtensionPreferences()}

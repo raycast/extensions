@@ -1,55 +1,39 @@
-import { Color, MenuBarExtra, openExtensionPreferences } from "@raycast/api";
-import { convertHours, parseCountdown } from "../utils/timeUtils";
+import { Color, MenuBarExtra, openExtensionPreferences, Icon, getPreferenceValues } from "@raycast/api";
+import { calculateMinutesUntil, formatPrayerTime } from "../utils/dateTimeUtils";
 import { usePrayerTimes } from "../utils/usePrayerTimes";
-import { getPrayerProperties } from "../utils/prayersProperties";
-import { PrayerProperty, Prayers } from "./prayer-types";
 import React from "react";
+import { Prayer } from "./types/prayerTypes";
 
 type Section = {
   title: string;
-  items: {
-    key: string;
-    value: string;
-    properties: PrayerProperty;
-  }[];
+  items: Prayer[];
 };
 
-const prepareItems = (prayers: Prayers, sectionType: "prayers" | "times") => {
-  return Object.entries(prayers as Record<keyof Prayers, string>)
-    .filter(([key]) => {
-      const properties = getPrayerProperties(key);
-      return properties?.section === sectionType;
-    })
-    .sort(([keyA], [keyB]) => {
-      const propA = getPrayerProperties(keyA);
-      const propB = getPrayerProperties(keyB);
-      return propA.sort - propB.sort;
-    })
-    .map(([key, value]) => ({
-      key,
-      value,
-      properties: getPrayerProperties(key),
-    }));
+const MenuBarIcon = {
+  source: {
+    dark: "menubar-icon.png",
+    light: "menubar-icon-light.png",
+  },
 };
 
 export default function Command() {
-  const { isLoading, prayers, currentPrayer, countdown, userPreference } = usePrayerTimes();
+  const { isLoading, currentPeriod, hijriDate, countdown } = usePrayerTimes();
+  const userPreference = getPreferenceValues();
   const displayIconOnly = userPreference.menu_bar_icon_only;
 
-  const renderMenuItem = (key: string, value: string, properties: PrayerProperty) => {
-    const isCurrent = key === currentPrayer?.current && properties.isPrayer;
-    const timeLeftInMinutes = isCurrent ? parseCountdown(countdown) : 0;
-    const color = timeLeftInMinutes > 30 ? Color.Green : timeLeftInMinutes > 10 ? Color.Orange : Color.Red;
-    const icon = isCurrent ? { source: properties.icon, tintColor: color } : properties.icon;
-    const prayerTime = userPreference.twelve_hours_system ? convertHours(value) : value;
+  const renderMenuItem = (prayer: Prayer) => {
+    const isCurrent = currentPeriod && prayer.name === currentPeriod.current.name && prayer.type === "prayer";
+    const timeLeftInMinutes = isCurrent && currentPeriod ? calculateMinutesUntil(currentPeriod.next.time) : 0;
+    const color = timeLeftInMinutes >= 30 ? Color.Green : timeLeftInMinutes >= 10 ? Color.Orange : Color.Red;
+    const icon = isCurrent ? { source: prayer.icon, tintColor: color } : prayer.icon;
+    const prayerTime = formatPrayerTime(prayer.time, userPreference.twelve_hours_system);
 
-    // if current, return extra item for countdown
     return (
-      <React.Fragment key={key}>
+      <React.Fragment key={prayer.name}>
         <MenuBarExtra.Item
-          key={`${key}-title`}
+          key={`${prayer.name}-title`}
           icon={icon}
-          title={`${properties.name}: ${prayerTime}`}
+          title={`${prayer.title}: ${prayerTime}`}
           onAction={
             isCurrent
               ? // Use this empty function to make the item active (white text)
@@ -61,8 +45,8 @@ export default function Command() {
         />
         {isCurrent && (
           <MenuBarExtra.Item
-            key={`${key}-countdown`}
-            title={`      ${countdown}`}
+            key={`${prayer.name}-countdown`}
+            title={`      ${countdown} until ${currentPeriod.next.title}`}
             onAction={() => {
               return;
             }}
@@ -72,34 +56,44 @@ export default function Command() {
     );
   };
 
-  const sections: Section[] = prayers
+  const sections: Section[] = currentPeriod
     ? [
         {
           title: "Prayers",
-          items: prepareItems(prayers, "prayers"),
+          items: currentPeriod.sortedTimings.filter((prayer) => prayer.type === "prayer"),
         },
         {
           title: "Timings",
-          items: prepareItems(prayers, "times"),
+          items: currentPeriod.sortedTimings.filter((prayer) => prayer.type === "timing"),
         },
       ]
-    : [];
+    : [
+        { title: "Prayers", items: [] },
+        { title: "Timings", items: [] },
+      ];
 
   return (
     <MenuBarExtra
-      icon="menubar-icon.png"
+      icon={MenuBarIcon}
       title={displayIconOnly ? "" : "Prayer Times"}
-      tooltip="Prayer times"
+      tooltip="Prayer Times"
       isLoading={isLoading}
     >
-      {sections.map((section) => (
-        <MenuBarExtra.Section key={section.title} title={section.title}>
-          {section.items.map((item) => renderMenuItem(item.key, item.value, item.properties))}
-        </MenuBarExtra.Section>
-      ))}
-      <MenuBarExtra.Section>
-        <MenuBarExtra.Item title="Change location Preferences" onAction={() => openExtensionPreferences()} />
-      </MenuBarExtra.Section>
+      {currentPeriod && (
+        <>
+          {sections.map((section) => (
+            <MenuBarExtra.Section key={section.title} title={section.title}>
+              {section.items.map((item) => renderMenuItem(item))}
+            </MenuBarExtra.Section>
+          ))}
+          <MenuBarExtra.Section key="date" title="Date">
+            <MenuBarExtra.Item title={hijriDate} icon={Icon.Calendar} />
+          </MenuBarExtra.Section>
+          <MenuBarExtra.Section>
+            <MenuBarExtra.Item title="Change location Preferences" onAction={() => openExtensionPreferences()} />
+          </MenuBarExtra.Section>
+        </>
+      )}
     </MenuBarExtra>
   );
 }
