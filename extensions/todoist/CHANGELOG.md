@@ -1,5 +1,13 @@
 # Todoist Changelog
 
+## [Support Commas in Filters] - 2025-03-28
+
+Add support for commas in filter strings.
+
+## [Added Inbox View in Menu Bar] - 2025-03-25
+
+Added a new option for Inbox in View under Menu Bar Tasks.
+
 ## [Added contributors] - 2025-03-15
 
 ## [Removal of Deadline Feature for Non-Premium Users] - 2025-02-28

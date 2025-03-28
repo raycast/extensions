@@ -52,7 +52,6 @@
     "axios": "^1.7.7",
     "fuzzysort": "^3.1.0",
     "ini": "^4.1.1",
-    "jotai": "^2.10.1",
     "node-fetch": "^3.3.2",
     "radash": "^12.1.0",
     "simple-plist": "^1.4.0-0",

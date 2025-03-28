@@ -4,6 +4,7 @@ import { CachedQueryClientProvider } from "@/components/CachedQueryClientProvide
 import { Bookmark } from "@/types";
 import { trpc } from "@/utils/trpc.util";
 import { NewTagForm } from "./NewTagForm";
+import { useTags } from "../hooks/use-tags.hook";
 
 interface FormValues {
   titleField: string;
@@ -28,7 +29,7 @@ function Body(props: Props) {
 
   const bookmarkUpdate = trpc.bookmark.update.useMutation();
 
-  const { data: spaceTags, refetch: spaceTagsRefetch } = trpc.tag.list.useQuery({ spaceIds: [bookmark.spaceId] });
+  const { data: spaceTags, refetch: spaceTagsRefetch } = useTags(bookmark.spaceId);
 
   const { pop } = useNavigation();
 
