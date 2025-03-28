@@ -37,8 +37,12 @@ export default function ReviewFlashcard() {
       lastReviewed: new Date().toISOString(),
     };
     setFlashcards(updatedFlashcards);
-    await LocalStorage.setItem("flashcards", JSON.stringify(updatedFlashcards));
-    handleNextCard();
+    try {
+      await LocalStorage.setItem("flashcards", JSON.stringify(updatedFlashcards));
+      handleNextCard();
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to save flashcard progress" });
+    }
   };
 
   if (isLoading) {
