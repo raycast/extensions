@@ -38,7 +38,6 @@ export default function BuildDetails({ buildId }: { buildId: string }) {
       return data[0].data.builds.byId;
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching project builds",
         message: (error as Error)?.message || "",

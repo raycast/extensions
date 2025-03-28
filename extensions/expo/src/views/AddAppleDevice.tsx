@@ -42,14 +42,12 @@ export default function AddAppleDevice({ appleTeamId, accountId }: { appleTeamId
       const url = `https://expo.dev/register-device/${addId}`;
 
       QRCode.toDataURL(url, function (err, url) {
-        console.log(url);
         setQr(url);
       });
 
       return url;
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error Fetching Register Code",
         message: (error as Error)?.message || "",

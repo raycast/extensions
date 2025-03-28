@@ -42,14 +42,8 @@ export default function EditEnv({ env, refreshEnvs }: { env: EnvironmentVariable
         ]),
       };
 
-      console.log(payload);
-
       try {
         const resp = await axios.request<EditAppleDeviceNameResponse>(config);
-
-        console.log("==============");
-
-        console.log(resp.data);
 
         if ("errors" in resp.data) {
           console.log("++++++++++++++");
@@ -60,16 +54,12 @@ export default function EditEnv({ env, refreshEnvs }: { env: EnvironmentVariable
             message: errorMessages,
             style: Toast.Style.Failure,
           });
-
-          console.error(errorMessages);
         } else {
           refreshEnvs();
           showToast({ title: "Environment variable updated", message: "", style: Toast.Style.Success });
           pop();
         }
       } catch (error) {
-        console.log("&&&&&&&&&&&&&&");
-        console.error((error as Error).message);
         showToast({
           title: "Failed to update device name",
           message: (error as Error).message || "",

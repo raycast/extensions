@@ -39,7 +39,6 @@ export default function Submission({ submissionId }: { submissionId: string }) {
       return data[0].data.submissions.byId;
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching submission",
         message: (error as Error)?.message || "",

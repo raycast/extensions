@@ -71,7 +71,6 @@ export default function LoginForm({ destination }: { destination?: ReactNode }) 
         push(destination ?? <Projects />);
       }
     } catch (error) {
-      console.log(error);
       showToast({ title: "Error setting up", message: (error as Error)?.message || "", style: Toast.Style.Failure });
     }
     setFormState("static");
@@ -97,9 +96,6 @@ export default function LoginForm({ destination }: { destination?: ReactNode }) 
             headers: baseHeaders,
           },
         );
-        console.log("=========");
-        console.log(resp.data);
-
         // check if succesful response or failed
         if ("data" in resp.data) {
           showToast({ title: "Logged In", message: "", style: Toast.Style.Success });
@@ -111,7 +107,7 @@ export default function LoginForm({ destination }: { destination?: ReactNode }) 
         }
       } catch (error) {
         const errorResponse = (error as AxiosError).response;
-        if (errorResponse && errorResponse.data) {
+        if (errorResponse && errorResponse.data && (errorResponse.data as ErrorResponse).errors) {
           const errorData = errorResponse.data as ErrorResponse;
           const errorCodes = errorData.errors.map((err) => err.code);
 
@@ -120,7 +116,6 @@ export default function LoginForm({ destination }: { destination?: ReactNode }) 
             return;
           }
         }
-        console.log(error);
         showToast({ title: "Error logging in", style: Toast.Style.Failure });
       }
     },

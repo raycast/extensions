@@ -39,7 +39,6 @@ export default function ProjectBuilds({ project }: { project: Project }) {
       return data[0].data.app.byFullName?.updatesPaginated.edges || [];
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching project builds",
         message: (error as Error)?.message || "",

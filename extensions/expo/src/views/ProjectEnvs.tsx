@@ -67,14 +67,11 @@ export default function ProjectEnvs({ appFullName }: { appFullName: string }) {
 
       const allRes = data[0].data.app.byFullName.environmentVariables;
 
-      console.log({ allRes, senstiveRes });
-
       const toReturn = allRes ?? senstiveRes;
 
       return toReturn;
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching project builds",
         message: (error as Error)?.message || "",

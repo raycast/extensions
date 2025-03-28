@@ -44,7 +44,6 @@ export default function ProjectBuilds({ project }: { project: Project }) {
       return builds;
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching project builds",
         message: (error as Error)?.message || "",

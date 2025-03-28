@@ -44,29 +44,19 @@ export default function CreateEnv({ refreshEnvs }: { refreshEnvs: () => void }) 
       try {
         const resp = await axios.request<EditAppleDeviceNameResponse>(config);
 
-        console.log("==============");
-
-        console.log(resp.data);
-
         if ("errors" in resp.data) {
-          console.log("++++++++++++++");
-
           const errorMessages = (resp.data as ErrorResponse).errors.map((error) => error.message).join(", ");
           showToast({
             title: "Failed to created enviroment variable",
             message: errorMessages,
             style: Toast.Style.Failure,
           });
-
-          console.error(errorMessages);
         } else {
           refreshEnvs();
           showToast({ title: "Environment variable created", message: "", style: Toast.Style.Success });
           pop();
         }
       } catch (error) {
-        console.log("&&&&&&&&&&&&&&");
-        console.error((error as Error).message);
         showToast({
           title: "Failed to update device name",
           message: (error as Error).message || "",

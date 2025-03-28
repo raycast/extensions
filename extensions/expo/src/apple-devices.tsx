@@ -65,7 +65,6 @@ export default function Command() {
       };
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching Apple Devices",
         message: (error as Error)?.message || "",

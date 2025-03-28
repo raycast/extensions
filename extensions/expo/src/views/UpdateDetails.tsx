@@ -18,8 +18,6 @@ export default function UpdateGroup({
 
   const url = `https://expo.dev/accounts/${username}/projects/${appName}/updates/${group}`;
 
-  console.log({ url });
-
   const { isLoading, data: update } = useFetch(url, {
     method: "get",
     headers: authHeaders,
@@ -39,12 +37,9 @@ export default function UpdateGroup({
 
       const updateData = jsonData.props.pageProps.updateGroupData as UpdatesByGroupType;
 
-      console.log(jsonData.props.pageProps);
-
       return updateData;
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching update group",
         message: (error as Error)?.message || "",

@@ -22,10 +22,6 @@ export default function EditAppleDevice({
 
   const { handleSubmit, itemProps } = useForm<EditPayload>({
     onSubmit: async (values) => {
-      console.log({ values });
-
-      console.log({ deviceId });
-
       const config: AxiosRequestConfig = {
         method: "post",
         maxBodyLength: Infinity,
@@ -45,7 +41,7 @@ export default function EditAppleDevice({
           },
         ]),
       };
-      console.log(config);
+
       try {
         const resp = await axios.request<EditAppleDeviceNameResponse>(config);
         console.log(resp.data);
@@ -59,7 +55,6 @@ export default function EditAppleDevice({
           pop();
         }
       } catch (error) {
-        console.log(error);
         showToast({
           title: "Failed to update device name",
           message: (error as Error).message || "",

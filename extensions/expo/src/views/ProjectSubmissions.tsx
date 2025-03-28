@@ -41,7 +41,6 @@ export default function ProjectSubmissions({ project }: { project: Project }) {
       return submissions || [];
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching project Submissions",
         message: (error as Error)?.message || "",

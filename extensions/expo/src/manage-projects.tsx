@@ -45,12 +45,9 @@ export default function Command() {
       }
 
       const projects = data[0].data.account.byName.appsPaginated.edges.map((item) => item.node);
-      console.log({ projects });
-      console.log(projects[0].githubRepository);
       return projects;
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching projects",
         message: (error as Error)?.message || "",

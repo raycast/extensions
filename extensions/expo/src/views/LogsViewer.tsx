@@ -6,10 +6,8 @@ import { generateLogsMarkdown } from "../lib/markdown/generateLogsMarkdown";
 
 export default function LogsViewer({ logFiles }: { logFiles: string[] }) {
   const { isLoading, data } = usePromise(async () => {
-    console.log("=====================");
     const response = await fetchLogs(logFiles);
-    console.log("+++++++++++++++++++++");
-    // console.log(response);
+
     return response;
   });
 

@@ -46,7 +46,6 @@ export default function Command() {
       return data[0].data.account.byName.appsPaginated.edges;
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching projects",
         message: (error as Error)?.message || "",
