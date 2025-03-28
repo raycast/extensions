@@ -9,5 +9,5 @@ type Input = {
 export default async function translateVocabulary(input: Input) {
   const { vocabulary } = input;
   const nativeLanguage: string = (await LocalStorage.getItem("native-language")) || "";
-  return translationPrompt.replace("[[vocabulary]]", vocabulary).replace("[[nativeLanguage]]", nativeLanguage);
+  return translationPrompt.replaceAll("[[vocabulary]]", vocabulary).replaceAll("[[nativeLanguage]]", nativeLanguage);
 }
