@@ -2,14 +2,13 @@ import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/a
 
 import { OpenPreferencesView } from "./components/OpenPreferencesView";
 import { useExivoClient } from "./hooks/useExivoClient";
-import { ExivoPreferences } from "./types/ExivoPreferences";
 import { getDoorModeTitle } from "./utils";
 
 export default function Command() {
   const { getExivoComponents, unlock, setMode } = useExivoClient();
   const { data: components, isLoading: loadingComponents, revalidate: revalidateComponents } = getExivoComponents();
 
-  const preferences = getPreferenceValues<ExivoPreferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   if (!preferences.clientId || !preferences.clientSecret || !preferences.siteId) {
     return <OpenPreferencesView />;
   }

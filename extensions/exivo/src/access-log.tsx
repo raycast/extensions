@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { AccessLogDetails } from "./components/AccessLogDetails";
 import { OpenPreferencesView } from "./components/OpenPreferencesView";
 import { useExivoClient } from "./hooks/useExivoClient";
-import { ExivoPreferences } from "./types/ExivoPreferences";
 import { ComponentGroupedAccessLog, groupByComponent } from "./utils/accesslogData";
 
 export default function Command() {
@@ -13,7 +12,7 @@ export default function Command() {
 
   const { data, isLoading } = useExivoClient().getAccessLogs();
 
-  const preferences = getPreferenceValues<ExivoPreferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   if (!preferences.clientId || !preferences.clientSecret || !preferences.siteId) {
     return <OpenPreferencesView />;
   }

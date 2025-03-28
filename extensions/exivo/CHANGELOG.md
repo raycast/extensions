@@ -1,5 +1,5 @@
 # Exivo Changelog
 
-## [Added Exivo] - {PR_MERGE_DATE}
+## [Added Exivo] - 2025-03-28
 
 Initial version code

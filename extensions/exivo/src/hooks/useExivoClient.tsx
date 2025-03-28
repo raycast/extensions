@@ -5,7 +5,6 @@ import fetch from "node-fetch";
 import { useMemo } from "react";
 import { AccessLogItem } from "../types/AccessLogItem";
 import { ExivoComponent, ExivoComponentMode } from "../types/ExivoComponent";
-import { ExivoPreferences } from "../types/ExivoPreferences";
 import { getDoorModeTitle } from "../utils";
 
 const ExivoConfig = {
@@ -13,13 +12,13 @@ const ExivoConfig = {
 };
 
 const siteId = () => {
-  const preferences = getPreferenceValues<ExivoPreferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   return preferences.siteId;
 };
 
 export const useExivoClient = () => {
   const credentials = useMemo(() => {
-    const preferences = getPreferenceValues<ExivoPreferences>();
+    const preferences = getPreferenceValues<ExtensionPreferences>();
     return btoa(`${preferences.clientId}:${preferences.clientSecret}`);
   }, []);
 
