@@ -20,17 +20,27 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
 
   const { data } = useCachedPromise(
     async (search) => {
-      const filterTasks = await getFilterTasks(search);
-      return filterSort(filterTasks);
+      const queries = search
+        .split(",")
+        .map((part: string) => part.trim())
+        .filter((q: string) => q.length > 0);
+      const sections = await Promise.all(
+        queries.map(async (q: string) => {
+          const tasks = await getFilterTasks(q);
+          const sortedTasks = filterSort(tasks);
+          return { name: q, tasks: sortedTasks };
+        }),
+      );
+      return sections;
     },
     [query],
   );
 
-  const tasks = data ?? [];
+  const sections = data ?? [];
 
-  const { sections, viewProps } = useViewTasks(`todoist.filter${name}`, { tasks });
+  const { viewProps } = useViewTasks(`todoist.filter${name}`, { tasks: sections.flatMap((section) => section.tasks) });
 
-  if (tasks.length === 0) {
+  if (sections.length === 0) {
     return (
       <List.EmptyView
         title="No tasks for this filter."
@@ -56,12 +66,7 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   }
 
   return (
-    <TaskListSections
-      mode={ViewMode.project}
-      sections={viewProps.groupBy?.value === "default" ? [{ name, tasks: tasks }] : sections}
-      viewProps={viewProps}
-      quickLinkView={quickLinkView}
-    />
+    <TaskListSections mode={ViewMode.project} sections={sections} viewProps={viewProps} quickLinkView={quickLinkView} />
   );
 }
 

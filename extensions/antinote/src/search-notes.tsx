@@ -3,6 +3,7 @@ import { runAppleScript, showFailureToast, useSQL } from "@raycast/utils";
 import { homedir } from "os";
 import { resolve } from "path";
 import { checkAntinoteInstalled } from "./utils";
+import { useEffect, useState } from "react";
 
 type Note = {
   id: string;
@@ -50,55 +51,67 @@ async function openInAntinote(noteId: string) {
 }
 
 export default function Command() {
-  checkAntinoteInstalled().then((isInstalled) => {
-    if (!isInstalled) {
-      return;
+  const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
+  const { isLoading, data: notes, permissionView } = useSQL<Note>(DB_PATH, query);
+
+  useEffect(() => {
+    async function checkInstallation() {
+      const installed = await checkAntinoteInstalled();
+      setIsInstalled(installed);
     }
 
-    const { isLoading, data: notes, permissionView } = useSQL<Note>(DB_PATH, query);
+    checkInstallation();
+  }, []);
 
-    if (permissionView) {
-      return permissionView;
-    }
+  if (isInstalled === null) {
+    return <List isLoading={true} />;
+  }
 
-    if (isLoading) {
-      return <List isLoading={true} />;
-    }
+  if (isInstalled === false) {
+    return <Detail markdown="Antinote is not installed." />;
+  }
 
-    if (!isLoading && !notes) {
-      return <Detail markdown="No notes found." />;
-    }
+  if (permissionView) {
+    return permissionView;
+  }
 
-    const ITEMS = notes!.map((note) => {
-      return {
-        id: note.id,
-        icon: Icon.Paragraph,
-        title: getTitle(note.content),
-        subtitle: getSanitizedContent(note.content),
-      };
-    });
+  if (isLoading) {
+    return <List isLoading={true} />;
+  }
 
-    return (
-      <List>
-        {ITEMS.map((item) => (
-          <List.Item
-            key={item.id}
-            icon={item.icon}
-            title={item.title}
-            subtitle={item.subtitle}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Find in Antinote"
-                  onAction={async () => {
-                    openInAntinote(item.id);
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List>
-    );
+  if (!isLoading && !notes) {
+    return <Detail markdown="No notes found." />;
+  }
+
+  const ITEMS = notes!.map((note) => {
+    return {
+      id: note.id,
+      icon: Icon.Paragraph,
+      title: getTitle(note.content),
+      subtitle: getSanitizedContent(note.content),
+    };
   });
+
+  return (
+    <List>
+      {ITEMS.map((item) => (
+        <List.Item
+          key={item.id}
+          icon={item.icon}
+          title={item.title}
+          subtitle={item.subtitle}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Find in Antinote"
+                onAction={async () => {
+                  openInAntinote(item.id);
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
 }
