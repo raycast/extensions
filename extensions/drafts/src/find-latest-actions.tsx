@@ -142,6 +142,7 @@ export default function Command() {
                 <ActionPanel.Submenu title="Create Quicklink to Run Action..." icon={Icon.Link}>
                   <Action.CreateQuicklink
                     quicklink={{
+                      name: `Run ${action.name}`,
                       link: AppBaseUrls.RUN_ACTION + "action=" + encodeURIComponent(action.name) + "&text=",
                     }}
                     icon={Icon.Plus}
@@ -150,6 +151,7 @@ export default function Command() {
                   />
                   <Action.CreateQuicklink
                     quicklink={{
+                      name: `Run ${action.name} with Input`,
                       link: AppBaseUrls.RUN_ACTION + "action=" + encodeURIComponent(action.name) + "&text={input}",
                     }}
                     icon={Icon.Plus}

@@ -109,9 +109,9 @@ export default function Command() {
               />
               <Action.CopyToClipboard content={draft.uuid} title="Copy UUID" />
               <Action.CreateQuicklink
-                quicklink={{ link: draft.openUrl }}
+                quicklink={{ name: `Open Draft ${draft.title}`, link: draft.openUrl }}
                 icon={Icon.Plus}
-                title={"Create Quicklink to " + draft.title}
+                title={"Create Quicklink to open " + draft.title}
                 key={draft.uuid}
               />
               <ActionPanel.Submenu

@@ -86,6 +86,15 @@ export default function Command() {
                 shortcut={{ modifiers: ["cmd"], key: "f" }}
                 onAction={() => toggleFavorite(workspace.key)}
               />
+              <Action.CreateQuicklink
+                quicklink={{
+                  name: `Open Workspace ${workspace.name}`,
+                  link: `${AppBaseUrls.OPEN_WORKSPACE}name=${workspace.name}`,
+                }}
+                icon={Icon.Plus}
+                title={"Create Quicklink to open Workspace " + workspace.name}
+                key={workspace.key}
+              />
             </ActionPanel>
           }
         />
