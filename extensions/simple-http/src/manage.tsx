@@ -22,7 +22,7 @@ export default function Command() {
   const currentPort = command.replace(/.*-m http\.server (\d+) --directory .*/, "$1");
   const currentDirectory = command.replace(/.*--directory (.+)/, "$1");
 
-  const [targetUrl, setTargetUrl] = useState("");
+  const [targetUrl, setTargetUrl] = useState(proc.length > 0 ? "http://localhost:" + currentPort : "");
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
