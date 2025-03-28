@@ -21,9 +21,9 @@ export default function Command() {
       }
       try {
         const savedFavorites = await LocalStorage.getItem<string>(favoritesPersistKey);
-        const favoriteSet = savedFavorites ? new Set(JSON.parse(savedFavorites)) : new Set();
+        const favoriteSet = savedFavorites ? new Set<string>(JSON.parse(savedFavorites)) : new Set<string>();
         if (savedFavorites) {
-          setFavorites(new Set(JSON.parse(savedFavorites)));
+          setFavorites(favoriteSet);
         }
 
         const data = await getWorkspaces();
