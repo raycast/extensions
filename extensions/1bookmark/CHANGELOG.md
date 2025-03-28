@@ -1,6 +1,6 @@
 # 1bookmark Changelog
 
-## [Improve Performance] - {PR_MERGE_DATE}
+## [Improve Performance] - 2025-03-28
 
 - 0.7.1
 - 💻 Remove `jotai` which causes unnecessary re-renders in raycast environment.
