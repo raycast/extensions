@@ -34,7 +34,10 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
   let price = 0;
   switch (model) {
     case "deepseek-r1-distill-llama-70b":
-      price = ((prompt_token * 3) / 1_000_000 + (output_token * 3) / 1_000_000) * 100;
+      price = ((prompt_token * 0.75) / 1_000_000 + (output_token * 0.99) / 1_000_000) * 100;
+      break;
+    case "deepseek-r1-distill-qwen-32b":
+      price = ((prompt_token * 0.69) / 1_000_000 + (output_token * 0.69) / 1_000_000) * 100;
       break;
     case "llama3-70b-8192":
     case "llama-3.3-70b-versatile":
@@ -49,6 +52,13 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
       break;
     case "gemma-9b-it":
       price = ((prompt_token * 0.2) / 1_000_000 + (output_token * 0.2) / 1_000_000) * 100;
+      break;
+    case "mistral-saba-24b":
+      price = ((prompt_token * 0.79) / 1_000_000 + (output_token * 0.79) / 1_000_000) * 100;
+      break;
+    case "qwen-2.5-32b":
+    case "qwen-2.5-coder-32b":
+      price = ((prompt_token * 0.79) / 1_000_000 + (output_token * 0.79) / 1_000_000) * 100;
       break;
   }
   return naiveRound(price, 5);
