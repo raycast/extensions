@@ -56,6 +56,22 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "paystack_live_api_key",
+      "type": "password",
+      "title": "Paystack Live API Key",
+      "description": "Enter your Paystack live API key to enable secure access to your account.",
+      "required": true
+    },
+    {
+      "name": "paystack_test_api_key",
+      "type": "password",
+      "title": "Paystack Test API Key",
+      "description": "Enter your Paystack test API key to enable secure access to your test environment.",
+      "required": true
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.94.2",
     "@raycast/utils": "^1.17.0"
