@@ -1,5 +1,11 @@
 # 1bookmark Changelog
 
+## [Improve Performance] - 2025-03-28
+
+- 0.7.1
+- 💻 Remove `jotai` which causes unnecessary re-renders in raycast environment.
+- 💻 Fix some infinite re-render issue.
+
 ## [Improve Search UX] - 2025-03-19
 
 - 0.7.0
