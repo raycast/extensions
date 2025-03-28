@@ -340,7 +340,20 @@ function getPromptMarkdown(prompt: Prompt) {
     author = prompt.author.link ? `by [${prompt.author.name}](${prompt.author.link})` : prompt.author.name;
   }
 
-  return `## ${prompt.title}\n\n${prompt.prompt.replace(/\{[^{}]+\}/g, "**$&**")}${example ? `\n\n${example}` : ""}${
+  const formattedPrompt = prompt.prompt
+    .split(/(@[a-zA-Z0-9-]+\{id=[^}]+\})/)
+    .map((part) => {
+      const match = part.match(/@([a-zA-Z0-9-]+)\{id=([^}]+)\}/);
+      if (match) {
+        // Format extension references as inline code
+        return `\`@${match[1]}\``;
+      }
+      // Keep existing placeholder highlighting
+      return part.replace(/\{[^{}]+\}/g, "**$&**");
+    })
+    .join("");
+
+  return `## ${prompt.title}\n\n${formattedPrompt}${example ? `\n\n${example}` : ""}${
     author ? `\n\n---\n_${author}_` : ""
   }`;
 }

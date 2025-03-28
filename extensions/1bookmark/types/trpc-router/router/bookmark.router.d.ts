@@ -123,4 +123,17 @@ export declare const bookmarkRouter: import("@trpc/server/unstable-core-do-not-i
             updatedAt: Date;
         };
     }>;
+    import: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            spaceId: string;
+            tags: string[];
+            bookmarks: {
+                name: string;
+                url: string;
+                description?: string | undefined;
+            }[];
+            browserName: string;
+        };
+        output: void;
+    }>;
 }>;

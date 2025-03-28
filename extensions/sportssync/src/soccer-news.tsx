@@ -1,9 +1,10 @@
-import { Detail, List, Action, ActionPanel } from "@raycast/api";
+import { Detail, List, Action, ActionPanel, Color, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 interface Article {
   headline: string;
   published: string;
+  type: string;
   images: { url: string }[];
   links: { web: { href: string } };
 }
@@ -20,8 +21,8 @@ export default function scoresAndSchedule() {
   );
 
   const soccerArticles = soccerArticlesData?.articles || [];
-  const soccerItems = soccerArticles.map((soccerArticle, index) => {
-    const articleDate = new Date(soccerArticle.published).toLocaleDateString([], {
+  const soccerItems = soccerArticles?.map((soccerArticle, index) => {
+    const articleDate = new Date(soccerArticle?.published).toLocaleDateString([], {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -29,18 +30,30 @@ export default function scoresAndSchedule() {
 
     const accessoryTitle = articleDate;
     const accessoryToolTip = "Date Published";
+    let articleType = soccerArticle?.type;
+
+    if (articleType === "HeadlineNews") {
+      articleType = "Headline";
+    }
 
     return (
       <List.Item
         key={index}
-        title={`${soccerArticle.headline}`}
+        title={`${soccerArticle?.headline}`}
         icon={
-          soccerArticle.images && soccerArticle.images[0]?.url ? { source: soccerArticle.images[0].url } : undefined
+          soccerArticle?.images && soccerArticle?.images[0]?.url ? { source: soccerArticle?.images[0]?.url } : undefined
         }
-        accessories={[{ text: { value: `${accessoryTitle}` }, tooltip: accessoryToolTip }]}
+        accessories={[
+          { tag: { value: articleType, color: Color.Green }, icon: Icon.Megaphone },
+          { text: { value: `${accessoryTitle ?? "No Headline Found"}` }, tooltip: accessoryToolTip ?? "Unknown" },
+          { icon: Icon.Calendar },
+        ]}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="View Article on ESPN" url={`${soccerArticle.links.web.href}`} />
+            <Action.OpenInBrowser
+              title="View Article on ESPN"
+              url={`${soccerArticle?.links?.web?.href ?? "https://www.espn.com"}`}
+            />
           </ActionPanel>
         }
       />
@@ -53,7 +66,7 @@ export default function scoresAndSchedule() {
 
   return (
     <List searchBarPlaceholder="Search for an article" isLoading={soccerArticlesStatus}>
-      <List.Section title={`${soccerArticles.length} Article${soccerArticles.length !== 1 ? "s" : ""}`}>
+      <List.Section title={`${soccerArticles?.length} Article${soccerArticles?.length !== 1 ? "s" : ""}`}>
         {soccerItems}
       </List.Section>
     </List>

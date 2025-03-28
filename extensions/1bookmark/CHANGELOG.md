@@ -1,5 +1,28 @@
 # 1bookmark Changelog
 
+## [Improve Search UX] - 2025-03-19
+
+- 0.7.0
+- 💻 Replace search library from `minisearch` to `fuzzysort`. So fuzzy search is now more accurate.
+
+## [New Command: Import Bookmarks] - 2025-03-14
+
+- 0.6.0
+- 📱 **Import Bookmarks** command added. It supports importing bookmarks from browsers.
+  Thanks to **Browser Bookmarks** contributors. Many codes from that extension are reused.
+
+## [Sign In UX Improvement] - 2025-03-04
+
+- 0.5.1
+- 📱 Sign in UX improvement. We no longer clear tokens when there is a simple network error.
+- 💻 The code for determining whether or not a user is signed out has been neatly organized.
+
+## [Space Detail View and Official Domain] - 2025-03-04
+
+- 0.5.0
+- 📱 Space detail view is now available.
+- 🌐 Service's official domain `1bookmark.net` is now used.
+
 ## [Improve Code Quality and Fixed Some Bugs] - 2025-02-28
 
 - 0.4.2

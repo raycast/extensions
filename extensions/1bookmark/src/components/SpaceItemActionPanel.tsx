@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { SpaceMembersView } from "../views/SpaceMembersView";
 import { NewSpaceForm } from "../views/NewSpaceForm";
 import { SpaceTagsView } from "../views/SpaceTagsView";
+import { SpaceDetailView } from "../views/SpaceDetailView";
 
 export const SpaceItemActionPanel = (props: {
   refetch: () => void;
@@ -13,14 +14,12 @@ export const SpaceItemActionPanel = (props: {
 
   return (
     <ActionPanel>
-      {/*
-      TODO: Additional features planned
-      <Action
+      <Action.Push
         title="Open Space Detail"
-        onAction={() => {
-          console.log("Open Space Detail");
-        }}
-      /> */}
+        icon={Icon.Info}
+        target={<SpaceDetailView spaceId={spaceId} />}
+        onPop={refetch}
+      />
       <Action.Push
         title="Tags"
         icon={Icon.Tag}

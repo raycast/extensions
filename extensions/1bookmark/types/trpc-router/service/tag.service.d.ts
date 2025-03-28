@@ -35,6 +35,7 @@ export declare class TagService {
         spaceId: string;
         name: string;
         author: string;
+        icon?: string;
     }): Promise<{
         description: string | null;
         spaceId: string;
