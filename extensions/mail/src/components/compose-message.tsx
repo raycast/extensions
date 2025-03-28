@@ -106,8 +106,8 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
       }
     >
       <Form.Dropdown title="From" placeholder="Select account" {...itemProps.account}>
-        {(account ? [account] : accounts)?.flatMap((account: Account, index: number) =>
-          account.emails.map((email: string) => <Form.Dropdown.Item key={index} value={email} title={email} />),
+        {(account ? [account] : accounts)?.flatMap((account: Account) =>
+          account.emails.map((email: string) => <Form.Dropdown.Item key={email} value={email} title={email} />),
         )}
       </Form.Dropdown>
 
