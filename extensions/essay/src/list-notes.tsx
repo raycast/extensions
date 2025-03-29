@@ -196,7 +196,7 @@ function CommentForm({ note }: { note: Note }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} icon={Icon.Check} />
         </ActionPanel>
       }
     >

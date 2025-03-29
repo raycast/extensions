@@ -49,7 +49,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
       enableDrafts
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Check} />
           <Action.OpenInBrowser icon={Icon.Globe} title="Write in Browser" url={`https://www.essay.ink/compose`} />
         </ActionPanel>
       }

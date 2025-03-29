@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, useNavigation, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import useEssayStore from "../stores/essay-store";
 import { Essay } from "../types";
@@ -49,7 +49,7 @@ export default function EssayForm({ essay }: { essay: Essay }) {
       isLoading={loading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Check} />
         </ActionPanel>
       }
     >

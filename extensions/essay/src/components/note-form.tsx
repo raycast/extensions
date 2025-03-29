@@ -1,4 +1,4 @@
-import { useNavigation, showToast, Toast, Form, ActionPanel, Action } from "@raycast/api";
+import { useNavigation, showToast, Toast, Form, ActionPanel, Action, Icon } from "@raycast/api";
 import { useForm, showFailureToast, FormValidation } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import useNoteStore from "../stores/note-store";
@@ -69,7 +69,7 @@ export function NoteForm({ note }: { note: Note }) {
       isLoading={folderLoading || loading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} icon={Icon.Check} />
         </ActionPanel>
       }
     >
