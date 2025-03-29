@@ -1214,6 +1214,15 @@
       "type": "checkbox",
       "default": true,
       "required": false
+    },
+    {
+      "name": "showMetadata",
+      "title": "Show metadata",
+      "label": "Enabled",
+      "description": "This will show the metadata of the response, including the model used, price, the token count, and the time taken to generate the response.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {

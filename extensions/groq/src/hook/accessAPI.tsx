@@ -1,6 +1,6 @@
 import { getSelectedText, Detail, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { global_model, enable_streaming, openai } from "./configAPI";
+import {global_model, enable_streaming, openai, show_metadata} from "./configAPI";
 import { Stream } from "openai/streaming";
 import { allModels as changeModels, currentDate, countToken, estimatePrice } from "./utils";
 import { ResultViewProps } from "./ResultView.types";
@@ -191,7 +191,7 @@ export default function ResultView(props: ResultViewProps) {
           </ActionPanel>
         )
       }
-      metadata={
+      metadata={ show_metadata && (
         <Detail.Metadata>
           <Detail.Metadata.Label title="Model" text={changeModels.filter((m) => m.id === metrics.model)[0].name} />
           <Detail.Metadata.Label title="Temperature" text={metrics.temp.toFixed(1)} />
@@ -210,7 +210,7 @@ export default function ResultView(props: ResultViewProps) {
           <Detail.Metadata.Label title="Cumulative Tokens" text={metrics.cumulativeTokens.toString()} />
           <Detail.Metadata.Label title="Cumulative Cost" text={`${metrics.cumulativeCost.toFixed(4)}¢`} />
         </Detail.Metadata>
-      }
+      )}
     />
   );
 }
