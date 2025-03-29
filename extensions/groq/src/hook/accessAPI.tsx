@@ -123,7 +123,7 @@ export default function ResultView(props: ResultViewProps) {
   if (user_extra_msg) {
     markdownSegments.push(formatUserMessage(user_extra_msg) + "\n\n");
   }
-  if (metrics.model.includes("deepseek")) {
+  if (metrics.model.includes("deepseek") || metrics.model.includes("qwen-qwq")) {
     const splitResponse = response.split("</think>");
     const thinkSegment = splitResponse[0].replace("<think>", "");
     markdownSegments.push("Thinking:\n ```" + thinkSegment + "```");
