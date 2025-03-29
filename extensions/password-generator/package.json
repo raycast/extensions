@@ -1,84 +1,50 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "password-generator",
-  "title": "Password Generator",
-  "description": "Generates a password from 5–64 characters with options for case, special characters, and more",
-  "icon": "password-generator-icon.png",
-  "author": "joshuaiz",
-  "contributors": [
-    "teziovsky",
-    "pernielsentikaer",
-    "hnsn"
-  ],
+  "title": "Create Password",
+  "description": "Generate secure password",
+  "icon": "extension-icon.png",
+  "author": "try_nayeem659",
   "categories": [
-    "Productivity",
-    "Developer Tools"
+    "Security"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "hideAfterCopy",
-      "description": "Hide the raycast panel after the password is copied to the clipboard.",
-      "type": "checkbox",
-      "required": false,
-      "default": false,
-      "title": "Options",
-      "label": "Hide Raycast after copy"
-    }
-  ],
+  "version": "1.0.0",
   "commands": [
     {
-      "name": "generate-random-password",
-      "title": "Generate Random Password",
-      "description": "Generates a password from 5–64 characters in length with options for case, numbers, special characters, and more.",
+      "name": "password-generator",
+      "title": "Create Password",
+      "subtitle": "Create Password",
+      "description": "generate secure password",
       "mode": "view",
-      "preferences": [
+      "arguments": [
         {
-          "name": "storePasswordLength",
-          "description": "Remember the last password length between runs.",
-          "type": "checkbox",
+          "name": "length",
+          "type": "text",
           "required": false,
-          "default": true,
-          "label": "Remember password length"
-        }
-      ]
-    },
-    {
-      "name": "generate-memorable-password",
-      "title": "Generate Memorable Password",
-      "description": "Generates a password with a specified format, with options for words, special characters, and random characters and numbers.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "rememberCustomFormat",
-          "description": "Remember the last custom format between runs.",
-          "type": "checkbox",
-          "required": false,
-          "default": true,
-          "label": "Remember custom format"
+          "placeholder": "length"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0"
+    "@raycast/api": "^1.94.2",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "react": "^18.2.0",
-    "typescript": "^5.3.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
-    "pull-contributions": "npx @raycast/api@latest pull-contributions"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
