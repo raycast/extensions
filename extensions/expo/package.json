@@ -12,28 +12,36 @@
   "commands": [
     {
       "name": "manage-projects",
-      "title": "Manage Projects",
-      "subtitle": "Expo projects",
+      "title": "Projects",
+      "subtitle": "Manage expo projects",
       "description": "Manage project builds,submissions and updates",
       "mode": "view"
     },
     {
       "name": "apple-devices",
       "title": "Apple Devices",
-      "subtitle": "Expo apple devices",
+      "subtitle": "Manage EAS apple devices",
       "description": "View, Create and Edit apple devices",
       "mode": "view"
     },
     {
       "name": "manage-envs",
       "title": "Environment Variables",
+      "subtitle": "Manage project environment variables",
       "description": "View, Create, Edit and Delete environment variables",
+      "mode": "view"
+    },
+    {
+      "name": "push-notification",
+      "title": "Push Notification",
+      "subtitle": "Test Expo push notifications",
+      "description": "Send customized push notifications to your Expo application users",
       "mode": "view"
     },
     {
       "name": "login",
       "title": "Login",
-      "subtitle": "Expo login",
+      "subtitle": "Login to your expo account",
       "description": "Login to your expo account",
       "mode": "view"
     }
