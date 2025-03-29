@@ -1,10 +1,10 @@
 import { runAppleScript } from "@raycast/utils";
 import { CLICK_TYPE_DISPLAY_NAME } from "../constants";
 import { ActionType, Result } from "../types";
-import { createResultFromAppleScriptError } from "./utils";
+import { createResultFromAppleScriptError, getTellApplication } from "./utils";
 
 function buildAppleScript(menuBarId: string, actionType: ActionType): string {
-  const prefix = `tell application "Bartender" to`;
+  const prefix = `${getTellApplication()} to`;
   const id = JSON.stringify(menuBarId);
 
   if (actionType === "activate") {

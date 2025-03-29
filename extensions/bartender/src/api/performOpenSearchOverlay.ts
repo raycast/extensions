@@ -1,10 +1,10 @@
 import { runAppleScript } from "@raycast/utils";
 import { Result } from "../types";
-import { createResultFromAppleScriptError } from "./utils";
+import { createResultFromAppleScriptError, getTellApplication } from "./utils";
 
 export async function performOpenSearchOverlay(): Promise<Result<void>> {
   try {
-    const script = `tell application "Bartender" to quick search`;
+    const script = `${getTellApplication()} to quick search`;
     await runAppleScript(script);
     return { status: "success" };
   } catch (error) {

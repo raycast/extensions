@@ -14,5 +14,6 @@ export default async function takeScreenshot() {
   } catch (e) {
     await showFailureToast(e, { title: "Failed to capture screenshot" });
   }
+
   return filePath;
 }

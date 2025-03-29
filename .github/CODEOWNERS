@@ -20,7 +20,7 @@
 /extensions/adb                                                     @quentin23soleil
 /extensions/adguard-home                                            @subsy
 /extensions/adhan-time                                              @mzaien
-/extensions/ado-search                                              @willemvanlent
+/extensions/ado-search                                              @willemvanlent @fschaal
 /extensions/adonisjs-documentation                                  @craigharman
 /extensions/advanced-replace                                        @Gitsack
 /extensions/advice-slip                                             @pernielsentikaer @andreaselia
@@ -63,6 +63,7 @@
 /extensions/anonaddy                                                @httpjamesm @pernielsentikaer @mormubis
 /extensions/ansible-documentation                                   @Kcih4518
 /extensions/antd-open-browser                                       @crazyair
+/extensions/antinote                                                @sc0
 /extensions/any-website-search                                      @rben01
 /extensions/anybox                                                  @francisfeng @iDarkHusky
 /extensions/anycoffee                                               @aymericio
@@ -146,7 +147,7 @@
 /extensions/bing-search                                             @maver1ck @3c1u
 /extensions/bing-wallpaper                                          @koinzhang
 /extensions/binge-clock                                             @Aayush9029
-/extensions/bintools                                                @Frostplexx
+/extensions/bintools                                                @Frostplexx @bestemic
 /extensions/bitbucket                                               @Lp-Francois @esarmstrong @itsrifat @skuio
 /extensions/bitbucket-search-self-hosted                            @yuercl
 /extensions/bitcoin-price                                           @futantan
@@ -523,6 +524,7 @@
 /extensions/explain-command                                         @maantje
 /extensions/expo                                                    @Patrick-web
 /extensions/f1-standings                                            @csigritz @sxn @qeude @ChetanGoti @drillprop
+/extensions/fabric                                                  @naktinis @naktinis
 /extensions/facetime                                                @ron-myers @arthur-fontaine
 /extensions/fake-financial-data                                     @andre-rd-rodrigues @farisaziz12
 /extensions/fake-swedish-personal-number                            @Corey-Maler
@@ -989,6 +991,7 @@
 /extensions/medialister-marketplace-helper                          @td-sedov
 /extensions/meduza                                                  @castletaste
 /extensions/mem                                                     @brianfakhoury
+/extensions/mem0                                                    @Dev-Khant
 /extensions/memberstack                                             @xmok
 /extensions/meme-generator                                          @timoransky
 /extensions/memo                                                    @mt40
@@ -1022,7 +1025,7 @@
 /extensions/miniflux                                                @Sevichecc @revett
 /extensions/minion-ipsum                                            @vigosan
 /extensions/minisim                                                 @okwasniewski
-/extensions/miro                                                    @felixhaeberle @mathieudutour
+/extensions/miro                                                    @felixhaeberle @mathieudutour @Silv-1
 /extensions/mirror-displays                                         @yonbergman
 /extensions/mite                                                    @paoloricciuti @ramsaysewell
 /extensions/mittwald                                                @danieldeichfuss
@@ -1037,6 +1040,7 @@
 /extensions/moji                                                    @Kasper4649
 /extensions/momentum                                                @LeOndaz
 /extensions/monday                                                  @freak4pc @xmok @xmok
+/extensions/moneybird                                               @janyksteenbeek
 /extensions/moneylover                                              @lacherogwu @xmok
 /extensions/mongodb-objectid                                        @tssujt
 /extensions/monitor-mate                                            @MuhaddiMu
@@ -1280,6 +1284,7 @@
 /extensions/pipedrive                                               @ahpatel
 /extensions/pitchfork                                               @koayon
 /extensions/pixabay                                                 @tonka3000 @mjherich @j3lte
+/extensions/pkg-swap                                                @neversitdull
 /extensions/placeholder                                             @koinzhang @j3lte
 /extensions/planetscale                                             @vimtor
 /extensions/plausible-analytics                                     @thebrokenfinger @xmok
@@ -1781,7 +1786,7 @@
 /extensions/tny                                                     @stayallive @stayallive
 /extensions/to-streamshare                                          @0PandaDEV @bkuzmanoski
 /extensions/todo-list                                               @maggie-j-liu @joshkorol @madza91 @pernielsentikaer @ridemountainpig @dedalusj
-/extensions/todoist                                                 @thomaslombart @AnishDe12020 @kud @casassg @Princeyadav05 @jfkisafk @ridemountainpig @kcole93 @RobErskine @jagadeesh-k-2802 @scottlovegrove @scottlovegrove
+/extensions/todoist                                                 @thomaslombart @AnishDe12020 @kud @casassg @Princeyadav05 @jfkisafk @ridemountainpig @kcole93 @RobErskine @jagadeesh-k-2802 @scottlovegrove @scottlovegrove @FlohGro-dev
 /extensions/toggl-track                                             @franzwilhelm @bkeys818 @michaelfaisst @teziovsky @lukebars @tangerine1202 @AlexIsMaking
 /extensions/toggle-desktop-visibility                               @Haojen @VatsalSy
 /extensions/toggle-fn                                               @elonwoo @pernielsentikaer
@@ -1916,7 +1921,7 @@
 /extensions/wayback-machine                                         @pernielsentikaer @andreaselia @j3lte
 /extensions/wcag                                                    @fgeierst
 /extensions/weather                                                 @tonka3000 @xilopaint
-/extensions/web-audit                                               @floriandwt
+/extensions/web-audit                                               @flornkm @ezzylan
 /extensions/web-page-design-mode                                    @danulqua
 /extensions/web3-profile                                            @peduarte
 /extensions/web3bio                                                 @picturepan2

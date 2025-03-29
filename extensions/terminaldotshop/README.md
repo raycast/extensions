@@ -6,6 +6,8 @@ Terminal and Raycast have partnered to bring you a limited edition coffee roast.
 
 With this extension, you can buy _Flow_ as well as all other bags that Terminal has to offer directly from Raycast.
 
+To celebrate this release, Raycast made a mini-doc about Flow. [Watch it on YouTube](https://youtu.be/H0nSmyuhFkE)!
+
 ### Some design choices...
 
 #### master-controller
