@@ -7,7 +7,7 @@ const api = axios.create({
   baseURL: "https://api.essay.ink",
   timeout: 60 * 1000, // 60 seconds
   headers: {
-    ResponseType: "json",
+    "Content-Type": "application/json",
     Authorization: `Bearer ${preferences.apiKey}`,
   },
 });
