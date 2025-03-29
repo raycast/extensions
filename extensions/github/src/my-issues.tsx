@@ -16,8 +16,9 @@ function MyIssues() {
   const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", ISSUE_DEFAULT_SORT_QUERY, {
     cacheNamespace: "github-my-issue",
   });
-  const { showCreated, showAssigned, showMentioned, showRecentlyClosed, excludedRepositories } =
+  const { showCreated, showAssigned, showMentioned, showRecentlyClosed, repositoryFilterMode, repositoryList } =
     getPreferenceValues<Preferences.MyIssues>();
+
   const {
     data: sections,
     isLoading,
@@ -29,7 +30,8 @@ function MyIssues() {
     showAssigned,
     showMentioned,
     showRecentlyClosed,
-    excludedRepositories,
+    filterMode: repositoryFilterMode,
+    repositoryList: repositoryList?.split(",") || [],
   });
 
   return (

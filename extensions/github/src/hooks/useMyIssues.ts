@@ -5,6 +5,7 @@ import { uniqBy } from "lodash";
 import { getGitHubClient } from "../api/githubClient";
 import { IssueFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
+import { getRepositoryFilter } from "../helpers/repository";
 
 export function useMyIssues({
   sortQuery,
@@ -13,7 +14,8 @@ export function useMyIssues({
   showAssigned,
   showMentioned,
   showRecentlyClosed,
-  excludedRepositories,
+  filterMode,
+  repositoryList,
 }: {
   repository: string | null;
   sortQuery: string;
@@ -21,21 +23,18 @@ export function useMyIssues({
   showAssigned: boolean;
   showMentioned: boolean;
   showRecentlyClosed: boolean;
-  excludedRepositories?: string;
+  filterMode: Preferences.MyIssues["repositoryFilterMode"];
+  repositoryList: string[];
 }) {
   const { github } = getGitHubClient();
 
   const { data, ...rest } = useCachedPromise(
-    async (repo, sortTxt, enableCreated, enableAssigned, enableMentioned, enableClosed) => {
+    async (repo, sortTxt, enableCreated, enableAssigned, enableMentioned, enableClosed, filterMode, repositoryList) => {
       const numberOfDays = 60;
       const twoWeeksAgo = format(subDays(Date.now(), numberOfDays), "yyyy-MM-dd");
       const updatedFilter = `updated:>${twoWeeksAgo}`;
 
-      const repositoriesToExclude = excludedRepositories ? excludedRepositories.split(",").map((r) => r.trim()) : [];
-      let repositoryFilter = repo ? `repo:${repo}` : "";
-      if (repositoriesToExclude.length) {
-        repositoryFilter = `${repositoryFilter} ${repositoriesToExclude.map((r) => `-repo:${r}`).join(" ")}`;
-      }
+      const repositoryFilter = getRepositoryFilter(filterMode, repositoryList, repo);
 
       const results = await Promise.all(
         [
@@ -52,7 +51,7 @@ export function useMyIssues({
 
       return results.map((result) => result.search.nodes as IssueFieldsFragment[]);
     },
-    [repository, sortQuery, showCreated, showAssigned, showMentioned, showRecentlyClosed],
+    [repository, sortQuery, showCreated, showAssigned, showMentioned, showRecentlyClosed, filterMode, repositoryList],
   );
 
   let created, createdClosed, assigned, assignedClosed, mentioned, mentionedClosed;

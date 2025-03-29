@@ -177,3 +177,28 @@ type AdditionalCloneFormatOptions = {
  */
 const formatRepositoryUrl = (repoNameWithOwner: string, protocol: "https" | "ssh"): string =>
   protocol === "https" ? `https://github.com/${repoNameWithOwner}.git` : `git@github.com:${repoNameWithOwner}.git`;
+
+/**
+ * Get the repository filter string based on the filter mode, repository list, and selected repository.
+ *
+ * @param {Preferences.MyIssues["repositoryFilterMode"]} filterMode - The mode to filter repositories ("all", "include", or "exclude").
+ * @param {string[]} repositoryList - The list of repositories to include or exclude.
+ * @param {string | null} selectedRepository - The selected repository to filter.
+ * @returns {string} The repository filter string.
+ */
+export function getRepositoryFilter(
+  filterMode: Preferences.MyIssues["repositoryFilterMode"],
+  repositoryList: string[],
+  selectedRepository: string | null,
+) {
+  if (selectedRepository) {
+    return `repo:${selectedRepository}`;
+  }
+
+  const list = repositoryList.filter(Boolean);
+  return filterMode === "all"
+    ? ""
+    : filterMode === "exclude"
+      ? list.map((repo) => `repo:-${repo}`).join(" ")
+      : list.map((repo) => `repo:${repo}`).join(" ");
+}

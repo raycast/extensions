@@ -149,12 +149,34 @@
           "default": false
         },
         {
-          "name": "excludedRepositories",
-          "title": "Excluded repositories",
-          "description": "A comma-separated list of repositories to exclude when listing your issues",
+          "name": "repositoryFilterMode",
+          "type": "dropdown",
+          "required": false,
+          "default": "all",
+          "title": "Repository Filter Mode",
+          "description": "How to filter repositories",
+          "data": [
+            {
+              "title": "All Repositories",
+              "value": "all"
+            },
+            {
+              "title": "Include Only Listed Repositories",
+              "value": "include"
+            },
+            {
+              "title": "Exclude Listed Repositories",
+              "value": "exclude"
+            }
+          ]
+        },
+        {
+          "name": "repositoryList",
           "type": "textfield",
           "required": false,
-          "label": "Excluded repositories"
+          "title": "Repository List",
+          "description": "Comma-separated list of repositories to include/exclude (e.g., 'owner/repo1, owner/repo2')",
+          "placeholder": "owner/repo1, owner/repo2, owner/repo3"
         }
       ]
     },
@@ -381,12 +403,34 @@
           "default": false
         },
         {
-          "name": "excludedRepositories",
-          "title": "Excluded repositories",
-          "description": "A comma-separated list of repositories to exclude when listing your issues",
+          "name": "repositoryFilterMode",
+          "type": "dropdown",
+          "required": false,
+          "default": "all",
+          "title": "Repository Filter Mode",
+          "description": "How to filter repositories",
+          "data": [
+            {
+              "title": "All Repositories",
+              "value": "all"
+            },
+            {
+              "title": "Include Only Listed Repositories",
+              "value": "include"
+            },
+            {
+              "title": "Exclude Listed Repositories",
+              "value": "exclude"
+            }
+          ]
+        },
+        {
+          "name": "repositoryList",
           "type": "textfield",
           "required": false,
-          "label": "Excluded repositories"
+          "title": "Repository List",
+          "description": "Comma-separated list of repositories to include/exclude (e.g., 'owner/repo1, owner/repo2')",
+          "placeholder": "owner/repo1, owner/repo2, owner/repo3"
         }
       ]
     },

@@ -32,7 +32,8 @@ function MyIssuesMenu() {
     showMentioned,
     showRecentlyClosed,
     useUnreadIndicator,
-    excludedRepositories,
+    repositoryFilterMode,
+    repositoryList,
   } = getPreferenceValues<Preferences.MyIssuesMenu>();
   const { data: sections, isLoading } = useMyIssues({
     repository: null,
@@ -41,7 +42,8 @@ function MyIssuesMenu() {
     showAssigned,
     showMentioned,
     showRecentlyClosed,
-    excludedRepositories,
+    filterMode: repositoryFilterMode,
+    repositoryList: repositoryList?.split(",") || [],
   });
 
   const issuesCount = sections?.reduce((acc, section) => acc + (section.issues ?? []).length, 0);
