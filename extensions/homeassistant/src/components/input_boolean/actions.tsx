@@ -1,6 +1,7 @@
+import { EntityStandardActionSections } from "@components/entity";
 import { State } from "@lib/haapi";
 import { Action, ActionPanel, Color } from "@raycast/api";
-import { EntityStandardActionSections } from "../entity";
+import React from "react";
 import {
   callInputBooleanToggleService,
   callInputBooleanTurnOffService,
@@ -8,7 +9,7 @@ import {
   isEditableInputBoolean,
 } from "./utils";
 
-export function InputBooleanToggleAction(props: { state: State }): JSX.Element | null {
+export function InputBooleanToggleAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!isEditableInputBoolean(s)) {
     return null;
@@ -22,7 +23,7 @@ export function InputBooleanToggleAction(props: { state: State }): JSX.Element |
   );
 }
 
-export function InputBooleanOnAction(props: { state: State }): JSX.Element | null {
+export function InputBooleanOnAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!isEditableInputBoolean(s)) {
     return null;
@@ -37,7 +38,7 @@ export function InputBooleanOnAction(props: { state: State }): JSX.Element | nul
   );
 }
 
-export function InputBooleanOffAction(props: { state: State }): JSX.Element | null {
+export function InputBooleanOffAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!isEditableInputBoolean(s)) {
     return null;

@@ -2,10 +2,11 @@ import { LastUpdateChangeMenubarItem, MenuBarSubmenu, OpenInMenubarItem } from "
 import { getIcon } from "@components/state/utils";
 import { State } from "@lib/haapi";
 import { capitalizeFirstLetter, getFriendlyName } from "@lib/utils";
-import { getVideoStreamUrlFromCamera } from "./utils";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import React from "react";
+import { getVideoStreamUrlFromCamera } from "./utils";
 
-function CameraOpenStreamInBrowserMenubarItem(props: { state: State }): JSX.Element | null {
+function CameraOpenStreamInBrowserMenubarItem(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("camera")) {
     return null;
@@ -17,7 +18,7 @@ function CameraOpenStreamInBrowserMenubarItem(props: { state: State }): JSX.Elem
   return <OpenInMenubarItem shortcut={{ modifiers: ["cmd"], key: "b" }} url={url} />;
 }
 
-export function CameraMenubarItem(props: { state: State }): JSX.Element | null {
+export function CameraMenubarItem(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   const friendlyName = getFriendlyName(s);
   const title = () => {

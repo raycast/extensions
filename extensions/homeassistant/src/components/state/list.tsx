@@ -28,7 +28,7 @@ import { ha, shouldDisplayEntityID } from "@lib/common";
 import { State } from "@lib/haapi";
 import { getStateTooltip } from "@lib/utils";
 import { ActionPanel, Color, Image, List, Toast, showToast } from "@raycast/api";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useStateSearch } from "./hooks";
 import { getIcon, getStateValue } from "./utils";
 
@@ -36,7 +36,7 @@ export function StatesList(props: {
   domain: string;
   deviceClass?: string | undefined;
   entitiesState?: State[] | undefined;
-}): JSX.Element {
+}): React.ReactElement {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useStateSearch(searchText, props.domain, props.deviceClass, props.entitiesState ?? allStates);
@@ -64,7 +64,7 @@ export function StatesList(props: {
   );
 }
 
-export function StateListItem(props: { state: State }): JSX.Element {
+export function StateListItem(props: { state: State }): React.ReactElement {
   const state = props.state;
 
   let icon: Image.ImageLike | undefined;
@@ -157,7 +157,7 @@ export function StateListItem(props: { state: State }): JSX.Element {
   );
 }
 
-export function StateActionPanel(props: { state: State }): JSX.Element {
+export function StateActionPanel(props: { state: State }): React.ReactElement {
   const state = props.state;
   const domain = props.state.entity_id.split(".")[0];
 
