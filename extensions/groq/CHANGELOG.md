@@ -1,6 +1,6 @@
 # Groq Changelog
 
-## [Updated Models] - {PR_MERGE_DATE}
+## [Updated Models] - 2025-03-29
 
 - Removed deprecated `Mixtral 8x7B 32k`
 - Added `DeepSeek R1 32B 128K`
