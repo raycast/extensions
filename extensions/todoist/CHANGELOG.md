@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Add Default Sorting in Menu Bar] - {PR_MERGE_DATE}
+
+Added same sorting order as Todoist home and web app.
+
 ## [Support Commas in Filters] - 2025-03-28
 
 Add support for commas in filter strings.
