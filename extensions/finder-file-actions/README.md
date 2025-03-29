@@ -33,6 +33,56 @@ Quickly move or copy selected files in Finder to a destination folder of your ch
 - `Cmd+Shift+Return`: Copy files to the selected folder
 - `Cmd+Shift+D`: Toggle details view
 
+## Installation
+> [!IMPORTANT]
+> this extension is not available in the Raycast store. You can see the ticket [here](https://github.com/raycast/extensions/pull/17705), so if you want to see it in the store, you can upvote it or smth.
+> in the meantime, you can install it manually.
+
+### Prerequisites
+
+- [Raycast](https://raycast.com/) installed on your machine
+- [Node.js](https://nodejs.org/) 18+ or [Bun](https://bun.sh/) runtime installed
+
+### Using *npm*
+
+```bash
+# Clone the repository
+git clone https://github.com/pa1ar/finder-file-actions
+cd finder-file-actions
+
+# Install dependencies
+npm install
+
+# Build the extension
+npm run build
+
+# Create a symlink in Raycast's extension directory
+npm run dev
+```
+
+### Using *Bun* 
+
+```bash
+# Clone the repository
+git clone https://github.com/pa1ar/finder-file-actions
+cd finder-file-actions
+
+# Install dependencies
+bun install
+
+# Build the extension
+bun run build
+
+# Create a symlink in Raycast's extension directory
+bun run dev
+```
+
+After running these commands, the extension will be available in Raycast. You can close the terminal, and the extension will remain functional. To access it, simply:
+
+1. Open Raycast
+2. Search for "Move to Folder" or "Copy to Folder"
+3. Start using the extension.
+
 ## Credits
 
 This extension is based on the [Folder Search](https://www.raycast.com/GastroGeek/folder-search) extension originally created by [GastroGeek](https://www.raycast.com/GastroGeek). The folder searching functionality was adapted from the original extension, while adding new capabilities for file operations.
