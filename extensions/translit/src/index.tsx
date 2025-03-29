@@ -2,8 +2,8 @@ import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/a
 import { useState } from "react";
 
 interface Preferences {
-  "primaryAction": string;
-  "clearOnAction": boolean;
+  primaryAction: string;
+  clearOnAction: boolean;
 }
 
 const PRIMARY_ACTIONS = {
@@ -134,7 +134,7 @@ export default function Command() {
   const [input, setInput] = useState("");
   const [cyrillicOutput, setCyrillicOutput] = useState("");
   const { primaryAction, clearOnAction } = getPreferenceValues<Preferences>();
-  
+
   const handleInputChange = (value: string) => {
     setInput(value);
     setCyrillicOutput(transliterateLatinToCyrillic(value));
@@ -147,22 +147,22 @@ export default function Command() {
 
   const actionComponents = {
     [PRIMARY_ACTIONS.PASTE_TO_ACTIVE_APP]: (
-      <Action.Paste 
+      <Action.Paste
         key="paste"
-        title={UI_TEXT.ACTIONS.PASTE_TITLE} 
-        icon={Icon.Clipboard} 
-        content={cyrillicOutput} 
+        title={UI_TEXT.ACTIONS.PASTE_TITLE}
+        icon={Icon.Clipboard}
+        content={cyrillicOutput}
         onPaste={() => {
           if (clearOnAction) clearInput();
         }}
       />
     ),
     [PRIMARY_ACTIONS.COPY_TO_CLIPBOARD]: (
-      <Action.CopyToClipboard 
+      <Action.CopyToClipboard
         key="copy"
-        title={UI_TEXT.ACTIONS.COPY_TITLE} 
-        icon={Icon.Clipboard} 
-        content={cyrillicOutput} 
+        title={UI_TEXT.ACTIONS.COPY_TITLE}
+        icon={Icon.Clipboard}
+        content={cyrillicOutput}
         onCopy={() => {
           if (clearOnAction) clearInput();
         }}
@@ -170,20 +170,12 @@ export default function Command() {
     ),
   };
 
-  const orderedActionKeys = Object.keys(actionComponents).sort(
-    (a, b) => (a === primaryAction ? -1 : b === primaryAction ? 1 : 0)
+  const orderedActionKeys = Object.keys(actionComponents).sort((a, b) =>
+    a === primaryAction ? -1 : b === primaryAction ? 1 : 0,
   );
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          {orderedActionKeys.map((key) => (
-            actionComponents[key]
-          ))}
-        </ActionPanel>
-      }
-    >
+    <Form actions={<ActionPanel>{orderedActionKeys.map((key) => actionComponents[key])}</ActionPanel>}>
       <Form.TextArea
         id="input"
         title={UI_TEXT.FORM.LATIN_INPUT_TITLE}
@@ -191,10 +183,7 @@ export default function Command() {
         value={input}
         onChange={handleInputChange}
       />
-      <Form.Description 
-        title={UI_TEXT.FORM.CYRILLIC_OUTPUT_TITLE} 
-        text={cyrillicOutput || DEFAULT.OUTPUT} 
-      />
+      <Form.Description title={UI_TEXT.FORM.CYRILLIC_OUTPUT_TITLE} text={cyrillicOutput || DEFAULT.OUTPUT} />
     </Form>
   );
 }
