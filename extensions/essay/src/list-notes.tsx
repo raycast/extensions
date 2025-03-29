@@ -1,5 +1,16 @@
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { ActionPanel, List, Action, Icon, showToast, Toast, Form, useNavigation, confirmAlert } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  Form,
+  useNavigation,
+  confirmAlert,
+  Clipboard,
+} from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { getRelativeTime } from "./utils";
 import { FormValidation, useForm } from "@raycast/utils";
@@ -37,15 +48,7 @@ export default function Command() {
 
   const { isLoading, pagination } = usePromise(
     (searchText: string) => async (options: { page: number }) => {
-      showToast({
-        style: Toast.Style.Animated,
-        title: "Searching...",
-      });
       const resp = await fetchNotes({ limit: 12, page: options.page + 1, keyword: searchText });
-      showToast({
-        style: Toast.Style.Success,
-        title: "Notes refreshed",
-      });
       return { data: resp.data, hasMore: resp.meta.hasMore };
     },
     [searchText],
@@ -95,6 +98,17 @@ export default function Command() {
                       target={<Comments comments={note.comments as NoteComment[]} />}
                     />
                   )}
+                  <Action
+                    icon={Icon.CopyClipboard}
+                    title="Copy"
+                    onAction={async () => {
+                      await Clipboard.copy(note.content);
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: "Note copied",
+                      });
+                    }}
+                  />
                   <Action.OpenInBrowser
                     icon={Icon.Globe}
                     title="Open in Browser"
