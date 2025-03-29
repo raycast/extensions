@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "alephalpha",
+  "title": "Aleph Alpha",
+  "description": "Interact with AlephAlpha Inference API",
+  "icon": "aa_logo.png",
+  "author": "tradeqvest",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "models",
+      "title": "List Models",
+      "description": "Display all available models.",
+      "mode": "view"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize a text.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "textInput",
+          "placeholder": "Text",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "improveWriting",
+      "title": "Improve Writing",
+      "description": "Improves the writing style, grammar and flow.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "textInput",
+          "placeholder": "Text",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "customChatPrompt",
+      "title": "Create Custom Chat Prompt",
+      "description": "Create a custom chat prompt with advanced settings.",
+      "mode": "view"
+    },
+    {
+      "name": "steering",
+      "title": "Use Steering",
+      "description": "Steer model outputs using pre-defined concepts.",
+      "mode": "view"
+    },
+    {
+      "name": "performance",
+      "title": "Check Performance",
+      "description": "Check the performance of certain models",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "label": "AlephAlpha API Key",
+      "description": "Enter your personal AlephAlpha API Key",
+      "type": "password",
+      "title": "API Key",
+      "required": true
+    },
+    {
+      "name": "apiUrl",
+      "label": "AlephAlpha API URL",
+      "description": "The url of the API.",
+      "type": "textfield",
+      "title": "API URL",
+      "required": true
+    },
+    {
+      "name": "defaultModel",
+      "label": "Default Model",
+      "description": "Default model that will be used for commands.",
+      "type": "textfield",
+      "title": "Default Model",
+      "default": "llama-3.1-8b-instruct",
+      "required": true
+    }
+  ]
+}
