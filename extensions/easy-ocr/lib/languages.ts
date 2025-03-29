@@ -1,12 +1,10 @@
-
-
 const languages = {
   afr: "Afrikaans",
   amh: "Amharic",
   ara: "Arabic",
   asm: "Assamese",
   aze: "Azerbaijani",
-  aze_cyrl: "Azerbaijani - Cyrilic",
+  aze_cyrl: "Azerbaijani - Cyrillic",
   bel: "Belarusian",
   ben: "Bengali",
   bod: "Tibetan",
@@ -124,7 +122,7 @@ const languages = {
   ukr: "Ukrainian",
   urd: "Urdu",
   uzb: "Uzbek",
-  uzb_cyrl: "Uzbek - Cyrilic",
+  uzb_cyrl: "Uzbek - Cyrillic",
   vie: "Vietnamese",
   yid: "Yiddish",
   yor: "Yoruba",

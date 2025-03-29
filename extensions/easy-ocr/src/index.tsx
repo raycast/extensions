@@ -16,8 +16,9 @@ export default async function main() {
     return;
   }
 
-  let defaultLangCode = getPreferenceValues<Preferences>().tesseract_lang;
+  let defaultLangCode = getPreferenceValues<Preferences>().tesseract_lang.toLowerCase();
 
+  // Fallback to English if user hasn't provided valid language is provided in extension options
   if (!utils.isValidLanguage(defaultLangCode)) {
     defaultLangCode = "eng";
   }
@@ -43,7 +44,7 @@ export default async function main() {
       // Detect language
       const detectedLangCode = franc(text);
 
-      if (utils.isValidLanguage(defaultLangCode) && detectedLangCode !== defaultLangCode) {
+      if (utils.isValidLanguage(detectedLangCode) && detectedLangCode !== defaultLangCode) {
         text = await tesseractOcr(filePath, detectedLangCode);
         text = utils.handleNewLines(text);
         languageUsed = detectedLangCode;
