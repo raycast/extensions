@@ -6,13 +6,13 @@ View scores, games, standings, news, injuries, and transactions across your favo
 
 ## Commands:
 
-| **Command**                 | **Description**                                                                                                                                                                                                              |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Scores and Schedule**     | Dynamically view live scores, game times, and completed scores (updates dynamically based on the game state). Supports scores from the past 3 days, games for the next 5 days, and today's games.                            |
-| **Standings Command**       | View team standings and in-depth stats (differs based on the league).                                                                                                                                                        |
-| **Tracker Command**         | View articles, injuries, and transactions (differs based on the league).                                                                                                                                                     |
-| **Favorite Team Dashboard** | One command to view completed games, scheduled games, team information, team standings position, injuries, transactions, and injuries (differs based on league, also requires a favorite league, sport, and team for setup). |
-| **Live Scores Menubar**     | View Live Scores, Game Times, and Completed Scores directly from your menubar. (Requires a favorite league and sport for setup)                                                                                              |
+| **Command**                 | **Description**                                                                                                                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Scores and Schedule**     | Dynamically view live scores, game times, and completed scores (updates dynamically based on the game state). Supports scores from the past 3 days, games for the next 5 days, and today's games.                  |
+| **Standings Command**       | View team standings and in-depth stats (differs based on the league).                                                                                                                                              |
+| **Tracker Command**         | View articles, injuries, and transactions (differs based on the league).                                                                                                                                           |
+| **Favorite Team Dashboard** | One command to view completed games, scheduled games, team information, team standings position, injuries, and transactions (differs based on league, also requires a favorite league, sport, and team for setup). |
+| **Live Scores Menubar**     | View Live Scores, Game Times, and Completed Scores directly from your menubar. (Requires a favorite league and sport for setup)                                                                                    |
 
 ## Supported Leagues:
 
