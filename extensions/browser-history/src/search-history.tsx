@@ -1,7 +1,6 @@
-import React from "react";
 import { ActionPanel, Action, getPreferenceValues, List } from "@raycast/api";
 import { useHistorySearch } from "./hooks/useHistorySearch";
-import { ReactElement, useState } from "react";
+import { ReactElement, isValidElement, useState } from "react";
 import { Preferences, SupportedBrowsers } from "./interfaces";
 import { BrowserHistoryActions, ListEntries } from "./components";
 
@@ -19,7 +18,7 @@ export default function Command(): ReactElement {
     .map(([key]) => useHistorySearch(key.replace("enable", "") as SupportedBrowsers, searchText))
     .map((entry) => {
       if (entry.permissionView) {
-        if (entry.permissionView && React.isValidElement(entry.permissionView)) {
+        if (entry.permissionView && isValidElement(entry.permissionView)) {
           permissionView.push(entry.permissionView);
         }
       }
@@ -62,7 +61,7 @@ export default function Command(): ReactElement {
         />
       ) : noHistory ? (
         <List.EmptyView
-          title={`No ${searchText ?? ""} history found`}
+          title={searchText ? `No ${searchText} history found` : "No history found"}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
