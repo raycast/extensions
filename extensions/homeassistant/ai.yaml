@@ -79,9 +79,9 @@ evals:
             entity_id: "sensor.living_room_climate_sensor_temperature"
             attributes:
               state_class: "measurement"
-              unit_of_measurement": "°C"
+              unit_of_measurement: "°C"
               device_class: "temperature"
-              friendly_name": "Living Room Climate Sensor Temperature"
+              friendly_name: "Living Room Climate Sensor Temperature"
     expected:
       - callsTool:
           name: "get-entities"
