@@ -1,5 +1,10 @@
 # Browser History Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Add a `search in browser` action when no search history is available.
+- Update dependencies.
+
 ## [Fix for Safari] - 2024-12-05
 
 - Fixed Safari history search.

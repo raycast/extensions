@@ -1,4 +1,5 @@
-import { ActionPanel, getPreferenceValues, List } from "@raycast/api";
+import React from "react";
+import { ActionPanel, Action, getPreferenceValues, List } from "@raycast/api";
 import { useHistorySearch } from "./hooks/useHistorySearch";
 import { ReactElement, useState } from "react";
 import { Preferences, SupportedBrowsers } from "./interfaces";
@@ -10,22 +11,27 @@ export default function Command(): ReactElement {
   const [searchText, setSearchText] = useState<string>();
 
   const isLoading: boolean[] = [];
-  const permissionView: any[] = [];
+  const permissionView: ReactElement[] = [];
+  let noHistory = true;
 
   let entries = Object.entries(preferences)
     .filter(([key, val]) => key.startsWith("enable") && val)
-    .map(([key], idx) => useHistorySearch(key.replace("enable", "") as SupportedBrowsers, searchText))
+    .map(([key]) => useHistorySearch(key.replace("enable", "") as SupportedBrowsers, searchText))
     .map((entry) => {
       if (entry.permissionView) {
-        permissionView.push(entry.permissionView);
+        if (entry.permissionView && React.isValidElement(entry.permissionView)) {
+          permissionView.push(entry.permissionView);
+        }
       }
       isLoading.push(entry.isLoading);
 
+      if ((entry.data?.length ?? 0) > 0) {
+        noHistory = false;
+      }
+
       return (
         <List.Section title={entry.browser || ""} key={entry.browser}>
-          {entry.data?.map((e) => (
-            <ListEntries.HistoryEntry entry={e} key={e.id} />
-          ))}
+          {entry.data?.map((e) => <ListEntries.HistoryEntry entry={e} key={e.id} />)}
         </List.Section>
       );
     });
@@ -42,13 +48,7 @@ export default function Command(): ReactElement {
   }
 
   return (
-    <List
-      onSearchTextChange={function (query) {
-        setSearchText(query);
-      }}
-      isLoading={isLoading.some((e) => e)}
-      throttle={false}
-    >
+    <List onSearchTextChange={setSearchText} isLoading={isLoading.some((e) => e)} throttle={false}>
       {!enabled ? (
         <List.EmptyView
           title="You haven't enabled any browsers yet"
@@ -57,6 +57,15 @@ export default function Command(): ReactElement {
           actions={
             <ActionPanel>
               <BrowserHistoryActions.OpenPreferences />
+            </ActionPanel>
+          }
+        />
+      ) : noHistory ? (
+        <List.EmptyView
+          title={`No ${searchText} history found`}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Search in Browser" url={`https://www.google.com/search?q=${searchText}`} />
             </ActionPanel>
           }
         />
