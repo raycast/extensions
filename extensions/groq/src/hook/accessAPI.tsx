@@ -1,6 +1,6 @@
 import { getSelectedText, Detail, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import {global_model, enable_streaming, openai, show_metadata} from "./configAPI";
+import { global_model, enable_streaming, openai, show_metadata } from "./configAPI";
 import { Stream } from "openai/streaming";
 import { allModels as changeModels, currentDate, countToken, estimatePrice } from "./utils";
 import { ResultViewProps } from "./ResultView.types";
