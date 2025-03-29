@@ -62,10 +62,13 @@ export default function Command(): ReactElement {
         />
       ) : noHistory ? (
         <List.EmptyView
-          title={`No ${searchText} history found`}
+          title={`No ${searchText ?? ""} history found`}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Search in Browser" url={`https://www.google.com/search?q=${searchText}`} />
+              <Action.OpenInBrowser
+                title="Search in Browser"
+                url={`https://www.google.com/search?q=${searchText ?? ""}`}
+              />
             </ActionPanel>
           }
         />
