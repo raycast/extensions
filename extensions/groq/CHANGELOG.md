@@ -6,6 +6,7 @@
 - Added `DeepSeek R1 32B 128K`
 - Added `Qwen 2.5 32B 128K`
 - Added `Qwen 2.5 Coder 32B 128K`
+- Added `Qwen QWQ 32B 128K`
 - Added `Mistral Saba 24B 32K`
 
 ## [Updated Models] - 2025-02-09

@@ -76,6 +76,10 @@
             {
               "value": "qwen-2.5-coder-32b",
               "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -150,6 +154,10 @@
             {
               "value": "qwen-2.5-coder-32b",
               "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -224,6 +232,10 @@
             {
               "value": "qwen-2.5-coder-32b",
               "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -298,6 +310,10 @@
             {
               "value": "qwen-2.5-coder-32b",
               "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -372,6 +388,10 @@
             {
               "value": "qwen-2.5-coder-32b",
               "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -446,6 +466,10 @@
             {
               "value": "qwen-2.5-coder-32b",
               "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -536,6 +560,10 @@
             {
               "value": "qwen-2.5-coder-32b",
               "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -627,6 +655,10 @@
             {
               "value": "qwen-2.5-coder-32b",
               "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -702,6 +734,10 @@
             {
               "value": "qwen-2.5-coder-32b",
               "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -777,6 +813,10 @@
             {
               "value": "qwen-2.5-coder-32b",
               "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -852,6 +892,10 @@
             {
               "value": "qwen-2.5-coder-32b",
               "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -927,6 +971,10 @@
             {
               "value": "qwen-2.5-coder-32b",
               "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -1002,6 +1050,10 @@
             {
               "value": "qwen-2.5-coder-32b",
               "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -1077,6 +1129,10 @@
             {
               "value": "qwen-2.5-coder-32b",
               "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -1143,6 +1199,10 @@
         {
           "value": "qwen-2.5-coder-32b",
           "title": "Qwen 2.5 Coder 32B 128K"
+        },
+        {
+          "value": "qwen-qwq-32b",
+          "title": "Qwen QWQ 32B 128K"
         }
       ]
     },
