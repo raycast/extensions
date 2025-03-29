@@ -3,7 +3,7 @@ import { globalModel, openai } from "./api";
 
 export default async function Command() {
   const { model_execute } = getPreferenceValues();
-  const model = model_execute == "global" ? globalModel : model_execute;
+  const model = model_execute === "global" ? globalModel : model_execute;
   let selectedText = "";
   try {
     selectedText = await getSelectedText();
