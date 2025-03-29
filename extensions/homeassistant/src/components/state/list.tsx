@@ -105,7 +105,10 @@ export function StateListItem(props: { state: State }): React.ReactElement {
       } else if (e.startsWith("climate") && "current_temperature" in state.attributes) {
         return `${state.attributes.current_temperature}°`;
       }
-    } catch (e) {
+    } catch (
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      e
+    ) {
       // ignore
     }
     return "";
@@ -119,7 +122,10 @@ export function StateListItem(props: { state: State }): React.ReactElement {
       } else if (e.startsWith("climate") && "current_temperature" in state.attributes) {
         return { source: "thermometer.svg", tintColor: Color.SecondaryText };
       }
-    } catch (e) {
+    } catch (
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      e
+    ) {
       // ignore
     }
   };
@@ -129,7 +135,10 @@ export function StateListItem(props: { state: State }): React.ReactElement {
       if (state.attributes.hvac_modes) {
         return { source: "cog.svg", tintColor: Color.SecondaryText };
       }
-    } catch (e) {
+    } catch (
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      e
+    ) {
       // ignore
     }
   };

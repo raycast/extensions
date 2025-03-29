@@ -692,7 +692,7 @@
     "yaml": "^2.5.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/lodash-es": "^4.17.12",
     "@types/multicast-dns": "^7.2.4",
     "@types/node": "^22.13.14",
@@ -702,7 +702,7 @@
     "@types/react": "^19.0.12",
     "@types/url-join": "^4.0.3",
     "@types/ws": "^8.5.12",
-    "eslint": "^8.57.0",
+    "eslint": "^9.23.0",
     "prettier": "^3.5.3",
     "react": "^19.1.0",
     "typescript": "^5.8.2"

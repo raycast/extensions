@@ -12,7 +12,10 @@ export function LastUpdateChangeMenubarItem({ state, onAction }: { state: State;
   const tooltip = (dt: string) => {
     try {
       return `${humanDateString(dt)} (${new Date(dt).toLocaleString()})`;
-    } catch (error) {
+    } catch (
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      error
+    ) {
       return `${humanDateString(dt)}`;
     }
   };
@@ -36,9 +39,7 @@ export function LastUpdateChangeMenubarItem({ state, onAction }: { state: State;
   );
 }
 
-export interface MenuBarSubmenuProps extends RUIMenuBarExtra.Submenu.Props {}
-
-export function MenuBarSubmenu({ titleSeparator, children, ...restProps }: MenuBarSubmenuProps) {
+export function MenuBarSubmenu({ titleSeparator, children, ...restProps }: RUIMenuBarExtra.Submenu.Props) {
   return (
     <RUIMenuBarExtra.Submenu titleSeparator={titleSeparator ?? "|"} {...restProps}>
       {children}
@@ -46,9 +47,7 @@ export function MenuBarSubmenu({ titleSeparator, children, ...restProps }: MenuB
   );
 }
 
-export interface LaunchCommandMenubarItemProps extends RUIMenuBarExtra.LaunchCommand.Props {}
-
-export function LaunchCommandMenubarItem({ shortcut, ...restProps }: LaunchCommandMenubarItemProps) {
+export function LaunchCommandMenubarItem({ shortcut, ...restProps }: RUIMenuBarExtra.LaunchCommand.Props) {
   return <RUIMenuBarExtra.LaunchCommand shortcut={shortcut ?? { modifiers: ["cmd"], key: "o" }} {...restProps} />;
 }
 

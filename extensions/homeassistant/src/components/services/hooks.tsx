@@ -89,7 +89,6 @@ export function useServiceCalls(): {
 }
 
 export interface FieldState {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   id: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value?: any;
@@ -101,7 +100,7 @@ export interface FieldState {
   fromYaml: (text: string) => any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validator: (userValue: any) => string | undefined;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   //selector: any
 }
 
@@ -205,7 +204,10 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
                   if (userValue && userValue.trim().length > 0) {
                     try {
                       parse(userValue);
-                    } catch (error) {
+                    } catch (
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                      error
+                    ) {
                       return "No valid yaml";
                     }
                   }
