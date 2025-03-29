@@ -47,6 +47,7 @@ export default function SleepList({ child }: SleepListProps) {
   async function createSleepAndNavigateBack() {
     await fetchSleepEntries();
     navigation.pop();
+    console.log("Sleep entry created and navigation popped");
   }
 
   useEffect(() => {
@@ -126,6 +127,7 @@ export default function SleepList({ child }: SleepListProps) {
           sleep={sleep}
           childName={child.first_name}
           onSleepDeleted={() => handleDeleteSleep(sleep)}
+          onSleepCreated={createSleepAndNavigateBack}
           onSleepUpdated={fetchSleepEntries}
         />
       ))}
@@ -137,10 +139,11 @@ interface SleepListItemProps {
   sleep: SleepEntry;
   childName: string;
   onSleepDeleted: () => void;
+  onSleepCreated: () => void;
   onSleepUpdated: () => void;
 }
 
-function SleepListItem({ sleep, childName, onSleepDeleted, onSleepUpdated }: SleepListItemProps) {
+function SleepListItem({ sleep, childName, onSleepDeleted, onSleepCreated, onSleepUpdated }: SleepListItemProps) {
   const timeInfo = formatTimeWithTooltip(sleep.end);
 
   // Get icon based on nap status
@@ -198,7 +201,7 @@ function SleepListItem({ sleep, childName, onSleepDeleted, onSleepUpdated }: Sle
                   child: sleep.child,
                 }}
                 childName={childName}
-                onEventCreated={onSleepUpdated}
+                onEventCreated={onSleepCreated}
               />
             }
             shortcut={{ modifiers: ["cmd"], key: "n" }}
