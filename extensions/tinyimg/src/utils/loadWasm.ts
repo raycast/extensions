@@ -22,7 +22,7 @@ export default async function loadWasm(): Promise<TinyImgWASMInstance> {
           resolve(wasmModule);
         })
         .catch((err: Error) => {
-          console.log("load wasm error:", err);
+          //console.log("load wasm error:", err);
           reject(err);
         });
     }

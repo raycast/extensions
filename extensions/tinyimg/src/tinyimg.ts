@@ -35,10 +35,13 @@ export default async function main() {
     const totalOriginalSize = results.reduce((acc, cur) => acc + cur.originalSize, 0);
     const totalCompressedSize = results.reduce((acc, cur) => acc + cur.compressedSize, 0);
 
+    const emoji = totalCompressedSize <= totalOriginalSize ? "🎉" : "🤔";
+    const f = totalCompressedSize <= totalOriginalSize ? "-" : "+";
+
     await showToast({
       style: Toast.Style.Success,
-      title: "Compression successful 🎉",
-      message: `-${(100 - (totalCompressedSize / totalOriginalSize) * 100).toFixed(1)}%`,
+      title: `Compression successful ${emoji}`,
+      message: `${f}${(100 - (totalCompressedSize / totalOriginalSize) * 100).toFixed(1)}%`,
     });
   } catch (e) {
     toast.style = Toast.Style.Failure;

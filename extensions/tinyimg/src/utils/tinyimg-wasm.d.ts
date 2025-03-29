@@ -5,6 +5,8 @@ declare module "./tinyimg-wasm.js" {
     _malloc: (size: number) => number;
     _free: (ptr: number) => void;
     HEAPU8: Uint8Array;
+    _w_compress: (inputPtr: number, inputLen: number, quality: number, isWebp: boolean) => number;
+    _drop_vector_struct: (ptr: number) => void;
   }
 
   interface TinyImgWASMOptions {
@@ -16,6 +18,6 @@ declare module "./tinyimg-wasm.js" {
     locateFile?: (path: string, scriptDirectory: string) => string;
   }
 
-  function TinyImg(options?: TinyImgWASMOptions): Promise<TinyImgWASMInstance>;
-  export default TinyImg;
+  function TinyImgWASM(options?: TinyImgWASMOptions): Promise<TinyImgWASMInstance>;
+  export default TinyImgWASM;
 }
