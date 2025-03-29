@@ -1,17 +1,38 @@
-import { Action, ActionPanel, Form, Icon, showHUD } from "@raycast/api";
-import { useForm } from "@raycast/utils";
-import { Clipboard } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
 import { useState } from "react";
 
-interface TransliterationFormValues {
-  latinInput: string;
-  cyrillicOutput: string;
+interface Preferences {
+  "primaryAction": string;
+  "clearOnAction": boolean;
 }
 
+const PRIMARY_ACTIONS = {
+  COPY_TO_CLIPBOARD: "copyToClipboard",
+  PASTE_TO_ACTIVE_APP: "pasteToActiveApp",
+};
+
+const UI_TEXT = {
+  FORM: {
+    LATIN_INPUT_TITLE: "Latin Input",
+    CYRILLIC_OUTPUT_TITLE: "Cyrillic Output",
+  },
+  ACTIONS: {
+    COPY_TITLE: "Copy to Clipboard",
+    PASTE_TITLE: "Paste to Active App",
+  },
+  MESSAGES: {
+    COPIED: "copied!",
+    PASTED: "pasted!",
+    ERROR: "Error occurred while copying/pasting.",
+  },
+};
+
+const DEFAULT = {
+  PLACEHOLDER: "Privet...",
+  OUTPUT: "Привет...",
+};
+
 const MAX_MUNCH_LENGTH = 3;
-const MAX_HUD_PREVIEW_LENGTH = 50;
-const DEFAULT_PLACEHOLDER = "Privet...";
-const DEFAULT_OUTPUT = "Привет...";
 
 const PHONETIC_MAP: Record<string, string[]> = {
   а: ["a"],
@@ -109,49 +130,71 @@ function transliterateLatinToCyrillic(input: string): string {
   return result;
 }
 
-/**
- * Creates a preview text for the HUD notification
- * @param text - Text to create preview from
- * @returns Truncated text with ellipsis if necessary
- */
-function createHUDPreview(text: string): string {
-  return text.length <= MAX_HUD_PREVIEW_LENGTH ? text : `${text.slice(0, MAX_HUD_PREVIEW_LENGTH)}...`;
-}
-
 export default function Command() {
   const [input, setInput] = useState("");
   const [cyrillicOutput, setCyrillicOutput] = useState("");
-
-  const { handleSubmit } = useForm<TransliterationFormValues>({
-    async onSubmit() {
-      await Clipboard.copy(cyrillicOutput);
-      await showHUD(`${createHUDPreview(cyrillicOutput)} copied!`);
-      setInput("");
-      setCyrillicOutput("");
-    },
-  });
-
+  const { primaryAction, clearOnAction } = getPreferenceValues<Preferences>();
+  
   const handleInputChange = (value: string) => {
     setInput(value);
     setCyrillicOutput(transliterateLatinToCyrillic(value));
   };
 
+  const clearInput = () => {
+    setInput("");
+    setCyrillicOutput("");
+  };
+
+  const actionComponents = {
+    [PRIMARY_ACTIONS.PASTE_TO_ACTIVE_APP]: (
+      <Action.Paste 
+        key="paste"
+        title={UI_TEXT.ACTIONS.PASTE_TITLE} 
+        icon={Icon.Clipboard} 
+        content={cyrillicOutput} 
+        onPaste={() => {
+          if (clearOnAction) clearInput();
+        }}
+      />
+    ),
+    [PRIMARY_ACTIONS.COPY_TO_CLIPBOARD]: (
+      <Action.CopyToClipboard 
+        key="copy"
+        title={UI_TEXT.ACTIONS.COPY_TITLE} 
+        icon={Icon.Clipboard} 
+        content={cyrillicOutput} 
+        onCopy={() => {
+          if (clearOnAction) clearInput();
+        }}
+      />
+    ),
+  };
+
+  const orderedActionKeys = Object.keys(actionComponents).sort(
+    (a, b) => (a === primaryAction ? -1 : b === primaryAction ? 1 : 0)
+  );
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Copy to Clipboard" icon={Icon.Clipboard} onSubmit={handleSubmit} />
+          {orderedActionKeys.map((key) => (
+            actionComponents[key]
+          ))}
         </ActionPanel>
       }
     >
       <Form.TextArea
         id="input"
-        title="Latin Input"
-        placeholder={DEFAULT_PLACEHOLDER}
+        title={UI_TEXT.FORM.LATIN_INPUT_TITLE}
+        placeholder={DEFAULT.PLACEHOLDER}
         value={input}
         onChange={handleInputChange}
       />
-      <Form.Description title="Cyrillic Output" text={cyrillicOutput || DEFAULT_OUTPUT} />
+      <Form.Description 
+        title={UI_TEXT.FORM.CYRILLIC_OUTPUT_TITLE} 
+        text={cyrillicOutput || DEFAULT.OUTPUT} 
+      />
     </Form>
   );
 }

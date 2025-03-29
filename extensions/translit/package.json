@@ -19,6 +19,35 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "Choose the primary action for the extension",
+      "required": false,
+      "type": "dropdown",
+      "default": "copyToClipboard",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copyToClipboard"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "pasteToActiveApp"
+        }
+      ]
+    },
+    {
+      "name": "clearOnAction",
+      "title": "Clear Input on Action",
+      "label": "Clear Input",
+      "description": "Clear the input field after performing the action",
+      "required": false,
+      "type": "checkbox",
+      "default": true
+    }]
+  ,
   "dependencies": {
     "@raycast/api": "^1.91.2",
     "@raycast/utils": "^1.18.1",
