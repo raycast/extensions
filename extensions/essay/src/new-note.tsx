@@ -67,7 +67,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
       isLoading={folderLoading || loading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Check} />
+          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} icon={Icon.Check} />
           <Action.OpenInBrowser
             icon={Icon.Globe}
             title="Write in Browser"

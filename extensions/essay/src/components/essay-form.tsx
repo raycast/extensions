@@ -49,7 +49,7 @@ export default function EssayForm({ essay }: { essay: Essay }) {
       isLoading={loading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Check} />
+          <Action.SubmitForm title="Publish" onSubmit={handleSubmit} icon={Icon.Check} />
         </ActionPanel>
       }
     >
