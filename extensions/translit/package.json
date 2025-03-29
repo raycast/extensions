@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "Latin to Cyrillic",
-      "subtitle": "Phonetic Transliteration",
+      "subtitle": "Translit",
       "description": "Convert Latin characters to Cyrillic using phonetic transliteration rules",
       "mode": "view"
     }
