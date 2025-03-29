@@ -2,7 +2,12 @@ import { ActionPanel, Action, Detail, Icon, useNavigation } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI } from "../api";
 import { Child, FeedingEntry, SleepEntry, DiaperEntry, TummyTimeEntry } from "../api";
-import { formatTimeAgo, formatMinutesToFullDuration, formatDiaperDescription, formatErrorMessage } from "../utils";
+import {
+  formatPreciseTimeAgo, // Import the new function
+  formatMinutesToFullDuration,
+  formatDiaperDescription,
+  formatErrorMessage,
+} from "../utils";
 import {
   calculateTotalFeedingAmount,
   calculateTotalSleepMinutes,
@@ -121,7 +126,7 @@ export default function ChildDetailView({ child }: ChildDetailViewProps) {
 ## Feeding
 ${
   stats.lastFeeding
-    ? `Last feeding: **${formatTimeAgo(stats.lastFeeding.start)}** (${stats.lastFeeding.type}, ${stats.lastFeeding.method}${stats.lastFeeding.amount ? `, ${stats.lastFeeding.amount}` : ""})`
+    ? `Last feeding: **${formatPreciseTimeAgo(stats.lastFeeding.start)}** (${stats.lastFeeding.type}, ${stats.lastFeeding.method}${stats.lastFeeding.amount ? `, ${stats.lastFeeding.amount}` : ""})`
     : "No recent feedings recorded"
 }
   
@@ -130,7 +135,7 @@ Total today: **${totalFeedingAmount.toFixed(1)}**
 ## Sleep
 ${
   stats.lastSleep
-    ? `Last sleep: **${formatTimeAgo(stats.lastSleep.end)}** (${stats.lastSleep.duration})`
+    ? `Last sleep: **${formatPreciseTimeAgo(stats.lastSleep.end)}** (${stats.lastSleep.duration})`
     : "No recent sleep recorded"
 }
   
@@ -139,7 +144,7 @@ Total today: **${formatMinutesToFullDuration(totalSleepMinutes)}**
 ## Diaper Changes
 ${
   stats.lastDiaper
-    ? `Last change: **${formatTimeAgo(stats.lastDiaper.time)}** (${formatDiaperDescription(stats.lastDiaper)})`
+    ? `Last change: **${formatPreciseTimeAgo(stats.lastDiaper.time)}** (${formatDiaperDescription(stats.lastDiaper)})`
     : "No recent diaper changes recorded"
 }
   
@@ -148,7 +153,7 @@ Total today: **${stats.todayDiapers.length}** changes (${wetDiapers} wet, ${soli
 ## Tummy Time
 ${
   stats.lastTummyTime
-    ? `Last tummy time: **${formatTimeAgo(stats.lastTummyTime.end)}** (${stats.lastTummyTime.duration})`
+    ? `Last tummy time: **${formatPreciseTimeAgo(stats.lastTummyTime.end)}** (${stats.lastTummyTime.duration})`
     : "No recent tummy time recorded"
 }
   

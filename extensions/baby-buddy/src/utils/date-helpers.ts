@@ -185,6 +185,43 @@ export function calculateElapsedTime(startTimeString: string): string {
 }
 
 /**
+ * Calculates and formats the precise elapsed time since a given date string.
+ * @param dateString - ISO date string
+ * @returns Formatted string like "1h 23m 45s ago" or "Invalid date"
+ */
+export function formatPreciseTimeAgo(dateString: string | undefined): string {
+  if (!dateString) return "Unknown";
+  try {
+    const date = parseISO(dateString);
+    const now = new Date();
+    const seconds = differenceInSeconds(now, date);
+
+    if (seconds < 0) return "in the future"; // Handle cases where the date is in the future
+    if (seconds < 60) return `${seconds}s ago`;
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    let result = "";
+    if (hours > 0) {
+      result += `${hours}h `;
+    }
+    if (minutes > 0) {
+      result += `${minutes}m `;
+    }
+    if (remainingSeconds > 0 || (hours === 0 && minutes === 0)) {
+      // Show seconds if less than a minute or if needed for precision when minutes/hours are present
+      result += `${remainingSeconds}s`;
+    }
+
+    return result.trim() + " ago";
+  } catch (error) {
+    return "Invalid date";
+  }
+}
+
+/**
  * Gets the start of today and end of today for filtering activities
  */
 export function getTodayDateRange(): { start: Date; end: Date } {
