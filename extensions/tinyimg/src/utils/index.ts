@@ -54,7 +54,7 @@ export async function compressImage(filePath: string, option: CompressOption): P
             if (status === 1) {
               const compressedData = new Uint8Array(wasmModule.HEAPU8.buffer, dataPtr, dataLen);
 
-              // creat a Transferable Objects
+              // create a Transferable Object
               const bufferCopy = new ArrayBuffer(compressedData.byteLength);
               const copyView = new Uint8Array(bufferCopy);
               copyView.set(compressedData);
