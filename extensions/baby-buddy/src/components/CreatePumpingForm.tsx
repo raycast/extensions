@@ -1,5 +1,5 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { BabyBuddyAPI, Timer } from "../api";
 import axios from "axios";
 import { showFailureToast } from "@raycast/utils";

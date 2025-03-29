@@ -156,10 +156,7 @@ export function prepareFeedingUpdateData(params: {
 
   // Calculate duration if both start and end times are provided
   if (startTime && endTime) {
-    updateData.duration = calculateDuration(
-      updateData.start as string,
-      updateData.end as string,
-    );
+    updateData.duration = calculateDuration(updateData.start as string, updateData.end as string);
   }
 
   if (type !== undefined) updateData.type = normalizeType(type);

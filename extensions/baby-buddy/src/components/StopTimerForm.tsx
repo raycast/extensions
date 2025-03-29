@@ -66,7 +66,6 @@ export default function StopTimerForm({
       // Import the list components for navigation after creation
       const { default: FeedingList } = await import("./FeedingList");
       const { default: SleepList } = await import("./SleepList");
-      const { default: DiaperList } = await import("./DiaperList");
       const { default: TummyTimeList } = await import("./TummyTimeList");
 
       // Get the child object from the API

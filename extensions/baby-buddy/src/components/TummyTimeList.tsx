@@ -235,7 +235,7 @@ function EditTummyTimeForm({ tummyTime, onTummyTimeUpdated }: EditTummyTimeFormP
         title: "Failed to Update Tummy Time",
         message: formatErrorMessage(error),
       });
-    } finally { 
+    } finally {
       setIsLoading(false);
     }
   }

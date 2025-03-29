@@ -6,7 +6,7 @@
   "icon": "icon.png",
   "author": "ShaneTheKing",
   "categories": [
-    "Applications", "Web", "AI"
+    "Applications", "Web"
   ],
   "license": "MIT",
   "commands": [
@@ -200,6 +200,33 @@
       {
         "input": "Start a sleep timer starting 20 minutes ago",
         "usedAsExample": true
+      },
+      {
+        "input" : "@baby-buddy list active timers",
+        "usedAsExample": false,
+        "mocks" : {
+          "getActiveTimers" : [
+            {
+              "child" : 3,
+              "childName" : "Child 2",
+              "duration" : "00:23:39.151727",
+              "id" : 5658,
+              "name" : "Sleep please",
+              "start" : "2025-03-28T17:10:00-07:00",
+              "user" : 1
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "getActiveTimers"
+            }
+          }
+        ]
       }
     ]
   }
