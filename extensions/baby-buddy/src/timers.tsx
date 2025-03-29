@@ -1,10 +1,11 @@
 import { ActionPanel, Action, List, Icon, Color, Detail, showToast, Toast, confirmAlert } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { BabyBuddyAPI, Timer } from "./api";
-import { calculateElapsedTime, formatTimeWithTooltip } from "./utils";
+import { calculateElapsedTime, formatErrorMessage, formatTimeWithTooltip } from "./utils";
 import CreateTimerForm from "./components/CreateTimerForm";
 import StopTimerForm from "./components/StopTimerForm";
 import EditTimerForm from "./components/EditTimerForm";
+import { showFailureToast } from "@raycast/utils";
 
 interface TimerWithDetails extends Timer {
   childName: string;
@@ -37,9 +38,9 @@ export default function Command() {
         );
 
         setTimers(timersWithDetails);
-        setIsLoading(false);
       } catch (e) {
         setError("Failed to fetch timers. Please check your Baby Buddy URL and API key.");
+      } finally {
         setIsLoading(false);
       }
     }
@@ -146,10 +147,9 @@ function TimerListItem({ timer, onTimerStopped }: { timer: TimerWithDetails; onT
 
         onTimerStopped(); // Refresh the timer list
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast({
           title: "Failed to Delete Timer",
-          message: "Please try again",
+          message: "Failed to delete the timer: " + formatErrorMessage(error),
         });
       }
     }

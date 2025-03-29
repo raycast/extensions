@@ -149,8 +149,10 @@ export function formatDuration(durationString: string | undefined): string {
 
   if (hours > 0) {
     return `${hours}h ${minutes}m`;
-  } else {
+  } else if (minutes > 0) {
     return `${minutes}m`;
+  } else {
+    return parts[2] + "s";
   }
 }
 

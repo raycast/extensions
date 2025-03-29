@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { BabyBuddyAPI } from "../api";
 import { findChildByName } from "../utils/api-helpers";
 import { formatDiaperDataFromContents } from "../utils/form-helpers";
@@ -10,7 +11,8 @@ import { formatTimeToISO, getContentsDescription, normalizeContents } from "../u
  *
  * If asked to create a diaper change with 2 different amount values,
  * create multiple diapers. E.g. "log a wet 1 and solid 2" should create
- * 2 diaper changes.
+ * 2 diaper changes. If there's two different types selected (wet and solid) but
+ * they have the same value, they can both be selected in the same diaper entry.
  *
  * @param childName - The name of the child
  * @param contents - Contents of the diaper (wet, solid, both)
@@ -73,12 +75,9 @@ export default async function ({
 
     return newDiaper;
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Error",
+    await showFailureToast({
+      title: "Error Creating Diaper Change",
       message: formatErrorMessage(error),
     });
-
-    throw error;
   }
 }

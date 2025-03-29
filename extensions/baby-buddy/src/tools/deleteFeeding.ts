@@ -1,6 +1,8 @@
 import { Action, showToast, Toast, Tool } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import axios from "axios";
 import { BabyBuddyAPI } from "../api";
+import { formatErrorMessage } from "../utils";
 
 type DeleteFeedingInput = {
   /**
@@ -41,11 +43,10 @@ export default async function deleteFeeding({ feedingId }: DeleteFeedingInput) {
   } catch (error) {
     let errorMessage = "Failed to delete feeding";
     if (axios.isAxiosError(error) && error.response) {
-      errorMessage += `: ${JSON.stringify(error.response.data)}`;
+      errorMessage += `: ${formatErrorMessage(error)}`;
     }
 
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast({
       title: "Error",
       message: errorMessage,
     });

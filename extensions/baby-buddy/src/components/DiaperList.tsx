@@ -94,7 +94,7 @@ export default function DiaperList({ child }: DiaperListProps) {
 
   function getIconForDiaperType(diaper: DiaperEntry) {
     if (diaper.wet && diaper.solid) {
-      return Icon.Droplets;
+      return Icon.Stars;
     } else if (diaper.wet) {
       return Icon.Droplets;
     } else if (diaper.solid) {
@@ -292,12 +292,13 @@ function EditDiaperForm({ diaper, onDiaperUpdated }: EditDiaperFormProps) {
 
       onDiaperUpdated();
     } catch (error) {
-      setIsLoading(false);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to Update Diaper Change",
         message: formatErrorMessage(error),
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 

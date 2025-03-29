@@ -2,6 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@ray
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Timer } from "../api";
 import axios from "axios";
+import { showFailureToast } from "@raycast/utils";
 
 interface CreateTummyTimeFormProps {
   timer: Timer;
@@ -32,15 +33,9 @@ export default function CreateTummyTimeForm({ timer, childName, onEventCreated }
   // Validate that end time is after start time
   const isTimeRangeValid = endTime > startTime;
 
-  // Use useEffect to handle validation side effects
-  useEffect(() => {
-    // Empty effect to avoid linter warnings about dependencies
-  }, [isTimeRangeValid]);
-
   async function handleSubmit() {
     if (!isTimeRangeValid) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Invalid time range",
         message: "End time must be after start time",
       });
@@ -80,8 +75,6 @@ export default function CreateTummyTimeForm({ timer, childName, onEventCreated }
       // Call the callback to refresh and navigate
       onEventCreated();
     } catch (error: unknown) {
-      setIsLoading(false);
-
       let errorMessage = "Please try again";
 
       // Check if it's an Axios error with response data
@@ -105,6 +98,8 @@ export default function CreateTummyTimeForm({ timer, childName, onEventCreated }
         title: "Failed to Create Tummy Time",
         message: errorMessage,
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 

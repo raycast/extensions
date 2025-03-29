@@ -61,13 +61,14 @@ export default function CreateDiaperForm({ timer, childName, onEventCreated }: C
       onEventCreated();
     } catch (error: unknown) {
       console.error("Failed to create diaper change:", error);
-      setIsLoading(false);
 
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to Create Diaper Change",
         message: formatErrorMessage(error),
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 

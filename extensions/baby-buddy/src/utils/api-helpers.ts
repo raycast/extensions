@@ -157,8 +157,8 @@ export function prepareFeedingUpdateData(params: {
   // Calculate duration if both start and end times are provided
   if (startTime && endTime) {
     updateData.duration = calculateDuration(
-      formatTimeToISO(startTime) || startTime,
-      formatTimeToISO(endTime) || endTime,
+      updateData.start as string,
+      updateData.end as string,
     );
   }
 

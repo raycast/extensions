@@ -1,4 +1,5 @@
 import { Action, showToast, Toast, Tool } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import axios from "axios";
 import { BabyBuddyAPI } from "../api";
 
@@ -38,12 +39,9 @@ export default async function deleteTummyTime({ tummyTimeId }: DeleteTummyTimeIn
       errorMessage += `: ${JSON.stringify(error.response.data)}`;
     }
 
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast({
       title: "Error",
       message: errorMessage,
     });
-
-    throw error;
   }
 }

@@ -100,9 +100,6 @@ export default function StopTimerForm({
           case "tummy-time":
             push(<TummyTimeList child={child} />);
             break;
-          case "diaper":
-            push(<DiaperList child={child} />);
-            break;
           default:
             // No specific navigation for pumping or other types
             pop();
@@ -249,11 +246,6 @@ export default function StopTimerForm({
 
   // Validate that the stop time is after the start time
   const isTimeRangeValid = stopDateTime > new Date(timer.start);
-
-  // Disable submit button if time range is invalid
-  useEffect(() => {
-    // Empty effect to avoid linter warnings about dependencies
-  }, [isTimeRangeValid]);
 
   return (
     <Form

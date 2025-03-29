@@ -5,6 +5,7 @@ import { createSleepData } from "../utils/form-helpers";
 import { formatErrorMessage } from "../utils/formatters";
 import { showInvalidTimeRangeError } from "../utils/validators";
 import { validateTimeRange } from "../utils/date-helpers";
+import { showFailureToast } from "@raycast/utils";
 
 interface CreateSleepFormProps {
   timer: Timer;
@@ -72,14 +73,12 @@ export default function CreateSleepForm({ timer, childName, onEventCreated }: Cr
       // Call the callback to refresh and navigate
       onEventCreated();
     } catch (error: unknown) {
-      console.error("Failed to create sleep entry:", error);
-      setIsLoading(false);
-
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Failed to Create Sleep Entry",
         message: formatErrorMessage(error),
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 

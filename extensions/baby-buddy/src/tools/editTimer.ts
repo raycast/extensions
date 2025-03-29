@@ -1,17 +1,13 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { BabyBuddyAPI } from "../api";
 import { formatErrorMessage, prepareTimerUpdateData } from "../utils/form-helpers";
-import { findChildByName } from "../utils/normalizers";
 
 type EditTimerInput = {
   /**
    * The ID of the timer to edit
    */
   timerId: number;
-  /**
-   * The name of the child this timer is for
-   */
-  childName?: string;
   /**
    * The name of the timer
    */
@@ -29,21 +25,8 @@ type EditTimerInput = {
 /**
  * Update a timer
  */
-export default async function editTimer({ timerId, childName, timerName, startTime, endTime }: EditTimerInput) {
+export default async function editTimer({ timerId, timerName, startTime, endTime }: EditTimerInput) {
   const api = new BabyBuddyAPI();
-
-  // If childName is provided, look up the child ID
-  if (childName) {
-    const children = await api.getChildren();
-    const child = findChildByName(children, childName);
-
-    if (!child) {
-      throw new Error(`Child with name ${childName} not found`);
-    }
-
-    // Note: We can't update the child association via the updateTimer API
-    // If we need this functionality, we would need to extend the API
-  }
 
   // Prepare update data using utility function
   const updateData = prepareTimerUpdateData({
@@ -69,12 +52,9 @@ export default async function editTimer({ timerId, childName, timerName, startTi
 
     return updatedTimer;
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast({
       title: "Error",
       message: formatErrorMessage(error),
     });
-
-    throw error;
   }
 }

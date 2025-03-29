@@ -2,6 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@ray
 import { useState } from "react";
 import { BabyBuddyAPI, Timer } from "../api";
 import { formatErrorMessage, prepareTimerUpdateData } from "../utils/form-helpers";
+import { showFailureToast } from "@raycast/utils";
 
 interface EditTimerFormProps {
   timer: Timer;
@@ -29,8 +30,7 @@ export default function EditTimerForm({ timer, childName, onTimerUpdated }: Edit
       // Update the timer
       await api.updateTimer(timer.id, updateData);
 
-      await showToast({
-        style: Toast.Style.Success,
+      await showFailureToast({
         title: "Timer Updated",
         message: `${timerName} timer updated`,
       });
@@ -38,12 +38,12 @@ export default function EditTimerForm({ timer, childName, onTimerUpdated }: Edit
       onTimerUpdated();
       pop();
     } catch (error) {
-      setIsLoading(false);
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Failed to Update Timer",
         message: formatErrorMessage(error),
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 

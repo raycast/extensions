@@ -2,6 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@ray
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Timer } from "../api";
 import axios from "axios";
+import { showFailureToast } from "@raycast/utils";
 
 interface CreatePumpingFormProps {
   timer: Timer;
@@ -16,6 +17,14 @@ export default function CreatePumpingForm({ timer, childName, onEventCreated }: 
   const navigation = useNavigation();
 
   async function handleSubmit(values: { amount?: string; notes?: string }) {
+    if (!isTimeRangeValid) {
+      await showFailureToast({
+        title: "Invalid Time Range",
+        message: "End time must be after start time",
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
       const api = new BabyBuddyAPI();
@@ -70,8 +79,7 @@ export default function CreatePumpingForm({ timer, childName, onEventCreated }: 
         }
       }
 
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Failed to Create Pumping",
         message: errorMessage,
       });
@@ -80,11 +88,6 @@ export default function CreatePumpingForm({ timer, childName, onEventCreated }: 
 
   // Validate that end time is after start time
   const isTimeRangeValid = endTime > startTime;
-
-  // Use useEffect to handle validation side effects
-  useEffect(() => {
-    // Empty effect to avoid linter warnings about dependencies
-  }, [isTimeRangeValid]);
 
   return (
     <Form

@@ -2,7 +2,7 @@ import { ActionPanel, Action, Detail, Icon, useNavigation } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI } from "../api";
 import { Child, FeedingEntry, SleepEntry, DiaperEntry, TummyTimeEntry } from "../api";
-import { formatTimeAgo, formatMinutesToFullDuration, formatDiaperDescription } from "../utils";
+import { formatTimeAgo, formatMinutesToFullDuration, formatDiaperDescription, formatErrorMessage } from "../utils";
 import {
   calculateTotalFeedingAmount,
   calculateTotalSleepMinutes,
@@ -17,6 +17,7 @@ import FeedingList from "./FeedingList";
 import SleepList from "./SleepList";
 import DiaperList from "./DiaperList";
 import TummyTimeList from "./TummyTimeList";
+import { showFailureToast } from "@raycast/utils";
 
 interface ChildDetailViewProps {
   child: Child;
@@ -90,7 +91,7 @@ export default function ChildDetailView({ child }: ChildDetailViewProps) {
 
         setIsLoading(false);
       } catch (error) {
-        console.error("Failed to fetch child stats:", error);
+        showFailureToast("Failed to fetch child stats", { message: formatErrorMessage(error) });
         setIsLoading(false);
       }
     }

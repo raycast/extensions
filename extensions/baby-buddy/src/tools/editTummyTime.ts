@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { BabyBuddyAPI, TummyTimeEntry } from "../api";
 import { formatErrorMessage } from "../utils/form-helpers";
 import { calculateDuration, findChildByName, formatTimeToISO } from "../utils/normalizers";
@@ -90,12 +91,9 @@ export default async function editTummyTime({
 
     return updatedTummyTime;
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast({
       title: "Error",
       message: formatErrorMessage(error),
     });
-
-    throw error;
   }
 }

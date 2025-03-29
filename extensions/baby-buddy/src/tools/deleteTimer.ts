@@ -1,6 +1,7 @@
 import { Action, showToast, Toast, Tool } from "@raycast/api";
 import axios from "axios";
 import { BabyBuddyAPI } from "../api";
+import { formatErrorMessage } from "../utils";
 
 type DeleteTimerInput = {
   /**
@@ -14,8 +15,8 @@ type DeleteTimerInput = {
  */
 export const confirmation: Tool.Confirmation<DeleteTimerInput> = async (input) => {
   // Fetch timer details to get the name
-  const api = new BabyBuddyAPI();
   try {
+    const api = new BabyBuddyAPI();
     const timer = await api.getTimerById(input.timerId);
 
     if (timer) {
@@ -95,12 +96,12 @@ export default async function deleteTimer({ timerId }: DeleteTimerInput) {
   } catch (error) {
     let errorMessage = "Failed to delete timer";
     if (axios.isAxiosError(error) && error.response) {
-      errorMessage += `: ${JSON.stringify(error.response.data)}`;
+      errorMessage += `: ${formatErrorMessage(error)}`;
     }
 
     await showToast({
       style: Toast.Style.Failure,
-      title: "Error",
+      title: "Error Deleting Timer",
       message: errorMessage,
     });
 

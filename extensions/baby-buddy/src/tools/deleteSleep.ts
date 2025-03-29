@@ -1,6 +1,8 @@
 import { Action, showToast, Toast, Tool } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import axios from "axios";
 import { BabyBuddyAPI } from "../api";
+import { formatErrorMessage } from "../utils";
 
 type DeleteSleepInput = {
   /**
@@ -35,11 +37,10 @@ export default async function deleteSleep({ sleepId }: DeleteSleepInput) {
   } catch (error) {
     let errorMessage = "Failed to delete sleep";
     if (axios.isAxiosError(error) && error.response) {
-      errorMessage += `: ${JSON.stringify(error.response.data)}`;
+      errorMessage += `: ${formatErrorMessage(error.response.data)}`;
     }
 
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast({
       title: "Error",
       message: errorMessage,
     });

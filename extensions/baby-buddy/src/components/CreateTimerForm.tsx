@@ -23,14 +23,14 @@ export default function CreateTimerForm({ onTimerCreated }: CreateTimerFormProps
         const api = new BabyBuddyAPI();
         const childrenData = await api.getChildren();
         setChildren(childrenData);
-        setIsLoading(false);
       } catch (error) {
-        setIsLoading(false);
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to fetch children",
           message: formatErrorMessage(error),
         });
+      } finally {
+        setIsLoading(false);
       }
     }
 

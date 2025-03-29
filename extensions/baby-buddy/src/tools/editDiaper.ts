@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { BabyBuddyAPI } from "../api";
 import { formatErrorMessage, prepareDiaperUpdateData } from "../utils/form-helpers";
 import { findChildByName } from "../utils/normalizers";
@@ -86,12 +87,9 @@ export default async function editDiaper({
 
     return updatedDiaper;
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast({
       title: "Error",
       message: formatErrorMessage(error),
     });
-
-    throw error;
   }
 }

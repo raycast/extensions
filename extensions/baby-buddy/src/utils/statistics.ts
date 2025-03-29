@@ -19,8 +19,8 @@ export function calculateTotalFeedingAmount(feedings: FeedingEntry[]): number {
 export function calculateTotalSleepMinutes(sleep: SleepEntry[]): number {
   return sleep.reduce((total, entry) => {
     // Parse the duration string (format: "HH:MM:SS")
-    const [hours, minutes] = entry.duration.split(":").map(Number);
-    return total + (hours * 60 + minutes);
+    const [hours, minutes, seconds] = entry.duration.split(":").map(Number);
+    return Math.round(total + (hours * 60 + minutes + seconds / 60));
   }, 0);
 }
 

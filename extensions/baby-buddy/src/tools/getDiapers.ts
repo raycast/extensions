@@ -1,4 +1,5 @@
 import { BabyBuddyAPI, DiaperEntry } from "../api";
+import { formatErrorMessage } from "../utils";
 import { findChildByName } from "../utils/normalizers";
 
 type GetDiapersInput = {
@@ -21,30 +22,34 @@ export default async function getDiapers({
   limit = 10,
   todayOnly = false,
 }: GetDiapersInput): Promise<(DiaperEntry & { childName: string })[]> {
-  const api = new BabyBuddyAPI();
-  const children = await api.getChildren();
+  try {
+    const api = new BabyBuddyAPI();
+    const children = await api.getChildren();
 
-  // Find child using the utility function
-  const child = findChildByName(children, childName);
+    // Find child using the utility function
+    const child = findChildByName(children, childName);
 
-  if (!child) {
-    throw new Error(`Child with name ${childName} not found`);
+    if (!child) {
+      throw new Error(`Child with name ${childName} not found`);
+    }
+
+    let diapers: DiaperEntry[];
+
+    if (todayOnly) {
+      diapers = await api.getTodayDiapers(child.id);
+    } else {
+      // Get recent diaper change entries
+      diapers = await api.getRecentDiapers(child.id, limit);
+    }
+
+    // Add child name to each diaper change entry
+    const enhancedDiapers = diapers.map((entry) => ({
+      ...entry,
+      childName: `${child?.first_name || ""} ${child?.last_name || ""}`,
+    }));
+
+    return enhancedDiapers;
+  } catch (error) {
+    throw new Error(formatErrorMessage(error));
   }
-
-  let diapers: DiaperEntry[];
-
-  if (todayOnly) {
-    diapers = await api.getTodayDiapers(child.id);
-  } else {
-    // Get recent diaper change entries
-    diapers = await api.getRecentDiapers(child.id, limit);
-  }
-
-  // Add child name to each diaper change entry
-  const enhancedDiapers = diapers.map((entry) => ({
-    ...entry,
-    childName: `${child.first_name} ${child.last_name}`,
-  }));
-
-  return enhancedDiapers;
 }

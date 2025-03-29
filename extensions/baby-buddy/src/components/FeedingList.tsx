@@ -15,6 +15,7 @@ import { BabyBuddyAPI, Child, FeedingEntry } from "../api";
 import { formatDuration, formatTimeAgo, formatTimeWithTooltip } from "../utils";
 import { formatErrorMessage } from "../utils/form-helpers";
 import CreateFeedingForm from "./CreateFeedingForm";
+import { showFailureToast } from "@raycast/utils";
 
 interface FeedingListProps {
   child: Child;
@@ -32,13 +33,12 @@ export default function FeedingList({ child }: FeedingListProps) {
       // Get all feedings for this child, sorted by newest first
       const feedingsData = await api.getFeedings(child.id, "", 100);
       setFeedings(feedingsData);
-      setIsLoading(false);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to fetch feedings",
         message: formatErrorMessage(error),
       });
+    } finally {
       setIsLoading(false);
     }
   }
@@ -77,6 +77,7 @@ export default function FeedingList({ child }: FeedingListProps) {
           title: "Failed to delete feeding",
           message: formatErrorMessage(error),
         });
+      } finally {
         setIsLoading(false);
       }
     }
@@ -246,11 +247,23 @@ function EditFeedingForm({ feeding, childName, onFeedingUpdated }: EditFeedingFo
     try {
       setIsLoading(true);
       const api = new BabyBuddyAPI();
+      let parsedAmount: number | undefined = undefined;
+      if (amount) {
+        parsedAmount = parseFloat(amount);
+        if (isNaN(parsedAmount)) {
+          showFailureToast({
+            title: "Invalid Amount",
+            message: "Please enter a valid number for the amount.",
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
 
       await api.updateFeeding(feeding.id, {
         type,
         method,
-        amount: amount ? parseFloat(amount) : undefined,
+        amount: parsedAmount,
         notes,
       });
 
@@ -261,12 +274,12 @@ function EditFeedingForm({ feeding, childName, onFeedingUpdated }: EditFeedingFo
 
       onFeedingUpdated();
     } catch (error) {
-      setIsLoading(false);
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to update feeding",
         message: formatErrorMessage(error),
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 

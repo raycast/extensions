@@ -89,7 +89,7 @@ export default function TummyTimeList({ child }: TummyTimeListProps) {
       id: 0,
       name: "New Tummy Time",
       start: new Date().toISOString(),
-      end: new Date().toISOString(),
+      end: new Date(new Date().getTime() + 1000).toISOString(),
       active: false,
       user: 0,
       child: child.id,
@@ -230,12 +230,13 @@ function EditTummyTimeForm({ tummyTime, onTummyTimeUpdated }: EditTummyTimeFormP
 
       onTummyTimeUpdated();
     } catch (error) {
-      setIsLoading(false);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to Update Tummy Time",
         message: formatErrorMessage(error),
       });
+    } finally { 
+      setIsLoading(false);
     }
   }
 

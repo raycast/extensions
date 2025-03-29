@@ -15,6 +15,7 @@ import { BabyBuddyAPI, Child, SleepEntry } from "../api";
 import { formatDuration, formatTimeAgo, formatTimeWithTooltip } from "../utils";
 import { formatErrorMessage } from "../utils/form-helpers";
 import CreateSleepForm from "./CreateSleepForm";
+import { showFailureToast } from "@raycast/utils";
 
 interface SleepListProps {
   child: Child;
@@ -71,13 +72,13 @@ export default function SleepList({ child }: SleepListProps) {
           style: Toast.Style.Success,
           title: "Sleep entry deleted",
         });
-        fetchSleepEntries();
+        await fetchSleepEntries();
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "Failed to delete sleep entry",
           message: formatErrorMessage(error),
         });
+      } finally {
         setIsLoading(false);
       }
     }
@@ -260,12 +261,12 @@ function EditSleepForm({ sleep, childName, onSleepUpdated }: EditSleepFormProps)
       onSleepUpdated();
       navigation.pop();
     } catch (error) {
-      setIsLoading(false);
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to update sleep entry",
         message: formatErrorMessage(error),
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 

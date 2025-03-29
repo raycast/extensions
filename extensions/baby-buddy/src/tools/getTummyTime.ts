@@ -21,30 +21,34 @@ export default async function getTummyTime({
   limit = 10,
   todayOnly = false,
 }: GetTummyTimeInput): Promise<(TummyTimeEntry & { childName: string })[]> {
-  const api = new BabyBuddyAPI();
-  const children = await api.getChildren();
+  try {
+    const api = new BabyBuddyAPI();
+    const children = await api.getChildren();
 
-  // Find child using the utility function
-  const child = findChildByName(children, childName);
+    // Find child using the utility function
+    const child = findChildByName(children, childName);
 
-  if (!child) {
-    throw new Error(`Child with name ${childName} not found`);
+    if (!child) {
+      throw new Error(`Child with name ${childName} not found`);
+    }
+
+    let tummyTime: TummyTimeEntry[];
+
+    if (todayOnly) {
+      tummyTime = await api.getTodayTummyTime(child.id);
+    } else {
+      // Get recent tummy time entries
+      tummyTime = await api.getRecentTummyTime(child.id, limit);
+    }
+
+    // Add child name to each tummy time entry
+    const enhancedTummyTime = tummyTime.map((entry) => ({
+      ...entry,
+      childName: `${child.first_name} ${child.last_name}`,
+    }));
+
+    return enhancedTummyTime;
+  } catch (error) {
+    throw new Error(`Error fetching tummy time entries: ${error}`);
   }
-
-  let tummyTime: TummyTimeEntry[];
-
-  if (todayOnly) {
-    tummyTime = await api.getTodayTummyTime(child.id);
-  } else {
-    // Get recent tummy time entries
-    tummyTime = await api.getRecentTummyTime(child.id, limit);
-  }
-
-  // Add child name to each tummy time entry
-  const enhancedTummyTime = tummyTime.map((entry) => ({
-    ...entry,
-    childName: `${child.first_name} ${child.last_name}`,
-  }));
-
-  return enhancedTummyTime;
 }

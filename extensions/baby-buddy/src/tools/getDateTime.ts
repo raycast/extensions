@@ -3,6 +3,6 @@
  * for example, if they ask "create a timer starting 10 minutes ago", use this
  * tool to get the current time and subtract 10 minutes.
  */
-export default async function () {
+export default function () {
   return new Date().toLocaleString();
 }

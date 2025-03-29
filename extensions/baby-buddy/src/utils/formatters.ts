@@ -90,8 +90,10 @@ export function formatMinutesToFullDuration(minutes: number): string {
  */
 export function formatAge(birthDate: string): string {
   const birth = new Date(birthDate);
+  if (isNaN(birth.getTime())) {
+    return "Invalid birth date";
+  }
   const now = new Date();
-
   // Calculate difference in milliseconds
   const diffMs = now.getTime() - birth.getTime();
 

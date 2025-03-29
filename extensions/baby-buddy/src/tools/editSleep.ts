@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { BabyBuddyAPI } from "../api";
 import { formatErrorMessage, prepareSleepUpdateData } from "../utils/form-helpers";
 import { findChildByName } from "../utils/normalizers";
@@ -58,7 +59,7 @@ export default async function editSleep({ sleepId, childName, isNap, notes, star
 
   // Only proceed if there's something to update
   if (Object.keys(updateData).length === 0) {
-    return { message: "No updates provided" };
+    throw new Error("No updates provided");
   }
 
   try {
@@ -72,12 +73,9 @@ export default async function editSleep({ sleepId, childName, isNap, notes, star
 
     return updatedSleep;
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Error",
+    await showFailureToast({
+      title: "Error Updating Sleep",
       message: formatErrorMessage(error),
     });
-
-    throw error;
   }
 }

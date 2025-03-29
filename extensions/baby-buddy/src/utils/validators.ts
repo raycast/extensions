@@ -3,6 +3,7 @@
  */
 
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 /**
  * Validates that a diaper entry has at least wet or solid
@@ -18,8 +19,7 @@ export function isValidDiaperType(wet: boolean, solid: boolean): boolean {
 export function validateDiaperForm(isWet: boolean, isSolid: boolean): boolean {
   // Validate that at least one of wet or solid is selected
   if (!isValidDiaperType(isWet, isSolid)) {
-    showToast({
-      style: Toast.Style.Failure,
+    showFailureToast({
       title: "Invalid diaper change",
       message: "At least one of Wet or Solid must be selected",
     });

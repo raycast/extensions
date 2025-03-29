@@ -85,15 +85,19 @@ export function formatTimeToISO(timeString?: string): string | undefined {
 export function calculateDuration(startTime?: string, endTime?: string): string | undefined {
   if (!startTime || !endTime) return undefined;
 
-  const startDate = new Date(startTime);
-  const endDate = new Date(endTime);
-  const durationMs = endDate.getTime() - startDate.getTime();
+  try {
+    const startDate = new Date(startTime);
+    const endDate = new Date(endTime);
+    const durationMs = endDate.getTime() - startDate.getTime();
 
-  const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
-  const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-  const durationSeconds = Math.floor((durationMs % (1000 * 60)) / 1000);
+    const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+    const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+    const durationSeconds = Math.floor((durationMs % (1000 * 60)) / 1000);
 
-  return `${durationHours.toString().padStart(2, "0")}:${durationMinutes.toString().padStart(2, "0")}:${durationSeconds.toString().padStart(2, "0")}`;
+    return `${durationHours.toString().padStart(2, "0")}:${durationMinutes.toString().padStart(2, "0")}:${durationSeconds.toString().padStart(2, "0")}`;
+  } catch {
+    return undefined;
+  }
 }
 
 /**
