@@ -80,6 +80,7 @@ export default function CreateEnv({ refreshEnvs }: { refreshEnvs: () => void }) 
         </ActionPanel>
       }
       navigationTitle="Create Enviroment Variable"
+      enableDrafts
     >
       <Form.TextField id="name" title="Name" placeholder="" />
 
