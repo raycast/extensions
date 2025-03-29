@@ -41,7 +41,7 @@ function WeatherMenuBarExtra(props: {
           </MenuBarExtra.Section>
         </>
       ) : (
-        props.children
+        <>{props.children}</>
       )}
     </MenuBarExtra>
   );

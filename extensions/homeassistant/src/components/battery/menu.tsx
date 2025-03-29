@@ -24,7 +24,11 @@ export function BatteryMenubarSection(props: {
   const states = props.states;
   if (!states || states.length <= 0) {
     if (props.emptyElement) {
-      return <MenuBarExtra.Section title={props.title}>{props.emptyElement}</MenuBarExtra.Section>;
+      return (
+        <MenuBarExtra.Section title={props.title}>
+          <>{props.emptyElement}</>
+        </MenuBarExtra.Section>
+      );
     }
     return null;
   }

@@ -1,9 +1,9 @@
-import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { getHomeAssistantServices, HAServiceField, HAServiceMeta } from "./utils";
-import { parse } from "path";
-import { useState, useEffect, useRef } from "react";
 import { getHAWSConnection } from "@lib/common";
-import { Connection, subscribeServices, servicesColl, HassServices } from "home-assistant-js-websocket";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { Connection, HassServices, servicesColl, subscribeServices } from "home-assistant-js-websocket";
+import { parse } from "path";
+import { useEffect, useRef, useState } from "react";
+import { getHomeAssistantServices, HAServiceField, HAServiceMeta } from "./utils";
 
 export interface HAServiceCall {
   domain: string;
@@ -37,9 +37,9 @@ export function useServiceCalls(): {
   isLoading: boolean;
 } {
   const [data, setData] = useCachedState<HAServiceCall[]>("servicescalls");
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<Error | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const hawsRef = useRef<Connection>();
+  const hawsRef = useRef<Connection | null>(null);
 
   useEffect(() => {
     async function fetchData() {

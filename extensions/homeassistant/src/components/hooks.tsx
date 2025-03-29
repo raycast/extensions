@@ -43,9 +43,9 @@ export function useHAStates(): {
   isLoading: boolean;
 } {
   const [states, setStates] = useCachedState<State[]>("states");
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<Error | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const hawsRef = useRef<Connection>();
+  const hawsRef = useRef<Connection | null>(null);
 
   useEffect(() => {
     async function fetchData() {
