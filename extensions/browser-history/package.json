@@ -140,6 +140,16 @@
           ]
         },
         {
+          "name": "searchEngine",
+          "type": "textfield",
+          "required": false,
+          "title": "Search Engine",
+          "description": "Use a search engine for queries when no history is found. Custom search engines utilize {{query}} to insert the search term into the search engine URL.",
+          "placeholder": "https://www.google.com/search?q={{query}}",
+          "default": "https://www.google.com/search?q={{query}}",
+          "label": "Search Engine URL"
+        },
+        {
           "name": "enableChrome",
           "type": "checkbox",
           "required": false,

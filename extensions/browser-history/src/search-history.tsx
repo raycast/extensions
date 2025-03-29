@@ -12,6 +12,11 @@ export default function Command(): ReactElement {
   const isLoading: boolean[] = [];
   const permissionView: ReactElement[] = [];
   let noHistory = true;
+  const searchTextEncoded = encodeURIComponent(searchText ?? "");
+  const searchEngine = preferences.searchEngine;
+  const searchUrl = searchEngine
+    ? searchEngine.replace(/{{query}}/g, searchTextEncoded)
+    : `https://www.google.com/search?q=${searchTextEncoded}`;
 
   let entries = Object.entries(preferences)
     .filter(([key, val]) => key.startsWith("enable") && val)
@@ -64,10 +69,7 @@ export default function Command(): ReactElement {
           title={searchText ? `No ${searchText} history found` : "No history found"}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Search in Browser"
-                url={`https://www.google.com/search?q=${searchText ?? ""}`}
-              />
+              <Action.OpenInBrowser title="Search in Browser" url={searchUrl} />
             </ActionPanel>
           }
         />
