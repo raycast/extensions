@@ -41,7 +41,7 @@ export default async function main() {
     await showToast({
       style: Toast.Style.Success,
       title: `Compression successful ${emoji}`,
-      message: `${f}${(100 - (totalCompressedSize / totalOriginalSize) * 100).toFixed(1)}%`,
+      message: totalOriginalSize === 0 ? "0%" : `${f}${(100 - (totalCompressedSize / totalOriginalSize) * 100).toFixed(1)}%`,
     });
   } catch (e) {
     toast.style = Toast.Style.Failure;
