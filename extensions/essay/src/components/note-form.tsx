@@ -24,6 +24,10 @@ export function NoteForm({ note }: { note: Note }) {
     async onSubmit(values) {
       try {
         setLoading(true);
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Saving the note...",
+        });
         await updateNote({ ...values, id: note.id });
         showToast({
           style: Toast.Style.Success,
@@ -32,7 +36,7 @@ export function NoteForm({ note }: { note: Note }) {
         });
         pop();
       } catch (err: unknown) {
-        showFailureToast(err, { title: "Fail to save note, please check your API key, API endpoint and try again." });
+        showFailureToast(err, { title: "Failed to save note, please check your API key, API endpoint and try again." });
       } finally {
         setLoading(false);
       }

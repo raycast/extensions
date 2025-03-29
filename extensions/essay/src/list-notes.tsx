@@ -14,6 +14,10 @@ export default function Command() {
   const onDeleteNote = useCallback(
     async (noteId: string) => {
       try {
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Deleting the note...",
+        });
         await deleteNote(noteId);
         showToast({
           style: Toast.Style.Success,
@@ -21,7 +25,9 @@ export default function Command() {
           message: "Note deleted",
         });
       } catch (err: unknown) {
-        showFailureToast(err, { title: "Fail to delete note, please check your API key, API endpoint and try again." });
+        showFailureToast(err, {
+          title: "Failed to delete note, please check your API key, API endpoint and try again.",
+        });
       }
     },
     [deleteNote],
@@ -31,7 +37,15 @@ export default function Command() {
 
   const { isLoading, pagination } = usePromise(
     (searchText: string) => async (options: { page: number }) => {
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Searching...",
+      });
       const resp = await fetchNotes({ limit: 12, page: options.page + 1, keyword: searchText });
+      showToast({
+        style: Toast.Style.Success,
+        title: "Notes refreshed",
+      });
       return { data: resp.data, hasMore: resp.meta.hasMore };
     },
     [searchText],
@@ -90,11 +104,17 @@ export default function Command() {
                     icon={Icon.Trash}
                     title="Delete"
                     onAction={async () => {
-                      if (await confirmAlert({ title: "Are you sure?" })) {
+                      if (await confirmAlert({ title: "Are you sure you want to delete this note" })) {
+                        showToast({
+                          style: Toast.Style.Animated,
+                          title: "Deleting the note...",
+                        });
                         onDeleteNote(note.id);
                       } else {
                         showToast({
+                          style: Toast.Style.Success,
                           title: "Canceled",
+                          message: "Note not deleted",
                         });
                       }
                     }}
@@ -137,15 +157,21 @@ function CommentForm({ note }: { note: Note }) {
   const { handleSubmit } = useForm<NoteFormValues>({
     async onSubmit(values) {
       try {
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Saving the comment...",
+        });
         await createComment({ noteId: note.id, content: values.content });
         showToast({
           style: Toast.Style.Success,
           title: "Success!",
-          message: "Comment created",
+          message: "Comment saved",
         });
         pop();
       } catch (err: unknown) {
-        showFailureToast(err, { title: "Fail to add comment, please check your API key, API endpoint and try again." });
+        showFailureToast(err, {
+          title: "Failed to add comment, please check your API key, API endpoint and try again.",
+        });
       }
     },
     validation: {
@@ -171,6 +197,10 @@ function Comments({ comments }: { comments: NoteComment[] }) {
   const onDeleteComment = useCallback(
     async (commentId: number) => {
       try {
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Deleting the comment...",
+        });
         await deleteComment(commentId);
         showToast({
           style: Toast.Style.Success,
@@ -180,7 +210,7 @@ function Comments({ comments }: { comments: NoteComment[] }) {
         setNoteComments((prev) => prev.filter((c) => c.id !== commentId));
       } catch (err: unknown) {
         showFailureToast(err, {
-          title: "Fail to delete comment, please check your API key, API endpoint and try again.",
+          title: "Failed to delete comment, please check your API key, API endpoint and try again.",
         });
       }
     },

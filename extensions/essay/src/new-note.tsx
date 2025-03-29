@@ -37,6 +37,10 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
     async onSubmit(values: Values) {
       try {
         setLoading(true);
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Saving the note...",
+        });
         const note = await createNote(values);
         showToast({
           style: Toast.Style.Success,
@@ -45,7 +49,9 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
         });
         push(<NoteDetail note={note} />);
       } catch (err: unknown) {
-        showFailureToast(err, { title: "Fail to create note, please check your API key, API endpoint and try again." });
+        showFailureToast(err, {
+          title: "Failed to create note, please check your API key, API endpoint and try again.",
+        });
       } finally {
         setLoading(false);
       }

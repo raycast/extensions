@@ -24,6 +24,10 @@ export default function EssayForm({ essay }: { essay: Essay }) {
         return;
       }
       setLoading(true);
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Saving the essay...",
+      });
       const updated = await updateEssay({ id: essay.id, content: values.content });
       showToast({
         style: Toast.Style.Success,

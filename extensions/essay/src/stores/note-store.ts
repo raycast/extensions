@@ -35,7 +35,7 @@ const useNoteStore = create<NoteState>((set, get) => ({
         data.data.forEach((note: Note) => noteMap.set(note.id, note));
         return { notes: Array.from(noteMap.values()) };
       } else {
-        return { notes: data };
+        return { notes: data.data };
       }
     });
     return data;

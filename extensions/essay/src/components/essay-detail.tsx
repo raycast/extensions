@@ -19,7 +19,7 @@ export function EssayDetail({ essay }: { essay: Essay }) {
         popToRoot();
       } catch (err: unknown) {
         showFailureToast(err, {
-          title: "Fail to delete essay, please check your API key, API endpoint and try again.",
+          title: "Failed to delete essay, please check your API key, API endpoint and try again.",
         });
       }
     },
@@ -40,11 +40,17 @@ export function EssayDetail({ essay }: { essay: Essay }) {
             icon={Icon.Trash}
             title="Delete"
             onAction={async () => {
-              if (await confirmAlert({ title: "Are you sure?" })) {
+              if (await confirmAlert({ title: "Are you sure you want to delete this essay?" })) {
+                showToast({
+                  style: Toast.Style.Animated,
+                  title: "Deleting the essay...",
+                });
                 onDelete(essay.id);
               } else {
                 showToast({
+                  style: Toast.Style.Success,
                   title: "Canceled",
+                  message: "Essay not deleted",
                 });
               }
             }}

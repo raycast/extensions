@@ -18,7 +18,9 @@ export function NoteDetail({ note }: { note: Note }) {
         });
         popToRoot();
       } catch (err: unknown) {
-        showFailureToast(err, { title: "Fail to delete note, please check your API key, API endpoint and try again." });
+        showFailureToast(err, {
+          title: "Failed to delete note, please check your API key, API endpoint and try again.",
+        });
       }
     },
     [deleteNote],
@@ -38,11 +40,17 @@ export function NoteDetail({ note }: { note: Note }) {
             icon={Icon.Trash}
             title="Delete"
             onAction={async () => {
-              if (await confirmAlert({ title: "Are you sure?" })) {
+              if (await confirmAlert({ title: "Are you sure you want to delete this note?" })) {
                 onDelete(note.id);
+                showToast({
+                  style: Toast.Style.Animated,
+                  title: "Deleting the note...",
+                });
               } else {
                 showToast({
+                  style: Toast.Style.Success,
                   title: "Canceled",
+                  message: "Note not deleted",
                 });
               }
             }}
