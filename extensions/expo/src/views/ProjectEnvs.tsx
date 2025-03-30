@@ -73,7 +73,7 @@ export default function ProjectEnvs({ appFullName }: { appFullName: string }) {
     },
     onError: (error) => {
       showToast({
-        title: "Error fetching project builds",
+        title: "Error fetching environment variables",
         message: (error as Error)?.message || "",
         style: Toast.Style.Failure,
       });
