@@ -1,0 +1,39 @@
+{
+  "name": "youtube-summary-pro",
+  "title": "Youtube Summary Pro",
+  "description": "Generate detailed AI summaries from YouTube videos. Get comprehensive breakdowns of long-form content with key insights, timestamps, and actionable takeaways.",
+  "icon": "extension_icon.png",
+  "author": "sanchit",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Generate Youtube Summary",
+      "description": "Generate detailed AI summaries from YouTube videos",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "youtube-transcript": "^1.0.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "~20.8.0",
+    "@types/react": "^17.0.0",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "1.0.0"
+}
