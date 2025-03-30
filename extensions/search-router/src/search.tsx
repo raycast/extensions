@@ -64,7 +64,10 @@ function processQuery(rawQuery: string) {
   }
 
   const cleanQuery = query.replace(/!\S+\s*/i, "").trim();
-  const finalQuery = searchEngine ? cleanQuery : `${searchEngineKey} ${cleanQuery}`;
+  let finalQuery = cleanQuery;
+  if (!searchEngine && searchEngineKey) {
+    finalQuery = `${searchEngineKey} ${cleanQuery}`;
+  }
 
   return { searchEngine: searchEngineOrDefault, finalQuery, searchEngineKey };
 }
