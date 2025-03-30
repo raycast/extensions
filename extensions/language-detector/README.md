@@ -24,6 +24,10 @@ See [API.md](https://github.com/raycast/extensions/tree/main/extensions/language
 - [npm:languagedetect](https://npmjs.com/languagedetect)
 - [npm:tinyld](https://npmjs.com/tinyld)
 
+## Related
+
+- [raycast-langauge-detector](https://github.com/LitoMore/raycast-langauge-detector) - API for this extension
+
 ## License
 
 MIT
