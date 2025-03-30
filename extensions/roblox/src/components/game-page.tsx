@@ -51,7 +51,7 @@ export function PlacesPage({ universeId }: RenderPlacesPageProps) {
 
   return (
     <List>
-      {placesData.data.map((place) => {
+      {placesData?.data?.map((place) => {
         const { id: placeId } = place;
 
         const placeUrl = generateGamePageLink(placeId);
@@ -157,7 +157,7 @@ export function GamePage({ universeId, options }: RenderGamePageProps) {
 
   const detailMarkdown = `
 # ${name}
-${thumbnailUrls.map((thumbnailUrl) => `![](${thumbnailUrl}?raycast-height=450)`).join("\n\n")}
+${thumbnailUrls?.map((thumbnailUrl) => `![](${thumbnailUrl}?raycast-height=450)`).join("\n\n")}
     `;
 
   const updatedDateText = getUpdatedText(updated);
