@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Detail, Form, getPreferenceValues, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Form,
+  getPreferenceValues,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Channel, fetchChannels, sendMessage } from "./api";
 
@@ -9,7 +20,7 @@ interface Preferences {
 function SendMessageForm({ channel }: { channel: Channel }) {
   const [isLoading, setIsLoading] = useState(false);
   const { pop } = useNavigation();
-  
+
   async function handleSubmit(values: { message: string; asBot: boolean }) {
     if (!values.message) {
       await showToast({
@@ -19,7 +30,7 @@ function SendMessageForm({ channel }: { channel: Channel }) {
       });
       return;
     }
-    
+
     setIsLoading(true);
     try {
       await sendMessage(values.message, channel.channel.name, values.asBot);
@@ -40,7 +51,7 @@ function SendMessageForm({ channel }: { channel: Channel }) {
       setIsLoading(false);
     }
   }
-  
+
   return (
     <Form
       isLoading={isLoading}
@@ -55,13 +66,7 @@ function SendMessageForm({ channel }: { channel: Channel }) {
         title={`Send to #${channel.channel.name}`}
         text={channel.channel.description || "Send a message to this channel"}
       />
-      <Form.TextArea 
-        id="message" 
-        title="Message" 
-        placeholder="Enter your message" 
-        enableMarkdown
-        autoFocus
-      />
+      <Form.TextArea id="message" title="Message" placeholder="Enter your message" enableMarkdown autoFocus />
       <Form.Checkbox id="asBot" label="Send as Bot" defaultValue={false} />
     </Form>
   );
@@ -83,24 +88,24 @@ export default function Command() {
 
       try {
         const data = await fetchChannels();
-        
+
         // Debug log to check what's coming from the API
         console.log("Fetched channels:", data);
-        
+
         if (!data || !Array.isArray(data)) {
           console.error("Invalid channel data:", data);
           setError("Received invalid channel data from the API");
           setIsLoading(false);
           return;
         }
-        
+
         // Filter for public channels only - channelType must be "PUBLIC"
-        const publicChannels = data.filter(channelItem => 
-          channelItem.channel.channelType === "PUBLIC" && channelItem.channel.isMember === true
+        const publicChannels = data.filter(
+          (channelItem) => channelItem.channel.channelType === "PUBLIC" && channelItem.channel.isMember === true,
         );
-        
+
         console.log(`Filtered from ${data.length} to ${publicChannels.length} public accessible channels`);
-        
+
         setChannels(publicChannels);
         setIsLoading(false);
       } catch (error) {
@@ -145,9 +150,7 @@ export default function Command() {
               icon={Icon.Globe}
               title={channel.name}
               subtitle={channel.description || ""}
-              accessories={[
-                { text: "Public" }
-              ]}
+              accessories={[{ text: "Public" }]}
               actions={
                 <ActionPanel>
                   <Action.Push
