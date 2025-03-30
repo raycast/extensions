@@ -1,15 +1,19 @@
-import { DOMAIN, ORGANIZATION_ID, YUNXIAO_HEADERS } from "../constants";
-import { Run } from "../types";
+import { DOMAIN, ORGANIZATION_ID } from "../constants";
+import { DeployInfo, Run } from "../types";
+import { fetchAliyunAPI } from "./base";
 
-export async function fetchPipelineRuns(pipelineId: number): Promise<Run[]> {
-  const result = await fetch(`${DOMAIN}/oapi/v1/flow/organizations/${ORGANIZATION_ID}/pipelines/${pipelineId}/runs`, {
-    headers: YUNXIAO_HEADERS,
-  });
+export async function fetchPipelineRuns(pipelineId: number) {
+  return fetchAliyunAPI<Run[]>(`${DOMAIN}/oapi/v1/flow/organizations/${ORGANIZATION_ID}/pipelines/${pipelineId}/runs`);
+}
 
-  if (!result.ok) {
-    throw new Error(`${result.statusText} (${result.status})`);
-  }
+export async function fetchVMDeployResult(pipelineId: number, deployOrderID: number) {
+  return fetchAliyunAPI<DeployInfo>(
+    `${DOMAIN}/oapi/v1/flow/organizations/${ORGANIZATION_ID}/pipelines/${pipelineId}/deploy/${deployOrderID}`,
+  );
+}
 
-  const data: Run[] = await result.json();
-  return data;
+export async function fetchVMLogs(pipelineId: number, deployOrderID: number, machineSN: string) {
+  return fetchAliyunAPI<{ deployLog: string }>(
+    `${DOMAIN}/oapi/v1/flow/organizations/${ORGANIZATION_ID}/pipelines/${pipelineId}/deploy/${deployOrderID}/machine/${machineSN}/log`,
+  );
 }

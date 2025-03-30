@@ -158,7 +158,7 @@ export default function Command() {
                       />
                       <Action
                         title={showAbsoluteTime ? "Show Relative Time" : "Show Absolute Time"}
-                        icon={showAbsoluteTime ? Icon.Clock : Icon.Clock}
+                        icon={Icon.Clock}
                         shortcut={{ modifiers: ["shift"], key: "a" }}
                         onAction={() => {
                           setShowAbsoluteTime((prev) => !prev);
@@ -187,7 +187,7 @@ function organizePipelinesByGroup(
   const pipelineGroups = new Map<number, PipelineWithRuns[]>();
 
   pipelines
-    .sort((a, b) => (b.runs[0].endTime || b.runs[0].startTime) - (a.runs[0].endTime || a.runs[0].startTime))
+    .sort((a, b) => (b.runs?.[0]?.endTime || b.runs?.[0]?.startTime) - (a.runs?.[0]?.endTime || a.runs?.[0]?.startTime))
     .forEach((pipeline) => {
       const groupId = pipeline.groupId || 0;
       if (!pipelineGroups.has(groupId)) {

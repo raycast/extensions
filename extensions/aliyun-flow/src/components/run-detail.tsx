@@ -1,9 +1,10 @@
 import { List } from "@raycast/api";
 import { useFetch, usePromise } from "@raycast/utils";
 import { FC, useMemo } from "react";
-import { DeployInfo, Run, RunDetailInfo } from "../types";
+import { Run, RunDetailInfo } from "../types";
 import { YUNXIAO_HEADERS, DOMAIN, ORGANIZATION_ID } from "../constants";
 import { extractLogErrors, formatDate } from "../utils";
+import { fetchVMDeployResult, fetchVMLogs } from "../apis";
 
 const MAX_LOG_LINES = 30;
 
@@ -72,28 +73,14 @@ export const RunDetail: FC<{
       return;
     }
 
-    const deployResult = await fetch(
-      `${DOMAIN}/oapi/v1/flow/organizations/${ORGANIZATION_ID}/pipelines/${run.pipelineId}/deploy/${deployOrderID}`,
-      {
-        headers: YUNXIAO_HEADERS,
-      },
-    );
-    const deployResultJson = (await deployResult.json()) as DeployInfo;
-    const machineSN = deployResultJson?.deployMachineInfo.deployMachines.find((item) => item.machineSn)?.machineSn;
+    const deployResult = await fetchVMDeployResult(run.pipelineId, deployOrderID);
+    const machineSN = deployResult?.deployMachineInfo.deployMachines.find((item) => item.machineSn)?.machineSn;
 
     if (!machineSN) {
       return { deployLog: "No VM logs found" };
     }
 
-    const vmLogResult = (await (
-      await fetch(
-        `${DOMAIN}/oapi/v1/flow/organizations/${ORGANIZATION_ID}/pipelines/${run.pipelineId}/deploy/${deployOrderID}/machine/${machineSN}/log`,
-        {
-          headers: YUNXIAO_HEADERS,
-        },
-      )
-    ).json()) as { deployLog: string };
-    return vmLogResult;
+    return fetchVMLogs(run.pipelineId, deployOrderID, machineSN);
   });
 
   const logLoading = useMemo(() => {
@@ -134,10 +121,10 @@ export const RunDetail: FC<{
       return `Error fetching logs ${error?.message || vmError?.message}`;
     }
 
-    let content = runLogs?.content || vmLogs?.deployLog || "loading...";
+    let content = runLogs?.content || vmLogs?.deployLog || "empty log";
 
     if (isFailed) {
-      content = extractLogErrors(content)[1];
+      content = extractLogErrors(content)?.[1];
     }
 
     let contentLines = content?.split("\n") ?? [];

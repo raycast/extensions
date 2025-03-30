@@ -6,7 +6,7 @@ export function extractLogErrors(log: string | undefined): [string, string] {
   const logLines = log?.split("\n") ?? [];
 
   for (const line of logLines) {
-    if (/ERROR|FAILED|Exception|Critical|[Ee]rror/.test(line)) {
+    if (/ERROR|FAILED|Exception|Critical|error/i.test(line)) {
       isInErrorBlock = true;
       errorLog.push(line);
     } else if (isInErrorBlock) {
