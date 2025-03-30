@@ -20,6 +20,7 @@ See [API.md](https://github.com/raycast/extensions/tree/main/extensions/language
 ## Supported Detectors
 
 - [Raycast AI](https://developers.raycast.com/api-reference/ai) (require [Raycast Pro](https://raycast.com/pro))
+- [npm:franc](https://npmjs.com/franc)
 - [npm:languagedetect](https://npmjs.com/languagedetect)
 - [npm:tinyld](https://npmjs.com/tinyld)
 
