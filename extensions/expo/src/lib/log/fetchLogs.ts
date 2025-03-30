@@ -34,4 +34,3 @@ export async function fetchLogs(urls: string[]): Promise<LogGroups> {
   const asArray = Object.keys(grouped).map((key) => [key, grouped[key]]);
   return asArray as LogGroups;
 }
-}
