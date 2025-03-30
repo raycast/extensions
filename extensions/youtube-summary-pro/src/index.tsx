@@ -283,6 +283,18 @@ async function getVideoTitleAndDescription(videoId: string): Promise<{ title: st
 async function scrapeTitleAndDescription(videoId: string): Promise<{ title: string; description: string }> {
   const defaultTitle = "Untitled Video";
   const defaultDescription = "";
+
+  function decodeHtmlEntities(text: string | null | undefined): string {
+    if (!text) return "";
+    return text
+      .replace(/"/g, '"')
+      .replace(/'/g, "'")
+      .replace(/</g, "<")
+      .replace(/>/g, ">")
+      .replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec))
+      .replace(/&/g, "&");
+  }
+
   try {
     const response = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
       headers: {
@@ -296,17 +308,6 @@ async function scrapeTitleAndDescription(videoId: string): Promise<{ title: stri
       throw new Error(`Scraping fetch failed: ${response.status} ${response.statusText} for video ${videoId}`);
     }
     const html = await response.text();
-
-    function decodeHtmlEntities(text: string | null | undefined): string {
-      if (!text) return "";
-      return text
-        .replace(/"/g, '"')
-        .replace(/'/g, "'")
-        .replace(/</g, "<")
-        .replace(/>/g, ">")
-        .replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec))
-        .replace(/&/g, "&");
-    }
 
     let title = defaultTitle;
     let titleMatch = html.match(/<title>(.*?)<\/title>/);
