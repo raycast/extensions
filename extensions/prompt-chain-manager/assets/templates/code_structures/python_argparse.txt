@@ -1,0 +1,34 @@
+import argparse
+
+def main():
+    parser = argparse.ArgumentParser(description='Description of your script')
+    parser.add_argument('--input', required=True, help='Input file path')
+    parser.add_argument('--output', default='output.txt', help='Output file path')
+    # Add more arguments as needed
+    args = parser.parse_args()
+
+    print(f"Input: {args.input}")
+    print(f"Output: {args.output}")
+    # Your script logic here
+
+if __name__ == '__main__':
+    main()
+
+// File: code_structures/python_class.txt
+class MyClass:
+    """Brief description of the class."""
+
+    def __init__(self, param1, param2):
+        """Initialize MyClass."""
+        self.param1 = param1
+        self.param2 = param2
+        # Add other initializations
+
+    def method1(self, arg1):
+        """Brief description of method1."""
+        # Method implementation
+        pass
+
+    def __str__(self):
+        """String representation of the object."""
+        return f"MyClass(param1={self.param1}, param2={self.param2})"

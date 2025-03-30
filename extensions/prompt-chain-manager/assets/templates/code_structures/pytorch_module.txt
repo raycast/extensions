@@ -1,0 +1,18 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class SimpleNet(nn.Module):
+    def __init__(self):
+        super(SimpleNet, self).__init__()
+        # Define layers here (e.g., conv, linear)
+        # self.conv1 = nn.Conv2d(...)
+        # self.fc1 = nn.Linear(...)
+        pass
+
+    def forward(self, x):
+        # Define forward pass logic here
+        # x = F.relu(self.conv1(x))
+        # x = torch.flatten(x, 1)
+        # x = self.fc1(x)
+        return x

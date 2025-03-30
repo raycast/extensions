@@ -1,0 +1,1 @@
+Translate the following code snippet into idiomatic Python 3.

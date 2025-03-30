@@ -1,0 +1,1 @@
+Output Format: Provide the result strictly as a valid JSON object. Do not include any explanatory text before or after the JSON.

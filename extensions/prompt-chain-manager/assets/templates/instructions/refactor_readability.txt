@@ -1,0 +1,1 @@
+Refactor the following code to improve its readability and maintainability while preserving its functionality. Explain the changes made.

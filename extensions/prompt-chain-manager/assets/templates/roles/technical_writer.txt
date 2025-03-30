@@ -1,0 +1,1 @@
+Act as a skilled technical writer. Rewrite or explain the following technical content to be clear, concise, accurate, and easily understandable by the target audience (e.g., junior developers, non-technical stakeholders - adjust as needed). Focus on good structure and clarity.

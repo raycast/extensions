@@ -1,0 +1,17 @@
+class MyClass:
+    """Brief description of the class."""
+
+    def __init__(self, param1, param2):
+        """Initialize MyClass."""
+        self.param1 = param1
+        self.param2 = param2
+        # Add other initializations
+
+    def method1(self, arg1):
+        """Brief description of method1."""
+        # Method implementation
+        pass
+
+    def __str__(self):
+        """String representation of the object."""
+        return f"MyClass(param1={self.param1}, param2={self.param2})"
