@@ -18,6 +18,13 @@
       "subtitle": "Pumble",
       "description": "List all users in your Pumble workspace",
       "mode": "view"
+    },
+    {
+      "name": "send-message",
+      "title": "Send Message",
+      "subtitle": "Pumble",
+      "description": "Send a message to a Pumble channel",
+      "mode": "view"
     }
   ],
   "preferences": [
