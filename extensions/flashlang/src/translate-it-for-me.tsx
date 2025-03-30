@@ -259,13 +259,12 @@ export default function TranslateItForMe() {
       isLoading={isLoadingHistory || isAiLoading || isLoading}
       searchBarPlaceholder="Search or type new word to translate..."
       onSearchTextChange={(text) => {
-        const trimmedText = text.trim();
-        setSearchText(trimmedText);
+        setSearchText(text);
 
         // Auto-select the matching entry
-        if (trimmedText) {
-          const exactMatch = Object.keys(history).find((word) => word === trimmedText);
-          setSelectedItemId(exactMatch || trimmedText);
+        if (text) {
+          const exactMatch = Object.keys(history).find((word) => word === text);
+          setSelectedItemId(exactMatch || text);
         } else {
           setSelectedItemId("");
         }
@@ -277,6 +276,7 @@ export default function TranslateItForMe() {
           setSelectedItemId(itemId || "");
         }
       }}
+      filtering
       throttle
       actions={
         <ActionPanel>
