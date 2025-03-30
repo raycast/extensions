@@ -113,6 +113,7 @@ export default function LoginForm({ destination }: { destination?: ReactNode }) 
 
           if (errorCodes.includes(OTP_ERROR_CODE)) {
             setRequiresOTP(true);
+            setFormState("static");
             return;
           }
         }
