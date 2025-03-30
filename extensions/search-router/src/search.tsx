@@ -3,12 +3,13 @@ import { open } from "@raycast/api";
 import { searchEngines } from "./data/search-engines";
 import { showFailureToast } from "@raycast/utils";
 import { getDefaultSearchEngine } from "./data/cache";
+import { isValidUrl } from "./utils";
 
 export default async function search(props: LaunchProps<{ arguments: { query: string }; fallbackText?: string }>) {
   try {
     const rawQuery = (props.arguments.query ?? props.fallbackText) as string;
 
-    const { searchEngine, cleanQuery, searchEngineKey } = processQuery(rawQuery);
+    const { searchEngine, finalQuery, searchEngineKey } = processQuery(rawQuery);
 
     if (!searchEngine) {
       await showToast({
@@ -18,13 +19,17 @@ export default async function search(props: LaunchProps<{ arguments: { query: st
       return;
     }
 
-    if (!cleanQuery) {
+    if (!finalQuery) {
       const url = new URL(searchEngine.u);
       await open(url.origin);
       return;
     }
 
-    const searchUrl = searchEngine.u.replace("{{{s}}}", encodeURIComponent(cleanQuery).replace(/%2F/g, "/"));
+    const searchUrl = searchEngine.u.replace("{{{s}}}", encodeURIComponent(finalQuery).replace(/%2F/g, "/"));
+    if (!isValidUrl(searchUrl)) {
+      throw new Error(`Invalid URL: ${searchUrl}`);
+    }
+
     await open(searchUrl);
   } catch (error) {
     await showFailureToast(error);
@@ -41,7 +46,8 @@ function processQuery(rawQuery: string) {
 
   const searchEngineKeyMatch = query.match(/!(\S+)/i);
   const searchEngineKey = searchEngineKeyMatch?.[1]?.toLowerCase();
-  const searchEngine = findSearchEngine(searchEngineKey) || getDefaultSearchEngine();
+  const searchEngine = findSearchEngine(searchEngineKey);
+  const searchEngineOrDefault = searchEngine || getDefaultSearchEngine();
 
   if (query.includes("@")) {
     const siteMatch = query.match(/@(\S+)/i);
@@ -57,6 +63,7 @@ function processQuery(rawQuery: string) {
   }
 
   const cleanQuery = query.replace(/!\S+\s*/i, "").trim();
+  const finalQuery = searchEngine ? cleanQuery : `${searchEngineKey} ${cleanQuery}`;
 
-  return { searchEngine, cleanQuery, searchEngineKey };
+  return { searchEngine: searchEngineOrDefault, finalQuery, searchEngineKey };
 }
