@@ -83,8 +83,25 @@ export default function Command() {
 
       try {
         const data = await fetchChannels();
+        
+        // Debug log to check what's coming from the API
         console.log("Fetched channels:", data);
-        setChannels(data);
+        
+        if (!data || !Array.isArray(data)) {
+          console.error("Invalid channel data:", data);
+          setError("Received invalid channel data from the API");
+          setIsLoading(false);
+          return;
+        }
+        
+        // Filter for public channels only - channelType must be "PUBLIC"
+        const publicChannels = data.filter(channelItem => 
+          channelItem.channel.channelType === "PUBLIC" && channelItem.channel.isMember === true
+        );
+        
+        console.log(`Filtered from ${data.length} to ${publicChannels.length} public accessible channels`);
+        
+        setChannels(publicChannels);
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching channels:", error);
@@ -116,8 +133,8 @@ export default function Command() {
       ) : channels.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Bubble}
-          title="No channels found"
-          description="There are no channels in your Pumble workspace or the API returned an empty list."
+          title="No public channels found"
+          description="You don't have access to any public channels in your Pumble workspace."
         />
       ) : (
         channels.map((channelItem) => {
@@ -125,10 +142,12 @@ export default function Command() {
           return (
             <List.Item
               key={channel.id}
-              icon={channel.channelType === "PUBLIC" ? Icon.Globe : Icon.Lock}
+              icon={Icon.Globe}
               title={channel.name}
               subtitle={channel.description || ""}
-              accessories={[{ text: channel.channelType === "PUBLIC" ? "Public" : "Private" }]}
+              accessories={[
+                { text: "Public" }
+              ]}
               actions={
                 <ActionPanel>
                   <Action.Push
@@ -140,11 +159,11 @@ export default function Command() {
                     title="Show Channel Details"
                     target={
                       <Detail
-                        markdown={`# ${channel.name}\n\n${channel.description ? `**Description:** ${channel.description}\n\n` : ""}**Type:** ${channel.channelType === "PUBLIC" ? "Public" : "Private"}`}
+                        markdown={`# ${channel.name}\n\n${channel.description ? `**Description:** ${channel.description}\n\n` : ""}**Type:** Public`}
                         metadata={
                           <Detail.Metadata>
                             <Detail.Metadata.Label title="ID" text={channel.id} />
-                            <Detail.Metadata.Label title="Type" text={channel.channelType === "PUBLIC" ? "Public" : "Private"} />
+                            <Detail.Metadata.Label title="Type" text="Public" />
                             {channel.description && (
                               <Detail.Metadata.Label title="Description" text={channel.description} />
                             )}
