@@ -8,7 +8,7 @@ import UpdateGroup from "./UpdateDetails";
 import useAuth from "../hooks/useAuth";
 import { Project } from "../lib/types/projects.types";
 
-export default function ProjectBuilds({ project }: { project: Project }) {
+export default function ProjectUpdates({ project }: { project: Project }) {
   const { authHeaders } = useAuth();
 
   const ProjectUpdatesPayload = JSON.stringify([
