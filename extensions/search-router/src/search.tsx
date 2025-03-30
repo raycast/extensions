@@ -26,6 +26,7 @@ export default async function search(props: LaunchProps<{ arguments: { query: st
     }
 
     const searchUrl = searchEngine.u.replace("{{{s}}}", encodeURIComponent(finalQuery).replace(/%2F/g, "/"));
+
     if (!isValidUrl(searchUrl)) {
       throw new Error(`Invalid URL: ${searchUrl}`);
     }
