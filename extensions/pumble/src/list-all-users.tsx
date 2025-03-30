@@ -27,12 +27,13 @@ export default function Command() {
       } catch (error) {
         console.error("Error fetching users:", error);
         setError(`Failed to fetch users: ${error instanceof Error ? error.message : String(error)}`);
-        setIsLoading(false);
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to fetch users",
           message: error instanceof Error ? error.message : String(error),
         });
+      } finally {
+        setIsLoading(false);
       }
     }
 
