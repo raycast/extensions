@@ -9,24 +9,26 @@ import { useSearch } from "@/hooks/useSearch";
 import Actions from "@/components/ActionsCollection";
 
 // Types
+import { CollectionResult, Orientation } from "@/types";
 interface CollectionListItemProps {
   searchResult: CollectionResult;
 }
 
 const UnsplashCollections: React.FC = () => {
-  const [orientation, setOrientation] = useState<"all" | "landscape" | "portrait" | "squarish">("landscape");
-  const { state, search } = useSearch("collections", orientation);
+  const [orientation, setOrientation] = useState<Orientation>("landscape");
+  const [search, setSearch] = useState("");
+  const { state } = useSearch(search, "collections", orientation);
   const itemSize = getGridItemSize();
 
   const handleOrientationChange = (value: string) => {
-    setOrientation(value as "all" | "landscape" | "portrait" | "squarish");
+    setOrientation(value as Orientation);
   };
 
   return (
     <Grid
       isLoading={state.isLoading}
       itemSize={itemSize}
-      onSearchTextChange={search}
+      onSearchTextChange={setSearch}
       searchBarPlaceholder="Search collections..."
       searchBarAccessory={
         <Grid.Dropdown
@@ -44,10 +46,11 @@ const UnsplashCollections: React.FC = () => {
         </Grid.Dropdown>
       }
       throttle
+      pagination={state.pagination}
     >
       <Grid.Section title="Results" subtitle={String(state?.results?.length)}>
         {state.results.map((result) => (
-          <SearchListItem key={result.id} searchResult={result} />
+          <SearchListItem key={result.id} searchResult={result as unknown as CollectionResult} />
         ))}
       </Grid.Section>
     </Grid>

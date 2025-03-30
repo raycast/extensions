@@ -123,17 +123,4 @@ interface LikesResult {
   };
 }
 
-// Options
-interface UnsplashPreferences {
-  accessKey: string;
-  secretKey: string;
-  orientation: "all" | "landscape" | "portrait" | "squarish";
-  downloadSize: "raw" | "full" | "regular" | "small" | "thumb";
-  collections: string;
-  wallpaperPath: string;
-  applyTo: "current" | "every";
-  includeDefaults: "yes" | "no";
-  updateTime: string;
-  gridItemSize: "small" | "medium" | "large";
-  showImageTitle: boolean;
-}
+export type Orientation = "all" | "landscape" | "portrait" | "squarish";

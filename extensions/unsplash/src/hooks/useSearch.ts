@@ -1,14 +1,15 @@
 import { apiRequest } from "@/functions/apiRequest";
+import { CollectionResult, Orientation, SearchResult } from "@/types";
 import { useCachedPromise } from "@raycast/utils";
 
 export const useSearch = <T extends "collections" | "photos">(
   query: string,
   type: T,
-  orientation: "all" | "landscape" | "portrait" | "squarish"
+  orientation: Orientation
 ) => {
   const { isLoading, data, pagination } = useCachedPromise(
-    (searchText: string, orientation: "all" | "landscape" | "portrait" | "squarish") => async (options: { page: number }) => {
-      if (!searchText) return {
+    (searchText: string, orientation: Orientation) => async (options: { page: number }) => {
+      if (!searchText.trim()) return {
         data: [],
         hasMore: false
       }
@@ -46,7 +47,7 @@ interface PerformSearchProps {
   searchText: string;
   options: {
     page: number;
-    orientation: "all" | "landscape" | "portrait" | "squarish";
+    orientation: Orientation;
     type: "photos" | "collections";
   };
 }

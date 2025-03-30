@@ -3,7 +3,7 @@ import { environment, LaunchType, getPreferenceValues, LocalStorage } from "@ray
 
 const setRandomWallpaper = async () => {
   const nowDate = new Date();
-  const { updateTime } = getPreferenceValues<UnsplashPreferences>();
+  const { updateTime } = getPreferenceValues<Preferences>();
   const lastTime = await LocalStorage.getItem<string>("last-time");
 
   if (environment.launchType === LaunchType.Background) {

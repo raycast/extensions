@@ -1,6 +1,6 @@
 import { OAuth, getPreferenceValues } from "@raycast/api";
 
-const { accessKey, secretKey } = getPreferenceValues<UnsplashPreferences>();
+const { accessKey, secretKey } = getPreferenceValues<Preferences>();
 
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,

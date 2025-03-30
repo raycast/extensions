@@ -3,6 +3,7 @@ import { apiRequest } from "@/functions/apiRequest";
 
 // Functions
 import setWallpaper from "@/functions/setWallpaper";
+import { SearchResult } from "@/types";
 
 const defaultCollections = [
   "4324303", // Vinyl and Covers

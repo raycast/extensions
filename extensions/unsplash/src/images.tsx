@@ -9,18 +9,19 @@ import { useSearch } from "@/hooks/useSearch";
 import Actions from "@/components/Actions";
 
 // Types
+import { Orientation, SearchResult } from "@/types";
 interface SearchListItemProps {
   searchResult: SearchResult;
 }
 
 const UnsplashImages: React.FC = () => {
-  const [orientation, setOrientation] = useState<"all" | "landscape" | "portrait" | "squarish">("landscape");
+  const [orientation, setOrientation] = useState<Orientation>("landscape");
   const [search, setSearch] = useState("");
   const { state } = useSearch(search, "photos", orientation);
   const itemSize = getGridItemSize();
 
   const handleOrientationChange = (value: string) => {
-    setOrientation(value as "all" | "landscape" | "portrait" | "squarish");
+    setOrientation(value as Orientation);
   };
 
   return (

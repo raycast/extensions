@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { apiRequest } from "@/functions/apiRequest";
 import { useCachedPromise } from "@raycast/utils";
+import { Errors, LikesResult, User } from "@/types";
 
 export const useLikes = () => {
   const { isLoading: loading, data: likes } = useCachedPromise(async () => {

@@ -7,7 +7,7 @@ interface SaveImageProps {
 }
 
 export const saveImage = async ({ url, id }: SaveImageProps) => {
-  const { downloadSize } = getPreferenceValues<UnsplashPreferences>();
+  const { downloadSize } = getPreferenceValues<Preferences>();
 
   try {
     await showHUD("Please select a location to save the image...");

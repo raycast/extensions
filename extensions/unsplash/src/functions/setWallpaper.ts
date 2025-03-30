@@ -17,7 +17,7 @@ const displayMessage = async (msg: string, type: "hud" | "toast") => {
 };
 
 export const setWallpaper = async ({ url, id, every, useHud = false, isBackground = false }: SetWallpaperProps) => {
-  const { downloadSize, wallpaperPath } = getPreferenceValues<UnsplashPreferences>();
+  const { downloadSize, wallpaperPath } = getPreferenceValues<Preferences>();
   const selectedPath = resolveHome(wallpaperPath || environment.supportPath);
 
   let toast;
@@ -75,7 +75,7 @@ export const setWallpaper = async ({ url, id, every, useHud = false, isBackgroun
 
     if (result !== "ok") throw new Error("Error setting wallpaper.");
     else if (useHud) {
-      !isBackground && (await showHUD("Wallpaper set!"));
+      if (!isBackground) await showHUD("Wallpaper set!");
     } else if (toast) {
       toast.style = Toast.Style.Success;
       toast.title = "Wallpaper set!";
