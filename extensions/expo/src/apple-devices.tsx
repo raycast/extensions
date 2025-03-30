@@ -15,6 +15,11 @@ export default function Command() {
   const { authHeaders } = useAuth();
 
   const [accountName, setAccountName] = useState("");
+  useEffect(() => {
+    if (accountName) {
+      revalidate();
+    }
+  }, [accountName]);
 
   const AppleDevicesPayload = JSON.stringify([
     {
