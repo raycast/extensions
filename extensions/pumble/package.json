@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pumble",
-  "title": "pumble",
+  "title": "Pumble",
   "description": "Interact with Pumble within the ease of Raycast.",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "ViGeng",
   "categories": [
     "Applications",
