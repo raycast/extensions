@@ -1,9 +1,21 @@
-import { List, ActionPanel, Action, showToast, Toast, Detail, AI, Icon, LocalStorage, environment } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  Detail,
+  AI,
+  Icon,
+  LocalStorage,
+  environment,
+} from "@raycast/api";
 import { useState, ReactElement, useEffect, useCallback } from "react";
 import { YoutubeTranscript } from "youtube-transcript";
 
 // YouTube URL validation regex
-const YOUTUBE_URL_REGEX = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})([?&].*)?$/;
+const YOUTUBE_URL_REGEX =
+  /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})([?&].*)?$/;
 
 // Maximum characters per chunk
 const MAX_CHUNK_SIZE = 10000;
@@ -173,7 +185,10 @@ function determineIconFromText(title: string, description: string): Icon {
   const combinedText = `${title.toLowerCase()} ${description?.toLowerCase() || ""}`; // Handle potentially undefined description
   for (const keyword in keywordIconMap) {
     try {
-      const regex = new RegExp(`\\b${keyword.replace(/[-\\/^$*+?.()|[\]{}]/g, "\\$&")}\\b`, "i");
+      const regex = new RegExp(
+        `\\b${keyword.replace(/[-\\/^$*+?.()|[\]{}]/g, "\\$&")}\\b`,
+        "i",
+      );
       if (regex.test(combinedText)) return keywordIconMap[keyword];
     } catch {
       if (combinedText.includes(keyword)) return keywordIconMap[keyword];
@@ -182,7 +197,10 @@ function determineIconFromText(title: string, description: string): Icon {
   return Icon.Video;
 }
 
-function debounce<T extends unknown[]>(func: (...args: T) => void, wait: number): (...args: T) => void {
+function debounce<T extends unknown[]>(
+  func: (...args: T) => void,
+  wait: number,
+): (...args: T) => void {
   let timeout: NodeJS.Timeout | null = null;
   return (...args: T): void => {
     const later = () => {
@@ -234,7 +252,9 @@ async function extractVideoId(url: string): Promise<string | null> {
 }
 
 // Primary function to get metadata, tries oEmbed first, falls back to scraping
-async function getVideoTitleAndDescription(videoId: string): Promise<{ title: string; description: string }> {
+async function getVideoTitleAndDescription(
+  videoId: string,
+): Promise<{ title: string; description: string }> {
   const defaultTitle = "Untitled Video";
   const defaultDescription = "";
   try {
@@ -242,22 +262,32 @@ async function getVideoTitleAndDescription(videoId: string): Promise<{ title: st
     const oEmbedResponse = await fetch(oEmbedUrl);
 
     if (!oEmbedResponse.ok) {
-      console.warn(`oEmbed fetch failed (${oEmbedResponse.status}), falling back to scraping for video: ${videoId}`);
+      console.warn(
+        `oEmbed fetch failed (${oEmbedResponse.status}), falling back to scraping for video: ${videoId}`,
+      );
       return await scrapeTitleAndDescription(videoId); // Fallback call
     }
 
     const oEmbedData: Record<string, unknown> = await oEmbedResponse.json();
-    const title = typeof oEmbedData.title === "string" ? oEmbedData.title.trim() : defaultTitle;
+    const title =
+      typeof oEmbedData.title === "string"
+        ? oEmbedData.title.trim()
+        : defaultTitle;
     // oEmbed doesn't provide description, so we might still need scraping for it.
     // Let's try scraping *only* if title was found via oEmbed to potentially get description.
     let description = defaultDescription;
     if (title !== defaultTitle) {
       try {
-        console.log("oEmbed successful for title, attempting scrape for description...");
+        console.log(
+          "oEmbed successful for title, attempting scrape for description...",
+        );
         const scrapedData = await scrapeTitleAndDescription(videoId);
         description = scrapedData.description; // Use scraped description if available
       } catch (scrapeError) {
-        console.warn("Scraping for description failed after successful oEmbed title fetch:", scrapeError);
+        console.warn(
+          "Scraping for description failed after successful oEmbed title fetch:",
+          scrapeError,
+        );
         // Keep the description as default if scraping fails here
       }
     } else {
@@ -280,7 +310,9 @@ async function getVideoTitleAndDescription(videoId: string): Promise<{ title: st
 }
 
 // Original scraping function (now primarily a fallback or for description)
-async function scrapeTitleAndDescription(videoId: string): Promise<{ title: string; description: string }> {
+async function scrapeTitleAndDescription(
+  videoId: string,
+): Promise<{ title: string; description: string }> {
   const defaultTitle = "Untitled Video";
   const defaultDescription = "";
 
@@ -305,7 +337,9 @@ async function scrapeTitleAndDescription(videoId: string): Promise<{ title: stri
       redirect: "follow",
     });
     if (!response.ok) {
-      throw new Error(`Scraping fetch failed: ${response.status} ${response.statusText} for video ${videoId}`);
+      throw new Error(
+        `Scraping fetch failed: ${response.status} ${response.statusText} for video ${videoId}`,
+      );
     }
     const html = await response.text();
 
@@ -315,26 +349,38 @@ async function scrapeTitleAndDescription(videoId: string): Promise<{ title: stri
 
     if (titleMatch && titleMatch[1]) {
       title = decodeHtmlEntities(titleMatch[1])
-        .replace(/\\u([\dA-Fa-f]{4})/g, (_, grp) => String.fromCharCode(parseInt(grp, 16)))
+        .replace(/\\u([\dA-Fa-f]{4})/g, (_, grp) =>
+          String.fromCharCode(parseInt(grp, 16)),
+        )
         .replace(/ - YouTube$/, "")
         .trim();
     }
 
     let description = defaultDescription;
-    let descMatch = html.match(/<meta property="og:description" content="([^"]*)"/);
-    if (!descMatch) descMatch = html.match(/<meta name="description" content="([^"]*)"/);
+    let descMatch = html.match(
+      /<meta property="og:description" content="([^"]*)"/,
+    );
+    if (!descMatch)
+      descMatch = html.match(/<meta name="description" content="([^"]*)"/);
 
     if (descMatch && descMatch[1]) {
       description = decodeHtmlEntities(descMatch[1]).trim();
     } else {
       try {
-        const scriptMatches = html.match(/var ytInitialPlayerResponse = ({.*?});/);
+        const scriptMatches = html.match(
+          /var ytInitialPlayerResponse = ({.*?});/,
+        );
         if (scriptMatches && scriptMatches[1]) {
           const playerResponse = JSON.parse(scriptMatches[1]);
-          description = playerResponse?.videoDetails?.shortDescription || defaultDescription;
+          description =
+            playerResponse?.videoDetails?.shortDescription ||
+            defaultDescription;
         } // Add more JSON parsing attempts if needed
       } catch (jsonError) {
-        console.warn("Failed to parse JSON for description fallback:", jsonError);
+        console.warn(
+          "Failed to parse JSON for description fallback:",
+          jsonError,
+        );
       }
     }
     return { title, description };
@@ -356,12 +402,19 @@ function chunkTranscript(transcriptItems: TranscriptItem[]): TranscriptChunk[] {
     const text = item.text.trim();
     if (!text) continue;
     const textLength = text.length + (currentChunkText ? 1 : 0);
-    const isPotentialBoundary = nextItem && nextItem.offset - (item.offset + item.duration) > 2;
+    const isPotentialBoundary =
+      nextItem && nextItem.offset - (item.offset + item.duration) > 2;
     if (
       (currentLength + textLength > MAX_CHUNK_SIZE && currentLength > 0) ||
-      (isPotentialBoundary && currentLength > MAX_CHUNK_SIZE * 0.5 && currentLength > 0)
+      (isPotentialBoundary &&
+        currentLength > MAX_CHUNK_SIZE * 0.5 &&
+        currentLength > 0)
     ) {
-      chunks.push({ text: currentChunkText, startTime: chunkStartTime, endTime: item.offset });
+      chunks.push({
+        text: currentChunkText,
+        startTime: chunkStartTime,
+        endTime: item.offset,
+      });
       currentChunkText = text;
       currentLength = text.length;
       chunkStartTime = item.offset;
@@ -373,7 +426,11 @@ function chunkTranscript(transcriptItems: TranscriptItem[]): TranscriptChunk[] {
   }
   if (currentChunkText && transcriptItems.length > 0) {
     const lastItem = transcriptItems[transcriptItems.length - 1];
-    chunks.push({ text: currentChunkText, startTime: chunkStartTime, endTime: lastItem.offset + lastItem.duration });
+    chunks.push({
+      text: currentChunkText,
+      startTime: chunkStartTime,
+      endTime: lastItem.offset + lastItem.duration,
+    });
   }
   return chunks;
 }
@@ -409,7 +466,11 @@ async function loadAndMigrateHistory(): Promise<SummaryHistoryItem[]> {
         summary: string;
         timestamp: number;
         overview?: string;
-        detailedChunks?: { startTime: number; endTime: number; summary: string }[];
+        detailedChunks?: {
+          startTime: number;
+          endTime: number;
+          summary: string;
+        }[];
         status?:
           | "pending"
           | "fetching_info"
@@ -473,12 +534,23 @@ async function loadAndMigrateHistory(): Promise<SummaryHistoryItem[]> {
     try {
       await LocalStorage.setItem("history", JSON.stringify(loadedHistory));
       await LocalStorage.removeItem(migratedFromKey);
-      console.log(`Successfully migrated history from "${migratedFromKey}" to "history".`);
-      if (migratedFromKey !== "preferences" && migratedFromKey !== "podcast-detail-extractor-preferences") {
-        await showToast({ style: Toast.Style.Success, title: "History Migrated" });
+      console.log(
+        `Successfully migrated history from "${migratedFromKey}" to "history".`,
+      );
+      if (
+        migratedFromKey !== "preferences" &&
+        migratedFromKey !== "podcast-detail-extractor-preferences"
+      ) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "History Migrated",
+        });
       }
     } catch (error) {
-      console.error(`Error saving migrated history or removing old key "${migratedFromKey}":`, error);
+      console.error(
+        `Error saving migrated history or removing old key "${migratedFromKey}":`,
+        error,
+      );
       await showToast({
         style: Toast.Style.Failure,
         title: "History Migration Issue",
@@ -503,7 +575,11 @@ async function _processVideoSummary(
   let currentToast: Toast | null = null;
 
   try {
-    setHistory((prev) => prev.map((item) => (item.id === itemId ? { ...item, status: "fetching_transcript" } : item)));
+    setHistory((prev) =>
+      prev.map((item) =>
+        item.id === itemId ? { ...item, status: "fetching_transcript" } : item,
+      ),
+    );
     currentToast = await showToastFn({
       style: Toast.Style.Animated,
       title: "Fetching Transcript...",
@@ -515,14 +591,18 @@ async function _processVideoSummary(
       transcriptItems = await YoutubeTranscript.fetchTranscript(videoId);
     } catch (transcriptError) {
       console.error("youtube-transcript error:", transcriptError);
-      const errorMsg = transcriptError instanceof Error ? transcriptError.message : "Unknown error";
+      const errorMsg =
+        transcriptError instanceof Error
+          ? transcriptError.message
+          : "Unknown error";
       let userMsg = `Failed to fetch transcript: ${errorMsg}`;
       if (
         errorMsg.includes("Could not find transcript") ||
         errorMsg.includes("disabled subtitles") ||
         errorMsg.includes("No transcripts")
       ) {
-        userMsg = "Transcript not available for this video (may be disabled or unsupported).";
+        userMsg =
+          "Transcript not available for this video (may be disabled or unsupported).";
       } else if (errorMsg.includes("status code 404")) {
         userMsg = "Video not found or unavailable (404 Error).";
       }
@@ -561,7 +641,11 @@ async function _processVideoSummary(
       title: "Analyzing Transcript Sections...",
       message: `${transcriptItems.length} segments found`,
     });
-    setHistory((prev) => prev.map((item) => (item.id === itemId ? { ...item, status: "chunking" } : item)));
+    setHistory((prev) =>
+      prev.map((item) =>
+        item.id === itemId ? { ...item, status: "chunking" } : item,
+      ),
+    );
     const chunks = chunkTranscript(transcriptItems);
 
     if (chunks.length === 0) {
@@ -582,7 +666,11 @@ async function _processVideoSummary(
 
     let overview = "";
     let finalSummaryMarkdown = "";
-    let finalDetailedChunks: { startTime: number; endTime: number; summary: string }[] = [];
+    let finalDetailedChunks: {
+      startTime: number;
+      endTime: number;
+      summary: string;
+    }[] = [];
 
     if (chunks.length === 1) {
       if (currentToast) await currentToast.hide();
@@ -591,7 +679,11 @@ async function _processVideoSummary(
         title: `Summarizing Video...`,
         message: `Processing 1 section`,
       });
-      setHistory((prev) => prev.map((item) => (item.id === itemId ? { ...item, status: "overview" } : item)));
+      setHistory((prev) =>
+        prev.map((item) =>
+          item.id === itemId ? { ...item, status: "overview" } : item,
+        ),
+      );
 
       const singleChunk = chunks[0];
       const prompt =
@@ -603,18 +695,26 @@ async function _processVideoSummary(
 
       try {
         overview = await AI.ask(prompt);
-        const actionableRegex = /##\s*Actionable Insights(?: & Key Takeaways)?\s*\n([\s\S]*?)(?=\n##\s|$)/;
+        const actionableRegex =
+          /##\s*Actionable Insights(?: & Key Takeaways)?\s*\n([\s\S]*?)(?=\n##\s|$)/;
         const quotesRegex = /##\s*Notable Quotes\s*\n([\s\S]*?)(?=\n##\s|$)/;
         const actionableMatch = overview.match(actionableRegex);
         const quotesMatch = overview.match(quotesRegex);
-        const firstSectionIndex = Math.min(actionableMatch?.index ?? Infinity, quotesMatch?.index ?? Infinity);
+        const firstSectionIndex = Math.min(
+          actionableMatch?.index ?? Infinity,
+          quotesMatch?.index ?? Infinity,
+        );
         const mainOverviewContent = (
-          firstSectionIndex === Infinity ? overview : overview.substring(0, firstSectionIndex)
+          firstSectionIndex === Infinity
+            ? overview
+            : overview.substring(0, firstSectionIndex)
         ).trim();
         const actionableContent = actionableMatch
           ? `## Actionable Insights & Key Takeaways\n${actionableMatch[1].trim()}\n`
           : "";
-        const quotesContent = quotesMatch ? `## Notable Quotes\n${quotesMatch[1].trim()}\n` : "";
+        const quotesContent = quotesMatch
+          ? `## Notable Quotes\n${quotesMatch[1].trim()}\n`
+          : "";
 
         finalSummaryMarkdown = [
           `# ${initialTitle}`,
@@ -631,16 +731,27 @@ async function _processVideoSummary(
         setHistory((prev) =>
           prev.map((item) =>
             item.id === itemId
-              ? { ...item, summary: finalSummaryMarkdown, overview: overview, detailedChunks: [], status: "done" }
+              ? {
+                  ...item,
+                  summary: finalSummaryMarkdown,
+                  overview: overview,
+                  detailedChunks: [],
+                  status: "done",
+                }
               : item,
           ),
         );
         if (currentToast) await currentToast.hide();
-        await showToastFn({ style: Toast.Style.Success, title: "Summary Complete", message: initialTitle });
+        await showToastFn({
+          style: Toast.Style.Success,
+          title: "Summary Complete",
+          message: initialTitle,
+        });
         currentToast = null;
       } catch (aiError) {
         console.error("AI Error on Single Chunk Overview:", aiError);
-        const errorMsg = aiError instanceof Error ? aiError.message : "Unknown AI error";
+        const errorMsg =
+          aiError instanceof Error ? aiError.message : "Unknown AI error";
         finalSummaryMarkdown = `# ${initialTitle}\n\n**Source:** [Watch on YouTube](${url})\n\n---\n\n## Summary Generation Failed\n*Error generating summary: ${errorMsg}*`;
         setHistory((prev) =>
           prev.map((item) =>
@@ -657,10 +768,18 @@ async function _processVideoSummary(
         );
         if (currentToast) await currentToast.hide();
         currentToast = null;
-        await showToastFn({ style: Toast.Style.Failure, title: "Summary Generation Failed", message: errorMsg });
+        await showToastFn({
+          style: Toast.Style.Failure,
+          title: "Summary Generation Failed",
+          message: errorMsg,
+        });
       }
     } else {
-      setHistory((prev) => prev.map((item) => (item.id === itemId ? { ...item, status: "summarizing" } : item)));
+      setHistory((prev) =>
+        prev.map((item) =>
+          item.id === itemId ? { ...item, status: "summarizing" } : item,
+        ),
+      );
       if (currentToast) await currentToast.hide();
       currentToast = await showToastFn({
         style: Toast.Style.Animated,
@@ -675,7 +794,8 @@ async function _processVideoSummary(
             chunk.text,
         ).catch((err) => {
           console.error(`AI Error on Chunk ${i + 1}:`, err);
-          const errorMsg = err instanceof Error ? err.message : "Unknown AI error";
+          const errorMsg =
+            err instanceof Error ? err.message : "Unknown AI error";
           return `*Error processing this chunk: ${errorMsg}*\n\n---\n*Original Text Snippet (approx. start):*\n${chunk.text.substring(0, 100)}...`;
         }),
       );
@@ -705,7 +825,13 @@ async function _processVideoSummary(
 
       setHistory((prev) =>
         prev.map((item) =>
-          item.id === itemId ? { ...item, status: "overview", detailedChunks: finalDetailedChunks } : item,
+          item.id === itemId
+            ? {
+                ...item,
+                status: "overview",
+                detailedChunks: finalDetailedChunks,
+              }
+            : item,
         ),
       );
       if (currentToast) await currentToast.hide();
@@ -730,18 +856,26 @@ async function _processVideoSummary(
       try {
         overview = await AI.ask(overviewPromptInput);
 
-        const actionableRegex = /##\s*Actionable Insights(?: & Key Takeaways)?\s*\n([\s\S]*?)(?=\n##\s|$)/;
+        const actionableRegex =
+          /##\s*Actionable Insights(?: & Key Takeaways)?\s*\n([\s\S]*?)(?=\n##\s|$)/;
         const quotesRegex = /##\s*Notable Quotes\s*\n([\s\S]*?)(?=\n##\s|$)/;
         const actionableMatch = overview.match(actionableRegex);
         const quotesMatch = overview.match(quotesRegex);
-        const firstSectionIndex = Math.min(actionableMatch?.index ?? Infinity, quotesMatch?.index ?? Infinity);
+        const firstSectionIndex = Math.min(
+          actionableMatch?.index ?? Infinity,
+          quotesMatch?.index ?? Infinity,
+        );
         const mainOverviewContent = (
-          firstSectionIndex === Infinity ? overview : overview.substring(0, firstSectionIndex)
+          firstSectionIndex === Infinity
+            ? overview
+            : overview.substring(0, firstSectionIndex)
         ).trim();
         const actionableContent = actionableMatch
           ? `## Actionable Insights & Key Takeaways\n${actionableMatch[1].trim()}\n`
           : "";
-        const quotesContent = quotesMatch ? `## Notable Quotes\n${quotesMatch[1].trim()}\n` : "";
+        const quotesContent = quotesMatch
+          ? `## Notable Quotes\n${quotesMatch[1].trim()}\n`
+          : "";
 
         finalSummaryMarkdown = [
           `# ${initialTitle}`,
@@ -753,7 +887,8 @@ async function _processVideoSummary(
           "\n---\n",
           "## Summary by Timestamp",
           ...finalDetailedChunks.map(
-            (chunk) => `\n### ${formatTime(chunk.startTime)} - ${formatTime(chunk.endTime)}\n${chunk.summary}`,
+            (chunk) =>
+              `\n### ${formatTime(chunk.startTime)} - ${formatTime(chunk.endTime)}\n${chunk.summary}`,
           ),
         ]
           .filter(Boolean)
@@ -762,15 +897,29 @@ async function _processVideoSummary(
 
         setHistory((prev) =>
           prev.map((item) =>
-            item.id === itemId ? { ...item, summary: finalSummaryMarkdown, overview: overview, status: "done" } : item,
+            item.id === itemId
+              ? {
+                  ...item,
+                  summary: finalSummaryMarkdown,
+                  overview: overview,
+                  status: "done",
+                }
+              : item,
           ),
         );
         if (currentToast) await currentToast.hide();
-        await showToastFn({ style: Toast.Style.Success, title: "Summary Complete", message: initialTitle });
+        await showToastFn({
+          style: Toast.Style.Success,
+          title: "Summary Complete",
+          message: initialTitle,
+        });
         currentToast = null;
       } catch (overviewError) {
         console.error("AI Error on Overview:", overviewError);
-        const errorMsg = overviewError instanceof Error ? overviewError.message : "Unknown AI error";
+        const errorMsg =
+          overviewError instanceof Error
+            ? overviewError.message
+            : "Unknown AI error";
         finalSummaryMarkdown = [
           `# ${initialTitle}`,
           `**Source:** [Watch on YouTube](${url})`,
@@ -780,7 +929,8 @@ async function _processVideoSummary(
           "\n---\n",
           "## Summary by Timestamp",
           ...finalDetailedChunks.map(
-            (chunk) => `\n### ${formatTime(chunk.startTime)} - ${formatTime(chunk.endTime)}\n${chunk.summary}`,
+            (chunk) =>
+              `\n### ${formatTime(chunk.startTime)} - ${formatTime(chunk.endTime)}\n${chunk.summary}`,
           ),
         ]
           .join("\n")
@@ -812,14 +962,18 @@ async function _processVideoSummary(
     setHistory((prev) =>
       prev.map((item) => {
         if (item.id === itemId && item.status !== "error") {
-          const errorMsg = error instanceof Error ? error.message : "Unknown error during processing";
+          const errorMsg =
+            error instanceof Error
+              ? error.message
+              : "Unknown error during processing";
           const currentSummary = item.summary || "";
           const newSummary =
             currentSummary.includes("Fetching") ||
             currentSummary.includes("Preparing") ||
             currentSummary.includes("Regenerating")
               ? `# ${initialTitle}\n\n**Source:** [Watch on YouTube](${url})\n\n---\n\nFailed during processing: ${errorMsg}`
-              : currentSummary + `\n\n---\n*Processing failed unexpectedly: ${errorMsg}*`;
+              : currentSummary +
+                `\n\n---\n*Processing failed unexpectedly: ${errorMsg}*`;
           return { ...item, status: "error", summary: newSummary };
         }
         return item;
@@ -836,7 +990,8 @@ async function _processVideoSummary(
       await showToastFn({
         style: Toast.Style.Failure,
         title: "Processing Failed Unexpectedly",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
+        message:
+          error instanceof Error ? error.message : "An unknown error occurred",
       });
     }
   } finally {
@@ -844,7 +999,9 @@ async function _processVideoSummary(
     setIsLoading(() => {
       let stillProcessing = false;
       setHistory((currentHistory) => {
-        stillProcessing = currentHistory.some((h) => h.status && h.status !== "done" && h.status !== "error");
+        stillProcessing = currentHistory.some(
+          (h) => h.status && h.status !== "done" && h.status !== "error",
+        );
         return currentHistory;
       });
       return stillProcessing;
@@ -884,11 +1041,13 @@ export default function Command(): ReactElement {
     debounce((currentHistory: SummaryHistoryItem[]) => {
       console.log("Debounced save triggered");
       if (currentHistory.length > 0) {
-        LocalStorage.setItem("history", JSON.stringify(currentHistory)).catch((err) =>
-          console.error("Failed to save history:", err),
+        LocalStorage.setItem("history", JSON.stringify(currentHistory)).catch(
+          (err) => console.error("Failed to save history:", err),
         );
       } else {
-        LocalStorage.removeItem("history").catch((err) => console.error("Failed to remove history:", err));
+        LocalStorage.removeItem("history").catch((err) =>
+          console.error("Failed to remove history:", err),
+        );
       }
     }, HISTORY_SAVE_DEBOUNCE_MS),
     [],
@@ -908,7 +1067,11 @@ export default function Command(): ReactElement {
 
   function validateUrl(url: string): boolean {
     if (!url) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: "Please enter a YouTube URL" });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "Please enter a YouTube URL",
+      });
       return false;
     }
     if (!YOUTUBE_URL_REGEX.test(url.trim())) {
@@ -937,7 +1100,11 @@ export default function Command(): ReactElement {
 
     const existingItem = history.find((item) => item.url === trimmedUrl);
     if (existingItem) {
-      if (existingItem.status && existingItem.status !== "done" && existingItem.status !== "error") {
+      if (
+        existingItem.status &&
+        existingItem.status !== "done" &&
+        existingItem.status !== "error"
+      ) {
         showToast({
           style: Toast.Style.Failure,
           title: "Already Processing",
@@ -952,12 +1119,16 @@ export default function Command(): ReactElement {
     }
 
     // Check if *any* item is currently processing
-    const isProcessingActive = history.some((item) => item.status && item.status !== "done" && item.status !== "error");
+    const isProcessingActive = history.some(
+      (item) =>
+        item.status && item.status !== "done" && item.status !== "error",
+    );
     if (isProcessingActive) {
       showToast({
         style: Toast.Style.Failure,
         title: "Processing Active",
-        message: "Please wait for the current summary to finish before starting another.",
+        message:
+          "Please wait for the current summary to finish before starting another.",
       });
       return;
     }
@@ -976,7 +1147,8 @@ export default function Command(): ReactElement {
       newItemId = Date.now().toString();
 
       const videoIdPreliminary = await extractVideoId(trimmedUrl);
-      if (!videoIdPreliminary) throw new Error("Could not extract Video ID from URL.");
+      if (!videoIdPreliminary)
+        throw new Error("Could not extract Video ID from URL.");
 
       const placeholderTitle = "Processing..."; // Use a clear placeholder
       const determinedIconName: keyof typeof Icon = "Video";
@@ -1025,11 +1197,16 @@ export default function Command(): ReactElement {
           finalDisplayTitle = fetchedTitle;
         } else {
           finalDisplayTitle = trimmedUrl;
-          console.warn("Fetched title was default or missing, using URL as title.");
+          console.warn(
+            "Fetched title was default or missing, using URL as title.",
+          );
         }
         finalDescription = fetchedDescription || "";
 
-        const determinedIcon = determineIconFromText(finalDisplayTitle, finalDescription);
+        const determinedIcon = determineIconFromText(
+          finalDisplayTitle,
+          finalDescription,
+        );
         // finalIconName = (Object.keys(Icon).find(key => Icon[key as keyof typeof Icon] === determinedIcon) as keyof typeof Icon) || 'Video' as keyof typeof Icon;
 
         // --- 4. Update Item with Fetched Data ---
@@ -1041,7 +1218,8 @@ export default function Command(): ReactElement {
                   title: finalDisplayTitle,
                   displayIcon:
                     (Object.keys(Icon).find(
-                      (key) => Icon[key as keyof typeof Icon] === determinedIcon,
+                      (key) =>
+                        Icon[key as keyof typeof Icon] === determinedIcon,
                     ) as keyof typeof Icon) || "Video", // Compute key here
                   summary: `# ${finalDisplayTitle}\n\nPreparing summary... Please wait.`,
                 }
@@ -1109,9 +1287,13 @@ export default function Command(): ReactElement {
       await showToast({
         style: Toast.Style.Failure,
         title: "Setup Failed",
-        message: setupError instanceof Error ? setupError.message : "Unknown error before processing",
+        message:
+          setupError instanceof Error
+            ? setupError.message
+            : "Unknown error before processing",
       });
-      if (newItemId) setHistory((prev) => prev.filter((item) => item.id !== newItemId));
+      if (newItemId)
+        setHistory((prev) => prev.filter((item) => item.id !== newItemId));
       setSelectedItemId(null);
       setIsLoading(false); // Ensure loading stops on setup failure
     }
@@ -1122,7 +1304,10 @@ export default function Command(): ReactElement {
   const filteredHistory = history.filter((item) => {
     if (!searchText) return true;
     const searchLower = searchText.toLowerCase();
-    return item.title.toLowerCase().includes(searchLower) || item.url.toLowerCase().includes(searchLower);
+    return (
+      item.title.toLowerCase().includes(searchLower) ||
+      item.url.toLowerCase().includes(searchLower)
+    );
   });
 
   function getIconForItem(item: SummaryHistoryItem): Icon {
@@ -1148,7 +1333,9 @@ export default function Command(): ReactElement {
   }
 
   // Check if any item is actively processing
-  const isAnyItemProcessing = history.some((item) => item.status && item.status !== "done" && item.status !== "error");
+  const isAnyItemProcessing = history.some(
+    (item) => item.status && item.status !== "done" && item.status !== "error",
+  );
   // Update global loading state (used for List loading and preventing overlapping actions)
   useEffect(() => {
     setIsLoading(isAnyItemProcessing);
@@ -1160,18 +1347,27 @@ export default function Command(): ReactElement {
     const timestampedDetailsContent =
       selectedItem.detailedChunks?.length > 0
         ? selectedItem.detailedChunks
-            .map((chunk) => `## ${formatTime(chunk.startTime)} - ${formatTime(chunk.endTime)}\n${chunk.summary}`)
+            .map(
+              (chunk) =>
+                `## ${formatTime(chunk.startTime)} - ${formatTime(chunk.endTime)}\n${chunk.summary}`,
+            )
             .join("\n\n")
         : "";
 
-    const actionableRegex = /##\s*Actionable Insights(?: & Key Takeaways)?\s*\n([\s\S]*?)(?=\n##\s|$)/;
+    const actionableRegex =
+      /##\s*Actionable Insights(?: & Key Takeaways)?\s*\n([\s\S]*?)(?=\n##\s|$)/;
     const quotesRegex = /##\s*Notable Quotes\s*\n([\s\S]*?)(?=\n##\s|$)/;
     const actionableMatch = overviewContent.match(actionableRegex);
     const quotesMatch = overviewContent.match(quotesRegex);
-    const actionableCopyContent = actionableMatch ? actionableMatch[1].trim() : "";
+    const actionableCopyContent = actionableMatch
+      ? actionableMatch[1].trim()
+      : "";
     const quotesCopyContent = quotesMatch ? quotesMatch[1].trim() : "";
 
-    const isProcessing = selectedItem.status && selectedItem.status !== "done" && selectedItem.status !== "error";
+    const isProcessing =
+      selectedItem.status &&
+      selectedItem.status !== "done" &&
+      selectedItem.status !== "error";
 
     const handleRegenerate = async () => {
       // Prevent regeneration if this item or *any other* item is processing
@@ -1179,10 +1375,18 @@ export default function Command(): ReactElement {
         const message = isProcessing
           ? "This item is currently processing."
           : "Another item is processing. Please wait.";
-        showToast({ style: Toast.Style.Failure, title: "Cannot Regenerate", message });
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Cannot Regenerate",
+          message,
+        });
         return;
       }
-      const { id: itemIdToRegenerate, url: itemUrl, title: currentTitle } = selectedItem;
+      const {
+        id: itemIdToRegenerate,
+        url: itemUrl,
+        title: currentTitle,
+      } = selectedItem;
 
       setIsLoading(true); // Indicate global processing start
       let toast: Toast | null = null;
@@ -1194,7 +1398,8 @@ export default function Command(): ReactElement {
         });
 
         const videoId = await extractVideoId(itemUrl);
-        if (!videoId) throw new Error("Could not extract Video ID for regeneration.");
+        if (!videoId)
+          throw new Error("Could not extract Video ID for regeneration.");
 
         setHistory((prev) =>
           prev.map((item) =>
@@ -1217,14 +1422,18 @@ export default function Command(): ReactElement {
           // Re-fetch metadata on regenerate
           const videoInfo = await getVideoTitleAndDescription(videoId);
           description = videoInfo.description;
-          if (videoInfo.title && videoInfo.title !== "Untitled Video") newTitle = videoInfo.title;
+          if (videoInfo.title && videoInfo.title !== "Untitled Video")
+            newTitle = videoInfo.title;
           const newIcon = determineIconFromText(newTitle, description);
           newIconKey =
-            (Object.keys(Icon).find((key) => Icon[key as keyof typeof Icon] === newIcon) as keyof typeof Icon) ||
-            ("Video" as keyof typeof Icon);
+            (Object.keys(Icon).find(
+              (key) => Icon[key as keyof typeof Icon] === newIcon,
+            ) as keyof typeof Icon) || ("Video" as keyof typeof Icon);
           setHistory((prev) =>
             prev.map((item) =>
-              item.id === itemIdToRegenerate ? { ...item, title: newTitle, displayIcon: newIconKey } : item,
+              item.id === itemIdToRegenerate
+                ? { ...item, title: newTitle, displayIcon: newIconKey }
+                : item,
             ),
           );
         } catch (e) {
@@ -1267,7 +1476,11 @@ export default function Command(): ReactElement {
         setHistory((prev) =>
           prev.map((item) =>
             item.id === itemIdToRegenerate && item.status === "pending"
-              ? { ...item, status: "error", summary: item.summary + "\n\nRegeneration setup failed." }
+              ? {
+                  ...item,
+                  status: "error",
+                  summary: item.summary + "\n\nRegeneration setup failed.",
+                }
               : item,
           ),
         );
@@ -1282,7 +1495,10 @@ export default function Command(): ReactElement {
     return (
       <Detail
         navigationTitle={selectedItem.title} // Shows placeholder initially, then fetched title
-        markdown={selectedItem.summary || (isProcessing ? "Processing..." : "Summary not available.")}
+        markdown={
+          selectedItem.summary ||
+          (isProcessing ? "Processing..." : "Summary not available.")
+        }
         isLoading={isProcessing} // Detail view's own spinner for THIS item
         actions={
           <ActionPanel>
@@ -1366,9 +1582,14 @@ export default function Command(): ReactElement {
                 style={Action.Style.Destructive}
                 shortcut={{ modifiers: ["cmd"], key: "d" }}
                 onAction={() => {
-                  setHistory((prev) => prev.filter((h) => h.id !== selectedItem.id));
+                  setHistory((prev) =>
+                    prev.filter((h) => h.id !== selectedItem.id),
+                  );
                   handleGoBack();
-                  showToast({ style: Toast.Style.Success, title: "Summary Deleted" });
+                  showToast({
+                    style: Toast.Style.Success,
+                    title: "Summary Deleted",
+                  });
                 }}
               />
             </ActionPanel.Section>
@@ -1403,7 +1624,11 @@ export default function Command(): ReactElement {
             actions={
               <ActionPanel>
                 {" "}
-                <Action title="Generate Summary" icon={Icon.Wand} onAction={() => handleUrlSubmit(searchText)} />{" "}
+                <Action
+                  title="Generate Summary"
+                  icon={Icon.Wand}
+                  onAction={() => handleUrlSubmit(searchText)}
+                />{" "}
               </ActionPanel>
             }
           />
@@ -1411,21 +1636,32 @@ export default function Command(): ReactElement {
 
       {/* History Section */}
       {filteredHistory.length > 0 && (
-        <List.Section title="Summary History" subtitle={`${filteredHistory.length} item(s)`}>
+        <List.Section
+          title="Summary History"
+          subtitle={`${filteredHistory.length} item(s)`}
+        >
           {filteredHistory.map((item) => {
-            const isProcessingItem = item.status && item.status !== "done" && item.status !== "error";
+            const isProcessingItem =
+              item.status && item.status !== "done" && item.status !== "error";
             return (
               <List.Item
                 key={item.id}
                 title={item.title} // Shows actual title (or placeholder if processing)
                 accessories={[
-                  { date: new Date(item.timestamp), tooltip: `Saved: ${new Date(item.timestamp).toLocaleString()}` },
+                  {
+                    date: new Date(item.timestamp),
+                    tooltip: `Saved: ${new Date(item.timestamp).toLocaleString()}`,
+                  },
                 ]}
                 icon={getIconForItem(item)} // Icon reflects status
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
-                      <Action title="View Summary" icon={Icon.Eye} onAction={() => setSelectedItemId(item.id)} />
+                      <Action
+                        title="View Summary"
+                        icon={Icon.Eye}
+                        onAction={() => setSelectedItemId(item.id)}
+                      />
                       <Action.OpenInBrowser
                         title="Open Video in Browser"
                         url={item.url}
@@ -1454,19 +1690,23 @@ export default function Command(): ReactElement {
                             icon={Icon.List}
                           />
                         )}
-                        {item.detailedChunks && item.detailedChunks.length > 0 && (
-                          <Action.CopyToClipboard
-                            title="Copy Timestamped Details"
-                            content={item.detailedChunks
-                              .map(
-                                (chunk) =>
-                                  `## ${formatTime(chunk.startTime)} - ${formatTime(chunk.endTime)}\n${chunk.summary}`,
-                              )
-                              .join("\n\n")}
-                            shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-                            icon={Icon.Clock}
-                          />
-                        )}
+                        {item.detailedChunks &&
+                          item.detailedChunks.length > 0 && (
+                            <Action.CopyToClipboard
+                              title="Copy Timestamped Details"
+                              content={item.detailedChunks
+                                .map(
+                                  (chunk) =>
+                                    `## ${formatTime(chunk.startTime)} - ${formatTime(chunk.endTime)}\n${chunk.summary}`,
+                                )
+                                .join("\n\n")}
+                              shortcut={{
+                                modifiers: ["cmd", "shift"],
+                                key: "t",
+                              }}
+                              icon={Icon.Clock}
+                            />
+                          )}
                       </ActionPanel.Section>
                     )}
                     {/* Manage Actions */}
@@ -1478,7 +1718,11 @@ export default function Command(): ReactElement {
                           icon={Icon.Repeat}
                           onAction={async () => {
                             // Trigger regenerate from list view
-                            const { id: itemIdToRegenerate, url: itemUrl, title: currentTitle } = item;
+                            const {
+                              id: itemIdToRegenerate,
+                              url: itemUrl,
+                              title: currentTitle,
+                            } = item;
                             setIsLoading(true); // Set global loading
                             let toast: Toast | null = null;
                             try {
@@ -1488,7 +1732,8 @@ export default function Command(): ReactElement {
                                 message: "Fetching video info...",
                               });
                               const videoId = await extractVideoId(itemUrl);
-                              if (!videoId) throw new Error("Could not extract Video ID.");
+                              if (!videoId)
+                                throw new Error("Could not extract Video ID.");
                               setHistory((prev) =>
                                 prev.map((h) =>
                                   h.id === itemIdToRegenerate
@@ -1504,25 +1749,44 @@ export default function Command(): ReactElement {
                               );
                               let description = "";
                               let newTitle = currentTitle;
-                              let newIconKey: keyof typeof Icon = item.displayIcon || "Video";
+                              let newIconKey: keyof typeof Icon =
+                                item.displayIcon || "Video";
                               try {
-                                const videoInfo = await getVideoTitleAndDescription(videoId);
+                                const videoInfo =
+                                  await getVideoTitleAndDescription(videoId);
                                 description = videoInfo.description;
-                                if (videoInfo.title && videoInfo.title !== "Untitled Video") newTitle = videoInfo.title;
-                                const newIcon = determineIconFromText(newTitle, description);
+                                if (
+                                  videoInfo.title &&
+                                  videoInfo.title !== "Untitled Video"
+                                )
+                                  newTitle = videoInfo.title;
+                                const newIcon = determineIconFromText(
+                                  newTitle,
+                                  description,
+                                );
                                 newIconKey =
                                   (Object.keys(Icon).find(
-                                    (key) => Icon[key as keyof typeof Icon] === newIcon,
-                                  ) as keyof typeof Icon) || ("Video" as keyof typeof Icon);
+                                    (key) =>
+                                      Icon[key as keyof typeof Icon] ===
+                                      newIcon,
+                                  ) as keyof typeof Icon) ||
+                                  ("Video" as keyof typeof Icon);
                                 setHistory((prev) =>
                                   prev.map((h) =>
                                     h.id === itemIdToRegenerate
-                                      ? { ...h, title: newTitle, displayIcon: newIconKey }
+                                      ? {
+                                          ...h,
+                                          title: newTitle,
+                                          displayIcon: newIconKey,
+                                        }
                                       : h,
                                   ),
                                 );
                               } catch (e) {
-                                console.error("Failed fetch metadata for regenerate:", e);
+                                console.error(
+                                  "Failed fetch metadata for regenerate:",
+                                  e,
+                                );
                               }
                               if (toast) {
                                 try {
@@ -1552,12 +1816,22 @@ export default function Command(): ReactElement {
                               await showToast({
                                 style: Toast.Style.Failure,
                                 title: "Regenerate Failed",
-                                message: error instanceof Error ? error.message : "Unknown error",
+                                message:
+                                  error instanceof Error
+                                    ? error.message
+                                    : "Unknown error",
                               });
                               setHistory((prev) =>
                                 prev.map((h) =>
-                                  h.id === itemIdToRegenerate && h.status === "pending"
-                                    ? { ...h, status: "error", summary: h.summary + "\n\nRegeneration setup failed." }
+                                  h.id === itemIdToRegenerate &&
+                                  h.status === "pending"
+                                    ? {
+                                        ...h,
+                                        status: "error",
+                                        summary:
+                                          h.summary +
+                                          "\n\nRegeneration setup failed.",
+                                      }
                                     : h,
                                 ),
                               );
@@ -1574,9 +1848,15 @@ export default function Command(): ReactElement {
                         style={Action.Style.Destructive}
                         shortcut={{ modifiers: ["cmd"], key: "d" }}
                         onAction={() => {
-                          setHistory((prev) => prev.filter((h) => h.id !== item.id));
-                          showToast({ style: Toast.Style.Success, title: "Summary Deleted" });
-                          if (selectedItemId === item.id) setSelectedItemId(null); // Deselect if deleted item was selected
+                          setHistory((prev) =>
+                            prev.filter((h) => h.id !== item.id),
+                          );
+                          showToast({
+                            style: Toast.Style.Success,
+                            title: "Summary Deleted",
+                          });
+                          if (selectedItemId === item.id)
+                            setSelectedItemId(null); // Deselect if deleted item was selected
                         }}
                       />
                     </ActionPanel.Section>
@@ -1590,17 +1870,21 @@ export default function Command(): ReactElement {
 
       {/* EmptyView */}
       {/* Show EmptyView only if not loading, history is empty, and search is not a valid URL */}
-      {!isListLoading && history.length === 0 && !(searchText && YOUTUBE_URL_REGEX.test(searchText.trim())) && (
-        <List.EmptyView
-          title={searchText ? "No Matching Summaries Found" : "No Summaries Yet"}
-          description={
-            searchText
-              ? "Try different search terms, or paste a valid YouTube URL."
-              : "Paste a YouTube video URL to generate a summary."
-          }
-          icon={searchText ? Icon.MagnifyingGlass : Icon.Video}
-        />
-      )}
+      {!isListLoading &&
+        history.length === 0 &&
+        !(searchText && YOUTUBE_URL_REGEX.test(searchText.trim())) && (
+          <List.EmptyView
+            title={
+              searchText ? "No Matching Summaries Found" : "No Summaries Yet"
+            }
+            description={
+              searchText
+                ? "Try different search terms, or paste a valid YouTube URL."
+                : "Paste a YouTube video URL to generate a summary."
+            }
+            icon={searchText ? Icon.MagnifyingGlass : Icon.Video}
+          />
+        )}
     </List>
   );
 }
