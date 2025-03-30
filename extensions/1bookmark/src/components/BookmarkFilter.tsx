@@ -2,6 +2,7 @@ import { Icon, List, useNavigation } from "@raycast/api";
 import { RouterOutputs, trpc } from "../utils/trpc.util";
 import { TagSelectView } from "../views/TagSelectView";
 import { Tag } from "../types";
+import { useTags } from "../hooks/use-tags.hook";
 
 const DropdownItem = (props: { tag: Tag; spaceIds: string[]; selectedTags: string[] }) => {
   const { tag, selectedTags } = props;
@@ -18,7 +19,7 @@ const DropdownItem = (props: { tag: Tag; spaceIds: string[]; selectedTags: strin
 
 export function BookmarkFilter(props: { me: RouterOutputs["user"]["me"]; spaceIds: string[] }) {
   const { me, spaceIds } = props;
-  const { data: tags, refetch, isFetching } = trpc.tag.list.useQuery({ spaceIds });
+  const { data: tags, refetch, isFetching } = useTags(spaceIds);
   const { push } = useNavigation();
   const trpcUtils = trpc.useUtils();
   const selectedTags = me.associatedSpaces.flatMap((space) => {
