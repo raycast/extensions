@@ -16,10 +16,21 @@ export interface User {
 }
 
 export interface Channel {
-  id: string;
-  name: string;
-  type: "PUBLIC" | "PRIVATE";
-  description?: string;
+  channel: {
+    id: string;
+    name: string;
+    channelType: "PUBLIC" | "PRIVATE";
+    description?: string;
+    workspaceId: string;
+    isMember: boolean;
+    isMuted: boolean;
+    isHidden: boolean;
+    isArchived: boolean;
+    isMain: boolean;
+    isInitial: boolean;
+    // Add other properties as needed
+  };
+  users: string[];
 }
 
 export interface Message {

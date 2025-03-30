@@ -20,6 +20,13 @@
       "mode": "view"
     },
     {
+      "name": "list-all-channels",
+      "title": "List All Channels",
+      "subtitle": "Pumble",
+      "description": "List all channels in your Pumble workspace",
+      "mode": "view"
+    },
+    {
       "name": "send-message",
       "title": "Send Message",
       "subtitle": "Pumble",
