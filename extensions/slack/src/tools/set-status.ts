@@ -11,6 +11,8 @@ type Input = {
   /**
    * A Slack-compatible string for single emoji matching the text of the status. Emojis should be in the form: :<emoji identifier>:. If the user doesn't specify an emoji, come up with one that matches the text.
    *
+   * You can call the `get-emojis` tool to get a list of all custom emojis in the workspace. Do this only if you think the user is using a custom emoji.
+   *
    * To unset the status, provide an empty string.
    */
   emoji: string;

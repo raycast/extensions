@@ -1,5 +1,12 @@
 # Slack Changelog
 
+## [New Emoji Features and Improvements] - 2024-03-26
+
+- Add new `Search Emojis` command to browse and copy Slack emojis
+- Add `get-emojis` tool to fetch emojis with AI
+- Improve getting channel history with AI
+- Update tool titles and improve overall functionality
+
 ## [Update README with improved manifest.yaml] - 2025-03-05
 
 ## [Added new scope] - 2025-02-26
@@ -8,7 +15,7 @@
 
 ## [New "Copy Message URL" action] - 2025-02-10
 
-- Add `Copy Message URL` action to copy the URL of a message to the clipboard from the `Search Messages` command 
+- Add `Copy Message URL` action to copy the URL of a message to the clipboard from the `Search Messages` command
 
 ## [New "Copy Huddle Link" action] - 2025-01-13
 
