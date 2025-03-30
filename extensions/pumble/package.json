@@ -16,8 +16,17 @@
       "name": "list-all-users",
       "title": "List All Users",
       "subtitle": "Pumble",
-      "description": "find someone",
+      "description": "List all users in your Pumble workspace",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Pumble API Key",
+      "type": "password",
+      "required": true
     }
   ],
   "dependencies": {
