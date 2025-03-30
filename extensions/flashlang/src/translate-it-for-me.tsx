@@ -46,11 +46,6 @@ export default function TranslateItForMe() {
           [selectedText]: existingHistory[selectedText] ?? "",
         });
         setSearchText(selectedText);
-
-        // don't generate prompt if the word is already in the history
-        if (selectedText && !existingHistory[selectedText]) {
-          generatePromptByText(selectedText);
-        }
       } catch (error) {
         console.error("Failed to read selected text:", error);
       }
@@ -106,12 +101,6 @@ export default function TranslateItForMe() {
     [searchText, languageOptions],
   );
 
-  const generatePromptBySearchText = useCallback(async () => {
-    const promptString = await translateVocabularyPrompt(searchText, languageOptions);
-    setPromptString(promptString || "");
-    setCurrentTranslatingWord(searchText); // Track what we're translating
-  }, [searchText, languageOptions]);
-
   // Get AI translation if no history exists
   const {
     data: aiTranslation,
@@ -133,6 +122,10 @@ export default function TranslateItForMe() {
     },
     [languageOptions, searchText],
   );
+
+  const generatePromptBySearchText = useCallback(async () => {
+    handleRefreshTranslation(searchText);
+  }, [searchText, languageOptions]);
 
   // Modify the save effect to use currentTranslatingWord
   useEffect(() => {
@@ -226,25 +219,25 @@ export default function TranslateItForMe() {
           ].filter(Boolean)}
           actions={
             <ActionPanel>
+              <Action
+                title="Translate / Refresh"
+                onAction={() => handleRefreshTranslation(item.vocabulary)}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
               {isInFlashcards ? (
                 <Action
                   title="Remove from Flashcards"
                   onAction={() => handleRemoveFromFlashcards(item.vocabulary)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                   style={Action.Style.Regular}
                 />
               ) : (
                 <Action
                   title="Add Selected to Flashcards"
                   onAction={() => handleAddToFlashcard(item.vocabulary)}
-                  shortcut={{ modifiers: ["cmd"], key: "s" }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                 />
               )}
-              <Action
-                title="Refresh Translation"
-                onAction={() => handleRefreshTranslation(item.vocabulary)}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
               <Action
                 title="Remove from History"
                 onAction={() => handleRemoveFromHistory(item.vocabulary)}
