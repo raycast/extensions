@@ -11,10 +11,6 @@ export default function LogsViewer({ logFiles }: { logFiles: string[] }) {
     return response;
   });
 
-  if (!data) {
-    <List.EmptyView title="No Builds Found" />;
-  }
-
   return (
     <List isLoading={isLoading} navigationTitle="Logs" isShowingDetail>
       {data && data.length > 0 ? (
