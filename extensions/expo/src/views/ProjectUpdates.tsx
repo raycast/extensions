@@ -40,7 +40,7 @@ export default function ProjectUpdates({ project }: { project: Project }) {
     },
     onError: (error) => {
       showToast({
-        title: "Error fetching project builds",
+        title: "Error fetching project updates",
         message: (error as Error)?.message || "",
         style: Toast.Style.Failure,
       });
