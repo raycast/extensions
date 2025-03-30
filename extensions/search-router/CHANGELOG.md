@@ -3,7 +3,7 @@
 ## [Fixed & Improvements] - {PR_MERGE_DATE}
 
 - Removed Kagi-specific search bangs
-- Added URL validation:
+- Added URL validation
 - Improved fallback behavior
 - Updated latest Kagi bangs
 

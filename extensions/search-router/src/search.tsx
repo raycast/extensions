@@ -1,9 +1,8 @@
 import { LaunchProps, showToast, Toast } from "@raycast/api";
-import { open } from "@raycast/api";
-import { searchEngines } from "./data/search-engines";
 import { showFailureToast } from "@raycast/utils";
 import { getDefaultSearchEngine } from "./data/cache";
-import { isValidUrl } from "./utils";
+import { searchEngines } from "./data/search-engines";
+import { isValidUrl, safeOpenUrl } from "./utils";
 
 export default async function search(props: LaunchProps<{ arguments: { query: string }; fallbackText?: string }>) {
   try {
@@ -21,7 +20,7 @@ export default async function search(props: LaunchProps<{ arguments: { query: st
 
     if (!finalQuery) {
       const url = new URL(searchEngine.u);
-      await open(url.origin);
+      await safeOpenUrl(url.origin);
       return;
     }
 
@@ -31,7 +30,7 @@ export default async function search(props: LaunchProps<{ arguments: { query: st
       throw new Error(`Invalid URL: ${searchUrl}`);
     }
 
-    await open(searchUrl);
+    await safeOpenUrl(searchUrl);
   } catch (error) {
     await showFailureToast(error);
   }
@@ -48,7 +47,6 @@ function processQuery(rawQuery: string) {
   const searchEngineKeyMatch = query.match(/!(\S+)/i);
   const searchEngineKey = searchEngineKeyMatch?.[1]?.toLowerCase();
   const searchEngine = findSearchEngine(searchEngineKey);
-  const searchEngineOrDefault = searchEngine || getDefaultSearchEngine();
 
   if (query.includes("@")) {
     const siteMatch = query.match(/@(\S+)/i);
@@ -69,5 +67,5 @@ function processQuery(rawQuery: string) {
     finalQuery = `${searchEngineKey} ${cleanQuery}`;
   }
 
-  return { searchEngine: searchEngineOrDefault, finalQuery, searchEngineKey };
+  return { searchEngine: searchEngine || getDefaultSearchEngine(), finalQuery, searchEngineKey };
 }
