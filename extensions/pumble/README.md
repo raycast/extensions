@@ -13,6 +13,4 @@ Maybe refactor by this [Pumble](SDKhttps://cake-com.github.io/pumble-node-sdk/ba
 - [x] list all channels
 - [x] send message to a channel
 - [ ] send a message to a user
-- [ ] list all channels
-- [ ] send message to channel
 
