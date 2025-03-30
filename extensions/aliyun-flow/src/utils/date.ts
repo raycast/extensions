@@ -1,14 +1,14 @@
 export function formatDate(date: number): string {
-  return new Date(date).toLocaleString("zh-CN");
+  return new Date(date).toLocaleString();
 }
 
 export function getDateString(timestamp: number): string {
   const date = new Date(timestamp);
-  return date.toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" });
+  return date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 }
 
 export function formatTime(timestamp: number): string {
-  return new Date(timestamp).toLocaleTimeString("zh-CN");
+  return new Date(timestamp).toLocaleTimeString();
 }
 
 // format duration, s, m, h
