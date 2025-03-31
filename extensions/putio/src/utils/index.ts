@@ -1,19 +1,26 @@
+import { getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getApplications } from "@raycast/api";
+import { getApplications, open } from "@raycast/api";
 
-export const useIsVlcInstalled = () => {
-  const [isVlcInstalled, setIsVlcInstalled] = useState(false);
+export const getAuthToken = () => {
+  const { token } = getPreferenceValues<{ token: string }>();
+  return token;
+};
+
+export const useVLC = () => {
+  const [installed, setInstalled] = useState(false);
 
   useEffect(() => {
     const checkIfVlcInstalled = async () => {
       const applications = await getApplications();
-      const vlcIsInstalled = applications.some(({ bundleId }) => bundleId === "org.videolan.vlc");
-
-      setIsVlcInstalled(vlcIsInstalled);
+      setInstalled(applications.some(({ bundleId }) => bundleId === "org.videolan.vlc"));
     };
 
     checkIfVlcInstalled();
   }, []);
 
-  return isVlcInstalled;
+  return {
+    isInstalled: installed,
+    open: (url: string) => open(url, "org.videolan.vlc"),
+  };
 };

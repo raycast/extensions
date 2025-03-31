@@ -1,4 +1,4 @@
-import * as fs from "fs"
+import * as fs from "fs";
 
 export const isWeChatTweakInstalled = (): boolean => {
   try {
@@ -8,10 +8,10 @@ export const isWeChatTweakInstalled = (): boolean => {
       "/usr/local/opt/wechattweak-cli",
       "/usr/local/bin/wechattweak-cli",
       "/opt/homebrew/bin/wechattweak-cli",
-      "/usr/local/bin/wechattweak-cli"
-    ].some(fs.existsSync)
+      "/usr/local/bin/wechattweak-cli",
+    ].some(fs.existsSync);
   } catch (e) {
-    console.error(String(e))
-    return false
+    console.error(String(e));
+    return false;
   }
-}
+};

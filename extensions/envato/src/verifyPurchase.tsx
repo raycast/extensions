@@ -1,21 +1,30 @@
 import { ActionPanel, Action, Form, showToast, Toast, useNavigation, LaunchProps } from "@raycast/api";
 import { verifyPurchaseCode } from "./utils";
 import PurchaseDetails from "./purchaseDetails";
+import { FormValidation, useForm } from "@raycast/utils";
 type Values = {
   pc: string;
 };
-export default function Command(props: LaunchProps<{ arguments: { purchaseCode: string } }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.VerifyPurchase }>) {
   const { push } = useNavigation();
+
+  const { itemProps, handleSubmit } = useForm<Values>({
+    onSubmit(values) {
+      submit(values.pc);
+    },
+    initialValues: {
+      pc: props.arguments.purchaseCode,
+    },
+    validation: {
+      pc: FormValidation.Required,
+    },
+  });
 
   if (props.arguments.purchaseCode) {
     submit(props.arguments.purchaseCode);
   }
 
   async function submit(purchaseCode: string) {
-    if (purchaseCode.length === 0) {
-      await showToast({ title: "Purchase code cannot be empty.", style: Toast.Style.Failure });
-      return;
-    }
     const loadingToast = await showToast({ title: "Verifiying...", style: Toast.Style.Animated });
     try {
       const result = await verifyPurchaseCode(purchaseCode);
@@ -35,11 +44,16 @@ export default function Command(props: LaunchProps<{ arguments: { purchaseCode: 
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={(values: Values) => submit(values.pc)} />
+          <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField title="Purchase Code" id="pc" defaultValue={props.arguments.purchaseCode} />
+      <Form.TextField
+        title="Purchase Code"
+        placeholder="86781236-23d0-4b3c-7dfa-c1c147e0dece
+"
+        {...itemProps.pc}
+      />
     </Form>
   );
 }

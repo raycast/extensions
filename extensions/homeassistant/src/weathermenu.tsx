@@ -1,5 +1,7 @@
 import { useHAStates } from "@components/hooks";
+import { LastUpdateChangeMenubarItem } from "@components/menu";
 import { PrimaryIconColor } from "@components/state/utils";
+import { SunMenubarSection } from "@components/sun/menu";
 import { useWeatherForecast } from "@components/weather/hooks";
 import {
   launchWeatherCommand,
@@ -9,10 +11,8 @@ import {
 import { getTemperatureFromState, weatherConditionToIcon, weatherConditionToText } from "@components/weather/utils";
 import { State } from "@lib/haapi";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
-import { Color, getPreferenceValues, Icon, Image, MenuBarExtra, openCommandPreferences } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
-import { SunMenubarSection } from "@components/sun/menu";
-import { LastUpdateChangeMenubarItem } from "@components/menu";
+import { Color, getPreferenceValues, Icon, Image, MenuBarExtra, openCommandPreferences } from "@raycast/api";
 
 function WeatherMenuBarExtra(props: {
   children: React.ReactNode;
@@ -136,7 +136,7 @@ export default function WeatherMenuBarCommand() {
       <SunMenubarSection sun={sunState} />
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          icon={{ source: "entity.png", tintColor: PrimaryIconColor }}
+          icon={{ source: "shape.svg", tintColor: PrimaryIconColor }}
           title="Source"
           subtitle={weather ? getFriendlyName(weather) : ""}
           onAction={openCommandPreferences}

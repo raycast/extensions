@@ -1,5 +1,9 @@
 # Menubar Weather Changelog
 
+## [Update icons] - 2024-09-02
+
+- Update icons for Street and Country
+
 ## [Refactor Extension] - 2024-07-16
 
 - Refactoring code to optimise extension performance

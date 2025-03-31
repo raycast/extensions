@@ -1,5 +1,10 @@
 # Swift-evolution Changelog
 
+## [Fix crash] - 2024-08-24
+
+- Fix reading name from undefined object
+- Update to displaying multiple reviewers instead of single one, as the field for single reviewer is not present anymore
+
 ## [Update to new evolution API] - 2024-05-10
 
 - Use the new evolution api for swift

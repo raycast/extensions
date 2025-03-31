@@ -1,6 +1,7 @@
-import { Cache as RaycastCache, getPreferenceValues } from "@raycast/api";
+import { Cache as RaycastCache } from "@raycast/api";
 
-import { Account, Message, Preferences } from "../types";
+import { Account, Message } from "../types";
+import { messageLimit } from "./common";
 
 export enum ExpirationTime {
   Minute = 60 * 1000,
@@ -8,9 +9,6 @@ export enum ExpirationTime {
   Day = 24 * Hour,
   Week = 7 * Day,
 }
-
-const preferences: Preferences = getPreferenceValues();
-const messageLimit = preferences.messageLimit ? parseInt(preferences.messageLimit) : 10;
 
 const isCacheExpired = (time: number, limit = ExpirationTime.Day): boolean => {
   return Date.now() - time > limit;
@@ -97,9 +95,34 @@ const deleteMessage = (id: string, account: string, mailbox: string) => {
   setMessages(nextMessages, account, mailbox);
 };
 
+const defaultAccount = new RaycastCache();
+
+const getDefaultAccount = (): Account | undefined => {
+  const accounts = getAccounts();
+
+  if (!accounts || accounts.length === 0) {
+    return undefined;
+  }
+
+  const defaultAccountId = defaultAccount.get("default-account-id");
+
+  if (defaultAccountId) {
+    const account = accounts.find((account) => account.id === defaultAccountId);
+    if (account) return account;
+  }
+
+  return accounts[0];
+};
+
+const setDefaultAccount = (id: string) => {
+  defaultAccount.set("default-account-id", id);
+};
+
 export const Cache = Object.freeze({
   getAccounts,
   setAccounts,
+  getDefaultAccount,
+  setDefaultAccount,
   getAccount,
   invalidateAccounts,
   getMessages,

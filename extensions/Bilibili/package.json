@@ -34,6 +34,12 @@
       "mode": "view"
     },
     {
+      "name": "searchVideos",
+      "title": "Search Videos",
+      "description": "Search videos",
+      "mode": "view"
+    },
+    {
       "name": "notifications",
       "title": "Notifications",
       "description": "Delivering the news for you from your dynamic feed",

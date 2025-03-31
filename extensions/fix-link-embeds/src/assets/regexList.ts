@@ -6,7 +6,7 @@ export const regexList = [
   },
   {
     test: /https?:\/\/(?:www\.|vm\.)?tiktok\.com/g,
-    replace: "https://tiktxk.com",
+    replace: "https://vxtiktok.com",
     settingsKey: "replaceTiktok",
   },
   {

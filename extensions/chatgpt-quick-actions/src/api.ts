@@ -1,8 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
 
-const configuration = new Configuration({
+export const openai = new OpenAI({
   apiKey: getPreferenceValues().apikey,
 });
-export const openai = new OpenAIApi(configuration);
 export const global_model = getPreferenceValues().model;

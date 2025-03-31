@@ -1,15 +1,13 @@
-import { TAspectRatio, TModelId, TModelName, TNumOutputs, TSchedulerId } from "@ts/constants";
+import { TAspectRatio, TModelId, TModelName, TNumOutputs } from "@ts/constants";
 
 export interface TGenerationCreateResult {
   outputs: TGenerationCreationOutput[];
   remaining_credits: number;
   settings: {
     model_id: TModelId;
-    scheduler_id: TSchedulerId;
     width: number;
     height: number;
     guidance_scale: number;
-    inference_steps: number;
     seed: number;
   };
   error?: string;
@@ -47,9 +45,7 @@ export interface TOutput {
     width: number;
     height: number;
     guidance_scale: number;
-    inference_steps: number;
     model_id: TModelId;
-    scheduler_id: TSchedulerId;
   };
 }
 
@@ -64,9 +60,7 @@ export interface TOutputHistory {
     width: number;
     height: number;
     guidance_scale: number;
-    inference_steps: number;
     model_id: TModelId;
-    scheduler_id: TSchedulerId;
   };
 }
 

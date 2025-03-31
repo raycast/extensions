@@ -1,5 +1,29 @@
 # NBA Game Viewer Changelog
 
+## [Improvements] - 2025-01-31
+
+- Added play-by-play view for completed and in-progress games.
+- Added details view for games list.
+- Added scoreboard for completed and in-progress games.
+
+## [Fixes] - 2024-10-28
+
+- Removed year from standings to default to current season.
+
+## [Improvements] - 2024-08-28
+
+- Added a score command that shows the scores of the games that are currently in progress and the games from the last 7 days.
+
+## [Fixes] - 2024-08-27
+
+- If `useLastValue` is not selected in preference, then default values for dropdown is picked from preference.
+- Uses bundled heart icon from raycast instead of a custom one.
+
+## [Improvements] - 2024-08-22
+
+- Adds the ability to select either the NBA or WNBA league to view games, standings, and more.
+- Adds a preference to store last values for league, conference etc. in drop-downs instead of default values.
+
 ## [Improvements] - 2023-11-30
 
 - Add livescores to the Schedule view for terminated and in progress games

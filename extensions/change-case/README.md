@@ -39,7 +39,7 @@ See the relevant GitHub issues for more information:
 - https://github.com/blakeembrey/change-case/issues/308
 - https://github.com/raycast/extensions/issues/10594
 
-If you would like to pre-lowercase the text before transforming it, you can enable the `Lowercase Text Before Changing Case` preference in the extension settings. This lowercases all text input before every transformation. Additionally, context-aware transformations, (mentioned above) will stop working when this setting is enabled.
+If you would like to pre-lowercase the text before transforming it, you can disable the `Preserve Casing` preference (enabled by default) in the extension settings. This lowercases all text input before every transformation. Additionally, context-aware transformations, (mentioned above) will stop working when this setting is enabled.
 
 For more information, please see:
 - https://github.com/raycast/extensions/issues/11878

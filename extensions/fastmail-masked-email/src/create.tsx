@@ -11,6 +11,7 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
+import { useState } from "react";
 import { createMaskedEmail } from "./fastmail";
 
 type Preferences = {
@@ -23,6 +24,7 @@ type FormValues = {
 };
 
 export default function Command() {
+  const [maskedEmail, setMaskedEmail] = useState<string>("");
   const { create_prefix } = getPreferenceValues<Preferences>();
 
   const handleSubmit = async ({ prefix, description }: FormValues) => {
@@ -32,8 +34,33 @@ export default function Command() {
       const email = await createMaskedEmail(prefix, description);
 
       Clipboard.copy(email);
-      await showHUD("🎉 Masked email copied to clipboard");
+
+      await showHUD(`🎉 Masked email copied to clipboard`);
+
       await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to create masked email";
+      toast.message =
+        error instanceof Error
+          ? error.message
+          : "An error occurred while creating the masked email, please try again later";
+    }
+  };
+
+  const handleSubmitInteractive = async ({ prefix, description }: FormValues) => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Creating masked email..." });
+
+    try {
+      const email = await createMaskedEmail(prefix, description);
+
+      setMaskedEmail(email);
+
+      Clipboard.copy(email);
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Masked email copied to clipboard";
+      toast.message = email;
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to create masked email";
@@ -49,6 +76,11 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Masked Email" icon={Icon.EyeDisabled} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Create Masked Email Interactively"
+            icon={Icon.EyeDisabled}
+            onSubmit={handleSubmitInteractive}
+          />
         </ActionPanel>
       }
     >
@@ -67,6 +99,15 @@ A prefix must be <= 64 characters in length and only contain characters a-z, 0-9
         placeholder="What is this masked email for?"
         autoFocus={true}
       />
+      {maskedEmail && (
+        <>
+          <Form.Description text={`\n${maskedEmail}\n`} />
+          <Form.Description
+            text={`This masked email is currently in the pending state and will be automatically deleted after 24 hours if not used`}
+          />
+          <Form.Description text={`Use ⇧⌘⏎ to generate a new masked email`} />
+        </>
+      )}
     </Form>
   );
 }

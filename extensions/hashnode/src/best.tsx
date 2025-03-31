@@ -1,6 +1,6 @@
-import StoriesList from "components/StoriesList";
-import { StoryType } from "models/StoryType";
+import StoriesList from "./components/StoriesList";
+import { StoryType } from "./models/StoryType";
 
 export default function Best() {
-  return <StoriesList type={StoryType.BEST} />;
+  return <StoriesList type={StoryType.RELEVANT} />;
 }

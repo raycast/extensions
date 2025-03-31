@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
-import { runShortcut, Shortcut } from "../util/shortcut";
 import { LocalStorage } from "@raycast/api";
+import { useCallback, useEffect, useState } from "react";
 import { ANNOTATIONS_SHORTCUTS } from "../build-in-shortcuts/annotation";
 import { CASES_SHORTCUTS } from "../build-in-shortcuts/case";
 import { CODERS_SHORTCUTS } from "../build-in-shortcuts/coder";
+import { DELETIONS_SHORTCUTS } from "../build-in-shortcuts/deletion";
 import { FORMAT_SHORTCUTS } from "../build-in-shortcuts/format";
 import { MARKDOWNS_SHORTCUTS } from "../build-in-shortcuts/markdown";
 import { TIMES_SHORTCUTS } from "../build-in-shortcuts/time";
-import { fetchItemInput } from "../util/input";
 import { Preferences } from "../types/preferences";
-import { DELETIONS_SHORTCUTS } from "../build-in-shortcuts/deletion";
+import { fetchItemInput } from "../util/input";
+import { runShortcut, Shortcut } from "../util/shortcut";
 
 export const getShortcuts = (refresh: number, preferences: Preferences) => {
   const [userShortcuts, setUserShortcuts] = useState<Shortcut[]>([]);

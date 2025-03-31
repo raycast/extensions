@@ -17,14 +17,15 @@
     "rotate",
     "sips"
   ],
-  "version": "1.8.1",
+  "version": "1.10.1",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
     "arronhunt",
     "nakaakist",
     "JUSTIVE",
-    "patomos"
+    "patomos",
+    "prince_gupta"
   ],
   "categories": [
     "Media",
@@ -112,6 +113,7 @@
       "name": "flip-horizontally",
       "title": "Flip Images Horizontally",
       "description": "Flip the selected images horizontally",
+      "icon": "flip-icon.png",
       "mode": "no-view",
       "keywords": [
         "reverse",
@@ -122,6 +124,7 @@
       "name": "flip-vertically",
       "title": "Flip Images Vertically",
       "description": "Flip the selected images vertically",
+      "icon": "flip-icon.png",
       "mode": "no-view",
       "keywords": [
         "mirror"
@@ -131,6 +134,7 @@
       "name": "rotate",
       "title": "Rotate Images",
       "description": "Rotate the selected images by the specified amount of degrees",
+      "icon": "rotate-icon.png",
       "mode": "no-view",
       "arguments": [
         {
@@ -171,6 +175,7 @@
       "name": "convert",
       "title": "Convert Images",
       "description": "Convert the selected images to the specified format",
+      "icon": "convert-icon.png",
       "mode": "view",
       "preferences": [
         {
@@ -378,6 +383,7 @@
       "name": "resize",
       "title": "Resize Images",
       "description": "Resize the selected images to the specified width and/or height",
+      "icon": "resize-icon.png",
       "mode": "no-view",
       "arguments": [
         {
@@ -398,6 +404,7 @@
       "name": "scale",
       "title": "Scale Images",
       "description": "Scale the selected images by the provided factor",
+      "icon": "scale-icon.png",
       "mode": "no-view",
       "arguments": [
         {
@@ -418,6 +425,7 @@
       "name": "pad",
       "title": "Pad Images",
       "description": "Pad images to the specified size using the provided color",
+      "icon": "pad-icon.png",
       "mode": "no-view",
       "arguments": [
         {
@@ -452,21 +460,42 @@
       "name": "apply-filter",
       "title": "Apply Image Filter",
       "description": "Apply filters to images using Apple's CIFilters",
+      "icon": "filter-icon.png",
       "mode": "view",
       "keywords": [
         "effect",
         "style"
+      ],
+      "preferences": [
+        {
+          "name": "showPreviews",
+          "label": "Generate Filter Previews",
+          "description": "Whether to show live previews of filters for selected files. Disabling this option might improve performance.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "hiddenFilters",
+          "title": "Hidden Filters",
+          "description": "Filters and filter categories to hide from the filter list. Use this to declutter the filter list as desired. Separate multiple filters with commas. For example: 'Bloom, Distortion, Tonal'",
+          "type": "textfield",
+          "default": "",
+          "required": false,
+          "placeholder": "e.g. Bloom, Distortion, Tonal"
+        }
       ]
     },
     {
       "name": "optimize",
       "title": "Optimize Images",
       "description": "Optimize images by compressing them",
+      "icon": "tool-icon.png",
       "mode": "no-view",
       "arguments": [
         {
           "name": "optimizationFactor",
-          "placeholder": "Amount (0 to 100)",
+          "placeholder": "Power (0 to 100)",
           "required": false,
           "type": "text"
         }
@@ -502,31 +531,545 @@
     },
     {
       "name": "strip-exif",
-      "title": "Strip EXIF Data",
+      "title": "Strip Exif Data",
       "description": "Remove EXIF data from images",
+      "icon": "tool-icon.png",
       "keywords": [
         "exif",
         "metadata",
         "remove"
       ],
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "remove-bg",
+      "title": "Remove Background",
+      "description": "Remove the background from images using on-device processing",
+      "icon": "remove-bg-icon.png",
+      "mode": "no-view",
+      "keywords": [
+        "erase",
+        "delete",
+        "cutout",
+        "mask",
+        "isolate"
+      ],
+      "arguments": [
+        {
+          "name": "bgcolor",
+          "placeholder": "Replacement Color",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "crop",
+          "placeholder": "Crop To Subject",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Yes",
+              "value": "yes"
+            },
+            {
+              "title": "No",
+              "value": "no"
+            }
+          ]
+        }
+      ],
+      "preferences": [
+        {
+          "name": "defaultBgColor",
+          "title": "Default Replacement Color",
+          "description": "The default color to replace backgrounds with. Specify colors in hex format with (optional) alpha (e.g. #FF0000 or FF0000FF) or by HTML name (e.g. red). Leave blank to remove the background entirely (i.e. make it transparent). This color is only used when the 'Replacement Color' argument is not provided.",
+          "type": "textfield",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "cropByDefault",
+          "label": "Crop By Default",
+          "description": "Whether to crop images to the subject by default. If disabled, the dimensions of the original image will be preserved, and the subject will remain at its original position. Otherwise, the image will be cropped to the smallest possible size that contains the subject. This option is only used when the 'Crop To Subject' argument is not provided.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "preserveFormat",
+          "label": "Preserve Image Format",
+          "description": "Whether to preserve the original image format when saving the result. When disabled, the result will be saved as a PNG image.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ]
     }
   ],
+  "tools": [
+    {
+      "name": "apply-filters",
+      "title": "Apply Image Filters",
+      "description": "Apply one or more filters to selected images",
+      "icon": "filter-icon.png"
+    },
+    {
+      "name": "convert-images",
+      "title": "Convert Images",
+      "description": "Convert selected images to a specified format",
+      "icon": "convert-icon.png"
+    },
+    {
+      "name": "create-image",
+      "title": "Create Image",
+      "description": "Generate a new image with specified dimensions, color, and pattern",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "flip-images",
+      "title": "Flip Images",
+      "description": "Flip selected images vertically or horizontally",
+      "icon": "flip-icon.png"
+    },
+    {
+      "name": "optimize-images",
+      "title": "Optimize Images",
+      "description": "Optimize selected images by compressing them",
+      "icon": "tool-icon.png"
+    },
+    {
+      "name": "pad-images",
+      "title": "Pad Images",
+      "description": "Add a border to selected images",
+      "icon": "pad-icon.png"
+    },
+    {
+      "name": "remove-bg",
+      "title": "Remove Backgrounds",
+      "description": "Remove the background from selected images",
+      "icon": "remove-bg-icon.png"
+    },
+    {
+      "name": "resize-images",
+      "title": "Resize Images",
+      "description": "Resize selected images to a specified width and/or height",
+      "icon": "resize-icon.png"
+    },
+    {
+      "name": "rotate-images",
+      "title": "Rotate Images",
+      "description": "Rotate selected images by a specified amount",
+      "icon": "rotate-icon.png"
+    },
+    {
+      "name": "scale-images",
+      "title": "Scale Images",
+      "description": "Scale selected images bv a specified factor",
+      "icon": "scale-icon.png"
+    },
+    {
+      "name": "strip-exif",
+      "title": "Strip Exif Data",
+      "description": "Remove EXIF data from selected images",
+      "icon": "tool-icon.png"
+    }
+  ],
+  "ai": {
+    "instructions": "The user's currently selected image will be detected; you just need to coordinate the request. Image Modification tools can operate on multiple paths at once, so try to fulfill the user's request with as few tool calls as necessary. You can present images by using this markdown image syntax: `![Preview](imagePath)`. Images for you to display will be provided as an array of paths. You must always use full paths to display images. Tildes (~) cannot be used in markdown. Only show images if they are particularly relevant to the user's query, as they can be quite large and slow to load. Make sure to provide all requested input data. You MUST run image modification tools sequentially (when user says 'then', call the second command AFTER the first one finishes, and pass the result of the first tool to the next). Pass any arguments you have as the previousResults argument.",
+    "evals": [
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "apply-filters",
+              "arguments": {
+                "filters": {
+                  "and": [
+                    {
+                      "includes": "Comic"
+                    },
+                    {
+                      "or": [
+                        {
+                          "includes": "Circular Screen"
+                        },
+                        {
+                          "includes": "Dot Screen"
+                        },
+                        {
+                          "includes": "Edges"
+                        },
+                        {
+                          "includes": "Edge Work"
+                        },
+                        {
+                          "includes": "Hatched Screen"
+                        },
+                        {
+                          "includes": "Line Overlay"
+                        },
+                        {
+                          "includes": "Line Screen"
+                        },
+                        {
+                          "includes": "Maximum Component"
+                        },
+                        {
+                          "includes": "Median"
+                        },
+                        {
+                          "includes": "Minimum Component"
+                        },
+                        {
+                          "includes": "Mono"
+                        },
+                        {
+                          "includes": "Noir"
+                        },
+                        {
+                          "includes": "Tonal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "apply-filters": [
+            "/Users/exampleUser/Desktop/firstItem-2.png",
+            "/Users/exampleUser/Desktop/secondImage-2.png"
+          ]
+        },
+        "input": "@sips Make this look like a black and white comic"
+      },
+      {
+        "input": "@sips Turns these into WebP",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "convert-images",
+              "arguments": {
+                "format": "WEBP"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "convert-images": [
+            "/Users/exampleUser/Downloads/firstImage-1.webp",
+            "/Users/exampleUser/Downloads/secondImage-2.webp"
+          ]
+        }
+      },
+      {
+        "mocks": {
+          "create-image": [
+            "/Users/exampleUser/Downloads/stripes.png"
+          ]
+        },
+        "input": "@sips Create a 800x200 blue and cyan stripe pattern",
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "height": 200,
+                "colors": [
+                  {
+                    "includes": "0000FF"
+                  },
+                  {
+                    "includes": "00FFFF"
+                  }
+                ],
+                "style": "Stripes",
+                "width": 800
+              },
+              "name": "create-image"
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "flip-images": [
+            "/Users/exampleUser/Desktop/example-2.png"
+          ]
+        },
+        "input": "@sips Mirror the image",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "flip-images",
+              "arguments": {
+                "direction": "horizontal"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "power": 80
+              },
+              "name": "optimize-images"
+            }
+          }
+        ],
+        "input": "@sips Compress with a power of 80",
+        "mocks": {
+          "optimize-images": [
+            "/Users/exampleUser/Desktop/example-optimized-2.png"
+          ]
+        }
+      },
+      {
+        "mocks": {
+          "optimize-images": [
+            "/Users/exampleUser/Desktop/example-optimized.png"
+          ]
+        },
+        "input": "@sips Compress this as much as possible",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "optimize-images",
+              "arguments": {
+                "power": 100
+              }
+            }
+          }
+        ],
+        "usedAsExample": false
+      },
+      {
+        "mocks": {
+          "pad-images": [
+            "/Users/exampleUser/Desktop/example-2.jpeg"
+          ]
+        },
+        "input": "@sips Add a 50px white border",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "pad-images",
+              "arguments": {
+                "borderSize": 50,
+                "color": "FFFFFF"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "resize-images": [
+            "/Users/exampleUser/Desktop/example-2.png"
+          ]
+        },
+        "input": "@sips Resize with a 500px width",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "resize-images",
+              "arguments": {
+                "width": 500,
+                "height": -1
+              }
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "resize-images": [
+            "/Users/exampleUser/Desktop/example-2.png"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "height": 1600,
+                "width": 2560
+              },
+              "name": "resize-images"
+            }
+          }
+        ],
+        "input": "@sips Adjust size to 2560x1600"
+      },
+      {
+        "input": "@sips Rotate 90 degrees",
+        "mocks": {
+          "rotate-images": [
+            "/Users/exampleUser/Downloads/example-2.png"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "rotate-images",
+              "arguments": {
+                "angle": 90
+              }
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "rotate-images": [
+            "/Users/exampleUser/Downloads/example-2.png"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "rotate-images",
+              "arguments": {
+                "angle": {
+                  "includes": "-1.57"
+                },
+                "isRadians": true
+              }
+            }
+          }
+        ],
+        "input": "@sips Rotate by -PI/2 rad"
+      },
+      {
+        "mocks": {
+          "scale-images": [
+            "/Users/exampleUser/Downloads/example-2.png"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "scale-images",
+              "arguments": {
+                "factor": 3
+              }
+            }
+          }
+        ],
+        "input": "@sips Scale up 3x"
+      },
+      {
+        "input": "@sips Shrink by 50%",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "scale-images",
+              "arguments": {
+                "factor": 0.5
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "scale-images": [
+            "/Users/exampleUser/Downloads/example-2.png"
+          ]
+        }
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "strip-exif",
+              "arguments": {}
+            }
+          }
+        ],
+        "input": "@sips Strip the metadata from these images",
+        "mocks": {
+          "strip-exif": [
+            "/Users/exampleUser/Downloads/firstImage-2.png",
+            "/Users/exampleUser/Downloads/secondImage-2.png"
+          ]
+        }
+      },
+      {
+        "mocks": {
+          "remove-bg": [
+            "/Users/exampleUser/Desktop/example.pdf"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "bgReplacementColor": "000000"
+              },
+              "name": "remove-bg"
+            }
+          }
+        ],
+        "input": "@sips remove the background, replace with black"
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "or": [
+                {
+                  "arguments": {
+                    "shouldCrop": true
+                  }
+                },
+                {
+                  "arguments": {}
+                }
+              ],
+              "name": "remove-bg"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "scale-images",
+              "arguments": {
+                "factor": 3,
+                "imagePaths": [
+                  "/Users/exampleUser/Desktop/example-2.jpg"
+                ]
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "scale-images": [
+            "/Users/exampleUser/Desktop/example-2-2.jpg"
+          ],
+          "remove-bg": [
+            "/Users/exampleUser/Desktop/example-2.jpg"
+          ]
+        },
+        "input": "@sips remove the background, then scale up 3x"
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.77.1",
-    "@raycast/utils": "^1.16.1",
-    "mathjs": "^11.8.2",
-    "svgo": "^3.0.2",
-    "tar": "^6.2.0"
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.18.1",
+    "mathjs": "^14.2.1",
+    "svgo": "^3.3.2",
+    "tar": "^7.4.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "@types/tar": "^6.1.11",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.3.3",
+    "@types/tar": "^6.1.13",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
+    "prettier": "3.3.3",
     "typescript": "^5.4.5"
   },
   "scripts": {
@@ -534,6 +1077,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "evals": "ray evals"
   }
 }

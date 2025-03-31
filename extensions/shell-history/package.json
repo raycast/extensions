@@ -64,6 +64,14 @@
         },
         {
           "title": "Shell History",
+          "name": "historyTimestamp",
+          "label": "History Timestamp",
+          "description": "Uncheck this option if zsh history isn't displayed correctly and when zsh history doesn't set the HIST_STAMPS flag.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
           "name": "removeDuplicates",
           "label": "Remove Duplicates",
           "description": "Remove duplicate commands",
@@ -110,19 +118,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.1",
-    "@raycast/utils": "^1.16.1",
+    "@raycast/api": "^1.89.0",
+    "@raycast/utils": "^1.18.1",
     "read-last-lines": "^1.8.0",
-    "shell-quote": "^1.8.1"
+    "shell-quote": "^1.8.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.14.9",
-    "@types/react": "18.3.3",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.10.7",
+    "@types/react": "18.3.18",
     "@types/shell-quote": "^1.7.5",
     "eslint": "^8.57.0",
-    "prettier": "^3.3.2",
-    "typescript": "^5.5.3"
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",

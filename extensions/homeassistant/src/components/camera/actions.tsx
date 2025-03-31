@@ -35,7 +35,7 @@ export function CameraTurnOnAction(props: { state: State }): JSX.Element | null 
       title="Turn On"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "o" }}
-      icon={{ source: "power-btn.png", tintColor: Color.Green }}
+      icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -53,7 +53,7 @@ export function CameraTurnOffAction(props: { state: State }): JSX.Element | null
       title="Turn Off"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "f" }}
-      icon={{ source: "power-btn.png", tintColor: Color.Red }}
+      icon={{ source: "power.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -111,7 +111,7 @@ export function CameraOpenStreamInIINAAction(props: { state: State }): JSX.Eleme
   }
   return (
     <Action.Open
-      title="Open in IINA"
+      title="Open in Iina"
       target={url}
       application="IINA"
       shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}

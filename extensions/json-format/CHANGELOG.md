@@ -1,5 +1,30 @@
 # Changelog
 
+## [Adds formatToJsonValue] - 2025-01-10
+
+- Add a new command to format text into a valid JSON value with double quotes and escapes
+
+## [Fix un-escaping JSON values] - 2025-01-09
+
+- Adds a check to determine if the full payload is escaped before attemptiong to un-escape the entire payload
+
+## [Adds formatSelectionAndShow] - 2024-12-06
+
+- Add a new command to format JSON selected in the foremost editor and show it in the viewer
+
+## [Adds support for escaped JSON strings] - 2024-10-02
+
+- Correctly validate a JSON string that has been escaped
+
+## [Improvements and fixes] - 2024-08-29
+
+- Format JSON Lines: Make actions in sync with Format JSON command, i.e. copies the output to clipboard for "Format" action.
+- Use toasts instead of HUDs to color-code messages/prompts.
+- Format JSON and JSON Lines: Add a detail view to view decorated JSON in markdown.
+- Added new command to format JSON selected in the foremost editor.
+- Upgraded dependencies to resolve critical security vulnerabilities.
+- Minor refactoring and linter fixes.
+
 ## [Adds support for JSONLines formatting] - 2024-04-22
 
 - Add formatting from JSON/JS Object Array to JSONLines

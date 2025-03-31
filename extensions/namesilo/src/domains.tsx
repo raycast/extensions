@@ -3,13 +3,15 @@ import useNameSilo from "./lib/hooks/useNameSilo";
 import { Domain, type DomainInfo } from "./lib/types";
 import { getFavicon } from "@raycast/utils";
 import { NAMESILO_LINKS } from "./lib/constants";
+import NameServers from "./lib/components/name-servers";
+import DNSRecords from "./lib/components/dns-records";
 
 export default function Domains() {
   const { isLoading, data } = useNameSilo<{ domains: Domain[] | { domain: Domain } }>("listDomains");
   const domains = data?.domains ? (data.domains instanceof Array ? data.domains : [data.domains.domain]) : [];
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search domain">
       {!isLoading && !domains.length ? (
         <List.EmptyView
           title="You do not have any active domains in your account"
@@ -35,6 +37,16 @@ export default function Domains() {
               actions={
                 <ActionPanel>
                   <Action.Push icon={Icon.Eye} title="Get Domain Info" target={<DomainInfo domain={domain.domain} />} />
+                  <Action.Push
+                    icon={Icon.Paragraph}
+                    title="View DNS Records"
+                    target={<DNSRecords domain={domain.domain} />}
+                  />
+                  <Action.Push
+                    icon={Icon.List}
+                    title="View NameServers"
+                    target={<NameServers domain={domain.domain} />}
+                  />
                 </ActionPanel>
               }
             />

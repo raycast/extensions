@@ -6,3 +6,6 @@
 # misc
 .DS_Store
 raycast-env.d.ts
+
+# pnpm
+pnpm-lock.yaml

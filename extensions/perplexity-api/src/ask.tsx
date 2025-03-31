@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, getPreferenceValues, getSelectedText } from "@raycast/api";
 import { allModels as changeModels } from "./hook/utils";
 import { useEffect, useState } from "react";
-import ResultView from "./hook/perplexityAPI";
+import ResultView from "./hook/accessAPI";
 
 const prefs = getPreferenceValues();
 const usedModel = prefs.model_ask;

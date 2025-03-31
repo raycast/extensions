@@ -1,5 +1,12 @@
 # ScreenOCR Changelog
 
+## [Improvements] - 2024-10-07
+
+- Migrated codebase to use new Swift macros
+- Replaced all HUDs with emojis with styled toast messages for user feedback
+- Added list section to the `Select Recognition Languages` command
+- Grouped checkbox preferences into a single section
+
 ## [Fixes & Improvements] - 2024-05-21
 
 - Selecting an area for text recognition left the original image in the clipboard

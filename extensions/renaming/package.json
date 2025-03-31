@@ -17,7 +17,8 @@
   "icon": "renaming-icon.png",
   "author": "theo_daguier",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "ridemountainpig"
   ],
   "categories": [
     "Productivity",
@@ -30,6 +31,12 @@
       "name": "index",
       "title": "Rename File(s)",
       "description": "Rename file(s) in a batch.",
+      "mode": "view"
+    },
+    {
+      "name": "replace",
+      "title": "Replace File(s) Characters",
+      "description": "Replace characters in file(s) names.",
       "mode": "view"
     }
   ],

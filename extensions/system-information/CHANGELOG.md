@@ -1,5 +1,12 @@
 # System Information Changelog
 
+## [Improved Storage Calculation] - 2025-03-18
+- Implement storage calculation with Swift script to be more accurate.
+
+## [macOS Sequoia Support + Running Processes] - 2024-10-28
+
+- New "Running Processes" section, with searchability and quitting processes.
+
 ## [Bug fixes & enhancements] - 2024-06-11
 
 - A Mac with Apple Silicon running macOS Monterey or later is required.

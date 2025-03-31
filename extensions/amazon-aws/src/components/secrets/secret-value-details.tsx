@@ -17,6 +17,13 @@ export const SecretValueDetails = ({ secret }: SecretProps) => {
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Secret Value" content={sec?.value || ""} />
           <AwsAction.Console url={resourceToConsoleLink(secret.Name, "AWS::SecretsManager::Secret")} />
+          {sec?.json && (
+            <ActionPanel.Section title={"Individual Secret Actions"}>
+              {Object.keys(sec.json).map((key) => (
+                <Action.CopyToClipboard key={key} title={`Copy '${key}' Value`} content={sec.json[key]} />
+              ))}
+            </ActionPanel.Section>
+          )}
           <ActionPanel.Section title={"Secret Actions"}>
             <SecretCopyActions {...{ secret }} />
           </ActionPanel.Section>

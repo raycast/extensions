@@ -1,4 +1,3 @@
-import tildify from "tildify";
 import { getCurrentBranchName } from "../utils";
 
 export default class Bookmark {
@@ -25,14 +24,15 @@ export default class Bookmark {
     this.Children = Children;
   }
 
-  get getFolder(): string {
-    return this.Folder
-      ? tildify(this.Folder.replace("file:/", "").replaceAll("&", "\\&").replaceAll("%20", "\\ "))
-      : "";
-  }
-
   get getPath(): string {
-    return this.Folder ? this.Folder.replace("file://", "").replaceAll("&", "&").replaceAll("%20", " ") : "";
+    if (!this.Folder) throw Error("Unable to retrieve the repository's path");
+
+    // Remove the path's scheme
+    const folderWithoutScheme = this.Folder.replace(/^file:\/\/?/, "");
+
+    // Decode the URI-encoded repository path provided by Tower's list of bookmarks
+    // Propagate a potential `URIError` as it will be caught while opening a bookmark
+    return decodeURI(folderWithoutScheme);
   }
 
   get isComplete(): boolean {

@@ -1,11 +1,11 @@
 import { Icon, LaunchProps, List, getPreferenceValues } from "@raycast/api";
-import { MutatePromise, useCachedPromise, useSQL } from "@raycast/utils";
+import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { chain } from "lodash";
 import { useState } from "react";
 import { getTabs } from "./arc";
 import { HistoryEntryListItem, SuggestionListItem, TabListItem } from "./list";
 import { searchArcPreferences } from "./preferences";
-import { getHistoryQuery, historyDatabasePath } from "./sql";
+import { useHistorySearch } from "./history";
 import { useSuggestions } from "./suggestions";
 import { HistoryEntry, Suggestion, Tab } from "./types";
 import {
@@ -20,11 +20,7 @@ import { VersionCheck } from "./version";
 
 function SearchArc(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
-  const {
-    data: history,
-    isLoading: isLoadingHistory,
-    permissionView,
-  } = useSQL<HistoryEntry>(historyDatabasePath, getHistoryQuery(searchText, 25));
+  const { data: history, isLoading: isLoadingHistory, permissionView } = useHistorySearch(searchText, 25);
   const { data: tabs, isLoading: isLoadingTabs, mutate: mutateTabs } = useCachedPromise(getTabs);
   const { data: suggestions, isLoading: isLoadingSuggestions } = useSuggestions(searchText);
 
@@ -63,7 +59,7 @@ function TabListSections(props: { tabs?: Tab[]; mutateTabs: MutatePromise<Tab[] 
     .filter(
       (tab) =>
         tab.title.toLowerCase().includes(props.searchText.toLowerCase()) ||
-        tab.url.toLowerCase().includes(props.searchText.toLowerCase())
+        tab.url.toLowerCase().includes(props.searchText.toLowerCase()),
     )
     .groupBy((tab) => tab.location)
     .value();

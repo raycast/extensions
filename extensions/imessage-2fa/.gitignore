@@ -5,3 +5,6 @@
 
 # misc
 .DS_Store
+
+# raycast auto generated env file
+raycast-env.d.ts

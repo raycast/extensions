@@ -5,6 +5,9 @@
   "description": "A LaTeX OCR by Simpletex",
   "icon": "command-icon.png",
   "author": "Arthals",
+  "contributors": [
+    "FrankMao"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -16,6 +19,24 @@
       "title": "API Key",
       "description": "API Key from SimpleTex",
       "type": "password"
+    },
+    {
+      "required": true,
+      "name": "server_suffix",
+      "title": "Server Location",
+      "description": "Server Location",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "China",
+          "value": "cn"
+        },
+        {
+          "title": "Global",
+          "value": "net"
+        }
+      ],
+      "default": "China"
     }
   ],
   "commands": [

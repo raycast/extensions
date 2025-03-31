@@ -9,7 +9,8 @@ export enum DocID {
   Remix, Slidev, Taro, Supabase,
   TailwindCSS, Tauri, Unidata, Vite,
   Vitest, Vue_Router, Vue, VueUse,
-  Vuepress, ElementPlus, Vuetify,
+  Vuepress, ElementPlus, Neovim, Less,
+  Sass, Deno, TypeScript
 }
 
 type Base = {
@@ -30,9 +31,10 @@ export type Meilisearch = Base & {
   type: "meilisearch";
 };
 
+type DocsTypes = "Manual" | "Modules";
 type Languages = "en-US" | "zh-CN" | "fr-FR" | "ko-KR" | "it-IT";
 type Versions = "V0" | "V1" | "V2" | "V3" | "V4" | "V9";
-export type Tags = `${Versions} ${Languages}` | `${Languages}`;
+export type Tags = `${Versions} ${Languages}` | `${Languages} ${DocsTypes}` | `${Languages}`;
 
 export type API = Algolia | Meilisearch;
 export type Data = {
@@ -42,6 +44,57 @@ export type Data = {
 };
 
 export const data: Data = {
+  [DocID.Deno]: {
+    "en-US Manual": {
+      icon: "../assets/logo/deno.png",
+      apiKey: "2ed789b2981acd210267b27f03ab47da",
+      appId: "QFPCRZC6WX",
+      indexName: "manual",
+      type: "algolia",
+      homepage: "https://deno.com/",
+      searchParameters: {
+        filters: "kind:paragraph",
+      },
+    },
+    "en-US Modules": {
+      icon: "../assets/logo/deno.png",
+      apiKey: "2ed789b2981acd210267b27f03ab47da",
+      appId: "QFPCRZC6WX",
+      indexName: "modules",
+      type: "algolia",
+      homepage: "https://deno.land/x/",
+    },
+  },
+  [DocID.Sass]: {
+    "en-US": {
+      icon: "../assets/logo/sass.png",
+      apiKey: "2ebc7881b79986f58dc2f424769bf3fc",
+      appId: "Q9MULQONSV",
+      indexName: "sass-lang",
+      type: "algolia",
+      homepage: "https://sass-lang.com/",
+    },
+  },
+  [DocID.Less]: {
+    "en-US": {
+      icon: "../assets/logo/less.png",
+      apiKey: "ad081396555d043318b6a9af4f27a9ec",
+      appId: "LELS6COOLE",
+      indexName: "lesscss",
+      type: "algolia",
+      homepage: "https://lesscss.org/",
+    },
+  },
+  [DocID.Neovim]: {
+    "en-US": {
+      icon: "../assets/logo/nvim.png",
+      apiKey: "b5e6b2f9c636b2b471303205e59832ed",
+      appId: "X185E15FPG",
+      indexName: "nvim",
+      type: "algolia",
+      homepage: "https://neovim.io/",
+    },
+  },
   [DocID.ElementPlus]: {
     "en-US": {
       icon: "../assets/logo/element.png",
@@ -775,16 +828,6 @@ export const data: Data = {
       homepage: "https://vueuse.org/",
     },
   },
-  [DocID.Vuetify]: {
-    "en-US": {
-      icon: "../assets/logo/vuetify.png",
-      apiKey: "ffa344297924c76b0f4155384aff7ef2",
-      appId: "NHT6C0IV19",
-      indexName: "vuetifyjs-v3",
-      type: "algolia",
-      homepage: "https://vuetifyjs.com/",
-    },
-  },
   [DocID.Vuepress]: {
     "V2 en-US": {
       icon: "../assets/logo/vuepress.png",
@@ -849,6 +892,24 @@ export const data: Data = {
       searchParameters: {
         facetFilters: ["lang:zh-CN", "tags:v1"],
       },
+    },
+  },
+  [DocID.TypeScript]: {
+    "en-US": {
+      icon: "../assets/logo/typescript.png",
+      apiKey: "37ee06fa68db6aef451a490df6df7c60",
+      appId: "BGCDYOIYZ5",
+      indexName: "typescriptlang",
+      type: "algolia",
+      homepage: "https://www.typescriptlang.org",
+    },
+    "zh-CN": {
+      icon: "../assets/logo/typescript.png",
+      apiKey: "feff649032d8034cf2a636ef55d96054",
+      appId: "43GX903BPS",
+      indexName: "ts-yayujs",
+      type: "algolia",
+      homepage: "https://yayujs.com/",
     },
   },
 };

@@ -20,6 +20,7 @@
       "subtitle": "ViaCEP",
       "description": "Search address by CEP",
       "mode": "view",
+      "keywords": ["cep"],
       "arguments": [
         {
           "name": "cep",
@@ -34,20 +35,21 @@
       "title": "Find CEP",
       "subtitle": "ViaCEP",
       "description": "Search CEP by address",
-      "mode": "view"
+      "mode": "view",
+      "keywords": ["address"]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.67.1",
-    "@raycast/utils": "^1.12.4"
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.18.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

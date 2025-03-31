@@ -32,3 +32,9 @@ lib-esm
 
 # temporary files
 /tmp
+
+raycast-env.d.ts
+
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift

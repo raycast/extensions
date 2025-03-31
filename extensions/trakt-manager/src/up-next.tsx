@@ -1,26 +1,53 @@
-import { Icon, Keyboard, Toast, showToast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { getFavicon, useCachedPromise } from "@raycast/utils";
+import { PaginationOptions } from "@raycast/utils/dist/types";
 import { setMaxListeners } from "node:events";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { getUpNextShows } from "./api/shows";
-import { ShowGrid } from "./components/show-grid";
-import { useShowMutations } from "./hooks/useShowMutations";
-import { APP_MAX_LISTENERS } from "./lib/constants";
+import { setTimeout } from "node:timers/promises";
+import { useCallback, useRef, useState } from "react";
+import { GenericGrid } from "./components/generic-grid";
+import { initTraktClient } from "./lib/client";
+import { APP_MAX_LISTENERS, IMDB_APP_URL, TRAKT_APP_URL } from "./lib/constants";
+import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
+import { TraktShowListItem, withPagination } from "./lib/schema";
 
 export default function Command() {
   const abortable = useRef<AbortController>();
   const [actionLoading, setActionLoading] = useState(false);
-  const { checkInNextEpisodeMutation, error, success } = useShowMutations(abortable);
+  const traktClient = initTraktClient();
   const {
     isLoading,
     data: shows,
     pagination,
     revalidate,
   } = useCachedPromise(
-    async () => {
+    () => async (options: PaginationOptions) => {
+      await setTimeout(200);
+
       abortable.current = new AbortController();
       setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
-      return await getUpNextShows(abortable.current?.signal);
+
+      const response = await traktClient.shows.getUpNextShows({
+        query: {
+          page: options.page + 1,
+          limit: 10,
+          extended: "full,cloud9",
+          sort_by: "added",
+          sort_how: "asc",
+          include_stats: true,
+        },
+        fetchOptions: {
+          signal: abortable.current.signal,
+        },
+      });
+
+      if (response.status !== 200) return { data: [], hasMore: false };
+      const paginatedResponse = withPagination(response);
+
+      return {
+        data: paginatedResponse.data,
+        hasMore:
+          paginatedResponse.pagination["x-pagination-page"] < paginatedResponse.pagination["x-pagination-page-count"],
+      };
     },
     [],
     {
@@ -36,12 +63,57 @@ export default function Command() {
     },
   );
 
+  const addEpisodeToHistory = useCallback(async (show: TraktShowListItem) => {
+    await traktClient.shows.addEpisodeToHistory({
+      body: {
+        episodes: [
+          {
+            ids: {
+              trakt: show.progress.next_episode.ids.trakt,
+            },
+            watched_at: new Date().toISOString(),
+          },
+        ],
+      },
+      fetchOptions: {
+        signal: abortable.current?.signal,
+      },
+    });
+  }, []);
+
+  const checkInEpisode = useCallback(async (show: TraktShowListItem) => {
+    await traktClient.shows.checkInEpisode({
+      body: {
+        episodes: [
+          {
+            ids: {
+              trakt: show.progress.next_episode.ids.trakt,
+            },
+            watched_at: new Date().toISOString(),
+          },
+        ],
+      },
+      fetchOptions: {
+        signal: abortable.current?.signal,
+      },
+    });
+  }, []);
+
   const handleAction = useCallback(
-    async (show: TraktShowListItem, action: (show: TraktShowListItem) => Promise<void>) => {
+    async (show: TraktShowListItem, action: (show: TraktShowListItem) => Promise<void>, message: string) => {
       setActionLoading(true);
       try {
         await action(show);
         revalidate();
+        showToast({
+          title: message,
+          style: Toast.Style.Success,
+        });
+      } catch (error) {
+        showToast({
+          title: (error as Error).message,
+          style: Toast.Style.Failure,
+        });
       } finally {
         setActionLoading(false);
       }
@@ -49,38 +121,51 @@ export default function Command() {
     [],
   );
 
-  useEffect(() => {
-    if (error) {
-      showToast({
-        title: error.message,
-        style: Toast.Style.Failure,
-      });
-    }
-  }, [error]);
-
-  useEffect(() => {
-    if (success) {
-      showToast({
-        title: success,
-        style: Toast.Style.Success,
-      });
-    }
-  }, [success]);
-
   return (
-    <ShowGrid
+    <GenericGrid
       isLoading={isLoading || actionLoading}
-      emptyViewTitle="No up next shows"
-      searchBarPlaceholder="Search for shows that are up next"
+      emptyViewTitle="No up-next shows"
+      searchBarPlaceholder="Search for shows"
       pagination={pagination}
-      shows={shows as TraktShowList}
+      items={shows}
+      aspectRatio="9/16"
+      fit={Grid.Fit.Fill}
+      title={(item) => item.show.title}
       subtitle={(show) =>
-        `${show.show.progress?.next_episode?.season}x${show.show.progress?.next_episode?.number.toString().padStart(2, "0")}`
+        `${show.progress.next_episode.season}x${show.progress.next_episode.number.toString().padStart(2, "0")}`
       }
-      primaryActionTitle="Check-in Next Episode"
-      primaryActionIcon={Icon.Checkmark}
-      primaryActionShortcut={Keyboard.Shortcut.Common.Edit}
-      primaryAction={(show) => handleAction(show, checkInNextEpisodeMutation)}
+      poster={(item) => getPosterUrl(item.show.images, "poster.png")}
+      keyFn={(item, index) => `${item.show.ids.trakt}-${index}`}
+      actions={(item) => (
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              icon={getFavicon(TRAKT_APP_URL)}
+              title="Open in Trakt"
+              url={getTraktUrl("shows", item.show.ids.slug)}
+            />
+            <Action.OpenInBrowser
+              icon={getFavicon(IMDB_APP_URL)}
+              title="Open in IMDb"
+              url={getIMDbUrl(item.show.ids.imdb)}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action
+              title="Check-in"
+              icon={Icon.Checkmark}
+              shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+              onAction={() => handleAction(item, checkInEpisode, "Episode checked-in")}
+            />
+            <Action
+              title="Add to History"
+              icon={Icon.Clock}
+              shortcut={Keyboard.Shortcut.Common.Duplicate}
+              onAction={() => handleAction(item, addEpisodeToHistory, "Episode added to history")}
+            />
+          </ActionPanel.Section>
+        </ActionPanel>
+      )}
     />
   );
 }

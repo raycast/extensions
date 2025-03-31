@@ -17,7 +17,10 @@
     "alexs",
     "yakitrak",
     "tleo19",
-    "dariuszpaluch"
+    "dariuszpaluch",
+    "zsidnam",
+    "edomora97",
+    "samuelkraft"
   ],
   "categories": [
     "Applications",
@@ -90,6 +93,132 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "search-pages",
+      "title": "Search Pages",
+      "description": "Search for pages in Notion."
+    },
+    {
+      "name": "get-page",
+      "title": "Get Page",
+      "description": "Get the content of a Notion page."
+    },
+    {
+      "name": "add-to-page",
+      "title": "Add to Page",
+      "description": "Append markdown to a Notion page."
+    },
+    {
+      "name": "create-page",
+      "title": "Create Page",
+      "description": "Create a Notion page in a specific database."
+    },
+    {
+      "name": "get-databases",
+      "title": "Get Databases",
+      "description": "Get Notion databases."
+    },
+    {
+      "name": "search-database",
+      "title": "Search Database",
+      "description": "Search for pages and/or databases contained in the given Notion database."
+    }
+  ],
+  "ai": {
+    "instructions": "-If asked to summarize or view a document, look for pages with the title of the document.\\n - When referring to a page or database, always include a link to the page or database. \\n - When creating a page, always include the database name. Ask for the database name if it's not provided.",
+    "evals": [
+      {
+        "input": "@notion Summarize the last marketing meeting notes",
+        "mocks": {
+          "search-pages": [
+            {
+              "id": "12345678-a123-12ab-a1b2-1234567a12ab",
+              "title": "Marketing Meeting Notes",
+              "url": "https://www.notion.so/12345678a12312aba1b21234567a12ab"
+            }
+          ],
+          "get-page": {
+            "markdown": "\n## Marketing meeting notes\n Publish tweets about new launch"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-pages"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-page",
+              "arguments": {
+                "pageId": "12345678-a123-12ab-a1b2-1234567a12ab"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@notion Add \"remember to call Joe\" to \"meeting notes\"",
+        "mocks": {
+          "search-pages": [
+            {
+              "id": "123abc",
+              "title": "Marketing Meeting Notes",
+              "url": "https://www.notion.so/Marketing-Meeting-Notes-123abc"
+            }
+          ],
+          "add-to-page": {
+            "markdown": "\n\nremember to call joe"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-pages"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "pageId": "123abc"
+              },
+              "name": "add-to-page"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@notion Create page in \"Marketing\" with the title \"Meeting Notes\" saying: \"Publish tweets about new launch\"",
+        "mocks": {
+          "get-databases": [
+            {
+              "id": "123abc",
+              "title": "Marketing"
+            }
+          ],
+          "create-page": {
+            "id": "123abc123abc"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-databases"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "databaseId": "123abc"
+              },
+              "name": "create-page"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "notion_token",
@@ -110,9 +239,9 @@
   ],
   "dependencies": {
     "@mozilla/readability": "^0.5.0",
-    "@notionhq/client": "^2.2.14",
+    "@notionhq/client": "^2.2.15",
     "@raycast/api": "^1.71.3",
-    "@raycast/utils": "^1.14.0",
+    "@raycast/utils": "^1.18.1",
     "@tryfabric/martian": "^1.2.4",
     "date-fns": "^3.3.1",
     "linkedom": "^0.16.8",

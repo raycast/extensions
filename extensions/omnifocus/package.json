@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "omnifocus",
+  "title": "OmniFocus",
+  "description": "Perform basic actions on your OmniFocus database.",
+  "icon": "extension-icon.png",
+  "author": "nicolas-marien",
+  "contributors": [
+    "alanwill"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-add-to-inbox",
+      "title": "Quick Add to Inbox",
+      "subtitle": "OmniFocus",
+      "description": "Quickly add a task to your OmniFocus inbox.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "todo",
+          "required": true,
+          "placeholder": "Take out the trash"
+        }
+      ]
+    },
+    {
+      "name": "add-task",
+      "title": "Add a Task",
+      "subtitle": "OmniFocus",
+      "description": "Add a task to OmniFocus.",
+      "mode": "view"
+    },
+    {
+      "name": "list-tasks",
+      "title": "List the Tasks of Your Perspectives",
+      "subtitle": "OmniFocus",
+      "description": "List the tasks of your perspectives",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showDetailsByDefault",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Details by Default",
+          "description": "Whether to show task details by default in list views",
+          "default": true,
+          "label": "Show task details by default"
+        },
+        {
+          "name": "defaultPerspective",
+          "type": "textfield",
+          "required": false,
+          "title": "Default Perspective",
+          "description": "The perspective to show by default when opening the command (defaults to Inbox if not specified)",
+          "placeholder": "Inbox"
+        },
+        {
+          "name": "defaultGrouping",
+          "type": "dropdown",
+          "required": false,
+          "title": "Default Grouping",
+          "description": "How tasks should be grouped by default when opening the command",
+          "default": "none",
+          "data": [
+            {
+              "title": "No Grouping",
+              "value": "none"
+            },
+            {
+              "title": "By Project",
+              "value": "project"
+            },
+            {
+              "title": "By Tags",
+              "value": "tags"
+            },
+            {
+              "title": "By Priority",
+              "value": "priority"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.91.2",
+    "@raycast/utils": "1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

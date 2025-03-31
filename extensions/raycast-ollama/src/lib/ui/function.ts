@@ -24,6 +24,52 @@ import { fileTypeFromBuffer } from "file-type";
 import { OllamaApiTagsResponseModel } from "../ollama/types";
 
 /**
+ * Get Ollama Server Array.
+ * @returns Servers Names Array.
+ */
+export async function GetServerArray(): Promise<string[]> {
+  const s = await GetOllamaServers();
+  const a = [...s.keys()].sort();
+  const al = a.filter((v) => v === "Local");
+  const ao = a.filter((v) => v !== "Local");
+  if (a.length > 1) return ["All", ...al, ...ao];
+  return [...al, ...ao];
+}
+
+/**
+ * Format "expires_at" value returnet by Ollama PS.
+ * @param expires_at
+ * @returns "expires_at" formatted as "0h0m0s".
+ */
+export function FormatOllamaPsModelExpireAtFormat(expires_at: string): string {
+  const now = new Date();
+  const expire = new Date(expires_at);
+
+  let timeoutS = "";
+  let timeout = Math.floor((expire.getTime() - now.getTime()) * 0.001);
+  ["s", "m", "h"].every((v) => {
+    const timeoutT = timeout / 60;
+    if (v === "h") {
+      if (timeout > 1000) {
+        timeoutS = "♾️";
+      } else {
+        timeoutS = `${Math.floor(timeout)}${v}` + timeoutS;
+      }
+      return false;
+    }
+    if (timeoutT < 1) {
+      timeoutS = `${Math.floor(timeout)}${v}` + timeoutS;
+      return false;
+    }
+    timeoutS = `${Math.round((timeoutT % 1) * 60)}${v}` + timeoutS;
+    timeout = Math.floor(timeoutT);
+    return true;
+  });
+
+  return timeoutS;
+}
+
+/**
  * Get Ollama Server Class.
  * @returns Server Map.
  */
@@ -43,8 +89,8 @@ export async function GetModelsName(): Promise<Map<string, string[]>> {
   const s = await GetServerClass();
   await Promise.all(
     [...s.entries()].map(async (s): Promise<void> => {
-      const tag = await s[1].OllamaApiTags().catch(async (e) => {
-        await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e });
+      const tag = await s[1].OllamaApiTags().catch(async (e: Error) => {
+        await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
         return undefined;
       });
       if (tag)
@@ -60,7 +106,7 @@ export async function GetModelsName(): Promise<Map<string, string[]>> {
 /**
  * Get Available Model for given Server.
  * @param server - Ollama Server Name.
- @ @param List of Avalibale Models.
+ * @param List of Avalibale Models.
  */
 export async function GetAvailableModel(server: string): Promise<OllamaApiTagsResponseModel[]> {
   const s = await GetOllamaServerByName(server);

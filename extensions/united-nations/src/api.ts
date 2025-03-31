@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { load } from "cheerio";
+import { load } from "cheerio/slim";
 import { XMLParser } from "fast-xml-parser";
 import got from "got";
 import TurndownService from "turndown";
@@ -8,10 +8,7 @@ import { NewsType, SiteIndex, UnDocument, UnPhoto, UnPress, UnNews, LanguageCode
 
 export const fetchUnDocuments = async () => {
   const xml = await got("https://undocs.org/rss/gadocs.xml").text();
-  const xmlParser = new XMLParser({
-    ignoreAttributes: false,
-    attributeNamePrefix: "",
-  });
+  const xmlParser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "" });
   const documents = xmlParser.parse(xml);
   // @ts-expect-error: Expected any usage
   return documents.rss.channel.item.map((x) => ({
@@ -27,10 +24,7 @@ export const fetchUnNews = async (newsType: NewsType) => {
   const xml = await got(
     `https://news.un.org/feed/subscribe/${newsLanguageCode}/news/${newsFeedUrlDict[newsType]}/rss.xml`,
   ).text();
-  const xmlParser = new XMLParser({
-    ignoreAttributes: false,
-    attributeNamePrefix: "",
-  });
+  const xmlParser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "" });
   const news = xmlParser.parse(xml);
   // @ts-expect-error: Expected any usage
   return news.rss.channel.item.map((x) => ({
@@ -45,10 +39,7 @@ export const fetchUnNews = async (newsType: NewsType) => {
 
 export const fetchUnPress = async () => {
   const xml = await got("https://press.un.org/en/rss.xml").text();
-  const xmlParser = new XMLParser({
-    ignoreAttributes: false,
-    attributeNamePrefix: "",
-  });
+  const xmlParser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "" });
   const press = xmlParser.parse(xml);
   // @ts-expect-error: Expected any usage
   return press.rss.channel.item.map((x) => ({

@@ -14,6 +14,7 @@ export interface Svg {
         dark: string;
         light: string;
       };
+  brandUrl: string;
   url: string;
 }
 
@@ -21,3 +22,16 @@ export interface Category {
   category: string;
   total: number;
 }
+
+export type SvgActionKey =
+  | "copySvg"
+  | "copySvgFile"
+  | "copySvgWordmark"
+  | "copyReactComponent"
+  | "copyVueComponent"
+  | "copySvelteComponent"
+  | "copyAngularComponent"
+  | "copySvgUrl"
+  | "copySvgWordmarkUrl"
+  | "operation"
+  | "svgInfo";

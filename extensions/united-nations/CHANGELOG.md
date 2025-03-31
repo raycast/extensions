@@ -1,5 +1,23 @@
 # United Nations Extension
 
+## [Maintenance] - 2025-02-28
+
+- Bump `fast-xml-parser` to v5 for named-exports
+- Bump all other dependencies to the latest
+
+## [Enhancement] - 2024-12-19
+
+- Add Pinyin search support for Chinese
+- Add text contains search support for Arabic, Russian, Hindi, and Urdu
+- Add RTL display support for Urdu
+- Show UN site URLs on UN Site Index results
+- Bump all dependencies to the latest
+
+## [Chore] - 2024-10-03
+
+- Optimize extension file size
+- Bump all dependencies to the latest
+
 ## [Bugfix] - 2024-07-24
 
 - Handle possibly undefined parameter on UN News

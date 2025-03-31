@@ -1,4 +1,4 @@
-import { deleteDocument, DocumentResult, DocumentWithContent, updateDocument } from "../../api/documents";
+import { deleteDocument, updateDocument } from "../../api/documents";
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import OpenInLinear from "../OpenInLinear";
 import { MutatePromise } from "@raycast/utils";
@@ -6,7 +6,9 @@ import { isLinearInstalled } from "../../helpers/isLinearInstalled";
 import { getProjectIcon } from "../../helpers/projects";
 import { ProjectResult } from "../../api/getProjects";
 import { getErrorMessage } from "../../helpers/errors";
-import { InitiativeResult } from "../../api/initiatives";
+import { InitiativeResult } from "../../tools/get-initiatives";
+import { DocumentResult } from "../../tools/get-documents";
+import { DocumentWithContent } from "../../tools/get-document-content";
 import { getInitiativeIcon } from "../../helpers/initiatives";
 
 export type DocumentActionsProps = {
@@ -126,7 +128,7 @@ function DeleteDocument({ doc, mutateDocs, deleteUnsupported }: DocumentActionsP
     return <></>;
   }
 
-  const trash = async () =>
+  const trash = () =>
     confirmAlert({
       title: "Delete Document",
       message: `Are you sure you want to delete '${doc.title}'?`,
@@ -136,7 +138,7 @@ function DeleteDocument({ doc, mutateDocs, deleteUnsupported }: DocumentActionsP
 
   const tryDelete = async () => {
     const toast = await showToast(Toast.Style.Animated, "Deleting document", doc.title);
-    await mutateDocs(deleteDocument(doc.id), {
+    mutateDocs(deleteDocument(doc.id), {
       optimisticUpdate: (data) => {
         if (!data) {
           return undefined;

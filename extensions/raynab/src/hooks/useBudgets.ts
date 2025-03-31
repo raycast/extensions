@@ -1,6 +1,7 @@
-import useSWR from 'swr';
+import { useCachedPromise } from '@raycast/utils';
+
 import { fetchBudgets } from '@lib/api';
 
 export function useBudgets() {
-  return useSWR('budgets', fetchBudgets);
+  return useCachedPromise(fetchBudgets);
 }

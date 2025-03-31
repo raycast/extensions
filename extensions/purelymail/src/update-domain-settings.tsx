@@ -1,9 +1,8 @@
-import { showToast, Toast, ActionPanel, Action, Form, LaunchProps, popToRoot, Icon } from "@raycast/api";
-import { useForm, FormValidation, getFavicon, useCachedState } from "@raycast/utils";
-import { useEffect, useState } from "react";
-import { getDomains, updateDomainSettings } from "./utils/api";
-import { Domain, Response, UpdateDomainSettingsRequest } from "./utils/types";
+import { showToast, Toast, ActionPanel, Action, Form, LaunchProps, Icon } from "@raycast/api";
+import { useForm, FormValidation, getFavicon } from "@raycast/utils";
+import { UpdateDomainSettingsRequest } from "./utils/types";
 import ErrorComponent from "./components/ErrorComponent";
+import { callApi, useDomains } from "./utils/hooks";
 
 interface DomainArgs {
   domain: string;
@@ -11,34 +10,32 @@ interface DomainArgs {
 
 export default function UpdateDomainSettings(props: LaunchProps<{ arguments: DomainArgs }>) {
   const propDomain = props.arguments.domain;
-
-  const [error, setError] = useState("");
-  const [domains, setDomains] = useCachedState<Domain[]>("domains");
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function getFromApi() {
-      const response: Response = await getDomains();
-
-      if (response.type === "error") {
-        setError(response.message);
-      } else {
-        setDomains(response.result.domains);
-      }
-      setIsLoading(false);
-    }
-
-    getFromApi();
-  }, []);
+  const { isLoading, data, error, mutate } = useDomains();
+  const domains = data.filter((d) => !d.isShared);
 
   const { handleSubmit, itemProps, setValue } = useForm<UpdateDomainSettingsRequest>({
     async onSubmit(values) {
-      setIsLoading(true);
-
-      const response = await updateDomainSettings({ ...values });
-      if (response.type === "success") {
-        await showToast(Toast.Style.Success, "Domain Settings Updated", "DOMAIN: " + values.name);
-        popToRoot({ clearSearchBar: true });
+      const toast = await showToast(Toast.Style.Animated, "Updating Domain");
+      try {
+        await mutate(callApi("updateDomainSettings", { body: values }), {
+          optimisticUpdate(data) {
+            const index = data.findIndex((d) => d.name === values.name);
+            const d = data[index];
+            data[index] = {
+              ...d,
+              allowAccountReset: values.allowAccountReset,
+              symbolicSubaddressing: values.allowAccountReset,
+            };
+            return data;
+          },
+        });
+        toast.style = Toast.Style.Success;
+        toast.title = "Domain Settings Updated";
+        toast.message = "DOMAIN: " + values.name;
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = (error as Error).cause as string;
+        toast.message = (error as Error).message;
       }
     },
     validation: {
@@ -55,7 +52,7 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
   };
 
   return error ? (
-    <ErrorComponent error={error} />
+    <ErrorComponent error={error.message} />
   ) : (
     <Form
       isLoading={isLoading}

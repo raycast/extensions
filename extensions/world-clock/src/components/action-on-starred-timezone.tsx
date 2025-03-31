@@ -1,5 +1,5 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, LocalStorage } from "@raycast/api";
-import { TimeInfo, Timezone } from "../types/types";
+import { CurrentTime, Timezone } from "../types/types";
 import { localStorageKey } from "../utils/costants";
 import { ActionToggleDetails } from "./action-toggle-details";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
@@ -10,25 +10,27 @@ import { addTimeZones } from "../utils/common-utils";
 import { MutatePromise } from "@raycast/utils";
 
 export function ActionOnStarredTimezone(props: {
-  timeInfo: TimeInfo;
   index: number;
+  currentTime: CurrentTime | undefined;
   starTimezones: Timezone[];
-  timezone: string;
+  timezone: Timezone;
   mutate: () => Promise<void>;
   showDetail: boolean;
   showDetailMutate: MutatePromise<boolean | undefined, boolean | undefined> | undefined;
 }) {
-  const { timeInfo, index, starTimezones, timezone, mutate, showDetail, showDetailMutate } = props;
+  const { index, currentTime, starTimezones, timezone, mutate, showDetail, showDetailMutate } = props;
   return (
     <ActionPanel>
-      {timeInfo !== ({} as TimeInfo) && timeInfo.timezone === timezone && <ActionTimeInfo timeInfo={timeInfo} />}
+      {currentTime && starTimezones[index].timezone === timezone.timezone && (
+        <ActionTimeInfo currentTime={currentTime} />
+      )}
       <ActionPanel.Section>
         <Action
           icon={Icon.StarDisabled}
           title={"Unstar Timezone"}
           shortcut={{ modifiers: ["cmd"], key: "s" }}
           onAction={async () => {
-            if (starTimezones.some((value) => value.timezone === timezone)) {
+            if (starTimezones.some((value) => value.timezone === timezone.timezone)) {
               const _starTimezones = [...starTimezones];
               _starTimezones.splice(index, 1);
               _starTimezones.forEach((value) => {

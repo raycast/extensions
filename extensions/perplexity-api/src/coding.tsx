@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, getPreferenceValues, getSelectedText } from "@raycast/api";
 import { allModels as changeModels } from "./hook/utils";
 import { useEffect, useState } from "react";
-import ResultView from "./hook/perplexityAPI";
+import ResultView from "./hook/accessAPI";
 
 const prefs = getPreferenceValues();
 const usedModel = prefs.model_coding;
@@ -67,6 +67,7 @@ export default function AskView(props: { arguments: { query?: string }; fallback
                 user_extra_msg={question ? question : default_question}
                 model_override={model_override}
                 toast_title={toast_title}
+                temperature={0.4}
               />
             }
           />

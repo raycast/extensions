@@ -5,7 +5,7 @@ import { MailIcon } from "./presets";
 
 const MAILBOXES = ["inbox", "important", "starred", "drafts", "outbox", "junk", "trash", "archive"] as const;
 
-const MAILBOX_ICONS = {
+const MAILBOX_ICONS: Record<string, Image.ImageLike> = {
   inbox: MailIcon.Inbox,
   important: MailIcon.Important,
   starred: MailIcon.Starred,

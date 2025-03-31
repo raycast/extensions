@@ -1,34 +1,43 @@
-import { closeMainWindow, LaunchProps, showHUD } from "@raycast/api";
+import { closeMainWindow, LaunchProps, showToast, Toast } from "@raycast/api";
 import { makeNewWindow } from "./arc";
-import { URLArguments } from "./types";
-import { validateURL } from "./utils";
+import { NewTabSearchConfigs, URLArguments } from "./types";
+import { isURL, validateURL } from "./utils";
+import { NewIncognitoWindowPreferences } from "./preferences";
 
-const handleOpenNewIncognitoTab = async (newTabUrl: string) => {
-  try {
-    if (await validateURL(newTabUrl)) {
-      // Append https:// if protocol is missing
-      const openURL = !/^\S+?:\/\//i.test(newTabUrl) ? "https://" + newTabUrl : newTabUrl;
-      await closeMainWindow();
-      await makeNewWindow({ incognito: true, url: openURL });
-    }
-  } catch (e) {
-    console.error(e);
-
-    await showHUD("❌ Failed opening a new tab");
-  }
+export const config: NewTabSearchConfigs = {
+  google: "https://www.google.com/search?q=",
+  duckduckgo: "https://www.duckduckgo.com?q=",
+  bing: "https://www.bing.com/search?q=",
+  yahoo: "https://search.yahoo.com/search?p=",
+  ecosia: "https://www.ecosia.org/search?q=",
+  kagi: "https://kagi.com/search?q=",
 };
 
 export default async function command(props: LaunchProps<{ arguments: URLArguments }>) {
   const { url } = props.arguments;
 
+  let NewIncognitoWindow = "";
+
+  if (url) {
+    NewIncognitoWindow = url;
+    const NewIncognitoWindowAsSearch = `${config[NewIncognitoWindowPreferences.engine as keyof NewTabSearchConfigs]}${encodeURIComponent(NewIncognitoWindow)}`;
+    NewIncognitoWindow = isURL(NewIncognitoWindow) ? NewIncognitoWindow : NewIncognitoWindowAsSearch;
+  } else {
+    NewIncognitoWindow = NewIncognitoWindowPreferences.url;
+  }
+
   try {
-    await closeMainWindow();
-    if (!url) {
-      await makeNewWindow({ incognito: true });
-      return;
+    if (await validateURL(NewIncognitoWindow)) {
+      // Append https:// if protocol is missing
+      const openURL = !/^\S+?:\/\//i.test(NewIncognitoWindow) ? "https://" + NewIncognitoWindow : NewIncognitoWindow;
+
+      await closeMainWindow();
+      await makeNewWindow({ incognito: true, url: openURL });
     }
-    await handleOpenNewIncognitoTab(url);
   } catch {
-    await showHUD("❌ Failed opening a new incognito window");
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed opening a new incognito window",
+    });
   }
 }

@@ -1,33 +1,54 @@
 import { getPreferenceValues } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import getObsidianTags from "../helpers/get-obsidian-tags";
-import { getLocalStorageTags } from "../helpers/localstorage-tags";
+import { useEffect, useState } from "react";
+import { getLocalStorageFiles } from "../helpers/localstorage-files";
+import getObsidianTags, { getTags } from "../helpers/get-obsidian-tags";
 import tagify from "../helpers/tagify";
 import { Preferences } from "../types";
+import { getLocalStorageTags, replaceLocalStorageTags } from "../helpers/localstorage-tags";
 
-export type TagsHook = { loading: boolean; tags: string[] };
+export type TagsHook = {
+  tags: string[];
+  loading: boolean;
+  backgroundLoading: boolean;
+};
+
+function uniqueTags(tags: string[]): string[] {
+  return Array.from(new Set(tags));
+}
+
 export default function useTags(): TagsHook {
-  const [loading, setLoading] = useState(true);
   const [tags, setTags] = useState<string[]>([]);
-  const addTags = useCallback(
-    (newTags: string[] | Set<string>) => {
-      setTags((orig) => {
-        const newSet = new Set([...orig, ...newTags]);
-        return [...newSet];
-      });
-    },
-    [setTags]
-  );
+  const [loading, setLoading] = useState(true);
+  const [backgroundLoading, setBackgroundLoading] = useState(true);
 
   useEffect(() => {
-    const obsidian = getObsidianTags().then((tags) => addTags(tags));
-    const localStorage = getLocalStorageTags().then((tags) => addTags(tags));
+    async function loadTags() {
+      try {
+        // Quick initial load from localStorage tags
+        const localTags = getTags(await getLocalStorageTags());
+        const extraTags = tagify(getPreferenceValues<Preferences>().extraTags);
+        setTags(uniqueTags([...localTags, ...extraTags]));
+        setLoading(false);
 
-    const extraTags = getPreferenceValues<Preferences>().extraTags;
-    addTags(tagify(extraTags));
+        // Full load using cached files to get fresh tags from Obsidian
+        const localFiles = await getLocalStorageFiles();
+        const obsidianTags = await getObsidianTags(localFiles);
+        setTags(uniqueTags([...obsidianTags, ...extraTags]));
+        replaceLocalStorageTags(obsidianTags);
+      } catch (error) {
+        console.error("Error loading tags:", error);
+      } finally {
+        setLoading(false);
+        setBackgroundLoading(false);
+      }
+    }
 
-    Promise.allSettled([obsidian, localStorage]).then(() => setLoading(false));
-  }, [addTags, setLoading]);
+    loadTags();
+  }, []);
 
-  return { tags, loading };
+  return {
+    tags,
+    loading,
+    backgroundLoading,
+  };
 }

@@ -1,12 +1,17 @@
 # DocSearch Changelog
 
-## [Support for new documentation] - 2024-07-19
+## [New feature] - 2024-9-17
 
-- 📄 Support [Vuetify](https://vuetifyjs.com/)
+- 📄 Support [TypeScript](https://www.typescriptlang.org/)
 
-## [Fix Bugs] - 2024-3-19
+## [New feature] - 2024-5-15
 
-- 🐛 Fix icon of docs not found
+- 📄 Support [Deno](https://deno.com/)
+
+## [New feature] - 2024-5-11
+
+- 📄 Support [Sass](https://sass-lang.com/)
+- 📄 Support [Less](https://lesscss.org/)
 
 ## [New feature] - 2024-2-3
 

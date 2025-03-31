@@ -1,5 +1,63 @@
 # Spotify Player Changelog
 
+## [Fix Select Device] - 2025-02-26
+
+- Fixed a possibly undefined issue from Select Devices command
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Fix Missing Playlists in Add Playing Song to Playlist command] - 2025-02-20
+
+- Fixed an issue where some playlists were not appearing when users attempted to add a currently playing song to a playlist.
+
+## [Add Copy Embed Code Command] - 2025-02-20
+
+- Added a new command to copy the iframe embed code for the currently playing song.
+
+## [Add "Skip 15 Seconds" and "Back 15 Seconds" commands] - 2025-02-18
+
+- Added the ability to skip forward or back 15 seconds in the current episode. This adds two new commands as well as two new menu bar items which only show when an 'episode' is playing.
+
+## [Artist Name Visibility Option] - 2025-02-07
+
+- Added the option to hide the artist's name in the Menu Bar Player.
+
+## [Fix Your Library] - 2025-02-04
+
+- Fix a possibly null issue from `getMeAlbums` API.
+
+## [Generate Playlist Improvement - Artists] - 2024-12-03
+
+- Modify the prompt so if the description contains "songs from: artist1, artist2, etc" it will only generate a playlist using those artists
+
+## [Fix Search Command] - 2024-11-22
+
+- Even though it's not documented, the Spotify API can return null items in some cases when searching for items. This has now been fixed.
+
+## [Minor Fixes] - 2024-09-20
+
+- Fixed an issue when "Nothing is playing" popped up after commands `next`, `previous` and `like` having `Current Track` command disabled
+
+## [Generate Playlist Improvement] - 2024-09-06
+
+- Use GPT-4o mini instead of GPT-4o to make it faster.
+
+## [Add "Start DJ" Command] - 2024-09-05
+
+- Added a command to start the DJ using AppleScript, because the Spotify API doesn't support it.
+
+## [Quicklink to Add Playing Song to Playlist] - 2024-08-29
+
+- Adds an action to create a quicklink to add the currently playing song to a specific playlist.
+
+## [Add Preference to Only Show Music in Search Command] - 2024-08-26
+
+- Added a preference to only show music results in the search command for users who don't want to see podcasts and episodes.
+
+## [Add "Remove All Searches" Action in Search Command] - 2024-08-22
+
+- Added `Remove All Searches` action to remove all search history in one click.
+
 ## [Log out the user if re-authentication fails] - 2024-07-11
 
 - Automatically log out users if re-authentication fails, instead of displaying an error message.
@@ -15,7 +73,7 @@
 
 ## [New Album Actions] - 2024-05-30
 
--  Added new actions in the album panel: `Add To Library` and `Remove From Library`.
+- Added new actions in the album panel: `Add To Library` and `Remove From Library`.
 
 ## [Automatically Trigger Current Track] - 2024-05-28
 

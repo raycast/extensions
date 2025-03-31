@@ -1,78 +1,74 @@
-import { Action, ActionPanel, List, environment, popToRoot } from "@raycast/api";
-import { runAppleScript, showFailureToast, usePromise } from "@raycast/utils";
-import { execa } from "execa";
-import { chmod } from "fs/promises";
-import path from "path";
-import { openFileCallback } from "./utils";
+import { Action, ActionPanel, getSelectedFinderItems, List, popToRoot } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import fs from "fs";
+import { drawImage, getPDFOutline } from "swift:../swift";
+import { Outline } from "./type";
+import { cache, openFileCallback } from "./utils";
 
-interface Outline {
-  title: string;
-  page: number;
-}
-
-const selectFile = async () => {
-  try {
-    const file = await runAppleScript(
-      `
-set selectedFile to choose file with prompt "Please select a PDF file" of type ("pdf")
-set raycastPath to POSIX path of (path to application "Raycast")
-do shell script "open " & raycastPath
-return POSIX path of selectedFile
-            `,
-    );
-    const command = path.join(environment.assetsPath, "GetOutline");
-    await chmod(command, "755");
-    const process = execa(command, [file]);
-    const { stdout, exitCode } = await process;
-    if (exitCode === 0) {
-      const outline: Outline[] = JSON.parse(stdout);
-      return { file, outline };
-    }
-    throw new Error();
-  } catch (error) {
-    await popToRoot();
-    showFailureToast("PDF document does not have an outline!");
-  }
-};
 export default function Command() {
-  const { data, isLoading } = usePromise(selectFile);
+  const { data, isLoading } = usePromise(async () => {
+    try {
+      const files = await getSelectedFinderItems();
+      if (files.length === 0) throw Error("No files selected!");
+      const outlinePromises = files.map(async (f) => {
+        try {
+          const fileOutlines: Outline[] = await getPDFOutline(f.path);
+          fileOutlines.forEach((o) => {
+            o.file = f.path;
+          });
+          return fileOutlines;
+        } catch {
+          return [];
+        }
+      });
+      const outlines = (await Promise.all(outlinePromises)).flat();
+      if (outlines.length === 0) throw new Error("Not outlines from selected files!");
+      return outlines;
+    } catch (err) {
+      showFailureToast(err as string);
+      await popToRoot();
+    }
+  });
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search PDF outline..." isShowingDetail throttle>
-      {data?.outline?.map((outline, i) => (
+    <List isLoading={isLoading} searchBarPlaceholder="Search PDF outline..." isShowingDetail>
+      {data?.map((outline, i) => (
         <List.Item
           key={i}
           title={outline.title}
           subtitle={`Page ${outline.page + 1}`}
           actions={
             <ActionPanel>
-              <Action.Open target={data.file} onOpen={() => openFileCallback(outline.page)} title="Open File" />
+              <Action.Open target={outline.file} onOpen={() => openFileCallback(outline.page)} title="Open File" />
               <Action.OpenWith
-                path={data.file}
+                path={outline.file}
                 onOpen={() => openFileCallback(outline.page)}
                 shortcut={{ modifiers: ["cmd"], key: "enter" }}
               />
             </ActionPanel>
           }
-          detail={<Detail outline={outline} filepath={data.file} />}
+          detail={<OutlineDetail outline={outline} filepath={outline.file} />}
         />
       ))}
     </List>
   );
 }
 
-function Detail({ outline, filepath }: { outline: Outline; filepath: string }) {
+function OutlineDetail({ outline, filepath }: { outline: Outline; filepath: string }) {
   const { data: imagePath, isLoading } = usePromise(async () => {
     try {
-      // execute swift binary that will draw image of pdf page and highlght search result
-      const command = path.join(environment.assetsPath, "DrawImage");
-      await chmod(command, "755");
-      const { stdout, exitCode } = await execa(command, [filepath, String(outline.page)]);
-      if (exitCode === 0) {
-        return stdout;
+      const key = `${outline.title}_${outline.page}`;
+      const tmpPath = cache.get(key);
+      // if file still exists in temp directory render it straightaway
+      if (tmpPath && fs.existsSync(tmpPath)) {
+        return tmpPath;
+      } else {
+        const newPath = await drawImage(filepath, outline.page);
+        cache.set(key, newPath);
+        return newPath;
       }
-    } catch {
-      // catch process cancellation exception that is triggered when query changes
+    } catch (err) {
+      showFailureToast(`Error occurred when drawing page: ${err}`);
     }
   });
 

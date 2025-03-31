@@ -12,7 +12,7 @@ function TimerStartMenubarItem(props: { state: State }) {
     return null;
   }
   const title = s.state === "active" ? "Restart" : "Start";
-  const iconSource = s.state === "active" ? Icon.ArrowClockwise : "play.png";
+  const iconSource = s.state === "active" ? Icon.ArrowClockwise : "play.svg";
   return <MenuBarExtra.Item title={title} icon={iconSource} onAction={() => callTimerStartService(s)} />;
 }
 
@@ -21,7 +21,7 @@ function TimerPauseMenubarItem(props: { state: State }) {
   if (!isTimerEditable(s) || s.state !== "active") {
     return null;
   }
-  return <MenuBarExtra.Item title="Pause" icon="pause.png" onAction={() => callTimerPauseService(s)} />;
+  return <MenuBarExtra.Item title="Pause" icon="pause.svg" onAction={() => callTimerPauseService(s)} />;
 }
 
 function TimerCancelMenubarItem(props: { state: State }) {

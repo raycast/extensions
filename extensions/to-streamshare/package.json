@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "streamshare-uploader",
+  "title": "Streamshare Uploader",
+  "description": "Upload files to streamshare",
+  "icon": "logo.png",
+  "author": "PandaDEV",
+  "contributors": [
+    "britown"
+  ],
+  "categories": [
+    "Data",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Upload Selected File",
+      "description": "Upload a file selected in Finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "uploadFromClipboard",
+      "title": "Upload File from Clipboard",
+      "description": "Upload a file from clipboard (path or copied file)",
+      "mode": "no-view"
+    },
+    {
+      "name": "viewHistory",
+      "title": "View Upload History",
+      "description": "View and manage your uploaded files",
+      "mode": "view"
+    },
+    {
+      "name": "copyLastUploadURL",
+      "title": "Copy Last Upload URL",
+      "description": "Copy the URL of the most recently uploaded file",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "copyUrlToClipboard",
+      "type": "checkbox",
+      "required": false,
+      "title": "Copy URL to Clipboard",
+      "description": "Automatically copy URL to clipboard when an upload completes",
+      "default": true,
+      "label": "Copy URL to Clipboard"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "archiver": "^7.0.1",
+    "axios": "^1.7.2",
+    "file-type": "^20.1.0",
+    "form-data": "^4.0.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/archiver": "^6.0.3",
+    "@types/node": "22.13.4",
+    "@types/react": "^18.3.18",
+    "@types/ws": "^8.5.11",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.1",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

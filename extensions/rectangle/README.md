@@ -2,22 +2,23 @@
 
 Browse & trigger [Rectangle](https://rectangleapp.com) window-management actions from Raycast.
 
+Supports both Rectangle & Rectangle Pro.
+
+## Features
+
+- Use Rectangle window management actions without setting up / memorizing keyboard shortcuts
+- Includes commands for most common window management actions
+- Searchable, visual overview of all available actions via the `Rectangle Actions` command
+  - Quickly and easily find specific actions with fuzzy matching, or browse actions by category.
+  - Found an action you can never remember the name of, or one which doesn't already have a command? Create a custom quicklink right from the index view!
+
+### ⚠️ Configuration Note
+
+As the internal identifier for Cascade App varies between Rectangle & Rectangle Pro, it is not exposed as a Raycast command by default.
+
+To add it as a top-level command, run the `Rectangle Actions` command, select Cascade App and create a new quicklink:
+![screenshot showing how to add Cascade App command](./media/rectangle-add-cascade-app.png)
+
 ## Development
-*(information in this section is only relevant if re-generating the window position icons. For all other purposes, refer to raycast extension docs)*
 
-### Generate icons
-Icon templates in `src/icons/window-position-templates` are sourced from the rectangle repo: https://github.com/rxhanson/Rectangle/tree/main/Rectangle/Assets.xcassets/WindowPositions
-
-External dev dependencies for the project are managed via [Devbox](https://github.com/jetify-com/devbox).
-
-Running `devbox run generateIcons` from the repository root will perform the following:
-
-1. Install necesarry dependencies (python and pillow)
-2. Run the included script `src/icons/generateIcons.py`
-
-### Todo
- - [ ] clean up ordering and groupings / derive groupings from [source](https://github.com/rxhanson/Rectangle/blob/cb791e670a7d84bc4e4ad4c3622a915ab016234d/Rectangle/WindowAction.swift#L587)
- - [ ] clean up titles & descriptions / derive from [source](https://github.com/rxhanson/Rectangle/blob/cb791e670a7d84bc4e4ad4c3622a915ab016234d/Rectangle/WindowAction.swift#L231)
- - [ ] add additional commands which rectangle implements (eg - todo commands)
- - [ ] document support for emulating "Reasonable Size" via `specified` - see [rectangle docs](https://github.com/rxhanson/Rectangle/blob/main/TerminalCommands.md#add-an-extra-centering-command-with-custom-size)
- - [ ] investigate support for Rectangle Pro
+See [DEVELOPMENT.md](DEVELOPMENT.md)

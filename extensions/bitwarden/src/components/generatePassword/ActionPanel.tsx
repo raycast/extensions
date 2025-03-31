@@ -1,7 +1,5 @@
 import { Action, ActionPanel, Clipboard, Icon, LocalStorage } from "@raycast/api";
-import BugReportCollectDataAction from "~/components/actions/BugReportCollectDataAction";
-import BugReportOpenAction from "~/components/actions/BugReportOpenAction";
-import CopyRuntimeErrorLog from "~/components/actions/CopyRuntimeErrorLog";
+import { DebuggingBugReportingActionSection } from "~/components/actions";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { showCopySuccessMessage } from "~/utils/clipboard";
 import { getTransientCopyPreference } from "~/utils/preferences";
@@ -40,14 +38,12 @@ const GeneratePasswordActionPanel = (props: GeneratePasswordActionPanelProps) =>
       <Action
         title="Regenerate Password"
         icon={Icon.ArrowClockwise}
-        onAction={regeneratePassword}
         shortcut={{ key: "backspace", modifiers: ["cmd"] }}
+        /* avoid passing a reference to onAction because, for some reason, a string
+        is passed to it, even though the type says otherwise 🤔 */
+        onAction={() => regeneratePassword()}
       />
-      <ActionPanel.Section title="Debugging & Bug Reporting">
-        <CopyRuntimeErrorLog />
-        <BugReportOpenAction />
-        <BugReportCollectDataAction />
-      </ActionPanel.Section>
+      <DebuggingBugReportingActionSection />
       {process.env.NODE_ENV === "development" && (
         <Action title="Clear storage" icon={Icon.Trash} onAction={clearStorage} />
       )}

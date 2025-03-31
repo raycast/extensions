@@ -1,6 +1,7 @@
 import fetch from "cross-fetch";
 import { useCachedPromise } from "@raycast/utils";
 import type { MatchFixture, TeamDetailData } from "@/types/team-detail";
+import { getHeaderToken } from "@/utils/token";
 
 // Extend TeamDetailData
 export type Data = TeamDetailData & {
@@ -15,7 +16,9 @@ export function useTeamDetail(teamId: string) {
   const { data, error, isLoading } = useCachedPromise(
     async (teamId: string): Promise<TeamDetailData> => {
       const url = `https://www.fotmob.com/api/teams?id=${teamId}`;
-      const response = await fetch(url);
+      const token = await getHeaderToken();
+
+      const response = await fetch(url, { headers: token });
       if (!response.ok) {
         throw new Error("Failed to fetch team details");
       }

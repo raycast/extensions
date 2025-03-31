@@ -4,7 +4,7 @@
 
 # NameSilo
 
-This is a Raycast extension for [NameSilo](https://www.namesilo.com/). With this extension, you can fetch latest domain pricing and view Domains, Orders, Account Balance. You can also run a Whois Check for a domain.
+This is a Raycast extension for [NameSilo](https://www.namesilo.com/). With this extension, you can fetch latest domain pricing and view Auctions, Domains, Orders, Account Balance. You can also run a Whois Check for a domain.
 
 ## 🚀 Getting Started
 
@@ -26,7 +26,12 @@ This is a Raycast extension for [NameSilo](https://www.namesilo.com/). With this
 
     c. `Enter this key` in Preferences OR at first prompt
 
+3. **(OPTIONAL) Get your OTE API Key**: You can choose to use OTE/Sandbox environment by checking it in `Preferences` which requires a separate API Key:
+
+    a. `Contact` the NameSilo team (https://www.namesilo.com/contact-us)
+
+    b. Once approved, you will get an OTE API Key which you can plug into `ote_api_key` in Preferences
+
 ## 🗒️ NOTES
 
 - Using `namesilo.com` as a query/parameter will almost always show an error e.g. running a `whois` for "namesilo.com" will error out. This is an issue with the API.
-- You can email the NameSilo team to get access to a Sandbox / OTE environment but the extension does not currently support OTE (this might change in the future).

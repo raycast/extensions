@@ -6,7 +6,7 @@ import { Shortcuts } from '@constants';
 
 export function GroupBySubmenu({ onGroup, currentGroup }: { onGroup: onGroupType; currentGroup: GroupNames | null }) {
   const renderGroupIcon = renderActionIcon<GroupNames>({
-    defaultIcon: Icon.TextDocument,
+    defaultIcon: Icon.Sidebar,
     currentType: currentGroup,
   });
 

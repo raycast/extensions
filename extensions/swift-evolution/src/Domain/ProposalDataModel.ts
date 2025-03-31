@@ -24,8 +24,10 @@ export type ProposalDataModel = {
     title: string;
     url: string;
   }[];
-  reviewManagerName: string;
-  reviewManagerProfileLink: string;
+  reviewManagers: {
+    name: string;
+    link: string;
+  }[];
   swiftVersion?: string;
   scheduled?: string;
   isNew: boolean;

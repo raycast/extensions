@@ -3,10 +3,15 @@ import { getIcon } from "./utils/resultUtils";
 import { useSearch } from "./utils/useSearch";
 
 export default function Command() {
-  const { isLoading, results, search, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch();
+  const { isLoading, results, search, searchText, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch();
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Google or enter a URL...">
+    <List
+      isLoading={isLoading}
+      searchText={searchText}
+      onSearchTextChange={search}
+      searchBarPlaceholder="Search Google or enter a URL..."
+    >
       <List.Section title="Results" subtitle={results.length + ""}>
         {results.map((item) => (
           <List.Item
@@ -29,6 +34,14 @@ export default function Command() {
 
                   <Action.CopyToClipboard title="Copy URL to Clipboard" content={item.url} />
                   <Action.CopyToClipboard title="Copy Suggestion to Clipboard" content={item.query} />
+                  <Action
+                    title="Set as Search Text"
+                    onAction={() => {
+                      search(item.query);
+                    }}
+                    icon={{ source: Icon.MagnifyingGlass }}
+                    shortcut={{ modifiers: ["shift"], key: "tab" }}
+                  />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="History">

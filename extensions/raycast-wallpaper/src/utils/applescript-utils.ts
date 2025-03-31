@@ -1,9 +1,9 @@
 import { RaycastWallpaper, RaycastWallpaperWithInfo } from "../types/types";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { Preferences } from "../types/preferences";
+import { showToast, Toast } from "@raycast/api";
 import { existsSync } from "fs-extra";
 import { runAppleScript } from "@raycast/utils";
 import { buildCachePath, cachePicture } from "./common-utils";
+import { applyTo } from "../types/preferences";
 
 const scriptSetWallpaper = (path: string, applyTo: string) => {
   return `
@@ -20,14 +20,6 @@ const scriptSetWallpaper = (path: string, applyTo: string) => {
           end tell
         end tell
       on error
-        set dialogTitle to "Error Setting Wallpaper"
-        set dialogText to "Please make sure you have given Raycast the required permission. To make sure, click the button below and grant Raycast the 'System Events' permission."
-
-        display alert dialogTitle message dialogText buttons {"Cancel", "Open Preferences"} default button 2 as informational
-          if button returned of result is "Open Preferences" then
-            do shell script "open 'x-apple.systempreferences:com.apple.preference.security?Privacy_Automation'"
-          end if
-
         return "error"
       end try
     `;
@@ -36,7 +28,6 @@ const scriptSetWallpaper = (path: string, applyTo: string) => {
 export const setWallpaper = async (wallpaper: RaycastWallpaperWithInfo) => {
   const toast = await showToast(Toast.Style.Animated, "Setting wallpaper...");
 
-  const { applyTo } = getPreferenceValues<Preferences>();
   const fixedPathName = buildCachePath(wallpaper);
 
   try {
@@ -65,7 +56,6 @@ export const setWallpaper = async (wallpaper: RaycastWallpaperWithInfo) => {
 };
 
 export const autoSetWallpaper = async (wallpaper: RaycastWallpaper) => {
-  const { applyTo } = getPreferenceValues<Preferences>();
   const fixedPathName = buildCachePath(wallpaper);
 
   try {

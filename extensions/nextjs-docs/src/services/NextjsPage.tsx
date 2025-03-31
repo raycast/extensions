@@ -62,7 +62,6 @@ export async function getPageFromCache(topic: TopicType): Promise<string | undef
     return fs.readFileSync(path.resolve(DATA_PATH, topic.path), "utf8");
   } catch (err) {
     clearStorageItem(topic.path);
-    // console.error("Failed to get data from cache:", err);
     return undefined;
   }
 }

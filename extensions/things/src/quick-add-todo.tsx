@@ -1,19 +1,24 @@
-import { AI, closeMainWindow, getPreferenceValues, LaunchProps, showToast, Toast } from '@raycast/api';
-import { handleError, silentlyOpenThingsURL } from './api';
-import qs from 'qs';
+import { AI, closeMainWindow, environment, getPreferenceValues, LaunchProps, showToast, Toast } from '@raycast/api';
+import { addTodo, handleError } from './api';
 
 export default async function Command(props: LaunchProps & { arguments: Arguments.QuickAddTodo }) {
   try {
-    const preferences = getPreferenceValues<Preferences.QuickAddTodo>();
+    const { shouldCloseMainWindow, dontUseAI } = getPreferenceValues<Preferences.QuickAddTodo>();
+    let json, toastMsg;
 
-    if (preferences.shouldCloseMainWindow) {
+    if (shouldCloseMainWindow) {
       await closeMainWindow();
     } else {
       await showToast({ style: Toast.Style.Animated, title: 'Adding to-do' });
     }
 
-    const result =
-      await AI.ask(`Act as a task manager. I'll give you a task in a natural language. Your job is to return me only a parsable and minified JSON object.
+    if (dontUseAI || !environment.canAccess(AI)) {
+      const { text } = props.arguments;
+      json = { title: text };
+      toastMsg = `Added "${text}" to 'Inbox'`;
+    } else {
+      const result =
+        await AI.ask(`Act as a task manager. I'll give you a task in a natural language. Your job is to return me only a parsable and minified JSON object.
 
 Here are the possible keys of the JSON object with their respective values:
 - title: The title of the to-do.
@@ -41,7 +46,8 @@ Here are some examples to help you out:
 
 Here's the task: "${props.fallbackText ?? props.arguments.text}"`);
 
-    const json = JSON.parse(result.trim());
+      json = JSON.parse(result.trim());
+    }
 
     if (props.arguments.notes) {
       json.notes = props.arguments.notes;
@@ -54,11 +60,12 @@ Here's the task: "${props.fallbackText ?? props.arguments.text}"`);
         .join('\n');
     }
 
-    await silentlyOpenThingsURL(`things:///add?${qs.stringify(json)}`);
+    await addTodo(json);
 
     await showToast({
       style: Toast.Style.Success,
       title: 'Added to-do',
+      message: toastMsg,
     });
   } catch (error) {
     handleError(error, 'Unable to add to-do');

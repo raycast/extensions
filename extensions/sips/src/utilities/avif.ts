@@ -5,17 +5,12 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2024-06-04 05:46:15
- * Last modified  : 2024-06-26 21:37:46
  */
 
-import { LocalStorage, Toast, confirmAlert, showToast } from "@raycast/api";
 import { execSync } from "child_process";
 
-const EncoderNotFoundError = {
-  title: "AVIF Encoder not found.",
-  message: "Please install the avifenc Homebrew formula and try again.",
-  style: Toast.Style.Failure,
-};
+import { LocalStorage, Toast, confirmAlert, showToast } from "@raycast/api";
+import { showErrorToast } from "./utils";
 
 /**
  * Attempts to install the AVIF encoder using Homebrew.
@@ -34,7 +29,7 @@ async function installAVIFEnc(): Promise<boolean> {
     await showToast({
       title: "Homebrew is required to install the AVIF encoder.",
       message:
-        "Please install Homebrew and try again. Visit https://brew.sh for more information. Once Homebrew is installed, run the command `brew install joedrago/repo/avifenc` to install the AVIF encoder manually (Otherwise, this command will be run automatically).",
+        "Please install Homebrew and try again. Visit https://brew.sh for more information. Once Homebrew is installed, run the command `brew install libavif` to install the AVIF encoder manually (Otherwise, this command will be run automatically).",
       style: Toast.Style.Failure,
     });
     return false;
@@ -44,7 +39,7 @@ async function installAVIFEnc(): Promise<boolean> {
     await confirmAlert({
       title: "Install AVIF Encoder",
       message:
-        "The avifenc Homebrew formula is required to convert images to/from AVIF format. Would you like to install it now?",
+        "The libavif Homebrew formula is required to convert images to/from AVIF format. Would you like to install it now?",
       primaryAction: {
         title: "Install",
       },
@@ -54,10 +49,20 @@ async function installAVIFEnc(): Promise<boolean> {
       title: "Installing AVIF Encoder...",
       style: Toast.Style.Animated,
     });
-    execSync(`${brewPath} install joedrago/repo/avifenc`);
-    toast.title = "AVIF Encoder installed successfully!";
-    toast.style = Toast.Style.Success;
-    return true;
+    try {
+      execSync(`${brewPath} install libavif`);
+      toast.title = "AVIF Encoder installed successfully!";
+      toast.style = Toast.Style.Success;
+      return true;
+    } catch (error) {
+      console.error(error);
+      showErrorToast(
+        "Failed to install AVIF Encoder.",
+        error as Error,
+        toast,
+        "If you previously attempted to install libavif or avifenc, please run `brew doctor` followed by `brew cleanup` and try again.",
+      );
+    }
   }
   await showToast({
     title: "AVIF Encoder not installed.",
@@ -90,10 +95,20 @@ export async function getAVIFEncPaths() {
           await LocalStorage.setItem("avifDecoderPath", decoderPath);
         } catch (error) {
           console.error(error);
-          await showToast(EncoderNotFoundError);
+          showErrorToast(
+            "AVIF Encoder not found.",
+            error as Error,
+            undefined,
+            "Please install the libavif Homebrew formula and try again.",
+          );
         }
       } else {
-        await showToast(EncoderNotFoundError);
+        showErrorToast(
+          "AVIF Encoder not found.",
+          error as Error,
+          undefined,
+          "Please install the libavif Homebrew formula and try again.",
+        );
       }
     }
   }

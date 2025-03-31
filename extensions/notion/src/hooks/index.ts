@@ -10,6 +10,7 @@ import {
   search,
   fetchPage,
   fetchDatabase,
+  isType,
   type Page,
   type DatabaseProperty,
 } from "../utils/notion";
@@ -26,17 +27,14 @@ export function useRelations(properties: DatabaseProperty[]) {
     async (properties: DatabaseProperty[]) => {
       const relationPages: Record<string, Page[]> = {};
 
-      for (const property of properties)
-        if (property.type == "relation") relationPages[property.relation.database_id] = [];
-
       await Promise.all(
-        Object.keys(relationPages).map(async (relationId) => {
-          let cursor: string | null = null;
-          do {
-            const { pages, nextCursor } = await queryDatabase(relationId, { cursor: cursor ?? undefined });
-            relationPages[relationId].push(...pages);
-            cursor = nextCursor;
-          } while (cursor != null);
+        properties.map(async (property) => {
+          if (!isType(property, "relation")) return null;
+          const relationId = property.config.database_id;
+          if (!relationId) return null;
+          const pages = await queryDatabase(relationId, undefined);
+          relationPages[relationId] = pages;
+          return pages;
         }),
       );
 

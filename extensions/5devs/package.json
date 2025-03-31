@@ -5,6 +5,9 @@
   "description": "Get realistic data for testing purposes.",
   "icon": "5.png",
   "author": "gustavofior",
+  "contributors": [
+    "guilhermevictor"
+  ],
   "categories": [
     "Data",
     "Productivity",

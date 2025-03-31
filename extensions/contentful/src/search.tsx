@@ -4,21 +4,17 @@ import { useCachedPromise } from "@raycast/utils";
 import { CONTENTFUL } from "./lib/contentful";
 import { ContentType, EntryProps, KeyValueMap, QueryOptions } from "contentful-management";
 import { CONTENTFUL_APP_URL, CONTENTFUL_LOCALE, CONTENTFUL_SPACE } from "./lib/config";
+import OpenInContentful from "./lib/components/open-in-contentful";
 
 type ContentfulContentEntry = EntryProps<KeyValueMap>;
 type ContentfulEntryStatus = "archived" | "published" | "draft" | "changed";
 
 function getEntryStatus(entry: ContentfulContentEntry): ContentfulEntryStatus {
-  const isChanged =
-    entry.sys.updatedAt && entry.sys.publishedAt && Date.parse(entry.sys.updatedAt) > Date.parse(entry.sys.publishedAt);
-
-  return entry.sys.archivedVersion
-    ? "archived"
-    : isChanged
-      ? "changed"
-      : entry.sys.publishedCounter && entry.sys.publishedCounter > 0
-        ? "published"
-        : "draft";
+  // reference: https://www.contentful.com/developers/docs/tutorials/general/determine-entry-asset-state/
+  if (!entry.sys.publishedVersion) return "draft";
+  if (entry.sys.archivedVersion) return "archived";
+  if (!!entry.sys.publishedVersion && entry.sys.version >= entry.sys.publishedVersion + 2) return "changed";
+  return "published";
 }
 
 export const ColorMapping: Record<ContentfulEntryStatus, Color> = {
@@ -83,6 +79,7 @@ export default function ContentfulSearch() {
       onSearchTextChange={setSearchText}
       throttle
       isShowingDetail={showDetail}
+      searchBarPlaceholder="Search content"
       searchBarAccessory={
         <List.Dropdown tooltip="Content Type" isLoading={contentTypesLoading} onChange={setContentType}>
           <List.Dropdown.Item icon={Icon.Layers} title="All" value="__all__" />
@@ -145,7 +142,7 @@ export const ContentfulContentEntryItem: FC<ContentfulContentEntryItemProps> = (
       title={title}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={entryUrl} />
+          <OpenInContentful url={entryUrl} />
           <Action
             title={showDetail ? "Hide Detail" : "Show Detail"}
             icon={Icon.AppWindowSidebarLeft}

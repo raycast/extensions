@@ -1,0 +1,13 @@
+---
+description: Coding style
+globs: *.tsx, *.ts
+alwaysApply: true
+---
+# Code style
+
+- do not use typescript `interface`, prefer `type`
+- only extract types if it's used more than one time, otherwise inline it
+- prefer separate react components in individual files if the component gets too big (over 400-600 lines)
+- prefer `function` declaration over lambdas (assigning lambda arrow functions to variables), use `function` declaration where possible
+- use kebab case for filenames, such as `html-color.tsx`, use kebab case with folders
+- use JSDoc comments, but do not annotate parameters (let Typescript handle that) and use them only if the function or constant is public (=exported from the module)

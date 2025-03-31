@@ -2,13 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brand-dev",
   "title": "Brand.dev",
-  "description": "An API to get a company's brand logos, colors, slogan, socials, and more.",
-  "icon": "brand-dev.png",
+  "description": "Get a company's brand logos, colors, slogan, socials, and more.",
+  "icon": "brand-dev-purple.png",
   "author": "xmok",
   "categories": [
-    "Applications",
     "Data",
-    "Design Tools"
+    "Design Tools",
+    "Web"
   ],
   "license": "MIT",
   "preferences": [
@@ -26,12 +26,40 @@
       "name": "retrieve-brands",
       "title": "Retrieve Brands",
       "description": "Get a company's brand logos, colors, slogan, socials, and more",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "brand.dev",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "action",
+          "title": "Secondary Action",
+          "description": "Set your Secondary Action",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Delete",
+              "value": "del"
+            },
+            {
+              "title": "New",
+              "value": "new"
+            }
+          ],
+          "default": "del",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.1",
-    "@raycast/utils": "^1.16.1"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

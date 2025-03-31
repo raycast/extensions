@@ -4,7 +4,13 @@
   "title": "Hashnode",
   "description": "Read, search and create stories from Raycast.",
   "icon": "command-icon.png",
+  "keywords": [
+    "News"
+  ],
   "author": "dpnick",
+  "contributors": [
+    "xmok"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -16,16 +22,16 @@
     },
     {
       "name": "best",
-      "title": "Read Best",
+      "title": "Read Relevant",
       "subtitle": "Hashnode",
-      "description": "read best posts",
+      "description": "read relevant posts",
       "mode": "view"
     },
     {
       "name": "new",
-      "title": "Read New",
+      "title": "Read Recent",
       "subtitle": "Hashnode",
-      "description": "read new posts",
+      "description": "read recent posts",
       "mode": "view"
     },
     {
@@ -64,23 +70,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0",
-    "node-fetch": "^3.1.1",
-    "open": "^8.4.0"
+    "@raycast/api": "^1.84.2",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.1.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "react": "^18.2.0",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

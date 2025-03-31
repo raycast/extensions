@@ -1,0 +1,134 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "noun-project",
+  "title": "Noun Project",
+  "description": "Search for and download SVG and PNG icons from the Noun Project",
+  "icon": "command-icon.png",
+  "author": "Rob",
+  "categories": [
+    "Design Tools",
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "key": "key",
+      "title": "API Key",
+      "name": "apiKey",
+      "description": "Your API key from the Noun Project: https://thenounproject.com/developers/apps/",
+      "required": true,
+      "type": "textfield",
+      "defaultValue": ""
+    },
+    {
+      "key": "secret",
+      "title": "API Secret",
+      "name": "apiSecret",
+      "description": "Your API secret from the Noun Project: https://thenounproject.com/developers/apps/",
+      "required": true,
+      "type": "password",
+      "defaultValue": ""
+    },
+    {
+      "key": "publicDomain",
+      "title": "Limit Search to Icons in the Public Domain",
+      "name": "publicDomain",
+      "description": "Outside the public domain is only available to paid API subscribers",
+      "required": false,
+      "type": "dropdown",
+      "defaultValue": "1",
+      "data": [
+        {
+          "title": "No",
+          "value": "0"
+        },
+        {
+          "title": "Yes",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "key": "showUsage",
+      "title": "API Usage",
+      "name": "showUsage",
+      "description": "Show your remaining API usage limits after each search",
+      "required": false,
+      "type": "dropdown",
+      "defaultValue": "true",
+      "data": [
+        {
+          "title": "No",
+          "value": "false"
+        },
+        {
+          "title": "Yes",
+          "value": "true"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Icons",
+      "description": "Search for an icon by a keyword",
+      "mode": "view",
+      "required": true,
+      "arguments": [
+        {
+          "name": "keyword",
+          "placeholder": "Search over 7M icons",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "color",
+          "placeholder": "Icon color",
+          "type": "dropdown",
+          "required": false,
+          "defaultValue": "000000",
+          "data": [
+            {
+              "title": "Black",
+              "value": "000000"
+            },
+            {
+              "title": "White",
+              "value": "FFFFFF"
+            }
+          ]
+        },
+        {
+          "name": "customColor",
+          "placeholder": "Custom Color",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.5.5",
+    "@types/oauth": "^0.9.5",
+    "@types/react": "18.3.7",
+    "@typescript-eslint/eslint-plugin": "^8.6.0",
+    "eslint": "^9.10.0",
+    "oauth": "github:ciaranj/node-oauth",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -6,25 +6,39 @@ import { getGitHubClient } from "../api/githubClient";
 import { IssueFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
 
-export function useMyIssues(repository: string | null, sortQuery: string) {
+export function useMyIssues({
+  sortQuery,
+  repository,
+  showCreated,
+  showAssigned,
+  showMentioned,
+  showRecentlyClosed,
+}: {
+  repository: string | null;
+  sortQuery: string;
+  showCreated: boolean;
+  showAssigned: boolean;
+  showMentioned: boolean;
+  showRecentlyClosed: boolean;
+}) {
   const { github } = getGitHubClient();
 
   const { data, ...rest } = useCachedPromise(
-    async (repository, sortTxt) => {
+    async (repo, sortTxt, enableCreated, enableAssigned, enableMentioned, enableClosed) => {
       const numberOfDays = 60;
       const twoWeeksAgo = format(subDays(Date.now(), numberOfDays), "yyyy-MM-dd");
       const updatedFilter = `updated:>${twoWeeksAgo}`;
 
-      const repositoryFilter = repository ? `repo:${repository}` : "";
+      const repositoryFilter = repo ? `repo:${repo}` : "";
 
       const results = await Promise.all(
         [
-          `is:issue author:@me archived:false is:open`,
-          `is:issue author:@me archived:false is:closed`,
-          `is:issue assignee:@me archived:false is:open`,
-          `is:issue assignee:@me archived:false is:closed`,
-          `is:issue mentions:@me archived:false is:open`,
-          `is:issue mentions:@me archived:false is:closed`,
+          ...(enableCreated ? [`is:issue author:@me archived:false is:open`] : []),
+          ...(enableClosed ? [`is:issue author:@me archived:false is:closed`] : []),
+          ...(enableAssigned ? [`is:issue assignee:@me archived:false is:open`] : []),
+          ...(enableAssigned && enableClosed ? [`is:issue assignee:@me archived:false is:closed`] : []),
+          ...(enableMentioned ? [`is:issue mentions:@me archived:false is:open`] : []),
+          ...(enableMentioned && enableClosed ? [`is:issue mentions:@me archived:false is:closed`] : []),
         ].map((query) =>
           github.searchIssues({ query: `${query} ${sortTxt} ${updatedFilter} ${repositoryFilter}`, numberOfItems: 20 }),
         ),
@@ -32,10 +46,23 @@ export function useMyIssues(repository: string | null, sortQuery: string) {
 
       return results.map((result) => result.search.nodes as IssueFieldsFragment[]);
     },
-    [repository, sortQuery],
+    [repository, sortQuery, showCreated, showAssigned, showMentioned, showRecentlyClosed],
   );
 
-  const [created, createdClosed, assigned, assignedClosed, mentioned, mentionedClosed] = data ?? [];
+  let created, createdClosed, assigned, assignedClosed, mentioned, mentionedClosed;
+  if (data) {
+    let count = 0;
+    if (showCreated) created = data[count++];
+    if (showRecentlyClosed) createdClosed = data[count++];
+    if (showAssigned) {
+      assigned = data[count++];
+      if (showRecentlyClosed) assignedClosed = data[count++];
+    }
+    if (showMentioned) {
+      mentioned = data[count++];
+      if (showRecentlyClosed) mentionedClosed = data[count++];
+    }
+  }
 
   const recentlyClosed = uniqBy(
     [...(createdClosed || []), ...(assignedClosed || []), ...(mentionedClosed || [])],

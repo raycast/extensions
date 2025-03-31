@@ -14,7 +14,8 @@
     "pernielsentikaer",
     "ofalvai",
     "adamadamsmusic",
-    "fservais"
+    "fservais",
+    "psychomane"
   ],
   "license": "MIT",
   "preferences": [
@@ -127,6 +128,15 @@
           "title": "Search Content",
           "required": false,
           "description": "Use the content of notes for searching",
+          "default": false
+        },
+        {
+          "name": "fuzzySearch",
+          "type": "checkbox",
+          "label": "Use Fuzzy Search",
+          "title": "Use Fuzzy Search",
+          "required": false,
+          "description": "If fuzzy search should be used",
           "default": false
         },
         {
@@ -289,6 +299,15 @@
           "title": "Name of heading in note in which to append",
           "required": false,
           "description": "If no heading is set, text will be appended to the end of the daily note"
+        },
+        {
+          "name": "prepend",
+          "type": "checkbox",
+          "label": "Prepend",
+          "title": "Prepend",
+          "required": false,
+          "description": "Prepend the text instead of appending",
+          "default": false
         },
         {
           "name": "silent",
@@ -542,6 +561,15 @@
           "default": "#task"
         },
         {
+          "name": "creationDate",
+          "type": "checkbox",
+          "title": "Creation Date",
+          "label": "Append creation date to the task",
+          "required": false,
+          "description": "➕ YYYY-MM-DD (Current date)",
+          "default": false
+        },
+        {
           "description": "Name of Obsidian vault where note is",
           "name": "vaultName",
           "required": false,
@@ -570,6 +598,7 @@
   "dependencies": {
     "@raycast/api": "^1.47.0",
     "@types/uuid": "^8.3.4",
+    "fuse.js": "^7.0.0",
     "luxon": "^3.4.4",
     "uuid": "^8.3.2",
     "yaml": "^2.1.1"

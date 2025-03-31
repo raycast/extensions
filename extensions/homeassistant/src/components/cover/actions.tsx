@@ -11,7 +11,7 @@ export function CoverActionPanel(props: { state: State }) {
         <Action
           title="Toggle"
           onAction={async () => await ha.toggleCover(props.state.entity_id)}
-          icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
+          icon={{ source: "cached.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Open"

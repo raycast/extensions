@@ -1,5 +1,5 @@
-import { Toast, closeMainWindow, showToast, getPreferenceValues } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { closeMainWindow, getPreferenceValues } from "@raycast/api";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { ZedBuild } from "./lib/zed";
 
 const preferences: Record<string, string> = getPreferenceValues();
@@ -28,11 +28,6 @@ export default async function command() {
     await closeMainWindow();
     await makeNewWindow();
   } catch (error) {
-    await showToast({
-      title: "Failed opening new window",
-      style: Toast.Style.Failure,
-      message: error instanceof Error ? error.message : String(error),
-    });
+    showFailureToast(error, { title: "Failed opening new window" });
   }
 }
-``;

@@ -1,5 +1,7 @@
 # Wi-Fi Changelog
 
+## [Removed Exception Capture] - 2024-08-05
+
 ## [Bug Fix] - 2024-07-29
 
 - Fixing Menubar Wi-Fi bugs

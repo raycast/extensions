@@ -5,12 +5,11 @@ import { load } from "cheerio";
   const icons = await fs.readdir("./braid-icons");
   try {
     await fs.access("./assets/icons");
-  } catch (e) {
+  } catch {
     await fs.mkdir("./assets/icons");
   }
 
   // Todo - Fix icon message filled
-  // Todo - Setup this script to automatically run on change of icon folder
 
   for (const icon of icons) {
     const iconContent = await fs.readFile(`./braid-icons/${icon}`, "utf-8");
@@ -29,7 +28,7 @@ import { load } from "cheerio";
       });
 
       // Add fill attributes
-      if (["path", "rect", "circle"].includes(el.tagName) && !$el.attr("fill")) {
+      if (["path", "rect", "circle"].includes(el.tagName)) {
         $el.attr("fill", "#ffffff");
       }
     });

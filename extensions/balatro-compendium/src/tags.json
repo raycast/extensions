@@ -1,0 +1,122 @@
+[
+  {
+    "Name": "Uncommon Tag",
+    "Effect": "Shop has an Uncommon Joker",
+    "Appearance": "tags_uncommon.png"
+  },
+  {
+    "Name": "Rare Tag",
+    "Effect": "Shop has a Rare Joker",
+    "Appearance": "tags_rare.png"
+  },
+  {
+    "Name": "Negative Tag",
+    "Effect": "Next base edition shop Joker becomes Negative",
+    "Appearance": "tags_negative.png"
+  },
+  {
+    "Name": "Foil Tag",
+    "Effect": "Next base edition shop Joker becomes Foil",
+    "Appearance": "tags_foil.png"
+  },
+  {
+    "Name": "Holographic Tag",
+    "Effect": "Next base edition shop Joker becomes Holographic",
+    "Appearance": "tags_holographic.png"
+  },
+  {
+    "Name": "Polychrome Tag",
+    "Effect": "Next base edition shop Joker becomes Polychrome",
+    "Appearance": "tags_polychrome.png"
+  },
+  {
+    "Name": "Investment Tag",
+    "Effect": "After defeating the Boss Blind, gain $15",
+    "Appearance": "tags_investment.png"
+  },
+  {
+    "Name": "Voucher Tag",
+    "Effect": "Adds one Voucher to the next shop",
+    "Appearance": "tags_voucher.png"
+  },
+  {
+    "Name": "Boss Tag",
+    "Effect": "Rerolls the Boss Blind",
+    "Appearance": "tags_boss.png"
+  },
+  {
+    "Name": "Standard Tag",
+    "Effect": "Gives a free Mega Standard Pack",
+    "Appearance": "tags_standard.png"
+  },
+  {
+    "Name": "Charm Tag",
+    "Effect": "Gives a free Mega Arcana Pack",
+    "Appearance": "tags_charm.png"
+  },
+  {
+    "Name": "Meteor Tag",
+    "Effect": "Gives a free Mega Celestial Pack",
+    "Appearance": "tags_celestial.png"
+  },
+  {
+    "Name": "Buffoon Tag",
+    "Effect": "Gives a free Mega Buffoon Pack",
+    "Appearance": "tags_buffoon.png"
+  },
+  {
+    "Name": "Handy Tag",
+    "Effect": "Gives $1 per played hand this run. Will give $x",
+    "Appearance": "tags_handy.png"
+  },
+  {
+    "Name": "Garbage Tag",
+    "Effect": "Gives $1 per unused discard this run. Will give $x",
+    "Appearance": "tags_garbage.png"
+  },
+  {
+    "Name": "Ethereal Tag",
+    "Effect": "Gives a free Spectral Pack",
+    "Appearance": "tags_spectral.png"
+  },
+  {
+    "Name": "Coupon Tag",
+    "Effect": "Initial cards and booster packs in next shop are free",
+    "Appearance": "tags_coupon.png"
+  },
+  {
+    "Name": "Double Tag",
+    "Effect": "Gives a copy of the next selected Tag. Double Tag excluded",
+    "Appearance": "tags_double.png"
+  },
+  {
+    "Name": "Juggle Tag",
+    "Effect": "+3 hand size next round",
+    "Appearance": "tags_juggle.png"
+  },
+  {
+    "Name": "D6 Tag",
+    "Effect": "Rerolls in next shop start at $0",
+    "Appearance": "tags_d6.png"
+  },
+  {
+    "Name": "Top-Up Tag",
+    "Effect": "Create up to 2 common Jokers. Must have room",
+    "Appearance": "tags_topup.png"
+  },
+  {
+    "Name": "Speed Tag",
+    "Effect": "Gives $5 per skipped Blind this run. Will give $x",
+    "Appearance": "tags_skip.png"
+  },
+  {
+    "Name": "Orbital Tag",
+    "Effect": "Upgrade [Random Poker Hand] by 3 levels",
+    "Appearance": "tags_orbital.png"
+  },
+  {
+    "Name": "Economy Tag",
+    "Effect": "Doubles your money. Max of $40",
+    "Appearance": "tags_economy.png"
+  }
+]

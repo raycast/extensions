@@ -13,8 +13,8 @@ export const Task = ({ task }: { task: TaskItem }) => (
         : { source: Icon.Dot, tintColor: task.priority?.color }
     }
     actions={
-      <ActionPanel title="List Actions">
-        <PushAction title="List Tasks" target={<TaskDetail task={task} />} />
+      <ActionPanel title="View Actions">
+        <PushAction title="View Task" target={<TaskDetail task={task} />} />
       </ActionPanel>
     }
   />

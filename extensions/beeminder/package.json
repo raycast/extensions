@@ -9,6 +9,9 @@
     "Web"
   ],
   "author": "vivgui",
+  "contributors": [
+    "hnsn"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -51,6 +54,42 @@
       "type": "textfield",
       "default": "",
       "required": true
+    },
+    {
+      "name": "colorProgression",
+      "title": "Color Progression",
+      "description": "The color progression to use for your goals.",
+      "type": "dropdown",
+      "required": false,
+      "default": "beeminder",
+      "data": [
+        {
+          "title": "Beeminder (🔴 🟠 🔵 🟢)",
+          "value": "beeminder"
+        },
+        {
+          "title": "Rainbow (🔴 🟠 🟡 🟢 🔵 🟣)",
+          "value": "rainbow"
+        }
+      ]
+    },
+    {
+      "name": "showDaysAboveLine",
+      "title": "Days Above Line",
+      "description": "Show how many days the goal is above the red line.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show days above the red line",
+      "default": false
+    },
+    {
+      "name": "sortByDaysAboveLine",
+      "title": "Sort by Days Above the Line",
+      "description": "Sort goals by how many days they are above the red line.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Sort goals by # of days above the red line",
+      "default": false
     }
   ],
   "scripts": {

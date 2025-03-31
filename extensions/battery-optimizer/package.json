@@ -9,7 +9,8 @@
   ],
   "author": "Qetesh",
   "contributors": [
-    "vatsalsanjay"
+    "vatsalsanjay",
+    "justin0u0"
   ],
   "license": "MIT",
   "commands": [
@@ -30,6 +31,13 @@
       "title": "Get Battery Threshold",
       "description": "Check the current battery charging limit",
       "mode": "no-view"
+    },
+    {
+      "name": "battery_optimizer_menu_bar",
+      "title": "Battery Optimizer Menu Bar",
+      "description": "Show the current battery charging threshold and enable/disable the Battery Optimizer in the menu bar",
+      "mode": "menu-bar",
+      "interval": "10m"
     }
   ],
   "preferences": [
@@ -50,7 +58,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.74.0"
+    "@raycast/api": "^1.74.0",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

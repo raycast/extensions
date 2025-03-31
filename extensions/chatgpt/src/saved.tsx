@@ -40,7 +40,7 @@ export default function Saved() {
   );
 
   const sortedSavedChats = savedChat.data.sort(
-    (a, b) => new Date(b.saved_at ?? 0).getTime() - new Date(a.saved_at ?? 0).getTime()
+    (a, b) => new Date(b.saved_at ?? 0).getTime() - new Date(a.saved_at ?? 0).getTime(),
   );
 
   const filteredSavedChats = sortedSavedChats

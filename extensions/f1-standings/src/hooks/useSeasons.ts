@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import fetch from "node-fetch";
+import fetch, { AbortError } from "node-fetch";
 import { popToRoot, showToast, Toast } from "@raycast/api";
 
 interface Season {
@@ -16,13 +16,16 @@ const useSeasons = () => {
       cancelRef.current?.abort();
       cancelRef.current = new AbortController();
       try {
-        const res = await fetch("https://ergast.com/api/f1/seasons.json?limit=100", {
+        const res = await fetch("https://api.jolpi.ca/ergast/f1/seasons.json?limit=100", {
           method: "get",
           signal: cancelRef.current.signal,
         });
         const data = (await res.json()) as any;
         setSeasons((data?.MRData?.SeasonTable?.Seasons || []).sort((a: Season, b: Season) => b.season - a.season));
       } catch (error) {
+        if (error instanceof AbortError) {
+          return;
+        }
         await showToast({
           style: Toast.Style.Failure,
           title: "Error",

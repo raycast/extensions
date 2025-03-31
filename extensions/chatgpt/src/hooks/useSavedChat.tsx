@@ -32,7 +32,7 @@ export function useSavedChat(): SavedChatHook {
       toast.title = "Answer saved!";
       toast.style = Toast.Style.Success;
     },
-    [setData, data]
+    [setData, data],
   );
 
   const remove = useCallback(
@@ -46,7 +46,7 @@ export function useSavedChat(): SavedChatHook {
       toast.title = "Answer unsaved!";
       toast.style = Toast.Style.Success;
     },
-    [setData, data]
+    [setData, data],
   );
 
   const clear = useCallback(async () => {

@@ -5,7 +5,7 @@ export interface LifeProgress {
   titleCanvas: { canvas: string; text: string };
   subTitle: string;
   number: number;
-  accessUnit: { icon: string }[];
+  accessUnit?: { icon: string }[];
 }
 
 export interface CountdownDate {

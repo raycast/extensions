@@ -1,6 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "trovu",
+  "version": "1.2.0",
   "title": "Trovu - Web Search Command Line",
   "description": "Search 1000+ websites in a command-line way, with curated and personal shortcuts, organized by namespaces, allowing multiple and typed arguments, with full privacy.",
   "icon": "command-icon.png",
@@ -1514,6 +1515,7 @@
     "@types/lodash": "^4.17.5",
     "countries-list": "^2.6.1",
     "dayjs": "^1.11.7",
+    "escape-string-regexp": "^4.0.0",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21"
   },

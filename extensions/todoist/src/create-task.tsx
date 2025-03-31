@@ -1,4 +1,17 @@
-import { ActionPanel, Form, Icon, useNavigation, open, Toast, Action, Color } from "@raycast/api";
+import {
+  ActionPanel,
+  Form,
+  Icon,
+  useNavigation,
+  closeMainWindow,
+  open,
+  Toast,
+  Action,
+  Color,
+  PopToRootType,
+  popToRoot,
+  getPreferenceValues,
+} from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 
 import { addComment, addTask, AddTaskArgs, handleError, uploadFile } from "./api";
@@ -18,7 +31,8 @@ import useSyncData from "./hooks/useSyncData";
 type CreateTaskValues = {
   content: string;
   description: string;
-  dueDate: Date | null;
+  date: Date | null;
+  deadline: Date | null;
   duration: string;
   priority: string;
   projectId: string;
@@ -37,6 +51,8 @@ type CreateTaskProps = {
 };
 
 function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues }: CreateTaskProps) {
+  const { shouldCloseMainWindow } = getPreferenceValues<Preferences.CreateTask>();
+
   const { push, pop } = useNavigation();
 
   const { data, setData, isLoading } = useSyncData();
@@ -49,11 +65,21 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
   const { handleSubmit, itemProps, values, focus, reset } = useForm<CreateTaskValues>({
     async onSubmit(values) {
+      if (shouldCloseMainWindow) {
+        await closeMainWindow({ popToRootType: PopToRootType.Suspended });
+      }
+
       const body: AddTaskArgs = { content: values.content, description: values.description };
 
-      if (values.dueDate) {
+      if (values.date) {
         body.due = {
-          date: Form.DatePicker.isFullDay(values.dueDate) ? getAPIDate(values.dueDate) : values.dueDate.toISOString(),
+          date: Form.DatePicker.isFullDay(values.date) ? getAPIDate(values.date) : values.date.toISOString(),
+        };
+      }
+
+      if (values.deadline) {
+        body.deadline = {
+          date: getAPIDate(values.deadline),
         };
       }
 
@@ -129,7 +155,8 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
         reset({
           content: "",
           description: "",
-          dueDate: null,
+          date: null,
+          deadline: null,
           priority: String(lowestPriority.value),
           projectId: "",
           sectionId: "",
@@ -142,18 +169,23 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
         focus("content");
       } catch (error) {
         handleError({ error, title: "Unable to create task" });
+      } finally {
+        if (shouldCloseMainWindow) {
+          await popToRoot();
+        }
       }
     },
     initialValues: {
       content: draftValues?.content,
       description: draftValues?.description,
-      dueDate: draftValues?.dueDate ?? (fromTodayEmptyView ? new Date() : null),
+      date: draftValues?.date ?? (fromTodayEmptyView ? new Date() : null),
+      deadline: draftValues?.deadline ?? null,
       duration: draftValues?.duration ?? "",
-      priority: draftValues?.priority || String(lowestPriority.value),
-      projectId: draftValues?.projectId ? draftValues.projectId : "" || fromProjectId ? fromProjectId : "",
-      sectionId: draftValues?.sectionId ? draftValues.sectionId : "",
-      responsibleUid: draftValues?.responsibleUid ? draftValues.responsibleUid : "",
-      labels: draftValues?.labels ?? (fromLabel ? [fromLabel] : []) ?? [],
+      priority: draftValues?.priority ?? String(lowestPriority.value),
+      projectId: draftValues?.projectId ?? fromProjectId ?? "",
+      sectionId: draftValues?.sectionId ?? "",
+      responsibleUid: draftValues?.responsibleUid ?? "",
+      labels: draftValues?.labels ?? (fromLabel ? [fromLabel] : []),
     },
     validation: {
       content: FormValidation.Required,
@@ -192,10 +224,14 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
       <Form.Separator />
 
-      <Form.DatePicker {...itemProps.dueDate} title="Due date" />
+      <Form.DatePicker {...itemProps.date} title="Date" />
 
-      {values.dueDate && !Form.DatePicker.isFullDay(values.dueDate) ? (
+      {values.date && !Form.DatePicker.isFullDay(values.date) ? (
         <Form.TextField {...itemProps.duration} title="Duration (minutes)" />
+      ) : null}
+
+      {data?.user?.premium_status !== "not_premium" ? (
+        <Form.DatePicker {...itemProps.deadline} title="Deadline" type={Form.DatePicker.Type.Date} />
       ) : null}
 
       <Form.Dropdown {...itemProps.priority} title="Priority">

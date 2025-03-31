@@ -36,6 +36,7 @@ export function Guide() {
       actions={
         <ActionPanel>
           <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          {/* eslint-disable-next-line @raycast/prefer-title-case */}
           <Action.Open title="Open 1Password Settings" target="onepassword://settings" />
           <Action title="Reset Cache" icon={Icon.Trash} onAction={() => resetCache()}></Action>
         </ActionPanel>

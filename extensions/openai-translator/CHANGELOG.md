@@ -1,5 +1,18 @@
 # OpenAI Translator Changelog
 
+## [Added Recent Translate Language] - 2024-10-30
+
+- Added the recent translation languages to the language dropdown list.
+
+## [Dynamic OpenAI & Ollama Model List] - 2024-09-28
+
+- Added dynamic retrieval of OpenAI & Ollama model lists.
+- Fixed issue where custom models were lost when re-editing the provider.
+
+## [Update OpenAI support model] - 2024-08-01
+
+- Update OpenAI support model
+
 ## [Toggle Auto copy to clipboard after translation] - 2024-04-29
 
 - Add preference to auto on/off copy to clipboard after translation @joyg
@@ -46,8 +59,6 @@
 - Auto exchange target and source when translate English and Chinese
 - Fixed incomplete display of translation
 
-
-
 ## [Improve & Feature] - 2023-04-06
 
 - Add SOCKS5 proxy suppoort
@@ -55,6 +66,5 @@
 - Improve network reliability
 - "Word" mode
 - Sync prompts from original openai translator
-
 
 ## [Initial Version] - 2023-03-10

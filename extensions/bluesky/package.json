@@ -3,14 +3,15 @@
   "name": "bluesky",
   "title": "Bluesky",
   "description": "Browse through your Bluesky timeline. Create new posts, find people, and view your notifications.",
-  "icon": "extension-icon.png",
+  "icon": "bsky-logo-1.png",
   "author": "dharamkapila",
   "categories": [
     "Communication",
     "Web"
   ],
   "contributors": [
-    "peduarte"
+    "peduarte",
+    "xmok"
   ],
   "license": "MIT",
   "preferences": [
@@ -19,6 +20,7 @@
       "title": "Bluesky Service URL",
       "description": "Service URL",
       "default": "https://bsky.social",
+      "placeholder": "https://bsky.social",
       "name": "service",
       "required": true
     },
@@ -27,6 +29,7 @@
       "title": "Bluesky Email or Handle",
       "description": "Your Bluesky email or handle",
       "name": "accountId",
+      "placeholder": "bsky.app",
       "required": true
     },
     {
@@ -34,6 +37,7 @@
       "title": "App Password",
       "description": "Your App Password",
       "name": "password",
+      "placeholder": "xxxx-xxxx-xxxx-xxxx",
       "required": true
     }
   ],
@@ -100,26 +104,28 @@
     }
   ],
   "dependencies": {
-    "@atproto/api": "^0.3.3",
-    "@atproto/uri": "^0.0.2",
-    "@raycast/api": "^1.52.1",
-    "@raycast/utils": "^1.5.2",
+    "@atproto/api": "^0.14.7",
+    "@atproto/uri": "^0.1.1",
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.18.1",
     "cross-fetch": "^3.1.5",
     "use-debounce": "^9.0.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "react": "^18.3.1",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

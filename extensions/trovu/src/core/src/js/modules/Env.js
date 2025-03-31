@@ -110,11 +110,15 @@ export default class Env {
     this.fetch = await this.getFetch();
     this.data = this.data || (await this.getData());
 
+    if (this.data.config.defaultKeyword) {
+      this.defaultKeyword = this.data.config.defaultKeyword;
+    }
+
     if (!params) {
       params = Env.getParamsFromUrl();
     }
 
-    const boolParams = Env.setBoolParams(params);
+    const boolParams = Env.getBoolParams(params);
     Object.assign(this, boolParams);
 
     // Assign before, to also catch "debug" and "reload" in params and query.
@@ -187,7 +191,7 @@ export default class Env {
     /* eslint-enable no-undef */
   }
 
-  static setBoolParams(params) {
+  static getBoolParams(params) {
     const boolParams = {};
     for (const paramName of ["debug", "reload"]) {
       if (params[paramName] === "1") {

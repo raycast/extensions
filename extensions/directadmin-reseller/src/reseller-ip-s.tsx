@@ -1,51 +1,34 @@
-import { useEffect, useState } from "react";
-import { getResellerIPInformation, getResellerIPs } from "./utils/api";
-import { Action, ActionPanel, Detail, Icon, List, Toast, showToast } from "@raycast/api";
-import { ErrorResponse, GetResellerIPInformationResponse, GetResellerIPsResponse } from "./types";
+import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import ErrorComponent from "./components/ErrorComponent";
+import InvalidUrlComponent from "./components/InvalidUrlComponent";
+import { isInvalidUrl } from "./utils/functions";
+import { useGetResellerIPInformation, useGetResellerIPs } from "./utils/hooks";
 
 export default function ResellerIPs() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [resellerIPs, setResellerIPs] = useState<string[]>();
-  const [error, setError] = useState<ErrorResponse>();
+  if (isInvalidUrl()) return <InvalidUrlComponent />;
 
-  async function getFromApi() {
-    setIsLoading(true);
-    const response = await getResellerIPs();
-    if (response.error === "0") {
-      const data = response as GetResellerIPsResponse;
-      const { list } = data;
-      setResellerIPs(list);
-      await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} Reseller IPs`);
-    } else if (response.error === "1") setError(response as ErrorResponse);
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-    getFromApi();
-  }, []);
+  const { isLoading, data: resellerIPs = [], error } = useGetResellerIPs();
 
   return error ? (
     <ErrorComponent errorResponse={error} />
   ) : (
-    <List isLoading={isLoading}>
-      {resellerIPs &&
-        resellerIPs.map((ip) => (
-          <List.Item
-            key={ip}
-            title={ip}
-            icon={Icon.Globe}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="Get Detailed Information"
-                  icon={Icon.Info}
-                  target={<GetResellerIPInformation ip={ip} />}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+    <List isLoading={isLoading} searchBarPlaceholder="Search ip">
+      {resellerIPs.map((ip) => (
+        <List.Item
+          key={ip}
+          title={ip}
+          icon={Icon.Globe}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Get Detailed Information"
+                icon={Icon.Info}
+                target={<GetResellerIPInformation ip={ip} />}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }
@@ -54,24 +37,7 @@ type GetResellerIPInformationProps = {
   ip: string;
 };
 function GetResellerIPInformation({ ip }: GetResellerIPInformationProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [resellerIPInfo, setResellerIPInfo] = useState<GetResellerIPInformationResponse>();
-
-  async function getFromApi() {
-    setIsLoading(true);
-    const response = await getResellerIPInformation(ip);
-    if (response.error === "0") {
-      const data = response as GetResellerIPInformationResponse;
-      setResellerIPInfo(data);
-
-      await showToast(Toast.Style.Success, "SUCCESS", `Fetched Reseller IP Information`);
-    }
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-    getFromApi();
-  }, []);
+  const { isLoading, data: resellerIPInfo } = useGetResellerIPInformation(ip);
 
   return (
     <Detail

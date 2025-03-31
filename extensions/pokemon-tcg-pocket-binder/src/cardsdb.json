@@ -1,0 +1,2165 @@
+[
+  {
+    "ID": "A1 001",
+    "Pack": "Mewtwo Packs",
+    "Name": "Bulbasaur",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a001-bulbasaur.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 002",
+    "Pack": "Mewtwo Packs",
+    "Name": "Ivysaur",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a002-ivysaur.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 003",
+    "Pack": "Mewtwo Packs",
+    "Name": "Venusaur",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a003-venusaur.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 004",
+    "Pack": "Mewtwo Packs",
+    "Name": "Venusaur EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a004-venusaur-ex.png",
+    "Rarity": "◇◇◇◇"
+  },
+  {
+    "ID": "A1 005",
+    "Pack": "Pikachu Packs",
+    "Name": "Caterpie",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a005-caterpie.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 006",
+    "Pack": "Pikachu Packs",
+    "Name": "Metapod",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a006-metapod.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 007",
+    "Pack": "Pikachu Packs",
+    "Name": "Butterfree",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a007-butterfree.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 008",
+    "Pack": "Mewtwo Packs",
+    "Name": "Weedle",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a008-weedle.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 009",
+    "Pack": "Mewtwo Packs",
+    "Name": "Kakuna",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a009-kakuna.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 010",
+    "Pack": "Mewtwo Packs",
+    "Name": "Beedrill",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a010-beedrill.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 011",
+    "Pack": "Charizard Packs",
+    "Name": "Oddish",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a011-oddish.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 012",
+    "Pack": "Charizard Packs",
+    "Name": "Gloom",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a012-gloom.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 013",
+    "Pack": "Charizard Packs",
+    "Name": "Vileplume",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a013-vileplume.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 014",
+    "Pack": "Pikachu Packs",
+    "Name": "Paras",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a014-paras.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 015",
+    "Pack": "Pikachu Packs",
+    "Name": "Parasect",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a015-parasect.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 016",
+    "Pack": "Mewtwo Packs",
+    "Name": "Venonat",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a016-venonat.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 017",
+    "Pack": "Mewtwo Packs",
+    "Name": "Venomoth",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a017-venomoth-1.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 018",
+    "Pack": "Charizard Packs",
+    "Name": "Bellsprout",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a018-bellsprout.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 019",
+    "Pack": "Charizard Packs",
+    "Name": "Weepinbell",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a019-weepinbell.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 020",
+    "Pack": "Charizard Packs",
+    "Name": "Victreebel",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a020-victreebel.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 021",
+    "Pack": "Charizard Packs",
+    "Name": "Exeggcute",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a021-exeggcute.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 022",
+    "Pack": "Charizard Packs",
+    "Name": "Exeggutor",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a022-exeggutor.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 023",
+    "Pack": "Charizard Packs",
+    "Name": "Exeggutor EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a023-exeggutor-ex.png",
+    "Rarity": "◇◇◇◇"
+  },
+  {
+    "ID": "A1 024",
+    "Pack": "Charizard Packs",
+    "Name": "Tangela",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a024-tangela.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 025",
+    "Pack": "Mewtwo Packs",
+    "Name": "Scyther",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a025-scyther.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 026",
+    "Pack": "All Packs",
+    "Name": "Pinsir",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a026-pinsir.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 027",
+    "Pack": "All Packs",
+    "Name": "Cottonee",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a027-cottonee.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 028",
+    "Pack": "All Packs",
+    "Name": "Whimsicott",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a028-whimsicott.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 029",
+    "Pack": "All Packs",
+    "Name": "Petilil",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a029-petilil.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 030",
+    "Pack": "All Packs",
+    "Name": "Lilligant",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a030-lilligant.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 031",
+    "Pack": "Charizard Packs",
+    "Name": "Skiddo",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a031-skiddo.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 032",
+    "Pack": "Charizard Packs",
+    "Name": "Gogoat",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a032-gogoat.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 033",
+    "Pack": "Charizard Packs",
+    "Name": "Charmander",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a033-charmander.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 034",
+    "Pack": "Charizard Packs",
+    "Name": "Charmeleon",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a034-charmeleon.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 035",
+    "Pack": "Charizard Packs",
+    "Name": "Charizard",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a035-charizard.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 036",
+    "Pack": "Charizard Packs",
+    "Name": "Charizard EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a036-charizard-ex.png",
+    "Rarity": "◇◇◇◇"
+  },
+  {
+    "ID": "A1 037",
+    "Pack": "Charizard Packs",
+    "Name": "Vulpix",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a037-vulpix.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 038",
+    "Pack": "Charizard Packs",
+    "Name": "Ninetales",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a038-ninetales.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 039",
+    "Pack": "Pikachu Packs",
+    "Name": "Growlithe",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a039-growlithe.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 040",
+    "Pack": "Pikachu Packs",
+    "Name": "Arcanine",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a040-arcanine.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 041",
+    "Pack": "Pikachu Packs",
+    "Name": "Arcanine EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a041-arcanine-ex.png",
+    "Rarity": "◇◇◇◇"
+  },
+  {
+    "ID": "A1 042",
+    "Pack": "All Packs",
+    "Name": "Ponyta",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a042-ponyta.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 043",
+    "Pack": "All Packs",
+    "Name": "Rapidash",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a043-rapidash.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 044",
+    "Pack": "Charizard Packs",
+    "Name": "Magmar",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a044-magmar.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 045",
+    "Pack": "Charizard Packs",
+    "Name": "Flareon",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a045-flareon.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 046",
+    "Pack": "Charizard Packs",
+    "Name": "Moltres",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a046-moltres.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 047",
+    "Pack": "Charizard Packs",
+    "Name": "Moltres EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a047-moltres-ex.png",
+    "Rarity": "◇◇◇◇"
+  },
+  {
+    "ID": "A1 048",
+    "Pack": "All Packs",
+    "Name": "Heatmor",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a048-heatmor.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 049",
+    "Pack": "Mewtwo Packs",
+    "Name": "Salandit",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a049-salandit.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 050",
+    "Pack": "Mewtwo Packs",
+    "Name": "Salazzle",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a050-salazzle.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 051",
+    "Pack": "All Packs",
+    "Name": "Sizzlipede",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a051-sizzlipede.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 052",
+    "Pack": "All Packs",
+    "Name": "Centiskorch",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a052-centiskorch.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 053",
+    "Pack": "Pikachu Packs",
+    "Name": "Squirtle",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a053-squirtle.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 054",
+    "Pack": "Pikachu Packs",
+    "Name": "Wartortle",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a054-wartortle.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 055",
+    "Pack": "Pikachu Packs",
+    "Name": "Blastoise",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a055-blastoise.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 056",
+    "Pack": "Pikachu Packs",
+    "Name": "Blastoise EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a056-blastoise-ex.png",
+    "Rarity": "◇◇◇◇"
+  },
+  {
+    "ID": "A1 057",
+    "Pack": "All Packs",
+    "Name": "Psyduck",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a057-psyduck.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 058",
+    "Pack": "All Packs",
+    "Name": "Golduck",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a058-golduck.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 059",
+    "Pack": "Charizard Packs",
+    "Name": "Poliwag",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a059-poliwag.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 060",
+    "Pack": "Charizard Packs",
+    "Name": "Poliwhirl",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a060-poliwhirl.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 061",
+    "Pack": "Charizard Packs",
+    "Name": "Poliwrath",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a061-poliwrath.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 062",
+    "Pack": "Mewtwo Packs",
+    "Name": "Tentacool",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a062-tentacool.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 063",
+    "Pack": "Mewtwo Packs",
+    "Name": "Tentacruel",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a063-tentacruel.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 064",
+    "Pack": "Pikachu Packs",
+    "Name": "Seel",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a064-seel.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 065",
+    "Pack": "Pikachu Packs",
+    "Name": "Dewgong",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a065-dewgong.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 066",
+    "Pack": "Mewtwo Packs",
+    "Name": "Shellder",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a066-shellder.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 067",
+    "Pack": "Mewtwo Packs",
+    "Name": "Cloyster",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a067-cloyster.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 068",
+    "Pack": "Mewtwo Packs",
+    "Name": "Krabby",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a068-krabby.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 069",
+    "Pack": "Mewtwo Packs",
+    "Name": "Kingler",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a069-kingler.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 070",
+    "Pack": "Pikachu Packs",
+    "Name": "Horsea",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a070-horsea.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 071",
+    "Pack": "Pikachu Packs",
+    "Name": "Seadra",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a071-seadra.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 072",
+    "Pack": "Pikachu Packs",
+    "Name": "Goldeen",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a072-goldeen.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 073",
+    "Pack": "Pikachu Packs",
+    "Name": "Seaking",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a073-seaking.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 074",
+    "Pack": "Charizard Packs",
+    "Name": "Staryu",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a074-staryu.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 075",
+    "Pack": "Charizard Packs",
+    "Name": "Starmie",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a075-starmie.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 076",
+    "Pack": "Charizard Packs",
+    "Name": "Starmie EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a076-starmie-ex.png",
+    "Rarity": "◇◇◇◇"
+  },
+  {
+    "ID": "A1 077",
+    "Pack": "Pikachu Packs",
+    "Name": "Magikarp",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a077-magikarp.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 078",
+    "Pack": "Pikachu Packs",
+    "Name": "Gyarados",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a078-gyarados.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 079",
+    "Pack": "Charizard Packs",
+    "Name": "Lapras",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a079-lapras.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 080",
+    "Pack": "Mewtwo Packs",
+    "Name": "Vaporeon",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a080-vaporeon.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 081",
+    "Pack": "Pikachu Packs",
+    "Name": "Omanyte",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a081-omanyte.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 082",
+    "Pack": "Pikachu Packs",
+    "Name": "Omastar",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a082-omastar.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 083",
+    "Pack": "Mewtwo Packs",
+    "Name": "Articuno",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a083-articuno.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 084",
+    "Pack": "Mewtwo Packs",
+    "Name": "Articuno EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a084-articuno-ex.png",
+    "Rarity": "◇◇◇◇"
+  },
+  {
+    "ID": "A1 085",
+    "Pack": "Charizard Packs",
+    "Name": "Ducklett",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a085-ducklett.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 086",
+    "Pack": "Charizard Packs",
+    "Name": "Swanna",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a086-swanna.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 087",
+    "Pack": "Charizard Packs",
+    "Name": "Froakie",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a087-froakie.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 088",
+    "Pack": "Charizard Packs",
+    "Name": "Frogadier",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a088-frogadier.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 089",
+    "Pack": "Charizard Packs",
+    "Name": "Greninja",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a089-greninja.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 090",
+    "Pack": "Charizard Packs",
+    "Name": "Pyukumuku",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a090-pyukumuku.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 091",
+    "Pack": "All Packs",
+    "Name": "Bruxish",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a091-bruxish.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 092",
+    "Pack": "All Packs",
+    "Name": "Snom",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a092-snom.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 093",
+    "Pack": "All Packs",
+    "Name": "Frosmoth",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a093-frosmoth.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 094",
+    "Pack": "Pikachu Packs",
+    "Name": "Pikachu",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a094-pikachu.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 095",
+    "Pack": "Pikachu Packs",
+    "Name": "Raichu",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a095-raichu.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 096",
+    "Pack": "Pikachu Packs",
+    "Name": "Pikachu EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a096-pikachu-ex.png",
+    "Rarity": "◇◇◇◇"
+  },
+  {
+    "ID": "A1 097",
+    "Pack": "Pikachu Packs",
+    "Name": "Magnemite",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a097-magnemite.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 098",
+    "Pack": "Pikachu Packs",
+    "Name": "Magneton",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a098-magneton.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 099",
+    "Pack": "Pikachu Packs",
+    "Name": "Voltorb",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a099-voltorb.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 100",
+    "Pack": "Pikachu Packs",
+    "Name": "Electrode",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a100-electrode.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 101",
+    "Pack": "Pikachu Packs",
+    "Name": "Electabuzz",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a101-electabuzz.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 102",
+    "Pack": "Pikachu Packs",
+    "Name": "Jolteon",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a102-jolteon.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 103",
+    "Pack": "Pikachu Packs",
+    "Name": "Zapdos",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a103-zapdos.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 104",
+    "Pack": "Pikachu Packs",
+    "Name": "Zapdos EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a104-zapdos-ex.png",
+    "Rarity": "◇◇◇◇"
+  },
+  {
+    "ID": "A1 105",
+    "Pack": "All Packs",
+    "Name": "Blitzle",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a105-blitzle.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 106",
+    "Pack": "All Packs",
+    "Name": "Zebstrika",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a106-zebstrika.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 107",
+    "Pack": "Mewtwo Packs",
+    "Name": "Tynamo",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a107-tynamo.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 108",
+    "Pack": "Mewtwo Packs",
+    "Name": "Eelektrik",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a108-eelektrik.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 109",
+    "Pack": "Mewtwo Packs",
+    "Name": "Eelektross",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a109-eelektross.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 110",
+    "Pack": "All Packs",
+    "Name": "Helioptile",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a110-helioptile.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 111",
+    "Pack": "All Packs",
+    "Name": "Heliolisk",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a111-heliolisk.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 112",
+    "Pack": "All Packs",
+    "Name": "Pincurchin",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a112-pincurchin.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 113",
+    "Pack": "Pikachu Packs",
+    "Name": "Clefairy",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a113-clefairy.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 114",
+    "Pack": "Pikachu Packs",
+    "Name": "Clefable",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a114-clefable.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 115",
+    "Pack": "Charizard Packs",
+    "Name": "Abra",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a115-abra.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 116",
+    "Pack": "Charizard Packs",
+    "Name": "Kadabra",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a116-kadabra.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 117",
+    "Pack": "Charizard Packs",
+    "Name": "Alakazam",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a117-alakazam.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 118",
+    "Pack": "All Packs",
+    "Name": "Slowpoke",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a118-slowpoke.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 119",
+    "Pack": "All Packs",
+    "Name": "Slowbro",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a119-slowbro.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 120",
+    "Pack": "Mewtwo Packs",
+    "Name": "Gastly",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a120-gastly.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 121",
+    "Pack": "Mewtwo Packs",
+    "Name": "Haunter",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a121-haunter.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 122",
+    "Pack": "Mewtwo Packs",
+    "Name": "Gengar",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a122-gengar.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 123",
+    "Pack": "Mewtwo Packs",
+    "Name": "Gengar EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a123-gengar-ex.png",
+    "Rarity": "◇◇◇◇"
+  },
+  {
+    "ID": "A1 124",
+    "Pack": "Pikachu Packs",
+    "Name": "Drowzee",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a124-drowzee.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 125",
+    "Pack": "Pikachu Packs",
+    "Name": "Hypno",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a125-hypno.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 126",
+    "Pack": "Mewtwo Packs",
+    "Name": "Mr. Mime",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a126-mr-mime.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 127",
+    "Pack": "Mewtwo Packs",
+    "Name": "Jynx",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a127-jynx.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 128",
+    "Pack": "Mewtwo Packs",
+    "Name": "Mewtwo",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a128-mewtwo.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 129",
+    "Pack": "Mewtwo Packs",
+    "Name": "Mewtwo EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a129-mewtwo-ex.png",
+    "Rarity": "◇◇◇◇"
+  },
+  {
+    "ID": "A1 130",
+    "Pack": "Mewtwo Packs",
+    "Name": "Ralts",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a130-ralts.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 131",
+    "Pack": "Mewtwo Packs",
+    "Name": "Kirlia",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a131-kirlia.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 132",
+    "Pack": "Mewtwo Packs",
+    "Name": "Gardevoir",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a132-gardevoir.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 133",
+    "Pack": "All Packs",
+    "Name": "Woobat",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a133-woobat.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 134",
+    "Pack": "All Packs",
+    "Name": "Swoobat",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a134-swoobat.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 135",
+    "Pack": "All Packs",
+    "Name": "Golett",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a135-golett.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 136",
+    "Pack": "All Packs",
+    "Name": "Golurk",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a136-golurk.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 137",
+    "Pack": "All Packs",
+    "Name": "Sandshrew",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a137-sandshrew.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 138",
+    "Pack": "All Packs",
+    "Name": "Sandslash",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a138-sandslash.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 139",
+    "Pack": "Pikachu Packs",
+    "Name": "Diglett",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a139-diglett.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 140",
+    "Pack": "Pikachu Packs",
+    "Name": "Dugtrio",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a140-dugtrio.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 141",
+    "Pack": "Charizard Packs",
+    "Name": "Mankey",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a141-mankey.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 142",
+    "Pack": "Charizard Packs",
+    "Name": "Primeape",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a142-primeape.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 143",
+    "Pack": "Charizard Packs",
+    "Name": "Machop",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a143-machop.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 144",
+    "Pack": "Charizard Packs",
+    "Name": "Machoke",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a144-machoke.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 145",
+    "Pack": "Charizard Packs",
+    "Name": "Machamp",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a145-machamp.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 146",
+    "Pack": "Charizard Packs",
+    "Name": "Machamp EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a146-machamp-ex.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 147",
+    "Pack": "Pikachu Packs",
+    "Name": "Geodude",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a147-geodude.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 148",
+    "Pack": "Pikachu Packs",
+    "Name": "Graveler",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a148-graveler.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 149",
+    "Pack": "Pikachu Packs",
+    "Name": "Golem",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a149-golem.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 150",
+    "Pack": "Pikachu Packs",
+    "Name": "Onix",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a150-onix.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 151",
+    "Pack": "Mewtwo Packs",
+    "Name": "Cubone",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a151-cubone.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 152",
+    "Pack": "Mewtwo Packs",
+    "Name": "Marowak",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a152-marowak.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 153",
+    "Pack": "Mewtwo Packs",
+    "Name": "Marowak EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a153-marowak-ex.png",
+    "Rarity": "◇◇◇◇"
+  },
+  {
+    "ID": "A1 154",
+    "Pack": "Mewtwo Packs",
+    "Name": "Hitmonlee",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a154-hitmonlee.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 155",
+    "Pack": "Charizard Packs",
+    "Name": "Hitmonchan",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a155-hitmonchan.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 156",
+    "Pack": "Mewtwo Packs",
+    "Name": "Rhyhorn",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a156-rhyhorn.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 157",
+    "Pack": "Mewtwo Packs",
+    "Name": "Rhydon",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a157-rhydon.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 158",
+    "Pack": "Charizard Packs",
+    "Name": "Kabuto",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a158-kabuto.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 159",
+    "Pack": "Charizard Packs",
+    "Name": "Kabutops",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a159-kabutops.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 160",
+    "Pack": "Pikachu Packs",
+    "Name": "Mienfoo",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a160-mienfoo.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 161",
+    "Pack": "Pikachu Packs",
+    "Name": "Mienshao",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a161-mienshao.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 162",
+    "Pack": "All Packs",
+    "Name": "Clobbopus",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a162-clobbopus.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 163",
+    "Pack": "All Packs",
+    "Name": "Grapploct",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a163-grapploct.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 164",
+    "Pack": "All Packs",
+    "Name": "Ekans",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a164-ekans.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 165",
+    "Pack": "All Packs",
+    "Name": "Arbok",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a165-arbok.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 166",
+    "Pack": "Pikachu Packs",
+    "Name": "Nidoran ♀",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a166-nidoranf.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 167",
+    "Pack": "Pikachu Packs",
+    "Name": "Nidorina",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a167-nidorina.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 168",
+    "Pack": "Pikachu Packs",
+    "Name": "Nidoqueen",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a168-nidoqueen.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 169",
+    "Pack": "Pikachu Packs",
+    "Name": "Nidoran ♂",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a169-nidoranm.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 170",
+    "Pack": "Pikachu Packs",
+    "Name": "Nidorino",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a170-nidorino.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 171",
+    "Pack": "Pikachu Packs",
+    "Name": "Nidoking",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a171-nidoking.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 172",
+    "Pack": "Mewtwo Packs",
+    "Name": "Zubat",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a172-zubat.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 173",
+    "Pack": "Mewtwo Packs",
+    "Name": "Golbat",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a173-golbat.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 174",
+    "Pack": "Mewtwo Packs",
+    "Name": "Grimer",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a174-grimer.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 175",
+    "Pack": "Mewtwo Packs",
+    "Name": "Muk",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a175-muk.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 176",
+    "Pack": "Mewtwo Packs",
+    "Name": "Koffing",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a176-koffing.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 177",
+    "Pack": "Mewtwo Packs",
+    "Name": "Weezing",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a177-weezing.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 178",
+    "Pack": "Charizard Packs",
+    "Name": "Mawile",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a178-mawile.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 179",
+    "Pack": "All Packs",
+    "Name": "Pawniard",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a179-pawniard.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 180",
+    "Pack": "All Packs",
+    "Name": "Bisharp",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a180-bisharp.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 181",
+    "Pack": "Charizard Packs",
+    "Name": "Meltan",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a181-meltan.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 182",
+    "Pack": "Charizard Packs",
+    "Name": "Melmetal",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a182-melmetal.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 183",
+    "Pack": "Mewtwo Packs",
+    "Name": "Dratini",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a183-dratini.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 184",
+    "Pack": "Mewtwo Packs",
+    "Name": "Dragonair",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a184-dragonair.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 185",
+    "Pack": "Mewtwo Packs",
+    "Name": "Dragonite",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a185-dragonite.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 186",
+    "Pack": "Mewtwo Packs",
+    "Name": "Pidgey",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a186-pidgey.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 187",
+    "Pack": "Mewtwo Packs",
+    "Name": "Pidgeotto",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a187-pidgeotto.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 188",
+    "Pack": "Mewtwo Packs",
+    "Name": "Pidgeot",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a188-pidgeot.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 189",
+    "Pack": "All Packs",
+    "Name": "Rattata",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a189-rattata.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 190",
+    "Pack": "All Packs",
+    "Name": "Raticate",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a190-raticate.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 191",
+    "Pack": "Charizard Packs",
+    "Name": "Spearow",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a191-spearow.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 192",
+    "Pack": "Charizard Packs",
+    "Name": "Fearow",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a192-fearow.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 193",
+    "Pack": "Pikachu Packs",
+    "Name": "Jigglypuff",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a193-jigglypuff.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 194",
+    "Pack": "Pikachu Packs",
+    "Name": "Wigglytuff",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a194-wigglytuff.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 195",
+    "Pack": "Pikachu Packs",
+    "Name": "Wigglytuff EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a195-wigglytuff-ex.png",
+    "Rarity": "◇◇◇◇"
+  },
+  {
+    "ID": "A1 196",
+    "Pack": "Charizard Packs",
+    "Name": "Meowth",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a196-meowth.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 197",
+    "Pack": "Charizard Packs",
+    "Name": "Persian",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a197-persian.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 198",
+    "Pack": "All Packs",
+    "Name": "Farfetch'd",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a198-farfetchd.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 199",
+    "Pack": "All Packs",
+    "Name": "Doduo",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a199-doduo.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 200",
+    "Pack": "All Packs",
+    "Name": "Dodrio",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a200-dodrio.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 201",
+    "Pack": "Mewtwo Packs",
+    "Name": "Lickitung",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a201-lickitung.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 202",
+    "Pack": "Pikachu Packs",
+    "Name": "Chansey",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a202-chansey.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 203",
+    "Pack": "Charizard Packs",
+    "Name": "Kangaskhan",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a203-kangaskhan.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 204",
+    "Pack": "Charizard Packs",
+    "Name": "Tauros",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a204-tauros.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 205",
+    "Pack": "Mewtwo Packs",
+    "Name": "Ditto",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a205-ditto.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 206",
+    "Pack": "Charizard Packs",
+    "Name": "Eevee",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a206-eevee.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 207",
+    "Pack": "Mewtwo Packs",
+    "Name": "Eevee",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a207-eevee.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 208",
+    "Pack": "Pikachu Packs",
+    "Name": "Eevee",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a208-eevee.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 209",
+    "Pack": "Mewtwo Packs",
+    "Name": "Porygon",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a209-porygon.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 210",
+    "Pack": "Mewtwo Packs",
+    "Name": "Aerodactyl",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a210-aerodactyl.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 211",
+    "Pack": "Pikachu Packs",
+    "Name": "Snorlax",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a211-snorlax.png",
+    "Rarity": "◇◇◇"
+  },
+  {
+    "ID": "A1 212",
+    "Pack": "All Packs",
+    "Name": "Minccino",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a212-minccino.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 213",
+    "Pack": "All Packs",
+    "Name": "Cinccino",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a213-cinccino.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 214",
+    "Pack": "All Packs",
+    "Name": "Wooloo",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a214-wooloo.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 215",
+    "Pack": "All Packs",
+    "Name": "Dubwool",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a215-dubwool.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 216",
+    "Pack": "Pikachu Packs",
+    "Name": "Helix Fossil",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a216-helix-fossil.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 217",
+    "Pack": "Charizard Packs",
+    "Name": "Dome Fossil",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a217-dome-fossil.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 218",
+    "Pack": "Mewtwo Packs",
+    "Name": "Old Amber",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a218-old-amber.png",
+    "Rarity": "◇"
+  },
+  {
+    "ID": "A1 219",
+    "Pack": "Charizard Packs",
+    "Name": "Erika",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a219-erika.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 220",
+    "Pack": "Pikachu Packs",
+    "Name": "Misty",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a220-misty.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 221",
+    "Pack": "Charizard Packs",
+    "Name": "Blaine",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-a221-blaine.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 222",
+    "Pack": "Mewtwo Packs",
+    "Name": "Koga",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-222-koga.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 223",
+    "Pack": "Mewtwo Packs",
+    "Name": "Giovanni",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-223-giovanni.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 224",
+    "Pack": "Pikachu Packs",
+    "Name": "Brock",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-224-brock.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 225",
+    "Pack": "Charizard Packs",
+    "Name": "Sabrina",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-225-sabrina.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 226",
+    "Pack": "Pikachu Packs",
+    "Name": "Lt. Surge",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-226-lt-surge.png",
+    "Rarity": "◇◇"
+  },
+  {
+    "ID": "A1 227",
+    "Pack": "Mewtwo Packs",
+    "Name": "Bulbasaur",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-227-bulbasaur.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 228",
+    "Pack": "Charizard Packs",
+    "Name": "Gloom",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-228-gloom.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 229",
+    "Pack": "Charizard Packs",
+    "Name": "Pinsir",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-229-pinsir.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 230",
+    "Pack": "Charizard Packs",
+    "Name": "Charmander",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-230-charmander.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 231",
+    "Pack": "Charizard Packs",
+    "Name": "Rapidash",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-231-rapidash.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 232",
+    "Pack": "Pikachu Packs",
+    "Name": "Squirtle",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-232-squirtle.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 233",
+    "Pack": "Pikachu Packs",
+    "Name": "Gyarados",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-233-gyarados.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 234",
+    "Pack": "Charizard Packs",
+    "Name": "Lapras",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-234-lapras.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 235",
+    "Pack": "Pikachu Packs",
+    "Name": "Electrode",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-235-electrode.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 236",
+    "Pack": "Charizard Packs",
+    "Name": "Alakazam",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-236-alakazam.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 237",
+    "Pack": "Charizard Packs",
+    "Name": "Slowpoke",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-237-slowpoke.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 238",
+    "Pack": "Pikachu Packs",
+    "Name": "Diglett",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-238-diglett.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 239",
+    "Pack": "Mewtwo Packs",
+    "Name": "Cubone",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-239-cubone.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 240",
+    "Pack": "Pikachu Packs",
+    "Name": "Nidoqueen",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-240-nidoqueen.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 241",
+    "Pack": "Pikachu Packs",
+    "Name": "Nidoking",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-241-nidoking.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 242",
+    "Pack": "Mewtwo Packs",
+    "Name": "Golbat",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-242-golbat.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 243",
+    "Pack": "Mewtwo Packs",
+    "Name": "Weezing",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-243-weezing.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 244",
+    "Pack": "Mewtwo Packs",
+    "Name": "Dragonite",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-244-dragonite.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 245",
+    "Pack": "Mewtwo Packs",
+    "Name": "Pidgeot",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-245-pidgeot.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 246",
+    "Pack": "Charizard Packs",
+    "Name": "Meowth",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-246-meowth.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 247",
+    "Pack": "Mewtwo Packs",
+    "Name": "Ditto",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-247-ditto.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 248",
+    "Pack": "Pikachu Packs",
+    "Name": "Eevee",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-248-eevee.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 249",
+    "Pack": "Mewtwo Packs",
+    "Name": "Porygon",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-249-porygon.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 250",
+    "Pack": "Pikachu Packs",
+    "Name": "Snorlax",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-250-snorlax.png",
+    "Rarity": "★"
+  },
+  {
+    "ID": "A1 251",
+    "Pack": "Mewtwo Packs",
+    "Name": "Venusaur EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-251-venusaur-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 252",
+    "Pack": "Charizard Packs",
+    "Name": "Exeggutor EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-252-exeggutor-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 253",
+    "Pack": "Charizard Packs",
+    "Name": "Charizard EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-253-charizard-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 254",
+    "Pack": "Pikachu Packs",
+    "Name": "Arcanine EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-254-arcanine-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 255",
+    "Pack": "Charizard Packs",
+    "Name": "Moltres EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-255-moltres-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 256",
+    "Pack": "Pikachu Packs",
+    "Name": "Blastoise EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-256-blastoise-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 257",
+    "Pack": "Charizard Packs",
+    "Name": "Starmie EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-257-starmie-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 258",
+    "Pack": "Mewtwo Packs",
+    "Name": "Articuno EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-258-articuno-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 259",
+    "Pack": "Pikachu Packs",
+    "Name": "Pikachu EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-259-pikachu-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 260",
+    "Pack": "Pikachu Packs",
+    "Name": "Zapdos EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-260-zapdos-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 261",
+    "Pack": "Mewtwo Packs",
+    "Name": "Gengar EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-261-gengar-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 262",
+    "Pack": "Mewtwo Packs",
+    "Name": "Mewtwo EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-262-mewtwo-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 263",
+    "Pack": "Charizard Packs",
+    "Name": "Machamp EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-263-machamp-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 264",
+    "Pack": "Mewtwo Packs",
+    "Name": "Marowak EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-264-marowak.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 265",
+    "Pack": "Pikachu Packs",
+    "Name": "Wigglytuff EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-265-wigglytuff-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 266",
+    "Pack": "Charizard Packs",
+    "Name": "Erika",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-266-erika.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 267",
+    "Pack": "Pikachu Packs",
+    "Name": "Misty",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-267-misty.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 268",
+    "Pack": "Charizard Packs",
+    "Name": "Blaine",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-268-blaine.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 269",
+    "Pack": "Mewtwo Packs",
+    "Name": "Koga",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-269-koga.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 270",
+    "Pack": "Mewtwo Packs",
+    "Name": "Giovanni",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-270-giovanni.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 271",
+    "Pack": "Pikachu Packs",
+    "Name": "Brock",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-271-brock.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 272",
+    "Pack": "Charizard Packs",
+    "Name": "Sabrina",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-272-sabrina.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 273",
+    "Pack": "Pikachu Packs",
+    "Name": "Lt. Surge",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-273-lt-surge.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 274",
+    "Pack": "Charizard Packs",
+    "Name": "Moltres EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-274-moltres-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 275",
+    "Pack": "Mewtwo Packs",
+    "Name": "Articuno EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-275-articuno-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 276",
+    "Pack": "Pikachu Packs",
+    "Name": "Zapdos EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-276-zapdos-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 277",
+    "Pack": "Mewtwo Packs",
+    "Name": "Gengar EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-277-gengar-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 278",
+    "Pack": "Charizard Packs",
+    "Name": "Machamp EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-278-machamp-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 279",
+    "Pack": "Pikachu Packs",
+    "Name": "Wigglytuff EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-279-wigglytuff-ex.png",
+    "Rarity": "★★"
+  },
+  {
+    "ID": "A1 280",
+    "Pack": "Charizard Packs",
+    "Name": "Charizard EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-280-charizard-ex.png",
+    "Rarity": "★★★"
+  },
+  {
+    "ID": "A1 281",
+    "Pack": "Pikachu Packs",
+    "Name": "Pikachu EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-281-pikachu-ex.png",
+    "Rarity": "★★★"
+  },
+  {
+    "ID": "A1 282",
+    "Pack": "Mewtwo Packs",
+    "Name": "Mewtwo EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-282-mewtwo-ex.png",
+    "Rarity": "★★★"
+  },
+  {
+    "ID": "A1 283",
+    "Pack": "Complete the Kanto Pokedex!",
+    "Name": "Mew",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-283-mew.png",
+    "Rarity": "★★★"
+  },
+  {
+    "ID": "A1 284",
+    "Pack": "All Packs",
+    "Name": "Charizard EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-284-charizard-ex.png",
+    "Rarity": "🜲"
+  },
+  {
+    "ID": "A1 285",
+    "Pack": "All Packs",
+    "Name": "Pikachu EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-285-pikachu-ex.png",
+    "Rarity": "🜲"
+  },
+  {
+    "ID": "A1 286",
+    "Pack": "All Packs",
+    "Name": "Mewtwo EX",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-pocket-tcg-286-mewtwo-ex.png",
+    "Rarity": "🜲"
+  },
+  {
+    "Name": "Potion",
+    "ID": "PA 001",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-001-potion.png",
+    "Rarity": "Shop"
+  },
+  {
+    "Name": "X Speed",
+    "ID": "PA 002",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-002-x-speed.png",
+    "Rarity": "Shop"
+  },
+  {
+    "Name": "Hand Scope",
+    "ID": "PA 003",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-003-hand-scope.png",
+    "Rarity": "Shop"
+  },
+  {
+    "Name": "Pokedex",
+    "ID": "PA 004",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-004-pokedex.png",
+    "Rarity": "Shop"
+  },
+  {
+    "Name": "Poke Ball",
+    "ID": "PA 005",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-005-poke-ball.png",
+    "Rarity": "Shop"
+  },
+  {
+    "Name": "Red Card",
+    "ID": "PA 006",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-006-red-card.png",
+    "Rarity": "Shop"
+  },
+  {
+    "Name": "Professor's Research",
+    "ID": "PA 007",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-007-professors-research.png",
+    "Rarity": "Shop"
+  },
+  {
+    "Name": "Pikachu",
+    "ID": "PA 009",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-009-pikachu.png",
+    "Rarity": "Premium Ticket"
+  },
+  {
+    "Name": "Mewtwo",
+    "ID": "PA 010",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-010-mewtwo.png",
+    "Rarity": "Premium Ticket"
+  },
+  {
+    "Name": "Chansey",
+    "ID": "PA 011",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-011-chansey.png",
+    "Rarity": "Chansey Pick"
+  },
+  {
+    "Name": "Meowth",
+    "ID": "PA 012",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-012-meowth.png",
+    "Rarity": "Chansey Pick"
+  },
+  {
+    "Name": "Butterfree",
+    "ID": "PA 013",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-013-butterfree.png",
+    "Rarity": "Chansey Pick"
+  },
+  {
+    "Name": "Lapras EX",
+    "ID": "PA 014",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-014-lapras-ex.png",
+    "Rarity": "Event"
+  },
+  {
+    "Name": "Pikachu",
+    "ID": "PA 015",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-015-pikachu.png",
+    "Rarity": "Event"
+  },
+  {
+    "Name": "Clefairy",
+    "ID": "PA 016",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-016-clefairy.png",
+    "Rarity": "Event"
+  },
+  {
+    "Name": "Mankey",
+    "ID": "PA 017",
+    "Pack": "Promo Pack A Series Vol. 1",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-017-mankey.png",
+    "Rarity": "Event"
+  },
+  {
+    "Name": "Venusaur",
+    "ID": "PA 018",
+    "Pack": "Promo Pack A Series Vol. 2",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-018-venusaur.png",
+    "Rarity": "Event"
+  },
+  {
+    "Name": "Greninja",
+    "ID": "PA 019",
+    "Pack": "Promo Pack A Series Vol. 2",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-019-greninja.png",
+    "Rarity": "Event"
+  },
+  {
+    "Name": "Haunter",
+    "ID": "PA 020",
+    "Pack": "Promo Pack A Series Vol. 2",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-020-haunter.png",
+    "Rarity": "Event"
+  },
+  {
+    "Name": "Onix",
+    "ID": "PA 021",
+    "Pack": "Promo Pack A Series Vol. 2",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-021-onix.png",
+    "Rarity": "Event"
+  },
+  {
+    "Name": "Jigglypuff",
+    "ID": "PA 022",
+    "Pack": "Promo Pack A Series Vol. 2",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-022-jigglypuff.png",
+    "Rarity": "Event"
+  },
+  {
+    "Name": "Bulbasaur",
+    "ID": "PA 023",
+    "Pack": "Promo Pack A Series Vol. 2",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-023-bulbasaur.png",
+    "Rarity": "Chansey Pick"
+  },
+  {
+    "Name": "Magnemite",
+    "ID": "PA 024",
+    "Pack": "Promo Pack A Series Vol. 2",
+    "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-024-magnemite.png",
+    "Rarity": "Chansey Pick"
+  }
+]

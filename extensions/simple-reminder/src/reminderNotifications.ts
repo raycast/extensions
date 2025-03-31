@@ -11,7 +11,6 @@ import { Frequency } from "./types/frequency";
 import { buildException } from "./utils/buildException";
 
 export default async function Command() {
-  const { mobileNotificationNtfy, mobileNotificationNtfyTopic } = getPreferenceValues<SimpleReminderPreferences>();
   const storedRemindersObject = await LocalStorage.allItems<Record<string, string>>();
   if (!Object.keys(storedRemindersObject).length) return;
 
@@ -21,9 +20,7 @@ export default async function Command() {
       const cleanTopic = sanitizeTopicForNotification(reminder.topic);
 
       await sendPushNotificationToMacOS(cleanTopic);
-      if (mobileNotificationNtfy && mobileNotificationNtfyTopic) {
-        await sendPushNotificationWithNtfy(mobileNotificationNtfyTopic, cleanTopic);
-      }
+      await sendMobileNotification(cleanTopic);
 
       if (reminder.frequency) {
         const newDate = updateReminderDateForRecurrence(reminder);
@@ -61,5 +58,28 @@ function updateReminderDateForRecurrence(reminder: Reminder) {
       return addWeeks(reminder.date, 2);
     case Frequency.MONTHLY:
       return addMonths(reminder.date, 1);
+  }
+}
+
+function sendMobileNotification(cleanTopic: string) {
+  const {
+    mobileNotificationNtfy,
+    mobileNotificationNtfyTopic,
+    mobileNotificationNtfyServerUrl,
+    mobileNotificationNtfyServerAccessToken,
+  } = getPreferenceValues<SimpleReminderPreferences>();
+  const isSelfHostedServer = mobileNotificationNtfyServerUrl !== "" && mobileNotificationNtfyServerAccessToken !== "";
+
+  if (mobileNotificationNtfy && mobileNotificationNtfyTopic) {
+    return sendPushNotificationWithNtfy(
+      mobileNotificationNtfyTopic,
+      cleanTopic,
+      isSelfHostedServer
+        ? {
+            serverUrl: mobileNotificationNtfyServerUrl,
+            serverAccessToken: mobileNotificationNtfyServerAccessToken,
+          }
+        : {},
+    );
   }
 }

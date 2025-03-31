@@ -1,7 +1,6 @@
 import {
   CreateRoutingRequest,
   CreateUserRequest,
-  UpdateDomainSettingsRequest,
   ErrorResponse,
   RequestBody,
   Response,
@@ -58,10 +57,13 @@ const callApi = async (
   }
 };
 
-export async function getUsers() {
-  const body = {};
-  return await callApi("listUser", body, "Fetching Users", "Fetched Users");
-}
+// MOVED TO hooks (delete this once all are moved):
+// getUsers
+// deleteUser
+// getRoutingRules
+// deleteRoutingRule
+// getDomains
+// updateDomainSettings
 export async function modifyUser({ ...params }: ModifyUserRequest) {
   const body = { ...params };
   return await callApi("modifyUser", body);
@@ -69,10 +71,6 @@ export async function modifyUser({ ...params }: ModifyUserRequest) {
 export async function createUser({ ...params }: CreateUserRequest) {
   const body = { ...params };
   return await callApi("createUser", body);
-}
-export async function deleteUser(userName: string) {
-  const body = { userName };
-  return await callApi("deleteUser", body);
 }
 
 export async function getOwnershipCode() {
@@ -83,30 +81,14 @@ export async function addDomain(domainName: string) {
   const body = { domainName };
   return await callApi("addDomain", body);
 }
-export async function updateDomainSettings({ ...params }: UpdateDomainSettingsRequest) {
-  const body = { ...params };
-  return await callApi("updateDomainSettings", body);
-}
 export async function deleteDomain(name: string) {
   const body = { name };
   return await callApi("deleteDomain", body, "Deleting Domain", "Deleted Domain");
-}
-export async function getDomains(includeShared = false) {
-  const body = { includeShared };
-  return await callApi("listDomains", body, "Fetching Domains", "Fetched Domains");
 }
 
 export async function createRoutingRule({ ...params }: CreateRoutingRequest) {
   const body = { ...params };
   return await callApi("createRoutingRule", body, "Creating Routing Rule", "Created Routing Rule");
-}
-export async function deleteRoutingRule(routingRuleId: number) {
-  const body = { routingRuleId };
-  return await callApi("deleteRoutingRule", body, "Deleting Routing Rule", "Deleted Routing Rule");
-}
-export async function getRoutingRules() {
-  const body = {};
-  return await callApi("listRoutingRules", body, "Fetching Routing Rules", "Fetched Routing Rules");
 }
 
 export async function getAccountCredit({ hideToasts = false }) {

@@ -14,8 +14,7 @@
   "license": "MIT",
   "contributors": [
     "AnishDe12020",
-    "pomdtr",
-    "jimmy-b36"
+    "pomdtr"
   ],
   "commands": [
     {
@@ -574,11 +573,71 @@
       "mode": "view"
     },
     {
-      "name": "vuetify",
-      "icon": "/logo/vuetify.png",
-      "title": "Vuetify",
+      "name": "neovim",
+      "icon": "/logo/nvim.png",
+      "title": "Neovim",
       "subtitle": "DocSearch",
-      "description": "Search Vuetify documentation",
+      "description": "Search Neovim documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "less",
+      "icon": "/logo/less.png",
+      "title": "Less",
+      "subtitle": "DocSearch",
+      "description": "Search Less documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "sass",
+      "icon": "/logo/sass.png",
+      "title": "Sass",
+      "subtitle": "DocSearch",
+      "description": "Search Sass documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "deno",
+      "icon": "/logo/deno.png",
+      "title": "Deno",
+      "subtitle": "DocSearch",
+      "description": "Search Deno documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "typescript",
+      "icon": "/logo/typescript.png",
+      "title": "TypeScript",
+      "subtitle": "DocSearch",
+      "description": "Search TypeScript documentation",
       "arguments": [
         {
           "name": "search",

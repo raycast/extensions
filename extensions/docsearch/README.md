@@ -4,7 +4,7 @@ Link **DocSearch** and **Meilisearch** into Raycast.
 
 ![interface](./metadata/docsearch-1.png)
 
-### Supported Documentations (38 documentations | 67 different versions)
+### Supported Documentations (42 documentations | 73 different versions)
 
 |                    Documentations                     |                                                   |                                                     |
 | :---------------------------------------------------: | :-----------------------------------------------: | :-------------------------------------------------: |
@@ -20,7 +20,8 @@ Link **DocSearch** and **Meilisearch** into Raycast.
 |        [TailwindCSS](https://tailwindcss.com/)        |            [Tauri](https://tauri.app/)            |           [Unidata](https://unidata.app/)           |
 |              [Vite](https://vitejs.dev/)              |           [Vitest](https://vitest.dev/)           |       [Vue Router](https://router.vuejs.org/)       |
 |               [Vue](https://vuejs.org/)               |           [VueUse](https://vueuse.org/)           |     [Vuepress](https://v2.vuepress.vuejs.org/)      |
-|    [ElementPlus](https://element-plus.org/en-US/)     |         [Vuetify](https://vuetifyjs.com/)         |                                                     |
+|    [ElementPlus](https://element-plus.org/en-US/)     |           [Neovim](https://neovim.io/)            |            [Less](https://lesscss.org/)             |
+|            [Sass](https://sass-lang.com/)             |             [Deno](https://deno.com/)             |          [TypeScript](https://yayujs.com/)          |
 
 ### Docsearch
 
@@ -52,7 +53,6 @@ Link **DocSearch** and **Meilisearch** into Raycast.
    ![developer_tools](./assets/developer_tools_Meilisearch.png)
 3. Download the site icon and put it into [assets/logo](assets/logo).
 4. Input DocSearch data into [apis.ts](/src/data/apis.ts), like below.
-
    ```ts
    [DocID.RSSHub]: { // add a unique name to the DocID enums, then write it here
      "en-US": { // write a tag name for this documentation version that combines both the version and the language
@@ -65,7 +65,6 @@ Link **DocSearch** and **Meilisearch** into Raycast.
      }
    }
    ```
-
 5. Run the command `npm run generate`. This will create the entry file and config. After that, you can run the command `npm run dev` to test it, and `npm run build` to build it.
 
 **Enjoy! Welcome to contribute.**

@@ -194,23 +194,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.1",
-    "@raycast/utils": "^1.16.2",
-    "cheerio": "^1.0.0-rc.12",
-    "execa": "^9.2.0",
-    "fast-xml-parser": "^4.4.0",
-    "got": "^14.3.0",
-    "mac-say": "^0.2.9",
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.18.1",
+    "cheerio": "^1.0.0",
+    "fast-xml-parser": "^5.0.8",
+    "got": "^14.4.6",
+    "mac-say": "^0.3.1",
+    "pinyin-pro": "^3.26.0",
     "raycast-cross-extension": "^0.2.3",
     "turndown": "^7.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.12.5",
-    "@types/react": "^18.2.75",
-    "@types/turndown": "^5.0.4",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.4"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.5",
+    "@types/react": "^18.3.18",
+    "@types/turndown": "^5.0.5",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.2",
+    "typescript": "^5.7.3"
   }
 }

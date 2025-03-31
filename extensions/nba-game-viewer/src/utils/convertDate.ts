@@ -3,7 +3,8 @@ const convertDate = (date: string): string => {
   const month = date.substring(4, 6);
   const day = date.substring(6, 8);
 
-  return `${month}/${day}/${year}`;
+  const newDate = new Date(`${year}-${month}-${day}`);
+  return newDate.toLocaleDateString();
 };
 
 export default convertDate;

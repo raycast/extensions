@@ -4,17 +4,28 @@ import * as Errors from "./errors";
 import fetch from "node-fetch";
 import { EventEmitter } from "stream";
 import { RequestInit, HeadersInit } from "node-fetch";
+import { FetchError } from "node-fetch";
 
 export class Ollama {
   private _server: string;
   private _headers: HeadersInit | undefined;
   private _signal: AbortSignal;
 
+  private _RouteApiVersion = `/api/version`;
+  private _RouteApiTags = `/api/tags`;
+  private _RouteApiShow = `/api/show`;
+  private _RouteApiDelete = `/api/delete`;
+  private _RouteApiPull = `/api/pull`;
+  private _RouteApiGenerate = `/api/generate`;
+  private _RouteApiChat = `/api/chat`;
+  private _RouteApiEmbeddings = `/api/embeddings`;
+  private _RouteApiPs = `/api/ps`;
+
   /**
    * @param server - Ollama Server Route, default value: { url: "http://127.0.0.1:11434" }.
    */
   constructor(server = { url: "http://127.0.0.1:11434" } as Types.OllamaServer) {
-    this._signal = AbortSignal.timeout(180);
+    this._signal = AbortSignal.timeout(1800);
     this._server = server.url;
     if (server.auth && server.auth.mode === Enum.OllamaServerAuthorizationMethod.BASIC)
       this._headers = {
@@ -42,11 +53,56 @@ export class Ollama {
   }
 
   /**
+   * Log `Error` on console.
+   */
+  private _ErrorLogger(error: FetchError | Error): void {
+    if (error instanceof Errors.OllamaServerError) {
+      console.error(
+        `Error: Route '${error.route}', Code '${error.code}', Message: ${error.message}${
+          error.req && ` Req: ${error.req}`
+        }`
+      );
+    } else {
+      console.error(`Error: ${error.message}`);
+    }
+    if (error.stack) console.error(`Stack trace: ${error.stack}`);
+  }
+
+  /**
+   * Handler Ollama Server Error.
+   *
+   * @param route - Ollama Server Route.
+   * @param code - Ollama Status Code Response.
+   * @param message - Ollama Error Message Response.
+   * @param req - Ollama Request.
+   * @param model - Ollama Model Tag Name, used for `/api/show` route.
+   */
+  private _ErrorHandlerOllamaServer(
+    route: string,
+    code: number,
+    message: Types.OllamaErrorResponse,
+    req?: RequestInit,
+    model?: string
+  ): void {
+    if (route in [this._RouteApiShow, this._RouteApiGenerate, this._RouteApiChat] && code === 404) {
+      throw new Errors.OllamaModelNotInstalled(Errors.OllamaMessageModelNotInstalled.message, model);
+    }
+    if (code === 400) {
+      throw new Errors.OllamaServerError(message.error, route, code, req);
+    }
+    if (code === 500) {
+      throw new Errors.OllamaServerError(message.error, route, code);
+    }
+    throw new Errors.OllamaServerError(message.error, route, code);
+  }
+
+  /**
    * Get Ollama Version.
    * @returns Ollama Version.
    */
   async OllamaApiVersion(): Promise<string> {
-    const url = `${this._server}/api/version`;
+    const route = this._RouteApiVersion;
+    const url = `${this._server}${route}`;
     const req: RequestInit = {
       headers: this._headers,
       signal: this._signal,
@@ -56,9 +112,9 @@ export class Ollama {
       .then((output): Types.OllamaApiVersionResponse => {
         return output as Types.OllamaApiVersionResponse;
       })
-      .catch((err) => {
-        console.error(err);
-        if (err.type && err.type === "ECONNREFUSED") throw Errors.OllamaNotInstalledOrRunning;
+      .catch((err: FetchError) => {
+        this._ErrorLogger(err);
+        if (err.type === "ECONNREFUSED") throw Errors.OllamaNotInstalledOrRunning;
         throw Errors.OllamaVersion;
       });
 
@@ -70,19 +126,27 @@ export class Ollama {
    * @returns List of installed models.
    */
   async OllamaApiTags(): Promise<Types.OllamaApiTagsResponse> {
-    const url = `${this._server}/api/tags`;
+    const route = this._RouteApiTags;
+    const url = `${this._server}${route}`;
     const req: RequestInit = {
       headers: this._headers,
       signal: this._signal,
     };
     const data = await fetch(url, req)
-      .then((response) => response.json())
+      .then(async (response) => {
+        if (!response.ok) {
+          const message = (await response.json()) as Types.OllamaErrorResponse;
+          this._ErrorHandlerOllamaServer(route, response.status, message);
+        }
+        return response.json();
+      })
       .then((output): Types.OllamaApiTagsResponse => {
         return output as Types.OllamaApiTagsResponse;
       })
-      .catch((err) => {
-        console.error(err);
-        throw Errors.OllamaNotInstalledOrRunning;
+      .catch((err: FetchError | Errors.OllamaServerError) => {
+        this._ErrorLogger(err);
+        if (err instanceof FetchError && err.type === "ECONNREFUSED") throw Errors.OllamaNotInstalledOrRunning;
+        throw err;
       });
 
     return data;
@@ -94,7 +158,8 @@ export class Ollama {
    * @returns Model details.
    */
   async OllamaApiShow(model: string): Promise<Types.OllamaApiShowResponse> {
-    const url = `${this._server}/api/show`;
+    const route = this._RouteApiShow;
+    const url = `${this._server}${route}`;
     const headers = { "Content-Type": "application/json", ...this._headers };
     const req: RequestInit = {
       method: "POST",
@@ -105,21 +170,20 @@ export class Ollama {
     };
 
     const data = await fetch(url, req)
-      .then((response) => {
+      .then(async (response) => {
         if (!response.ok) {
-          throw new Errors.OllamaModelNotInstalled(Errors.OllamaMessageModelNotInstalled, model);
+          const message = (await response.json()) as Types.OllamaErrorResponse;
+          this._ErrorHandlerOllamaServer(route, response.status, message, req, model);
         }
         return response.json();
       })
       .then((output): Types.OllamaApiShowResponse => {
         return output as Types.OllamaApiShowResponse;
       })
-      .catch((err) => {
-        if (err instanceof Errors.OllamaModelNotInstalled) {
-          throw err;
-        }
-        console.error(err);
-        throw Errors.OllamaNotInstalledOrRunning;
+      .catch((err: FetchError | Error) => {
+        this._ErrorLogger(err);
+        if (err instanceof FetchError && err.type === "ECONNREFUSED") throw Errors.OllamaNotInstalledOrRunning;
+        throw err;
       });
 
     return data;
@@ -436,28 +500,28 @@ export class Ollama {
    * @param model - Model name.
    */
   async OllamaApiDelete(model: string): Promise<void> {
-    const url = `${this._server}/api/delete`;
+    const route = this._RouteApiDelete;
+    const url = `${this._server}${route}`;
     const headers = { "Content-Type": "application/json", ...this._headers };
     const req: RequestInit = {
       method: "DELETE",
       headers: headers,
       body: JSON.stringify({
-        name: model,
+        model: model,
       }),
     };
 
     await fetch(url, req)
-      .then((response) => {
+      .then(async (response) => {
         if (!response.ok) {
-          throw new Errors.OllamaModelNotInstalled(Errors.OllamaMessageModelNotInstalled, model);
+          const message = (await response.json()) as Types.OllamaErrorResponse;
+          this._ErrorHandlerOllamaServer(route, response.status, message, req, model);
         }
       })
-      .catch((err) => {
-        if (err instanceof Errors.OllamaModelNotInstalled) {
-          throw err;
-        }
-        console.error(err);
-        throw Errors.OllamaNotInstalledOrRunning;
+      .catch((err: FetchError | Error) => {
+        this._ErrorLogger(err);
+        if (err instanceof FetchError && err.type === "ECONNREFUSED") throw Errors.OllamaNotInstalledOrRunning;
+        throw err;
       });
   }
 
@@ -471,7 +535,8 @@ export class Ollama {
    *  - {string} `done` - On download completed.
    */
   async OllamaApiPull(model: string): Promise<EventEmitter> {
-    const url = `${this._server}/api/pull`;
+    const route = this._RouteApiPull;
+    const url = `${this._server}${route}`;
     const req: RequestInit = {
       method: "POST",
       headers: this._headers,
@@ -483,7 +548,13 @@ export class Ollama {
 
     while (emitter === undefined) {
       emitter = await fetch(url, req)
-        .then(async (response) => response.body)
+        .then(async (response) => {
+          if (!response.ok) {
+            const message = (await response.json()) as Types.OllamaErrorResponse;
+            this._ErrorHandlerOllamaServer(route, response.status, message, req, model);
+          }
+          return response.body;
+        })
         .then((body) => {
           if (body === undefined) {
             return undefined;
@@ -493,7 +564,7 @@ export class Ollama {
 
           body?.on("data", (chunk) => {
             if (chunk !== undefined) {
-              let json: Types.OllamaApiPullResponse | undefined;
+              let json: Types.OllamaApiPullResponse | Types.OllamaErrorResponse | undefined;
               const buffer = Buffer.from(chunk);
               try {
                 json = JSON.parse(buffer.toString());
@@ -501,11 +572,11 @@ export class Ollama {
                 console.error(err);
               }
               if (json)
-                if (json.total && json.completed) {
+                if ("total" in json && json.total && "completed" in json && json.completed) {
                   e.emit("downloading", json.completed / json.total);
-                } else if (json.status === "success") {
+                } else if ("status" in json && json.status === "success") {
                   e.emit("done", "Download completed");
-                } else if (json.error) {
+                } else if ("error" in json) {
                   e.emit("error", json.error);
                 } else {
                   e.emit("message", json.status);
@@ -515,8 +586,92 @@ export class Ollama {
 
           return e;
         })
-        .catch((err) => {
-          console.error(err);
+        .catch((err: FetchError | Error) => {
+          this._ErrorLogger(err);
+          if (err instanceof FetchError && err.type === "ECONNREFUSED") throw Errors.OllamaNotInstalledOrRunning;
+          throw err;
+        });
+    }
+    return emitter;
+  }
+
+  /**
+   * Handle streaming API response.
+   * @param route - Route path of the API.
+   * @param body - Request Body.
+   * @param contentExtractor - Extract content from response.
+   * @returns Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning an object contains all metadata of inference.
+   * @private
+   */
+  private async _OllamaApiStream<T extends { model: string }>(
+    route: string,
+    body: T,
+    contentExtractor: (json: Types.OllamaApiChatResponse | Types.OllamaErrorResponse | undefined) => string | undefined
+  ): Promise<EventEmitter> {
+    const url = `${this._server}${route}`;
+    const req: RequestInit = {
+      method: "POST",
+      headers: this._headers,
+      body: JSON.stringify(body),
+    };
+    let emitter: EventEmitter | undefined;
+
+    while (emitter === undefined) {
+      let part = "";
+      emitter = await fetch(url, req)
+        .then(async (response) => {
+          if (!response.ok) {
+            const message = (await response.json()) as Types.OllamaErrorResponse;
+            this._ErrorHandlerOllamaServer(route, response.status, message, req, body.model);
+          }
+          return response.body;
+        })
+        .then((body) => {
+          if (body === undefined) {
+            return undefined;
+          }
+
+          const e = new EventEmitter();
+
+          const emitContent = (json: Types.OllamaApiChatResponse | Types.OllamaErrorResponse | undefined) => {
+            if (json)
+              if ("done" in json) {
+                if (json.done) {
+                  e.emit("done", json);
+                } else {
+                  const content = contentExtractor(json);
+                  if (content) e.emit("data", content);
+                }
+              } else if ("error" in json && json.error) {
+                e.emit("error", json);
+              }
+          };
+
+          body?.on("data", (chunk) => {
+            if (chunk !== undefined) {
+              const buffer = Buffer.from(chunk);
+              let jsonStr = buffer.toString();
+              if (part !== "") {
+                jsonStr = part + jsonStr;
+              }
+              for (const j of jsonStr.split("\n").filter((p) => p !== "")) {
+                try {
+                  const json = JSON.parse(j);
+                  emitContent(json);
+                  part = "";
+                } catch (err) {
+                  console.error(err);
+                  part += j;
+                }
+              }
+            }
+          });
+
+          return e;
+        })
+        .catch((err: FetchError | Error) => {
+          this._ErrorLogger(err);
+          if (err instanceof FetchError && err.type === "ECONNREFUSED") throw Errors.OllamaNotInstalledOrRunning;
           throw err;
         });
     }
@@ -529,60 +684,9 @@ export class Ollama {
    * @returns Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning a `OllamaApiGenerateResponse` object contains all metadata of inference.
    */
   async OllamaApiGenerate(body: Types.OllamaApiGenerateRequestBody): Promise<EventEmitter> {
-    const url = `${this._server}/api/generate`;
-    const req: RequestInit = {
-      method: "POST",
-      headers: this._headers,
-      body: JSON.stringify(body),
-    };
-    let emitter: EventEmitter | undefined;
-
-    while (emitter === undefined) {
-      emitter = await fetch(url, req)
-        .then(async (response) => {
-          if (response.ok) {
-            return response.body;
-          }
-          if (response.status === 400) {
-            const e = await (response.json() as Promise<Types.OllamaErrorResponse>);
-            throw e.error;
-          }
-        })
-        .then((body) => {
-          if (body === undefined) {
-            return undefined;
-          }
-
-          const e = new EventEmitter();
-
-          body?.on("data", (chunk) => {
-            if (chunk !== undefined) {
-              let json: Types.OllamaApiGenerateResponse | undefined;
-              const buffer = Buffer.from(chunk);
-              try {
-                json = JSON.parse(buffer.toString());
-              } catch (err) {
-                console.error(err);
-              }
-              if (json)
-                switch (json.done) {
-                  case false:
-                    e.emit("data", json.response);
-                    break;
-                  case true:
-                    e.emit("done", json);
-                }
-            }
-          });
-
-          return e;
-        })
-        .catch((err) => {
-          console.error(err);
-          throw err;
-        });
-    }
-    return emitter;
+    return await this._OllamaApiStream(this._RouteApiGenerate, body, (json) => {
+      if (json && "response" in json && json.response) return json.response as string;
+    });
   }
 
   /**
@@ -591,61 +695,9 @@ export class Ollama {
    * @returns Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning a `OllamaApiChatResponse` object contains all metadata of inference.
    */
   async OllamaApiChat(body: Types.OllamaApiChatRequestBody): Promise<EventEmitter> {
-    const url = `${this._server}/api/chat`;
-    const req: RequestInit = {
-      method: "POST",
-      headers: this._headers,
-      body: JSON.stringify(body),
-    };
-    let emitter: EventEmitter | undefined;
-
-    while (emitter === undefined) {
-      emitter = await fetch(url, req)
-        .then(async (response) => {
-          if (response.ok) {
-            return response.body;
-          }
-
-          if (response.status === 400) {
-            const e = await (response.json() as Promise<Types.OllamaErrorResponse>);
-            throw e.error;
-          }
-        })
-        .then((body) => {
-          if (body === undefined) {
-            return undefined;
-          }
-
-          const e = new EventEmitter();
-
-          body?.on("data", (chunk) => {
-            if (chunk !== undefined) {
-              let json: Types.OllamaApiChatResponse | undefined;
-              const buffer = Buffer.from(chunk);
-              try {
-                json = JSON.parse(buffer.toString());
-              } catch (err) {
-                console.error(err);
-              }
-              if (json)
-                switch (json.done) {
-                  case false:
-                    json.message && e.emit("data", json.message.content);
-                    break;
-                  case true:
-                    e.emit("done", json);
-                }
-            }
-          });
-
-          return e;
-        })
-        .catch((err) => {
-          console.error(err);
-          throw err;
-        });
-    }
-    return emitter;
+    return await this._OllamaApiStream(this._RouteApiChat, body, (json) => {
+      if (json && "message" in json && json.message) return json.message.content;
+    });
   }
 
   /**
@@ -655,7 +707,8 @@ export class Ollama {
    */
   async OllamaApiGenerateNoStream(body: Types.OllamaApiGenerateRequestBody): Promise<Types.OllamaApiGenerateResponse> {
     body.stream = false;
-    const url = `${this._server}/api/generate`;
+    const route = this._RouteApiGenerate;
+    const url = `${this._server}${route}`;
     const req: RequestInit = {
       method: "POST",
       headers: this._headers,
@@ -664,20 +717,18 @@ export class Ollama {
 
     const response: Types.OllamaApiGenerateResponse | undefined = await fetch(url, req)
       .then(async (response) => {
-        if (response.ok) {
-          return response.json();
+        if (!response.ok) {
+          const message = (await response.json()) as Types.OllamaErrorResponse;
+          this._ErrorHandlerOllamaServer(route, response.status, message, req, body.model);
         }
-
-        if (response.status === 400) {
-          const e = await (response.json() as Promise<Types.OllamaErrorResponse>);
-          throw e.error;
-        }
+        return response.json();
       })
       .then((json) => {
         return json as Types.OllamaApiGenerateResponse;
       })
-      .catch((err) => {
-        console.error(err);
+      .catch((err: FetchError | Error) => {
+        this._ErrorLogger(err);
+        if (err instanceof FetchError && err.type === "ECONNREFUSED") throw Errors.OllamaNotInstalledOrRunning;
         throw err;
       });
 
@@ -691,7 +742,8 @@ export class Ollama {
    * @returns Ollama API embeddings response.
    */
   async OllamaApiEmbeddings(prompt: string, model: string): Promise<Types.OllamaApiEmbeddingsResponse> {
-    const url = `${this._server}/api/embeddings`;
+    const route = this._RouteApiEmbeddings;
+    const url = `${this._server}${route}`;
     const req: RequestInit = {
       method: "POST",
       headers: this._headers,
@@ -705,26 +757,61 @@ export class Ollama {
     while (embeddings === undefined) {
       embeddings = await fetch(url, req)
         .then(async (response) => {
-          if (response.ok) {
-            return response;
+          if (!response.ok) {
+            const message = (await response.json()) as Types.OllamaErrorResponse;
+            this._ErrorHandlerOllamaServer(route, response.status, message, req, model);
           }
-
-          if (response.status === 400) {
-            const e = await (response.json() as Promise<Types.OllamaErrorResponse>);
-            throw e.error;
-          }
+          return response.json();
         })
         .then(async (response) => {
           if (response === undefined) {
             return undefined;
           }
-          return (await response.json()) as Types.OllamaApiEmbeddingsResponse;
+          return response as Types.OllamaApiEmbeddingsResponse;
         })
-        .catch((err) => {
-          console.error(err);
+        .catch((err: FetchError | Error) => {
+          this._ErrorLogger(err);
+          if (err instanceof FetchError && err.type === "ECONNREFUSED") throw Errors.OllamaNotInstalledOrRunning;
           throw err;
         });
     }
     return embeddings;
+  }
+
+  /**
+   * Show loaded models
+   * @return List of models loaded in ram
+   */
+  async OllamaApiPs(): Promise<Types.OllamaApiPsResponse> {
+    const route = this._RouteApiPs;
+    const url = `${this._server}${route}`;
+    const req: RequestInit = {
+      method: "GET",
+      headers: this._headers,
+    };
+    let ps: Types.OllamaApiPsResponse | undefined;
+
+    while (ps === undefined) {
+      ps = await fetch(url, req)
+        .then(async (response) => {
+          if (!response.ok) {
+            const message = (await response.json()) as Types.OllamaErrorResponse;
+            this._ErrorHandlerOllamaServer(route, response.status, message, req);
+          }
+          return response.json();
+        })
+        .then(async (response) => {
+          if (response === undefined) {
+            return undefined;
+          }
+          return response as Types.OllamaApiPsResponse;
+        })
+        .catch((err: FetchError | Error) => {
+          this._ErrorLogger(err);
+          if (err instanceof FetchError && err.type === "ECONNREFUSED") throw Errors.OllamaNotInstalledOrRunning;
+          throw err;
+        });
+    }
+    return ps;
   }
 }

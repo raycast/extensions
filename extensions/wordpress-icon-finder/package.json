@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wordpress-icon-finder",
   "title": "WordPress Icon Finder",
-  "description": "It help you search icons from the WordPress Icons Library.",
+  "description": "It helps you search icons from the WordPress Icons Library.",
   "icon": "icon.png",
   "author": "javierarce",
   "categories": [

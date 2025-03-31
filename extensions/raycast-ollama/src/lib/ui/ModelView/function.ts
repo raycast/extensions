@@ -5,25 +5,12 @@ import { showToast, Toast } from "@raycast/api";
 import { GetServerClass } from "../function";
 
 /**
- * Get Ollama Server Array.
- * @returns Servers Names Array.
- */
-export async function GetServerArray(): Promise<string[]> {
-  const s = await GetOllamaServers();
-  const a = [...s.keys()].sort();
-  const al = a.filter((v) => v === "Local");
-  const ao = a.filter((v) => v !== "Local");
-  if (a.length > 1) return ["All", ...al, ...ao];
-  return [...al, ...ao];
-}
-
-/**
  * Get Ollama Server Class.
  * @returns Server Map.
  */
 export async function GetServerClassByName(name: string): Promise<Ollama> {
   const s = await GetOllamaServers();
-  if (!s.has(name)) throw "Ollama Server Not Configured";
+  if (!s.has(name)) throw new Error("Ollama Server Not Configured");
   return new Ollama(s.get(name));
 }
 
@@ -60,8 +47,12 @@ export async function GetModels(server: string): Promise<Types.UiModel[]> {
   (
     await Promise.all(
       [...s.entries()].map(async (s): Promise<Types.UiModel[]> => {
-        const tag = await s[1].OllamaApiTags().catch(async (e) => {
-          await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e });
+        const tag = await s[1].OllamaApiTags().catch(async (e: Error) => {
+          await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
+          return undefined;
+        });
+        const ps = await s[1].OllamaApiPs().catch(async (e: Error) => {
+          await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
           return undefined;
         });
         if (!tag) return await Promise.resolve([] as Types.UiModel[]);
@@ -76,6 +67,7 @@ export async function GetModels(server: string): Promise<Types.UiModel[]> {
               detail: v,
               show: show,
               modelfile: s[1].OllamaApiShowParseModelfile(show),
+              ps: ps && ps.models.filter((ps) => ps.name === v.name)[0],
             };
           })
         );
@@ -86,6 +78,21 @@ export async function GetModels(server: string): Promise<Types.UiModel[]> {
 }
 
 /**
+ * Update model pulling from the registry the latest version
+ * @param model.
+ * @param setDownload - setDownload Function.
+ * @param revalidate - RevalidateModel Function.
+ */
+export async function UpdateModel(
+  model: Types.UiModel,
+  setDownload: React.Dispatch<React.SetStateAction<Types.UiModelDownload[]>>,
+  revalidate: CallableFunction
+) {
+  const o = await GetServerClassByName(model.server.name);
+  await PullModel(o, model.server.name, model.detail.name, setDownload, revalidate);
+}
+
+/**
  * Delete Model.
  * @param model.
  * @param revalidate - revalidate function for reload all models.
@@ -93,7 +100,7 @@ export async function GetModels(server: string): Promise<Types.UiModel[]> {
 export async function DeleteModel(model: Types.UiModel, revalidate: CallableFunction): Promise<void> {
   await model.server.ollama
     .OllamaApiDelete(model.detail.name)
-    .then(async (v) => {
+    .then(async () => {
       await showToast({
         style: Toast.Style.Success,
         title: `Model '${model.detail.name}' Deleted on '${model.server.name}' Server`,

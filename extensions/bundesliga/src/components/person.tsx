@@ -1,16 +1,19 @@
 import { Detail } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
-import { usePerson } from "../hooks";
+import { getPerson } from "../api";
 import { Name } from "../types";
-import { positionMap, getFlagEmoji } from "../utils";
+import { getFlagEmoji, positionMap } from "../utils";
 
 export default function Person(props: Name) {
-  const player = usePerson(props.slugifiedFull);
+  const { data: player, isLoading } = usePromise(getPerson, [
+    props.slugifiedFull,
+  ]);
 
   return player ? (
     <Detail
       navigationTitle={`${props.full} | Profile & Stats`}
-      isLoading={!player}
+      isLoading={isLoading}
       markdown={json2md([
         { h1: player.names.full },
         {

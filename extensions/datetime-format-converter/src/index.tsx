@@ -1,9 +1,22 @@
-import { List, ActionPanel, Action, Clipboard, Icon, Color } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Color,
+  getPreferenceValues,
+  Icon,
+  List,
+  openCommandPreferences,
+} from "@raycast/api";
+import dayjs, { Dayjs } from "dayjs";
 import React, { useState } from "react";
-import dayjs from "dayjs";
+
+import advancedFormat from "dayjs/plugin/advancedFormat";
+dayjs.extend(advancedFormat);
 
 import localizedFormat from "dayjs/plugin/localizedFormat";
 dayjs.extend(localizedFormat);
+
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
@@ -11,6 +24,26 @@ export default function main() {
   const [clipboardText, setClipboardText] = useState("");
   const [input, setInput] = useState<string>(clipboardText);
   const [resultList, setResultList] = useState([] as string[]);
+  const [validFormat, setValidFormat] = useState<boolean>(false);
+
+  const dateTimeFormats = {
+    isoDate: "YYYY-MM-DD",
+    isoDateTime: "YYYY-MM-DD HH:mm:ss",
+    formatWithMillis: "YYYY-MM-DD HH:mm:ss.SSS",
+    formatWithTimezone: "YYYY-MM-DD HH:mm:ssZ",
+    isoFormat: "YYYY-MM-DDTHH:mm:ssZ",
+    utcIsoFormat: "YYYY-MM-DDTHH:mm:ss[Z]",
+    unixTimestamp: "X",
+    unixMillis: "x",
+    localizedShortDate: "L",
+    localizedShortDateTime: "L LT",
+    localizedFullDateTime: "LLL",
+    localizedLongDateTime: "LLLL",
+    localizedTime: "LT",
+    localizedSecondsTime: "LTS",
+  };
+
+  const preferences = getPreferenceValues();
 
   React.useEffect(() => {
     Clipboard.readText().then((text) => {
@@ -29,6 +62,7 @@ export default function main() {
 
   function timeConverter(time: string) {
     setInput(time);
+    setValidFormat(true);
     if (!time || time === "now") {
       setResultList(formatTime(new Date().toString()));
     } else {
@@ -36,13 +70,14 @@ export default function main() {
       if (dTime.isValid()) {
         setResultList(formatTime(time));
       } else {
+        setValidFormat(false);
         setResultList([]);
       }
     }
   }
 
   function formatTime(time: string) {
-    let dTime;
+    let dTime: Dayjs;
     if (!isNaN(Number(time))) {
       if (time.length == 10) {
         // is unix timestamp seconds
@@ -57,27 +92,11 @@ export default function main() {
       dTime = dayjs(time);
     }
 
-    return [
-      // ISO 8601 or similar
-      dTime.format("YYYY-MM-DD").toString(),
-      dTime.format("YYYY-MM-DD HH:mm:ss").toString(),
-      dTime.format("YYYY-MM-DD HH:mm:ss.SSS").toString(),
-      dTime.format("YYYY-MM-DD HH:mm:ssZ").toString(),
-      dTime.format().toString(),
-      dTime.utc().format().toString(),
-
-      // Unix timestamps
-      dTime.unix().toString(),
-      dTime.valueOf().toString(),
-
-      // Localized formats
-      dTime.format("L").toString(),
-      dTime.format("L LT").toString(),
-      dTime.format("LLL").toString(),
-      dTime.format("LLLL").toString(),
-      dTime.format("LT").toString(),
-      dTime.format("LTS").toString(),
-    ];
+    return Object.entries(dateTimeFormats)
+      .filter(([key]) => preferences[key])
+      .map(([key, value]) =>
+        key === "utcIsoFormat" ? dTime.utc().format(value).toString() : dTime.format(value).toString()
+      );
   }
 
   type ActionItem = {
@@ -105,11 +124,22 @@ export default function main() {
         resultList.map((time, index) => (
           <List.Item key={index} title={time.toString()} actions={<Actions item={{ content: time }} />}></List.Item>
         ))
-      ) : (
+      ) : !validFormat ? (
         <List.EmptyView
           icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
           title="An error occurred"
           description="This is not a time format."
+        />
+      ) : (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
+          title="No Date Time Format is selected in preferences"
+          description="press ↵ to Open Extension Preferences"
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
+            </ActionPanel>
+          }
         />
       )}
     </List>

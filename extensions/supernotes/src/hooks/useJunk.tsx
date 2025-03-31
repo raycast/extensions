@@ -1,13 +1,12 @@
+import { showToast, Toast } from "@raycast/api";
+import { superfetch } from "api/superfetch";
 import React from "react";
 
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
-import fetch from "node-fetch";
-
-import { SUPERNOTES_API_URL, Status } from "utils/defines";
-import { ValidationError, WrappedCardResponses } from "utils/types";
+import { Status } from "~/utils/defines";
+import { getSupernotesPrefs } from "~/utils/helpers";
 
 const useJunk = (successCallback: () => void) => {
-  const { apiKey } = getPreferenceValues();
+  const { apiKey } = getSupernotesPrefs();
 
   const [loading, setLoading] = React.useState(false);
 
@@ -18,30 +17,25 @@ const useJunk = (successCallback: () => void) => {
       title: "Junking",
       message: "Moving card to junk",
     });
-    try {
-      if (!apiKey) throw new Error("No API key found");
-      const res = await fetch(`${SUPERNOTES_API_URL}/cards/`, {
-        method: "PATCH",
-        headers: { "Api-Key": apiKey, "Content-Type": "application/json" },
-        body: JSON.stringify({ [cardId]: { membership: { status: Status.DISABLED } } }),
-      });
-      setLoading(false);
-      const jsonData = (await res.json()) as WrappedCardResponses | ValidationError;
-      if ("errors" in jsonData) throw new Error(jsonData.errors.body);
-      const wrapped_card = jsonData[0];
-      // error checking
-      if (wrapped_card.card_id !== cardId) throw new Error("Card mismatch");
-      if (!wrapped_card.success) throw new Error(wrapped_card.payload);
-      // success
-      toast.style = Toast.Style.Success;
-      toast.title = "Success";
-      toast.message = "Card junked";
-      successCallback();
-    } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed";
-      toast.message = String(err);
+    const fetched = await superfetch("/v1/cards", "patch", {
+      apiKey,
+      body: { [cardId]: { membership: { status: Status.DISABLED } } },
+    });
+    setLoading(false);
+    if (!fetched.ok) {
+      showToast(Toast.Style.Failure, "Junk failed", fetched.body.detail);
+      return;
     }
+    const wrappedCard = fetched.body[0];
+    if (!wrappedCard.success) {
+      showToast(Toast.Style.Failure, "Junk failed", wrappedCard.payload);
+      return;
+    }
+    if (wrappedCard.card_id !== cardId) throw new Error("Card mismatch");
+    toast.style = Toast.Style.Success;
+    toast.title = "Success";
+    toast.message = "Card junked";
+    successCallback();
     setTimeout(() => toast.hide(), 3000);
   };
 

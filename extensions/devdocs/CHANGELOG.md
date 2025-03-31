@@ -1,5 +1,23 @@
 # DevDocs Extension
 
+## [Changes] - 2025-02-26
+
+- Add support for search aliases (filtering on exact match)
+
+## [Fix] - 2024-10-02
+
+- Account for settings file imports with multiple preferences set
+
+## [Changes] - 2024-10-01
+
+- Add new command to import enabled documentations from DevDocs.io
+- Split documentations into two sections: "preferred" (imported from DevDocs website); remaining sets show as "available"
+- Update documentation icon fetching to pull from DevDocs GitHub repo (instead of favicon) to use higher resolution and better quality images
+
+## [New Preference] - 2024-08-16
+
+- Add preference to indicate which "open" action should appear first in action panel
+
 ## [Changes] - 2024-07-27
 
 - Update list item icon
@@ -20,7 +38,7 @@
 
 - Fixed wrong link in `Open in DevDocs`
 
-## Deeplinks - 2023-02-07
+## [Deeplinks] - 2023-02-07
 
 - Add deeplinks support
 

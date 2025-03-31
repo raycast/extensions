@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, getPreferenceValues } from "@raycast/api";
 
 import { Details } from "@/components/Details";
 import { useSearch } from "@/hooks/use-search";
@@ -49,6 +49,8 @@ export default function MDNSearchResultsList() {
   const [locale, setLocale] = useState<string>("en-us");
   const { data, isLoading } = useSearch(query, locale);
 
+  const { preferredAction } = getPreferenceValues<Preferences.Index>();
+
   return (
     <List
       isLoading={isLoading}
@@ -71,13 +73,16 @@ export default function MDNSearchResultsList() {
           subtitle={result.summary}
           actions={
             <ActionPanel>
-              <Action.Push
-                icon={Icon.Document}
-                title="Read Document"
-                target={<Details result={result} locale={locale} />}
-              />
-              <Action.OpenInBrowser url={result.url} />
-              <Action.CopyToClipboard content={result.url} shortcut={{ modifiers: ["cmd"], key: "." }} />
+              {[
+                <Action.Push
+                  key="read"
+                  icon={Icon.Document}
+                  title="Read Document"
+                  target={<Details result={result} locale={locale} />}
+                />,
+                <Action.OpenInBrowser key="open" url={result.url} />,
+                <Action.CopyToClipboard key="copy" content={result.url} shortcut={{ modifiers: ["cmd"], key: "." }} />,
+              ].sort((a) => (a.key === preferredAction ? -1 : 1))}
             </ActionPanel>
           }
         />

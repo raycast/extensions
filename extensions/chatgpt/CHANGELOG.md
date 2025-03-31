@@ -1,5 +1,63 @@
 # Changelog
 
+## [Feature] - 2025-02-23
+
+- Fix: Fixed the error display issue: errors are now always fully readable and rendered correctly in their respective places.
+- Fix: Fixed the issue when some errors may not be displayed in the UI.
+- Feature: Added a tip to help users understand how to discuss the results of the AI command in chat.
+- Feature: Refactored error messages. Now, they are more informative and user-friendly.
+
+## [Feature] - 2025-01-22
+
+- Feature: Introduced a method to dynamically create new commands for processing user text input from various sources, including selected text, clipboard text, and open web pages.
+- Feature: Added new commands: "Fix Spelling and Grammar" and "Improve Writing".
+
+## [Feature] - 2025-01-01
+
+- Feature: Added import/export functionality to Conversations.
+
+## [Fix] - 2025-01-01
+
+- Fix: Fixed o1 models not working, and added a prompt warning for o1 models.
+
+## [Fix] - 2024-11-24
+
+- Fix: Fixed Images not rendering if their paths have spaces in them.
+
+## [Feature] - 2024-10-09
+
+- Feature: Added import/export functionality to Models to prevent potential data loss and alleviate data anxiety.
+- Feature: Introduced a new reusable import/export module, so that it can be used in other parts of the extension in the future.
+
+## [Fix] - 2024-10-09
+
+- Fix: Modified the `useModel` initialization process to update `localStorage` only after initialization is complete, preventing data overwrite. Addresses issues #8977, #14356, and #14125.
+- Chore: Removed `List.EmptyView` when the model list is empty, as the Action panel would remain empty and default models ensure the model list is not empty.
+
+## [Feature] - 2024-10-06
+
+- Feature: Change all occurence of `gpt-3.5` and the like to `gpt-4o-mini`, as the latter is cheaper and more efficient.
+- Feature: Update `setOption` to include all model IDs, removing the filter for 'gpt' prefix. (To support `o1` models).
+- Chore: Remove unnecessary union type literals in `src/type.ts:Model.option`, since 'option' was already effectively a 'string'.
+
+## [Feature] - 2024-09-02
+
+- Feature: Support for certain platforms that only accept simple string formats, such as DeepSeek.
+
+## [Feature] - 2024-08-26
+
+- Feature: Support custom vision model name
+
+## [Fix] - 2024-08-13
+
+- Fix: the image width calculation in AnswerDetailView, which previously returned undefined.
+- Update package-lock.json to fix the security vulnerability (npm audit fix)
+
+## [Fix] - 2024-08-09
+
+- Fix: An unhandled error was encountered while parsing the CSV file.
+- Chore: Update prompts.csv URL to the latest version
+
 ## [Fix] - 2024-07-29
 
 - Restarting a conversation will retain the currently selected model

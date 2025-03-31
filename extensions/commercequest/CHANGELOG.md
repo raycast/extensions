@@ -1,5 +1,8 @@
 # CommerceQuest.space Changelog
 
+## [Adapted to new forum-url] - 2024-10-20
+- Using the new url `forum.commercequest.space`
+
 ## [Group Search-results by date] - 2023-09-24
 - Search-results are now grouped by `today`, `yesterday`, `last week` and `older`
 

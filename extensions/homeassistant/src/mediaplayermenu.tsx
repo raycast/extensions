@@ -3,8 +3,8 @@ import { MediaPlayerMenubarItem } from "@components/mediaplayer/menu";
 import { LaunchCommandMenubarItem } from "@components/menu";
 import { filterViaPreferencePatterns } from "@components/state/utils";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
-import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 
 export default function MediaPlayerMenuCommand() {
   const { states, error, isLoading } = useHAStates();
@@ -15,7 +15,7 @@ export default function MediaPlayerMenuCommand() {
 
   return (
     <MenuBarExtra
-      icon={{ source: "mediaplayer.png", tintColor: Color.PrimaryText }}
+      icon={{ source: "cast-connected.svg", tintColor: Color.PrimaryText }}
       isLoading={isLoading}
       tooltip={"Home Assistant Media Players"}
     >

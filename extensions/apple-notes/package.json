@@ -15,7 +15,9 @@
     "tylerwince",
     "thomaslombart",
     "xilopaint",
-    "ridemountainpig"
+    "ridemountainpig",
+    "teemu_suvinen",
+    "juan_saldana"
   ],
   "license": "MIT",
   "commands": [
@@ -99,6 +101,242 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "description": "Create a new note in Apple Notes."
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "description": "Search for notes in Apple Notes."
+    },
+    {
+      "name": "get-note-content",
+      "title": "Get Note Content",
+      "description": "Get the content of a specific note in Apple Notes."
+    },
+    {
+      "name": "update-note",
+      "title": "Update Note",
+      "description": "Update the content of a specific note in Apple Notes."
+    }
+  ],
+  "ai": {
+    "instructions": "- Always format note titles as Markdown links using the note's URL.\\n- If you can't access the Apple Notes database, tell the user he needs to give Raycast the full disk access permission in the system settings. Be detailed about the steps.",
+    "evals": [
+      {
+        "input": "@apple-notes what's on my grocery list",
+        "expected": [
+          {
+            "callsTool": "search-notes"
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "noteId": "grocery-list"
+              },
+              "name": "get-note-content"
+            }
+          }
+        ],
+        "mocks": {
+          "get-note-content": "<li>Bananas</li><li>Carrots</li><li>Potatoes</li><li>Yogurt</li><li>Cheese</li><li>Milk</li><li>Bread</li><li>Butter</li><li>Jam</li><li>Coffee</li>",
+          "search-notes": [
+            {
+              "id": "grocery-list",
+              "folder": "Home",
+              "modifiedAt": "2025-01-21 13:15:50",
+              "snippet": "- Bananas - Carrots",
+              "title": "Grocery list"
+            },
+            {
+              "id": "carbonara-recipe",
+              "folder": "Notes",
+              "modifiedAt": "2025-01-21 13:12:46",
+              "snippet": "Ingredients:",
+              "title": "Carbonara Recipe"
+            },
+            {
+              "id": "weekly-todos",
+              "folder": "Work",
+              "modifiedAt": "2025-01-21 13:11:27",
+              "snippet": "Fix bugs, Implement user profile page",
+              "title": "Weekly to-dos"
+            },
+            {
+              "id": "budget",
+              "folder": "Notes",
+              "modifiedAt": "2025-01-21 13:09:52",
+              "snippet": "Food: $100, Rent: $1000, Bills: $100",
+              "title": "Budget"
+            }
+          ]
+        }
+      },
+      {
+        "input": "@apple-notes Create a new note of a carbonara recipe",
+        "mocks": {
+          "create-note": "Successfully called \"create-note\""
+        },
+        "expected": [
+          {
+            "callsTool": "create-note"
+          }
+        ]
+      },
+      {
+        "input": "@apple-notes Find me all my note ideas",
+        "mocks": {
+          "search-notes": [
+            {
+              "id": "app-ideas",
+              "folder": "Ideas",
+              "modifiedAt": "2025-01-21 15:30:22",
+              "snippet": "1. Recipe manager with AI suggestions 2. Plant care reminder app",
+              "title": "App Ideas 2025"
+            },
+            {
+              "id": "business-ideas",
+              "folder": "Ideas",
+              "modifiedAt": "2025-01-19 18:45:12",
+              "snippet": "Subscription box for sustainable products, Online workshop platform",
+              "title": "Startup Ideas"
+            },
+            {
+              "id": "shopping-list",
+              "folder": "Personal",
+              "modifiedAt": "2025-01-21 16:10:05",
+              "snippet": "Milk, Bread, Eggs",
+              "title": "Grocery List"
+            },
+            {
+              "id": "meeting-notes",
+              "folder": "Work",
+              "modifiedAt": "2025-01-21 14:25:18",
+              "snippet": "Q1 goals discussion, team updates",
+              "title": "Team Meeting 01/21"
+            },
+            {
+              "id": "gift-ideas",
+              "folder": "Ideas",
+              "modifiedAt": "2025-01-17 20:30:15",
+              "snippet": "Dad: vintage vinyl records",
+              "title": "Birthday Gift Ideas"
+            },
+            {
+              "id": "workout",
+              "folder": "Health",
+              "modifiedAt": "2025-01-21 07:00:00",
+              "snippet": "Monday: Upper body, Tuesday: Lower body",
+              "title": "Workout Schedule"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "search-notes"
+          },
+          {
+            "meetsCriteria": "Returns a list of 3 notes, each with a link to the note."
+          }
+        ]
+      },
+      {
+        "input": "@apple-notes which notes have a checklist?",
+        "mocks": {
+          "search-notes": [
+            {
+              "id": "grocery-list",
+              "folder": "Home",
+              "checklist": true,
+              "modifiedAt": "2025-01-21 13:15:50",
+              "snippet": "- Bananas - Carrots",
+              "title": "Grocery list"
+            },
+            {
+              "id": "moving-tasks",
+              "folder": "Personal",
+              "checklist": true,
+              "modifiedAt": "2025-01-20 09:30:00",
+              "snippet": "- Pack kitchen - Call movers - Update address",
+              "title": "Moving Checklist"
+            },
+            {
+              "id": "project-milestones",
+              "folder": "Work",
+              "checklist": true,
+              "modifiedAt": "2025-01-19 16:45:22",
+              "snippet": "- Design review - User testing - Launch prep",
+              "title": "Q1 Project Milestones"
+            },
+            {
+              "id": "random-note",
+              "folder": "Notes",
+              "checklist": false,
+              "modifiedAt": "2025-01-21 10:20:15",
+              "snippet": "Just some regular text without any checklist items",
+              "title": "Random Thoughts"
+            },
+            {
+              "id": "travel-packing",
+              "folder": "Travel",
+              "checklist": true,
+              "modifiedAt": "2025-01-18 20:15:30",
+              "snippet": "- Passport - Chargers - Toiletries",
+              "title": "Paris Trip Packing"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "search-notes"
+          },
+          {
+            "meetsCriteria": "Returns a list of 4 notes, each with a link to the note."
+          }
+        ]
+      },
+      {
+        "input": "@apple-notes Add gift ideas for my dad in birthday gifts note",
+        "mocks": {
+          "search-notes": [
+            {
+              "id": "birthday-gifts",
+              "folder": "Notes",
+              "modifiedAt": "2025-01-21 13:15:50",
+              "snippet": "Some gift ideas",
+              "title": "Birthday gifts"
+            }
+          ],
+          "update-note": "Successfully updated the note",
+          "get-note-content": "<div><h1>Birthday gifts</h1></div>\n<div><br></div>\n<div><h2>Dad</h2></div>\n<ul>\n<li>Vintage vinyl records</li>\n</ul>\n<div><br></div>\n<div><h2>Mom</h2></div>\n<ul>\n<li>Rock concert</li>\n<li>Go to the restaurant together</li>\n</ul>\n"
+        },
+        "expected": [
+          {
+            "callsTool": "search-notes"
+          },
+          {
+            "callsTool": {
+              "name": "get-note-content",
+              "arguments": {
+                "noteId": "birthday-gifts"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "noteId": "birthday-gifts"
+              },
+              "name": "update-note"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "accounts",
@@ -184,8 +422,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.74.1",
-    "@raycast/utils": "^1.15.0",
+    "@raycast/api": "^1.89.0",
+    "@raycast/utils": "^1.18.1",
     "date-fns": "^3.6.0",
     "lodash": "^4.17.21",
     "node-html-markdown": "^1.3.0"

@@ -1,5 +1,17 @@
 # World Clock Changelog
 
+## [Refactor Extension] - 2025-01-20
+
+- Refactoring extensions to replace the api used, now using [TimeAPI](https://www.timeapi.io)
+
+## [Fix Star Half Hour Time Zone] - 2024-10-04
+
+- Fix the bug that the half-hour time zone is not included in starred time zones
+
+## [Fix Half Hour Time Zone] - 2024-09-24
+
+- Fix the bug that the half-hour time zone is not included in current time
+
 ## [Update Refresh interval] - 2024-07-30
 
 - Update the refresh interval to 10 seconds

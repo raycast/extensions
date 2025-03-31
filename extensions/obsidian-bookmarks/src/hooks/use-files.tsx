@@ -1,29 +1,47 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import getObsidianFiles from "../helpers/get-obsidian-files";
 import { getLocalStorageFiles } from "../helpers/localstorage-files";
-import { File, unique } from "../types";
+import { File } from "../types";
 
-export type FilesHook = { loading: boolean; files: File[] };
+export type FilesHook = {
+  files: File[];
+  loading: boolean;
+  backgroundLoading: boolean;
+};
+
 export default function useFiles(): FilesHook {
-  const [loading, setLoading] = useState(true);
   const [files, setFiles] = useState<File[]>([]);
-  const addFiles = useCallback(
-    (newFiles: File[]) => {
-      setFiles((orig) => {
-        const unsorted = unique([...orig, ...newFiles]);
-        const sorted = unsorted.sort((a, b) => a.attributes.title.localeCompare(b.attributes.title));
-        return sorted;
-      });
-    },
-    [setFiles]
-  );
+  const [loading, setLoading] = useState(true);
+  const [backgroundLoading, setBackgroundLoading] = useState(true);
 
   useEffect(() => {
-    const obsidian = getObsidianFiles().then((files) => addFiles(files));
-    const localStorage = getLocalStorageFiles().then((files) => addFiles(files));
+    async function loadFiles() {
+      try {
+        // Load initial files from localStorage
+        const localFiles = await getLocalStorageFiles();
+        setFiles(localFiles);
+        setLoading(false);
 
-    Promise.allSettled([obsidian, localStorage]).then(() => setLoading(false));
-  }, [addFiles, setLoading]);
+        // Process files and update as they complete
+        const loadedFiles: File[] = [];
+        await getObsidianFiles(localFiles, (file) => {
+          loadedFiles.push(file);
+          setFiles([...loadedFiles]);
+        });
+      } catch (error) {
+        console.error("Error loading files:", error);
+      } finally {
+        setLoading(false);
+        setBackgroundLoading(false);
+      }
+    }
 
-  return { files, loading };
+    loadFiles();
+  }, []);
+
+  return {
+    files,
+    loading,
+    backgroundLoading,
+  };
 }

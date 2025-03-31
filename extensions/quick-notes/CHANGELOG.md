@@ -1,5 +1,11 @@
 # Quick Notes Changelog
 
+## [AI Summary] - 2024-08-03
+
+- Raycast Pro users can now summarize notes using AI
+- Summarize a note using `⌘ + I`
+- Clear note summary using `⌘ + ⇧ + I`
+
 ## [Performance] - 2024-07-18
 
 - Reduce lag when loading and searching

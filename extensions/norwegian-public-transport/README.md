@@ -33,7 +33,7 @@ To see more options about a stop place or departure, you can open the actions pa
 
 ## Feature requests and bug reports
 
-If you have any suggestions for improvements or bug fixes, you can open an issue on [github.com/rosvik/raycast-public-transport](https://github.com/rosvik/raycast-public-transport). PRs are also welcome: See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
+If you have any suggestions for improvements or bug fixes, you can open an issue on [github.com/rosvik/raycast-public-transport](https://github.com/rosvik/raycast-public-transport). PRs are also welcome: See [CONTRIBUTING.md](https://github.com/rosvik/raycast-public-transport/blob/main/CONTRIBUTING.md) for more information.
 
 ## Data source and usage
 

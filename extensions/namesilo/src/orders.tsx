@@ -9,7 +9,7 @@ export default function Orders() {
   const orders = parseAsArray(data?.order);
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search order">
       <List.Section title={`${orders.length} orders`}>
         {orders.map((order) => (
           <List.Item
@@ -42,7 +42,7 @@ function OrderDetails({ order_number }: { order_number: string }) {
   const orderDetails = parseAsArray(data?.order_details);
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search order detail">
       <List.Section title={`Orders / ${order_number} / Details`}>
         {orderDetails.map((order, orderIndex) => (
           <List.Item

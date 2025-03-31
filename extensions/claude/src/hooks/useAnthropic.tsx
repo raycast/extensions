@@ -8,7 +8,9 @@ export function useAnthropic(): Anthropic {
       apiKey: string;
     }>().apiKey;
 
-    return new Anthropic({ apiKey: apiKey });
+    return new Anthropic({
+      apiKey: apiKey,
+    });
   });
 
   return anthropic;

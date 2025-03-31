@@ -4,17 +4,9 @@ import {
   BlueskyFeedType,
   BlueskyProfileUrlBase,
   BlueskyQuoteType,
-  BlueskySearchUrlBase,
   FirstSignInSuccessToast,
 } from "../utils/constants";
-import {
-  ATSessionResponse,
-  Account,
-  CredentialsHashStore,
-  Notification,
-  PostReference,
-  SearchPostResult,
-} from "../types/types";
+import { ATSessionResponse, Account, CredentialsHashStore, Notification, PostReference } from "../types/types";
 import {
   AppBskyActorSearchActors,
   AppBskyFeedGetAuthorFeed,
@@ -25,7 +17,7 @@ import {
   AppBskyGraphGetMutes,
   AppBskyNotificationListNotifications,
   AtpSessionData,
-  BskyAgent,
+  AtpAgent,
   ComAtprotoRepoDeleteRecord,
   ComAtprotoRepoListRecords,
   RichText,
@@ -37,12 +29,13 @@ import { AppPasswordRegex } from "../config/config";
 import { AtUri } from "@atproto/uri";
 import { LocalStorage } from "@raycast/api";
 import { clearCache } from "../utils/cacheStore";
-import fetch from "cross-fetch";
+import "cross-fetch/polyfill";
 import { getPreferences } from "../utils/preference";
+import FormData from "cross-fetch";
+//@ts-expect-error Incompatible FormData Types
+global.FormData = FormData; // we do this to make atproto client happy
 
-global.fetch = fetch;
-
-const agent = new BskyAgent({
+const agent = new AtpAgent({
   service: getPreferences().service,
   persistSession: (sessionEvent, session) => {
     switch (sessionEvent) {
@@ -78,35 +71,16 @@ export const resolveHandle = async (handle: string): Promise<boolean> => {
 };
 
 export const getSearchPosts = async (searchTerm: string) => {
-  const response = await fetch(`${BlueskySearchUrlBase}${searchTerm}`);
-  const data: SearchPostResult[] = await response.json();
-
-  if (!data || data.length === 0) {
-    return null;
+  const response = await agent.app.bsky.feed.searchPosts({ q: searchTerm, sort: "latest" });
+  if (response.data) {
+    const postResponse = response.data.posts.map((item) => ({
+      post: item,
+    }));
+    return {
+      feed: postResponse,
+    };
   }
-
-  data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 20);
-
-  const uris = data.map((post) => `at://${post.user.did}/${post.tid}`);
-
-  const postResponse = await Promise.all(
-    uris
-      .map(async (uri) => {
-        try {
-          const response = await getPostThread(uri);
-          if (response && response.thread) {
-            return response.thread;
-          }
-        } catch {
-          return null;
-        }
-      })
-      .filter((thread) => thread !== null)
-  );
-
-  return {
-    feed: postResponse,
-  };
+  return null;
 };
 
 export const getTimelinePosts = async (cursor: string | null, limit = 10) => {
@@ -155,7 +129,7 @@ export const getLikePosts = async (handle: string, cursor: string | null, limit 
           return null;
         }
       })
-      .filter((thread) => thread !== null)
+      .filter((thread) => thread !== null),
   );
 
   return {
@@ -212,7 +186,7 @@ export const createPost = async (postText: string, postReference?: PostReference
   await rt.detectFacets(agent);
 
   const postRecord: Partial<AppBskyFeedPost.Record> & Omit<AppBskyFeedPost.Record, "createdAt"> = {
-    $type: { BskyFeedType: BlueskyFeedType },
+    $type: BlueskyFeedType,
     text: rt.text,
     facets: rt.facets,
     createdAt: new Date().toISOString(),
@@ -385,7 +359,7 @@ export const block = async (account: Account) => {
     {
       createdAt: new Date().toISOString(),
       subject: account.did,
-    }
+    },
   );
 };
 

@@ -6,11 +6,14 @@
   "icon": "command-icon.png",
   "author": "ThatNerd",
   "contributors": [
-    "marcjulian",
     "GastroGeek",
     "pernielsentikaer",
     "lokot0k",
-    "mitchwu"
+    "mitchwu",
+    "a-laughlin"
+  ],
+  "pastContributors": [
+    "marcjulian"
   ],
   "categories": [
     "Productivity",
@@ -188,6 +191,18 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "description": "Start a new timer, optionally saving it as a preset."
+    },
+    {
+      "name": "start-preset",
+      "title": "Start Preset",
+      "description": "Start a timer from an existing preset. Note that this will only work for presets that have already been saved."
+    }
+  ],
   "preferences": [
     {
       "name": "selectedSound",
@@ -295,7 +310,16 @@
       "title": "Close Window on Timer Start",
       "description": "Whether or not to close the Raycast window when a timer or stopwatch is started.",
       "label": "Automatically close window on start",
-      "default": true
+      "default": false
+    },
+    {
+      "name": "customTimerFormBypass",
+      "label": "Skip form if arguments are given",
+      "title": "Custom Timer Form Bypass",
+      "type": "checkbox",
+      "required": false,
+      "description": "For the 'Start Custom Timer' command, skip the timer add form if any hour, minute, or second arguments are given.",
+      "default": false
     },
     {
       "name": "newTimerInputOrder",
@@ -317,7 +341,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.1"
+    "@raycast/api": "^1.91.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
@@ -331,5 +355,150 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "lint-fix": "ray lint --fix"
+  },
+  "ai": {
+    "instructions": "The user will request for a timer of a certain length to be started, in hours, minutes, and seconds. Some of these may be left out. For example, the user may ask, 'Start a 25 minute timer'. In this case the input is hours: 0, minutes: 25, seconds: 0. Always respond telling the user a timer has been successfully started, and include the length of the timer in hours, minutes, and seconds. The user can also add a name for the timer. Do not change the capitalisation or formatting of the name.",
+    "evals": [
+      {
+        "input": "@timers start a 10 min timer",
+        "mocks": {
+          "start-timer": {
+            "timeInSeconds": 600,
+            "timerName": null,
+            "saved": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-timer",
+              "arguments": {
+                "hours": 0,
+                "minutes": 10,
+                "seconds": 0
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@timers start a 1h30m 'deep work' timer and save it",
+        "mocks": {
+          "start-timer": {
+            "timeInSeconds": 5400,
+            "timerName": "deep work",
+            "saved": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-timer",
+              "arguments": {
+                "hours": 1,
+                "minutes": 30,
+                "seconds": 0,
+                "name": "deep work",
+                "shouldBeSaved": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@timers start a 90s timer for fighting bears in woods",
+        "mocks": {
+          "start-timer": {
+            "timeInSeconds": 90,
+            "timerName": "fighting bears in woods"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-timer",
+              "arguments": {
+                "hours": 0,
+                "minutes": 1,
+                "seconds": 30,
+                "name": "fighting bears in woods"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@timers start a 'tea steeping' timer for 4 min",
+        "mocks": {
+          "start-timer": {
+            "timeInSeconds": 240,
+            "timerName": "tea steeping",
+            "saved": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-timer",
+              "arguments": {
+                "hours": 0,
+                "minutes": 4,
+                "seconds": 0,
+                "name": "tea steeping"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@timers start pomodoro preset",
+        "mocks": {
+          "start-preset": "pomodoro"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-preset",
+              "arguments": {
+                "name": "pomodoro"
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "start-timer"
+            }
+          },
+          {
+            "meetsCriteria": "Tells the user that the 'pomodoro' preset timer has been successfully started."
+          }
+        ]
+      },
+      {
+        "input": "@timers start dark magic preset",
+        "usedAsExample": false,
+        "mocks": {
+          "start-preset": null
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-preset",
+              "arguments": {
+                "name": "dark magic"
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "start-timer"
+            }
+          },
+          {
+            "meetsCriteria": "Tells the user that this preset does not exist."
+          }
+        ]
+      }
+    ]
   }
 }

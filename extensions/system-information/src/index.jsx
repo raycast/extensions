@@ -6,25 +6,40 @@ import os from "os";
 import { useEffect, useState } from "react";
 import si from "systeminformation";
 
-async function calculateDiskStorage() {
-  const disks = await si.fsSize();
-
-  const diskObj = disks[0];
-  const totalSize = (diskObj.size / (1024 * 1024 * 1024)).toFixed(2);
-  const totalAvailableStorage = (diskObj.available / (1024 * 1024 * 1024)).toFixed(2);
-
-  return `${totalAvailableStorage} GB available of ${totalSize} GB`;
-}
+import { getStorageInfo } from "swift:../swift";
 
 export default function Command() {
   const [storageInfo, setStorageInfo] = useState("");
   const [serialNumber, setSerialNumber] = useState("");
   const [networkDevices, setNetworkDevices] = useState([]);
+  const [processes, setProcesses] = useState([]);
+
+  const releaseImage = () => {
+    switch (macosRelease().name) {
+      case "Sonoma":
+        return `${environment.assetsPath}/macos_sonoma.png`;
+      case "Ventura":
+        return `${environment.assetsPath}/macos_ventura.png`;
+      case "Monterey":
+        return `${environment.assetsPath}/macos_monterey.png`;
+      default:
+        return `${environment.assetsPath}/macos_sequoia.png`;
+    }
+  };
 
   useEffect(() => {
-    calculateDiskStorage().then((size) => {
-      setStorageInfo(size);
-    });
+    // Use the getStorageInfo function (either from Swift or the fallback)
+    getStorageInfo()
+      .then((info) => {
+        const totalFormatted = info.total.toFixed(2) + " GB";
+        const usedFormatted = info.used.toFixed(2) + " GB";
+        const freeFormatted = info.free.toFixed(2) + " GB";
+        setStorageInfo(`${usedFormatted} used of ${totalFormatted} (${freeFormatted} available)`);
+      })
+      .catch((error) => {
+        console.error("Failed to get storage info:", error);
+        setStorageInfo("Failed to retrieve storage information");
+      });
 
     exec("/usr/sbin/system_profiler SPHardwareDataType", (error, stdout, stderr) => {
       if (error) {
@@ -54,22 +69,21 @@ export default function Command() {
     }
 
     setNetworkDevices(devices);
+
+    si.processes().then((data) => {
+      setProcesses(data.list);
+    });
   }, []);
 
-  const releaseImage = () => {
-    switch (macosRelease().name) {
-      // TODO: macOS 15 betas doesn't report themselves as "Sequoia", instead "macOS 15" shows up
-      // case "Sequoia":
-      //   return `${environment.assetsPath}/macos_sequoia.png`;
-      case "Sonoma":
-        return `${environment.assetsPath}/macos_sonoma.png`;
-      case "Ventura":
-        return `${environment.assetsPath}/macos_ventura.png`;
-      case "Monterey":
-        return `${environment.assetsPath}/macos_monterey.png`;
-      default:
-        return "ERROR";
-    }
+  const quitProcess = (pid) => {
+    exec(`kill ${pid}`, (error) => {
+      if (error) {
+        console.error(`Failed to kill process with PID ${pid}: ${error.message}`);
+      } else {
+        console.log(`Process with PID ${pid} has been killed.`);
+        setProcesses((prevProcesses) => prevProcesses.filter((proc) => proc.pid !== pid));
+      }
+    });
   };
 
   return (
@@ -111,10 +125,9 @@ export default function Command() {
           }
         />
       </List.Section>
-
       <List.Section title="macOS">
         <List.Item
-          icon={releaseImage() == "ERROR" ? Icon.Gear : releaseImage()}
+          icon={releaseImage()}
           title={`macOS ${macosRelease().name == "Unknown" ? macOSVersion().split(".")[0] : `${macosRelease().name}`}`}
           accessories={[{ text: `Version ${macOSVersion()}` }]}
           actions={
@@ -138,12 +151,11 @@ export default function Command() {
           }
         />
       </List.Section>
-
       <List.Section title="Storage">
         <List.Item
           icon={Icon.HardDrive}
           title="Macintosh HD"
-          accessories={[{ text: storageInfo, tooltip: "This information may be inaccurate" }]}
+          accessories={[{ text: storageInfo, tooltip: "Storage information from native Swift API" }]}
           actions={
             <ActionPanel>
               <Action.Open
@@ -154,7 +166,6 @@ export default function Command() {
           }
         />
       </List.Section>
-
       <List.Section title="Network">
         {networkDevices.map((device) => (
           <List.Item
@@ -165,6 +176,24 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy IP Address" content={device.ip} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+
+      <List.Section title="Running Processes">
+        {processes.map((proc) => (
+          <List.Item
+            key={proc.pid}
+            icon={Icon.Application}
+            title={`${proc.name}`}
+            accessories={[{ text: `PID: ${proc.pid}` }]}
+            actions={
+              <ActionPanel>
+                <Action title="Quit Process" onAction={() => quitProcess(proc.pid)} />
+                <Action.CopyToClipboard title="Copy Process Name" content={proc.name} />
+                <Action.CopyToClipboard title="Copy Pid" content={proc.pid.toString()} />
               </ActionPanel>
             }
           />

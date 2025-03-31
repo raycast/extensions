@@ -48,7 +48,7 @@ export const QuestionForm = ({
         .then((p) => setFiles(p.sort()))
         .catch(errCallback);
     },
-    [setFiles]
+    [setFiles],
   );
 
   const addFromClipboard = useCallback(async () => {

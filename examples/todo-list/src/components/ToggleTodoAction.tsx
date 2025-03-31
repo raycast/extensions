@@ -1,14 +1,12 @@
 import { Action, Icon } from "@raycast/api";
 import { Todo } from "../types";
 
-function ToggleTodoAction(props: { todo: Todo; onToggle: () => void }) {
+export function ToggleTodoAction(props: { todo: Todo; onToggle: () => void }) {
   return (
     <Action
-      icon={props.todo.isCompleted ? Icon.Circle : Icon.Checkmark}
-      title={props.todo.isCompleted ? "Uncomplete Todo" : "Complete Todo"}
+      icon={props.todo.isCompleted ? Icon.Circle : Icon.CheckCircle}
+      title={props.todo.isCompleted ? "Mark as Uncompleted" : "Mark as Completed"}
       onAction={props.onToggle}
     />
   );
 }
-
-export default ToggleTodoAction;

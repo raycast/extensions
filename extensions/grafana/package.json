@@ -63,11 +63,11 @@
     {
       "name": "apikey",
       "type": "password",
-      "title": "API-key",
+      "title": "Service Account Token",
       "required": true,
       "default": "",
-      "description": "Grafana API key",
-      "placeholder": "bXlzZWNyZXRhcGlrZXk="
+      "description": "Grafana Service Account Token",
+      "placeholder": "glsa_bXlzZWNyZXRhcGlrZXk="
     }
   ],
   "dependencies": {

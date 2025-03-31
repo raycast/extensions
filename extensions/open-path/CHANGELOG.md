@@ -1,5 +1,9 @@
 # Open Path Changelog
 
+## [Add Folder Action Settings] - 2025-01-22
+
+-  Add Folder Action settings
+
 ## [Update Command Metadata] - 2024-06-18
 
 -  Fix the problem of not updating the command metadata

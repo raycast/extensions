@@ -43,6 +43,22 @@
       ]
     },
     {
+      "name": "web-shortcuts",
+      "title": "List Current Web Shortcuts",
+      "description": "Show shortcuts for the frontmost web page",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "delay",
+          "title": "Delay",
+          "description": "Specify delay required before running shortcut on the web page",
+          "required": false,
+          "default": "0",
+          "type": "textfield"
+        }
+      ]
+    },
+    {
       "name": "current-app",
       "title": "Copy Current App's Bundle Id",
       "description": "Saves current app's bundle id in the clipboard",

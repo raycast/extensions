@@ -11,13 +11,20 @@
     "pernielsentikaer",
     "cb372",
     "henrik-dmg",
-    "spacedog",
-    "JakeMoosey",
     "superwhys",
-    "lukah"
+    "lukah",
+    "litomore",
+    "vimtor"
   ],
-  "past_contributors": ["Davidwalser"],
-  "categories": ["Security"],
+  "past_contributors": [
+    "Davidwalser",
+    "JakeMoosey",
+    "spacedog",
+    "Lemon"
+  ],
+  "categories": [
+    "Security"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -25,7 +32,12 @@
       "title": "My Passwords",
       "subtitle": "1Password",
       "description": "List of all your 1Password items. Then open in your default browser, view items in 1Password, or open items in 1Password for editing.",
-      "keywords": ["1p", "1password", "password", "login"],
+      "keywords": [
+        "1p",
+        "1password",
+        "password",
+        "login"
+      ],
       "mode": "view"
     },
     {
@@ -33,7 +45,12 @@
       "title": "Auto Renew Authorization",
       "subtitle": "1Password",
       "description": "Renews the authorization each 9 minutes. Avoiding the prompt for user's password each use after 10 minutes.",
-      "keywords": ["1p", "1password", "password", "login"],
+      "keywords": [
+        "1p",
+        "1password",
+        "password",
+        "login"
+      ],
       "interval": "9m",
       "mode": "no-view",
       "disabledByDefault": true
@@ -43,7 +60,19 @@
       "title": "My Vaults",
       "subtitle": "1Password",
       "description": "List of all your 1Password vaults. Then open all items related to each vault.",
-      "keywords": ["1p", "1password", "password", "login"],
+      "keywords": [
+        "1p",
+        "1password",
+        "password",
+        "login"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "subtitle": "1Password",
+      "description": "Generate a random password with 1Password.",
       "mode": "view"
     }
   ],
@@ -152,17 +181,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.59.0",
-    "@raycast/utils": "^1.4.9",
-    "fast-glob": "^3.2.12"
+    "@raycast/api": "^1.89.0",
+    "@raycast/utils": "^1.18.1",
+    "fast-glob": "^3.3.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.7",
+    "@types/react": "18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "react": "^18.3.1",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",

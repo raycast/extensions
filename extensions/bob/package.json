@@ -10,7 +10,8 @@
   "author": "ViGeng",
   "contributors": [
     "thuggyduck",
-    "xxxbrian"
+    "xxxbrian",
+    "EdwardW"
   ],
   "license": "MIT",
   "commands": [
@@ -62,6 +63,35 @@
       "subtitle": "Bob",
       "description": "Translate what is captured",
       "mode": "no-view"
+    },
+    {
+      "name": "showTransWindow",
+      "title": "Show Translate Window",
+      "subtitle": "Bob",
+      "description": "Show Bob's Main Window",
+      "mode": "no-view"
+    },
+    {
+      "name": "showOcrWindow",
+      "title": "Show OCR Window",
+      "subtitle": "Bob",
+      "description": "Show Bob's OCR Result Window",
+      "mode": "no-view"
+    },
+    {
+      "name": "transArgument",
+      "title": "Translate",
+      "subtitle": "Bob",
+      "description": "Translate the given text",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "src",
+          "placeholder": "Text to translate",
+          "required": true,
+          "type": "text"
+        }
+      ]
     }
   ],
   "dependencies": {
