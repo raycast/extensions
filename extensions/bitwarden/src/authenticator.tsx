@@ -88,7 +88,7 @@ function AuthenticatorList() {
 
 function VaultItem({ item, interval }: { item: Item; interval: number }) {
   const icon = useItemIcon(item);
-  const { code } = useAuthenticator(item, interval);
+  const code = useAuthenticatorCode(item, interval);
 
   return (
     <VaultItemContext.Provider value={item}>
@@ -145,7 +145,7 @@ function useInterval(ms: number) {
   return time;
 }
 
-function useAuthenticator(item: Item, interval: number) {
+function useAuthenticatorCode(item: Item, interval: number) {
   const [code, setCode] = useState<string>();
 
   useEffect(() => {
@@ -160,7 +160,7 @@ function useAuthenticator(item: Item, interval: number) {
     if (interval === 30) setCode(authenticator.generate(totp));
   }, [interval]);
 
-  return { code };
+  return code;
 }
 
 export default AuthenticatorComponent;
