@@ -7,54 +7,57 @@ import {
   Action,
   openExtensionPreferences,
   Icon,
-} from "@raycast/api";
-import { useEffect, useState } from "react";
-import { usePaystack } from "./hooks/paystack";
-import { useCurrencyFormatter } from "./hooks/currency";
+} from '@raycast/api'
+import { useEffect, useState } from 'react'
+import { usePaystack } from './hooks/paystack'
+import { useCurrencyFormatter } from './hooks/currency'
 
-const preferences = getPreferenceValues<Preferences>();
+const preferences = getPreferenceValues<Preferences>()
 
 export default function Command() {
-  const formatCurrency = useCurrencyFormatter();
-  const mode = preferences.mode === "live" ? "Live" : "Test";
-  const { get, isLoading } = usePaystack();
+  const formatCurrency = useCurrencyFormatter()
+  const mode = preferences.mode === 'live' ? 'Live' : 'Test'
+  const { get, isLoading } = usePaystack()
   interface Balance {
-    currency: string;
-    balance: number;
+    currency: string
+    balance: number
   }
 
-  const [balances, setBalance] = useState<Array<Balance>>([]);
+  const [balances, setBalance] = useState<Array<Balance>>([])
 
   useEffect(() => {
     async function getBalance() {
       try {
-        const balance = (await get("/balance")) as {
-          status: boolean;
-          message: string;
-          data: { currency: string; balance: number }[];
-        };
-        if (balance.status) {
-          showToast({ style: Toast.Style.Success, title: "Balances fetched successfully!" });
+        const balance = (await get('/balance')) as {
+          status: boolean
+          message: string
+          data: { currency: string; balance: number }[]
         }
-        setBalance(balance.data);
+        if (balance.status) {
+          showToast({
+            style: Toast.Style.Success,
+            title: 'Balances fetched successfully!',
+          })
+        }
+        setBalance(balance.data)
       } catch (error) {
-        console.error("Error fetching balance:", error);
+        console.error('Error fetching balance:', error)
         showToast({
           style: Toast.Style.Failure,
-          title: "Error fetching balance",
+          title: 'Error fetching balance',
           message: (error as Error).message,
-        });
-        setBalance([]);
+        })
+        setBalance([])
       }
     }
-    getBalance();
-  }, []);
+    getBalance()
+  }, [])
 
   useEffect(() => {
     if (isLoading) {
-      showToast({ style: Toast.Style.Animated, title: "Loading balances..." });
+      showToast({ style: Toast.Style.Animated, title: 'Loading balances...' })
     }
-  }, [isLoading]);
+  }, [isLoading])
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search balances...">
@@ -70,14 +73,14 @@ export default function Command() {
                 <Action
                   onAction={openExtensionPreferences}
                   title={mode}
-                  icon={mode == "Live" ? Icon.CheckCircle : Icon.XMarkCircle}
+                  icon={mode == 'Live' ? Icon.CheckCircle : Icon.XMarkCircle}
                 />
               </ActionPanel.Section>
               <Action.OpenInBrowser
                 url={`https://dashboard.paystack.com/#/dashboard?currency=${balance.currency}`}
                 shortcut={{
-                  modifiers: ["cmd"],
-                  key: "o",
+                  modifiers: ['cmd'],
+                  key: 'o',
                 }}
                 title="Open in Dashboard"
               />
@@ -85,12 +88,12 @@ export default function Command() {
               <Action.CopyToClipboard
                 title="Copy Balance"
                 content={formatCurrency(balance.balance, balance.currency)}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={{ modifiers: ['cmd'], key: 'c' }}
               />
             </ActionPanel>
           }
         />
       ))}
     </List>
-  );
+  )
 }

@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, Icon } from '@raycast/api'
 
 export default function Command() {
   return (
@@ -8,10 +8,13 @@ export default function Command() {
         title="Greeting"
         actions={
           <ActionPanel>
-            <Action.Push title="Show Details" target={<Detail markdown="# Hey! 👋" />} />
+            <Action.Push
+              title="Show Details"
+              target={<Detail markdown="# Hey! 👋" />}
+            />
           </ActionPanel>
         }
       />
     </List>
-  );
+  )
 }
