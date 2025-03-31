@@ -6,6 +6,7 @@ import {
   ActionPanel,
   Action,
   openExtensionPreferences,
+  Icon,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { usePaystack } from "./hooks/paystack";
@@ -15,7 +16,7 @@ const preferences = getPreferenceValues<Preferences>();
 
 export default function Command() {
   const formatCurrency = useCurrencyFormatter();
-  const mode = preferences.mode === "live" ? "🟢 Live" : "🔴 Test";
+  const mode = preferences.mode === "live" ? "Live" : "Test";
   const { get, isLoading } = usePaystack();
   interface Balance {
     currency: string;
@@ -62,10 +63,15 @@ export default function Command() {
           key={index}
           title={formatCurrency(balance.balance, balance.currency)}
           subtitle={balance.currency}
+          icon={Icon.Wallet}
           actions={
             <ActionPanel>
               <ActionPanel.Section title="Dashboard Mode">
-                <Action onAction={openExtensionPreferences} title={mode} />
+                <Action
+                  onAction={openExtensionPreferences}
+                  title={mode}
+                  icon={mode == "Live" ? Icon.CheckCircle : Icon.XMarkCircle}
+                />
               </ActionPanel.Section>
               <Action.OpenInBrowser
                 url={`https://dashboard.paystack.com/#/dashboard?currency=${balance.currency}`}
