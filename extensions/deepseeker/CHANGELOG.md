@@ -1,6 +1,6 @@
 # DeepSeeker - Quick Actions Changelog
 
-## [New Features] - {PR_MERGE_DATE}
+## [New Features] - 2025-03-31
 
 - 🤖 Now Ask LLM command supports **search bar fallback**
 - 🔧 Refactor preference getting logic
