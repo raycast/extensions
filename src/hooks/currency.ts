@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 
 export function useCurrencyFormatter() {
   return useCallback((amount: number, currency: string) => {
+    amount = amount / 100
     return new Intl.NumberFormat(getCurrencyLocale(currency), {
       style: 'currency',
       currency,

@@ -1,6 +1,6 @@
 import { getPreferenceValues } from '@raycast/api'
 import { useState } from 'react'
-
+import { PaystackResponse } from '../utils/types'
 interface Preferences {
   liveSecretKey: string
   testSecretKey: string
@@ -12,11 +12,7 @@ interface PaystackError {
   message: string
 }
 
-interface PaystackResponse<T> {
-  status: boolean
-  message: string
-  data: T
-}
+
 
 export function usePaystack() {
   const { liveSecretKey, testSecretKey, mode } =

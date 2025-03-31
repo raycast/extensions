@@ -69,14 +69,7 @@ export default function Command() {
           icon={Icon.Wallet}
           actions={
             <ActionPanel>
-              <ActionPanel.Section title="Dashboard Mode">
-                <Action
-                  onAction={openExtensionPreferences}
-                  title={mode}
-                  icon={mode == 'Live' ? Icon.CheckCircle : Icon.XMarkCircle}
-                />
-              </ActionPanel.Section>
-              <Action.OpenInBrowser
+               <Action.OpenInBrowser
                 url={`https://dashboard.paystack.com/#/dashboard?currency=${balance.currency}`}
                 shortcut={{
                   modifiers: ['cmd'],
@@ -84,12 +77,17 @@ export default function Command() {
                 }}
                 title="Open in Dashboard"
               />
-
               <Action.CopyToClipboard
                 title="Copy Balance"
                 content={formatCurrency(balance.balance, balance.currency)}
                 shortcut={{ modifiers: ['cmd'], key: 'c' }}
               />
+             <Action
+              onAction={openExtensionPreferences}
+              title={"Open Preferences"}
+              shortcut={{ modifiers: ['cmd'], key: 'p' }}
+              icon={Icon.Gear}
+            />
             </ActionPanel>
           }
         />
