@@ -37,6 +37,7 @@ type ItemWithTabMatches = {
 
 function AuthenticatorList() {
   const { items, isLoading } = useVaultContext();
+  const interval = useAuthenticatorInterval();
   const { data: activeTab, isLoading: isActiveTabLoading } = usePromise(async () => {
     const tabs = await BrowserExtension.getTabs();
     const activeTab = tabs.find((tab) => tab.active);
@@ -68,19 +69,19 @@ function AuthenticatorList() {
         <>
           <List.Section title={`Active Tab (${activeTab.url.hostname})`}>
             {totpItemsWithTabMatches.tabItems.map((item) => (
-              <VaultItem key={item.id} item={item} />
+              <VaultItem key={item.id} item={item} interval={interval} />
             ))}
           </List.Section>
           <List.Section title="Others">
             {totpItemsWithTabMatches.items.map((item) => (
-              <VaultItem key={item.id} item={item} />
+              <VaultItem key={item.id} item={item} interval={interval} />
             ))}
           </List.Section>
         </>
       ) : (
         <>
           {totpItemsWithTabMatches.items.map((item) => (
-            <VaultItem key={item.id} item={item} />
+            <VaultItem key={item.id} item={item} interval={interval} />
           ))}
         </>
       )}
@@ -103,9 +104,8 @@ const useAuthenticatorInterval = () => {
   return time;
 };
 
-const useAuthenticator = (item: Item) => {
+const useAuthenticator = (item: Item, interval: number) => {
   const [code, setCode] = useState<string>();
-  const time = useAuthenticatorInterval();
 
   useEffect(() => {
     const { totp } = item.login ?? {};
@@ -116,10 +116,10 @@ const useAuthenticator = (item: Item) => {
   useEffect(() => {
     const { totp } = item.login ?? {};
     if (!totp || totp === SENSITIVE_VALUE_PLACEHOLDER) return undefined;
-    if (time === 30) setCode(authenticator.generate(totp));
-  }, [time]);
+    if (interval === 30) setCode(authenticator.generate(totp));
+  }, [interval]);
 
-  return { code, time };
+  return { code };
 };
 
 const CopyCodeAction = () => {
@@ -143,9 +143,9 @@ const CopyCodeAction = () => {
   return <Action title="Copy Code" icon={Icon.Clipboard} onAction={handleCopyCode} />;
 };
 
-function VaultItem({ item }: { item: Item }) {
+function VaultItem({ item, interval }: { item: Item; interval: number }) {
   const icon = useItemIcon(item);
-  const { code, time } = useAuthenticator(item);
+  const { code } = useAuthenticator(item, interval);
 
   return (
     <VaultItemContext.Provider value={item}>
@@ -159,7 +159,7 @@ function VaultItem({ item }: { item: Item }) {
         }
         accessories={[
           { text: item.login?.totp === SENSITIVE_VALUE_PLACEHOLDER ? "Loading..." : code },
-          { tag: { value: String(time), color: time < 5 ? Color.Red : Color.Blue } },
+          { tag: { value: String(interval), color: interval < 5 ? Color.Red : Color.Blue } },
         ]}
       />
     </VaultItemContext.Provider>
