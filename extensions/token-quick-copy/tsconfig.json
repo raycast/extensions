@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": ["es2020", "DOM"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "outDir": "dist",
+    "strict": false,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "allowJs": true,
+    "checkJs": false
+  },
+  "ts-node": {
+    "transpileOnly": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
