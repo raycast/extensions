@@ -1,6 +1,6 @@
 # Ntfy Changelog
 
-## [Initial version] - {PR_MERGE_DATE}
+## [Initial version] - 2025-03-31
 
 - Configuration for server and topic
 - Send notification functionality
