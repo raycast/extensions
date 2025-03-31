@@ -75,7 +75,7 @@ const Site = ({ site }: { site: SiteType }) => {
   };
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} navigationTitle={`Departures for ${site.name}`}>
       {combinedData.map((item) => {
         const line = getMetroLine(item.line.id);
         return (
@@ -85,7 +85,7 @@ const Site = ({ site }: { site: SiteType }) => {
             subtitle={item.display}
             accessories={[
               {
-                text: {
+                tag: {
                   color: line?.color ?? Color.PrimaryText,
                   value: line?.name ?? "",
                 },
@@ -93,7 +93,7 @@ const Site = ({ site }: { site: SiteType }) => {
             ]}
             actions={
               <ActionPanel>
-                <Action title="Reload" onAction={revalidate} />
+                <Action title="Reload" icon={Icon.ArrowClockwise} onAction={revalidate} />
               </ActionPanel>
             }
             icon={getIcon(item.line.transport_mode)}

@@ -4,7 +4,9 @@
   "author": "ericostholmm",
   "title": "SL",
   "description": "Departures for public transport in Stockholm",
-  "pastContributors": ["albingroen"],
+  "pastContributors": [
+    "albingroen"
+  ],
   "license": "MIT",
   "icon": "command-icon.png",
   "categories": [

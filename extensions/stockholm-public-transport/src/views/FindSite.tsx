@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, useNavigation, Keyboard } from "@raycast/api";
 import { metroSites } from "../fetchers/metroSites";
 import { useSites } from "../fetchers/sites";
 import { useState } from "react";
@@ -40,6 +40,7 @@ export default function FindSite() {
                   <Action.Push title="Select" target={<Site site={item} />} />
                   <Action
                     title="Unfavorite"
+                    shortcut={Keyboard.Shortcut.Common.Pin}
                     icon={Icon.HeartDisabled}
                     onAction={() => setFavorites(favorites?.filter((id) => id !== item.id) ?? [])}
                   />
@@ -58,8 +59,13 @@ export default function FindSite() {
             accessories={[{ icon: Icon.HeartDisabled }]}
             actions={
               <ActionPanel>
-                <Action title="Select" onAction={() => push(<Site site={item} />)} />
-                <Action title="Favorite" onAction={() => addFavorite(item.id)} />
+                <Action title="Select" icon={Icon.ArrowRight} onAction={() => push(<Site site={item} />)} />
+                <Action
+                  title="Favorite"
+                  icon={Icon.Heart}
+                  shortcut={Keyboard.Shortcut.Common.Pin}
+                  onAction={() => addFavorite(item.id)}
+                />
               </ActionPanel>
             }
           />
