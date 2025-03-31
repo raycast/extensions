@@ -6,9 +6,27 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
 export default async function (clientName?: string) {
+  function initEnv() {
+    const shell = os.userInfo().shell || "/bin/sh";
+    const command = `LC_ALL=en_US.UTF-8 ${shell} -L -i -c 'printenv'`;
+    try {
+      const variables = execSync(command, { encoding: "utf8" });
+      variables.split("\n").forEach((line) => {
+        const [key, value] = line.split("=");
+        if (key && value) {
+          process.env[key] = value;
+        }
+      });
+    } catch (error) {
+      console.error("Error retrieving shell PATH:", error);
+      process.env.PATH = process.env.PATH || "";
+    }
+  }
+  initEnv();
+
   function getUserShellPath() {
     const shell = os.userInfo().shell || "/bin/sh";
-    const command = `${shell} -l -i -c 'echo $PATH'`;
+    const command = `${shell} -l -c 'echo $PATH'`;
 
     try {
       const path = execSync(command).toString().trim();

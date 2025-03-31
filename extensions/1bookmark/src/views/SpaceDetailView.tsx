@@ -2,8 +2,6 @@ import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { trpc } from "@/utils/trpc.util";
 import { useMe } from "../hooks/use-me.hook";
-import { useAtom } from "jotai";
-import { sessionTokenAtom } from "../states/session-token.state";
 import { EditSpaceOneValueForm, KeyToEdit } from "./EditSpaceOneValueForm";
 import { SpaceMembersView } from "./SpaceMembersView";
 import { SpaceTagsView } from "./SpaceTagsView";
@@ -23,8 +21,7 @@ const EditAction = (props: { spaceId: string; keyToEdit: KeyToEdit; value: strin
 function Body(props: { spaceId: string }) {
   const { spaceId } = props;
   const { data, isLoading, refetch } = trpc.space.get.useQuery({ spaceId });
-  const [sessionToken] = useAtom(sessionTokenAtom);
-  const me = useMe(sessionToken);
+  const me = useMe();
 
   if (isLoading || !data || me.isLoading || !me.data) {
     return <List isLoading />;

@@ -5,13 +5,14 @@ import {
   useGetBusinessInvoices,
   useGetBusinessProductsAndServices,
 } from "./lib/wave";
-import { Business } from "./lib/types";
-import { getInvoiceStatusColor } from "./lib/utils";
+import { Business, InvoiceStatus } from "./lib/types";
+import { getCustomerJoinedName, getInvoiceStatusColor } from "./lib/utils";
 import { useCachedState, withAccessToken } from "@raycast/utils";
 import { HELP_LINKS, INVOICE_STATUSES } from "./lib/config";
 import CustomerStatement from "./lib/components/customer-statement";
 import { provider } from "./lib/oauth";
 import OpenInWave from "./lib/components/open-in-wave";
+import { useState } from "react";
 
 export default withAccessToken(provider)(ManageWave);
 
@@ -56,12 +57,32 @@ function ManageWave() {
 
 function BusinessInvoices({ business }: { business: Business }) {
   const [isShowingDetail, setIsShowingDetail] = useCachedState("details-invoices", false);
+  const [status, setStatus] = useState("");
 
   const { isLoading, data: invoices } = useGetBusinessInvoices(business.id);
   const isEmpty = !isLoading && !invoices.length;
 
   return (
-    <List isLoading={isLoading} isShowingDetail={!isEmpty && isShowingDetail} searchBarPlaceholder="Search invoice">
+    <List
+      isLoading={isLoading}
+      isShowingDetail={!isEmpty && isShowingDetail}
+      searchBarPlaceholder="Search invoice"
+      searchBarAccessory={
+        !invoices.length ? undefined : (
+          <List.Dropdown tooltip="Status" onChange={setStatus}>
+            <List.Dropdown.Item icon={Icon.Receipt} title="All" value="" />
+            {Object.keys(INVOICE_STATUSES).map((status) => (
+              <List.Dropdown.Item
+                key={status}
+                icon={{ source: Icon.Receipt, tintColor: getInvoiceStatusColor(status as InvoiceStatus) }}
+                title={status}
+                value={status}
+              />
+            ))}
+          </List.Dropdown>
+        )
+      }
+    >
       {isEmpty ? (
         <List.EmptyView
           title="Get paid fast."
@@ -74,68 +95,74 @@ function BusinessInvoices({ business }: { business: Business }) {
         />
       ) : (
         <List.Section title={`Businesses / ${business.name} / Invoices`}>
-          {invoices.map((invoice) => {
-            const title = `${invoice.title} - ${invoice.invoiceNumber}`;
-            const markdown = `# ${title}
+          {invoices
+            .filter((invoice) => !status || invoice.status === status)
+            .map((invoice) => {
+              const title = `${invoice.title} - ${invoice.invoiceNumber}`;
+              const markdown = `# ${title}
 | ${invoice.itemTitle} | ${invoice.unitTitle} | ${invoice.priceTitle} | ${invoice.amountTitle} |
 |----------------------|----------------------|-----------------------|------------------------|
 ${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${item.price} | ${item.subtotal.currency.symbol}${item.subtotal.value}`).join(`\n`)}`;
 
-            return (
-              <List.Item
-                key={invoice.id}
-                icon={{ source: Icon.Receipt, tintColor: getInvoiceStatusColor(invoice.status) }}
-                title={title}
-                subtitle={isShowingDetail ? undefined : invoice.subhead}
-                accessories={
-                  isShowingDetail
-                    ? undefined
-                    : [
-                        { tag: { value: invoice.status, color: getInvoiceStatusColor(invoice.status) } },
-                        { date: new Date(invoice.modifiedAt) },
-                      ]
-                }
-                detail={
-                  <List.Item.Detail
-                    markdown={markdown}
-                    metadata={
-                      <List.Item.Detail.Metadata>
-                        <List.Item.Detail.Metadata.Label
-                          title="Created At"
-                          text={new Date(invoice.createdAt).toISOString()}
-                        />
-                        <List.Item.Detail.Metadata.Label
-                          title="Modified At"
-                          text={new Date(invoice.modifiedAt).toISOString()}
-                        />
-                        <List.Item.Detail.Metadata.Link
-                          title="View PDF"
-                          text={invoice.pdfUrl}
-                          target={invoice.pdfUrl}
-                        />
-                        <List.Item.Detail.Metadata.Link
-                          title="View in Wave"
-                          text={invoice.viewUrl}
-                          target={invoice.viewUrl}
-                        />
-                        <List.Item.Detail.Metadata.Label title="Status" text={INVOICE_STATUSES[invoice.status]} />
-                        <List.Item.Detail.Metadata.Label title="Customer" text={invoice.customer.name} />
-                      </List.Item.Detail.Metadata>
-                    }
-                  />
-                }
-                actions={
-                  <ActionPanel>
-                    <Action
-                      icon={Icon.AppWindowSidebarLeft}
-                      title="Toggle Details"
-                      onAction={() => setIsShowingDetail((prev) => !prev)}
+              return (
+                <List.Item
+                  key={invoice.id}
+                  icon={{
+                    source: Icon.Receipt,
+                    tintColor: getInvoiceStatusColor(invoice.status),
+                    tooltip: invoice.status,
+                  }}
+                  title={title}
+                  subtitle={isShowingDetail ? undefined : invoice.subhead}
+                  accessories={
+                    isShowingDetail
+                      ? undefined
+                      : [
+                          { tag: { value: invoice.status, color: getInvoiceStatusColor(invoice.status) } },
+                          { date: new Date(invoice.modifiedAt) },
+                        ]
+                  }
+                  detail={
+                    <List.Item.Detail
+                      markdown={markdown}
+                      metadata={
+                        <List.Item.Detail.Metadata>
+                          <List.Item.Detail.Metadata.Label
+                            title="Created At"
+                            text={new Date(invoice.createdAt).toISOString()}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Modified At"
+                            text={new Date(invoice.modifiedAt).toISOString()}
+                          />
+                          <List.Item.Detail.Metadata.Link
+                            title="View PDF"
+                            text={invoice.pdfUrl}
+                            target={invoice.pdfUrl}
+                          />
+                          <List.Item.Detail.Metadata.Link
+                            title="View in Wave"
+                            text={invoice.viewUrl}
+                            target={invoice.viewUrl}
+                          />
+                          <List.Item.Detail.Metadata.Label title="Status" text={INVOICE_STATUSES[invoice.status]} />
+                          <List.Item.Detail.Metadata.Label title="Customer" text={invoice.customer.name} />
+                        </List.Item.Detail.Metadata>
+                      }
                     />
-                  </ActionPanel>
-                }
-              />
-            );
-          })}
+                  }
+                  actions={
+                    <ActionPanel>
+                      <Action
+                        icon={Icon.AppWindowSidebarLeft}
+                        title="Toggle Details"
+                        onAction={() => setIsShowingDetail((prev) => !prev)}
+                      />
+                    </ActionPanel>
+                  }
+                />
+              );
+            })}
         </List.Section>
       )}
     </List>
@@ -169,7 +196,7 @@ function BusinessCustomers({ business }: { business: Business }) {
                 key={customer.id}
                 icon="no-user.png"
                 title={customer.name}
-                subtitle={isShowingDetail ? undefined : `${customer.firstName} ${customer.lastName}`}
+                subtitle={isShowingDetail ? undefined : getCustomerJoinedName(customer)}
                 accessories={
                   isShowingDetail ? undefined : [{ text: customer.email }, { date: new Date(customer.modifiedAt) }]
                 }
@@ -185,6 +212,12 @@ function BusinessCustomers({ business }: { business: Business }) {
                           title="Modified At"
                           text={new Date(customer.modifiedAt).toISOString()}
                         />
+                        <List.Item.Detail.Metadata.Label title="Customer" text={customer.name} />
+                        <List.Item.Detail.Metadata.Label
+                          title="Name"
+                          text={getCustomerJoinedName(customer)}
+                          icon={!getCustomerJoinedName(customer) ? Icon.Minus : undefined}
+                        />
                         {customer.website ? (
                           <List.Item.Detail.Metadata.Link
                             title="Website"
@@ -193,6 +226,24 @@ function BusinessCustomers({ business }: { business: Business }) {
                           />
                         ) : (
                           <List.Item.Detail.Metadata.Label title="Website" icon={Icon.Minus} />
+                        )}
+                        {customer.email ? (
+                          <List.Item.Detail.Metadata.Link
+                            title="Email"
+                            text={customer.email}
+                            target={`mailto:${customer.email}`}
+                          />
+                        ) : (
+                          <List.Item.Detail.Metadata.Label title="Email" icon={Icon.Minus} />
+                        )}
+                        {customer.phone ? (
+                          <List.Item.Detail.Metadata.Link
+                            title="Phone"
+                            text={customer.phone}
+                            target={`tel:${customer.phone}`}
+                          />
+                        ) : (
+                          <List.Item.Detail.Metadata.Label title="Phone" icon={Icon.Minus} />
                         )}
                       </List.Item.Detail.Metadata>
                     }
