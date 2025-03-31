@@ -1,10 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import ResultView from "./common";
 
-const prompt = getPreferenceValues().prompt_rephrase;
-const modelOverride = getPreferenceValues().model_rephrase;
-const toastTitle = "Rephrasing...";
-
 export default function Rephrase() {
-  return ResultView(prompt, modelOverride, toastTitle, true);
+  const { prompt_rephrase, model_rephrase } = getPreferenceValues();
+  const toastTitle = "Rephrasing...";
+  return ResultView(prompt_rephrase, model_rephrase, toastTitle, true);
 }
