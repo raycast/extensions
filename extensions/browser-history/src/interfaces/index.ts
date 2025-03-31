@@ -25,6 +25,7 @@ export interface Preferences {
   readonly profilePathSidekick?: string;
   readonly firstInResults: SupportedBrowsers;
   readonly defaultBrowser?: SupportedBrowsers & "Default";
+  readonly searchEngine?: string;
 }
 
 export interface SearchResult {
