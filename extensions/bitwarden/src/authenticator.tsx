@@ -18,7 +18,7 @@ import { usePromise } from "@raycast/utils";
 
 const AuthenticatorComponent = () => (
   <RootErrorBoundary>
-    <BitwardenProvider loadingFallback={<List searchBarPlaceholder="Search items" isLoading />}>
+    <BitwardenProvider loadingFallback={<List searchBarPlaceholder="Search vault" isLoading />}>
       <SessionProvider unlock>
         <VaultListenersProvider>
           <VaultProvider>
@@ -29,11 +29,6 @@ const AuthenticatorComponent = () => (
     </BitwardenProvider>
   </RootErrorBoundary>
 );
-
-type ItemWithTabMatches = {
-  items: Item[];
-  tabItems: Item[];
-};
 
 function AuthenticatorList() {
   const { items: vaultItems, isLoading } = useVaultContext();
@@ -50,7 +45,7 @@ function AuthenticatorList() {
   const itemsWithTabMatches = useMemo(() => {
     if (!activeTab) return { items: items, tabItems: [] };
 
-    return items.reduce<ItemWithTabMatches>(
+    return items.reduce<{ items: Item[]; tabItems: Item[] }>(
       (acc, item) => {
         const mayHaveUrl = item.login?.uris?.some(({ uri }) => uri?.includes(activeTab.url.hostname));
         if (mayHaveUrl) {
@@ -69,7 +64,7 @@ function AuthenticatorList() {
   ));
 
   return (
-    <List searchBarPlaceholder="Search items" isLoading={isLoading || isActiveTabLoading}>
+    <List searchBarPlaceholder="Search vault" isLoading={isLoading || isActiveTabLoading}>
       {activeTab && itemsWithTabMatches.tabItems.length > 0 ? (
         <>
           <List.Section title={`Active Tab (${activeTab.url.hostname})`}>
@@ -94,6 +89,7 @@ function VaultItem({ item, interval }: { item: Item; interval: number }) {
     <VaultItemContext.Provider value={item}>
       <List.Item
         title={item.name}
+        subtitle={item.login?.username ?? undefined}
         icon={icon}
         actions={
           <ActionPanel>
