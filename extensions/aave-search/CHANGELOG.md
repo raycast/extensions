@@ -1,5 +1,11 @@
 # Aave Search Changelog
 
+## [1.1.1] - {PR_MERGE_DATE}
+
+### Fixes
+
+- Fixed CSV header being incorrectly processed as contract data
+
 ## [1.1.0] - 2025-03-25
 
 ### Offline fallback & Fixes
