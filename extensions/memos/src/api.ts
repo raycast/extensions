@@ -261,7 +261,6 @@ export const deleteMemo = (memoName: string) => {
 
 export const getResourceBinToBase64 = async (resourceName: string, resourceFilename: string) => {
   const url = getRequestUrl(`/file/${resourceName}/${resourceFilename}?thumbnail=1`);
-  console.log("url", url);
 
   const blob = await getFetch<ArrayBuffer>({
     url,

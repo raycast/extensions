@@ -12,6 +12,7 @@ import {
   sendMemo,
 } from "./api";
 import { VISIBILITY } from "./constant";
+import { showFailureToast } from "@raycast/utils";
 
 interface FormData {
   content: string;
@@ -70,7 +71,7 @@ export default function SendMemoFormCommand(): JSX.Element {
 
       setCreatedMarkdown(markdown);
     } catch (error) {
-      //
+      showFailureToast(error, { title: "Failed to fetch memo details" });
     }
 
     setLoadingDetail(false);

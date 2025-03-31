@@ -65,11 +65,14 @@ export default function MemosListCommand(): JSX.Element {
     const { content, resources } = item;
     let markdown = content;
 
-    for (const resource of resources) {
-      const resourceBlobUrl = await getResourceBinToBase64(resource.name, resource.filename);
+    const resourceMarkdowns = await Promise.all(
+      resources.map(async (resource) => {
+        const resourceBlobUrl = await getResourceBinToBase64(resource.name, resource.filename);
+        return `\n\n![${resource.filename}](${resourceBlobUrl})`;
+      }),
+    );
 
-      markdown += `\n\n![${resource.filename}](${resourceBlobUrl})`;
-    }
+    markdown += resourceMarkdowns.join("");
 
     setFilterList((prevList) => {
       const updatedList = prevList.map((prevItem) => {
