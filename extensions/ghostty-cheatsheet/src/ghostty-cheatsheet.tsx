@@ -9,9 +9,11 @@ export default function Command() {
     <List>
       {Object.keys(shortcuts).map((key) => (
         <List.Section key={key} title={key}>
-          {shortcuts[key].map((item) => (
-            <List.Item key={item.action} title={item.action} subtitle={item[os]} />
-          ))}
+          {shortcuts[key]
+            .filter((item) => item[os])
+            .map((item) => (
+              <List.Item key={item.action} title={item.action} subtitle={item[os]} />
+            ))}
         </List.Section>
       ))}
     </List>

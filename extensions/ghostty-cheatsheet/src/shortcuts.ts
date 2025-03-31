@@ -14,7 +14,7 @@ const shortcuts: Record<string, Shortcut[]> = {
     },
     {
       action: "Close all windows",
-      ["Windows/Linux"]: "-",
+      ["Windows/Linux"]: undefined,
       macOS: "⌘+⇧+⌥+W",
     },
     {
@@ -58,11 +58,6 @@ const shortcuts: Record<string, Shortcut[]> = {
       action: "Go to last tab",
       ["Windows/Linux"]: "Alt+9",
       macOS: "⌘+9",
-    },
-    {
-      action: "Move tab",
-      ["Windows/Linux"]: "-",
-      macOS: "-",
     },
   ],
   ["Split Management"]: [
@@ -151,7 +146,7 @@ const shortcuts: Record<string, Shortcut[]> = {
     {
       action: "Paste from selection",
       ["Windows/Linux"]: "⇧+Insert",
-      macOS: "-",
+      macOS: undefined,
     },
   ],
   ["Text Navigation"]: [
@@ -187,7 +182,7 @@ const shortcuts: Record<string, Shortcut[]> = {
     },
     {
       action: "Clear screen",
-      ["Windows/Linux"]: "-",
+      ["Windows/Linux"]: undefined,
       macOS: "⌘+K",
     },
   ],

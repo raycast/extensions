@@ -6,93 +6,92 @@
 
 Default keyboard shortcuts for Ghostty terminal emulator.
 
+Note: These are the default keybindings. All keybindings can be customized through the configuration file using the `keybind` option.
+
 ## Window Management
 
-| Action            | Windows/Linux | macOS                   |
-| ----------------- | ------------- | ----------------------- |
-| New window        | Ctrl+Shift+N  | Cmd+N                   |
-| Close window      | Alt+F4        | Cmd+Shift+W             |
-| Close all windows | -             | Cmd+Shift+Option+W      |
-| Toggle fullscreen | Ctrl+Enter    | Cmd+Enter or Cmd+Ctrl+F |
-| Quit application  | Ctrl+Shift+Q  | Cmd+Q                   |
+| Action            | Windows/Linux | macOS               |
+| ----------------- | ------------- | ------------------- |
+| New window        | Ctrl+⇧+N      | ⌘+N                 |
+| Close window      | Alt+F4        | ⌘+⇧+W               |
+| Close all windows | -             | ⌘+⇧+⌥+W             |
+| Toggle fullscreen | Ctrl+Enter    | ⌘+Enter or ⌘+Ctrl+F |
+| Quit application  | Ctrl+⇧+Q      | ⌘+Q                 |
 
 ## Tab Management
 
-| Action            | Windows/Linux                                 | macOS       |
-| ----------------- | --------------------------------------------- | ----------- |
-| New tab           | Ctrl+Shift+T                                  | Cmd+T       |
-| Close tab/surface | Ctrl+Shift+W                                  | Cmd+W       |
-| Previous tab      | Ctrl+Shift+Tab, Ctrl+Shift+Left, Ctrl+Page Up | Cmd+Shift+[ |
-| Next tab          | Ctrl+Tab, Ctrl+Shift+Right, Ctrl+Page Down    | Cmd+Shift+] |
-| Go to tab 1-8     | Alt+[1-8]                                     | Cmd+[1-8]   |
-| Go to last tab    | Alt+9                                         | Cmd+9       |
-| Move tab          | -                                             | -           |
+| Action            | Windows/Linux                      | macOS   |
+| ----------------- | ---------------------------------- | ------- |
+| New tab           | Ctrl+⇧+T                           | ⌘+T     |
+| Close tab/surface | Ctrl+⇧+W                           | ⌘+W     |
+| Previous tab      | Ctrl+⇧+Tab, Ctrl+⇧+←, Ctrl+Page Up | ⌘+⇧+[   |
+| Next tab          | Ctrl+Tab, Ctrl+⇧+→, Ctrl+Page Down | ⌘+⇧+]   |
+| Go to tab 1-8     | Alt+[1-8]                          | ⌘+[1-8] |
+| Go to last tab    | Alt+9                              | ⌘+9     |
 
 ## Split Management
 
-| Action               | Windows/Linux          | macOS            |
-| -------------------- | ---------------------- | ---------------- |
-| New split (right)    | Ctrl+Shift+O           | Cmd+D            |
-| New split (down)     | Ctrl+Shift+E           | Cmd+Shift+D      |
-| Focus previous split | Ctrl+Super+[           | Cmd+[            |
-| Focus next split     | Ctrl+Super+]           | Cmd+]            |
-| Focus split up       | Ctrl+Alt+Up            | Cmd+Option+Up    |
-| Focus split down     | Ctrl+Alt+Down          | Cmd+Option+Down  |
-| Focus split left     | Ctrl+Alt+Left          | Cmd+Option+Left  |
-| Focus split right    | Ctrl+Alt+Right         | Cmd+Option+Right |
-| Toggle split zoom    | Ctrl+Shift+Enter       | Cmd+Shift+Enter  |
-| Resize split up      | Ctrl+Super+Shift+Up    | Cmd+Ctrl+Up      |
-| Resize split down    | Ctrl+Super+Shift+Down  | Cmd+Ctrl+Down    |
-| Resize split left    | Ctrl+Super+Shift+Left  | Cmd+Ctrl+Left    |
-| Resize split right   | Ctrl+Super+Shift+Right | Cmd+Ctrl+Right   |
-| Equalize splits      | Ctrl+Super+Shift+=     | Cmd+Ctrl+=       |
+| Action               | Windows/Linux     | macOS       |
+| -------------------- | ----------------- | ----------- |
+| New split (right)    | Ctrl+⇧+O          | ⌘+D         |
+| New split (down)     | Ctrl+⇧+E          | ⌘+⇧+D       |
+| Focus previous split | Ctrl+Super+[      | ⌘+[         |
+| Focus next split     | Ctrl+Super+]      | ⌘+]         |
+| Focus split up       | Ctrl+Alt+Up       | ⌘+⌥+Up      |
+| Focus split down     | Ctrl+Alt+Down     | ⌘+⌥+Down    |
+| Focus split left     | Ctrl+Alt+←        | ⌘+⌥+←       |
+| Focus split right    | Ctrl+Alt+→        | ⌘+⌥+→       |
+| Toggle split zoom    | Ctrl+⇧+Enter      | ⌘+⇧+Enter   |
+| Resize split up      | Ctrl+Super+⇧+Up   | ⌘+Ctrl+Up   |
+| Resize split down    | Ctrl+Super+⇧+Down | ⌘+Ctrl+Down |
+| Resize split left    | Ctrl+Super+⇧+←    | ⌘+Ctrl+←    |
+| Resize split right   | Ctrl+Super+⇧+→    | ⌘+Ctrl+→    |
+| Equalize splits      | Ctrl+Super+⇧+=    | ⌘+Ctrl+=    |
 
 ## Copy & Paste
 
 | Action               | Windows/Linux | macOS |
 | -------------------- | ------------- | ----- |
-| Copy                 | Ctrl+Shift+C  | Cmd+C |
-| Paste                | Ctrl+Shift+V  | Cmd+V |
-| Paste from selection | Shift+Insert  | -     |
+| Copy                 | Ctrl+⇧+C      | ⌘+C   |
+| Paste                | Ctrl+⇧+V      | ⌘+V   |
+| Paste from selection | ⇧+Insert      | -     |
 
 ## Text Navigation
 
-| Action                  | Windows/Linux        | macOS         |
-| ----------------------- | -------------------- | ------------- |
-| Scroll to top           | Shift+Home           | Cmd+Home      |
-| Scroll to bottom        | Shift+End            | Cmd+End       |
-| Scroll page up          | Shift+Page Up        | Cmd+Page Up   |
-| Scroll page down        | Shift+Page Down      | Cmd+Page Down |
-| Jump to previous prompt | Ctrl+Shift+Page Up   | Cmd+Up        |
-| Jump to next prompt     | Ctrl+Shift+Page Down | Cmd+Down      |
-| Clear screen            | -                    | Cmd+K         |
+| Action                  | Windows/Linux    | macOS       |
+| ----------------------- | ---------------- | ----------- |
+| Scroll to top           | ⇧+Home           | ⌘+Home      |
+| Scroll to bottom        | ⇧+End            | ⌘+End       |
+| Scroll page up          | ⇧+Page Up        | ⌘+Page Up   |
+| Scroll page down        | ⇧+Page Down      | ⌘+Page Down |
+| Jump to previous prompt | Ctrl+⇧+Page Up   | ⌘+Up        |
+| Jump to next prompt     | Ctrl+⇧+Page Down | ⌘+Down      |
+| Clear screen            | -                | ⌘+K         |
 
 ## Font Size
 
-| Action             | Windows/Linux | macOS       |
-| ------------------ | ------------- | ----------- |
-| Increase font size | Ctrl++/Ctrl+= | Cmd++/Cmd+= |
-| Decrease font size | Ctrl+-        | Cmd+-       |
-| Reset font size    | Ctrl+0        | Cmd+0       |
+| Action             | Windows/Linux | macOS   |
+| ------------------ | ------------- | ------- |
+| Increase font size | Ctrl++/Ctrl+= | ⌘++/⌘+= |
+| Decrease font size | Ctrl+-        | ⌘+-     |
+| Reset font size    | Ctrl+0        | ⌘+0     |
 
 ## Configuration
 
-| Action        | Windows/Linux | macOS       |
-| ------------- | ------------- | ----------- |
-| Open config   | Ctrl+,        | Cmd+,       |
-| Reload config | Ctrl+Shift+,  | Cmd+Shift+, |
+| Action        | Windows/Linux | macOS |
+| ------------- | ------------- | ----- |
+| Open config   | Ctrl+,        | ⌘+,   |
+| Reload config | Ctrl+⇧+,      | ⌘+⇧+, |
 
 ## Inspector
 
-| Action           | Windows/Linux | macOS        |
-| ---------------- | ------------- | ------------ |
-| Toggle inspector | Ctrl+Shift+I  | Cmd+Option+I |
+| Action           | Windows/Linux | macOS |
+| ---------------- | ------------- | ----- |
+| Toggle inspector | Ctrl+⇧+I      | ⌘+⌥+I |
 
 ## Scrollback
 
-| Action                           | Windows/Linux    | macOS              |
-| -------------------------------- | ---------------- | ------------------ |
-| Write scrollback to file (paste) | Ctrl+Shift+J     | Cmd+Shift+J        |
-| Write scrollback to file (open)  | Ctrl+Shift+Alt+J | Cmd+Shift+Option+J |
-
-Note: These are the default keybindings. All keybindings can be customized through the configuration file using the `keybind` option.
+| Action                           | Windows/Linux | macOS   |
+| -------------------------------- | ------------- | ------- |
+| Write scrollback to file (paste) | Ctrl+⇧+J      | ⌘+⇧+J   |
+| Write scrollback to file (open)  | Ctrl+⇧+Alt+J  | ⌘+⇧+⌥+J |
