@@ -111,11 +111,7 @@ export const useFilterBookmark = (params: {
     }
 
     // Apply filters to both tagged and untagged bookmarks
-    const filters = {
-      spaceFilters: spaceFilters.map((filter) => filter.toLowerCase()),
-      creatorFilters: creatorFilters.map((filter) => filter.toLowerCase()),
-      tagFilters: tagFilters.map((filter) => filter.toLowerCase()),
-    };
+    const filters = { spaceFilters, creatorFilters, tagFilters };
     const filteredTaggedPreparedBookmarks = filterAsPattern(taggedPrepare, filters);
     const filteredUntaggedPreparedBookmarks = filterAsPattern(untaggedPrepare, filters);
 
