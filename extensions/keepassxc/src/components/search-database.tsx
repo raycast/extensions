@@ -5,6 +5,7 @@ import {
   Color,
   Clipboard,
   closeMainWindow,
+  getPreferenceValues,
   Icon,
   List,
   open,
@@ -12,8 +13,17 @@ import {
   showHUD,
   Toast,
 } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { KeePassLoader, showToastCliErrors } from "../utils/keepass-loader";
 import { getTOTPCode } from "../utils/totp";
+
+interface Preference {
+  userInterfaceFavicon: boolean;
+}
+
+const preferences: Preference = getPreferenceValues();
+// Whether to display favicons in the user interface
+const userInterfaceFavicon = Boolean(preferences.userInterfaceFavicon);
 
 /**
  * Get an array of unique folder names from the given entries.
@@ -114,6 +124,7 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
             <List.Item
               key={i}
               title={entry[1]}
+              icon={userInterfaceFavicon ? getFavicon(entry[4], { fallback: Icon.QuestionMarkCircle }) : undefined}
               subtitle={{ value: entry[2], tooltip: "Username" }}
               accessories={[
                 entry[0] !== ""
