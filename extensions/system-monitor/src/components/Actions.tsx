@@ -3,13 +3,13 @@ import { runAppleScript } from "@raycast/utils";
 import { openActivityMonitorAppleScript } from "../utils";
 
 interface ActionsProps {
-  radioButtonNumber: number;
+  radioButtonNumber?: number;
 }
 
 export const Actions = ({ radioButtonNumber }: ActionsProps) => {
   const handleRunAppleScript = async () => {
     try {
-      await runAppleScript(openActivityMonitorAppleScript(radioButtonNumber));
+      await runAppleScript(openActivityMonitorAppleScript(radioButtonNumber ?? null));
       await closeMainWindow();
     } catch (error) {
       await showToast({

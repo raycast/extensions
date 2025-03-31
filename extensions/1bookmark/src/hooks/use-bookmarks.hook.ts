@@ -1,30 +1,35 @@
-import { Cache } from "@raycast/api";
 import { RouterOutputs, trpc } from "@/utils/trpc.util";
 import { Bookmark } from "../types";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { useCachedState } from "@raycast/utils";
+import { useMe } from "./use-me.hook";
 
-const cache = new Cache();
+export const useMyBookmarks = () => {
+  const [sessionToken] = useCachedState("session-token", "");
+  const [cached, setCached] = useCachedState<RouterOutputs["bookmark"]["listAll"] | null>("my-bookmarks", null);
 
-export const useBookmarks = (p: { sessionToken: string; spaceIds: string[]; me?: RouterOutputs["user"]["me"] }) => {
-  const { sessionToken, spaceIds, me } = p;
+  const me = useMe();
+  const spaceIds = useMemo(() => {
+    return me.data?.associatedSpaces.map((s) => s.id) || [];
+  }, [me.data]);
+
   const r = trpc.bookmark.listAll.useQuery(
     {
       spaceIds,
     },
     {
-      enabled: !!sessionToken && !!me,
+      enabled: !!sessionToken && !!me.data,
       initialData: () => {
-        const cachedBookmarks = cache.get("bookmarks");
-        if (!cachedBookmarks) {
+        if (!cached) {
           return undefined;
         }
 
         // TODO: Check compatibility and return.
         // Or, change key for each schema version.
-        const initialData: Bookmark[] = JSON.parse(cachedBookmarks);
+        const initialData: Bookmark[] = cached;
         if (!initialData[0]?.tags) {
           // Remove cache for versions before 0.3.0.
-          cache.remove("bookmarks");
+          setCached(null);
           return undefined;
         }
         console.info("Cache hit useBookmarks");
@@ -36,8 +41,23 @@ export const useBookmarks = (p: { sessionToken: string; spaceIds: string[]; me?:
   useEffect(() => {
     if (!r.data) return;
 
-    cache.set("bookmarks", JSON.stringify(r.data));
-  }, [r.data]);
+    setCached(r.data);
+  }, [r.data, setCached]);
 
   return r;
+};
+
+export const useBookmarks = (spaceIdOrIds: string | string[]) => {
+  const [sessionToken] = useCachedState("session-token", "");
+  const me = useMe();
+  const spaceIds = useMemo(() => {
+    return Array.isArray(spaceIdOrIds) ? spaceIdOrIds : [spaceIdOrIds];
+  }, [spaceIdOrIds]);
+
+  return trpc.bookmark.listAll.useQuery(
+    { spaceIds },
+    {
+      enabled: !!sessionToken && !!me.data,
+    },
+  );
 };

@@ -9,7 +9,7 @@ export async function openNewTab(queryText: string | null | undefined): Promise<
   closeMainWindow({ clearRootSearch: true });
 
   const script = `
-    tell application "Zen Browser"
+    tell application "Zen"
     set savedClipboard to get the clipboard
     set the clipboard to "${SEARCH_ENGINE[getPreferenceValues<Preferences>().searchEngine.toLowerCase()]}${queryText}"
     activate
@@ -36,7 +36,7 @@ export async function openHistoryTab(url: string): Promise<boolean | string> {
   closeMainWindow({ clearRootSearch: true });
 
   const script = `
-    tell application "Zen Browser"
+    tell application "Zen"
      set savedClipboard to get the clipboard
       set the clipboard to "${url}"
       activate
@@ -60,7 +60,7 @@ export async function openHistoryTab(url: string): Promise<boolean | string> {
 
 export async function setActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
-    tell application "Zen Browser"
+    tell application "Zen"
       activate
       repeat with w from 1 to count of windows
         set startTab to name of window 1

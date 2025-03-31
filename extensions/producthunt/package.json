@@ -2,13 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "producthunt",
   "title": "Product Hunt - Today's Hunts",
-  "description": "Get the latest products from the fontpage of Product Hunt.",
+  "description": "Get the latest products from the frontpage of Product Hunt.",
   "icon": "icon.png",
   "author": "ragnor",
   "contributors": [
     "pernielsentikaer",
     "thomasjost",
-    "marcmagn1"
+    "marcmagn1",
+    "chrismessina"
   ],
   "license": "MIT",
   "commands": [
@@ -16,7 +17,7 @@
       "name": "frontpage",
       "title": "Check Today's Hunts",
       "subtitle": "Product Hunt",
-      "description": "Get the latest products from the fontpage of Product Hunt.",
+      "description": "Get the latest products from the frontpage of Product Hunt.",
       "mode": "view"
     }
   ],
@@ -155,6 +156,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
+    "evals": "npx ray evals"
   }
 }

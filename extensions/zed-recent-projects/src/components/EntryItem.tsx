@@ -1,17 +1,16 @@
-import type { FC, PropsWithChildren } from "react";
-import { List, ActionPanel } from "@raycast/api";
+import { List } from "@raycast/api";
 import { Entry } from "../lib/entry";
 
-export interface EntryItemProps extends Pick<List.Item.Props, "icon" | "accessoryIcon"> {
+export interface EntryItemProps extends Pick<List.Item.Props, "icon" | "accessoryIcon" | "actions"> {
   entry: Entry;
 }
 
-export const EntryItem: FC<PropsWithChildren<EntryItemProps>> = ({ entry, children, ...props }) => {
+export const EntryItem = ({ entry, ...props }: EntryItemProps) => {
   return (
     <List.Item
       title={entry.title}
       subtitle={entry.subtitle}
-      actions={children && <ActionPanel>{children}</ActionPanel>}
+      icon={entry.is_remote ? "remote.svg" : entry.path && { fileIcon: entry.path }}
       {...props}
     />
   );

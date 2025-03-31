@@ -1,6 +1,7 @@
 import { environment, Cache } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { SearchEngine, searchEngines } from "./search-engines";
+import { searchEngines } from "./search-engines";
+import { SearchEngine } from "../types";
 
 const config = {
   namespace: environment.extensionName,

@@ -1,5 +1,16 @@
 # Mail Changelog
 
+## [Add AI Tools] - {PR_MERGE_DATE}
+
+This release turns this extension into an AI extension.
+
+Supported tools:
+- Search emails
+- List addresses
+- Send email
+
+Added support for setting the default mail account, which is now used as the default in `Compose New Message` and by the AI when sending an email.
+
 ## [Improvement] - 2025-01-15
 
 - Add preference for `See Recent Mail`: `unreadonly` to show whether only unread messages.

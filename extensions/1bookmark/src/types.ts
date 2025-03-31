@@ -7,5 +7,12 @@ export interface RegisterBookmarkForm {
   description: string;
 }
 
+export interface BrowserBookmark {
+  id: string;
+  title: string;
+  url: string;
+  folder: string;
+}
+
 export type Bookmark = RouterOutputs["bookmark"]["listAll"][number];
 export type Tag = RouterOutputs["tag"]["list"][number];

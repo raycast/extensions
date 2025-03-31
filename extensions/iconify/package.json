@@ -98,10 +98,18 @@
           "value": "currentColor"
         },
         {
-          "title": "White",
-          "value": "#ffffff"
+          "title": "Custom",
+          "value": "customColor"
         }
       ]
+    },
+    {
+      "name": "customColor",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Icon Color",
+      "description": "Custom icon color to use in icons",
+      "default": "#ffffff"
     }
   ],
   "dependencies": {

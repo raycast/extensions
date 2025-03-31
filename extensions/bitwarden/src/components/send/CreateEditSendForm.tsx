@@ -4,6 +4,7 @@ import { Send, SendDateOption, SendType } from "~/types/send";
 import { captureException } from "~/utils/development";
 import { SendTypeOptions } from "~/constants/send";
 import { PremiumFeatureError } from "~/utils/errors";
+import { DebuggingBugReportingActionSection } from "~/components/actions";
 
 const validateOptionalDateUnder31Days = (value: Date | null | undefined) => {
   if (!value) return;
@@ -134,6 +135,7 @@ export const CreateEditSendForm = ({
             icon={{ source: "send.svg" }}
             onSubmit={handleSubmit}
           />
+          <DebuggingBugReportingActionSection />
         </ActionPanel>
       }
     >

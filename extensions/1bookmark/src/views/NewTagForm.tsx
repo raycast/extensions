@@ -1,16 +1,13 @@
 import { CachedQueryClientProvider } from "@/components/CachedQueryClientProvider";
 import { useState } from "react";
-import { useAtom } from "jotai";
 import { trpc } from "@/utils/trpc.util";
 import { Form, ActionPanel, Action, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 import { useMe } from "../hooks/use-me.hook";
-import { sessionTokenAtom } from "../states/session-token.state";
 
 function Body(props: { spaceId: string }) {
   const { spaceId } = props;
   const [selectedSpaceId, setSelectedSpaceId] = useState(spaceId);
-  const [sessionToken] = useAtom(sessionTokenAtom);
-  const me = useMe(sessionToken);
+  const me = useMe();
 
   const { pop } = useNavigation();
   const create = trpc.tag.create.useMutation();
