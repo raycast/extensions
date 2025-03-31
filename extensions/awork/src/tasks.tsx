@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon, launchCommand, LaunchProps, LaunchType, List, LocalStorage } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { getProjects, getTasks, task } from "./composables/FetchData";
-import { authorizationInProgress } from "./composables/WebClient";
+import { authorizationInProgress, getTokens } from "./composables/WebClient";
 
 const Actions = (props: { taskId: string; projectId: string; typeOfWorkId: string | undefined }) => {
   const { data: BaseUrl } = useCachedPromise(() => LocalStorage.getItem<string>("URL"));
@@ -55,6 +55,13 @@ const TaskItem = (props: { task: task }) => {
 };
 
 export default function Command(props: LaunchProps) {
+  const { data: token, revalidate } = usePromise(getTokens, [], {
+    onData: (data) => {
+      if (!data || data.isExpired()) {
+        revalidate();
+      }
+    },
+  });
   const [searchText, setSearchText] = useState<string>("");
   const [projectId, setProjectId] = useState<string>("");
   const {
@@ -62,13 +69,11 @@ export default function Command(props: LaunchProps) {
     pagination,
     isLoading: isLoadingTasks,
     revalidate: updateTasks,
-  } = useCachedPromise(getTasks, [searchText, 100, projectId], {
+  } = useCachedPromise(getTasks, [token?.accessToken as string, searchText, 100, projectId], {
+    execute: !!token?.accessToken && !token.isExpired(),
     onData: (data) => {
       if (data.length === 0 && !searchText && !authorizationInProgress) {
-        setTimeout(() => {
-          console.log("Reloading tasks");
-          updateTasks();
-        }, 500);
+        updateTasks();
       }
     },
   });
@@ -76,13 +81,11 @@ export default function Command(props: LaunchProps) {
     data: projects,
     isLoading: isLoadingProjects,
     revalidate: updateProjects,
-  } = useCachedPromise(getProjects, ["", 1000], {
+  } = useCachedPromise(getProjects, [token?.accessToken as string, "", 1000], {
+    execute: !!token?.accessToken && !token.isExpired(),
     onData: (data) => {
       if (data.length === 0 && !authorizationInProgress) {
-        setTimeout(() => {
-          console.log("Reloading projects");
-          updateProjects();
-        }, 500);
+        updateProjects();
       }
       if (props.launchContext?.projectId) {
         setProjectId(props.launchContext.projectId);

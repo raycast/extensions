@@ -68,15 +68,17 @@ const authorizeClient = async () => {
   if (await client.getTokens()) {
     console.log("Logged in successfully!");
     await getUserData();
+
+    authorizationInProgress = false;
+
+    return await client.getTokens();
   }
-  authorizationInProgress = false;
 };
 
 export const refreshToken = async () => {
   const tokens = await client.getTokens();
   if (!tokens) {
-    await authorizeClient();
-    return;
+    return await authorizeClient();
   } else {
     if (revalidating) {
       return;
@@ -117,9 +119,11 @@ export const refreshToken = async () => {
     if (tokens.accessToken !== (await client.getTokens())?.accessToken) {
       console.log("Refreshed Token");
       await getUserData();
-    }
 
-    revalidating = false;
+      revalidating = false;
+
+      return await client.getTokens();
+    }
   }
 };
 
@@ -151,7 +155,7 @@ const getUserData = async () => {
     });
 };
 
-export const getToken = async () => {
+export const getTokens = async () => {
   if (authorizationInProgress) {
     console.log("Currently authorizing");
     return;
@@ -160,9 +164,14 @@ export const getToken = async () => {
     console.log("Currently refreshing token");
     return;
   }
+
   if (!(await client.getTokens())) {
     console.log("Authorize Client");
-    await authorizeClient();
+    return await authorizeClient();
   }
-  return (await client.getTokens())?.accessToken;
+  if ((await client.getTokens())?.isExpired()) {
+    console.log("Refresh token");
+    await refreshToken();
+  }
+  return await client.getTokens();
 };

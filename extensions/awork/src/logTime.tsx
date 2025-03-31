@@ -9,11 +9,11 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useCachedPromise, useForm, usePromise } from "@raycast/utils";
 import fetch from "node-fetch";
 import { getProjects, getTasks, getTypesOfWork, task } from "./composables/FetchData";
 import { convertDurationsToSeconds, validateDuration } from "./composables/ValidateDuration";
-import { authorizationInProgress, baseURI, getToken } from "./composables/WebClient";
+import { authorizationInProgress, baseURI, getTokens } from "./composables/WebClient";
 
 interface FormValues {
   note: string;
@@ -26,8 +26,7 @@ interface FormValues {
   isBillable: boolean;
 }
 
-const logTime = async (values: FormValues, tasks: task[] | string) => {
-  const token = await getToken();
+const logTime = async (token: string, values: FormValues, tasks: task[] | string) => {
   values.date = values.date ? values.date : new Date();
   if (!Array.isArray(tasks)) {
     return;
@@ -51,7 +50,7 @@ const logTime = async (values: FormValues, tasks: task[] | string) => {
   });
 
   try {
-    await fetch(`${baseURI}/timeentries`, {
+    const response = await fetch(`${baseURI}/timeentries`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -60,26 +59,35 @@ const logTime = async (values: FormValues, tasks: task[] | string) => {
       body: body,
       redirect: "follow",
     });
+    if (!response.ok) {
+      showFailureToast("Couldn't log time");
+    } else {
+      await showHUD("Successfully logged time");
+    }
   } catch (error) {
     showFailureToast(error as Error);
     console.error(error);
     return;
   }
-  await showHUD("Successfully logged time");
 };
 
 export default function Command(props: LaunchProps) {
+  const { data: token, revalidate } = usePromise(getTokens, [], {
+    onData: (data) => {
+      if (!data || data.isExpired()) {
+        revalidate();
+      }
+    },
+  });
   const {
     data: projects,
     isLoading: isLoadingProjects,
     revalidate: revalidateProjects,
-  } = useCachedPromise(getProjects, ["", 1000], {
+  } = useCachedPromise(getProjects, [token?.accessToken as string, "", 1000], {
+    execute: !!token?.accessToken && !token.isExpired(),
     onData: (data) => {
       if ((!data || data.length === 0) && !authorizationInProgress) {
-        setTimeout(() => {
-          console.log("Reloading projects");
-          revalidateProjects();
-        }, 500);
+        revalidateProjects();
       }
       if (props.launchContext?.projectId) {
         setValue("projectId", props.launchContext.projectId);
@@ -96,13 +104,11 @@ export default function Command(props: LaunchProps) {
     data: tasks,
     isLoading: isLoadingTasks,
     revalidate: revalidateTasks,
-  } = useCachedPromise(getTasks, ["", 1000], {
+  } = useCachedPromise(getTasks, [token?.accessToken as string, "", 1000], {
+    execute: !!token?.accessToken && !token.isExpired(),
     onData: (data) => {
       if ((!data || data.length === 0) && !authorizationInProgress) {
-        setTimeout(() => {
-          console.log("Reloading tasks");
-          revalidateTasks();
-        }, 500);
+        revalidateTasks();
       }
       if (props.launchContext?.taskId) {
         setValue("taskId", props.launchContext.taskId);
@@ -119,13 +125,11 @@ export default function Command(props: LaunchProps) {
     data: typesOfWork,
     isLoading: isLoadingTypesOwWork,
     revalidate: revalidateTypesOfWork,
-  } = useCachedPromise(getTypesOfWork, [], {
+  } = useCachedPromise(getTypesOfWork, [token?.accessToken as string], {
+    execute: !!token?.accessToken && !token.isExpired(),
     onData: (data) => {
       if (!Array.isArray(data) && !authorizationInProgress) {
-        setTimeout(() => {
-          console.log("Reloading typesOfWork");
-          revalidateTypesOfWork();
-        }, 500);
+        revalidateTypesOfWork();
       }
       if (props.launchContext?.typeOfWorkId) {
         setValue("typeOfWorkId", props.launchContext.typeOfWorkId);
@@ -143,7 +147,7 @@ export default function Command(props: LaunchProps) {
   const { handleSubmit, itemProps, setValidationError, setValue, values } = useForm<FormValues>({
     onSubmit: async (values) => {
       if (Array.isArray(tasks)) {
-        await logTime(values, tasks);
+        await logTime(token?.accessToken as string, values, tasks);
         pop();
       } else {
         showToast({

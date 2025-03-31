@@ -1,6 +1,6 @@
 import { showFailureToast } from "@raycast/utils";
 import fetch from "node-fetch";
-import { baseURI, getToken, refreshToken } from "./WebClient";
+import { baseURI, refreshToken } from "./WebClient";
 
 interface company {
   id: string;
@@ -35,53 +35,45 @@ const getRequestOptions = (token: string) => ({
   redirect: "follow" as const,
 });
 
-export const getProjects = (searchText: string, pageSize: number) => async (options: { page: number }) => {
-  const token = await getToken();
-  if (!token) {
-    return { data: [], hasMore: false };
-  }
-  return fetch(
-    new URL(
-      `${baseURI}/projects?page=${options.page + 1}&pageSize=${pageSize}&orderby=updatedOn desc${searchText ? `&filterby=substringof('${searchText}',name)` : ""}`,
-    ),
-    getRequestOptions(token),
-  )
-    .then((response) => {
-      if (!response.ok) {
-        const error = new Error(`HTTP error! status: ${response.status}`);
-        error.name = "FetchError";
-        throw error;
-      }
-      return { body: response.text(), headers: response.headers };
-    })
-    .then(async (result) => {
-      const data = await result.body;
-      if (data.match(/token expired/i)) {
-        await refreshToken();
-        return { data: [], hasMore: false };
-      }
-      return {
-        data: <Array<project>>JSON.parse(data),
-        hasMore: Number(result.headers.get("aw-totalitems")) > pageSize * (options.page + 1),
-      };
-    })
-    .catch((e: Error) => {
-      showFailureToast(e, {
-        title: e.name === "FetchError" ? "Couldn´t load Projects" : e.name,
-        message: e.name === "FetchError" ? e.name + ": " + e.message : e.message,
+export const getProjects =
+  (token: string, searchText: string, pageSize: number) => async (options: { page: number }) => {
+    return fetch(
+      new URL(
+        `${baseURI}/projects?page=${options.page + 1}&pageSize=${pageSize}&orderby=updatedOn desc${searchText ? `&filterby=substringof('${searchText}',name)` : ""}`,
+      ),
+      getRequestOptions(token),
+    )
+      .then((response) => {
+        if (!response.ok) {
+          const error = new Error(`HTTP error! status: ${response.status}`);
+          error.name = "FetchError";
+          throw error;
+        }
+        return { body: response.text(), headers: response.headers };
+      })
+      .then(async (result) => {
+        const data = await result.body;
+        if (data.match(/token expired/i)) {
+          await refreshToken();
+          return { data: [], hasMore: false };
+        }
+        return {
+          data: <Array<project>>JSON.parse(data),
+          hasMore: Number(result.headers.get("aw-totalitems")) > pageSize * (options.page + 1),
+        };
+      })
+      .catch((e: Error) => {
+        showFailureToast(e, {
+          title: e.name === "FetchError" ? "Couldn´t load Projects" : e.name,
+          message: e.name === "FetchError" ? e.name + ": " + e.message : e.message,
+        });
+        console.error(e);
+        return { data: [] as project[], hasMore: false };
       });
-      console.error(e);
-      return { data: [], hasMore: false };
-    });
-};
+  };
 
 export const getTasks =
-  (searchText: string, pageSize: number, projectId?: string) => async (options: { page: number }) => {
-    const token = await getToken();
-    if (!token) {
-      return { data: [], hasMore: false };
-    }
-
+  (token: string, searchText: string, pageSize: number, projectId?: string) => async (options: { page: number }) => {
     const route = projectId ? `projects/${projectId}/projecttasks` : "me/projecttasks";
     const pagination = `page=${options.page + 1}&pageSize=${pageSize}`;
     let filterBy = "filterby=taskstatus/type ne 'done'";
@@ -122,11 +114,7 @@ export const getTasks =
       });
   };
 
-export const getTypesOfWork = async () => {
-  const token = await getToken();
-  if (!token) {
-    return "noToken";
-  }
+export const getTypesOfWork = async (token: string) => {
   return fetch(`${baseURI}/typeofwork?OrderBy=name`, getRequestOptions(token))
     .then((response) => response.text())
     .then(async (result) => {
