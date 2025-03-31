@@ -36,20 +36,21 @@ type ItemWithTabMatches = {
 };
 
 function AuthenticatorList() {
-  const { items, isLoading } = useVaultContext();
-  const interval = useAuthenticatorInterval();
+  const { items: vaultItems, isLoading } = useVaultContext();
   const { data: activeTab, isLoading: isActiveTabLoading } = usePromise(async () => {
     const tabs = await BrowserExtension.getTabs();
     const activeTab = tabs.find((tab) => tab.active);
     return activeTab ? { ...activeTab, url: new URL(activeTab.url) } : undefined;
   });
 
-  const totpItems = items.filter((item) => item.login?.totp);
+  const interval = useInterval(1000);
 
-  const totpItemsWithTabMatches = useMemo(() => {
-    if (!activeTab) return { items: totpItems, tabItems: [] };
+  const items = useMemo(() => vaultItems.filter((item) => item.login?.totp), [vaultItems]);
 
-    return totpItems.reduce<ItemWithTabMatches>(
+  const itemsWithTabMatches = useMemo(() => {
+    if (!activeTab) return { items: items, tabItems: [] };
+
+    return items.reduce<ItemWithTabMatches>(
       (acc, item) => {
         const mayHaveUrl = item.login?.uris?.some(({ uri }) => uri?.includes(activeTab.url.hostname));
         if (mayHaveUrl) {
@@ -61,87 +62,29 @@ function AuthenticatorList() {
       },
       { items: [], tabItems: [] }
     );
-  }, [totpItems, activeTab]);
+  }, [items, activeTab]);
+
+  const otherItemList = itemsWithTabMatches.items.map((item) => (
+    <VaultItem key={item.id} item={item} interval={interval} />
+  ));
 
   return (
     <List searchBarPlaceholder="Search items" isLoading={isLoading || isActiveTabLoading}>
-      {activeTab && totpItemsWithTabMatches.tabItems.length > 0 ? (
+      {activeTab && itemsWithTabMatches.tabItems.length > 0 ? (
         <>
           <List.Section title={`Active Tab (${activeTab.url.hostname})`}>
-            {totpItemsWithTabMatches.tabItems.map((item) => (
+            {itemsWithTabMatches.tabItems.map((item) => (
               <VaultItem key={item.id} item={item} interval={interval} />
             ))}
           </List.Section>
-          <List.Section title="Others">
-            {totpItemsWithTabMatches.items.map((item) => (
-              <VaultItem key={item.id} item={item} interval={interval} />
-            ))}
-          </List.Section>
+          <List.Section title="Others">{otherItemList}</List.Section>
         </>
       ) : (
-        <>
-          {totpItemsWithTabMatches.items.map((item) => (
-            <VaultItem key={item.id} item={item} interval={interval} />
-          ))}
-        </>
+        <>{otherItemList}</>
       )}
     </List>
   );
 }
-
-const useAuthenticatorInterval = () => {
-  const [time, setTime] = useState(authenticator.timeRemaining());
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const time = authenticator.timeRemaining();
-      setTime(time);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return time;
-};
-
-const useAuthenticator = (item: Item, interval: number) => {
-  const [code, setCode] = useState<string>();
-
-  useEffect(() => {
-    const { totp } = item.login ?? {};
-    if (!totp || totp === SENSITIVE_VALUE_PLACEHOLDER) return undefined;
-    setCode(authenticator.generate(totp));
-  }, [item]);
-
-  useEffect(() => {
-    const { totp } = item.login ?? {};
-    if (!totp || totp === SENSITIVE_VALUE_PLACEHOLDER) return undefined;
-    if (interval === 30) setCode(authenticator.generate(totp));
-  }, [interval]);
-
-  return { code };
-};
-
-const CopyCodeAction = () => {
-  const selectedItem = useSelectedVaultItem();
-  const getUpdatedVaultItem = useGetUpdatedVaultItem();
-
-  const handleCopyCode = async () => {
-    try {
-      const totp = await getUpdatedVaultItem(selectedItem, (item) => item.login?.totp, "Getting code...");
-      if (totp) {
-        const code = authenticator.generate(totp);
-        await Clipboard.copy(code, { transient: getTransientCopyPreference("other") });
-        await showCopySuccessMessage("Copied code to clipboard");
-      }
-    } catch (error) {
-      await showToast(Toast.Style.Failure, "Failed to get code");
-      captureException("Failed to copy code", error);
-    }
-  };
-
-  return <Action title="Copy Code" icon={Icon.Clipboard} onAction={handleCopyCode} />;
-};
 
 function VaultItem({ item, interval }: { item: Item; interval: number }) {
   const icon = useItemIcon(item);
@@ -164,6 +107,60 @@ function VaultItem({ item, interval }: { item: Item; interval: number }) {
       />
     </VaultItemContext.Provider>
   );
+}
+
+function CopyCodeAction() {
+  const selectedItem = useSelectedVaultItem();
+  const getUpdatedVaultItem = useGetUpdatedVaultItem();
+
+  const handleCopyCode = async () => {
+    try {
+      const totp = await getUpdatedVaultItem(selectedItem, (item) => item.login?.totp, "Getting code...");
+      if (totp) {
+        const code = authenticator.generate(totp);
+        await Clipboard.copy(code, { transient: getTransientCopyPreference("other") });
+        await showCopySuccessMessage("Copied code to clipboard");
+      }
+    } catch (error) {
+      await showToast(Toast.Style.Failure, "Failed to get code");
+      captureException("Failed to copy code", error);
+    }
+  };
+
+  return <Action title="Copy Code" icon={Icon.Clipboard} onAction={handleCopyCode} />;
+}
+
+function useInterval(ms: number) {
+  const [time, setTime] = useState(authenticator.timeRemaining());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const time = authenticator.timeRemaining();
+      setTime(time);
+    }, ms);
+
+    return () => clearInterval(interval);
+  }, [ms]);
+
+  return time;
+}
+
+function useAuthenticator(item: Item, interval: number) {
+  const [code, setCode] = useState<string>();
+
+  useEffect(() => {
+    const { totp } = item.login ?? {};
+    if (!totp || totp === SENSITIVE_VALUE_PLACEHOLDER) return;
+    setCode(authenticator.generate(totp));
+  }, [item]);
+
+  useEffect(() => {
+    const { totp } = item.login ?? {};
+    if (!totp || totp === SENSITIVE_VALUE_PLACEHOLDER) return;
+    if (interval === 30) setCode(authenticator.generate(totp));
+  }, [interval]);
+
+  return { code };
 }
 
 export default AuthenticatorComponent;
