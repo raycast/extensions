@@ -26,22 +26,27 @@ export async function downloadFile(url: string, filename: string): Promise<strin
         title: "Download Failed",
         message: "Response is not a stream",
       });
+      return "";
+    } else {
+      // Get the buffer
+      const buffer = await response.data;
+
+      // Write to file
+      return fs.promises
+        .writeFile(filepath, buffer)
+        .then(() => {
+          // Success notification
+          showToast({
+            style: Toast.Style.Success,
+            title: "Download Complete",
+            message: `Saved to Downloads folder`,
+          });
+          return filepath;
+        })
+        .catch((error) => {
+          throw error;
+        });
     }
-
-    // Get the buffer
-    const buffer = await response.data;
-
-    // Write to file
-    fs.writeFileSync(filepath, buffer);
-
-    // Success notification
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Download Complete",
-      message: `Saved to Downloads folder`,
-    });
-
-    return filepath;
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,

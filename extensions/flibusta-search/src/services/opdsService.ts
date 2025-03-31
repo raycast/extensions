@@ -45,8 +45,9 @@ function parseOpdsBook(entry: OpdsEntry): OpdsBook {
   const downloadLinks: OpdsBook["downloadLinks"] = {};
 
   // Parse download links
-  if (Array.isArray(entry.link)) {
-    entry.link.forEach((link: OpdsLink) => {
+  const links = Array.isArray(entry.link) ? entry.link : [entry.link];
+  if (links) {
+    links.forEach((link: OpdsLink) => {
       if (link.rel === "http://opds-spec.org/acquisition/open-access") {
         const type = link.type?.split("+")[0];
         if (type === "application/epub") downloadLinks.epub = link.href;
@@ -73,7 +74,9 @@ function parseOpdsBook(entry: OpdsEntry): OpdsBook {
           term: cat.term,
           label: cat.label,
         }))
-      : [],
+      : entry.category
+        ? [{ term: entry.category.term, label: entry.category.label }]
+        : [],
     language: entry["dc:language"],
     format: entry["dc:format"],
     issued: entry["dc:issued"],
