@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Suggest opening URL] - {PR_MERGE_DATE}
+## [Suggest opening URL] - 2025-03-31
 
 When searching for a URL, offer to open the URL 
 
