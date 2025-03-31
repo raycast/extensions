@@ -11,6 +11,6 @@ export async function getSystemPrompt(): Promise<string | undefined> {
   return await LocalStorage.getItem(storageKey);
 }
 
-export async function setSystemPrompt(conversations: string) {
-  await LocalStorage.setItem(storageKey, conversations);
+export async function setSystemPrompt(prompt: string) {
+  await LocalStorage.setItem(storageKey, prompt);
 }

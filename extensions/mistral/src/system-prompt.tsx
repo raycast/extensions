@@ -16,6 +16,7 @@ export default function Command() {
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save System Prompt" onSubmit={handleSubmit} />
