@@ -1,6 +1,6 @@
 # AirPods Noise Control Changelog
 
-## [Bug Fix] - 2025-03-25
+## [Bug Fix] - {PR_MERGE_DATE}
 
 - Fixed incorrect logic selecting "Adaptive" instead of "Transparency" in Noise Control toggle
 
