@@ -1,6 +1,6 @@
 # Browser History Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-03-31
 
 - Add a `search in browser` action when no search history is available.
 - Update dependencies.
