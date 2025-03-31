@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Moved contributor] - {PR_MERGE_DATE}
+## [Moved contributor] - 2025-03-31
 
 ## [Update README with improved manifest.yaml] - 2025-03-05
 
