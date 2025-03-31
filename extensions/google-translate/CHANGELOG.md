@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-03-31
 
 - Add ability to set proxy
 
