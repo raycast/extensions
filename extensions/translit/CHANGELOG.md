@@ -1,6 +1,6 @@
 # Translit Changelog
 
-## [Added Translit] - {PR_MERGE_DATE}
+## [Added Translit] - 2025-03-31
 
 - Initial release of the Translit extension
 - Support for standard Russian phonetic transliteration rules
