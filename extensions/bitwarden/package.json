@@ -88,7 +88,11 @@
       "subtitle": "Bitwarden",
       "description": "Search all items with TOTP and generate codes.",
       "icon": "search.png",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "totp",
+        "otp"
+      ]
     },
     {
       "name": "generate-password",
@@ -376,7 +380,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.83.2",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/utils": "^1.19.1",
     "execa": "^7.0.0",
     "fast-fuzzy": "^1.12.0",
     "node-stream-zip": "^1.15.0",

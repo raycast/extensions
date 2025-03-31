@@ -43,8 +43,6 @@ export function VaultProvider(props: VaultProviderProps) {
   const publishItems = useVaultItemPublisher();
   const { getCachedVault, cacheVault } = useVaultCaching();
 
-  console.log({publishItems})
-
   const [currentFolderId, setCurrentFolderId] = useCachedState<Nullable<string>>(CACHE_KEYS.CURRENT_FOLDER_ID, null);
   const [state, setState] = useReducer(
     (previous: VaultState, next: Partial<VaultState>) => ({ ...previous, ...next }),

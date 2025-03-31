@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, BrowserExtension, Clipboard, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
@@ -6,7 +6,7 @@ import { useVaultContext, VaultProvider } from "~/context/vault";
 import { Item } from "~/types/vault";
 import { useItemIcon } from "~/components/searchVault/utils/useItemIcon";
 import { authenticator } from "otplib";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import VaultListenersProvider from "~/components/searchVault/context/vaultListeners";
 import { SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
 import VaultItemContext, { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
@@ -14,6 +14,7 @@ import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdated
 import { getTransientCopyPreference } from "~/utils/preferences";
 import { showCopySuccessMessage } from "~/utils/clipboard";
 import { captureException } from "~/utils/development";
+import { usePromise } from "@raycast/utils";
 
 const AuthenticatorComponent = () => (
   <RootErrorBoundary>
@@ -29,16 +30,60 @@ const AuthenticatorComponent = () => (
   </RootErrorBoundary>
 );
 
+type ItemWithTabMatches = {
+  items: Item[];
+  tabItems: Item[];
+};
+
 function AuthenticatorList() {
   const { items, isLoading } = useVaultContext();
+  const { data: activeTab, isLoading: isActiveTabLoading } = usePromise(async () => {
+    const tabs = await BrowserExtension.getTabs();
+    const activeTab = tabs.find((tab) => tab.active);
+    return activeTab ? { ...activeTab, url: new URL(activeTab.url) } : undefined;
+  });
 
   const totpItems = items.filter((item) => item.login?.totp);
 
+  const totpItemsWithTabMatches = useMemo(() => {
+    if (!activeTab) return { items: totpItems, tabItems: [] };
+
+    return totpItems.reduce<ItemWithTabMatches>(
+      (acc, item) => {
+        const mayHaveUrl = item.login?.uris?.some(({ uri }) => uri?.includes(activeTab.url.hostname));
+        if (mayHaveUrl) {
+          acc.tabItems.push(item);
+        } else {
+          acc.items.push(item);
+        }
+        return acc;
+      },
+      { items: [], tabItems: [] }
+    );
+  }, [totpItems, activeTab]);
+
   return (
-    <List searchBarPlaceholder="Search items" isLoading={isLoading}>
-      {totpItems.map((item) => (
-        <VaultItem key={item.id} item={item} />
-      ))}
+    <List searchBarPlaceholder="Search items" isLoading={isLoading || isActiveTabLoading}>
+      {activeTab && totpItemsWithTabMatches.tabItems.length > 0 ? (
+        <>
+          <List.Section title={`Active Tab (${activeTab.url.hostname})`}>
+            {totpItemsWithTabMatches.tabItems.map((item) => (
+              <VaultItem key={item.id} item={item} />
+            ))}
+          </List.Section>
+          <List.Section title="Others">
+            {totpItemsWithTabMatches.items.map((item) => (
+              <VaultItem key={item.id} item={item} />
+            ))}
+          </List.Section>
+        </>
+      ) : (
+        <>
+          {totpItemsWithTabMatches.items.map((item) => (
+            <VaultItem key={item.id} item={item} />
+          ))}
+        </>
+      )}
     </List>
   );
 }
