@@ -4,7 +4,7 @@
 
 # Ghostty Keyboard Shortcuts
 
-Default keyboard shortcuts for Ghostty terminal emulator.
+Default keyboard shortcuts for Ghostty terminal emulator
 
 Note: These are the default keybindings. All keybindings can be customized through the configuration file using the `keybind` option.
 
