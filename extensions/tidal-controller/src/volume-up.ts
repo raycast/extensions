@@ -12,6 +12,6 @@ export default async function doVolumeUp() {
           click menu item "${getMenuOptions().volUp}" of menu "${getMenuOptions().playback}" of menu bar 1
         end tell
       end tell`);
-    showMessage("Tidal: Volume Up 🔊ra");
+    showMessage("Tidal: Volume Up 🔊");
   });
 }
