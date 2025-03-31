@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Add Default Sorting in Menu Bar] - {PR_MERGE_DATE}
+## [Add Default Sorting in Menu Bar] - 2025-03-31
 
 Added same sorting order as Todoist home and web app.
 
