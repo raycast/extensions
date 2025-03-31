@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, List, useNavigation } from "@raycast/api";
 import { useConversations } from "./hooks/use-conversations";
 import { Conversation } from "./components/conversation";
 
@@ -25,7 +25,17 @@ export default function Command() {
                 style={Action.Style.Destructive}
                 icon={Icon.Trash}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                onAction={() => setConversations(conversations.filter((c) => c.id !== conversation.id))}
+                onAction={async () => {
+                  if (
+                    await confirmAlert({
+                      title: "Delete Conversation",
+                      message: "Are you sure you want to delete this conversation?",
+                      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+                    })
+                  ) {
+                    setConversations(conversations.filter((c) => c.id !== conversation.id));
+                  }
+                }}
               />
             </ActionPanel>
           }

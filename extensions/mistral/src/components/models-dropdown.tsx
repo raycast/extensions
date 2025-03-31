@@ -12,7 +12,7 @@ export function ModelDropdown() {
   if (!value) return null;
 
   return (
-    <List.Dropdown tooltip="Models" value={value} onChange={(value) => setValue(value)}>
+    <List.Dropdown tooltip="Models" value={value} onChange={setValue}>
       {models.map((model) => (
         <List.Dropdown.Item key={model.id} title={model.name} value={model.id} />
       ))}

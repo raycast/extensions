@@ -23,6 +23,13 @@
       "subtitle": "Mistral",
       "description": "Browse your past conversations",
       "mode": "view"
+    },
+    {
+      "name": "system-prompt",
+      "title": "System Prompt",
+      "subtitle": "Mistral",
+      "description": "Set the system prompt for your upcoming conversations",
+      "mode": "view"
     }
   ],
   "preferences": [
