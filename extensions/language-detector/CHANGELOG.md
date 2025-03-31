@@ -1,6 +1,6 @@
 # Language Detector Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-03-31
 
 - Add new detector - [franc](https://npmjs.com/franc)
 - Bump all dependencies to the latest
