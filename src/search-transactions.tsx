@@ -72,7 +72,6 @@ const filteredTransactions = transactions.filter((transaction) => {
             <Action
               onAction={openExtensionPreferences}
               title={"Open Preferences"}
-              shortcut={{ modifiers: ['cmd'], key: 'p' }}
               icon={Icon.Gear}
             />
             </ActionPanel>
