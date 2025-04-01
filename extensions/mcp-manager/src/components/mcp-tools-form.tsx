@@ -4,7 +4,6 @@ import path from "path";
 import { useEffect, useState } from "react";
 import fs from "fs";
 import { McpFile } from "../types";
-import { getDescription } from "../utils";
 
 export default function McpToolsForm({
   existingFile,
@@ -100,39 +99,29 @@ export default function McpToolsForm({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={existingFile ? "Update" : "Save"} onSubmit={handleSubmit} />
-          <Action.SubmitForm
-            title="Apply to Cursor Mcp"
-            onSubmit={applyCursor}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
-          />
+          <Action.SubmitForm title="Save" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Apply to Cursor" onSubmit={applyCursor} />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="name"
-        title="File Name"
-        placeholder="my-mcp-tools"
-        defaultValue={existingFile?.name.replace(/\.json$/, "")}
-        info="File extension (.json) will be added automatically"
+        title="Name"
+        defaultValue={existingFile?.name.replace(/\.json$/, "") || ""}
+        placeholder="Enter file name"
       />
       <Form.TextField
         id="description"
         title="Description"
-        placeholder="Enter a description for your MCP Tools"
-        defaultValue={existingFile ? getDescription(existingFile.filePath) : ""}
+        defaultValue={existingFile?.description || ""}
+        placeholder="Enter description"
       />
       <Form.TextArea
         id="content"
-        title="JSON Content"
-        placeholder='{
-  "key": "value"
-}'
-        defaultValue={existingFile?.content || defaultContent}
+        title="Content"
+        defaultValue={existingFile?.content || defaultContent || ""}
+        placeholder="Enter JSON content"
         error={jsonError}
-        onChange={(value) => validateJson(value)}
-        info="Must be valid JSON format"
-        enableMarkdown={false}
       />
     </Form>
   );

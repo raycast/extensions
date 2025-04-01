@@ -5,7 +5,19 @@ import { homedir } from "os";
 import { useEffect, useMemo, useState } from "react";
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 
-export default function McpAgentForm({ files, onSave }: { files: McpFile[]; onSave: () => void }) {
+export default function McpAgentForm({
+  files,
+  onSave,
+  existingTemplate,
+}: {
+  files: McpFile[];
+  onSave: () => void;
+  existingTemplate?: {
+    name: string;
+    description: string;
+    content: McpContent;
+  };
+}) {
   const templateDir = path.join(
     homedir(),
     "Library",
@@ -20,6 +32,9 @@ export default function McpAgentForm({ files, onSave }: { files: McpFile[]; onSa
 
   // 초기 JSON 내용 생성
   const initialContent = useMemo(() => {
+    if (existingTemplate) {
+      return JSON.stringify(existingTemplate.content, null, 2);
+    }
     if (files.length === 0) return "";
 
     const mergedContent: McpContent = {
@@ -37,7 +52,7 @@ export default function McpAgentForm({ files, onSave }: { files: McpFile[]; onSa
     });
 
     return JSON.stringify(mergedContent, null, 2);
-  }, [files]);
+  }, [files, existingTemplate]);
 
   useEffect(() => {
     if (!fs.existsSync(templateDir)) {
@@ -63,6 +78,14 @@ export default function McpAgentForm({ files, onSave }: { files: McpFile[]; onSa
       const templateName = values.name.endsWith(".json") ? values.name : `${values.name}.json`;
       const templatePath = path.join(templateDir, templateName);
 
+      // 기존 템플릿이 있고 이름이 변경된 경우 기존 파일 삭제
+      if (existingTemplate && existingTemplate.name !== templateName) {
+        const oldTemplatePath = path.join(templateDir, existingTemplate.name);
+        if (fs.existsSync(oldTemplatePath)) {
+          fs.unlinkSync(oldTemplatePath);
+        }
+      }
+
       const content = JSON.parse(values.content);
       const templateContent = {
         description: values.description,
@@ -78,7 +101,7 @@ export default function McpAgentForm({ files, onSave }: { files: McpFile[]; onSa
       onSave();
 
       showToast({
-        title: "MCP Agent save complete",
+        title: existingTemplate ? "MCP Agent update complete" : "MCP Agent save complete",
         style: Toast.Style.Success,
       });
     } catch (error) {
@@ -94,32 +117,32 @@ export default function McpAgentForm({ files, onSave }: { files: McpFile[]; onSa
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save as Mcp Agent" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title={existingTemplate ? "Update Mcp Agent" : "Save as Mcp Agent"}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="name"
-        title="MCP Agent Name"
-        placeholder="my-mcp-agent"
-        info={files.length > 0 ? `Will be created from ${files.length} selected files` : "Enter MCP Agent name"}
+        title="Name"
+        defaultValue={existingTemplate?.name.replace(/\.json$/, "") || ""}
+        placeholder="Enter agent name"
       />
-      <Form.TextField id="description" title="Description" placeholder="Enter a description for your MCP Agent" />
+      <Form.TextField
+        id="description"
+        title="Description"
+        defaultValue={existingTemplate?.description || ""}
+        placeholder="Enter description"
+      />
       <Form.TextArea
         id="content"
-        title="JSON Content"
+        title="Content"
         defaultValue={initialContent}
-        placeholder='{
-  "mcpServers": {
-    "your-server-name": {
-      "tools": []
-    }
-  }
-}'
+        placeholder="Enter JSON content"
         error={jsonError}
         onChange={(value) => validateJson(value)}
-        info="Must be valid JSON format"
-        enableMarkdown={false}
       />
       {files.length > 0 && (
         <Form.Description

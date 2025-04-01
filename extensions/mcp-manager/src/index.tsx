@@ -279,7 +279,7 @@ export default function Command() {
                       title="Apply to Cursor and Claude"
                       onAction={() => mergeMcpFiles("both")}
                       icon={Icon.CheckCircle}
-                      shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                     />
                     <Action title="Apply to Cursor" onAction={() => mergeMcpFiles("cursor")} icon={Icon.CheckCircle} />
                     <Action title="Apply to Claude" onAction={() => mergeMcpFiles("claude")} icon={Icon.CheckCircle} />
@@ -360,11 +360,26 @@ export default function Command() {
                       title="Apply to Cursor and Claude"
                       onAction={() => applyTemplate(template)}
                       icon={Icon.CheckCircle}
-                      shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                     />
                     <Action
                       title="Edit"
-                      onAction={() => push(<McpAgentForm files={[]} onSave={() => setTemplates(getTemplates())} />)}
+                      onAction={() => {
+                        const templateContent = JSON.parse(
+                          fs.readFileSync(path.join(templateDir, template.name), "utf-8"),
+                        );
+                        push(
+                          <McpAgentForm
+                            files={[]}
+                            existingTemplate={{
+                              name: template.name,
+                              description: template.description || "",
+                              content: templateContent.files[0].content,
+                            }}
+                            onSave={() => setTemplates(getTemplates())}
+                          />,
+                        );
+                      }}
                       icon={Icon.Pencil}
                     />
                     <Action
