@@ -10,6 +10,6 @@ type Input = {
 /**
  * A function that allows yout to display text fullscreen.
  */
-export default function tool(input: Input) {
-  fullScreen(input.text);
+export default async function tool(input: Input) {
+  await fullScreen(input.text);
 }
