@@ -99,12 +99,31 @@ export interface PaystackResponse<T> {
 export type Currency = 'NGN' | 'USD' | 'GHS' | 'ZAR' | 'KES'
 
 export interface Subscription {
-  customer: number
-  plan: number
+  customer: Customer
+  plan: Plan
+  authorization: {
+    authorization_code: string
+    bin: string
+    last4: string
+    exp_month: string
+    exp_year: string
+    channel: string
+    card_type: string
+    bank: string
+    country_code: string
+    brand: string
+    reusable: boolean
+    signature: string
+    account_name: string
+  }
+  status: 'active' | 'cancelled'
   subscription_code: string
-  status: string
+  email_token: string
   amount: number
+  next_payment_date: string
   createdAt: string
+  updatedAt: string
+  id: number
 }
 
 export interface Plan {

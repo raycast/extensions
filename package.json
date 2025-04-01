@@ -61,6 +61,13 @@
       "subtitle": "Find subscription plans by name or ID.",
       "description": "Quickly search for subscription plans in your Paystack account using their name or ID. View plan details and pricing information.",
       "mode": "view"
+    },
+    {
+      "name": "search-subscriptions",
+      "title": "Search Subscriptions",
+      "subtitle": "Find subscriptions by customer or plan ID.",
+      "description": "Quickly search for active or inactive subscriptions in your Paystack account using customer or plan ID. View subscription details and status.",
+      "mode": "view"
     }
   ],
   "preferences": [
