@@ -12,6 +12,7 @@ const getUrl = (slug: string) => {
 export const getForecast = async (slug: string) => {
   try {
     const response = await fetch(getUrl(slug));
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
 
     const content = data.content as DetailedArea;
