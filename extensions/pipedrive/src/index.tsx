@@ -12,32 +12,161 @@ export default function PipedriveSearch() {
   const { state, search } = useSearch();
   const [filterValue, setFilterValue] = useState<string>("");
 
-  const handleFilterChange = useCallback((value: string) => setFilterValue(value), []);
-
   const filteredResults = useMemo(() => {
+    const results = state.results ?? [];
     if (filterValue === "") {
-      return state.results;
+      return results;
     }
-    return state.results.filter((result) => result.type === filterValue);
+    return results.filter((result) => result?.type === filterValue);
   }, [state.results, filterValue]);
 
+  const handleFilterChange = useCallback((value: string) => setFilterValue(value), []);
+  const handleSearchTextChange = useCallback(
+    (newSearchText: string) => {
+      if (newSearchText === "") {
+        return;
+      }
+      search(newSearchText);
+    },
+    [search],
+  );
+
   const emojiMap: { [key: string]: string } = {
-    deal: "💰 ",
-    person: "🅿️ ",
-    organization: "🅾️ ",
+    deal: "💰",
+    person: "🅿️",
+    organization: "🅾️",
+    email: "📧",
+    activities: "📝",
+    search: "🔎",
   };
+
+  const preferences: Preferences = getPreferenceValues();
+  const addNewPersonURL = `https://${preferences.domain}/persons#dialog/person/add`;
+  const addNewDealURL = `https://${preferences.domain}/deals#dialog/deal/add`;
+  const addNewOrganizationURL = `https://${preferences.domain}/organizations#dialog/organization/add`;
+  const openEmailURL = `https://${preferences.domain}/mail/inbox`;
+  const openActivitiesURL = `https://${preferences.domain}/activities/list`;
+  const addNewPersonShortcut = { modifiers: ["cmd"], key: "n" };
+  const addNewDealShortcut = { modifiers: ["cmd"], key: "d" };
+  const addNewOrganizationShortcut = { modifiers: ["cmd"], key: "o" };
+  const openEmailShortcut = { modifiers: ["cmd"], key: "e" };
+  const openActivitiesShortcut = { modifiers: ["cmd"], key: "t" };
+
+  const openInBrowserItems = [
+    {
+      id: "addNewPerson",
+      title: emojiMap["person"] + "   Add New Person",
+      url: addNewPersonURL,
+      shortcut: addNewPersonShortcut,
+    },
+    {
+      id: "addNewDeal",
+      title: emojiMap["deal"] + "   Add New Deal",
+      url: addNewDealURL,
+      shortcut: addNewDealShortcut,
+    },
+    {
+      id: "addNewOrganization",
+      title: emojiMap["organization"] + "   Add New Organization",
+      url: addNewOrganizationURL,
+      shortcut: addNewOrganizationShortcut,
+    },
+    {
+      id: "openEmail",
+      title: emojiMap["email"] + "   Open Email",
+      url: openEmailURL,
+      shortcut: openEmailShortcut,
+    },
+    {
+      id: "openActivities",
+      title: emojiMap["activities"] + "   Open Activities",
+      url: openActivitiesURL,
+      shortcut: openActivitiesShortcut,
+    },
+  ];
+
+  function showOpenInBrowserActions() {
+    return (
+      <List.Section title="Open In Browser">
+        {openInBrowserItems.map((item) => (
+          <List.Item
+            key={item.id}
+            title={item.title}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  <Action.OpenInBrowser title="Open in Browser" url={item.url} />
+                  <Action.OpenInBrowser
+                    title="Add New Person"
+                    url={addNewPersonURL}
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    icon={emojiMap["person"]}
+                  />
+                  <Action.OpenInBrowser
+                    title="Add New Deal"
+                    url={addNewDealURL}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    icon={emojiMap["deal"]}
+                  />
+                  <Action.OpenInBrowser
+                    title="Add New Organization"
+                    url={addNewOrganizationURL}
+                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    icon={emojiMap["organization"]}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open Email"
+                    url={openEmailURL}
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    icon={emojiMap["email"]}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open Activities"
+                    url={openActivitiesURL}
+                    shortcut={{ modifiers: ["cmd"], key: "t" }}
+                    icon={emojiMap["activities"]}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+    );
+  }
+
+  if (!state.results || filteredResults.length === 0) {
+    return (
+      <List
+        isLoading={state.isLoading}
+        onSearchTextChange={handleSearchTextChange}
+        searchBarPlaceholder="Search by name of deal, person or organization..."
+        searchBarAccessory={
+          <List.Dropdown tooltip="Filter results by type" onChange={handleFilterChange} filtering={true}>
+            <List.Dropdown.Item title="All" value="" icon={emojiMap["search"]} />
+            <List.Dropdown.Item title="Deals" value="deal" icon={emojiMap["deal"]} />
+            <List.Dropdown.Item title="People" value="person" icon={emojiMap["person"]} />
+            <List.Dropdown.Item title="Organizations" value="organization" icon={emojiMap["organization"]} />
+          </List.Dropdown>
+        }
+        throttle
+      >
+        {showOpenInBrowserActions()}
+      </List>
+    );
+  }
 
   return (
     <List
       isLoading={state.isLoading}
-      onSearchTextChange={search}
+      onSearchTextChange={handleSearchTextChange}
       searchBarPlaceholder="Search by name of deal, person or organization..."
       searchBarAccessory={
         <List.Dropdown tooltip="Filter results by type" onChange={handleFilterChange} filtering={true}>
-          <List.Dropdown.Item title="🔎  All" value="" />
-          <List.Dropdown.Item title="💰  Deals" value="deal" />
-          <List.Dropdown.Item title="🅿️  People" value="person" />
-          <List.Dropdown.Item title="🅾️  Organizations" value="organization" />
+          <List.Dropdown.Item title="All" value="" icon={emojiMap["search"]} />
+          <List.Dropdown.Item title="Deals" value="deal" icon={emojiMap["deal"]} />
+          <List.Dropdown.Item title="People" value="person" icon={emojiMap["person"]} />
+          <List.Dropdown.Item title="Organizations" value="organization" icon={emojiMap["organization"]} />
         </List.Dropdown>
       }
       throttle
@@ -45,7 +174,7 @@ export default function PipedriveSearch() {
       <List.Section title="Results" subtitle={`${filteredResults.length} `}>
         {filteredResults.map((searchResult) => (
           <SearchListItem
-            key={`${searchResult.type}${searchResult.id}`}
+            key={`${searchResult?.type}${searchResult?.id}`}
             searchResult={searchResult}
             emojiMap={emojiMap}
           />
@@ -62,60 +191,51 @@ function SearchListItem({
   searchResult: SearchResult;
   emojiMap: { [key: string]: string };
 }) {
-  const preferences: Preferences = getPreferenceValues();
+  const preferences = getPreferenceValues();
   const itemUrl = `https://${preferences.domain}/${searchResult.type}/${searchResult.id}`;
-  const subtitle = searchResult.subtitle;
-  const accessoryTitle = searchResult.accessoryTitle;
+  const { title, subtitle, accessoryTitle, name, email, phone, organization, ccEmail } = searchResult;
   const emoji = emojiMap[searchResult.type] || "";
+
+  if (!searchResult) {
+    return null;
+  }
 
   return (
     <List.Item
-      title={`${emoji} ${searchResult.title}`}
+      title={`${emoji}` + "   " + `${title}`}
       subtitle={subtitle}
       accessories={[{ text: accessoryTitle }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={itemUrl} />
-            {searchResult.name && ( // Conditionally render if person exists
-              <Action.CopyToClipboard
-                title="Copy Name"
-                content={searchResult.name}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
-              />
+            {name && (
+              <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "n" }} />
             )}
-            {searchResult.email && ( // Conditionally render if person email exists
-              <Action.CopyToClipboard
-                title="Copy Email"
-                content={searchResult.email}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
-              />
+            {email && (
+              <Action.CopyToClipboard title="Copy Email" content={email} shortcut={{ modifiers: ["cmd"], key: "e" }} />
             )}
-            {searchResult.phone && ( // Conditionally render if person phone exists
-              <Action.CopyToClipboard
-                title="Copy Phone"
-                content={searchResult.phone}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
-              />
+            {phone && (
+              <Action.CopyToClipboard title="Copy Phone" content={phone} shortcut={{ modifiers: ["cmd"], key: "c" }} />
             )}
-            {searchResult.organization && ( // Conditionally render if organization exists for deal or person
+            {organization && (
               <Action.CopyToClipboard
                 title="Copy Organization"
-                content={searchResult.organization}
+                content={organization}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
               />
             )}
-            {searchResult.ccEmail && ( // Conditionally render if deal exists
+            {ccEmail && (
               <Action.CopyToClipboard
                 title="Copy Deal Name"
-                content={searchResult.title as string}
+                content={title}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
             )}
-            {searchResult.subtitle === "org" && ( // Conditionally render if organization exists
+            {subtitle === "org" && (
               <Action.CopyToClipboard
                 title="Copy Organization Name"
-                content={searchResult.title as string}
+                content={title}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
             )}
@@ -127,7 +247,7 @@ function SearchListItem({
 }
 
 function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: false });
+  const [state, setState] = useState<SearchState>({ results: [], isLoading: false, searchText: "" });
   const cancelRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -143,9 +263,19 @@ function useSearch() {
     }
 
     if (searchText.length < 2) {
-      setState({ results: [], isLoading: false });
+      setState((prevState) => ({
+        ...prevState,
+        isLoading: false,
+        searchText,
+      }));
       return;
     }
+    cancelRef.current = new AbortController();
+    setState((prevState) => ({
+      ...prevState,
+      isLoading: true,
+      searchText,
+    }));
 
     cancelRef.current = new AbortController();
     setState((prevState) => ({
@@ -168,7 +298,6 @@ function useSearch() {
       showToast(Toast.Style.Failure, "Could not perform search", String(error));
     }
   }
-
   return {
     state,
     search,
@@ -265,6 +394,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 interface SearchState {
   results: SearchResult[];
   isLoading: boolean;
+  searchText: string;
 }
 
 interface SearchResult {
