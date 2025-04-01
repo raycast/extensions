@@ -1,9 +1,9 @@
 import { XcodeProject } from "../models/xcode-project/xcode-project.model";
 import { XcodeProjectService } from "./xcode-project.service";
-import { getPreferences } from "../shared/get-preferences";
 import { XcodeProjectType } from "../models/xcode-project/xcode-project-type.model";
 import { XcodeProjectFavoriteService } from "./xcode-project-favorite.service";
 import { XcodeProjectsMenuBarList } from "../models/xcode-projects-menu-bar/xcode-projects-menu-bar-list.model";
+import { showRecentProjectsInMenuBarCommandPreferences } from "../shared/preferences";
 
 /**
  * XcodeProjectMenuBarService
@@ -16,7 +16,7 @@ export class XcodeProjectMenuBarService {
     // Retrieve XcodeProjects
     const xcodeProjects = await XcodeProjectService.xcodeProjects();
     // Retrieve Preferences
-    const preferences = getPreferences();
+    const preferences = showRecentProjectsInMenuBarCommandPreferences;
     // Filter XcodeProjects by type
     let recentXcodeProjects = xcodeProjects.filter((project) => {
       // Switch on XcodeProjectType to decide

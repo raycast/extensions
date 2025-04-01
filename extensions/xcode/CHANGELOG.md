@@ -1,5 +1,20 @@
 # Xcode Changelog
 
+## [AI Tools & Improved Search Recent Projects] - {PR_MERGE_DATE}
+
+- Added AI tools to search for your recent Xcode projects, Swift packages, boot and shutdown simulators, and more.
+- Improved the "Search Recent Projects" command to sort the most recent projects by their last usage.
+- Added an option to select the Swift version when creating a playground.
+- Removed the "Search Apple Developer Documentation" command due to the unavailability of the underlying API.
+- Updated Raycast Store screenshots.
+
+## [Improvements] - 2024-12-18
+
+- Improved the ordering of the "Search Recent Projects" command to show the most recent projects first.
+- Added "Open With Terminal" action to the "Search Recent Projects" command.
+- Added "Create Quicklink" action to the "Search Recent Projects" command.
+- Added "Delete" action to the "Manage Simulators" command.
+
 ## [Added Delete App Data] - 2024-09-30
 
 - Added delete app data command to remove the data of an app installed on a simulator without uninstalling.
