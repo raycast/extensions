@@ -13,6 +13,7 @@ import { SUPPORTED_CURRENCIES } from './data/supported-currency'
 import { useForm, FormValidation } from '@raycast/utils'
 import { usePaystack } from './hooks/paystack'
 import { useEffect } from 'react'
+import { paystackDocsUrl } from './utils/urls'
 
 interface RefundFormValues {
   transactionId: string
@@ -88,7 +89,7 @@ export default function Command({
     <Form
       searchBarAccessory={
         <Form.LinkAccessory
-          target="https://paystack.com/docs/api/refund/"
+          target={`${paystackDocsUrl}/refund}`}
           text="Refunds Documentation"
         />
       }
