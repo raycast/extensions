@@ -1,5 +1,10 @@
 # HackMD Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Add support for AI Extensions
+- Improve stability and error handling
+
 ## [Feature] - 2025-02-28
 
 - Bump @raycast/api version to latest
@@ -9,7 +14,6 @@
 
 - Display the last changed date of note instead of creation date
 - Add Edit in Browser action
-
 
 ## [Fixes] - 2022-08-09
 
