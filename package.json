@@ -42,10 +42,10 @@
       "mode": "view"
     },
     {
-      "name": "search-settlements",
-      "title": "Search Settlements",
-      "subtitle": "Find settlements by ID, currency, or, status.",
-    "description": "Search for settlements in your Paystack account by date or status. View details directly from Raycast.",
+      "name": "search-payouts",
+      "title": "Search Payouts",
+      "subtitle": "Find payouts by ID, currency, or status.",
+      "description": "Search for payouts in your Paystack account by date or status. View details directly from Raycast.",
       "mode": "view"
     },
     {

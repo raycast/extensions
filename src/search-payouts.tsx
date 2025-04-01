@@ -15,7 +15,7 @@ import { useDate } from './hooks/date'
 import { Currency, PaystackResponse } from './utils/types'
 import { paystackDashboardUrl } from './utils/urls'
 
-interface Settlement {
+interface Payout {
   id: number
   domain: string
   status: string
@@ -35,66 +35,62 @@ export default function Command() {
   const formatCurrency = useCurrencyFormatter()
   const { parseDate } = useDate()
   const { get, isLoading } = usePaystack()
-  const [settlements, setSettlements] = useState<Array<Settlement>>([])
-  const [filteredSettlements, setFilteredSettlements] = useState<
-    Array<Settlement>
-  >([])
+  const [payouts, setPayouts] = useState<Array<Payout>>([])
+  const [filteredPayouts, setFilteredPayouts] = useState<Array<Payout>>([])
   const [searchText, setSearchText] = useState<string>('')
   const [currentStatus, setCurrentStatus] = useState<string>('all')
 
   useEffect(() => {
-    async function getSettlements() {
+    async function getPayouts() {
       try {
-        const settlements = (await get('/settlement')) as PaystackResponse<
-          Settlement[]
-        >
-        if (settlements.status) {
+        const payouts = (await get('/settlement')) as PaystackResponse<Payout[]>
+        if (payouts.status) {
           showToast({
             style: Toast.Style.Success,
-            title: 'Settlements fetched successfully!',
+            title: 'Payouts fetched successfully!',
           })
         }
-        setSettlements(settlements.data)
-        setFilteredSettlements(settlements.data)
+        setPayouts(payouts.data)
+        setFilteredPayouts(payouts.data)
       } catch (error) {
         console.error('Error fetching payouts:', error)
         showToast({
           style: Toast.Style.Failure,
-          title: 'Error fetching settlements',
+          title: 'Error fetching payouts',
           message: (error as Error).message,
         })
-        setSettlements([])
-        setFilteredSettlements([])
+        setPayouts([])
+        setFilteredPayouts([])
       }
     }
-    getSettlements()
+    getPayouts()
   }, [])
 
   useEffect(() => {
     if (isLoading) {
       showToast({
         style: Toast.Style.Animated,
-        title: 'Loading settlements...',
+        title: 'Loading payouts...',
       })
     }
   }, [isLoading])
 
-  const filterSettlements = (text: string, status: string) => {
+  const filterPayouts = (text: string, status: string) => {
     const searchLower = text.toLowerCase()
-    return settlements.filter((settlement) => {
+    return payouts.filter((payout) => {
       const matchesSearch =
-        settlement.id.toString().includes(searchLower) ||
-        settlement.currency?.includes(searchLower)
+        payout.id.toString().includes(searchLower) ||
+        payout.currency?.includes(searchLower)
 
-      const matchesStatus = status === 'all' || settlement.status === status
+      const matchesStatus = status === 'all' || payout.status === status
 
       return matchesSearch && matchesStatus
     })
   }
 
   useEffect(() => {
-    setFilteredSettlements(filterSettlements(searchText, currentStatus))
-  }, [searchText, currentStatus, settlements])
+    setFilteredPayouts(filterPayouts(searchText, currentStatus))
+  }, [searchText, currentStatus, payouts])
 
   function onStatusChange(status: string) {
     setCurrentStatus(status)
@@ -102,44 +98,44 @@ export default function Command() {
 
   return (
     <List
-      searchBarPlaceholder="Search settlements by ID, currency, or, status."
+      searchBarPlaceholder="Search payouts by ID, currency, or, status."
       onSearchTextChange={setSearchText}
       searchBarAccessory={StatusDropdown(onStatusChange)}
     >
-      {filteredSettlements.map((settlement) => (
+      {filteredPayouts.map((payout) => (
         <List.Item
-          key={settlement.id}
+          key={payout.id}
           title={`${
-            settlement.status === 'success'
-              ? 'Settled'
-              : settlement.status === 'pending'
-                ? 'Settlement pending'
-                : settlement.status === 'processing'
-                  ? 'Settlement processing'
-                  : 'Settlement attempted'
-          } ${formatCurrency(settlement.total_amount, settlement.currency)}`}
-          subtitle={settlement.id.toString()}
+            payout.status === 'success'
+              ? 'Paid out'
+              : payout.status === 'pending'
+                ? 'Payout pending'
+                : payout.status === 'processing'
+                  ? 'Payout processing'
+                  : 'Payout attempted'
+          } ${formatCurrency(payout.total_amount, payout.currency)}`}
+          subtitle={payout.id.toString()}
           accessories={[
             {
-              text: `+${formatCurrency(settlement.total_processed, settlement.currency)}`,
+              text: `+${formatCurrency(payout.total_processed, payout.currency)}`,
             },
             {
-              text: `-${formatCurrency(settlement.total_fees, settlement.currency)}`,
+              text: `-${formatCurrency(payout.total_fees, payout.currency)}`,
             },
             {
               icon:
-                settlement.status === 'success'
+                payout.status === 'success'
                   ? Icon.CheckCircle
-                  : settlement.status === 'pending'
+                  : payout.status === 'pending'
                     ? Icon.CircleProgress25
-                    : settlement.status === 'processing'
+                    : payout.status === 'processing'
                       ? Icon.CircleProgress50
                       : Icon.XMarkCircle,
-              text: settlement.status,
+              text: payout.status,
             },
             {
-              text: settlement.settlement_date
-                ? parseDate(settlement.settlement_date)
+              text: payout.settlement_date
+                ? parseDate(payout.settlement_date)
                 : null,
             },
           ]}
@@ -147,12 +143,12 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                url={`${paystackDashboardUrl}/payouts/${settlement.id}`}
+                url={`${paystackDashboardUrl}/payouts/${payout.id}`}
                 title="View in Dashboard"
               />
               <Action.CopyToClipboard
                 title="Copy ID"
-                content={settlement.id.toString()}
+                content={payout.id.toString()}
               />
               <Action
                 onAction={openExtensionPreferences}
