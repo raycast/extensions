@@ -6,6 +6,7 @@ import {
   Toast,
   confirmAlert,
   Icon,
+  Alert,
 } from '@raycast/api'
 import { Currency, PaystackResponse } from './utils/types'
 import { SUPPORTED_CURRENCIES } from './data/supported-currency'
@@ -38,6 +39,7 @@ export default function Command({
           icon: Icon.Warning,
           primaryAction: {
             title: 'Issue Refund',
+            style: Alert.ActionStyle.Destructive,
           },
         })
       ) {
