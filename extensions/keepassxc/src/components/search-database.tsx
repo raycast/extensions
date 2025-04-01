@@ -33,7 +33,7 @@ const userInterfaceFavicon = Boolean(preferences.userInterfaceFavicon);
  */
 function getFolders(entries: string[][]): string[] {
   return Array.from(new Set(entries.map((entry: string[]) => entry[0]).filter((v: string) => v !== ""))).sort((a, b) =>
-    (a as string).localeCompare(b as string)
+    (a as string).localeCompare(b as string),
   );
 }
 
@@ -228,7 +228,7 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                 </ActionPanel>
               }
             />
-          )
+          ),
       )}
       <List.EmptyView
         title="No Entries Found"
