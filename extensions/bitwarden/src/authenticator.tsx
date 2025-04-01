@@ -16,7 +16,7 @@ import { showCopySuccessMessage } from "~/utils/clipboard";
 import { captureException } from "~/utils/development";
 import { usePromise } from "@raycast/utils";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
-import { ActionWithReprompt } from "~/components/actions";
+import { ActionWithReprompt, DebuggingBugReportingActionSection, VaultActionsSection } from "~/components/actions";
 import { tryCatch } from "~/utils/errors";
 
 const AuthenticatorComponent = () => (
@@ -66,8 +66,18 @@ function AuthenticatorList() {
     <VaultItem key={item.id} item={item} interval={interval} />
   ));
 
+  const isEmpty = itemsWithTabMatches.tabItems.length === 0 && otherItemList.length === 0;
+
   return (
-    <List searchBarPlaceholder="Search vault" isLoading={isLoading || isActiveTabLoading}>
+    <List
+      searchBarPlaceholder="Search vault"
+      isLoading={isLoading || isActiveTabLoading}
+      actions={
+        <ActionPanel>
+          <CommonActions />
+        </ActionPanel>
+      }
+    >
       {activeTab && itemsWithTabMatches.tabItems.length > 0 ? (
         <>
           <List.Section title={`Active Tab (${activeTab.url.hostname})`}>
@@ -78,8 +88,13 @@ function AuthenticatorList() {
           <List.Section title="Others">{otherItemList}</List.Section>
         </>
       ) : (
-        <>{otherItemList}</>
+        otherItemList
       )}
+      <List.EmptyView
+        icon={{ source: "bitwarden-64.png" }}
+        title={isEmpty ? "No authenticator keys found" : "No matching items found"}
+        description="Hit the sync button to sync your vault"
+      />
     </List>
   );
 }
@@ -98,6 +113,7 @@ function VaultItem({ item, interval }: { item: Item; interval: number }) {
           <ActionPanel>
             <CopyCodeAction />
             <PasteCodeAction />
+            <CommonActions />
           </ActionPanel>
         }
         accessories={[
@@ -106,6 +122,15 @@ function VaultItem({ item, interval }: { item: Item; interval: number }) {
         ]}
       />
     </VaultItemContext.Provider>
+  );
+}
+
+function CommonActions() {
+  return (
+    <>
+      <VaultActionsSection />
+      <DebuggingBugReportingActionSection />
+    </>
   );
 }
 

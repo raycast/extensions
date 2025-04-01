@@ -1,6 +1,5 @@
 import { List, Icon, ActionPanel } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
-import VaultManagementActions from "~/components/searchVault/actions/shared/VaultManagementActions";
 import VaultListenersProvider from "~/components/searchVault/context/vaultListeners";
 import VaultItem from "~/components/searchVault/Item";
 import ListFolderDropdown from "~/components/searchVault/ListFolderDropdown";
@@ -11,6 +10,7 @@ import { useVaultContext, VaultProvider } from "~/context/vault";
 import { Folder, Item } from "~/types/vault";
 import { VaultLoadingFallback } from "~/components/searchVault/VaultLoadingFallback";
 import { useVaultSearch } from "./utils/search";
+import { VaultActionsSection } from "~/components/actions";
 
 const SearchVaultCommand = () => (
   <RootErrorBoundary>
@@ -67,7 +67,7 @@ function SearchVaultComponent() {
           actions={
             !isLoading && (
               <ActionPanel>
-                <VaultManagementActions />
+                <VaultActionsSection />
               </ActionPanel>
             )
           }
