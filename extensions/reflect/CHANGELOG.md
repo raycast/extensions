@@ -1,6 +1,6 @@
 # Reflect Changelog
 
-## Record Audio Memo] - {PR_MERGE_DATE}
+## [Record Audio Memo] - {PR_MERGE_DATE}
 
 - Adding Record Audio Memo command which allows users to Start/Stop memo recording
 
