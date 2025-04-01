@@ -206,14 +206,17 @@ function useSyncTimeRemaining() {
 function useTimeRemaining() {
   const [time, setTime] = useState(() => {
     const value = Cache.get(TimeRemainingCacheKey);
-    return value ? Number.parseInt(value) : 30;
+    return value ? parseInt(value) : 30;
   });
 
   useEffect(() => {
     Cache.subscribe((key, value) => {
       if (!value || key !== TimeRemainingCacheKey) return;
-      const newTime = Number.parseInt(value);
-      if (newTime) setTime(newTime);
+
+      const newTime = parseInt(value);
+      if (!Number.isNaN(newTime)) {
+        setTime(newTime);
+      }
     });
   }, []);
 
