@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react'
 import { usePaystack } from './hooks/paystack'
 import { useCurrencyFormatter } from './hooks/currency'
 import { useDate } from './hooks/date'
-import { PaystackResponse, Transaction } from './utils/types'
+import { Currency, PaystackResponse, Transaction } from './utils/types'
 import { paystackDashboardUrl } from './utils/urls'
 
 import IssueRefunds from './issue-refunds'
@@ -131,7 +131,10 @@ export default function Command() {
               />
               <Action.Push
                 target={
-                  <IssueRefunds transactionId={transaction.id.toString()} />
+                  <IssueRefunds
+                    transactionId={transaction.id.toString()}
+                    currency={transaction.currency as Currency}
+                  />
                 }
                 title="Issue Refund"
                 icon={Icon.Coin}
