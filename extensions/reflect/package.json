@@ -9,7 +9,8 @@
     "joshknowles",
     "tylerwince",
     "ocavue",
-    "theomjones"
+    "theomjones",
+    "ErBlack"
   ],
   "categories": [
     "Applications",
@@ -146,6 +147,17 @@
         "daily note",
         "note today",
         "daily"
+      ]
+    },
+    {
+      "name": "record",
+      "title": "Record Audio Memo",
+      "subtitle": "Reflect",
+      "description": "Start/Stop recording audio memo with Reflect app.",
+      "mode": "no-view",
+      "keywords": [
+        "audio memo",
+        "transcribe"
       ]
     }
   ],
