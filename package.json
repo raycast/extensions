@@ -49,10 +49,10 @@
       "mode": "view"
     },
     {
-      "name": "customer-insights",
-      "title": "Customer Insights",
-      "subtitle": "Retrieve customer details and transaction history.",
-      "description": "Search for a customer using their email and view their transaction history, lifetime value, and other key insights.",
+      "name": "search-customers",
+      "title": "Search Customers",
+      "subtitle": "Find customers by email or ID.",
+      "description": "Quickly search for customers in your Paystack account using their email or ID. View customer details and transaction history.",
       "mode": "view"
     }
   ],
