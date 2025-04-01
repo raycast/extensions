@@ -147,7 +147,10 @@
           },
           {
             "callsTool": {
-              "name": "get-forecast-for-area"
+              "name": "get-forecast-for-area",
+              "arguments": {
+                "areaSlug": "vastra_harjedalsfjallen"
+              }
             }
           }
         ]
