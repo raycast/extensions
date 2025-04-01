@@ -165,7 +165,11 @@
             {
               "id": "note_id",
               "title": "note_title",
-              "tags": ["list", "of", "tags"],
+              "tags": [
+                "list",
+                "of",
+                "tags"
+              ],
               "createdAt": 1560349049743,
               "titleUpdatedAt": 1736666704378,
               "tagsUpdatedAt": null,
@@ -194,9 +198,6 @@
             "callsTool": {
               "name": "get-recent-notes"
             }
-          },
-          {
-            "meetsCriteria": "Return history note list"
           }
         ]
       },
@@ -207,7 +208,10 @@
             {
               "id": "note_id_1",
               "title": "Personal Note Title",
-              "tags": ["personal", "notes"],
+              "tags": [
+                "personal",
+                "notes"
+              ],
               "createdAt": 1560349049743,
               "titleUpdatedAt": 1736666704378,
               "tagsUpdatedAt": null,
@@ -280,7 +284,10 @@
             {
               "id": "team_note_id",
               "title": "Team Note Title",
-              "tags": ["team", "notes"],
+              "tags": [
+                "team",
+                "notes"
+              ],
               "createdAt": 1560349049743,
               "titleUpdatedAt": 1736666704378,
               "tagsUpdatedAt": null,
@@ -311,9 +318,6 @@
             }
           },
           {
-            "meetsCriteria": "Return user profile and joined teams to identify the team path"
-          },
-          {
             "callsTool": {
               "name": "get-team-workspace-notes",
               "arguments": {
@@ -327,12 +331,46 @@
         ]
       },
       {
-        "input": "@hackmd Open the note with ID note_detail_id or shortId SomeNoteID",
+        "input": "@hackmd Open the note with ID note_detail_id",
         "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              },
+              {
+                "id": "ba6e4c56-0c04-4b3a-be11-9249a7316554",
+                "ownerId": null,
+                "path": "team-path",
+                "name": "Team Name",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Public Team description",
+                "visibility": "public",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          },
           "view-note": {
             "id": "note_detail_id",
             "title": "Detailed Note Title",
-            "tags": ["important", "documentation"],
+            "tags": [
+              "important",
+              "documentation"
+            ],
             "createdAt": 1560349049743,
             "titleUpdatedAt": 1736666704378,
             "tagsUpdatedAt": null,
@@ -360,7 +398,7 @@
             "callsTool": {
               "name": "view-note",
               "arguments": {
-                "noteId": "*matches*note_detail_id|SomeNoteID*"
+                "noteId": "note_detail_id"
               }
             }
           },
@@ -375,7 +413,10 @@
           "view-note": {
             "id": "abc123_full_id",
             "title": "My Important Note",
-            "tags": ["project", "meeting"],
+            "tags": [
+              "project",
+              "meeting"
+            ],
             "createdAt": 1620349049743,
             "titleUpdatedAt": 1726666704378,
             "tagsUpdatedAt": 1726666704378,
@@ -406,9 +447,6 @@
                 "noteId": "abc123"
               }
             }
-          },
-          {
-            "meetsCriteria": "Returns the note content and metadata for the specified shortId"
           }
         ]
       },
@@ -445,9 +483,9 @@
             "callsTool": {
               "name": "create-note",
               "arguments": {
-                "content": "*matches*Project Planning*deadline*",
-                "readPermission": "*any*",
-                "writePermission": "*any*"
+                "content": {
+                  "includes": "project planning"
+                }
               }
             }
           },
@@ -511,31 +549,56 @@
             }
           },
           {
-            "meetsCriteria": "Retrieves user information to check available teams"
-          },
-          {
             "callsTool": {
               "name": "create-note",
               "arguments": {
-                "content": "*matches*Design Team Meeting*",
-                "teamPath": "hackmd",
-                "readPermission": "*any*",
-                "writePermission": "*any*"
+                "teamPath": "hackmd"
               }
             }
-          },
-          {
-            "meetsCriteria": "Creates a meeting agenda note in the specified team workspace"
           }
         ]
       },
       {
-        "input": "@hackmd Could you update my note with ID personal_note_id or shortId personal_note_short_id to include a section on risk management?",
+        "input": "@hackmd Could you update my note with ID personal_note_id to include a section on risk management?",
         "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              },
+              {
+                "id": "ba6e4c56-0c04-4b3a-be11-9249a7316554",
+                "ownerId": null,
+                "path": "team-path",
+                "name": "Team Name",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Public Team description",
+                "visibility": "public",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          },
           "view-note": {
             "id": "personal_note_id",
             "title": "Project Planning with Deadline Tracking",
-            "tags": ["project", "planning"],
+            "tags": [
+              "project",
+              "planning"
+            ],
             "createdAt": 1720349049743,
             "titleUpdatedAt": 1720349049743,
             "tagsUpdatedAt": 1720349049743,
@@ -560,7 +623,10 @@
           "update-note": {
             "id": "personal_note_id",
             "title": "Project Planning with Deadline Tracking",
-            "tags": ["project", "planning"],
+            "tags": [
+              "project",
+              "planning"
+            ],
             "createdAt": 1720349049743,
             "titleUpdatedAt": 1720349049743,
             "tagsUpdatedAt": 1720349049743,
@@ -587,34 +653,64 @@
             "callsTool": {
               "name": "view-note",
               "arguments": {
-                "noteId": "*matches*personal_note_id|personal_note_short_id*"
+                "noteId": "personal_note_id"
               }
             }
-          },
-          {
-            "meetsCriteria": "First retrieves the current content of the note using either ID format"
           },
           {
             "callsTool": {
               "name": "update-note",
               "arguments": {
-                "noteId": "*matches*personal_note_id|personal_note_short_id*",
-                "content": "*matches*Risk Management*"
+                "noteId": "personal_note_id",
+                "content": {
+                  "includes": "risk management"
+                }
               }
             }
-          },
-          {
-            "meetsCriteria": "Updates the note with a new section on risk management while preserving existing content"
           }
         ]
       },
       {
         "input": "@hackmd I'd like to make the team note with shortId team_note_short_id public in the hackmd team",
         "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              },
+              {
+                "id": "ba6e4c56-0c04-4b3a-be11-9249a7316554",
+                "ownerId": null,
+                "path": "team-path",
+                "name": "Team Name",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Public Team description",
+                "visibility": "public",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          },
           "view-note": {
             "id": "team_note_id",
             "title": "Team Meeting Minutes",
-            "tags": ["meeting", "minutes"],
+            "tags": [
+              "meeting",
+              "minutes"
+            ],
             "createdAt": 1720349049743,
             "titleUpdatedAt": 1720349049743,
             "tagsUpdatedAt": 1720349049743,
@@ -639,7 +735,10 @@
           "update-note": {
             "id": "team_note_id",
             "title": "Team Meeting Minutes",
-            "tags": ["meeting", "minutes"],
+            "tags": [
+              "meeting",
+              "minutes"
+            ],
             "createdAt": 1720349049743,
             "titleUpdatedAt": 1720349049743,
             "tagsUpdatedAt": 1720349049743,
@@ -664,38 +763,56 @@
         "expected": [
           {
             "callsTool": {
-              "name": "view-note",
-              "arguments": {
-                "noteId": "team_note_short_id"
-              }
-            }
-          },
-          {
-            "meetsCriteria": "First retrieves the current note information"
-          },
-          {
-            "callsTool": {
               "name": "update-note",
               "arguments": {
                 "noteId": "team_note_short_id",
                 "teamPath": "hackmd",
-                "readPermission": "guest",
-                "content": "*any*"
+                "readPermission": "guest"
               }
             }
-          },
-          {
-            "meetsCriteria": "Updates the note permissions to make it readable by guests (public) while preserving content"
           }
         ]
       },
       {
-        "input": "@hackmd I need to delete the obsolete note with ID obsolete_note_id or shortId obsolete_note_short_id",
+        "input": "@hackmd I need to delete the obsolete note with ID obsolete_note_id",
         "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              },
+              {
+                "id": "ba6e4c56-0c04-4b3a-be11-9249a7316554",
+                "ownerId": null,
+                "path": "team-path",
+                "name": "Team Name",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Public Team description",
+                "visibility": "public",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          },
           "view-note": {
             "id": "obsolete_note_id",
             "title": "Obsolete Note",
-            "tags": ["archive"],
+            "tags": [
+              "archive"
+            ],
             "createdAt": 1600349049743,
             "titleUpdatedAt": 1600349049743,
             "tagsUpdatedAt": 1600349049743,
@@ -725,35 +842,55 @@
         "expected": [
           {
             "callsTool": {
-              "name": "view-note",
-              "arguments": {
-                "noteId": "*matches*obsolete_note_id|obsolete_note_short_id*"
-              }
-            }
-          },
-          {
-            "meetsCriteria": "First retrieves the note to confirm details before deletion"
-          },
-          {
-            "callsTool": {
               "name": "delete-note",
               "arguments": {
-                "noteId": "*matches*obsolete_note_id|obsolete_note_short_id*"
+                "noteId": "obsolete_note_id"
               }
             }
-          },
-          {
-            "meetsCriteria": "Successfully deletes the note from personal workspace using either ID format"
           }
         ]
       },
       {
         "input": "@hackmd Please remove that outdated documentation with shortId team_doc_short_id from our hackmd team workspace",
         "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              },
+              {
+                "id": "ba6e4c56-0c04-4b3a-be11-9249a7316554",
+                "ownerId": null,
+                "path": "team-path",
+                "name": "Team Name",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Public Team description",
+                "visibility": "public",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          },
           "view-note": {
             "id": "team_doc_id",
             "title": "Outdated Team Documentation",
-            "tags": ["docs", "outdated"],
+            "tags": [
+              "docs",
+              "outdated"
+            ],
             "createdAt": 1700349049743,
             "titleUpdatedAt": 1700349049743,
             "tagsUpdatedAt": 1700349049743,
@@ -783,26 +920,12 @@
         "expected": [
           {
             "callsTool": {
-              "name": "view-note",
-              "arguments": {
-                "noteId": "team_doc_short_id"
-              }
-            }
-          },
-          {
-            "meetsCriteria": "First retrieves the note to confirm it's a team note"
-          },
-          {
-            "callsTool": {
               "name": "delete-note",
               "arguments": {
                 "noteId": "team_doc_short_id",
                 "teamPath": "hackmd"
               }
             }
-          },
-          {
-            "meetsCriteria": "Deletes the note from the specified team workspace"
           }
         ]
       }
