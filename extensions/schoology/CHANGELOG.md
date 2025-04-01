@@ -1,5 +1,7 @@
 # Schoology Changelog
 
+## [Update to Package.json] - 2025-4-31
+
 ## [View Assignment Details and Graphs + FREE NOTIFICATIONS + Grade Calculation Bug fixes]
 - You can now use the `Show Graph` action inside the assignment view on the `Overall Grade` list item
 - You can copy data (that the extension fetches from the API) and see the JSON
