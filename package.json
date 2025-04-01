@@ -28,9 +28,9 @@
       "mode": "view"
     },
     {
-      "name": "generate-payment-links",
-      "title": "Generate Payment Links",
-      "subtitle": "Create and copy Paystack payment links in seconds.",
+      "name": "generate-payment-link",
+      "title": "Generate Payment Link",
+      "subtitle": "Create and copy Paystack payment link in seconds.",
       "description": "Generate a new Paystack payment link instantly, copy it to your clipboard, and share it with customers—all from Raycast.",
       "mode": "no-view"
     },
