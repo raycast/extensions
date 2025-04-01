@@ -17,11 +17,7 @@ import { getFavicon } from "@raycast/utils";
 import { KeePassLoader, showToastCliErrors } from "../utils/keepass-loader";
 import { getTOTPCode } from "../utils/totp";
 
-interface Preference {
-  userInterfaceFavicon: boolean;
-}
-
-const preferences: Preference = getPreferenceValues();
+const preferences: Preference = getPreferenceValues<ExtensionPreferences>();
 // Whether to display favicons in the user interface
 const userInterfaceFavicon = Boolean(preferences.userInterfaceFavicon);
 
