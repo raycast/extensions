@@ -14,6 +14,8 @@ import { useCurrencyFormatter } from './hooks/currency'
 import { useDate } from './hooks/date'
 import { PaystackResponse, Transaction } from './utils/types'
 import { paystackDashboardUrl } from './utils/urls'
+
+import IssueRefunds from './issue-refunds'
 export default function Command() {
   const formatCurrency = useCurrencyFormatter()
   const { parseDate } = useDate()
@@ -126,6 +128,13 @@ export default function Command() {
                 onAction={openExtensionPreferences}
                 title={'Open Preferences'}
                 icon={Icon.Gear}
+              />
+              <Action.Push
+                target={
+                  <IssueRefunds transactionId={transaction.id.toString()} />
+                }
+                title="Issue Refund"
+                icon={Icon.Coin}
               />
             </ActionPanel>
           }
