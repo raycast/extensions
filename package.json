@@ -54,6 +54,13 @@
       "subtitle": "Find customers by email or ID.",
       "description": "Quickly search for customers in your Paystack account using their email or ID. View customer details and transaction history.",
       "mode": "view"
+    },
+    {
+      "name": "search-plans",
+      "title": "Search Plans",
+      "subtitle": "Find subscription plans by name or ID.",
+      "description": "Quickly search for subscription plans in your Paystack account using their name or ID. View plan details and pricing information.",
+      "mode": "view"
     }
   ],
   "preferences": [
