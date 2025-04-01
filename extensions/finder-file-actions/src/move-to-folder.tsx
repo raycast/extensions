@@ -681,13 +681,13 @@ export default function Command(props: LaunchProps) {
               <List.Item
                 title={path.basename(currentPath)}
                 subtitle={currentPath}
-                icon={Icon.Footprints}
+                icon={Icon.Folder}
                 actions={
                   <ActionPanel>
                     <Action
                       title="Navigate to Folder"
                       onAction={() => navigateToFolder(currentPath)}
-                      icon={Icon.Footprints}
+                      icon={Icon.ChevronRight}
                     />
                     <Action
                       title={isCopyMode ? "Copy Files Here" : "Move Files Here"}
@@ -720,7 +720,7 @@ export default function Command(props: LaunchProps) {
                 id={`subfolder-${folder.path}`}
                 title={folderName(folder)}
                 subtitle={folder.path}
-                icon={Icon.Footprints}
+                icon={Icon.Folder}
                 accessories={[
                   {
                     text: folder.kMDItemContentModificationDate
@@ -765,7 +765,7 @@ export default function Command(props: LaunchProps) {
                     <Action
                       title="Navigate to Folder"
                       onAction={() => navigateToFolder(folder.path)}
-                      icon={Icon.Footprints}
+                      icon={Icon.ChevronRight}
                     />
                     <Action
                       title={isCopyMode ? "Copy Files Here" : "Move Files Here"}
@@ -847,7 +847,7 @@ export default function Command(props: LaunchProps) {
                       <Action
                         title="Navigate to Folder"
                         onAction={() => navigateToFolder(folder.path)}
-                        icon={Icon.Footprints}
+                        icon={Icon.ChevronRight}
                       />
                       <Action
                         title={isCopyMode ? "Copy Files Here" : "Move Files Here"}
