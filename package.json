@@ -42,10 +42,10 @@
       "mode": "view"
     },
     {
-      "name": "daily-revenue-summary",
-      "title": "Daily Revenue Summary",
-      "subtitle": "Track today’s total revenue at a glance.",
-      "description": "See how much you've earned today in real-time. Get quick insights into your revenue without logging into Paystack.",
+      "name": "search-settlements",
+      "title": "Search Settlements",
+      "subtitle": "Find settlements by date or status.",
+    "description": "Search for settlements in your Paystack account by date or status. View details directly from Raycast.",
       "mode": "view"
     },
     {

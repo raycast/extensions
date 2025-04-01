@@ -9,7 +9,7 @@ import {
 import { paystackDocsUrl } from './utils/urls'
 import { useForm, FormValidation } from '@raycast/utils'
 import { usePaystack } from './hooks/paystack'
-import { SUPPORTED_CURRENCIES } from './data/supported-currency'
+import { SUPPORTED_CURRENCIES } from './data/supported-currencies'
 import { useEffect } from 'react'
 import { Currency, PaystackResponse } from './utils/types'
 

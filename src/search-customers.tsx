@@ -44,10 +44,10 @@ export default function Command() {
         setCustomers(customers.data)
         setFilteredCustomers(customers.data)
       } catch (error) {
-        console.error('Error fetching transactions:', error)
+        console.error('Error fetching customers:', error)
         showToast({
           style: Toast.Style.Failure,
-          title: 'Error fetching transactions',
+          title: 'Error fetching customers',
           message: (error as Error).message,
         })
         setCustomers([])
