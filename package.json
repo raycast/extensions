@@ -35,8 +35,8 @@
       "mode": "no-view"
     },
     {
-      "name": "issue-refunds",
-      "title": "Issue Refunds",
+      "name": "issue-refund",
+      "title": "Issue Refund",
       "subtitle": "Process refunds quickly with a single command.",
       "description": "Find a transaction and refund it directly through Raycast. A confirmation step ensures you don’t issue refunds by mistake.",
       "mode": "view"
