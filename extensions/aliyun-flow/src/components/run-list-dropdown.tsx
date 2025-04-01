@@ -1,5 +1,6 @@
 import { List } from "@raycast/api";
-import { STATUS_TO_COLOR_MAP, StatusFilter } from "../constants";
+import { STATUS_TO_COLOR_MAP } from "../constants";
+import { StatusFilter } from "../types";
 
 export function RunListDropdown(props: { onStatusChange: (newValue: StatusFilter) => void }) {
   const { onStatusChange } = props;

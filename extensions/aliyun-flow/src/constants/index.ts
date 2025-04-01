@@ -1,28 +1,26 @@
-import { Icon, Image, getPreferenceValues } from "@raycast/api";
+import { Color, Icon, Image, getPreferenceValues } from "@raycast/api";
 import { Status } from "../types";
 
 export const DOMAIN = "https://openapi-rdc.aliyuncs.com";
-export const ORGANIZATION_ID = getPreferenceValues().organization_id;
 
-export const YUNXIAO_TOKEN = getPreferenceValues().yunxiao_token;
+export const { organization_id: ORGANIZATION_ID, yunxiao_token: YUNXIAO_TOKEN } =
+  getPreferenceValues<ExtensionPreferences>();
 
 export const STATUS_TO_COLOR_MAP: Record<Status, { color?: string; icon: Image.Source }> = {
   SUCCESS: {
-    color: "#15AD31",
+    color: Color.Green,
     icon: Icon.Checkmark,
   },
-  FAIL: { color: "#E62412", icon: Icon.Xmark },
+  FAIL: { color: Color.Red, icon: Icon.Xmark },
   RUNNING: {
     icon: {
       light: "circle-process.gif",
       dark: "circle-process@dark.gif",
     },
   },
-  CANCELED: { color: "#666687", icon: Icon.CircleDisabled },
-  WAITING: { color: "#666687", icon: Icon.Clock },
+  CANCELED: { color: Color.SecondaryText, icon: Icon.CircleDisabled },
+  WAITING: { color: Color.Blue, icon: Icon.Clock },
 };
-
-export type StatusFilter = "ALL" | Status;
 
 export const YUNXIAO_HEADERS = {
   "x-yunxiao-token": YUNXIAO_TOKEN,

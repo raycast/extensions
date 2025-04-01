@@ -12,7 +12,7 @@ export interface Pipeline {
   modifierAccountId: string | null;
   creatorAccountId: string;
   updateTime: number | null;
-  groupId: number; // 0 则是未分组
+  groupId: number; // 0 means no group
   envName: string | null;
   envId: string | null;
   tagList: null;
@@ -38,6 +38,8 @@ export interface Run {
   creator: null;
   creatorAccountId: string;
 }
+
+export type StatusFilter = "ALL" | Status;
 
 export interface RunDetailInfo {
   globalParams: {
