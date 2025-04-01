@@ -1,6 +1,6 @@
 # 1bookmark Changelog
 
-## [Pattern Search by Space, Creator, Tag] - {PR_MERGE_DATE}
+## [Pattern Search by Space, Creator, Tag] - 2025-04-01
 
 - 0.8.0
 - 📱 Space, creator, tag filter pattern is now supported.
