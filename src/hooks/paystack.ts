@@ -12,8 +12,6 @@ interface PaystackError {
   message: string
 }
 
-
-
 export function usePaystack() {
   const { liveSecretKey, testSecretKey, mode } =
     getPreferenceValues<Preferences>()
