@@ -28,21 +28,5 @@ export default function Main() {
     );
   }, [isEuropeRegion, updateToken, withOAuthLoading]);
 
-  useEffect(() => {
-    void withOAuthLoading(
-      oauth({ isEuropeRegion })
-        .then((token) => {
-          if (token) updateToken(token);
-        })
-        .catch((err) => {
-          return showToast({
-            message: `Failed to authenticate with pCloud: ${err.message}`,
-            title: "Error",
-            style: Toast.Style.Failure,
-          });
-        })
-    );
-  }, []);
-
   return <FileList isLoading={oAuthLoading} />;
 }
