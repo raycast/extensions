@@ -1,4 +1,4 @@
-import { Action, ActionPanel, BrowserExtension, Clipboard, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, BrowserExtension, Clipboard, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
@@ -15,6 +15,9 @@ import { getTransientCopyPreference } from "~/utils/preferences";
 import { showCopySuccessMessage } from "~/utils/clipboard";
 import { captureException } from "~/utils/development";
 import { usePromise } from "@raycast/utils";
+import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
+import { ActionWithReprompt } from "~/components/actions";
+import { tryCatch } from "~/utils/errors";
 
 const AuthenticatorComponent = () => (
   <RootErrorBoundary>
@@ -94,6 +97,7 @@ function VaultItem({ item, interval }: { item: Item; interval: number }) {
         actions={
           <ActionPanel>
             <CopyCodeAction />
+            <PasteCodeAction />
           </ActionPanel>
         }
         accessories={[
@@ -109,21 +113,50 @@ function CopyCodeAction() {
   const selectedItem = useSelectedVaultItem();
   const getUpdatedVaultItem = useGetUpdatedVaultItem();
 
-  const handleCopyCode = async () => {
-    try {
-      const totp = await getUpdatedVaultItem(selectedItem, (item) => item.login?.totp, "Getting code...");
-      if (totp) {
-        const code = authenticator.generate(totp);
-        await Clipboard.copy(code, { transient: getTransientCopyPreference("other") });
-        await showCopySuccessMessage("Copied code to clipboard");
-      }
-    } catch (error) {
+  const copy = async () => {
+    const { data: totp, error } = await tryCatch(
+      getUpdatedVaultItem(selectedItem, (item) => item.login?.totp, "Getting code...")
+    );
+    if (error) {
       await showToast(Toast.Style.Failure, "Failed to get code");
       captureException("Failed to copy code", error);
     }
+    if (totp) {
+      const code = authenticator.generate(totp);
+      await Clipboard.copy(code, { transient: getTransientCopyPreference("other") });
+      await showCopySuccessMessage("Copied code to clipboard");
+    }
   };
 
-  return <Action title="Copy Code" icon={Icon.Clipboard} onAction={handleCopyCode} />;
+  return <ActionWithReprompt title="Copy Code" icon={Icon.Clipboard} onAction={copy} />;
+}
+
+function PasteCodeAction() {
+  const selectedItem = useSelectedVaultItem();
+  const getUpdatedVaultItem = useGetUpdatedVaultItem();
+  const frontmostAppName = useFrontmostApplicationName();
+
+  const paste = async () => {
+    const { data: totp, error } = await tryCatch(
+      getUpdatedVaultItem(selectedItem, (item) => item.login?.totp, "Getting code...")
+    );
+    if (error) {
+      await showToast(Toast.Style.Failure, "Failed to get code");
+      captureException("Failed to paste code", error);
+    }
+    if (totp) {
+      const code = authenticator.generate(totp);
+      await Clipboard.paste(code);
+    }
+  };
+
+  return (
+    <ActionWithReprompt
+      title={frontmostAppName ? `Paste Code into ${frontmostAppName}` : "Paste Code"}
+      icon={Icon.Window}
+      onAction={paste}
+    />
+  );
 }
 
 function useInterval(ms: number) {
