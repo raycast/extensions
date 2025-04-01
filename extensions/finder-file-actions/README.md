@@ -19,6 +19,14 @@ Quickly move or copy selected files in Finder to a destination folder of your ch
 - Visual feedback for successful/failed operations
 - Metadata display (last used date, modification date, file type)
 
+#### Performance
+
+- Concurrent file operations (up to 3 streams at a time)
+- Streaming for large files with minimal memory usage
+- Progress tracking for both individual files and batches
+- Continues on errors (failing files don't stop the batch)
+- Memory-efficient batch processing
+
 #### Usage
 
 1. Select one or more files in Finder
@@ -35,7 +43,7 @@ Quickly move or copy selected files in Finder to a destination folder of your ch
 
 ## Installation
 > [!IMPORTANT]
-> this extension is not available in the Raycast store. You can see the ticket [here](https://github.com/raycast/extensions/pull/17705), so if you want to see it in the store, you can upvote it or smth.
+> this extension is not available yet in the Raycast store. You can see the ticket [here](https://github.com/raycast/extensions/pull/17705), so if you want to see it in the store, you can upvote it or smth.
 > in the meantime, you can install it manually.
 
 ### Prerequisites

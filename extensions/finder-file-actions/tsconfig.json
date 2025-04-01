@@ -3,15 +3,17 @@
   "display": "Node 16",
   "include": ["src/**/*"],
   "compilerOptions": {
-    "lib": ["es2021"],
+    "target": "ES2021",
+    "lib": ["ES2021"],
     "module": "commonjs",
-    "target": "es2021",
-    "strict": true,
-    "isolatedModules": true,
+    "moduleResolution": "node",
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "strict": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true
+    "baseUrl": ".",
+    "paths": {
+      "@raycast/api": ["./src/tests/mocks/raycast-api"]
+    }
   }
 }

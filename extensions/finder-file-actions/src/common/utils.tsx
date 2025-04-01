@@ -2,13 +2,20 @@ import { Alert, Icon, closeMainWindow, confirmAlert, trash, showToast, popToRoot
 
 import { runAppleScript } from "run-applescript";
 import { SpotlightSearchResult } from "./types";
+import path from "path";
 
 const safeSearchScope = (searchScope: string | undefined) => {
   return searchScope === "" ? undefined : searchScope;
 };
 
 const folderName = (result: SpotlightSearchResult) => {
-  return result.path.slice(0).split("/").pop() || "Untitled";
+  // Use kMDItemDisplayName if available (this is set by Spotlight with the localized name)
+  if (result.kMDItemDisplayName) {
+    return result.kMDItemDisplayName;
+  }
+
+  // Otherwise fall back to the path's basename
+  return path.basename(result.path) || "Untitled";
 };
 
 const enclosingFolderName = (result: SpotlightSearchResult) => {
