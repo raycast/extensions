@@ -1,3 +1,4 @@
+import { authenticator } from "otplib";
 import { ActionPanel, BrowserExtension, Clipboard, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider } from "~/context/bitwarden";
@@ -5,7 +6,6 @@ import { SessionProvider } from "~/context/session";
 import { useVaultContext, VaultProvider } from "~/context/vault";
 import { Item } from "~/types/vault";
 import { useItemIcon } from "~/components/searchVault/utils/useItemIcon";
-import { authenticator } from "otplib";
 import { useEffect, useMemo, useState } from "react";
 import VaultListenersProvider from "~/components/searchVault/context/vaultListeners";
 import { SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
@@ -96,8 +96,8 @@ function AuthenticatorList() {
 
 function VaultItem({ item }: { item: Item }) {
   const icon = useItemIcon(item);
-  const interval = useTimeRemaining();
-  const code = useAuthenticatorCode(item, interval);
+  const time = useTimeRemaining();
+  const code = useCode(item, time);
 
   return (
     <VaultItemContext.Provider value={item}>
@@ -114,7 +114,7 @@ function VaultItem({ item }: { item: Item }) {
         }
         accessories={[
           { text: item.login?.totp === SENSITIVE_VALUE_PLACEHOLDER ? "Loading..." : code },
-          { tag: { value: String(interval), color: interval < 5 ? Color.Red : Color.Blue } },
+          { tag: { value: String(time), color: time < 5 ? Color.Red : Color.Blue } },
         ]}
       />
     </VaultItemContext.Provider>
@@ -223,7 +223,7 @@ function useTimeRemaining() {
   return time;
 }
 
-function useAuthenticatorCode(item: Item, interval: number) {
+function useCode(item: Item, time: number) {
   const [code, setCode] = useState<string>();
 
   useEffect(() => {
@@ -235,8 +235,8 @@ function useAuthenticatorCode(item: Item, interval: number) {
   useEffect(() => {
     const { totp } = item.login ?? {};
     if (!totp || totp === SENSITIVE_VALUE_PLACEHOLDER) return;
-    if (interval === 30) setCode(authenticator.generate(totp));
-  }, [interval]);
+    if (time === 30) setCode(authenticator.generate(totp));
+  }, [time]);
 
   return code;
 }
