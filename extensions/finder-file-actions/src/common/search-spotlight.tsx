@@ -25,37 +25,33 @@ const searchSpotlight = (
   callback: (result: SpotlightSearchResult) => void
 ): Promise<void> => {
   const { maxResults } = getPreferenceValues<SpotlightSearchPreferences>();
-
   const isExactSearch = search.startsWith("[") && search.endsWith("]");
 
   return new Promise((resolve, reject) => {
     const spotlightSearchAttributes: string[] = folderSpotlightSearchAttributes;
+
+    // Add additional filter to search for paths containing the search term
+    // This helps find system folders regardless of localization
     const searchFilter = isExactSearch
       ? ["kMDItemContentType=='public.folder'", `kMDItemDisplayName == '${search.replace(/[[|\]]/gi, "")}'`]
-      : ["kMDItemContentType=='public.folder'", `kMDItemDisplayName = "*${search}*"cd`];
+      : [
+          "kMDItemContentType=='public.folder'",
+          `(kMDItemDisplayName = "*${search}*"cd || kMDItemPath = "*${search}*"cd)`,
+        ];
 
+    // Continue with existing spotlight search
     let resultsCount = 0;
-
-    // folder hard-coded into search
     spotlight(search, safeSearchScope(searchScope), searchFilter, spotlightSearchAttributes as [], abortable)
       .on("data", (result: SpotlightSearchResult) => {
         if (resultsCount < maxResults) {
-          // keep emitting the match and
-          // incr resultsCount (since a folder was found)
           resultsCount++;
           callback(result);
         } else if (resultsCount >= maxResults) {
-          // bail/abort on results >= maxResults
           abortable?.current?.abort();
-
-          // allow results to stabilize via usePromise()
-          // for onData()
           setTimeout(() => {
             resolve();
           }, 0);
         }
-
-        // keep searching...
       })
       .on("error", (e: Error) => {
         reject(e);
