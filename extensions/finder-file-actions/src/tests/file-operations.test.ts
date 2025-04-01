@@ -1,17 +1,47 @@
-import { describe, expect, beforeEach, afterEach, it } from "@jest/globals";
-import fs from "fs-extra";
+import { beforeEach, afterEach, describe, it, expect } from "@jest/globals";
 import path from "path";
-import { setupTestEnvironment, cleanupTestEnvironment } from "./utils/test-helpers";
+import fs from "fs-extra";
+import { createTestDirectory, cleanupTestDirectory } from "./utils/test-helpers";
+import { fsAsync } from "../common/fs-async";
 
 describe("File Operations", () => {
   let testDir: string;
+  let sourceDir: string;
+  let destDir: string;
+  let readOnlyDir: string;
 
   beforeEach(async () => {
-    testDir = await setupTestEnvironment();
+    testDir = await createTestDirectory();
+    sourceDir = path.join(testDir, "source");
+    destDir = path.join(testDir, "destination");
+    readOnlyDir = path.join(testDir, "readonly");
+
+    // Create test directories
+    await fs.mkdir(sourceDir);
+    await fs.mkdir(destDir);
+    await fs.mkdir(readOnlyDir);
+
+    // Create test files
+    await fs.writeFile(path.join(sourceDir, "test1.txt"), "test content 1");
+    await fs.writeFile(path.join(sourceDir, "test2.txt"), "test content 2");
+    await fs.writeFile(path.join(sourceDir, "test3.txt"), "test content 3");
+
+    // Set readonly permissions
+    try {
+      await fs.chmod(readOnlyDir, 0o444);
+    } catch (error) {
+      console.error("Failed to set readonly permissions:", error);
+    }
   });
 
   afterEach(async () => {
-    await cleanupTestEnvironment(testDir);
+    try {
+      // Reset permissions before cleanup
+      await fs.chmod(readOnlyDir, 0o777).catch(() => {});
+    } catch (error) {
+      console.error("Failed to reset permissions:", error);
+    }
+    await cleanupTestDirectory(testDir);
   });
 
   describe("Move Operations", () => {
@@ -19,13 +49,14 @@ describe("File Operations", () => {
       const files = ["test1.txt", "test2.txt", "test3.txt"];
 
       for (const file of files) {
-        const sourcePath = path.join(testDir, "source", file);
-        const destPath = path.join(testDir, "dest", file);
-        await fs.move(sourcePath, destPath);
+        const sourcePath = path.join(sourceDir, file);
+        const destPath = path.join(destDir, file);
+        const result = await fsAsync.moveFile(sourcePath, destPath);
 
-        // Verify file was moved
-        expect(await fs.exists(sourcePath)).toBe(false);
-        expect(await fs.exists(destPath)).toBe(true);
+        // Verify move was successful
+        expect(result.success).toBe(true);
+        expect(await fsAsync.exists(sourcePath)).toBe(false);
+        expect(await fsAsync.exists(destPath)).toBe(true);
 
         // Verify content remains intact
         const content = await fs.readFile(destPath, "utf8");
@@ -35,14 +66,19 @@ describe("File Operations", () => {
 
     it("should handle moving to existing files with overwrite", async () => {
       const testFile = "test1.txt";
-      const sourcePath = path.join(testDir, "source", testFile);
-      const destPath = path.join(testDir, "dest", testFile);
+      const sourcePath = path.join(sourceDir, testFile);
+      const destPath = path.join(destDir, testFile);
 
       // Create a file at destination
       await fs.writeFile(destPath, "original content");
 
       // Move with overwrite
-      await fs.move(sourcePath, destPath, { overwrite: true });
+      const result = await fsAsync.moveFile(sourcePath, destPath, { overwrite: true });
+
+      // Verify move was successful
+      expect(result.success).toBe(true);
+      expect(await fsAsync.exists(sourcePath)).toBe(false);
+      expect(await fsAsync.exists(destPath)).toBe(true);
 
       // Verify content was overwritten
       const content = await fs.readFile(destPath, "utf8");
@@ -51,13 +87,15 @@ describe("File Operations", () => {
 
     it("should fail when moving to readonly directory", async () => {
       const testFile = "test1.txt";
-      const sourcePath = path.join(testDir, "source", testFile);
-      const destPath = path.join(testDir, "readonly", testFile);
+      const sourcePath = path.join(sourceDir, testFile);
+      const destPath = path.join(readOnlyDir, testFile);
 
-      await expect(fs.move(sourcePath, destPath)).rejects.toThrow();
+      const result = await fsAsync.moveFile(sourcePath, destPath);
 
-      // Verify source file still exists
-      expect(await fs.exists(sourcePath)).toBe(true);
+      // Verify move failed
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
+      expect(await fsAsync.exists(sourcePath)).toBe(true);
     });
   });
 
@@ -66,13 +104,14 @@ describe("File Operations", () => {
       const files = ["test1.txt", "test2.txt", "test3.txt"];
 
       for (const file of files) {
-        const sourcePath = path.join(testDir, "source", file);
-        const destPath = path.join(testDir, "dest", file);
-        await fs.copy(sourcePath, destPath);
+        const sourcePath = path.join(sourceDir, file);
+        const destPath = path.join(destDir, file);
+        const result = await fsAsync.copyFile(sourcePath, destPath);
 
-        // Verify both files exist
-        expect(await fs.exists(sourcePath)).toBe(true);
-        expect(await fs.exists(destPath)).toBe(true);
+        // Verify copy was successful
+        expect(result.success).toBe(true);
+        expect(await fsAsync.exists(sourcePath)).toBe(true);
+        expect(await fsAsync.exists(destPath)).toBe(true);
 
         // Verify content is identical
         const sourceContent = await fs.readFile(sourcePath, "utf8");
@@ -83,14 +122,19 @@ describe("File Operations", () => {
 
     it("should handle copying to existing files with overwrite", async () => {
       const testFile = "test1.txt";
-      const sourcePath = path.join(testDir, "source", testFile);
-      const destPath = path.join(testDir, "dest", testFile);
+      const sourcePath = path.join(sourceDir, testFile);
+      const destPath = path.join(destDir, testFile);
 
       // Create a file at destination
       await fs.writeFile(destPath, "original content");
 
       // Copy with overwrite
-      await fs.copy(sourcePath, destPath);
+      const result = await fsAsync.copyFile(sourcePath, destPath, { overwrite: true });
+
+      // Verify copy was successful
+      expect(result.success).toBe(true);
+      expect(await fsAsync.exists(sourcePath)).toBe(true);
+      expect(await fsAsync.exists(destPath)).toBe(true);
 
       // Verify content was overwritten
       const content = await fs.readFile(destPath, "utf8");
@@ -99,34 +143,35 @@ describe("File Operations", () => {
 
     it("should fail when copying to readonly directory", async () => {
       const testFile = "test1.txt";
-      const sourcePath = path.join(testDir, "source", testFile);
-      const destPath = path.join(testDir, "readonly", testFile);
+      const sourcePath = path.join(sourceDir, testFile);
+      const destPath = path.join(readOnlyDir, testFile);
 
-      await expect(fs.copy(sourcePath, destPath)).rejects.toThrow();
+      const result = await fsAsync.copyFile(sourcePath, destPath);
 
-      // Verify source file still exists and wasn't modified
-      expect(await fs.exists(sourcePath)).toBe(true);
-      const content = await fs.readFile(sourcePath, "utf8");
-      expect(content).toBe("test content 1");
+      // Verify copy failed
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
+      expect(await fsAsync.exists(sourcePath)).toBe(true);
     });
   });
 
   describe("Concurrent Operations", () => {
     it("should handle multiple concurrent copy operations", async () => {
       const files = ["test1.txt", "test2.txt", "test3.txt"];
-      const copyPromises = files.map((file) =>
-        fs.copy(path.join(testDir, "source", file), path.join(testDir, "dest", file))
-      );
+      const copyPromises = files.map((file) => fsAsync.copyFile(path.join(sourceDir, file), path.join(destDir, file)));
 
-      await Promise.all(copyPromises);
+      const results = await Promise.all(copyPromises);
+
+      // Verify all copies were successful
+      results.forEach((result) => expect(result.success).toBe(true));
 
       // Verify all files were copied correctly
       for (const file of files) {
-        const sourcePath = path.join(testDir, "source", file);
-        const destPath = path.join(testDir, "dest", file);
+        const sourcePath = path.join(sourceDir, file);
+        const destPath = path.join(destDir, file);
 
-        expect(await fs.exists(sourcePath)).toBe(true);
-        expect(await fs.exists(destPath)).toBe(true);
+        expect(await fsAsync.exists(sourcePath)).toBe(true);
+        expect(await fsAsync.exists(destPath)).toBe(true);
 
         const sourceContent = await fs.readFile(sourcePath, "utf8");
         const destContent = await fs.readFile(destPath, "utf8");
@@ -136,19 +181,20 @@ describe("File Operations", () => {
 
     it("should handle multiple concurrent move operations", async () => {
       const files = ["test1.txt", "test2.txt", "test3.txt"];
-      const movePromises = files.map((file) =>
-        fs.move(path.join(testDir, "source", file), path.join(testDir, "dest", file))
-      );
+      const movePromises = files.map((file) => fsAsync.moveFile(path.join(sourceDir, file), path.join(destDir, file)));
 
-      await Promise.all(movePromises);
+      const results = await Promise.all(movePromises);
+
+      // Verify all moves were successful
+      results.forEach((result) => expect(result.success).toBe(true));
 
       // Verify all files were moved correctly
       for (const file of files) {
-        const sourcePath = path.join(testDir, "source", file);
-        const destPath = path.join(testDir, "dest", file);
+        const sourcePath = path.join(sourceDir, file);
+        const destPath = path.join(destDir, file);
 
-        expect(await fs.exists(sourcePath)).toBe(false);
-        expect(await fs.exists(destPath)).toBe(true);
+        expect(await fsAsync.exists(sourcePath)).toBe(false);
+        expect(await fsAsync.exists(destPath)).toBe(true);
       }
     });
   });
@@ -160,22 +206,28 @@ describe("File Operations", () => {
 
       // Create 100 small files
       const fileCount = 100;
-      for (let i = 0; i < fileCount; i++) {
-        await fs.writeFile(path.join(largeDir, `file${i}.txt`), `content ${i}`);
-      }
+      const filePromises = Array.from({ length: fileCount }, (_, i) =>
+        fs.writeFile(path.join(largeDir, `file${i}.txt`), `content ${i}`)
+      );
+      await Promise.all(filePromises);
 
       const largeDest = path.join(testDir, "large-dest");
       await fs.mkdir(largeDest);
 
-      // Copy entire directory
-      await fs.copy(largeDir, largeDest);
-
-      // Verify all files were copied
+      // Copy files using batch processing
       const sourceFiles = await fs.readdir(largeDir);
-      const destFiles = await fs.readdir(largeDest);
+      const copyResults = await fsAsync.batchProcess(
+        sourceFiles.map((file) => path.join(largeDir, file)),
+        async (sourcePath) => {
+          const fileName = path.basename(sourcePath);
+          const destPath = path.join(largeDest, fileName);
+          return fsAsync.copyFile(sourcePath, destPath);
+        },
+        { concurrency: 10 }
+      );
 
-      expect(sourceFiles.length).toBe(fileCount);
-      expect(destFiles.length).toBe(fileCount);
+      // Verify all copies were successful
+      copyResults.forEach((result) => expect(result.success).toBe(true));
 
       // Verify content of random files
       for (let i = 0; i < 10; i++) {

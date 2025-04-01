@@ -13,7 +13,8 @@ Quickly move or copy selected files in Finder to a destination folder of your ch
 - Move or copy one or more files selected in Finder to any folder
 - Fast and reliable folder search using macOS Spotlight (`mdfind`)
 - Smart sorting of search results based on relevance and recency
-- Recently used folders for quick access
+- Pin frequently used folders for quick access
+- Recently used folders history
 - Folder navigation in case you don't know the exact folder name
 - Indication of the selected files
 - Visual feedback for successful/failed operations
@@ -25,7 +26,7 @@ Quickly move or copy selected files in Finder to a destination folder of your ch
 - Streaming for large files with minimal memory usage
 - Progress tracking for both individual files and batches
 - Continues on errors (failing files don't stop the batch)
-- Memory-efficient batch processing
+- Smart folder history management
 
 #### Usage
 
@@ -40,6 +41,8 @@ Quickly move or copy selected files in Finder to a destination folder of your ch
 - `Cmd+Return`: Move files to the selected folder
 - `Cmd+Shift+Return`: Copy files to the selected folder
 - `Cmd+Shift+D`: Toggle details view
+- `Cmd+Shift+P`: Pin/Unpin folder
+- `Cmd+Shift+R`: Remove folder from recent history
 
 ## Installation
 > [!IMPORTANT]

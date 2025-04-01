@@ -8,6 +8,55 @@ const safeSearchScope = (searchScope: string | undefined) => {
   return searchScope === "" ? undefined : searchScope;
 };
 
+// Map to cache system folder names
+const systemFolderNameCache = new Map<string, string>();
+
+// Function to get localized display name for a path
+const getLocalizedFolderName = async (folderPath: string): Promise<string> => {
+  // Check cache first
+  if (systemFolderNameCache.has(folderPath)) {
+    return systemFolderNameCache.get(folderPath)!;
+  }
+
+  // Default to the last part of the path
+  let name = path.basename(folderPath);
+
+  try {
+    // Only run AppleScript for common system folders to avoid performance issues
+    const homePath = process.env.HOME || "";
+    const commonPaths = [
+      path.join(homePath, "Desktop"),
+      path.join(homePath, "Documents"),
+      path.join(homePath, "Downloads"),
+      path.join(homePath, "Pictures"),
+      path.join(homePath, "Music"),
+      path.join(homePath, "Movies"),
+    ];
+
+    // Only use AppleScript for system folders
+    if (commonPaths.includes(folderPath)) {
+      const script = `
+        tell application "System Events"
+          set folderPath to "${folderPath}"
+          set folderAlias to POSIX file folderPath as alias
+          return name of folderAlias
+        end tell
+      `;
+
+      const result = await runAppleScript(script);
+      if (result && result.trim()) {
+        name = result.trim();
+        // Cache the result
+        systemFolderNameCache.set(folderPath, name);
+      }
+    }
+  } catch (error) {
+    console.error(`Error getting localized name for ${folderPath}:`, error);
+  }
+
+  return name;
+};
+
 const folderName = (result: SpotlightSearchResult) => {
   // Use kMDItemDisplayName if available (this is set by Spotlight with the localized name)
   if (result.kMDItemDisplayName) {
@@ -86,4 +135,5 @@ export {
   maybeMoveResultToTrash,
   lastUsedSort,
   fixDoubleConcat,
+  getLocalizedFolderName,
 };

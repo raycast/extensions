@@ -105,11 +105,8 @@ const searchSpotlight = (
     // If the search might match a system folder, try to get those first
     // as they should have higher priority than regular search results
     if (mightMatchSystemFolder) {
-      (async () => {
-        try {
-          // Get system folder paths
-          const folderMap = await getSystemFolderPaths();
-
+      getSystemFolderPaths()
+        .then((folderMap) => {
           // Check each folder to see if it matches the search
           for (const [folderType, folderPath] of folderMap.entries()) {
             if (folderType.includes(lowerSearch) || lowerSearch.includes(folderType)) {
@@ -147,37 +144,88 @@ const searchSpotlight = (
               }
             }
           }
-        } catch (error) {
+
+          // Continue with regular Spotlight search
+          spotlight(search, safeSearchScope(searchScope), searchFilter, spotlightSearchAttributes as [], abortable)
+            .on("data", (result: SpotlightSearchResult) => {
+              // Skip duplicates - only add if path not already added
+              const normalizedPath = normalizePath(result.path);
+              if (!addedPaths.has(normalizedPath)) {
+                addedPaths.add(normalizedPath);
+
+                if (resultsCount < maxResults) {
+                  resultsCount++;
+                  allResults.push(result);
+                } else if (resultsCount >= maxResults) {
+                  abortable?.current?.abort();
+                  callback(allResults);
+                  resolve();
+                }
+              }
+            })
+            .on("error", (e: Error) => {
+              reject(e);
+            })
+            .on("end", () => {
+              callback(allResults);
+              resolve();
+            });
+        })
+        .catch((error) => {
           console.error("Error processing system folders:", error);
-        }
-      })();
-    }
+          // Continue with regular Spotlight search even if system folders fail
+          spotlight(search, safeSearchScope(searchScope), searchFilter, spotlightSearchAttributes as [], abortable)
+            .on("data", (result: SpotlightSearchResult) => {
+              // Skip duplicates - only add if path not already added
+              const normalizedPath = normalizePath(result.path);
+              if (!addedPaths.has(normalizedPath)) {
+                addedPaths.add(normalizedPath);
 
-    // Continue with regular Spotlight search for other folders
-    spotlight(search, safeSearchScope(searchScope), searchFilter, spotlightSearchAttributes as [], abortable)
-      .on("data", (result: SpotlightSearchResult) => {
-        // Skip duplicates - only add if path not already added
-        const normalizedPath = normalizePath(result.path);
-        if (!addedPaths.has(normalizedPath)) {
-          addedPaths.add(normalizedPath);
+                if (resultsCount < maxResults) {
+                  resultsCount++;
+                  allResults.push(result);
+                } else if (resultsCount >= maxResults) {
+                  abortable?.current?.abort();
+                  callback(allResults);
+                  resolve();
+                }
+              }
+            })
+            .on("error", (e: Error) => {
+              reject(e);
+            })
+            .on("end", () => {
+              callback(allResults);
+              resolve();
+            });
+        });
+    } else {
+      // If no system folder matches, just do regular Spotlight search
+      spotlight(search, safeSearchScope(searchScope), searchFilter, spotlightSearchAttributes as [], abortable)
+        .on("data", (result: SpotlightSearchResult) => {
+          // Skip duplicates - only add if path not already added
+          const normalizedPath = normalizePath(result.path);
+          if (!addedPaths.has(normalizedPath)) {
+            addedPaths.add(normalizedPath);
 
-          if (resultsCount < maxResults) {
-            resultsCount++;
-            allResults.push(result);
-          } else if (resultsCount >= maxResults) {
-            abortable?.current?.abort();
-            callback(allResults);
-            resolve();
+            if (resultsCount < maxResults) {
+              resultsCount++;
+              allResults.push(result);
+            } else if (resultsCount >= maxResults) {
+              abortable?.current?.abort();
+              callback(allResults);
+              resolve();
+            }
           }
-        }
-      })
-      .on("error", (e: Error) => {
-        reject(e);
-      })
-      .on("end", () => {
-        callback(allResults);
-        resolve();
-      });
+        })
+        .on("error", (e: Error) => {
+          reject(e);
+        })
+        .on("end", () => {
+          callback(allResults);
+          resolve();
+        });
+    }
   });
 };
 

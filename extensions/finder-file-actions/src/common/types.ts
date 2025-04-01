@@ -1,12 +1,9 @@
-export interface PinnedFolder extends SpotlightSearchResult {
-  pinnedAt: Date;
-  lastVerified: Date;
-}
-
 export interface SpotlightSearchPreferences {
   maxResults: number;
   maxRecentFolders: string;
 }
+
+export interface SpotlightSearchDefinition extends Array<string> {}
 
 export interface SpotlightSearchResult {
   path: string;
@@ -18,4 +15,9 @@ export interface SpotlightSearchResult {
   kMDItemContentModificationDate: Date;
   kMDItemLastUsedDate: Date;
   kMDItemUseCount: number;
+}
+
+export interface PinnedFolder extends SpotlightSearchResult {
+  pinnedAt: Date;
+  lastVerified: Date;
 }
