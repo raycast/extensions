@@ -12,7 +12,8 @@
     "matt",
     "dgrcode",
     "samuelkraft",
-    "xmok"
+    "xmok",
+    "ridemountainpig"
   ],
   "commands": [
     {
@@ -38,6 +39,21 @@
       "title": "Search Domains",
       "description": "Explore your Vercel domains",
       "mode": "view"
+    },
+    {
+      "name": "check-domain-availability",
+      "title": "Check Domain Availability",
+      "description": "Check if a domain is available",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain",
+          "description": "The domain to check",
+          "type": "text",
+          "placeholder": "example.com",
+          "required": true
+        }
+      ]
     }
   ],
   "tools": [
@@ -80,6 +96,11 @@
       "name": "add-environment-variable",
       "title": "Add Environment Variable",
       "description": "Add a Vercel environment variable"
+    },
+    {
+      "name": "check-domain-availability",
+      "title": "Check Domain Availability",
+      "description": "Check if a domain is available"
     }
   ],
   "ai": {
@@ -309,6 +330,26 @@
                 "envId": "KEY",
                 "teamId": "team_vQ7Eag8KdhOGpsdvxtCGN1ff"
               }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@vercast Check if vercast.com domain is available",
+        "mocks": {
+          "check-domain-availability": [
+            {
+              "domain": "raycast.com"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "domain": "raycast.com"
+              },
+              "name": "check-domain-availability"
             }
           }
         ]

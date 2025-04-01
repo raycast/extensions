@@ -1,5 +1,9 @@
 # Vercast Changelog
 
+## [2.10] - {PR_MERGE_DATE}
+
+- Added `Check Domain Availability` command and AI tool to check if a domain is available
+
 ## [2.9] - 2025-03-12
 
 - Update items in `Search Components`
