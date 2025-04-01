@@ -2,7 +2,6 @@ import {
   showToast,
   Toast,
   List,
-  getPreferenceValues,
   ActionPanel,
   Action,
   openExtensionPreferences,
@@ -12,11 +11,8 @@ import { useEffect, useState } from 'react'
 import { usePaystack } from './hooks/paystack'
 import { useCurrencyFormatter } from './hooks/currency'
 
-const preferences = getPreferenceValues<Preferences>()
-
 export default function Command() {
   const formatCurrency = useCurrencyFormatter()
-  const mode = preferences.mode === 'live' ? 'Live' : 'Test'
   const { get, isLoading } = usePaystack()
   interface Balance {
     currency: string
@@ -69,7 +65,7 @@ export default function Command() {
           icon={Icon.Wallet}
           actions={
             <ActionPanel>
-               <Action.OpenInBrowser
+              <Action.OpenInBrowser
                 url={`https://dashboard.paystack.com/#/dashboard?currency=${balance.currency}`}
                 shortcut={{
                   modifiers: ['cmd'],
@@ -82,11 +78,11 @@ export default function Command() {
                 content={formatCurrency(balance.balance, balance.currency)}
                 shortcut={{ modifiers: ['cmd'], key: 'c' }}
               />
-             <Action
-              onAction={openExtensionPreferences}
-              title={"Open Preferences"}
-              icon={Icon.Gear}
-            />
+              <Action
+                onAction={openExtensionPreferences}
+                title={'Open Preferences'}
+                icon={Icon.Gear}
+              />
             </ActionPanel>
           }
         />
