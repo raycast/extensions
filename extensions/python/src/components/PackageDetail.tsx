@@ -59,7 +59,7 @@ type PackageInfo = {
     url: string;
     yanked: boolean;
     yanked_reason: string | null;
-  }[]
+  }[];
 };
 
 export const PackageDetail = ({ name, version }: PackageDetailProps): JSX.Element => {
@@ -99,15 +99,15 @@ export const PackageDetail = ({ name, version }: PackageDetailProps): JSX.Elemen
             title="Released"
             text={{
               value: data?.urls?.[0]?.upload_time_iso_8601
-          ? new Date(data.urls[0].upload_time_iso_8601).toLocaleDateString()
-          : "Unknown",
+                ? new Date(data.urls[0].upload_time_iso_8601).toLocaleDateString()
+                : "Unknown",
               color: Color.PrimaryText,
             }}
           />
           {keywords.length > 0 && (
             <Detail.Metadata.TagList title="Keywords">
               {keywords.map((keyword) => (
-          <Detail.Metadata.TagList.Item key={keyword} text={keyword} />
+                <Detail.Metadata.TagList.Item key={keyword} text={keyword} />
               ))}
             </Detail.Metadata.TagList>
           )}
@@ -126,7 +126,7 @@ export const PackageDetail = ({ name, version }: PackageDetailProps): JSX.Elemen
         <ActionPanel>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
-              title="Copy PIP Install Command"
+              title="Copy Pip Install Command"
               content={`pip install ${name}`}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />

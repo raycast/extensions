@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 import { useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { PackageListItem } from "./components/PackageListItem";
-import { Package } from './types';
+import { Package } from "./types";
 
 interface DoltPackageRow {
   name: string;
@@ -18,9 +18,9 @@ export default function PackageList() {
 
   const { isLoading, data, revalidate } = usePromise(
     async (): Promise<Package[]> => {
-      const url = `https://www.dolthub.com/api/v1alpha1/iloveitaly/pypi/main?q=SELECT+*+FROM+%60projects%60+WHERE+name+LIKE+%27${searchTerm}%25%27+LIMIT+50%3B`
+      const url = `https://www.dolthub.com/api/v1alpha1/iloveitaly/pypi/main?q=SELECT+*+FROM+%60projects%60+WHERE+name+LIKE+%27${searchTerm}%25%27+LIMIT+50%3B`;
       const response = await fetch(url);
-      const packageJsonResponse = await response.json() as { rows: DoltPackageRow[] };
+      const packageJsonResponse = (await response.json()) as { rows: DoltPackageRow[] };
 
       /*
       {
@@ -72,7 +72,7 @@ export default function PackageList() {
           description: row.summary,
           version: row.version,
         } as Package;
-      })
+      });
     },
     [],
     { abortable, execute: !!searchTerm },
@@ -113,7 +113,7 @@ export default function PackageList() {
                   <ActionPanel>
                     <Action.OpenInBrowser
                       url={`https://pypi.org/search?q=${searchTerm}`}
-                      title="View PyPI Search Results"
+                      title="View Pypi Search Results"
                     />
                   </ActionPanel>
                 }
