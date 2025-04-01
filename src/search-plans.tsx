@@ -4,29 +4,7 @@ import { useEffect, useState } from 'react'
 import { usePaystack } from './hooks/paystack'
 import { useDate } from './hooks/date'
 import { useCurrencyFormatter } from './hooks/currency'
-import { PaystackResponse, Currency } from './utils/types'
-
-interface Subscription {
-  customer: number
-  plan: number
-  subscription_code: string
-  status: string
-  amount: number
-  createdAt: string
-}
-
-interface Plan {
-  id: number
-  name: string
-  plan_code: string
-  description: string | null
-  amount: number
-  interval: string
-  currency: Currency
-  subscriptions: Subscription[]
-  createdAt: string
-  updatedAt: string
-}
+import { PaystackResponse, Plan } from './utils/types'
 
 export default function Command() {
   const { parseDate } = useDate()

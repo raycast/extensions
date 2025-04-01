@@ -97,3 +97,25 @@ export interface PaystackResponse<T> {
   data: T
 }
 export type Currency = 'NGN' | 'USD' | 'GHS' | 'ZAR' | 'KES'
+
+export interface Subscription {
+  customer: number
+  plan: number
+  subscription_code: string
+  status: string
+  amount: number
+  createdAt: string
+}
+
+export interface Plan {
+  id: number
+  name: string
+  plan_code: string
+  description: string | null
+  amount: number
+  interval: string
+  currency: Currency
+  subscriptions: Subscription[]
+  createdAt: string
+  updatedAt: string
+}
