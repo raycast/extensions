@@ -1,6 +1,6 @@
 # Pipedrive Changelog
 
-## [New Action] - {PR_MERGE_DATE}
+## [New Action] - 2025-04-01
 
 - Add links to launch Pipedrive to add new person, deal, org or view email or activity when no results are found
 
