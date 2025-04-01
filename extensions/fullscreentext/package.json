@@ -47,7 +47,7 @@
   "ai": {
     "evals": [
       {
-        "input": "Write the words 'Raycast Rocks' fullscreen with @fullscreentext ",
+        "input": "@fullscreentext write the words 'Raycast Rocks' fullscreen with",
         "mocks": {
           "fullscreen-text": "Successfully called \"fullscreen-text\""
         },
@@ -63,7 +63,7 @@
         ]
       },
       {
-        "input": "What is the result of this operation: 5*9+3. Write only the answer @fullscreentext ",
+        "input": "@fullscreentext what is the result of this operation: 5*9+3. Write only the answer.",
         "mocks": {
           "fullscreen-text": "Successfully called \"fullscreen-text\""
         },
