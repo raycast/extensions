@@ -1,6 +1,6 @@
 # HackMD Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-04-01
 
 - Add support for AI Extensions
 - Improve stability and error handling
