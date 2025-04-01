@@ -18,6 +18,7 @@ import { usePromise } from "@raycast/utils";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 import { ActionWithReprompt, DebuggingBugReportingActionSection, VaultActionsSection } from "~/components/actions";
 import { tryCatch } from "~/utils/errors";
+import { Cache } from "~/utils/cache";
 
 const AuthenticatorComponent = () => (
   <RootErrorBoundary>
@@ -35,13 +36,9 @@ const AuthenticatorComponent = () => (
 
 function AuthenticatorList() {
   const { items: vaultItems, isLoading } = useVaultContext();
-  const { data: activeTab, isLoading: isActiveTabLoading } = usePromise(async () => {
-    const tabs = await BrowserExtension.getTabs();
-    const activeTab = tabs.find((tab) => tab.active);
-    return activeTab ? { ...activeTab, url: new URL(activeTab.url) } : undefined;
-  });
+  const { data: activeTab, isLoading: isActiveTabLoading } = useActiveTabUrl();
 
-  const interval = useInterval(1000);
+  useSyncTimeRemaining();
 
   const items = useMemo(() => vaultItems.filter((item) => item.login?.totp), [vaultItems]);
 
@@ -62,11 +59,9 @@ function AuthenticatorList() {
     );
   }, [items, activeTab]);
 
-  const otherItemList = itemsWithTabMatches.items.map((item) => (
-    <VaultItem key={item.id} item={item} interval={interval} />
-  ));
+  const otherItemsList = itemsWithTabMatches.items.map((item) => <VaultItem key={item.id} item={item} />);
 
-  const isEmpty = itemsWithTabMatches.tabItems.length === 0 && otherItemList.length === 0;
+  const isEmpty = itemsWithTabMatches.tabItems.length === 0 && otherItemsList.length === 0;
 
   return (
     <List
@@ -82,13 +77,13 @@ function AuthenticatorList() {
         <>
           <List.Section title={`Active Tab (${activeTab.url.hostname})`}>
             {itemsWithTabMatches.tabItems.map((item) => (
-              <VaultItem key={item.id} item={item} interval={interval} />
+              <VaultItem key={item.id} item={item} />
             ))}
           </List.Section>
-          <List.Section title="Others">{otherItemList}</List.Section>
+          <List.Section title="Others">{otherItemsList}</List.Section>
         </>
       ) : (
-        otherItemList
+        otherItemsList
       )}
       <List.EmptyView
         icon={{ source: "bitwarden-64.png" }}
@@ -99,8 +94,9 @@ function AuthenticatorList() {
   );
 }
 
-function VaultItem({ item, interval }: { item: Item; interval: number }) {
+function VaultItem({ item }: { item: Item }) {
   const icon = useItemIcon(item);
+  const interval = useTimeRemaining();
   const code = useAuthenticatorCode(item, interval);
 
   return (
@@ -184,17 +180,42 @@ function PasteCodeAction() {
   );
 }
 
-function useInterval(ms: number) {
-  const [time, setTime] = useState(authenticator.timeRemaining());
+function useActiveTabUrl() {
+  return usePromise(async () => {
+    const tabs = await BrowserExtension.getTabs();
+    const activeTab = tabs.find((tab) => tab.active);
+    return activeTab ? { ...activeTab, url: new URL(activeTab.url) } : undefined;
+  });
+}
 
+const TimeRemainingCacheKey = "authenticatorTimeRemaining";
+
+function useSyncTimeRemaining() {
   useEffect(() => {
+    Cache.set(TimeRemainingCacheKey, String(authenticator.timeRemaining()));
+
     const interval = setInterval(() => {
       const time = authenticator.timeRemaining();
-      setTime(time);
-    }, ms);
+      Cache.set(TimeRemainingCacheKey, String(time));
+    }, 500); // update every 500ms for better accuracy
 
     return () => clearInterval(interval);
-  }, [ms]);
+  }, []);
+}
+
+function useTimeRemaining() {
+  const [time, setTime] = useState(() => {
+    const value = Cache.get(TimeRemainingCacheKey);
+    return value ? Number.parseInt(value) : 30;
+  });
+
+  useEffect(() => {
+    Cache.subscribe((key, value) => {
+      if (!value || key !== TimeRemainingCacheKey) return;
+      const newTime = Number.parseInt(value);
+      if (newTime) setTime(newTime);
+    });
+  }, []);
 
   return time;
 }
