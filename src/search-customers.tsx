@@ -38,7 +38,7 @@ export default function Command() {
         if (customers.status) {
           showToast({
             style: Toast.Style.Success,
-            title: 'Transactions fetched successfully!',
+            title: 'Customers fetched successfully!',
           })
         }
         setCustomers(customers.data)
@@ -61,19 +61,20 @@ export default function Command() {
     if (isLoading) {
       showToast({
         style: Toast.Style.Animated,
-        title: 'Loading transactions...',
+        title: 'Loading customers...',
       })
     }
   }, [isLoading])
 
   function filterCustomers(text: string) {
     const searchLower = text.toLowerCase()
-    return customers.filter((customers) => {
+    return customers.filter((customer) => {
       const matchesSearch =
-        customers.id.toString().includes(searchLower) ||
-        customers.customer_code.includes(searchLower) ||
-        customers.email.includes(searchLower)
-
+        customer.id.toString().includes(searchLower) ||
+        customer.customer_code.includes(searchLower) ||
+        customer.email.includes(searchLower) ||
+        customer.first_name.includes(searchLower) ||
+        customer.last_name.includes(searchLower)
       return matchesSearch
     })
   }
