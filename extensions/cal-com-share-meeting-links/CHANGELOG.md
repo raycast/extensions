@@ -1,6 +1,6 @@
 # Cal.com Share Meeting Links Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-01
 
 - Adds action to open availability troubleshooter for meeting links
 
