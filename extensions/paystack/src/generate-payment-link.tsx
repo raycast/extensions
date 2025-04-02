@@ -64,7 +64,7 @@ export default function Command() {
       amount: FormValidation.Required,
       email: FormValidation.Required,
       reference: (value) => {
-        if (value && !/^[a-zA-Z0-9_.=]+$/.test(value)) {
+        if (value && !/^[a-zA-Z0-9_.=-]+$/.test(value)) {
           return 'Only -, ., = and alphanumeric characters allowed'
         }
       },
