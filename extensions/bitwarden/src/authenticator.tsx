@@ -35,19 +35,19 @@ const AuthenticatorComponent = () => (
 );
 
 function AuthenticatorList() {
-  const { items: vaultItems, isLoading } = useVaultContext();
-  const { data: activeTab, isLoading: isActiveTabLoading } = useActiveTabUrl();
+  const vault = useVaultContext();
+  const { data: activeTabUrl, isLoading: isActiveTabLoading } = useActiveTab();
 
   useSyncTimeRemaining();
 
-  const items = useMemo(() => vaultItems.filter((item) => item.login?.totp), [vaultItems]);
+  const items = useMemo(() => vault.items.filter((item) => item.login?.totp), [vault.items]);
 
   const itemsWithTabMatches = useMemo(() => {
-    if (!activeTab) return { items: items, tabItems: [] };
+    if (!activeTabUrl) return { items, tabItems: [] };
 
     return items.reduce<{ items: Item[]; tabItems: Item[] }>(
       (acc, item) => {
-        const mayHaveUrl = item.login?.uris?.some(({ uri }) => uri?.includes(activeTab.url.hostname));
+        const mayHaveUrl = item.login?.uris?.some(({ uri }) => uri?.includes(activeTabUrl.url.hostname));
         if (mayHaveUrl) {
           acc.tabItems.push(item);
         } else {
@@ -57,25 +57,25 @@ function AuthenticatorList() {
       },
       { items: [], tabItems: [] }
     );
-  }, [items, activeTab]);
+  }, [items, activeTabUrl]);
+
+  const isEmpty = itemsWithTabMatches.items.length === 0 && itemsWithTabMatches.tabItems.length === 0;
 
   const otherItemsList = itemsWithTabMatches.items.map((item) => <VaultItem key={item.id} item={item} />);
-
-  const isEmpty = itemsWithTabMatches.tabItems.length === 0 && otherItemsList.length === 0;
 
   return (
     <List
       searchBarPlaceholder="Search vault"
-      isLoading={isLoading || isActiveTabLoading}
+      isLoading={vault.isLoading || isActiveTabLoading}
       actions={
         <ActionPanel>
           <CommonActions />
         </ActionPanel>
       }
     >
-      {activeTab && itemsWithTabMatches.tabItems.length > 0 ? (
+      {activeTabUrl && itemsWithTabMatches.tabItems.length > 0 ? (
         <>
-          <List.Section title={`Active Tab (${activeTab.url.hostname})`}>
+          <List.Section title={`Active Tab (${activeTabUrl.url.hostname})`}>
             {itemsWithTabMatches.tabItems.map((item) => (
               <VaultItem key={item.id} item={item} />
             ))}
@@ -180,7 +180,7 @@ function PasteCodeAction() {
   );
 }
 
-function useActiveTabUrl() {
+function useActiveTab() {
   return usePromise(async () => {
     const tabs = await BrowserExtension.getTabs();
     const activeTab = tabs.find((tab) => tab.active);
