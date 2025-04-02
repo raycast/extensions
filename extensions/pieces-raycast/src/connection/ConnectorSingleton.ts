@@ -88,6 +88,38 @@ export default class ConnectorSingleton {
     this.watchConfigFile();
     this.createApis();
   }
+  private _connectionPromise: Promise<Context | null> | null = null;
+
+  public async ensureConnection(): Promise<boolean> {
+    if (this.apiContext) {
+      return true; // already connected
+    }
+
+    if (!this._connectionPromise) {
+      this._connectionPromise = this.connectorApi
+        .connect({
+          seededConnectorConnection: this.seeded,
+        })
+        .then((response) => {
+          if (response) {
+            // set the context using existing setter
+            this.context = response;
+            return response;
+          }
+          return null;
+        })
+        .catch((error) => {
+          console.error("Failed to connect to Pieces OS:", error);
+          return null;
+        })
+        .finally(() => {
+          this._connectionPromise = null;
+        });
+    }
+
+    const result = await this._connectionPromise;
+    return !!result;
+  }
 
   private static set port(port: string | null) {
     if (port == ConnectorSingleton._port && port != null) return;
@@ -261,7 +293,6 @@ export default class ConnectorSingleton {
     this.tagApi = new TagApi(coreConfig);
     this.websiteApi = new WebsiteApi(coreConfig);
   }
-
   set context(context: Context) {
     this.apiContext = context;
     this.addApplicationHeaders(context.application.id);
