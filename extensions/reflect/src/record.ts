@@ -1,6 +1,6 @@
-import { Toast, closeMainWindow, open, showToast } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { Toast, closeMainWindow, open } from "@raycast/api";
 import { checkReflect, reflectDownload } from "./helpers/reflect";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 export default async () => {
   const reflectInstalled = await checkReflect();
@@ -32,12 +32,6 @@ export default async () => {
         keystroke "r" using {command down, shift down}
     `);
   } catch (error) {
-    if (error instanceof Error) {
-      showToast({
-        title: "Error",
-        message: error.message,
-        style: Toast.Style.Failure,
-      });
-    }
+    showFailureToast(error, { title: "Could not run AppleScript" });
   }
 };
