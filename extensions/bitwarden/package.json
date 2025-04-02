@@ -87,7 +87,7 @@
       "title": "Authenticator",
       "subtitle": "Bitwarden",
       "description": "Search all items with TOTP and generate codes.",
-      "icon": "search.png",
+      "icon": "authenticator.png",
       "mode": "view",
       "keywords": [
         "totp",
