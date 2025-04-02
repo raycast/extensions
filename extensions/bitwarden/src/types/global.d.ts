@@ -24,16 +24,16 @@ declare global {
   }
 
   export type AllPreferences = Preferences &
-    Preferences.Search &
+    Preferences.Authenticator &
+    Preferences.CreateFolder &
+    Preferences.CreateSend &
     Preferences.GeneratePassword &
     Preferences.GeneratePasswordQuick &
-    Preferences.SearchSends &
-    Preferences.CreateSend &
-    Preferences.ReceiveSend &
-    Preferences.CreateFolder &
     Preferences.LockVault &
     Preferences.LogoutVault &
-    Preferences.Authenticator;
+    Preferences.ReceiveSend &
+    Preferences.Search &
+    Preferences.SearchSends;
 
   type RecordOfAny = Record<string, any>;
   type RecordOfStrings = Record<string, string>;
