@@ -4,7 +4,7 @@ import { showToast, Toast, open, getApplications, popToRoot, Detail } from "@ray
 import { useState, useEffect } from "react";
 import path from "path";
 import fs from "fs";
-import NotesList from "./components/NotesList";
+import TasksList from "./components/TasksList";
 
 export default function Command() {
   const [evernoteDB, setEvernoteDB] = useState<string | null>(null);
@@ -75,5 +75,6 @@ export default function Command() {
   if (!evernoteDB) {
     return <Detail markdown="Loading ..." />;
   }
-  return <NotesList evernoteDB={evernoteDB} />;
+
+  return <TasksList evernoteDB={evernoteDB} />;
 }
