@@ -1,4 +1,4 @@
-import { Toast, closeMainWindow, open } from "@raycast/api";
+import { Toast, closeMainWindow, open, showToast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { checkReflect, reflectDownload } from "./helpers/reflect";
 
@@ -24,9 +24,20 @@ export default async () => {
   }
 
   await closeMainWindow();
-  await runAppleScript(`
-    tell application "Reflect" to activate
-    tell application "System Events" to tell process "Reflect" to ¬
-    click menu item "New Note" of menu "File" of menu bar 1
-  `);
+
+  try {
+    await runAppleScript(`
+        tell application "Reflect" to activate
+        tell application "System Events" to tell process "Reflect" to ¬
+        click menu item "New Note" of menu "File" of menu bar 1
+    `);
+  } catch (error) {
+    if (error instanceof Error) {
+      showToast({
+        title: "Error",
+        message: error.message,
+        style: Toast.Style.Failure,
+      });
+    }
+  }
 };
