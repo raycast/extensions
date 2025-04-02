@@ -6,7 +6,7 @@ import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
 
-//
+// From https://github.com/raycast/extensions/blob/main/extensions/visual-studio-code-recent-projects/src/utils/git.ts
 export async function getGitBranch(directoryPath: string): Promise<string | null> {
   try {
     // If it's a file URL, convert it to a file path
