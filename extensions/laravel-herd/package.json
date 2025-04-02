@@ -81,7 +81,7 @@
       "name": "check-for-updates",
       "title": "Check for Updates",
       "subtitle": "Laravel Herd",
-      "description": "Checks if there's a new version of Laravel Herd availale.",
+      "description": "Checks if there's a new version of Laravel Herd available.",
       "mode": "no-view"
     },
     {
