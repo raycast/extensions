@@ -8,11 +8,6 @@ interface FastGPTViewProps {
   query: string;
 }
 
-interface ExtensionPreferences {
-  token: string;
-  apiKey: string;
-}
-
 export default function FastGPTView(props: FastGPTViewProps) {
   const { token, apiKey }: ExtensionPreferences = getPreferenceValues();
   const [isLoading, setIsLoading] = useState(true);
