@@ -1,71 +1,63 @@
-import { Article } from "./Article";
-import { Duration } from "./Duration";
+import { Article } from "./models/article";
+import { ArticleDto } from "./models/dto/articleDto";
+import { Duration } from "./models/duration";
 
-export function createDuration(articleResponse: any): Duration {
+export function createDuration(article: ArticleDto): Duration {
   try {
-    const modified = Object(articleResponse.changes)["modified"];
-    const published = Object(articleResponse.changes)["published"];
-    const updated = Object(articleResponse.meta.changes)["updated"];
-    const lastSaved = Object(articleResponse.meta.changes)["last_saved"];
+    const modified = article.changes?.modified;
+    const published = article.changes?.published;
+    const updated = article.meta?.changes?.updated;
+    const lastSaved = article.meta?.changes?.last_saved;
+
     return calculateDuration(modified, published, updated, lastSaved);
   } catch (error) {
-    if (error instanceof TypeError) {
-      console.error("No time stamp found:", error.message);
-    } else {
-      throw error;
-    }
+    console.error("Error extracting duration:", error);
+    return {
+      durationLastModified: "",
+      lastModifiedInSec: 0,
+    };
   }
-  const duration: Duration = {
-    durationLastModified: "",
-    lastModifiedInSec: 0,
-  };
-  return duration;
 }
 
-export function checkForDescription(articleResponse: any): string {
+export function checkForDescription(article: ArticleDto): string {
   try {
-    let text = "";
-    const res: [any] = articleResponse.main_text.paragraphs;
-    res.forEach((e) => {
-      text += Object(e.text)["value"] + "\n\n";
-    });
-    return text;
+    const textResource = article.resources?.find(
+      (resource) => resource.type === "Text"
+    );
+
+    if (!textResource?.paragraphs) return "";
+
+    return textResource.paragraphs
+      .map((paragraph) => paragraph.text?.value || "")
+      .filter((text) => text.length > 0)
+      .join("\n\n");
   } catch (error) {
-    if (error instanceof TypeError) {
-      console.error("No category found:", error.message);
-    } else {
-      return "";
-    }
+    console.error("Error extracting description:", error);
+    return "";
   }
-  return "";
 }
 
-export function checkForCategory(articleResponse: any): string {
+export function checkForCategory(article: ArticleDto): string {
   try {
-    return Object(articleResponse.category["title"]);
+    return article.category?.title || article.vignette?.title || "";
   } catch (error) {
-    if (error instanceof TypeError) {
-      console.error("No category found:", error.message);
-    } else {
-      return Object(articleResponse.vignette["title"]);
-    }
+    console.error("Error extracting category:", error);
+    return "";
   }
-  return "";
 }
 
-export function getImageLink(articleResponse: any): string {
+export function getImageLink(article: ArticleDto): string {
   const imageBase = "https://gfx.omni.se/images/";
   try {
-    const imageId = Object(articleResponse.main_resource.image_asset)["id"];
-    return imageBase + imageId;
+    const imageResource = article.resources?.find(
+      (resource) => resource.type === "Image"
+    );
+    const imageId = imageResource?.image_asset?.id;
+    return imageId ? `${imageBase}${imageId}` : "";
   } catch (error) {
-    if (error instanceof TypeError) {
-      console.error("No image found:", error.message);
-    } else {
-      throw error;
-    }
+    console.error("Error extracting image link:", error);
+    return "";
   }
-  return "";
 }
 
 export function sortArticleByTime(articles: Article[]): Article[] {

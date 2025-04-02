@@ -41,7 +41,7 @@
       "title": "News Limit",
       "description": "The amount of articles to be fetched",
       "type": "textfield",
-      "default": "10",
+      "default": "100",
       "required": false
     },
     {
