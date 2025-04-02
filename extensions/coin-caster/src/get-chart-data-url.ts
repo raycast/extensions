@@ -58,7 +58,7 @@ const getChartDataUrl = async (chart: ChartData) => {
   myChart.setFormat("svg");
   myChart.setBackgroundColor("transparent");
   myChart.setHeight(200);
-  const isUp = chart[0].price < chart[chart.length - 1].price;
+  const isUp = chart.length > 0 ? chart[0].price < chart[chart.length - 1].price : false;
   myChart.setConfig({
     type: "line",
     data: {
