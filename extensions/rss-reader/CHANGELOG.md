@@ -1,6 +1,6 @@
 # RSS Reader Changelog
 
-## [Fix Feeds Not Moving] - {PR_MERGE_DATE}
+## [Fix Feeds Not Moving] - 2025-04-02
 
 - Fixed moving feed up or down (ref: [Issue #18308](https://github.com/raycast/extensions/issues/18308))
 
