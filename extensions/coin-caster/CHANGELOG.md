@@ -1,8 +1,6 @@
 # Coin Caster Changelog
 
-## v1.0.0 - 2025-03-11
-
-## v1.1.0 - 2024-04-02
+## [Update] - {PR_MERGE_DATE}
 
 - Updated screenshot to include watchlist
 - Fixed an issue with the chart erroring due to dropped support for `react-dom`
@@ -10,3 +8,5 @@
 - Added error toasts
 - Removed a redundant filter
 - More cleanly handle invalid prices
+
+## [Initial Version] - 2025-03-11
