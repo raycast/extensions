@@ -53,6 +53,7 @@
     "@typescript-eslint/parser": "^7.17.0",
     "eslint": "8.57.0",
     "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.5.3",
     "react-devtools": "^5.2.0",
     "typescript": "^5.5.4"
   },
