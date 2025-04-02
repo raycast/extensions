@@ -24,7 +24,7 @@ export const truncateEventSize = (eventTitle: string) => {
     // surrogate pair.  By forcing the string through stringify, first,
     // we can make sure the otherwise two-part characters are in a format
     // that Javascript can understand
-    const sub = JSON.stringify(eventTitle).substring(0, TRUNCATE_LENGTH);
+    const sub = JSON.stringify(eventTitle).substring(0, TRUNCATE_LENGTH).replace(/^"/, "").replace(/"$/, "");
     return `${sub}...`;
   }
   return eventTitle;
