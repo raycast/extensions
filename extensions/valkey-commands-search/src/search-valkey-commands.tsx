@@ -3,8 +3,8 @@ if (!globalThis.fetch) {
   globalThis.fetch = fetch;
 }
 
-import { List, ActionPanel, Action, Toast, LocalStorage } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils"
+import { List, ActionPanel, Action, LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import * as cheerio from "cheerio";
 
@@ -66,7 +66,7 @@ async function fetchValkeyCommands(): Promise<Command[]> {
     return commands;
   } catch (error) {
     if (error instanceof Error) {
-      showFailureToast(error, { title: "Failed to fetch commands" })
+      showFailureToast(error, { title: "Failed to fetch commands" });
     }
     return [];
   }
