@@ -47,8 +47,8 @@ function AuthenticatorList() {
 
     return items.reduce<{ items: Item[]; tabItems: Item[] }>(
       (acc, item) => {
-        const mayHaveUrl = item.login?.uris?.some(({ uri }) => uri?.includes(activeTabUrl.url.hostname));
-        if (mayHaveUrl) {
+        const matchesUrl = item.login?.uris?.some(({ uri }) => uri?.includes(activeTabUrl.url.hostname));
+        if (matchesUrl) {
           acc.tabItems.push(item);
         } else {
           acc.items.push(item);
