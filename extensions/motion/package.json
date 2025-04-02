@@ -1,0 +1,203 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "motion",
+  "title": "Motion",
+  "description": "Extension for interacting with Motion.",
+  "icon": "Motion_extension_icon.png",
+  "author": "owendavidprice",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "subtitle": "Motion",
+      "description": "Add a task to Motion, including priority, deadline, etc.",
+      "mode": "view"
+    },
+    {
+      "name": "list-tasks",
+      "title": "List Tasks",
+      "subtitle": "Motion",
+      "description": "Browse, search, and filter your Motion tasks by name, label, and project",
+      "mode": "view"
+    },
+    {
+      "name": "delete-task",
+      "title": "Delete Task",
+      "subtitle": "Motion",
+      "description": "Select and delete tasks from your Motion account",
+      "mode": "view"
+    },
+    {
+      "name": "debug-workspaces",
+      "title": "Workspace Details",
+      "subtitle": "Motion",
+      "description": "View detailed information about your Motion workspaces and connections",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Motion API Key",
+      "description": "Your Motion API Key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "workspaceId",
+      "title": "Motion Workspace ID",
+      "description": "Your Motion Workspace ID",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "tools": [
+    {
+      "name": "ask-motion",
+      "title": "Ask Motion",
+      "description": "Ask about your Motion tasks, deadlines, and schedule. The AI can help you with information about your tasks, upcoming deadlines, and your schedule in Motion.",
+      "arguments": [
+        {
+          "name": "question",
+          "placeholder": "What tasks are due today?",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "ai": {
+    "instructions": "You are a helpful AI assistant for Motion, a task and productivity tool. Your role is to help users understand their tasks, deadlines, and schedules in Motion. Be conversational, concise, and friendly. When users ask about tasks, answer based on the information provided to you about their Motion tasks. Remember the context of the conversation when they ask follow-up questions. If you don't know something or the information is not provided, be honest about it.",
+    "evals": [
+      {
+        "input": "@motion What tasks do I have due today?",
+        "mocks": {
+          "ask-motion": {
+            "tasks": [
+              {
+                "id": "1",
+                "name": "Complete project proposal",
+                "priority": "HIGH",
+                "dueDate": "2025-03-06"
+              },
+              {
+                "id": "2",
+                "name": "Review marketing material",
+                "priority": "MEDIUM",
+                "dueDate": "2025-03-06"
+              },
+              {
+                "id": "3",
+                "name": "Schedule team meeting",
+                "priority": "LOW",
+                "dueDate": "2025-03-06"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "ask-motion"
+          }
+        ]
+      },
+      {
+        "input": "@motion How many high priority tasks do I have?",
+        "mocks": {
+          "ask-motion": {
+            "tasks": [
+              {
+                "id": "1",
+                "name": "Complete project proposal",
+                "priority": "HIGH",
+                "dueDate": "2025-03-06"
+              },
+              {
+                "id": "4",
+                "name": "Client presentation preparation",
+                "priority": "HIGH",
+                "dueDate": "2025-03-07"
+              },
+              {
+                "id": "5",
+                "name": "Quarterly report",
+                "priority": "HIGH",
+                "dueDate": "2025-03-11"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "ask-motion"
+          }
+        ]
+      },
+      {
+        "input": "@motion What's on my schedule for tomorrow?",
+        "mocks": {
+          "ask-motion": {
+            "schedule": [
+              {
+                "title": "Client meeting",
+                "start": "2025-03-07T10:00:00Z",
+                "duration": 60
+              },
+              {
+                "title": "Team standup",
+                "start": "2025-03-07T14:00:00Z",
+                "duration": 30
+              }
+            ],
+            "tasks": [
+              {
+                "id": "4",
+                "name": "Client presentation preparation",
+                "priority": "HIGH",
+                "dueDate": "2025-03-07"
+              },
+              {
+                "id": "6",
+                "name": "Send weekly report",
+                "priority": "MEDIUM",
+                "dueDate": "2025-03-07"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "ask-motion"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^2.6.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.4",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "save": "git add . && git commit -m 'Save changes' && git push"
+  }
+}
