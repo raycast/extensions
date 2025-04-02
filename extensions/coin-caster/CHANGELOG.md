@@ -1,6 +1,6 @@
 # Coin Caster Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-02
 
 - Updated screenshot to include watchlist
 - Fixed an issue with the chart erroring due to dropped support for `react-dom`
