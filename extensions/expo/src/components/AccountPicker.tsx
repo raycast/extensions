@@ -15,7 +15,7 @@ export default function AccountPicker({ onPick }: { onPick: (account: AccountsIt
   }
 
   useEffect(() => {
-    if (accounts?.length > 0) {
+    if (accounts && accounts?.length > 0) {
       onPick(accounts[0]);
     }
   }, [accounts]);
