@@ -1,0 +1,156 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macos-info",
+  "title": "macOS Information",
+  "description": "Shows Mac hardware and software information including model, chip, RAM, OS version, boot info and more.",
+  "icon": "extension-icon.png",
+  "author": "birkhoff",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "hardware-overview",
+      "title": "Hardware Overview",
+      "subtitle": "macOS Information",
+      "description": "Shows Mac Model Name, Identifier/Number, chip, ram and other information like serial numbers.",
+      "mode": "view"
+    },
+    {
+      "name": "software-overview",
+      "title": "Software Overview",
+      "subtitle": "macOS Information",
+      "description": "Shows macOS version and other software-related information.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "machine-name",
+      "title": "Get Machine Name",
+      "subtitle": "macOS Information",
+      "description": "Get your Mac's machine name"
+    },
+    {
+      "name": "machine-model",
+      "title": "Get Machine Model",
+      "description": "Get your Mac's model information"
+    },
+    {
+      "name": "model-number",
+      "title": "Get Model Number",
+      "description": "Get your Mac's model number"
+    },
+    {
+      "name": "os-version",
+      "title": "Get OS Version",
+      "description": "Get your macOS version"
+    },
+    {
+      "name": "chip-type",
+      "title": "Get Chip Type",
+      "description": "Get your Mac's chip type"
+    },
+    {
+      "name": "memory",
+      "title": "Get Physical Memory",
+      "description": "Get your Mac's physical memory information"
+    },
+    {
+      "name": "processors",
+      "title": "Get Processors",
+      "description": "Get your Mac's processor information"
+    },
+    {
+      "name": "boot-rom",
+      "title": "Get Boot ROM Version",
+      "description": "Get your Mac's Boot ROM version"
+    },
+    {
+      "name": "os-loader",
+      "title": "Get OS Loader Version",
+      "description": "Get your Mac's OS loader version"
+    },
+    {
+      "name": "serial-number",
+      "title": "Get Serial Number",
+      "description": "Get your Mac's serial number"
+    },
+    {
+      "name": "platform-uuid",
+      "title": "Get Platform UUID",
+      "description": "Get your Mac's platform UUID"
+    },
+    {
+      "name": "provisioning-udid",
+      "title": "Get Provisioning UDID",
+      "description": "Get your Mac's provisioning UDID"
+    },
+    {
+      "name": "activation-lock",
+      "title": "Get Activation Lock Status",
+      "description": "Get your Mac's activation lock status"
+    },
+    {
+      "name": "boot-mode",
+      "title": "Get Boot Mode",
+      "description": "Get your Mac's boot mode"
+    },
+    {
+      "name": "boot-volume",
+      "title": "Get Boot Volume",
+      "description": "Get your Mac's boot volume"
+    },
+    {
+      "name": "kernel-version",
+      "title": "Get Kernel Version",
+      "description": "Get your Mac's kernel version"
+    },
+    {
+      "name": "local-host-name",
+      "title": "Get Local Host Name",
+      "description": "Get your Mac's local host name"
+    },
+    {
+      "name": "secure-vm",
+      "title": "Get Secure VM Status",
+      "description": "Get your Mac's secure VM status"
+    },
+    {
+      "name": "system-integrity",
+      "title": "Get System Integrity Status",
+      "description": "Get your Mac's system integrity status"
+    },
+    {
+      "name": "uptime",
+      "title": "Get Uptime",
+      "description": "Get your Mac's uptime"
+    },
+    {
+      "name": "user-name",
+      "title": "Get User Name",
+      "description": "Get the current user name"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
