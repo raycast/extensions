@@ -113,7 +113,7 @@ export default function PackageList() {
                   <ActionPanel>
                     <Action.OpenInBrowser
                       url={`https://pypi.org/search?q=${searchTerm}`}
-                      title="View Pypi Search Results"
+                      title="View PyPI Search Results"
                     />
                   </ActionPanel>
                 }
