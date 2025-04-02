@@ -1,5 +1,5 @@
 import { captureException } from "@raycast/api";
-import { existsSync, lstatSync, renameSync, rmSync } from "node:fs";
+import { existsSync, lstatSync, renameSync } from "node:fs";
 import { join } from "node:path";
 import { buildException } from "./buildException";
 
@@ -24,15 +24,16 @@ type moveOrDeleteArgs = {
 };
 
 export const moveOrDelete = ({ file, currentPath, folderPath }: moveOrDeleteArgs) => {
-  try {
-    const newPath = join(folderPath, file);
+  const newPath = join(folderPath, file);
 
+  try {
     if (!existsSync(newPath)) {
       renameSync(currentPath, newPath);
     } else {
-      rmSync(currentPath);
+      // TODO: The file already exists, how do we handle this situation?
+      // TODO: Should I prompt the user to replace or rename?
     }
   } catch (error) {
-    captureException(buildException(error as Error, "Failed to move file", { file, currentPath, folderPath }));
+    captureException(buildException(error as Error, "Failed to move file", { currentPath, newPath }));
   }
 };
