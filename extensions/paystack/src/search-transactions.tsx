@@ -95,7 +95,7 @@ export default function Command() {
       {filteredTransactions.map((transaction) => (
         <List.Item
           key={transaction.id}
-          title={`${transaction.customer.email} ${transaction.status == 'success' ? 'paid you' : 'tried to pay you'} ${formatCurrency(transaction.amount, transaction.currency)}`}
+          title={`${transaction.customer?.email} ${transaction.status == 'success' ? 'paid you' : 'tried to pay you'} ${formatCurrency(transaction.amount, transaction.currency)}`}
           subtitle={transaction.id.toString()}
           accessories={[
             {
