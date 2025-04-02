@@ -1,7 +1,7 @@
 import { getPreferenceValues, Tool } from "@raycast/api";
 import humanizeDuration from "humanize-duration";
-import { withGoogleAPIs, getCalendarClient, getAutoAddHangouts } from "../google";
-import { addSignature, toISO8601WithTimezoneOffset } from "../utils";
+import { withGoogleAPIs, getCalendarClient } from "../lib/google";
+import { addSignature, toISO8601WithTimezoneOffset } from "../lib/utils";
 import { parseISO, addMinutes } from "date-fns";
 import { calendar_v3 } from "@googleapis/calendar";
 import { nanoid } from "nanoid";
@@ -36,10 +36,19 @@ type Input = {
    */
   description?: string;
   /**
-   * Whether to add a Hangouts/Google Meet link to the event
-   * @defaults The user's default setting from Google Calendar
+   * Whether to add a Google Meet link to the event
+   * @example "with digital conference link"
+   * @defaults false
+   * @remarks If enabled, a Google Meet link will be added to the event. The link will be included in the event details and can be used to join the meeting.
    */
-  addHangoutsLink?: boolean;
+  addGoogleMeetLink?: boolean;
+  /**
+   * The ID of the calendar to create the event in
+   * @example "primary" or "email@abstract...com"
+   * @default "primary"
+   * @remarks If not provided, the event will be created in the user's primary calendar. The calendar ID can be found using the `list-calendars` tool.
+   */
+  calendarId?: string;
 };
 
 const preferences: ExtensionPreferences = getPreferenceValues();
@@ -60,6 +69,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
       },
       { name: "Attendees", value: input.attendees?.join(", ") },
       { name: "Description", value: input.description },
+      { name: "Add Google Meet Link", value: input.addGoogleMeetLink ? "Yes" : "No" },
     ],
   };
 };
@@ -69,8 +79,6 @@ const tool = async (input: Input) => {
 
   const startDate = parseISO(input.startDate);
   const endDate = addMinutes(startDate, input.duration ?? parseInt(preferences.defaultEventDuration));
-  const autoAddHangouts = await getAutoAddHangouts();
-  const addHangoutsLink = input.addHangoutsLink ?? autoAddHangouts;
 
   const requestBody: calendar_v3.Schema$Event = {
     summary: input.title,
@@ -82,7 +90,7 @@ const tool = async (input: Input) => {
       dateTime: toISO8601WithTimezoneOffset(endDate),
     },
     attendees: input.attendees ? input.attendees.map((email) => ({ email })) : undefined,
-    conferenceData: addHangoutsLink
+    conferenceData: input.addGoogleMeetLink
       ? {
           createRequest: {
             conferenceSolutionKey: {
@@ -96,9 +104,9 @@ const tool = async (input: Input) => {
 
   try {
     const event = await calendar.events.insert({
-      calendarId: "primary",
+      calendarId: input.calendarId || "primary",
       requestBody,
-      conferenceDataVersion: addHangoutsLink ? 1 : undefined,
+      conferenceDataVersion: input.addGoogleMeetLink ? 1 : undefined,
     });
     return {
       id: event.data.id,
