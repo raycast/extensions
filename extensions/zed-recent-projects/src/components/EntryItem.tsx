@@ -9,7 +9,7 @@ export interface EntryItemProps extends Pick<List.Item.Props, "icon" | "accessor
 }
 
 function useGitBranch(path: string) {
-  const [branch, setBranch] = useState<string | null>("test");
+  const [branch, setBranch] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchGitBranch() {
