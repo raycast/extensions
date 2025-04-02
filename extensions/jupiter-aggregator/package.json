@@ -4,7 +4,7 @@
   "title": "Jupiter Aggregator",
   "description": "Lets you display the value of a token in the menu bar and lets you calculate the value of tokens",
   "icon": "jupiter.png",
-  "author": "stevedsimkins",
+  "author": "stevedylandev",
   "categories": [
     "Data"
   ],
