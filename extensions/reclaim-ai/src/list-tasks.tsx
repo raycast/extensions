@@ -345,7 +345,7 @@ function TaskList() {
                           >
                             <Action
                               icon={{ source: Icon.Circle }}
-                              title="Add 15min"
+                              title="Add 15Min"
                               onAction={() => {
                                 const time = 15;
                                 handleAddTime(task, time);
@@ -353,7 +353,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress25 }}
-                              title="Add 30min"
+                              title="Add 30Min"
                               onAction={() => {
                                 const time = 30;
                                 handleAddTime(task, time);
@@ -361,7 +361,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress50 }}
-                              title="Add 1h"
+                              title="Add 1H"
                               onAction={() => {
                                 const time = 60;
                                 handleAddTime(task, time);
@@ -369,7 +369,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress75 }}
-                              title="Add 2h"
+                              title="Add 2H"
                               onAction={() => {
                                 const time = 120;
                                 handleAddTime(task, time);
@@ -378,7 +378,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress100 }}
-                              title="Add 4h"
+                              title="Add 4H"
                               onAction={() => {
                                 const time = 240;
                                 handleAddTime(task, time);
@@ -398,7 +398,7 @@ function TaskList() {
                           {task.onDeck ? (
                             <Action
                               icon={{ source: Icon.ArrowDown, tintColor: Color.Red }}
-                              title="Remove From Up Next"
+                              title="Remove from up Next"
                               onAction={() => {
                                 const payload = { onDeck: false };
                                 handleUpdateTask(task, payload);
@@ -407,7 +407,7 @@ function TaskList() {
                           ) : (
                             <Action
                               icon={{ source: Icon.ArrowNe, tintColor: Color.Yellow }}
-                              title="Send to Up Next"
+                              title="Send to up Next"
                               onAction={() => {
                                 const payload = { onDeck: true };
                                 handleUpdateTask(task, payload);

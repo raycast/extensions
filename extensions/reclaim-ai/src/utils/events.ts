@@ -46,7 +46,7 @@ export const getOriginalEventIDFromSyncEvent = (event: ApiResponseEvents[number]
       const [id] = rest;
       return id;
     }
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -79,7 +79,7 @@ export function filterMultipleOutDuplicateEvents<Events extends ApiResponseEvent
         return id ? !ids.has(id) : true;
       }
       return true;
-    } catch (error) {
+    } catch {
       return true;
     }
   }) as Events;
