@@ -1,9 +1,10 @@
-import fetchPolyfill from "node-fetch";
+import fetch from "node-fetch";
 if (!globalThis.fetch) {
-  globalThis.fetch = fetchPolyfill as unknown as typeof fetch;
+  globalThis.fetch = fetch;
 }
 
-import { List, ActionPanel, Action, showToast, Toast, LocalStorage } from "@raycast/api";
+import { List, ActionPanel, Action, Toast, LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils"
 import { useState, useEffect } from "react";
 import * as cheerio from "cheerio";
 
@@ -60,11 +61,13 @@ async function fetchValkeyCommands(): Promise<Command[]> {
     });
 
     if (commands.length === 0) {
-      showToast(Toast.Style.Failure, "No commands found", "The page structure might have changed.");
+      showFailureToast("The page structure might have changed.", { title: "No commands found" });
     }
     return commands;
-  } catch (error: unknown) {
-    showToast(Toast.Style.Failure, "Failed to fetch commands", error.message);
+  } catch (error) {
+    if (error instanceof Error) {
+      showFailureToast(error, { title: "Failed to fetch commands" })
+    }
     return [];
   }
 }
@@ -85,8 +88,11 @@ async function getCommands(forceRefresh: boolean = false): Promise<Command[]> {
   }
 
   const commands = await fetchValkeyCommands();
-  await LocalStorage.setItem(CACHE_KEY, JSON.stringify(commands));
-  await LocalStorage.setItem(CACHE_TIMESTAMP_KEY, now);
+  if (commands.length > 0) {
+    await LocalStorage.setItem(CACHE_KEY, JSON.stringify(commands));
+    await LocalStorage.setItem(CACHE_TIMESTAMP_KEY, now);
+  }
+
   return commands;
 }
 
