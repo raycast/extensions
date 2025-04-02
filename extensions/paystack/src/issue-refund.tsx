@@ -89,7 +89,7 @@ export default function Command({
     <Form
       searchBarAccessory={
         <Form.LinkAccessory
-          target={`${paystackDocsUrl}/refund}`}
+          target={`${paystackDocsUrl}/refund`}
           text="Refunds Documentation"
         />
       }
