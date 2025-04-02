@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stockholm-public-transport",
   "author": "ericostholmm",
-  "title": "SL",
+  "title": "Stockholm Public Transport",
   "description": "Departures for public transport in Stockholm",
   "pastContributors": [
     "albingroen"
