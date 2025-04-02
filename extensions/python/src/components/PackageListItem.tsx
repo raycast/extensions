@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { PackageDetail } from "./PackageDetail";
+import { Package } from "../types";
 
 interface PackageListItemProps {
   pkg: Package;
