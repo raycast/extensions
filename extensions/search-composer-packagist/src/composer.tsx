@@ -27,6 +27,7 @@ type PackagistHit = {
   popularity: number;
   meta: PackagistHitMeta;
   tags: string[];
+  abandoned: boolean;
 };
 
 function getComposerRequireCommand(hit: PackagistHit) {
@@ -39,6 +40,10 @@ function getComposerRequireDevCommand(hit: PackagistHit) {
 
 function getPackagistPageURL(hit: PackagistHit) {
   return `https://packagist.org/packages/${hit.name}`;
+}
+
+function getListItemTitle(hit: PackagistHit) {
+  return {hit.abandoned ? 'Abandon ' + hit.name : hit.name}
 }
 
 export default function SearchDocumentation() {
@@ -91,7 +96,7 @@ export default function SearchDocumentation() {
         return (
           <List.Item
             key={hit.id}
-            title={hit.name}
+            title={getListItemTitle(hit)}
             subtitle={hit.description}
             icon="composer-icon.png"
             actions={
