@@ -1,3 +1,4 @@
+import { Action } from "@raycast/api";
 import { getCalendarClient, withGoogleAPIs } from "../lib/google";
 
 type Input = {
@@ -17,6 +18,7 @@ export const confirmation = withGoogleAPIs(async (input: Input) => {
   const calendar = getCalendarClient();
   const event = await calendar.events.get({ calendarId: input.calendarId ?? "primary", eventId: input.eventId });
   return {
+    style: Action.Style.Destructive,
     message: "Are you sure you want to delete this event?",
     info: [{ name: "Event", value: event.data.summary }],
   };
