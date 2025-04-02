@@ -7,6 +7,6 @@
 - Added light and dark mode colors for chart
 - Added error toasts
 - Removed a redundant filter
-- More cleanly handle invalid prices
+- More cleanly handles invalid prices
 
 ## [Initial Version] - 2025-03-11
