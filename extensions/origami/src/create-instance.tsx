@@ -45,7 +45,7 @@ function EntitySelectionForm() {
       navigationTitle="Select Entity"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Continue" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Continue" icon={Icon.ArrowRight} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
