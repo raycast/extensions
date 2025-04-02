@@ -1,25 +1,12 @@
-import {
-  Detail,
-  getPreferenceValues,
-  PreferenceValues,
-  List,
-  Color,
-  Icon,
-  LaunchProps,
-  ActionPanel,
-  Action,
-} from "@raycast/api";
+import { Detail, List, Color, Icon, LaunchProps, ActionPanel, Action } from "@raycast/api";
 import { showFailureToast, useFetch } from "@raycast/utils";
-import { API_BASE_URL } from "./utils/constants";
-
-const preferences = getPreferenceValues<PreferenceValues>();
+import { API_BASE_URL, API_KEY } from "./utils/constants";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.GetResources }>) {
-  const apiKey = preferences.apiKey;
   const userId = props.arguments.authorId;
 
   const { data, isLoading, error } = useFetch<ResourceSearchResult[]>(`${API_BASE_URL}/resources/authors/${userId}`, {
-    headers: { Authorization: `Private ${apiKey}`, "Content-Type": "application/json" },
+    headers: { Authorization: `Private ${API_KEY}`, "Content-Type": "application/json" },
     parseResponse: parseFetchResponse,
   });
 

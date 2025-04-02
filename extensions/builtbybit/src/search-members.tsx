@@ -1,13 +1,9 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, LaunchProps, PreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, LaunchProps } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { API_BASE_URL } from "./utils/constants";
-
-const preferences = getPreferenceValues<PreferenceValues>();
+import { API_BASE_URL, API_KEY } from "./utils/constants";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.SearchMembers }>) {
   try {
-    const apiKey = preferences.apiKey;
-
     const { method, search } = props.arguments;
     let baseUrl = "";
 
@@ -26,7 +22,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
     }
 
     const { data, isLoading, error } = useFetch<MemberSearchResult[]>(baseUrl, {
-      headers: { Authorization: `Private ${apiKey}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Private ${API_KEY}`, "Content-Type": "application/json" },
       parseResponse: parseFetchResponse,
     });
 

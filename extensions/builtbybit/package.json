@@ -50,7 +50,7 @@
     },
     {
       "name": "get-resources",
-      "title": "Fetch Resources by Author",
+      "title": "Search Resources by Author",
       "subtitle": "BuiltByBit",
       "description": "Fetch all authored resources by a specific user",
       "mode": "view",
@@ -137,18 +137,18 @@
       "description": "Your BuiltByBit Private API Key",
       "type": "password",
       "required": true,
-      "placeholder": "Find your API key here, https://builtbybit.com/account/api. Requires an Ultimate Subscription."
+      "placeholder": "Find your Private API key here, https://builtbybit.com/account/api. Requires an Ultimate Subscription."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
+    "@raycast/api": "^1.94.3",
     "@raycast/utils": "^1.19.1",
     "axios": "^1.8.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.11",
-    "@types/react": "19.0.12",
+    "@types/node": "22.14.0",
+    "@types/react": "19.1.0",
     "eslint": "^9.23.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"

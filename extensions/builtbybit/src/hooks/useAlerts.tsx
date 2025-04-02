@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { showFailureToast } from "@raycast/utils";
-import { getPreferenceValues, Cache } from "@raycast/api";
+import { Cache } from "@raycast/api";
 import axios from "axios";
 import { Alert } from "../types/alert";
-import { API_BASE_URL, CACHE_NAMESPACE } from "../utils/constants";
+import { API_BASE_URL, API_KEY, CACHE_NAMESPACE } from "../utils/constants";
 import Throttler from "../utils/throttler";
 import { UserUtils } from "../utils/userUtils";
 
-const apiKey = getPreferenceValues<{ apiKey: string }>().apiKey;
 const throttler = new Throttler();
 const cache = new Cache();
 
@@ -42,7 +41,7 @@ export function useAlerts(refreshKey: number) {
       await throttler.stallIfRequired(false);
 
       const response = await axios.get(`${API_BASE_URL}/alerts`, {
-        headers: { Authorization: `Private ${apiKey}` },
+        headers: { Authorization: `Private ${API_KEY}` },
       });
 
       // Check if we're still mounted before processing

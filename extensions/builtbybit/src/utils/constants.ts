@@ -2,7 +2,7 @@ import { Cache, getPreferenceValues } from "@raycast/api";
 import axios from "axios";
 
 export const API_BASE_URL = "https://api.builtbybit.com/v1";
-const API_KEY = getPreferenceValues<{ apiKey: string }>().apiKey;
+export const API_KEY = getPreferenceValues<{ apiKey: string }>().apiKey;
 
 export const CACHE_TTL = {
   SHORT: 5 * 60 * 1000, // 5 minutes
