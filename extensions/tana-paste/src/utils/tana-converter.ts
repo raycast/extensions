@@ -717,6 +717,75 @@ export function processTableRow(text: string): string {
 }
 
 /**
+ * Detects if a line contains a YouTube transcript in the format (MM:SS)
+ * @param text The text to check for timestamps
+ * @returns Array of segments split by timestamps, with each timestamp as its own segment
+ */
+function processYouTubeTranscriptTimestamps(text: string): string[] {
+  // Check if this is a transcript line
+  if (!text.includes("Transcript:")) {
+    return [text];
+  }
+
+  // This regex matches YouTube timestamps in format (MM:SS) or (HH:MM:SS)
+  const timestampRegex = /\((\d{1,2}:\d{2}(?::\d{2})?)\)/g;
+
+  // If no timestamps found, return the original text
+  if (!text.match(timestampRegex)) {
+    return [text];
+  }
+
+  // Clean the text by removing unnecessary quotes
+  const cleanedText = text
+    .replace(/Transcript:\s*"/, "Transcript: ")
+    .replace(/"$/, "");
+
+  // Initialize the segments array
+  const segments: string[] = [];
+
+  // Find all timestamp matches
+  const matches: RegExpExecArray[] = [];
+  let match;
+  while ((match = timestampRegex.exec(cleanedText)) !== null) {
+    matches.push({ ...match });
+  }
+
+  // If no matches, return the original text
+  if (matches.length === 0) {
+    return [text];
+  }
+
+  // Process each timestamp and the text that follows it
+  for (let i = 0; i < matches.length; i++) {
+    const currentMatch = matches[i];
+    const nextMatch = i < matches.length - 1 ? matches[i + 1] : null;
+
+    // For the first timestamp, include the "Transcript:" label
+    if (i === 0) {
+      const startIndex = cleanedText.indexOf("Transcript:");
+      const beforeTimestamp = cleanedText
+        .substring(startIndex, currentMatch.index)
+        .trim();
+      const endIndex = nextMatch ? nextMatch.index : cleanedText.length;
+      const segment =
+        beforeTimestamp +
+        " " +
+        cleanedText.substring(currentMatch.index, endIndex).trim();
+      segments.push(segment);
+    } else {
+      // For subsequent timestamps
+      const endIndex = nextMatch ? nextMatch.index : cleanedText.length;
+      const segment = cleanedText
+        .substring(currentMatch.index, endIndex)
+        .trim();
+      segments.push(segment);
+    }
+  }
+
+  return segments;
+}
+
+/**
  * Convert markdown to Tana format
  *
  * Enhanced to properly indent content under headings without using Tana's heading format
@@ -724,8 +793,19 @@ export function processTableRow(text: string): string {
 export function convertToTana(inputText: string | undefined | null): string {
   if (!inputText) return "No text selected.";
 
+  // Process the input for YouTube transcript timestamps
+  const processedLines: string[] = [];
+  inputText.split("\n").forEach((line) => {
+    // Check if this line contains YouTube timestamps and split it if needed
+    const segments = processYouTubeTranscriptTimestamps(line);
+    processedLines.push(...segments);
+  });
+
+  // Join the processed lines back together
+  const processedInputText = processedLines.join("\n");
+
   // Split into lines and parse
-  const lines = inputText.split("\n").map((line) => parseLine(line));
+  const lines = processedInputText.split("\n").map((line) => parseLine(line));
 
   // Build hierarchy
   const hierarchicalLines = buildHierarchy(lines);

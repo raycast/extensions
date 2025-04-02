@@ -1,22 +1,29 @@
 # Tana Paste Changelog
 
-## [Fix bullet point and list formatting] - {PR_MERGE_DATE}
-
-### Fixed
-- Improved bullet point (•) detection and formatting
-- Fixed handling of lettered and numbered lists (a., b., 1., etc.)
-- Enhanced indentation detection to handle tabs correctly
-- Ensured proper nesting of content under list items ending with colons
-- Fixed inconsistent indentation of related list items
-
-## [1.0.0] - 2025-04-01
+## [Unreleased]
 
 ### Added
-- Initial release of Tana Paste extension for Raycast
-- Three commands to convert content to Tana Paste format:
-  - Quick Clipboard to Tana: instantly convert clipboard content
-  - Paste and Edit for Tana: edit before converting
-  - Convert Selected Text to Tana: convert currently selected text
+
+- Support for YouTube transcript timestamps as separate nodes in Tana (#4)
+
+## [1.1.0] - 2023-04-02
+
+### Changed
+
+- Improved output of indentation, bullets, and list styles.
+
+## [1.0.0] - 2023-04-01
+
+### Added
+
+- Initial version.
+- Support for converting Markdown bullet points to Tana bullet points.
+- Support for handling timestamps as formatted fields.
+- Support for Markdown headings converted to regular nodes (not headlines).
+- Support for numbered lists (1. 2. 3. etc).
+- Support for lettered lists (a. b. c. etc).
+- Support for colons - adding a node below the colon that captures the items that follow.
+- Support for converting common date format to Tana date fields.
 
 ### Features
 - Convert Markdown headings to Tana nodes with proper indentation
