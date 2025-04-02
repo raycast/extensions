@@ -43,7 +43,7 @@ function getPackagistPageURL(hit: PackagistHit) {
 }
 
 function getListItemTitle(hit: PackagistHit) {
-  return {hit.abandoned ? 'Abandon ' + hit.name : hit.name}
+  return hit.abandoned ? 'Abandon ' + hit.name : hit.name;
 }
 
 export default function SearchDocumentation() {
