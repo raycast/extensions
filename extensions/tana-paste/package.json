@@ -5,6 +5,7 @@
   "icon": "command-icon.png",
   "author": "lisaross",
   "type": "module",
+  "version": "1.0.1",
   "license": "MIT",
   "commands": [
     {

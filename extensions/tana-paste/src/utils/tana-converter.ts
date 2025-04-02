@@ -13,6 +13,7 @@ interface Line {
   raw: string;
   isHeader: boolean;
   isCodeBlock: boolean;
+  isListItem?: boolean;
   parent?: number;
 }
 
@@ -22,10 +23,12 @@ interface Line {
 function parseLine(line: string): Line {
   const raw = line;
 
-  // Calculate indent level based on spaces
+  // Calculate indent level based on spaces and tabs
   const match = line.match(/^(\s*)/);
   const spaces = match ? match[1].length : 0;
-  const indent = Math.floor(spaces / 2);
+  // Consider tabs as 2 spaces for indentation purposes
+  const tabAdjustedSpaces = line.slice(0, spaces).replace(/\t/g, "  ").length;
+  const indent = Math.floor(tabAdjustedSpaces / 2);
 
   // Get content without indentation
   const content = line.slice(spaces).trimEnd();
@@ -36,7 +39,21 @@ function parseLine(line: string): Line {
   // Detect if it's a code block
   const isCodeBlock = content.startsWith("```");
 
-  return { content, indent, raw, isHeader, isCodeBlock, parent: undefined };
+  // Detect if it's a list item (bullet point or numbered/lettered)
+  const isListItem =
+    /^[-*+•]\s+/.test(content) ||
+    /^[a-z]\.\s+/i.test(content) ||
+    /^\d+\.\s+/.test(content);
+
+  return {
+    content,
+    indent,
+    raw,
+    isHeader,
+    isCodeBlock,
+    isListItem,
+    parent: undefined,
+  };
 }
 
 /**
@@ -109,16 +126,67 @@ function buildHierarchy(lines: Line[]): Line[] {
     // Handle list items and content
     const effectiveIndent = line.indent;
 
-    // Find the appropriate parent
-    while (lastParentAtLevel.length > effectiveIndent + 1) {
-      lastParentAtLevel.pop();
+    // Check if previous line ends with a colon - this often indicates a sublist follows
+    const prevLineEndsWithColon =
+      i > 0 && result[i - 1]?.content.trim().endsWith(":");
+
+    // Check for lettered list items (a., b., etc.)
+    const isLetteredListItem = /^[a-z]\.\s+/i.test(line.content.trim());
+
+    // Find the previous lettered list item to maintain consistent indentation
+    let prevLetteredItemIndex = -1;
+    if (isLetteredListItem) {
+      for (let j = i - 1; j >= 0; j--) {
+        if (/^[a-z]\.\s+/i.test(result[j].content.trim())) {
+          prevLetteredItemIndex = j;
+          break;
+        }
+      }
     }
 
-    // Content is parented to the most recent element at the previous indentation level
-    line.parent = lastParentAtLevel[effectiveIndent] ?? -1;
+    // Adjust indentation based on context
+    let adjustedIndent = effectiveIndent;
+
+    // If this is the first lettered item after a colon, increase indentation
+    if (
+      isLetteredListItem &&
+      prevLetteredItemIndex === -1 &&
+      prevLineEndsWithColon
+    ) {
+      adjustedIndent = effectiveIndent + 1;
+    }
+    // If this is a subsequent lettered item, use the same indentation as the first one
+    else if (isLetteredListItem && prevLetteredItemIndex !== -1) {
+      adjustedIndent = result[prevLetteredItemIndex].indent;
+      // If parent was adjusted, use that adjustment
+      if (result[prevLetteredItemIndex].parent !== undefined) {
+        line.parent = result[prevLetteredItemIndex].parent;
+      }
+    }
+    // For regular list items after a colon
+    else if (line.isListItem && prevLineEndsWithColon) {
+      adjustedIndent = effectiveIndent + 1;
+    }
+
+    // Skip parent assignment if we've explicitly set it for lettered items
+    if (
+      !(
+        isLetteredListItem &&
+        prevLetteredItemIndex !== -1 &&
+        line.parent !== undefined
+      )
+    ) {
+      // Find the appropriate parent
+      while (lastParentAtLevel.length > adjustedIndent + 1) {
+        lastParentAtLevel.pop();
+      }
+
+      // Content is parented to the most recent element at the previous indentation level
+      line.parent = lastParentAtLevel[adjustedIndent] ?? -1;
+    }
 
     // Update parent tracking at this level
-    lastParentAtLevel[effectiveIndent + 1] = i;
+    lastParentAtLevel[adjustedIndent + 1] = i;
   }
 
   return result;
@@ -733,8 +801,11 @@ export function convertToTana(inputText: string | undefined | null): string {
         processedContent = match[2];
       }
     } else {
-      // Remove list markers but preserve checkboxes
-      processedContent = processedContent.replace(/^[-*+]\s+(?!\[[ x]\])/, "");
+      // Remove list markers of all types but preserve checkboxes
+      // This handles standard markdown list markers (-, *, +) as well as bullet points (•) and lettered/numbered lists (a., b., 1., etc.)
+      processedContent = processedContent.replace(/^[-*+•]\s+(?!\[[ x]\])/, "");
+      processedContent = processedContent.replace(/^[a-z]\.\s+/i, "");
+      processedContent = processedContent.replace(/^\d+\.\s+/, "");
 
       // Convert fields first
       processedContent = convertFields(processedContent);

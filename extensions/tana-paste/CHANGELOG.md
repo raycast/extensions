@@ -1,5 +1,14 @@
 # Tana Paste Changelog
 
+## [Fix bullet point and list formatting] - {PR_MERGE_DATE}
+
+### Fixed
+- Improved bullet point (•) detection and formatting
+- Fixed handling of lettered and numbered lists (a., b., 1., etc.)
+- Enhanced indentation detection to handle tabs correctly
+- Ensured proper nesting of content under list items ending with colons
+- Fixed inconsistent indentation of related list items
+
 ## [1.0.0] - 2025-04-01
 
 ### Added
