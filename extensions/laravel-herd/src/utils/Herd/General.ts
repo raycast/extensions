@@ -37,7 +37,7 @@ export class General {
       const config = readFileSync(path, "utf8");
       const parsedConfig = JSON.parse(config);
 
-      if (parsedConfig[key]) {
+      if (key in parsedConfig) {
         return parsedConfig[key] as T;
       }
     } catch (error: unknown) {
