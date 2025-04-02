@@ -1,5 +1,8 @@
 # Supernotes Changelog
 
+## [Quick Daily Command] - 2025-04-02
+- Update the local date format for "Quick Daily" command
+
 ## [Daily Append Local Time]
 - Use the local day when appending content to a daily card
 

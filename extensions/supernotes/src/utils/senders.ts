@@ -12,7 +12,9 @@ export async function sendToDaily(text: string, headless?: boolean) {
     await showToast({ style: Toast.Style.Animated, title: "Sending to Daily Card" });
   }
   const now = new Date();
-  const localDate = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+  const localDay = now.getDate() < 10 ? `0${now.getDate()}` : now.getDate();
+  const localMonth = now.getMonth() < 9 ? `0${(now.getMonth() + 1)}` : now.getMonth() + 1;
+  const localDate = `${now.getFullYear()}-${localMonth}-${localDay}`;
   const fetched = await superfetch("/v1/cards/daily", "put", {
     apiKey,
     body: { markup: text, local_date: localDate },
