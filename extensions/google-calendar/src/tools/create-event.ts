@@ -54,6 +54,10 @@ type Input = {
 const preferences: ExtensionPreferences = getPreferenceValues();
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  if (!input.attendees) {
+    return;
+  }
+
   return {
     message: "Are you sure you want to create an event with the following details?",
     info: [
