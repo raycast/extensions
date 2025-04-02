@@ -4,6 +4,9 @@
   "author": "ericostholmm",
   "title": "Stockholm Public Transport",
   "description": "Departures for public transport in Stockholm",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "pastContributors": [
     "albingroen"
   ],
