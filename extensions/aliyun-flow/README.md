@@ -1,4 +1,4 @@
-# Aliyun Flow status
+# Aliyun Flow Status
 
 View the pipeline status of [Aliyun Flow](https://www.aliyun.com/product/yunxiao/flow "Aliyun Flow") from Raycast.
 
