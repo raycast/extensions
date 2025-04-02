@@ -3,6 +3,7 @@
 ## [New Command] - {PR_MERGE_DATE}
 
 - Add Authenticator command
+- Correct README typos
 
 ## [Improvement] - 2025-03-24
 
