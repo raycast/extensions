@@ -1,6 +1,6 @@
 # Search Router Changelog
 
-## [Fixed & Improvements] - {PR_MERGE_DATE}
+## [Fixed & Improvements] - 2025-04-02
 
 - Removed Kagi-specific search bangs
 - Added URL validation
