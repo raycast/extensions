@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 if (!globalThis.fetch) {
-  globalThis.fetch = fetch;
+  globalThis.fetch = fetch as unknown as typeof globalThis.fetch;
 }
 
 import { List, ActionPanel, Action, LocalStorage } from "@raycast/api";
