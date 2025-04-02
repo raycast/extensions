@@ -1,5 +1,6 @@
-# Changelog
-## [1.1.0] - 2025-03-27
+# Kagi Search Changelog
+
+## [1.1.0] - {PR_MERGE_DATE}
 * Added querying of API in addition to autosuggestions
 * Added FastGPT queries with "?"
 * Supports Bangs
