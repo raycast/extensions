@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiBaseUrl } from "./constants";
 import fetch from "node-fetch";
+import { showFailureToast } from "@raycast/utils";
 
 export type ChartData = {
   price: number;
@@ -8,8 +9,13 @@ export type ChartData = {
 }[];
 
 const getChart = async (id: string): Promise<ChartData> => {
-  const response = await fetch(`${apiBaseUrl}/chart/${id}`);
-  return response.json() as Promise<ChartData>;
+  try {
+    const response = await fetch(`${apiBaseUrl}/chart/${id}`);
+    return response.json() as Promise<ChartData>;
+  } catch (error) {
+    showFailureToast("Failed to fetch chart data");
+    return [];
+  }
 };
 
 export default function useChart(id: string, query: boolean) {
