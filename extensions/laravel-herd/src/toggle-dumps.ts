@@ -8,6 +8,6 @@ export default async function main() {
 
   await Herd.Dumps.toggleIntercept();
 
-  isIntercepting = !isIntercepting;
+  isIntercepting = await Herd.Dumps.isInterceptingDumps();
   await updateCommandMetadata({ subtitle: isIntercepting ? "Intercepting" : "Not intercepting" });
 }
