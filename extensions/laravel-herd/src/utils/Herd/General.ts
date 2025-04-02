@@ -17,7 +17,7 @@ export class General {
 
     const proStatus = response.split(":");
 
-    if (proStatus.length > 0) {
+    if (proStatus.length > 1) {
       return proStatus[1] === "true";
     }
 
