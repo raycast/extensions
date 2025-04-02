@@ -398,7 +398,8 @@ function TaskList() {
                           {task.onDeck ? (
                             <Action
                               icon={{ source: Icon.ArrowDown, tintColor: Color.Red }}
-                              title="Remove from up Next"
+                              // eslint-disable-next-line @raycast/prefer-title-case
+                              title="Remove from Up Next"
                               onAction={() => {
                                 const payload = { onDeck: false };
                                 handleUpdateTask(task, payload);
@@ -407,7 +408,8 @@ function TaskList() {
                           ) : (
                             <Action
                               icon={{ source: Icon.ArrowNe, tintColor: Color.Yellow }}
-                              title="Send to up Next"
+                              // eslint-disable-next-line @raycast/prefer-title-case
+                              title="Send to Up Next"
                               onAction={() => {
                                 const payload = { onDeck: true };
                                 handleUpdateTask(task, payload);
