@@ -58,7 +58,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
   }
 
   const infoItems = [
-    { name: "From", value: account.email },
+    { name: "From", value: account.emails[0] },
     { name: "To", value: input.to.join(", ") },
     { name: "Subject", value: input.subject },
     { name: "Content", value: input.content },
