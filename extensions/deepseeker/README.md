@@ -19,22 +19,6 @@ Enjoy using DeepSeeker! 🚀
 
 ## Features
 
-- [x] 🚀 Results Stream in real time
-- [x] ⌘ Supports custom keybinding for each action
-- [x] 📄 Custom prompt for each action
-- [x] 💸 Set token price in settings
-- [x] 🌐 Support Translate and Looking Up Words
-- [x] 🎨 Multiple models support (Deepseek, OpenAI, Gemini)
-- [ ] Interaction with Zoo using deeplinks?
-- [ ] 📦 More flexibility for personal needs
-  - [ ] Prompt zoo
-  - [ ] Choose proopt when running the command
-
-## Bugs / TODOs
-
-- [ ] It seems translate will run two times. Need to fix it.
-![Translation bug demonstration](./assets/translate-bug.gif)
-
 | Command             | Function                                                     | Use Selected Text? |
 | ------------------- | ------------------------------------------------------------ | ------------------ |
 | **Ask on Selected** | Ask questions or instruct on the selected text               | ✅                  |
@@ -45,8 +29,20 @@ Enjoy using DeepSeeker! 🚀
 | **Translate**       | Auto translate selected text into target language as setting | ✅                  |
 | **What**            | Give a brief explanation of the selected text                | ✅                  |
 | **Why**             | Give a brief explanation of the selected declaration         | ✅                  |
+| **History**         | Browse all interaction histories                             | ❌                  |
 
-> This extension is built highly inspired by [ChatGPT Quick Actions](https://www.raycast.com/alanzchen/chatgpt-quick-actions) by [Alan Chen](https://www.raycast.com/alanzchen).
+- [x] 🚀 Results Stream in real time
+- [x] ⌘ Supports custom keybinding for each action
+- [x] 📄 Custom prompt for each action
+- [x] 💸 Set token price in settings
+- [x] 🌐 Support Translate and Looking Up Words
+- [x] 🎨 Multiple models support (Deepseek, OpenAI, Gemini)
+- [x] 📜 Support Histories (**ATTENTION**: do not rely on it for important data!)
+
+## Bugs / TODOs / Known Issues
+
+- The stream output is blinking when the result is updated. It should be caused by the Raycast react use effect. The API should be called only once.
+- Github Models seem to have issues with stream output. DeepSeek and Google Gemini models are working fine.
 
 ## Metadatas
 
@@ -58,3 +54,5 @@ The wallpaper for the Screenshots is the <https://misc-assets.raycast.com/wallpa
 All the examples have been generated on [Elon Musk's Wikipedia page 1st Paragraph](https://en.wikipedia.org/wiki/Elon_Musk)
 
 </details>
+
+> This extension is built highly inspired by [ChatGPT Quick Actions](https://www.raycast.com/alanzchen/chatgpt-quick-actions) by [Alan Chen](https://www.raycast.com/alanzchen).

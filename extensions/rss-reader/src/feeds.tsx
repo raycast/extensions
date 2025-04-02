@@ -42,12 +42,14 @@ function FeedsList() {
     revalidate();
   };
 
-  const moveFeed = (index: number, change: number) => {
-    if (index + change < 0 || index + change > feeds.length - 1) {
+  const moveFeed = async (index: number, change: number) => {
+    const newIndex = index + change;
+    if (newIndex < 0 || newIndex >= feeds.length) {
       return;
     }
     const feedItems = [...feeds] as Feed[];
-    [feedItems[index], feedItems[index + change]] = [feedItems[index + change], feedItems[index]];
+    [feedItems[index], feedItems[newIndex]] = [feedItems[newIndex], feedItems[index]];
+    await LocalStorage.setItem("feeds", JSON.stringify(feedItems));
     revalidate();
   };
 

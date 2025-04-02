@@ -39,7 +39,8 @@
     "geb",
     "ridemountainpig",
     "nebbles",
-    "alanxmay"
+    "alanxmay",
+    "gdsmith"
   ],
   "pastContributors": [
     "pomdtr",
@@ -173,10 +174,45 @@
       "preferences": [
         {
           "name": "url",
-          "title": "URL",
-          "description": "The URL to open in the new window",
+          "title": "Default URL",
+          "description": "The URL to open in the new tab if no argument is provided",
           "type": "textfield",
-          "required": false
+          "required": false,
+          "default": "https://google.com"
+        },
+        {
+          "name": "engine",
+          "title": "Search Engine",
+          "description": "Search engine used when opening incognito window with a non-url argument",
+          "type": "dropdown",
+          "required": false,
+          "default": "google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "google"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "duckduckgo"
+            },
+            {
+              "title": "Bing",
+              "value": "bing"
+            },
+            {
+              "title": "Yahoo!",
+              "value": "yahoo"
+            },
+            {
+              "title": "Ecosia",
+              "value": "ecosia"
+            },
+            {
+              "title": "Kagi",
+              "value": "kagi"
+            }
+          ]
         }
       ],
       "arguments": [
@@ -358,9 +394,715 @@
       "disabledByDefault": true
     }
   ],
+  "tools": [
+    {
+      "name": "new-window",
+      "title": "Open New Window",
+      "description": "Create and open a new window"
+    },
+    {
+      "name": "new-blank-window",
+      "title": "Open New Blank Window",
+      "description": "Create and open a new blank window"
+    },
+    {
+      "name": "new-little-arc",
+      "title": "Open New Little Arc Window",
+      "description": "Create and open a new little arc window"
+    },
+    {
+      "name": "new-incognito-window",
+      "title": "Open New Incognito Window",
+      "description": "Create and open a new incognito window"
+    },
+    {
+      "name": "new-tab",
+      "title": "Open New Tab",
+      "description": "Create and open a new tab in the current window"
+    },
+    {
+      "name": "get-spaces",
+      "title": "Get Spaces",
+      "description": "Gets the open spaces from the current window"
+    },
+    {
+      "name": "get-tabs",
+      "title": "Get Tabs",
+      "description": "Gets the open tabs from the current window"
+    },
+    {
+      "name": "select-tab",
+      "title": "Select Tab",
+      "description": "Selects an open tab in the current window"
+    },
+    {
+      "name": "select-space",
+      "title": "Select Space",
+      "description": "Selects an open space in the current window"
+    },
+    {
+      "name": "close-tab",
+      "title": "Close Tab",
+      "description": "Closes an open tab in the current window"
+    },
+    {
+      "name": "get-active-space",
+      "title": "Get Active Space",
+      "description": "Gets the currently active space in the current window"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search the browsing history"
+    }
+  ],
+  "ai": {
+    "instructions": "Arc is a web browser. It contains spaces, which group tabs together. Most likely, the user assumes asking questinos about the active space if they don't specify otherwise",
+    "evals": [
+      {
+        "input": "@arc open a new window",
+        "expected": [
+          {
+            "or": [
+              {
+                "callsTool": "new-window"
+              },
+              {
+                "callsTool": "new-blank-window"
+              }
+            ]
+          }
+        ],
+        "mocks": {
+          "new-window": "Successfully called \"new-window\"",
+          "new-blank-window": "Successfully called \"new-blank-window\"",
+          "get-spaces": [
+            {
+              "title": "Personal",
+              "id": 1,
+              "isActive": false
+            },
+            {
+              "title": "Work",
+              "id": 2,
+              "isActive": true
+            }
+          ]
+        }
+      },
+      {
+        "input": "@arc open a new window in space Work",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-window",
+              "arguments": {
+                "spaceId": "2"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "new-window": "Successfully called \"new-window\"",
+          "get-spaces": [
+            {
+              "title": "Personal",
+              "id": 1,
+              "isActive": false
+            },
+            {
+              "title": "Work",
+              "id": 2,
+              "isActive": true
+            }
+          ]
+        }
+      },
+      {
+        "input": "@arc open a new blank window",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-blank-window",
+              "arguments": {}
+            }
+          }
+        ],
+        "mocks": {
+          "new-blank-window": "Successfully called \"new-blank-window\""
+        }
+      },
+      {
+        "input": "@arc open https://www.raycast.com/ in new little Arc window",
+        "mocks": {
+          "new-little-arc": {
+            "url": "https://www.raycast.com/"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-little-arc",
+              "arguments": {
+                "url": "https://www.raycast.com/"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc google search for Raycast in the new little Arc window",
+        "mocks": {
+          "new-little-arc": "Successfully opened"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-little-arc",
+              "arguments": {
+                "url": [
+                  {
+                    "includes": "google"
+                  },
+                  {
+                    "includes": "Raycast"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc search for Raycast in the new little Arc window using DuckDuckGo",
+        "mocks": {
+          "new-little-arc": {
+            "url": "https://duckduckgo.com/?q=Raycast"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-little-arc",
+              "arguments": {
+                "url": [
+                  {
+                    "includes": "duckduckgo"
+                  },
+                  {
+                    "includes": "Raycast"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc open a new incognito window",
+        "mocks": {
+          "new-incognito-window": {
+            "url": ""
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-incognito-window",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc open https://www.raycast.com/ in new incognito window",
+        "mocks": {
+          "new-incognito-window": {
+            "url": "https://www.raycast.com/"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-incognito-window",
+              "arguments": {
+                "url": "https://www.raycast.com/"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc google search for Raycast in the new incognito window",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-incognito-window",
+              "arguments": {
+                "url": [
+                  {
+                    "includes": "google"
+                  },
+                  {
+                    "includes": "raycast"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-active-space": {
+            "id": 2,
+            "isActive": true,
+            "title": "Work"
+          },
+          "new-incognito-window": "Successfully called \"new-incognito-window\""
+        }
+      },
+      {
+        "input": "@arc search for Raycast in the new incognito window using DuckDuckGo",
+        "mocks": {
+          "new-incognito-window": "Ok"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-incognito-window",
+              "arguments": {
+                "url": [
+                  {
+                    "includes": "duckduckgo"
+                  },
+                  {
+                    "includes": "raycast"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc open a new tab",
+        "mocks": {
+          "new-tab": {
+            "url": "",
+            "space": ""
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-tab",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc open a new tab in Work",
+        "mocks": {
+          "new-tab": {
+            "url": "",
+            "space": "Work"
+          },
+          "get-spaces": [
+            {
+              "title": "Personal",
+              "id": 1,
+              "isActive": false
+            },
+            {
+              "title": "Work",
+              "id": 2,
+              "isActive": true
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-tab",
+              "arguments": {
+                "spaceId": "2"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc open https://www.raycast.com/ in new tab",
+        "mocks": {
+          "new-tab": {
+            "url": "https://www.raycast.com/",
+            "space": ""
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-tab",
+              "arguments": {
+                "url": "https://www.raycast.com/"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc open https://www.raycast.com/,https://www.raycast.com/store in new tab",
+        "mocks": {
+          "new-tab": "Successfully opened"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-tab",
+              "arguments": {
+                "url": {
+                  "includes": "https://www.raycast.com/"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "new-tab",
+              "arguments": {
+                "url": {
+                  "includes": "https://www.raycast.com/store"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc open https://www.raycast.com/ in a new tab in the Work space",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-tab",
+              "arguments": {
+                "url": "https://www.raycast.com/",
+                "spaceId": "2"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "new-tab": {
+            "url": "https://www.raycast.com/",
+            "spaceId": "2"
+          },
+          "get-active-space": {
+            "id": 2,
+            "isActive": true,
+            "title": "Work"
+          },
+          "get-spaces": [
+            {
+              "title": "Personal",
+              "id": 1,
+              "isActive": false
+            },
+            {
+              "title": "Work",
+              "id": 2,
+              "isActive": true
+            }
+          ]
+        }
+      },
+      {
+        "input": "@arc open https://www.raycast.com/ and https://www.raycast.com/store in new tabs in the Work space",
+        "mocks": {
+          "get-active-space": {
+            "id": 2,
+            "isActive": true,
+            "title": "Work"
+          },
+          "new-tab": "Successfully opened a new tab",
+          "get-spaces": [
+            {
+              "title": "Personal",
+              "id": 1,
+              "isActive": false
+            },
+            {
+              "title": "Work",
+              "id": 2,
+              "isActive": true
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-tab",
+              "arguments": {
+                "url": {
+                  "includes": "https://www.raycast.com"
+                },
+                "spaceId": "2"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "new-tab",
+              "arguments": {
+                "url": {
+                  "includes": "https://www.raycast.com/store"
+                },
+                "spaceId": "2"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc what spaces do I have open?",
+        "mocks": {
+          "get-spaces": [
+            {
+              "title": "Personal",
+              "id": 1,
+              "isActive": false
+            },
+            {
+              "title": "Travel",
+              "id": 2,
+              "isActive": true
+            },
+            {
+              "title": "AI",
+              "id": 3,
+              "isActive": false
+            },
+            {
+              "title": "Demo",
+              "id": 4,
+              "isActive": false
+            },
+            {
+              "title": "",
+              "id": 5,
+              "isActive": false
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-spaces",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc select hackernews tab",
+        "mocks": {
+          "get-spaces": [
+            {
+              "title": "Personal",
+              "id": 1,
+              "isActive": false
+            },
+            {
+              "title": "Work",
+              "id": 2,
+              "isActive": true
+            }
+          ],
+          "get-active-space": {
+            "id": 2,
+            "isActive": true,
+            "title": "Work"
+          },
+          "get-tabs": [
+            {
+              "id": "A144D0CC-D960-4642-85EE-E4D066EE2F51",
+              "location": "unpinned",
+              "title": "Raycast - Your shortcut to everything",
+              "url": "https://www.raycast.com/"
+            },
+            {
+              "id": "E34EE895-6391-4672-94BF-BE6D91B1D7FC",
+              "location": "unpinned",
+              "title": "Chat Completions - OpenAI API",
+              "url": "https://platform.openai.com/chat-completions"
+            },
+            {
+              "id": "9E4A15A7-C228-497E-9DE3-9CB1F99023B6",
+              "location": "unpinned",
+              "title": "Hacker News",
+              "url": "https://news.ycombinator.com/"
+            }
+          ],
+          "select-tab": "Successfully called \"select-tab\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "tabId": "9E4A15A7-C228-497E-9DE3-9CB1F99023B6"
+              },
+              "name": "select-tab"
+            }
+          },
+          {
+            "includes": "Hacker News"
+          }
+        ]
+      },
+      {
+        "input": "@arc open pinned tab",
+        "mocks": {
+          "get-active-space": {
+            "id": 2,
+            "isActive": true,
+            "title": "Work"
+          },
+          "get-tabs": [
+            {
+              "id": "A144D0CC-D960-4642-85EE-E4D066EE2F51",
+              "location": "unpinned",
+              "title": "Raycast - Your shortcut to everything",
+              "url": "https://www.raycast.com/"
+            },
+            {
+              "id": "E34EE895-6391-4672-94BF-BE6D91B1D7FC",
+              "location": "pinned",
+              "title": "Chat Completions - OpenAI API",
+              "url": "https://platform.openai.com"
+            },
+            {
+              "id": "9E4A15A7-C228-497E-9DE3-9CB1F99023B6",
+              "location": "unpinned",
+              "title": "Hacker News",
+              "url": "https://news.ycombinator.com/"
+            }
+          ],
+          "select-tab": "ok"
+        },
+        "expected": [
+          {
+            "callsTool": "get-tabs"
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "tabId": "E34EE895-6391-4672-94BF-BE6D91B1D7FC"
+              },
+              "name": "select-tab"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc write the content of unpinned tabs into a new note in @raycast-notes",
+        "mocks": {
+          "get-active-space": {
+            "id": 2,
+            "isActive": true,
+            "title": "Work"
+          },
+          "get-spaces": [
+            {
+              "title": "Personal",
+              "id": 1,
+              "isActive": false
+            },
+            {
+              "title": "Work",
+              "id": 2,
+              "isActive": true
+            }
+          ],
+          "get-tabs": [
+            {
+              "id": "A144D0CC-D960-4642-85EE-E4D066EE2F51",
+              "location": "pinned",
+              "title": "Raycast - Your shortcut to everything",
+              "url": "https://www.raycast.com/"
+            },
+            {
+              "id": "E34EE895-6391-4672-94BF-BE6D91B1D7FC",
+              "location": "pinned",
+              "title": "Chat Completions - OpenAI API",
+              "url": "https://platform.openai.com"
+            },
+            {
+              "id": "9E4A15A7-C228-497E-9DE3-9CB1F99023B6",
+              "location": "pinned",
+              "title": "Hacker News",
+              "url": "https://news.ycombinator.com/"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-tabs",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc search history",
+        "mocks": {
+          "search-history": {}
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-history",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc search 10 history",
+        "mocks": {
+          "search-history": {}
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-history",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "input": "@arc search history about Raycast",
+        "mocks": {
+          "search-history": {
+            "searchText": "Raycast"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-history",
+              "arguments": {
+                "searchText": "Raycast"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.81.2",
-    "@raycast/utils": "^1.16.5",
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.18.1",
     "cross-fetch": "^3.1.6",
     "fuse.js": "^7.0.0",
     "iconv-lite": "^0.6.3",

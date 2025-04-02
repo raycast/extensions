@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "t3-chat",
+  "title": "T3 Chat",
+  "description": "Query T3 Chat directly from Raycast",
+  "icon": "raycast-t3-chat.png",
+  "author": "Lermatroid",
+  "categories": [
+    "Productivity",
+    "Applications",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-t3-chat",
+      "title": "Ask T3 Chat",
+      "description": "Quickly ask T3 Chat anything",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": true,
+          "placeholder": "Query"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "model",
+          "title": "Model",
+          "description": "The model to use for the chat",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "GPT-4o Mini",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-o3 Mini",
+              "value": "gpt-o3-mini"
+            },
+            {
+              "title": "Claude 3.5",
+              "value": "claude-3.5"
+            },
+            {
+              "title": "Claude 3.7",
+              "value": "claude-3.7"
+            },
+            {
+              "title": "Claude 3.7 Reasoning",
+              "value": "claude-3.7-reasoning"
+            },
+            {
+              "title": "Llama 3.3 70B (Groq)",
+              "value": "llama-3.3-70b-groq"
+            },
+            {
+              "title": "Gemini 2.0 Flash Lite Preview",
+              "value": "gemini-2.0-flash-lite-preview-02-05"
+            },
+            {
+              "title": "DeepSeek v3 (Fireworks)",
+              "value": "deepseek-v3-fireworks"
+            },
+            {
+              "title": "DeepSeek R1 (OpenRouter)",
+              "value": "deepseek-r1-openrouter"
+            },
+            {
+              "title": "DeepSeek R1 (Groq)",
+              "value": "deepseek-r1-groq"
+            },
+            {
+              "title": "DeepSeek R1 Distill Qwen 32B (Groq)",
+              "value": "deepseek-r1-distill-qwen-32b-groq"
+            },
+            {
+              "title": "Qwen 2.5 32B (Groq)",
+              "value": "qwen-2.5-32b-groq"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

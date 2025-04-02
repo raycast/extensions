@@ -37,9 +37,7 @@ export default function NoteDetail({ noteId, mutate }: { noteId: string; mutate?
         <Detail.Metadata>
           {data?.tags?.length && data?.tags?.length > 0 ? (
             <Detail.Metadata.TagList title="Tags">
-              {data?.tags.map((tag) => (
-                <Detail.Metadata.TagList.Item text={tag} key={tag} />
-              ))}
+              {data?.tags.map((tag) => <Detail.Metadata.TagList.Item text={tag} key={tag} />)}
             </Detail.Metadata.TagList>
           ) : null}
 

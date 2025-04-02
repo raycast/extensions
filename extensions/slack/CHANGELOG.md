@@ -1,5 +1,13 @@
 # Slack Changelog
 
+## [Moved contributor] - 2025-03-31
+
+## [Update README with improved manifest.yaml] - 2025-03-05
+
+## [Added new scope] - 2025-02-26
+
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [New "Copy Message URL" action] - 2025-02-10
 
 - Add `Copy Message URL` action to copy the URL of a message to the clipboard from the `Search Messages` command 
