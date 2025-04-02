@@ -9,7 +9,7 @@ export const getPrice = async (symbol: string): Promise<number> => {
     const data = (await response.json()) as { price: string };
     return Number(data.price);
   } catch (error) {
-    showFailureToast("Failed to fetch token price");
+    showFailureToast(error as Error, { title: "Failed to fetch token price" });
     return 0;
   }
 };
