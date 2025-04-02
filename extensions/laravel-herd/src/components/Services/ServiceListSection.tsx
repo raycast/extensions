@@ -2,6 +2,7 @@ import { List, ActionPanel, Icon, Action } from "@raycast/api";
 import { InstalledService } from "../../lib/types/service";
 import { Herd } from "../../utils/Herd";
 import { useServiceState } from "../../hooks/useServiceState";
+import { rescue } from "../../utils/rescue";
 
 type Props = {
   category: string;
@@ -26,7 +27,12 @@ export function ServiceListSection({ category, services, actions }: Props) {
                       key={app.name}
                       title={`${app.action} with ${app.name}`}
                       icon={Herd.ExternalApps.getIcon(app)}
-                      onAction={async () => await Herd.ExternalApps.openService(app, installedService)}
+                      onAction={async () => {
+                        await rescue(
+                          () => Herd.ExternalApps.openService(app, installedService),
+                          "Failed to open service.",
+                        );
+                      }}
                     />
                   );
                 })}

@@ -97,7 +97,7 @@ export default function Command() {
               key={`php_${version.key}`}
               title={`PHP ${version.cycle}`}
               actions={
-                <ActionPanel title={`PHP ${version}`}>
+                <ActionPanel title={`PHP ${version.cycle}`}>
                   <Action title="Install" onAction={async () => await actions.installPHPVersion(version.cycle)} />
                 </ActionPanel>
               }
