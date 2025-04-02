@@ -33,6 +33,7 @@ export function useSitesState() {
 
       setState({ loading: false, sites: sites, phpVersions: phpVersions, nodeVersions: nodeVersions });
     } catch (error) {
+      setState(prevState => ({ ...prevState, loading: false }));
       showFailureToast(error, { title: "Could not fetch sites" });
     }
   }
