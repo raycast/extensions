@@ -67,12 +67,12 @@ export function VaultProvider(props: VaultProviderProps) {
         folders = foldersResult.result;
         items.sort(favoriteItemsFirstSorter);
       } catch (error) {
-        publishItems?.(new FailedToLoadVaultItemsError());
+        publishItems(new FailedToLoadVaultItemsError());
         throw error;
       }
 
       setState({ items, folders });
-      publishItems?.(items);
+      publishItems(items);
       cacheVault(items, folders);
     } catch (error) {
       await showToast(Toast.Style.Failure, "Failed to load vault items", getDisplayableErrorMessage(error));
