@@ -21,9 +21,10 @@ export const truncateEventSize = (eventTitle: string) => {
 
   if (eventTitle.length > TRUNCATE_LENGTH) {
     // Javascript is horrible with UTF-16, and sometimes substring splits a
-    // surrogate pair.  We can make this readable by forcing it to a JSON
-    // string and then removing any leftover unicode artifacts
-    const sub = JSON.stringify(eventTitle.substring(0, TRUNCATE_LENGTH)).replace(/\\u[0-9a-z]+/i, "");
+    // surrogate pair.  By forcing the string through stringify, first,
+    // we can make sure the otherwise two-part characters are in a format
+    // that Javascript can understand
+    const sub = JSON.stringify(eventTitle).substring(0, TRUNCATE_LENGTH);
     return `${sub}...`;
   }
   return eventTitle;
