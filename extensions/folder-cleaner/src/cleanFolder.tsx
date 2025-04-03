@@ -12,9 +12,8 @@ import {
   Toast,
 } from "@raycast/api";
 
-import { moveOrDelete } from "./utils/files";
+import { cleanFile } from "./utils/files";
 
-import { extname, join } from "node:path";
 import { ListFoldersAction } from "./components/list-folders";
 import { useFetchFolderFiles } from "./hooks/useFetchFolderFiles";
 import { useLocalStorage } from "@raycast/utils";
@@ -29,23 +28,29 @@ const CleanFolderCommand = () => {
 
   const isLoading = isLoadingFolders || isLoadingFiles;
 
+  const cleanOneFile = useCallback(
+    (file: string) => {
+      try {
+        if (!folders) return;
+
+        cleanFile({ folderToClean, folders, file });
+
+        void fetchFolderFiles();
+        return showHUD("File Cleaned");
+      } catch (error) {
+        captureException(buildException(error as Error, "File not Cleaned", { folders, file }));
+        return showToast(Toast.Style.Failure, "File not Cleaned", "Something went wrong");
+      }
+    },
+    [folders],
+  );
+
   const cleanAllFiles = useCallback(() => {
     try {
       if (!folders) return;
 
       for (const file of folderFiles) {
-        const currentPath = join(folderToClean, file);
-        const extension = extname(file).toLocaleLowerCase();
-
-        for (const { path, extensions } of folders) {
-          if (extensions.includes(extension)) {
-            moveOrDelete({
-              file,
-              currentPath,
-              folderPath: path,
-            });
-          }
-        }
+        cleanFile({ folderToClean, folders, file });
       }
 
       void fetchFolderFiles();
@@ -83,6 +88,7 @@ const CleanFolderCommand = () => {
               <ActionPanel>
                 {folders && folders.length > 0 && (
                   <ActionPanel.Section title="Cleaner Actions">
+                    <Action title="Clean" onAction={() => cleanOneFile(file)} icon={Icon.Checkmark} />
                     <Action title="Clean All" onAction={cleanAllFiles} icon={Icon.Checkmark} />
                   </ActionPanel.Section>
                 )}
