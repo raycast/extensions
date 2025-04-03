@@ -2,28 +2,51 @@
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-04-03
+
 ### Added
 
 - Support for YouTube transcript timestamps as separate nodes in Tana (#4)
+- Support for Limitless Pendant transcription format (#8)
 
-## [1.1.0] - 2023-04-02
+### Fixed
 
-### Changed
+- Properly preserve bold text formatting in standard markdown (no longer converts to italic-underscore format) (#5)
+- Correct indentation hierarchy for numbered headings and their content (#5)
 
-- Improved output of indentation, bullets, and list styles.
-
-## [1.0.0] - 2023-04-01
+## [1.2.0] - 2025-04-03
 
 ### Added
 
-- Initial version.
-- Support for converting Markdown bullet points to Tana bullet points.
-- Support for handling timestamps as formatted fields.
-- Support for Markdown headings converted to regular nodes (not headlines).
-- Support for numbered lists (1. 2. 3. etc).
-- Support for lettered lists (a. b. c. etc).
-- Support for colons - adding a node below the colon that captures the items that follow.
-- Support for converting common date format to Tana date fields.
+- Support for YouTube transcript timestamps as separate nodes in Tana
+- Comprehensive Jest testing infrastructure
+
+### Fixed
+
+- Properly preserve bold text formatting in standard markdown (no longer converts to italic-underscore format)
+- Correct indentation hierarchy for numbered headings and their content
+- Improved error handling and stability
+
+## [1.1.0] - 2023-04-02
+
+### Added
+
+- Improved output formatting in the Python script
+- Support for more complex Markdown formatting
+- Better handling of fields with colons
+- Proper preservation of URL syntax
+
+## [1.0.0] - 2023-03-15
+
+### Added
+
+- Initial release with main features:
+  - Convert Markdown bullet points to Tana nodes
+  - Support for headings as parent nodes
+  - Handle nested content with proper indentation
+  - Parse fields with colons and convert to Tana format
+  - Process inline formatting
+  - Support for timestamps
 
 ### Features
 - Convert Markdown headings to Tana nodes with proper indentation

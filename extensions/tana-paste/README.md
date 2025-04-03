@@ -15,6 +15,9 @@ A Raycast extension that converts clipboard content to Tana Paste format. Perfec
   - Numbered lists
   - Paragraphs
   - Nested content with proper indentation
+- Specialized format support:
+  - YouTube transcript timestamps
+  - Limitless Pendant transcriptions
 - Instant feedback via HUD notifications
 - TypeScript implementation with strict typing
 - Comprehensive error handling
@@ -108,6 +111,7 @@ For these cases, we provide a Python script that implements the same conversion 
 - Preserves bracketed elements in text that shouldn't be converted
 - Handles URL and link syntax correctly
 - Improved heading indentation logic
+- Special format detection (YouTube timestamps, Limitless Pendant transcriptions)
 - Supports all the same markdown elements as the Raycast extension
 - UTF-8 encoding support
 - Comprehensive error handling
@@ -160,6 +164,28 @@ Output (in clipboard):
     - List item 1
       - Nested item
     - List item 2
+```
+
+### Limitless Pendant Transcription Example
+
+Input:
+```markdown
+# Meeting Title
+
+## Discussion Topic
+
+> [Speaker 1](#startMs=1743688649931&endMs=1743688652931): Hello everyone.
+
+> [You](#startMs=1743688652931&endMs=1743688653931): Good morning.
+```
+
+Output:
+```
+%%tana%%
+- Meeting Title
+  - Discussion Topic
+    - Speaker 1: Hello everyone.
+    - You: Good morning.
 ```
 
 ## Development

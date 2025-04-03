@@ -5,7 +5,7 @@
   "icon": "command-icon.png",
   "author": "lisaross",
   "type": "module",
-  "version": "1.1.0",
+  "version": "1.3.0",
   "license": "MIT",
   "commands": [
     {
@@ -49,13 +49,13 @@
     "typescript-eslint": "^8.29.0"
   },
   "scripts": {
-    "build": "npm run test && ray build -e dist",
-    "dev": "ray develop",
+    "build": "npx jest && ray build -e dist",
+    "dev": "npx jest && ray develop",
     "lint": "ray lint",
     "publish": "ray publish",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test": "npx jest",
+    "test:watch": "npx jest --watch",
+    "test:coverage": "npx jest --coverage",
     "validate": "npm run lint && npm run test",
     "prepare": "npm run validate"
   }

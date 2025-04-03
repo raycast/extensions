@@ -49,6 +49,7 @@ def build_hierarchy(lines):
     Build the hierarchy by linking lines to their parents
     
     Enhanced to properly nest headings based on their level (H1, H2, etc.)
+    and to handle numbered headers like '### 1. Context Awareness:' correctly
     """
     if not lines:
         return lines
@@ -59,10 +60,22 @@ def build_hierarchy(lines):
     # headers_at_level[0] = H1, headers_at_level[1] = H2, etc.
     headers_at_level = []
     
+    # Track section headers (headings with numbers like "1. Title")
+    section_headers = {}
+    
     last_parent_at_level = [-1]
     in_code_block = False
     code_block_parent = None
+    current_section = -1
     
+    # First pass - identify numbered section headers
+    for i, line in enumerate(result):
+        content = line.content.strip()
+        if line.is_header and re.match(r'^#+\s+\d+\.', content):
+            level = len(re.match(r'^#+', content).group(0)) if re.match(r'^#+', content) else 1
+            section_headers[i] = level
+    
+    # Second pass - build hierarchy with special handling for sections
     for i, line in enumerate(result):
         content = line.content.strip()
         
@@ -85,14 +98,25 @@ def build_hierarchy(lines):
         if line.is_header:
             level = len(re.match(r'^#+', content).group(0)) if re.match(r'^#+', content) else 1
             
+            # Check if this is a numbered header (e.g., "### 1. Context Awareness")
+            is_numbered_header = bool(re.match(r'^#+\s+\d+\.', content))
+            
             # Find the parent for this header based on heading levels
             if level == 1:
                 # Top-level (H1) headings are at the root
                 line.parent = -1
+                current_section = -1
             else:
                 # Subheadings (H2+) are children of the most recent header one level up
                 # For example, H2s are children of the most recent H1
-                line.parent = headers_at_level[level - 2] if level > 1 and level - 2 < len(headers_at_level) else -1
+                parent_idx = -1
+                if level > 1 and level - 2 < len(headers_at_level):
+                    parent_idx = headers_at_level[level - 2]
+                line.parent = parent_idx
+                
+                # If this is a numbered header, set it as the current section
+                if is_numbered_header:
+                    current_section = i
             
             # Update the header tracking for this level
             if level - 1 >= len(headers_at_level):
@@ -108,6 +132,13 @@ def build_hierarchy(lines):
             last_parent_at_level.append(i)
             
             continue
+            
+        # Special case for lines that look like section content
+        # These are lines like "**Definition:**" which should be children of the section
+        if current_section >= 0 and re.match(r'^\*\*[^*:]+:\*\*', content):
+            line.parent = current_section
+            last_parent_at_level = [current_section]
+            continue
         
         # Handle list items and content
         effective_indent = line.indent
@@ -120,7 +151,11 @@ def build_hierarchy(lines):
         if effective_indent < len(last_parent_at_level):
             line.parent = last_parent_at_level[effective_indent]
         else:
-            line.parent = -1
+            # If we're in a section and this is a direct child, parent to the section
+            if current_section >= 0 and effective_indent <= 1:
+                line.parent = current_section
+            else:
+                line.parent = -1
         
         # Update parent tracking at this level
         if effective_indent + 1 >= len(last_parent_at_level):
@@ -361,10 +396,9 @@ def convert_fields(text):
 
 def process_inline_formatting(text):
     """
-    Process inline formatting.
+    Process inline formatting with special handling for bold text.
     
-    Improved handling of bracketed elements and links to ensure regular bracketed
-    text is preserved and not incorrectly converted to tags or references.
+    Preserves bold text format and ensures it's properly rendered in Tana.
     """
     # First protect URLs and existing references
     protected_items = []
@@ -373,21 +407,35 @@ def process_inline_formatting(text):
         protected_items.append(match.group(0))
         return f"__PROTECTED_{len(protected_items)-1}__"
         
+    # Protect URLs and existing references
     text = re.sub(r'(\[\[.*?\]\]|https?://[^\s)]+)',
                  protect_item,
                  text)
+                 
+    # We must handle the bold format first - this part is key
+    # This approach just keeps bold elements as they are
+    bold_elements = []
     
-    # Process formatting first
-    text = re.sub(r'\*\*([^*]+)\*\*', r'**\1**', text)  # Bold
-    text = re.sub(r'\*([^*]+)\*', r'__\1__', text)      # Italic
-    text = re.sub(r'==([^=]+)==', r'^^\1^^', text)      # Highlight
+    def save_bold(match):
+        # Save the bold text as-is without modification
+        content = match.group(1)
+        key = f"__BOLD_{len(bold_elements)}__"
+        bold_elements.append(f"**{content}**")
+        return key
     
-    # Handle image syntax first
+    # Extract and protect bold text
+    text = re.sub(r'\*\*([^*]+)\*\*', save_bold, text)
+    
+    # Process other formatting
+    text = re.sub(r'\*([^*]+)\*', r'__\1__', text)  # Italic
+    text = re.sub(r'==([^=]+)==', r'^^\1^^', text)  # Highlight
+    
+    # Handle image syntax
     text = re.sub(r'!\[([^\]]*)\]\(([^)]+)\)',          
                  lambda m: f"{m.group(1)}::!{m.group(1)} {m.group(2)}" if m.group(1) else f"!Image {m.group(2)}",
                  text)
     
-    # Handle link syntax next (but preserve the bracketed text for now)
+    # Handle link syntax
     link_items = {}
     
     def process_link(match):
@@ -398,28 +446,19 @@ def process_inline_formatting(text):
     text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', process_link, text)
     
     # Preserve bracketed elements that are not links
-    # Fix for issue: "bracketed elements in text become supertags when they shouldn't"
-    # We need to preserve regular bracketed text [like this] so it doesn't get converted
-    
-    def protect_brackets(match):
-        protected_items.append(match.group(0))
-        return f"__PROTECTED_{len(protected_items)-1}__"
-        
-    text = re.sub(r'\[([^\]]+)\]', protect_brackets, text)
-    
-    # Note: We are deliberately NOT converting parentheses to tags anymore.
-    # This was causing regular text in parentheses to be incorrectly converted to tags.
-    # Tags in Markdown should already use the # symbol, which will be preserved.
+    text = re.sub(r'\[([^\]]+)\]', protect_item, text)
     
     # Restore links
-    text = re.sub(r'__LINK_(\d+)__',
-                 lambda m: link_items[f"__LINK_{m.group(1)}__"],
-                 text)
+    for key, value in link_items.items():
+        text = text.replace(key, value)
+    
+    # Restore bold elements last
+    for i, bold in enumerate(bold_elements):
+        text = text.replace(f"__BOLD_{i}__", bold)
     
     # Restore protected content
-    text = re.sub(r'__PROTECTED_(\d+)__',
-                 lambda m: protected_items[int(m.group(1))],
-                 text)
+    for i, item in enumerate(protected_items):
+        text = text.replace(f"__PROTECTED_{i}__", item)
     
     return text
 
@@ -431,14 +470,47 @@ def process_table_row(text):
     """Process table row."""
     return ' | '.join(cell.strip() for cell in text.split('|') if cell.strip())
 
+def process_limitless_pendant_transcription(text):
+    """Process a line in Limitless Pendant transcription format."""
+    # Check if it matches the Limitless Pendant format
+    match = re.match(r'^>\s*\[(.*?)\]\(#startMs=\d+&endMs=\d+\):\s*(.*?)$', text)
+    if not match:
+        return text
+    
+    speaker = match.group(1)
+    content = match.group(2)
+    
+    # Format as simple "{Speaker}: {Content}" (no fields)
+    return f"{speaker}: {content}"
+
+def is_limitless_pendant_transcription(text):
+    """Detect if text is a Limitless Pendant transcription."""
+    # Check for multiple lines in the Limitless Pendant format
+    lines = text.split('\n')
+    pendant_format_count = 0
+    
+    for line in lines:
+        if re.match(r'^>\s*\[(.*?)\]\(#startMs=\d+&endMs=\d+\):', line):
+            pendant_format_count += 1
+        
+        # If we found multiple matching lines, it's likely a Limitless Pendant transcription
+        if pendant_format_count >= 3:
+            return True
+    
+    return False
+
 def convert_to_tana(input_text):
     """
     Convert markdown to Tana format
     
     Enhanced to properly indent content under headings without using Tana's heading format
+    and to correctly handle formatting from Claude's AI outputs
     """
     if not input_text:
         return "No text selected."
+    
+    # Check if this is a Limitless Pendant transcription
+    is_pendant_transcription = is_limitless_pendant_transcription(input_text)
     
     # Split into lines and parse
     lines = [parse_line(line) for line in input_text.split('\n')]
@@ -452,12 +524,30 @@ def convert_to_tana(input_text):
     # Start with root level at 0
     indentation_levels[-1] = 0
     
+    # Identify section headers (numbered headings)
+    section_headers = set()
+    section_content = {}
+    
+    for i, line in enumerate(hierarchical_lines):
+        content = line.content.strip()
+        if not content:
+            continue
+            
+        if line.is_header and re.match(r'^#+\s+\d+\.', content):
+            section_headers.add(i)
+            section_content[i] = []
+    
     # First pass to determine indentation levels
     for i, line in enumerate(hierarchical_lines):
         if not line.content.strip():
             continue
         
         parent_index = line.parent if line.parent is not None else -1
+        
+        # Add to section content if parented to a section header
+        if parent_index in section_headers:
+            section_content[parent_index].append(i)
+        
         parent_level = indentation_levels.get(parent_index, 0)
         
         # Determine indentation level
@@ -468,8 +558,31 @@ def convert_to_tana(input_text):
             # H1 = level 0, H2 = level 1, etc.
             indentation_levels[i] = level - 1
         else:
-            # Content indentation is one more than its parent
-            indentation_levels[i] = parent_level + 1
+            # Special case for content directly under a section header
+            if parent_index in section_headers:
+                # Content under a section header should be indented one level deeper
+                indentation_levels[i] = indentation_levels[parent_index] + 1
+            else:
+                # Special case for Limitless Pendant transcription lines - indent them deeper
+                if is_pendant_transcription and line.content.strip().startswith('>'):
+                    # Find the current section this line belongs to
+                    current_section_idx = parent_index
+                    while current_section_idx >= 0 and not hierarchical_lines[current_section_idx].is_header:
+                        current_section_idx = hierarchical_lines[current_section_idx].parent if hierarchical_lines[current_section_idx].parent is not None else -1
+                    
+                    if current_section_idx >= 0:
+                        # Get the header level
+                        header_content = hierarchical_lines[current_section_idx].content.strip()
+                        header_level = len(re.match(r'^#+', header_content).group(0)) if re.match(r'^#+', header_content) else 1
+                        
+                        # Indent as if it's one level deeper than the section header
+                        indentation_levels[i] = header_level
+                    else:
+                        # Default to parent level + 2 if we can't find a header
+                        indentation_levels[i] = parent_level + 2
+                else:
+                    # Normal content indentation is one more than its parent
+                    indentation_levels[i] = parent_level + 1
     
     # Generate output
     output = ["%%tana%%"]
@@ -510,17 +623,21 @@ def convert_to_tana(input_text):
                 # Just use the header text without the !! prefix
                 processed_content = match.group(2)
         else:
-            # Remove list markers but preserve checkboxes
-            processed_content = re.sub(r'^[-*+]\s+(?!\[[ x]\])', '', processed_content)
-            
-            # Convert fields first
-            processed_content = convert_fields(processed_content)
-            
-            # Then convert dates
-            processed_content = convert_dates(processed_content)
-            
-            # Finally process inline formatting
-            processed_content = process_inline_formatting(processed_content)
+            # Check if this is a Limitless Pendant transcription line
+            if is_pendant_transcription and processed_content.startswith('>'):
+                processed_content = process_limitless_pendant_transcription(processed_content)
+            else:
+                # Remove list markers but preserve checkboxes
+                processed_content = re.sub(r'^[-*+]\s+(?!\[[ x]\])', '', processed_content)
+                
+                # Convert fields first
+                processed_content = convert_fields(processed_content)
+                
+                # Then convert dates
+                processed_content = convert_dates(processed_content)
+                
+                # Finally process inline formatting
+                processed_content = process_inline_formatting(processed_content)
         
         output.append(f"{indent}- {processed_content}")
     

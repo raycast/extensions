@@ -6,7 +6,9 @@ export default {
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
   },
-  testMatch: ['**/__tests__/**/*.test.(ts|tsx)'],
+  testMatch: [
+    '**/__tests__/**/*.test.(ts|tsx)'
+  ],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.ts$': '$1',
   },

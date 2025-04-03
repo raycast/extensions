@@ -60,6 +60,7 @@ function parseLine(line: string): Line {
  * Build the hierarchy by linking lines to their parents
  *
  * Enhanced to properly nest headings based on their level (H1, H2, etc.)
+ * and to handle numbered headers like '### 1. Context Awareness:' correctly
  */
 function buildHierarchy(lines: Line[]): Line[] {
   if (lines.length === 0) return lines;
@@ -70,10 +71,25 @@ function buildHierarchy(lines: Line[]): Line[] {
   // headersAtLevel[0] = H1, headersAtLevel[1] = H2, etc.
   const headersAtLevel: number[] = [];
 
+  // Track section headers (headings with numbers like "1. Title")
+  const sectionHeaders: Set<number> = new Set();
+
   let lastParentAtLevel: number[] = [-1];
   let inCodeBlock = false;
   let codeBlockParent: number | undefined = undefined;
+  let currentSection = -1;
 
+  // First pass - identify numbered section headers
+  for (let i = 0; i < result.length; i++) {
+    const line = result[i];
+    const content = line.content.trim();
+    if (line.isHeader && /^#+\s+\d+\./.test(content)) {
+      const level = content.match(/^#+/)?.[0].length ?? 1;
+      sectionHeaders.add(i);
+    }
+  }
+
+  // Second pass - build hierarchy with special handling for sections
   for (let i = 0; i < result.length; i++) {
     const line = result[i];
     const content = line.content.trim();
@@ -99,14 +115,27 @@ function buildHierarchy(lines: Line[]): Line[] {
     if (line.isHeader) {
       const level = content.match(/^#+/)?.[0].length ?? 1;
 
+      // Check if this is a numbered header (e.g., "### 1. Context Awareness")
+      const isNumberedHeader = /^#+\s+\d+\./.test(content);
+
       // Find the parent for this header based on heading levels
       if (level === 1) {
         // Top-level (H1) headings are at the root
         line.parent = -1;
+        currentSection = -1;
       } else {
         // Subheadings (H2+) are children of the most recent header one level up
         // For example, H2s are children of the most recent H1
-        line.parent = headersAtLevel[level - 2] ?? -1;
+        let parentIdx = -1;
+        if (level > 1 && level - 2 < headersAtLevel.length) {
+          parentIdx = headersAtLevel[level - 2] ?? -1;
+        }
+        line.parent = parentIdx;
+
+        // If this is a numbered header, set it as the current section
+        if (isNumberedHeader) {
+          currentSection = i;
+        }
       }
 
       // Update the header tracking for this level
@@ -120,6 +149,14 @@ function buildHierarchy(lines: Line[]): Line[] {
       lastParentAtLevel = lastParentAtLevel.slice(0, level + 1);
       lastParentAtLevel[level] = i;
 
+      continue;
+    }
+
+    // Special case for lines that look like section content
+    // These are lines like "**Definition:**" which should be children of the section
+    if (currentSection >= 0 && /^\*\*[^*:]+:\*\*/.test(content)) {
+      line.parent = currentSection;
+      lastParentAtLevel = [currentSection];
       continue;
     }
 
@@ -182,11 +219,20 @@ function buildHierarchy(lines: Line[]): Line[] {
       }
 
       // Content is parented to the most recent element at the previous indentation level
-      line.parent = lastParentAtLevel[adjustedIndent] ?? -1;
+      if (effectiveIndent < lastParentAtLevel.length) {
+        line.parent = lastParentAtLevel[effectiveIndent];
+      } else {
+        // If we're in a section and this is a direct child, parent to the section
+        if (currentSection >= 0 && effectiveIndent <= 1) {
+          line.parent = currentSection;
+        } else {
+          line.parent = -1;
+        }
+      }
     }
 
     // Update parent tracking at this level
-    lastParentAtLevel[adjustedIndent + 1] = i;
+    lastParentAtLevel[effectiveIndent + 1] = i;
   }
 
   return result;
@@ -629,30 +675,42 @@ function convertFields(text: string): string {
 }
 
 /**
- * Process inline formatting
+ * Process inline formatting with special handling for bold text
  */
 function processInlineFormatting(text: string): string {
   // First protect URLs and existing references
   const protectedItems: string[] = [];
-  text = text.replace(/(\[\[.*?\]\]|https?:\/\/[^\s)]+)/g, (match) => {
+
+  const protectItem = (match: string) => {
     protectedItems.push(match);
     return `__PROTECTED_${protectedItems.length - 1}__`;
-  });
+  };
 
-  // Process formatting first
-  text = text
-    // Bold/italic
-    .replace(/\*\*([^*]+)\*\*/g, "**$1**")
-    .replace(/\*([^*]+)\*/g, "__$1__")
-    // Highlight
-    .replace(/==([^=]+)==/g, "^^$1^^");
+  // Protect URLs and existing references
+  text = text.replace(/(\[\[.*?\]\]|https?:\/\/[^\s)]+)/g, protectItem);
 
-  // Handle image syntax first
+  // Handle bold text formatting first - key to fix Claude's markdown
+  const boldElements: string[] = [];
+
+  const saveBold = (match: string, content: string) => {
+    const key = `__BOLD_${boldElements.length}__`;
+    boldElements.push(`**${content}**`);
+    return key;
+  };
+
+  // Extract and protect bold text
+  text = text.replace(/\*\*([^*]+)\*\*/g, saveBold);
+
+  // Process other formatting
+  text = text.replace(/\*([^*]+)\*/g, "__$1__"); // Italic
+  text = text.replace(/==([^=]+)==/g, "^^$1^^"); // Highlight
+
+  // Handle image syntax
   text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, title, url) =>
     title ? `${title}::!${title} ${url}` : `!Image ${url}`,
   );
 
-  // Handle link syntax next (but preserve the bracketed text for now)
+  // Handle link syntax
   const linkItems: { [key: string]: string } = {};
   text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
     const key = `__LINK_${Object.keys(linkItems).length}__`;
@@ -661,33 +719,22 @@ function processInlineFormatting(text: string): string {
   });
 
   // Preserve bracketed elements that are not links
-  // Fix for issue #1: "bracketed elements in text become supertags when they shouldn't"
-  // We need to preserve regular bracketed text [like this] so it doesn't get converted
-  text = text.replace(/\[([^\]]+)\]/g, (match) => {
-    protectedItems.push(match);
-    return `__PROTECTED_${protectedItems.length - 1}__`;
-  });
-
-  // Note: We are deliberately NOT converting parentheses to tags anymore.
-  // Previous behavior:
-  // text = text.replace(/\(([^)]+)\)/g, (_, tag) => {
-  //   if (tag.match(/^\[\[.*\]\]$/)) return `(${tag})`;
-  //   return tag.includes(' ') ? `#[[${tag}]]` : `#${tag}`;
-  // });
-  // This was causing regular text in parentheses to be incorrectly converted to tags.
-  // Tags in Markdown should already use the # symbol, which will be preserved.
+  text = text.replace(/\[([^\]]+)\]/g, protectItem);
 
   // Restore links
-  text = text.replace(
-    /__LINK_(\d+)__/g,
-    (_, index) => linkItems[`__LINK_${index}__`],
-  );
+  for (const [key, value] of Object.entries(linkItems)) {
+    text = text.replace(key, value);
+  }
+
+  // Restore bold elements
+  for (let i = 0; i < boldElements.length; i++) {
+    text = text.replace(`__BOLD_${i}__`, boldElements[i]);
+  }
 
   // Restore protected content
-  text = text.replace(
-    /__PROTECTED_(\d+)__/g,
-    (_, index) => protectedItems[parseInt(index)],
-  );
+  for (let i = 0; i < protectedItems.length; i++) {
+    text = text.replace(`__PROTECTED_${i}__`, protectedItems[i]);
+  }
 
   return text;
 }
@@ -786,12 +833,56 @@ function processYouTubeTranscriptTimestamps(text: string): string[] {
 }
 
 /**
+ * Process a Limitless Pendant transcription section
+ * Format: > [Speaker](#startMs=timestamp&endMs=timestamp): Text
+ */
+function processLimitlessPendantTranscription(text: string): string {
+  // Check if it matches the Limitless Pendant format
+  const match = text.match(
+    /^>\s*\[(.*?)\]\(#startMs=\d+&endMs=\d+\):\s*(.*?)$/,
+  );
+  if (!match) return text;
+
+  const speaker = match[1];
+  const content = match[2];
+
+  // Format as simple "{Speaker}: {Content}" (no fields)
+  return `${speaker}: ${content}`;
+}
+
+/**
+ * Detect if text is a Limitless Pendant transcription
+ */
+function isLimitlessPendantTranscription(text: string): boolean {
+  // Check for multiple lines in the Limitless Pendant format
+  const lines = text.split("\n");
+  let pendantFormatCount = 0;
+
+  for (const line of lines) {
+    if (line.match(/^>\s*\[(.*?)\]\(#startMs=\d+&endMs=\d+\):/)) {
+      pendantFormatCount++;
+    }
+
+    // If we found multiple matching lines, it's likely a Limitless Pendant transcription
+    if (pendantFormatCount >= 3) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
  * Convert markdown to Tana format
  *
  * Enhanced to properly indent content under headings without using Tana's heading format
+ * and to correctly handle formatting from Claude's AI outputs
  */
 export function convertToTana(inputText: string | undefined | null): string {
   if (!inputText) return "No text selected.";
+
+  // Check if this is a Limitless Pendant transcription
+  const isPendantTranscription = isLimitlessPendantTranscription(inputText);
 
   // Process the input for YouTube transcript timestamps
   const processedLines: string[] = [];
@@ -818,28 +909,85 @@ export function convertToTana(inputText: string | undefined | null): string {
   // Map to store each line's indentation level in the output
   const indentationLevels: Map<number, number> = new Map();
 
+  // Identify section headers (numbered headings)
+  const sectionHeaders: Set<number> = new Set();
+  const sectionContent: Map<number, number[]> = new Map();
+
+  for (let i = 0; i < hierarchicalLines.length; i++) {
+    const line = hierarchicalLines[i];
+    const content = line.content.trim();
+    if (!content) continue;
+
+    if (line.isHeader && /^#+\s+\d+\./.test(content)) {
+      sectionHeaders.add(i);
+      sectionContent.set(i, []);
+    }
+  }
+
   // Start with root level at 0
   indentationLevels.set(-1, 0);
 
   // First pass to determine indentation levels
   for (let i = 0; i < hierarchicalLines.length; i++) {
     const line = hierarchicalLines[i];
+    const content = line.content.trim();
+    if (!content) continue;
 
-    if (!line.content.trim()) continue;
+    const parentIdx = line.parent !== undefined ? line.parent : -1;
 
-    const parentIndex = line.parent !== undefined ? line.parent : -1;
-    const parentLevel = indentationLevels.get(parentIndex) ?? 0;
+    // Add to section content if parented to a section header
+    if (sectionHeaders.has(parentIdx)) {
+      const currentContent = sectionContent.get(parentIdx) || [];
+      currentContent.push(i);
+      sectionContent.set(parentIdx, currentContent);
+    }
+
+    const parentLevel = indentationLevels.get(parentIdx) ?? 0;
 
     // Determine indentation level
     if (line.isHeader) {
-      const level = line.content.match(/^#+/)?.[0].length ?? 1;
+      const headerMatch = content.match(/^(#+)/);
+      const level = headerMatch ? headerMatch[0].length : 1;
 
       // The indentation for a header is based on its header level
       // H1 = level 0, H2 = level 1, etc.
       indentationLevels.set(i, level - 1);
     } else {
-      // Content indentation is one more than its parent
-      indentationLevels.set(i, parentLevel + 1);
+      // Special case for content directly under a section header
+      if (sectionHeaders.has(parentIdx)) {
+        // Content under a section header should be indented one level deeper
+        indentationLevels.set(i, (indentationLevels.get(parentIdx) ?? 0) + 1);
+      } else {
+        // Special case for Limitless Pendant transcription lines - indent them deeper
+        if (isPendantTranscription && content.startsWith(">")) {
+          // Find the current section this line belongs to
+          let currentSectionIdx = parentIdx;
+          while (
+            currentSectionIdx >= 0 &&
+            !hierarchicalLines[currentSectionIdx]?.isHeader
+          ) {
+            currentSectionIdx =
+              hierarchicalLines[currentSectionIdx]?.parent ?? -1;
+          }
+
+          if (currentSectionIdx >= 0) {
+            // Get the header level
+            const headerContent =
+              hierarchicalLines[currentSectionIdx].content.trim();
+            const headerMatch = headerContent.match(/^(#+)/);
+            const headerLevel = headerMatch ? headerMatch[0].length : 1;
+
+            // Indent as if it's one level deeper than the section header
+            indentationLevels.set(i, headerLevel);
+          } else {
+            // Default to parent level + 2 if we can't find a header
+            indentationLevels.set(i, parentLevel + 2);
+          }
+        } else {
+          // Normal content indentation is one more than its parent
+          indentationLevels.set(i, parentLevel + 1);
+        }
+      }
     }
   }
 
@@ -881,11 +1029,20 @@ export function convertToTana(inputText: string | undefined | null): string {
         processedContent = match[2];
       }
     } else {
-      // Remove list markers of all types but preserve checkboxes
-      // This handles standard markdown list markers (-, *, +) as well as bullet points (•) and lettered/numbered lists (a., b., 1., etc.)
-      processedContent = processedContent.replace(/^[-*+•]\s+(?!\[[ x]\])/, "");
-      processedContent = processedContent.replace(/^[a-z]\.\s+/i, "");
-      processedContent = processedContent.replace(/^\d+\.\s+/, "");
+      // Check if this is a Limitless Pendant transcription line
+      if (isPendantTranscription && processedContent.startsWith(">")) {
+        processedContent =
+          processLimitlessPendantTranscription(processedContent);
+      } else {
+        // Remove list markers of all types but preserve checkboxes
+        // This handles standard markdown list markers (-, *, +) as well as bullet points (•) and lettered/numbered lists (a., b., 1., etc.)
+        processedContent = processedContent.replace(
+          /^[-*+•]\s+(?!\[[ x]\])/,
+          "",
+        );
+        processedContent = processedContent.replace(/^[a-z]\.\s+/i, "");
+        processedContent = processedContent.replace(/^\d+\.\s+/, "");
+      }
 
       // Convert fields first
       processedContent = convertFields(processedContent);
