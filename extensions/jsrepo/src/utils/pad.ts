@@ -36,10 +36,11 @@ export function leftPad(str: string, space: number, padWith = " "): string {
  * ```
  */
 export function leftPadMin(str: string, length: number, padWith = " "): string {
-	if (stripAsni(str).length > length)
+	const strippedLength = stripAsni(str).length;
+	if (strippedLength > length)
 		throw new Error("String length is greater than the length provided.");
 
-	return padWith.repeat(length - stripAsni(str).length) + str;
+	return padWith.repeat(length - strippedLength) + str;
 }
 
 /** Adds the `padWith` (default `' '`) to the string the amount of times specified by the `space` argument
