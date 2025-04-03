@@ -2,7 +2,7 @@ import {
 	Block,
 	RegistryProvider,
 	RegistryProviderState,
-} from "jsrepo/dist/api";
+} from "jsrepo";
 import * as array from "../utils/array";
 import { LocalStorage } from "@raycast/api";
 
