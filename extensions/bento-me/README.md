@@ -1,5 +1,5 @@
 <p align="center">
- <img width="125" src="https://raw.githubusercontent.com/raycast/extensions/main/extensions/bento/assets/bento.png">
+ <img width="125" src="https://raw.githubusercontent.com/raycast/extensions/main/extensions/bento-me/assets/bento.png">
 </p>
 
 <h1 align="center">Bento for Raycast</h1>
