@@ -38,6 +38,8 @@ export function trimCodeToLength(code: string, maximumLOC?: number) {
 	let trimmed = code;
 
 	if (maximumLOC !== undefined) {
+		if (maximumLOC <= 0) return trimmed;
+
 		const lines = l.get(trimmed);
 
 		const overLimit = lines.length > maximumLOC;
