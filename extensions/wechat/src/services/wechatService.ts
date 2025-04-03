@@ -12,7 +12,12 @@ class WeChatService {
    */
   async startChat(contactId: string): Promise<void> {
     const url = this.getStartUrl(contactId);
-    await fetch(url);
+    try {
+      await fetch(url);
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to start WeChat chat" });
+      throw error;
+    }
   }
 
   /**
