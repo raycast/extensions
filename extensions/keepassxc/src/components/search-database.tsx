@@ -16,6 +16,7 @@ import {
 import { getFavicon } from "@raycast/utils";
 import { KeePassLoader, showToastCliErrors } from "../utils/keepass-loader";
 import { getTOTPCode } from "../utils/totp";
+import { isValidUrl } from "../utils/url-checker";
 
 const preferences: ExtensionPreferences = getPreferenceValues();
 // Whether to display favicons in the user interface
@@ -120,7 +121,13 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
             <List.Item
               key={i}
               title={entry[1]}
-              icon={userInterfaceFavicon ? getFavicon(entry[4], { fallback: Icon.QuestionMarkCircle }) : undefined}
+              icon={
+                userInterfaceFavicon
+                  ? isValidUrl(entry[4])
+                    ? getFavicon(entry[4], { fallback: Icon.QuestionMarkCircle })
+                    : { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText }
+                  : undefined
+              }
               subtitle={{ value: entry[2], tooltip: "Username" }}
               accessories={[
                 entry[0] !== ""
