@@ -1,3 +1,4 @@
+import { showFailureToast } from "@raycast/utils";
 import fetch from "node-fetch";
 
 const STARTURL = "http://localhost:48065/wechat/start";
