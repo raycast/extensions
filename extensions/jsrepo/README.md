@@ -38,4 +38,4 @@ Raycast extension to interact with [jsrepo](https://jsrepo.dev) registries.
 
 jsrepo is a CLI to distribute your code.
 
-![og](metadata/jsrepo-3.png)
+![og](assets/og.png)
