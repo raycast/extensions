@@ -22,10 +22,10 @@ function isExitNodeActive(devices: Device[]) {
   return devices.some((d) => d.exitnode);
 }
 
-function setExitNode(hostipv4: string, allowLAN: boolean) {
+function setExitNode(hostipv6: string, allowLAN: boolean) {
   popToRoot();
   closeMainWindow();
-  tailscale(`set --exit-node "${hostipv4}"`);
+  tailscale(`set --exit-node "${hostipv6}"`);
 
   if (allowLAN) {
     tailscale(`set --exit-node-allow-lan-access`);
@@ -99,10 +99,10 @@ export default function ExitNodeList() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action title="Use as Exit Node" onAction={() => setExitNode(exitNode.ipv4, false)} />
+                  <Action title="Use as Exit Node" onAction={() => setExitNode(exitNode.ipv6, false)} />
                   <Action
                     title="Use as Exit Node and Allow LAN Access"
-                    onAction={() => setExitNode(exitNode.ipv4, true)}
+                    onAction={() => setExitNode(exitNode.ipv6, true)}
                   />
                 </ActionPanel>
               }
