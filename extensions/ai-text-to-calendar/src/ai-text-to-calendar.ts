@@ -1,7 +1,8 @@
 import { Clipboard, getPreferenceValues, getSelectedText, open, showHUD, showToast, Toast } from "@raycast/api";
 import OpenAI from "openai";
+import { toURL } from "./calendars";
 
-interface CalendarEvent {
+export interface CalendarEvent {
   title: string;
   start_date: string;
   start_time: string;
@@ -17,6 +18,7 @@ export default async function main() {
     const endpoint = getPreferenceValues().endpoint || "https://api.openai.com/v1";
     const language = getPreferenceValues().language || "English";
     const model = getPreferenceValues().model || "gpt-4o-mini";
+    const calendar = getPreferenceValues().calendar || "googleCalendar";
 
     showToast({ style: Toast.Style.Animated, title: "Extracting..." });
     const selectedText = await getSelectedText();
@@ -26,7 +28,7 @@ export default async function main() {
     }
 
     const calendarEvent = JSON.parse(json) as CalendarEvent;
-    const url = toURL(calendarEvent);
+    const url = toURL(calendarEvent, calendar);
 
     await showHUD("Extracted! Copied to clipboard and opened in browser.");
     await Clipboard.copy(`${url}`);
@@ -88,21 +90,4 @@ Note:
   });
 
   return response.choices[0].message.content;
-}
-
-function toURL(json: CalendarEvent) {
-  // Clean up and format dates/times - remove any non-numeric characters
-  const startDateTime = `${json.start_date.replace(/-/g, "")}T${json.start_time.replace(/:/g, "")}00`;
-  const endDateTime = `${json.end_date.replace(/-/g, "")}T${json.end_time.replace(/:/g, "")}00`;
-
-  // Encode parameters for URL safety
-  const params = {
-    text: encodeURIComponent(json.title),
-    dates: `${startDateTime}/${endDateTime}`,
-    details: encodeURIComponent(json.details),
-    location: encodeURIComponent(json.location),
-  };
-
-  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${params.text}&dates=${params.dates}&details=${params.details}&location=${params.location}&trp=false`;
-  return url;
 }

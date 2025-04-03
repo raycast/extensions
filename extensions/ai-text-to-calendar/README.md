@@ -19,12 +19,14 @@ Configure the extension via `Raycast Settings > Extensions > AI Text to Calendar
 | `model`    | Model Name         | string | false    | LLM model name, default is `gpt-4o-mini`                                                           |
 | `language` | Language           | string | false    | Language of the output text, default is `English`                                                  |
 | `endpoint` | Endpoint           | string | false    | LLM service endpoint (e.g., <https://api.deepseek.com/v1>), default is `https://api.openai.com/v1` |
+| `calendar` | Calendar           | string | false    | Select your calendar service, default is `googleCalendar`.                                         |
+
 
 ## TODO
 
 - [ ] User default settings (e.g., default date, time)
 - [ ] With supplementary information (e.g., selected text + user input)
-- [ ] Support for other calendar services (e.g., use Apple Script or Shortcut for Apple Calendar)
+- [x] Support for other calendar services (e.g., use Apple Script or Shortcut for Apple Calendar)
 
 ## License
 
