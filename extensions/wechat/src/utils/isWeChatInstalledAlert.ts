@@ -1,4 +1,4 @@
-import { Alert, confirmAlert, open, closeMainWindow } from "@raycast/api";
+import { Alert, closeMainWindow, confirmAlert, open } from "@raycast/api";
 
 export const isWeChatInstalledAlertDialog = async () => {
   const options: Alert.Options = {
