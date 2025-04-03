@@ -63,7 +63,7 @@ class ContactService {
           if (aExactMatch && !bExactMatch) return -1;
           if (!aExactMatch && bExactMatch) return 1;
 
-          // The first match is the second
+          // Starts-with matches have the second highest priority
           const aStartsWith = aTitle.startsWith(lowerSearchText) || aSubtitle.startsWith(lowerSearchText);
           const bStartsWith = bTitle.startsWith(lowerSearchText) || bSubtitle.startsWith(lowerSearchText);
           if (aStartsWith && !bStartsWith) return -1;
