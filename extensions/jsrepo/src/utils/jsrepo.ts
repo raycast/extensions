@@ -1,8 +1,4 @@
-import {
-	Block,
-	RegistryProvider,
-	RegistryProviderState,
-} from "jsrepo";
+import type { Block, RegistryProvider, RegistryProviderState } from "jsrepo";
 import * as array from "../utils/array";
 import { LocalStorage } from "@raycast/api";
 
