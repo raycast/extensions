@@ -1,5 +1,9 @@
 # Things Changelog
 
+## [Detect URL in Notes] - {PR_MERGE_DATE}
+
+- Detect a URL in todo notes and offer `Open URL From Notes` and `Copy URL From Notes` actions.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Focus Input Fields] - 2024-10-25
