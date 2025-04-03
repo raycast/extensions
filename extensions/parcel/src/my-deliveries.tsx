@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, Toast, showToast, Icon, open, Color } from "@raycast/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Delivery, STATUS_DESCRIPTIONS, FilterMode } from "./api";
 import { useDeliveries } from "./hooks/useDeliveries";
 
@@ -134,13 +134,15 @@ export default function Command() {
     return markdown;
   };
 
-  if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to load deliveries",
-      message: error.message,
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load deliveries",
+        message: error.message,
+      });
+    }
+  }, [error]);
 
   return (
     <List
