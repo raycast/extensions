@@ -140,6 +140,13 @@ function Metadata(props: MetadataProps) {
         text={movie.released}
       />
 
+      {movie.runtime ? (
+        <Detail.Metadata.Label
+          title={STRINGS.runtimeLabel}
+          text={movie.runtime}
+        />
+      ) : null}
+
       {movie.stats ? (
         <Detail.Metadata.Link
           title={STRINGS.stats}

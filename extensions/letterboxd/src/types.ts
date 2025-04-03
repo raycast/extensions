@@ -58,6 +58,7 @@ export interface MovieDetails extends Pick<Movie, "id" | "director" | "title"> {
   posterUrl?: string;
   description: string;
   released: string;
+  runtime?: string;
   stats?: MovieStatistics;
   ratingHistogram?: MovieRatingHistogram;
   releases: Array<ReleasesByType>;

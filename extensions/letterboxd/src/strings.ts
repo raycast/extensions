@@ -4,6 +4,7 @@ export const STRINGS = {
   copyUrl: "Copy URL",
   copyTitle: "Copy Title",
   releasedLabel: "Released",
+  runtimeLabel: "Runtime",
   somethingWentWrong: "Something went wrong",
   tryAgain: "Please try again",
   retry: "Retry",
