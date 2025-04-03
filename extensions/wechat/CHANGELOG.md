@@ -1,5 +1,13 @@
 # WeChat Changelog
 
+## [New Feature] - 2025-04-03
+
+- Added fuzzy search contacts
+- pinned contacts
+- recent contacts
+- default avatar
+- optimized code structure and performance and much more..
+
 ## [Maintenance] - 2025-03-20
 
 - Update project files
