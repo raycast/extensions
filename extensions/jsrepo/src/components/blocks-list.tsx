@@ -36,7 +36,7 @@ type Props = {
 export default function BlocksList({ registryUrl }: Props) {
 	const [isLoading, setIsLoading] = useState(true);
 	const [manifest, setManifest] = useState<Manifest>();
-	const [blockFileCode, setBlockFileCode] = useState<Map<string, File[]>>();
+	const [blockFileCode, setBlockFileCode] = useState<Map<string, File[]>>(new Map());
 
 	const navigation = useNavigation();
 
