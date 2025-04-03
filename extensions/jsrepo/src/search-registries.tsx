@@ -97,10 +97,11 @@ export default function ViewRegistries() {
 		setIsAdding(true);
 
 		try {
-			const response = await fetch("https://jsrepo.dev/api/registries", {
-				method: "POST",
-				body: JSON.stringify({ url }),
-			});
+const response = await fetch("https://jsrepo.dev/api/registries", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ url }),
+});
 
 			if (response.ok) {
 				navigation.push(<BlocksList registryUrl={url} />);
