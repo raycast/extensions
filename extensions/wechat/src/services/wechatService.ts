@@ -26,7 +26,7 @@ class WeChatService {
    * @returns URL to start chat
    */
   getStartUrl(contactId: string): string {
-    return `${STARTURL}?session=${contactId}`;
+    return `${STARTURL}?session=${encodeURIComponent(contactId)}`;
   }
 }
 
