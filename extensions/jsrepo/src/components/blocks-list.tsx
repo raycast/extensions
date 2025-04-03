@@ -25,6 +25,7 @@ import {
 } from "../utils/jsrepo";
 import * as u from "../utils/url";
 import { generateMarkdownContent } from "../utils/markdown";
+import type { Preferences } from "../preferences";
 
 type File = { name: string; code: string };
 

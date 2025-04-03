@@ -1,4 +1,4 @@
-import { Block } from "jsrepo";
+import type { Block } from "jsrepo";
 import { parseFileExtension } from "./jsrepo";
 import * as u from "../utils/url";
 import * as l from "../utils/lines";
