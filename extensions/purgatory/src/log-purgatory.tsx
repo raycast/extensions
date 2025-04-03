@@ -1,4 +1,4 @@
-import { showToast, Toast, Form, ActionPanel, Action, closeMainWindow } from "@raycast/api";
+import { showToast, Toast, Form, ActionPanel, Action, popToRoot } from "@raycast/api";
 import fs from "fs";
 import os from "os";
 import path from "path";
@@ -13,7 +13,7 @@ export default function Command() {
     try {
       fs.appendFileSync(purgatoryPath, entry);
       await showToast({ style: Toast.Style.Success, title: "Dropped into Purgatory." });
-      await closeMainWindow();
+      await popToRoot();
     } catch (error) {
       await showToast({ style: Toast.Style.Failure, title: `${error}` });
     }
