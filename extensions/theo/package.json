@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "theo",
+  "title": "Theo",
+  "description": "The bot for everything.",
+  "icon": "extension-icon.png",
+  "author": "mischa_lamoureux",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "enrich",
+      "title": "Bulk Enrich",
+      "subtitle": "Enrich multiple companies.",
+      "description": "Enriches multiple companies.",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "filename": "enrich.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "OWNER_EMAIL",
+      "title": "Your Theory Email",
+      "description": "This email will be used when creating new records.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "name@theory.ventures"
+    },
+    {
+      "name": "ATTIO_API_KEY",
+      "title": "Attio API Key",
+      "description": "The Theo Attio API key.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
