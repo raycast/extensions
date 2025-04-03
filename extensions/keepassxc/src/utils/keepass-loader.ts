@@ -189,7 +189,11 @@ class KeePassLoader {
       cli.on("error", reject);
       cli.stderr.on("data", this.cliStderrErrorHandler(reject));
       cli.on("exit", (code) => {
-        code === 0 ? resolve() : reject(new Error("Invalid Credentials"));
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error("Invalid Credentials"));
+        }
       });
     });
   };

@@ -146,9 +146,11 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       title="Paste Password"
                       icon={Icon.BlankDocument}
                       onAction={() => {
-                        entry[3] !== ""
-                          ? Clipboard.paste(entry[3]).then(() => closeMainWindow())
-                          : showToast(Toast.Style.Failure, "Error", "No Password Set");
+                        if (entry[3] !== "") {
+                          Clipboard.paste(entry[3]).then(() => closeMainWindow());
+                        } else {
+                          showToast(Toast.Style.Failure, "Error", "No Password Set");
+                        }
                       }}
                     />
                     <Action
@@ -156,13 +158,15 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       icon={Icon.BlankDocument}
                       shortcut={{ modifiers: ["shift"], key: "enter" }}
                       onAction={() => {
-                        entry[2] !== ""
-                          ? Clipboard.paste(entry[2]).then(() => closeMainWindow())
-                          : showToast(Toast.Style.Failure, "Error", "No Username Set");
+                        if (entry[2] !== "") {
+                          Clipboard.paste(entry[2]).then(() => closeMainWindow());
+                        } else {
+                          showToast(Toast.Style.Failure, "Error", "No Username Set");
+                        }
                       }}
                     />
                     <Action
-                      title="Paste TOTP"
+                      title="Paste Totp"
                       icon={Icon.BlankDocument}
                       shortcut={{ modifiers: ["opt"], key: "enter" }}
                       onAction={() => {
@@ -202,7 +206,7 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       }}
                     />
                     <Action
-                      title="Copy TOTP"
+                      title="Copy Totp"
                       icon={Icon.Clipboard}
                       shortcut={{ modifiers: ["cmd"], key: "t" }}
                       onAction={() => {
@@ -222,7 +226,11 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                     icon={Icon.Globe}
                     shortcut={{ modifiers: ["shift", "cmd"], key: "u" }}
                     onAction={() => {
-                      entry[4] !== "" ? open(entry[4]) : showToast(Toast.Style.Failure, "Error", "No URL Set");
+                      if (entry[4] !== "") {
+                        open(entry[4]);
+                      } else {
+                        showToast(Toast.Style.Failure, "Error", "No URL Set");
+                      }
                     }}
                   />
                 </ActionPanel>
