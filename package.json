@@ -3,7 +3,7 @@
   "name": "paystack",
   "title": "Paystack",
   "description": "Manage your Paystack account effortlessly in Raycast—check balances, search transactions, generate links, issue refunds, and track revenue—all from your keyboard.",
-  "icon": "paystack.png",
+  "icon": "extension-icon.png",
   "author": "dominuskelvin",
   "categories": [
     "Developer Tools",
