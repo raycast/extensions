@@ -18,7 +18,7 @@ A Raycast extension that uses AI to automatically rename image files based on th
    - Create a new API key or use an existing one
 3. Configure the extension:
    - Open Raycast and go to Extensions > rename.ai > Settings
-   - Add your Google API key to the `GOOGLE_API_KEY` preference field
+   - Add your Google API key to the `GOOGLE_GENERATIVE_AI_API_KEY` preference field
 
 ## Usage
 
