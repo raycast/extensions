@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Color,
+  Form,
+  Icon,
+  Image,
+  Toast,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
@@ -8,6 +19,7 @@ import { getErrorMessage } from "./helpers/errors";
 import { getGitHubUser } from "./helpers/users";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyRepositories } from "./hooks/useRepositories";
+import { useSharedSelections } from "./hooks/useSharedSelections";
 
 type PullRequestFormValues = {
   repository: string;
@@ -140,16 +152,27 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   );
 
   const defaultBranch = data?.repository?.defaultBranchRef;
-
   const collaborators = data?.repository?.collaborators?.nodes;
-
   const reviewers = collaborators?.filter((collaborator) => !collaborator?.isViewer);
-
   const labels = data?.repository?.labels?.nodes;
-
   const projects = data?.repository?.projectsV2?.nodes;
-
   const milestones = data?.repository?.milestones?.nodes;
+
+  // Use the custom hook to share selections across commands
+  useSharedSelections(values, setValue, { collaborators, projects });
+
+  // Set template and default branch
+  useEffect(() => {
+    const template = data?.repository?.pullRequestTemplates?.[0];
+
+    if (template && template.body && !values.description) {
+      setValue("description", template.body);
+    }
+
+    if (defaultBranch) {
+      setValue("into", defaultBranch.name);
+    }
+  }, [data]);
 
   const searchRepoBranches = (repo: string, query: string) => {
     const selectedRepository = repositories?.find((r) => r.id === repo);
@@ -185,90 +208,73 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
     (node) => node?.name !== values.from,
   );
 
-  useEffect(() => {
-    const template = data?.repository?.pullRequestTemplates?.[0];
-
-    if (template && template.body && !values.description) {
-      setValue("description", template.body);
-    }
-
-    if (defaultBranch) {
-      setValue("into", defaultBranch.name);
-    }
-  }, [data]);
-
-  useEffect(() => {
-    setValue("from", "");
-    setValue("into", "");
-    setValue("description", "");
-    setValue("reviewers", []);
-    setValue("assignees", []);
-    setValue("labels", []);
-    setValue("projects", []);
-    setValue("milestone", "");
-  }, [values.repository]);
-
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} title="Create Pull Request" />
+          <Action.SubmitForm
+            onSubmit={handleSubmit}
+            title={`Create ${values.draft ? "Draft " : ""}Pull Request`}
+            icon={values.draft ? Icon.Circle : Icon.Check}
+          />
         </ActionPanel>
       }
       enableDrafts
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingFrom || isLoadingInto}
     >
       <Form.Dropdown {...itemProps.repository} title="Repository" storeValue>
-        {repositories?.map((repository) => {
+        {repositories?.map((repository) => (
+          <Form.Dropdown.Item
+            key={repository.id}
+            title={repository.nameWithOwner}
+            value={repository.id}
+            icon={{ source: repository.owner.avatarUrl, mask: Image.Mask.Circle }}
+          />
+        ))}
+      </Form.Dropdown>
+
+      <Form.Separator />
+
+      <Form.Dropdown
+        title="Branch"
+        info={values.draft ? "Create as draft" : undefined}
+        {...itemProps.from}
+        onSearchTextChange={setFromQuery}
+      >
+        {fromBranches?.map((branch) => {
+          if (!branch || !branch.target) {
+            return null;
+          }
+
           return (
             <Form.Dropdown.Item
-              key={repository.id}
-              title={repository.nameWithOwner}
-              value={repository.id}
-              icon={{ source: repository.owner.avatarUrl, mask: Image.Mask.Circle }}
+              key={branch.id}
+              title={branch.name}
+              value={branch.name}
+              icon={{ source: Icon.ArrowRightCircle, tintColor: Color.PrimaryText }}
             />
           );
         })}
       </Form.Dropdown>
 
-      <Form.Dropdown
-        {...itemProps.from}
-        title="From"
-        isLoading={isLoadingFrom}
-        throttle
-        onSearchTextChange={setFromQuery}
-      >
-        {fromBranches
-          ? fromBranches.map((branch) => {
-              if (!branch) {
-                return null;
-              }
+      <Form.Dropdown title="Target branch" {...itemProps.into} onSearchTextChange={setIntoQuery}>
+        {intoBranches?.map((branch) => {
+          if (!branch || !branch.target) {
+            return null;
+          }
 
-              return <Form.Dropdown.Item key={branch?.id} title={branch.name} value={branch.name} />;
-            })
-          : null}
+          return (
+            <Form.Dropdown.Item
+              key={branch.id}
+              title={branch.name}
+              value={branch.name}
+              icon={branch.id === defaultBranch?.id ? { source: Icon.Star, tintColor: Color.Yellow } : undefined}
+            />
+          );
+        })}
       </Form.Dropdown>
 
-      <Form.Dropdown
-        {...itemProps.into}
-        title="Into"
-        storeValue
-        isLoading={isLoadingInto}
-        throttle
-        onSearchTextChange={setIntoQuery}
-      >
-        {intoBranches
-          ? intoBranches.map((branch) => {
-              if (!branch) {
-                return null;
-              }
-
-              return <Form.Dropdown.Item key={branch?.id} title={branch.name} value={branch.name} />;
-            })
-          : null}
-      </Form.Dropdown>
-
-      <Form.Checkbox {...itemProps.draft} label="As draft" />
+      <Form.Checkbox {...itemProps.draft} title="Draft" label="Create as draft" />
 
       <Form.Separator />
 
@@ -276,8 +282,8 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
 
       <Form.TextArea
         {...itemProps.description}
-        placeholder="Pull request description (e.g **bold**)"
         title="Description"
+        placeholder="Pull request description (e.g **bold**)"
         enableMarkdown
       />
 
@@ -289,7 +295,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
 
           const user = getGitHubUser(reviewer);
 
-          return <Form.TagPicker.Item key={reviewer.id} icon={user.icon} title={user.text} value={reviewer.id} />;
+          return <Form.TagPicker.Item key={reviewer.id} title={user.text} icon={user.icon} value={reviewer.id} />;
         })}
       </Form.TagPicker>
 

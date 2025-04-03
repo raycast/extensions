@@ -823,6 +823,33 @@
       "placeholder": "Enter your personal access token"
     },
     {
+      "name": "retainLastRepository",
+      "type": "checkbox",
+      "required": false,
+      "title": "Global: Retain Last Used Repository",
+      "description": "If checked, the last used repository will be shared globally across all commands (create issues, branches, pull requests, etc.)",
+      "default": true,
+      "label": "Share Repository Selection"
+    },
+    {
+      "name": "retainLastAssignee",
+      "type": "checkbox",
+      "required": false,
+      "title": "Global: Retain Last Used Assignee",
+      "description": "If checked, the last used assignee will be shared globally across all commands (create issues, pull requests)",
+      "default": true,
+      "label": "Share Assignee Selection"
+    },
+    {
+      "name": "retainLastProject",
+      "type": "checkbox",
+      "required": false,
+      "title": "Global: Retain Last Used Project",
+      "description": "If checked, the last used project will be shared globally across all commands (create issues, pull requests)",
+      "default": true,
+      "label": "Share Project Selection"
+    },
+    {
       "name": "defaultSearchTerms",
       "type": "textfield",
       "required": false,
