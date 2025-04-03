@@ -10,7 +10,7 @@ try {
   const preferences = getPreferenceValues<Preferences>();
   apiKey = preferences.GOOGLE_GENERATIVE_AI_API_KEY;
 } catch (error) {
-  console.log("Could not load preferences, falling back to .env file");
+  console.log("Could not load preferences");
 }
 
 // If neither worked, API key will be undefined
