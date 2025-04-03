@@ -1,6 +1,7 @@
 import type { Block, RegistryProvider, RegistryProviderState } from "jsrepo";
 import * as array from "../utils/array";
 import { LocalStorage } from "@raycast/api";
+import { Preferences } from "../preferences";
 
 export function determinePrimaryLanguage(...blocks: Block[]) {
 	const langMap = new Map<string, number>();
@@ -74,6 +75,8 @@ export function getToken(preferences: Preferences, provider: RegistryProvider) {
 			return preferences.bitbucket_token;
 		case "azure":
 			return preferences.azure_token;
+		default:
+			return undefined;
 	}
 }
 
