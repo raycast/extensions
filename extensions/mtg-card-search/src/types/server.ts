@@ -15,7 +15,7 @@ export interface ScryfallCard {
   cardmarket_id?: number;
   name: string;
   lang: string;
-  released_at: Date;
+  released_at: string;
   uri: string;
   scryfall_uri: string;
   layout: string;
