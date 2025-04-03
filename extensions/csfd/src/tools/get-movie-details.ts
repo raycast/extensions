@@ -55,12 +55,9 @@ export default async function tool(input: Input) {
         // Try to get the first description
         const firstDesc = movie.descriptions[0];
         if (typeof firstDesc === "object" && firstDesc !== null) {
+          const descObj = firstDesc as DescriptionObject;
           description =
-            firstDesc.value ||
-            firstDesc.content ||
-            firstDesc.text ||
-            firstDesc.description ||
-            "No description available.";
+            descObj.value || descObj.content || descObj.text || descObj.description || "No description available.";
         } else if (typeof firstDesc === "string") {
           description = firstDesc;
         }
