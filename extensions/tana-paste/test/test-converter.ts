@@ -1,10 +1,10 @@
 // Test script for tana-converter.ts
 
-import fs from 'fs';
-import { convertToTana } from '../src/utils/tana-converter';
+import { readFileSync } from 'fs';
+import { convertToTana } from '../src/utils/tana-converter.js';
 
 // Read test file
-const testFile = fs.readFileSync('./test/test-brackets.md', 'utf-8');
+const testFile = readFileSync('./test/test-brackets.md', 'utf-8');
 
 // Convert and log result
 const result = convertToTana(testFile);
