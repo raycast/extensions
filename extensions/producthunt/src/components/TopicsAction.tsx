@@ -1,12 +1,7 @@
 import React from "react";
-import { ActionPanel, Action, open, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, open, showToast, Toast, Icon } from "@raycast/api";
 import { Topic } from "../types";
 import { generateTopicUrl } from "../util/topicUtils";
-
-type SubmenuType = React.ComponentType<{
-  title: string;
-  children: React.ReactNode;
-}>;
 
 interface TopicsActionProps {
   topics: Topic[];
@@ -33,21 +28,11 @@ export function TopicsAction({ topics, showAsSubmenu = true }: TopicsActionProps
   if (showAsSubmenu) {
     return (
       <React.Fragment>
-        {(() => {
-          const Submenu = ActionPanel.Submenu as SubmenuType;
-          return (
-            <Submenu title="View Topics">
-              {topics.map((topic) => (
-                <Action
-                  key={topic.id}
-                  title={topic.name}
-                  onAction={() => handleTopicAction(topic)}
-                  shortcut={{ modifiers: ["cmd"], key: "t" }}
-                />
-              ))}
-            </Submenu>
-          );
-        })()}
+        <ActionPanel.Submenu title="View Topics">
+          {topics.map((topic) => (
+            <Action key={topic.id} title={topic.name} onAction={() => handleTopicAction(topic)} icon={Icon.Tag} />
+          ))}
+        </ActionPanel.Submenu>
       </React.Fragment>
     );
   } else {
@@ -55,7 +40,12 @@ export function TopicsAction({ topics, showAsSubmenu = true }: TopicsActionProps
     return (
       <React.Fragment>
         {topics.map((topic) => (
-          <Action key={topic.id} title={`Topic: ${topic.name}`} onAction={() => handleTopicAction(topic)} />
+          <Action
+            key={topic.id}
+            title={`Topic: ${topic.name}`}
+            onAction={() => handleTopicAction(topic)}
+            icon={Icon.Tag}
+          />
         ))}
       </React.Fragment>
     );

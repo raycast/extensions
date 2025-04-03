@@ -137,7 +137,7 @@ export function processThumbnail(url: string, options: { isDetailView?: boolean 
         height,
         fit: ImgixFit.CROP,
         auto: ["format"],
-        ...(quality && { quality }),
+        ...(quality !== undefined ? { quality } : {}),
       });
     }
 
@@ -147,7 +147,7 @@ export function processThumbnail(url: string, options: { isDetailView?: boolean 
       height,
       fit: ImgixFit.CROP,
       auto: ["format", "compress"],
-      ...(quality && { quality }),
+      ...(quality !== undefined ? { quality } : {}),
     });
   } catch (error) {
     console.error(`Error processing ${isDetailView ? "detail" : "list"} thumbnail:`, error);
