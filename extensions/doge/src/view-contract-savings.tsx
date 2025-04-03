@@ -42,17 +42,24 @@ export default function Command() {
   const [sortBy, setSortBy] = useState<SortOption>(SortOption.SavingsHighToLow);
   const [selectedContractId, setSelectedContractId] = useState<number | null>(null);
 
-  const { data, isLoading, pagination, error, revalidate } = useFetch<ApiResponse, Contract[]>(
+  const pagination: { page: number } = { page: 0 }; // Initialize with a default value
+
+  const {
+    data,
+    isLoading,
+    pagination: listPagination,
+    error,
+    revalidate,
+  } = useFetch<ApiResponse>(
     (options) => `https://api.doge.gov/savings/contracts?page=${options.page + 1}&q=${encodeURIComponent(searchText)}`,
     {
       keepPreviousData: true,
-      initialData: [],
-      mapResult: (result: ApiResponse) => {
+      mapResult: (result: ApiResponse): { data: ApiResponse; hasMore: boolean } => {
         // Store the total count for display purposes
         setTotalResults(result.meta.total_results);
 
         return {
-          data: result.result.contracts, // Return the contracts array directly
+          data: result,
           hasMore: result.meta.pages > (pagination?.page || 0) + 1,
         };
       },
@@ -66,12 +73,12 @@ export default function Command() {
     },
   );
 
-  const contracts = data || [];
+  const contracts = data?.result?.contracts || [];
 
-  // Filter contracts based on search text (client-side filtering as backup)
+  // Filter contracts with type assertion
   const filteredContracts = searchText.trim()
     ? contracts.filter(
-        (contract) =>
+        (contract: Contract) =>
           contract.vendor.toLowerCase().includes(searchText.toLowerCase()) ||
           contract.agency.toLowerCase().includes(searchText.toLowerCase()) ||
           contract.description.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -79,8 +86,8 @@ export default function Command() {
       )
     : contracts;
 
-  // Apply sorting to the contracts array
-  const sortedContracts = [...filteredContracts].sort((a, b) => {
+  // Apply sorting with type assertion
+  const sortedContracts = [...filteredContracts].sort((a: Contract, b: Contract) => {
     switch (sortBy) {
       case SortOption.SavingsHighToLow:
         return b.savings - a.savings;
@@ -101,9 +108,9 @@ export default function Command() {
     }
   });
 
-  // Calculate total savings and value for display based on filtered data
-  const totalSavings = filteredContracts.reduce((sum, contract) => sum + contract.savings, 0);
-  const totalValue = filteredContracts.reduce((sum, contract) => sum + contract.value, 0);
+  // Calculate totals with type assertion
+  const totalSavings = filteredContracts.reduce((sum: number, contract: Contract) => sum + contract.savings, 0);
+  const totalValue = filteredContracts.reduce((sum: number, contract: Contract) => sum + contract.value, 0);
 
   // Format currency values with dollar sign and commas
   const formatCurrency = (value: number) => `$${value.toLocaleString()}`;
@@ -172,7 +179,7 @@ ${contract.fpds_link ? `[View Contract Details on FPDS](${contract.fpds_link})` 
       isLoading={isLoading}
       searchBarPlaceholder="Search contracts by vendor, agency, or description..."
       onSearchTextChange={setSearchText}
-      pagination={pagination}
+      pagination={listPagination}
       navigationTitle="Contract Savings"
       searchText={searchText}
       throttle

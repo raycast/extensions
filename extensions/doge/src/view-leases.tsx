@@ -42,17 +42,25 @@ export default function Command() {
   const [sortBy, setSortBy] = useState<SortOption>(SortOption.SavingsHighToLow);
   const [selectedLeaseId, setSelectedLeaseId] = useState<number | null>(null);
 
-  const { data, isLoading, pagination, error, revalidate } = useFetch<ApiResponse, Lease[]>(
+  // Fix pagination and mapResult typings
+  const pagination: { page: number } = { page: 0 }; // Initialize with a default value
+
+  const {
+    data,
+    isLoading,
+    pagination: listPagination,
+    error,
+    revalidate,
+  } = useFetch<ApiResponse>(
     (options) => `https://api.doge.gov/savings/leases?page=${options.page + 1}&q=${encodeURIComponent(searchText)}`,
     {
       keepPreviousData: true,
-      initialData: [],
-      mapResult: (result: ApiResponse) => {
+      mapResult: (result: ApiResponse): { data: ApiResponse; hasMore: boolean } => {
         // Store the total count for display purposes
         setTotalResults(result.meta.total_results);
 
         return {
-          data: result.result.leases, // Return the leases array directly
+          data: result,
           hasMore: result.meta.pages > (pagination?.page || 0) + 1,
         };
       },
@@ -66,20 +74,21 @@ export default function Command() {
     },
   );
 
-  const leases = data || [];
+  // Fix lease type assertions
+  const leases = data?.result?.leases || [];
 
-  // Filter leases based on search text (client-side filtering as backup)
+  // Filter leases with type assertion
   const filteredLeases = searchText.trim()
     ? leases.filter(
-        (lease) =>
+        (lease: Lease) =>
           lease.location.toLowerCase().includes(searchText.toLowerCase()) ||
           lease.agency.toLowerCase().includes(searchText.toLowerCase()) ||
           lease.description.toLowerCase().includes(searchText.toLowerCase()),
       )
     : leases;
 
-  // Apply sorting to the leases array
-  const sortedLeases = [...filteredLeases].sort((a, b) => {
+  // Apply sorting with type assertion
+  const sortedLeases = [...filteredLeases].sort((a: Lease, b: Lease) => {
     switch (sortBy) {
       case SortOption.SavingsHighToLow:
         return b.savings - a.savings;
@@ -104,9 +113,9 @@ export default function Command() {
     }
   });
 
-  // Calculate total savings and value for display based on filtered data
-  const totalSavings = filteredLeases.reduce((sum, lease) => sum + lease.savings, 0);
-  const totalSquareFt = filteredLeases.reduce((sum, lease) => sum + lease.sq_ft, 0);
+  // Calculate totals with type assertion
+  const totalSavings = filteredLeases.reduce((sum: number, lease: Lease) => sum + lease.savings, 0);
+  const totalSquareFt = filteredLeases.reduce((sum: number, lease: Lease) => sum + lease.sq_ft, 0);
 
   // Format currency values with dollar sign and commas
   const formatCurrency = (value: number) => `$${value.toLocaleString()}`;
@@ -223,7 +232,7 @@ ${lease.description}
       isLoading={isLoading}
       searchBarPlaceholder="Search leases by location, agency, or description..."
       onSearchTextChange={setSearchText}
-      pagination={pagination}
+      pagination={listPagination}
       navigationTitle="Lease Savings"
       searchText={searchText}
       throttle

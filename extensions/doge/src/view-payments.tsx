@@ -46,6 +46,10 @@ export default function Command() {
   const [sortBy, setSortBy] = useState<SortOption>(SortOption.AmountHighToLow);
   const [selectedPaymentId, setSelectedPaymentId] = useState<number | null>(null);
 
+  // Add missing filter state variables
+  const [filterOption] = useState<FilterOption>(FilterOption.None);
+  const [filterValue] = useState("");
+
   // Convert SortOption to API sort_by and sort_order parameters
   const getSortParams = () => {
     switch (sortBy) {
@@ -86,30 +90,41 @@ export default function Command() {
     return { filter, filter_value: filterValue };
   };
 
+  // Fix pagination and mapResult typings
+  const pagination: { page: number } = { page: 0 }; // Initialize with a default value
+
   // Build the API URL with all parameters
   const buildApiUrl = (options: { page: number }) => {
     const { sort_by, sort_order } = getSortParams();
     const filterParams = getFilterParams();
 
-    const params = new URLSearchParams({
-      page: (options.page + 1).toString(),
-      sort_by,
-      sort_order,
-      q: searchText,
-      ...filterParams,
-    });
+    const params = new URLSearchParams();
+    params.append("page", (options.page + 1).toString());
+    params.append("sort_by", sort_by);
+    params.append("sort_order", sort_order);
+    params.append("q", searchText);
+
+    if ("filter" in filterParams) {
+      params.append("filter", filterParams.filter);
+      params.append("filter_value", filterParams.filter_value);
+    }
 
     return `https://api.doge.gov/payments?${params.toString()}`;
   };
 
-  const { data, isLoading, pagination, error, revalidate } = useFetch<ApiResponse, Payment[]>(buildApiUrl, {
+  const {
+    data,
+    isLoading,
+    pagination: listPagination,
+    error,
+    revalidate,
+  } = useFetch<ApiResponse>(buildApiUrl, {
     keepPreviousData: true,
-    initialData: [],
-    mapResult: (result: ApiResponse) => {
+    mapResult: (result: ApiResponse): { data: ApiResponse; hasMore: boolean } => {
       setTotalResults(result.meta.total_results);
 
       return {
-        data: result.result.payments,
+        data: result,
         hasMore: result.meta.pages > (pagination?.page || 0) + 1,
       };
     },
@@ -122,12 +137,13 @@ export default function Command() {
     },
   });
 
-  const payments = data || [];
+  // Fix payment type assertions
+  const payments = data?.result?.payments || [];
 
-  // Filter payments based on search text (client-side filtering as backup)
+  // Filter payments with type assertion
   const filteredPayments = searchText.trim()
     ? payments.filter(
-        (payment) =>
+        (payment: Payment) =>
           (payment.org_name && payment.org_name.toLowerCase().includes(searchText.toLowerCase())) ||
           (payment.agency && payment.agency.toLowerCase().includes(searchText.toLowerCase())) ||
           (payment.description && payment.description.toLowerCase().includes(searchText.toLowerCase())) ||
@@ -135,8 +151,8 @@ export default function Command() {
       )
     : payments;
 
-  // Apply additional client-side sorting if needed
-  const sortedPayments = [...filteredPayments].sort((a, b) => {
+  // Apply sorting with type assertion
+  const sortedPayments = [...filteredPayments].sort((a: Payment, b: Payment) => {
     switch (sortBy) {
       case SortOption.Agency:
         return a.agency.localeCompare(b.agency);
@@ -147,8 +163,8 @@ export default function Command() {
     }
   });
 
-  // Calculate total amount for display based on filtered data
-  const totalAmount = filteredPayments.reduce((sum, payment) => sum + payment.amount, 0);
+  // Calculate total with type assertion
+  const totalAmount = filteredPayments.reduce((sum: number, payment: Payment) => sum + payment.amount, 0);
 
   // Format currency values with dollar sign and commas
   const formatCurrency = (value: number) => `$${value.toLocaleString()}`;
@@ -233,7 +249,7 @@ ${payment.description || "No description provided."}
       isLoading={isLoading}
       searchBarPlaceholder="Search payments by agency, organization, or description..."
       onSearchTextChange={setSearchText}
-      pagination={pagination}
+      pagination={listPagination}
       navigationTitle="Government Payments"
       searchText={searchText}
       throttle

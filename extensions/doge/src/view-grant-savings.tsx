@@ -39,17 +39,24 @@ export default function Command() {
   const [sortBy, setSortBy] = useState<SortOption>(SortOption.SavingsHighToLow);
   const [selectedGrantId, setSelectedGrantId] = useState<number | null>(null);
 
-  const { data, isLoading, pagination, error, revalidate } = useFetch<ApiResponse, Grant[]>(
+  const pagination: { page: number } = { page: 0 }; // Initialize with a default value
+
+  const {
+    data,
+    isLoading,
+    pagination: listPagination,
+    error,
+    revalidate,
+  } = useFetch<ApiResponse>(
     (options) => `https://api.doge.gov/savings/grants?page=${options.page + 1}&q=${encodeURIComponent(searchText)}`,
     {
       keepPreviousData: true,
-      initialData: [],
-      mapResult: (result: ApiResponse) => {
+      mapResult: (result: ApiResponse): { data: ApiResponse; hasMore: boolean } => {
         // Store the total count for display purposes
         setTotalResults(result.meta.total_results);
 
         return {
-          data: result.result.grants, // Return the grants array directly
+          data: result,
           hasMore: result.meta.pages > (pagination?.page || 0) + 1,
         };
       },
@@ -63,12 +70,12 @@ export default function Command() {
     },
   );
 
-  const grants = data || [];
+  const grants = data?.result?.grants || [];
 
   // Filter grants based on search text (client-side filtering as backup)
   const filteredGrants = searchText.trim()
     ? grants.filter(
-        (grant) =>
+        (grant: Grant) =>
           grant.recipient.toLowerCase().includes(searchText.toLowerCase()) ||
           grant.agency.toLowerCase().includes(searchText.toLowerCase()) ||
           grant.description.toLowerCase().includes(searchText.toLowerCase()),
@@ -76,7 +83,7 @@ export default function Command() {
     : grants;
 
   // Apply sorting to the grants array
-  const sortedGrants = [...filteredGrants].sort((a, b) => {
+  const sortedGrants = [...filteredGrants].sort((a: Grant, b: Grant) => {
     switch (sortBy) {
       case SortOption.SavingsHighToLow:
         return b.savings - a.savings;
@@ -96,8 +103,8 @@ export default function Command() {
   });
 
   // Calculate total savings and value for display based on filtered data
-  const totalSavings = filteredGrants.reduce((sum, grant) => sum + grant.savings, 0);
-  const totalValue = filteredGrants.reduce((sum, grant) => sum + grant.value, 0);
+  const totalSavings = filteredGrants.reduce((sum: number, grant: Grant) => sum + grant.savings, 0);
+  const totalValue = filteredGrants.reduce((sum: number, grant: Grant) => sum + grant.value, 0);
 
   // Format currency values with dollar sign and commas
   const formatCurrency = (value: number) => `$${value.toLocaleString()}`;
@@ -148,7 +155,7 @@ ${grant.link ? `[View Grant Details](${grant.link})` : ""}
       isLoading={isLoading}
       searchBarPlaceholder="Search grants by recipient, agency, or description..."
       onSearchTextChange={setSearchText}
-      pagination={pagination}
+      pagination={listPagination}
       navigationTitle="Grant Savings"
       searchText={searchText}
       throttle
