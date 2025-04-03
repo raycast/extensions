@@ -1,10 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import ResultView from "./common";
 
-const prompt = getPreferenceValues().prompt_what;
-const modelOverride = getPreferenceValues().model_what;
-const toastTitle = "Introducing...";
-
 export default function What() {
-  return ResultView(prompt, modelOverride, toastTitle, true);
+  const { prompt_what, model_what } = getPreferenceValues();
+  const toastTitle = "Introducing...";
+  return ResultView(prompt_what, model_what, toastTitle, true);
 }

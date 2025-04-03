@@ -22,7 +22,8 @@
     "Rob",
     "jagadeesh_k",
     "scottlovegrove",
-    "henningmu"
+    "henningmu",
+    "FlohGro"
   ],
   "commands": [
     {
@@ -158,6 +159,10 @@
           "name": "view",
           "type": "dropdown",
           "data": [
+            {
+              "title": "Inbox",
+              "value": "inbox"
+            },
             {
               "title": "Today",
               "value": "today"

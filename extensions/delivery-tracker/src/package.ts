@@ -1,4 +1,5 @@
 import { Color, Icon } from "@raycast/api";
+import { Delivery } from "./delivery";
 
 interface Activity {
   time: Date;
@@ -17,6 +18,18 @@ export interface PackageMap {
     packages: Package[];
     lastUpdated?: Date;
   };
+}
+
+export function packagesFromOfflineCarrier(delivery: Delivery): Package[] {
+  return [
+    {
+      delivered: delivery.manualDeliveryDate
+        ? new Date().setHours(0, 0, 0, 0) > new Date(delivery.manualDeliveryDate).setHours(0, 0, 0, 0)
+        : false, // truncate the time from both now and the manual delivery date
+      deliveryDate: delivery.manualDeliveryDate,
+      activity: [],
+    },
+  ];
 }
 
 export function deliveryIcon(packages?: Package[]): Icon {

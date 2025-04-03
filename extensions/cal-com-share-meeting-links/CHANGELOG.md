@@ -1,5 +1,9 @@
 # Cal.com Share Meeting Links Changelog
 
+## [Update] - 2025-04-01
+
+- Adds action to open availability troubleshooter for meeting links
+
 ## [Update] - 2024-07-29
 
 - Display event prices

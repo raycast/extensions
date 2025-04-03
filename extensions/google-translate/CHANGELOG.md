@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Feature] - 2025-03-31
+
+- Add ability to set proxy
+
 ## [Feature] - 2025-01-09
 
 - Add ability to set multiple target languages to translate

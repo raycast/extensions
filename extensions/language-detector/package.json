@@ -49,43 +49,20 @@
       ]
     }
   ],
-  "preferences": [
-    {
-      "name": "detector",
-      "title": "Detector",
-      "description": "Choose the language detector.",
-      "type": "dropdown",
-      "required": false,
-      "default": "ai",
-      "data": [
-        {
-          "title": "Raycast AI",
-          "value": "ai"
-        },
-        {
-          "title": "npm:languagedetect",
-          "value": "languagedetect"
-        },
-        {
-          "title": "npm:tinyld",
-          "value": "tinyld"
-        }
-      ]
-    }
-  ],
   "dependencies": {
-    "@raycast/api": "^1.92.1",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.94.2",
+    "@raycast/utils": "^1.19.1",
     "mac-say": "^0.3.1",
+    "raycast-backend-api": "^0.1.1",
     "raycast-cross-extension": "^0.2.3",
-    "raycast-language-detector": "^0.1.1"
+    "raycast-language-detector": "^0.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^22.13.5",
-    "@types/react": "^18.3.12",
-    "eslint": "^8.57.1",
-    "prettier": "^3.5.2",
-    "typescript": "^5.7.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.14",
+    "@types/react": "^19.0.12",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   }
 }

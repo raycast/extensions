@@ -11,20 +11,16 @@ import {
   showHUD,
   getFrontmostApplication,
   Keyboard,
-  Cache,
 } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
-import { useAtom } from "jotai";
+import { runAppleScript, useCachedState } from "@raycast/utils";
 import { trpc } from "./utils/trpc.util";
 import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
 import MyAccount from "./views/MyAccount";
-import { sessionTokenAtom } from "./states/session-token.state";
-import { recentSelectedSpaceAtom, recentSelectedTagsAtom } from "./states/recent-selected.state";
 import { LoginView } from "./views/LoginView";
 import { NewTagForm } from "./views/NewTagForm";
 import { useMe } from "./hooks/use-me.hook";
-
-const cache = new Cache();
+import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
+import { useTags } from "./hooks/use-tags.hook";
 
 interface ScriptsPerBrowser {
   getURL: () => Promise<string>;
@@ -142,15 +138,19 @@ async function getCurrentBrowserPageInfo() {
   }
 }
 
+interface SelectedTag {
+  name: string;
+  spaceId: string;
+}
+
 function Body(props: { onlyPop?: boolean }) {
   const { onlyPop = false } = props;
   const { pop } = useNavigation();
   const [title, setTitle] = useState<string>("");
   const [url, setUrl] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [sessionToken] = useAtom(sessionTokenAtom);
-  const [selectedSpace, setSelectedSpace] = useAtom(recentSelectedSpaceAtom);
-  const [selectedTags, setSelectedTags] = useAtom(recentSelectedTagsAtom);
+  const [selectedSpace, setSelectedSpace] = useCachedState("recent-selected-space", "");
+  const [selectedTags, setSelectedTags] = useCachedState<SelectedTag[]>("recent-selected-tags", []);
 
   const isSlackHuddleUrl = useMemo(() => {
     // ex: https://app.slack.com/huddle/T07LSULVCQY/C07L45LKYHY
@@ -164,13 +164,14 @@ function Body(props: { onlyPop?: boolean }) {
     });
   }, []);
 
-  const me = useMe(sessionToken);
+  const me = useMe();
 
   const spaceIds = useMemo(() => {
-    return me?.data?.associatedSpaces.map((s) => s.id) || [];
-  }, [me.data]);
+    return me.data?.associatedSpaces.map((s) => s.id) || [];
+  }, [me.data?.associatedSpaces]);
 
-  const tags = trpc.tag.list.useQuery({ spaceIds });
+  const tags = useTags(spaceIds);
+
   const spaceTags = useMemo(() => {
     if (!tags.data) return undefined;
 
@@ -201,20 +202,7 @@ function Body(props: { onlyPop?: boolean }) {
     }
   };
 
-  const [after1Sec, setAfter1Sec] = useState(false);
-  useEffect(() => {
-    // If this is not here, will briefly appear.
-    setTimeout(() => setAfter1Sec(true), 1000);
-  }, []);
-
-  const loggedOutStatus = !sessionToken && after1Sec;
-  useEffect(() => {
-    // Clear data when logged out.
-    if (loggedOutStatus) {
-      cache.remove("me");
-      cache.remove("bookmarks");
-    }
-  }, [loggedOutStatus]);
+  const { loggedOutStatus } = useLoggedOutStatus();
 
   if (loggedOutStatus) {
     return <LoginView />;
@@ -229,17 +217,7 @@ function Body(props: { onlyPop?: boolean }) {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create" icon={Icon.SaveDocument} onSubmit={handleSubmit} />
-          <Action.Push
-            title="My Account"
-            icon={Icon.Person}
-            target={<MyAccount />}
-            onPush={() => {
-              setAfter1Sec(false);
-            }}
-            onPop={() => {
-              setTimeout(() => setAfter1Sec(true), 100);
-            }}
-          />
+          <Action.Push title="My Account" icon={Icon.Person} target={<MyAccount />} />
           <Action.Push
             title="Create New Tag"
             icon={Icon.Tag}

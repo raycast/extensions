@@ -13,7 +13,7 @@ export interface MarkdownFile {
 export interface SystemTag {
   id: string;
   label: string;
-  color: string;
+  color: Color;
 }
 
 export const SYSTEM_TAGS: readonly SystemTag[] = [

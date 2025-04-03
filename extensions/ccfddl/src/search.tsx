@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { cache, CACHE_KEY, fetchFromGitHub } from "./api";
+import { cache, CACHE_KEY } from "./api";
+import { fetchFromCDN } from "./cdn";
 import { Item } from "./types";
 import { getMarkdownTable } from "./utils";
 
@@ -92,11 +93,11 @@ export default function Command() {
 
   // Function to refresh data manually
   function refreshData() {
-    console.log("Manually refreshing data from GitHub");
+    console.log("Manually refreshing data from CDN");
     setIsRefreshing(true);
     cache.remove(CACHE_KEY); // Clear the cache
 
-    fetchFromGitHub(true, {
+    fetchFromCDN(true, {
       onSuccess: (data) => {
         setItems(data);
       },
@@ -129,9 +130,9 @@ export default function Command() {
         return;
       }
 
-      // Fetch from GitHub if no cache
+      // Fetch from CDN if no cache
       setIsRefreshing(true);
-      await fetchFromGitHub(false, {
+      await fetchFromCDN(false, {
         onSuccess: (data) => {
           setItems(data);
         },

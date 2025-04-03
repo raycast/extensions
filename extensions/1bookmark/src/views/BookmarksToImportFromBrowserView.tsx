@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { ActionPanel, Action, List, Icon, useNavigation } from "@raycast/api";
-import MiniSearch from "minisearch";
+import fuzzysort from "fuzzysort";
 import useChromeBookmarks from "../browser-bookmark-hooks/useChromeBookmarks";
 import useSafariBookmarks from "../browser-bookmark-hooks/useSafariBookmarks";
 import useFirefoxBookmarks from "../browser-bookmark-hooks/useFirefoxBookmarks";
@@ -8,7 +8,7 @@ import useArcBookmarks from "../browser-bookmark-hooks/useArcBookmarks";
 import useBraveBookmarks from "../browser-bookmark-hooks/useBraveBookmarks";
 import useEdgeBookmarks from "../browser-bookmark-hooks/useEdgeBookmarks";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
-import { RouterOutputs, trpc } from "../utils/trpc.util";
+import { RouterOutputs } from "../utils/trpc.util";
 import { ImportBookmarksForm } from "./ImportBookmarksForm";
 import { BrowserBookmark } from "../types";
 import useZenBookmarks from "../browser-bookmark-hooks/useZenBookmarks";
@@ -25,6 +25,7 @@ import useBraveBetaBookmarks from "../browser-bookmark-hooks/useBraveBetaBookmar
 import useBraveNightlyBookmarks from "../browser-bookmark-hooks/useBraveNightlyBookmarks";
 import { BROWSERS_BUNDLE_ID } from "../browser-bookmark-hooks/useAvailableBrowsers";
 import PermissionErrorScreen from "../browser-bookmark-components/PermissionErrorScreen";
+import { useBookmarks } from "../hooks/use-bookmarks.hook";
 
 // To prevent Error: Worker terminated due to reaching memory limit: JS heap out of memory
 const LIMIT_AT_ONCE = 100;
@@ -39,7 +40,7 @@ function Body(props: Props) {
   const [selectedBookmarks, setSelectedBookmarks] = useState<BrowserBookmark[]>([]);
   const { pop } = useNavigation();
   const [keyword, setKeyword] = useState("");
-  const existingBookmarks = trpc.bookmark.listAll.useQuery({ spaceIds: [space.id] });
+  const existingBookmarks = useBookmarks(space.id);
 
   const browserName = useMemo(() => {
     if (selectedBrowser === BROWSERS_BUNDLE_ID.chrome) return "Chrome";
@@ -84,26 +85,48 @@ function Body(props: Props) {
   const whaleBookmarks = useWhaleBookmarks(selectedBrowser === BROWSERS_BUNDLE_ID.whale);
 
   // Combine all bookmarks
-  const allBookmarks: BrowserBookmark[] = [
-    ...(chromeBookmarks.bookmarks || []),
-    ...(chromeBetaBookmarks.bookmarks || []),
-    ...(chromeDevBookmarks.bookmarks || []),
-    ...(safariBookmarks.bookmarks || []),
-    ...(firefoxBookmarks.bookmarks || []),
-    ...(arcBookmarks.bookmarks || []),
-    ...(braveBookmarks.bookmarks || []),
-    ...(braveBetaBookmarks.bookmarks || []),
-    ...(braveNightlyBookmarks.bookmarks || []),
-    ...(edgeBookmarks.bookmarks || []),
-    ...(edgeDevBookmarks.bookmarks || []),
-    ...(edgeCanaryBookmarks.bookmarks || []),
-    ...(zenBookmarks.bookmarks || []),
-    ...(vivaldiBookmarks.bookmarks || []),
-    ...(islandBookmarks.bookmarks || []),
-    ...(sidekickBookmarks.bookmarks || []),
-    ...(prismaAccessBookmarks.bookmarks || []),
-    ...(whaleBookmarks.bookmarks || []),
-  ];
+  const allBookmarks: BrowserBookmark[] = useMemo(
+    () => [
+      ...(chromeBookmarks.bookmarks || []),
+      ...(chromeBetaBookmarks.bookmarks || []),
+      ...(chromeDevBookmarks.bookmarks || []),
+      ...(safariBookmarks.bookmarks || []),
+      ...(firefoxBookmarks.bookmarks || []),
+      ...(arcBookmarks.bookmarks || []),
+      ...(braveBookmarks.bookmarks || []),
+      ...(braveBetaBookmarks.bookmarks || []),
+      ...(braveNightlyBookmarks.bookmarks || []),
+      ...(edgeBookmarks.bookmarks || []),
+      ...(edgeDevBookmarks.bookmarks || []),
+      ...(edgeCanaryBookmarks.bookmarks || []),
+      ...(zenBookmarks.bookmarks || []),
+      ...(vivaldiBookmarks.bookmarks || []),
+      ...(islandBookmarks.bookmarks || []),
+      ...(sidekickBookmarks.bookmarks || []),
+      ...(prismaAccessBookmarks.bookmarks || []),
+      ...(whaleBookmarks.bookmarks || []),
+    ],
+    [
+      chromeBookmarks.bookmarks,
+      chromeBetaBookmarks.bookmarks,
+      chromeDevBookmarks.bookmarks,
+      safariBookmarks.bookmarks,
+      firefoxBookmarks.bookmarks,
+      arcBookmarks.bookmarks,
+      braveBookmarks.bookmarks,
+      braveBetaBookmarks.bookmarks,
+      braveNightlyBookmarks.bookmarks,
+      edgeBookmarks.bookmarks,
+      edgeDevBookmarks.bookmarks,
+      edgeCanaryBookmarks.bookmarks,
+      zenBookmarks.bookmarks,
+      vivaldiBookmarks.bookmarks,
+      islandBookmarks.bookmarks,
+      sidekickBookmarks.bookmarks,
+      prismaAccessBookmarks.bookmarks,
+      whaleBookmarks.bookmarks,
+    ],
+  );
 
   const isLoadingBookmarks =
     chromeBookmarks.isLoading ||
@@ -125,35 +148,54 @@ function Body(props: Props) {
     prismaAccessBookmarks.isLoading ||
     whaleBookmarks.isLoading;
 
-  const [miniSearch] = useState(() => {
-    return new MiniSearch<BrowserBookmark>({
-      fields: ["title", "url", "folder"],
-      storeFields: ["id", "title", "url", "folder"],
-    });
-  });
-
   const importAvailableBookmarks = useMemo(() => {
     if (!existingBookmarks.data) return undefined;
     if (!allBookmarks) return undefined;
+
     return allBookmarks.filter((b) => !existingBookmarks.data.some((eb) => eb.url === b.url));
   }, [existingBookmarks.data, allBookmarks]);
+
+  const preparedBookmarks = useMemo(() => {
+    if (!importAvailableBookmarks) return [];
+
+    return importAvailableBookmarks.map((bookmark) => ({
+      original: bookmark,
+      titlePrepared: fuzzysort.prepare(bookmark.title || ""),
+      urlPrepared: fuzzysort.prepare(bookmark.url || ""),
+      folderPrepared: fuzzysort.prepare(bookmark.folder || ""),
+    }));
+  }, [importAvailableBookmarks]);
 
   const filtered = useMemo(() => {
     if (!importAvailableBookmarks) return undefined;
     if (!keyword) return importAvailableBookmarks.slice(0, LIMIT_AT_ONCE);
 
-    miniSearch.removeAll();
-    miniSearch.addAll(importAvailableBookmarks);
+    const results = preparedBookmarks
+      .map((item) => {
+        const titleResult = fuzzysort.single(keyword, item.titlePrepared);
+        const urlResult = fuzzysort.single(keyword, item.urlPrepared);
+        const folderResult = fuzzysort.single(keyword, item.folderPrepared);
 
-    const results = miniSearch.search(keyword, { prefix: true, combineWith: "AND" }) as unknown as BrowserBookmark[];
-    return results.slice(0, LIMIT_AT_ONCE);
-  }, [importAvailableBookmarks, keyword]);
+        // Select the best score
+        const bestScore = [titleResult?.score, urlResult?.score, folderResult?.score]
+          .filter((score) => score !== undefined)
+          .reduce(
+            (best, current) => (current && (best === undefined || current > best) ? current : best),
+            undefined as number | undefined,
+          );
 
-  useEffect(() => {
-    return () => {
-      miniSearch.removeAll();
-    };
-  }, []);
+        return {
+          item: item.original,
+          score: bestScore,
+        };
+      })
+      .filter((result) => result.score !== undefined)
+      .sort((a, b) => (b.score || 0) - (a.score || 0))
+      .map((result) => result.item)
+      .slice(0, LIMIT_AT_ONCE);
+
+    return results;
+  }, [importAvailableBookmarks, keyword, preparedBookmarks]);
 
   const toggleBookmarkSelection = (bookmark: BrowserBookmark) => {
     setSelectedBookmarks((prev) =>

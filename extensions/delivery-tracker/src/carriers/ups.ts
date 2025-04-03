@@ -1,4 +1,4 @@
-import { Package } from "../package";
+import { Package, packagesFromOfflineCarrier } from "../package";
 import { getPreferenceValues, Cache } from "@raycast/api";
 import fetch from "node-fetch";
 import { randomUUID } from "node:crypto";
@@ -31,8 +31,8 @@ export async function updateUpsTracking(delivery: Delivery): Promise<Package[]> 
   const clientSecret = preferences.upsClientSecret;
 
   if (!clientId || !clientSecret) {
-    console.log(`Unable to update tracking for ${trackingNumber} because clientId or clientSecret is missing`);
-    throw new Error("UPS client ID or client secret is missing.  Ensure they are filled in this extension's settings.");
+    console.log(`Unable to update remote tracking for ${trackingNumber} because clientId or clientSecret is missing`);
+    return packagesFromOfflineCarrier(delivery);
   }
 
   const loginResponse = await loginWithCachedData(clientId, clientSecret);
