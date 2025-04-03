@@ -6,10 +6,12 @@
   "icon": "slack-icon-rounded.png",
   "author": "mommertf",
   "contributors": [
-    "Elliot67",
     "stelo",
     "thomaslombart",
     "Rob"
+  ],
+  "pastContributors": [
+    "Elliot67"
   ],
   "categories": [
     "Communication",
