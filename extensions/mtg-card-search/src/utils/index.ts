@@ -43,6 +43,12 @@ export const mapCard = (card: ScryfallCard): MtgCard => {
       keywords: card.keywords,
       artist: card.artist,
       gameChanger: card.game_changer,
+      legalities: {
+        commander: card.legalities.commander,
+        standard: card.legalities.standard,
+        modern: card.legalities.modern,
+        duel: card.legalities.duel,
+      },
     },
     faces: mapCardFaces(card),
   };

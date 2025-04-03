@@ -1,5 +1,5 @@
-import { Detail, Color } from "@raycast/api";
-import type { ScryfallSet, Rarity, MtgCardMetadata } from "../types";
+import { Color, Detail } from "@raycast/api";
+import { Legality, MtgCardMetadata, Rarity, ScryfallSet } from "../types";
 import { capitalize } from "../utils";
 import { useFetch } from "@raycast/utils";
 
@@ -13,13 +13,20 @@ const ManaMapping = {
 } as const;
 
 const RarityMapping: Record<Rarity, string> = {
-  common: "#191917",
-  uncommon: "#AACADA",
-  rare: "#E2CE96",
-  mythic: "#DB7B3B",
-  special: "#85699C",
-  bonus: "#F68624",
+  [Rarity.Common]: "#191917",
+  [Rarity.Uncommon]: "#AACADA",
+  [Rarity.Rare]: "#E2CE96",
+  [Rarity.Mythic]: "#DB7B3B",
+  [Rarity.Special]: "#85699C",
+  [Rarity.Bonus]: "#F68624",
   basic: "raycast-primary-text",
+} as const;
+
+const legalColorMap: Record<Legality, string> = {
+  [Legality.Legal]: Color.Green,
+  [Legality.NotLegal]: Color.Red,
+  [Legality.Banned]: Color.Red,
+  [Legality.Restricted]: Color.Yellow,
 } as const;
 
 const formatPrices = (prices: MtgCardMetadata["prices"]) => {
@@ -69,7 +76,6 @@ export default function CardMetadata({ metadata }: Props) {
 
   return (
     <Detail.Metadata>
-      {metadata.gameChanger && <Detail.Metadata.Label title="⚠️ Game Changer" />}
       <Detail.Metadata.Label
         title="Set"
         text={metadata.set.name}
@@ -98,6 +104,12 @@ export default function CardMetadata({ metadata }: Props) {
       <Detail.Metadata.TagList title="Price">
         {pricesList.map((t, index) => (
           <Detail.Metadata.TagList.Item key={t + index} text={t} />
+        ))}
+      </Detail.Metadata.TagList>
+      <Detail.Metadata.TagList title="Legality">
+        {metadata.gameChanger && <Detail.Metadata.TagList.Item text="⚠️ EDH Game Changer" color={Color.Yellow} />}
+        {Object.entries(metadata.legalities).map(([format, legal]) => (
+          <Detail.Metadata.TagList.Item key={format} text={capitalize(format)} color={legalColorMap[legal]} />
         ))}
       </Detail.Metadata.TagList>
       <Detail.Metadata.Label title="Artist" text={metadata.artist} icon="🎨" />

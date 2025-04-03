@@ -1,4 +1,4 @@
-import { Rarity } from "./server";
+import { Legality, Rarity } from "./server";
 
 export interface MtgCardMetadata {
   set: {
@@ -11,6 +11,12 @@ export interface MtgCardMetadata {
   keywords: string[];
   artist: string;
   gameChanger: boolean;
+  legalities: {
+    commander: Legality;
+    standard: Legality;
+    modern: Legality;
+    duel: Legality;
+  };
 }
 
 export interface MtgCardFace {
