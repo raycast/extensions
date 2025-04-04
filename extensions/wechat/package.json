@@ -47,8 +47,5 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "build": "ray build -e dist"
-  },
-  "assets": [
-    "assets"
-  ]
+  }
 }
