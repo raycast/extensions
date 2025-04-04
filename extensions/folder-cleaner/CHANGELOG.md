@@ -1,6 +1,6 @@
 # Folder Cleaner Changelog
 
-## [Clean One & Improvements] - {PR_MERGE_DATE}
+## [Clean One & Improvements] - 2025-04-04
 
 - Add action to clean / organize just one file
 - Add delete folder confirmation alert
