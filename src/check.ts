@@ -16,7 +16,7 @@ async function showDetectionResults(
   resourceName?: string,
 ) {
   const totalEngines = stats.malicious + stats.suspicious + stats.undetected;
-  const detectionRate = ((stats.malicious + stats.suspicious) / totalEngines) * 100;
+  const detectionRate = totalEngines === 0 ? 0 : ((stats.malicious + stats.suspicious) / totalEngines) * 100;
 
   if (stats.malicious > 0 || stats.suspicious > 0) {
     await showToast({
@@ -156,7 +156,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
           const fileName = path.basename(filePath);
 
           try {
-            const fileBuffer = fs.readFileSync(filePath);
+            const fileBuffer = await fs.promises.readFile(filePath);
             const hash = await calculateSha256(fileBuffer);
 
             const report = await getFileReport(hash);
