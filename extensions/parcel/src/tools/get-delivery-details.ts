@@ -1,4 +1,4 @@
-import { fetchDeliveries } from "../api";
+import { fetchDeliveries, getStatusDescription, FilterMode } from "../api";
 
 /**
  * Get detailed information about a specific delivery.
@@ -20,12 +20,12 @@ type Input = {
 export default async function getDeliveryDetails(input: Input) {
   try {
     // Try active deliveries first
-    let deliveries = await fetchDeliveries("active");
+    let deliveries = await fetchDeliveries(FilterMode.ACTIVE);
     let delivery = deliveries.find((d) => d.tracking_number === input.tracking_number);
 
     // If not found in active, try recent
     if (!delivery) {
-      deliveries = await fetchDeliveries("recent");
+      deliveries = await fetchDeliveries(FilterMode.RECENT);
       delivery = deliveries.find((d) => d.tracking_number === input.tracking_number);
     }
 
@@ -104,19 +104,4 @@ export default async function getDeliveryDetails(input: Input) {
   } catch (error) {
     throw new Error(`Failed to fetch delivery details: ${(error as Error).message}`);
   }
-}
-
-// Helper function to get status descriptions
-function getStatusDescription(statusCode: string | number): string {
-  const STATUS_DESCRIPTIONS: Record<string, string> = {
-    delivered: "Delivered",
-    out_for_delivery: "Out for Delivery",
-    in_transit: "In Transit",
-    exception: "Exception",
-    pending: "Pending",
-    expired: "Expired",
-    returning: "Returning to Sender",
-  };
-
-  return STATUS_DESCRIPTIONS[statusCode.toString()] || "Unknown Status";
 }
