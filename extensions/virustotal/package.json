@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "virustotal",
+  "title": "VirusTotal",
+  "description": "Check files, URLs, and hashes for malware using VirusTotal",
+  "icon": "virustotal-icon.png",
+  "author": "sadv1r",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check",
+      "title": "Check File or URL",
+      "description": "Check files, URLs, or hashes with VirusTotal",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "input",
+          "placeholder": "Hash or URL",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "launchType": "selection"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "VirusTotal API Key",
+      "description": "Your VirusTotal API key",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
