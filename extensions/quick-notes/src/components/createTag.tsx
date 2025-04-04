@@ -16,7 +16,7 @@ const CreateTag = ({ tag }: { tag?: string }) => {
   const { handleSubmit, itemProps } = useForm<TagForm>({
     async onSubmit(values) {
       // if tag already exists, don't do anything
-      if (tags.find((tag) => tag.name === values.name)) {
+      if (tags.find((tag) => tag.name.toLocaleLowerCase() === values.name.toLocaleLowerCase())) {
         showToast({ title: "Tag Exists" });
         pop();
         return;
