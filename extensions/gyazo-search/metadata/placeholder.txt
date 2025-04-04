@@ -1,0 +1,14 @@
+# Screenshot Placeholders
+
+This directory should contain the following screenshot files:
+- screenshot-1.png - Showing the Gyazo Search Grid View
+
+Please replace this file with actual screenshots of your extension in action before submitting to the Raycast store.
+
+## Screenshot Guidelines
+
+1. Screenshots should be high quality and clearly show the extension's functionality
+2. Recommended resolution: 1600x1000 pixels
+3. Use real data (with sensitive information redacted if necessary)
+4. Show the extension in action with search results
+5. Capture both the grid view
