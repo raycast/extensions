@@ -1,6 +1,10 @@
 # Jira Changelog
 
-## [AI Extension Fix] - {PR_MERGE_DATE}
+## [Improve self-hosted Jira support] - {PR_MERGE_DATE}
+
+- Added experimental option "Use token for self-hosted Jira"
+
+## [AI Extension Fix] - 2025-02-27
 
 Reduced the numbers of issues being passed to the AI during search to avoid bloating it.
 
