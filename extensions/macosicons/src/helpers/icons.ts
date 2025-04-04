@@ -6,20 +6,24 @@ import { Store } from "./store.ts";
 import { execPromise } from "./utils.ts";
 
 export async function setIcon(app: Application, icon: IconMetadata | null) {
-  const toast = await showToast({
-    style: Toast.Style.Animated,
-    title: `Updating icon...`,
-  });
-
   try {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Updating icon...`,
+      message: app.name,
+    });
     if (!icon) {
-      await removeIcon(app);
+      await revertIcon(app);
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      toast.title = "Icon set to default";
     } else {
       await updateIcon(app, icon);
+
+      toast.title = "Icon updated";
     }
 
     toast.style = Toast.Style.Success;
-    toast.title = "Changed icon";
     toast.message = `Relaunch ${app.name} from dock to see changes`;
     toast.primaryAction = {
       title: `Clear Cache and Relaunch ${app.name}`,
@@ -63,7 +67,7 @@ export async function clearDockCache() {
 }
 
 async function updateIcon(app: Application, icon: IconMetadata) {
-  return Promise.all([
+  return Promise.allSettled([
     runAppleScript(
       `
 			use framework "Foundation"
@@ -79,10 +83,10 @@ async function updateIcon(app: Application, icon: IconMetadata) {
   ]);
 }
 
-async function removeIcon(app: Application) {
-  return Promise.all([
+async function revertIcon(app: Application) {
+  return Promise.allSettled([
     execPromise(
-      `xattr -d -r com.apple.FinderInfo "${app.path}" && rm ${path.join(app.path, "/Icon\r")}`,
+      `xattr -d -r com.apple.FinderInfo "${app.path}" && rm "${path.join(app.path, "Icon\r")}"`,
     ),
     Store.unsetIcon(app),
   ]);

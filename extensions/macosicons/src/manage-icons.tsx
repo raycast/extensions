@@ -107,7 +107,7 @@ export default function ManageIconsCommand() {
           />
         ))}
       <Grid.EmptyView
-        title="No custom icons found"
+        title="You haven't used any icons yet"
         actions={
           <ActionPanel>
             <Action.Push
@@ -158,7 +158,11 @@ function ApplicationSection({
         }
         actions={
           <ActionPanel>
-            <Action title="Revert Icon" icon={Icon.Undo} onAction={revert} />
+            <Action
+              title="Revert Icon to Default"
+              icon={Icon.Undo}
+              onAction={revert}
+            />
           </ActionPanel>
         }
       />
