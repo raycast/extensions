@@ -85,7 +85,7 @@ const Command = () => {
   if (isLoading) {
     return (
       <MenuBarExtra icon={Icon.Clock} tooltip="Loading tasks...">
-        <MenuBarExtra.Item title="Obsidian Tasks is loading..." />;
+        <MenuBarExtra.Item title="Obsidian Tasks is loading..." />
       </MenuBarExtra>
     );
   }
