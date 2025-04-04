@@ -124,6 +124,10 @@ export default function Command() {
                 title="Copy Reference"
                 content={transaction.reference}
               />
+                 <Action.CopyToClipboard
+                title="Copy Customer Email"
+                content={transaction.customer?.email}
+              />
               <Action.Push
                 target={
                   <IssueRefund
