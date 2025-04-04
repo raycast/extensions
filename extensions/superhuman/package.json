@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "superhuman",
+  "title": "Superhuman",
+  "description": "Boost your email workflow with powerful contextual Superhuman integration. Draft emails with context and search your inbox using Superhuman's advanced operators - all without leaving flow.",
+  "icon": "extension-icon.png",
+  "author": "jlokos",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "placeholder",
+      "title": "Placeholder",
+      "description": "Placeholder until as extensions require a command",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "draft-email",
+      "title": "Draft Email",
+      "description": "Create a new email draft in Superhuman with recipient, subject, and body.",
+      "icon": "extension-icon.png",
+      "keywords": ["compose", "write", "new", "email", "mail", "message", "send", "draft", "create", "author", "prepare"]
+    },
+    {
+      "name": "search-inbox",
+      "title": "Search Superhuman",
+      "description": "Search for emails within Superhuman using search operators like from:, to:, subject:, has:attachment. Supports complex queries to help find specific emails.",
+      "icon": "extension-icon.png",
+      "keywords": ["find", "search", "query", "emails", "messages", "filter", "locate", "discover", "inbox"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableDraftPreviews",
+      "title": "Draft Preferences",
+      "label": "Enable Draft Previews",
+      "description": "Show a preview of the email before creating it, allowing you to review before opening in Superhuman",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
