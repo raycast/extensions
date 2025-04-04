@@ -1,6 +1,6 @@
 # Figma Files Changelog
 
-## [Adds cache clearing action] - {PR_MERGE_DATE}
+## [Adds cache clearing action] - 2025-04-04
 
 - Adds action to clear all cache (some users complained this was out of date).
 
