@@ -1,12 +1,10 @@
-import type { Package } from "../pypi";
-
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { PackageDetail } from "./PackageDetail";
+import { Package } from "../types";
 
 interface PackageListItemProps {
   pkg: Package;
 }
-
 export const PackageListItem = ({ pkg }: PackageListItemProps): JSX.Element => {
   const accessories: List.Item.Accessory[] = [
     {

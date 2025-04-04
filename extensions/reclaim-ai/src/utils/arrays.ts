@@ -32,7 +32,7 @@ export const alphaComparator: SortStateComparator<string | undefined> = (a = "",
   b = b.toLowerCase();
   if (a && !b) return -1;
   if (!a && b) return 1;
-  // eslint-disable-next-line no-nested-ternary
+
   return a === b ? 0 : a > b ? 1 : -1;
 };
 
