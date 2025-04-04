@@ -45,7 +45,7 @@ export default function Command() {
           showToast({
             style: Toast.Style.Failure,
             title: 'Failed to fetch balances',
-            message: balance.message
+            message: balance.message,
           })
         }
       } catch (error) {
