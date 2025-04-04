@@ -1,5 +1,9 @@
 # Dub Link Shortener Changelog
 
+## [Chore] - 2025-04-04
+
+- Bump dub sdk to v0.61.5
+
 ## [Improvements] - 2025-03-12
 
 - Add a toggle to show/hide details in the search links command
