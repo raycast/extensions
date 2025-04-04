@@ -2,109 +2,98 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "solana-explorer",
   "title": "Solana Explorer",
-  "description": "Look up transactions and accounts on the various Solana clusters.",
-  "icon": "command-icon.png",
-  "author": "darklong",
-  "license": "MIT",
-  "contributors": [
-    "AnishDe12020"
+  "description": "Brings the Solana Explorer to your Raycast. Quickly Search by Address, Transaction Hash, block or token.",
+  "icon": "extension-icon.png",
+  "author": "dharmin_nagar",
+  "categories": [
+    "Finance",
+    "Productivity"
   ],
+  "license": "MIT",
   "commands": [
     {
-      "name": "mainnet",
-      "title": "Solana Mainnet Explorer",
-      "description": "Explore transactions on the mainnet",
-      "mode": "view"
-    },
-    {
-      "name": "testnet",
-      "title": "Solana Testnet Explorer",
-      "description": "Explore transactions on the testnet",
-      "mode": "view"
-    },
-    {
-      "name": "devnet",
-      "title": "Solana Devnet Explorer",
-      "description": "Explore transactions on the devnet",
+      "name": "search-explorer",
+      "title": "Search Explorer",
+      "description": "Quickly open up a Search Menu for the Explorer",
       "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "explorer",
-      "description": "Your preferred Solana explorer",
+      "name": "defaultExplorer",
       "type": "dropdown",
-      "required": false,
-      "title": "Preferred explorer",
-      "default": "SOLSCAN",
+      "required": true,
+      "title": "Default Explorer",
+      "description": "Choose your preferred Solana explorer",
       "data": [
-        {
-          "title": "Solscan",
-          "value": "SOLSCAN"
-        },
         {
           "title": "Solana Explorer",
-          "value": "SOLANA_EXPLORER"
+          "value": "Solana Explorer"
         },
         {
-          "title": "Solana FM",
-          "value": "SOLANA_FM"
+          "title": "Solscan",
+          "value": "Solscan"
         },
         {
-          "title": "Solana Beach",
-          "value": "SOLANA_BEACH"
+          "title": "Solana.fm",
+          "value": "SolanaFM"
+        },
+        {
+          "title": "Orb",
+          "value": "Orb"
         }
-      ]
+      ],
+      "default": "Solana Explorer"
     },
     {
-      "name": "maxStorage",
-      "description": "Maximum last values to store",
-      "type": "dropdown",
-      "required": false,
-      "title": "Maximum last values to store",
-      "default": "20",
-      "data": [
-        {
-          "title": "10",
-          "value": "10"
-        },
-        {
-          "title": "20",
-          "value": "20"
-        },
-        {
-          "title": "50",
-          "value": "50"
-        },
-        {
-          "title": "100",
-          "value": "100"
-        }
-      ]
+      "name": "mainnetRpcUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Mainnet RPC URL",
+      "description": "Enter your preferred Mainnet RPC URL",
+      "default": "https://api.mainnet-beta.solana.com"
+    },
+    {
+      "name": "devnetRpcUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Devnet RPC URL",
+      "description": "Enter your preferred Devnet RPC URL",
+      "default": "https://api.devnet.solana.com"
+    },
+    {
+      "name": "testnetRpcUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Testnet RPC URL",
+      "description": "Enter your preferred Testnet RPC URL",
+      "default": "https://api.testnet.solana.com"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.46.1",
-    "@raycast/utils": "^1.4.16",
+    "@bonfida/spl-name-service": "^3.0.10",
+    "@metaplex-foundation/mpl-token-metadata": "^3.4.0",
+    "@metaplex-foundation/umi-bundle-defaults": "^1.1.1",
+    "@raycast/api": "^1.94.2",
+    "@raycast/utils": "^1.17.0",
+    "@solana/spl-token": "^0.3.11",
     "@solana/spl-token-registry": "^0.2.4574",
-    "@solana/web3.js": "^1.73.0",
-    "axios": "^1.8.4",
-    "use-debounce": "^9.0.3"
+    "@solana/web3.js": "^1.91.1"
   },
   "devDependencies": {
-    "@types/node": "~18.11.18",
-    "@types/react": "^18.0.27",
-    "@typescript-eslint/eslint-plugin": "^5.49.0",
-    "@typescript-eslint/parser": "^5.49.0",
-    "eslint": "^8.33.0",
-    "eslint-config-prettier": "^8.6.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "react-devtools": "^4.27.1",
-    "typescript": "^4.9.4"
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
