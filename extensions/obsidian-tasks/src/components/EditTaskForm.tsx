@@ -3,14 +3,14 @@ import { useState } from "react";
 import { updateTask } from "../utils/taskOperations";
 import { Task, Priority } from "../types";
 import { ICONS } from "../constants";
-
+import { getFormattedDescription } from "../utils";
 interface EditTaskFormProps {
   task: Task;
   onTaskUpdated: (task: Task) => void;
 }
 
 export function EditTaskForm({ task, onTaskUpdated }: EditTaskFormProps) {
-  const [description, setDescription] = useState(task.description);
+  const [text, setText] = useState(getFormattedDescription(task));
   const [dueDate, setDueDate] = useState<Date | undefined>(task.dueDate);
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>(task.scheduledDate);
   const [startDate, setStartDate] = useState<Date | undefined>(task.startDate);
@@ -23,10 +23,11 @@ export function EditTaskForm({ task, onTaskUpdated }: EditTaskFormProps) {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    console.log(text);
     try {
       const updatedTask: Task = {
         ...task,
-        description,
+        description: text,
         dueDate,
         scheduledDate,
         startDate,
@@ -91,8 +92,8 @@ export function EditTaskForm({ task, onTaskUpdated }: EditTaskFormProps) {
         id="description"
         title="Description"
         placeholder="Enter task description"
-        value={description}
-        onChange={setDescription}
+        value={text}
+        onChange={setText}
         autoFocus
       />
 

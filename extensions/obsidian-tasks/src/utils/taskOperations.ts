@@ -86,7 +86,7 @@ export const addTask = async (
       createdAt: new Date(),
       line: lines.length,
       filePath: taskFile.path,
-      indentation: "  ", // Default indentation
+      indentation: "", // Default indentation
     };
 
     const taskText = formatTask(newTask);
