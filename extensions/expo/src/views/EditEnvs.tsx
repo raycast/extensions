@@ -2,11 +2,10 @@ import { showToast, Toast, Form, ActionPanel, Action, useNavigation, Icon } from
 import { useForm, FormValidation } from "@raycast/utils";
 import axios, { AxiosRequestConfig } from "axios";
 import { EditAppleDeviceNameResponse } from "../lib/types/apple-devices.types";
-import { useEffect, useState } from "react";
-import { getAuthHeaders } from "../lib/utils";
 import { BASE_URL } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
 import { EnvironmentVariablesItem } from "../lib/types/project-envs.types";
+import useAuth from "../hooks/useAuth";
 
 interface EditEnvPayload {
   name: string;
@@ -15,7 +14,7 @@ interface EditEnvPayload {
   environments: Array<"DEVELOPMENT" | "PREVIEW" | "PRODUCTION">;
 }
 export default function EditEnv({ env, refreshEnvs }: { env: EnvironmentVariablesItem; refreshEnvs: () => void }) {
-  const [headers, setHeaders] = useState<Record<string, string>>({});
+  const { authHeaders } = useAuth();
   const { pop } = useNavigation();
 
   const { handleSubmit } = useForm<EditEnvPayload>({
@@ -32,7 +31,7 @@ export default function EditEnv({ env, refreshEnvs }: { env: EnvironmentVariable
         method: "post",
         maxBodyLength: Infinity,
         url: BASE_URL,
-        headers,
+        headers: authHeaders,
         data: JSON.stringify([
           {
             operationName: "UpdateEnvironmentVariable",
@@ -43,14 +42,8 @@ export default function EditEnv({ env, refreshEnvs }: { env: EnvironmentVariable
         ]),
       };
 
-      console.log(payload);
-
       try {
         const resp = await axios.request<EditAppleDeviceNameResponse>(config);
-
-        console.log("==============");
-
-        console.log(resp.data);
 
         if ("errors" in resp.data) {
           console.log("++++++++++++++");
@@ -61,16 +54,12 @@ export default function EditEnv({ env, refreshEnvs }: { env: EnvironmentVariable
             message: errorMessages,
             style: Toast.Style.Failure,
           });
-
-          console.error(errorMessages);
         } else {
           refreshEnvs();
           showToast({ title: "Environment variable updated", message: "", style: Toast.Style.Success });
           pop();
         }
       } catch (error) {
-        console.log("&&&&&&&&&&&&&&");
-        console.error((error as Error).message);
         showToast({
           title: "Failed to update device name",
           message: (error as Error).message || "",
@@ -83,14 +72,6 @@ export default function EditEnv({ env, refreshEnvs }: { env: EnvironmentVariable
       value: FormValidation.Required,
     },
   });
-
-  useEffect(() => {
-    async function fetchHeaders() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    fetchHeaders();
-  }, []);
 
   return (
     <Form

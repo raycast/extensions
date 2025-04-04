@@ -1,16 +1,16 @@
 import { showToast, Toast, ActionPanel, Detail, Action, Icon, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useEffect } from "react";
 import { BASE_URL } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
-import { getAuthHeaders } from "../lib/utils";
+import { isObjectEmpty } from "../lib/utils";
 import LogsViewer from "./LogsViewer";
 import { SubmissionDetailsResponse, SubmissionDetails } from "../lib/types/submission-details.types";
 import BuildDetails from "./BuildDetails";
 import generateSubmissionMarkdown from "../lib/markdown/generateSubmissionMarkdown";
+import useAuth from "../hooks/useAuth";
 
 export default function Submission({ submissionId }: { submissionId: string }) {
-  const [headers, setHeaders] = useState<Record<string, string> | null>(null);
+  const { authHeaders } = useAuth();
 
   const BuildDetailsPayload = JSON.stringify([
     {
@@ -26,8 +26,8 @@ export default function Submission({ submissionId }: { submissionId: string }) {
   const { isLoading, data: submission } = useFetch(BASE_URL, {
     body: BuildDetailsPayload,
     method: "post",
-    headers: headers || {},
-    execute: headers === null ? false : true,
+    headers: authHeaders,
+    execute: !isObjectEmpty(authHeaders),
     parseResponse: async (resp) => {
       const data = (await resp.json()) as SubmissionDetailsResponse;
       if ("errors" in data) {
@@ -39,7 +39,6 @@ export default function Submission({ submissionId }: { submissionId: string }) {
       return data[0].data.submissions.byId;
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching submission",
         message: (error as Error)?.message || "",
@@ -48,14 +47,6 @@ export default function Submission({ submissionId }: { submissionId: string }) {
     },
     initialData: null,
   });
-
-  useEffect(() => {
-    async function fetchHeaders() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    fetchHeaders();
-  }, []);
 
   function getExpoLink(submission: SubmissionDetails) {
     if (!submission || !submission.__typename) {

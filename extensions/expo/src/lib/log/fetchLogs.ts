@@ -28,15 +28,9 @@ type LogAsArray = [string, LogItem[]];
 export type LogGroups = LogAsArray[];
 
 export async function fetchLogs(urls: string[]): Promise<LogGroups> {
-  return new Promise((resolve, reject) => {
-    fetchUrls(urls)
-      .then((result) => {
-        const logs = result.flat().map((item) => JSON.parse(item)) as LogItem[];
-        const grouped = groupBy(logs, "phase");
-        const asArray = Object.keys(grouped).map((key) => [key, grouped[key]]);
-
-        resolve(asArray as LogGroups);
-      })
-      .catch((error) => reject(error));
-  });
+  const result = await fetchUrls(urls);
+  const logs = result.flat().map((item) => JSON.parse(item)) as LogItem[];
+  const grouped = groupBy(logs, "phase");
+  const asArray = Object.keys(grouped).map((key) => [key, grouped[key]]);
+  return asArray as LogGroups;
 }

@@ -1,9 +1,9 @@
 import { showToast, Toast, List, Icon, ActionPanel, Action, Color, confirmAlert, Alert } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { BASE_URL } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
-import { changeCase, getAuthHeaders } from "../lib/utils";
+import { changeCase, isObjectEmpty } from "../lib/utils";
 import {
   EnvironmentVariablesItem,
   ProjectEnvsResponse,
@@ -12,9 +12,10 @@ import {
 import EditEnv from "./EditEnvs";
 import axios from "axios";
 import CreateEnv from "./CreateEnv";
+import useAuth from "../hooks/useAuth";
 
 export default function ProjectEnvs({ appFullName }: { appFullName: string }) {
-  const [headers, setHeaders] = useState<Record<string, string> | null>(null);
+  const { authHeaders } = useAuth();
 
   const environments = ["ALL", "DEVELOPMENT", "PREVIEW", "PRODUCTION"];
 
@@ -48,8 +49,8 @@ export default function ProjectEnvs({ appFullName }: { appFullName: string }) {
   const { isLoading, data, revalidate } = useFetch(BASE_URL, {
     body: environment === "ALL" ? ProjectEnvsPayload : ProjectSenstiveEnvsPayload,
     method: "post",
-    headers: headers || {},
-    execute: headers === null ? false : true,
+    headers: authHeaders,
+    execute: !isObjectEmpty(authHeaders),
     parseResponse: async (resp) => {
       const data = (await resp.json()) as ProjectEnvsSenstiveResponse | ProjectEnvsResponse;
       if ("errors" in data) {
@@ -66,16 +67,13 @@ export default function ProjectEnvs({ appFullName }: { appFullName: string }) {
 
       const allRes = data[0].data.app.byFullName.environmentVariables;
 
-      console.log({ allRes, senstiveRes });
-
       const toReturn = allRes ?? senstiveRes;
 
       return toReturn;
     },
     onError: (error) => {
-      console.log(error);
       showToast({
-        title: "Error fetching project builds",
+        title: "Error fetching environment variables",
         message: (error as Error)?.message || "",
         style: Toast.Style.Failure,
       });
@@ -112,11 +110,12 @@ export default function ProjectEnvs({ appFullName }: { appFullName: string }) {
 
       try {
         const { data } = await axios.post(BASE_URL, deleteEnvPayload, {
-          headers: headers || {},
+          headers: authHeaders,
         });
 
         if ("errors" in data) {
           const errorMessages = (data as ErrorResponse).errors.map((error) => error.message).join(", ");
+
           showToast({
             title: "Error Fetching Project Enviroment Variables",
             message: errorMessages,
@@ -133,14 +132,6 @@ export default function ProjectEnvs({ appFullName }: { appFullName: string }) {
       await showToast({ title: "Operation Canceled" });
     }
   }
-
-  useEffect(() => {
-    async function fetchHeaders() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    fetchHeaders();
-  }, []);
 
   return (
     <List
@@ -160,7 +151,7 @@ export default function ProjectEnvs({ appFullName }: { appFullName: string }) {
         </ActionPanel>
       }
     >
-      {data ? (
+      {data && data.length > 0 ? (
         <>
           {data.map((env) => (
             <List.Item

@@ -2,10 +2,9 @@ import { showToast, Toast, Form, ActionPanel, Action, useNavigation, Icon } from
 import { useForm, FormValidation } from "@raycast/utils";
 import axios, { AxiosRequestConfig } from "axios";
 import { EditAppleDeviceNameResponse } from "../lib/types/apple-devices.types";
-import { useEffect, useState } from "react";
-import { getAuthHeaders } from "../lib/utils";
 import { BASE_URL } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
+import useAuth from "../hooks/useAuth";
 
 interface CreateEnvPayload {
   name: string;
@@ -14,7 +13,7 @@ interface CreateEnvPayload {
   environments: Array<"DEVELOPMENT" | "PREVIEW" | "PRODUCTION">;
 }
 export default function CreateEnv({ refreshEnvs }: { refreshEnvs: () => void }) {
-  const [headers, setHeaders] = useState<Record<string, string>>({});
+  const { authHeaders } = useAuth();
   const { pop } = useNavigation();
 
   const { handleSubmit } = useForm<CreateEnvPayload>({
@@ -23,7 +22,7 @@ export default function CreateEnv({ refreshEnvs }: { refreshEnvs: () => void }) 
         method: "post",
         maxBodyLength: Infinity,
         url: BASE_URL,
-        headers,
+        headers: authHeaders,
         data: JSON.stringify([
           {
             operationName: "CreateBulkEnvironmentVariableForApp",
@@ -45,29 +44,19 @@ export default function CreateEnv({ refreshEnvs }: { refreshEnvs: () => void }) 
       try {
         const resp = await axios.request<EditAppleDeviceNameResponse>(config);
 
-        console.log("==============");
-
-        console.log(resp.data);
-
         if ("errors" in resp.data) {
-          console.log("++++++++++++++");
-
           const errorMessages = (resp.data as ErrorResponse).errors.map((error) => error.message).join(", ");
           showToast({
             title: "Failed to created enviroment variable",
             message: errorMessages,
             style: Toast.Style.Failure,
           });
-
-          console.error(errorMessages);
         } else {
           refreshEnvs();
           showToast({ title: "Environment variable created", message: "", style: Toast.Style.Success });
           pop();
         }
       } catch (error) {
-        console.log("&&&&&&&&&&&&&&");
-        console.error((error as Error).message);
         showToast({
           title: "Failed to update device name",
           message: (error as Error).message || "",
@@ -83,14 +72,6 @@ export default function CreateEnv({ refreshEnvs }: { refreshEnvs: () => void }) 
     },
   });
 
-  useEffect(() => {
-    async function fetchHeaders() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    fetchHeaders();
-  }, []);
-
   return (
     <Form
       actions={
@@ -99,6 +80,7 @@ export default function CreateEnv({ refreshEnvs }: { refreshEnvs: () => void }) 
         </ActionPanel>
       }
       navigationTitle="Create Enviroment Variable"
+      enableDrafts
     >
       <Form.TextField id="name" title="Name" placeholder="" />
 

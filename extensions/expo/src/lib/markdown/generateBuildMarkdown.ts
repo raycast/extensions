@@ -20,7 +20,7 @@ export default function generateBuildMarkdown(build: Build): string {
 | **PROPERTY**      | **VALUE**       |
 |-------------------|-----------------|
 | Profile       | ${build.buildProfile} |
-| Deployment    | ${build.appBuildVersion} |
+| Deployment    | ${build.deployment.channel.name} |
 | Version       | ${build.runtime?.version} |
 | Build Number  | ${build.appBuildVersion} |
 | Commit        | ${build.gitCommitHash} |

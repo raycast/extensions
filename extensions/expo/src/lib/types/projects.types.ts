@@ -44,7 +44,15 @@ export interface Project {
     id: string;
     __typename: string;
   };
-  githubRepository: null;
+  githubRepository: {
+    githubRepositoryUrl: string;
+    __typename: string;
+    metadata: {
+      githubRepoName: string;
+      githubRepoOwnerName: string;
+      __typename: string;
+    };
+  };
   lastDeletionAttemptTime: null;
 }
 
