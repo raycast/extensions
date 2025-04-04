@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
-import { Note, Vault } from "../utils/interfaces";
-import { filterContent } from "../utils/utils";
+import { renewCache } from "../api/cache/cache.service";
+import { Note } from "../api/vault/notes/notes.types";
+import { filterContent } from "../api/vault/vault.service";
+import { Vault } from "../api/vault/vault.types";
 import { NoteActions, OpenNoteActions } from "../utils/actions";
-import { renewCache } from "../utils/data/cache";
 
 export function NoteQuickLook(props: { showTitle: boolean; note: Note; vault: Vault; allNotes: Note[] }) {
   const { note, showTitle, allNotes, vault } = props;
