@@ -50,10 +50,6 @@ export default async function Command() {
     });
   } catch (error) {
     // Show error toast
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to create calendar event",
-      message: String(error),
-    });
+    await showFailureToast(error, { title: "Failed to create calendar event" });
   }
 }
