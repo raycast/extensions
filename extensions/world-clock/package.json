@@ -164,7 +164,7 @@
   "dependencies": {
     "@raycast/api": "^1.89.0",
     "@raycast/utils": "^1.18.1",
-    "axios": "1.7.4",
+    "axios": "^1.8.4",
     "file-url": "^4.0.0",
     "date-fns": "^4.1.0"
   },

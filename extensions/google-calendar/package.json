@@ -5,6 +5,9 @@
   "description": "Manage your Google calendar easily. Create events, search contacts, and check out your upcoming schedule.",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "j3lte"
+  ],
   "categories": [
     "Productivity",
     "Applications"
@@ -40,6 +43,13 @@
       "name": "list-events",
       "title": "List Events",
       "description": "View your upcoming Google Calendar events",
+      "mode": "view",
+      "subtitle": "Google Calendar"
+    },
+    {
+      "name": "list-calendars",
+      "title": "List Calendars",
+      "description": "View your Google Calendars",
       "mode": "view",
       "subtitle": "Google Calendar"
     }
@@ -84,6 +94,11 @@
       "name": "get-current-time",
       "title": "Get Current Time",
       "description": "Returns the current time of the user in the user's timezone"
+    },
+    {
+      "name": "list-calendars",
+      "title": "List Calendars",
+      "description": "Lists the user's Google Calendars"
     }
   ],
   "preferences": [
@@ -123,22 +138,22 @@
     }
   ],
   "dependencies": {
-    "@googleapis/calendar": "^9.7.9",
+    "@googleapis/calendar": "^9.8.0",
     "@googleapis/people": "^3.0.9",
-    "@raycast/api": "^1.90.0",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.94.2",
+    "@raycast/utils": "^1.19.1",
     "date-fns": "^4.1.0",
     "humanize-duration": "^3.32.1",
-    "nanoid": "^5.1.2"
+    "nanoid": "^5.1.5"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/humanize-duration": "^3.27.4",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
