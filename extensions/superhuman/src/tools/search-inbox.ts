@@ -2,6 +2,23 @@ import { open } from "@raycast/api";
 import { Tool } from "@raycast/api";
 
 /**
+ * Common phrases that indicate someone might be trying to compose an email
+ * rather than search for existing emails
+ */
+const COMPOSE_PHRASES = [
+  "email to",
+  "send email",
+  "write to",
+  "draft",
+  "compose",
+  "new email",
+  "message to",
+  "write email",
+  "send a message",
+  "send message",
+];
+
+/**
  * Input parameters for the search-inbox tool
  * This tool is ONLY for searching existing emails in Superhuman.
  * For composing new emails, use the draft-email tool instead.
@@ -60,20 +77,7 @@ function formatSearchQuery(query: string): string {
  */
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   // Detect potential misuse - when search query looks like it's trying to compose
-  const composePhrases = [
-    "email to",
-    "send email",
-    "write to",
-    "draft",
-    "compose",
-    "new email",
-    "message to",
-    "write email",
-    "send a message",
-    "send message",
-  ];
-
-  const searchLooksLikeCompose = composePhrases.some((phrase) =>
+  const searchLooksLikeCompose = COMPOSE_PHRASES.some((phrase) =>
     input.query.toLowerCase().includes(phrase.toLowerCase()),
   );
 
@@ -110,20 +114,7 @@ export default async function tool(input: Input): Promise<string> {
     console.log(`Searching in Superhuman`);
 
     // Look for potential misuse where someone is trying to compose
-    const composePhrases = [
-      "email to",
-      "send email",
-      "write to",
-      "draft",
-      "compose",
-      "new email",
-      "message to",
-      "write email",
-      "send a message",
-      "send message",
-    ];
-
-    const searchLooksLikeCompose = composePhrases.some((phrase) =>
+    const searchLooksLikeCompose = COMPOSE_PHRASES.some((phrase) =>
       input.query.toLowerCase().includes(phrase.toLowerCase()),
     );
 
