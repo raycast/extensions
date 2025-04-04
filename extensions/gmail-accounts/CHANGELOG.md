@@ -1,6 +1,6 @@
 # Gmail Accounts Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-04-04
 
 - Fixed account parsing when account is signed out
 
