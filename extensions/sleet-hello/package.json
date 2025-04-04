@@ -1,0 +1,127 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sleet-hello",
+  "title": "Sleet X Near",
+  "description": "A hello extension by Sleet for interacting with the near blockchain.",
+  "icon": "sleet_icon_trans.png",
+  "author": "nonresistant",
+  "categories": [
+    "Finance",
+    "Security",
+    "Communication",
+    "Developer Tools",
+    "Data",
+    "Fun",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "get-greeting",
+      "title": "Get Greeting",
+      "description": "Fetch and display the greeting from the NEAR blockchain",
+      "mode": "view",
+      "view": "GetGreeting"
+    },
+    {
+      "name": "update-greeting",
+      "title": "Update Greeting",
+      "description": "Update the greeting on the NEAR blockchain using your credentials",
+      "mode": "view",
+      "view": "UpdateGreeting"
+    },
+    {
+      "name": "web4-apps",
+      "title": "Browse Web4 Apps",
+      "description": "Browse and open Web4 apps on NEAR blockchain",
+      "mode": "view",
+      "icon": "web_globe_icon.png",
+      "view": "web4-apps"
+    },
+    {
+      "name": "near-cli",
+      "title": "Near Cli",
+      "description": "Run NEAR CLI commands directly from Raycast",
+      "mode": "view",
+      "icon": "sleet_code_icon_trans.png",
+      "view": "NearCli"
+    },
+    {
+      "name": "submit-web4-app",
+      "title": "Submit Web4 App",
+      "description": "Submit or update your Web4 app to the catalog",
+      "mode": "view",
+      "icon": "web_globe_icon.png",
+      "view": "submit-web4-app"
+    },
+    {
+      "name": "near-dapps",
+      "title": "Browse Near Dapps",
+      "description": "Discover and open popular NEAR ecosystem applications",
+      "mode": "view",
+      "icon": "web_globe_icon.png",
+      "view": "near-dapps"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "networkId",
+      "title": "NEAR Network",
+      "description": "Select which NEAR network to connect to",
+      "type": "dropdown",
+      "required": true,
+      "default": "testnet",
+      "data": [
+        {
+          "title": "Testnet",
+          "value": "testnet"
+        },
+        {
+          "title": "Mainnet",
+          "value": "mainnet"
+        }
+      ]
+    },
+    {
+      "name": "rpcEndpoint",
+      "title": "RPC Endpoint",
+      "description": "Select the RPC endpoint for the chosen network",
+      "type": "dropdown",
+      "required": true,
+      "default": "default",
+      "data": [
+        {
+          "title": "Default (NEAR)",
+          "value": "default"
+        },
+        {
+          "title": "FastNEAR",
+          "value": "fastnear"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.3",
+    "@raycast/utils": "^1.17.0",
+    "near-api-js": "^5.1.1",
+    "react": "^19.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "packageManager": "pnpm@10.7.1"
+}
