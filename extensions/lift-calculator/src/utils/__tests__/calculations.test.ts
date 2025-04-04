@@ -16,7 +16,7 @@ describe("calculateOneRepMax", () => {
     expect(calculateOneRepMax(225, 3)).toBe(expected2);
 
     // Let's also verify some known Epley formula results
-    // 100kg x 5 should be approximately 112.5kg
+    // 100kg x 5 should be approximately 116.65kg
     expect(calculateOneRepMax(100, 5)).toBeCloseTo(116.65, 1);
   });
 
