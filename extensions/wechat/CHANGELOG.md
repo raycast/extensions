@@ -1,12 +1,19 @@
 # WeChat Changelog
 
+## ## [New Feature] - 2025-04-04
+
+- Manage WeChatTweak directly from Raycast
+- Rerited the logic & code structure of Environment Test
+
 ## [New Feature] - 2025-04-03
 
-- Added fuzzy search contacts
-- pinned contacts
-- recent contacts
-- default avatar
-- optimized code structure and performance and much more..
+ - Added fuzzy search contacts
+ - pinned contacts
+ - recent contacts
+ - default avatar
+ - optimized code structure and performance and much more..
+ - Manage WeChatTweak directly from Raycast
+
 
 ## [Maintenance] - 2025-03-20
 

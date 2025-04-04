@@ -20,6 +20,12 @@
       "subtitle": "WeChat",
       "description": "A Raycast extension for WeChat  to quickly search your contacts and chat",
       "mode": "view"
+    },
+    {
+      "name": "manageTweak",
+      "title": "Manage WeChatTweak",
+      "description": "Install, uninstall, or manage WeChatTweak",
+      "mode": "view"
     }
   ],
   "dependencies": {

@@ -1,7 +1,7 @@
 import fetch, { AbortError } from "node-fetch";
 import { URLSearchParams } from "url";
 import { SearchResult } from "../types";
-import { isWeChatRunning } from "../utils/isWeChatRunning";
+import { WeChatManager } from "../utils/wechatManager";
 import { wechatService } from "./wechatService";
 
 const SEARCHURL = "http://localhost:48065/wechat/search";
@@ -84,7 +84,9 @@ class ContactService {
     } catch (error) {
       console.error("API search failed:", error);
       if (!(error instanceof AbortError)) {
-        await isWeChatRunning();
+        if (!WeChatManager.isWeChatRunning()) {
+          throw new Error("WeChat is not running");
+        }
       }
       throw error;
     }

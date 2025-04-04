@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { contactService } from "../services/contactService";
 import { storageService } from "../services/storageService";
 import { SearchResult, SearchState } from "../types";
-import { isWeChatRunning } from "../utils/isWeChatRunning";
+import { WeChatManager } from "../utils/wechatManager";
 
 export function useSearch() {
   const [state, setState] = useState<SearchState>({
@@ -49,7 +49,7 @@ export function useSearch() {
             isLoading: false,
           }));
 
-          showToast({
+          await showToast({
             style: Toast.Style.Success,
             title: "Search history cleared",
           });
@@ -61,7 +61,7 @@ export function useSearch() {
           }));
         }
       } else {
-        showToast({
+        await showToast({
           style: Toast.Style.Failure,
           title: "Failed to clear search history",
         });
@@ -116,13 +116,19 @@ export function useSearch() {
             }));
 
             console.error("Search failed:", error);
-            showToast({
+            await showToast({
               style: Toast.Style.Failure,
               title: "Search failed",
               message: String(error),
             });
 
-            await isWeChatRunning();
+            if (!WeChatManager.isWeChatRunning()) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "WeChat is not running",
+                message: "Please start WeChat to use this extension",
+              });
+            }
           }
         }
       }, 150);

@@ -1,32 +1,33 @@
-# Wechat
+# WeChat
 
-A [Raycast](https://www.raycast.com) extension for Wechat to quickly search your contacts and chat.
+A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your contacts and chat.
 
-![Wechat](./assets/cover.png)
-![Wechat Showcase](./metadata/showcase.png)
+![WeChat](./assets/cover.png)
+![WeChat Showcase1](./metadata/wechat-1.png)
+![WeChat Showcase2](./metadata/wechat-2.png)
 
 ## Requirements
 
-1. Install [Wechat for Mac](https://www.Wechat.com)
-2. Install [WechatTweak-macOS](https://github.com/Sunnyyoung/WechatTweak-macOS)
+1. Install [WeChat for Mac](https://www.wechat.com)
+2. Install [WeChatTweak-macOS](https://github.com/Sunnyyoung/WeChatTweak-macOS)
 
 ## Features
 
 - [x] Search Contact / 搜索微信通讯录好友
-- [x] List Search Contact Numbers / 显示检索的好友数量
 - [x] Open Contact / 打开微信好友
-- [x] List Wechat ID / 显示好友微信ID
-- [x] Copy Wechat ID / 复制微信ID
+- [x] List WeChat ID / 显示好友微信ID
 - [x] Display Avatar / 显示微信头像
-- [x] Detect if Wechat & WechatExtension is installed / 检测微信以及WechatExtension是否安装
-- [x] Support fuzzy query / 微信通讯录模糊查询
+- [x] Pinned Contacts / 置顶好友
+- [x] Recent Contacts / 最近联系人
+- [x] Support fuzzy Query / 微信通讯录模糊查询
+- [x] Manage WeChatTweak / 管理WeChatTweak
 
 ## Shortcuts
-`Enter` Open Wechat Contact / 打开微信好友
+`Enter` Open WeChat Contact / 打开微信好友
 
-`Command + c`Copy Wechat Contact ID / 复制微信好友ID
+`Command + c`Copy WeChat Contact ID / 复制微信好友ID
 
-`Command + Shift + p` Pin Wechat Contact / 置顶好友
+`Command + Shift + p` Pin WeChat Contact / 置顶好友
 
 `Command + Shift + x` Clear Search History / 清除好友搜索记录
 
