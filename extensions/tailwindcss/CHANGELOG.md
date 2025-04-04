@@ -1,6 +1,6 @@
 # Tailwind CSS Changelog
 
-## [Add Dropdown for Version Selection in UI] - {PR_MERGE_DATE}
+## [Add Dropdown for Version Selection in UI] - 2025-04-04
 
 - Add dropdown in the `Search Documentation` UI to select different Tailwind CSS versions.
 
