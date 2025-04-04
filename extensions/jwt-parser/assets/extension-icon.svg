@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="64" fill="#2A2A42"/>
+  
+  <!-- JWT Letters styled as token segments -->
+  <g>
+    <!-- J segment (blue) -->
+    <path d="M115 128L175 128L175 256C175 283.614 152.614 306 125 306L115 306L115 266L125 266C130.523 266 135 261.523 135 256L135 128Z" fill="#61DAFB"/>
+    
+    <!-- W segment (green) -->
+    <path d="M218 128L258 128L278 236L298 128L338 128L298 306L258 306L218 128Z" fill="#10B981"/>
+    
+    <!-- T segment (red) -->
+    <path d="M378 128L438 128L438 168L418 168L418 306L378 306L378 168L358 168L358 128L378 128Z" fill="#F43F5E"/>
+    
+    <!-- Connecting dots -->
+    <circle cx="196" cy="217" r="12" fill="#FCD34D"/>
+    <circle cx="318" cy="217" r="12" fill="#FCD34D"/>
+  </g>
+  
+  <!-- Key symbol at bottom -->
+  <path d="M256 330C228.386 330 206 352.386 206 380C206 407.614 228.386 430 256 430C283.614 430 306 407.614 306 380C306 352.386 283.614 330 256 330ZM256 390C261.523 390 266 385.523 266 380C266 374.477 261.523 370 256 370C250.477 370 246 374.477 246 380C246 385.523 250.477 390 256 390Z" fill="#F59E0B"/>
+  <rect x="266" y="380" width="80" height="20" rx="10" fill="#F59E0B"/>
+  <rect x="316" y="380" width="10" height="30" rx="5" fill="#F59E0B" transform="translate(342 390) rotate(90)"/>
+  <rect x="336" y="380" width="10" height="30" rx="5" fill="#F59E0B" transform="translate(362 390) rotate(90)"/>
+</svg> 
