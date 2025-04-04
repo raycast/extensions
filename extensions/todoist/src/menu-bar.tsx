@@ -19,6 +19,7 @@ import View from "./components/View";
 import { getToday } from "./helpers/dates";
 import { groupByDates } from "./helpers/groupBy";
 import { truncateMiddle } from "./helpers/menu-bar";
+import { sortByDefault } from "./helpers/sortBy";
 import { getTasksForTodayOrUpcomingView } from "./helpers/tasks";
 import useFilterTasks from "./hooks/useFilterData";
 import { useFocusedTask } from "./hooks/useFocusedTask";
@@ -36,6 +37,11 @@ function MenuBar(props: MenuBarProps) {
   const { data: filterTasks, isLoading: isLoadingFilter } = useFilterTasks(view === "filter" ? filter : "");
 
   const tasks = useMemo(() => {
+    if (view === "inbox") {
+      const inboxProject = data?.projects.find((p) => p.inbox_project);
+      return data?.items.filter((t) => t.project_id === inboxProject?.id) ?? [];
+    }
+
     const tasks = data ? getTasksForTodayOrUpcomingView(data.items, data.user.id) : [];
 
     if (view === "today") {
@@ -59,6 +65,7 @@ function MenuBar(props: MenuBarProps) {
         return isBefore(new Date(t.due.date), dateToCompare);
       });
     }
+
     return data?.items.filter((t) => t.due?.date) ?? [];
   }, [data, upcomingDays, view]);
 
@@ -88,9 +95,11 @@ function MenuBar(props: MenuBarProps) {
       return "";
     }
 
-    if (tasks && view !== "filter") {
+    if (tasks && !["filter"].includes(view)) {
       return tasks.length > 0 ? tasks.length.toString() : "🎉";
-    } else if (filterTasks) {
+    }
+
+    if (filterTasks) {
       return filterTasks.length > 0 ? filterTasks.length.toString() : "🎉";
     }
   }, [focusedTask, tasks, hideMenuBarCount, filterTasks, view, showNextTask, taskWidth]);
@@ -98,8 +107,12 @@ function MenuBar(props: MenuBarProps) {
   let taskView = tasks && <UpcomingView tasks={tasks} data={data} setData={setData} />;
   if (view === "today") {
     taskView = tasks && <TodayView tasks={tasks} data={data} setData={setData} />;
-  } else if (view === "filter") {
+  }
+  if (view === "filter") {
     taskView = <FilterView tasks={filterTasks || []} data={data} setData={setData} />;
+  }
+  if (view === "inbox") {
+    taskView = <InboxView tasks={tasks || []} data={data} setData={setData} />;
   }
 
   return (
@@ -196,7 +209,8 @@ const TodayView = ({ tasks, data, setData }: TaskViewProps) => {
   const completedToday = todayStats?.total_completed ?? 0;
 
   const sections = useMemo(() => {
-    return groupByDates(tasks);
+    const sortedTasks = [...tasks].sort(sortByDefault);
+    return groupByDates(sortedTasks);
   }, [tasks]);
 
   if (tasks.length > 0) {
@@ -229,7 +243,8 @@ const TodayView = ({ tasks, data, setData }: TaskViewProps) => {
 
 const FilterView = ({ tasks, data, setData }: TaskViewProps) => {
   const sections = useMemo(() => {
-    return groupByDates(tasks);
+    const sortedTasks = [...tasks].sort(sortByDefault);
+    return groupByDates(sortedTasks);
   }, [tasks]);
 
   if (tasks.length > 0) {
@@ -256,7 +271,8 @@ const UpcomingView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
   const isUpcomingDaysView = upcomingDays !== "" && !isNaN(Number(upcomingDays));
 
   const sections = useMemo(() => {
-    return groupByDates(tasks);
+    const sortedTasks = [...tasks].sort(sortByDefault);
+    return groupByDates(sortedTasks);
   }, [tasks]);
 
   return tasks.length > 0 ? (
@@ -277,6 +293,23 @@ const UpcomingView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
     </>
   ) : (
     <MenuBarExtra.Item title="No upcoming tasks." />
+  );
+};
+
+const InboxView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
+  const transformedTasks = useMemo(() => {
+    const sortedTasks = [...tasks].sort(sortByDefault);
+    return sortedTasks;
+  }, [tasks]);
+
+  return tasks.length > 0 ? (
+    <MenuBarExtra.Section title="Inbox tasks">
+      {transformedTasks.map((task) => (
+        <MenuBarTask key={task.id} task={task} data={data} setData={setData} />
+      ))}
+    </MenuBarExtra.Section>
+  ) : (
+    <MenuBarExtra.Item title="No tasks in inbox." />
   );
 };
 

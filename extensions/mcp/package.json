@@ -5,6 +5,9 @@
   "description": "Interact with the Model Context Protocol (MCP) in Raycast AI",
   "icon": "mcp-icon.png",
   "author": "EvanZhouDev",
+  "contributors": [
+    "radzio"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"

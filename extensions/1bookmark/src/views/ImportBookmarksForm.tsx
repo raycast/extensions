@@ -4,6 +4,7 @@ import { CachedQueryClientProvider } from "../components/CachedQueryClientProvid
 import { BrowserBookmark } from "../types";
 import { trpc } from "../utils/trpc.util";
 import { NewTagForm } from "./NewTagForm";
+import { useTags } from "../hooks/use-tags.hook";
 
 interface FormValues {
   tags: string[];
@@ -20,7 +21,7 @@ function Body(props: Props) {
   const { bookmarks, spaceId, spaceName, browserName } = props;
   const { pop } = useNavigation();
 
-  const { data: spaceTags, refetch: spaceTagsRefetch, isLoading } = trpc.tag.list.useQuery({ spaceIds: [spaceId] });
+  const { data: spaceTags, refetch: spaceTagsRefetch, isLoading } = useTags(spaceId);
   const importBookmarks = trpc.bookmark.import.useMutation();
 
   async function handleSubmit(values: FormValues) {

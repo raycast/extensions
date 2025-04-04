@@ -1,4 +1,14 @@
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, List, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  closeMainWindow,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  List,
+  showHUD,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { getConnections, saveConnections } from "./storage.api";
@@ -510,12 +520,25 @@ export default function Command() {
   }, []);
 
   async function removeItem(item: ISSHConnection) {
-    let items: ISSHConnection[] = await getConnections();
-    items = items.filter((i) => i.id !== item.id);
+    const confirmed = await confirmAlert({
+      title: "Remove Connection",
+      message: `Are you sure you want to remove connection [${item.name}]?`,
+      primaryAction: {
+        title: "Remove",
+        style: Alert.ActionStyle.Destructive,
+      },
+      dismissAction: {
+        title: "Cancel",
+      },
+    });
+    if (confirmed) {
+      let items: ISSHConnection[] = await getConnections();
+      items = items.filter((i) => i.id !== item.id);
 
-    await saveConnections(items);
-    setConnectionsList(items);
-    await showHUD(`🗑 Connection [${item.name}] removed!`);
+      await saveConnections(items);
+      setConnectionsList(items);
+      await showHUD(`🗑 Connection [${item.name}] removed!`);
+    }
   }
 
   return (
@@ -564,6 +587,7 @@ function GetAction({
         <Action
           title="Remove Connection"
           icon={Icon.Trash}
+          style={Action.Style.Destructive}
           onAction={() => onItemRemove(item)}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
         />
