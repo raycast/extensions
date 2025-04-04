@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="500" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="500" fill="#2C2C2C"/>
+  <rect x="50" y="50" width="700" height="400" rx="10" fill="#1E1E1E"/>
+  <text x="80" y="100" fill="#FFFFFF" font-family="Arial" font-size="24">Search Todo</text>
+  <rect x="70" y="120" width="660" height="40" rx="5" fill="#3C3C3C"/>
+  <text x="90" y="145" fill="#CCCCCC" font-family="Arial" font-size="16">Search content or page name</text>
+  <rect x="70" y="170" width="660" height="200" rx="5" fill="#3C3C3C"/>
+  <text x="90" y="200" fill="#FFFFFF" font-family="Arial" font-size="14">Buy groceries</text>
+  <text x="90" y="230" fill="#FFFFFF" font-family="Arial" font-size="14">Finish project report</text>
+  <text x="90" y="260" fill="#FFFFFF" font-family="Arial" font-size="14">Call dentist</text>
+  <text x="90" y="290" fill="#FFFFFF" font-family="Arial" font-size="14">Review presentation</text>
+  <text x="90" y="320" fill="#FFFFFF" font-family="Arial" font-size="14">Send email to team</text>
+  <circle cx="700" cy="200" r="8" fill="#4CAF50"/>
+  <circle cx="700" cy="230" r="8" fill="#FFC107"/>
+  <circle cx="700" cy="260" r="8" fill="#F44336"/>
+  <circle cx="700" cy="290" r="8" fill="#2196F3"/>
+  <circle cx="700" cy="320" r="8" fill="#9C27B0"/>
+</svg>
