@@ -4,6 +4,7 @@ import { Task, Priority } from "../types";
 import { readTasksFile } from "./fileUtils";
 import { formatTask, removeSpecialCharacters } from "./taskFormatter";
 import { priorityToValue } from "./priority";
+import { refreshMenubar } from "./menubarRefresh";
 
 export const getAllTasks = async (): Promise<Task[]> => {
   const taskFile = await readTasksFile();
@@ -100,6 +101,8 @@ export const addTask = async (
       title: "Task added",
     });
 
+    await refreshMenubar();
+
     return newTask;
   } catch (error) {
     console.error("Error adding task:", error);
@@ -125,6 +128,8 @@ export const updateTask = async (task: Task): Promise<Task> => {
 
     await fs.writeFile(taskFile.path, lines.join("\n"), "utf-8");
 
+    await refreshMenubar();
+
     return task;
   } catch (error) {
     console.error("Error updating task:", error);
@@ -134,12 +139,20 @@ export const updateTask = async (task: Task): Promise<Task> => {
 
 export const markTaskDone = async (task: Task): Promise<Task> => {
   const updatedTask = { ...task, completed: true, completedAt: new Date() };
-  return updateTask(updatedTask);
+  const result = await updateTask(updatedTask);
+
+  await refreshMenubar();
+
+  return result;
 };
 
 export const markTaskUndone = async (task: Task): Promise<Task> => {
   const updatedTask = { ...task, completed: false, completedAt: undefined };
-  return updateTask(updatedTask);
+  const result = await updateTask(updatedTask);
+
+  await refreshMenubar();
+
+  return result;
 };
 
 export const deleteTask = async (task: Task): Promise<void> => {
@@ -150,6 +163,8 @@ export const deleteTask = async (task: Task): Promise<void> => {
     lines.splice(task.line, 1);
 
     await fs.writeFile(taskFile.path, lines.join("\n"), "utf-8");
+
+    await refreshMenubar();
   } catch (error) {
     console.error("Error deleting task:", error);
     throw error;
