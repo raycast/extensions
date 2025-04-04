@@ -1,6 +1,6 @@
 # WeChat Changelog
 
-## ## [New Feature] - 2025-04-04
+## [New Feature] - 2025-04-04
 
 - Manage WeChatTweak directly from Raycast
 - Rerited the logic & code structure of Environment Test
