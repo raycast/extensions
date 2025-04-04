@@ -1,64 +1,50 @@
-import "reflect-metadata";
-import { Type } from "class-transformer";
+// [
+//   {
+//     "id": "160215",
+//     "flags": [],
+//     "subject": "<redacted>",
+//     "from": {
+//       "name": "<redacted>",
+//       "addr": "<redacted>@<redacted>.com"
+//     },
+//     "to": {
+//       "name": "Jesse",
+//       "addr": "<redacted>@<redacted>.com"
+//     },
+//     "date": "2025-04-04 18:51+00:00",
+//     "has_attachment": false
+//   }
+// ]
+import { z } from "zod";
 
-export enum Flag {
+enum Flags {
   Seen = "Seen",
   Answered = "Answered",
   Flagged = "Flagged",
   Deleted = "Deleted",
   Draft = "Draft",
   Recent = "Recent",
-  // TODO Custom
 }
 
-export class Envelope {
-  id: string;
-  internal_id: string;
-  message_id: string;
-  flags: Flag[];
-  @Type(() => From)
-  from: From;
-  subject: string;
-  @Type(() => Date)
-  date: Date;
+const FlagEnum = z.nativeEnum(Flags);
 
-  constructor(
-    id: string,
-    internal_id: string,
-    message_id: string,
-    flags: Flag[],
-    from: From,
-    subject: string,
-    date: Date
-  ) {
-    this.id = id;
-    this.internal_id = internal_id;
-    this.message_id = message_id;
-    this.flags = flags;
-    this.from = from;
-    this.subject = subject;
-    this.date = date;
-  }
-}
+export const Address = z.object({
+  name: z.string().nullable().optional(),
+  addr: z.string().nullable().optional(),
+});
 
-export class From {
-  name: string;
-  addr: string;
+export const Envelope = z.object({
+  id: z.string(),
+  flags: z.array(FlagEnum).nullable().optional().default([]),
+  subject: z.string().nullable().optional().default(""),
+  from: Address.nullable().optional(),
+  to: Address.nullable().optional(),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(?:[+-]\d{2}:\d{2}|[+-]\d{4}|\+00:00)$/)
+    .nullable()
+    .optional(),
+  has_attachment: z.boolean().nullable().optional().default(false),
+});
 
-  constructor(name: string, addr: string) {
-    this.name = name;
-    this.addr = addr;
-  }
-}
-
-export class Folder {
-  delim: string;
-  name: string;
-  desc: string;
-
-  constructor(delim: string, name: string, desc: string) {
-    this.delim = delim;
-    this.name = name;
-    this.desc = desc;
-  }
-}
+export type Envelope = z.infer<typeof Envelope>;
