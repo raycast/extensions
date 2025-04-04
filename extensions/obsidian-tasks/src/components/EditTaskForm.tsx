@@ -23,7 +23,6 @@ export function EditTaskForm({ task, onTaskUpdated }: EditTaskFormProps) {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    console.log(text);
     try {
       const updatedTask: Task = {
         ...task,
