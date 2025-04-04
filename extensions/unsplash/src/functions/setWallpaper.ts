@@ -28,7 +28,7 @@ export const setWallpaper = async ({ url, id, every, useHud = false, isBackgroun
     } else {
       toast = await displayMessage(
         "The selected path does not exist. Please select a valid path.",
-        useHud ? "hud" : "toast"
+        useHud ? "hud" : "toast",
       );
     }
   }

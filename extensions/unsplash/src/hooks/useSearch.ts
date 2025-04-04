@@ -2,18 +2,15 @@ import { apiRequest } from "@/functions/apiRequest";
 import { CollectionResult, Orientation, SearchResult } from "@/types";
 import { useCachedPromise } from "@raycast/utils";
 
-export const useSearch = <T extends "collections" | "photos">(
-  query: string,
-  type: T,
-  orientation: Orientation
-) => {
+export const useSearch = <T extends "collections" | "photos">(query: string, type: T, orientation: Orientation) => {
   const { isLoading, data, pagination } = useCachedPromise(
     (searchText: string, orientation: Orientation) => async (options: { page: number }) => {
-      if (!searchText.trim()) return {
-        data: [],
-        hasMore: false
-      }
-      
+      if (!searchText.trim())
+        return {
+          data: [],
+          hasMore: false,
+        };
+
       const { errors, results, total_pages } = await performSearch({
         searchText,
         options: {
@@ -21,24 +18,25 @@ export const useSearch = <T extends "collections" | "photos">(
           orientation,
           type: type || "photos",
         },
-      })
+      });
       if (errors?.length) throw new Error();
 
       return {
         data: results,
-        hasMore: options.page < total_pages
-      }
-
-    }, [query, orientation], {
+        hasMore: options.page < total_pages,
+      };
+    },
+    [query, orientation],
+    {
       initialData: [],
       failureToastOptions: {
-        title: `Failed to fetch ${type}.`
-      }
-    }
-  )
+        title: `Failed to fetch ${type}.`,
+      },
+    },
+  );
 
   return {
-    state: { results: data, isLoading, pagination }
+    state: { results: data, isLoading, pagination },
   };
 };
 
@@ -58,8 +56,8 @@ type SearchOrCollectionResult<T extends PerformSearchProps> = T extends { option
 
 export const performSearch = async <T extends PerformSearchProps>({
   searchText,
-  options
-}: PerformSearchProps): Promise<{ errors?: string[]; results: SearchOrCollectionResult<T>, total_pages: number }> => {
+  options,
+}: PerformSearchProps): Promise<{ errors?: string[]; results: SearchOrCollectionResult<T>; total_pages: number }> => {
   const searchParams = new URLSearchParams({
     page: options.page.toString(),
     query: searchText,
@@ -68,9 +66,11 @@ export const performSearch = async <T extends PerformSearchProps>({
 
   if (options.orientation !== "all") searchParams.append("orientation", options.orientation);
 
-  const { errors, results, total_pages } = await apiRequest<{ errors?: string[]; results: SearchOrCollectionResult<T>, total_pages: number }>(
-    `/search/${options.type}?${searchParams.toString()}`,
-  );
+  const { errors, results, total_pages } = await apiRequest<{
+    errors?: string[];
+    results: SearchOrCollectionResult<T>;
+    total_pages: number;
+  }>(`/search/${options.type}?${searchParams.toString()}`);
 
   return {
     results,

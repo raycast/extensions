@@ -29,7 +29,7 @@ export const useRandom = async (nowTime: number) => {
       : customCollections || defaultCollections;
 
   const response = await apiRequest<SearchResult>(
-    `/photos/random?orientation=landscape&collections=${encodeURIComponent(whichCollections.join(","))}`
+    `/photos/random?orientation=landscape&collections=${encodeURIComponent(whichCollections.join(","))}`,
   );
 
   if (response.errors) {
