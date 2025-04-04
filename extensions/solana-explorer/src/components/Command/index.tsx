@@ -36,7 +36,7 @@ const Command = ({ cluster }: Props) => {
       return filteredTokens;
     },
     [debouncedQuery as string],
-    { abortable, execute: !!debouncedQuery }
+    { abortable, execute: !!debouncedQuery },
   );
 
   const revalidateAll = () => {
@@ -141,8 +141,8 @@ const Command = ({ cluster }: Props) => {
                   item.type === SolType.TRANSACTION
                     ? truncateSig(item.data)
                     : item.type === SolType.ADDRESS
-                    ? truncateAddress(item.data)
-                    : item.data
+                      ? truncateAddress(item.data)
+                      : item.data
                 }
                 icon={{ source: getIconForType(item.type), mask: Image.Mask.Circle, fallback: "command-icon.png" }}
                 accessories={[{ text: item.type, icon: getIconForType(item.type) }]}

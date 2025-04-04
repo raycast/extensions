@@ -4,7 +4,7 @@
 
 - Add russian aliases for folders
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-04-02
 
 - Support for mail accounts with multiple sender addresses.
 
