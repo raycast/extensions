@@ -40,5 +40,5 @@ export function useVisitedFiles() {
     await saveVisitedFiles(nextFiles);
   }
 
-  return { files, visitFile, isLoading: !files };
+  return { files, visitFile, isLoading: !files, revalidate: () => loadVisitedFiles().then(setFiles) };
 }
