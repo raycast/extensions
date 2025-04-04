@@ -55,7 +55,7 @@ export default function Command() {
         console.error('Error generating payment link:', error)
         showToast({
           style: Toast.Style.Failure,
-          title: 'Error issuing refund',
+          title: 'Error generating payment link',
           message: (error as Error).message,
         })
       }
