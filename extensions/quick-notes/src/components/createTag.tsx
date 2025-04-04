@@ -17,6 +17,12 @@ const CreateTag = () => {
 
   const { handleSubmit, itemProps } = useForm<TagForm>({
     async onSubmit(values) {
+      // if tag already exists, don't do anything
+      if (tags.find((tag) => tag.name.toLocaleLowerCase() === values.name.toLocaleLowerCase())) {
+        showToast({ title: "Tag Exists" });
+        pop();
+        return;
+      }
       setTag([...tags, { name: values.name, color }]);
       showToast({ title: "Tag Saved" });
       pop();

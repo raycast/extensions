@@ -14,7 +14,7 @@ Create simple markdown notes in Raycast stored locally. No integrations required
 - Tag manager
 - Summarize note using AI (Raycast Pro)
 
-If you’d like, you can export or auto-sync your notes as markdown to a directory to use in a 3rd-party app like Obisidian, VS Code, or Notion. This is completely optional though and notes will still save locally.
+If you’d like, you can export or auto-sync your notes as markdown to a directory to use in a 3rd-party app like Obsidian, VS Code, or Notion. This is **completely optional** though and notes will still save locally.
 
 ### Commands
 
