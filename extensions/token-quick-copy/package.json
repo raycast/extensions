@@ -1,0 +1,46 @@
+{
+  "name": "token-quick-copy",
+  "title": "Token Quick Copy",
+  "description": "Quickly copy Ethereum ERC20 token addresses to your clipboard",
+  "icon": "logo.png",
+  "author": "wavey0x",
+  "categories": [
+    "Finance",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Lookup Token",
+      "icon": "logo.png",
+      "description": "Quickly copy Ethereum ERC20 token addresses to your clipboard",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0",
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "axios": "^1.6.7",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "keccak": "^3.0.4",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "eslint": "^8.51.0",
+    "@types/keccak": "^3.0.5",
+    "@types/node": "^20.11.19",
+    "@types/react": "^18.2.57",
+    "prettier": "^3.5.3",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
