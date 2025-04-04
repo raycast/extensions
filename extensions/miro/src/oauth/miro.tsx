@@ -1,6 +1,6 @@
 import { OAuth, LocalStorage } from "@raycast/api";
-import fetch from "node-fetch";
-import { Board, BoardMember, MiroApi } from "@mirohq/miro-api";
+import fetch, { RequestInfo } from "node-fetch";
+import { Board, BoardMember } from "@mirohq/miro-api";
 
 // Miro App client ID
 const clientId = "3458764538138428083";
@@ -85,15 +85,25 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
   return tokenResponse;
 }
 
-// Fetch boards
-export async function fetchItems(): Promise<Board[]> {
+// Fetch my boards
+export async function fetchMyItems(): Promise<Board[]> {
   const teamId = await LocalStorage.getItem("teamId");
 
   if (typeof teamId !== "string") {
     throw new Error("Team ID not found");
   }
 
-  const response = await fetch(`https://api.miro.com/v2/boards?team_id=${teamId}&sort=default`, {
+  return fetchItems(`https://api.miro.com/v2/boards?team_id=${teamId}&sort=default`);
+}
+
+// Fetch recent boards
+export async function fetchRecentItems(): Promise<Board[]> {
+  return fetchItems(`https://api.miro.com/v2/boards?sort=default`);
+}
+
+// Fetch boards
+async function fetchItems(url: RequestInfo): Promise<Board[]> {
+  const response = await fetch(url, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

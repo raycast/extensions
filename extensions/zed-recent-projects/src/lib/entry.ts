@@ -3,7 +3,7 @@ import tildify from "tildify";
 import { ZedEntry } from "./zedEntries";
 
 export interface Entry {
-  id: string;
+  id: number;
   uri: string;
   path: string;
   title: string;

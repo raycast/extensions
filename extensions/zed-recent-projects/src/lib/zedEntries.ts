@@ -11,7 +11,7 @@ const preferences = getPreferenceValues<Preferences>();
 const zedBuild = preferences.build;
 
 export interface ZedEntry {
-  id: string;
+  id: number;
   path: string;
   uri: string;
   lastOpened: number;
@@ -25,7 +25,7 @@ function getPath() {
 }
 
 interface BaseWorkspace {
-  id: string;
+  id: number;
   timestamp: number;
   type: "local" | "remote";
 }
@@ -49,7 +49,7 @@ interface ZedRecentWorkspaces {
   entries: ZedEntries;
   isLoading?: boolean;
   error?: Error;
-  removeEntry: (id: string) => Promise<void>;
+  removeEntry: (id: number) => Promise<void>;
   removeAllEntries: () => Promise<void>;
 }
 
@@ -121,7 +121,7 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
 
   const { data, isLoading, error, mutate } = useSQL<Workspace>(path, query);
 
-  async function removeEntry(id: string) {
+  async function removeEntry(id: number) {
     try {
       await mutate(deleteEntryById(id), { shouldRevalidateAfter: true });
 
@@ -186,11 +186,16 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
 
 export const execFilePromise = util.promisify(execFile);
 
-async function deleteEntryById(id: string) {
-  const deleteQuery = `DELETE FROM workspaces WHERE workspace_id = '${id}'`;
+async function deleteEntryById(id: number) {
+  const deleteQuery = `
+DELETE FROM ssh_projects WHERE id = (
+  SELECT ssh_project_id FROM workspaces WHERE workspace_id = ${id}
+);
+DELETE FROM workspaces WHERE workspace_id = ${id}
+`;
   await execFilePromise("sqlite3", [getPath(), deleteQuery]);
 }
 
 async function deleteAllWorkspaces() {
-  await execFilePromise("sqlite3", [getPath(), "DELETE FROM workspaces"]);
+  await execFilePromise("sqlite3", [getPath(), "DELETE FROM ssh_projects;DELETE FROM workspaces;"]);
 }

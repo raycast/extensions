@@ -61,7 +61,7 @@
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^7.14.1",
     "@typescript-eslint/parser": "^7.14.1",
-    "axios": "^1.7.2",
+    "axios": "^1.8.4",
     "cheerio": "^1.0.0-rc.12",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",

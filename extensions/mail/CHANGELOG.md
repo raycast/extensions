@@ -1,6 +1,10 @@
 # Mail Changelog
 
-## [Add AI Tools] - {PR_MERGE_DATE}
+## [Fix] - 2025-04-02
+
+- Support for mail accounts with multiple sender addresses.
+
+## [Add AI Tools] - 2025-03-21
 
 This release turns this extension into an AI extension.
 

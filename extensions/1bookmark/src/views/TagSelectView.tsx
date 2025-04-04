@@ -3,10 +3,9 @@ import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@ra
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { NewTagForm } from "./NewTagForm";
 import { useMe } from "../hooks/use-me.hook";
-import { useAtom } from "jotai";
-import { sessionTokenAtom } from "../states/session-token.state";
 import { Tag } from "../types";
 import { useEffect } from "react";
+import { useTags } from "../hooks/use-tags.hook";
 
 const TagItem = (props: {
   tag: Tag;
@@ -48,9 +47,8 @@ export const Body = (props: {
   promise: Promise<void>;
 }) => {
   const { spaceIds, toggleTag, toggleTagType, promise } = props;
-  const [sessionToken] = useAtom(sessionTokenAtom);
-  const me = useMe(sessionToken);
-  const { data: tags, refetch, isFetching } = trpc.tag.list.useQuery({ spaceIds });
+  const me = useMe();
+  const { data: tags, refetch, isFetching } = useTags(spaceIds);
 
   const selectedTags = me.data?.associatedSpaces.flatMap((space) => {
     return space.myTags.map((tag) => `${space.id}:${tag}`);
