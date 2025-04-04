@@ -1,4 +1,4 @@
-# SL Departures Changelog
+# Stockholm Public Transport Changelog
 
 ## [Changed API] - {PR_MERGE_DATE}
 
