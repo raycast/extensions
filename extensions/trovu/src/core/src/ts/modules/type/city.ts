@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 export default class CityType {
   static parse(str, env) {
     let country = env.country;

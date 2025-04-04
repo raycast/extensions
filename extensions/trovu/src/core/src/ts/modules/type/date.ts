@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 export default class DateType {
   static parse(str, env) {
     const now = new Date();

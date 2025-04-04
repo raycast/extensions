@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 /** @module Logger */
 
 /** Logs errors and warnings. */
@@ -9,7 +11,6 @@ export default class Logger {
   constructor(logElementSelector) {
     this.logs = [];
     if (!(typeof document === "undefined")) {
-      // eslint-disable-next-line no-undef
       this.logElement = document.querySelector(logElementSelector);
     }
   }
