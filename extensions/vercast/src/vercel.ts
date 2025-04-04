@@ -321,3 +321,15 @@ export async function fetchDomains(teamId?: string, limit = 100) {
   const json = (await response.json()) as { domains: Domain[] };
   return json.domains;
 }
+
+export async function checkDomainAvailability(domain: string) {
+  const response = await fetch(apiURL + `v4/domains/status?name=${domain}`, {
+    method: "get",
+    headers: headers,
+  });
+  const json = (await response.json()) as { available: string; error?: { code: string; message: string } };
+  if (json.error) {
+    return "Check domain availability failed. Please verify that the domain is valid or try again later.";
+  }
+  return json.available;
+}
