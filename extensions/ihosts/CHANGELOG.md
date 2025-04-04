@@ -1,4 +1,7 @@
 # iHosts Changelog
+## [Support Remote Host] - 2025-05-27
+- support fetch remote hosts
+- add command `update remote hosts quickly`, quick update remote hosts
 
 ## [Optimize Experience] - 2022-11-28
 
