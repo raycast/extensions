@@ -32,7 +32,7 @@ export const useFetchFolderFiles = () => {
 
   useEffect(() => {
     void fetchFolderFiles();
-  }, []);
+  }, [fetchFolderFiles]);
 
   return {
     folderFiles,

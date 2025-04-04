@@ -42,7 +42,7 @@ const CleanFolderCommand = () => {
         return showToast(Toast.Style.Failure, "File not Cleaned", "Something went wrong");
       }
     },
-    [folders],
+    [folders, folderToClean, fetchFolderFiles],
   );
 
   const cleanAllFiles = useCallback(() => {
@@ -59,7 +59,7 @@ const CleanFolderCommand = () => {
       captureException(buildException(error as Error, "Folder not Cleaned", { folders, folderFiles }));
       return showToast(Toast.Style.Failure, "Folder not Cleaned", "Something went wrong");
     }
-  }, [folderFiles, folders]);
+  }, [folderFiles, folders, folderToClean, fetchFolderFiles]);
 
   const listIsEmpty = folderFiles.length <= 0;
 
