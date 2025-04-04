@@ -1,6 +1,6 @@
 # Omni News Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-04
 
 - Added cache
 - Handle API changes in images fetching
