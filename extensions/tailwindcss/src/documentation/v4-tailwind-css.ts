@@ -9,16 +9,8 @@ export default {
       title: "Editor Setup",
     },
     {
-      url: "https://tailwindcss.com/docs/using-with-preprocessors",
-      title: "Using with Preprocessors",
-    },
-    {
-      url: "https://tailwindcss.com/docs/optimizing-for-production",
-      title: "Optimizing for Production",
-    },
-    {
-      url: "https://tailwindcss.com/docs/browser-support",
-      title: "Browser Support",
+      url: "https://tailwindcss.com/docs/compatibility",
+      title: "Compatibility",
     },
     {
       url: "https://tailwindcss.com/docs/upgrade-guide",
@@ -27,7 +19,7 @@ export default {
   ],
   "Core Concepts": [
     {
-      url: "https://tailwindcss.com/docs/utility-first",
+      url: "https://tailwindcss.com/docs/styling-with-utility-classes",
       title: "Utility-First Fundamentals",
     },
     {
@@ -43,50 +35,24 @@ export default {
       title: "Dark Mode",
     },
     {
-      url: "https://tailwindcss.com/docs/reusing-styles",
-      title: "Reusing Styles",
+      url: "https://tailwindcss.com/docs/theme",
+      title: "Theme Variables",
+    },
+    {
+      url: "https://tailwindcss.com/docs/colors",
+      title: "Colors",
     },
     {
       url: "https://tailwindcss.com/docs/adding-custom-styles",
       title: "Adding Custom Styles",
     },
     {
+      url: "https://tailwindcss.com/docs/detecting-classes-in-source-files",
+      title: "Detecting Classes in Source Files",
+    },
+    {
       url: "https://tailwindcss.com/docs/functions-and-directives",
       title: "Functions & Directives",
-    },
-  ],
-  Customization: [
-    {
-      url: "https://tailwindcss.com/docs/configuration",
-      title: "Configuration",
-    },
-    {
-      url: "https://tailwindcss.com/docs/content-configuration",
-      title: "Content",
-    },
-    {
-      url: "https://tailwindcss.com/docs/theme",
-      title: "Theme",
-    },
-    {
-      url: "https://tailwindcss.com/docs/screens",
-      title: "Screens",
-    },
-    {
-      url: "https://tailwindcss.com/docs/customizing-colors",
-      title: "Colors",
-    },
-    {
-      url: "https://tailwindcss.com/docs/customizing-spacing",
-      title: "Spacing",
-    },
-    {
-      url: "https://tailwindcss.com/docs/plugins",
-      title: "Plugins",
-    },
-    {
-      url: "https://tailwindcss.com/docs/presets",
-      title: "Presets",
     },
   ],
   "Base Styles": [
@@ -99,10 +65,6 @@ export default {
     {
       url: "https://tailwindcss.com/docs/aspect-ratio",
       title: "Aspect Ratio",
-    },
-    {
-      url: "https://tailwindcss.com/docs/container",
-      title: "Container",
     },
     {
       url: "https://tailwindcss.com/docs/columns",
@@ -284,10 +246,6 @@ export default {
       url: "https://tailwindcss.com/docs/margin",
       title: "Margin",
     },
-    {
-      url: "https://tailwindcss.com/docs/space",
-      title: "Space Between",
-    },
   ],
   Sizing: [
     {
@@ -313,10 +271,6 @@ export default {
     {
       url: "https://tailwindcss.com/docs/max-height",
       title: "Max-Height",
-    },
-    {
-      url: "https://tailwindcss.com/docs/size",
-      title: "Size",
     },
   ],
   Typography: [
@@ -373,11 +327,11 @@ export default {
       title: "Text Align",
     },
     {
-      url: "https://tailwindcss.com/docs/text-color",
+      url: "https://tailwindcss.com/docs/color",
       title: "Text Color",
     },
     {
-      url: "https://tailwindcss.com/docs/text-decoration",
+      url: "https://tailwindcss.com/docs/text-decoration-line",
       title: "Text Decoration",
     },
     {
@@ -417,7 +371,7 @@ export default {
       title: "Vertical Align",
     },
     {
-      url: "https://tailwindcss.com/docs/whitespace",
+      url: "https://tailwindcss.com/docs/white-space",
       title: "Whitespace",
     },
     {
@@ -447,6 +401,10 @@ export default {
       title: "Background Color",
     },
     {
+      url: "https://tailwindcss.com/docs/background-image",
+      title: "Background Image",
+    },
+    {
       url: "https://tailwindcss.com/docs/background-origin",
       title: "Background Origin",
     },
@@ -461,14 +419,6 @@ export default {
     {
       url: "https://tailwindcss.com/docs/background-size",
       title: "Background Size",
-    },
-    {
-      url: "https://tailwindcss.com/docs/background-image",
-      title: "Background Image",
-    },
-    {
-      url: "https://tailwindcss.com/docs/gradient-color-stops",
-      title: "Gradient Color Stops",
     },
   ],
   Borders: [
@@ -489,18 +439,6 @@ export default {
       title: "Border Style",
     },
     {
-      url: "https://tailwindcss.com/docs/divide-width",
-      title: "Divide Width",
-    },
-    {
-      url: "https://tailwindcss.com/docs/divide-color",
-      title: "Divide Color",
-    },
-    {
-      url: "https://tailwindcss.com/docs/divide-style",
-      title: "Divide Style",
-    },
-    {
       url: "https://tailwindcss.com/docs/outline-width",
       title: "Outline Width",
     },
@@ -516,31 +454,11 @@ export default {
       url: "https://tailwindcss.com/docs/outline-offset",
       title: "Outline Offset",
     },
-    {
-      url: "https://tailwindcss.com/docs/ring-width",
-      title: "Ring Width",
-    },
-    {
-      url: "https://tailwindcss.com/docs/ring-color",
-      title: "Ring Color",
-    },
-    {
-      url: "https://tailwindcss.com/docs/ring-offset-width",
-      title: "Ring Offset Width",
-    },
-    {
-      url: "https://tailwindcss.com/docs/ring-offset-color",
-      title: "Ring Offset Color",
-    },
   ],
   Effects: [
     {
       url: "https://tailwindcss.com/docs/box-shadow",
       title: "Box Shadow",
-    },
-    {
-      url: "https://tailwindcss.com/docs/box-shadow-color",
-      title: "Box Shadow Color",
     },
     {
       url: "https://tailwindcss.com/docs/opacity",
@@ -647,10 +565,14 @@ export default {
       title: "Caption Side",
     },
   ],
-  "Transitions and Animation": [
+  "Transitions & Animation": [
     {
       url: "https://tailwindcss.com/docs/transition-property",
       title: "Transition Property",
+    },
+    {
+      url: "https://tailwindcss.com/docs/transition-behavior",
+      title: "Transition Behavior",
     },
     {
       url: "https://tailwindcss.com/docs/transition-duration",
@@ -671,6 +593,30 @@ export default {
   ],
   Transforms: [
     {
+      url: "https://tailwindcss.com/docs/backface-visibility",
+      title: "Backface Visibility",
+    },
+    {
+      url: "https://tailwindcss.com/docs/perspective",
+      title: "Perspective",
+    },
+    {
+      url: "https://tailwindcss.com/docs/perspective-origin",
+      title: "Perspective Origin",
+    },
+    {
+      url: "https://tailwindcss.com/docs/rotate",
+      title: "Rotate",
+    },
+    {
+      url: "https://tailwindcss.com/docs/scale",
+      title: "Scale",
+    },
+    {
+      url: "https://tailwindcss.com/docs/skew",
+      title: "Skew",
+    },
+    {
       url: "https://tailwindcss.com/docs/transform",
       title: "Transform",
     },
@@ -679,34 +625,38 @@ export default {
       title: "Transform Origin",
     },
     {
-      url: "https://tailwindcss.com/docs/scale",
-      title: "Scale",
-    },
-    {
-      url: "https://tailwindcss.com/docs/rotate",
-      title: "Rotate",
+      url: "https://tailwindcss.com/docs/transform-style",
+      title: "Transform Style",
     },
     {
       url: "https://tailwindcss.com/docs/translate",
       title: "Translate",
     },
-    {
-      url: "https://tailwindcss.com/docs/skew",
-      title: "Skew",
-    },
-    {
-      url: "https://tailwindcss.com/docs/perspective",
-      title: "Perspective",
-    },
   ],
   Interactivity: [
+    {
+      url: "https://tailwindcss.com/docs/accent-color",
+      title: "Accent Color",
+    },
     {
       url: "https://tailwindcss.com/docs/appearance",
       title: "Appearance",
     },
     {
+      url: "https://tailwindcss.com/docs/caret-color",
+      title: "Caret Color",
+    },
+    {
+      url: "https://tailwindcss.com/docs/color-scheme",
+      title: "Color Scheme",
+    },
+    {
       url: "https://tailwindcss.com/docs/cursor",
       title: "Cursor",
+    },
+    {
+      url: "https://tailwindcss.com/docs/field-sizing",
+      title: "Field Sizing",
     },
     {
       url: "https://tailwindcss.com/docs/pointer-events",
@@ -769,30 +719,26 @@ export default {
   ],
   Accessibility: [
     {
-      url: "https://tailwindcss.com/docs/screen-readers",
-      title: "Screen Readers",
-    },
-    {
       url: "https://tailwindcss.com/docs/forced-color-adjust",
       title: "Forced Color Adjust",
     },
   ],
   "Official Plugins": [
     {
-      url: "https://github.com/tailwindlabs/tailwindcss-aspect-ratio",
-      title: "Aspect Ratio",
+      url: "https://github.com/tailwindlabs/tailwindcss-typography",
+      title: "Typography",
     },
     {
       url: "https://github.com/tailwindlabs/tailwindcss-forms",
       title: "Forms",
     },
     {
-      url: "https://github.com/tailwindlabs/tailwindcss-line-clamp",
-      title: "Line Clamp",
+      url: "https://github.com/tailwindlabs/tailwindcss-aspect-ratio",
+      title: "Aspect Ratio",
     },
     {
-      url: "https://github.com/tailwindlabs/tailwindcss-typography",
-      title: "Typography",
+      url: "https://github.com/tailwindlabs/tailwindcss-container-queries",
+      title: "Container Queries",
     },
   ],
 };
