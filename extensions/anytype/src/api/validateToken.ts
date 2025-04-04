@@ -1,13 +1,27 @@
-import { apiFetch } from "../helpers/api";
-import { apiEndpoints } from "../helpers/constants";
-import { Space, PaginatedResponse } from "../helpers/schemas";
-import { errorConnectionMessage } from "../helpers/constants";
+import { showToast, Toast } from "@raycast/api";
+import { PaginatedResponse, RawSpace } from "../models";
+import { apiEndpoints, apiFetch, currentApiVersion, errorConnectionMessage } from "../utils";
 
-// Validate token by checking if data can be fetched without errors
-export async function validateToken(): Promise<boolean> {
+// Validate api version and token by checking if data can be fetched without errors
+export async function checkApiTokenValidity(): Promise<boolean> {
   try {
     const { url, method } = apiEndpoints.getSpaces({ offset: 0, limit: 1 });
-    await apiFetch<PaginatedResponse<Space>>(url, { method: method });
+    const response = await apiFetch<PaginatedResponse<RawSpace>>(url, { method: method });
+
+    const apiVersion = response.headers.get("Anytype-Version");
+    if (!apiVersion || apiVersion < currentApiVersion) {
+      showToast(
+        Toast.Style.Failure,
+        "App Update Required",
+        `Please update the Anytype app to match the extension's API version ${currentApiVersion}.`,
+      );
+    } else if (apiVersion > currentApiVersion) {
+      showToast(
+        Toast.Style.Failure,
+        "Extension Update Required",
+        `Please update the extension to match the Anytype app's API version ${apiVersion}.`,
+      );
+    }
     return true;
   } catch (error) {
     if (error instanceof Error) {

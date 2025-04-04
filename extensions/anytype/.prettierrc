@@ -1,4 +1,5 @@
 {
   "printWidth": 120,
-  "singleQuote": false
+  "singleQuote": false,
+  "plugins": ["prettier-plugin-organize-imports"]
 }

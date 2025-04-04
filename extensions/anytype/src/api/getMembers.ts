@@ -1,8 +1,6 @@
-import { apiFetch } from "../helpers/api";
-import { apiEndpoints } from "../helpers/constants";
-import { PaginatedResponse } from "../helpers/schemas";
 import { mapMembers } from "../mappers/members";
-import { Member, Pagination } from "../helpers/schemas";
+import { Member, PaginatedResponse, Pagination, RawMember } from "../models";
+import { apiEndpoints, apiFetch } from "../utils";
 
 export async function getMembers(
   spaceId: string,
@@ -12,10 +10,10 @@ export async function getMembers(
   pagination: Pagination;
 }> {
   const { url, method } = apiEndpoints.getMembers(spaceId, options);
-  const response = await apiFetch<PaginatedResponse<Member>>(url, { method: method });
+  const response = await apiFetch<PaginatedResponse<RawMember>>(url, { method: method });
 
   return {
-    members: response.data ? await mapMembers(response.data) : [],
-    pagination: response.pagination,
+    members: response.payload.data ? await mapMembers(response.payload.data) : [],
+    pagination: response.payload.pagination,
   };
 }

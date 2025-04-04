@@ -1,11 +1,11 @@
-import { apiFetch } from "../helpers/api";
-import { apiEndpoints } from "../helpers/constants";
+import { CreateSpaceRequest } from "../models";
+import { apiEndpoints, apiFetch } from "../utils";
 
-export async function createSpace(objectData: { name: string }): Promise<void> {
+export async function createSpace(spaceData: CreateSpaceRequest): Promise<void> {
   const { url, method } = apiEndpoints.createSpace;
 
   await apiFetch(url, {
     method: method,
-    body: JSON.stringify({ name: objectData.name }),
+    body: JSON.stringify(spaceData),
   });
 }
