@@ -9,7 +9,8 @@
     "theherk",
     "walker-tx",
     "jimmy-b36",
-    "sdaza"
+    "sdaza",
+    "ellioth"
   ],
   "categories": [
     "Applications",
@@ -30,9 +31,13 @@
           "type": "dropdown",
           "required": false,
           "title": "Search Engine",
-          "description": "Search Engine for query (default: Google).",
-          "default": "Google",
+          "description": "Search Engine for query (default: Browser Default).",
+          "default": "Default",
           "data": [
+            {
+              "title": "Browser Default",
+              "value": "Default"
+            },
             {
               "title": "Google",
               "value": "Google"
