@@ -124,7 +124,7 @@ export default function Command() {
                 title="Copy Reference"
                 content={transaction.reference}
               />
-                 <Action.CopyToClipboard
+              <Action.CopyToClipboard
                 title="Copy Customer Email"
                 content={transaction.customer?.email}
               />
