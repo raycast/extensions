@@ -1,5 +1,9 @@
 # Tidal Controller Changelog
 
+## [Volume Control Support] - 2025-03-31
+
+- Added volume up and down control. This allows for users to bind Tidal-only volume control to a hotkey.
+
 ## [Additional Language Support] - 2024-09-06
 
 - Added proper support for all Tidal languages. This will enable users of those languages to use the extension. For this extension to work, you must select the same language in Raycast as you have selected in Tidal.
