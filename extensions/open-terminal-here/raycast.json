@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "title": "Open Terminal Here",
+  "description": "Opens a new Terminal window in the Finder's current directory.",
+  "icon": "terminal",
+  "author": "stephen_sanders",
+  "commands": [
+    {
+      "name": "finder-to-terminal",
+      "title": "Open Terminal Here",
+      "mode": "no-view"
+    }
+  ]
+}
