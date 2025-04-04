@@ -1,4 +1,5 @@
 import { Clipboard, showToast, Toast, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   try {

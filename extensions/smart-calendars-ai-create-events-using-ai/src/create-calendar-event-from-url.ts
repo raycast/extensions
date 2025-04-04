@@ -1,4 +1,5 @@
 import { Clipboard, showToast, Toast, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   try {
@@ -61,10 +62,6 @@ export default async function Command() {
     });
   } catch (error) {
     // Show error toast
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to create calendar event",
-      message: String(error),
-    });
+    await showFailureToast(error, { title: "Failed to create calendar event" });
   }
 }
