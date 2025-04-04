@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "lib": ["es2020"],
+    "target": "ES2021",
+    "lib": ["ES2021"],
     "module": "commonjs",
     "moduleResolution": "node",
     "esModuleInterop": true,
@@ -16,4 +16,4 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"]
-} 
+}

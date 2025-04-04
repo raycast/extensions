@@ -172,6 +172,9 @@ export const getFormattedDescription = (task: Task, maxLength = 100): string => 
     description = description.replace(completionDateMatch[0], "").trim();
   }
 
+  // Clean up any extra whitespace
+  description = description.replace(/\s+/g, " ").trim();
+
   if (description.length > maxLength) {
     description = description.substring(0, maxLength) + "...";
   }

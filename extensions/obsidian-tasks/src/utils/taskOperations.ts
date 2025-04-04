@@ -2,7 +2,7 @@ import fs from "fs-extra";
 import { showToast, Toast } from "@raycast/api";
 import { Task, Priority } from "../types";
 import { readTasksFile } from "./fileUtils";
-import { formatTask } from "./taskFormatter";
+import { formatTask, removeSpecialCharacters } from "./taskFormatter";
 import { priorityToValue } from "./priority";
 
 export const getAllTasks = async (): Promise<Task[]> => {
@@ -116,6 +116,8 @@ export const addTask = async (
 
 export const updateTask = async (task: Task): Promise<Task> => {
   try {
+    task.description = removeSpecialCharacters(task.description);
+
     const taskFile = await readTasksFile();
     const lines = taskFile.content.split("\n");
 
