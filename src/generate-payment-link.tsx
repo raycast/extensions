@@ -106,7 +106,7 @@ export default function Command() {
         id="amount"
         title="Amount"
         placeholder="Enter amount"
-        info="An optional amount. If not provided, the full amount of the transaction will be refunded."
+        info="The amount to be paid through this payment link."
       />
       <Form.TextField
         id="email"
