@@ -2,6 +2,8 @@
 
 This extension is used for generating text from screen captured images, and it requires Tesseract binary in order to work!
 
+Latest version features automatic language detection, which helps with recognition of special characters for given language.
+
 ## Tesseract
 Tesseract is open source OCR engine, and it needs to be installed locally on your machine.
 

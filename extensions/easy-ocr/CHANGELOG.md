@@ -1,5 +1,11 @@
 # Tesseract OCR Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Added automatic language detection option 
+- Language used for OCR is now being displayed on successful OCR toast
+- Added fallback language (english) if user types wrong language code in options
+
 ## [Bug Fixes] - 2025-03-26
 
 - Fixed error when running command twice in short time (not visible to user)
