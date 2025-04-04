@@ -1,5 +1,9 @@
 # Figma Files Changelog
 
+## [Adds cache cleaing action] - 2025-04-03
+
+- Adds action to clear all cache (some users complained this was out of date).
+
 ## [Adds support for Figma's updated API] - 2025-02-07
 
 - Updated oauth endpoints via new Raycast Proxies.
