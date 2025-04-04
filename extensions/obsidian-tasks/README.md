@@ -25,7 +25,7 @@ A Raycast extension to manage your [Obsidian](https://obsidian.md) tasks from yo
 
 The extension requires minimal setup:
 
-1. **Tasks File Path**: Selet your tasks file (e.g., `tasks.md`)
+1. **Tasks File Path**: Select your tasks file (e.g., `tasks.md`)
 
 ## Usage
 
