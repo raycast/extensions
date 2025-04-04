@@ -1,4 +1,4 @@
-import { showHUD, environment, updateCommandMetadata, LaunchType } from "@raycast/api";
+import { environment, updateCommandMetadata, LaunchType, Toast, showToast } from "@raycast/api";
 import { Herd } from "./utils/Herd";
 import { rescue } from "./utils/rescue";
 
@@ -13,9 +13,17 @@ export default async function main() {
   const recentSite = await Herd.Sites.getRecentSite();
 
   if (!recentSite) {
-    await showHUD("No recent site found");
+    await showToast({
+      title: "No recent site found.",
+      style: Toast.Style.Failure,
+    });
     return;
   }
+
+  await showToast({
+    title: `Opening database for ${recentSite.site}...`,
+    style: Toast.Style.Animated,
+  });
 
   await rescue(() => Herd.Sites.openDatabase(recentSite), "Could not open Database for Site.");
 }

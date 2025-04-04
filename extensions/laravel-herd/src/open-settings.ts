@@ -1,8 +1,14 @@
-import { showHUD } from "@raycast/api";
+import { closeMainWindow, showToast, Toast } from "@raycast/api";
 import { Herd } from "./utils/Herd";
+import { rescue } from "./utils/rescue";
 
 export default async function main() {
-  await showHUD("Open settings");
+  await showToast({
+    title: "Opening Settings...",
+    style: Toast.Style.Animated,
+  });
 
-  await Herd.General.openSettings("general");
+  await rescue(() => Herd.General.openSettings("general"), "Failed to open Settings.");
+
+  await closeMainWindow();
 }

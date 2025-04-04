@@ -1,4 +1,4 @@
-import { showHUD } from "@raycast/api";
+import { closeMainWindow, showHUD } from "@raycast/api";
 import { Herd } from "./utils/Herd";
 
 export default async function main() {
@@ -10,6 +10,7 @@ export default async function main() {
 
   if (!isPinned) {
     await Herd.Dumps.open();
+    await closeMainWindow();
   }
 
   await Herd.Dumps.togglePin();

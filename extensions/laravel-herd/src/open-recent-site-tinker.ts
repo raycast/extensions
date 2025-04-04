@@ -1,4 +1,4 @@
-import { showHUD, environment, updateCommandMetadata, LaunchType } from "@raycast/api";
+import { environment, updateCommandMetadata, LaunchType, Toast, showToast } from "@raycast/api";
 import { Herd } from "./utils/Herd";
 
 export default async function main() {
@@ -12,10 +12,17 @@ export default async function main() {
   const recentSite = await Herd.Sites.getRecentSite();
 
   if (!recentSite) {
-    await showHUD("No recent site found");
+    await showToast({
+      title: "No recent site found.",
+      style: Toast.Style.Failure,
+    });
     return;
   }
 
-  await showHUD(`Opening ${recentSite.site} with tinker...`);
+  await showToast({
+    title: `Opening ${recentSite.site} with tinker...`,
+    style: Toast.Style.Animated,
+  });
+
   await Herd.ExternalApps.openTinker(recentSite.path);
 }

@@ -1,8 +1,14 @@
-import { showHUD } from "@raycast/api";
+import { closeMainWindow, showToast, Toast } from "@raycast/api";
 import { Herd } from "./utils/Herd";
+import { rescue } from "./utils/rescue";
 
 export default async function main() {
-  await showHUD("Open mails");
+  await showToast({
+    title: "Opening Mails...",
+    style: Toast.Style.Animated,
+  });
 
-  await Herd.Mails.open();
+  await rescue(() => Herd.Mails.open(), "Failed to open Mails.");
+
+  await closeMainWindow();
 }

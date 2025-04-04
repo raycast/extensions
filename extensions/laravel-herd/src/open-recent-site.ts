@@ -1,4 +1,4 @@
-import { showHUD, environment, updateCommandMetadata, LaunchType, open } from "@raycast/api";
+import { environment, updateCommandMetadata, LaunchType, open, showToast, Toast } from "@raycast/api";
 import { Herd } from "./utils/Herd";
 import { rescue } from "./utils/rescue";
 
@@ -10,13 +10,20 @@ export default async function main() {
     return;
   }
 
-  const recentSite = await rescue(() => Herd.Sites.getRecentSite(), "Failed to get recent site.", "");
+  const recentSite = await rescue(() => Herd.Sites.getRecentSite(), "Failed to get recent site.", null);
 
   if (!recentSite) {
-    await showHUD("No recent site found");
+    await showToast({
+      title: "No recent site found.",
+      style: Toast.Style.Failure,
+    });
     return;
   }
 
-  await showHUD(`Opening ${recentSite.site}...`);
+  await showToast({
+    title: `Opening ${recentSite.site}...`,
+    style: Toast.Style.Animated,
+  });
+
   open(recentSite.url);
 }
