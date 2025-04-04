@@ -35,7 +35,19 @@ export default function Command() {
             title: 'Balances fetched successfully!',
           })
         }
-        setBalance(balance.data)
+        if (balance.status) {
+          showToast({
+            style: Toast.Style.Success,
+            title: 'Balances fetched successfully!',
+          })
+          setBalance(balance.data)
+        } else {
+          showToast({
+            style: Toast.Style.Failure,
+            title: 'Failed to fetch balances',
+            message: balance.message,
+          })
+        }
       } catch (error) {
         console.error('Error fetching balance:', error)
         showToast({
