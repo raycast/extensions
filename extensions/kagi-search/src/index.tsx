@@ -1,6 +1,7 @@
 // In src/index.tsx
 import { ActionPanel, closeMainWindow, getPreferenceValues, Icon, List } from "@raycast/api";
 import { getIcon, apiEnabled } from "./utils/resultUtils";
+
 import { useSearch } from "./utils/useSearch";
 import open from "open";
 import { SearchResult } from "./utils/types";
@@ -157,6 +158,7 @@ export default function Command() {
                   />
                   </ActionPanel.Section>
                 }
+
               </ActionPanel>
             }
           />

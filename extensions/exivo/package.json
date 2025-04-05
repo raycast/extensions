@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "exivo",
+  "title": "Exivo",
+  "description": "Use dormakaba exivo api to unlock doors.",
+  "icon": "extension-icon.png",
+  "author": "Michi-2124",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "unlock-door",
+      "title": "Unlock Door",
+      "subtitle": "Exivo",
+      "description": "Unlock your dormakaba doors using exivo.",
+      "mode": "view"
+    },
+    {
+      "name": "access-log",
+      "title": "View Access Log",
+      "subtitle": "Exivo",
+      "description": "Access log for your dormakaba components using exivo.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "siteId",
+      "title": "System ID",
+      "description": "Unique dormakaba exivo system id.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "clientId",
+      "title": "Client ID",
+      "description": "Your dormakaba exivo client id.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "clientSecret",
+      "title": "Client Secret",
+      "description": "Your dormakaba exivo client secret.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.17.0",
+    "luxon": "^3.5.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/luxon": "^3.4.2",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

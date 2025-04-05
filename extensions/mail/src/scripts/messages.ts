@@ -305,7 +305,7 @@ export const getMessages = async (
     return {
       id,
       account: account.name,
-      accountAddress: account.email,
+      accountAddress: account.emails[0],
       subject,
       date: constructDate(date),
       read: read === "true",

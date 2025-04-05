@@ -1,5 +1,9 @@
 # Zeabur Changelog
 
+## [Update] - 2025-03-31
+
+- Updated the deploy script for the "Deploy Project" command.
+
 ## [Update] - 2025-02-04
 
 - Updated the deploy script for the "Deploy Project" command.

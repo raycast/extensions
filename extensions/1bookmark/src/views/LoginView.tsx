@@ -3,17 +3,15 @@ import { ActionPanel, Action, Form, Icon } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { trpc } from "@/utils/trpc.util";
 import { handleSignIn } from "@/handle-signin";
-import { useAtom } from "jotai";
-import { sessionTokenAtom } from "@/states/session-token.state";
-import { loggingEmailAtom, loggingTokenSentAtom } from "../states/logging-email.state";
+import { useCachedState } from "@raycast/utils";
 
 function Body() {
-  const [, setSessionToken] = useAtom(sessionTokenAtom);
+  const [, setSessionToken] = useCachedState("session-token", "");
   const { mutateAsync, isPending } = trpc.login.generateMagicLink.useMutation();
   const verificationTokenRef = useRef<Form.TextField>(null);
 
-  const [tokenSent, setTokenSent] = useAtom(loggingTokenSentAtom);
-  const [email, setEmail] = useAtom(loggingEmailAtom);
+  const [email, setEmail] = useCachedState("logging-email", "");
+  const [tokenSent, setTokenSent] = useCachedState("logging-token-sent", false);
 
   const [code, setCode] = useState("");
 

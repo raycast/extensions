@@ -527,13 +527,13 @@
       ]
     },
     {
-      "name": "customa",
+      "name": "custom_a",
       "title": "Custom Action A",
       "description": "Ask LLM Model based on a custom prompt",
       "mode": "view",
       "preferences": [
         {
-          "name": "prompt_custom",
+          "name": "prompt_custom_a",
           "title": "Custom Prompt",
           "description": "The prompt for the custom action command",
           "type": "textfield",
@@ -541,7 +541,7 @@
           "required": false
         },
         {
-          "name": "model_custom",
+          "name": "model_custom_a",
           "description": "Override the global preferred model for this command",
           "type": "dropdown",
           "required": false,
@@ -585,13 +585,13 @@
       ]
     },
     {
-      "name": "customb",
+      "name": "custom_b",
       "title": "Custom Action B",
       "description": "Ask LLM Model based on a custom prompt",
       "mode": "view",
       "preferences": [
         {
-          "name": "prompt_custom",
+          "name": "prompt_custom_b",
           "title": "Custom Prompt",
           "description": "The prompt for the custom action command",
           "type": "textfield",
@@ -599,7 +599,7 @@
           "required": false
         },
         {
-          "name": "model_custom",
+          "name": "model_custom_b",
           "description": "Override the global preferred model for this command",
           "type": "dropdown",
           "required": false,

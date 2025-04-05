@@ -47,6 +47,7 @@
       "type": "checkbox",
       "default": true,
       "required": false
+
     }
   ],
   "dependencies": {
