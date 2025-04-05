@@ -40,7 +40,7 @@ const useFormula1DriverUrl = (season: string | null, driver: Driver | null): str
         if (response.status !== 200) {
           return;
         }
-        const $ = load(await response.text(), { xml: { normalizeWhitespace: true } });
+        const $ = load(await response.text());
         $(`table.resultsarchive-table tr td a`).each((_, el) => {
           const $el = $(el);
           if (!matches($el.text(), [driver.givenName, driver.familyName])) {
