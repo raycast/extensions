@@ -5,9 +5,15 @@
   "description": "Interact with the Model Context Protocol (MCP) in Raycast AI",
   "icon": "mcp-icon.png",
   "author": "EvanZhouDev",
+  "version": "1.1.0",
   "contributors": [
+    "EugeneVanchugov",
     "radzio"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/raycast/extensions"
+  },
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -16,7 +22,7 @@
   "commands": [
     {
       "name": "manage-mcp-servers",
-      "title": "Manage MCP Servers",
+      "title": "Manage Mcp Servers",
       "description": "Add, remove, or edit your MCP servers.",
       "mode": "view"
     }
@@ -24,12 +30,12 @@
   "tools": [
     {
       "name": "get-mcp-clients",
-      "title": "Get MCP Clients",
+      "title": "Get Mcp Clients",
       "description": "Get data about loaded MCP clients"
     },
     {
       "name": "run-mcp-tool",
-      "title": "Run MCP Tool",
+      "title": "Run Mcp Tool",
       "description": "Runs an available MCP tool"
     }
   ],
@@ -49,7 +55,7 @@
     ]
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.4.1",
+    "@modelcontextprotocol/sdk": "^1.8.0",
     "@raycast/api": "^1.90.0",
     "@raycast/utils": "^1.17.0",
     "zod": "^3.24.1"
