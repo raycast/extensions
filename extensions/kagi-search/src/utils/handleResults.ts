@@ -63,7 +63,7 @@ export async function getSearchResults(
     // Apply the same conditional logic to the other results
     if (result.query.includes("!")) {
       result.description = "Use a Kagi bang with: " + item;
-    } else if (result.query.includes("?")) {
+    } else if (result.query.includes("?") && getPreferenceValues()["fastGptShortcut"]) {
       result.description = "Ask FastGPT: " + item;
     }
     results[i + 1] = result;
