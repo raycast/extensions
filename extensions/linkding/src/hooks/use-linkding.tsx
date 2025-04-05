@@ -60,16 +60,21 @@ const useLinkding = () => {
     return fuseRef.current.search(searchText).map((r) => r.item);
   }, [searchText, allBookmarks]);
 
-  const deleteBookmark = useCallback((id: number) => {
-    showToast(Toast.Style.Animated, "Deleting bookmark", id.toString());
-    api
-      .deleteBookmark(id)
-      .then(() => {
-        showToast(Toast.Style.Success, "Bookmark deleted", id.toString());
-        setAllBookmarks([...allBookmarks.filter((bookmark) => bookmark.id !== id)]);
-      })
-      .catch((err) => showFailureToast(err, { title: `Failed to delete bookmark ${id}` }));
-  }, []);
+  const deleteBookmark = useCallback(
+    (id: number) => {
+      showToast(Toast.Style.Animated, "Deleting bookmark", id.toString());
+      api
+        .deleteBookmark(id)
+        .then(() => {
+          showToast(Toast.Style.Success, "Bookmark deleted", id.toString());
+          const filteredBookmarks = allBookmarks.filter((bookmark) => bookmark.id !== id);
+          setAllBookmarks(filteredBookmarks);
+          saveBookmarksToCache(filteredBookmarks);
+        })
+        .catch((err) => showFailureToast(err, { title: `Failed to delete bookmark ${id}` }));
+    },
+    [allBookmarks]
+  );
 
   const createBookmark = useCallback(async (values: CreateLinkdingBookmarkFormValues) => {
     showToast(Toast.Style.Animated, "Creating bookmark", values.title);
