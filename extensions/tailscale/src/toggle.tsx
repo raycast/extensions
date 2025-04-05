@@ -7,7 +7,7 @@ export default async function Toggle() {
   try {
     // Check current status
     const isConnected = await isTailscaleConnected();
-    
+
     if (isConnected) {
       // Disconnect
       await showToast({
@@ -19,7 +19,7 @@ export default async function Toggle() {
 
       popToRoot();
       closeMainWindow();
-      
+
       // Await the disconnect command
       await tailscale("down");
 
@@ -36,12 +36,12 @@ export default async function Toggle() {
 
       popToRoot();
       closeMainWindow();
-      
+
       // Await the connect command
       await tailscale("up");
 
       // Wait briefly for connection to establish
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const data = getStatus(false);
       const magicDNSSuffix = data.MagicDNSSuffix;
@@ -62,4 +62,4 @@ async function isTailscaleConnected(): Promise<boolean> {
   } catch (err) {
     return false;
   }
-} 
+}
