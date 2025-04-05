@@ -1,5 +1,6 @@
 import { Clipboard, closeMainWindow, showToast, Toast } from "@raycast/api";
 import { markdownToTanaPaste } from "./utils";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   try {
@@ -32,18 +33,8 @@ export default async function Command() {
     // No view commands should close immediately
     await closeMainWindow();
   } catch (error) {
-    console.error("Conversion failed", error);
-    let errorMessage = "Unknown error occurred";
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    } else if (typeof error === "string") {
-      errorMessage = error;
-    }
-
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: "Conversion Failed",
-      message: errorMessage,
     });
   }
 }
