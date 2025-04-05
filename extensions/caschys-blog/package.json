@@ -135,6 +135,9 @@
       },
       {
         "input": "@caschys-blog find articles about iPhone",
+        "mocks": {
+          "search-articles": []
+        },
         "expected": [
           {
             "callsTool": {
@@ -148,6 +151,9 @@
       },
       {
         "input": "@caschys-blog show me the latest articles",
+        "mocks": {
+          "get-latest-articles": []
+        },
         "expected": [
           {
             "callsTool": "get-latest-articles"
@@ -156,6 +162,9 @@
       },
       {
         "input": "@caschys-blog I want to submit a tip about a new tech product",
+        "mocks": {
+          "submit-tip": {}
+        },
         "expected": [
           {
             "callsTool": "submit-tip"
