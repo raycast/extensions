@@ -1,10 +1,10 @@
-import { DOUYIN_TENAPI } from "../utils/constants";
-import { Trend } from "../types/types";
 import { useCachedPromise } from "@raycast/utils";
-import { fetchTrend } from "../utils/common-utils";
+import { Trend } from "../types/types";
+import { fetchTophubTrend } from "../utils/common-utils";
+import { DOUYIN_HASHID } from "../utils/constants";
 
 export function useDouyin() {
   return useCachedPromise(() => {
-    return fetchTrend(DOUYIN_TENAPI) as Promise<Trend[]>;
+    return fetchTophubTrend(DOUYIN_HASHID) as Promise<Trend[]>;
   });
 }

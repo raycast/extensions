@@ -1,28 +1,65 @@
-import { Icon, MenuBarExtra, openCommandPreferences } from "@raycast/api";
+import { Icon, MenuBarExtra, openExtensionPreferences } from "@raycast/api";
+import { useMemo, useState } from "react";
+import { ApiKeyForm } from "./components/api-key-form";
 import { TrendMenubarItem } from "./components/trend-menubar-item";
 import { useBaidu } from "./hooks/useBaidu";
 import { useBili } from "./hooks/useBili";
 import { useDouyin } from "./hooks/useDouyin";
+import { usePengpai } from "./hooks/usePengpai";
 import { useToutiao } from "./hooks/useToutiao";
 import { useWeibo } from "./hooks/useWeibo";
+import { useWeixin } from "./hooks/useWeixin";
 import { useZhihu } from "./hooks/useZhihu";
-import { useMemo } from "react";
-import { TrendsTags } from "./utils/constants";
-import { showBaiDu, showBiliBili, showDouYin, showTouTiao, showWeibo, showZhiHu } from "./types/preferences";
-import { getMenubarTitle, spliceTrends } from "./utils/common-utils";
+import {
+  showBaiDu,
+  showBiliBili,
+  showDouYin,
+  showPengpai,
+  showTouTiao,
+  showWeibo,
+  showWeixin,
+  showZhiHu,
+  tophubApiKey,
+} from "./types/preferences";
 import { SocialTrend } from "./types/types";
+import { getMenubarTitle, spliceTrends } from "./utils/common-utils";
+import { TrendsTags } from "./utils/constants";
 
 export default function SearchTrendsOfSocialNetworkMenuBar() {
+  // All state hooks must be called unconditionally at the top of the component
+  const [apiKeySubmitted, setApiKeySubmitted] = useState<boolean>(!!tophubApiKey);
+
+  // All data hooks must be called unconditionally, even if we may not use their results
   const { data: baiduData, isLoading: baiduLoading } = useBaidu();
   const { data: biliData, isLoading: biliLoading } = useBili();
   const { data: douyinData, isLoading: douyinLoading } = useDouyin();
   const { data: toutiaoData, isLoading: toutiaoLoading } = useToutiao();
   const { data: weiboData, isLoading: weiboLoading } = useWeibo();
   const { data: zhihuData, isLoading: zhihuLoading } = useZhihu();
+  const { data: weixinData, isLoading: weixinLoading } = useWeixin();
+  const { data: pengpaiData, isLoading: pengpaiLoading } = usePengpai();
 
   const isLoading = useMemo(() => {
-    return baiduLoading || biliLoading || douyinLoading || toutiaoLoading || weiboLoading || zhihuLoading;
-  }, [baiduLoading, biliLoading, douyinLoading, toutiaoLoading, weiboLoading, zhihuLoading]);
+    return (
+      baiduLoading ||
+      biliLoading ||
+      douyinLoading ||
+      toutiaoLoading ||
+      weiboLoading ||
+      zhihuLoading ||
+      weixinLoading ||
+      pengpaiLoading
+    );
+  }, [
+    baiduLoading,
+    biliLoading,
+    douyinLoading,
+    toutiaoLoading,
+    weiboLoading,
+    zhihuLoading,
+    weixinLoading,
+    pengpaiLoading,
+  ]);
 
   const socialTrends = useMemo(() => {
     const socialTrends_: SocialTrend[] = [];
@@ -45,8 +82,19 @@ export default function SearchTrendsOfSocialNetworkMenuBar() {
     if (biliData && showBiliBili) {
       socialTrends_.push({ title: TrendsTags.BILI, data: spliceTrends(biliData, num) });
     }
+    if (weixinData && showWeixin) {
+      socialTrends_.push({ title: TrendsTags.WEIXIN, data: spliceTrends(weixinData, num) });
+    }
+    if (pengpaiData && showPengpai) {
+      socialTrends_.push({ title: TrendsTags.PENGPAI, data: spliceTrends(pengpaiData, num) });
+    }
     return socialTrends_;
-  }, [baiduData, biliData, douyinData, toutiaoData, weiboData, zhihuData]);
+  }, [baiduData, biliData, douyinData, toutiaoData, weiboData, zhihuData, weixinData, pengpaiData]);
+
+  // If there is no API Key, display the API Key input form
+  if (!apiKeySubmitted) {
+    return <ApiKeyForm onApiKeySaved={() => setApiKeySubmitted(true)} />;
+  }
 
   return (
     <MenuBarExtra isLoading={isLoading} title={getMenubarTitle(socialTrends)} icon={Icon.Hashtag}>
@@ -65,7 +113,7 @@ export default function SearchTrendsOfSocialNetworkMenuBar() {
           title={"Settings..."}
           shortcut={{ modifiers: ["cmd"], key: "," }}
           onAction={async () => {
-            await openCommandPreferences();
+            await openExtensionPreferences();
           }}
         />
       </MenuBarExtra.Section>
