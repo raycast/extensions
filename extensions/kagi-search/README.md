@@ -20,7 +20,7 @@ There are two other optional settings in the Command Preferences:
 ## Future Features / Improvements
 Here's some things that may be nice improvements I'd like to add (or have help with):
 * Improved navigation (using actions.push,etc)
-* Fallback to broswer search of out of api balance
+* Fallback to browser search of out of api balance
 * Improved formatting of results for longer previews
 
 Thank you! Enjoy!
