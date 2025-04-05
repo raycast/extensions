@@ -39,6 +39,6 @@ export async function search(
   }
 
   throw new Error(
-		data.message || searchResponse.statusText || "Search request failed"
-	);
+    data.message || searchResponse.statusText || "Search request failed",
+  );
 }
