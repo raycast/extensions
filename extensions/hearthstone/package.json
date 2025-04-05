@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hearthstone",
+  "title": "Hearthstone",
+  "description": "Search the best Hearthstone decks",
+  "icon": "hearthstone-icon.png",
+  "author": "raffeyang",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "title": "Decks",
+      "name": "search-best-decks",
+      "description": "Search the best Hearthstone decks",
+      "mode": "view"
+    },
+    {
+      "title": "Heroes",
+      "name": "search-class-decks",
+      "description": "Search the best Hearthstone decks per class",
+      "mode": "view"
+    },
+    {
+      "title": "Cards",
+      "name": "card-list",
+      "description": "Browse Hearthstone cards",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultCardImageLanguage",
+      "title": "Default Card Image Language",
+      "description": "Choose the default language for card images only (UI remains in English)",
+      "type": "dropdown",
+      "required": true,
+      "default": "enUS",
+      "data": [
+        {
+          "title": "English",
+          "value": "enUS"
+        },
+        {
+          "title": "Chinese",
+          "value": "zhCN"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.13.5",
+    "axios": "^1.6.8",
+    "cheerio": "^1.0.0-rc.12",
+    "jsdom": "^24.0.0",
+    "ts-node": "^10.9.2",
+    "xpath": "^0.0.34"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/jquery": "^3.5.32",
+    "@types/node": "^20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "build": "ray build -e dist"
+  }
+}
