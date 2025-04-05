@@ -49,7 +49,7 @@ export default function Command() {
             icon={getIcon(item)}
             actions={
               <ActionPanel>
-                { apiEnabled?
+                {apiEnabled ? (
                   <ActionPanel.Section title="Result">
                     {getPreferenceValues()["fastGptShortcut"] && item.query.endsWith("?") ? (
                       // For question mark queries, default action is Ask FastGPT
@@ -116,7 +116,7 @@ export default function Command() {
                         icon={{ source: Icon.Globe }}
                       />
                     )}
-                    { getPreferenceValues()["fastGptShortcut"] && !(item.isFastGPT || item.query.includes("?")) && (
+                    {getPreferenceValues()["fastGptShortcut"] && !(item.isFastGPT || item.query.includes("?")) && (
                       <ActionPanel.Item
                         title="Ask FastGPT"
                         shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
@@ -143,22 +143,20 @@ export default function Command() {
                       />
                     )}
                   </ActionPanel.Section>
-
-                :
+                ) : (
                   <ActionPanel.Section title="Result">
-                  <ActionPanel.Item
-                    title="Open in Browser"
-                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
-                    onAction={async () => {
-                      await addHistory(item);
-                      await open(`https://kagi.com/search?q=${encodeURIComponent(item.query)}`);
-                      await closeMainWindow();
-                    }}
-                    icon={{ source: Icon.Globe }}
-                  />
+                    <ActionPanel.Item
+                      title="Open in Browser"
+                      shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                      onAction={async () => {
+                        await addHistory(item);
+                        await open(`https://kagi.com/search?q=${encodeURIComponent(item.query)}`);
+                        await closeMainWindow();
+                      }}
+                      icon={{ source: Icon.Globe }}
+                    />
                   </ActionPanel.Section>
-                }
-
+                )}
               </ActionPanel>
             }
           />
