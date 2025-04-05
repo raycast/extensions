@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "producthunt",
-  "title": "Product Hunt - Today's Hunts",
-  "description": "Get the latest products from the frontpage of Product Hunt.",
+  "title": "Product Hunt",
+  "description": "View today's featured products on Product Hunt.",
   "icon": "icon.png",
   "author": "ragnor",
   "contributors": [
@@ -15,17 +15,27 @@
   "commands": [
     {
       "name": "frontpage",
-      "title": "Check Today's Hunts",
+      "title": "View Today's Featured Products",
       "subtitle": "Product Hunt",
-      "description": "Get the latest products from the frontpage of Product Hunt.",
+      "description": "View today's featured products on Product Hunt.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "username",
+      "title": "Username",
+      "description": "Your Product Hunt username",
+      "type": "textfield",
+      "required": false,
+      "default": ""
     }
   ],
   "tools": [
     {
       "name": "get-latest-products",
-      "title": "Get Latest Products",
-      "description": "Get the latest products from Product Hunt with their details, votes, and descriptions"
+      "title": "Get Today's Featured Products",
+      "description": "Get today's featured products from Product Hunt with their details, votes, and taglines."
     }
   ],
   "ai": {
@@ -45,21 +55,24 @@
               "author": "Anton Selikhov",
               "title": "Talo",
               "description": "Real-time AI voice translator for video-calls",
-              "publishedAt": "2025-02-10T10:42:50.000Z",
+              "votesCount": 245,
+              "commentsCount": 18,
               "link": "https://www.producthunt.com/posts/talo-ai"
             },
             {
               "author": "Mohamed Ghaith",
               "title": "Stunning",
               "description": "Design client websites fast with AI",
-              "publishedAt": "2025-02-10T10:41:57.000Z",
+              "votesCount": 187,
+              "commentsCount": 12,
               "link": "https://www.producthunt.com/posts/stunning-9bbcb88d-5b97-4822-aed6-46f67430eb49"
             },
             {
               "author": "Joseph LeBlanc",
               "title": "Practice Pro ",
               "description": "Practice widgets for musicians you can customize",
-              "publishedAt": "2025-02-10T10:41:56.000Z",
+              "votesCount": 156,
+              "commentsCount": 7,
               "link": "https://www.producthunt.com/posts/practice-pro-2"
             }
           ]
@@ -81,21 +94,24 @@
               "author": "Anton Selikhov",
               "title": "Talo",
               "description": "Real-time AI voice translator for video-calls",
-              "publishedAt": "2025-02-10T10:42:50.000Z",
+              "votesCount": 245,
+              "commentsCount": 18,
               "link": "https://www.producthunt.com/posts/talo-ai"
             },
             {
               "author": "Mohamed Ghaith",
               "title": "Stunning",
               "description": "Design client websites fast with AI",
-              "publishedAt": "2025-02-10T10:41:57.000Z",
+              "votesCount": 187,
+              "commentsCount": 12,
               "link": "https://www.producthunt.com/posts/stunning-9bbcb88d-5b97-4822-aed6-46f67430eb49"
             },
             {
               "author": "Joseph LeBlanc",
               "title": "Practice Pro ",
               "description": "Practice widgets for musicians you can customize",
-              "publishedAt": "2025-02-10T10:41:56.000Z",
+              "votesCount": 156,
+              "commentsCount": 7,
               "link": "https://www.producthunt.com/posts/practice-pro-2"
             }
           ]
@@ -117,21 +133,24 @@
               "author": "Mohamed Ghaith",
               "title": "Stunning",
               "description": "Design client websites fast with AI",
-              "publishedAt": "2025-02-10T10:53:52.000Z",
+              "votesCount": 312,
+              "commentsCount": 24,
               "link": "https://www.producthunt.com/posts/stunning-9bbcb88d-5b97-4822-aed6-46f67430eb49"
             },
             {
               "author": "Zac Zuo",
               "title": "Pikadditions",
               "description": "Bring your videos to life with images",
-              "publishedAt": "2025-02-10T10:54:01.000Z",
+              "votesCount": 287,
+              "commentsCount": 19,
               "link": "https://www.producthunt.com/posts/pikadditions"
             },
             {
               "author": "Markiian Pukshin",
               "title": "Moodcare Journal",
               "description": "Make your thoughts as clear as possible",
-              "publishedAt": "2025-02-10T10:53:53.000Z",
+              "votesCount": 253,
+              "commentsCount": 15,
               "link": "https://www.producthunt.com/posts/moodcare-journal"
             }
           ]
@@ -140,19 +159,18 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.90.0",
-    "@raycast/utils": "^1.9.1",
-    "node-fetch": "^2.7.0",
-    "rss-parser": "^3.13.0"
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "cheerio": "^1.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^20.8.10",
-    "@types/node-fetch": "^2.6.12",
-    "@types/react": "^18.3.3",
-    "eslint": "^7.32.0",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/cheerio": "^0.22.35",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
