@@ -20,7 +20,10 @@
     "ridemountainpig",
     "kcole93",
     "Rob",
-    "jagadeesh_k"
+    "jagadeesh_k",
+    "scottlovegrove",
+    "henningmu",
+    "FlohGro"
   ],
   "commands": [
     {
@@ -156,6 +159,10 @@
           "name": "view",
           "type": "dropdown",
           "data": [
+            {
+              "title": "Inbox",
+              "value": "inbox"
+            },
             {
               "title": "Today",
               "value": "today"
@@ -604,7 +611,7 @@
   "dependencies": {
     "@raycast/api": "^1.78.1",
     "@raycast/utils": "^1.18.1",
-    "axios": "^1.7.2",
+    "axios": "^1.8.4",
     "date-fns": "^3.6.0",
     "form-data": "^4.0.0",
     "lodash": "^4.17.21",

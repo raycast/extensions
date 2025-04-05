@@ -81,11 +81,14 @@ export const scriptFirefoxBrowserPath = (app: string) => `
 tell application "${app}"
   activate
   tell application "System Events"
-    keystroke "l" using command down
-    keystroke "c" using command down
+    delay 0.2
+    key code 37 using command down
+    delay 0.2
+    key code 8 using command down
+    delay 0.2
     key code 53
   end tell
-  delay 0.2
+  delay 0.3
   set activeTabURL to the clipboard
   return (activeTabURL)
 end tell`;

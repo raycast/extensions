@@ -29,7 +29,7 @@
   "dependencies": {
     "@raycast/api": "^1.68.1",
     "@raycast/utils": "^1.12.5",
-    "axios": "^1.7.2",
+    "axios": "^1.8.4",
     "npm-check": "^6.0.1"
   },
   "devDependencies": {

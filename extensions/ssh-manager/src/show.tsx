@@ -1,4 +1,14 @@
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, List, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  closeMainWindow,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  List,
+  showHUD,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { getConnections, saveConnections } from "./storage.api";
@@ -364,6 +374,77 @@ async function runTerminal(item: ISSHConnection) {
   call_forward()
   `;
 
+  const scriptGhostty = `
+  -- Set this property to true to open in a new window instead of a new tab
+  property open_in_new_window : ${openIn == "newWindow"}
+
+  on new_window()
+      tell application "Ghostty"
+          activate
+          tell application "System Events" to tell process "Ghostty"
+              keystroke "n" using {command down}
+          end tell
+      end tell
+      delay 0.5
+  end new_window
+
+  on new_tab()
+      tell application "Ghostty"
+          activate
+          tell application "System Events" to tell process "Ghostty"
+              keystroke "t" using {command down}
+          end tell
+      end tell
+      delay 0.5
+  end new_tab
+
+  on call_forward()
+      tell application "Ghostty" to activate
+  end call_forward
+
+  on is_running()
+      application "Ghostty" is running
+  end is_running
+
+  on has_windows()
+      if not is_running() then return false
+      tell application "System Events"
+          if windows of process "Ghostty" is {} then return false
+      end tell
+      true
+  end has_windows
+
+  on send_text(custom_text)
+      tell application "System Events" to tell process "Ghostty"
+          keystroke custom_text & return
+      end tell
+  end send_text
+
+  -- Main
+  if has_windows() then
+      if open_in_new_window then
+          new_window()
+      else
+          new_tab()
+      end if
+  else
+      if is_running() then
+          new_window()
+      else
+          call_forward()
+      end if
+  end if
+
+  -- Give Ghostty some time to load
+  repeat until has_windows()
+      delay 0.5
+  end repeat
+  delay 0.5
+
+  send_text("${command}")
+  call_forward()
+  `;
+
   if (terminal == "iTerm") {
     try {
       await runAppleScript(scriptIterm);
@@ -389,6 +470,13 @@ async function runTerminal(item: ISSHConnection) {
   } else if (terminal == "Hyper") {
     try {
       await runAppleScript(scriptHyper);
+    } catch (error) {
+      await runAppleScript(scriptTerminal);
+      console.log(error);
+    }
+  } else if (terminal == "Ghostty") {
+    try {
+      await runAppleScript(scriptGhostty);
     } catch (error) {
       await runAppleScript(scriptTerminal);
       console.log(error);
@@ -432,12 +520,25 @@ export default function Command() {
   }, []);
 
   async function removeItem(item: ISSHConnection) {
-    let items: ISSHConnection[] = await getConnections();
-    items = items.filter((i) => i.id !== item.id);
+    const confirmed = await confirmAlert({
+      title: "Remove Connection",
+      message: `Are you sure you want to remove connection [${item.name}]?`,
+      primaryAction: {
+        title: "Remove",
+        style: Alert.ActionStyle.Destructive,
+      },
+      dismissAction: {
+        title: "Cancel",
+      },
+    });
+    if (confirmed) {
+      let items: ISSHConnection[] = await getConnections();
+      items = items.filter((i) => i.id !== item.id);
 
-    await saveConnections(items);
-    setConnectionsList(items);
-    await showHUD(`🗑 Connection [${item.name}] removed!`);
+      await saveConnections(items);
+      setConnectionsList(items);
+      await showHUD(`🗑 Connection [${item.name}] removed!`);
+    }
   }
 
   return (
@@ -486,6 +587,7 @@ function GetAction({
         <Action
           title="Remove Connection"
           icon={Icon.Trash}
+          style={Action.Style.Destructive}
           onAction={() => onItemRemove(item)}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
         />

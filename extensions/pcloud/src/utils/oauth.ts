@@ -2,7 +2,10 @@ import fetch from "node-fetch";
 import { getPreferenceValues, LocalStorage, OAuth } from "@raycast/api";
 
 const oauthConfig = {
-  url: "https://raycast.aleflo.it",
+  url: {
+    us: "https://raycast-us.aleflo.it",
+    eu: "https://raycast.aleflo.it",
+  },
   params: {
     client_id: "hQIu8GcQpUk",
     response_type: "code",
@@ -10,8 +13,15 @@ const oauthConfig = {
   },
 };
 
-export async function oauth(forceReauth = false): Promise<string> {
+export async function oauth({
+  forceReauth = false,
+  isEuropeRegion = false,
+}: {
+  forceReauth?: boolean;
+  isEuropeRegion?: boolean;
+}): Promise<string> {
   const preferenceToken = getPreferenceValues().pcloud_token;
+  const server = isEuropeRegion ? "eu" : "us";
 
   const client = new OAuth.PKCEClient({
     redirectMethod: OAuth.RedirectMethod.Web,
@@ -23,7 +33,7 @@ export async function oauth(forceReauth = false): Promise<string> {
   if (preferenceToken && !forceReauth) {
     return preferenceToken;
   }
-  const token = await checkTokens(client).catch(console.error);
+  const token = await checkTokens(client, server).catch(console.error);
 
   if (token && !forceReauth) {
     return token;
@@ -32,7 +42,7 @@ export async function oauth(forceReauth = false): Promise<string> {
   const alreadyAuthorizing = new Promise<string>((resolve, reject) => {
     async function run() {
       const authRequest = await client.authorizationRequest({
-        endpoint: `${oauthConfig.url}/authorize`,
+        endpoint: `${oauthConfig.url[server]}/authorize`,
         clientId: oauthConfig.params.client_id,
         extraParameters: {
           response_type: oauthConfig.params.response_type,
@@ -41,7 +51,7 @@ export async function oauth(forceReauth = false): Promise<string> {
       });
       const { authorizationCode } = await client.authorize(authRequest);
       //console.log({ authorizationCode, code_verifier: authRequest.codeVerifier });
-      const tokenResponse = await fetchTokens(authRequest, authorizationCode);
+      const tokenResponse = await fetchTokens(authRequest, authorizationCode, server);
       //console.log({ tokenResponse });
       await client.setTokens(tokenResponse);
       return tokenResponse.access_token;
@@ -52,7 +62,11 @@ export async function oauth(forceReauth = false): Promise<string> {
   return await alreadyAuthorizing;
 }
 
-async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
+async function fetchTokens(
+  authRequest: OAuth.AuthorizationRequest,
+  authCode: string,
+  server: "eu" | "us"
+): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", oauthConfig.params.client_id);
   params.append("code", authCode);
@@ -63,7 +77,7 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
 
   //console.log("fetch tokens", params.toString());
 
-  const response = await fetch(`${oauthConfig.url}/token`, {
+  const response = await fetch(`${oauthConfig.url[server]}/token`, {
     headers: { "Content-Type": "application/json" },
     method: "POST",
     //convert params to json
@@ -77,11 +91,11 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
   return (await response.json()) as OAuth.TokenResponse;
 }
 
-export async function checkTokens(client: OAuth.PKCEClient) {
+export async function checkTokens(client: OAuth.PKCEClient, server: "eu" | "us") {
   const tokenSet = await client.getTokens();
   if (tokenSet?.accessToken) {
     if (tokenSet.refreshToken && tokenSet.isExpired()) {
-      const newTokenSet = await refreshTokens(tokenSet.refreshToken);
+      const newTokenSet = await refreshTokens(tokenSet.refreshToken, server);
       await client.setTokens(newTokenSet);
       await LocalStorage.setItem("pcloud_token", tokenSet?.accessToken || "");
       return newTokenSet.access_token;
@@ -93,14 +107,14 @@ export async function checkTokens(client: OAuth.PKCEClient) {
   return null;
 }
 
-async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
+async function refreshTokens(refreshToken: string, server: "eu" | "us"): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", oauthConfig.params.client_id);
   params.append("refresh_token", refreshToken);
   params.append("grant_type", "refresh_token");
   params.append("scope", "files.read");
 
-  const response = await fetch(`${oauthConfig.url}/token`, {
+  const response = await fetch(`${oauthConfig.url[server]}/token`, {
     headers: { "Content-Type": "application/json" },
     method: "POST",
     body: params,

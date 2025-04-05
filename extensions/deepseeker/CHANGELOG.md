@@ -1,5 +1,10 @@
 # DeepSeeker - Quick Actions Changelog
 
+## [New Features] - 2025-03-31
+
+- 🤖 Now Ask LLM command supports **search bar fallback**
+- 🔧 Refactor preference getting logic
+
 ## [March Update - Code Refactor] - 2025-03-11
 
 - 📏 **Obey** case naming convention
