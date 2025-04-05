@@ -9,10 +9,10 @@
     "Web"
   ],
   "contributors": [
-    "lin",
     "chrismessina",
     "klaussner",
-    "krsntn"
+    "krsntn",
+    "lin"
   ],
   "keywords": [
     "directions",
@@ -22,6 +22,19 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "searchPlaces",
+      "title": "Search Places",
+      "subtitle": "Google Maps",
+      "description": "Search for places and see detailed information and a map view. Enable autofill to use selected text or clipboard.",
+      "mode": "view"
+    },
+    {
+      "name": "findNearbyPlaces",
+      "title": "Find Nearby Places",
+      "subtitle": "Google Places",
+      "description": "Find places near your home or current location.",
+      "mode": "view"
+    },{
       "name": "travelHome",
       "title": "Get Me Home",
       "subtitle": "Google Maps",
@@ -52,23 +65,42 @@
       "keywords": [
         "find place"
       ]
-    },
-    {
-      "name": "find",
-      "title": "Search Google Maps",
-      "subtitle": "Google Maps",
-      "description": "Use text selection or clipboard to find a place or category on Google Maps.",
-      "mode": "view"
     }
   ],
   "preferences": [
     {
+      "name": "googlePlacesApiKey",
+      "title": "Google Places API Key",
+      "description": "Enter your Google Places API key. Required for place details and map features.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Your Google Places API Key",
+      "information": "Get your API key from the Google Cloud Console: https://console.cloud.google.com/"
+    },{
       "name": "homeAddress",
       "title": "Home Address",
       "description": "Enter your home address.",
       "type": "textfield",
       "required": true,
       "placeholder": "Street Address, City, State, ZIP Code"
+    },
+    {
+      "name": "preferredOrigin",
+      "title": "Preferred Starting Location",
+      "description": "Select your preferred starting location.",
+      "type": "dropdown",
+      "required": true,
+      "default": "home",
+      "data": [
+        {
+          "title": "Home Address",
+          "value": "home"
+        },
+        {
+          "title": "Custom Address",
+          "value": "custom"
+        }
+      ]
     },
     {
       "name": "preferredMode",
@@ -97,24 +129,20 @@
       ]
     },
     {
-      "name": "preferredOrigin",
-      "title": "Preferred Starting Location",
-      "description": "Select your preferred starting location.",
+      "name": "unitSystem",
       "type": "dropdown",
-      "required": true,
-      "default": "curloc",
+      "title": "Unit System",
+      "required": false,
+      "default": "metric",
+      "description": "Choose between metric or imperial units for distances.",
       "data": [
         {
-          "title": "Current Location",
-          "value": "curloc"
+          "title": "Metric System",
+          "value": "metric"
         },
         {
-          "title": "Home",
-          "value": "home"
-        },
-        {
-          "title": "Custom",
-          "value": "custom"
+          "title": "Imperial Units",
+          "value": "imperial"
         }
       ]
     },
@@ -135,10 +163,81 @@
       "type": "checkbox",
       "required": false,
       "default": true
+    },
+    {
+      "name": "showMapInSidebar",
+      "title": "Show Map in Place Details",
+      "label": "Show Maps",
+      "description": "Check this box to show a map when viewing place details.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "defaultSortOrder",
+      "title": "Default Sort Order",
+      "description": "Choose how search results should be sorted by default.",
+      "type": "dropdown",
+      "required": false,
+      "default": "none",
+      "data": [
+        {
+          "title": "Default",
+          "value": "none"
+        },
+        {
+          "title": "Proximity",
+          "value": "proximity"
+        },
+        {
+          "title": "Rating",
+          "value": "rating"
+        },
+        {
+          "title": "Price Level",
+          "value": "price"
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "searchPlaces",
+      "title": "Search Places",
+      "description": "Search for places by name, address, or category",
+      "mode": "view",
+      "path": "./src/tools/searchPlaces.ts",
+      "confirmation": "./src/tools/searchPlaces.ts:confirmation"
+    },
+    {
+      "name": "getPlaceDetails",
+      "title": "Get Place Details",
+      "description": "Get detailed information about a specific place",
+      "mode": "view",
+      "path": "./src/tools/getPlaceDetails.ts",
+      "confirmation": "./src/tools/getPlaceDetails.ts:confirmation"
+    },
+    {
+      "name": "getDirections",
+      "title": "Get Directions",
+      "description": "Get directions between locations",
+      "mode": "view",
+      "path": "./src/tools/getDirections.ts",
+      "confirmation": "./src/tools/getDirections.ts:confirmation"
+    },
+    {
+      "name": "showPlacesOnMap",
+      "title": "Show Places on Map",
+      "description": "Display multiple places on a Google Maps interface",
+      "mode": "view",
+      "path": "./src/tools/showPlacesOnMap.ts",
+      "confirmation": "./src/tools/showPlacesOnMap.ts:confirmation"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.80.0"
+    "@googlemaps/google-maps-services-js": "^3.4.0",
+    "@raycast/api": "^1.87.0",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
@@ -149,6 +248,72 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
+    "evals": "npx ray evals"
+  },
+  "ai": {
+    "evals": [
+      {
+        "input": "@google-maps-search find restaurants in San Francisco",
+        "mocks": {
+          "searchPlaces": "Here are some places matching \"restaurants in San Francisco\":\n\n- **Lazy Bear**\n  Address: 3416 19th St, San Francisco, CA 94110, USA\n  Rating: 4.5/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/Lazy+Bear+3416+19th+St%2C+San+Francisco%2C+CA+94110%2C+USA)\n\n- **Nopa**\n  Address: 560 Divisadero St, San Francisco, CA 94117, USA\n  Rating: 4.6/5\n  Status: Closed\n  [View on Google Maps](https://www.google.com/maps/search/Nopa+560+Divisadero+St%2C+San+Francisco%2C+CA+94117%2C+USA)\n\n- **State Bird Provisions**\n  Address: 1529 Fillmore St, San Francisco, CA 94115, USA\n  Rating: 4.5/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/State+Bird+Provisions+1529+Fillmore+St%2C+San+Francisco%2C+CA+94115%2C+USA)"
+        },
+        "expected": [
+          {
+            "callsTool": "searchPlaces"
+          }
+        ]
+      },
+      {
+        "input" : "@google-maps-search show me a nearby coffee shop on a map",
+        "mocks" : {
+          "searchPlaces" : "Here is a place matching \"coffee shop\":\n\n- **Damask Rose**\n  Address: 6606 Shattuck Ave., Oakland, CA 94609, United States\n  Rating: 4.9/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/?api=1&query=Damask%2520Rose%206606%2520Shattuck%2520Ave.%252C%2520Oakland%252C%2520CA%252094609%252C%2520United%2520States)",
+          "showPlacesOnMap" : "# Place on Map\n\n[![Map of place](https://maps.googleapis.com/maps/api/staticmap?size=600x400&format=png32&scale=2&maptype=roadmap&markers=color:red%7Clabel:A%7C37.811722,-122.267222&visible=37.811722,-122.267222&key=)](https://www.google.com/maps?q=37.8117223,-122.2672224)\n\n## Place Shown\n\n1. Damask Rose\n"
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "limit" : 5,
+                "query" : "coffee shop"
+              },
+              "name" : "searchPlaces"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "places" : "Damask Rose",
+                "useColoredMarkers" : true
+              },
+              "name" : "showPlacesOnMap"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@google-maps-search tell me about the Ferry Building in San Francisco",
+        "mocks": {
+          "getPlaceDetails": "# Ferry Building\n\n**Address**: Ferry Building, San Francisco, CA 94111, USA\n**Phone**: +1 415-983-8000\n**Website**: [https://www.ferrybuildingmarketplace.com/](https://www.ferrybuildingmarketplace.com/)\n**Rating**: ★★★★★ (4.7) based on 25,413 reviews\n**Price Level**: $$\n\n**Status**: Open Now\n\n**Opening Hours**:\n- Monday: 7:00 AM – 10:00 PM\n- Tuesday: 7:00 AM – 10:00 PM\n- Wednesday: 7:00 AM – 10:00 PM\n- Thursday: 7:00 AM – 10:00 PM\n- Friday: 7:00 AM – 10:00 PM\n- Saturday: 8:00 AM – 10:00 PM\n- Sunday: 8:00 AM – 10:00 PM\n\n**Categories**: tourist_attraction, food, point_of_interest, establishment\n\n**Links**:\n- [View on Google Maps](https://www.google.com/maps/search/Ferry+Building+Ferry+Building%2C+San+Francisco%2C+CA+94111%2C+USA)\n- [Get Directions](https://www.google.com/maps/dir/?api=1&destination=Ferry+Building%2C+San+Francisco%2C+CA+94111%2C+USA&travelmode=driving)"
+        },
+        "expected": [
+          {
+            "callsTool": "getPlaceDetails"
+          }
+        ]
+      },
+      {
+        "input": "@google-maps-search how do I get from Fisherman's Wharf to Alcatraz Island?",
+        "mocks": {
+          "getDirections": "## Directions to Alcatraz Island\n\nFrom: Fisherman's Wharf\nTo: Alcatraz Island\nMode: Driving\n\n[Open Directions in Google Maps](https://www.google.com/maps/dir/?api=1&origin=Fisherman%27s+Wharf&destination=Alcatraz+Island&travelmode=driving)\n\nYou can view turn-by-turn directions, traffic information, and estimated travel time by opening the link in Google Maps."
+        },
+        "expected": [
+          {
+            "callsTool": "getDirections"
+          }
+        ]
+      }
+    ]
   }
 }
