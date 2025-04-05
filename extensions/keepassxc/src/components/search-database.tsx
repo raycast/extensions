@@ -5,6 +5,7 @@ import {
   Color,
   Clipboard,
   closeMainWindow,
+  getPreferenceValues,
   Icon,
   List,
   open,
@@ -12,8 +13,14 @@ import {
   showHUD,
   Toast,
 } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { KeePassLoader, showToastCliErrors } from "../utils/keepass-loader";
 import { getTOTPCode } from "../utils/totp";
+import { isValidUrl } from "../utils/url-checker";
+
+const preferences: ExtensionPreferences = getPreferenceValues();
+// Whether to display favicons in the user interface
+const userInterfaceFavicon = Boolean(preferences.userInterfaceFavicon);
 
 /**
  * Get an array of unique folder names from the given entries.
@@ -27,7 +34,7 @@ import { getTOTPCode } from "../utils/totp";
  */
 function getFolders(entries: string[][]): string[] {
   return Array.from(new Set(entries.map((entry: string[]) => entry[0]).filter((v: string) => v !== ""))).sort((a, b) =>
-    (a as string).localeCompare(b as string)
+    (a as string).localeCompare(b as string),
   );
 }
 
@@ -114,6 +121,13 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
             <List.Item
               key={i}
               title={entry[1]}
+              icon={
+                userInterfaceFavicon
+                  ? isValidUrl(entry[4])
+                    ? getFavicon(entry[4], { fallback: Icon.QuestionMarkCircle })
+                    : { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText }
+                  : undefined
+              }
               subtitle={{ value: entry[2], tooltip: "Username" }}
               accessories={[
                 entry[0] !== ""
@@ -139,9 +153,11 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       title="Paste Password"
                       icon={Icon.BlankDocument}
                       onAction={() => {
-                        entry[3] !== ""
-                          ? Clipboard.paste(entry[3]).then(() => closeMainWindow())
-                          : showToast(Toast.Style.Failure, "Error", "No Password Set");
+                        if (entry[3] !== "") {
+                          Clipboard.paste(entry[3]).then(() => closeMainWindow());
+                        } else {
+                          showToast(Toast.Style.Failure, "Error", "No Password Set");
+                        }
                       }}
                     />
                     <Action
@@ -149,13 +165,15 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       icon={Icon.BlankDocument}
                       shortcut={{ modifiers: ["shift"], key: "enter" }}
                       onAction={() => {
-                        entry[2] !== ""
-                          ? Clipboard.paste(entry[2]).then(() => closeMainWindow())
-                          : showToast(Toast.Style.Failure, "Error", "No Username Set");
+                        if (entry[2] !== "") {
+                          Clipboard.paste(entry[2]).then(() => closeMainWindow());
+                        } else {
+                          showToast(Toast.Style.Failure, "Error", "No Username Set");
+                        }
                       }}
                     />
                     <Action
-                      title="Paste TOTP"
+                      title="Paste Totp"
                       icon={Icon.BlankDocument}
                       shortcut={{ modifiers: ["opt"], key: "enter" }}
                       onAction={() => {
@@ -195,7 +213,7 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       }}
                     />
                     <Action
-                      title="Copy TOTP"
+                      title="Copy Totp"
                       icon={Icon.Clipboard}
                       shortcut={{ modifiers: ["cmd"], key: "t" }}
                       onAction={() => {
@@ -215,13 +233,17 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                     icon={Icon.Globe}
                     shortcut={{ modifiers: ["shift", "cmd"], key: "u" }}
                     onAction={() => {
-                      entry[4] !== "" ? open(entry[4]) : showToast(Toast.Style.Failure, "Error", "No URL Set");
+                      if (entry[4] !== "") {
+                        open(entry[4]);
+                      } else {
+                        showToast(Toast.Style.Failure, "Error", "No URL Set");
+                      }
                     }}
                   />
                 </ActionPanel>
               }
             />
-          )
+          ),
       )}
       <List.EmptyView
         title="No Entries Found"

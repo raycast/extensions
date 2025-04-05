@@ -1,4 +1,4 @@
-import OTPAuth = require("otpauth");
+import { URI } from "otpauth";
 
 /**
  * Generates a TOTP code given the TOTP URL.
@@ -6,7 +6,7 @@ import OTPAuth = require("otpauth");
  * @returns {string} The generated TOTP code.
  */
 function getTOTPCode(totpUrl: string) {
-  const totp = OTPAuth.URI.parse(totpUrl);
+  const totp = URI.parse(totpUrl);
   const code = totp.generate();
   return code;
 }
