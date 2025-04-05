@@ -1,8 +1,9 @@
 import { closeMainWindow, popToRoot, showHUD, showToast, Toast, updateCommandMetadata } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getErrorDetails, tailscale, getStatus } from "./shared";
 
 export default async function Toggle() {
-  let subtitle: string;
+  let subtitle = "Tailscale";
   try {
     // Check current status
     const isConnected = await isTailscaleConnected();
@@ -18,7 +19,9 @@ export default async function Toggle() {
 
       popToRoot();
       closeMainWindow();
-      tailscale("down");
+      
+      // Await the disconnect command
+      await tailscale("down");
 
       showHUD("Disconnected");
       subtitle = "Disconnected";
@@ -33,9 +36,11 @@ export default async function Toggle() {
 
       popToRoot();
       closeMainWindow();
-      tailscale("up");
+      
+      // Await the connect command
+      await tailscale("up");
 
-      // Wait for connection to establish
+      // Wait briefly for connection to establish
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       const data = getStatus(false);
@@ -44,9 +49,8 @@ export default async function Toggle() {
       showHUD(subtitle);
     }
   } catch (err) {
-    console.error(err);
+    await showFailureToast(err, { title: "Failed to toggle connection" });
     subtitle = getErrorDetails(err, "").title;
-    showHUD(`Unable to toggle connection: ${subtitle}`);
   }
   await updateCommandMetadata({ subtitle });
 }
