@@ -1,5 +1,5 @@
 // src/utils/handleResults.ts
-import { getLocalStorageItem, randomId } from "@raycast/api";
+import { getLocalStorageItem, getPreferenceValues, randomId } from "@raycast/api";
 import { SearchResult } from "./types";
 import fetch from "node-fetch";
 import { TextDecoder } from "node:util";
@@ -47,7 +47,7 @@ export async function getSearchResults(
   // Apply description changes based on conditions
   if (searchText.includes("!")) {
     firstResult.description = "Use a Kagi bang with: " + searchText;
-  } else if (searchText.includes("?")) {
+  } else if (searchText.includes("?") && getPreferenceValues()["fastGptShortcut"]) {
     firstResult.description = "Ask FastGPT: " + searchText;
   }
 
