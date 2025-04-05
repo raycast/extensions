@@ -5,27 +5,645 @@
   "description": "Run BTT actions from Raycast",
   "icon": "command-icon.png",
   "author": "dnnsmnstrr",
+  "contributors": [
+    "kmusick"
+  ],
   "categories": [
     "Applications",
     "Productivity"
   ],
   "license": "MIT",
+  "keywords": [
+    "Better Touch Tool"
+  ],
   "commands": [
     {
       "name": "trigger",
-      "title": "Run BTT Named Trigger",
-      "subtitle": "Search for and run named trigger in BTT",
-      "description": "Find a named trigger in BetterTouchTool",
+      "title": "Search Named Triggers",
+      "description": "Search for and run named trigger in BTT",
       "mode": "view"
     },
     {
       "name": "action",
-      "title": "Run BTT Action",
-      "subtitle": "Search for and run an action in BTT",
-      "description": "Find an action in BetterTouchTool",
+      "title": "Search Actions",
+      "description": "Search for and run an action in BTT",
       "mode": "view"
+    },
+    {
+      "name": "get-variable",
+      "title": "Get Variable Value",
+      "description": "Get the value of a variable from BTT (string or number)",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "variableName",
+          "type": "text",
+          "placeholder": "Name",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "set-string-variable",
+      "title": "Set String Variable",
+      "description": "Set a string variable in BTT (persistent or temporary)",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "variableName",
+          "type": "text",
+          "placeholder": "Name",
+          "required": true
+        },
+        {
+          "name": "variableValue",
+          "type": "text",
+          "placeholder": "Value",
+          "required": false
+        },
+        {
+          "name": "variableType",
+          "type": "dropdown",
+          "placeholder": "Temporary",
+          "required": false,
+          "data": [
+            {
+              "title": "Temporary",
+              "value": "temporary"
+            },
+            {
+              "title": "Persistent",
+              "value": "persistent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "set-number-variable",
+      "title": "Set Number Variable",
+      "description": "Set a number variable in BTT (persistent or temporary)",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "variableName",
+          "type": "text",
+          "placeholder": "Name",
+          "required": true
+        },
+        {
+          "name": "variableValue",
+          "type": "text",
+          "placeholder": "Value",
+          "required": false
+        },
+        {
+          "name": "variableType",
+          "type": "dropdown",
+          "placeholder": "Temporary",
+          "required": false,
+          "data": [
+            {
+              "title": "Temporary",
+              "value": "temporary"
+            },
+            {
+              "title": "Persistent",
+              "value": "persistent"
+            }
+          ]
+        }
+      ]
     }
   ],
+  "tools": [
+    {
+      "name": "search-named-triggers",
+      "title": "Search Named Triggers",
+      "description": "Search for Named Triggers in BetterTouchTool"
+    },
+    {
+      "name": "run-named-trigger",
+      "title": "Run Named Trigger",
+      "description": "Run a Named Trigger"
+    },
+    {
+      "name": "get-variable-value",
+      "title": "Get Variable Value",
+      "description": "Get the value of a variable from BetterTouchTool"
+    },
+    {
+      "name": "set-variable-value",
+      "title": "Set Variable Value",
+      "description": "Set the value of a variable in BetterTouchTool"
+    },
+    {
+      "name": "search-action",
+      "title": "Search Actions",
+      "description": "Search for Actions in BetterTouchTool"
+    },
+    {
+      "name": "run-action",
+      "title": "Run Action",
+      "description": "Run an Action in BetterTouchTool"
+    }
+  ],
+  "ai": {
+    "instructions": "When dealing with BetterTouchTool variable values or names, do NOT change the format, capitalization, punctuation, etc. The verbatim values MUST be used. Always include the variable type (string or number) in the output.",
+    "evals": [
+      {
+        "input": "@bettertouchtool set myVar to test value",
+        "mocks": {
+          "set-variable-value": {
+            "status": "success",
+            "message": "`myVar` set to `test value` **(string)**"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "variableName": "myVar",
+                "variableType": "string",
+                "variableValue": "test value"
+              },
+              "name": "set-variable-value"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@bettertouchtool get value of myVar",
+        "mocks": {
+          "get-variable-value": {
+            "status": "success",
+            "message": "`myVar` is set to `test value` **(string)**"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "variableName": "myVar"
+              },
+              "name": "get-variable-value"
+            }
+          },
+          {
+            "not": {
+              "callsTool": "set-variable-value"
+            }
+          },
+          {
+            "includes": "myVar"
+          },
+          {
+            "includes": "test value"
+          },
+          {
+            "includes": "string"
+          }
+        ]
+      },
+      {
+        "input": "@bettertouchtool set value of myNumVar to 123456",
+        "mocks": {
+          "set-variable-value": {
+            "status": "success",
+            "message": "`myNumVar` set to `123456` **(number)**"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "variableName": "myNumVar",
+                "variableType": "number",
+                "variableValue": "123456"
+              },
+              "name": "set-variable-value"
+            }
+          },
+          {
+            "includes": "myNumVar"
+          },
+          {
+            "includes": "123456"
+          },
+          {
+            "not": {
+              "includes": "123,456"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@bettertouchtool find disabled triggers in Helpers folder",
+        "mocks": {
+          "search-named-triggers": [
+            {
+              "enabled": false,
+              "groupName": "Helpers",
+              "name": "Alpha",
+              "score": "0.000000"
+            },
+            {
+              "enabled": false,
+              "groupName": "Helpers",
+              "name": "Bravo",
+              "score": "0.000000"
+            },
+            {
+              "enabled": false,
+              "groupName": "Others",
+              "name": "Charlie",
+              "score": "0.669754"
+            },
+            {
+              "enabled": false,
+              "groupName": "Others",
+              "name": "Delta",
+              "score": "0.669754"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchEnabledStatus": "disabled",
+                "searchGroups": [
+                  {
+                    "or": [
+                      {
+                        "includes": "helpers"
+                      },
+                      {
+                        "includes": "Helpers"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "name": "search-named-triggers"
+            }
+          },
+          {
+            "includes": "Alpha"
+          },
+          {
+            "includes": "Bravo"
+          },
+          {
+            "not": {
+              "includes": "Charlie"
+            }
+          },
+          {
+            "not": {
+              "includes": "Delta"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@bettertouchtool find triggers in group helpers or other",
+        "mocks": {
+          "search-named-triggers": [
+            {
+              "enabled": false,
+              "groupName": "Helpers",
+              "name": "Alpha",
+              "score": "0.000000"
+            },
+            {
+              "enabled": false,
+              "groupName": "Helpers",
+              "name": "Bravo",
+              "score": "0.000000"
+            },
+            {
+              "enabled": true,
+              "groupName": "Helpers",
+              "name": "Charlie",
+              "score": "0.000000"
+            },
+            {
+              "enabled": false,
+              "groupName": "Others",
+              "name": "Delta",
+              "score": "0.021179"
+            },
+            {
+              "enabled": false,
+              "groupName": "Others",
+              "name": "Echo",
+              "score": "0.021179"
+            },
+            {
+              "enabled": true,
+              "groupName": "Others",
+              "name": "Foxtrot",
+              "score": "0.021179"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchGroups": [
+                  {
+                    "or": [
+                      {
+                        "includes": "helpers"
+                      },
+                      {
+                        "includes": "Helpers"
+                      }
+                    ]
+                  },
+                  {
+                    "or": [
+                      {
+                        "includes": "other"
+                      },
+                      {
+                        "includes": "Other"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "name": "search-named-triggers"
+            }
+          },
+          {
+            "includes": "Alpha"
+          },
+          {
+            "includes": "Bravo"
+          },
+          {
+            "includes": "Charlie"
+          },
+          {
+            "includes": "Delta"
+          },
+          {
+            "includes": "Echo"
+          },
+          {
+            "includes": "Foxtrot"
+          }
+        ]
+      },
+      {
+        "input": "@bettertouchtool run trigger bravo",
+        "mocks": {
+          "run-named-trigger": {
+            "status": "success"
+          },
+          "search-named-triggers": {
+            "data": [
+              {
+                "enabled": true,
+                "groupName": "Helpers",
+                "name": "Bravo",
+                "score": "0.000000"
+              },
+              {
+                "enabled": false,
+                "groupName": "Helpers",
+                "name": "Bravo #2",
+                "score": "0.086996"
+              }
+            ],
+            "status": "success"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchNames": [
+                  {
+                    "or": [
+                      {
+                        "includes": "bravo"
+                      },
+                      {
+                        "includes": "Bravo"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "name": "search-named-triggers"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "searchResult.name": "Bravo",
+                "searchResult.groupName": "Helpers",
+                "searchResult.enabled": true,
+                "searchResult.score": "0.000000",
+                "runType": {
+                  "not": [
+                    {
+                      "includes": "URL"
+                    },
+                    {
+                      "includes": "AppleScript"
+                    }
+                  ]
+                }
+              },
+              "name": "run-named-trigger"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@bettertouchtool run trigger bravo using http",
+        "mocks": {
+          "run-named-trigger": {
+            "status": "success"
+          },
+          "search-named-triggers": {
+            "data": [
+              {
+                "enabled": true,
+                "groupName": "Helpers",
+                "name": "Bravo",
+                "score": "0.000000"
+              },
+              {
+                "enabled": false,
+                "groupName": "Helpers",
+                "name": "Bravo #2",
+                "score": "0.086996"
+              }
+            ],
+            "status": "success"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchNames": [
+                  {
+                    "or": [
+                      {
+                        "includes": "bravo"
+                      },
+                      {
+                        "includes": "Bravo"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "name": "search-named-triggers"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "searchResult.name": "Bravo",
+                "searchResult.groupName": "Helpers",
+                "searchResult.enabled": true,
+                "searchResult.score": "0.000000",
+                "runType": "URL"
+              },
+              "name": "run-named-trigger"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@bettertouchtool run 'finder' action",
+        "mocks": {
+          "run-action": {
+            "status": "success"
+          },
+          "search-action": [
+            {
+              "id": "BTTPredefinedActionFinder",
+              "name": "Finder",
+              "score": 1.9515200026411723e-07,
+              "type": 10
+            },
+            {
+              "id": "BTTPredefinedActionHiddenFiles",
+              "keywords": [
+                "finder"
+              ],
+              "name": "Hidden Files",
+              "score": 0.0047257320184317898,
+              "type": 16
+            },
+            {
+              "id": "BTTPredefinedActionOpenFinderSelectionWithApp",
+              "name": "Open Finder Selection With App",
+              "score": 0.56327984822460209,
+              "type": 157
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchNames": [
+                  {
+                    "or": [
+                      {
+                        "includes": "finder"
+                      },
+                      {
+                        "includes": "Finder"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "name": "search-action"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "id": "BTTPredefinedActionFinder",
+                "name": "Finder",
+                "type": 10
+              },
+              "name": "run-action"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@bettertouchtool run bravo",
+        "mocks": {
+          "run-named-trigger": {
+            "status": "success"
+          },
+          "search-named-triggers": {
+            "data": [
+              {
+                "enabled": true,
+                "groupName": "Helpers",
+                "name": "Bravo",
+                "score": "0.000000"
+              },
+              {
+                "enabled": false,
+                "groupName": "Helpers",
+                "name": "Bravo #2",
+                "score": "0.086996"
+              }
+            ],
+            "status": "success"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchNames": [
+                  {
+                    "or": [
+                      {
+                        "includes": "bravo"
+                      },
+                      {
+                        "includes": "Bravo"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "name": "search-named-triggers"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "searchResult.name": "Bravo",
+                "searchResult.groupName": "Helpers",
+                "searchResult.enabled": true,
+                "searchResult.score": "0.000000"
+              },
+              "name": "run-named-trigger"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "bttSharedSecret",
@@ -33,20 +651,86 @@
       "type": "password",
       "required": false,
       "title": "Shared Secret (only required if set in BTT)"
+    },
+    {
+      "name": "bttNamedTriggerMostUsedCount",
+      "description": "The number of named triggers to show in the most used section",
+      "type": "dropdown",
+      "required": false,
+      "title": "Most Used Count",
+      "default": "5",
+      "data": [
+        {
+          "value": "none",
+          "title": "None"
+        },
+        {
+          "value": "3",
+          "title": "3"
+        },
+        {
+          "value": "5",
+          "title": "5"
+        },
+        {
+          "value": "10",
+          "title": "10"
+        }
+      ]
+    },
+    {
+      "name": "bttNamedTriggerDefaultAction",
+      "title": "Default Action for Named Trigger",
+      "description": "The default action to perform when running a named trigger",
+      "type": "dropdown",
+      "required": false,
+      "default": "url",
+      "data": [
+        {
+          "value": "url",
+          "title": "Open URL"
+        },
+        {
+          "value": "applescript",
+          "title": "Run AppleScript"
+        }
+      ]
+    },
+    {
+      "name": "bttSetVariableDefaultAction",
+      "title": "Default Action for Set Variable",
+      "description": "The default action to perform when setting a variable. It is not possible to keep Raycast open when using Open URL",
+      "type": "dropdown",
+      "required": false,
+      "default": "url",
+      "data": [
+        {
+          "value": "url",
+          "title": "Open URL"
+        },
+        {
+          "value": "applescript",
+          "title": "Run AppleScript"
+        },
+        {
+          "value": "applescript_close",
+          "title": "Run AppleScript and Close"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.0",
-    "@raycast/utils": "^1.14.1"
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
+    "fuse.js": "^7.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
