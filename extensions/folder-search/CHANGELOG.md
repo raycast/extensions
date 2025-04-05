@@ -1,5 +1,8 @@
 # Folder Search Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+- **fixed** Search results flickering when using fallback command by adding 150ms debounce to search updates
+
 ## [New Features] - 2025-03-13
 
 - **added** 'Move' action for selected finder items
