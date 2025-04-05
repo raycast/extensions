@@ -45,7 +45,7 @@ export function PersonCopyUserIDAction({ state: s }: { state: State }) {
   }
   return (
     <Action.CopyToClipboard
-      title="Copy User Id"
+      title="Copy User ID"
       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
       content={user_id}
     />
@@ -60,7 +60,7 @@ export function PersonCopyIDAction({ state: s }: { state: State }) {
   if (id === undefined) {
     return null;
   }
-  return <Action.CopyToClipboard title="Copy Id" shortcut={{ modifiers: ["cmd", "shift"], key: "i" }} content={id} />;
+  return <Action.CopyToClipboard title="Copy ID" shortcut={{ modifiers: ["cmd", "shift"], key: "i" }} content={id} />;
 }
 
 export function PersonActionPanel(props: { state: State }) {
