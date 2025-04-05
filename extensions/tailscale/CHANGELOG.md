@@ -1,5 +1,9 @@
 # Tailscale Changelog
 
+## [Add new features] - 2025-04-05
+
+- Add `toggle connection` command
+
 ## [Add new features] - 2025-01-02
 
 - Add `netcheck` command
