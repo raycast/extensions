@@ -179,7 +179,7 @@ export const addTask = async (data: {
   title: string;
   description: string;
   dueDate?: string;
-  isAllDay: boolean;
+  isAllDay?: boolean;
   priority?: string;
 }) => {
   const { projectId, title, description, dueDate, isAllDay, priority } = data;
