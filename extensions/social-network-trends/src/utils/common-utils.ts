@@ -58,6 +58,10 @@ export async function fetchTophubTrend(hashid: string): Promise<Trend[]> {
 
       clearTimeout(timeoutId);
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = (await response.json()) as TophubApiResponse;
 
       if (data.error) {
