@@ -6,7 +6,6 @@ import {
   loadFavorites,
   setServiceStatus,
 } from "./network-services";
-import { getVpnStatus } from "./store";
 
 export default async () => {
   const lastUsedName = await LocalStorage.getItem(LAST_USED_KEY);
