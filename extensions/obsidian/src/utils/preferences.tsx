@@ -1,5 +1,6 @@
 export interface GlobalPreferences {
   vaultPath: string;
+  configFileName: string;
   removeYAML: boolean;
   removeLinks: boolean;
   removeLatex: boolean;
