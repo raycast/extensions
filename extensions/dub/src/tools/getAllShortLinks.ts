@@ -1,4 +1,3 @@
-import "@/polyfills/fetch";
 import { withAccessToken } from "@raycast/utils";
 import { dubOAuth } from "../api/oauth";
 import { getAllShortLinks } from "../api";

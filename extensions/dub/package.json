@@ -80,17 +80,101 @@
       "description": "Get the number of shortened links in dub.co"
     }
   ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@dub what are all my short links",
+        "mocks": {
+          "getAllShortLinks": [
+            {
+              "android": null,
+              "archived": false,
+              "clicks": 1,
+              "comments": null,
+              "createdAt": "2023-12-01T11:12:05.279Z",
+              "description": "No description",
+              "doIndex": false,
+              "domain": "dub.sh",
+              "expiredUrl": null,
+              "expiresAt": null,
+              "externalId": null,
+              "geo": null,
+              "id": "cl",
+              "image": null,
+              "ios": null,
+              "key": "w0",
+              "lastClicked": "2023-12-01T11:12:08.000Z",
+              "leads": 0,
+              "partnerId": null,
+              "password": null,
+              "programId": null,
+              "projectId": "cl",
+              "proxy": false,
+              "publicStats": false,
+              "rewrite": false,
+              "saleAmount": 0,
+              "sales": 0,
+              "tagId": null,
+              "tags": [],
+              "tenantId": null,
+              "title": "",
+              "trackConversion": false,
+              "updatedAt": "2024-10-04T16:37:35.064Z",
+              "url": "",
+              "userId": "cl_",
+              "utmCampaign": null,
+              "utmContent": null,
+              "utmMedium": null,
+              "utmSource": null,
+              "utmTerm": null,
+              "video": null,
+              "webhookIds": [],
+              "workspaceId": "ws_"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "getAllShortLinks"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@dub create shortlink for raycast.com/blog and raycast.com/store",
+        "mocks": {
+          "createShortLink": {}
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "originalUrl": {
+                  "includes": "raycast.com/store"
+                }
+              },
+              "name": "createShortLink"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.61.2",
+    "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.16.0",
     "dub": "^0.46.2",
     "undici": "^6.19.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/react": "^18.3.3",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
+    "react-devtools": "^6.1.1",
     "typescript": "^5.2.2"
   },
   "scripts": {
