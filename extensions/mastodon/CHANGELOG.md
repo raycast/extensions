@@ -1,6 +1,6 @@
 # Mastodon Changelog
 
-## [Bug FIx] - {PR_MERGE_DATE}
+## [Bug Fix] - {PR_MERGE_DATE}
 - Fixed the issue where the loading animation persisted when adding a status (#18115).
 
 ## [New feature] - 2024-04-22
