@@ -15,6 +15,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "toggle",
+      "title": "Toggle Last Used",
+      "subtitle": "VPN",
+      "description": "Toggle your Last Used VPN",
+      "mode": "no-view"
+    },
+    {
       "name": "index",
       "title": "Show Network Services",
       "subtitle": "VPN",
