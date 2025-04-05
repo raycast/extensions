@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lightproxy",
+  "title": "Lightproxy",
+  "description": "Control LightProxy - a lightweight development proxy for local services",
+  "icon": "command-icon.png",
+  "author": "exxzo",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start",
+      "title": "Start Lightproxy",
+      "description": "Start the LightProxy server",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop",
+      "title": "Stop Lightproxy",
+      "description": "Stop the LightProxy server",
+      "mode": "no-view"
+    },
+    {
+      "name": "auto-setup",
+      "title": "Auto Setup Lightproxy",
+      "description": "Run auto-setup for LightProxy with a custom TLD",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Check Lightproxy Status",
+      "description": "Check the status of the LightProxy server",
+      "mode": "view"
+    },
+    {
+      "name": "list",
+      "title": "List Mappings",
+      "description": "List all domain to service mappings",
+      "mode": "view"
+    },
+    {
+      "name": "add",
+      "title": "Add Mapping",
+      "description": "Add a new domain to service mapping",
+      "mode": "view"
+    },
+    {
+      "name": "remove",
+      "title": "Remove Mapping",
+      "description": "Remove a domain to service mapping",
+      "mode": "view"
+    },
+    {
+      "name": "discover",
+      "title": "Discover Services",
+      "description": "Discover and add running services",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "lightproxyPath",
+      "title": "LightProxy Path",
+      "description": "Path to the LightProxy executable",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
