@@ -1,5 +1,8 @@
 # Change Case Changelog
 
+## [Fix lowercase implementation] - 2025-03-17
+- Fixes the implementation of the lowercased change case
+
 ## [Focus last used case] - 2024-11-24
 - Focus the last used case when opening the extension
 
