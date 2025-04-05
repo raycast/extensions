@@ -11,9 +11,9 @@ A Raycast extension for quickly switching Surge's outbound mode without using HT
 
 This extension uses AppleScript to communicate with Surge, providing the following features:
 
-- One-click switch to Direct mode
-- One-click switch to Global Proxy mode
-- One-click switch to Rule-based Proxy mode
+- Instant switch to Direct mode
+- Instant switch to Global Proxy mode
+- Instant switch to Rule-based Proxy mode
 
 ## Usage
 
