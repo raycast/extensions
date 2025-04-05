@@ -1,6 +1,6 @@
 # Dub Link Shortener Changelog
 
-## [A.I Extension support] - 2025-03-13
+## [A.I Extension support] - {PR_MERGE_DATE}
 
 - Added tools to work with Raycast Pro's new A.I extensions feature.
 
