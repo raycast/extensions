@@ -17,4 +17,10 @@ There are two other optional settings in the Command Preferences:
 * "Use API for Search": (default: on) allows user to disable in-raycast responses to queries, even if you have an API Key.
 * "Enable FastGPT Shortcut": (default: on) allows user to enable / disable in-Raycast responses from FastGPT by ending query with question mark.
 
+## Future Features / Improvements
+Here's some things that may be nice improvements I'd like to add (or have help with):
+* Improved navigation (using actions.push,etc)
+* Fallback to broswer search of out of api balance
+* Improved formatting of results for longer previews
+
 Thank you! Enjoy!
