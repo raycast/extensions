@@ -14,16 +14,12 @@ export default async function Command() {
       selectedText = await getSelectedText();
     } catch (error) {
       console.error("Error getting selected text:", error);
-      await showHUD(
-        "Unable to get selected text. Please ensure text is selected and try again.",
-      );
+      await showHUD("Unable to get selected text. Please ensure text is selected and try again.");
       return;
     }
 
     if (!selectedText) {
-      await showHUD(
-        "No text is currently selected. Please select some text and try again.",
-      );
+      await showHUD("No text is currently selected. Please select some text and try again.");
       return;
     }
 
@@ -39,14 +35,10 @@ export default async function Command() {
       await showHUD("Selected text converted and copied. Opening Tana... ✨");
     } catch (error) {
       console.error("Error opening Tana:", error);
-      await showHUD(
-        "Selected text converted and copied (but couldn't open Tana) ✨",
-      );
+      await showHUD("Selected text converted and copied (but couldn't open Tana) ✨");
     }
   } catch (error) {
     console.error("Error processing text:", error);
-    await showHUD(
-      "Failed to process selected text. Please try selecting the text again.",
-    );
+    await showHUD("Failed to process selected text. Please try selecting the text again.");
   }
 }

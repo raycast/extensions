@@ -49,14 +49,16 @@
     "typescript-eslint": "^8.29.0"
   },
   "scripts": {
-    "build": "npx jest && ray build -e dist",
-    "dev": "npx jest && ray develop",
+    "build": "npm run format && npm run lint && npx jest && ray build -e dist",
+    "dev": "npm run format && npm run lint && npx jest && ray develop",
     "lint": "ray lint",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx}\"",
     "publish": "ray publish",
     "test": "npx jest",
     "test:watch": "npx jest --watch",
     "test:coverage": "npx jest --coverage",
-    "validate": "npm run lint && npm run test",
+    "validate": "npm run format:check && npm run lint && npm run test",
     "prepare": "npm run validate"
   }
 }

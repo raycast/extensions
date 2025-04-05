@@ -74,9 +74,7 @@ export default function Command() {
         await showHUD("Tana format copied to clipboard. Opening Tana... ✨");
       } catch (error) {
         console.error("Error opening Tana:", error);
-        await showHUD(
-          "Tana format copied to clipboard (but couldn't open Tana) ✨",
-        );
+        await showHUD("Tana format copied to clipboard (but couldn't open Tana) ✨");
       }
     } catch (error) {
       console.error("Error converting text:", error);
@@ -90,10 +88,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.SubmitForm
-              title="Convert and Open in Tana"
-              onSubmit={handleSubmit}
-            />
+            <Action.SubmitForm title="Convert and Open in Tana" onSubmit={handleSubmit} />
             <Action
               title="Load Clipboard Content"
               shortcut={{ modifiers: ["cmd"], key: "l" }}

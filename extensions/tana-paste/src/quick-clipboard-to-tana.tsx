@@ -27,9 +27,7 @@ export default async function Command() {
       await showHUD("Tana format copied to clipboard. Opening Tana... ✨");
     } catch (error) {
       console.error("Error opening Tana:", error);
-      await showHUD(
-        "Tana format copied to clipboard (but couldn't open Tana) ✨",
-      );
+      await showHUD("Tana format copied to clipboard (but couldn't open Tana) ✨");
     }
   } catch (error) {
     console.error("Error processing clipboard:", error);

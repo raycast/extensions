@@ -61,6 +61,7 @@ npm test
   1. Run `npm run dev` to start development mode
   2. Test changes in Raycast
   3. Run tests with `npm test`
+  4. Run `npm run build` before committing changes to ensure code is formatted, linted, and tests pass
 - **Extension Publishing**:
   1. Ensure tests pass: `npm run build`
   2. Publish to Raycast: `npm run publish`
@@ -91,6 +92,7 @@ npm test
 - Follow commit message format: `{type}: {message} #{issue-number}`
 - Types include: feat, fix, docs, style, refactor, test, chore
 - Reference issues in commit messages for traceability
+- Run `npm run build` before committing to ensure code is formatted, linted, and tests pass
 
 ### Pull Request Process
 1. Create a pull request linking to the relevant issue

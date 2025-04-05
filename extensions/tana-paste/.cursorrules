@@ -16,6 +16,11 @@ Tana Paste is a Raycast extension and Python script that converts text and Markd
 - Proper indentation is critical for hierarchy
 - Special formatting for dates: `[[date:YYYY-MM-DD]]`
 
+### Special Format Support
+- YouTube transcript timestamps are converted to separate nodes
+- Limitless Pendant transcriptions follow "{Speaker}: {Content}" format
+- Transcription content is properly indented under section headers
+
 ### Command Structure
 - All commands follow a consistent pattern:
   1. Get input (clipboard, selection, or direct input)
@@ -27,6 +32,7 @@ Tana Paste is a Raycast extension and Python script that converts text and Markd
 - Jest tests focus on isolated transformation functions
 - Test cases cover various Markdown structures
 - Edge cases are specifically targeted
+- Special format detection is comprehensively tested
 
 ## Project Preferences
 
@@ -45,18 +51,22 @@ Tana Paste is a Raycast extension and Python script that converts text and Markd
 - Test-driven development encouraged
 - Manual testing for complex transformations
 - Version bump and CHANGELOG update with each release
+- GitHub issue tracking and feature branches
 
 ## Usage Patterns
 - Raycast extension for quick daily conversions
 - Python script for large documents or batch processing
 - Most common use: converting notes from other apps to Tana
+- Growing use case: converting meeting transcriptions to structured notes
 
 ## Known Challenges
 - Complex nested structures require careful indentation
 - Performance considerations with large documents
 - Edge cases in special formatting
+- Detecting and handling various transcription formats
 
 ## Future Directions
 - Enhanced support for complex Markdown elements
 - Performance optimizations
-- Additional special format conversions 
+- Additional special format conversions
+- Support for more transcription tool formats 
