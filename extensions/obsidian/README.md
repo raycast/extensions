@@ -120,6 +120,7 @@ Both the note name and note content support these templates:
 - `{millisecond}`
 - `{timestamp}`, `{zettelkastenID}`
 - `{clipboard}`, `{clip}`
+- `{selection}`, `{selected}`
 - `{\n}`, `{nl}`, `{newline}`
 
 But also the table of tokens defined in the [luxon documentation](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) (such as dd, MM, YYYY,...).

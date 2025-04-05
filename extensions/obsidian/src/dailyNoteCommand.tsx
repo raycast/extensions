@@ -1,9 +1,11 @@
 import { Action, ActionPanel, closeMainWindow, List, open, popToRoot } from "@raycast/api";
 
-import { getObsidianTarget, ObsidianTargetType, useObsidianVaults, vaultPluginCheck } from "./utils/utils";
+import { getObsidianTarget, ObsidianTargetType } from "./utils/utils";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { vaultsWithoutAdvancedURIToast } from "./components/Toasts";
 import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
+import { useObsidianVaults } from "./utils/hooks";
+import { vaultPluginCheck } from "./api/vault/plugins/plugins.service";
 
 export default function Command() {
   const { vaults, ready } = useObsidianVaults();

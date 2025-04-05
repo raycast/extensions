@@ -1,5 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
-import { Vault } from "../utils/interfaces";
+import { Vault } from "../api/vault/vault.types";
 
 //--------------------------------------------------------------------------------
 // All toasts for all commands should be defined here.

@@ -2,11 +2,13 @@ import { List, ActionPanel } from "@raycast/api";
 import React from "react";
 import fs from "fs";
 
-import { Note, Vault } from "../../utils/interfaces";
-import { readingTime, wordCount, trimPath, createdDateFor, fileSizeFor, filterContent } from "../../utils/utils";
-import { renewCache } from "../../utils/data/cache";
+import { readingTime, wordCount, trimPathToMaxLength, createdDateFor, fileSizeFor } from "../../utils/utils";
 import { yamlPropertyForString } from "../../utils/yaml";
 import { SearchNotePreferences } from "../../utils/preferences";
+import { Note } from "../../api/vault/notes/notes.types";
+import { Vault } from "../../api/vault/vault.types";
+import { filterContent } from "../../api/vault/vault.service";
+import { renewCache } from "../../api/cache/cache.service";
 
 export function NoteListItem(props: {
   note: Note;
@@ -80,7 +82,7 @@ export function NoteListItem(props: {
                 <List.Item.Detail.Metadata.Label title="File Size" text={fileSizeFor(note).toFixed(2) + " KB"} />
                 <List.Item.Detail.Metadata.Label
                   title="Note Path"
-                  text={trimPath(note.path.split(vault.path)[1], 55)}
+                  text={trimPathToMaxLength(note.path.split(vault.path)[1], 55)}
                 />
               </List.Item.Detail.Metadata>
             ) : (

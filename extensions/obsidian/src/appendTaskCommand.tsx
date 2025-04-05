@@ -5,14 +5,11 @@ import { NoPathProvided } from "./components/Notifications/NoPathProvided";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { vaultsWithoutAdvancedURIToast } from "./components/Toasts";
 import { appendTaskPreferences } from "./utils/preferences";
-import {
-  applyTemplates,
-  getObsidianTarget,
-  ObsidianTargetType,
-  useObsidianVaults,
-  vaultPluginCheck,
-} from "./utils/utils";
-import { clearCache } from "./utils/data/cache";
+import { getObsidianTarget, ObsidianTargetType } from "./utils/utils";
+import { useObsidianVaults } from "./utils/hooks";
+import { vaultPluginCheck } from "./api/vault/plugins/plugins.service";
+import { clearCache } from "./api/cache/cache.service";
+import { applyTemplates } from "./api/templating/templating.service";
 
 interface appendTaskArgs {
   text: string;

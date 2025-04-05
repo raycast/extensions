@@ -4,12 +4,12 @@
   "title": "Obsidian",
   "description": "Control Obsidian with Raycast",
   "icon": "extension_icon.png",
-  "author": "KevinBatdorf",
+  "author": "marcjulian",
   "categories": [
     "Productivity"
   ],
   "contributors": [
-    "marcjulian",
+    "KevinBatdorf",
     "iancanderson",
     "pernielsentikaer",
     "ofalvai",
@@ -596,7 +596,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.0",
+    "@raycast/api": "^1.94.0",
     "@types/uuid": "^8.3.4",
     "fuse.js": "^7.0.0",
     "luxon": "^3.4.4",
