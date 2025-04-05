@@ -19,14 +19,54 @@ export function useFolderSearch() {
   const [hasCheckedPreferences, setHasCheckedPreferences] = useState<boolean>(false);
 
   const abortable = useRef<AbortController>();
+  const searchTextRef = useRef<string>(searchText);
+  const debounceTimerRef = useRef<NodeJS.Timeout>();
 
-  // handle double text issue
+  // Update ref when searchText changes
+  useEffect(() => {
+    searchTextRef.current = searchText;
+  }, [searchText]);
+
+  // debounce search
   useEffect(() => {
     const fixedText = fixDoubleConcat(searchText);
     if (fixedText !== searchText) {
       setSearchText(fixedText);
+      return;
     }
-  }, [searchText]);
+
+    // Clear any existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Set a new timer
+    debounceTimerRef.current = setTimeout(() => {
+      // Only proceed if the text hasn't changed during the delay
+      if (searchTextRef.current === searchText) {
+        abortable.current?.abort();
+        setResults([]);
+
+        if (searchScope === "pinned") {
+          setResults(
+            pinnedResults.filter((pin) =>
+              pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
+            )
+          );
+          setCanExecute(false);
+          setIsQuerying(false);
+        } else {
+          setCanExecute(true);
+        }
+      }
+    }, 150); // 150ms debounce delay
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [searchText, searchScope, pinnedResults]);
 
   // check plugins
   usePromise(
@@ -136,28 +176,6 @@ export function useFolderSearch() {
       abortable,
     }
   );
-
-  // Handle search text and scope changes
-  useEffect(() => {
-    (async () => {
-      abortable.current?.abort();
-
-      setResults([]);
-      setIsQuerying(false);
-
-      // short-circuit for 'pinned'
-      if (searchScope === "pinned") {
-        setResults(
-          pinnedResults.filter((pin) =>
-            pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
-          )
-        );
-        setCanExecute(false);
-      } else {
-        setCanExecute(true);
-      }
-    })();
-  }, [searchText, searchScope, pinnedResults]);
 
   // Helper functions
   const resultIsPinned = (result: SpotlightSearchResult) => {
