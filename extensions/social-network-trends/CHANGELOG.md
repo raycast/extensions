@@ -1,5 +1,11 @@
 # Social Network Trends Changelog
 
+## [Switched to the new service API and bug fixed] - 2025-04-05
+
+- Switched to the new service API
+- Fixed all data unavailable bugs
+- Added WeChat and PengPai data
+
 ## [Show Trend on Menubar Title] - 2024-06-27
 
 - Show the first trend on the menu bar title
