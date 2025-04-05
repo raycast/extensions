@@ -45,8 +45,8 @@ class LinkdingApi {
     return this.axios.delete(`/api/bookmarks/${id}`);
   }
 
-  async createBookmark(payload: PostLinkdingBookmarkPayload) {
-    return await this.axios.post("/api/bookmarks/", payload);
+  createBookmark(payload: PostLinkdingBookmarkPayload) {
+    return this.axios.post("/api/bookmarks/", payload);
   }
 
   async getWebsiteMetadata(url: string) {
