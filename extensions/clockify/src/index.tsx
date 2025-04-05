@@ -188,13 +188,13 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
           <Action.SubmitForm
             title="Start"
             onSubmit={({ description, projectId, taskId }) => {
-              if (description && projectId) {
+              if (projectId) {
                 addNewTimeEntry(description, projectId, taskId === "-1" ? null : taskId).then(() =>
                   updateTimeEntries(),
                 );
                 pop();
               } else {
-                showToast(Toast.Style.Failure, "All fields are required");
+                showToast(Toast.Style.Failure, "Project is required.");
               }
             }}
           />
@@ -303,7 +303,7 @@ async function stopCurrentTimer(): Promise<void> {
 }
 
 async function addNewTimeEntry(
-  description: string,
+  description: string | undefined | null,
   projectId: string,
   taskId: string | undefined | null,
 ): Promise<void> {

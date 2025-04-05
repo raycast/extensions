@@ -1,5 +1,9 @@
 # Clockify Changelog
 
+## [Fix description requirement] - {PR_MERGE_DATE}
+
+- Made description on new tasks optional.
+
 ## [Update] - 2024-11-11
 
 - Add selection for different clockify regions
