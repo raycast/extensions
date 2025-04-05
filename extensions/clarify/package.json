@@ -4,7 +4,9 @@
   "title": "Clarify",
   "description": "Interact with Clarify CRM directly from your command bar",
   "icon": "icon.png",
-  "author": "akramarev",
+  "owner": "getclarify",
+  "author": "clarifyhq",
+  "access": "public",
   "categories": [
     "Data",
     "Productivity"
@@ -69,7 +71,7 @@
   "dependencies": {
     "@raycast/api": "^1.78.1",
     "@raycast/utils": "^1.16.2",
-    "axios": "^1.7.2"
+    "axios": "^1.8.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

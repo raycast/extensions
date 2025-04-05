@@ -28,7 +28,7 @@
   "dependencies": {
     "@raycast/api": "^1.64.4",
     "@raycast/utils": "^1.10.1",
-    "axios": "^1.6.3",
+    "axios": "^1.8.4",
     "node-fetch": "2.6.12"
   },
   "devDependencies": {
