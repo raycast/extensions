@@ -3,3 +3,4 @@ export { default as BugReportCollectDataAction } from "./BugReportCollectDataAct
 export { default as BugReportOpenAction } from "./BugReportOpenAction";
 export { default as CopyRuntimeErrorLog } from "./CopyRuntimeErrorLog";
 export { DebuggingBugReportingActionSection } from "./DebuggingBugReportingActionSection";
+export { VaultActionsSection } from "./VaultActionsSection";

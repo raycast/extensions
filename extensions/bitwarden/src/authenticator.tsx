@@ -1,0 +1,244 @@
+import { authenticator } from "otplib";
+import { ActionPanel, BrowserExtension, Clipboard, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import RootErrorBoundary from "~/components/RootErrorBoundary";
+import { BitwardenProvider } from "~/context/bitwarden";
+import { SessionProvider } from "~/context/session";
+import { useVaultContext, VaultProvider } from "~/context/vault";
+import { Item } from "~/types/vault";
+import { useItemIcon } from "~/components/searchVault/utils/useItemIcon";
+import { useEffect, useMemo, useState } from "react";
+import VaultListenersProvider from "~/components/searchVault/context/vaultListeners";
+import { SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
+import VaultItemContext, { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
+import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
+import { getTransientCopyPreference } from "~/utils/preferences";
+import { showCopySuccessMessage } from "~/utils/clipboard";
+import { captureException } from "~/utils/development";
+import { usePromise } from "@raycast/utils";
+import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
+import { ActionWithReprompt, DebuggingBugReportingActionSection, VaultActionsSection } from "~/components/actions";
+import { tryCatch } from "~/utils/errors";
+import { Cache } from "~/utils/cache";
+
+const AuthenticatorComponent = () => (
+  <RootErrorBoundary>
+    <BitwardenProvider loadingFallback={<List searchBarPlaceholder="Search vault" isLoading />}>
+      <SessionProvider unlock>
+        <VaultListenersProvider>
+          <VaultProvider>
+            <AuthenticatorList />
+          </VaultProvider>
+        </VaultListenersProvider>
+      </SessionProvider>
+    </BitwardenProvider>
+  </RootErrorBoundary>
+);
+
+function AuthenticatorList() {
+  const vault = useVaultContext();
+  const { data: activeTabUrl, isLoading: isActiveTabLoading } = useActiveTab();
+
+  useSyncTimeRemaining();
+
+  const items = useMemo(() => vault.items.filter((item) => item.login?.totp), [vault.items]);
+
+  const itemsWithTabMatches = useMemo(() => {
+    if (!activeTabUrl) return { items, tabItems: [] };
+
+    return items.reduce<{ items: Item[]; tabItems: Item[] }>(
+      (acc, item) => {
+        const matchesUrl = item.login?.uris?.some(({ uri }) => uri?.includes(activeTabUrl.url.hostname));
+        if (matchesUrl) {
+          acc.tabItems.push(item);
+        } else {
+          acc.items.push(item);
+        }
+        return acc;
+      },
+      { items: [], tabItems: [] }
+    );
+  }, [items, activeTabUrl]);
+
+  const isEmpty = itemsWithTabMatches.items.length === 0 && itemsWithTabMatches.tabItems.length === 0;
+
+  const otherItemsList = itemsWithTabMatches.items.map((item) => <VaultItem key={item.id} item={item} />);
+
+  return (
+    <List
+      searchBarPlaceholder="Search vault"
+      isLoading={vault.isLoading || isActiveTabLoading}
+      actions={
+        <ActionPanel>
+          <CommonActions />
+        </ActionPanel>
+      }
+    >
+      {activeTabUrl && itemsWithTabMatches.tabItems.length > 0 ? (
+        <>
+          <List.Section title={`Active Tab (${activeTabUrl.url.hostname})`}>
+            {itemsWithTabMatches.tabItems.map((item) => (
+              <VaultItem key={item.id} item={item} />
+            ))}
+          </List.Section>
+          <List.Section title="Others">{otherItemsList}</List.Section>
+        </>
+      ) : (
+        otherItemsList
+      )}
+      <List.EmptyView
+        icon={{ source: "bitwarden-64.png" }}
+        title={isEmpty ? "No authenticator keys found" : "No matching items found"}
+        description="Hit the sync button to sync your vault"
+      />
+    </List>
+  );
+}
+
+function VaultItem({ item }: { item: Item }) {
+  const icon = useItemIcon(item);
+  const time = useTimeRemaining();
+  const code = useCode(item, time);
+
+  return (
+    <VaultItemContext.Provider value={item}>
+      <List.Item
+        title={item.name}
+        subtitle={item.login?.username ?? undefined}
+        icon={icon}
+        actions={
+          <ActionPanel>
+            <CopyCodeAction />
+            <PasteCodeAction />
+            <CommonActions />
+          </ActionPanel>
+        }
+        accessories={[
+          { text: item.login?.totp === SENSITIVE_VALUE_PLACEHOLDER ? "Loading..." : code },
+          { tag: { value: String(time), color: time < 5 ? Color.Red : Color.Blue } },
+        ]}
+      />
+    </VaultItemContext.Provider>
+  );
+}
+
+function CommonActions() {
+  return (
+    <>
+      <VaultActionsSection />
+      <DebuggingBugReportingActionSection />
+    </>
+  );
+}
+
+function CopyCodeAction() {
+  const selectedItem = useSelectedVaultItem();
+  const getUpdatedVaultItem = useGetUpdatedVaultItem();
+
+  const copy = async () => {
+    const { data: totp, error } = await tryCatch(
+      getUpdatedVaultItem(selectedItem, (item) => item.login?.totp, "Getting code...")
+    );
+    if (error) {
+      await showToast(Toast.Style.Failure, "Failed to get code");
+      captureException("Failed to copy code", error);
+    }
+    if (totp) {
+      const code = authenticator.generate(totp);
+      await Clipboard.copy(code, { transient: getTransientCopyPreference("other") });
+      await showCopySuccessMessage("Copied code to clipboard");
+    }
+  };
+
+  return <ActionWithReprompt title="Copy Code" icon={Icon.Clipboard} onAction={copy} />;
+}
+
+function PasteCodeAction() {
+  const selectedItem = useSelectedVaultItem();
+  const getUpdatedVaultItem = useGetUpdatedVaultItem();
+  const frontmostAppName = useFrontmostApplicationName();
+
+  const paste = async () => {
+    const { data: totp, error } = await tryCatch(
+      getUpdatedVaultItem(selectedItem, (item) => item.login?.totp, "Getting code...")
+    );
+    if (error) {
+      await showToast(Toast.Style.Failure, "Failed to get code");
+      captureException("Failed to paste code", error);
+    }
+    if (totp) {
+      const code = authenticator.generate(totp);
+      await Clipboard.paste(code);
+    }
+  };
+
+  return (
+    <ActionWithReprompt
+      title={frontmostAppName ? `Paste Code into ${frontmostAppName}` : "Paste Code"}
+      icon={Icon.Window}
+      onAction={paste}
+    />
+  );
+}
+
+function useActiveTab() {
+  return usePromise(async () => {
+    const tabs = await BrowserExtension.getTabs();
+    const activeTab = tabs.find((tab) => tab.active);
+    return activeTab ? { ...activeTab, url: new URL(activeTab.url) } : undefined;
+  });
+}
+
+const TimeRemainingCacheKey = "authenticatorTimeRemaining";
+
+function useSyncTimeRemaining() {
+  useEffect(() => {
+    Cache.set(TimeRemainingCacheKey, String(authenticator.timeRemaining()));
+
+    const interval = setInterval(() => {
+      const time = authenticator.timeRemaining();
+      Cache.set(TimeRemainingCacheKey, String(time));
+    }, 500); // update every 500ms for better accuracy
+
+    return () => clearInterval(interval);
+  }, []);
+}
+
+function useTimeRemaining() {
+  const [time, setTime] = useState(() => {
+    const value = Cache.get(TimeRemainingCacheKey);
+    return value ? parseInt(value) : 30;
+  });
+
+  useEffect(() => {
+    Cache.subscribe((key, value) => {
+      if (!value || key !== TimeRemainingCacheKey) return;
+
+      const newTime = parseInt(value);
+      if (!Number.isNaN(newTime)) {
+        setTime(newTime);
+      }
+    });
+  }, []);
+
+  return time;
+}
+
+function useCode(item: Item, time: number) {
+  const [code, setCode] = useState<string>();
+
+  useEffect(() => {
+    const { totp } = item.login ?? {};
+    if (!totp || totp === SENSITIVE_VALUE_PLACEHOLDER) return;
+    setCode(authenticator.generate(totp));
+  }, [item]);
+
+  useEffect(() => {
+    const { totp } = item.login ?? {};
+    if (!totp || totp === SENSITIVE_VALUE_PLACEHOLDER) return;
+    if (time === 30) setCode(authenticator.generate(totp));
+  }, [time]);
+
+  return code;
+}
+
+export default AuthenticatorComponent;
