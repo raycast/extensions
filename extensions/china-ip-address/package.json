@@ -20,7 +20,7 @@
   "dependencies": {
     "@raycast/api": "^1.57.1",
     "@types/ip": "^1.1.0",
-    "axios": "^1.5.0",
+    "axios": "^1.8.4",
     "ip": "^1.1.8"
   },
   "devDependencies": {
