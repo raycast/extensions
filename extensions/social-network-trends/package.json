@@ -1,38 +1,35 @@
 {
-  "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "social-network-trends",
-  "title": "Social Network Trends",
   "description": "Show trends on WeiBo, ZhiHu, DouYin，BaiDu, TouTiao, BiliBili.",
-  "icon": "social-trends-icon.png",
-  "author": "koinzhang",
   "categories": [
     "Fun",
     "News"
   ],
+  "author": "koinzhang",
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "tophubApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Tophub API Key",
+      "description": "Please input tophub.today API Key"
+    }
+  ],
   "commands": [
     {
-      "name": "search-trends-of-social-network",
-      "title": "Search Trends",
-      "subtitle": "Social Network Trends",
-      "description": "Show trends on WeiBo, ZhiHu, DouYin，BaiDu, TouTiao, BiliBili.",
       "mode": "view",
+      "title": "Search Trends",
       "preferences": [
         {
-          "name": "rememberTag",
-          "type": "checkbox",
-          "required": false,
+          "default": false,
           "title": "Advanced",
           "label": "Remember Filter Tag",
-          "description": "Remember social filter tag.",
-          "default": false
+          "type": "checkbox",
+          "required": false,
+          "name": "rememberTag",
+          "description": "Remember social filter tag."
         },
         {
-          "title": "Trends Number",
-          "name": "trendsNumber",
-          "type": "dropdown",
-          "required": false,
-          "description": "Number of Trends Displayed.",
           "default": "20",
           "data": [
             {
@@ -55,147 +52,191 @@
               "title": "50",
               "value": "50"
             }
-          ]
+          ],
+          "title": "Trends Number",
+          "type": "dropdown",
+          "required": false,
+          "name": "trendsNumber",
+          "description": "Number of Trends Displayed."
         },
         {
-          "name": "showWeibo",
-          "type": "checkbox",
-          "required": false,
+          "default": true,
           "title": "Social Trends",
           "label": "Show Weibo",
-          "description": "Show Weibo trends.",
-          "default": true
+          "type": "checkbox",
+          "required": false,
+          "name": "showWeibo",
+          "description": "Show Weibo trends."
         },
         {
+          "description": "Show ZhiHu trends.",
+          "label": "Show ZhiHu",
+          "default": true,
           "name": "showZhiHu",
           "type": "checkbox",
-          "required": false,
-          "label": "Show ZhiHu",
-          "description": "Show ZhiHu trends.",
-          "default": true
+          "required": false
         },
         {
+          "description": "Show BaiDu trends.",
+          "label": "Show BaiDu",
+          "default": false,
           "name": "showBaiDu",
           "type": "checkbox",
-          "required": false,
-          "label": "Show BaiDu",
-          "description": "Show BaiDu trends.",
-          "default": false
+          "required": false
         },
         {
+          "description": "Show DouYin trends.",
+          "label": "Show DouYin",
+          "default": false,
           "name": "showDouYin",
           "type": "checkbox",
-          "required": false,
-          "label": "Show DouYin",
-          "description": "Show DouYin trends.",
-          "default": false
+          "required": false
         },
         {
+          "description": "Show TouTiao trends.",
+          "label": "Show TouTiao",
+          "default": false,
           "name": "showTouTiao",
           "type": "checkbox",
-          "required": false,
-          "label": "Show TouTiao",
-          "description": "Show TouTiao trends.",
-          "default": false
+          "required": false
         },
         {
+          "description": "Show BiliBili trends.",
+          "label": "Show BiliBili",
+          "default": false,
           "name": "showBiliBili",
           "type": "checkbox",
-          "required": false,
-          "label": "Show BiliBili",
-          "description": "Show BiliBili trends.",
-          "default": false
+          "required": false
+        },
+        {
+          "description": "Show WeChat trends.",
+          "label": "Show WeChat",
+          "default": false,
+          "name": "showWeixin",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "description": "Show PengPai trends.",
+          "label": "Show PengPai",
+          "default": false,
+          "name": "showPengpai",
+          "type": "checkbox",
+          "required": false
         }
-      ]
+      ],
+      "name": "search-trends-of-social-network",
+      "subtitle": "Social Network Trends",
+      "description": "Show trends on WeiBo, ZhiHu, DouYin，BaiDu, TouTiao, BiliBili."
     },
     {
-      "name": "search-trends-of-social-network-menu-bar",
-      "title": "Menubar Trends",
       "subtitle": "Social Network Trends",
-      "description": "Show trends on WeiBo, ZhiHu, DouYin，BaiDu, TouTiao, BiliBili on the menu bar.",
       "mode": "menu-bar",
-      "interval": "10m",
       "preferences": [
         {
-          "name": "showTrendsTitle",
-          "type": "checkbox",
-          "required": false,
+          "default": true,
           "title": "Menubar Title",
           "label": "Show Trend",
-          "description": "Show first trend title on menu bar.",
-          "default": true
-        },
-        {
-          "name": "showWeibo",
           "type": "checkbox",
           "required": false,
+          "name": "showTrendsTitle",
+          "description": "Show first trend title on menu bar."
+        },
+        {
+          "default": true,
           "title": "Social Trends",
           "label": "Show Weibo",
-          "description": "Show Weibo trends.",
-          "default": true
+          "type": "checkbox",
+          "required": false,
+          "name": "showWeibo",
+          "description": "Show Weibo trends."
         },
         {
+          "description": "Show ZhiHu trends.",
+          "label": "Show ZhiHu",
+          "default": true,
           "name": "showZhiHu",
           "type": "checkbox",
-          "required": false,
-          "label": "Show ZhiHu",
-          "description": "Show ZhiHu trends.",
-          "default": true
+          "required": false
         },
         {
+          "description": "Show BaiDu trends.",
+          "label": "Show BaiDu",
+          "default": false,
           "name": "showBaiDu",
           "type": "checkbox",
-          "required": false,
-          "label": "Show BaiDu",
-          "description": "Show BaiDu trends.",
-          "default": false
+          "required": false
         },
         {
+          "description": "Show DouYin trends.",
+          "label": "Show DouYin",
+          "default": false,
           "name": "showDouYin",
           "type": "checkbox",
-          "required": false,
-          "label": "Show DouYin",
-          "description": "Show DouYin trends.",
-          "default": false
+          "required": false
         },
         {
+          "description": "Show TouTiao trends.",
+          "label": "Show TouTiao",
+          "default": false,
           "name": "showTouTiao",
           "type": "checkbox",
-          "required": false,
-          "label": "Show TouTiao",
-          "description": "Show TouTiao trends.",
-          "default": false
+          "required": false
         },
         {
+          "description": "Show BiliBili trends.",
+          "label": "Show BiliBili",
+          "default": false,
           "name": "showBiliBili",
           "type": "checkbox",
-          "required": false,
-          "label": "Show BiliBili",
-          "description": "Show BiliBili trends.",
-          "default": false
+          "required": false
+        },
+        {
+          "description": "Show WeChat trends.",
+          "label": "Show WeChat",
+          "default": false,
+          "name": "showWeixin",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "description": "Show PengPai trends.",
+          "label": "Show PengPai",
+          "default": false,
+          "name": "showPengpai",
+          "type": "checkbox",
+          "required": false
         }
-      ]
+      ],
+      "title": "Menubar Trends",
+      "description": "Show trends on WeiBo, ZhiHu, DouYin，BaiDu, TouTiao, BiliBili on the menu bar.",
+      "name": "search-trends-of-social-network-menu-bar",
+      "interval": "10m"
     }
   ],
+  "title": "Social Network Trends",
+  "icon": "social-trends-icon.png",
+  "scripts": {
+    "fix-lint": "ray lint --fix",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "build": "ray build -e dist"
+  },
   "dependencies": {
-    "@raycast/api": "^1.77.2",
     "node-fetch": "^3.3.2",
+    "@raycast/api": "^1.77.2",
     "@raycast/utils": "^1.16.1"
   },
   "devDependencies": {
     "@types/node": "~20.14.9",
     "@types/react": "^18.3.3",
-    "@typescript-eslint/eslint-plugin": "^7.14.1",
     "@typescript-eslint/parser": "^7.14.1",
     "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^7.14.1",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.3.2",
     "typescript": "^5.5.2"
   },
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "social-network-trends"
 }

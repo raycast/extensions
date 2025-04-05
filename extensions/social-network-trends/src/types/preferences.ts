@@ -10,6 +10,9 @@ interface Preferences {
   showDouYin: boolean;
   showBiliBili: boolean;
   showTouTiao: boolean;
+  showWeixin: boolean;
+  showPengpai: boolean;
+  tophubApiKey: string;
 }
 
 export const {
@@ -22,4 +25,7 @@ export const {
   showDouYin,
   showBiliBili,
   showTouTiao,
+  showWeixin,
+  showPengpai,
+  tophubApiKey,
 } = getPreferenceValues<Preferences>();

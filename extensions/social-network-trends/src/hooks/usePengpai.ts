@@ -1,10 +1,10 @@
 import { useCachedPromise } from "@raycast/utils";
 import { Trend } from "../types/types";
 import { fetchTophubTrend } from "../utils/common-utils";
-import { ZHIHU_HASHID } from "../utils/constants";
+import { PENGPAI_HASHID } from "../utils/constants";
 
-export function useZhihu() {
+export function usePengpai() {
   return useCachedPromise(() => {
-    return fetchTophubTrend(ZHIHU_HASHID) as Promise<Trend[]>;
+    return fetchTophubTrend(PENGPAI_HASHID) as Promise<Trend[]>;
   });
 }
