@@ -49,7 +49,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Result">
-                  {item.query.endsWith("?") ? (
+                  {getPreferenceValues()["fastGptShortcut"] && item.query.endsWith("?") ? (
                     // For question mark queries, default action is Ask FastGPT
                     <ActionPanel.Item
                       title="Ask FastGPT"
@@ -114,7 +114,7 @@ export default function Command() {
                       icon={{ source: Icon.Globe }}
                     />
                   )}
-                  {!(item.isFastGPT || item.query.includes("?")) && (
+                  { getPreferenceValues()["fastGptShortcut"] && !(item.isFastGPT || item.query.includes("?")) && (
                     <ActionPanel.Item
                       title="Ask FastGPT"
                       shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
