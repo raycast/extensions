@@ -3,6 +3,7 @@ import { List, Icon, Color, useNavigation } from "@raycast/api";
 import { Product } from "../types";
 import { ProductDetailView } from "./ProductDetailView";
 import { ProductActions, ViewContext } from "./ProductActions";
+import { cleanText } from "../util/textUtils";
 
 interface ProductListItemProps {
   product: Product;
@@ -50,15 +51,15 @@ export function ProductListItem({
 
   const itemProps = featured
     ? {
-        title: product.name,
-        subtitle: product.tagline,
+        title: cleanText(product.name),
+        subtitle: cleanText(product.tagline),
         icon: { source: thumbnailSource },
         accessories,
         tintColor: Color.Yellow,
       }
     : {
-        title: product.name,
-        subtitle: product.tagline,
+        title: cleanText(product.name),
+        subtitle: cleanText(product.tagline),
         icon: { source: thumbnailSource },
         accessories,
       };

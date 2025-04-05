@@ -4,6 +4,7 @@ import { generateTopicUrl } from "../util/topicUtils";
 import { useState, useEffect } from "react";
 import { enhanceProductWithMetadata } from "../api/scraper";
 import { ProductActions, ViewContext } from "./ProductActions";
+import { cleanText } from "../util/textUtils";
 
 interface ProductDetailViewProps {
   product: Product;
@@ -57,19 +58,19 @@ export function ProductDetailView({
 
   // Create markdown content for the product details
   const markdown = `
-  # ${product.name}
+  # ${cleanText(product.name)}
   
-  _${product.tagline}_
+  _${cleanText(product.tagline)}_
   
-  ${displayImage ? `![${product.name}](${displayImage})` : ""}
+  ${displayImage ? `![${cleanText(product.name)}](${displayImage})` : ""}
   
-  ${product.description || "No description available."}
+  ${cleanText(product.description) || "No description available."}
   `;
 
   return (
     <Detail
       markdown={markdown}
-      navigationTitle={product.name}
+      navigationTitle={cleanText(product.name)}
       isLoading={isLoading}
       actions={
         <ProductActions

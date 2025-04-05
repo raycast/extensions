@@ -1,8 +1,10 @@
 import * as cheerio from "cheerio";
-import { cleanText } from "../util/topicUtils";
+import { cleanText, sanitizeJsonString } from "../util/textUtils";
 import { Product, Topic, User, Shoutout } from "../types";
 import { processImageUrl, ImgixFit } from "./imgix";
 import { fetchSvgAsBase64 } from "../util/imageUtils";
+
+const HOST_URL = "https://www.producthunt.com/";
 
 // Interface for Apollo event data
 interface ApolloEvent {
@@ -115,124 +117,11 @@ interface OpenGraphMetadata {
   type?: string;
 }
 
-// Helper function to replace all occurrences of 'undefined' with 'null' in JSON strings
-// and handle other potential JSON parsing issues
-function sanitizeJsonString(jsonString: string | undefined): string | undefined {
-  if (!jsonString) return jsonString;
+// sanitizeJsonString has been moved to textUtils.ts
 
-  // Replace undefined with null
-  let sanitized = jsonString.replace(/undefined/g, "null");
+// findLastValidJson has been moved to textUtils.ts
 
-  // Replace control characters that might break JSON parsing
-  // eslint-disable-next-line no-control-regex
-  sanitized = sanitized.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
-
-  // Fix unescaped quotes and backslashes that might break JSON
-  sanitized = sanitized.replace(/\\(?!["\\/bfnrt])/g, "\\\\");
-
-  // Handle potential trailing commas in arrays and objects
-  sanitized = sanitized.replace(/,\s*([}\]])/g, "$1");
-
-  // Handle unescaped line breaks in strings
-  sanitized = sanitized.replace(/([^\\])(["'])\s*[\n\r]+\s*(["'])/g, "$1$2 $3");
-
-  // Handle potential non-whitespace characters after JSON
-  try {
-    // Try to parse the JSON to find where it ends
-    JSON.parse(sanitized);
-    return sanitized;
-  } catch (error) {
-    if (error instanceof SyntaxError && error.message.includes("position")) {
-      // Extract position from error message
-      const positionMatch = error.message.match(/position (\d+)/);
-      if (positionMatch && positionMatch[1]) {
-        const position = parseInt(positionMatch[1], 10);
-
-        // Try to find a valid JSON substring
-        try {
-          // First try: take everything up to the error position
-          const truncated = sanitized.substring(0, position);
-          // Check if this is valid JSON by itself
-          JSON.parse(truncated);
-          return truncated;
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_e1) {
-          // Second try: look for the last valid closing bracket
-          const lastValidJson = findLastValidJson(sanitized);
-          if (lastValidJson) {
-            return lastValidJson;
-          }
-        }
-      }
-    }
-
-    // If all else fails, try a more aggressive approach
-    return aggressiveSanitization(sanitized);
-  }
-}
-
-// Helper function to find the last valid JSON in a string
-function findLastValidJson(str: string): string | null {
-  // Try to find the last valid JSON by looking for balanced brackets
-  let bracketCount = 0;
-  let lastClosingBracketPos = -1;
-
-  for (let i = 0; i < str.length; i++) {
-    if (str[i] === "[") bracketCount++;
-    else if (str[i] === "]") {
-      bracketCount--;
-      if (bracketCount === 0) lastClosingBracketPos = i;
-    }
-  }
-
-  if (lastClosingBracketPos > 0) {
-    try {
-      const candidate = str.substring(0, lastClosingBracketPos + 1);
-      JSON.parse(candidate);
-      return candidate;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_e) {
-      // Not valid JSON, continue with other approaches
-    }
-  }
-
-  return null;
-}
-
-// More aggressive sanitization for problematic JSON
-function aggressiveSanitization(str: string): string {
-  // Replace any potentially problematic sequences
-  let result = str;
-
-  // Replace any non-ASCII characters
-  // eslint-disable-next-line no-control-regex
-  result = result.replace(/[^\x00-\x7F]/g, "");
-
-  // Replace any unescaped control characters
-  // eslint-disable-next-line no-control-regex
-  result = result.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
-
-  // Fix unbalanced quotes
-  const quoteCount = (result.match(/"/g) || []).length;
-  if (quoteCount % 2 !== 0) {
-    // Find the last quote and remove everything after it
-    const lastQuotePos = result.lastIndexOf('"');
-    if (lastQuotePos > 0) {
-      result = result.substring(0, lastQuotePos + 1);
-    }
-  }
-
-  // Ensure the string ends with proper JSON structure
-  if (!result.endsWith("]")) {
-    // Find the last closing bracket
-    const lastBracketPos = result.lastIndexOf("]");
-    if (lastBracketPos > 0) {
-      result = result.substring(0, lastBracketPos + 1);
-    }
-  }
-
-  return result;
-}
+// aggressiveSanitization has been moved to textUtils.ts
 
 // Extract username from a Product Hunt profile URL
 function extractUsernameFromUrl(url: string): string {
@@ -259,10 +148,36 @@ function cleanTopicName(name: string | undefined | null): string {
   return cleanText(name);
 }
 
+// Normalize image URLs for consistent processing
+function normalizeImageUrl(url: string): string {
+  if (!url.includes(".svg") && url.includes("imgix.net")) {
+    return processImageUrl(url, {
+      fit: ImgixFit.CROP,
+      auto: ["format", "compress"],
+      width: 1200,
+      height: 800,
+    });
+  }
+  return url;
+}
+
+// Normalize thumbnail URLs with thumbnail-specific dimensions
+function normalizeThumbnailUrl(url: string): string {
+  if (!url.includes(".svg") && url.includes("imgix.net")) {
+    return processImageUrl(url, {
+      fit: ImgixFit.CROP,
+      auto: ["format", "compress"],
+      width: 1024,
+      height: 512,
+    });
+  }
+  return url;
+}
+
 // Parse RSS feed from Product Hunt
 export async function getFrontpageProducts(): Promise<{ products: Product[]; error?: string }> {
   try {
-    const response = await fetch("https://www.producthunt.com/");
+    const response = await fetch(HOST_URL);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -315,10 +230,10 @@ export async function getFrontpageProducts(): Promise<{ products: Product[]; err
     // Transform to our Product type
     const products = productItems.map((item) => ({
       id: item.id,
-      name: item.name,
+      name: cleanText(item.name),
       tagline: formatTagline(item.tagline),
-      description: item.description || "",
-      url: `https://www.producthunt.com/posts/${item.slug}`,
+      description: cleanText(item.description || ""),
+      url: `${HOST_URL}posts/${item.slug}`,
       thumbnail: item.thumbnailImageUuid ? `https://ph-files.imgix.net/${item.thumbnailImageUuid}` : "",
       votesCount: item.votesCount || 0,
       commentsCount: item.commentsCount || 0,
@@ -404,7 +319,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
                 username: postData.hunter.username,
                 avatarUrl: postData.hunter.profileImage || "",
                 profileImage: postData.hunter.profileImage,
-                profileUrl: `https://www.producthunt.com/@${postData.hunter.username}`,
+                profileUrl: `${HOST_URL}@${postData.hunter.username}`,
               };
             }
 
@@ -416,7 +331,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
                 username: maker.username,
                 avatarUrl: maker.profileImage || "",
                 profileImage: maker.profileImage,
-                profileUrl: `https://www.producthunt.com/@${maker.username}`,
+                profileUrl: `${HOST_URL}@${maker.username}`,
               }));
             }
           }
@@ -596,21 +511,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
         // console.log(`Found gallery image: ${imgSrc}`);
 
         if (imgSrc && !galleryImages.includes(imgSrc)) {
-          // Process the image URL to get a high-quality version
-          let processedImgSrc = imgSrc;
-
-          // SVGs will be processed later in enhanceProductWithMetadata
-          // For other imgix images, ensure proper formatting
-          if (!imgSrc.includes(".svg") && imgSrc.includes("imgix.net")) {
-            processedImgSrc = processImageUrl(imgSrc, {
-              fit: ImgixFit.CROP,
-              auto: ["format", "compress"],
-              width: 1200,
-              height: 800,
-            });
-          }
-
-          galleryImages.push(processedImgSrc);
+          galleryImages.push(normalizeImageUrl(imgSrc));
         }
       });
     } else if (galleryClassElements.length > 0) {
@@ -622,21 +523,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
         console.log(`Found gallery image: ${imgSrc}`);
 
         if (imgSrc && !galleryImages.includes(imgSrc)) {
-          // Process the image URL to get a high-quality version
-          let processedImgSrc = imgSrc;
-
-          // SVGs will be processed later in enhanceProductWithMetadata
-          // For other imgix images, ensure proper formatting
-          if (!imgSrc.includes(".svg") && imgSrc.includes("imgix.net")) {
-            processedImgSrc = processImageUrl(imgSrc, {
-              fit: ImgixFit.CROP,
-              auto: ["format", "compress"],
-              width: 1200,
-              height: 800,
-            });
-          }
-
-          galleryImages.push(processedImgSrc);
+          galleryImages.push(normalizeImageUrl(imgSrc));
         }
       });
     } else {
@@ -646,21 +533,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
       $(".styles_imageContainer__Hm_9x img, .styles_image__wG8b_ img").each((i, el) => {
         const imgSrc = $(el).attr("src");
         if (imgSrc && !galleryImages.includes(imgSrc)) {
-          // Process the image URL to get a high-quality version
-          let processedImgSrc = imgSrc;
-
-          // SVGs will be processed later in enhanceProductWithMetadata
-          // For other imgix images, ensure proper formatting
-          if (!imgSrc.includes(".svg") && imgSrc.includes("imgix.net")) {
-            processedImgSrc = processImageUrl(imgSrc, {
-              fit: ImgixFit.CROP,
-              auto: ["format", "compress"],
-              width: 1200,
-              height: 800,
-            });
-          }
-
-          galleryImages.push(processedImgSrc);
+          galleryImages.push(normalizeImageUrl(imgSrc));
         }
       });
     }
@@ -885,14 +758,9 @@ export async function enhanceProductWithMetadata(product: Product): Promise<Prod
       if (thumbnailUrl.includes(".svg")) {
         // We'll set this asynchronously later
         // For now, keep the original URL as a fallback
-      } else if (thumbnailUrl.includes("imgix.net")) {
-        // For other imgix images, ensure proper formatting
-        thumbnailUrl = processImageUrl(thumbnailUrl, {
-          fit: ImgixFit.CROP,
-          auto: ["format", "compress"],
-          width: 1024,
-          height: 512,
-        });
+      } else {
+        // For other images, normalize the URL
+        thumbnailUrl = normalizeThumbnailUrl(thumbnailUrl);
       }
     }
 
@@ -996,7 +864,7 @@ export async function scrapeOpenGraphMetadata(url: string): Promise<OpenGraphMet
 // Get detailed information about a specific product
 export async function getProductDetails(productId: string): Promise<{ product?: Product; error?: string }> {
   try {
-    const url = `https://www.producthunt.com/posts/${productId}`;
+    const url = `${HOST_URL}posts/${productId}`;
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -1045,10 +913,10 @@ export async function getProductDetails(productId: string): Promise<{ product?: 
     // Transform to our Product type
     const product: Product = {
       id: postData.id,
-      name: postData.name,
+      name: cleanText(postData.name),
       tagline: formatTagline(postData.tagline),
-      description: postData.description || "",
-      url: canonicalUrl || `https://www.producthunt.com/posts/${postData.slug}`,
+      description: cleanText(postData.description || ""),
+      url: canonicalUrl || `${HOST_URL}posts/${postData.slug}`,
       thumbnail: postData.thumbnailImageUuid ? `https://ph-files.imgix.net/${postData.thumbnailImageUuid}` : "",
       votesCount: postData.votesCount || 0,
       commentsCount: postData.commentsCount || 0,
@@ -1088,7 +956,7 @@ export async function getProductDetails(productId: string): Promise<{ product?: 
 // Scrape trending products
 export async function getTrendingProducts(): Promise<{ products: Product[]; error?: string }> {
   try {
-    const response = await fetch("https://www.producthunt.com/");
+    const response = await fetch(HOST_URL);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -1143,10 +1011,10 @@ export async function getTrendingProducts(): Promise<{ products: Product[]; erro
     // Transform to our Product type
     const products = productItems.map((item) => ({
       id: item.id,
-      name: item.name,
+      name: cleanText(item.name),
       tagline: formatTagline(item.tagline),
-      description: item.description || "",
-      url: `https://www.producthunt.com/posts/${item.slug}`,
+      description: cleanText(item.description || ""),
+      url: `${HOST_URL}posts/${item.slug}`,
       thumbnail: item.thumbnailImageUuid ? `https://ph-files.imgix.net/${item.thumbnailImageUuid}` : "",
       votesCount: item.votesCount || 0,
       commentsCount: item.commentsCount || 0,
@@ -1178,7 +1046,7 @@ export async function getTrendingProducts(): Promise<{ products: Product[]; erro
 // Scrape topics
 export async function getTopics(): Promise<{ topics: Topic[]; error?: string }> {
   try {
-    const response = await fetch("https://www.producthunt.com/topics");
+    const response = await fetch(`${HOST_URL}topics`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -1242,7 +1110,7 @@ export async function getTopics(): Promise<{ topics: Topic[]; error?: string }> 
 export async function searchProducts(query: string): Promise<{ products: Product[]; error?: string }> {
   try {
     const encodedQuery = encodeURIComponent(query);
-    const url = `https://www.producthunt.com/search?q=${encodedQuery}`;
+    const url = `${HOST_URL}search?q=${encodedQuery}`;
 
     const response = await fetch(url);
 
@@ -1292,10 +1160,10 @@ export async function searchProducts(query: string): Promise<{ products: Product
     // Transform to our Product type
     const products = productItems.map((item) => ({
       id: item.id,
-      name: item.name,
+      name: cleanText(item.name),
       tagline: formatTagline(item.tagline),
-      description: item.description || "",
-      url: `https://www.producthunt.com/posts/${item.slug}`,
+      description: cleanText(item.description || ""),
+      url: `${HOST_URL}posts/${item.slug}`,
       thumbnail: item.thumbnailImageUuid ? `https://ph-files.imgix.net/${item.thumbnailImageUuid}` : "",
       votesCount: item.votesCount || 0,
       commentsCount: item.commentsCount || 0,
