@@ -3,20 +3,21 @@ import { Question } from "../../hooks/useQuestions";
 import FollowUpList from "./FollowUpList";
 
 type SummaryActionsProps = {
-  transcript: string;
-  summary: string;
-  video_url: string;
   ownerProfileUrl: string;
   questions: Question[];
+  summary?: string;
+  transcript: string;
+  video_url: string;
 };
 
 export default function SummaryActions({
-  transcript,
-  summary,
-  video_url,
   ownerProfileUrl,
   questions,
+  summary,
+  transcript,
+  video_url,
 }: SummaryActionsProps) {
+  if (!summary) return null;
   return (
     <ActionPanel title="Video Actions">
       <Action.Push
