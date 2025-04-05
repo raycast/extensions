@@ -58,4 +58,10 @@ You will need some additional steps to install this plugin.
 
 ---
 
+**Q:** Why am I running out of API calls so quick?
+
+**A:** The extension implements pagination so each "page" counts as another API call. To minimize your use of requests, try a different search query if the first couple of pages do not meet your needs.
+
+---
+
 More? Feel free to create an **issue**!

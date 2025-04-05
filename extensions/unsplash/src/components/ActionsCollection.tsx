@@ -2,6 +2,7 @@ import { ActionPanel, Icon, useNavigation, Action } from "@raycast/api";
 
 // Components
 import Details from "@/views/DetailsCollections";
+import { CollectionResult } from "@/types";
 
 // Types
 interface BaseProps {

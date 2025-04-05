@@ -3,7 +3,7 @@ import { join } from "path";
 import { homedir } from "os";
 import { apiRequest } from "@/functions/apiRequest";
 
-const preferences = getPreferenceValues<UnsplashPreferences>();
+const preferences = getPreferenceValues<Preferences>();
 
 export const getGridItemSize = (): Grid.ItemSize => {
   const { gridItemSize } = preferences;
@@ -40,6 +40,7 @@ export const likeOrDislike = async (id: number, liked?: boolean) => {
 
     toast.style = Toast.Style.Success;
     toast.title = `Photo ${liked ? "unliked" : "liked"}!`;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     toast.style = Toast.Style.Failure;
     toast.title = "An error occured";
