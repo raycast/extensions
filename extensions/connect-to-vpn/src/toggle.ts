@@ -9,8 +9,6 @@ import {
 
 export default async () => {
   const lastUsedName = await LocalStorage.getItem(LAST_USED_KEY);
-  const test = await getVpnStatus();
-  console.log(test);
   await showToast({
     style: Toast.Style.Animated,
     title: `Toggling ${lastUsedName}`,
