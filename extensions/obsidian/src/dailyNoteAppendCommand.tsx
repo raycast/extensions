@@ -77,7 +77,7 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
   // Only show the vault selection list if we have multiple vaults and no specific vault configured
   if (!vaultName && vaultsWithPlugin.length > 1) {
     return (
-      <List isLoading={vaultsWithPlugin === undefined}>
+      <List>
         {vaultsWithPlugin?.map((vault) => (
           <List.Item
             title={vault.name}

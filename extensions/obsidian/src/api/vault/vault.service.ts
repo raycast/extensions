@@ -73,17 +73,14 @@ const DEFAULT_EXCLUDED_PATHS = [".git", ".obsidian", ".trash", ".excalidraw", ".
 function walkFilesHelper(pathToWalk: string, excludedFolders: string[], fileEndings: string[], resultFiles: string[]) {
   const files = fs.readdirSync(pathToWalk);
   const { configFileName } = getPreferenceValues();
-  const defaultExcludedPaths = DEFAULT_EXCLUDED_PATHS;
-  if (configFileName) {
-    defaultExcludedPaths.push(configFileName);
-  }
 
   for (const file of files) {
     const fullPath = path.join(pathToWalk, file);
     const stats = fs.statSync(fullPath);
 
     if (stats.isDirectory()) {
-      if (defaultExcludedPaths.includes(file)) continue;
+      if (file === configFileName) continue;
+      if (DEFAULT_EXCLUDED_PATHS.includes(file)) continue;
       if (isPathExcluded(fullPath, excludedFolders)) continue;
       // Recursively process subdirectory
       walkFilesHelper(fullPath, excludedFolders, fileEndings, resultFiles);

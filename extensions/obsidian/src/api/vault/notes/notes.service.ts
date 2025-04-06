@@ -88,7 +88,7 @@ function createObsidianProperties(tags: string[]): string {
     for (let i = 0; i < tags.length - 1; i++) {
       obsidianProperties += '"' + tags[i] + '",';
     }
-    obsidianProperties += '"' + tags.pop() + '"]\n---\n';
+    obsidianProperties += '"' + tags[tags.length - 1] + '"]\n---\n';
   }
 
   return obsidianProperties;
@@ -115,6 +115,7 @@ async function saveStringToDisk(vaultPath: string, content: string, name: string
       writeTextToMarkdownFile(fullPath, name, content);
       return true;
     }
+    return false;
   } else {
     writeTextToMarkdownFile(fullPath, name, content);
     return true;

@@ -43,8 +43,8 @@ export function CreateNoteForm(props: { vault: Vault; showTitle: boolean }) {
     if (path !== undefined) {
       params.path = path;
     }
-    const saved = createNote(vault, params);
-    if (await saved) {
+    const saved = await createNote(vault, params);
+    if (saved) {
       renewCache(vault);
     }
     popToRoot();

@@ -4,13 +4,13 @@ export type BookmarkFile = {
   title: string;
 };
 
-export type BookMarkGroup = {
+export type BookmarkGroup = {
   type: "group";
   title: string;
   items: BookmarkEntry[];
 };
 
-export type BookmarkEntry = BookmarkFile | BookMarkGroup;
+export type BookmarkEntry = BookmarkFile | BookmarkGroup;
 
 export type BookMarkJson = {
   items: BookmarkEntry[];
