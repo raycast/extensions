@@ -61,7 +61,7 @@ export const ListView: React.FC<ListViewProps> = ({ weight, setWeight, results }
       onSearchTextChange={handleSearchTextChange}
       searchText={weight}
       isShowingDetail={showingDetail}
-      isLoading={results.length > 0 && weight !== ""}
+      isLoading={weight !== "" && results.length === 0}
     >
       {renderContent()}
     </List>
