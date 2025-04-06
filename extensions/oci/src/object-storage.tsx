@@ -4,26 +4,30 @@ import { useCachedPromise } from "@raycast/utils";
 import { objectstorage } from "oci-sdk";
 
 export default function Command() {
-    return <ProviderContextProvider>
-        <ObjectStorage />
+  return (
+    <ProviderContextProvider>
+      <ObjectStorage />
     </ProviderContextProvider>
+  );
 }
 
 function ObjectStorage() {
-    const {provider} = useProvider();
-    const {
-        isLoading,
-        data: namespaces,
-        mutate,
-      } = useCachedPromise(
-        async () => {
-          const objectstorageClient = new objectstorage.ObjectStorageClient({ authenticationDetailsProvider: provider });
-          const namespaces = await objectstorageClient.getNamespace({ compartmentId: provider.getTenantId() });
-          return namespaces.value;
-        },
-        [],
-        { initialData: [] },
-      );
+  const { provider } = useProvider();
+  const {
+    isLoading,
+    data: namespaces,
+    mutate,
+  } = useCachedPromise(
+    async () => {
+      const objectstorageClient = new objectstorage.ObjectStorageClient({ authenticationDetailsProvider: provider });
+      const namespaces = await objectstorageClient.getNamespace({});
+      return namespaces.value;
+    },
+    [],
+    { initialData: [], onError(error) {
+      console.log(error)
+    }, execute: !!provider },
+  );
 
-    return <Detail markdown={JSON.stringify(namespaces)} />
+  return <Detail markdown={JSON.stringify(namespaces)} />;
 }

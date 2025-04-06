@@ -12,11 +12,11 @@ const KEYS: Record<string, string> = {
 
 /**
  * Converts an object into a Markdown table format.
- * 
+ *
  * @param title - The title of the Markdown table.
  * @param obj - The object to be converted; defaults to an empty object if not provided.
  * @returns A string representing the Markdown table.
-*/
+ */
 export function mapObjectToMarkdownTable(title: string, obj: { [key: string]: unknown } = {}) {
   return `${title} \n\n
 | - | - |

@@ -15,9 +15,7 @@ export default function ProviderContextProvider({ children }: { children: React.
   try {
     const provider = new common.ConfigFileAuthenticationDetailsProvider();
     if (!provider) return <Detail isLoading />;
-    return <ProviderContext.Provider value={{ provider }}>
-      {children}
-    </ProviderContext.Provider>
+    return <ProviderContext.Provider value={{ provider }}>{children}</ProviderContext.Provider>;
   } catch (error) {
     return (
       <Detail

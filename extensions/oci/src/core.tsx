@@ -7,6 +7,7 @@ import { Instance } from "oci-core/lib/model";
 import { mapObjectToMarkdownTable } from "./utils";
 import { InstanceActionRequest } from "oci-core/lib/request";
 import OpenInOCI from "./open-in-oci";
+import ProviderContextProvider, { useProvider } from "./provider-context";
 
 const onError = (error: Error) => {
   const err = error.message as string | common.OciError;
@@ -15,32 +16,16 @@ const onError = (error: Error) => {
   showFailureToast(message, { title });
 };
 
-export default function CheckProvider() {
-  try {
-    const provider = new common.ConfigFileAuthenticationDetailsProvider();
-    if (!provider) return <Detail isLoading />;
-    return <Core provider={provider} />;
-  } catch (error) {
-    return (
-      <Detail
-        navigationTitle="Oracle Cloud - Provider Error"
-        markdown={`## Error: \n\n Can't load the default config from \`~/.oci/config\` or \`~/.oraclebmc/config\` because it does not exists or it's not a file. For more info about config file and how to get required information, see https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm for more info on OCI configuration files. \n\n > TIP: Check extension README!`}
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser
-              icon={getFavicon("https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm", {
-                fallback: Icon.Globe,
-              })}
-              url="https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm"
-            />
-          </ActionPanel>
-        }
-      />
-    );
-  }
+export default function Command() {
+  return (
+    <ProviderContextProvider>
+      <Core />
+    </ProviderContextProvider>
+  );
 }
 
-function Core({ provider }: { provider: common.ConfigFileAuthenticationDetailsProvider }) {
+function Core() {
+  const { provider } = useProvider();
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-instance-details", false);
 
   const {
@@ -75,7 +60,7 @@ function Core({ provider }: { provider: common.ConfigFileAuthenticationDetailsPr
         return undefined;
     }
   }
-  
+
   async function confirmAndTerminate(instance: Instance) {
     const options: Alert.Options = {
       icon: { source: Icon.Trash, tintColor: Color.Red },
@@ -83,9 +68,9 @@ function Core({ provider }: { provider: common.ConfigFileAuthenticationDetailsPr
       message: `Do you want to permanently delete instance "${instance.displayName || instance.id}"?`,
       primaryAction: {
         title: "Terminate",
-        style: Alert.ActionStyle.Destructive
-      }
-    }
+        style: Alert.ActionStyle.Destructive,
+      },
+    };
 
     if (await confirmAlert(options)) doInstanceAction(instance, "TERMINATE");
   }
@@ -95,11 +80,12 @@ function Core({ provider }: { provider: common.ConfigFileAuthenticationDetailsPr
     try {
       const computeClient = new core.ComputeClient({ authenticationDetailsProvider: provider });
       await mutate(
-        action!=="TERMINATE" ?
-        computeClient.instanceAction({
-          instanceId: instance.id,
-          action,
-        }) : computeClient.terminateInstance({ instanceId: instance.id }),
+        action !== "TERMINATE"
+          ? computeClient.instanceAction({
+              instanceId: instance.id,
+              action,
+            })
+          : computeClient.terminateInstance({ instanceId: instance.id }),
       );
       toast.style = Toast.Style.Success;
       toast.title = `${action} ✅`;
@@ -175,7 +161,16 @@ function Core({ provider }: { provider: common.ConfigFileAuthenticationDetailsPr
                   {instance.lifecycleState === Instance.LifecycleState.Stopped && (
                     <Action icon={Icon.Play} title="Start" onAction={() => doInstanceAction(instance, "START")} />
                   )}
-                  {![Instance.LifecycleState.Terminated, Instance.LifecycleState.Terminating].includes(instance.lifecycleState) && <Action icon={Icon.Trash} title="Terminate" onAction={() => confirmAndTerminate(instance)} style={Action.Style.Destructive} />}
+                  {![Instance.LifecycleState.Terminated, Instance.LifecycleState.Terminating].includes(
+                    instance.lifecycleState,
+                  ) && (
+                    <Action
+                      icon={Icon.Trash}
+                      title="Terminate"
+                      onAction={() => confirmAndTerminate(instance)}
+                      style={Action.Style.Destructive}
+                    />
+                  )}
                 </ActionPanel.Section>
               </ActionPanel>
             }
