@@ -82,4 +82,4 @@ function hello() {
 - Simple tag #project
 - Multi-word tag #[[project management]]
 - Tag with ID #task^ghi789
-- Tag reference [[#task]] 
+- Tag reference [[#task]]
