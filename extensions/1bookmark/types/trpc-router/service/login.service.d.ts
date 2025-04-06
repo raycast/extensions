@@ -3,6 +3,6 @@ export declare const loginRequest: (params: {
     preparedToken?: string;
 }) => Promise<{
     email: string;
-    token: string;
     expires: Date;
+    token: string;
 }>;

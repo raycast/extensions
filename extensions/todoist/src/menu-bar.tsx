@@ -19,6 +19,7 @@ import View from "./components/View";
 import { getToday } from "./helpers/dates";
 import { groupByDates } from "./helpers/groupBy";
 import { truncateMiddle } from "./helpers/menu-bar";
+import { sortByDefault } from "./helpers/sortBy";
 import { getTasksForTodayOrUpcomingView } from "./helpers/tasks";
 import useFilterTasks from "./hooks/useFilterData";
 import { useFocusedTask } from "./hooks/useFocusedTask";
@@ -208,7 +209,8 @@ const TodayView = ({ tasks, data, setData }: TaskViewProps) => {
   const completedToday = todayStats?.total_completed ?? 0;
 
   const sections = useMemo(() => {
-    return groupByDates(tasks);
+    const sortedTasks = [...tasks].sort(sortByDefault);
+    return groupByDates(sortedTasks);
   }, [tasks]);
 
   if (tasks.length > 0) {
@@ -241,7 +243,8 @@ const TodayView = ({ tasks, data, setData }: TaskViewProps) => {
 
 const FilterView = ({ tasks, data, setData }: TaskViewProps) => {
   const sections = useMemo(() => {
-    return groupByDates(tasks);
+    const sortedTasks = [...tasks].sort(sortByDefault);
+    return groupByDates(sortedTasks);
   }, [tasks]);
 
   if (tasks.length > 0) {
@@ -268,7 +271,8 @@ const UpcomingView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
   const isUpcomingDaysView = upcomingDays !== "" && !isNaN(Number(upcomingDays));
 
   const sections = useMemo(() => {
-    return groupByDates(tasks);
+    const sortedTasks = [...tasks].sort(sortByDefault);
+    return groupByDates(sortedTasks);
   }, [tasks]);
 
   return tasks.length > 0 ? (
@@ -293,9 +297,14 @@ const UpcomingView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
 };
 
 const InboxView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
+  const transformedTasks = useMemo(() => {
+    const sortedTasks = [...tasks].sort(sortByDefault);
+    return sortedTasks;
+  }, [tasks]);
+
   return tasks.length > 0 ? (
     <MenuBarExtra.Section title="Inbox tasks">
-      {tasks.map((task) => (
+      {transformedTasks.map((task) => (
         <MenuBarTask key={task.id} task={task} data={data} setData={setData} />
       ))}
     </MenuBarExtra.Section>

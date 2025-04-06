@@ -244,6 +244,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 url: string;
                 tags: string[];
                 author: string;
+                authorEmail: string;
                 deletedAt: Date | null;
                 updatedAt: Date;
             };
@@ -253,15 +254,16 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 spaceIds: string[];
             };
             output: {
-                description: string | null;
-                spaceId: string;
                 id: string;
-                createdAt: Date;
+                authorEmail: string;
+                authorName: string;
+                spaceId: string;
+                spaceName: string;
+                tags: string[];
                 name: string;
                 url: string;
-                tags: string[];
-                author: string;
-                deletedAt: Date | null;
+                description: string | null;
+                createdAt: Date;
                 updatedAt: Date;
             }[];
         }>;
@@ -276,6 +278,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 url: string;
                 tags: string[];
                 author: string;
+                authorEmail: string;
                 deletedAt: Date | null;
                 updatedAt: Date;
             }[];
@@ -308,6 +311,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 url: string;
                 tags: string[];
                 author: string;
+                authorEmail: string;
                 deletedAt: Date | null;
                 updatedAt: Date;
             };

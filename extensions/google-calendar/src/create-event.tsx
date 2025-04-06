@@ -13,11 +13,14 @@ import {
 } from "@raycast/api";
 import { FormValidation, getFavicon, showFailureToast, useForm } from "@raycast/utils";
 import { ConferenceProviderActions, useConferenceProviders } from "./conferencing";
-import { useCalendar, useGoogleAPIs, withGoogleAPIs } from "./google";
-import { addSignature, roundUpTime } from "./utils";
+import { useCalendar, useGoogleAPIs, withGoogleAPIs } from "./lib/google";
+import useCalendars from "./hooks/useCalendars";
+import { addSignature, roundUpTime } from "./lib/utils";
 import { calendar_v3 } from "@googleapis/calendar";
+import { useMemo, useState } from "react";
 
 type FormValues = {
+  calendar: string;
   title: string;
   startDate: Date | null;
   duration: string;
@@ -30,10 +33,28 @@ const preferences: Preferences.CreateEvent = getPreferenceValues();
 
 function Command(props: LaunchProps<{ launchContext: FormValues }>) {
   const { calendar } = useGoogleAPIs();
+  const [calendarId, setCalendarId] = useState("primary");
+
+  const { data: calendarsData, isLoading: isLoadingCalendars } = useCalendars();
+  const availableCalendars = useMemo(() => {
+    const available = [...calendarsData.selected, ...calendarsData.unselected].filter(
+      (calendar) => calendar.accessRole === "owner",
+    );
+    const hasOnePrimary = available.filter((calendar) => calendar.primary).length === 1;
+    return available.map((calendar) => ({
+      id: hasOnePrimary && calendar.primary ? "primary" : calendar.id!,
+      title:
+        hasOnePrimary && calendar.primary
+          ? `Primary${calendar.summary ? ` (${calendar.summary})` : ""}`
+          : (calendar.summaryOverride ?? calendar.summary ?? "-- Unknown --"),
+    }));
+  }, [calendarsData]);
+
   const [conferencingProviders] = useConferenceProviders();
-  const { data: calendarData, isLoading } = useCalendar("primary");
+  const { data: calendarData, isLoading } = useCalendar(calendarId);
   const { focus, handleSubmit, itemProps, reset } = useForm<FormValues>({
     initialValues: {
+      calendar: props.launchContext?.calendar ?? "primary",
       title: props.launchContext?.title ?? "",
       startDate: props.launchContext?.startDate ?? roundUpTime(),
       duration: props.launchContext?.duration ?? preferences.defaultEventDuration,
@@ -47,6 +68,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
     onSubmit: async (values) => {
       await showToast({ style: Toast.Style.Animated, title: "Creating event" });
 
+      const calendarId = values.calendar ?? "primary";
       const startDate = values.startDate ?? new Date();
       const requestBody: calendar_v3.Schema$Event = {
         summary: values.title,
@@ -75,15 +97,20 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
             : undefined,
       };
 
+      const resetForm = () => {
+        setCalendarId("primary");
+        focus("title");
+        reset();
+      };
+
       try {
         const event = await calendar.events.insert({
-          calendarId: "primary",
+          calendarId,
           requestBody,
           conferenceDataVersion: values.conferencingProvider === "hangoutsMeet" ? 1 : undefined,
         });
 
-        focus("title");
-        reset();
+        resetForm();
 
         await showToast({
           title: "Created event",
@@ -106,7 +133,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
                   await showToast({ style: Toast.Style.Animated, title: "Deleting event" });
 
                   try {
-                    await calendar.events.delete({ calendarId: "primary", eventId: event.data.id! });
+                    await calendar.events.delete({ calendarId, eventId: event.data.id! });
                     await showToast({ style: Toast.Style.Success, title: "Deleted event" });
                   } catch (error) {
                     await showFailureToast(error, { title: "Failed deleting event" });
@@ -121,9 +148,17 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
     },
   });
 
+  const calendarItemProps = {
+    ...itemProps.calendar,
+    onChange: (value: string) => {
+      setCalendarId(value);
+      itemProps?.calendar?.onChange?.(value);
+    },
+  };
+
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingCalendars}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Calendar} title="Create Event" onSubmit={handleSubmit} />
@@ -131,6 +166,11 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         </ActionPanel>
       }
     >
+      <Form.Dropdown title="Calendar" value={calendarId} {...calendarItemProps}>
+        {availableCalendars.map((calendar) => (
+          <Form.Dropdown.Item key={calendar.id} value={calendar.id} title={calendar.title} />
+        ))}
+      </Form.Dropdown>
       <Form.TextField title="Title" placeholder="Event title..." {...itemProps.title} />
       <Form.DatePicker
         title="Start Date"

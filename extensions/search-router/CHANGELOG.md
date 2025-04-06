@@ -1,5 +1,12 @@
 # Search Router Changelog
 
+## [Fixed & Improvements] - 2025-04-02
+
+- Removed Kagi-specific search bangs
+- Added URL validation
+- Improved fallback behavior
+- Updated latest Kagi bangs
+
 ## [Feature & Improvements] - 2025-03-26
 
 - Added fuzzy search to "Browse Search Engines" for better search engine discovery

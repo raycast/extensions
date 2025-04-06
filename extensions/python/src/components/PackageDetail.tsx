@@ -15,6 +15,51 @@ type PackageInfo = {
     keywords: string;
     project_urls: Map<string, string>;
   };
+  /*
+      "urls": [
+        {
+            "comment_text": null,
+            "digests": {
+                "blake2b_256": "50b3b51f09c2ba432a576fe63758bddc81f78f0c6309d9e5c10d194313bf021e",
+                "md5": "e1d8b9b56324788b42ffcf5833b5a3f4",
+                "sha256": "e94613d6c05e27be7ffebdd6ea5f388112e5e430c8f7d6494a9d1d88d43e814d"
+            },
+            "downloads": -1,
+            "filename": "fastapi-0.115.12-py3-none-any.whl",
+            "has_sig": false,
+            "md5_digest": "e1d8b9b56324788b42ffcf5833b5a3f4",
+            "packagetype": "bdist_wheel",
+            "python_version": "py3",
+            "requires_python": ">=3.8",
+            "size": 95164,
+            "upload_time": "2025-03-23T22:55:42",
+            "upload_time_iso_8601": "2025-03-23T22:55:42.101023Z",
+            "url": "https://files.pythonhosted.org/packages/50/b3/b51f09c2ba432a576fe63758bddc81f78f0c6309d9e5c10d194313bf021e/fastapi-0.115.12-py3-none-any.whl",
+            "yanked": false,
+            "yanked_reason": null
+        },
+  */
+  urls: {
+    comment_text: string | null;
+    digests: {
+      blake2b_256: string;
+      md5: string;
+      sha256: string;
+    };
+    downloads: number;
+    filename: string;
+    has_sig: boolean;
+    md5_digest: string;
+    packagetype: string;
+    python_version: string;
+    requires_python: string;
+    size: number;
+    upload_time: string;
+    upload_time_iso_8601: string;
+    url: string;
+    yanked: boolean;
+    yanked_reason: string | null;
+  }[];
 };
 
 export const PackageDetail = ({ name, version }: PackageDetailProps): JSX.Element => {
@@ -50,6 +95,15 @@ export const PackageDetail = ({ name, version }: PackageDetailProps): JSX.Elemen
               color: Color.Green,
             }}
           />
+          <Detail.Metadata.Label
+            title="Released"
+            text={{
+              value: data?.urls?.[0]?.upload_time_iso_8601
+                ? new Date(data.urls[0].upload_time_iso_8601).toLocaleDateString()
+                : "Unknown",
+              color: Color.PrimaryText,
+            }}
+          />
           {keywords.length > 0 && (
             <Detail.Metadata.TagList title="Keywords">
               {keywords.map((keyword) => (
@@ -72,7 +126,7 @@ export const PackageDetail = ({ name, version }: PackageDetailProps): JSX.Elemen
         <ActionPanel>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
-              title="Copy PIP Install Command"
+              title="Copy Pip Install Command"
               content={`pip install ${name}`}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />

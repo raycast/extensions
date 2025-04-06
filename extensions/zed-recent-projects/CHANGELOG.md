@@ -1,5 +1,13 @@
 #  Zed Recent Projects Changelog
 
+## [Fixes] - 2025-04-03
+
+- Show Git branch label based on extension preferences
+
+## [Enhancements] - 2025-04-02
+
+- Added a Git branch label for each project
+
 ## [Fixes] - 2025-03-25
 
 - Fix remove recent remote projects

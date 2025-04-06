@@ -28,7 +28,7 @@
   "dependencies": {
     "@raycast/api": "^1.88.4",
     "@raycast/utils": "^1.13.3",
-    "axios": "^1.6.2"
+    "axios": "^1.8.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
