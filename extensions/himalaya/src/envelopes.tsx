@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Action, Icon, List, Detail, confirmAlert, Color } from "@raycast/api";
-import { Envelope, Flags } from "./models";
+import { Envelope, Flags, Folder } from "./models";
 import { execa } from "execa";
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "./preferences";
-import { deleteEnvelopeAndRefresh, loadEnvelopesFromStorage } from "./control";
+import { deleteEnvelopeAndRefresh, loadEnvelopesFromStorage, loadFoldersFromStorage } from "./control";
 
 // Format date for display
 const formatDate = (dateString: string) => {
@@ -80,6 +80,8 @@ function MessageDetail({ envelope, onDelete }: { envelope: Envelope; onDelete: (
 
 **Date:** ${formatDate(envelope.date || "")}
 
+${envelope.folder_name ? `**Folder:** ${envelope.folder_name}` : ""}
+
 ---
 
 ${messageBody}
@@ -117,16 +119,31 @@ ${messageBody}
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [envelopes, setEnvelopes] = useState<Envelope[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [selectedFolderName, setSelectedFolderName] = useState<string>("INBOX");
   const [lastSync, setLastSync] = useState<string | null>(null);
   const preferences = getPreferenceValues<Preferences>();
 
   useEffect(() => {
-    loadEnvelopesFromStorage().then((data) => {
-      setEnvelopes(data.envelopes);
-      setLastSync(data.lastSync);
+    Promise.all([loadEnvelopesFromStorage(), loadFoldersFromStorage()]).then(([envelopeData, folderData]) => {
+      setEnvelopes(envelopeData.envelopes);
+      setFolders(folderData.folders);
+      setLastSync(envelopeData.lastSync);
       setIsLoading(false);
     });
   }, []);
+
+  // Filter envelopes by selected folder
+  const filteredEnvelopes =
+    selectedFolderName === "all"
+      ? envelopes
+      : envelopes.filter((envelope) => {
+          if (envelope.folder_name) {
+            return envelope.folder_name === selectedFolderName;
+          }
+
+          return false;
+        });
 
   // Get flag icons
   const getFlagIcons = (flags: string[]) => {
@@ -177,7 +194,7 @@ export default function Command() {
   };
 
   // Group envelopes by date
-  const groupedEnvelopes = envelopes.reduce<Record<string, Envelope[]>>((acc, envelope) => {
+  const groupedEnvelopes = filteredEnvelopes.reduce<Record<string, Envelope[]>>((acc, envelope) => {
     if (!envelope.date) {
       if (!acc["Unknown"]) {
         acc["Unknown"] = [];
@@ -202,7 +219,39 @@ export default function Command() {
   });
 
   return (
-    <List isLoading={isLoading} navigationTitle="Email Envelopes">
+    <List
+      isLoading={isLoading}
+      navigationTitle="Email Envelopes"
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Filter by folder"
+          defaultValue={preferences.defaultFolder}
+          onChange={(newValue) => {
+            setSelectedFolderName(newValue);
+          }}
+        >
+          <List.Dropdown.Item title="All Folders" value="all" />
+          {folders.map((folder) => (
+            <List.Dropdown.Item
+              key={folder.name}
+              title={folder.name}
+              value={folder.name}
+              icon={
+                folder.desc.includes("\\Inbox")
+                  ? Icon.Envelope
+                  : folder.desc.includes("\\Sent")
+                    ? Icon.Airplane
+                    : folder.desc.includes("\\Trash")
+                      ? Icon.Trash
+                      : folder.desc.includes("\\Draft")
+                        ? Icon.Pencil
+                        : Icon.Folder
+              }
+            />
+          ))}
+        </List.Dropdown>
+      }
+    >
       {sortedDates.map((dateKey, index) => (
         <List.Section
           key={dateKey}
@@ -271,7 +320,7 @@ export default function Command() {
           ))}
         </List.Section>
       ))}
-      {envelopes.length === 0 && !isLoading && (
+      {filteredEnvelopes.length === 0 && !isLoading && (
         <List.EmptyView
           title="No emails found"
           description={lastSync ? `Last synced: ${new Date(lastSync).toLocaleString()}` : "Try syncing your emails"}

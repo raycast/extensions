@@ -45,6 +45,14 @@ export const Envelope = z.object({
     .nullable()
     .optional(),
   has_attachment: z.boolean().nullable().optional().default(false),
+  folder_name: z.string().optional(),
 });
 
 export type Envelope = z.infer<typeof Envelope>;
+
+export const Folder = z.object({
+  name: z.string(),
+  desc: z.string(),
+});
+
+export type Folder = z.infer<typeof Folder>;
