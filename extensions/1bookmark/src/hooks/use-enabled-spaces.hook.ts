@@ -14,7 +14,7 @@ export const useEnabledSpaces = () => {
     if (!me.data) return [];
 
     return me.data.associatedSpaces.filter((s) => !disabledSpaceIds.includes(s.id));
-  }, [me.data?.associatedSpaces]);
+  }, [me.data, disabledSpaceIds]);
 
   const enabledSpaceIds = useMemo(() => enabledSpaces?.map((s) => s.id), [enabledSpaces]);
 
@@ -26,7 +26,7 @@ export const useEnabledSpaces = () => {
     if (updated.length !== disabledSpaceIds.length) {
       setDisabledSpaceIds(updated);
     }
-  }, [me.data?.associatedSpaces]);
+  }, [me.data, disabledSpaceIds]);
 
   const toggleEnableDisable = useCallback(
     async (spaceId: string) => {
@@ -52,18 +52,13 @@ export const useEnabledSpaces = () => {
         }
         return [...prev, spaceId];
       });
-      me.refetch();
     },
-    [enabledSpaceIds, disabledSpaceIds, setDisabledSpaceIds],
+    [enabledSpaceIds, setDisabledSpaceIds],
   );
 
-  if (!me.data) {
-    return { enabledSpaceIds: null, refetch: me.refetch };
-  }
-
   return {
-    enabledSpaces,
-    enabledSpaceIds,
+    enabledSpaces: me.data ? enabledSpaces : null,
+    enabledSpaceIds: me.data ? enabledSpaceIds : null,
     toggleEnableDisable,
     refetch: me.refetch,
   };
