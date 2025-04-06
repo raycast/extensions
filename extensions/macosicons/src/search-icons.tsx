@@ -61,7 +61,7 @@ export default function SearchIconsCommand() {
       onSearchTextChange={setValue}
       filtering={false}
       pagination={pagination}
-      searchBarPlaceholder="Search for icons"
+      searchBarPlaceholder="Search icons"
     >
       {data?.map((icon) => (
         <Grid.Item
@@ -92,6 +92,7 @@ export default function SearchIconsCommand() {
           }
         />
       ))}
+      <Grid.EmptyView title="No icons found" />
     </Grid>
   );
 }
