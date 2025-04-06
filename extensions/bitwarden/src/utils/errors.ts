@@ -107,13 +107,23 @@ export const getErrorString = (error: any): string | undefined => {
 
 export type Success<T> = { data: T; error: null };
 export type Failure<E> = { data: null; error: E };
-export type Result<T, E = Error> = Success<T> | Failure<E>;
+export type ResultAs<N extends string, T, E = Error> =
+  | ({ [k in N]: T } & { error: null })
+  | ({ [K in N]: null } & { error: E });
+export type Result<T, E = Error> = ResultAs<"data", T, E>;
 
-export async function tryCatch<T, E = Error>(promise: Promise<T>): Promise<Result<T, E>> {
-  try {
-    const data = await promise;
-    return { data, error: null };
-  } catch (error) {
-    return { data: null, error: error as E };
+type MaybePromise<T> = T | Promise<T>;
+
+export function tryCatch<T, E = Error>(fn: () => T): Result<T, E>;
+export function tryCatch<T, E = Error>(promise: Promise<T>): Promise<Result<T, E>>;
+export function tryCatch<T, E = Error>(fnOrPromise: (() => T) | Promise<T>): MaybePromise<Result<T, E>> {
+  if (typeof fnOrPromise === "function") {
+    try {
+      const data = fnOrPromise();
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error: error as E };
+    }
   }
+  return fnOrPromise.then((data) => ({ data, error: null })).catch((error) => ({ data: null, error }));
 }

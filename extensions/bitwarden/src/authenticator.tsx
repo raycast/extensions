@@ -1,4 +1,5 @@
-import { authenticator } from "otplib";
+import * as OTPAuth from "otpauth";
+
 import { ActionPanel, BrowserExtension, Clipboard, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider } from "~/context/bitwarden";
@@ -17,7 +18,7 @@ import { captureException } from "~/utils/development";
 import { usePromise } from "@raycast/utils";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 import { ActionWithReprompt, DebuggingBugReportingActionSection, VaultActionsSection } from "~/components/actions";
-import { tryCatch } from "~/utils/errors";
+import { ResultAs as ResultAs, tryCatch } from "~/utils/errors";
 import { Cache } from "~/utils/cache";
 
 const AuthenticatorComponent = () => (
@@ -38,7 +39,7 @@ function AuthenticatorList() {
   const vault = useVaultContext();
   const { data: activeTabUrl, isLoading: isActiveTabLoading } = useActiveTab();
 
-  useSyncTimeRemaining();
+  authenticator.useSyncTimer();
 
   const items = useMemo(() => vault.items.filter((item) => item.login?.totp), [vault.items]);
 
@@ -96,8 +97,7 @@ function AuthenticatorList() {
 
 function VaultItem({ item }: { item: Item }) {
   const icon = useItemIcon(item);
-  const time = useTimeRemaining();
-  const code = useCode(item, time);
+  const { code, timeRemaining } = authenticator.useCode(item);
 
   return (
     <VaultItemContext.Provider value={item}>
@@ -112,10 +112,14 @@ function VaultItem({ item }: { item: Item }) {
             <CommonActions />
           </ActionPanel>
         }
-        accessories={[
-          { text: item.login?.totp === SENSITIVE_VALUE_PLACEHOLDER ? "Loading..." : code },
-          { tag: { value: String(time), color: time < 5 ? Color.Red : Color.Blue } },
-        ]}
+        accessories={
+          code && timeRemaining
+            ? [
+                { text: code },
+                { tag: { value: String(timeRemaining), color: timeRemaining <= 7 ? Color.Red : Color.Blue } },
+              ]
+            : [{ text: "Loading..." }]
+        }
       />
     </VaultItemContext.Provider>
   );
@@ -143,9 +147,16 @@ function CopyCodeAction() {
       captureException("Failed to copy code", error);
     }
     if (totp) {
-      const code = authenticator.generate(totp);
-      await Clipboard.copy(code, { transient: getTransientCopyPreference("other") });
-      await showCopySuccessMessage("Copied code to clipboard");
+      const { generator, error } = authenticator.getGenerator(totp);
+      if (error) {
+        await showToast(Toast.Style.Failure, "Failed to get code");
+        captureException("Failed to copy code", error);
+      }
+      if (generator) {
+        const code = generator.generate();
+        await Clipboard.copy(code, { transient: getTransientCopyPreference("other") });
+        await showCopySuccessMessage("Copied code to clipboard");
+      }
     }
   };
 
@@ -166,8 +177,15 @@ function PasteCodeAction() {
       captureException("Failed to paste code", error);
     }
     if (totp) {
-      const code = authenticator.generate(totp);
-      await Clipboard.paste(code);
+      const { generator, error } = authenticator.getGenerator(totp);
+      if (error) {
+        await showToast(Toast.Style.Failure, "Failed to get code");
+        captureException("Failed to paste code", error);
+      }
+      if (generator) {
+        const code = generator.generate();
+        await Clipboard.paste(code);
+      }
     }
   };
 
@@ -188,57 +206,104 @@ function useActiveTab() {
   });
 }
 
-const TimeRemainingCacheKey = "authenticatorTimeRemaining";
+const Algorithms = {
+  SHA1: "SHA1",
+  SHA224: "SHA224",
+  SHA256: "SHA256",
+  SHA384: "SHA384",
+  SHA512: "SHA512",
+  SHA3_224: "SHA3-224",
+  SHA3_256: "SHA3-256",
+  SHA3_384: "SHA3-384",
+  SHA3_512: "SHA3-512",
+} as const;
 
-function useSyncTimeRemaining() {
-  useEffect(() => {
-    Cache.set(TimeRemainingCacheKey, String(authenticator.timeRemaining()));
+type AuthenticatorOptions = {
+  secret: string;
+  period: number;
+  algorithm: (typeof Algorithms)[keyof typeof Algorithms];
+  digits: number;
+};
 
-    const interval = setInterval(() => {
-      const time = authenticator.timeRemaining();
-      Cache.set(TimeRemainingCacheKey, String(time));
-    }, 500); // update every 500ms for better accuracy
+const authenticator = {
+  cacheKey: "authenticatorTimeTicker",
+  parseTotp(totpString: string): AuthenticatorOptions {
+    if (totpString.includes("otpauth")) {
+      const { data: parsed, error } = tryCatch(() => OTPAuth.URI.parse(totpString));
+      if (error || !(parsed instanceof OTPAuth.TOTP)) throw new Error("Invalid key");
 
-    return () => clearInterval(interval);
-  }, []);
-}
+      const algorithm = Algorithms[parsed.algorithm as keyof typeof Algorithms];
+      if (!algorithm) throw new Error("Invalid algorithm");
 
-function useTimeRemaining() {
-  const [time, setTime] = useState(() => {
-    const value = Cache.get(TimeRemainingCacheKey);
-    return value ? parseInt(value) : 30;
-  });
+      return {
+        algorithm,
+        secret: parsed.secret.base32.toString(),
+        period: parsed.period,
+        digits: parsed.digits,
+      };
+    }
 
-  useEffect(() => {
-    Cache.subscribe((key, value) => {
-      if (!value || key !== TimeRemainingCacheKey) return;
+    return { secret: totpString, period: 30, algorithm: "SHA1", digits: 6 };
+  },
+  getGenerator(totpString: string): ResultAs<"generator", OTPAuth.TOTP> {
+    try {
+      const { data: options, error } = tryCatch(() => authenticator.parseTotp(totpString));
+      if (error) return { generator: null, error: new Error("Invalid key") };
+      return { generator: new OTPAuth.TOTP(options), error: null };
+    } catch (error) {
+      return { generator: null, error: new Error("Invalid key") };
+    }
+  },
+  useSyncTimer() {
+    useEffect(() => {
+      let count = 0;
+      Cache.set(authenticator.cacheKey, String(count));
+      const interval = setInterval(() => {
+        Cache.set(authenticator.cacheKey, String(++count));
+      }, 500); // update every 500ms for better accuracy
 
-      const newTime = parseInt(value);
-      if (!Number.isNaN(newTime)) {
-        setTime(newTime);
-      }
+      return () => clearInterval(interval);
+    }, []);
+  },
+  useCode(item: Item) {
+    const { generator, error } = useMemo(() => {
+      const { totp } = item.login ?? {};
+      if (totp === SENSITIVE_VALUE_PLACEHOLDER) return { generator: null, error: new Error("Loading...") };
+      if (!totp) return { generator: null, error: new Error("No TOTP found") };
+      return authenticator.getGenerator(totp);
+    }, [item]);
+
+    const [code, setCode] = useState(() => {
+      if (error) return error.message;
+      return generator.generate();
     });
-  }, []);
 
-  return time;
-}
+    const [timeRemaining, setTimeRemaining] = useState(() => {
+      if (error) return null;
+      return Math.ceil(generator.remaining() / 1000);
+    });
 
-function useCode(item: Item, time: number) {
-  const [code, setCode] = useState<string>();
+    useEffect(() => {
+      if (error) return;
 
-  useEffect(() => {
-    const { totp } = item.login ?? {};
-    if (!totp || totp === SENSITIVE_VALUE_PLACEHOLDER) return;
-    setCode(authenticator.generate(totp));
-  }, [item]);
+      const unsubscribe = Cache.subscribe((key) => {
+        if (key !== authenticator.cacheKey) return;
 
-  useEffect(() => {
-    const { totp } = item.login ?? {};
-    if (!totp || totp === SENSITIVE_VALUE_PLACEHOLDER) return;
-    if (time === 30) setCode(authenticator.generate(totp));
-  }, [time]);
+        const timeRemaining = Math.ceil(generator.remaining() / 1000);
+        setTimeRemaining(timeRemaining);
 
-  return code;
-}
+        if (timeRemaining === generator.period) {
+          setCode(generator.generate());
+        }
+      });
+
+      setCode(generator.generate());
+
+      return () => unsubscribe();
+    }, [item, generator]);
+
+    return { code, timeRemaining };
+  },
+};
 
 export default AuthenticatorComponent;
