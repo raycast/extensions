@@ -2,6 +2,7 @@
 
 ## [Fixes] - {PR_MERGE_DATE}
 - **fixed** Search results flickering when using fallback command by adding 150ms debounce to search updates
+- **improved** Search text handling by removing fixDoubleConcat workaround and relying on debouncing to handle rapid text changes
 
 ## [New Features] - 2025-03-13
 

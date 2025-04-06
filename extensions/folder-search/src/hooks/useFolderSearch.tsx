@@ -29,12 +29,6 @@ export function useFolderSearch() {
 
   // debounce search
   useEffect(() => {
-    const fixedText = fixDoubleConcat(searchText);
-    if (fixedText !== searchText) {
-      setSearchText(fixedText);
-      return;
-    }
-
     // Clear any existing timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
