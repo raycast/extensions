@@ -19,14 +19,14 @@
       "title": "Search Prayer Time",
       "description": "View adhan prayer times directly from Raycast",
       "mode": "view",
-      "interval": "2h"
+      "interval": "24h"
     },
     {
       "name": "adhan",
       "title": "View Prayer Time on Menu Bar",
       "description": "View adhan prayer times directly from your menubar",
       "mode": "menu-bar",
-      "interval": "2h"
+      "interval": "24h"
     }
   ],
   "preferences": [
