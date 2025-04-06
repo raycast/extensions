@@ -15,9 +15,6 @@ export default async function removeTrackingParams(rawText: string) {
   // generate new urls without tracking parameters
   const newURLs = [];
   for (const url of urls) {
-    // convert shortened url to full url
-    // url = await convertURL(url);
-    // console.log("converted url", url);
     // find allow params in rules
     const allowParams = rules.find((rule) => url.includes(rule.url))?.allowParams || [];
     console.log("allow params", allowParams);
