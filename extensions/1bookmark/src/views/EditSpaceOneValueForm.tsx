@@ -12,20 +12,19 @@ function Body(props: { spaceId: string; keyToEdit: KeyToEdit; value: string }) {
   const { pop } = useNavigation();
   const update = trpc.space.update.useMutation();
 
-  async function handleSubmit() {
-    try {
-      await update.mutateAsync({ spaceId, [keyToEdit]: editingValue });
-      showToast({
-        style: Toast.Style.Success,
-        title: "Updated space",
-      });
-      pop();
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to update space",
-      });
-    }
+  function handleSubmit() {
+    update.mutate(
+      { spaceId, [keyToEdit]: editingValue },
+      {
+        onSuccess: () => {
+          showToast({
+            style: Toast.Style.Success,
+            title: "Updated space",
+          });
+          pop();
+        },
+      },
+    );
   }
 
   return (

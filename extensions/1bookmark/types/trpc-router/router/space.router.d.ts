@@ -38,8 +38,10 @@ export declare const spaceRouter: import("@trpc/server/unstable-core-do-not-impo
         };
         output: void;
     }>;
-    leave: import("@trpc/server").TRPCQueryProcedure<{
-        input: string;
+    leave: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            spaceId: string;
+        };
         output: void;
     }>;
     get: import("@trpc/server").TRPCQueryProcedure<{

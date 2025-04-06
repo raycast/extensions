@@ -1,15 +1,17 @@
-import { ActionPanel, Action, List, Icon, Keyboard } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Keyboard, Color } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { trpc } from "@/utils/trpc.util";
 import { NewSpaceForm } from "./NewSpaceForm";
 import { SpaceItemActionPanel } from "../components/SpaceItemActionPanel";
 import { useSortedSpaces } from "../hooks/use-sorted-spaces.hook";
+import { useEnabledSpaces } from "../hooks/use-enabled-spaces.hook";
 
 function Body() {
   const { data, isFetching, refetch, isLoading } = trpc.user.me.useQuery();
   const spaces = useSortedSpaces(data?.associatedSpaces);
+  const { enabledSpaceIds, toggleEnableDisable } = useEnabledSpaces();
 
-  if (isLoading || !spaces) {
+  if (isLoading || !spaces || !enabledSpaceIds) {
     return <List isLoading />;
   }
 
@@ -39,7 +41,20 @@ function Body() {
           title={s.name}
           subtitle={s.type === "PERSONAL" ? "This is a private space for you" : undefined}
           icon={s.image || (s.type === "TEAM" ? Icon.TwoPeople : Icon.Person)}
-          actions={<SpaceItemActionPanel spaceId={s.id} refetch={refetch} type={s.type} />}
+          accessories={
+            enabledSpaceIds.includes(s.id)
+              ? [{ tag: { value: "Enabled", color: Color.Green } }]
+              : [{ tag: { value: "Disabled" } }]
+          }
+          actions={
+            <SpaceItemActionPanel
+              spaceId={s.id}
+              refetch={refetch}
+              type={s.type}
+              enabled={enabledSpaceIds.includes(s.id)}
+              toggleSpace={toggleEnableDisable}
+            />
+          }
         />
       ))}
     </List>

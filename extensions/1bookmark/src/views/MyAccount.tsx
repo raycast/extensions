@@ -5,13 +5,14 @@ import { useCachedState } from "@raycast/utils";
 import { EditProfileNameForm } from "./EditProfileNameForm";
 import { useSortedSpaces } from "../hooks/use-sorted-spaces.hook";
 import { useMe } from "../hooks/use-me.hook";
+import { CACHED_KEY_SESSION_TOKEN } from "../utils/constants.util";
 
 export const cache = new Cache();
 
 const Body = () => {
   const { data, isLoading, refetch } = useMe();
   const { pop } = useNavigation();
-  const [, setSessionToken] = useCachedState("session-token", "");
+  const [, setSessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
   const utils = trpc.useUtils();
   const spaces = useSortedSpaces(data?.associatedSpaces);
 

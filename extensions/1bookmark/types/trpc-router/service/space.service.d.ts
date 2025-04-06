@@ -1,4 +1,4 @@
-import { SpaceType } from "@repo/db";
+import type { SpaceType, UserAndSpace } from "@repo/db";
 export declare class SpaceService {
     create(p: {
         type: SpaceType;
@@ -45,9 +45,8 @@ export declare class SpaceService {
         role: import(".prisma/client").$Enums.TeamRole;
     } | null>;
     removeMember(p: {
+        targetUserAndSpace: UserAndSpace;
         actorEmail: string;
-        targetEmail: string;
-        spaceId: string;
     }): Promise<void>;
     update(p: {
         email: string;

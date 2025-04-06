@@ -13,20 +13,19 @@ function Body(props: { spaceId: string }) {
   const create = trpc.tag.create.useMutation();
   const [tag, setTag] = useState("");
 
-  async function handleSubmit() {
-    try {
-      await create.mutateAsync({ spaceId: selectedSpaceId, name: tag });
-      showToast({
-        style: Toast.Style.Success,
-        title: "Created tag",
-      });
-      pop();
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to create tag",
-      });
-    }
+  function handleSubmit() {
+    create.mutate(
+      { spaceId: selectedSpaceId, name: tag },
+      {
+        onSuccess: () => {
+          showToast({
+            style: Toast.Style.Success,
+            title: "Created tag",
+          });
+          pop();
+        },
+      },
+    );
   }
 
   return (

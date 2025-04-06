@@ -10,20 +10,19 @@ function Body(props: { spaceId: string }) {
   const { pop } = useNavigation();
   const invite = trpc.user.inviteMembers.useMutation();
 
-  async function handleSubmit() {
-    try {
-      await invite.mutateAsync({ spaceId, emails });
-      showToast({
-        style: Toast.Style.Success,
-        title: "Sent invitations",
-      });
-      pop();
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to send invitations",
-      });
-    }
+  function handleSubmit() {
+    invite.mutate(
+      { spaceId, emails },
+      {
+        onSuccess: () => {
+          showToast({
+            style: Toast.Style.Success,
+            title: "Sent invitations",
+          });
+          pop();
+        },
+      },
+    );
   }
 
   const [emails, setEmails] = useState<string[]>([]);

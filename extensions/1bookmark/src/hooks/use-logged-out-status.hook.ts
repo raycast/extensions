@@ -3,12 +3,18 @@ import { useState } from "react";
 import { useCachedState } from "@raycast/utils";
 import { RouterOutputs, trpc } from "@/utils/trpc.util";
 import { cache } from "../views/MyAccount";
+import {
+  CACHED_KEY_SESSION_TOKEN,
+  CACHED_KEY_ME,
+  CACHED_KEY_MY_BOOKMARKS,
+  CACHED_KEY_MY_TAGS,
+} from "../utils/constants.util";
 
 export const useLoggedOutStatus = () => {
-  const [sessionToken] = useCachedState("session-token", "");
-  const [, setMe] = useCachedState<RouterOutputs["user"]["me"] | null>("me", null);
-  const [, setBookmarks] = useCachedState<RouterOutputs["bookmark"]["listAll"] | null>("my-bookmarks", null);
-  const [, setTags] = useCachedState<RouterOutputs["tag"]["list"] | null>("tags", null);
+  const [sessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
+  const [, setMe] = useCachedState<RouterOutputs["user"]["me"] | null>(CACHED_KEY_ME, null);
+  const [, setBookmarks] = useCachedState<RouterOutputs["bookmark"]["listAll"] | null>(CACHED_KEY_MY_BOOKMARKS, null);
+  const [, setTags] = useCachedState<RouterOutputs["tag"]["list"] | null>(CACHED_KEY_MY_TAGS, null);
   const [after1Sec, setAfter1Sec] = useState(sessionToken ? true : false);
   const timeoutRef = useRef<NodeJS.Timeout>();
   const cleared = useRef(false);

@@ -1,17 +1,19 @@
 import { RouterOutputs, trpc } from "@/utils/trpc.util";
 import { useEffect, useMemo } from "react";
 import { useCachedState } from "@raycast/utils";
+import { CACHED_KEY_MY_TAGS } from "../utils/constants.util";
+import { useEnabledSpaces } from "./use-enabled-spaces.hook";
 
-export const useTags = (spaceIdOrSpaceIds: string | string[]) => {
-  const spaceIds = useMemo(() => {
-    return Array.isArray(spaceIdOrSpaceIds) ? spaceIdOrSpaceIds : [spaceIdOrSpaceIds];
-  }, [spaceIdOrSpaceIds]);
-  const cacheKey = useMemo(() => `tags:${spaceIds.join(",")}`, [spaceIds]);
-  const [cached, setCached] = useCachedState<RouterOutputs["tag"]["list"] | null>(cacheKey, null);
+export const useMyTags = () => {
+  const { enabledSpaceIds } = useEnabledSpaces();
 
+  const [cached, setCached] = useCachedState<RouterOutputs["tag"]["list"] | null>(CACHED_KEY_MY_TAGS, null);
   const r = trpc.tag.list.useQuery(
-    { spaceIds },
     {
+      spaceIds: enabledSpaceIds || [],
+    },
+    {
+      enabled: !!enabledSpaceIds,
       initialData: () => {
         if (!cached) {
           return undefined;
@@ -29,6 +31,16 @@ export const useTags = (spaceIdOrSpaceIds: string | string[]) => {
 
     setCached(r.data);
   }, [r.data]);
+
+  return r;
+};
+
+export const useTags = (spaceIdOrSpaceIds: string | string[]) => {
+  const spaceIds = useMemo(() => {
+    return Array.isArray(spaceIdOrSpaceIds) ? spaceIdOrSpaceIds : [spaceIdOrSpaceIds];
+  }, [spaceIdOrSpaceIds]);
+
+  const r = trpc.tag.list.useQuery({ spaceIds });
 
   return r;
 };
