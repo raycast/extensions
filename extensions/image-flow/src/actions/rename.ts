@@ -26,7 +26,9 @@ export default async function (i: Input, config: Config): Promise<Output> {
   const newPath = path.join(path.dirname(inputPath), newName);
 
   await saveStreamToFile(fs.createReadStream(inputPath), newPath);
-  fs.unlinkSync(inputPath);
+  if (fs.existsSync(inputPath)) {
+    fs.unlinkSync(inputPath);
+  }
 
   return { type: "filepath", value: newPath } as Output;
 }

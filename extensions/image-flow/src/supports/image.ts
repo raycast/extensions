@@ -2,6 +2,7 @@ import { getSelectedFinderItems, Clipboard } from "@raycast/api";
 import { Image, Imager, Input } from "../types";
 import path from "path";
 import { fileTypeFromFile } from "file-type";
+import fs from "fs";
 
 const ImageExtensions = [".png", ".jpg", ".jpeg", ".webp", ".avif", ".apng"];
 
@@ -9,7 +10,7 @@ export async function getImages(): Promise<Image[]> {
   let images: Image[];
 
   try {
-    images = await getImagesFromSelectedFinderItems();
+    images = await getImagesFromSelectedFinderItems(isImage);
   } catch (e) {
     // if finder is not the front-most application will throw an error
     // we can try to get images from clipboard as a fallback
@@ -24,6 +25,10 @@ export async function getImages(): Promise<Image[]> {
   }
 
   return images;
+}
+
+export async function getFiles(): Promise<Image[]> {
+  return await getImagesFromSelectedFinderItems(isFile);
 }
 
 export function buildNewImageName(image: Image, extension: string): string {
@@ -61,10 +66,10 @@ export function imageExtensionToMimeType(extension: string): string {
   }
 }
 
-async function getImagesFromSelectedFinderItems(): Promise<Image[]> {
+async function getImagesFromSelectedFinderItems(filter: (p: string) => boolean): Promise<Image[]> {
   return (await getSelectedFinderItems())
     .map((f) => f.path)
-    .filter(isImage)
+    .filter(filter)
     .map((p) => toImage(p));
 }
 
@@ -83,7 +88,7 @@ async function getImageFromFileProtocol(file?: string): Promise<Image | null> {
   console.log("get image from file protocol: ", file);
 
   // format image path to convert %20 to space
-  const p = file.replace("%20", " ").replace("file://", "");
+  const p = file.replaceAll("%20", " ").replace("file://", "");
   const meta = await fileTypeFromFile(p);
 
   if (!meta) {
@@ -120,8 +125,12 @@ export class EasyImager implements Imager {
   }
 }
 
-function isImage(path: string): boolean {
+export function isImage(path: string): boolean {
   return ImageExtensions.some((ext) => path.endsWith(ext));
+}
+
+export function isFile(path: string): boolean {
+  return fs.existsSync(path);
 }
 
 function toImage(path: string): Image {

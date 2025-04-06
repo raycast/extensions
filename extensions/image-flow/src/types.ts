@@ -27,7 +27,7 @@ export interface IWorkflow {
   run: (i: Input) => Promise<Output>;
 }
 
-export type WorkflowAlias = "default" | "one" | "two";
+export type WorkflowAlias = "default" | "file" | string;
 
 export interface WorkflowNode {
   action: string;

@@ -45,6 +45,8 @@ class Workflow implements IWorkflow {
   }
 
   wrapWithProcessing(_: WorkflowNode, fn: Promise<Input>): Promise<Input> {
+    // todo: add processing
+
     return Promise.resolve(fn);
   }
 

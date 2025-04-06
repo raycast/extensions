@@ -1,8 +1,8 @@
 import { Config, Input, Output } from "../types";
 import s3, { S3Config, S3UploadParams } from "../services/s3";
-import validate from "../supports/validate";
 import fs from "fs";
 import path from "path";
+import { validateInputMustBeFilepath } from "../supports/validate";
 
 /**
  * Upload the image to S3.
@@ -14,7 +14,7 @@ import path from "path";
  * @return uploaded image url
  */
 export default async function (i: Input, config: Config, services: Record<string, Config>): Promise<Output> {
-  validate.inputMustBeFilepath(i);
+  validateInputMustBeFilepath(i);
 
   const uploadParams = buildUploadParams(i, config);
   const s3Config = buildS3Config(services);

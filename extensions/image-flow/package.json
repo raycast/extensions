@@ -2,25 +2,37 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "image-flow",
   "title": "Imageflow",
-  "description": "Process images in Pipeline",
+  "description": "Image Flow is a powerful optimization tool for images and files, enabling you to process them efficiently with workflows.",
   "icon": "extension_icon.png",
   "author": "Godruoyi",
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Imageflow",
-      "description": "Optimize, resize, and compress images in your workflow",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "workflow",
-          "description": "Your configuration for the workflow",
-          "type": "file",
-          "required": true,
-          "title": "Workflow YAML"
-        }
-      ]
+      "name": "process-image",
+      "title": "Process Image",
+      "description": "Optimize, resize, and compress images in your custom workflow",
+      "mode": "view"
+    },
+    {
+      "name": "process-file",
+      "title": "Process File",
+      "description": "Process your images with custom workflows, such as uploading, renaming, etc",
+      "mode": "view"
+    },
+    {
+      "name": "process-all",
+      "title": "Process with specific workflow",
+      "description": "Specify a workflow to process images or files",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "workflow",
+      "description": "Your configuration for the workflow",
+      "type": "file",
+      "required": true,
+      "title": "Workflow YAML File"
     }
   ],
   "dependencies": {

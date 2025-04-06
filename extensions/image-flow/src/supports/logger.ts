@@ -84,9 +84,9 @@ function markdownReader(stages: Stage[]): string {
 
   let head = "## Progressing image ![loading](https://images.godruoyi.com/loading.gif)\n\n";
   if (finished) {
-    head = "## All actions are completed 🎉";
+    head = "## All actions have completed 🎉";
   } else if (failed) {
-    head = "## Some actions are failed 🚨";
+    head = "## Some actions have failed 🚨";
   }
 
   return stages.reduce((acc, s) => {

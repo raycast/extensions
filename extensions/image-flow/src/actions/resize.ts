@@ -2,6 +2,7 @@ import { Config, Image, Input, Output } from "../types";
 import tinypng from "../services/tinypng";
 import { saveStreamToTmpFile } from "../supports/file";
 import path from "path";
+import { validateAndGetTinyPngApiKey, validateInputMustBeImage } from "../supports/validate";
 
 /**
  * Resize image with TinyPNG, this will compress and resize the image.
@@ -15,7 +16,8 @@ import path from "path";
  * @returns resized image path
  */
 export default async function (i: Input, config: Config, services: Record<string, Config>): Promise<Output> {
-  const key = services?.["tinypng"]?.["apiKey"] as string;
+  validateInputMustBeImage(i);
+  const key = validateAndGetTinyPngApiKey(services);
 
   const privateUrl = await tinypng.upload(i as Image, key as string);
   const stream = (await tinypng.compressAndResize(privateUrl, key as string, {

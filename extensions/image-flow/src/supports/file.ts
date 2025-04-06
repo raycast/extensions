@@ -1,11 +1,9 @@
 import fs from "fs";
 import path from "path";
+import * as os from "node:os";
 
 export async function saveStreamToTmpFile(stream: NodeJS.ReadableStream, filename: string): Promise<string> {
-  // todo: widows support?
-  const tmp = path.join("/tmp", `imageflow_${Date.now()}_${filename}`);
-
-  console.log(tmp);
+  const tmp = path.join(os.tmpdir(), `imageflow_${Date.now()}_${filename}`);
 
   return saveStreamToFile(stream, tmp);
 }

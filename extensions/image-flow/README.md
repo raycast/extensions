@@ -16,10 +16,11 @@ Imageflow is a Raycast extension for processing images with custom pipelines, yo
 - [x] 🍮 Copy Image To Clipboard
 - [x] 🐼 Convert Image To Markdown format
 - [x] 🍉 Rename Image with uuid or date or something else
+- [x] 🍅 Customize any workflow—choose whatever you want
 
 ## Demo
 
-https://github.com/user-attachments/assets/32e7ccbe-39be-431d-ae5a-97dfb6a45b94
+https://github.com/user-attachments/assets/9b22bc67-1138-4c01-8ecc-0f7c59bb3542
 
 > [!NOTE]  
 > You can quickly get the sample configuration file by running the following command in your terminal.
@@ -31,51 +32,7 @@ curl https://raw.githubusercontent.com/godruoyi/imageflow/master/workflow.yaml |
 #### Sample configuration file `workflow.yaml`:
 
 ```yaml
-workflows:
-  default:
-    - name: Resize And Compress Image to 1200x800
-      action: resize
-      params:
-        type: cover
-        width: 1200
-        height: 800
 
-    - name: Convert Image To AVIF
-      action: convert
-      params:
-        format: avif
-
-    - name: Overwrite Original images
-      action: overwrite
-      
-    - name: Rename to `yyyy_MM_dd` format
-      action: rename
-      params:
-        # available variables: {uuid}, {timestamp}, {yyyy}, {yyyy_MM}, {yyyy_MM_dd}
-        to: "{yyyy_MM_dd}" 
-
-    - name: Upload Image To S3
-      action: upload
-      params:
-        root: hello/tmp
-        bucket: gblog-images
-        cdn: https://images.godruoyi.com
-        service: s3
-
-    - name: Convert URL to Markdown format
-      action: tomarkdown
-
-    - name: Copy to clipboard
-      action: clipboard 
-services:
-  s3:
-    # example to upload file to cloudflare R2 storage
-    endpoint: https://your-account-id.r2.cloudflarestorage.com
-    region: auto
-    access_key_id: id
-    secret_access_key: key
-  tinypng:
-    apiKey: your-tinypng-api-key
 ```
 
 ## Actions
@@ -103,7 +60,7 @@ You will need to have [Node.js](https://nodejs.org) and npm installed.
 
 1. Clone this repo `git clone https://github.com/godruoyi/imageflow.git`
 2. Go to the folder `cd imageflow`
-3. Install dependencies `npm install & npm run build`
+3. Install dependencies `npm install && npm run build`
 4. Go to Raycast, run `Import Extension` and select the folder
 
 

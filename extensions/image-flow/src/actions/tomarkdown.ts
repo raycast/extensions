@@ -11,5 +11,5 @@ import path from "path";
 export default async function (i: Input): Promise<Output> {
   const name = i.type === "filepath" ? path.basename(i.value) : "image";
 
-  return { type: "markdown", value: `![${name}](${i.value})` } as Output;
+  return { type: "markdown", value: `![${name}](${encodeURI(i.value)})` } as Output;
 }

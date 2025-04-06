@@ -1,36 +1,37 @@
-import { Input } from "../types";
+import { Config, Input } from "../types";
 import fs from "fs";
+import { isImage } from "./image";
 
-function inputMustBeFilepath(input: Input): string {
-  if (input.type == "filepath" && input.value !== "" && fs.existsSync(input.value)) {
-    return input.value;
+export function validateInputMustBeFilepath(input: Input): boolean {
+  if (input.type === "filepath" && input.value !== "" && fs.existsSync(input.value)) {
+    return true;
   }
 
-  throw new Error("Input must be a valid filepath");
+  throw new Error(`input must be a valid file path: ${input.value}`);
 }
 
-function inputMustBeAURL(input: Input): string {
-  if (input.type == "url" && input.value !== "" && input.value.startsWith("http")) {
-    return input.value;
+export function validateInputMustBeImage(input: Input) {
+  if (validateInputMustBeFilepath(input) && isImage(input.value)) {
+    return true;
   }
 
-  throw new Error("Input must be a valid filepath");
+  throw new Error(`input must be a valid image file path: ${input.value}`);
 }
 
-function inputMustBeFilepathOrURL(input: Input): string {
-  try {
-    return inputMustBeFilepath(input);
-  } catch (e) {
-    try {
-      return inputMustBeAURL(input);
-    } catch (e) {
-      throw new Error("Input must be a valid filepath or URL");
-    }
+export function validateAndGetTinyPngApiKey(config: Record<string, Config>): string {
+  const key = config?.["tinypng"]?.["apiKey"];
+  if (!key) {
+    throw new Error("TinyPNG API key is required but not configured");
   }
+
+  return key as string;
 }
 
-export default {
-  inputMustBeFilepath,
-  inputMustBeAURL,
-  inputMustBeFilepathOrURL,
-};
+export function validateAndGetConvertFormat(config: Config): string {
+  const format = config?.["format"] as string;
+  if (!format) {
+    throw new Error(`[convert] action format is required but not configured`);
+  }
+
+  return format as string;
+}

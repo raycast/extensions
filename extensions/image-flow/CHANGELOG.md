@@ -1,3 +1,3 @@
-# godruoyi-tinypng-raycast Changelog
+# Image Flow Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}

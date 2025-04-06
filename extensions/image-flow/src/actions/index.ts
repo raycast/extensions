@@ -17,10 +17,10 @@ const actions = {
   clipboard: clipboard,
   tomarkdown: tomarkdown,
   rename: rename,
-};
+} as Record<string, ActionFn>;
 
 export default function resolveAction(name: string): ActionFn {
-  if (name in actions) {
+  if (Object.hasOwn(actions, name)) {
     return actions[name as keyof typeof actions];
   }
 

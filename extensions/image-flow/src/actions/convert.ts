@@ -2,6 +2,11 @@ import { Config, Image, Imager, Input, Output } from "../types";
 import tinypng from "../services/tinypng";
 import { saveStreamToTmpFile } from "../supports/file";
 import { buildNewImageName, imageExtensionToMimeType } from "../supports/image";
+import {
+  validateAndGetConvertFormat,
+  validateAndGetTinyPngApiKey,
+  validateInputMustBeImage,
+} from "../supports/validate";
 
 /**
  * Convert the image to a different format, tinify currently supports converting between
@@ -22,15 +27,15 @@ export default async function (
   services: Record<string, Config>,
   originImage: Imager,
 ): Promise<Output> {
-  const key = services?.["tinypng"]?.["apiKey"] as string;
-  const format = config?.["format"] as string;
+  validateInputMustBeImage(i);
+
+  const key = validateAndGetTinyPngApiKey(services);
+  const format = validateAndGetConvertFormat(config);
   const mimetype = imageExtensionToMimeType(format);
 
   const privateUrl = await tinypng.upload(i as Image, key);
   const stream = (await tinypng.convert(privateUrl, key, { type: mimetype })) as NodeJS.ReadableStream;
-  const newfile = await saveStreamToTmpFile(stream, buildNewImageName(originImage.get(), format));
+  const newFile = await saveStreamToTmpFile(stream, buildNewImageName(originImage.get(), format));
 
-  console.log(`converted image path: ${newfile}`);
-
-  return { type: "filepath", value: newfile } as Output;
+  return { type: "filepath", value: newFile } as Output;
 }

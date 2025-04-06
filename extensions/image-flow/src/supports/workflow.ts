@@ -10,9 +10,7 @@ export async function getWorkflowConfigs(): Promise<WorkflowConfigs> {
   const doc = yaml.load(content);
 
   if (!doc) {
-    console.error("failed to parse workflow config file:", path);
-
-    return {} as WorkflowConfigs;
+    throw new Error(`failed to parse workflow config file: ${path}`);
   }
 
   return doc as WorkflowConfigs;
