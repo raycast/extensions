@@ -28,18 +28,6 @@ export const Toast = {
   },
 };
 
-// export const List = {
-//   EmptyView: jest.fn(),
-//   Item: {
-//     Detail: {
-//       Metadata: {
-//         Label: jest.fn(),
-//         Link: jest.fn(),
-//         Separator: jest.fn(),
-//       },
-//     },
-//   },
-// };
 
 export const List = {
   EmptyView: jest.fn(),
