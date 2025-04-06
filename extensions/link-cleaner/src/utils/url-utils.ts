@@ -15,7 +15,7 @@ function replaceURLs(text: string, newURLs: string[]): string {
 }
 
 // remove some query params from url
-function removeQueryParams(url: string, allowParmas: string[]): string {
+function removeQueryParams(url: string, allowParams: string[]): string {
   // find all query params
   const urlParts = url.split("?");
   if (urlParts.length < 2) {
@@ -24,8 +24,8 @@ function removeQueryParams(url: string, allowParmas: string[]): string {
   const query = urlParts[1].split("&");
 
   // if params is not empty, match params to remove
-  if (allowParmas.length > 0) {
-    const newQuery = query.filter((param) => allowParmas.includes(param.split("=")[0]));
+  if (allowParams.length > 0) {
+    const newQuery = query.filter((param) => allowParams.includes(param.split("=")[0]));
     return `${urlParts[0]}?${newQuery.join("&")}`;
   }
   // if params is empty, remove all query params
