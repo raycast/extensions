@@ -112,8 +112,6 @@ export type ResultAs<N extends string, T, E = Error> =
   | ({ [K in N]: null } & { error: E });
 export type Result<T, E = Error> = ResultAs<"data", T, E>;
 
-type MaybePromise<T> = T | Promise<T>;
-
 export function tryCatch<T, E = Error>(fn: () => T): Result<T, E>;
 export function tryCatch<T, E = Error>(promise: Promise<T>): Promise<Result<T, E>>;
 export function tryCatch<T, E = Error>(fnOrPromise: (() => T) | Promise<T>): MaybePromise<Result<T, E>> {

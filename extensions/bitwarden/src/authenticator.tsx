@@ -19,7 +19,6 @@ import { usePromise } from "@raycast/utils";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 import { ActionWithReprompt, DebuggingBugReportingActionSection, VaultActionsSection } from "~/components/actions";
 import { ResultAs as ResultAs, tryCatch } from "~/utils/errors";
-import { Cache } from "~/utils/cache";
 
 const AuthenticatorComponent = () => (
   <RootErrorBoundary>
@@ -38,8 +37,6 @@ const AuthenticatorComponent = () => (
 function AuthenticatorList() {
   const vault = useVaultContext();
   const { data: activeTabUrl, isLoading: isActiveTabLoading } = useActiveTab();
-
-  authenticator.useSyncTimer();
 
   const items = useMemo(() => vault.items.filter((item) => item.login?.totp), [vault.items]);
 
@@ -254,17 +251,6 @@ const authenticator = {
       return { generator: null, error: new Error("Invalid key") };
     }
   },
-  useSyncTimer() {
-    useEffect(() => {
-      let count = 0;
-      Cache.set(authenticator.cacheKey, String(count));
-      const interval = setInterval(() => {
-        Cache.set(authenticator.cacheKey, String(++count));
-      }, 500); // update every 500ms for better accuracy
-
-      return () => clearInterval(interval);
-    }, []);
-  },
   useCode(item: Item) {
     const { generator, error } = useMemo(() => {
       const { totp } = item.login ?? {};
@@ -286,20 +272,26 @@ const authenticator = {
     useEffect(() => {
       if (error) return;
 
-      const unsubscribe = Cache.subscribe((key) => {
-        if (key !== authenticator.cacheKey) return;
-
+      const evaluate = () => {
         const timeRemaining = Math.ceil(generator.remaining() / 1000);
         setTimeRemaining(timeRemaining);
 
         if (timeRemaining === generator.period) {
           setCode(generator.generate());
         }
-      });
+      };
 
-      setCode(generator.generate());
+      let interval: NodeJS.Timeout;
+      // set an initial timeout to ensure the first evaluation is time accurate
+      // and then keep evaluating every second
+      setTimeout(() => {
+        evaluate();
+        interval = setInterval(evaluate, 1000);
+      }, generator.remaining() % 1000);
 
-      return () => unsubscribe();
+      setCode(generator.generate()); // first generation before the interval starts
+
+      return () => interval && clearInterval(interval);
     }, [item, generator]);
 
     return { code, timeRemaining };
