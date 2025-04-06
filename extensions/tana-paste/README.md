@@ -188,11 +188,43 @@ Output:
     - You: Good morning.
 ```
 
+More examples can be found in the `examples/` directory, including:
+- `examples/all-features.md`: All supported features in a single document
+- `examples/limitless-pendant/`: Examples of Limitless Pendant transcription formats
+- `examples/youtube-transcript-test.md`: Example of YouTube transcript timestamp format
+
 ## Development
 
 - `npm run dev` - Start development mode
 - `npm run build` - Build the extension
 - `npm run lint` - Run linter
+
+## Testing
+
+### Test Structure
+The Tana Paste project uses the following test structure:
+
+- `src/utils/__tests__/tana-converter.test.ts` - Primary Jest test file that runs with `npm test`
+- This file contains all the unit tests for the core conversion functionality
+
+### Running Tests
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+### Test Guidelines
+1. **Add tests for new features**: All new functionality should have corresponding tests
+2. **Test edge cases**: Ensure tests cover edge cases and error conditions
+3. **Use Jest**: All new tests should be added to the Jest test suite
+4. **Test organization**: Group related tests using `describe` blocks
+5. **Keep test files together**: Place new test files in the `src/utils/__tests__/` directory to maintain organization
 
 ## Technical Details
 

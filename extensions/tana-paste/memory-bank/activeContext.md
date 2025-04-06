@@ -9,6 +9,7 @@
 - Memory bank maintenance and documentation
 - Fixing indentation hierarchy for bullet points under headings (PR #11)
 - Setting up Prettier formatting and integrating it into build process
+- Cleaning up test directory structure and removing duplicate test files (Issue #12)
 
 ## Recent Changes
 - Version 1.2.0 (2025-04-03):
@@ -38,6 +39,7 @@
 - Focused on comprehensive testing to ensure proper behavior
 - Established code formatting standards with Prettier
 - Added pre-commit practice to run build for formatting, linting, and testing
+- GitHub CLI issue creation must avoid newlines in command parameters (use spaces or commas instead)
 
 ## Next Steps
 - Review core conversion logic in `tana-converter.ts` to understand implementation details

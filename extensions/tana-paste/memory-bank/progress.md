@@ -28,6 +28,13 @@
 - Enhanced error handling
 - Improved hierarchical indentation for transcriptions
 - Fixed indentation for bullet points under deeper headings (H3+)
+- Cleaned up test directory structure (Issue #12)
+  - Removed duplicate test files
+  - Consolidated testing approach to use Jest
+  - Updated jest.config.mjs to explicitly target tests in src directory
+  - Added testing documentation to README.md
+  - Organized example files into more structured directories
+  - Removed obsolete files (claude-issue.md and duplicate examples)
 
 ## What's Left to Build
 - Features in development:
