@@ -1,7 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import dayjs from "dayjs";
 import { Server } from "./types";
-import fetch from "node-fetch";
 
 const { max_num_as_unlimited } = getPreferenceValues<Preferences>();
 
@@ -32,9 +31,9 @@ export async function deleteServer(server: Server) {
       Accept: "application/json",
       "Content-Type": "application/json",
       Authorization: `Bearer ${api_key}`,
-    }
+    },
   });
   if (!response.ok) throw new Error();
-  const result = await response.json() as { result: "success" };
+  const result = (await response.json()) as { result: "success" };
   return result;
 }

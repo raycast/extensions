@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { Item, Server, ServerType } from "../types";
 import PriceListItem from "./price-list-item";
 import NextDueDate from "./next-due-date";
@@ -15,23 +27,22 @@ export default function ServerItem({ server, mutate }: { server: Server; mutate:
       message: "Are you sure you want to delete this?",
       primaryAction: {
         title: "Delete",
-        style: Alert.ActionStyle.Destructive
-      }
-    }
+        style: Alert.ActionStyle.Destructive,
+      },
+    };
 
     if (await confirmAlert(options)) {
       const toast = await showToast(Toast.Style.Animated, "Deleting server", server.hostname);
       try {
-        await mutate(
-          deleteServer(server), {
-            optimisticUpdate(data) {
-              return data.filter(s => s.id!==server.id);
-            },
-          }
-        )
+        await mutate(deleteServer(server), {
+          optimisticUpdate(data) {
+            return data.filter((s) => s.id !== server.id);
+          },
+        });
         toast.style = Toast.Style.Success;
         toast.title = "Deleted server";
-      } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (_) {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not delete";
       }
@@ -87,7 +98,12 @@ export default function ServerItem({ server, mutate }: { server: Server; mutate:
             title="Update Server"
             target={<EditServer server={server} mutate={mutate} />}
           />
-          <Action icon={Icon.Trash} title="Delete Server" onAction={() => confirmAndDeleteServer(server)} style={Action.Style.Destructive} />
+          <Action
+            icon={Icon.Trash}
+            title="Delete Server"
+            onAction={() => confirmAndDeleteServer(server)}
+            style={Action.Style.Destructive}
+          />
         </ActionPanel>
       }
     />
