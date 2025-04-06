@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Action, Icon, List, Detail, confirmAlert, Color } from "@raycast/api";
-import { Envelope } from "./models";
+import { Envelope, Flags } from "./models";
 import { execa } from "execa";
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "./preferences";
@@ -132,28 +132,21 @@ export default function Command() {
   const getFlagIcons = (flags: string[]) => {
     const flagIcons: { icon: { source: Icon; tintColor?: Color }; tooltip: string; text?: string }[] = [];
 
-    if (flags.includes("\\Flagged")) {
+    if (flags.includes(Flags.Flagged)) {
       flagIcons.push({
         icon: { source: Icon.Flag, tintColor: Color.Red },
         tooltip: "Flagged",
       });
     }
 
-    if (flags.includes("\\Seen")) {
-      flagIcons.push({
-        icon: { source: Icon.Eye },
-        tooltip: "Read",
-      });
-    }
-
-    if (flags.includes("\\Answered")) {
+    if (flags.includes(Flags.Answered)) {
       flagIcons.push({
         icon: { source: Icon.Reply },
         tooltip: "Replied",
       });
     }
 
-    if (flags.includes("\\Draft")) {
+    if (flags.includes(Flags.Draft)) {
       flagIcons.push({
         icon: { source: Icon.Pencil },
         tooltip: "Draft",
@@ -219,9 +212,17 @@ export default function Command() {
           {groupedEnvelopes[dateKey].map((envelope) => (
             <List.Item
               key={envelope.id}
-              icon={envelope.has_attachment ? { source: Icon.Paperclip } : { source: Icon.Envelope }}
+              icon={
+                envelope.flags?.includes(Flags.Seen)
+                  ? { source: Icon.CircleProgress100, tintColor: Color.SecondaryText }
+                  : { source: Icon.Circle, tintColor: Color.Blue }
+              }
               title={envelope.subject || "(No Subject)"}
               accessories={[
+                {
+                  icon: envelope.has_attachment ? { source: Icon.Paperclip } : undefined,
+                  tooltip: envelope.has_attachment ? "Has Attachment" : undefined,
+                },
                 {
                   icon: { source: Icon.Person },
                   text: envelope.from?.name || envelope.from?.addr || "Unknown",

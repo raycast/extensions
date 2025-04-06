@@ -17,7 +17,7 @@
 // ]
 import { z } from "zod";
 
-enum Flags {
+export enum Flags {
   Seen = "Seen",
   Answered = "Answered",
   Flagged = "Flagged",
