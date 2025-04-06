@@ -1,3 +1,4 @@
+import { HOST_URL } from "../constants";
 import { Topic } from "../types";
 import { cleanText } from "./textUtils";
 
@@ -46,5 +47,5 @@ export function generateTopicSlug(topic: Topic): string {
  */
 export function generateTopicUrl(topic: Topic): string {
   const slug = generateTopicSlug(topic);
-  return `https://www.producthunt.com/topics/${slug}`;
+  return `${HOST_URL}topics/${slug}`;
 }

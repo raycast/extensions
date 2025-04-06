@@ -3,42 +3,24 @@
  */
 
 /**
- * Cleans text by replacing common Unicode escapes and HTML entities with their actual characters
+ * Cleans text by replacing Unicode escapes and HTML entities with actual characters
  * @param text The text to clean
  * @returns The cleaned text
  */
 export function cleanText(text: string | undefined | null): string {
   if (!text) return "";
 
-  // Define replacement maps for more efficient processing
-  const commonUnicodeEscapes: Record<string, string> = {
-    "\\u0026": "&",
-    "\\u003c": "<",
-    "\\u003e": ">",
-    "\\u0022": '"',
-    "\\u0027": "'",
-  };
-
-  const htmlEntities: Record<string, string> = {
-    "&amp;": "&",
-    "&lt;": "<",
-    "&gt;": ">",
-    "&quot;": '"',
-    "&#39;": "'",
-  };
-
-  // Replace unicode escapes
-  let cleanedText = text;
-  Object.entries(commonUnicodeEscapes).forEach(([escape, char]) => {
-    cleanedText = cleanedText.replace(new RegExp(escape, "g"), char);
-  });
-
-  // Replace HTML entities
-  Object.entries(htmlEntities).forEach(([entity, char]) => {
-    cleanedText = cleanedText.replace(new RegExp(entity, "g"), char);
-  });
-
-  return cleanedText;
+  return (
+    text
+      // Convert all Unicode escapes (like \u0026)
+      .replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+      // Replace common HTML entities
+      .replace(
+        /&(amp|lt|gt|quot|#39);/g,
+        (_, entity: "amp" | "lt" | "gt" | "quot" | "#39") =>
+          ({ amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" })[entity] || _,
+      )
+  );
 }
 
 /**

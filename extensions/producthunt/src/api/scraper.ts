@@ -3,8 +3,7 @@ import { cleanText, sanitizeJsonString } from "../util/textUtils";
 import { Product, Topic, User, Shoutout } from "../types";
 import { processImageUrl, ImgixFit } from "./imgix";
 import { fetchSvgAsBase64 } from "../util/imageUtils";
-
-const HOST_URL = "https://www.producthunt.com/";
+import { HOST_URL } from "../constants";
 
 // Interface for Apollo event data
 interface ApolloEvent {
@@ -381,7 +380,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
             name: hunterName,
             username: username,
             avatarUrl: hunterImage,
-            profileUrl: hunterUrl.startsWith("http") ? hunterUrl : `https://www.producthunt.com${hunterUrl}`,
+            profileUrl: hunterUrl.startsWith("http") ? hunterUrl : `${HOST_URL}${hunterUrl}`,
           };
         }
       }
@@ -413,7 +412,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
               name: hunterName,
               username: username,
               avatarUrl: hunterImage || "",
-              profileUrl: hunterUrl.startsWith("http") ? hunterUrl : `https://www.producthunt.com${hunterUrl}`,
+              profileUrl: hunterUrl.startsWith("http") ? hunterUrl : `${HOST_URL}${hunterUrl}`,
             };
           }
         }
@@ -437,7 +436,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
               name: hunterName,
               username: username,
               avatarUrl: hunterImage || "",
-              profileUrl: hunterUrl.startsWith("http") ? hunterUrl : `https://www.producthunt.com${hunterUrl}`,
+              profileUrl: hunterUrl.startsWith("http") ? hunterUrl : `${HOST_URL}${hunterUrl}`,
             };
           }
         }
@@ -474,7 +473,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
               name: makerName,
               username: username,
               avatarUrl: makerImage || "",
-              profileUrl: makerUrl.startsWith("http") ? makerUrl : `https://www.producthunt.com${makerUrl}`,
+              profileUrl: makerUrl.startsWith("http") ? makerUrl : `${HOST_URL}${makerUrl}`,
             });
           }
         });
@@ -617,7 +616,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
         shoutouts.push({
           id: `shoutout-${i}`,
           name: shoutoutName,
-          url: shoutoutLink.startsWith("http") ? shoutoutLink : `https://www.producthunt.com${shoutoutLink}`,
+          url: shoutoutLink.startsWith("http") ? shoutoutLink : `${HOST_URL}${shoutoutLink}`,
           thumbnail: shoutoutImg || "",
         });
       }
@@ -641,7 +640,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
     if (productHubLink.length > 0) {
       const hubUrl = productHubLink.attr("href");
       if (hubUrl) {
-        productHubUrl = hubUrl.startsWith("http") ? hubUrl : `https://www.producthunt.com${hubUrl}`;
+        productHubUrl = hubUrl.startsWith("http") ? hubUrl : `${HOST_URL}${hubUrl}`;
 
         // Try to extract the number of previous launches
         const launchesText = productHubLink.text();
@@ -683,7 +682,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
                 username: postData.user.username,
                 avatarUrl: postData.user.profileImage || "",
                 profileImage: postData.user.profileImage,
-                profileUrl: `https://www.producthunt.com/@${postData.user.username}`,
+                profileUrl: `${HOST_URL}/@${postData.user.username}`,
               });
             }
           }

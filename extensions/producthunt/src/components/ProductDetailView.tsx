@@ -3,6 +3,7 @@ import { Product } from "../types";
 import { generateTopicUrl } from "../util/topicUtils";
 import { useState, useEffect } from "react";
 import { enhanceProductWithMetadata } from "../api/scraper";
+import { HOST_URL } from "../constants";
 import { ProductActions, ViewContext } from "./ProductActions";
 import { cleanText } from "../util/textUtils";
 
@@ -118,7 +119,7 @@ export function ProductDetailView({
                     });
                     open(product.hunter.profileUrl);
                   } else if (product.hunter?.username) {
-                    const profileUrl = `https://www.producthunt.com/@${product.hunter.username}`;
+                    const profileUrl = `${HOST_URL}/@${product.hunter.username}`;
                     showToast({
                       style: Toast.Style.Success,
                       title: `Opening hunter profile: ${product.hunter.name}`,
@@ -146,7 +147,7 @@ export function ProductDetailView({
                       });
                       open(maker.profileUrl);
                     } else if (maker.username) {
-                      const profileUrl = `https://www.producthunt.com/@${maker.username}`;
+                      const profileUrl = `${HOST_URL}/@${maker.username}`;
                       showToast({
                         style: Toast.Style.Success,
                         title: `Opening maker profile: ${maker.name}`,
