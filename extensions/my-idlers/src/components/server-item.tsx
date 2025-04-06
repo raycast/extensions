@@ -41,7 +41,7 @@ export default function ServerItem({ server, mutate }: { server: Server; mutate:
         });
         toast.style = Toast.Style.Success;
         toast.title = "Deleted server";
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (_) {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not delete";
