@@ -22,7 +22,7 @@ export default function ResultView(props: ResultViewProps) {
     cumulativeTokens: 0,
     cumulativeCost: 0,
     model: model_override === "global" ? global_model : model_override,
-    temp: temperature ?? 0.8,
+    temp: temperature ?? 0.7,
   });
 
   async function getChatResponse(sysPrompt: string, selectedText: string, model: string, temp: number) {
