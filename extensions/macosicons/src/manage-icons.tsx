@@ -47,6 +47,8 @@ export default function ManageIconsCommand() {
       .toSorted((a, b) => a!.name.localeCompare(b!.name)) as Application[];
   }, [state, apps]);
 
+  const hasActiveApps = activeApps.length > 0;
+
   const filteredApps = useMemo(() => {
     return activeApps.filter((app) =>
       app?.name.toLowerCase().includes(searchText.toLowerCase()),
@@ -107,11 +109,17 @@ export default function ManageIconsCommand() {
           />
         ))}
       <Grid.EmptyView
-        title="You haven't used any icons yet"
+        icon={!hasActiveApps ? Icon.Tray : undefined}
+        title={"No icons found"}
+        description={
+          !hasActiveApps
+            ? `Your collection is empty, press enter to open search`
+            : ""
+        }
         actions={
           <ActionPanel>
             <Action.Push
-              title="Search Icons"
+              title="Open Search"
               target={<SearchIconsCommand />}
               icon={Icon.MagnifyingGlass}
               onPop={revalidateState}
