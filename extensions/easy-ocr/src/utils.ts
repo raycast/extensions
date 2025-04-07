@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import fs from "fs";
-import { languages } from "../lib/languages";
+import { languages } from "./lib/languages";
 
 function handleNewLines(text: string) {
   const newLine = getPreferenceValues<Preferences>().newLine;

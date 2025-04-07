@@ -2,7 +2,7 @@
 
 ## [Enhancements] - {PR_MERGE_DATE}
 
-- Added automatic language detection option 
+- Added automatic language detection option with either Raycast AI, Franc, LanguageDetect or Tinyld
 - Language used for OCR is now being displayed on successful OCR toast
 - Added fallback language (english) if user types wrong language code in options
 

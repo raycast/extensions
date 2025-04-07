@@ -1,6 +1,6 @@
 import { recognize } from "node-tesseract-ocr";
 import { getPreferenceValues } from "@raycast/api";
-import { languages } from "../lib/languages";
+import { languages } from "./lib/languages";
 
 export default async function tesseractOcr(imagePath: string, lang: string) {
   /**
