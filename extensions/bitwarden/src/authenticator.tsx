@@ -1,13 +1,14 @@
 import * as OTPAuth from "otpauth";
-
+import { useEffect, useMemo, useState } from "react";
 import { ActionPanel, BrowserExtension, Clipboard, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
 import { useVaultContext, VaultProvider } from "~/context/vault";
 import { Item } from "~/types/vault";
 import { useItemIcon } from "~/components/searchVault/utils/useItemIcon";
-import { useEffect, useMemo, useState } from "react";
 import VaultListenersProvider from "~/components/searchVault/context/vaultListeners";
 import { SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
 import VaultItemContext, { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
@@ -15,10 +16,9 @@ import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdated
 import { getTransientCopyPreference } from "~/utils/preferences";
 import { showCopySuccessMessage } from "~/utils/clipboard";
 import { captureException } from "~/utils/development";
-import { usePromise } from "@raycast/utils";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 import { ActionWithReprompt, DebuggingBugReportingActionSection, VaultActionsSection } from "~/components/actions";
-import { ErrN, OkN, ResultN, tryCatch } from "~/utils/errors";
+import { Err, Ok, Result, tryCatch } from "~/utils/errors";
 
 const AuthenticatorCommand = () => (
   <RootErrorBoundary>
@@ -94,16 +94,15 @@ function AuthenticatorList() {
 
 function ListItem({ item }: { item: Item }) {
   const icon = useItemIcon(item);
-  const { code, timeRemaining, error, isLoading } = authenticator.useCode(item);
+  const { code, time, error, isLoading } = authenticator.useCode(item);
 
   function getAccessories(): List.Item.Props["accessories"] {
     if (!isLoading) {
-      if (error) return [{ text: { value: error.message, color: Color.Red } }];
-      if (code && timeRemaining) {
-        return [
-          { text: code },
-          { tag: { value: String(timeRemaining), color: timeRemaining <= 7 ? Color.Red : Color.Blue } },
-        ];
+      if (error) {
+        return [{ text: { value: error.message, color: Color.Red } }];
+      }
+      if (code && time) {
+        return [{ text: code }, { tag: { value: String(time), color: time <= 7 ? Color.Red : Color.Blue } }];
       }
     }
     return [{ text: "Loading..." }];
@@ -180,7 +179,7 @@ function useGetCodeForAction(action: "copy" | "paste") {
       const totp = await getVaultItem(selectedItem, (item) => item.login?.totp, "Getting code...");
       if (!totp) throw new Error("Failed to get totp");
 
-      const { generator, error } = authenticator.getGenerator(totp);
+      const [generator, error] = authenticator.getGenerator(totp);
       if (error) throw error;
 
       return generator.generate();
@@ -194,7 +193,7 @@ function useGetCodeForAction(action: "copy" | "paste") {
 
 function useActiveTab() {
   return usePromise(async () => {
-    const { data: tabs, error } = await tryCatch(BrowserExtension.getTabs());
+    const [tabs, error] = await tryCatch(BrowserExtension.getTabs());
     if (error) return undefined;
     const activeTab = tabs.find((tab) => tab.active);
     return activeTab ? { ...activeTab, url: new URL(activeTab.url) } : undefined;
@@ -225,7 +224,7 @@ type AuthenticatorOptions = {
 const authenticator = {
   parseTotp(totpString: string): AuthenticatorOptions {
     if (totpString.includes("otpauth")) {
-      const { data: parsed, error } = tryCatch(() => OTPAuth.URI.parse(totpString));
+      const [parsed, error] = tryCatch(() => OTPAuth.URI.parse(totpString));
       if (error || !(parsed instanceof OTPAuth.TOTP)) throw new Error("Invalid key");
 
       const algorithm = Algorithms[parsed.algorithm as keyof typeof Algorithms];
@@ -241,21 +240,17 @@ const authenticator = {
 
     return { secret: totpString, period: 30, algorithm: "SHA1", digits: 6 };
   },
-  getGenerator(totpString: string): ResultN<"generator", OTPAuth.TOTP> {
-    const { data: options, error } = tryCatch(() => authenticator.parseTotp(totpString));
-    if (error) return ErrN("generator", error);
-    return OkN("generator", new OTPAuth.TOTP(options));
+  getGenerator(totpString: string): Result<OTPAuth.TOTP> {
+    const [options, error] = tryCatch(() => authenticator.parseTotp(totpString));
+    if (error) return Err(error);
+    return Ok(new OTPAuth.TOTP(options));
   },
   useCode(item: Item) {
-    const { generator, error, isLoading } = useMemo(() => {
+    const [generator, error, isLoading = false] = useMemo(() => {
       const { totp } = item.login ?? {};
-      if (totp === SENSITIVE_VALUE_PLACEHOLDER) {
-        return { generator: null, error: new Error("Loading..."), isLoading: true };
-      }
-      if (!totp) {
-        return { generator: null, error: new Error("No TOTP found"), isLoading: false };
-      }
-      return { ...authenticator.getGenerator(totp), isLoading: false };
+      if (totp === SENSITIVE_VALUE_PLACEHOLDER) return Loading(new Error("Loading..."));
+      if (!totp) return Err(new Error("No TOTP found"));
+      return authenticator.getGenerator(totp);
     }, [item]);
 
     const [code, setCode] = useState(() => {
@@ -263,7 +258,7 @@ const authenticator = {
       return generator.generate();
     });
 
-    const [timeRemaining, setTimeRemaining] = useState(() => {
+    const [time, setTime] = useState(() => {
       if (error) return null;
       return Math.ceil(generator.remaining() / 1000);
     });
@@ -273,7 +268,7 @@ const authenticator = {
 
       const setTimeAndCode = () => {
         const timeRemaining = Math.ceil(generator.remaining() / 1000);
-        setTimeRemaining(timeRemaining);
+        setTime(timeRemaining);
 
         if (timeRemaining === generator.period) {
           setCode(generator.generate());
@@ -293,8 +288,12 @@ const authenticator = {
       return () => interval && clearInterval(interval);
     }, [item, generator]);
 
-    return { code, timeRemaining, error, isLoading };
+    return { code, time, error, isLoading };
   },
 };
+
+function Loading(error: Error) {
+  return [null, error, true] as const;
+}
 
 export default AuthenticatorCommand;
