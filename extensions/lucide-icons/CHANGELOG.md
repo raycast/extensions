@@ -1,5 +1,9 @@
 # Lucide Icons Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Add the preference to copy icon name in Pascal Case.
+
 ## [Update] - 2024-10-07
 
 - Introduced AI-based icon search.
