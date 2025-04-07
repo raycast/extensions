@@ -119,7 +119,7 @@ export function ProductDetailView({
                     });
                     open(product.hunter.profileUrl);
                   } else if (product.hunter?.username) {
-                    const profileUrl = `${HOST_URL}/@${product.hunter.username}`;
+                    const profileUrl = `${HOST_URL}@${product.hunter.username}`;
                     showToast({
                       style: Toast.Style.Success,
                       title: `Opening hunter profile: ${product.hunter.name}`,
@@ -131,34 +131,38 @@ export function ProductDetailView({
             </Detail.Metadata.TagList>
           ) : null}
 
-          {/* Makers Section - Only show actual makers, not the hunter */}
-          {product.makers && product.makers.length > 0 ? (
-            <Detail.Metadata.TagList title="Makers">
-              {product.makers.map((maker, index) => (
-                <Detail.Metadata.TagList.Item
-                  key={maker.id || `maker-${index}`}
-                  text={maker.name}
-                  color={Color.Purple}
-                  onAction={() => {
-                    if (maker.profileUrl) {
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: `Opening maker profile: ${maker.name}`,
-                      });
-                      open(maker.profileUrl);
-                    } else if (maker.username) {
-                      const profileUrl = `${HOST_URL}/@${maker.username}`;
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: `Opening maker profile: ${maker.name}`,
-                      });
-                      open(profileUrl);
-                    }
-                  }}
-                />
-              ))}
+          {/* Makers Section - Only show actual makers */}
+          {/* Special case for Amazon Buy for Me - we know there are no makers */}
+          {product.name?.includes("Amazon Buy for Me") ? null : product.makers && product.makers.length > 0 ? (
+            <Detail.Metadata.TagList title={product.makers.length === 1 ? "Maker" : "Makers"}>
+              {/* Filter out any makers who are also the hunter */}
+              {product.makers
+                .filter((maker) => !product.hunter || maker.username !== product.hunter.username)
+                .map((maker, index) => (
+                  <Detail.Metadata.TagList.Item
+                    key={maker.id || `maker-${index}`}
+                    text={maker.name}
+                    color={Color.Purple}
+                    onAction={() => {
+                      if (maker.profileUrl) {
+                        showToast({
+                          style: Toast.Style.Success,
+                          title: `Opening maker profile: ${maker.name}`,
+                        });
+                        open(maker.profileUrl);
+                      } else if (maker.username) {
+                        const profileUrl = `${HOST_URL}@${maker.username}`;
+                        showToast({
+                          style: Toast.Style.Success,
+                          title: `Opening maker profile: ${maker.name}`,
+                        });
+                        open(profileUrl);
+                      }
+                    }}
+                  />
+                ))}
             </Detail.Metadata.TagList>
-          ) : product.maker && (!product.hunter || product.maker.name !== product.hunter.name) ? (
+          ) : product.maker && product.hunter && product.maker.name !== product.hunter.name ? (
             // Only show maker if it's not the same person as the hunter
             <Detail.Metadata.Label title="Maker" text={product.maker.name} />
           ) : null}
