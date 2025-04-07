@@ -250,13 +250,9 @@ const authenticator = {
     return { secret: totpString, period: 30, algorithm: "SHA1", digits: 6 };
   },
   getGenerator(totpString: string): ResultN<"generator", OTPAuth.TOTP> {
-    try {
-      const { data: options, error } = tryCatch(() => authenticator.parseTotp(totpString));
-      if (error) return ErrN("generator", error);
-      return OkN("generator", new OTPAuth.TOTP(options));
-    } catch (error) {
-      return ErrN("generator", new Error("Invalid key"));
-    }
+    const { data: options, error } = tryCatch(() => authenticator.parseTotp(totpString));
+    if (error) return ErrN("generator", error);
+    return OkN("generator", new OTPAuth.TOTP(options));
   },
   useCode(item: Item) {
     const { generator, error, isLoading } = useMemo(() => {

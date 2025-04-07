@@ -108,7 +108,7 @@ export const getErrorString = (error: any): string | undefined => {
 export type Success<T> = { data: T; error: null };
 export type Failure<E> = { data: null; error: E };
 
-export type Result<T, E = Error> = { data: T; error: null } | { data: null; error: E };
+export type Result<T, E = Error> = Success<T> | Failure<E>;
 
 export function Ok<T>(data: T) {
   return { data, error: null } as { data: T; error: null };
@@ -117,10 +117,11 @@ export function Err<E = Error>(error: E) {
   return { data: null, error } as { data: null; error: E };
 }
 
+export type SuccessN<N extends string, T> = { [k in N]: T } & { error: null };
+export type FailureN<N extends string, E> = { [K in N]: null } & { error: E };
+
 /** Same as {@link Result} but with a named data property */
-export type ResultN<N extends string, T, E = Error> =
-  | ({ [k in N]: T } & { error: null })
-  | ({ [K in N]: null } & { error: E });
+export type ResultN<N extends string, T, E = Error> = SuccessN<N, T> | FailureN<N, E>;
 
 /** Same as {@link Ok} but with a named data property */
 export function OkN<N extends string, T>(as: N, data: T) {
@@ -133,6 +134,10 @@ export function ErrN<N extends string, E = Error>(as: N, error: E) {
 
 export function tryCatch<T, E = Error>(fn: () => T): Result<T, E>;
 export function tryCatch<T, E = Error>(promise: Promise<T>): Promise<Result<T, E>>;
+/**
+ * Execute a function or a promise safely inside a try/catch and
+ * return a `Result` (`data` and `error`).
+ */
 export function tryCatch<T, E = Error>(fnOrPromise: (() => T) | Promise<T>): MaybePromise<Result<T, E>> {
   if (typeof fnOrPromise === "function") {
     try {
