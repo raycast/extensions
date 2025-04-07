@@ -1,5 +1,10 @@
 # Contentful Changelog
 
+## [Modernize + Show Video Asset Thumbnail] - {PR_MERGE_DATE}
+
+- Modernize extension w/ updated deps
+- Fix: `Assets` would not show thumbnail for video
+
 ## [Fixes] - 2024-11-17
 
 - Fix: `Assets` crashing when an item has no _file_
