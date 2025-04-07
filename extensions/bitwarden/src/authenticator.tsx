@@ -97,13 +97,14 @@ function VaultItem({ item }: { item: Item }) {
   const { code, timeRemaining, error, isLoading } = authenticator.useCode(item);
 
   function getAccessories(): List.Item.Props["accessories"] {
-    if (isLoading) return [{ text: "Loading..." }];
-    if (error) return [{ text: { value: error.message, color: Color.Red } }];
-    if (code && timeRemaining) {
-      return [
-        { text: code },
-        { tag: { value: String(timeRemaining), color: timeRemaining <= 7 ? Color.Red : Color.Blue } },
-      ];
+    if (!isLoading) {
+      if (error) return [{ text: { value: error.message, color: Color.Red } }];
+      if (code && timeRemaining) {
+        return [
+          { text: code },
+          { tag: { value: String(timeRemaining), color: timeRemaining <= 7 ? Color.Red : Color.Blue } },
+        ];
+      }
     }
     return [{ text: "Loading..." }];
   }
