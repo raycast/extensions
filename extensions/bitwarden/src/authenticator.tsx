@@ -233,7 +233,7 @@ const authenticator = {
     if (totpString.includes("otpauth")) {
       const [otp, error] = tryCatch(() => OTPAuth.URI.parse(totpString));
       if (error) throw error;
-      if (error || !(otp instanceof OTPAuth.TOTP)) throw new Error("Invalid key");
+      if (!(otp instanceof OTPAuth.TOTP)) throw new Error("Invalid key");
 
       return { algorithm: otp.algorithm, secret: otp.secret.base32.toString(), period: otp.period, digits: otp.digits };
     }
