@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [New Feature] - {PR_MERGE_DATE}
+## [New Feature] - 2025-04-07
 
 - Add russian aliases for folders
 
