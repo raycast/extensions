@@ -119,8 +119,8 @@ export function Err<E = Error>(error: E): Failure<E> {
 export function tryCatch<T, E = Error>(fn: () => T): Result<T, E>;
 export function tryCatch<T, E = Error>(promise: Promise<T>): Promise<Result<T, E>>;
 /**
- * Execute a function or a promise safely inside a try/catch and
- * return a `Result` (`[data, error]`).
+ * Executes a function or a promise safely inside a try/catch and
+ * returns a `Result` (`[data, error]`).
  */
 export function tryCatch<T, E = Error>(fnOrPromise: (() => T) | Promise<T>): MaybePromise<Result<T, E>> {
   if (typeof fnOrPromise === "function") {
