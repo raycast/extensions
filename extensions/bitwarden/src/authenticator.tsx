@@ -59,7 +59,7 @@ function AuthenticatorList() {
 
   const isEmpty = itemsWithTabMatches.items.length === 0 && itemsWithTabMatches.tabItems.length === 0;
 
-  const otherItemsList = itemsWithTabMatches.items.map((item) => <VaultItem key={item.id} item={item} />);
+  const otherItemsList = itemsWithTabMatches.items.map((item) => <ListItem key={item.id} item={item} />);
 
   return (
     <List
@@ -75,7 +75,7 @@ function AuthenticatorList() {
         <>
           <List.Section title={`Active Tab (${activeTabUrl.url.hostname})`}>
             {itemsWithTabMatches.tabItems.map((item) => (
-              <VaultItem key={item.id} item={item} />
+              <ListItem key={item.id} item={item} />
             ))}
           </List.Section>
           <List.Section title="Others">{otherItemsList}</List.Section>
@@ -92,7 +92,7 @@ function AuthenticatorList() {
   );
 }
 
-function VaultItem({ item }: { item: Item }) {
+function ListItem({ item }: { item: Item }) {
   const icon = useItemIcon(item);
   const { code, timeRemaining, error, isLoading } = authenticator.useCode(item);
 
@@ -138,28 +138,13 @@ function CommonActions() {
 }
 
 function CopyCodeAction() {
-  const selectedItem = useSelectedVaultItem();
-  const getUpdatedVaultItem = useGetUpdatedVaultItem();
+  const getCode = useGetCodeForAction("copy");
 
   const copy = async () => {
-    const { data: totp, error } = await tryCatch(
-      getUpdatedVaultItem(selectedItem, (item) => item.login?.totp, "Getting code...")
-    );
-    if (error) {
-      await showToast(Toast.Style.Failure, "Failed to get code");
-      captureException("Failed to copy code", error);
-    }
-    if (totp) {
-      const { generator, error } = authenticator.getGenerator(totp);
-      if (error) {
-        await showToast(Toast.Style.Failure, "Failed to get code");
-        captureException("Failed to copy code", error);
-      }
-      if (generator) {
-        const code = generator.generate();
-        await Clipboard.copy(code, { transient: getTransientCopyPreference("other") });
-        await showCopySuccessMessage("Copied code to clipboard");
-      }
+    const code = await getCode();
+    if (code) {
+      await Clipboard.copy(code, { transient: getTransientCopyPreference("other") });
+      await showCopySuccessMessage("Copied code to clipboard");
     }
   };
 
@@ -167,28 +152,13 @@ function CopyCodeAction() {
 }
 
 function PasteCodeAction() {
-  const selectedItem = useSelectedVaultItem();
-  const getUpdatedVaultItem = useGetUpdatedVaultItem();
   const frontmostAppName = useFrontmostApplicationName();
+  const getCode = useGetCodeForAction("paste");
 
   const paste = async () => {
-    const { data: totp, error } = await tryCatch(
-      getUpdatedVaultItem(selectedItem, (item) => item.login?.totp, "Getting code...")
-    );
-    if (error) {
-      await showToast(Toast.Style.Failure, "Failed to get code");
-      captureException("Failed to paste code", error);
-    }
-    if (totp) {
-      const { generator, error } = authenticator.getGenerator(totp);
-      if (error) {
-        await showToast(Toast.Style.Failure, "Failed to get code");
-        captureException("Failed to paste code", error);
-      }
-      if (generator) {
-        const code = generator.generate();
-        await Clipboard.paste(code);
-      }
+    const code = await getCode();
+    if (code) {
+      await Clipboard.paste(code);
     }
   };
 
@@ -199,6 +169,27 @@ function PasteCodeAction() {
       onAction={paste}
     />
   );
+}
+
+function useGetCodeForAction(action: "copy" | "paste") {
+  const selectedItem = useSelectedVaultItem();
+  const getVaultItem = useGetUpdatedVaultItem();
+
+  return async () => {
+    try {
+      const totp = await getVaultItem(selectedItem, (item) => item.login?.totp, "Getting code...");
+      if (!totp) throw new Error("Failed to get totp");
+
+      const { generator, error } = authenticator.getGenerator(totp);
+      if (error) throw error;
+
+      return generator.generate();
+    } catch (error) {
+      await showToast(Toast.Style.Failure, "Failed to get code");
+      captureException(`Failed to ${action} code`, error);
+      return undefined;
+    }
+  };
 }
 
 function useActiveTab() {
