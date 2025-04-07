@@ -2,7 +2,6 @@ import React from "react";
 // src/index.tsx
 import { List, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
-import fetch from "node-fetch";
 
 // Popular game IDs
 const POPULAR_GAMES = [
