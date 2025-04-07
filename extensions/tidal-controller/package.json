@@ -60,6 +60,19 @@
       "title": "Volume Down",
       "description": "Turns down the volume in Tidal.",
       "mode": "no-view"
+    },
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "description": "Shows the currently playing track as a popup",
+      "mode": "no-view"
+    },
+    {
+      "name": "nowPlayingMenubar",
+      "title": "Now Playing Menubar",
+      "description": "Shows the currently playing track as a menubar item. Note: it is only able to show the song title if the window is open or minimized. If Tidal is playing, but the song name doesn't appear, please ensure you didn't close the Tidal player window.",
+      "mode": "menu-bar",
+      "interval": "5s"
     }
   ],
   "preferences": [
