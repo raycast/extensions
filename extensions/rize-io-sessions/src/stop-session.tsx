@@ -124,18 +124,9 @@ export default function StopSessionCommand() {
           status: error.response?.status,
           headers: error.response?.headers,
         });
-
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Stop Session Failed",
-          message: `Error ${error.response?.status}: ${error.response?.data?.message || "Unable to stop session"}`,
-        });
+        showFailureToast(error, { title: "Stop Session Failed" });
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Stop Session Failed",
-          message: error instanceof Error ? error.message : String(error),
-        });
+        showFailureToast(error, { title: "Stop Session Failed" });
       }
     }
   };
