@@ -74,8 +74,8 @@
     "dependencies": {
         "@raycast/api": "^1.56.1",
         "@raycast/utils": "^1.10.0",
-        "franc": "^6.2.0",
-        "node-tesseract-ocr": "^2.2.1"
+        "node-tesseract-ocr": "^2.2.1",
+        "raycast-language-detector": "^0.2.3"
     },
     "devDependencies": {
         "@raycast/eslint-config": "1.0.5",

@@ -1,8 +1,6 @@
 # Easy OCR
 
-This extension is used for generating text from screen captured images, and it requires Tesseract binary in order to work!
-
-Latest version features automatic language detection, which helps with recognition of special characters for given language.
+This extension is used for generating text from screen captured images, detect language with Raycast AI or any few other famous libraries, and it requires Tesseract binary in order to work!
 
 ## Tesseract
 Tesseract is open source OCR engine, and it needs to be installed locally on your machine.
@@ -31,6 +29,8 @@ By default, Tesseract supports only English language, but you can install additi
 
 After installing additional languages, you need to update Easy OCR extension settings in Raycast, and set language you want to use by default.
 
+By default, this extension tries to detect language, you can disable that feature in extension options.
+
 
 ## Possible problems
 If you get Tesseract not found error make sure it is installed by running `tesseract -v` in your terminal, and if it's installed, then you need to update its path in Raycast settings.
@@ -45,4 +45,4 @@ and you will get output similar to (depends on how you installed Tesseract):
 
 Copy that value and go to *Raycast settings -> Extensions -> Paste copied value under "Tesseract binary path"*
 
-If you have any feature requests or find any bugs [PM me](https://raycastcommunity.slack.com/app_redirect?channel=@U061RQMECP9) on Raycasts Slack channel.
+If you have any feature requests or find any bugs [PM me](https://github.com/Rafo1994) on GitHub.

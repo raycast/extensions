@@ -2,7 +2,7 @@ import { Clipboard, closeMainWindow, getPreferenceValues, showToast, Toast } fro
 import tesseractOcr from "./ocr";
 import utils from "./utils";
 import takeScreenshot from "./screenshot";
-import { franc } from "franc";
+import { detect, LanguageCodeFormat } from "raycast-language-detector";
 
 export default async function main() {
   const isTesseractInstalled = await utils.isTesseractInstalled();
@@ -31,25 +31,28 @@ export default async function main() {
     text = utils.handleNewLines(text);
 
     let languageUsed = defaultLangCode;
+
     if (!text) {
       await showToast({
         style: Toast.Style.Failure,
-        title: `No text found on image! Language: ${languageUsed}`,
-        message: `No text found on image! Language: ${languageUsed}`,
+        title: `No text found on image!`,
+        message: `No text found on image!`,
       });
       return;
     }
 
-    if (getPreferenceValues<Preferences>().autodetect_lang) {
-      // Detect language
-      const detectedLangCode = franc(text);
+    const autodetectLanguage = await autoDetectedLanguage(text);
 
-      if (utils.isValidLanguage(detectedLangCode) && detectedLangCode !== defaultLangCode) {
-        text = await tesseractOcr(filePath, detectedLangCode);
-        text = utils.handleNewLines(text);
-        languageUsed = detectedLangCode;
-      }
+    if (
+      autodetectLanguage?.languageCode &&
+      utils.isValidLanguage(autodetectLanguage?.languageCode) &&
+      autodetectLanguage?.languageCode !== defaultLangCode
+    ) {
+      text = await tesseractOcr(filePath, autodetectLanguage?.languageCode);
+      text = utils.handleNewLines(text);
     }
+
+    languageUsed = autodetectLanguage?.languageName ?? languageUsed;
 
     await Clipboard.copy(text);
     await showToast({
@@ -64,4 +67,15 @@ export default async function main() {
       message: "Failed to OCR the image!",
     });
   }
+}
+
+async function autoDetectedLanguage(text: string) {
+  if (!getPreferenceValues<Preferences>().autodetect_lang) {
+    return;
+  }
+
+  // Detect language
+  return await detect(text, {
+    languageCodeFormat: LanguageCodeFormat.ISO_639_3,
+  });
 }
