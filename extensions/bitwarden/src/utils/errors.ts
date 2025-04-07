@@ -107,10 +107,29 @@ export const getErrorString = (error: any): string | undefined => {
 
 export type Success<T> = { data: T; error: null };
 export type Failure<E> = { data: null; error: E };
-export type ResultAs<N extends string, T, E = Error> =
+
+export type Result<T, E = Error> = { data: T; error: null } | { data: null; error: E };
+
+export function Ok<T>(data: T) {
+  return { data, error: null } as { data: T; error: null };
+}
+export function Err<E = Error>(error: E) {
+  return { data: null, error } as { data: null; error: E };
+}
+
+/** Same as {@link Result} but with a named data property */
+export type ResultN<N extends string, T, E = Error> =
   | ({ [k in N]: T } & { error: null })
   | ({ [K in N]: null } & { error: E });
-export type Result<T, E = Error> = ResultAs<"data", T, E>;
+
+/** Same as {@link Ok} but with a named data property */
+export function OkN<N extends string, T>(as: N, data: T) {
+  return { [as]: data, error: null } as ResultN<N, T>;
+}
+/** Same as {@link Err} but with a named error property */
+export function ErrN<N extends string, E = Error>(as: N, error: E) {
+  return { [as]: null, error } as { [k in N]: null } & { error: E };
+}
 
 export function tryCatch<T, E = Error>(fn: () => T): Result<T, E>;
 export function tryCatch<T, E = Error>(promise: Promise<T>): Promise<Result<T, E>>;

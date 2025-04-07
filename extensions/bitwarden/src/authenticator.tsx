@@ -18,7 +18,7 @@ import { captureException } from "~/utils/development";
 import { usePromise } from "@raycast/utils";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 import { ActionWithReprompt, DebuggingBugReportingActionSection, VaultActionsSection } from "~/components/actions";
-import { ResultAs as ResultAs, tryCatch } from "~/utils/errors";
+import { ErrN, OkN, ResultN, tryCatch } from "~/utils/errors";
 
 const AuthenticatorComponent = () => (
   <RootErrorBoundary>
@@ -202,7 +202,8 @@ function PasteCodeAction() {
 
 function useActiveTab() {
   return usePromise(async () => {
-    const tabs = await BrowserExtension.getTabs();
+    const { data: tabs, error } = await tryCatch(BrowserExtension.getTabs());
+    if (error) return undefined;
     const activeTab = tabs.find((tab) => tab.active);
     return activeTab ? { ...activeTab, url: new URL(activeTab.url) } : undefined;
   });
@@ -220,15 +221,16 @@ const Algorithms = {
   SHA3_512: "SHA3-512",
 } as const;
 
+type Algorithm = (typeof Algorithms)[keyof typeof Algorithms];
+
 type AuthenticatorOptions = {
   secret: string;
   period: number;
-  algorithm: (typeof Algorithms)[keyof typeof Algorithms];
+  algorithm: Algorithm;
   digits: number;
 };
 
 const authenticator = {
-  cacheKey: "authenticatorTimeTicker",
   parseTotp(totpString: string): AuthenticatorOptions {
     if (totpString.includes("otpauth")) {
       const { data: parsed, error } = tryCatch(() => OTPAuth.URI.parse(totpString));
@@ -247,13 +249,13 @@ const authenticator = {
 
     return { secret: totpString, period: 30, algorithm: "SHA1", digits: 6 };
   },
-  getGenerator(totpString: string): ResultAs<"generator", OTPAuth.TOTP> {
+  getGenerator(totpString: string): ResultN<"generator", OTPAuth.TOTP> {
     try {
       const { data: options, error } = tryCatch(() => authenticator.parseTotp(totpString));
-      if (error) return { generator: null, error: new Error("Invalid key") };
-      return { generator: new OTPAuth.TOTP(options), error: null };
+      if (error) return ErrN("generator", error);
+      return OkN("generator", new OTPAuth.TOTP(options));
     } catch (error) {
-      return { generator: null, error: new Error("Invalid key") };
+      return ErrN("generator", new Error("Invalid key"));
     }
   },
   useCode(item: Item) {
@@ -281,7 +283,7 @@ const authenticator = {
     useEffect(() => {
       if (error) return;
 
-      const evaluate = () => {
+      const setTimeAndCode = () => {
         const timeRemaining = Math.ceil(generator.remaining() / 1000);
         setTimeRemaining(timeRemaining);
 
@@ -294,8 +296,8 @@ const authenticator = {
       // set an initial timeout to ensure the first evaluation is time accurate
       // and then keep evaluating every second
       setTimeout(() => {
-        evaluate();
-        interval = setInterval(evaluate, 1000);
+        setTimeAndCode();
+        interval = setInterval(setTimeAndCode, 1000);
       }, generator.remaining() % 1000);
 
       setCode(generator.generate()); // first generation before the interval starts
