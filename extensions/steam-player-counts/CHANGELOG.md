@@ -1,3 +1,3 @@
-# Test Extension Oliver Changelog
+# First Extension Release
 
 ## [Initial Version] - {PR_MERGE_DATE}
