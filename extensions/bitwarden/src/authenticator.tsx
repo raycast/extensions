@@ -118,13 +118,13 @@ function ListItem({ item }: { item: Item }) {
         icon={icon}
         actions={
           <ActionPanel>
-            {!canGenerate ? (
-              <ConfirmAction onConfirm={() => setCanGenerate(true)} />
-            ) : (
+            {canGenerate ? (
               <>
                 <CopyCodeAction />
                 <PasteCodeAction />
               </>
+            ) : (
+              <ConfirmAction onConfirm={() => setCanGenerate(true)} />
             )}
             <CommonActions />
           </ActionPanel>
