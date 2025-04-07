@@ -24,6 +24,9 @@ export async function getStories(): Promise<CacheEntry["items"]> {
       "User-Agent": `Hacker News Extension, Raycast/${environment.raycastVersion} (${os.type()} ${os.release()})`,
     },
   });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  }
   const { items } = await response.json();
   cache.set(key, JSON.stringify({ timestamp: Date.now(), items }));
 
