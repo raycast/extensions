@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gemini-translate",
+  "title": "Gemini Translate",
+  "description": "Translate and Summarize text using Google Gemini API.",
+  "icon": "extension-icon.png",
+  "author": "yuki_tsuchida",
+  "categories": [
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "geminiApiKey",
+      "title": "Gemini API Key",
+      "description": "Your Google AI Gemini API Key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "geminiModel",
+      "title": "Gemini Model",
+      "description": "Enter the Gemini model to use",
+      "type": "textfield",
+      "required": true,
+      "default": "gemini-2.0-flash"
+    }
+  ],
+  "commands": [
+    {
+      "name": "translate-to-english",
+      "title": "Translate to English (gemini)",
+      "description": "Translate selected/clipboard text to English using Gemini.",
+      "mode": "view",
+      "shortcut": {
+        "modifiers": [
+          "cmd",
+          "shift"
+        ],
+        "key": "e"
+      }
+    },
+    {
+      "name": "translate-to-japanese",
+      "title": "Translate to Japanese (gemini)",
+      "description": "Translate selected/clipboard text to Japanese using Gemini.",
+      "mode": "view",
+      "shortcut": {
+        "modifiers": [
+          "cmd",
+          "shift"
+        ],
+        "key": "j"
+      }
+    },
+    {
+      "name": "summarize-japanese",
+      "title": "Summarize in Japanese (gemini)",
+      "description": "Summarize selected/clipboard text in Japanese using Gemini.",
+      "mode": "view",
+      "shortcut": {
+        "modifiers": [
+          "cmd",
+          "shift"
+        ],
+        "key": "s"
+      }
+    }
+  ],
+  "dependencies": {
+    "@google/generative-ai": "^0.24.0",
+    "@raycast/api": "^1.94.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.14.0",
+    "@types/react": "19.1.0",
+    "eslint": "^9.24.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
