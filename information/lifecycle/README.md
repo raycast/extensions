@@ -61,7 +61,7 @@ export default function Command(props: LaunchProps) {
 | :--- | :--- | :--- |
 | arguments<mark style="color:red;">*</mark> | Use these values to populate the initial state for your command. | <code>[Arguments](arguments.md#arguments)</code> |
 | launchType<mark style="color:red;">*</mark> | The type of launch for the command (user initiated or background). | <code>[LaunchType](../../api-reference/environment.md#launchtype)</code> |
-| draftValues | When a user enters the command via a draft, this object will contain the user inputs that were saved as a draft. Use its values to populate the initial state for your Form. | <code>[Form.Values](../../api-reference/user-interface/form.md#form.values)</code> |
+| draftValues | When a user enters the command via a draft, this object will contain the user inputs that were saved as a draft.  Use its values to populate the initial state for your Form. | <code>[Form.Values](../../api-reference/user-interface/form.md#form.values)</code> |
 | fallbackText | When the command is launched as a fallback command, this string contains the text of the root search. | <code>string</code> |
 | launchContext | When the command is launched programmatically via `launchCommand`, this object contains the value passed to `context`. | <code>[LaunchContext](../../api-reference/command.md#launchcontext)</code> |
 

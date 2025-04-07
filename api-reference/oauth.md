@@ -334,10 +334,10 @@ The options for creating a new [PKCEClient](#oauth.pkceclient).
 | Property | Description | Type |
 | :--- | :--- | :--- |
 | providerName<mark style="color:red;">*</mark> | The name of the provider, displayed in the OAuth overlay. | <code>string</code> |
-| redirectMethod<mark style="color:red;">*</mark> | The redirect method for the OAuth flow. Make sure to set this to the correct method for the provider, see [OAuth.RedirectMethod](oauth.md#oauth.redirectmethod) for more information. | <code>[OAuth.RedirectMethod](oauth.md#oauth.redirectmethod)</code> |
-| description | An optional description, shown in the OAuth overlay. You can use this to customize the message for the end user, for example for handling scope changes or other migrations. Raycast shows a default message if this is not configured. | <code>string</code> |
-| providerIcon | An icon displayed in the OAuth overlay. Make sure to provide at least a size of 64x64 pixels. | <code>[Image.ImageLike](user-interface/icons-and-images.md#image.imagelike)</code> |
-| providerId | An optional ID for associating the client with a provider. Only set this if you use multiple different clients in your extension. | <code>string</code> |
+| redirectMethod<mark style="color:red;">*</mark> | The redirect method for the OAuth flow.  Make sure to set this to the correct method for the provider, see OAuth.RedirectMethod for more information. | <code>[OAuth.RedirectMethod](oauth.md#oauth.redirectmethod)</code> |
+| description | An optional description, shown in the OAuth overlay.  You can use this to customize the message for the end user, for example for handling scope changes or other migrations.  Raycast shows a default message if this is not configured. | <code>string</code> |
+| providerIcon | An icon displayed in the OAuth overlay.  Make sure to provide at least a size of 64x64 pixels. | <code>[Image.ImageLike](user-interface/icons-and-images.md#image.imagelike)</code> |
+| providerId | An optional ID for associating the client with a provider.  Only set this if you use multiple different clients in your extension. | <code>string</code> |
 
 ### OAuth.RedirectMethod
 
@@ -359,8 +359,8 @@ The options for an authorization request via [authorizationRequest](#oauth.autho
 | :--- | :--- | :--- |
 | clientId<mark style="color:red;">*</mark> | The client ID of the configured OAuth app. | <code>string</code> |
 | endpoint<mark style="color:red;">*</mark> | The URL to the authorization endpoint for the OAuth provider. | <code>string</code> |
-| scope<mark style="color:red;">*</mark> | A space-delimited list of scopes for identifying the resources to access on the user's behalf. The scopes are typically shown to the user on the provider's consent screen in the browser. Note that some providers require the same scopes be configured in the registered OAuth app. | <code>string</code> |
-| extraParameters | Optional additional parameters for the authorization request. Note that some providers require additional parameters, for example to obtain long-lived refresh tokens. | <code>Record&lt;string, string></code> |
+| scope<mark style="color:red;">*</mark> | A space-delimited list of scopes for identifying the resources to access on the user's behalf.  The scopes are typically shown to the user on the provider's consent screen in the browser.  Note that some providers require the same scopes be configured in the registered OAuth app. | <code>string</code> |
+| extraParameters | Optional additional parameters for the authorization request.  Note that some providers require additional parameters, for example to obtain long-lived refresh tokens. | <code>{ [string]: string }</code> |
 
 ### OAuth.AuthorizationRequestURLParams
 
@@ -385,7 +385,7 @@ Can be used as direct input to [authorize](#oauth.pkceclient-authorize), or to e
 | codeVerifier<mark style="color:red;">*</mark> | The PKCE `code_verifier` value. | <code>string</code> |
 | redirectURI<mark style="color:red;">*</mark> | The OAuth `redirect_uri` value. | <code>string</code> |
 | state<mark style="color:red;">*</mark> | The OAuth `state` value. | <code>string</code> |
-| toURL<mark style="color:red;">*</mark> | Constructs the full authorization URL. | <code>() => string</code> |
+| toURL<mark style="color:red;">*</mark> |  | <code>() => string</code> |
 
 #### Methods
 
@@ -418,12 +418,12 @@ Securely store a token set via [setTokens](#oauth.pkceclient-settokens) and retr
 | Property | Description | Type |
 | :--- | :--- | :--- |
 | accessToken<mark style="color:red;">*</mark> | The access token returned by an OAuth token request. | <code>string</code> |
-| updatedAt<mark style="color:red;">*</mark> | The date when the token set was stored via [OAuth.PKCEClient.setTokens](oauth.md#oauth.pkceclient). | <code>Date</code> |
-| isExpired<mark style="color:red;">*</mark> | A convenience method for checking whether the access token has expired. The method factors in some seconds of "buffer", so it returns true a couple of seconds before the actual expiration time. This requires the `expiresIn` parameter to be set. | <code>() => boolean</code> |
+| updatedAt<mark style="color:red;">*</mark> | The date when the token set was stored via OAuth.PKCEClient.setTokens. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> |
+| isExpired<mark style="color:red;">*</mark> |  | <code>() => boolean</code> |
 | expiresIn | An optional expires value (in seconds) returned by an OAuth token request. | <code>number</code> |
 | idToken | An optional id token returned by an identity request (e.g. /me, Open ID Connect). | <code>string</code> |
 | refreshToken | An optional refresh token returned by an OAuth token request. | <code>string</code> |
-| scope | The optional space-delimited list of scopes returned by an OAuth token request. You can use this to compare the currently stored access scopes against new access scopes the extension might require in a future version, and then ask the user to re-authorize with new scopes. | <code>string</code> |
+| scope | The optional space-delimited list of scopes returned by an OAuth token request.  You can use this to compare the currently stored access scopes against new access scopes the extension might require in a future version,  and then ask the user to re-authorize with new scopes. | <code>string</code> |
 
 #### Methods
 

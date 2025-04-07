@@ -143,7 +143,7 @@ export default async function Command() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| options<mark style="color:red;">*</mark> |  | <code>{ id: string }</code> or <code>{ bounds: { position?: { x?: number; y?: number }; size?: { height?: number; width?: number } }; desktopId?: string }</code> or <code>{ id: string }</code> or <code>{ bounds: "fullscreen" }</code> |
+| options<mark style="color:red;">*</mark> |  | <code>{ id: string }</code> or <code>{ bounds: { position?: { x?: number; y?: number }; size?: { height?: number; width?: number } }; desktopId?: string }</code> or <code>{ bounds: "fullscreen" }</code> |
 
 #### Return
 

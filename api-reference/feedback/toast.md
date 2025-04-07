@@ -165,6 +165,6 @@ The options to create a [Toast](#toast) Action.
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| title<mark style="color:red;">*</mark> | The title of the action. | <code>string</code> |
 | onAction<mark style="color:red;">*</mark> | A callback called when the action is triggered. | <code>(toast: [Toast](toast.md#toast)) => void</code> |
+| title<mark style="color:red;">*</mark> | The title of the action. | <code>string</code> |
 | shortcut | The keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> |

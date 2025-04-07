@@ -261,12 +261,12 @@ Optionally add a [Form.LinkAccessory](form.md#form.linkaccessory) in the right-h
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| actions | A reference to an [ActionPanel](action-panel.md#actionpanel). | <code>React.ReactNode</code> | - |
+| actions | A reference to an ActionPanel. | <code>React.ReactNode</code> | - |
 | children | The Form.Item elements of the form. | <code>React.ReactNode</code> | - |
-| enableDrafts | Defines whether the Form.Items values will be preserved when user exits the screen. | <code>boolean</code> | `false` |
-| isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
-| navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
-| searchBarAccessory | [Form.LinkAccessory](form.md#form.linkaccessory) that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;[Form.LinkAccessory.Props](form.md#props), string></code> | - |
+| enableDrafts | Defines whether the Form.Items values will be preserved when user exits the screen. | <code>boolean</code> | - |
+| isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | - |
+| navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | - |
+| searchBarAccessory | Form.LinkAccessory that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;[Form.LinkAccessory.Props](form.md#props), string></code> | - |
 
 ### Form.TextField
 
@@ -329,18 +329,18 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>string</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
+| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 | placeholder | Placeholder text shown in the text field. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | value | The current value of the item. | <code>string</code> | - |
-| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
-| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
-| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -410,18 +410,18 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>string</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
+| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 | placeholder | Placeholder text shown in the password field. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | value | The current value of the item. | <code>string</code> | - |
-| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
-| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
-| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -494,19 +494,19 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
-| enableMarkdown | Whether markdown will be highlighted in the TextArea or not. When enabled, markdown shortcuts starts to work for the TextArea (pressing `⌘ + B` will add `**bold**` around the selected text, `⌘ + I` will make the selected text italic, etc.) | <code>boolean</code> | `false` |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>string</code> | - |
+| enableMarkdown | Whether markdown will be highlighted in the TextArea or not.  When enabled, markdown shortcuts starts to work for the TextArea (pressing `⌘ + B` will add `**bold**` around the selected text, `⌘ + I` will make the selected text italic, etc.) | <code>boolean</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
+| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 | placeholder | Placeholder text shown in the text area. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | value | The current value of the item. | <code>string</code> | - |
-| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
-| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
-| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -576,18 +576,18 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
 | label<mark style="color:red;">*</mark> | The label displayed on the right side of the checkbox. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>boolean</code> | - |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>boolean</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
-| storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
-| title | The title displayed on the left side of the item. | <code>string</code> | - |
-| value | The current value of the item. | <code>boolean</code> | - |
 | onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;boolean>) => void</code> | - |
 | onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: boolean) => void</code> | - |
 | onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;boolean>) => void</code> | - |
+| storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
+| title | The title displayed on the left side of the item. | <code>string</code> | - |
+| value | The current value of the item. | <code>boolean</code> | - |
 
 #### Methods (Imperative API)
 
@@ -657,20 +657,20 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>Date</code> | - |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
-| max | The maximum date (inclusive) allowed for selection. | <code>Date</code> | - |
-| min | The minimum date (inclusive) allowed for selection. | <code>Date</code> | - |
+| max | The maximum date (inclusive) allowed for selection.    - If the PickDate type is `Type.Date`, only the full day date will be considered for comparison, ignoring the time components of the Date object.  - If the PickDate type is `Type.DateTime`, both date and time components will be considered for comparison.    The date should be a JavaScript Date object. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> | - |
+| min | The minimum date (inclusive) allowed for selection.    - If the PickDate type is `Type.Date`, only the full day date will be considered for comparison, ignoring the time components of the Date object.  - If the PickDate type is `Type.DateTime`, both date and time components will be considered for comparison.    The date should be a JavaScript Date object. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)>) => void</code> | - |
+| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)>) => void</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
-| type | Indicates what types of date components can be picked | <code>[Form.DatePicker.Type](form.md#form.datepicker.type)</code> | - |
-| value | The current value of the item. | <code>Date</code> | - |
-| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;Date \| null>) => void</code> | - |
-| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: Date \| null) => void</code> | - |
-| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;Date \| null>) => void</code> | - |
+| type | Indicates what types of date components can be picked    Defaults to Form.DatePicker.Type.DateTime | <code>[Form.DatePicker.Type](form.md#form.datepicker.type)</code> | - |
+| value | The current value of the item. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> | - |
 
 #### Methods (Imperative API)
 
@@ -788,23 +788,23 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
-| children | Sections or items. If [Form.Dropdown.Item](form.md#form.dropdown.item) elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
-| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
+| children | Sections or items. If Form.Dropdown.Item elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>string</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the  items. When `false`, the extension needs to take care of the filtering.    You can further define how native filtering orders sections by setting an object with a `keepSectionOrder` property:  When `true`, ensures that Raycast filtering maintains the section order as defined in the extension.  When `false`, filtering may change the section order depending on the ranking values of items. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
-| isLoading | Indicates whether a loading indicator should be shown or hidden next to the search bar | <code>boolean</code> | `false` |
-| placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | `"Search…"` |
-| storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
-| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | `false` |
-| title | The title displayed on the left side of the item. | <code>string</code> | - |
-| value | The current value of the item. | <code>string</code> | - |
+| isLoading | Indicates whether a loading indicator should be shown or hidden next to the search bar | <code>boolean</code> | - |
 | onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 | onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
 | onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 | onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
+| placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | - |
+| storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
+| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events.  Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | - |
+| title | The title displayed on the left side of the item. | <code>string</code> | - |
+| value | The current value of the item. | <code>string</code> | - |
 
 #### Methods (Imperative API)
 
@@ -844,9 +844,9 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title displayed for the item. | <code>string</code> | - |
-| value<mark style="color:red;">*</mark> | Value of the dropdown item. Make sure to assign each unique value for each item. | <code>string</code> | - |
+| value<mark style="color:red;">*</mark> | Value of the dropdown item.  Make sure to assign each unique value for each item. | <code>string</code> | - |
 | icon | A optional icon displayed for the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
-| keywords | An optional property used for providing additional indexable strings for search. When filtering the items in Raycast, the keywords will be searched in addition to the title. | <code>string[]</code> | The title of its section if any |
+| keywords | An optional property used for providing additional indexable strings for search.  When filtering the items in Raycast, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
 
 ### Form.Dropdown.Section
 
@@ -963,19 +963,19 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
 | children | The list of tags. | <code>React.ReactNode</code> | - |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string[]</code> | - |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>string[]</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
+| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string[]) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
 | placeholder | Placeholder text shown in the token field. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | value | The current value of the item. | <code>string[]</code> | - |
-| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
-| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string[]) => void</code> | - |
-| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -1017,7 +1017,7 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The display title of the tag. | <code>string</code> | - |
-| value<mark style="color:red;">*</mark> | Value of the tag. Make sure to assign unique value for each item. | <code>string</code> | - |
+| value<mark style="color:red;">*</mark> | Value of the tag.  Make sure to assign unique value for each item. | <code>string</code> | - |
 | icon | An icon to show in the tag. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 
 ### Form.Separator
@@ -1186,21 +1186,21 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
-| allowMultipleSelection | Indicates whether the user can select multiple items or only one. | <code>boolean</code> | `true` |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
+| allowMultipleSelection | Indicates whether the user can select multiple items or only one. | <code>boolean</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
-| canChooseDirectories | Indicates whether it's possible to choose a directory. | <code>boolean</code> | `false` |
-| canChooseFiles | Indicates whether it's possible to choose a file. | <code>boolean</code> | `true` |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string[]</code> | - |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| canChooseDirectories | Indicates whether it's possible to choose a directory. | <code>boolean</code> | - |
+| canChooseFiles | Indicates whether it's possible to choose a file. | <code>boolean</code> | - |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>string[]</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
-| showHiddenFiles | Indicates whether the file picker displays files that are normally hidden from the user. | <code>boolean</code> | `false` |
-| storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
-| title | The title displayed on the left side of the item. | <code>string</code> | - |
-| value | The current value of the item. | <code>string[]</code> | - |
 | onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
 | onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string[]) => void</code> | - |
 | onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
+| showHiddenFiles | Indicates whether the file picker displays files that are normally hidden from the user. | <code>boolean</code> | - |
+| storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
+| title | The title displayed on the left side of the item. | <code>string</code> | - |
+| value | The current value of the item. | <code>string[]</code> | - |
 
 #### Methods (Imperative API)
 

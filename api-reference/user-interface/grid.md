@@ -391,23 +391,23 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| actions | A reference to an [ActionPanel](action-panel.md#actionpanel). It will only be shown when there aren't any children. | <code>React.ReactNode</code> | - |
-| aspectRatio | Aspect ratio for the [Grid.Item](grid.md#grid.item) elements. Defaults to 1. | <code>"1"</code> or <code>"3/2"</code> or <code>"2/3"</code> or <code>"4/3"</code> or <code>"3/4"</code> or <code>"16/9"</code> or <code>"9/16"</code> | - |
-| children | Grid sections or items. If [Grid.Item](grid.md#grid.item) elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
-| columns | Column count for the grid's sections. Minimum value is 1, maximum value is 8. | <code>number</code> | `5` |
-| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
-| fit | Fit for the [Grid.Item](grid.md#grid.item) element content. Defaults to "contain" | <code>[Grid.Fit](grid.md#grid.fit)</code> | - |
-| inset | Indicates how much space there should be between a [Grid.Item](grid.md#grid.item)s' content and its borders. The absolute value depends on the value of the `itemSize` prop. | <code>[Grid.Inset](grid.md#grid.inset)</code> | - |
-| isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
-| navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
-| pagination | Configuration for pagination | <code>{ hasMore: boolean; pageSize: number; onLoadMore: () => void }</code> | - |
-| searchBarAccessory | [Grid.Dropdown](grid.md#grid.dropdown) that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;[List.Dropdown.Props](list.md#props), string></code> | - |
-| searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | `"Search…"` |
+| actions | A reference to an ActionPanel. It will only be shown when there aren't any children. | <code>React.ReactNode</code> | - |
+| aspectRatio | Aspect ratio for the Grid.Item elements. Defaults to 1. | <code>"1"</code> or <code>"3/2"</code> or <code>"2/3"</code> or <code>"4/3"</code> or <code>"3/4"</code> or <code>"16/9"</code> or <code>"9/16"</code> | - |
+| children | Grid sections or items. If Grid.Item elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
+| columns | Column count for the grid's sections. Minimum value is 1, maximum value is 8. | <code>number</code> | - |
+| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the  items. When `false`, the extension needs to take care of the filtering.    You can further define how native filtering orders sections by setting an object with a `keepSectionOrder` property:  When `true`, ensures that Raycast filtering maintains the section order as defined in the extension.  When `false`, filtering may change the section order depending on the ranking values of items. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | - |
+| fit | Fit for the Grid.Item element content. Defaults to "contain" | <code>[Grid.Fit](grid.md#grid.fit)</code> | - |
+| inset | Indicates how much space there should be between a Grid.Items' content and its borders.  The absolute value depends on the value of the `itemSize` prop. | <code>[Grid.Inset](grid.md#grid.inset)</code> | - |
+| isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | - |
+| navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | - |
+| onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
+| onSelectionChange | Callback triggered when the item selection in the grid changes.    When the received id is `null`, it means that all items have been filtered out  and that there are no item selected | <code>(id: string) => void</code> | - |
+| pagination | Configuration for pagination | <code>{ hasMore: boolean; onLoadMore: () => void; pageSize: number }</code> | - |
+| searchBarAccessory | Grid.Dropdown that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;[List.Dropdown.Props](list.md#props), string></code> | - |
+| searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | - |
 | searchText | The text that will be displayed in the search bar. | <code>string</code> | - |
 | selectedItemId | Selects the item with the specified id. | <code>string</code> | - |
-| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | `false` |
-| onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
-| onSelectionChange | Callback triggered when the item selection in the grid changes. | <code>(id: string) => void</code> | - |
+| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events.  Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | - |
 
 ### Grid.Dropdown
 
@@ -460,16 +460,16 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | tooltip<mark style="color:red;">*</mark> | Tooltip displayed when hovering the dropdown. | <code>string</code> | - |
 | children | Dropdown sections or items. If Dropdown.Item elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
-| defaultValue | The default value of the dropdown. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
-| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
+| defaultValue | The default value of the dropdown.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    **If you're using `storeValue` and configured it as `true` _and_ a Dropdown.Item with the same value exists, then it will be selected.**    **If you configure `value` at the same time as `defaultValue`, the `value` will have precedence over `defaultValue`.** | <code>string</code> | - |
+| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the  items. When `false`, the extension needs to take care of the filtering.    You can further define how native filtering orders sections by setting an object with a `keepSectionOrder` property:  When `true`, ensures that Raycast filtering maintains the section order as defined in the extension.  When `false`, filtering may change the section order depending on the ranking values of items. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | - |
 | id | ID of the dropdown. | <code>string</code> | - |
-| isLoading | Indicates whether a loading indicator should be shown or hidden next to the search bar | <code>boolean</code> | `false` |
-| placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | `"Search…"` |
-| storeValue | Indicates whether the value of the dropdown should be persisted after selection, and restored next time the dropdown is rendered. | <code>boolean</code> | - |
-| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | `false` |
-| value | The currently value of the dropdown. | <code>string</code> | - |
+| isLoading | Indicates whether a loading indicator should be shown or hidden next to the search bar | <code>boolean</code> | - |
 | onChange | Callback triggered when the dropdown selection changes. | <code>(newValue: string) => void</code> | - |
 | onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
+| placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | - |
+| storeValue | Indicates whether the value of the dropdown should be persisted after selection, and restored next time the dropdown is rendered. | <code>boolean</code> | - |
+| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events.  Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | - |
+| value | The currently value of the dropdown. | <code>string</code> | - |
 
 ### Grid.Dropdown.Item
 
@@ -502,9 +502,9 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title displayed for the item. | <code>string</code> | - |
-| value<mark style="color:red;">*</mark> | Value of the dropdown item. Make sure to assign each unique value for each item. | <code>string</code> | - |
+| value<mark style="color:red;">*</mark> | Value of the dropdown item.  Make sure to assign each unique value for each item. | <code>string</code> | - |
 | icon | An optional icon displayed for the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
-| keywords | An optional property used for providing additional indexable strings for search. When filtering the items in Raycast, the keywords will be searched in addition to the title. | <code>string[]</code> | The title of its section if any |
+| keywords | An optional property used for providing additional indexable strings for search.  When filtering the items in Raycast, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
 
 ### Grid.Dropdown.Section
 
@@ -590,7 +590,7 @@ export default function CommandWithCustomEmptyView() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| actions | A reference to an [ActionPanel](action-panel.md#actionpanel). | <code>React.ReactNode</code> | - |
+| actions | A reference to an ActionPanel. | <code>React.ReactNode</code> | - |
 | description | An optional description for why the empty view is shown. | <code>string</code> | - |
 | icon | An icon displayed in the center of the EmptyView. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 | title | The main title displayed for the Empty View. | <code>string</code> | - |
@@ -620,12 +620,12 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| content<mark style="color:red;">*</mark> | An image or color, optionally with a tooltip, representing the content of the grid item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>{ color: [Color.ColorLike](colors.md#color.colorlike) }</code> or <code>{ tooltip: string; value: [Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>{ color: [Color.ColorLike](colors.md#color.colorlike) } }</code> | - |
-| accessory | An optional [Grid.Item.Accessory](grid.md#grid.item.accessory) item displayed underneath a [Grid.Item](grid.md#grid.item). | <code>[Grid.Item.Accessory](grid.md#grid.item.accessory)</code> | - |
-| actions | An [ActionPanel](action-panel.md#actionpanel) that will be updated for the selected grid item. | <code>React.ReactNode</code> | - |
-| id | ID of the item. This string is passed to the `onSelectionChange` handler of the [Grid](grid.md#grid) when the item is selected. Make sure to assign each item a unique ID or a UUID will be auto generated. | <code>string</code> | - |
-| keywords | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
-| quickLook | Optional information to preview files with Quick Look. Toggle the preview ith [Action.ToggleQuickLook](actions.md#action.togglequicklook). | <code>{ name?: string; path: string }</code> | - |
+| content<mark style="color:red;">*</mark> | An image or color, optionally with a tooltip, representing the content of the grid item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>{ color: [Color.ColorLike](colors.md#color.colorlike) }</code> or <code>{ tooltip: string; value: Image.ImageLike</code> or <code>{ color: Color.ColorLike; } }</code> | - |
+| accessory | An optional Grid.Item.Accessory item displayed underneath a Grid.Item. | <code>[Grid.Item.Accessory](grid.md#grid.item.accessory)</code> | - |
+| actions | An ActionPanel that will be updated for the selected grid item. | <code>React.ReactNode</code> | - |
+| id | ID of the item. This string is passed to the `onSelectionChange` handler of the Grid when the item is selected.  Make sure to assign each item a unique ID or a UUID will be auto generated. | <code>string</code> | - |
+| keywords | An optional property used for providing additional indexable strings for search.  When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
+| quickLook | Optional information to preview files with Quick Look. Toggle the preview ith Action.ToggleQuickLook. | <code>{ name?: string; path: "fs".PathLike }</code> | - |
 | subtitle | An optional subtitle displayed below the title. | <code>string</code> | - |
 | title | An optional title displayed below the content. | <code>string</code> | - |
 
@@ -696,11 +696,11 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| aspectRatio | Aspect ratio for the [Grid.Item](grid.md#grid.item) elements. Defaults to 1. | <code>"1"</code> or <code>"3/2"</code> or <code>"2/3"</code> or <code>"4/3"</code> or <code>"3/4"</code> or <code>"16/9"</code> or <code>"9/16"</code> | - |
-| children | The [Grid.Item](grid.md#grid.item) elements of the section. | <code>React.ReactNode</code> | - |
-| columns | Column count for the section. Minimum value is 1, maximum value is 8. | <code>number</code> | `5` |
-| fit | Fit for the [Grid.Item](grid.md#grid.item) element content. Defaults to "contain" | <code>[Grid.Fit](grid.md#grid.fit)</code> | - |
-| inset | Inset for the [Grid.Item](grid.md#grid.item) element content. Defaults to "none". | <code>[Grid.Inset](grid.md#grid.inset)</code> | - |
+| aspectRatio | Aspect ratio for the Grid.Item elements. Defaults to 1. | <code>"1"</code> or <code>"3/2"</code> or <code>"2/3"</code> or <code>"4/3"</code> or <code>"3/4"</code> or <code>"16/9"</code> or <code>"9/16"</code> | - |
+| children | The Grid.Item elements of the section. | <code>React.ReactNode</code> | - |
+| columns | Column count for the section. Minimum value is 1, maximum value is 8. | <code>number</code> | - |
+| fit | Fit for the Grid.Item element content. Defaults to "contain" | <code>[Grid.Fit](grid.md#grid.fit)</code> | - |
+| inset | Inset for the Grid.Item element content. Defaults to "none". | <code>[Grid.Inset](grid.md#grid.inset)</code> | - |
 | subtitle | An optional subtitle displayed next to the title of the section. | <code>string</code> | - |
 | title | Title displayed above the section. | <code>string</code> | - |
 

@@ -162,7 +162,7 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | children | `MenuBarExtra.Item`s, `MenuBarExtra.Submenu`s, `MenuBarExtra.Separator` or a mix of either. | <code>React.ReactNode</code> | - |
 | icon | The icon that is displayed in the menu bar. | <code>[Image.ImageLike](user-interface/icons-and-images.md#image.imagelike)</code> | - |
-| isLoading | Indicates to Raycast that it should not unload the command, as it is still executing. If you set make use of `isLoading`, you need to make sure you set it to `false` at the end of the task you are executing (such as an API call), so Raycast can then unload the command. | <code>boolean</code> | `false` |
+| isLoading | Indicates to Raycast that it should not unload the command, as it is still executing. If you set make use of `isLoading`, you need to make sure you set it to `false` at the end of the task you are executing (such as an API call), so Raycast can then unload the command. | <code>boolean</code> | - |
 | title | The string that is displayed in the menu bar. | <code>string</code> | - |
 | tooltip | A tooltip to display when the cursor hovers the item in the menu bar. | <code>string</code> | - |
 
@@ -269,12 +269,12 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The main title displayed for this item. | <code>string</code> | - |
-| alternate | A [MenuBarExtra.Item](menu-bar-commands.md#menubarextra.item) to be displayed when a user presses the ⌥ (opt) key. | <code>ReactElement&lt;[MenuBarExtra.Item.Props](menu-bar-commands.md#props), string></code> | - |
+| alternate | A MenuBarExtra.Item to be displayed when a user presses the ⌥ (opt) key. | <code>ReactElement&lt;[MenuBarExtra.Item.Props](menu-bar-commands.md#props)></code> | - |
 | icon | An optional icon for this item. | <code>[Image.ImageLike](user-interface/icons-and-images.md#image.imagelike)</code> | - |
+| onAction | An action handler called when the user clicks the item. | <code>(event: [MenuBarExtra.ActionEvent](menu-bar-commands.md#menubarextra.actionevent)) => void</code> | - |
 | shortcut | A shortcut used to invoke this item when its parent menu is open. | <code>[Keyboard.Shortcut](keyboard.md#keyboard.shortcut)</code> | - |
 | subtitle | The subtitle displayed for this item. | <code>string</code> | - |
 | tooltip | A tooltip to display when the cursor hovers the item. | <code>string</code> | - |
-| onAction | An action handler called when the user clicks the item. | <code>(event: [MenuBarExtra.ActionEvent](menu-bar-commands.md#menubarextra.actionevent)) => void</code> | - |
 
 ### MenuBarExtra.Submenu
 
@@ -382,7 +382,7 @@ An interface describing Action events in callbacks.
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| type<mark style="color:red;">*</mark> | A type of the action event | <code>"left-click"</code> or <code>"right-click"</code> |
+| type<mark style="color:red;">*</mark> | A type of the action event    * `left-click` is a left mouse click on the MenuBarExtra.Item or a Keyboard.Shortcut  * `right-click` is a right mouse click on the MenuBarExtra.Item | <code>"left-click"</code> or <code>"right-click"</code> |
 
 #### Example
 

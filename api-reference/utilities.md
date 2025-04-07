@@ -50,7 +50,7 @@ export default async function Command() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| path | The path of the file or folder to get the applications for. If no path is specified, all installed applications are returned. | <code>[PathLike](utilities.md#pathlike)</code> |
+| path | The path of the file or folder to get the applications for. If no path is specified, all installed applications are returned. | <code>"fs".PathLike</code> |
 
 #### Return
 
@@ -81,7 +81,7 @@ export default async function Command() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| path<mark style="color:red;">*</mark> | The path of the file or folder to get the default application for. | <code>[PathLike](utilities.md#pathlike)</code> |
+| path<mark style="color:red;">*</mark> | The path of the file or folder to get the default application for. | <code>"fs".PathLike</code> |
 
 #### Return
 
@@ -138,7 +138,7 @@ export default async function Command() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| path<mark style="color:red;">*</mark> | The path to show in the Finder. | <code>[PathLike](utilities.md#pathlike)</code> |
+| path<mark style="color:red;">*</mark> | The path to show in the Finder. | <code>"fs".PathLike</code> |
 
 #### Return
 
@@ -173,7 +173,7 @@ export default async function Command() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| path<mark style="color:red;">*</mark> |  | <code>[PathLike](utilities.md#pathlike)</code> or <code>[PathLike](utilities.md#pathlike)[]</code> |
+| path<mark style="color:red;">*</mark> | The item or items to move to the trash. | <code>"fs".PathLike</code> or <code>"fs".PathLike[]</code> |
 
 #### Return
 
@@ -204,7 +204,7 @@ export default async function Command() {
 | Name | Description | Type |
 | :--- | :--- | :--- |
 | target<mark style="color:red;">*</mark> | The file, folder or URL to open. | <code>string</code> |
-| application | The application name to use for opening the file. If no application is specified, the default application as determined by the system is used to open the specified file. Note that you can use the application name, app identifier, or absolute path to the app. | <code>string</code> or <code>[Application](utilities.md#application)</code> |
+| application | The application name to use for opening the file. If no application is specified, the default application as determined by the system  is used to open the specified file. Note that you can use the application name, app identifier, or absolute path to the app. | <code>string</code> or <code>[Application](utilities.md#application)</code> |
 
 #### Return
 
@@ -246,7 +246,7 @@ export default async function Command() {
 | Name | Description | Type |
 | :--- | :--- | :--- |
 | target<mark style="color:red;">*</mark> | The file, folder or URL to open. | <code>string</code> |
-| application | The application name to use for opening the file. If no application is specified, the default application as determined by the system is used to open the specified file. Note that you can use the application name, app identifier, or absolute path to the app. | <code>string</code> or <code>[Application](utilities.md#application)</code> |
+| application | The application name to use for opening the file. If no application is specified, the default application as determined by the system  is used to open the specified file. Note that you can use the application name, app identifier, or absolute path to the app. | <code>string</code> or <code>[Application](utilities.md#application)</code> |
 
 ## Types
 

@@ -166,8 +166,8 @@ The options for creating a new Cache.
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| capacity | The capacity in bytes. If the stored data exceeds the capacity, the least recently used data is removed. The default capacity is 10 MB. | <code>number</code> |
-| namespace | If set, the Cache will be namespaced via a subdirectory. This can be useful to separate the caches for individual commands of an extension. By default, the cache is shared between the commands of an extension. | <code>string</code> |
+| capacity | The capacity in bytes. If the stored data exceeds the capacity, the least recently used data is removed.  The default capacity is 10 MB. | <code>number</code> |
+| namespace | If set, the Cache will be namespaced via a subdirectory.  This can be useful to separate the caches for individual commands of an extension.  By default, the cache is shared between the commands of an extension. | <code>string</code> |
 
 ### Cache.Subscriber
 

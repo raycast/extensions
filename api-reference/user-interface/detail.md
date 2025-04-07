@@ -42,11 +42,11 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| actions | A reference to an [ActionPanel](action-panel.md#actionpanel). | <code>React.ReactNode</code> | - |
-| isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
+| actions | A reference to an ActionPanel. | <code>React.ReactNode</code> | - |
+| isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | - |
 | markdown | The CommonMark string to be rendered. | <code>string</code> | - |
 | metadata | The `Detail.Metadata` to be rendered in the right side area | <code>React.ReactNode</code> | - |
-| navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
+| navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | - |
 
 {% hint style="info" %}
 You can specify custom image dimensions by adding a `raycast-width` and `raycast-height` query string to the markdown image. For example: `![Image Title](example.png?raycast-width=250&raycast-height=250)`
@@ -152,7 +152,7 @@ export default function Main() {
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of the item. | <code>string</code> | - |
 | icon | An icon to illustrate the value of the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
-| text | The text value of the item. Specifying `color` will display the text in the provided color. Defaults to [Color.SecondaryText](colors.md#color). | <code>string</code> or <code>{ color?: [Color](colors.md#color); value: string }</code> | - |
+| text | The text value of the item.  Specifying `color` will display the text in the provided color. Defaults to Color.PrimaryText. | <code>string</code> or <code>{ color?: [Color](colors.md#color); value: string }</code> | - |
 
 ### Detail.Metadata.Link
 
@@ -251,8 +251,8 @@ A Tag in a `Detail.Metadata.TagList`.
 | :--- | :--- | :--- | :--- |
 | color | Changes the text color to the provided color and sets a transparent background with the same color. | <code>[Color.ColorLike](colors.md#color.colorlike)</code> | - |
 | icon | The optional icon tag icon. Required if the tag has no text. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
-| text | The optional tag text. Required if the tag has no icon. | <code>string</code> | - |
 | onAction | Callback that is triggered when the item is clicked. | <code>() => void</code> | - |
+| text | The optional tag text. Required if the tag has no icon. | <code>string</code> | - |
 
 ### Detail.Metadata.Separator
 

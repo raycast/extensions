@@ -131,7 +131,7 @@ export default async function main() {
 | Name | Description | Type |
 | :--- | :--- | :--- |
 | prompt<mark style="color:red;">*</mark> | The prompt to ask the AI. | <code>string</code> |
-| options | Options to control which and how the AI model should behave.  | <code>AI.AskOptions</code> |
+| options | Options to control which and how the AI model should behave. | <code>AI.AskOptions</code> |
 
 #### Return
 
@@ -166,7 +166,8 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 | OpenAI_o1                         | OpenAI o1 is an advanced reasoning model designed to tackle complex problems in science, coding, mathematics, and similar fields.                                                                                            |
 | OpenAI_o3-mini                    | OpenAI o3-mini is a fast and powerful reasoning model optimized for STEM tasks like science, math, and coding. It offers advanced features like web search making it ideal for complex problem-solving with reduced latency. |
 | Anthropic_Claude_Haiku            | Claude 3.5 Haiku is Anthropic's fastest model, with a large context window that makes it ideal for analyzing code, documents, or large amounts of text.                                                                      |
-| Anthropic_Claude_Sonnet           | Claude 3.5 Sonnet from Anthropic has enhanced intelligence with increased speed. It excels at complex tasks like visual reasoning or workflow orchestrations. Currently points to claude-3-5-sonnet-20241022                 |
+| Anthropic_Claude_Sonnet           | Claude 3.5 Sonnet from Anthropic has enhanced intelligence with increased speed. It excels at complex tasks like visual reasoning or workflow orchestrations. Currently points to claude-3-5-sonnet-20241022.                |
+| Anthropic_Claude_Sonnet_3.7       | Claude 3.7 Sonnet is Anthropic's most intelligent model and the first hybrid reasoning model on the market.                                                                                                                  |
 | Anthropic_Claude_Opus             | Claude 3 Opus is Anthropic's intelligent model designed to solve highly complex tasks. It stands out for its remarkable fluency.                                                                                             |
 | Perplexity_Sonar                  | Lightweight Perplexity model with search grounding, quicker than Sonar Pro                                                                                                                                                   |
 | Perplexity_Sonar_Pro              | Premier Perplexity model with search grounding, supporting advanced queries and follow-ups                                                                                                                                   |
@@ -176,28 +177,24 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 | Llama3.1_8B                       | Llama 3.1 8B is an open-source model from Meta, optimized for instruction following and high-speed performance.                                                                                                              |
 | Llama3_70B                        | Llama 3 70B from Meta is a highly capable open-source LLM that can serve as a tool for various text-related tasks.                                                                                                           |
 | Llama3.1_405B                     | Llama 3.1 405B is Meta's flagship open-source model, offering unparalleled capabilities in general knowledge, steerability, math, tool use, and multilingual translation.                                                    |
-| MixtraL_8x7B                      | Mixtral 8x7B from Mistral is an open-source model that demonstrates high performance in generating code and text at an impressive speed.                                                                                     |
 | Mistral_Nemo                      | Mistral Nemo is a small model built in collaboration with NVIDIA, and released under the Apache 2.0 license.                                                                                                                 |
 | Mistral_Large                     | Mistral Large is Mistral's top-tier reasoning model for high-complexity tasks with stronger multilingual support. Currently points to mistral-large-2411                                                                     |
-| Mistral_Small                     | Mistral Small is Mistral's latest enterprise-grade small model that delivers significant improvements in human alignment, reasoning capabilities, and code. Currently points to mistral-small-2501                           |
+| Mistral_Small                     | Mistral Small is Mistral's latest enterprise-grade small model that delivers significant improvements in human alignment, reasoning capabilities, and code. Currently points to mistral-small-2503                           |
 | Mistral_Codestral                 | Codestral is Mistral's cutting-edge language model that specializes in low-latency, high-frequency tasks such as fill-in-the-middle (FIM), code correction and test generation. Currently points to codestral-2501           |
-| DeepSeek_R1                       | Fully open-source model with performance on par with OpenAI-o1                                                                                                                                                               |
 | DeepSeek_R1_Distill_Llama_3.3_70B | DeepSeek R1 Distill Llama 3.3 70B is a fine-tuned version of Llama 3.3 70B, leveraging DeepSeek-R1's advanced capabilities for enhanced reasoning and precision.                                                             |
-| Google_Gemini_1.5_Flash           | Google's fastest multimodal model with exceptional speed and efficiency for quick, high-frequency tasks                                                                                                                      |
-| Google_Gemini_1.5_Pro             | Google's high-performing multimodal model for complex tasks requiring deep reasoning and nuanced understanding                                                                                                               |
 | Google_Gemini_2.0_Flash           | Google's powerful workhorse model with low latency and enhanced performance, built to power agentic experiences                                                                                                              |
 | Google_Gemini_2.0_Flash_Thinking  | Gemini 2.0 Flash Thinking is an experimental model that generates its internal reasoning process, enabling stronger analytical capabilities                                                                                  |
+| DeepSeek_R1                       | Fully open-source model with performance on par with OpenAI-o1                                                                                                                                                               |
 | xAI_Grok_2                        | Grok-2 is xAI's frontier language model with state-of-the-art reasoning capabilities                                                                                                                                         |
 
 If a model isn't available to the user, Raycast will fallback to a similar one:
 
 - `AI.Model.OpenAI_GPT4`, `AI.Model["OpenAI_GPT4-turbo"]`, and `AI.Model.OpenAI_GPT4o` -> `AI.Model["OpenAI_GPT4o-mini"]`
 - `AI.Model["OpenAI_o1-preview"]`, `AI.Model["OpenAI_o1-mini"]`, and `AI.Model.OpenAI_o1` -> `AI.Model["OpenAI_GPT4o-mini"]`
-- `AI.Model.Anthropic_Claude_Opus` and `AI.Model.Anthropic_Claude_Sonnet` -> `AI.Model.Anthropic_Claude_Haiku`
+- `AI.Model.Anthropic_Claude_Opus`, `AI.Model.Anthropic_Claude_Sonnet`, and `AI.Model["Anthropic_Claude_Sonnet_3.7"]` -> `AI.Model.Anthropic_Claude_Haiku`
 - `AI.Model.Perplexity_Sonar_Pro` -> `AI.Model.Perplexity_Sonar`
 - `AI.Model.Mistral_Large` -> `AI.Model.Mistral_Nemo`
 - `AI.Model["Llama3.1_405B"]` -> `AI.Model["Llama3.3_70B"]`
-- `AI.Model["Google_Gemini_1.5_Pro"]` -> `AI.Model["Google_Gemini_1.5_Flash"]`
 - `AI.Model.DeepSeek_R1` -> `AI.Model["DeepSeek_R1_Distill_Llama_3.3_70B"]`
 - `AI.Model.xAI_Grok_2` -> `AI.Model["OpenAI_GPT4o-mini"]`
 
@@ -207,9 +204,9 @@ If a model isn't available to the user, Raycast will fallback to a similar one:
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| creativity | Concrete tasks, such as fixing grammar, require less creativity while open-ended questions, such as generating ideas, require more. If a number is passed, it needs to be in the range 0-2. For larger values, 2 will be used. For lower values, 0 will be used. | <code>AI.Creativity</code> |
+| creativity | Concrete tasks, such as fixing grammar, require less creativity while open-ended questions, such as generating ideas, require more.  If a number is passed, it needs to be in the range 0-2. For larger values, 2 will be used. For lower values, 0 will be used. | <code>AI.Creativity</code> |
 | model | The AI model to use to answer to the prompt. | <code>AI.Model</code> |
-| signal | Abort signal to cancel the request. | <code>AbortSignal</code> |
+| signal | Abort signal to cancel the request. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal)</code> |
 
 
 # Browser Extension
@@ -276,8 +273,8 @@ export default async function command() {
 | Name | Description | Type |
 | :--- | :--- | :--- |
 | options | Options to control which content to get. | <code>Object</code> |
-| options.cssSelector | Only returns the content of the element that matches the [CSS selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_selectors). | <code>string</code> |
-| options.format | The format of the content. | <code>"html"</code> or <code>"text"</code> or <code>"markdown"</code> |
+| options.cssSelector | Only returns the content of the element that matches the [CSS selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_selectors).    If the selector matches multiple elements, only the first one is returned.  If the selector doesn't match any element, an empty string is returned.    When using a CSS selector, the `format` option can not be `markdown`. | <code>string</code> |
+| options.format | The format of the content.    - `html`: `document.documentElement.outerHTML`  - `text`: `document.body.innerText`  - `markdown`: A heuristic to get the "content" of the document and convert it to markdown. Think of it as the "reader mode" of a browser. | <code>"html"</code> or <code>"text"</code> or <code>"markdown"</code> |
 | options.tabId | The ID of the tab to get the content from. If not specified, the content of the active tab of the focused window is returned. | <code>number</code> |
 
 #### Return
@@ -317,7 +314,7 @@ A Promise that resolves with the list of tabs.
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| active<mark style="color:red;">*</mark> | Whether the tab is active in its window. There can only be one active tab per window but if there are multiple browser windows, there can be multiple active tabs. | <code>boolean</code> |
+| active<mark style="color:red;">*</mark> | Whether the tab is active in its window.  There can only be one active tab per window but if there are multiple browser windows, there can be multiple active tabs. | <code>boolean</code> |
 | id<mark style="color:red;">*</mark> | The ID of the tab. Tab IDs are unique within a browser session. | <code>number</code> |
 | url<mark style="color:red;">*</mark> | The URL the tab is displaying. | <code>string</code> |
 | favicon | The URL of the tab's [favicon](https://developer.mozilla.org/en-US/docs/Glossary/Favicon). It may also be `undefined` if the tab is loading. | <code>string</code> |
@@ -492,8 +489,8 @@ The options for creating a new Cache.
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| capacity | The capacity in bytes. If the stored data exceeds the capacity, the least recently used data is removed. The default capacity is 10 MB. | <code>number</code> |
-| namespace | If set, the Cache will be namespaced via a subdirectory. This can be useful to separate the caches for individual commands of an extension. By default, the cache is shared between the commands of an extension. | <code>string</code> |
+| capacity | The capacity in bytes. If the stored data exceeds the capacity, the least recently used data is removed.  The default capacity is 10 MB. | <code>number</code> |
+| namespace | If set, the Cache will be namespaced via a subdirectory.  This can be useful to separate the caches for individual commands of an extension.  By default, the cache is shared between the commands of an extension. | <code>string</code> |
 
 ### Cache.Subscriber
 
@@ -826,9 +823,9 @@ The options that can be used when launching a command from the same extension.
 | Property | Description | Type |
 | :--- | :--- | :--- |
 | name<mark style="color:red;">*</mark> | Command name as defined in the extension's manifest | <code>string</code> |
-| type<mark style="color:red;">*</mark> | LaunchType.UserInitiated</code> |
+| type<mark style="color:red;">*</mark> | LaunchType.UserInitiated or LaunchType.Background | <code>LaunchType</code> |
 | arguments | Optional object for the argument properties and values as defined in the extension's manifest, for example: `{ "argument1": "value1" }` | <code>Arguments</code> or <code>null</code> |
-| context | Arbitrary object for custom data that should be passed to the command and accessible as LaunchProps</code> or <code>null</code> |
+| context | Arbitrary object for custom data that should be passed to the command and accessible as LaunchProps; the object must be JSON serializable (Dates and Buffers supported) | <code>LaunchContext</code> or <code>null</code> |
 | fallbackText | Optional string to send as fallback text to the command | <code>string</code> or <code>null</code> |
 
 #### InterExtensionLaunchOptions
@@ -840,9 +837,9 @@ The options that can be used when launching a command from a different extension
 | extensionName<mark style="color:red;">*</mark> | When launching command from a different extension, the extension name (as defined in the extension's manifest) is necessary | <code>string</code> |
 | name<mark style="color:red;">*</mark> | Command name as defined in the extension's manifest | <code>string</code> |
 | ownerOrAuthorName<mark style="color:red;">*</mark> | When launching command from a different extension, the owner or author (as defined in the extension's manifest) is necessary | <code>string</code> |
-| type<mark style="color:red;">*</mark> | LaunchType.UserInitiated</code> |
+| type<mark style="color:red;">*</mark> | LaunchType.UserInitiated or LaunchType.Background | <code>LaunchType</code> |
 | arguments | Optional object for the argument properties and values as defined in the extension's manifest, for example: `{ "argument1": "value1" }` | <code>Arguments</code> or <code>null</code> |
-| context | Arbitrary object for custom data that should be passed to the command and accessible as LaunchProps</code> or <code>null</code> |
+| context | Arbitrary object for custom data that should be passed to the command and accessible as LaunchProps; the object must be JSON serializable (Dates and Buffers supported) | <code>LaunchContext</code> or <code>null</code> |
 | fallbackText | Optional string to send as fallback text to the command | <code>string</code> or <code>null</code> |
 
 
@@ -880,9 +877,9 @@ export default async function Command() {
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| appearance<mark style="color:red;">*</mark> | The appearance used by the Raycast application. | <code>"light"</code> or <code>"dark"</code> |
+| appearance<mark style="color:red;">*</mark> | The appearance used by the Raycast application. | <code>"dark"</code> or <code>"light"</code> |
 | assetsPath<mark style="color:red;">*</mark> | The absolute path to the assets directory of the extension. | <code>string</code> |
-| commandMode<mark style="color:red;">*</mark> | The mode of the launched command, as specified in package.json | <code>"no-view"</code> or <code>"view"</code> or <code>"menu-bar"</code> |
+| commandMode<mark style="color:red;">*</mark> | The mode of the launched command, as specified in package.json | <code>"view"</code> or <code>"no-view"</code> or <code>"menu-bar"</code> |
 | commandName<mark style="color:red;">*</mark> | The name of the launched command, as specified in package.json | <code>string</code> |
 | extensionName<mark style="color:red;">*</mark> | The name of the extension, as specified in package.json | <code>string</code> |
 | isDevelopment<mark style="color:red;">*</mark> | Indicates whether the command is a development command (vs. an installed command from the Store). | <code>boolean</code> |
@@ -891,7 +888,7 @@ export default async function Command() {
 | raycastVersion<mark style="color:red;">*</mark> | The version of the main Raycast app | <code>string</code> |
 | supportPath<mark style="color:red;">*</mark> | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. | <code>string</code> |
 | textSize<mark style="color:red;">*</mark> | The text size used by the Raycast application. | <code>"medium"</code> or <code>"large"</code> |
-| canAccess<mark style="color:red;">*</mark> | Returns whether the user has access to the given API. | <code>(api: unknown) => boolean</code> |
+| canAccess<mark style="color:red;">*</mark> |  | <code>(api: unknown) => boolean</code> |
 
 ### environment.canAccess
 
@@ -1106,7 +1103,7 @@ export default async function Command() {
 | icon | The icon of an alert to illustrate the action. Displayed on the top. | <code>Image.ImageLike</code> |
 | message | An additional message for an Alert. Useful to show more information, e.g. a confirmation message for a destructive action. | <code>string</code> |
 | primaryAction | The primary Action the user can take. | <code>Alert.ActionOptions</code> |
-| rememberUserChoice | If set to true, the Alert will also display a `Do not show this message again` checkbox. When checked, the answer is persisted and directly returned to the extension the next time the alert should be shown, without the user actually seeing the alert. | <code>boolean</code> |
+| rememberUserChoice | If set to true, the Alert will also display a `Do not show this message again` checkbox. When checked, the answer  is persisted and directly returned to the extension the next time the alert should be shown, without the user  actually seeing the alert. | <code>boolean</code> |
 
 ### Alert.ActionOptions
 
@@ -1117,8 +1114,8 @@ The options to create an Alert Action.
 | Property | Description | Type |
 | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of the action. | <code>string</code> |
-| style | The style of the action. | <code>Alert.ActionStyle</code> |
 | onAction | A callback called when the action is triggered. | <code>() => void</code> |
+| style | The style of the action. | <code>Alert.ActionStyle</code> |
 
 ### Alert.ActionStyle
 
@@ -1184,7 +1181,7 @@ export default async function Command() {
 | title<mark style="color:red;">*</mark> | The title that will be displayed in the HUD. | <code>string</code> |
 | options | Can be used to control the behaviour after closing the main window. | <code>Object</code> |
 | options.clearRootSearch | Clears the text in the root search bar and scrolls to the top | <code>boolean</code> |
-| options.popToRootType | Defines the pop to root behavior (PopToRootType</code> |
+| options.popToRootType | Defines the pop to root behavior (PopToRootType); the default is to to respect the user's "Pop to Root Search" preference in Raycast | <code>PopToRootType</code> |
 
 #### Return
 
@@ -1358,8 +1355,8 @@ The options to create a Toast Action.
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| title<mark style="color:red;">*</mark> | The title of the action. | <code>string</code> |
 | onAction<mark style="color:red;">*</mark> | A callback called when the action is triggered. | <code>(toast: Toast => void</code> |
+| title<mark style="color:red;">*</mark> | The title of the action. | <code>string</code> |
 | shortcut | The keyboard shortcut for the action. | <code>Keyboard.Shortcut</code> |
 
 
@@ -1694,7 +1691,7 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | children | `MenuBarExtra.Item`s, `MenuBarExtra.Submenu`s, `MenuBarExtra.Separator` or a mix of either. | <code>React.ReactNode</code> | - |
 | icon | The icon that is displayed in the menu bar. | <code>Image.ImageLike</code> | - |
-| isLoading | Indicates to Raycast that it should not unload the command, as it is still executing. If you set make use of `isLoading`, you need to make sure you set it to `false` at the end of the task you are executing (such as an API call), so Raycast can then unload the command. | <code>boolean</code> | `false` |
+| isLoading | Indicates to Raycast that it should not unload the command, as it is still executing. If you set make use of `isLoading`, you need to make sure you set it to `false` at the end of the task you are executing (such as an API call), so Raycast can then unload the command. | <code>boolean</code> | - |
 | title | The string that is displayed in the menu bar. | <code>string</code> | - |
 | tooltip | A tooltip to display when the cursor hovers the item in the menu bar. | <code>string</code> | - |
 
@@ -1801,12 +1798,12 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The main title displayed for this item. | <code>string</code> | - |
-| alternate | A MenuBarExtra.Item, string></code> | - |
+| alternate | A MenuBarExtra.Item to be displayed when a user presses the ⌥ (opt) key. | <code>ReactElement&lt;MenuBarExtra.Item.Props></code> | - |
 | icon | An optional icon for this item. | <code>Image.ImageLike</code> | - |
+| onAction | An action handler called when the user clicks the item. | <code>(event: MenuBarExtra.ActionEvent => void</code> | - |
 | shortcut | A shortcut used to invoke this item when its parent menu is open. | <code>Keyboard.Shortcut</code> | - |
 | subtitle | The subtitle displayed for this item. | <code>string</code> | - |
 | tooltip | A tooltip to display when the cursor hovers the item. | <code>string</code> | - |
-| onAction | An action handler called when the user clicks the item. | <code>(event: MenuBarExtra.ActionEvent => void</code> | - |
 
 ### MenuBarExtra.Submenu
 
@@ -1914,7 +1911,7 @@ An interface describing Action events in callbacks.
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| type<mark style="color:red;">*</mark> | A type of the action event | <code>"left-click"</code> or <code>"right-click"</code> |
+| type<mark style="color:red;">*</mark> | A type of the action event    * `left-click` is a left mouse click on the MenuBarExtra.Item or a Keyboard.Shortcut  * `right-click` is a right mouse click on the MenuBarExtra.Item | <code>"left-click"</code> or <code>"right-click"</code> |
 
 #### Example
 
@@ -2270,10 +2267,10 @@ The options for creating a new PKCEClient.
 | Property | Description | Type |
 | :--- | :--- | :--- |
 | providerName<mark style="color:red;">*</mark> | The name of the provider, displayed in the OAuth overlay. | <code>string</code> |
-| redirectMethod<mark style="color:red;">*</mark> | The redirect method for the OAuth flow. Make sure to set this to the correct method for the provider, see OAuth.RedirectMethod</code> |
-| description | An optional description, shown in the OAuth overlay. You can use this to customize the message for the end user, for example for handling scope changes or other migrations. Raycast shows a default message if this is not configured. | <code>string</code> |
-| providerIcon | An icon displayed in the OAuth overlay. Make sure to provide at least a size of 64x64 pixels. | <code>Image.ImageLike</code> |
-| providerId | An optional ID for associating the client with a provider. Only set this if you use multiple different clients in your extension. | <code>string</code> |
+| redirectMethod<mark style="color:red;">*</mark> | The redirect method for the OAuth flow.  Make sure to set this to the correct method for the provider, see OAuth.RedirectMethod for more information. | <code>OAuth.RedirectMethod</code> |
+| description | An optional description, shown in the OAuth overlay.  You can use this to customize the message for the end user, for example for handling scope changes or other migrations.  Raycast shows a default message if this is not configured. | <code>string</code> |
+| providerIcon | An icon displayed in the OAuth overlay.  Make sure to provide at least a size of 64x64 pixels. | <code>Image.ImageLike</code> |
+| providerId | An optional ID for associating the client with a provider.  Only set this if you use multiple different clients in your extension. | <code>string</code> |
 
 ### OAuth.RedirectMethod
 
@@ -2295,8 +2292,8 @@ The options for an authorization request via authorizationRequest.
 | :--- | :--- | :--- |
 | clientId<mark style="color:red;">*</mark> | The client ID of the configured OAuth app. | <code>string</code> |
 | endpoint<mark style="color:red;">*</mark> | The URL to the authorization endpoint for the OAuth provider. | <code>string</code> |
-| scope<mark style="color:red;">*</mark> | A space-delimited list of scopes for identifying the resources to access on the user's behalf. The scopes are typically shown to the user on the provider's consent screen in the browser. Note that some providers require the same scopes be configured in the registered OAuth app. | <code>string</code> |
-| extraParameters | Optional additional parameters for the authorization request. Note that some providers require additional parameters, for example to obtain long-lived refresh tokens. | <code>Record&lt;string, string></code> |
+| scope<mark style="color:red;">*</mark> | A space-delimited list of scopes for identifying the resources to access on the user's behalf.  The scopes are typically shown to the user on the provider's consent screen in the browser.  Note that some providers require the same scopes be configured in the registered OAuth app. | <code>string</code> |
+| extraParameters | Optional additional parameters for the authorization request.  Note that some providers require additional parameters, for example to obtain long-lived refresh tokens. | <code>{ [string]: string }</code> |
 
 ### OAuth.AuthorizationRequestURLParams
 
@@ -2321,7 +2318,7 @@ Can be used as direct input to authorize.
 | codeVerifier<mark style="color:red;">*</mark> | The PKCE `code_verifier` value. | <code>string</code> |
 | redirectURI<mark style="color:red;">*</mark> | The OAuth `redirect_uri` value. | <code>string</code> |
 | state<mark style="color:red;">*</mark> | The OAuth `state` value. | <code>string</code> |
-| toURL<mark style="color:red;">*</mark> | Constructs the full authorization URL. | <code>() => string</code> |
+| toURL<mark style="color:red;">*</mark> |  | <code>() => string</code> |
 
 #### Methods
 
@@ -2354,12 +2351,12 @@ Securely store a token set via setTokens.
 | Property | Description | Type |
 | :--- | :--- | :--- |
 | accessToken<mark style="color:red;">*</mark> | The access token returned by an OAuth token request. | <code>string</code> |
-| updatedAt<mark style="color:red;">*</mark> | The date when the token set was stored via OAuth.PKCEClient.setTokens. | <code>Date</code> |
-| isExpired<mark style="color:red;">*</mark> | A convenience method for checking whether the access token has expired. The method factors in some seconds of "buffer", so it returns true a couple of seconds before the actual expiration time. This requires the `expiresIn` parameter to be set. | <code>() => boolean</code> |
+| updatedAt<mark style="color:red;">*</mark> | The date when the token set was stored via OAuth.PKCEClient.setTokens. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> |
+| isExpired<mark style="color:red;">*</mark> |  | <code>() => boolean</code> |
 | expiresIn | An optional expires value (in seconds) returned by an OAuth token request. | <code>number</code> |
 | idToken | An optional id token returned by an identity request (e.g. /me, Open ID Connect). | <code>string</code> |
 | refreshToken | An optional refresh token returned by an OAuth token request. | <code>string</code> |
-| scope | The optional space-delimited list of scopes returned by an OAuth token request. You can use this to compare the currently stored access scopes against new access scopes the extension might require in a future version, and then ask the user to re-authorize with new scopes. | <code>string</code> |
+| scope | The optional space-delimited list of scopes returned by an OAuth token request.  You can use this to compare the currently stored access scopes against new access scopes the extension might require in a future version,  and then ask the user to re-authorize with new scopes. | <code>string</code> |
 
 #### Methods
 
@@ -2918,7 +2915,7 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| children | Sections or Actions. If Action</code> | - |
+| children | Sections or Actions. If Action elements are specified, a default section is automatically created. | <code>ActionPanel.Children</code> | - |
 | title | The title displayed at the top of the panel | <code>string</code> | - |
 
 ### ActionPanel.Section
@@ -3018,13 +3015,13 @@ export default function Command() {
 | title<mark style="color:red;">*</mark> | The title displayed for submenu. | <code>string</code> | - |
 | autoFocus | Indicates whether the ActionPanel.Submenu should be focused automatically when the parent ActionPanel (or Actionpanel.Submenu) opens. | <code>boolean</code> | - |
 | children | Items of the submenu. | <code>ActionPanel.Submenu.Children</code> | - |
-| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
+| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the  items. When `false`, the extension needs to take care of the filtering.    You can further define how native filtering orders sections by setting an object with a `keepSectionOrder` property:  When `true`, ensures that Raycast filtering maintains the section order as defined in the extension.  When `false`, filtering may change the section order depending on the ranking values of items. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | - |
 | icon | The icon displayed for the submenu. | <code>Image.ImageLike</code> | - |
-| isLoading | Indicates whether a loading indicator should be shown or hidden next to the search bar | <code>boolean</code> | `false` |
-| shortcut | The keyboard shortcut for the submenu. | <code>Keyboard.Shortcut</code> | - |
-| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | `false` |
-| onOpen | Callback that is triggered when the Submenu is opened. | <code>() => void</code> | - |
+| isLoading | Indicates whether a loading indicator should be shown or hidden next to the search bar | <code>boolean</code> | - |
+| onOpen | Callback that is triggered when the Submenu is opened.    This callback can be used to fetch its content lazily:  ```js  function LazySubmenu() {    const [content, setContent] = useState(null)      return (      <ActionPanel.Submenu onOpen={() => fetchSubmenuContent().then(setContent)}>        {content}      </ActionPanel.Submenu>    )  }  ``` | <code>() => void</code> | - |
 | onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
+| shortcut | The keyboard shortcut for the submenu. | <code>Keyboard.Shortcut</code> | - |
+| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events.  Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | - |
 
 ## Types
 
@@ -3096,9 +3093,9 @@ export default function Command() {
 | title<mark style="color:red;">*</mark> | The title displayed for the Action. | <code>string</code> | - |
 | autoFocus | Indicates whether the Action should be focused automatically when the parent ActionPanel (or Actionpanel.Submenu) opens. | <code>boolean</code> | - |
 | icon | The icon displayed for the Action. | <code>Image.ImageLike</code> | - |
-| shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
-| style | Defines the visual style of the Action. | <code>Alert.ActionStyle |
 | onAction | Callback that is triggered when the Action is selected. | <code>() => void</code> | - |
+| shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
+| style | Defines the visual style of the Action. | <code>Alert.ActionStyle</code> | - |
 
 ### Action.CopyToClipboard
 
@@ -3130,11 +3127,11 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | content<mark style="color:red;">*</mark> | The contents that will be copied to the clipboard. | <code>string</code> or <code>number</code> or <code>Clipboard.Content</code> | - |
-| concealed | Indicates whether the content be treated as confidential. If `true`, it will not be recorded in the Clipboard History. | <code>boolean</code> | `false` |
-| icon | A optional icon displayed for the Action. | <code>Image.ImageLike |
-| shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
-| title | An optional title for the Action. | <code>string</code> | `"Copy to Clipboard"` |
+| concealed | Indicates whether the content be treated as confidential. If `true`, it will not be recorded in the Clipboard History. | <code>boolean</code> | - |
+| icon | A optional icon displayed for the Action. | <code>Image.ImageLike</code> | - |
 | onCopy | Callback when the content was copied to clipboard. | <code>(content: string \| number \| Clipboard.Content => void</code> | - |
+| shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
+| title | An optional title for the Action. | <code>string</code> | - |
 
 ### Action.Open
 
@@ -3169,9 +3166,9 @@ export default function Command() {
 | target<mark style="color:red;">*</mark> | The file, folder or URL to open. | <code>string</code> | - |
 | title<mark style="color:red;">*</mark> | The title for the Action. | <code>string</code> | - |
 | application | The application name to use for opening the file. | <code>string</code> or <code>Application</code> | - |
-| icon | The icon displayed for the Action. | <code>Image.ImageLike |
-| shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
+| icon | The icon displayed for the Action. | <code>Image.ImageLike</code> | - |
 | onOpen | Callback when the file or folder was opened. | <code>(target: string) => void</code> | - |
+| shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
 
 ### Action.OpenInBrowser
 
@@ -3203,10 +3200,10 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | url<mark style="color:red;">*</mark> | The URL to open. | <code>string</code> | - |
-| icon | The icon displayed for the Action. | <code>Image.ImageLike |
-| shortcut | The optional keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
-| title | An optional title for the Action. | <code>string</code> | `"Open in Browser"` |
+| icon | The icon displayed for the Action. | <code>Image.ImageLike</code> | - |
 | onOpen | Callback when the URL was opened in the browser. | <code>(url: string) => void</code> | - |
+| shortcut | The optional keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
+| title | An optional title for the Action. | <code>string</code> | - |
 
 ### Action.OpenWith
 
@@ -3242,10 +3239,10 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | path<mark style="color:red;">*</mark> | The path to open. | <code>string</code> | - |
-| icon | The icon displayed for the Action. | <code>Image.ImageLike |
-| shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
-| title | The title for the Action. | <code>string</code> | `"Open With"` |
+| icon | The icon displayed for the Action. | <code>Image.ImageLike</code> | - |
 | onOpen | Callback when the file or folder was opened. | <code>(path: string) => void</code> | - |
+| shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
+| title | The title for the Action. | <code>string</code> | - |
 
 ### Action.Paste
 
@@ -3277,10 +3274,10 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | content<mark style="color:red;">*</mark> | The contents that will be pasted to the frontmost application. | <code>string</code> or <code>number</code> or <code>Clipboard.Content</code> | - |
-| icon | The icon displayed for the Action. | <code>Image.ImageLike |
-| shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
-| title | An optional title for the Action. | <code>string</code> | `"Paste in Active App"` |
+| icon | The icon displayed for the Action. | <code>Image.ImageLike</code> | - |
 | onPaste | Callback when the content was pasted into the front-most application. | <code>(content: string \| number \| Clipboard.Content => void</code> | - |
+| shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
+| title | An optional title for the Action. | <code>string</code> | - |
 
 ### Action.Push
 
@@ -3320,9 +3317,9 @@ export default function Command() {
 | target<mark style="color:red;">*</mark> | The target view that will be pushed to the navigation stack. | <code>React.ReactNode</code> | - |
 | title<mark style="color:red;">*</mark> | The title displayed for the Action. | <code>string</code> | - |
 | icon | The icon displayed for the Action. | <code>Image.ImageLike</code> | - |
-| shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
 | onPop | Callback when the target view will be popped. | <code>() => void</code> | - |
 | onPush | Callback when the target view was pushed. | <code>() => void</code> | - |
+| shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
 
 ### Action.ShowInFinder
 
@@ -3356,11 +3353,11 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| path<mark style="color:red;">*</mark> | The path to open. | <code>PathLike</code> | - |
-| icon | A optional icon displayed for the Action. | <code>Image.ImageLike |
+| path<mark style="color:red;">*</mark> | The path to open. | <code>"fs".PathLike</code> | - |
+| icon | A optional icon displayed for the Action. | <code>Image.ImageLike</code> | - |
+| onShow | Callback when the file or folder was shown in the Finder. | <code>(path: "fs".PathLike) => void</code> | - |
 | shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
-| title | An optional title for the Action. | <code>string</code> | `"Show in Finder"` |
-| onShow | Callback when the file or folder was shown in the Finder. | <code>(path: PathLike => void</code> | - |
+| title | An optional title for the Action. | <code>string</code> | - |
 
 ### Action.SubmitForm
 
@@ -3391,10 +3388,10 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | icon | The icon displayed for the Action. | <code>Image.ImageLike</code> | - |
+| onSubmit | Callback when the Form was submitted.  The handler receives a the values object containing the user input. | <code>(input: Form.Values => boolean \| void \| Promise&lt;boolean \| void></code> | - |
 | shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
-| style | Defines the visual style of the Action. | <code>Alert.ActionStyle |
-| title | The title displayed for the Action. | <code>string</code> | `"Submit Form"` |
-| onSubmit | Callback when the Form was submitted. The handler receives a the values object containing the user input. | <code>(input: Form.Values => boolean \| void \| Promise&lt;boolean \| void></code> | - |
+| style | Defines the visual style of the Action. | <code>Alert.ActionStyle</code> | - |
+| title | The title displayed for the Action. | <code>string</code> | - |
 
 ### Action.Trash
 
@@ -3426,11 +3423,11 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| paths<mark style="color:red;">*</mark> | The item or items to move to the trash. | <code>PathLike[]</code> | - |
-| icon | A optional icon displayed for the Action. | <code>Image.ImageLike |
+| paths<mark style="color:red;">*</mark> | The item or items to move to the trash. | <code>"fs".PathLike</code> or <code>"fs".PathLike[]</code> | - |
+| icon | A optional icon displayed for the Action. | <code>Image.ImageLike</code> | - |
+| onTrash | Callback when all items were moved to the trash. | <code>(paths: "fs".PathLike \| "fs".PathLike[]) => void</code> | - |
 | shortcut | The optional keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
-| title | An optional title for the Action. | <code>string</code> | `"Move to Trash"` |
-| onTrash | Callback when all items were moved to the trash. | <code>(paths: PathLike => void</code> | - |
+| title | An optional title for the Action. | <code>string</code> | - |
 
 ### Action.CreateSnippet
 
@@ -3460,7 +3457,7 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | snippet<mark style="color:red;">*</mark> |  | <code>Snippet</code> | - |
-| icon | A optional icon displayed for the Action. See Image.ImageLike</code> | - |
+| icon | A optional icon displayed for the Action. See Image.ImageLike for the supported formats and types. | <code>Image.ImageLike</code> | - |
 | shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
 | title | An optional title for the Action. | <code>string</code> | - |
 
@@ -3491,8 +3488,8 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| quicklink<mark style="color:red;">*</mark> | The Quicklink</code> | - |
-| icon | A optional icon displayed for the Action. See Image.ImageLike</code> | - |
+| quicklink<mark style="color:red;">*</mark> | The Quicklink to create. | <code>Quicklink</code> | - |
+| icon | A optional icon displayed for the Action. See Image.ImageLike for the supported formats and types. | <code>Image.ImageLike</code> | - |
 | shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
 | title | An optional title for the Action. | <code>string</code> | - |
 
@@ -3526,9 +3523,9 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| icon | The icon displayed for the Action. | <code>Image.ImageLike |
+| icon | The icon displayed for the Action. | <code>Image.ImageLike</code> | - |
 | shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
-| title | The title for the Action. | <code>string</code> | `"Quick Look"` |
+| title | The title for the Action. | <code>string</code> | - |
 
 ### Action.PickDate
 
@@ -3559,13 +3556,13 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
+| onChange<mark style="color:red;">*</mark> | Callback when the Date was picked | <code>(date: [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)) => void</code> | - |
 | title<mark style="color:red;">*</mark> | A title for the Action. | <code>string</code> | - |
-| onChange<mark style="color:red;">*</mark> | Callback when the Date was picked | <code>(date: Date) => void</code> | - |
-| icon | A optional icon displayed for the Action. | <code>Image.ImageLike |
-| max | The maximum date (inclusive) allowed for selection. | <code>Date</code> | - |
-| min | The minimum date (inclusive) allowed for selection. | <code>Date</code> | - |
+| icon | A optional icon displayed for the Action. | <code>Image.ImageLike</code> | - |
+| max | The maximum date (inclusive) allowed for selection.    - If the PickDate type is `Type.Date`, only the full day date will be considered for comparison, ignoring the time components of the Date object.  - If the PickDate type is `Type.DateTime`, both date and time components will be considered for comparison.    The date should be a JavaScript Date object. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> | - |
+| min | The minimum date (inclusive) allowed for selection.    - If the PickDate type is `Type.Date`, only the full day date will be considered for comparison, ignoring the time components of the Date object.  - If the PickDate type is `Type.DateTime`, both date and time components will be considered for comparison.    The date should be a JavaScript Date object. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> | - |
 | shortcut | The keyboard shortcut for the Action. | <code>Keyboard.Shortcut</code> | - |
-| type | Indicates what types of date components can be picked | <code>Action.PickDate.Type</code> | - |
+| type | Indicates what types of date components can be picked    Defaults to Action.PickDate.Type.DateTime | <code>Action.PickDate.Type</code> | - |
 
 ## Types
 
@@ -3585,7 +3582,7 @@ export default function Command() {
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| link<mark style="color:red;">*</mark> | The URL or file path, optionally including placeholders such as in "https://google.com/search?q=\{Query\}" | <code>string</code> |
+| link<mark style="color:red;">*</mark> | The URL or file path, optionally including placeholders such as in "https://google.com/search?q={Query}" | <code>string</code> |
 | application | The application that the quicklink should be opened in. | <code>string</code> or <code>Application</code> |
 | icon | The icon to display for the quicklink. | <code>Icon</code> |
 | name | The quicklink name | <code>string</code> |
@@ -3834,10 +3831,10 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | actions | A reference to an ActionPanel. | <code>React.ReactNode</code> | - |
-| isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
+| isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | - |
 | markdown | The CommonMark string to be rendered. | <code>string</code> | - |
 | metadata | The `Detail.Metadata` to be rendered in the right side area | <code>React.ReactNode</code> | - |
-| navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
+| navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | - |
 
 {% hint style="info" %}
 You can specify custom image dimensions by adding a `raycast-width` and `raycast-height` query string to the markdown image. For example: `!Image Title`
@@ -3943,7 +3940,7 @@ export default function Main() {
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of the item. | <code>string</code> | - |
 | icon | An icon to illustrate the value of the item. | <code>Image.ImageLike</code> | - |
-| text | The text value of the item. Specifying `color` will display the text in the provided color. Defaults to Color.SecondaryText; value: string }</code> | - |
+| text | The text value of the item.  Specifying `color` will display the text in the provided color. Defaults to Color.PrimaryText. | <code>string</code> or <code>{ color?: Color; value: string }</code> | - |
 
 ### Detail.Metadata.Link
 
@@ -4042,8 +4039,8 @@ A Tag in a `Detail.Metadata.TagList`.
 | :--- | :--- | :--- | :--- |
 | color | Changes the text color to the provided color and sets a transparent background with the same color. | <code>Color.ColorLike</code> | - |
 | icon | The optional icon tag icon. Required if the tag has no text. | <code>Image.ImageLike</code> | - |
-| text | The optional tag text. Required if the tag has no icon. | <code>string</code> | - |
 | onAction | Callback that is triggered when the item is clicked. | <code>() => void</code> | - |
+| text | The optional tag text. Required if the tag has no icon. | <code>string</code> | - |
 
 ### Detail.Metadata.Separator
 
@@ -4346,10 +4343,10 @@ Optionally add a Form.LinkAccessory in the right-hand side of the navigation bar
 | :--- | :--- | :--- | :--- |
 | actions | A reference to an ActionPanel. | <code>React.ReactNode</code> | - |
 | children | The Form.Item elements of the form. | <code>React.ReactNode</code> | - |
-| enableDrafts | Defines whether the Form.Items values will be preserved when user exits the screen. | <code>boolean</code> | `false` |
-| isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
-| navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
-| searchBarAccessory | Form.LinkAccessory, string></code> | - |
+| enableDrafts | Defines whether the Form.Items values will be preserved when user exits the screen. | <code>boolean</code> | - |
+| isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | - |
+| navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | - |
+| searchBarAccessory | Form.LinkAccessory that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;Form.LinkAccessory.Props, string></code> | - |
 
 ### Form.TextField
 
@@ -4412,18 +4409,18 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>string</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
+| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 | placeholder | Placeholder text shown in the text field. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | value | The current value of the item. | <code>string</code> | - |
-| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
-| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
-| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -4493,18 +4490,18 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>string</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
+| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 | placeholder | Placeholder text shown in the password field. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | value | The current value of the item. | <code>string</code> | - |
-| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
-| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
-| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -4577,19 +4574,19 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
-| enableMarkdown | Whether markdown will be highlighted in the TextArea or not. When enabled, markdown shortcuts starts to work for the TextArea (pressing `⌘ + B` will add `**bold**` around the selected text, `⌘ + I` will make the selected text italic, etc.) | <code>boolean</code> | `false` |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>string</code> | - |
+| enableMarkdown | Whether markdown will be highlighted in the TextArea or not.  When enabled, markdown shortcuts starts to work for the TextArea (pressing `⌘ + B` will add `**bold**` around the selected text, `⌘ + I` will make the selected text italic, etc.) | <code>boolean</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
+| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 | placeholder | Placeholder text shown in the text area. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | value | The current value of the item. | <code>string</code> | - |
-| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
-| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
-| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -4659,18 +4656,18 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
 | label<mark style="color:red;">*</mark> | The label displayed on the right side of the checkbox. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>boolean</code> | - |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>boolean</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
-| storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
-| title | The title displayed on the left side of the item. | <code>string</code> | - |
-| value | The current value of the item. | <code>boolean</code> | - |
 | onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;boolean>) => void</code> | - |
 | onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: boolean) => void</code> | - |
 | onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;boolean>) => void</code> | - |
+| storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
+| title | The title displayed on the left side of the item. | <code>string</code> | - |
+| value | The current value of the item. | <code>boolean</code> | - |
 
 #### Methods (Imperative API)
 
@@ -4740,20 +4737,20 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>Date</code> | - |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
-| max | The maximum date (inclusive) allowed for selection. | <code>Date</code> | - |
-| min | The minimum date (inclusive) allowed for selection. | <code>Date</code> | - |
+| max | The maximum date (inclusive) allowed for selection.    - If the PickDate type is `Type.Date`, only the full day date will be considered for comparison, ignoring the time components of the Date object.  - If the PickDate type is `Type.DateTime`, both date and time components will be considered for comparison.    The date should be a JavaScript Date object. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> | - |
+| min | The minimum date (inclusive) allowed for selection.    - If the PickDate type is `Type.Date`, only the full day date will be considered for comparison, ignoring the time components of the Date object.  - If the PickDate type is `Type.DateTime`, both date and time components will be considered for comparison.    The date should be a JavaScript Date object. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)>) => void</code> | - |
+| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)>) => void</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
-| type | Indicates what types of date components can be picked | <code>Form.DatePicker.Type</code> | - |
-| value | The current value of the item. | <code>Date</code> | - |
-| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;Date \| null>) => void</code> | - |
-| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: Date \| null) => void</code> | - |
-| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;Date \| null>) => void</code> | - |
+| type | Indicates what types of date components can be picked    Defaults to Form.DatePicker.Type.DateTime | <code>Form.DatePicker.Type</code> | - |
+| value | The current value of the item. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> | - |
 
 #### Methods (Imperative API)
 
@@ -4871,23 +4868,23 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
 | children | Sections or items. If Form.Dropdown.Item elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
-| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>string</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the  items. When `false`, the extension needs to take care of the filtering.    You can further define how native filtering orders sections by setting an object with a `keepSectionOrder` property:  When `true`, ensures that Raycast filtering maintains the section order as defined in the extension.  When `false`, filtering may change the section order depending on the ranking values of items. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
-| isLoading | Indicates whether a loading indicator should be shown or hidden next to the search bar | <code>boolean</code> | `false` |
-| placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | `"Search…"` |
-| storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
-| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | `false` |
-| title | The title displayed on the left side of the item. | <code>string</code> | - |
-| value | The current value of the item. | <code>string</code> | - |
+| isLoading | Indicates whether a loading indicator should be shown or hidden next to the search bar | <code>boolean</code> | - |
 | onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 | onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
 | onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 | onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
+| placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | - |
+| storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
+| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events.  Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | - |
+| title | The title displayed on the left side of the item. | <code>string</code> | - |
+| value | The current value of the item. | <code>string</code> | - |
 
 #### Methods (Imperative API)
 
@@ -4927,9 +4924,9 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title displayed for the item. | <code>string</code> | - |
-| value<mark style="color:red;">*</mark> | Value of the dropdown item. Make sure to assign each unique value for each item. | <code>string</code> | - |
+| value<mark style="color:red;">*</mark> | Value of the dropdown item.  Make sure to assign each unique value for each item. | <code>string</code> | - |
 | icon | A optional icon displayed for the item. | <code>Image.ImageLike</code> | - |
-| keywords | An optional property used for providing additional indexable strings for search. When filtering the items in Raycast, the keywords will be searched in addition to the title. | <code>string[]</code> | The title of its section if any |
+| keywords | An optional property used for providing additional indexable strings for search.  When filtering the items in Raycast, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
 
 ### Form.Dropdown.Section
 
@@ -5046,19 +5043,19 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
 | children | The list of tags. | <code>React.ReactNode</code> | - |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string[]</code> | - |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>string[]</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
+| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string[]) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
 | placeholder | Placeholder text shown in the token field. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | value | The current value of the item. | <code>string[]</code> | - |
-| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
-| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string[]) => void</code> | - |
-| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -5100,7 +5097,7 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The display title of the tag. | <code>string</code> | - |
-| value<mark style="color:red;">*</mark> | Value of the tag. Make sure to assign unique value for each item. | <code>string</code> | - |
+| value<mark style="color:red;">*</mark> | Value of the tag.  Make sure to assign unique value for each item. | <code>string</code> | - |
 | icon | An icon to show in the tag. | <code>Image.ImageLike</code> | - |
 
 ### Form.Separator
@@ -5269,21 +5266,21 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
-| allowMultipleSelection | Indicates whether the user can select multiple items or only one. | <code>boolean</code> | `true` |
+| id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
+| allowMultipleSelection | Indicates whether the user can select multiple items or only one. | <code>boolean</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
-| canChooseDirectories | Indicates whether it's possible to choose a directory. | <code>boolean</code> | `false` |
-| canChooseFiles | Indicates whether it's possible to choose a file. | <code>boolean</code> | `true` |
-| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string[]</code> | - |
-| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| canChooseDirectories | Indicates whether it's possible to choose a directory. | <code>boolean</code> | - |
+| canChooseFiles | Indicates whether it's possible to choose a file. | <code>boolean</code> | - |
+| defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>string[]</code> | - |
+| error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
-| showHiddenFiles | Indicates whether the file picker displays files that are normally hidden from the user. | <code>boolean</code> | `false` |
-| storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
-| title | The title displayed on the left side of the item. | <code>string</code> | - |
-| value | The current value of the item. | <code>string[]</code> | - |
 | onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
 | onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string[]) => void</code> | - |
 | onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
+| showHiddenFiles | Indicates whether the file picker displays files that are normally hidden from the user. | <code>boolean</code> | - |
+| storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
+| title | The title displayed on the left side of the item. | <code>string</code> | - |
+| value | The current value of the item. | <code>string[]</code> | - |
 
 #### Methods (Imperative API)
 
@@ -5976,20 +5973,20 @@ export default function Command() {
 | actions | A reference to an ActionPanel. It will only be shown when there aren't any children. | <code>React.ReactNode</code> | - |
 | aspectRatio | Aspect ratio for the Grid.Item elements. Defaults to 1. | <code>"1"</code> or <code>"3/2"</code> or <code>"2/3"</code> or <code>"4/3"</code> or <code>"3/4"</code> or <code>"16/9"</code> or <code>"9/16"</code> | - |
 | children | Grid sections or items. If Grid.Item elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
-| columns | Column count for the grid's sections. Minimum value is 1, maximum value is 8. | <code>number</code> | `5` |
-| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
-| fit | Fit for the Grid.Item</code> | - |
-| inset | Indicates how much space there should be between a Grid.Item</code> | - |
-| isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
-| navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
-| pagination | Configuration for pagination | <code>{ hasMore: boolean; pageSize: number; onLoadMore: () => void }</code> | - |
-| searchBarAccessory | Grid.Dropdown, string></code> | - |
-| searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | `"Search…"` |
+| columns | Column count for the grid's sections. Minimum value is 1, maximum value is 8. | <code>number</code> | - |
+| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the  items. When `false`, the extension needs to take care of the filtering.    You can further define how native filtering orders sections by setting an object with a `keepSectionOrder` property:  When `true`, ensures that Raycast filtering maintains the section order as defined in the extension.  When `false`, filtering may change the section order depending on the ranking values of items. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | - |
+| fit | Fit for the Grid.Item element content. Defaults to "contain" | <code>Grid.Fit</code> | - |
+| inset | Indicates how much space there should be between a Grid.Items' content and its borders.  The absolute value depends on the value of the `itemSize` prop. | <code>Grid.Inset</code> | - |
+| isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | - |
+| navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | - |
+| onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
+| onSelectionChange | Callback triggered when the item selection in the grid changes.    When the received id is `null`, it means that all items have been filtered out  and that there are no item selected | <code>(id: string) => void</code> | - |
+| pagination | Configuration for pagination | <code>{ hasMore: boolean; onLoadMore: () => void; pageSize: number }</code> | - |
+| searchBarAccessory | Grid.Dropdown that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;List.Dropdown.Props, string></code> | - |
+| searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | - |
 | searchText | The text that will be displayed in the search bar. | <code>string</code> | - |
 | selectedItemId | Selects the item with the specified id. | <code>string</code> | - |
-| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | `false` |
-| onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
-| onSelectionChange | Callback triggered when the item selection in the grid changes. | <code>(id: string) => void</code> | - |
+| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events.  Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | - |
 
 ### Grid.Dropdown
 
@@ -6042,16 +6039,16 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | tooltip<mark style="color:red;">*</mark> | Tooltip displayed when hovering the dropdown. | <code>string</code> | - |
 | children | Dropdown sections or items. If Dropdown.Item elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
-| defaultValue | The default value of the dropdown. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
-| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
+| defaultValue | The default value of the dropdown.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    **If you're using `storeValue` and configured it as `true` _and_ a Dropdown.Item with the same value exists, then it will be selected.**    **If you configure `value` at the same time as `defaultValue`, the `value` will have precedence over `defaultValue`.** | <code>string</code> | - |
+| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the  items. When `false`, the extension needs to take care of the filtering.    You can further define how native filtering orders sections by setting an object with a `keepSectionOrder` property:  When `true`, ensures that Raycast filtering maintains the section order as defined in the extension.  When `false`, filtering may change the section order depending on the ranking values of items. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | - |
 | id | ID of the dropdown. | <code>string</code> | - |
-| isLoading | Indicates whether a loading indicator should be shown or hidden next to the search bar | <code>boolean</code> | `false` |
-| placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | `"Search…"` |
-| storeValue | Indicates whether the value of the dropdown should be persisted after selection, and restored next time the dropdown is rendered. | <code>boolean</code> | - |
-| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | `false` |
-| value | The currently value of the dropdown. | <code>string</code> | - |
+| isLoading | Indicates whether a loading indicator should be shown or hidden next to the search bar | <code>boolean</code> | - |
 | onChange | Callback triggered when the dropdown selection changes. | <code>(newValue: string) => void</code> | - |
 | onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
+| placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | - |
+| storeValue | Indicates whether the value of the dropdown should be persisted after selection, and restored next time the dropdown is rendered. | <code>boolean</code> | - |
+| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events.  Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | - |
+| value | The currently value of the dropdown. | <code>string</code> | - |
 
 ### Grid.Dropdown.Item
 
@@ -6084,9 +6081,9 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title displayed for the item. | <code>string</code> | - |
-| value<mark style="color:red;">*</mark> | Value of the dropdown item. Make sure to assign each unique value for each item. | <code>string</code> | - |
+| value<mark style="color:red;">*</mark> | Value of the dropdown item.  Make sure to assign each unique value for each item. | <code>string</code> | - |
 | icon | An optional icon displayed for the item. | <code>Image.ImageLike</code> | - |
-| keywords | An optional property used for providing additional indexable strings for search. When filtering the items in Raycast, the keywords will be searched in addition to the title. | <code>string[]</code> | The title of its section if any |
+| keywords | An optional property used for providing additional indexable strings for search.  When filtering the items in Raycast, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
 
 ### Grid.Dropdown.Section
 
@@ -6202,12 +6199,12 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| content<mark style="color:red;">*</mark> | An image or color, optionally with a tooltip, representing the content of the grid item. | <code>Image.ImageLike } }</code> | - |
-| accessory | An optional Grid.Item.Accessory</code> | - |
+| content<mark style="color:red;">*</mark> | An image or color, optionally with a tooltip, representing the content of the grid item. | <code>Image.ImageLike }</code> or <code>{ tooltip: string; value: Image.ImageLike</code> or <code>{ color: Color.ColorLike; } }</code> | - |
+| accessory | An optional Grid.Item.Accessory item displayed underneath a Grid.Item. | <code>Grid.Item.Accessory</code> | - |
 | actions | An ActionPanel that will be updated for the selected grid item. | <code>React.ReactNode</code> | - |
-| id | ID of the item. This string is passed to the `onSelectionChange` handler of the Grid when the item is selected. Make sure to assign each item a unique ID or a UUID will be auto generated. | <code>string</code> | - |
-| keywords | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
-| quickLook | Optional information to preview files with Quick Look. Toggle the preview ith Action.ToggleQuickLook. | <code>{ name?: string; path: string }</code> | - |
+| id | ID of the item. This string is passed to the `onSelectionChange` handler of the Grid when the item is selected.  Make sure to assign each item a unique ID or a UUID will be auto generated. | <code>string</code> | - |
+| keywords | An optional property used for providing additional indexable strings for search.  When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
+| quickLook | Optional information to preview files with Quick Look. Toggle the preview ith Action.ToggleQuickLook. | <code>{ name?: string; path: "fs".PathLike }</code> | - |
 | subtitle | An optional subtitle displayed below the title. | <code>string</code> | - |
 | title | An optional title displayed below the content. | <code>string</code> | - |
 
@@ -6280,9 +6277,9 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | aspectRatio | Aspect ratio for the Grid.Item elements. Defaults to 1. | <code>"1"</code> or <code>"3/2"</code> or <code>"2/3"</code> or <code>"4/3"</code> or <code>"3/4"</code> or <code>"16/9"</code> or <code>"9/16"</code> | - |
 | children | The Grid.Item elements of the section. | <code>React.ReactNode</code> | - |
-| columns | Column count for the section. Minimum value is 1, maximum value is 8. | <code>number</code> | `5` |
-| fit | Fit for the Grid.Item</code> | - |
-| inset | Inset for the Grid.Item</code> | - |
+| columns | Column count for the section. Minimum value is 1, maximum value is 8. | <code>number</code> | - |
+| fit | Fit for the Grid.Item element content. Defaults to "contain" | <code>Grid.Fit</code> | - |
+| inset | Inset for the Grid.Item element content. Defaults to "none". | <code>Grid.Inset</code> | - |
 | subtitle | An optional subtitle displayed next to the title of the section. | <code>string</code> | - |
 | title | Title displayed above the section. | <code>string</code> | - |
 
@@ -6548,10 +6545,10 @@ const icon = { source: { light: "https://example.com/icon-light.png", dark: "htt
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| source<mark style="color:red;">*</mark> | The Image.Source</code> |
-| fallback | Image.Fallback</code> |
-| mask | A Image.Mask</code> |
-| tintColor | A Color.ColorLike</code> |
+| source<mark style="color:red;">*</mark> | The Image.Source of the image. | <code>Image.Source</code> |
+| fallback | Image.Fallback image, in case `source` can't be loaded. | <code>Image.Fallback</code> |
+| mask | A Image.Mask to apply to the image. | <code>Image.Mask</code> |
+| tintColor | A Color.ColorLike to tint all the non-transparent pixels of the image. | <code>Color.ColorLike</code> |
 
 ### FileIcon
 
@@ -7177,18 +7174,18 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | actions | A reference to an ActionPanel. It will only be shown when there aren't any children. | <code>React.ReactNode</code> | - |
 | children | List sections or items. If List.Item elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
-| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
-| isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
-| isShowingDetail | Whether the List should have an area on the right side of the items to show additional details about the selected item. | <code>boolean</code> | - |
-| navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
-| pagination | Configuration for pagination | <code>{ hasMore: boolean; pageSize: number; onLoadMore: () => void }</code> | - |
-| searchBarAccessory | List.Dropdown, string></code> | - |
-| searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | `"Search…"` |
+| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the  items. When `false`, the extension needs to take care of the filtering.    You can further define how native filtering orders sections by setting an object with a `keepSectionOrder` property:  When `true`, ensures that Raycast filtering maintains the section order as defined in the extension.  When `false`, filtering may change the section order depending on the ranking values of items. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | - |
+| isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | - |
+| isShowingDetail | Whether the List should have an area on the right side of the items to show additional details about the selected item.    When true, it is recommended not to show any accessories on the `List.Item` and instead show the additional information in the `List.Item.Detail` view. | <code>boolean</code> | - |
+| navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | - |
+| onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
+| onSelectionChange | Callback triggered when the item selection in the list changes.    When the received id is `null`, it means that all items have been filtered out  and that there are no item selected | <code>(id: string) => void</code> | - |
+| pagination | Configuration for pagination | <code>{ hasMore: boolean; onLoadMore: () => void; pageSize: number }</code> | - |
+| searchBarAccessory | List.Dropdown that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;List.Dropdown.Props, string></code> | - |
+| searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | - |
 | searchText | The text that will be displayed in the search bar. | <code>string</code> | - |
 | selectedItemId | Selects the item with the specified id. | <code>string</code> | - |
-| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | `false` |
-| onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
-| onSelectionChange | Callback triggered when the item selection in the list changes. | <code>(id: string) => void</code> | - |
+| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events.  Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | - |
 
 ### List.Dropdown
 
@@ -7249,16 +7246,16 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | tooltip<mark style="color:red;">*</mark> | Tooltip displayed when hovering the dropdown. | <code>string</code> | - |
 | children | Dropdown sections or items. If Dropdown.Item elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
-| defaultValue | The default value of the dropdown. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
-| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
+| defaultValue | The default value of the dropdown.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    **If you're using `storeValue` and configured it as `true` _and_ a Dropdown.Item with the same value exists, then it will be selected.**    **If you configure `value` at the same time as `defaultValue`, the `value` will have precedence over `defaultValue`.** | <code>string</code> | - |
+| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the  items. When `false`, the extension needs to take care of the filtering.    You can further define how native filtering orders sections by setting an object with a `keepSectionOrder` property:  When `true`, ensures that Raycast filtering maintains the section order as defined in the extension.  When `false`, filtering may change the section order depending on the ranking values of items. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | - |
 | id | ID of the dropdown. | <code>string</code> | - |
-| isLoading | Indicates whether a loading indicator should be shown or hidden next to the search bar | <code>boolean</code> | `false` |
-| placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | `"Search…"` |
-| storeValue | Indicates whether the value of the dropdown should be persisted after selection, and restored next time the dropdown is rendered. | <code>boolean</code> | - |
-| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | `false` |
-| value | The currently value of the dropdown. | <code>string</code> | - |
+| isLoading | Indicates whether a loading indicator should be shown or hidden next to the search bar | <code>boolean</code> | - |
 | onChange | Callback triggered when the dropdown selection changes. | <code>(newValue: string) => void</code> | - |
 | onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
+| placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | - |
+| storeValue | Indicates whether the value of the dropdown should be persisted after selection, and restored next time the dropdown is rendered. | <code>boolean</code> | - |
+| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events.  Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | - |
+| value | The currently value of the dropdown. | <code>string</code> | - |
 
 ### List.Dropdown.Item
 
@@ -7291,9 +7288,9 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title displayed for the item. | <code>string</code> | - |
-| value<mark style="color:red;">*</mark> | Value of the dropdown item. Make sure to assign each unique value for each item. | <code>string</code> | - |
+| value<mark style="color:red;">*</mark> | Value of the dropdown item.  Make sure to assign each unique value for each item. | <code>string</code> | - |
 | icon | An optional icon displayed for the item. | <code>Image.ImageLike</code> | - |
-| keywords | An optional property used for providing additional indexable strings for search. When filtering the items in Raycast, the keywords will be searched in addition to the title. | <code>string[]</code> | The title of its section if any |
+| keywords | An optional property used for providing additional indexable strings for search.  When filtering the items in Raycast, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
 
 ### List.Dropdown.Section
 
@@ -7407,13 +7404,13 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The main title displayed for that item, optionally with a tooltip. | <code>string</code> or <code>{ tooltip?: string; value: string }</code> | - |
-| accessories | An optional array of List.Item.Accessory[]</code> | - |
+| accessories | An optional array of List.Item.Accessory items displayed on the right side in a List.Item. | <code>List.Item.Accessory[]</code> | - |
 | actions | An ActionPanel that will be updated for the selected list item. | <code>React.ReactNode</code> | - |
 | detail | The `List.Item.Detail` to be rendered in the right side area when the parent List is showing details and the item is selected. | <code>React.ReactNode</code> | - |
 | icon | An optional icon displayed for the list item. | <code>Image.ImageLike }</code> | - |
-| id | ID of the item. This string is passed to the `onSelectionChange` handler of the List when the item is selected. Make sure to assign each item a unique ID or a UUID will be auto generated. | <code>string</code> | - |
-| keywords | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
-| quickLook | Optional information to preview files with Quick Look. Toggle the preview with Action.ToggleQuickLook. | <code>{ name?: string; path: string }</code> | - |
+| id | ID of the item. This string is passed to the `onSelectionChange` handler of the List when the item is selected.  Make sure to assign each item a unique ID or a UUID will be auto generated. | <code>string</code> | - |
+| keywords | An optional property used for providing additional indexable strings for search.  When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
+| quickLook | Optional information to preview files with Quick Look. Toggle the preview with Action.ToggleQuickLook. | <code>{ name?: string; path: "fs".PathLike }</code> | - |
 | subtitle | An optional subtitle displayed next to the main title, optionally with a tooltip. | <code>string</code> or <code>{ tooltip?: string; value?: string }</code> | - |
 
 ### List.Item.Detail
@@ -7448,7 +7445,7 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| isLoading | Indicates whether a loading bar should be shown or hidden above the detail | <code>boolean</code> | `false` |
+| isLoading | Indicates whether a loading bar should be shown or hidden above the detail | <code>boolean</code> | - |
 | markdown | The CommonMark string to be rendered in the right side area when the parent List is showing details and the item is selected. | <code>string</code> | - |
 | metadata | The `List.Item.Detail.Metadata` to be rendered in the bottom side of the `List.Item.Detail` | <code>React.ReactNode</code> | - |
 
@@ -7598,7 +7595,7 @@ export default function Metadata() {
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of the item. | <code>string</code> | - |
 | icon | An icon to illustrate the value of the item. | <code>Image.ImageLike</code> | - |
-| text | The text value of the item. Specifying `color` will display the text in the provided color. Defaults to Color.SecondaryText; value: string }</code> | - |
+| text | The text value of the item.  Specifying `color` will display the text in the provided color. Defaults to Color.PrimaryText. | <code>string</code> or <code>{ color?: Color; value: string }</code> | - |
 
 ### List.Item.Detail.Metadata.Link
 
@@ -7693,8 +7690,8 @@ A Tag in a `List.Item.Detail.Metadata.TagList`.
 | :--- | :--- | :--- | :--- |
 | color | Changes the text color to the provided color and sets a transparent background with the same color. | <code>Color.ColorLike</code> | - |
 | icon | The optional icon tag icon. Required if the tag has no text. | <code>Image.ImageLike</code> | - |
-| text | The optional tag text. Required if the tag has no icon. | <code>string</code> | - |
 | onAction | Callback that is triggered when the item is clicked. | <code>() => void</code> | - |
+| text | The optional tag text. Required if the tag has no icon. | <code>string</code> | - |
 
 ### List.Item.Detail.Metadata.Separator
 
@@ -7775,10 +7772,10 @@ An interface describing an accessory view in a `List.Item`.
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| tag<mark style="color:red;">*</mark> | A string or Date that will be used as the label, optionally colored. The date is formatted relatively to the current time (for example `new Date()` will be displayed as `"now"`, yesterday's Date will be displayed as "1d", etc.). Color changes the text color to the provided color and sets a transparent background with the same color. Defaults to Color.SecondaryText; value: string</code> or <code>Date</code> or <code>undefined</code> or <code>null }</code> |
-| text | An optional text that will be used as the label, optionally colored. Color changes the text color to the provided color. Defaults to Color.SecondaryText; value: string</code> or <code>undefined</code> or <code>null }</code> |
-| date | An optional Date that will be used as the label, optionally colored. The date is formatted relatively to the current time (for example `new Date()` will be displayed as `"now"`, yesterday's Date will be displayed as "1d", etc.). Color changes the text color to the provided color. Defaults to Color.SecondaryText; value: Date</code> or <code>undefined</code> or <code>null }</code> |
-| icon | An optional Image.ImageLike</code> or <code>null</code> |
+| tag<mark style="color:red;">*</mark> | A string or Date that will be used as the label, optionally colored. The date is formatted relatively to the current time (for example `new Date()` will be displayed as `"now"`, yesterday's Date will be displayed as "1d", etc.).  Color changes the text color to the provided color and sets a transparent background with the same color.  Defaults to Color.SecondaryText. | <code>string</code> or <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> or <code>undefined</code> or <code>null</code> or <code>{ color?: Color.ColorLike</code> or <code>undefined</code> or <code>null }</code> |
+| text | An optional text that will be used as the label, optionally colored.  Color changes the text color to the provided color.  Defaults to Color.SecondaryText. | <code>string</code> or <code>null</code> or <code>{ color?: Color; value: string</code> or <code>undefined</code> or <code>null }</code> |
+| date | An optional Date that will be used as the label, optionally colored. The date is formatted relatively to the current time (for example `new Date()` will be displayed as `"now"`, yesterday's Date will be displayed as "1d", etc.).  Color changes the text color to the provided color.  Defaults to Color.SecondaryText. | <code>[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)</code> or <code>null</code> or <code>{ color?: Color</code> or <code>undefined</code> or <code>null }</code> |
+| icon | An optional Image.ImageLike that will be used as the icon. | <code>Image.ImageLike</code> or <code>null</code> |
 | tooltip | An optional tooltip shown when the accessory is hovered. | <code>string</code> or <code>null</code> |
 
 #### Example
@@ -7936,7 +7933,7 @@ export default async function Command() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| path | The path of the file or folder to get the applications for. If no path is specified, all installed applications are returned. | <code>PathLike</code> |
+| path | The path of the file or folder to get the applications for. If no path is specified, all installed applications are returned. | <code>"fs".PathLike</code> |
 
 #### Return
 
@@ -7967,7 +7964,7 @@ export default async function Command() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| path<mark style="color:red;">*</mark> | The path of the file or folder to get the default application for. | <code>PathLike</code> |
+| path<mark style="color:red;">*</mark> | The path of the file or folder to get the default application for. | <code>"fs".PathLike</code> |
 
 #### Return
 
@@ -8024,7 +8021,7 @@ export default async function Command() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| path<mark style="color:red;">*</mark> | The path to show in the Finder. | <code>PathLike</code> |
+| path<mark style="color:red;">*</mark> | The path to show in the Finder. | <code>"fs".PathLike</code> |
 
 #### Return
 
@@ -8059,7 +8056,7 @@ export default async function Command() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| path<mark style="color:red;">*</mark> |  | <code>PathLike[]</code> |
+| path<mark style="color:red;">*</mark> | The item or items to move to the trash. | <code>"fs".PathLike</code> or <code>"fs".PathLike[]</code> |
 
 #### Return
 
@@ -8090,7 +8087,7 @@ export default async function Command() {
 | Name | Description | Type |
 | :--- | :--- | :--- |
 | target<mark style="color:red;">*</mark> | The file, folder or URL to open. | <code>string</code> |
-| application | The application name to use for opening the file. If no application is specified, the default application as determined by the system is used to open the specified file. Note that you can use the application name, app identifier, or absolute path to the app. | <code>string</code> or <code>Application</code> |
+| application | The application name to use for opening the file. If no application is specified, the default application as determined by the system  is used to open the specified file. Note that you can use the application name, app identifier, or absolute path to the app. | <code>string</code> or <code>Application</code> |
 
 #### Return
 
@@ -8132,7 +8129,7 @@ export default async function Command() {
 | Name | Description | Type |
 | :--- | :--- | :--- |
 | target<mark style="color:red;">*</mark> | The file, folder or URL to open. | <code>string</code> |
-| application | The application name to use for opening the file. If no application is specified, the default application as determined by the system is used to open the specified file. Note that you can use the application name, app identifier, or absolute path to the app. | <code>string</code> or <code>Application</code> |
+| application | The application name to use for opening the file. If no application is specified, the default application as determined by the system  is used to open the specified file. Note that you can use the application name, app identifier, or absolute path to the app. | <code>string</code> or <code>Application</code> |
 
 ## Types
 
@@ -8180,7 +8177,7 @@ async function clearSearchBar(options?: { forceScrollToTop?: boolean }): Promise
 | Name | Description | Type |
 | :--- | :--- | :--- |
 | options | Can be used to control the behaviour after the search bar is cleared. | <code>Object</code> |
-| options.forceScrollToTop | Can be used to force scrolling to the top. Defaults to scrolling to the top after the the search bar was cleared. | <code>boolean</code> |
+| options.forceScrollToTop | Can be used to force scrolling to the top. Defaults to scrolling to the top after the  the search bar was cleared. | <code>boolean</code> |
 
 #### Return
 
@@ -8224,7 +8221,7 @@ export default async () => {
 | :--- | :--- | :--- |
 | options | Can be used to control the behaviour after closing the main window. | <code>Object</code> |
 | options.clearRootSearch | Clears the text in the root search bar and scrolls to the top | <code>boolean</code> |
-| options.popToRootType | Defines the pop to root behavior (PopToRootType</code> |
+| options.popToRootType | Defines the pop to root behavior (PopToRootType); the default is to to respect the user's "Pop to Root Search" preference in Raycast | <code>PopToRootType</code> |
 
 #### Return
 
@@ -8429,7 +8426,7 @@ export default async function Command() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| options<mark style="color:red;">*</mark> |  | <code>{ id: string }</code> or <code>{ bounds: { position?: { x?: number; y?: number }; size?: { height?: number; width?: number } }; desktopId?: string }</code> or <code>{ id: string }</code> or <code>{ bounds: "fullscreen" }</code> |
+| options<mark style="color:red;">*</mark> |  | <code>{ id: string }</code> or <code>{ bounds: { position?: { x?: number; y?: number }; size?: { height?: number; width?: number } }; desktopId?: string }</code> or <code>{ bounds: "fullscreen" }</code> |
 
 #### Return
 

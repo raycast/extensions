@@ -17,7 +17,7 @@ async function clearSearchBar(options?: { forceScrollToTop?: boolean }): Promise
 | Name | Description | Type |
 | :--- | :--- | :--- |
 | options | Can be used to control the behaviour after the search bar is cleared. | <code>Object</code> |
-| options.forceScrollToTop | Can be used to force scrolling to the top. Defaults to scrolling to the top after the the search bar was cleared. | <code>boolean</code> |
+| options.forceScrollToTop | Can be used to force scrolling to the top. Defaults to scrolling to the top after the  the search bar was cleared. | <code>boolean</code> |
 
 #### Return
 
@@ -61,7 +61,7 @@ export default async () => {
 | :--- | :--- | :--- |
 | options | Can be used to control the behaviour after closing the main window. | <code>Object</code> |
 | options.clearRootSearch | Clears the text in the root search bar and scrolls to the top | <code>boolean</code> |
-| options.popToRootType | Defines the pop to root behavior ([PopToRootType](window-and-search-bar.md#poptoroottype)); the default is to to respect the user's "Pop to Root Search" preference in Raycast | <code>[PopToRootType](window-and-search-bar.md#poptoroottype)</code> |
+| options.popToRootType | Defines the pop to root behavior (PopToRootType); the default is to to respect the user's "Pop to Root Search" preference in Raycast | <code>[PopToRootType](window-and-search-bar.md#poptoroottype)</code> |
 
 #### Return
 
