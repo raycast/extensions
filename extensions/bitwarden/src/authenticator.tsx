@@ -94,7 +94,19 @@ function AuthenticatorList() {
 
 function VaultItem({ item }: { item: Item }) {
   const icon = useItemIcon(item);
-  const { code, timeRemaining } = authenticator.useCode(item);
+  const { code, timeRemaining, error, isLoading } = authenticator.useCode(item);
+
+  function getAccessories(): List.Item.Props["accessories"] {
+    if (isLoading) return [{ text: "Loading..." }];
+    if (error) return [{ text: { value: error.message, color: Color.Red } }];
+    if (code && timeRemaining) {
+      return [
+        { text: code },
+        { tag: { value: String(timeRemaining), color: timeRemaining <= 7 ? Color.Red : Color.Blue } },
+      ];
+    }
+    return [{ text: "Loading..." }];
+  }
 
   return (
     <VaultItemContext.Provider value={item}>
@@ -109,14 +121,7 @@ function VaultItem({ item }: { item: Item }) {
             <CommonActions />
           </ActionPanel>
         }
-        accessories={
-          code && timeRemaining
-            ? [
-                { text: code },
-                { tag: { value: String(timeRemaining), color: timeRemaining <= 7 ? Color.Red : Color.Blue } },
-              ]
-            : [{ text: "Loading..." }]
-        }
+        accessories={getAccessories()}
       />
     </VaultItemContext.Provider>
   );
@@ -252,15 +257,19 @@ const authenticator = {
     }
   },
   useCode(item: Item) {
-    const { generator, error } = useMemo(() => {
+    const { generator, error, isLoading } = useMemo(() => {
       const { totp } = item.login ?? {};
-      if (totp === SENSITIVE_VALUE_PLACEHOLDER) return { generator: null, error: new Error("Loading...") };
-      if (!totp) return { generator: null, error: new Error("No TOTP found") };
-      return authenticator.getGenerator(totp);
+      if (totp === SENSITIVE_VALUE_PLACEHOLDER) {
+        return { generator: null, error: new Error("Loading..."), isLoading: true };
+      }
+      if (!totp) {
+        return { generator: null, error: new Error("No TOTP found"), isLoading: false };
+      }
+      return { ...authenticator.getGenerator(totp), isLoading: false };
     }, [item]);
 
     const [code, setCode] = useState(() => {
-      if (error) return error.message;
+      if (error) return null;
       return generator.generate();
     });
 
@@ -294,7 +303,7 @@ const authenticator = {
       return () => interval && clearInterval(interval);
     }, [item, generator]);
 
-    return { code, timeRemaining };
+    return { code, timeRemaining, error, isLoading };
   },
 };
 
