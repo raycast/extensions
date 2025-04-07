@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [New Emoji Features and Improvements] - 2024-03-26
+## [New Emoji Features and Improvements] - {PR_MERGE_DATE}
 
 - Add new `Search Emojis` command to browse and copy Slack emojis
 - Add `get-emojis` tool to fetch emojis with AI
