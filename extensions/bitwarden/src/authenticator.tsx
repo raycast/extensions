@@ -1,6 +1,6 @@
 import * as OTPAuth from "otpauth";
 import { useEffect, useMemo, useState } from "react";
-import { ActionPanel, BrowserExtension, Clipboard, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, BrowserExtension, Clipboard, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
 import RootErrorBoundary from "~/components/RootErrorBoundary";
@@ -94,9 +94,11 @@ function AuthenticatorList() {
 
 function ListItem({ item }: { item: Item }) {
   const icon = useItemIcon(item);
-  const { code, time, error, isLoading } = authenticator.useCode(item);
+  const [canGenerate, setCanGenerate] = useState(!item.reprompt);
+  const { code, time, error, isLoading } = authenticator.useCode(item, canGenerate);
 
   function getAccessories(): List.Item.Props["accessories"] {
+    if (!canGenerate) return [{ text: { value: "Needs confirmation", color: Color.Yellow } }];
     if (!isLoading) {
       if (error) {
         return [{ text: { value: error.message, color: Color.Red } }];
@@ -116,8 +118,14 @@ function ListItem({ item }: { item: Item }) {
         icon={icon}
         actions={
           <ActionPanel>
-            <CopyCodeAction />
-            <PasteCodeAction />
+            {!canGenerate ? (
+              <ConfirmAction onConfirm={() => setCanGenerate(true)} />
+            ) : (
+              <>
+                <CopyCodeAction />
+                <PasteCodeAction />
+              </>
+            )}
             <CommonActions />
           </ActionPanel>
         }
@@ -136,6 +144,19 @@ function CommonActions() {
   );
 }
 
+function ConfirmAction({ onConfirm }: { onConfirm: () => void }) {
+  const selectedItem = useSelectedVaultItem();
+
+  return (
+    <ActionWithReprompt
+      title="Confirm Password"
+      onAction={onConfirm}
+      icon={Icon.Lock}
+      repromptDescription={`Generating an authentication code for <${selectedItem.name}>`}
+    />
+  );
+}
+
 function CopyCodeAction() {
   const getCode = useGetCodeForAction("copy");
 
@@ -147,7 +168,7 @@ function CopyCodeAction() {
     }
   };
 
-  return <ActionWithReprompt title="Copy Code" icon={Icon.Clipboard} onAction={copy} />;
+  return <Action title="Copy Code" onAction={copy} icon={Icon.Clipboard} />;
 }
 
 function PasteCodeAction() {
@@ -162,10 +183,10 @@ function PasteCodeAction() {
   };
 
   return (
-    <ActionWithReprompt
+    <Action
       title={frontmostAppName ? `Paste Code into ${frontmostAppName}` : "Paste Code"}
-      icon={Icon.Window}
       onAction={paste}
+      icon={Icon.Window}
     />
   );
 }
@@ -245,13 +266,14 @@ const authenticator = {
     if (error) return Err(error);
     return Ok(new OTPAuth.TOTP(options));
   },
-  useCode(item: Item) {
+  useCode(item: Item, canGenerate = true) {
     const [generator, error, isLoading = false] = useMemo(() => {
       const { totp } = item.login ?? {};
+      if (!canGenerate) return Loading(new Error("Needs confirmation..."));
       if (totp === SENSITIVE_VALUE_PLACEHOLDER) return Loading(new Error("Loading..."));
       if (!totp) return Err(new Error("No TOTP found"));
       return authenticator.getGenerator(totp);
-    }, [item]);
+    }, [item, canGenerate]);
 
     const [code, setCode] = useState(() => {
       if (error) return null;
