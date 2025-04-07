@@ -1,12 +1,15 @@
 import { Cache } from "@raycast/api";
-import { BYTES_PER_MEGABYTE } from "../constants";
-import { Note, Vault } from "../interfaces";
-import { NoteLoader } from "./loader";
+import { BYTES_PER_MEGABYTE } from "../../utils/constants";
+import { Logger } from "../logger/logger.service";
+import { Note } from "../vault/notes/notes.types";
+import { loadNotes } from "../vault/vault.service";
+import { Vault } from "../vault/vault.types";
 
 //--------------------------------------------------------------------------------
 // This cache is shared accross all commands.
 //--------------------------------------------------------------------------------
 
+const logger = new Logger("Cache");
 const cache = new Cache({ capacity: BYTES_PER_MEGABYTE * 500 });
 
 /**
@@ -16,8 +19,7 @@ const cache = new Cache({ capacity: BYTES_PER_MEGABYTE * 500 });
  * @returns The cached notes for the vault
  */
 export function cacheNotesFor(vault: Vault) {
-  const nl = new NoteLoader(vault);
-  const notes = nl.loadNotes();
+  const notes = loadNotes(vault);
   cache.set(vault.name, JSON.stringify({ lastCached: Date.now(), notes: notes }));
   return notes;
 }
@@ -79,8 +81,8 @@ export function getNotesFromCache(vault: Vault) {
   if (cacheExistForVault(vault)) {
     const data = JSON.parse(cache.get(vault.name) ?? "{}");
     if (data.notes?.length > 0 && data.lastCached > Date.now() - 1000 * 60 * 5) {
-      const notes_ = data.notes;
-      console.log("Returning cached notes");
+      const notes_ = data.notes as Note[];
+      logger.info("Using cached notes.");
       return notes_;
     }
   }
