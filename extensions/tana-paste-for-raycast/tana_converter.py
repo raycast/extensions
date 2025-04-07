@@ -210,7 +210,7 @@ def parse_date(text):
     # ISO date with time
     iso_time_match = re.match(r'^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})$', text)
     if iso_time_match:
-        _, date, time = iso_time_match.groups()
+        date, time = iso_time_match.groups()
         return ParsedDate('time', f"{date} {time}")
 
     # Legacy format with time
