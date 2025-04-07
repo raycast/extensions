@@ -107,7 +107,6 @@ export const getErrorString = (error: any): string | undefined => {
 
 export type Success<T> = { data: T; error: null };
 export type Failure<E> = { data: null; error: E };
-
 export type Result<T, E = Error> = Success<T> | Failure<E>;
 
 export function Ok<T>(data: T) {
@@ -117,9 +116,10 @@ export function Err<E = Error>(error: E) {
   return { data: null, error } as { data: null; error: E };
 }
 
+/** Same as {@link Success} but with a named data property */
 export type SuccessN<N extends string, T> = { [k in N]: T } & { error: null };
+/** Same as {@link Failure} but with a named error property */
 export type FailureN<N extends string, E> = { [K in N]: null } & { error: E };
-
 /** Same as {@link Result} but with a named data property */
 export type ResultN<N extends string, T, E = Error> = SuccessN<N, T> | FailureN<N, E>;
 
