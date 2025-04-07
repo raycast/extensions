@@ -45,6 +45,7 @@ export default function Command() {
       tooltip={`Hacker News 500+ Stories${unseenCount > 0 ? ` (${unseenCount})` : ""}`}
       isLoading={loading}
     >
+      {stories.length === 0 && <MenuBarExtra.Item title="No recent stories" />}
       {stories?.map((story: Story) => (
         <MenuBarExtra.Item
           key={story.external_url}
