@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [✨ Improved Error Handling] - {PR_MERGE_DATE}
+## [✨ Improved Error Handling] - 2025-04-07
 
 - Fixed an issue that caused the application to crash when users attempted to update a todo item from the menu bar without a valid authentication token.
 
