@@ -224,17 +224,17 @@ type AuthenticatorOptions = {
 const authenticator = {
   parseTotp(totpString: string): AuthenticatorOptions {
     if (totpString.includes("otpauth")) {
-      const [parsed, error] = tryCatch(() => OTPAuth.URI.parse(totpString));
-      if (error || !(parsed instanceof OTPAuth.TOTP)) throw new Error("Invalid key");
+      const [otp, error] = tryCatch(() => OTPAuth.URI.parse(totpString));
+      if (error || !(otp instanceof OTPAuth.TOTP)) throw new Error("Invalid key");
 
-      const algorithm = Algorithms[parsed.algorithm as keyof typeof Algorithms];
+      const algorithm = Algorithms[otp.algorithm as keyof typeof Algorithms];
       if (!algorithm) throw new Error("Invalid algorithm");
 
       return {
         algorithm,
-        secret: parsed.secret.base32.toString(),
-        period: parsed.period,
-        digits: parsed.digits,
+        secret: otp.secret.base32.toString(),
+        period: otp.period,
+        digits: otp.digits,
       };
     }
 
