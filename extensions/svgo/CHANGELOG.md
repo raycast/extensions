@@ -1,5 +1,10 @@
 # SVGO Changelog
 
+## [New Configuration] - {PR_MERGE_DATE}
+
+- Added ability to modify (`save`, `restore`) configuration for all commands
+- Upgraded plugins to latest versions: `@raycast/api`, `svgo`
+
 ## [New Command] - 2023-06-06
 
 - Added new command to create optimized SVG files based on the current Finder selection
