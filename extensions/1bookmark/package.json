@@ -49,7 +49,7 @@
     "@trpc/client": "^11.0.0-rc.604",
     "@trpc/react-query": "^11.0.0-rc.604",
     "@trpc/server": "^11.0.0-rc.604",
-    "axios": "^1.7.7",
+    "axios": "^1.8.4",
     "fuzzysort": "^3.1.0",
     "ini": "^4.1.1",
     "node-fetch": "^3.3.2",
