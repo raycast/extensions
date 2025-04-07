@@ -20,17 +20,11 @@ export default function Command() {
       .then((stories) => {
         const now = Date.now();
         const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
-        return stories
-          .filter((story) => {
-            // Remove stories more than 24 hours old
-            const storyDate = new Date(story.date_published).getTime();
-            return now - storyDate < twentyFourHoursInMs;
-          })
-          .map((story) => {
-            // Shorten the title length
-            const title = story.title.length > 50 ? `${story.title.slice(0, 50)}...` : story.title;
-            return { ...story, title };
-          });
+        return stories.filter((story) => {
+          // Remove stories more than 24 hours old
+          const storyDate = new Date(story.date_published).getTime();
+          return now - storyDate < twentyFourHoursInMs;
+        });
       })
       .then((stories) => setStories(stories))
       .finally(() => setLoading(false));
@@ -50,7 +44,7 @@ export default function Command() {
         <MenuBarExtra.Item
           key={story.external_url}
           icon={getFavicon(story.url)}
-          title={story.title}
+          title={story.title.length > 50 ? `${story.title.slice(0, 50)}...` : story.title}
           tooltip={`${seen.includes(story.external_url) ? "(read) " : ""}${story.title}`}
           onAction={() => {
             open(story.external_url);
