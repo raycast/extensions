@@ -1,4 +1,4 @@
-# Rize.io Raycast Extension
+# Rize.io Sessions
 
 ## Overview
 
