@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "include": ["**/*.ts", "**/*.tsx"],
   "compilerOptions": {
-    "lib": ["es2021"],
+    "lib": ["es2021", "dom"],
     "module": "commonjs",
     "target": "es2021",
     "strict": true,
