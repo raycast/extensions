@@ -275,17 +275,20 @@ const authenticator = {
         }
       };
 
-      let interval: NodeJS.Timeout;
+      let interval: NodeJS.Timeout | undefined;
       // set an initial timeout to ensure the first evaluation is time accurate
       // and then keep evaluating every second
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         setTimeAndCode();
         interval = setInterval(setTimeAndCode, 1000);
       }, generator.remaining() % 1000);
 
       setCode(generator.generate()); // first generation before the interval starts
 
-      return () => interval && clearInterval(interval);
+      return () => {
+        clearTimeout(timeout);
+        clearInterval(interval);
+      };
     }, [item, generator]);
 
     return { code, time, error, isLoading };
