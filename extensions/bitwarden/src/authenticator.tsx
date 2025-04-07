@@ -20,7 +20,7 @@ import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationNa
 import { ActionWithReprompt, DebuggingBugReportingActionSection, VaultActionsSection } from "~/components/actions";
 import { ErrN, OkN, ResultN, tryCatch } from "~/utils/errors";
 
-const AuthenticatorComponent = () => (
+const AuthenticatorCommand = () => (
   <RootErrorBoundary>
     <BitwardenProvider loadingFallback={<List searchBarPlaceholder="Search vault" isLoading />}>
       <SessionProvider unlock>
@@ -305,4 +305,4 @@ const authenticator = {
   },
 };
 
-export default AuthenticatorComponent;
+export default AuthenticatorCommand;
