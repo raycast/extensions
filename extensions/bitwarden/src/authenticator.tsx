@@ -233,14 +233,9 @@ const authenticator = {
     if (totpString.includes("otpauth")) {
       const [otp, error] = tryCatch(() => OTPAuth.URI.parse(totpString));
       if (error) throw error;
-      if (!(otp instanceof OTPAuth.TOTP)) throw new Error("Invalid key");
+      if (error || !(otp instanceof OTPAuth.TOTP)) throw new Error("Invalid key");
 
-      return {
-        algorithm: otp.algorithm,
-        secret: otp.secret.base32.toString(),
-        period: otp.period,
-        digits: otp.digits,
-      };
+      return { algorithm: otp.algorithm, secret: otp.secret.base32.toString(), period: otp.period, digits: otp.digits };
     }
 
     return { secret: totpString, period: 30, algorithm: "SHA1", digits: 6 };
@@ -256,6 +251,7 @@ const authenticator = {
       if (!canGenerate) return Loading(new Error("Needs confirmation..."));
       if (totp === SENSITIVE_VALUE_PLACEHOLDER) return Loading(new Error("Loading..."));
       if (!totp) return Err(new Error("No TOTP found"));
+
       return authenticator.getGenerator(totp);
     }, [item, canGenerate]);
 
