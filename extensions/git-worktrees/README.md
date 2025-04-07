@@ -2,7 +2,7 @@
 
 A powerful Raycast extension for efficiently managing Git worktrees with a streamlined interface. This extension helps developers work with multiple branches simultaneously by creating and managing Git worktrees through an intuitive Raycast interface.
 
-![git-worktrees-1.png](./metadata/git-worktrees-1.png)
+![git-worktrees-commands](./media/git-worktrees-commands.png)
 
 ## Features
 
