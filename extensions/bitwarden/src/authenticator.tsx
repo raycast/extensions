@@ -221,24 +221,10 @@ function useActiveTab() {
   });
 }
 
-const Algorithms = {
-  SHA1: "SHA1",
-  SHA224: "SHA224",
-  SHA256: "SHA256",
-  SHA384: "SHA384",
-  SHA512: "SHA512",
-  SHA3_224: "SHA3-224",
-  SHA3_256: "SHA3-256",
-  SHA3_384: "SHA3-384",
-  SHA3_512: "SHA3-512",
-} as const;
-
-type Algorithm = (typeof Algorithms)[keyof typeof Algorithms];
-
 type AuthenticatorOptions = {
   secret: string;
   period: number;
-  algorithm: Algorithm;
+  algorithm: string;
   digits: number;
 };
 
@@ -246,13 +232,11 @@ const authenticator = {
   parseTotp(totpString: string): AuthenticatorOptions {
     if (totpString.includes("otpauth")) {
       const [otp, error] = tryCatch(() => OTPAuth.URI.parse(totpString));
-      if (error || !(otp instanceof OTPAuth.TOTP)) throw new Error("Invalid key");
-
-      const algorithm = Algorithms[otp.algorithm as keyof typeof Algorithms];
-      if (!algorithm) throw new Error("Invalid algorithm");
+      if (error) throw error;
+      if (!(otp instanceof OTPAuth.TOTP)) throw new Error("Invalid key");
 
       return {
-        algorithm,
+        algorithm: otp.algorithm,
         secret: otp.secret.base32.toString(),
         period: otp.period,
         digits: otp.digits,
