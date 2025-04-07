@@ -25,15 +25,15 @@ export async function getStories(): Promise<CacheEntry["items"]> {
     },
   });
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    console.error("Failed to fetch stories:", response.statusText);
+    return [];
   }
   try {
     const { items } = await response.json();
     cache.set(key, JSON.stringify({ timestamp: Date.now(), items }));
+    return items;
   } catch (error) {
-    showFailureToast(error, { title: "Failed to fetch Hacker News stories" });
-    throw error;
+    console.error("Failed to parse response:", error);
+    return [];
   }
-
-  return items;
 }
