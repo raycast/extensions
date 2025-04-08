@@ -18,21 +18,24 @@
       "title": "Hide This",
       "subtitle": "Make selected items invisible in Finder",
       "description": "Uses `chflags hidden` on currently selected Finder items.\nWorks with both files and folders.",
-      "mode": "view"
+      "mode": "view",
+      "icon": "hide.png"
     },
     {
       "name": "reveal-this",
       "title": "Reveal This",
       "subtitle": "Unhide selected Finder items",
       "description": "Applies `chflags nohidden` to unhide files/folder in Finder.",
-      "mode": "view"
+      "mode": "view",
+      "icon": "unhide.png"
     },
     {
       "name": "ghost-mode",
       "title": "Ghost Mode",
       "subtitle": "Toggle show/hide all hidden files",
       "description": "Switches macOS hidden tile visibility globally (defaults write AppleShowAllFiles).",
-      "mode": "no-view"
+      "mode": "no-view",
+      "icon": "toggle-global.png"
     }
   ],
   "dependencies": {
