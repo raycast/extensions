@@ -48,40 +48,56 @@ export default async function Command() {
     const allEnvelopes: Record<string, Envelope> = {};
     let totalEnvelopes = 0;
 
-    // Process folders one by one
-    for (let i = 0; i < folders.length; i++) {
-      const folder = folders[i];
+    // Process folders in batches of 5
+    const BATCH_SIZE = 5;
+    for (let i = 0; i < folders.length; i += BATCH_SIZE) {
+      // Get the current batch of folders
+      const folderBatch = folders.slice(i, i + BATCH_SIZE);
 
       // Update progress toast
       if (!isRunningInBackground && progressToast) {
-        // Create a new toast instead of updating the existing one
         progressToast = await showToast({
           style: Toast.Style.Animated,
           title: "Fetching emails",
-          message: `Folder ${i + 1}/${folders.length}: ${folder.name}`,
+          message: `Batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(folders.length / BATCH_SIZE)}: ${folderBatch.map((f) => f.name).join(", ")}`,
         });
       }
 
       try {
-        // Fetch envelopes for this folder
-        const folderEnvelopes = await fetchEnvelopesFromCLI(preferences, folder.name);
+        // Fetch envelopes for all folders in this batch in parallel
+        const batchResults = await Promise.all(
+          folderBatch.map(async (folder) => {
+            try {
+              const folderEnvelopes = await fetchEnvelopesFromCLI(preferences, folder.name);
+              return { folder, envelopes: folderEnvelopes, success: true };
+            } catch (folderError) {
+              console.error(`Error fetching envelopes for folder ${folder.name}:`, folderError);
+              return { folder, envelopes: [], success: false };
+            }
+          }),
+        );
 
-        // Add each envelope to our collection, using ID as key to avoid duplicates
-        folderEnvelopes.forEach((envelope) => {
-          // Only add if we don't already have this envelope, or if we're replacing with a non-INBOX folder
-          // This prioritizes non-INBOX folder assignments when emails appear in multiple folders
-          if (
-            !allEnvelopes[envelope.id] ||
-            (allEnvelopes[envelope.id].folder_name === "INBOX" && envelope.folder_name !== "INBOX")
-          ) {
-            allEnvelopes[envelope.id] = envelope;
+        // Process the results from this batch
+        for (const result of batchResults) {
+          if (result.success) {
+            // Add each envelope to our collection, using ID as key to avoid duplicates
+            result.envelopes.forEach((envelope) => {
+              // Only add if we don't already have this envelope, or if we're replacing with a non-INBOX folder
+              // This prioritizes non-INBOX folder assignments when emails appear in multiple folders
+              if (
+                !allEnvelopes[envelope.id] ||
+                (allEnvelopes[envelope.id].folder_name === "INBOX" && envelope.folder_name !== "INBOX")
+              ) {
+                allEnvelopes[envelope.id] = envelope;
+              }
+            });
+
+            totalEnvelopes += result.envelopes.length;
           }
-        });
-
-        totalEnvelopes += folderEnvelopes.length;
-      } catch (folderError) {
-        console.error(`Error fetching envelopes for folder ${folder.name}:`, folderError);
-        // Continue with other folders even if one fails
+        }
+      } catch (batchError) {
+        console.error(`Error processing batch starting at folder ${i}:`, batchError);
+        // Continue with other batches even if one fails
       }
     }
 
