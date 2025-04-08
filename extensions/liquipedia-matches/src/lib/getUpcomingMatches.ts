@@ -44,8 +44,6 @@ export async function getUpcomingMatches(): Promise<Match[]> {
   }
 
   const { parse } = await res.json();
-
-  const { parse } = await res.json();
   const html = parse.text["*"];
   const $ = cheerio.load(html);
 
