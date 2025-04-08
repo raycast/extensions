@@ -55,12 +55,30 @@
         "host file",
         "etc/hosts"
       ]
+    },
+    {
+      "name": "update",
+      "title": "Update Remote Hosts Quickly",
+      "description": "Update Remote Hosts Quickly",
+      "mode": "no-view",
+      "keywords": [
+        "remote",
+        "update remote hosts",
+        "ihosts",
+        "hosts",
+        "host",
+        "system hosts",
+        "manage hosts",
+        "host file",
+        "etc/hosts"
+      ]
     }
   ],
   "keywords": [
     "ihosts",
     "hosts",
     "host",
+    "remote",
     "system hosts",
     "manage hosts",
     "host file",
@@ -82,7 +100,7 @@
     "typescript": "^4.4.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "rm -rf dist/* && ray build -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
