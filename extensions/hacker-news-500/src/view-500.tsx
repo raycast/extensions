@@ -23,6 +23,7 @@ export default function Command() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stories, setStories] = useState<Story[]>([]);
+
   const hasUnread = stories.some((story) => !readStories.includes(story.external_url));
   const unreadCount = stories.filter((story) => !readStories.includes(story.external_url)).length;
 
@@ -37,7 +38,7 @@ export default function Command() {
     setLoading(true);
     // cache the points we used
     cache.set(prefKey, points);
-    getStories(points || "500")
+    getStories(points || "500", { cache })
       .then((stories) => {
         const now = Date.now();
 
@@ -48,6 +49,7 @@ export default function Command() {
           })
           .map((story) => ({ story, seen: now }));
 
+        // merge everything now with a seen prop
         const allStoriesSeen = [...seenStories, ...unseenStories].toSorted((a, b) => {
           const aDate = new Date(a.seen).getTime();
           const bDate = new Date(b.seen).getTime();
@@ -58,6 +60,7 @@ export default function Command() {
         const twentyFourHoursInMs = 240 * 60 * 60 * 1000;
         return allStoriesSeen
           .filter(({ seen }) => {
+            // We dont show anything seen over 24 hours ago
             const storyDate = new Date(seen).getTime();
             return now - storyDate < twentyFourHoursInMs;
           })

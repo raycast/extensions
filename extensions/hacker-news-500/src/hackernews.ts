@@ -1,16 +1,19 @@
 import os from "node:os";
-import { Cache, environment } from "@raycast/api";
+import { environment } from "@raycast/api";
+import type { Cache } from "@raycast/api";
 import { CacheEntry, Story } from "./types";
 
 // The HNRSS service caches responses for 5 minutes: https://github.com/hnrss/hnrss/issues/71
 const CACHE_DURATION_IN_MS = 5 * 60 * 1_000;
 
-const cache = new Cache();
 const key = "hnrss-newest";
 
-export async function getStories(points = "500"): Promise<CacheEntry["items"]> {
+type GetStoriesProps = {
+  points: string;
+  options: { cache: Cache };
+};
+export async function getStories(points = "500", { cache }: GetStoriesProps["options"]): Promise<CacheEntry["items"]> {
   const cachedResponse = cache.get(key);
-  console.log("cachedResponse", cachedResponse);
   if (cachedResponse) {
     const parsed: CacheEntry = JSON.parse(cachedResponse);
     const elapsed = Date.now() - parsed.timestamp;
