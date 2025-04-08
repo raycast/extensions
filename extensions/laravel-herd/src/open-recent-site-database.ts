@@ -10,7 +10,7 @@ export default async function main() {
     return;
   }
 
-  const recentSite = await Herd.Sites.getRecentSite();
+  const recentSite = await rescue(() => Herd.Sites.getRecentSite(), "Failed to get recent site.", null);
 
   if (!recentSite) {
     await showToast({

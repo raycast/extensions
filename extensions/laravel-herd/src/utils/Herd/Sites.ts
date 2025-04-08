@@ -44,12 +44,11 @@ export class Sites {
   static async getRecentSite(): Promise<Site | null> {
     const recentSite = await Herd.runAppleScript<string>(`get recent site`);
 
-    if (!recentSite) return null;
+    if (!recentSite || recentSite === "{}") return null;
 
     try {
       return JSON.parse(recentSite) as Site;
     } catch (e) {
-      console.error(e);
       return null;
     }
   }
