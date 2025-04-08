@@ -20,6 +20,12 @@
             "title": "Envelopes",
             "description": "List envelopes",
             "mode": "view"
+        },
+        {
+            "name": "reset",
+            "title": "Reset",
+            "description": "Clear all cached data",
+            "mode": "no-view"
         }
     ],
     "preferences": [
