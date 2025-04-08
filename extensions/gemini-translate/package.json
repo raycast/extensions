@@ -16,7 +16,8 @@
       "title": "Gemini API Key",
       "description": "Your Google AI Gemini API Key",
       "type": "password",
-      "required": true
+      "required": true,
+      "placeholder": "Enter your Gemini API Key"
     },
     {
       "name": "geminiModel",
@@ -24,13 +25,14 @@
       "description": "Enter the Gemini model to use",
       "type": "textfield",
       "required": true,
-      "default": "gemini-2.0-flash"
+      "default": "gemini-2.0-flash",
+      "placeholder": "e.g., gemini-2.0-flash"
     }
   ],
   "commands": [
     {
       "name": "translate-to-english",
-      "title": "Translate to English (gemini)",
+      "title": "Translate to English",
       "description": "Translate selected/clipboard text to English using Gemini.",
       "mode": "view",
       "shortcut": {
@@ -43,7 +45,7 @@
     },
     {
       "name": "translate-to-japanese",
-      "title": "Translate to Japanese (gemini)",
+      "title": "Translate to Japanese",
       "description": "Translate selected/clipboard text to Japanese using Gemini.",
       "mode": "view",
       "shortcut": {
@@ -56,7 +58,7 @@
     },
     {
       "name": "summarize-japanese",
-      "title": "Summarize in Japanese (gemini)",
+      "title": "Summarize in Japanese",
       "description": "Summarize selected/clipboard text in Japanese using Gemini.",
       "mode": "view",
       "shortcut": {
