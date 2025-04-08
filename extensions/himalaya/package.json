@@ -13,7 +13,7 @@
             "title": "Sync",
             "description": "Sync envelopes",
             "mode": "no-view",
-            "interval": "1m"
+            "interval": "5m"
         },
         {
             "name": "envelopes",

@@ -190,7 +190,9 @@ export default function Command() {
         },
       })
     ) {
+      // Perform the deletion and update UI only after CLI deletion succeeds
       deleteEnvelopeAndRefresh(id, preferences, () => {
+        // Update local state from localStorage after successful deletion
         loadEnvelopesFromStorage().then((data) => {
           setEnvelopes(data.envelopes);
           setLastSync(data.lastSync);

@@ -85,7 +85,7 @@ export async function getLastSyncTime(): Promise<Date | null> {
 }
 
 /**
- * Deletes an envelope using the Himalaya CLI and refreshes the envelope list
+ * Deletes an envelope using the Himalaya CLI and updates localStorage
  * @param id ID of the envelope to delete
  * @param preferences User preferences
  * @param onSuccess Callback function to execute after successful deletion
@@ -102,15 +102,17 @@ export async function deleteEnvelopeAndRefresh(
       title: "Deleting email...",
     });
 
-    // Execute delete command
+    // Execute delete command - wait for this to complete first
     await execa(
       preferences.binaryPath,
       ["message", "delete", id, "--account", preferences.defaultAccount, "--output", "json"],
       {},
     );
 
-    // Fetch the latest envelopes from the CLI
-    await fetchEnvelopesFromCLI(preferences);
+    // Only after successful CLI deletion, update localStorage
+    const { envelopes } = await loadEnvelopesFromStorage();
+    const updatedEnvelopes = envelopes.filter((envelope) => envelope.id !== id);
+    await updateEnvelopesInStorage(updatedEnvelopes);
 
     // Show success toast
     await showToast({
