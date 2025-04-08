@@ -33,22 +33,14 @@ function Actions(props: { item: Device }) {
   return (
     <ActionPanel title={props.item.model}>
       <ActionPanel.Section>
-        <ActionPanel.Item
-          title={"Power On"}
-          onAction={() => handleDevicePower(deviceControl, true)}
-          icon={Icon.Power}
-        ></ActionPanel.Item>
-        <ActionPanel.Item
-          title={"Power Off"}
-          onAction={() => handleDevicePower(deviceControl, false)}
-          icon={Icon.Power}
-        ></ActionPanel.Item>
+        <Action title={"Power On"} onAction={() => handleDevicePower(deviceControl, true)} icon={Icon.Power}></Action>
+        <Action title={"Power Off"} onAction={() => handleDevicePower(deviceControl, false)} icon={Icon.Power}></Action>
         <Action.Push title="Set Custom Color" target={<ColorPicker device={deviceControl} />} icon={Icon.EyeDropper} />
-        <ActionPanel.Item
-          title={"Set as default device"}
+        <Action
+          title={"Set as Default Device"}
           onAction={() => setDefaultDevice(props.item.address)}
           icon={Icon.Heart}
-        ></ActionPanel.Item>
+        ></Action>
       </ActionPanel.Section>
     </ActionPanel>
   );
@@ -62,13 +54,13 @@ function ColorPicker({ device }: { device: Control }) {
       try {
         await device.setColor(red, green, blue);
       } catch (err) {
-        showToast({
+        await showToast({
           style: Toast.Style.Failure,
           title: "Oops!",
           message: `Something went wrong. Please try again.`,
         });
       }
-      showToast({
+      await showToast({
         style: Toast.Style.Success,
         title: "Yay!",
         message: `Color set to ${values.hexCode}`,

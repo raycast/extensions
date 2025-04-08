@@ -1,11 +1,11 @@
-import { ActionPanel, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { Discovery } from "magic-home";
 import { Device } from "../types/device";
 import Style = Toast.Style;
 
 async function handleDeviceSave(device: Device) {
-  LocalStorage.setItem(`device-${device.id}`, JSON.stringify(device));
+  await LocalStorage.setItem(`device-${device.id}`, JSON.stringify(device));
   await showToast({ title: "Device saved", style: Style.Success });
 }
 
@@ -13,11 +13,7 @@ function Actions(props: { item: Device }) {
   return (
     <ActionPanel title={props.item.model}>
       <ActionPanel.Section>
-        <ActionPanel.Item
-          title={"Add to My Devices"}
-          onAction={() => handleDeviceSave(props.item)}
-          icon={Icon.Plus}
-        ></ActionPanel.Item>
+        <Action title={"Add to My Devices"} onAction={() => handleDeviceSave(props.item)} icon={Icon.Plus}></Action>
       </ActionPanel.Section>
     </ActionPanel>
   );
