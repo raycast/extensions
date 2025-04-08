@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Detail, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { Preferences, getInputText, callGemini } from "./utils"; // utilsから共通関数と型をインポート
+import { showFailureToast } from "@raycast/utils";
+import { Preferences, getInputText, callGemini } from "./utils";
 
 export default function Command() {
   // 状態管理用フック
@@ -36,11 +37,10 @@ export default function Command() {
         setText(translatedText);
         await showToast(Toast.Style.Success, "Translation Complete");
       } catch (err) {
-        // エラーハンドリング
         console.error("Translation Error:", err);
-        const message = err instanceof Error ? err.message : "An unknown error occurred";
-        setError(message); // エラー状態をセット
-        await showToast(Toast.Style.Failure, "Error", message); // エラートースト表示
+        const message = err instanceof Error ? err.message : "An unknown error occurred"; // エラーメッセージを取得
+        setError(message);
+        await showFailureToast(err, { title: "Translation Failed" });
       } finally {
         // 成功・失敗に関わらずローディング状態を解除
         setIsLoading(false);
