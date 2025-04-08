@@ -1,5 +1,4 @@
 import { Form, ActionPanel, Action, showToast, useNavigation, Toast, Icon, Keyboard } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { BrowserBookmark } from "../types";
 import { trpc } from "../utils/trpc.util";
@@ -24,9 +23,9 @@ function Body(props: Props) {
   const { data: spaceTags, refetch: spaceTagsRefetch, isLoading } = useTags(spaceId);
   const importBookmarks = trpc.bookmark.import.useMutation();
 
-  async function handleSubmit(values: FormValues) {
-    try {
-      await importBookmarks.mutateAsync({
+  function handleSubmit(values: FormValues) {
+    importBookmarks.mutate(
+      {
         spaceId,
         tags: values.tags,
         browserName,
@@ -35,17 +34,18 @@ function Body(props: Props) {
           name: b.title,
           description: b.folder ? `Imported from ${browserName}, folder: ${b.folder}` : `Imported from ${browserName}`,
         })),
-      });
-
-      pop();
-      showToast({
-        style: Toast.Style.Success,
-        title: "Bookmarks imported successfully",
-        message: `${bookmarks.length} bookmarks imported to "${spaceName}"`,
-      });
-    } catch (error) {
-      showFailureToast(error, { title: "Failed to import bookmarks" });
-    }
+      },
+      {
+        onSuccess: () => {
+          pop();
+          showToast({
+            style: Toast.Style.Success,
+            title: "Bookmarks imported successfully",
+            message: `${bookmarks.length} bookmarks imported to "${spaceName}"`,
+          });
+        },
+      },
+    );
   }
 
   if (isLoading) {

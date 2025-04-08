@@ -2,7 +2,7 @@ import { Icon, List, useNavigation } from "@raycast/api";
 import { RouterOutputs, trpc } from "../utils/trpc.util";
 import { TagSelectView } from "../views/TagSelectView";
 import { Tag } from "../types";
-import { useTags } from "../hooks/use-tags.hook";
+import { useMyTags } from "../hooks/use-tags.hook";
 
 const DropdownItem = (props: { tag: Tag; spaceIds: string[]; selectedTags: string[] }) => {
   const { tag, selectedTags } = props;
@@ -19,7 +19,7 @@ const DropdownItem = (props: { tag: Tag; spaceIds: string[]; selectedTags: strin
 
 export function BookmarkFilter(props: { me: RouterOutputs["user"]["me"]; spaceIds: string[] }) {
   const { me, spaceIds } = props;
-  const { data: tags, refetch, isFetching } = useTags(spaceIds);
+  const { data: tags, refetch, isFetching } = useMyTags();
   const { push } = useNavigation();
   const trpcUtils = trpc.useUtils();
   const selectedTags = me.associatedSpaces.flatMap((space) => {
@@ -46,12 +46,20 @@ export function BookmarkFilter(props: { me: RouterOutputs["user"]["me"]; spaceId
 
   const toggle = async (tag: Tag) => {
     if (selectedTags.includes(`${tag.spaceId}:${tag.name}`)) {
-      await unsubscribeTag.mutateAsync({ spaceId: tag.spaceId, tagName: tag.name });
+      await unsubscribeTag.mutateAsync(
+        { spaceId: tag.spaceId, tagName: tag.name },
+        {
+          onSuccess: () => refetch(),
+        },
+      );
     } else {
-      await subscribeTag.mutateAsync({ spaceId: tag.spaceId, tagName: tag.name });
+      await subscribeTag.mutateAsync(
+        { spaceId: tag.spaceId, tagName: tag.name },
+        {
+          onSuccess: () => refetch(),
+        },
+      );
     }
-
-    refetch();
   };
 
   return (
@@ -68,7 +76,6 @@ export function BookmarkFilter(props: { me: RouterOutputs["user"]["me"]; spaceId
 
         push(
           <TagSelectView
-            spaceIds={spaceIds}
             toggleTag={newValue}
             toggleTagType={selected ? "unsubscribe" : "subscribe"}
             promise={promise}
