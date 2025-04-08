@@ -16,7 +16,7 @@ export function XcodeRuntimeListItem(props: { runtime: XcodeRuntime; revalidate:
       subtitle={{ tooltip: "Build version", value: props.runtime.buildVersion }}
       keywords={[props.runtime.platform, props.runtime.name, props.runtime.version]}
       accessories={[
-        ...(props.runtime.isSupported == false
+        ...(!props.runtime.isSupported
           ? [
               {
                 icon: {
