@@ -1,5 +1,8 @@
 # Android Debug Bridge (Adb) Changelog
 
+## [Add uninstall command] - {PR_MERGE_DATE}
+- Add `uninstall` command to uninstall an app, disabled by default
+
 ## [Add restart ADB command] - 2024-05-01
 - Add `restart adb` command, disabled by default
 
