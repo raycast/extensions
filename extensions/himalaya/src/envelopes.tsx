@@ -4,7 +4,12 @@ import { Envelope, Flags, Folder } from "./models";
 import { execa } from "execa";
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "./preferences";
-import { deleteEnvelopeAndRefresh, loadEnvelopesFromStorage, loadFoldersFromStorage } from "./control";
+import {
+  deleteEnvelopeAndRefresh,
+  loadEnvelopesFromStorage,
+  loadFoldersFromStorage,
+  moveEnvelopeAndRefresh,
+} from "./control";
 
 // Format date for display
 const formatDate = (dateString: string) => {
@@ -44,11 +49,15 @@ const formatDateForSection = (dateString: string) => {
 function MessageDetail({ envelope, onDelete }: { envelope: Envelope; onDelete: () => void }) {
   const [isLoading, setIsLoading] = useState(true);
   const [messageBody, setMessageBody] = useState<string>("");
+  const [folders, setFolders] = useState<Folder[]>([]);
   const preferences = getPreferenceValues<Preferences>();
   const { pop } = useNavigation();
 
   useEffect(() => {
     fetchMessageBody();
+    loadFoldersFromStorage().then((data) => {
+      setFolders(data.folders);
+    });
   }, [envelope.id]);
 
   async function fetchMessageBody() {
@@ -110,6 +119,56 @@ ${messageBody}
               });
             }}
           />
+          <Action.Push
+            title="Move Email"
+            icon={{ source: Icon.Folder }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+            target={
+              <List navigationTitle="Move Email" searchBarPlaceholder="Search folders">
+                {folders.map((folder) => (
+                  <List.Item
+                    key={folder.name}
+                    title={folder.name}
+                    icon={
+                      folder.desc.includes("\\Inbox")
+                        ? Icon.Envelope
+                        : folder.desc.includes("\\Sent")
+                          ? Icon.Airplane
+                          : folder.desc.includes("\\Trash")
+                            ? Icon.Trash
+                            : folder.desc.includes("\\Draft")
+                              ? Icon.Pencil
+                              : Icon.Folder
+                    }
+                    accessories={[
+                      {
+                        text: folder.desc,
+                      },
+                    ]}
+                    actions={
+                      <ActionPanel>
+                        <Action
+                          title="Move to This Folder"
+                          icon={{ source: Icon.Folder }}
+                          onAction={() => {
+                            const prefs = getPreferenceValues<Preferences>();
+                            moveEnvelopeAndRefresh(envelope.id, folder.name, prefs, () => {
+                              // Call the onDelete callback to refresh the list
+                              onDelete();
+                              // Pop back to the list view (this will pop the folder selection view)
+                              pop();
+                              // Pop one more time to go back to the envelope list (if we're in the detail view)
+                              pop();
+                            });
+                          }}
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                ))}
+              </List>
+            }
+          />
           <Action.CopyToClipboard title="Copy Subject" content={envelope.subject || "(No Subject)"} />
           <Action.CopyToClipboard title="Copy ID" content={envelope.id} />
           <Action.CopyToClipboard
@@ -122,13 +181,15 @@ ${messageBody}
   );
 }
 
-export default function Command() {
+// Component to display a list of envelopes
+export default function EnvelopeList() {
   const [isLoading, setIsLoading] = useState(true);
   const [envelopes, setEnvelopes] = useState<Envelope[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selectedFolderName, setSelectedFolderName] = useState<string>("INBOX");
   const [lastSync, setLastSync] = useState<string | null>(null);
   const preferences = getPreferenceValues<Preferences>();
+  const { pop } = useNavigation();
 
   useEffect(() => {
     Promise.all([loadEnvelopesFromStorage(), loadFoldersFromStorage()]).then(([envelopeData, folderData]) => {
@@ -325,6 +386,57 @@ export default function Command() {
                     style={Action.Style.Destructive}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
                     onAction={() => handleDelete(envelope.id)}
+                  />
+                  <Action.Push
+                    title="Move Email"
+                    icon={{ source: Icon.Folder }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+                    target={
+                      <List navigationTitle="Move Email" searchBarPlaceholder="Search folders">
+                        {folders.map((folder) => (
+                          <List.Item
+                            key={folder.name}
+                            title={folder.name}
+                            icon={
+                              folder.desc.includes("\\Inbox")
+                                ? Icon.Envelope
+                                : folder.desc.includes("\\Sent")
+                                  ? Icon.Airplane
+                                  : folder.desc.includes("\\Trash")
+                                    ? Icon.Trash
+                                    : folder.desc.includes("\\Draft")
+                                      ? Icon.Pencil
+                                      : Icon.Folder
+                            }
+                            accessories={[
+                              {
+                                text: folder.desc,
+                              },
+                            ]}
+                            actions={
+                              <ActionPanel>
+                                <Action
+                                  title="Move to This Folder"
+                                  icon={{ source: Icon.Folder }}
+                                  onAction={() => {
+                                    const prefs = getPreferenceValues<Preferences>();
+                                    moveEnvelopeAndRefresh(envelope.id, folder.name, prefs, () => {
+                                      // Update local state from localStorage after successful deletion
+                                      loadEnvelopesFromStorage().then((data) => {
+                                        setEnvelopes(data.envelopes);
+                                        setLastSync(data.lastSync);
+                                      });
+                                      // Pop back to close the folder selection view
+                                      pop();
+                                    });
+                                  }}
+                                />
+                              </ActionPanel>
+                            }
+                          />
+                        ))}
+                      </List>
+                    }
                   />
                   <Action.CopyToClipboard title="Copy Subject" content={envelope.subject || "(No Subject)"} />
                   <Action.CopyToClipboard title="Copy ID" content={envelope.id} />

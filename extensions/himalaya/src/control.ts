@@ -190,3 +190,59 @@ export async function loadFoldersFromStorage(): Promise<{ folders: Folder[]; las
 
   return { folders: [], lastSync: null };
 }
+
+/**
+ * Moves an envelope to a different folder using the Himalaya CLI and updates localStorage
+ * @param id ID of the envelope to move
+ * @param targetFolder Target folder to move the envelope to
+ * @param preferences User preferences
+ * @param onSuccess Callback function to execute after successful move
+ */
+export async function moveEnvelopeAndRefresh(
+  id: string,
+  targetFolder: string,
+  preferences: Preferences,
+  onSuccess: () => void,
+): Promise<void> {
+  try {
+    // Show moving toast
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Moving email...",
+    });
+
+    // Execute move command - wait for this to complete first
+    await execa(
+      preferences.binaryPath,
+      ["message", "move", targetFolder, id, "--account", preferences.defaultAccount, "--output", "json"],
+      {},
+    );
+
+    // Only after successful CLI move, update localStorage
+    const { envelopes } = await loadEnvelopesFromStorage();
+    const updatedEnvelopes = envelopes.map((envelope) => {
+      if (envelope.id === id) {
+        return { ...envelope, folder_name: targetFolder };
+      }
+      return envelope;
+    });
+    await updateEnvelopesInStorage(updatedEnvelopes);
+
+    // Show success toast
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Email moved",
+      message: `Email was successfully moved to ${targetFolder}`,
+    });
+
+    // Call the success callback
+    onSuccess();
+  } catch (error) {
+    console.error("Move error:", error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to move email",
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
