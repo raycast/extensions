@@ -36,8 +36,8 @@ const DevtoolsPanel = ({ selectedTarget, targets }: { selectedTarget: string | n
     };
 
     ws.on("message", (rawData) => {
-      const data = JSON.parse(rawData.toString());
-
+      try {
+        const data = JSON.parse(rawData.toString());
       // Handle Console logs
       if (data.method === "Console.messageAdded") {
         const message = data.params.message;
