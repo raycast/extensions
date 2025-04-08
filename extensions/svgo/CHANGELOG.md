@@ -1,6 +1,6 @@
 # SVGO Changelog
 
-## [New Configuration] - {PR_MERGE_DATE}
+## [New Configuration] - 2025-04-08
 
 - Added ability to modify (`save`, `restore`) configuration for all commands
 - Upgraded plugins to latest versions: `@raycast/api`, `svgo`
