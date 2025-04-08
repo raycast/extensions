@@ -16,15 +16,6 @@ const seenCache = new Cache();
 const seenKey = "seen-stories";
 const seenStories = JSON.parse(seenCache.get(seenKey) ?? "[]") as { story: Story; seen: number }[];
 
-seenStories.forEach((seenStory) => {
-  // just log how long ago we saw the story
-  const now = Date.now();
-  const storyDate = new Date(seenStory.seen).getTime();
-  const diff = now - storyDate;
-  const diffInHours = Math.floor(diff / (1000 * 60 * 60));
-  console.log(`Seen story ${seenStory.story.title} (${seenStory.story.external_url}) ${diffInHours} hours ago`);
-});
-
 export default function Command() {
   const [loading, setLoading] = useState(true);
   const [stories, setStories] = useState<Story[]>([]);
@@ -42,7 +33,13 @@ export default function Command() {
           return !seenStories.find((seenStory) => seenStory.story.external_url === story.external_url);
         });
 
-        const allStoriesSeen = [...seenStories, ...unseenStories.map((story) => ({ story, seen: now }))];
+        const allStoriesSeen = [...seenStories, ...unseenStories.map((story) => ({ story, seen: now }))].toSorted(
+          (a, b) => {
+            const aDate = new Date(a.seen).getTime();
+            const bDate = new Date(b.seen).getTime();
+            return bDate - aDate;
+          },
+        );
         seenCache.set(seenKey, JSON.stringify(allStoriesSeen));
         const twentyFourHoursInMs = 240 * 60 * 60 * 1000;
         return allStoriesSeen
