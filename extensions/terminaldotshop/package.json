@@ -5,6 +5,9 @@
   "description": "The finest coffee for the finest people.",
   "icon": "icon.png",
   "author": "thdxr",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "access": "public",
   "owner": "terminaldotshop",
   "categories": [
