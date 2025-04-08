@@ -274,15 +274,8 @@ const authenticator = {
       return authenticator.getGenerator(totp);
     }, [item, canGenerate]);
 
-    const [code, setCode] = useState(() => {
-      if (error) return null;
-      return generator.generate();
-    });
-
-    const [time, setTime] = useState(() => {
-      if (error) return null;
-      return Math.ceil(generator.remaining() / 1000);
-    });
+    const [code, setCode] = useState(() => (!error ? generator.generate() : null));
+    const [time, setTime] = useState(() => (!error ? Math.ceil(generator.remaining() / 1000) : null));
 
     useEffect(() => {
       if (error) return;
