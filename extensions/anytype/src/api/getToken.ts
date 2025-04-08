@@ -1,8 +1,8 @@
-import { apiFetch } from "../helpers/api";
-import { apiEndpoints } from "../helpers/constants";
-import { TokenResponse } from "../helpers/schemas";
+import { TokenResponse } from "../models";
+import { apiEndpoints, apiFetch } from "../utils";
 
 export async function getToken(challengeId: string, code: string): Promise<TokenResponse> {
   const { url, method } = apiEndpoints.getToken(challengeId, code);
-  return await apiFetch<TokenResponse>(url, { method: method });
+  const response = await apiFetch<TokenResponse>(url, { method: method });
+  return response.payload;
 }

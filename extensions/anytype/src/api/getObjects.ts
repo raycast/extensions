@@ -1,7 +1,6 @@
-import { apiFetch } from "../helpers/api";
-import { apiEndpoints } from "../helpers/constants";
 import { mapObjects } from "../mappers/objects";
-import { PaginatedResponse, Pagination, SpaceObject } from "../helpers/schemas";
+import { PaginatedResponse, Pagination, RawSpaceObject, SpaceObject } from "../models";
+import { apiEndpoints, apiFetch } from "../utils";
 
 export async function getObjects(
   spaceId: string,
@@ -11,10 +10,10 @@ export async function getObjects(
   pagination: Pagination;
 }> {
   const { url, method } = apiEndpoints.getObjects(spaceId, options);
-  const response = await apiFetch<PaginatedResponse<SpaceObject>>(url, { method: method });
+  const response = await apiFetch<PaginatedResponse<RawSpaceObject>>(url, { method: method });
 
   return {
-    objects: response.data ? await mapObjects(response.data) : [],
-    pagination: response.pagination,
+    objects: response.payload.data ? await mapObjects(response.payload.data) : [],
+    pagination: response.payload.pagination,
   };
 }
