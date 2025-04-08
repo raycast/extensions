@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Icon, List, Detail, confirmAlert, Color, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Detail, confirmAlert, Color, useNavigation, Alert } from "@raycast/api";
 import { Envelope, Flags, Folder } from "./models";
 import { execa } from "execa";
 import { getPreferenceValues } from "@raycast/api";
@@ -187,6 +187,7 @@ export default function Command() {
         message: "Are you sure you want to delete this email?",
         primaryAction: {
           title: "Delete",
+          style: Alert.ActionStyle.Destructive,
         },
       })
     ) {
