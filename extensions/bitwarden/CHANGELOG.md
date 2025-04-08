@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [New Command] - {PR_MERGE_DATE}
+## [New Command] - 2025-04-08
 
 - Add Authenticator command
 - Correct README typos
