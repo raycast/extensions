@@ -1,5 +1,9 @@
 # dict.cc Changelog
 
+## [v.1.3.0] - {PR_MERGE_DATE}
+
+- Introducing `Translate from Selection` command.
+
 ## [v.1.2.0] - 2023-02-27
 
 - Introducing `Translate from Clipboard` command.
