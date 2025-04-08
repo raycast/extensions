@@ -224,6 +224,15 @@ export default function Command() {
     return new Date(b).getTime() - new Date(a).getTime();
   });
 
+  // Sort envelopes within each date group by time (newest first)
+  for (const dateKey of sortedDates) {
+    groupedEnvelopes[dateKey].sort((a, b) => {
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+  }
+
   return (
     <List
       isLoading={isLoading}
