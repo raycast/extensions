@@ -1,6 +1,6 @@
 # 1bookmark Changelog
 
-## [Per-Device Enable/Disable Spaces] - {PR_MERGE_DATE}
+## [Per-Device Enable/Disable Spaces] - 2025-04-08
 
 - 0.9.0
 - 📱 Space enable/disable feature is now available. This feature allows you to access only the spaces you are interested in on a per-device basis.
