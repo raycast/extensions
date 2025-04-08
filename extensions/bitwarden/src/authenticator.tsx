@@ -104,13 +104,26 @@ function ListItem({ item }: { item: Item }) {
   const { code, time, error, isLoading } = authenticator.useCode(item, canGenerate);
 
   function getAccessories(): List.Item.Props["accessories"] {
-    if (!canGenerate) return [{ text: { value: "Needs confirmation", color: Color.Yellow } }];
+    if (!canGenerate) {
+      return [
+        {
+          text: { value: "Needs confirmation", color: Color.Yellow },
+          tooltip: "Needs master password confirmation",
+        },
+      ];
+    }
     if (!isLoading) {
       if (error) {
         return [{ text: { value: error.message, color: Color.Red } }];
       }
       if (code && time) {
-        return [{ text: code }, { tag: { value: String(time), color: time <= 7 ? Color.Red : Color.Blue } }];
+        return [
+          { text: code },
+          {
+            tag: { value: String(time), color: time <= 7 ? Color.Red : Color.Blue },
+            tooltip: `${time} seconds remaining`,
+          },
+        ];
       }
     }
     return [{ text: "Loading..." }];
