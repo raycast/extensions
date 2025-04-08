@@ -16,13 +16,11 @@ const { paperlessURL }: Preferences = getPreferenceValues();
 
 axios.interceptors.request.use(
   (config) => {
+    config.headers.set("Authorization", "Token " + apiToken);
     config = {
       ...config,
       baseURL: paperlessURL,
       method: "get",
-      headers: {
-        Authorization: "Token " + apiToken,
-      },
       responseType: "stream",
     };
     return config;

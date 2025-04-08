@@ -57,7 +57,7 @@ function parseAccounts(input: GetAccountsReqResult): Omit<Account, "profile" | "
 
   return input[1].map((account) => {
     const id = account[7];
-    if (typeof id !== "number") {
+    if (typeof id !== "number" && id !== null) {
       throw new Error("Invalid account id");
     }
 

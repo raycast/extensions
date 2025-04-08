@@ -1,5 +1,13 @@
 # 1bookmark Changelog
 
+## [Pattern Search by Space, Creator, Tag] - 2025-04-01
+
+- 0.8.0
+- 📱 Space, creator, tag filter pattern is now supported.
+    - `!space` - Filter by space name. Example: `!raycast api` searches for "api" in the "raycast" space
+    - `@user` - Filter by bookmark creator name or email. Example: `@john documentation` searches for "documentation" created by "john"
+    - `#tag#` - Filter by tag. Example: `#dev#tools` searches for "tools" with the "dev" tag
+
 ## [Improve Performance] - 2025-03-28
 
 - 0.7.1

@@ -1,5 +1,11 @@
 # svgl Changelog
 
+## [✨ AI Enhancements] - {PR_MERGE_DATE}
+
+AI Tools to:
+- Get SVG Logo
+- Get SVG Component
+
 ## [Update] - 2025-03-27
 
 - Added a default action preference that allows users to choose the default action when selecting an SVG.
