@@ -1,6 +1,6 @@
 # MyIdlers Changelog
 
-## [Delete Server] - {PR_MERGE_DATE}
+## [Delete Server] - 2025-04-08
 
 - Optimistically delete server through `Action`
 
