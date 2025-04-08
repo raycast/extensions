@@ -39,6 +39,12 @@ export async function getUpcomingMatches(): Promise<Match[]> {
     headers: headers,
   });
 
+  if (!res.ok) {
+    throw new Error(`Failed to fetch matches: ${res.status} ${res.statusText}`);
+  }
+
+  const { parse } = await res.json();
+
   const { parse } = await res.json();
   const html = parse.text["*"];
   const $ = cheerio.load(html);
@@ -64,11 +70,11 @@ export async function getUpcomingMatches(): Promise<Match[]> {
     const team1Icon = team1Logo ? "https://liquipedia.net" + team1Logo : undefined;
     const team2Icon = team2Logo ? "https://liquipedia.net" + team2Logo : undefined;
 
-    const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const currentDate = new Date();
+    const todayStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
     const todayStartUnix = Math.floor(todayStart.getTime() / 1000);
 
-    if (timestampAttr < todayStartUnix) {
+    if (timestamp < todayStartUnix) {
       return; // skip past match
     }
 
