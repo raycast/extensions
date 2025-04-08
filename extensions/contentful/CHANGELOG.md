@@ -1,6 +1,6 @@
 # Contentful Changelog
 
-## [Modernize + Show Video Asset Thumbnail] - {PR_MERGE_DATE}
+## [Modernize + Show Video Asset Thumbnail] - 2025-04-08
 
 - Modernize extension w/ updated deps
 - Fix: `Assets` would not show thumbnail for video
