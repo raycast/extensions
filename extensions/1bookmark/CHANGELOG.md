@@ -1,5 +1,14 @@
 # 1bookmark Changelog
 
+## [Per-Device Enable/Disable Spaces] - 2025-04-08
+
+- 0.9.0
+- 📱 Space enable/disable feature is now available. This feature allows you to access only the spaces you are interested in on a per-device basis.
+- 📱 Add a feature to leave a space. You may leave a space at any time, except in the following cases:
+    - You can't leave a private space
+    - When there is only one space owner, the owner cannot leave the team.
+- 💻 Fix and refactor many codes to be more readable, stable.
+
 ## [Pattern Search by Space, Creator, Tag] - 2025-04-01
 
 - 0.8.0

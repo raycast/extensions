@@ -33,7 +33,7 @@ function Body(props: Props) {
 
   const { pop } = useNavigation();
 
-  async function handleSubmit(values: FormValues) {
+  function handleSubmit(values: FormValues) {
     if (!values.titleField) {
       setTitleError("Title is required");
       return;
@@ -44,21 +44,25 @@ function Body(props: Props) {
       return;
     }
 
-    await bookmarkUpdate.mutateAsync({
-      id: bookmark.id,
-      name: values.titleField,
-      url: values.urlField,
-      description: values.descriptionField,
-      tags: values.tags,
-    });
-
-    showToast({
-      style: Toast.Style.Success,
-      title: "Bookmark updated",
-    });
-
-    refetch();
-    pop();
+    bookmarkUpdate.mutate(
+      {
+        id: bookmark.id,
+        name: values.titleField,
+        url: values.urlField,
+        description: values.descriptionField,
+        tags: values.tags,
+      },
+      {
+        onSuccess: () => {
+          showToast({
+            style: Toast.Style.Success,
+            title: "Bookmark updated",
+          });
+          refetch();
+          pop();
+        },
+      },
+    );
   }
 
   return (
