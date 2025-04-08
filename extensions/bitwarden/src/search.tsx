@@ -2,7 +2,7 @@ import { List, Icon, ActionPanel } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import VaultListenersProvider from "~/components/searchVault/context/vaultListeners";
 import VaultItem from "~/components/searchVault/Item";
-import ListFolderDropdown from "~/components/searchVault/ListFolderDropdown";
+import ListFolderDropdown from "~/components/ListFolderDropdown";
 import { BitwardenProvider } from "~/context/bitwarden";
 import { FavoritesProvider, useSeparateFavoriteItems } from "~/context/favorites";
 import { SessionProvider } from "~/context/session";

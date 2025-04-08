@@ -20,6 +20,7 @@ import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationNa
 import { ActionWithReprompt, DebuggingBugReportingActionSection, VaultActionsSection } from "~/components/actions";
 import { Err, Ok, Result, tryCatch } from "~/utils/errors";
 import { useVaultSearch } from "~/utils/search";
+import ListFolderDropdown from "~/components/ListFolderDropdown";
 
 const AuthenticatorCommand = () => (
   <RootErrorBoundary>
@@ -69,6 +70,7 @@ function AuthenticatorList() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search items"
       isLoading={vault.isLoading || isActiveTabLoading}
+      searchBarAccessory={<ListFolderDropdown />}
       actions={
         <ActionPanel>
           <CommonActions />
