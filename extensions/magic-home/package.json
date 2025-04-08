@@ -6,7 +6,7 @@
   "icon": "extension-icon.png",
   "author": "bruno_caruso",
   "engine": {
-    "node": ">=22.14.0"
+    "node": ">=20.15.1"
   },
   "categories": [
     "Productivity"
