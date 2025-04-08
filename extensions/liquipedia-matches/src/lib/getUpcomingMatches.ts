@@ -43,8 +43,17 @@ export async function getUpcomingMatches(): Promise<Match[]> {
     throw new Error(`Failed to fetch matches: ${res.status} ${res.statusText}`);
   }
 
-  const { parse } = await res.json();
-  const html = parse.text["*"];
+  type LiquipediaParseResponse = {
+    parse: {
+      text: {
+        "*": string;
+      };
+    };
+  };
+
+  const data = (await res.json()) as LiquipediaParseResponse;
+  const html = data.parse.text["*"];
+
   const $ = cheerio.load(html);
 
   const matches: Match[] = [];
