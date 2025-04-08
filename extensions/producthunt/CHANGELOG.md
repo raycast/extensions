@@ -1,7 +1,25 @@
 # Product Hunt Changelog
 
-## [2.0] - 2025-04-07
+## [2.1] - {PR_MERGE_DATE}
 
+### Added
+- Added scraper tests to help with stale or incorrect counts
+
+### Changed
+- Improved handling of vote count scraping
+- Swapped vote count and comments in List Item to match Product Hunt leaderboard
+
+
+## [2.1] - {PR_MERGE_DATE}
+
+### Added
+- Added scraper tests to help with stale or incorrect counts
+
+### Changed
+- Improved handling of vote count scraping
+- Swapped vote count and comments in List Item to match Product Hunt leaderboard
+
+## [2.0] - 2025-04-07
 
 ### Added
 - Enhanced image gallery with improved navigation
