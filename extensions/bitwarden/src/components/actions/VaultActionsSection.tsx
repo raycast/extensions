@@ -1,9 +1,9 @@
-import { Action, Color, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, showToast, Toast } from "@raycast/api";
 import { VAULT_LOCK_MESSAGES } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
 import { useVaultContext } from "~/context/vault";
 
-function VaultManagementActions() {
+export function VaultActionsSection() {
   const vault = useVaultContext();
   const bitwarden = useBitwarden();
 
@@ -25,7 +25,7 @@ function VaultManagementActions() {
   };
 
   return (
-    <>
+    <ActionPanel.Section title="Vault Actions">
       <Action
         title="Sync Vault"
         shortcut={{ modifiers: ["cmd"], key: "r" }}
@@ -39,7 +39,6 @@ function VaultManagementActions() {
         onAction={handleLockVault}
       />
       <Action style={Action.Style.Destructive} title="Logout" icon={Icon.Logout} onAction={handleLogoutVault} />
-    </>
+    </ActionPanel.Section>
   );
 }
-export default VaultManagementActions;
