@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "phantom-files",
+  "title": "Phantom Files",
+  "description": "Master your macOS file visibility - toggle hidden files globally or hide/unhide specific files with quick commands. Perfect for decluttering or securing sensitive files.",
+  "icon": "extension-icon.png",
+  "author": "fahidnasir",
+  "categories": [
+    "Productivity",
+    "System",
+    "Media",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "hide-this",
+      "title": "Hide This",
+      "subtitle": "Make selected items invisible in Finder",
+      "description": "Uses `chflags hidden` on currently selected Finder items.\nWorks with both files and folders.",
+      "mode": "view"
+    },
+    {
+      "name": "reveal-this",
+      "title": "Reveal This",
+      "subtitle": "Unhide selected Finder items",
+      "description": "Applies `chflags nohidden` to unhide files/folder in Finder.",
+      "mode": "view"
+    },
+    {
+      "name": "ghost-mode",
+      "title": "Ghost Mode",
+      "subtitle": "Toggle show/hide all hidden files",
+      "description": "Switches macOS hidden tile visibility globally (defaults write AppleShowAllFiles).",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.3",
+    "@raycast/utils": "^1.17.0",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
