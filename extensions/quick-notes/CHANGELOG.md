@@ -1,6 +1,6 @@
 # Quick Notes Changelog
 
-## [New Commands] - {PR_MERGE_DATE}
+## [New Commands] - 2025-04-08
 
 - 3 new commands to use outside of `View Notes`: `Create Note`, `Create Tag`, `Search Notes`
 - Can now use these commands to intake note from clipboard, selected text, etc. using Raycast Quicklinks
