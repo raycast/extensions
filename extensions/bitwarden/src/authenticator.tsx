@@ -19,10 +19,11 @@ import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 import { ActionWithReprompt, DebuggingBugReportingActionSection, VaultActionsSection } from "~/components/actions";
 import { Err, Ok, Result, tryCatch } from "~/utils/errors";
+import { useVaultSearch } from "~/utils/search";
 
 const AuthenticatorCommand = () => (
   <RootErrorBoundary>
-    <BitwardenProvider loadingFallback={<List searchBarPlaceholder="Search vault" isLoading />}>
+    <BitwardenProvider loadingFallback={<List searchBarPlaceholder="Search items" isLoading />}>
       <SessionProvider unlock>
         <VaultListenersProvider>
           <VaultProvider>
@@ -38,12 +39,13 @@ function AuthenticatorList() {
   const vault = useVaultContext();
   const { data: activeTabUrl, isLoading: isActiveTabLoading } = useActiveTab();
 
-  const items = useMemo(() => vault.items.filter((item) => item.login?.totp), [vault.items]);
+  const vaultItems = useMemo(() => vault.items.filter((item) => item.login?.totp), [vault.items]);
+  const { setSearchText, filteredItems } = useVaultSearch(vaultItems);
 
-  const itemsWithTabMatches = useMemo(() => {
-    if (!activeTabUrl) return { items, tabItems: [] };
+  const itemMatches = useMemo(() => {
+    if (!activeTabUrl) return { items: filteredItems, tabItems: [] };
 
-    return items.reduce<{ items: Item[]; tabItems: Item[] }>(
+    return filteredItems.reduce<{ items: Item[]; tabItems: Item[] }>(
       (acc, item) => {
         const matchesUrl = item.login?.uris?.some(({ uri }) => uri?.includes(activeTabUrl.url.hostname));
         if (matchesUrl) {
@@ -55,15 +57,17 @@ function AuthenticatorList() {
       },
       { items: [], tabItems: [] }
     );
-  }, [items, activeTabUrl]);
+  }, [filteredItems, activeTabUrl]);
 
-  const isEmpty = itemsWithTabMatches.items.length === 0 && itemsWithTabMatches.tabItems.length === 0;
+  const isEmpty = itemMatches.items.length === 0 && itemMatches.tabItems.length === 0;
 
-  const otherItemsList = itemsWithTabMatches.items.map((item) => <ListItem key={item.id} item={item} />);
+  const otherItemsList = itemMatches.items.map((item) => <ListItem key={item.id} item={item} />);
 
   return (
     <List
-      searchBarPlaceholder="Search vault"
+      filtering={false}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search items"
       isLoading={vault.isLoading || isActiveTabLoading}
       actions={
         <ActionPanel>
@@ -71,10 +75,10 @@ function AuthenticatorList() {
         </ActionPanel>
       }
     >
-      {activeTabUrl && itemsWithTabMatches.tabItems.length > 0 ? (
+      {activeTabUrl && itemMatches.tabItems.length > 0 ? (
         <>
           <List.Section title={`Active Tab (${activeTabUrl.url.hostname})`}>
-            {itemsWithTabMatches.tabItems.map((item) => (
+            {itemMatches.tabItems.map((item) => (
               <ListItem key={item.id} item={item} />
             ))}
           </List.Section>
