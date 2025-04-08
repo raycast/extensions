@@ -1,6 +1,9 @@
 # Expo Raycast Extension
 
-![Expo Logo](./media/extension-icon.png)
+
+<div align="center">
+  <img src="./media/extension-icon.png" alt="Expo Logo" width="200" />
+</div>
 
 ## Overview
 
@@ -13,7 +16,6 @@ The Expo Raycast Extension allows you to manage your Expo.dev projects, Apple de
 - **Apple Devices**: View, create, and edit Apple devices registered with your Expo account.
 - **Environment Variables**: View, create, edit, and delete environment variables for your Expo projects.
 
-## Usage
 
 ### Login
 

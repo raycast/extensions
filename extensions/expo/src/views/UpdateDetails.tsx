@@ -1,9 +1,9 @@
 import { showToast, Toast, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useEffect } from "react";
-import { changeCase, getAuthHeaders, stripHTMLTags } from "../lib/utils";
+import { changeCase, isObjectEmpty, stripHTMLTags } from "../lib/utils";
 import { UpdatesByGroupType } from "../lib/types/update.types";
 import generateUpdateMarkdown from "../lib/markdown/generateUpdateMarkdown";
+import useAuth from "../hooks/useAuth";
 
 export default function UpdateGroup({
   username,
@@ -14,16 +14,14 @@ export default function UpdateGroup({
   appName: string;
   group: string;
 }) {
-  const [headers, setHeaders] = useState<Record<string, string> | null>(null);
+  const { authHeaders } = useAuth();
 
   const url = `https://expo.dev/accounts/${username}/projects/${appName}/updates/${group}`;
 
-  console.log({ url });
-
   const { isLoading, data: update } = useFetch(url, {
     method: "get",
-    headers: headers || {},
-    execute: headers === null ? false : true,
+    headers: authHeaders,
+    execute: !isObjectEmpty(authHeaders),
     parseResponse: async (resp) => {
       const html = await resp.text();
 
@@ -39,12 +37,9 @@ export default function UpdateGroup({
 
       const updateData = jsonData.props.pageProps.updateGroupData as UpdatesByGroupType;
 
-      console.log(jsonData.props.pageProps);
-
       return updateData;
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching update group",
         message: (error as Error)?.message || "",
@@ -53,14 +48,6 @@ export default function UpdateGroup({
     },
     initialData: null,
   });
-
-  useEffect(() => {
-    async function fetchHeaders() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    fetchHeaders();
-  }, []);
 
   return (
     <List isLoading={isLoading} navigationTitle="Update Group Details" isShowingDetail>

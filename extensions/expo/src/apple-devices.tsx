@@ -2,17 +2,24 @@ import { ActionPanel, List, Action, showToast, Toast, Icon } from "@raycast/api"
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { BASE_URL } from "./lib/constants";
-import { getAuthHeaders } from "./lib/utils";
+import { isObjectEmpty } from "./lib/utils";
 import { ErrorResponse } from "./lib/types";
 import { AppleDevicesResponse } from "./lib/types/apple-devices.types";
 import EditAppleDevice from "./views/EditAppleDevice";
 import AddAppleDevice from "./views/AddAppleDevice";
 import AccountPicker from "./components/AccountPicker";
+import AuthWrapper from "./components/AuthWrapper";
+import useAuth from "./hooks/useAuth";
 
 export default function Command() {
-  const [headers, setHeaders] = useState<Record<string, string> | null>(null);
+  const { authHeaders } = useAuth();
 
   const [accountName, setAccountName] = useState("");
+  useEffect(() => {
+    if (accountName) {
+      revalidate();
+    }
+  }, [accountName]);
 
   const AppleDevicesPayload = JSON.stringify([
     {
@@ -39,8 +46,8 @@ export default function Command() {
   const { isLoading, data, revalidate } = useFetch(BASE_URL, {
     body: AppleDevicesPayload,
     method: "post",
-    headers: headers || {},
-    execute: headers === null ? false : true,
+    headers: authHeaders,
+    execute: !isObjectEmpty(authHeaders),
     parseResponse: async (resp) => {
       const data = (await resp.json()) as AppleDevicesResponse;
       if ("errors" in data) {
@@ -63,7 +70,6 @@ export default function Command() {
       };
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching Apple Devices",
         message: (error as Error)?.message || "",
@@ -77,75 +83,71 @@ export default function Command() {
   });
 
   useEffect(() => {
-    console.log("Apple Devices Rendered");
     revalidate();
-    async function fetchHeaders() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    fetchHeaders();
   }, []);
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Apple Devices"
-      isShowingDetail
-      searchBarAccessory={<AccountPicker onPick={(acc) => setAccountName(acc.name)} />}
-    >
-      {data && data.devices ? (
-        <>
-          {data.devices.map((device) => (
-            <List.Item
-              key={device.identifier}
-              icon={"phone.png"}
-              title={device.name ? device.name : device.identifier || ""}
-              detail={
-                <List.Item.Detail
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label title="Device ID" text={device.identifier} />
-                      <List.Item.Detail.Metadata.Label title="Device Name" text={device.name ?? "N/A"} />
-                      <List.Item.Detail.Metadata.Label
-                        title="Device Type"
-                        text={`${device.deviceClass} ${device.model}`}
-                      />
+    <AuthWrapper>
+      <List
+        isLoading={isLoading}
+        navigationTitle="Apple Devices"
+        isShowingDetail
+        searchBarAccessory={<AccountPicker onPick={(acc) => setAccountName(acc.name)} />}
+      >
+        {data && data.devices ? (
+          <>
+            {data.devices.map((device) => (
+              <List.Item
+                key={device.identifier}
+                icon={"phone.png"}
+                title={device.name ? device.name : device.identifier || ""}
+                detail={
+                  <List.Item.Detail
+                    metadata={
+                      <List.Item.Detail.Metadata>
+                        <List.Item.Detail.Metadata.Label title="Device ID" text={device.identifier} />
+                        <List.Item.Detail.Metadata.Label title="Device Name" text={device.name ?? "N/A"} />
+                        <List.Item.Detail.Metadata.Label
+                          title="Device Type"
+                          text={`${device.deviceClass} ${device.model}`}
+                        />
 
-                      <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Separator />
 
-                      <List.Item.Detail.Metadata.Label
-                        title="Apple Team"
-                        text={device.appleTeam?.appleTeamName ?? "N/A"}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Apple Team ID"
-                        text={device.appleTeam?.appleTeamIdentifier ?? "N/A"}
-                      />
-                    </List.Item.Detail.Metadata>
-                  }
-                ></List.Item.Detail>
-              }
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="Add New Device"
-                    target={<AddAppleDevice appleTeamId={device.appleTeam?.id || ""} accountId={device.accountId} />}
-                    icon={Icon.Plus}
-                  />
-                  <Action.Push
-                    title="Edit Device Name"
-                    target={<EditAppleDevice deviceId={device.id} refreshDevices={revalidate} />}
-                    icon={Icon.Pencil}
-                  />
-                  <Action title="Delete Device" icon={Icon.Trash} />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </>
-      ) : (
-        <List.EmptyView />
-      )}
-    </List>
+                        <List.Item.Detail.Metadata.Label
+                          title="Apple Team"
+                          text={device.appleTeam?.appleTeamName ?? "N/A"}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="Apple Team ID"
+                          text={device.appleTeam?.appleTeamIdentifier ?? "N/A"}
+                        />
+                      </List.Item.Detail.Metadata>
+                    }
+                  ></List.Item.Detail>
+                }
+                actions={
+                  <ActionPanel>
+                    <Action.Push
+                      title="Add New Device"
+                      target={<AddAppleDevice appleTeamId={device.appleTeam?.id || ""} accountId={device.accountId} />}
+                      icon={Icon.Plus}
+                    />
+                    <Action.Push
+                      title="Edit Device Name"
+                      target={<EditAppleDevice deviceId={device.id} refreshDevices={revalidate} />}
+                      icon={Icon.Pencil}
+                    />
+                    <Action title="Delete Device" icon={Icon.Trash} />
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </>
+        ) : (
+          <List.EmptyView />
+        )}
+      </List>
+    </AuthWrapper>
   );
 }
