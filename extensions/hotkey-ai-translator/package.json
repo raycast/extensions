@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hotkey-ai-translator",
+  "title": "Hotkey AI Translator",
+  "description": "A simple AI translation command that launches from Raycast's Hotkey.",
+  "icon": "extension_icon_command_black.png",
+  "author": "ogakuzuko",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "launch-ai-translate",
+      "title": "AI Translate",
+      "description": "Translate the selected text using AI. Please set a hotkey for this command.",
+      "mode": "no-view"
+    },
+    {
+      "name": "ai-translate",
+      "title": "AI Translation Result (called by AI Translate)",
+      "description": "Display the AI translation result. This command is called automatically by AI Translate and should not be used directly.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key for translation",
+      "type": "password",
+      "placeholder": "sk-...",
+      "required": true
+    },
+    {
+      "name": "targetLanguage",
+      "title": "Target Language",
+      "description": "Language to translate to (e.g. Japanese, English, French, Chinese, etc.)",
+      "type": "textfield",
+      "placeholder": "Japanese, English, French, Chinese, etc.",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.17.0",
+    "openai": "^4.87.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@testing-library/react": "^16.2.0",
+    "@testing-library/react-hooks": "^8.0.1",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "happy-dom": "^17.4.4",
+    "prettier": "^3.3.3",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.4.5",
+    "vitest": "^3.0.8"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "volta": {
+    "node": "22.14.0",
+    "npm": "10.2.4"
+  }
+}
