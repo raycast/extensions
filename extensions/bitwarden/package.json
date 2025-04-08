@@ -97,9 +97,9 @@
         {
           "name": "primaryAction",
           "type": "dropdown",
-          "description": "The primary action to perform on an authenticator item.",
+          "description": "The primary action to perform on an authenticator code.",
           "required": false,
-          "title": "Primary Authenticator Action",
+          "title": "Primary Code Action",
           "default": "copy",
           "data": [
             {
