@@ -112,9 +112,10 @@ function AuthenticatorList() {
 
 function ListItem({ item }: { item: Item }) {
   const icon = useItemIcon(item);
+  const preferences = getPreferenceValues<Preferences.Authenticator>();
+
   const [canGenerate, setCanGenerate] = useState(!item.reprompt);
   const { code, time, error, isLoading } = authenticator.useCode(item, canGenerate);
-  const { primaryAction } = getPreferenceValues<Preferences.Authenticator>();
 
   function getAccessories(): List.Item.Props["accessories"] {
     if (!canGenerate) {
@@ -151,7 +152,7 @@ function ListItem({ item }: { item: Item }) {
         actions={
           <ActionPanel>
             {canGenerate ? (
-              <ComponentReverser reverse={primaryAction === "paste"}>
+              <ComponentReverser reverse={preferences.primaryAction === "paste"}>
                 <CopyCodeAction />
                 <PasteCodeAction />
               </ComponentReverser>
