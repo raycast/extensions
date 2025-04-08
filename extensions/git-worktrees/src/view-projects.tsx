@@ -7,7 +7,7 @@ import { getPreferences } from "#/helpers/raycast";
 import { useProjects } from "#/hooks/use-projects";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import AddWorktree from "./add-worktree";
-import ViewWorktrees, { EmptyWorktreeList } from "./view-worktrees";
+import { EmptyWorktreeList } from "./view-worktrees";
 
 export default function Command() {
   const { projects, isLoadingProjects, revalidateProjects, visitProject, resetProjectRanking } = useProjects();
@@ -41,11 +41,6 @@ export default function Command() {
               <ActionPanel>
                 <ActionPanel.Section title="Project Actions">
                   <ViewProjectWorktrees projectId={project.id} visitProject={() => visitProject?.(project)} />
-                  <Action.Push
-                    title="View Worktrees"
-                    icon={Icon.Tree}
-                    target={<ViewWorktrees projectId={project.id} />}
-                  />
 
                   <Action.Push
                     title="Add New Worktree"
