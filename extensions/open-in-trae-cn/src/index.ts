@@ -30,7 +30,6 @@ const getSelectedFinderWindow = (): Promise<string> => {
     });
 
     child.on("close", () => {
-      child.kill();
     });
   });
 };
