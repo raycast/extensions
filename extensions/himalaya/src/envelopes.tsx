@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Icon, List, Detail, confirmAlert, Color } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Detail, confirmAlert, Color, useNavigation } from "@raycast/api";
 import { Envelope, Flags, Folder } from "./models";
 import { execa } from "execa";
 import { getPreferenceValues } from "@raycast/api";
@@ -45,6 +45,7 @@ function MessageDetail({ envelope, onDelete }: { envelope: Envelope; onDelete: (
   const [isLoading, setIsLoading] = useState(true);
   const [messageBody, setMessageBody] = useState<string>("");
   const preferences = getPreferenceValues<Preferences>();
+  const { pop } = useNavigation();
 
   useEffect(() => {
     fetchMessageBody();
@@ -101,7 +102,12 @@ ${messageBody}
             shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
             onAction={() => {
               const prefs = getPreferenceValues<Preferences>();
-              deleteEnvelopeAndRefresh(envelope.id, prefs, onDelete);
+              deleteEnvelopeAndRefresh(envelope.id, prefs, () => {
+                // Call the onDelete callback to refresh the list
+                onDelete();
+                // Pop back to the list view
+                pop();
+              });
             }}
           />
           <Action.CopyToClipboard title="Copy Subject" content={envelope.subject || "(No Subject)"} />
