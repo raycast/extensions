@@ -1,30 +1,56 @@
 import { useEffect, useState } from "react";
-import { Cache, MenuBarExtra, open } from "@raycast/api";
+import { Cache, Icon, MenuBarExtra, open } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { getStories } from "./hackernews";
 import { Story } from "./types";
 
-const cache = new Cache({ capacity: 1000 });
+// Stories that the user clicked on
+const readCache = new Cache();
 const key = "read-stories";
+const read = JSON.parse(readCache.get(key) ?? "[]") as string[];
+// Stories that we've seen over the past week.
+// If we've seen something more than 24 hours ago, we remove it
+// This allows for stories posted e.g. 3 days ago to hit 500 points today
+// [{ story: {}, seen: 1234567890 }]
+const seenCache = new Cache();
+const seenKey = "seen-stories";
+const seenStories = JSON.parse(seenCache.get(seenKey) ?? "[]") as { story: Story; seen: number }[];
+
+seenStories.forEach((seenStory) => {
+  // just log how long ago we saw the story
+  const now = Date.now();
+  const storyDate = new Date(seenStory.seen).getTime();
+  const diff = now - storyDate;
+  const diffInHours = Math.floor(diff / (1000 * 60 * 60));
+  console.log(`Seen story ${seenStory.story.title} (${seenStory.story.external_url}) ${diffInHours} hours ago`);
+});
 
 export default function Command() {
   const [loading, setLoading] = useState(true);
   const [stories, setStories] = useState<Story[]>([]);
-  const seen = JSON.parse(cache.get(key) ?? "[]") as string[];
-  const hasUnseen = stories.some((story) => !seen.includes(story.external_url));
-  const unseenCount = stories.filter((story) => !seen.includes(story.external_url)).length;
+  const hasUnread = stories.some((story) => !read.includes(story.external_url));
+  const unreadCount = stories.filter((story) => !read.includes(story.external_url)).length;
 
   useEffect(() => {
     setLoading(true);
     getStories()
       .then((stories) => {
         const now = Date.now();
-        const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
-        return stories.filter((story) => {
-          // Remove stories more than 24 hours old
-          const storyDate = new Date(story.date_published).getTime();
-          return now - storyDate < twentyFourHoursInMs;
+
+        // Get list of unseen stories (they aren't in the seenCache)
+        const unseenStories = stories.filter((story) => {
+          return !seenStories.find((seenStory) => seenStory.story.external_url === story.external_url);
         });
+
+        const allStoriesSeen = [...seenStories, ...unseenStories.map((story) => ({ story, seen: now }))];
+        seenCache.set(seenKey, JSON.stringify(allStoriesSeen));
+        const twentyFourHoursInMs = 240 * 60 * 60 * 1000;
+        return allStoriesSeen
+          .filter(({ seen }) => {
+            const storyDate = new Date(seen).getTime();
+            return now - storyDate < twentyFourHoursInMs;
+          })
+          .map(({ story }) => story);
       })
       .then((stories) => setStories(stories))
       .finally(() => setLoading(false));
@@ -33,23 +59,32 @@ export default function Command() {
   return (
     <MenuBarExtra
       icon={{
-        source: hasUnseen ? "icon.png" : "icon-64-dark.png",
-        tintColor: hasUnseen ? null : { light: "#000000", dark: "#ffffff", adjustContrast: true },
+        source: hasUnread ? "icon.png" : "icon-64-dark.png",
+        tintColor: hasUnread ? null : { light: "#000000", dark: "#ffffff", adjustContrast: true },
       }}
-      tooltip={`Hacker News 500+ Stories${unseenCount > 0 ? ` (${unseenCount})` : ""}`}
+      tooltip={`Hacker News 500+ Stories${unreadCount > 0 ? ` (${unreadCount})` : ""}`}
       isLoading={loading}
     >
       {stories.length === 0 && <MenuBarExtra.Item title="No recent stories" />}
       {stories?.map((story: Story) => (
         <MenuBarExtra.Item
           key={story.external_url}
-          icon={getFavicon(story.url)}
+          icon={
+            read.includes(story.external_url)
+              ? getFavicon(story.external_url)
+              : {
+                  source: Icon.Dot,
+                  tintColor: "#E96E37",
+                }
+          }
           title={story.title.length > 50 ? `${story.title.slice(0, 50)}...` : story.title}
-          tooltip={`${seen.includes(story.external_url) ? "(read) " : ""}${story.title}`}
+          tooltip={`${read.includes(story.external_url) ? "" : "(unread) "}${story.title}`}
           onAction={() => {
             open(story.external_url);
-            const current = JSON.parse(cache.get(key) ?? "[]");
-            cache.set(key, JSON.stringify([...current, story.external_url]));
+            const current = JSON.parse(readCache.get(key) ?? "[]");
+            readCache.set(key, JSON.stringify([...current, story.external_url]));
+            // force update the icon
+            setStories((prev) => structuredClone(prev));
           }}
         />
       ))}
