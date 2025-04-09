@@ -124,7 +124,6 @@ export default class Env {
     this.language = undefined;
     this.country = undefined;
 
-    this.fetch = this.getFetch();
     this.data = this.data || (await this.getData());
 
     // Raycast cannot handle too much data.
@@ -138,10 +137,6 @@ export default class Env {
 
     if (this.data.config.defaultKeyword) {
       this.defaultKeyword = this.data.config.defaultKeyword;
-    }
-
-    if (!params) {
-      params = Env.getParamsFromUrl();
     }
 
     const boolParams = Env.getBoolParams(params);
@@ -390,13 +385,13 @@ export default class Env {
       case "web-ext":
         prefix = "/";
         url = `${prefix}data.json?version=${this.gitInfo.commit.hash}`;
-        this.fetchLog(this.context, prefix);
+        Env.fetchLog(this.context, prefix);
         text = await Helper.fetchAsync(url, this);
         break;
       case "raycast":
         prefix = "https://trovu.net/";
         url = `${prefix}data.json`;
-        this.fetchLog(this.context, prefix);
+        Env.fetchLog(this.context, prefix);
         text = await Helper.fetchAsync(url, this);
         break;
       case "node": {
@@ -424,9 +419,9 @@ export default class Env {
    *
    * @param context
    */
-  fetchLog(context, prefix) {
+  static fetchLog(context, prefix) {
     const url = `${prefix}log.json?context=${context}`;
-    this.fetch(url);
+    fetch(url);
   }
 
   /**
@@ -459,11 +454,5 @@ export default class Env {
 
   isRunningStandalone() {
     return window.navigator.standalone || window.matchMedia("(display-mode: standalone)").matches;
-  }
-  getFetch() {
-    // This was here to bind it to node-fetch when Raycast seemingly didn't have fetch.
-    // But now it seems to have fetch, so this is not needed.
-    // Keeping it here for now, in case it's needed later.
-    return fetch.bind(null);
   }
 }

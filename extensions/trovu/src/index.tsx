@@ -114,6 +114,7 @@ ${examples || ""}
             // Set env to null to trigger a reload on useEffect.
             setEnv(null);
           }
+          Env.fetchLog("raycast", "https://trovu.net/");
           await open(buildTrovuUrl(searchText));
         }}
       />

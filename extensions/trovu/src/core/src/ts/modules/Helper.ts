@@ -14,7 +14,7 @@ export default class Helper {
    */
   static async fetchAsync(url, env) {
     const requestCache = env.reload ? "reload" : "force-cache";
-    const response = await env.fetch(url, {
+    const response = await fetch(url, {
       cache: requestCache,
     });
     if (response.status != 200) {

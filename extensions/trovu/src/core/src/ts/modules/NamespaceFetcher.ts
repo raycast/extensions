@@ -193,7 +193,7 @@ export default class NamespaceFetcher {
       if (!namespaceInfo.url) {
         continue;
       }
-      const promise = this.env.fetch(namespaceInfo.url, {
+      const promise = fetch(namespaceInfo.url, {
         cache: this.env.reload ? "reload" : "default",
       });
       promises.push(promise);
