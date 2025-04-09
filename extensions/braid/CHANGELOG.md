@@ -1,6 +1,6 @@
 # Braid Changelog
 
-## [Improvements & New Features] - {PR_MERGE_DATE}
+## [Improvements & New Features] - 2025-04-09
 
 - Dynamically fetch icons from `braid-design-system` repo
 
