@@ -105,7 +105,9 @@ export default function TrackDeliveriesCommand() {
                 />
                 {carriers.get(delivery.carrier)?.ableToTrackRemotely() && (
                   <Action
-                    title={delivery.manualMarkedAsDelivered ? "Mark as Undelivered" : "Mark as Delivered"}
+                    title={
+                      delivery.manualMarkedAsDelivered ? "Manually Mark as Undelivered" : "Manually Mark as Delivered"
+                    }
                     icon={delivery.manualMarkedAsDelivered ? Icon.CircleProgress : Icon.CheckCircle}
                     shortcut={{ modifiers: ["cmd"], key: "d" }}
                     style={Action.Style.Regular}
@@ -233,7 +235,7 @@ async function toggleDeliveryDelivered(
 
   await showToast({
     style: Toast.Style.Success,
-    title: `Marked Delivery as ${toBeDelivered ? "Delivered" : "Undelivered"}`,
+    title: `Manually Marked as ${toBeDelivered ? "Delivered" : "Undelivered"}`,
     message: nameOfDeliveryToMarkAsDelivered,
   });
 }
