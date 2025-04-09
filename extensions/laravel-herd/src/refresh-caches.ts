@@ -1,6 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
 import { Herd } from "./utils/Herd";
-import { rescue } from "./utils/rescue";
 
 export default async function main() {
   await showToast({
@@ -8,10 +7,19 @@ export default async function main() {
     style: Toast.Style.Animated,
   });
 
-  await rescue(() => Herd.PHP.clearCache(), "Failed to refresh PHP cache.");
-  await rescue(() => Herd.Node.clearCache(), "Failed to refresh Node cache.");
-  await rescue(() => Herd.Services.clearCache(), "Failed to refresh Services cache.");
-  await rescue(() => Herd.Sites.clearCache(), "Failed to refresh Sites cache.");
+  try {
+    Herd.PHP.clearCache();
+    Herd.Node.clearCache();
+    Herd.Services.clearCache();
+    Herd.Sites.clearCache();
+  } catch (error) {
+    await showToast({
+      title: "Failed to refresh caches.",
+      style: Toast.Style.Failure,
+    });
+
+    return;
+  }
 
   await showToast({
     title: "Caches refreshed.",
