@@ -100,7 +100,7 @@ const MenuItems = ({ error, stories, setStories, readStories }: MenuItemsProps) 
       key={story.external_url}
       icon={{
         source: Icon.Dot,
-        tintColor: readStories.includes(story.external_url) ? "#787794" : "#E96E37",
+        tintColor: readStories.includes(story.external_url) ? { light: "#787794", dark: "gray" } : "#E96E37",
       }}
       title={story.title.length > 50 ? `${story.title.slice(0, 50)}...` : story.title}
       tooltip={`${readStories.includes(story.external_url) ? "" : "(unread) "}${story.title}`}
