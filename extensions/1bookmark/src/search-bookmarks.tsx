@@ -13,16 +13,14 @@ import { useBookmarkSearch } from "./hooks/use-bookmark-search.hook";
 import { useFilterBookmark } from "./hooks/use-filter-bookmark.hook";
 import { RequiredActions } from "./components/BookmarkItemActionPanel";
 import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
+import { useEnabledSpaces } from "./hooks/use-enabled-spaces.hook";
 
 export function Body() {
   const me = useMe();
-  const [keyword, setKeyword] = useState("");
-
-  const spaceIds = useMemo(() => {
-    return me.data?.associatedSpaces.map((s) => s.id) || [];
-  }, [me.data?.associatedSpaces]);
-
+  const { enabledSpaceIds } = useEnabledSpaces();
   const { data, isFetching, isFetched, refetch: refetchBookmarks } = useMyBookmarks();
+
+  const [keyword, setKeyword] = useState("");
 
   const refetch = useCallback(() => {
     refetchBookmarks();
@@ -109,7 +107,7 @@ export function Body() {
     return (
       <List
         isLoading={isFetching || !me.data}
-        searchBarAccessory={me.data && <BookmarkFilter spaceIds={spaceIds} me={me.data} />}
+        searchBarAccessory={me.data && enabledSpaceIds && <BookmarkFilter spaceIds={enabledSpaceIds} me={me.data} />}
         searchText={keyword}
         onSearchTextChange={setKeyword}
       >
@@ -125,7 +123,7 @@ export function Body() {
   return (
     <List
       isLoading={isFetching || !me.data}
-      searchBarAccessory={me.data && <BookmarkFilter spaceIds={spaceIds} me={me.data} />}
+      searchBarAccessory={me.data && enabledSpaceIds && <BookmarkFilter spaceIds={enabledSpaceIds} me={me.data} />}
       searchText={keyword}
       onSearchTextChange={setKeyword}
     >
