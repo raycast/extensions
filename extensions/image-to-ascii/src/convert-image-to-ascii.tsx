@@ -18,7 +18,7 @@ import FormData from "form-data";
 export default function Command() {
   const { push } = useNavigation();
   const [selectedImage, setSelectedImage] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     async function getSelectedImage() {
@@ -43,6 +43,7 @@ export default function Command() {
 
   const convertImageToAscii = async (imagePath: string, complex: boolean, width?: number, height?: number) => {
     try {
+      setIsLoading(true);
       const formData = new FormData();
       formData.append("file", fs.createReadStream(imagePath));
       formData.append("complex", complex.toString());
@@ -60,6 +61,8 @@ export default function Command() {
     } catch (error) {
       console.error("Failed to convert image:", error);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
