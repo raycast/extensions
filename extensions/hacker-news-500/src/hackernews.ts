@@ -33,7 +33,7 @@ export async function getStories(points = "500", { cache }: GetStoriesProps["opt
     throw new Error(response.statusText);
   }
   try {
-    const { items } = await response.json();
+    const { items = [] } = (await response.json()) as { items?: Story[] };
     cache.set(key, JSON.stringify({ timestamp: Date.now(), items }));
     const now = new Date();
     return items.filter((item: Story) => {
