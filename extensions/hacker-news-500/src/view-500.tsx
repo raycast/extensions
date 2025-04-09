@@ -11,7 +11,7 @@ const readKey = "read-stories";
 // This allows for stories posted e.g. 3 days ago to hit 500 points today
 // [{ story: {}, seen: 1234567890 }]
 const seenKey = "seen-stories";
-// To cache the preference values
+// To cache the points to clear cache when they change
 const prefKey = "preferences";
 
 export default function Command() {
