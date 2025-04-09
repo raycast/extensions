@@ -80,7 +80,7 @@ export async function getNowPlaying(): Promise<{ full: string; formatted: string
           return "TIDAL"
         end try
       end tell`);
-  console.log(songInfo);
+  // the full single line song info
   const full = songInfo;
   // formatted returns a newline (\n) after the first space after the 40ch
   const formatted = songInfo.replace(/(.{40}\S*?)(\s+|$)/g, "$1\n");

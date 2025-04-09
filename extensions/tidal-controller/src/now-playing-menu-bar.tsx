@@ -8,8 +8,9 @@ import doPrevSong from "./prev-song";
 import doShuffle from "./shuffle";
 
 export default function nowPlayingMenuBar() {
-  const [nowPlaying, setNowPlaying] = useState<string | null>(null);
   const [fullNowPlaying, setFullNowPlaying] = useState<string | null>(null);
+  const [nowPlaying, setNowPlaying] = useState<string | null>(null);
+  const [formattedNowPlaying, setFormattedNowPlaying] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     async function loadNowPlaying() {
@@ -17,10 +18,10 @@ export default function nowPlayingMenuBar() {
       await runTidalCommand(
         async () => {
           const { full, formatted, short } = await getNowPlaying();
+          setFullNowPlaying(full);
+          setFormattedNowPlaying(formatted);
           setNowPlaying(short);
-          setFullNowPlaying(formatted);
           setIsLoading(false);
-          console.log(full);
         },
         { silent: true }, //passing a silent flag for when Tidal is not running
       );
@@ -39,13 +40,13 @@ export default function nowPlayingMenuBar() {
       title={nowPlaying !== null && nowPlaying !== "TIDAL" ? (nowPlaying as string) : undefined}
       isLoading={isLoading}
       tooltip={
-        fullNowPlaying !== null && nowPlaying !== "TIDAL"
-          ? (nowPlaying as string)
+        fullNowPlaying !== null && fullNowPlaying !== "TIDAL"
+          ? (fullNowPlaying as string)
           : "Tidal must be minimized, hidden or open to show Now Playing information"
       }
     >
       {nowPlaying !== null && nowPlaying !== "TIDAL" ? (
-        <MenuBarExtra.Section title={fullNowPlaying as string}>
+        <MenuBarExtra.Section title={formattedNowPlaying as string}>
           {[
             { icon: "⏸️", title: "Pause", action: doPause },
             { icon: "⏩", title: "Next Song", action: doNextSong },
