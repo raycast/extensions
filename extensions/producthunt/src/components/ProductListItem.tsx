@@ -35,8 +35,8 @@ export function ProductListItem({
 
   if (featured) {
     baseAccessories = [
-      { text: `${product.votesCount}`, icon: { source: Icon.ArrowUp } },
       { text: product.commentsCount ? `${product.commentsCount}` : undefined, icon: { source: Icon.Bubble } },
+      { text: `${product.votesCount}`, icon: { source: Icon.ArrowUp } },
       ...(product.maker ? [{ text: `by ${product.maker.name}` }] : []),
     ];
   } else {
