@@ -772,6 +772,7 @@
 /extensions/ilovepdf                                                @MohamedK1 @ridemountainpig
 /extensions/image-base64                                            @vitorLostadaC
 /extensions/image-diff-checker                                      @yasuhiro-yamamoto
+/extensions/image-flow                                              @godruoyi
 /extensions/image-host                                              @SuleymanEfe
 /extensions/image-wallet                                            @ibll
 /extensions/imagekit-uploader                                       @ludafa
