@@ -103,13 +103,15 @@ export default function TrackDeliveriesCommand() {
                     />
                   }
                 />
-                <Action
-                  title="Mark as Delivered"
-                  icon={Icon.CheckCircle}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
-                  style={Action.Style.Regular}
-                  onAction={() => toggleDeliveryDelivered(delivery.id, deliveries, setDeliveries)}
-                />
+                {carriers.get(delivery.carrier)?.ableToTrackRemotely() && (
+                  <Action
+                    title={delivery.manualMarkedAsDelivered ? "Mark as Undelivered" : "Mark as Delivered"}
+                    icon={delivery.manualMarkedAsDelivered ? Icon.CircleProgress : Icon.CheckCircle}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    style={Action.Style.Regular}
+                    onAction={() => toggleDeliveryDelivered(delivery.id, deliveries, setDeliveries, setPackages)}
+                  />
+                )}
                 <Action
                   title="Delete Delivery"
                   icon={Icon.Trash}
@@ -147,7 +149,6 @@ async function refreshTracking(
     // don't do anything until both deliveries and packages are initialized
     return;
   }
-
   setTrackingIsLoading(true);
 
   const now = new Date();
@@ -202,50 +203,37 @@ async function toggleDeliveryDelivered(
   id: string,
   deliveries: Delivery[] | undefined,
   setDeliveries: (value: Delivery[]) => Promise<void>,
+  setPackages: (value: ((prevState: PackageMap) => PackageMap) | PackageMap) => void,
 ) {
   if (!deliveries) {
     return;
   }
 
-  const deliveryIndex = deliveries.findIndex(delivery => delivery.id === id);
+  const deliveryIndex = deliveries.findIndex((delivery) => delivery.id === id);
   if (deliveryIndex === -1) {
     return;
   }
 
-  const updatedDeliveries = deliveries
+  const toBeDelivered = !deliveries[deliveryIndex].manualMarkedAsDelivered;
 
-  updatedDeliveries[deliveryIndex] = {
+  deliveries[deliveryIndex] = {
     ...deliveries[deliveryIndex],
-    manualMarkedAsDelivered: !deliveries[deliveryIndex].manualMarkedAsDelivered,
+    manualMarkedAsDelivered: toBeDelivered,
   };
 
-  const nameOfDeliveryToMarkAsDelivered = updatedDeliveries[deliveryIndex].name;
+  const nameOfDeliveryToMarkAsDelivered = deliveries[deliveryIndex].name;
 
-  // let nameOfDeliveryToMarkAsDelivered = "";
-  //
-  // const updatedDeliveries = deliveries.map((delivery) => {
-  //   if (delivery.id !== id) {
-  //     return delivery;
-  //   }
-  //
-  //   nameOfDeliveryToMarkAsDelivered = delivery.name;
-  //
-  //   return {
-  //     ...delivery,
-  //     manualMarkedAsDelivered: !delivery.manualMarkedAsDelivered
-  //   };
-  // });
-  //
-  // if (nameOfDeliveryToMarkAsDelivered === "") {
-  //   // nothing was modified
-  //   return;
-  // }
+  await setDeliveries(deliveries);
 
-  await setDeliveries(updatedDeliveries);
+  // clear packages for this delivery so it will refresh
+  setPackages((packages) => {
+    delete packages[id];
+    return packages;
+  });
 
   await showToast({
     style: Toast.Style.Success,
-    title: "Marked Delivery as Delivered",
+    title: `Marked Delivery as ${toBeDelivered ? "Delivered" : "Undelivered"}`,
     message: nameOfDeliveryToMarkAsDelivered,
   });
 }
