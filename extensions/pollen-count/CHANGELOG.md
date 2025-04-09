@@ -1,3 +1,3 @@
 # Pollenflug Changelog
 
-## [Add Pollenflug] - {PR_MERGE_DATE}
+## [Add Pollenflug] - 2025-04-09
