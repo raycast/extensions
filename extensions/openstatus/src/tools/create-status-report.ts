@@ -1,5 +1,5 @@
 import { getPreferenceValues, Tool } from "@raycast/api";
-import fetch from "node-fetch";
+
 import { StatusReport } from "../api/schema";
 
 type Input = {
@@ -24,9 +24,9 @@ export default async function (input: Input) {
     body: JSON.stringify({
       ...input,
       pageId: +input.pageId,
-      date: new Date(input.date ?? "").toISOString()
-    })
-  })
+      date: new Date(input.date ?? "").toISOString(),
+    }),
+  });
   if (!response.ok) throw new Error("Failed to create status report");
   const result = await response.json();
   return result as StatusReport;
@@ -37,24 +37,24 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     info: [
       {
         name: "Title",
-        value: input.title
+        value: input.title,
       },
       {
         name: "Message",
-        value: input.message
+        value: input.message,
       },
       {
         name: "Start Date",
-        value: input.date
+        value: input.date,
       },
       {
         name: "Status",
-        value: input.status
+        value: input.status,
       },
       {
         name: "Page ID",
-        value: input.pageId
-      }
-    ]
+        value: input.pageId,
+      },
+    ],
   };
 };

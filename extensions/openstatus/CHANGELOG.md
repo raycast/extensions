@@ -2,6 +2,9 @@
 
 ## [✨ AI Enhancements] - {PR_MERGE_DATE}
 
+- Add various AI Tools 
+- Modernize extension: chore: remove `node-fetch`
+
 ## [Add "Show Incidents" command] - 2025-01-29
 
 - New "Show Incidents" command: _View_ and Acknowledge, Resolve

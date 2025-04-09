@@ -1,5 +1,5 @@
 import { getPreferenceValues, Tool } from "@raycast/api";
-import fetch from "node-fetch";
+
 import { StatusReportUpdate } from "../api/schema";
 
 type Input = {
@@ -7,7 +7,7 @@ type Input = {
   statusReportId: string;
   message: string;
   /* The status of the update. Based on user entry, set this as one of the following EXACTLY: 'investigating' or 'identified' or 'monitoring' or 'resolved'. If status is not obvious, prompt user to re-enter. */
-  status: 'investigating'|'identified'|'monitoring'|'resolved';
+  status: "investigating" | "identified" | "monitoring" | "resolved";
   /* The start date of the update. The date CANNOT be in the past. Parse it as a date. If no date given, use current. */
   date?: string;
 };
@@ -22,10 +22,10 @@ export default async function (input: Input) {
     method: "POST",
     body: JSON.stringify({
       ...input,
-      date: new Date(input.date ?? "").toISOString()
-    })
-  })
-  
+      date: new Date(input.date ?? "").toISOString(),
+    }),
+  });
+
   if (!response.ok) throw new Error("Failed to create status report update");
   const result = await response.json();
   return result as StatusReportUpdate;
@@ -36,20 +36,20 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     info: [
       {
         name: "Message",
-        value: input.message
+        value: input.message,
       },
       {
         name: "Start Date",
-        value: input.date
+        value: input.date,
       },
       {
         name: "Status",
-        value: input.status
+        value: input.status,
       },
       {
         name: "Status Report ID",
-        value: input.statusReportId
-      }
-    ]
+        value: input.statusReportId,
+      },
+    ],
   };
 };

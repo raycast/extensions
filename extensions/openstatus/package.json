@@ -68,131 +68,121 @@
     {
       "name": "create-status-report",
       "title": "Create Status Report",
-      "description": ""
+      "description": "Create a new status report for your status page"
     },
     {
       "name": "create-status-report-update",
       "title": "Create Status Report Update",
-      "description": ""
+      "description": "Create a new Status Report Update for your Status Report"
     },
     {
       "name": "show-status-reports",
       "title": "Show Status Reports",
-      "description": ""
+      "description": "View all your status reports from your OpenStatus account"
     }
-      ],
+  ],
   "ai": {
     "evals": [
       {
-        "input" : "@openstatus show all monitors",
-        "mocks" : {
-          "show-monitors" : [
+        "input": "@openstatus show all monitors",
+        "mocks": {
+          "show-monitors": [
             {
-              "active" : true,
-              "jobType" : "http",
-              "name" : "",
-              "public" : false,
-              "regions" : [
+              "active": true,
+              "jobType": "http",
+              "name": "",
+              "public": false,
+              "regions": [
                 "ams"
               ]
             }
           ]
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-      
-              },
-              "name" : "show-monitors"
+            "callsTool": {
+              "arguments": {},
+              "name": "show-monitors"
             }
           }
         ]
       },
       {
-        "input" : "@openstatus show me active status pages",
-        "mocks" : {
-          "show-status-pages" : [
+        "input": "@openstatus show me active status pages",
+        "mocks": {
+          "show-status-pages": [
             {
-              "description" : "Description",
-              "id" : 1457,
-              "slug" : "prickly-wolf",
-              "title" : ""
+              "description": "Description",
+              "id": 1457,
+              "slug": "prickly-wolf",
+              "title": ""
             }
           ]
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-      
-              },
-              "name" : "show-status-pages"
-            }
-          }
-        ]
-      },{
-        "input" : "@openstatus show all status pages",
-        "mocks" : {
-          "show-status-pages" : [
-            {
-              "description" : "Description",
-              "slug" : "slug",
-              "title" : "Title"
-            }
-          ]
-        },
-        "expected" : [
-          {
-            "callsTool" : {
-              "arguments" : {
-      
-              },
-              "name" : "show-status-pages"
+            "callsTool": {
+              "arguments": {},
+              "name": "show-status-pages"
             }
           }
         ]
       },
       {
-        "input" : "@openstatus create report for raycast saying we are investigating date of next monday 9am",
-        "mocks" : {
-          "show-status-pages" : [
+        "input": "@openstatus show all status pages",
+        "mocks": {
+          "show-status-pages": [
             {
-              "description" : "Description",
-              "id" : 0,
-              "slug" : "raycast",
-              "title" : "Raycast"
+              "description": "Description",
+              "slug": "slug",
+              "title": "Title"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "show-status-pages"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@openstatus create report for raycast saying we are investigating date of next monday 9am",
+        "mocks": {
+          "show-status-pages": [
+            {
+              "description": "Description",
+              "id": 0,
+              "slug": "raycast",
+              "title": "Raycast"
             }
           ],
-          "create-status-report" : {
-            "id" : 0,
-            "pageId" : 0,
-            "status" : "investigating",
-            "statusReportUpdateIds" : [
+          "create-status-report": {
+            "id": 0,
+            "pageId": 0,
+            "status": "investigating",
+            "statusReportUpdateIds": [
               2
             ],
-            "title" : "Investigation Ongoing"
+            "title": "Investigation Ongoing"
           }
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-      
-              },
-              "name" : "show-status-pages"
+            "callsTool": {
+              "arguments": {},
+              "name": "show-status-pages"
             }
           },
           {
-            "callsTool" : {
-              "arguments" : {
-                "date" : "2025-03-24T09:00:00",
-                "message" : "We are investigating",
-                "pageId" : "0",
-                "status" : "investigating",
-                "title" : "Investigation Ongoing"
+            "callsTool": {
+              "arguments": {
+                "pageId": "0",
+                "status": "investigating"
               },
-              "name" : "create-status-report"
+              "name": "create-status-report"
             }
           }
         ]
@@ -210,18 +200,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.0",
+    "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.19.1",
-    "node-fetch": "^3.3.2",
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.7.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
