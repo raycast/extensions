@@ -7,7 +7,6 @@ import { showToast, Toast } from "@raycast/api";
 export default async function Toggle() {
   let subtitle = "Tailscale";
   try {
-    // Check current status
     const isConnected = await isTailscaleConnected();
 
     if (isConnected) {
