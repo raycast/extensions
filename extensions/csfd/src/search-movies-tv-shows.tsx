@@ -215,7 +215,7 @@ ${description}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            title="Open in ČSfd"
+            title="Open in ČSFD"
             url={`https://www.csfd.cz/film/${movie?.id}`}
             shortcut={{ modifiers: [], key: "return" }}
           />
