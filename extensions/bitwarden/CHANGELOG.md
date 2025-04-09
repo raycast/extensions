@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [New Preference] - {PR_MERGE_DATE}
+## [New Preference] - 2025-04-09
 
 - Add primary action preference for authenticator command
 
