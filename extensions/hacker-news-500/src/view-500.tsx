@@ -23,7 +23,6 @@ export default function Command() {
   const [error, setError] = useState<string | null>(null);
   const [stories, setStories] = useState<Story[]>([]);
 
-  const hasUnread = stories.some((story) => !readStories.includes(story.external_url));
   const unreadCount = stories.filter((story) => !readStories.includes(story.external_url)).length;
 
   if (cache.get(prefKey) !== points) {
@@ -73,8 +72,8 @@ export default function Command() {
   return (
     <MenuBarExtra
       icon={{
-        source: hasUnread ? "icon.png" : "icon-64-dark.png",
-        tintColor: hasUnread ? null : { light: "#000000", dark: "#ffffff", adjustContrast: true },
+        source: unreadCount > 0 ? "icon.png" : "icon-64-dark.png",
+        tintColor: unreadCount > 0 ? null : { light: "#000000", dark: "#ffffff", adjustContrast: true },
       }}
       tooltip={`Hacker News 500+ Stories${unreadCount > 0 ? ` (${unreadCount})` : ""}`}
       isLoading={loading}
