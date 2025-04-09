@@ -2,7 +2,7 @@ import { showFailureToast } from "@raycast/utils";
 import { getErrorDetails, getStatus } from "./shared";
 import Disconnect from "./disconnect";
 import Connect from "./connect";
-import { showToast, Toast } from "@raycast/api";
+import { showHUD, showToast, Toast } from "@raycast/api";
 
 export default async function Toggle() {
   let subtitle = "Tailscale";
@@ -29,6 +29,7 @@ export default async function Toggle() {
   } catch (err) {
     await showFailureToast(err, { title: "Failed to toggle connection" });
     subtitle = getErrorDetails(err, "").title;
+    showHUD(`Unable to connect: ${subtitle}`);
   }
 }
 
