@@ -41,6 +41,7 @@ export default function TrackDeliveriesCommand() {
   const [trackingIsLoading, setTrackingIsLoading] = useState(false);
 
   useEffect(() => {
+    console.log("useEffect");
     refreshTracking(false, deliveries, packages, setPackages, setTrackingIsLoading);
   }, [deliveries]);
 
@@ -103,7 +104,7 @@ export default function TrackDeliveriesCommand() {
                     />
                   }
                 />
-                {carriers.get(delivery.carrier)?.ableToTrackRemotely() && (
+                {!carriers.get(delivery.carrier)?.ableToTrackRemotely() && (
                   <Action
                     title={
                       delivery.manualMarkedAsDelivered ? "Manually Mark as Undelivered" : "Manually Mark as Delivered"
@@ -151,6 +152,7 @@ async function refreshTracking(
     // don't do anything until both deliveries and packages are initialized
     return;
   }
+  console.log("refreshTracking");
   setTrackingIsLoading(true);
 
   const now = new Date();
