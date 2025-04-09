@@ -1,9 +1,8 @@
 # Polar Changelog
 
-## [Update] - 2025-04-09
+## [Update] - {PR_MERGE_DATE}
 
 - Fix issue with expired OAuth access tokens
-
 ## [Update] - 2024-12-20
 
 - Implements a View Customers command
