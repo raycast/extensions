@@ -55,7 +55,7 @@ export default function Command() {
         });
         cache.set(seenKey, JSON.stringify(allStoriesSeen));
 
-        const twentyFourHoursInMs = 240 * 60 * 60 * 1000;
+        const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
         return allStoriesSeen
           .filter(({ seen }) => {
             // We dont show anything seen over 24 hours ago
