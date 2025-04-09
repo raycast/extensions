@@ -49,12 +49,12 @@
           "default": "copy",
           "data": [
             {
-              "title": "Paste to Active App",
-              "value": "paste"
-            },
-            {
               "title": "Copy to Clipboard",
               "value": "copy"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
             }
           ]
         },
@@ -92,6 +92,26 @@
       "keywords": [
         "totp",
         "otp"
+      ],
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "The primary action to perform on an authenticator code.",
+          "required": false,
+          "title": "Primary Code Action",
+          "default": "copy",
+          "data": [
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            }
+          ]
+        }
       ]
     },
     {

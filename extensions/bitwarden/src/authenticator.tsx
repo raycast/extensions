@@ -1,6 +1,17 @@
 import * as OTPAuth from "otpauth";
 import { useEffect, useMemo, useState } from "react";
-import { Action, ActionPanel, BrowserExtension, Clipboard, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  BrowserExtension,
+  Clipboard,
+  Color,
+  getPreferenceValues,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
 import RootErrorBoundary from "~/components/RootErrorBoundary";
@@ -21,6 +32,7 @@ import { ActionWithReprompt, DebuggingBugReportingActionSection, VaultActionsSec
 import { Err, Ok, Result, tryCatch } from "~/utils/errors";
 import { useVaultSearch } from "~/utils/search";
 import ListFolderDropdown from "~/components/ListFolderDropdown";
+import ComponentReverser from "~/components/ComponentReverser";
 
 const AuthenticatorCommand = () => (
   <RootErrorBoundary>
@@ -100,6 +112,8 @@ function AuthenticatorList() {
 
 function ListItem({ item }: { item: Item }) {
   const icon = useItemIcon(item);
+  const preferences = getPreferenceValues<Preferences.Authenticator>();
+
   const [canGenerate, setCanGenerate] = useState(!item.reprompt);
   const { code, time, error, isLoading } = authenticator.useCode(item, canGenerate);
 
@@ -138,10 +152,10 @@ function ListItem({ item }: { item: Item }) {
         actions={
           <ActionPanel>
             {canGenerate ? (
-              <>
+              <ComponentReverser reverse={preferences.primaryAction === "paste"}>
                 <CopyCodeAction />
                 <PasteCodeAction />
-              </>
+              </ComponentReverser>
             ) : (
               <ConfirmAction onConfirm={() => setCanGenerate(true)} />
             )}
