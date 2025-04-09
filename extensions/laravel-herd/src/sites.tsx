@@ -112,6 +112,14 @@ export default function Command() {
                             await actions.openTinker(site);
                           }}
                         />
+                        <Action
+                          key="open-site-logs"
+                          title={`Open Logs`}
+                          icon={Icon.Eye}
+                          onAction={async () => {
+                            await actions.openLogs(site);
+                          }}
+                        />
                         <Action.ShowInFinder key="open-site-finder" path={site.path} />
                       </ActionPanel.Section>
                       <ActionPanel.Section title={`${site.site}: Configuration`}>

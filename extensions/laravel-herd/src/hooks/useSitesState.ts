@@ -69,6 +69,12 @@ export function useSitesState() {
     await rescue(() => Herd.Sites.openDatabase(site), "Could not open Database for Site.");
   }
 
+  async function openLogs(site: Site): Promise<void> {
+    await closeMainWindow();
+    await showHUD(`Opening Log Viewer for ${site.site}...`);
+    await rescue(() => Herd.Sites.openLogs(site.path), "Could not open Log Viewer for Site.");
+  }
+
   async function openTerminal(site: Site): Promise<void> {
     await closeMainWindow();
     await showHUD(`Opening Terminal for ${site.site}...`);
@@ -183,6 +189,7 @@ export function useSitesState() {
       openInIDE,
       openInBrowser,
       openDatabase,
+      openLogs,
       openTerminal,
       openTinker,
       parseSiteEnv,

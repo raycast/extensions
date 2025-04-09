@@ -102,11 +102,19 @@
     },
     {
       "name": "open-recent-site-tinker",
-      "title": "Open Recent Site in Tinkerwell",
+      "title": "Open Recent Site in Tinker(well)",
       "subtitle": "Laravel Herd",
-      "description": "Opens the most recent site in Tinkerwell.",
+      "description": "Opens the most recent site in Tinkerwell, if installed. Otherwise, opens a tinker session in the terminal.",
       "mode": "no-view",
       "interval": "5m"
+    },
+    {
+      "name": "open-recent-site-logs",
+      "title": "Open Logs for Recent Site",
+      "subtitle": "Laravel Herd",
+      "description": "Opens the Log Viewer for your most recent site.",
+      "mode": "no-view",
+      "interval": "5s"
     },
     {
       "name": "open-docs",
@@ -120,6 +128,13 @@
       "title": "Open Configuration Folder",
       "subtitle": "Laravel Herd",
       "description": "Opens the general configuration folder for Laravel Herd.",
+      "mode": "no-view"
+    },
+    {
+      "name": "refresh-caches",
+      "title": "Refresh Caches",
+      "subtitle": "Laravel Herd",
+      "description": "Refresh the caches for Laravel Herd.",
       "mode": "no-view"
     }
   ],
