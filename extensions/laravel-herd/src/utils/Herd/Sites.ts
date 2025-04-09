@@ -67,6 +67,11 @@ export class Sites {
     return true;
   }
 
+  static async openLogs(sitePath: string) {
+    await Herd.runAppleScript<boolean>(`logs "${sitePath}"`);
+    return true;
+  }
+
   static async secure(site: Site): Promise<boolean> {
     await Herd.runAppleScript<boolean>(`site "${site.site}" action "secure"`);
     return true;

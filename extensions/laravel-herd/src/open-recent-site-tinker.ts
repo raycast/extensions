@@ -25,5 +25,5 @@ export default async function main() {
     style: Toast.Style.Animated,
   });
 
-  await Herd.ExternalApps.openTinker(recentSite.path);
+  await rescue(async () => Herd.ExternalApps.openTinker(recentSite.path), "Failed to open tinker.");
 }

@@ -14,7 +14,7 @@ export class Dumps {
   }
 
   static async isPinned(): Promise<boolean> {
-    return await Herd.runAppleScript<boolean>(`appstate value "keepDumpsOnTop`);
+    return await Herd.runAppleScript<boolean>(`appstate value "keepDumpsOnTop"`);
   }
 
   static async clear(): Promise<boolean> {
