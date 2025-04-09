@@ -27,10 +27,10 @@ export default async () => {
 
   try {
     await runAppleScript(`
-    tell application "Reflect" to activate
-    tell application "System Events" to tell process "Reflect" to ¬
-    click menu item "Select Daily Note" of menu "Go" of menu bar 1
-  `);
+        tell application "Reflect" to activate
+        tell application "System Events" to tell process "Reflect" to ¬
+        keystroke "r" using {command down, shift down}
+    `);
   } catch (error) {
     showFailureToast(error, { title: "Could not run AppleScript" });
   }
