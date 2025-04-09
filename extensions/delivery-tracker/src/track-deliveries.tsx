@@ -104,6 +104,13 @@ export default function TrackDeliveriesCommand() {
                   }
                 />
                 <Action
+                  title="Mark as Delivered"
+                  icon={Icon.CheckCircle}
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  style={Action.Style.Regular}
+                  onAction={() => toggleDeliveryDelivered(delivery.id, deliveries, setDeliveries)}
+                />
+                <Action
                   title="Delete Delivery"
                   icon={Icon.Trash}
                   shortcut={Keyboard.Shortcut.Common.Remove}
@@ -189,6 +196,58 @@ async function refreshTracking(
   }
 
   setTrackingIsLoading(false);
+}
+
+async function toggleDeliveryDelivered(
+  id: string,
+  deliveries: Delivery[] | undefined,
+  setDeliveries: (value: Delivery[]) => Promise<void>,
+) {
+  if (!deliveries) {
+    return;
+  }
+
+  const deliveryIndex = deliveries.findIndex(delivery => delivery.id === id);
+  if (deliveryIndex === -1) {
+    return;
+  }
+
+  const updatedDeliveries = deliveries
+
+  updatedDeliveries[deliveryIndex] = {
+    ...deliveries[deliveryIndex],
+    manualMarkedAsDelivered: !deliveries[deliveryIndex].manualMarkedAsDelivered,
+  };
+
+  const nameOfDeliveryToMarkAsDelivered = updatedDeliveries[deliveryIndex].name;
+
+  // let nameOfDeliveryToMarkAsDelivered = "";
+  //
+  // const updatedDeliveries = deliveries.map((delivery) => {
+  //   if (delivery.id !== id) {
+  //     return delivery;
+  //   }
+  //
+  //   nameOfDeliveryToMarkAsDelivered = delivery.name;
+  //
+  //   return {
+  //     ...delivery,
+  //     manualMarkedAsDelivered: !delivery.manualMarkedAsDelivered
+  //   };
+  // });
+  //
+  // if (nameOfDeliveryToMarkAsDelivered === "") {
+  //   // nothing was modified
+  //   return;
+  // }
+
+  await setDeliveries(updatedDeliveries);
+
+  await showToast({
+    style: Toast.Style.Success,
+    title: "Marked Delivery as Delivered",
+    message: nameOfDeliveryToMarkAsDelivered,
+  });
 }
 
 async function deleteTracking(

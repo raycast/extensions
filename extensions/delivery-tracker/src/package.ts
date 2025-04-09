@@ -23,9 +23,7 @@ export interface PackageMap {
 export function packagesFromOfflineCarrier(delivery: Delivery): Package[] {
   return [
     {
-      delivered: delivery.manualDeliveryDate
-        ? new Date().setHours(0, 0, 0, 0) > new Date(delivery.manualDeliveryDate).setHours(0, 0, 0, 0)
-        : false, // truncate the time from both now and the manual delivery date
+      delivered: delivery.manualMarkedAsDelivered ?? false,
       deliveryDate: delivery.manualDeliveryDate,
       activity: [],
     },
