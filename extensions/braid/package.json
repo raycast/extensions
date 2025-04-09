@@ -15,12 +15,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-docs",
-      "title": "Search Docs",
-      "description": "Search and open Docs in Braid Design System",
-      "mode": "view"
-    },
-    {
       "name": "search-iconography",
       "title": "Search Iconography",
       "description": "Search and open Iconography in Braid Design System",
@@ -29,15 +23,16 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.84.2",
-    "@raycast/utils": "^1.18.0"
+    "@raycast/utils": "^1.18.0",
+    "change-case": "^5.4.4",
+    "eslint": "^8.51.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.11",
     "@types/node": "22.7.5",
     "@types/react": "18.3.11",
     "@typescript-eslint/eslint-plugin": "^8.8.1",
-    "cheerio": "1.0.0",
-    "eslint": "^8.51.0",
     "prettier": "^3.3.3",
     "tsm": "^2.3.0",
     "typescript": "^5.6.3"
@@ -48,7 +43,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
-    "generate-icons": "tsm scripts/darkify-icons.ts",
     "format": "ray lint --fix"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
