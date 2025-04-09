@@ -1,36 +1,35 @@
-import { Cache, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { RouterOutputs, trpc } from "@/utils/trpc.util";
 import { useEffect } from "react";
-import { useAtom } from "jotai";
-import { sessionTokenAtom } from "../states/session-token.state";
+import { useCachedState } from "@raycast/utils";
+import { CACHED_KEY_ME } from "../utils/constants.util";
+import { CACHED_KEY_SESSION_TOKEN } from "../utils/constants.util";
 
-const cache = new Cache();
+export const useMe = () => {
+  const [sessionToken, setSessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
+  const [cachedData, setCachedData] = useCachedState<RouterOutputs["user"]["me"] | null>(CACHED_KEY_ME, null);
 
-export const useMe = (sessionToken: string) => {
-  const [, setSessionToken] = useAtom(sessionTokenAtom);
   const me = trpc.user.me.useQuery(undefined, {
     enabled: !!sessionToken,
-
     initialData: () => {
-      const cachedMe = cache.get("me");
-      if (!cachedMe) {
+      if (!cachedData) {
         return undefined;
       }
 
-      const initialData: RouterOutputs["user"]["me"] = JSON.parse(cachedMe);
-      // Check compatibility of cache.
-      if (!initialData.associatedSpaces[0]?.tags) {
+      if (!cachedData.associatedSpaces[0]?.tags) {
+        setCachedData(null);
         return undefined;
       }
+
       console.info("Cache hit useMe");
-      return initialData;
+      return cachedData;
     },
   });
 
   useEffect(() => {
     if (!me.data) return;
 
-    cache.set("me", JSON.stringify(me.data));
+    setCachedData(me.data);
   }, [me.data]);
 
   useEffect(() => {
@@ -48,6 +47,7 @@ export const useMe = (sessionToken: string) => {
     // Login failed maybe due to token expiration.
     // Clear sessionToken and send to LoginView.
     setSessionToken("");
+    setCachedData(null);
     showToast({
       style: Toast.Style.Failure,
       title: "Login required",

@@ -50,4 +50,7 @@ dub
 e2b
 firecrawl
 resend
+terminaldotshop
+fabric
+laravel-herd
 exa

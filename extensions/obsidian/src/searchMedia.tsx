@@ -1,11 +1,12 @@
 import { List } from "@raycast/api";
 
-import { useObsidianVaults } from "./utils/utils";
 import { VaultSelection } from "./components/VaultSelection";
-import { MediaSearchArguments, Vault } from "./utils/interfaces";
+import { MediaSearchArguments } from "./utils/interfaces";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { noVaultPathsToast } from "./components/Toasts";
 import { MediaGrid } from "./components/MediaGrid";
+import { useObsidianVaults } from "./utils/hooks";
+import { Vault } from "./api/vault/vault.types";
 
 export default function Command(props: { arguments: MediaSearchArguments }) {
   const { vaults, ready } = useObsidianVaults();

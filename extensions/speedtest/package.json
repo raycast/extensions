@@ -27,7 +27,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.77.1",
-    "axios": "^1.7.2",
+    "axios": "^1.8.4",
     "sha256-file": "^1.0.0",
     "tar": "^7.2.0"
   },

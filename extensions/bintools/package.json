@@ -5,6 +5,9 @@
   "description": "A calculator for binary, decimal, hex and octal numbers.",
   "icon": "command-icon.png",
   "author": "frostplexx",
+  "contributors": [
+    "bestemic"
+  ],
   "categories": [
     "Developer Tools"
   ],

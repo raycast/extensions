@@ -1,25 +1,14 @@
 import { ComponentType, createContext, useContext } from "react";
-import {
-  List,
-  Action,
-  Application,
-  getApplications,
-  getPreferenceValues,
-  Detail,
-  Icon,
-  ActionPanel,
-} from "@raycast/api";
+import { List, Action, Application, getApplications, Detail, Icon, ActionPanel } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { existsSync } from "fs";
 import { URL } from "url";
 import { getEntry } from "./lib/entry";
-import { getZedBundleId, ZedBuild } from "./lib/zed";
+import { zedBuild } from "./lib/preferences";
+import { getZedBundleId } from "./lib/zed";
 import { useZedRecentWorkspaces, ZedEntry } from "./lib/zedEntries";
 import { usePinnedEntries } from "./hooks/usePinnedEntries";
 import { EntryItem } from "./components/EntryItem";
-
-const preferences: Record<string, string> = getPreferenceValues();
-const zedBuild: ZedBuild = preferences.build as ZedBuild;
 
 const ZedContext = createContext<{
   zed?: Application;

@@ -42,7 +42,7 @@
   "dependencies": {
     "@raycast/api": "^1.69.3",
     "@raycast/utils": "^1.13.2",
-    "axios": "^1.6.8",
+    "axios": "^1.8.4",
     "node-html-markdown": "^1.3.0"
   },
   "devDependencies": {
