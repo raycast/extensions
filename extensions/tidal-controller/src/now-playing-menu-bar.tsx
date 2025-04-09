@@ -42,7 +42,7 @@ export default function nowPlayingMenuBar() {
       tooltip={
         fullNowPlaying !== null && fullNowPlaying !== "TIDAL"
           ? (fullNowPlaying as string)
-          : "Tidal must be minimized, hidden or open to show Now Playing information"
+          : "Tidal must be minimized, hidden or open to show now playing information"
       }
     >
       {nowPlaying !== null && nowPlaying !== "TIDAL" ? (
