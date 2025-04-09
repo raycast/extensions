@@ -36,6 +36,10 @@ Each command has a property `name` that maps to its main entry point file in the
 
 The optional `assets` folder can contain icons that will be packaged into the extension archive. All bundled assets can be referenced at runtime. Additionally, icons can be used in the `package.json` as extension or command icons.
 
+{% hint style="info" %}
+During development the `assets` folder for [environment.assetsPath](../api-reference/environment.md#properties) will be cleared when starting the extension via `npm run dev` to ensure you get the same behavior the user would get when installing the extension.
+{% endhint %}
+
 ## Support files
 
 The directory contains a few more files that setup common JavaScript tooling:

@@ -18,9 +18,10 @@ import { CachedQueryClientProvider } from "./components/CachedQueryClientProvide
 import MyAccount from "./views/MyAccount";
 import { LoginView } from "./views/LoginView";
 import { NewTagForm } from "./views/NewTagForm";
-import { useMe } from "./hooks/use-me.hook";
 import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
-import { useTags } from "./hooks/use-tags.hook";
+import { useMyTags } from "./hooks/use-tags.hook";
+import { CACHED_KEY_RECENT_SELECTED_TAGS, CACHED_KEY_RECENT_SELECTED_SPACE } from "./utils/constants.util";
+import { useEnabledSpaces } from "./hooks/use-enabled-spaces.hook";
 
 interface ScriptsPerBrowser {
   getURL: () => Promise<string>;
@@ -149,8 +150,8 @@ function Body(props: { onlyPop?: boolean }) {
   const [title, setTitle] = useState<string>("");
   const [url, setUrl] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [selectedSpace, setSelectedSpace] = useCachedState("recent-selected-space", "");
-  const [selectedTags, setSelectedTags] = useCachedState<SelectedTag[]>("recent-selected-tags", []);
+  const [selectedSpace, setSelectedSpace] = useCachedState(CACHED_KEY_RECENT_SELECTED_SPACE, "");
+  const [selectedTags, setSelectedTags] = useCachedState<SelectedTag[]>(CACHED_KEY_RECENT_SELECTED_TAGS, []);
 
   const isSlackHuddleUrl = useMemo(() => {
     // ex: https://app.slack.com/huddle/T07LSULVCQY/C07L45LKYHY
@@ -164,13 +165,8 @@ function Body(props: { onlyPop?: boolean }) {
     });
   }, []);
 
-  const me = useMe();
-
-  const spaceIds = useMemo(() => {
-    return me.data?.associatedSpaces.map((s) => s.id) || [];
-  }, [me.data?.associatedSpaces]);
-
-  const tags = useTags(spaceIds);
+  const tags = useMyTags();
+  const { enabledSpaces } = useEnabledSpaces();
 
   const spaceTags = useMemo(() => {
     if (!tags.data) return undefined;
@@ -180,26 +176,31 @@ function Body(props: { onlyPop?: boolean }) {
 
   const bookmarkCreate = trpc.bookmark.create.useMutation();
 
-  const handleSubmit = async () => {
-    await bookmarkCreate.mutateAsync({
-      name: title,
-      description: description,
-      url: url,
-      spaceId: selectedSpace,
-      tags: selectedTags.map((tag) => tag.name),
-    });
-
-    if (onlyPop) {
-      showToast({
-        style: Toast.Style.Success,
-        title: "Bookmark added",
-        message: "Bookmark added successfully",
-      });
-      pop();
-    } else {
-      showHUD("Bookmark added");
-      popToRoot({ clearSearchBar: true });
-    }
+  const handleSubmit = () => {
+    bookmarkCreate.mutate(
+      {
+        name: title,
+        description: description,
+        url: url,
+        spaceId: selectedSpace,
+        tags: selectedTags.map((tag) => tag.name),
+      },
+      {
+        onSuccess: () => {
+          if (onlyPop) {
+            showToast({
+              style: Toast.Style.Success,
+              title: "Bookmark added",
+              message: "Bookmark added successfully",
+            });
+            pop();
+          } else {
+            showHUD("Bookmark added");
+            popToRoot({ clearSearchBar: true });
+          }
+        },
+      },
+    );
   };
 
   const { loggedOutStatus } = useLoggedOutStatus();
@@ -208,7 +209,7 @@ function Body(props: { onlyPop?: boolean }) {
     return <LoginView />;
   }
 
-  if (!me.data) {
+  if (!enabledSpaces) {
     return <Form isLoading={true} />;
   }
 
@@ -248,12 +249,12 @@ function Body(props: { onlyPop?: boolean }) {
         id="space"
         title="Space"
         defaultValue={selectedSpace}
-        isLoading={!me.data}
+        isLoading={!enabledSpaces}
         onChange={(value) => {
           setSelectedSpace(value);
         }}
       >
-        {me.data?.associatedSpaces.map((s) => (
+        {enabledSpaces.map((s) => (
           <Form.Dropdown.Item key={s.id} value={s.id} title={s.name} icon={s.image || Icon.TwoPeople} />
         ))}
       </Form.Dropdown>
