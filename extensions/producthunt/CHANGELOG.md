@@ -1,6 +1,6 @@
 # Product Hunt Changelog
 
-## [2.1] - {PR_MERGE_DATE}
+## [2.1] - 2025-04-09
 
 ### Added
 - Added scraper tests to help with stale or incorrect counts
