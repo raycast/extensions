@@ -1,4 +1,3 @@
-import { showFailureToast } from "@raycast/utils";
 import { getErrorDetails, getStatus } from "./shared";
 import Disconnect from "./disconnect";
 import Connect from "./connect";
@@ -27,7 +26,6 @@ export default async function Toggle() {
       await Connect();
     }
   } catch (err) {
-    await showFailureToast(err, { title: "Failed to toggle connection" });
     subtitle = getErrorDetails(err, "").title;
     showHUD(`Unable to connect: ${subtitle}`);
   }
