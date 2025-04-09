@@ -98,14 +98,10 @@ const MenuItems = ({ error, stories, setStories, readStories }: MenuItemsProps) 
   return stories?.map((story: Story) => (
     <MenuBarExtra.Item
       key={story.external_url}
-      icon={
-        readStories.includes(story.external_url)
-          ? getFavicon(story.external_url)
-          : {
-              source: Icon.Dot,
-              tintColor: "#E96E37",
-            }
-      }
+      icon={{
+        source: Icon.Dot,
+        tintColor: readStories.includes(story.external_url) ? "#787794" : "#E96E37",
+      }}
       title={story.title.length > 50 ? `${story.title.slice(0, 50)}...` : story.title}
       tooltip={`${readStories.includes(story.external_url) ? "" : "(unread) "}${story.title}`}
       onAction={() => {
