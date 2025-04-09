@@ -231,7 +231,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action
-            title="Create New Mcp Tools"
+            title="Create New MCP Tools"
             onAction={() => push(<McpToolsForm onSave={updateMcpFiles} />)}
             icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -248,7 +248,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action
-                  title="Create New Mcp File"
+                  title="Create New MCP File"
                   onAction={() => push(<McpToolsForm onSave={updateMcpFiles} />)}
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -333,7 +333,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action
-                  title="Create New Mcp Agent"
+                  title="Create New MCP Agent"
                   onAction={() => push(<McpAgentForm files={[]} onSave={() => setTemplates(getTemplates())} />)}
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -383,7 +383,7 @@ export default function Command() {
                       icon={Icon.Pencil}
                     />
                     <Action
-                      title="Create New Mcp Agent"
+                      title="Create New MCP Agent"
                       onAction={() => push(<McpAgentForm files={[]} onSave={() => setTemplates(getTemplates())} />)}
                       icon={Icon.Plus}
                       shortcut={{ modifiers: ["cmd"], key: "n" }}
