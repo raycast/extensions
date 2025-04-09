@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Cache, Icon, MenuBarExtra, open, getPreferenceValues } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
 import { getStories } from "./hackernews";
 import { Story } from "./types";
 
