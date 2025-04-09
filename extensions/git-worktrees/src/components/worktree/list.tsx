@@ -7,7 +7,7 @@ import { Item } from "./item";
 export const List = memo(
   ({
     project,
-    worktrees,
+    worktrees: incomingWorktrees,
     rankBareRepository,
     revalidateProjects,
     worktreeTitle = "path",
@@ -20,6 +20,7 @@ export const List = memo(
   }) => {
     const { enableWorktreesFrequencySorting } = getPreferences();
 
+    let worktrees = incomingWorktrees;
     let visitWorktree: ((item: Worktree) => Promise<void>) | undefined;
     let resetWorktreeRanking: ((item: Worktree) => Promise<void>) | undefined;
 
@@ -28,7 +29,10 @@ export const List = memo(
         data: sortedWorktrees,
         visitItem,
         resetRanking,
-      } = useFrecencySorting(worktrees, { sortUnvisited: (a, b) => a.id.localeCompare(b.id), namespace: "worktrees" });
+      } = useFrecencySorting(worktrees, {
+        sortUnvisited: (a, b) => a.id.localeCompare(b.id),
+        namespace: "worktrees",
+      });
 
       worktrees = sortedWorktrees;
       visitWorktree = visitItem;

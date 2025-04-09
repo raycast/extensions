@@ -8,7 +8,7 @@ import { RenameWorktree } from "#/components/actions/rename-worktree";
 import { ResetRanking } from "#/components/actions/reset-ranking";
 import type { BareRepository, Worktree } from "#/config/types";
 import { getPreferences } from "#/helpers/raycast";
-import { useBranchInformation } from "#/hooks/use-branch-infomation";
+import { useBranchInformation } from "#/hooks/use-branch-information";
 import { useViewingWorktreesStore } from "#/stores/viewing-worktrees";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { relative } from "node:path";

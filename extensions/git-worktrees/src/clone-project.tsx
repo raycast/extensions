@@ -49,7 +49,7 @@ export default function Command() {
         toast.title = "Setting Up Repository";
         toast.message = "Please wait while the repository is being set up";
 
-        if (!["", ".", "./"].includes("./.bare")) await writeFile(path.join(tempDir, ".git"), `gitdir: ./.bare`);
+        await writeFile(path.join(tempDir, ".git"), `gitdir: ./.bare`);
 
         await setUpBareRepositoryFetch(tempDir);
 

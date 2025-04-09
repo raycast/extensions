@@ -295,9 +295,6 @@ export const shouldPushWorktree = async ({
   branch: string;
   onAccept?: () => void;
 }) => {
-  // const origin = await getRemoteOrigin();
-  // if (!origin) return;
-
   const { shouldAutomaticallyPushWorktree } = getPreferences();
 
   if (shouldAutomaticallyPushWorktree === "no") return;

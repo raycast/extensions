@@ -10,7 +10,7 @@ export const RemoveProject = ({
   project: BareRepository | undefined;
   revalidateProjects: () => void;
 }) => {
-  if (!project) return;
+  if (!project) return null;
 
   const handleRemoveProject = async (project: BareRepository) => {
     const options: Alert.Options = {

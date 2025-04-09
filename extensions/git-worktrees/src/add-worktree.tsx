@@ -28,6 +28,7 @@ enum WorktreeFlowType {
 // Prefix for remote branch values in the dropdown
 const REMOTE_BRANCH_PREFIX = "origin/";
 const DEFAULT_BRANCHES = ["main", "master"];
+const invalidBranchNameRegex = /(\.\.|[\s~^:?*[\]\\]|^\/|\/\/|\/\$|\.$|@\{|^@$)/;
 
 interface AddWorktreeFormValues {
   project: string;
@@ -190,7 +191,11 @@ export default function Command({ directory: initialDirectory }: { directory?: s
         return undefined;
       },
       worktreeName: (value) => {
-        if (values.branch === WorktreeFlowType.CREATE_NEW && (!value || value.trim() === "")) return "Name is required";
+        if (!value) return "Worktree name is required";
+
+        if (invalidBranchNameRegex.test(value))
+          return "Invalid branch name. Branch names cannot contain spaces, special characters (~ ^ : ? * [ ]), consecutive dots (..), start/end with slash, end with dot, or contain @{";
+
         return undefined;
       },
       trackingBranch: (value) => {
@@ -212,7 +217,7 @@ export default function Command({ directory: initialDirectory }: { directory?: s
   }, [values.project, projects]);
 
   // Loading remote branches
-  const abortable = useRef<AbortController>(undefined);
+  const abortable = useRef<AbortController | null>(null);
   const { isLoading: isLoadingRemoteBranches, data: remoteBranches } = useCachedPromise(
     async (project: string) => {
       await fetch(project);
