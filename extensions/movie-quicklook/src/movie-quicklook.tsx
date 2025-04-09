@@ -72,7 +72,11 @@ export default function Command() {
             key={movie.id}
             title={`${movie.title} (${movie.release_date.substring(0, 4)})`}
             subtitle={`${movie.vote_average > 0 ? movie.vote_average.toFixed(2) : "N/A"}`}
-            content={`https://image.tmdb.org/t/p/original/${movie.poster_path}`}
+            content={
+              movie.poster_path
+                ? `https://image.tmdb.org/t/p/original/${movie.poster_path}`
+                : "../assets/no-poster-search.png"
+            }
             actions={
               <ActionPanel>
                 <Action
@@ -114,7 +118,7 @@ function MovieDetails({ movieId, api_key }: { movieId: number; api_key: string }
             <Action title="Search" onAction={pop} />
           </ActionPanel>
         }
-        markdown={`![Image](https://image.tmdb.org/t/p/w185/${detail.poster_path})&NewLine;${detail.overview}`}
+        markdown={`![Image](${detail.poster_path ? `https://image.tmdb.org/t/p/w185/${detail.poster_path}` : `../assets/no-poster-detail.png`})&NewLine;${detail.overview}`}
         metadata={
           <Detail.Metadata>
             <Detail.Metadata.Label title="Title" text={`${detail.title}`} />
