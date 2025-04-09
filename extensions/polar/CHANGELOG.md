@@ -3,6 +3,7 @@
 ## [Update] - {PR_MERGE_DATE}
 
 - Fix issue with expired OAuth access tokens
+
 ## [Update] - 2024-12-20
 
 - Implements a View Customers command
