@@ -26,8 +26,8 @@ function Command() {
 
   return (
     <List isShowingDetail>
-      {list.map(({ title, items }) => (
-        <List.Section key={title} title={title}>
+      {list.map(({ title: groupTitle, items }) => (
+        <List.Section key={groupTitle} title={groupTitle}>
           {items.map(({ title, cover, coverDark, subtitle, description, documentation }) => (
             <List.Item
               title={title}
