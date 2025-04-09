@@ -2,6 +2,10 @@
 
 ## [Update] - 2025-04-09
 
+- Update Polar SDK version
+
+## [Update] - 2025-04-09
+
 - Fix issue with expired OAuth access tokens
 
 ## [Update] - 2024-12-20
