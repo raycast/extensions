@@ -12,27 +12,29 @@
   "commands": [
     {
       "name": "discover",
-      "title": "Discover",
-      "subtitle": "Discover devices",
+      "title": "Discover Devices",
+      "subtitle": "Magic Home",
       "description": "Used to discover devices connected to your network",
       "mode": "view"
     },
     {
       "name": "devices",
       "title": "My Devices",
-      "subtitle": "List saved devices",
+      "subtitle": "Magic Home",
       "description": "Lists your saved devices that was previously discovered",
       "mode": "view"
     },
     {
       "name": "power-on",
       "title": "Power on Default Device",
+      "subtitle": "Magic Home",
       "description": "Power on the default device",
       "mode": "no-view"
     },
     {
       "name": "power-off",
       "title": "Power off Default Device",
+      "subtitle": "Magic Home",
       "description": "Power off the default device",
       "mode": "no-view"
     }
