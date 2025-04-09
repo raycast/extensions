@@ -1,3 +1,3 @@
-# fut.gg Changelog
+# dpm.lol Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}

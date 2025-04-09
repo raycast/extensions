@@ -11,12 +11,15 @@ function getPlatformTag(platform: string) {
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
-  const { isLoading, data } = useFetch<Summoner[]>(`https://dpm.lol/v1/search?gameName=${searchText}`, {
+  const encodedSearchText = encodeURIComponent(searchText);
+
+  const { isLoading, data } = useFetch<Summoner[]>(`https://dpm.lol/v1/search?gameName=${encodedSearchText}`, {
     headers: {
       "User-Agent": "Raycast",
       Accept: "application/json",
     },
     keepPreviousData: true,
+    execute: encodedSearchText.length > 0,
   });
 
   const dataWithAssets = useMemo(
