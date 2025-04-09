@@ -882,6 +882,7 @@
   "KevinBatdorf/laravel-artisan": "laravel-artisan",
   "indykoning/laravel-docs": "laravel-docs",
   "KevinBatdorf/laravel-forge": "laravel-forge",
+  "beyond-code/laravel-herd": "laravel-herd",
   "tafhyseni/laravel-livewire": "laravel-livewire",
   "plank/laravel-nova": "laravel-nova",
   "denniseilander/laravel-shift": "laravel-shift",

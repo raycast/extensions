@@ -883,6 +883,7 @@
 /extensions/laravel-artisan                                         @KevinBatdorf
 /extensions/laravel-docs                                            @indykoning @aglipanci @Erth0
 /extensions/laravel-forge                                           @KevinBatdorf @macbookandrew
+/extensions/laravel-herd                                            @mechelon
 /extensions/laravel-livewire                                        @tafhyseni @patrikkernke
 /extensions/laravel-nova                                            @a-drew
 /extensions/laravel-shift                                           @denniseilander @pernielsentikaer
