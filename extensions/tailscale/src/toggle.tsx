@@ -1,6 +1,8 @@
-import { closeMainWindow, popToRoot, showHUD, showToast, Toast, updateCommandMetadata } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { getErrorDetails, tailscale, getStatus } from "./shared";
+import { getErrorDetails, getStatus } from "./shared";
+import Disconnect from "./disconnect";
+import Connect from "./connect";
+import { showToast, Toast } from "@raycast/api";
 
 export default async function Toggle() {
   let subtitle = "Tailscale";
@@ -15,16 +17,7 @@ export default async function Toggle() {
         title: "Disconnecting",
       });
 
-      await updateCommandMetadata({ subtitle: "" });
-
-      popToRoot();
-      closeMainWindow();
-
-      // Await the disconnect command
-      await tailscale("down");
-
-      showHUD("Disconnected");
-      subtitle = "Disconnected";
+      await Disconnect();
     } else {
       // Connect
       await showToast({
@@ -32,27 +25,12 @@ export default async function Toggle() {
         title: "Connecting",
       });
 
-      await updateCommandMetadata({ subtitle: "" });
-
-      popToRoot();
-      closeMainWindow();
-
-      // Await the connect command
-      await tailscale("up");
-
-      // Wait briefly for connection to establish
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      const data = getStatus(false);
-      const magicDNSSuffix = data.MagicDNSSuffix;
-      subtitle = `Connected on ${magicDNSSuffix}`;
-      showHUD(subtitle);
+      await Connect();
     }
   } catch (err) {
     await showFailureToast(err, { title: "Failed to toggle connection" });
     subtitle = getErrorDetails(err, "").title;
   }
-  await updateCommandMetadata({ subtitle });
 }
 
 async function isTailscaleConnected(): Promise<boolean> {
