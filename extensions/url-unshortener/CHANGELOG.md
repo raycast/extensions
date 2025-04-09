@@ -1,6 +1,6 @@
 # URL Unshortener Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2025-04-09
 
 - Fixed issue with selected text retrieval, adding clipboard fallback when frontmost application access fails
 
