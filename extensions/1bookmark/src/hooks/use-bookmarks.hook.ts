@@ -2,23 +2,24 @@ import { RouterOutputs, trpc } from "@/utils/trpc.util";
 import { Bookmark } from "../types";
 import { useEffect, useMemo } from "react";
 import { useCachedState } from "@raycast/utils";
-import { useMe } from "./use-me.hook";
+import { CACHED_KEY_SESSION_TOKEN, CACHED_KEY_MY_BOOKMARKS } from "@/utils/constants.util";
+import { useEnabledSpaces } from "./use-enabled-spaces.hook";
 
 export const useMyBookmarks = () => {
-  const [sessionToken] = useCachedState("session-token", "");
-  const [cached, setCached] = useCachedState<RouterOutputs["bookmark"]["listAll"] | null>("my-bookmarks", null);
+  const [sessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
+  const [cached, setCached] = useCachedState<RouterOutputs["bookmark"]["listAll"] | null>(
+    CACHED_KEY_MY_BOOKMARKS,
+    null,
+  );
 
-  const me = useMe();
-  const spaceIds = useMemo(() => {
-    return me.data?.associatedSpaces.map((s) => s.id) || [];
-  }, [me.data]);
+  const { enabledSpaceIds } = useEnabledSpaces();
 
   const r = trpc.bookmark.listAll.useQuery(
     {
-      spaceIds,
+      spaceIds: enabledSpaceIds || [],
     },
     {
-      enabled: !!sessionToken && !!me.data,
+      enabled: !!sessionToken && !!enabledSpaceIds,
       initialData: () => {
         if (!cached) {
           return undefined;
@@ -48,8 +49,7 @@ export const useMyBookmarks = () => {
 };
 
 export const useBookmarks = (spaceIdOrIds: string | string[]) => {
-  const [sessionToken] = useCachedState("session-token", "");
-  const me = useMe();
+  const [sessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
   const spaceIds = useMemo(() => {
     return Array.isArray(spaceIdOrIds) ? spaceIdOrIds : [spaceIdOrIds];
   }, [spaceIdOrIds]);
@@ -57,7 +57,7 @@ export const useBookmarks = (spaceIdOrIds: string | string[]) => {
   return trpc.bookmark.listAll.useQuery(
     { spaceIds },
     {
-      enabled: !!sessionToken && !!me.data,
+      enabled: !!sessionToken,
     },
   );
 };

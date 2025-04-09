@@ -916,6 +916,7 @@
 /extensions/library-genesis                                         @yz3440 @j3lte @xmok
 /extensions/lichess-org                                             @ftonato
 /extensions/life-progress                                           @koinzhang
+/extensions/lift-calculator                                         @marianbreitmeyer
 /extensions/lifx                                                    @felixb1010
 /extensions/lightning-time                                          @MatthewStanciu
 /extensions/lightshot-gallery                                       @feyli
@@ -960,7 +961,7 @@
 /extensions/macrumors                                               @hughmcmillanv @pernielsentikaer
 /extensions/macstories                                              @nicolas-marien
 /extensions/macupdater                                              @karlsander @xmok
-/extensions/mail                                                    @yug2005 @ikupenov @pernielsentikaer @fengtianze @tleo19 @Luk4h @jfkisafk @StevenRCE0 @ridemountainpig @ViGeng @danteissaias
+/extensions/mail                                                    @yug2005 @ikupenov @pernielsentikaer @fengtianze @tleo19 @Luk4h @jfkisafk @StevenRCE0 @ridemountainpig @ViGeng @danteissaias @ANemcov
 /extensions/mailboxlayer                                            @xmok
 /extensions/mailerlite-stats                                        @nklmilojevic @xmok
 /extensions/mailsy                                                  @BalliAsghar
@@ -1038,6 +1039,7 @@
 /extensions/minisim                                                 @okwasniewski
 /extensions/miro                                                    @felixhaeberle @mathieudutour @Silv-1
 /extensions/mirror-displays                                         @yonbergman
+/extensions/mistral                                                 @colinlienard
 /extensions/mite                                                    @paoloricciuti @ramsaysewell
 /extensions/mittwald                                                @danieldeichfuss
 /extensions/mixpanel                                                @smsimone
@@ -1160,7 +1162,7 @@
 /extensions/oblique-strategies                                      @dnnsmnstrr
 /extensions/obs-clippings                                           @trevware
 /extensions/obs-control                                             @Yukaii @j3lte @RealCyGuy
-/extensions/obsidian                                                @KevinBatdorf @marcjulianschwarz @iancanderson @pernielsentikaer @ofalvai @adamadamsmusic @FServais @rakoort
+/extensions/obsidian                                                @marcjulianschwarz @KevinBatdorf @iancanderson @pernielsentikaer @ofalvai @adamadamsmusic @FServais @rakoort
 /extensions/obsidian-bookmarks                                      @Dru89 @moeyua @iwex @qfettes
 /extensions/obsidian-smart-capture                                  @trillhause @Jimmy-b36
 /extensions/oci                                                     @xmok
@@ -1704,11 +1706,12 @@
 /extensions/surfed                                                  @hosy
 /extensions/surfs-up                                                @comoser
 /extensions/surge                                                   @ysj151215 @Hopsken
+/extensions/surge-outbound-switcher                                 @the3ash
 /extensions/surl                                                    @fujiyamaorange
 /extensions/svelte-docs                                             @paoloricciuti
 /extensions/svga-player                                             @liaoyuanng
 /extensions/svgl                                                    @1weiho @ridemountainpig
-/extensions/svgo                                                    @kaichii @kgrhartlage
+/extensions/svgo                                                    @kaichii @kgrhartlage @dangkhoipro
 /extensions/svgr                                                    @rickMcGavin
 /extensions/swap-commas-dots                                        @brunopicinin
 /extensions/swift-command                                           @aaronlinv
@@ -1764,12 +1767,12 @@
 /extensions/the-verge                                               @klkvsky @pernielsentikaer
 /extensions/thesaurus                                               @ABukSwienty
 /extensions/thingiverse                                             @mSarheed
-/extensions/things                                                  @loris @andreaselia @jfkisafk @thomaslombart @srikirank @vimtor @samuelkraft
+/extensions/things                                                  @loris @andreaselia @jfkisafk @thomaslombart @srikirank @vimtor @samuelkraft @vmrjnvc
 /extensions/thrasher-magazine                                       @whitespacecode
 /extensions/threads                                                 @chrismessina @ridemountainpig
 /extensions/threads-video-downloader                                @ridemountainpig
 /extensions/ticktick                                                @viduycheung @viduycheung @Alireza29675 @Yakitrak @ridemountainpig
-/extensions/tidal-controller                                        @0xDreamWeaver
+/extensions/tidal-controller                                        @0xDreamWeaver @srcurran
 /extensions/tidyread---streamline-your-daily-reading                @DophinL
 /extensions/tiktoken                                                @Envl
 /extensions/tim                                                     @tmwrnr

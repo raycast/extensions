@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [New Command] - 2025-04-08
+
+- Add Authenticator command
+- Correct README typos
+
 ## [Improvement] - 2025-03-24
 
 - Correct setup API key instructions 
