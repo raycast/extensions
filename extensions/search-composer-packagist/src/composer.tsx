@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List, Action } from "@raycast/api";
+import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
 import { useMemo, useState } from "react";
 import algoliaSearch from "algoliasearch/lite";
 import { useCachedPromise } from "@raycast/utils";
@@ -40,10 +40,6 @@ function getComposerRequireDevCommand(hit: PackagistHit) {
 
 function getPackagistPageURL(hit: PackagistHit) {
   return `https://packagist.org/packages/${hit.name}`;
-}
-
-function getListItemTitle(hit: PackagistHit) {
-  return hit.abandoned ? 'Abandon ' + hit.name : hit.name;
 }
 
 export default function SearchDocumentation() {
@@ -96,7 +92,25 @@ export default function SearchDocumentation() {
         return (
           <List.Item
             key={hit.id}
-            title={getListItemTitle(hit)}
+            title={hit.name}
+            accessories={[
+              ...(hit.abandoned
+                ? [
+                    {
+                      icon: {
+                        source: Icon.Warning,
+                        tintColor: Color.Yellow,
+                      },
+                      tooltip: "Abandoned",
+                    },
+                  ]
+                : []),
+              {
+                icon: Icon.Star,
+                text: hit.meta?.favers_formatted,
+                tooltip: hit.meta?.favers_formatted,
+              },
+            ]}
             subtitle={hit.description}
             icon="composer-icon.png"
             actions={
@@ -122,12 +136,6 @@ export default function SearchDocumentation() {
                 />
               </ActionPanel>
             }
-            accessories={[
-              {
-                icon: Icon.Star,
-                text: hit.meta?.favers_formatted,
-              },
-            ]}
           />
         );
       })}
