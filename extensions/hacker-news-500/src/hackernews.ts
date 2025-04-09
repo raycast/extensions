@@ -6,14 +6,14 @@ import { CacheEntry, Story } from "./types";
 // The HNRSS service caches responses for 5 minutes: https://github.com/hnrss/hnrss/issues/71
 const CACHE_DURATION_IN_MS = 5 * 60 * 1_000;
 
-const key = "hnrss-newest";
+const cacheKey = "hnrss-newest";
 
 type GetStoriesProps = {
   points: string;
   options: { cache: Cache };
 };
 export async function getStories(points = "500", { cache }: GetStoriesProps["options"]): Promise<CacheEntry["items"]> {
-  const cachedResponse = cache.get(key);
+  const cachedResponse = cache.get(cacheKey);
   if (cachedResponse) {
     const parsed: CacheEntry = JSON.parse(cachedResponse);
     const elapsed = Date.now() - parsed.timestamp;
@@ -34,7 +34,7 @@ export async function getStories(points = "500", { cache }: GetStoriesProps["opt
   }
   try {
     const { items = [] } = (await response.json()) as { items?: Story[] };
-    cache.set(key, JSON.stringify({ timestamp: Date.now(), items }));
+    cache.set(cacheKey, JSON.stringify({ timestamp: Date.now(), items }));
     const now = new Date();
     return items.filter((item: Story) => {
       const publishedDate = new Date(item.date_published);
