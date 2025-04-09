@@ -1,6 +1,6 @@
 # Polar Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-09
 
 - Fix issue with expired OAuth access tokens
 
