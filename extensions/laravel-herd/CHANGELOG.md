@@ -1,7 +1,7 @@
 # Laravel Herd Changelog
 
 
-## Log Viewer Commands, Refresh & Bugfixes - {PR_MERGE_DATE}
+## Log Viewer Commands, Refresh & Bugfixes - 2025-04-09
 
 - Added command to open the log viewer for most recent site
 - Added action to open log viewer for a site in the Sites command
