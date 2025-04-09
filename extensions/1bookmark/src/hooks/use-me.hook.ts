@@ -2,10 +2,12 @@ import { showToast, Toast } from "@raycast/api";
 import { RouterOutputs, trpc } from "@/utils/trpc.util";
 import { useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
+import { CACHED_KEY_ME } from "../utils/constants.util";
+import { CACHED_KEY_SESSION_TOKEN } from "../utils/constants.util";
 
 export const useMe = () => {
-  const [sessionToken, setSessionToken] = useCachedState("session-token", "");
-  const [cachedData, setCachedData] = useCachedState<RouterOutputs["user"]["me"] | null>("me", null);
+  const [sessionToken, setSessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
+  const [cachedData, setCachedData] = useCachedState<RouterOutputs["user"]["me"] | null>(CACHED_KEY_ME, null);
 
   const me = trpc.user.me.useQuery(undefined, {
     enabled: !!sessionToken,

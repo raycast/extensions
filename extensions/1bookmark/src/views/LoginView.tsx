@@ -4,25 +4,35 @@ import { CachedQueryClientProvider } from "../components/CachedQueryClientProvid
 import { trpc } from "@/utils/trpc.util";
 import { handleSignIn } from "@/handle-signin";
 import { useCachedState } from "@raycast/utils";
+import {
+  CACHED_KEY_LOGGING_EMAIL,
+  CACHED_KEY_LOGGING_TOKEN_SENT,
+  CACHED_KEY_SESSION_TOKEN,
+} from "../utils/constants.util";
 
 function Body() {
-  const [, setSessionToken] = useCachedState("session-token", "");
-  const { mutateAsync, isPending } = trpc.login.generateMagicLink.useMutation();
+  const [, setSessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
+  const generateMagicLink = trpc.login.generateMagicLink.useMutation();
   const verificationTokenRef = useRef<Form.TextField>(null);
 
-  const [email, setEmail] = useCachedState("logging-email", "");
-  const [tokenSent, setTokenSent] = useCachedState("logging-token-sent", false);
+  const [email, setEmail] = useCachedState(CACHED_KEY_LOGGING_EMAIL, "");
+  const [tokenSent, setTokenSent] = useCachedState(CACHED_KEY_LOGGING_TOKEN_SENT, false);
 
   const [code, setCode] = useState("");
 
   const emailRef = useRef<Form.TextField>(null);
 
   const [isLoginPending, setIsLoginPending] = useState(false);
-  const isLoading = isPending || isLoginPending;
-  const requestToToken = async (email: string) => {
-    await mutateAsync({ email });
-
-    setTokenSent(true);
+  const isLoading = generateMagicLink.isPending || isLoginPending;
+  const requestToToken = (email: string) => {
+    generateMagicLink.mutate(
+      { email },
+      {
+        onSuccess: () => {
+          setTokenSent(true);
+        },
+      },
+    );
   };
 
   useEffect(() => {
