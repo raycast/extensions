@@ -5,19 +5,19 @@ export function getPlexUrlOfTitle(serverId: string, ratingKey: string): string {
   return `https://app.plex.tv/desktop/#!/server/${serverId}/details?key=%2Flibrary%2Fmetadata%2F${ratingKey}`;
 }
 
-export function capitalizeEachWord(str: string): string {
+export function capitalizeEachWord(str: string) {
   return str
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 }
 
-export function videoDecision(stream: string): string {
+export function videoDecision(stream: string) {
   if (stream === "copy") return "direct stream";
   return stream;
 }
 
-export function millisecondsToTimecode(msString: string): string {
+export function millisecondsToTimecode(msString: string) {
   // Parse the input string to a number
   const ms = parseInt(msString);
 
@@ -54,7 +54,7 @@ export function streamStateIcon(state: string) {
     case "buffering":
       return { source: "loader.svg" };
     default:
-      return Icon.Play;
+      return Icon.QuestionMarkCircle;
   }
 }
 
