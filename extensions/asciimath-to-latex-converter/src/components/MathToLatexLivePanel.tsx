@@ -73,7 +73,7 @@ export default function MathToLatexLivePanel({ defaultWrapLatex }: MathToLatexLi
           )}
           <Action.CopyToClipboard
             content={wrappedLatex}
-            title="Copy Latex Code"
+            title="Copy LaTeX Code"
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
           <Action.Paste
