@@ -52,4 +52,5 @@ firecrawl
 resend
 terminaldotshop
 fabric
+awork
 exa
