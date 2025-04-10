@@ -11,7 +11,7 @@ import {
   captureException,
 } from '@raycast/api';
 import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 
 import { createTransaction } from '@lib/api';
 import {
@@ -63,7 +63,7 @@ interface TransactionCreateFormProps {
   };
 }
 
-export function TransactionCreateForm({ categoryId, accountId, transaction }: TransactionCreateFormProps) {
+export function TransactionCreateForm({ accountId, transaction }: TransactionCreateFormProps) {
   // 1. All hooks must be called unconditionally at the top
   const { value: activeBudgetId = '', isLoading: isLoadingBudgetId } = useLocalStorage('activeBudgetId', '');
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);

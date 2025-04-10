@@ -1,6 +1,6 @@
 import { Action, Tool, LocalStorage } from '@raycast/api';
 import { launchCommand, LaunchType } from '@raycast/api';
-import { fetchAccounts, fetchBudgets } from '@lib/api';
+import { fetchAccounts } from '@lib/api';
 import { showToast, Toast } from '@raycast/api';
 import { Account, CurrencyFormat } from '@srcTypes';
 import { formatToReadableAmount } from '@lib/utils';
