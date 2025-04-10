@@ -34,6 +34,24 @@ export type ResourceRecord = {
   address?: string;
 };
 
+export type ResourceRecordsListCreateOrUpdateItem = {
+  type: "TXT";
+  value: string;
+  name: string;
+  ttl?: number;
+} | {
+  type: "MX";
+  exchange: string;
+  preference: number;
+  name: string;
+  ttl?: number;
+} | {
+  type: "A";
+  address: string;
+  name: string;
+  ttl?: number;
+}
+
 export type SuccessResult<T> = {
   items: T[];
   total: number;

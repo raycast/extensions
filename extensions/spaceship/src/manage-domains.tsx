@@ -1,14 +1,17 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, Keyboard, List } from "@raycast/api";
-import { getFavicon, useCachedState, useFetch } from "@raycast/utils";
-import { DomainInfo, ErrorResult, SuccessResult, ResourceRecord, DomainClientEPPStatus } from "./types";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Form, getPreferenceValues, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { getFavicon, useCachedState, useFetch, useForm } from "@raycast/utils";
+import { DomainInfo, ErrorResult, SuccessResult, ResourceRecord, DomainClientEPPStatus, ResourceRecordsListCreateOrUpdateItem } from "./types";
 
+const { apiKey, apiSecret } = getPreferenceValues<Preferences>();
+const API_URL = "https://spaceship.dev/api/v1/";
+const API_HEADERS = {
+  "X-Api-Key": apiKey,
+  "X-Api-Secret": apiSecret,
+  "Content-Type": "application/json"
+}
 function useSpaceship<T>(endpoint: string) {
-  const { apiKey, apiSecret } = getPreferenceValues<Preferences>();
-  const { isLoading, data } = useFetch(`https://spaceship.dev/api/v1/${endpoint}?take=20&skip=0`, {
-    headers: {
-      "X-Api-Key": apiKey,
-      "X-Api-Secret": apiSecret,
-    },
+  const { isLoading, data, mutate, revalidate } = useFetch(`${API_URL}${endpoint}?take=20&skip=0`, {
+    headers: API_HEADERS,
     async parseResponse(response) {
       if (!response.ok) {
         const res: ErrorResult = await response.json();
@@ -19,7 +22,7 @@ function useSpaceship<T>(endpoint: string) {
     },
     initialData: [],
   });
-  return { isLoading, data };
+  return { isLoading, data, mutate, revalidate };
 }
 
 export default function ManageDomains() {
@@ -86,15 +89,64 @@ export default function ManageDomains() {
 }
 
 function ManageDNSRecords({ domain }: { domain: DomainInfo }) {
-  const { isLoading, data: records } = useSpaceship<ResourceRecord>(`dns/records/${domain.name}`);
+  const { isLoading, data: records, mutate, revalidate } = useSpaceship<ResourceRecord>(`dns/records/${domain.name}`);
 
   function generateAccessories(record: ResourceRecord) {
     const accessories: List.Item.Accessory[] = [{ tag: record.type, tooltip: "Type" }];
 
+    if (record.ttl) accessories.unshift({
+      icon: Icon.Clock,
+      text: `${record.ttl/60} min`,
+      tooltip: "Time To Live"
+    })
     if (record.address) accessories.unshift({ icon: Icon.Text, text: record.address, tooltip: "Address" });
     else if (record.value) accessories.unshift({ icon: Icon.Text, text: record.value, tooltip: "Value" });
 
     return accessories;
+  }
+
+  async function deleteRecord(record: ResourceRecord) {
+    const options: Alert.Options = {
+      title: `Delete ${record.type} record`,
+      message: "Deleting DNS records might affect the correct working of this domain. This change might also take a while to propagate.",
+      primaryAction: {
+        title: "Yes, delete record",
+        style: Alert.ActionStyle.Destructive
+      },
+      rememberUserChoice: true
+    }
+    if (await confirmAlert(options)) {
+      const toast = await showToast(Toast.Style.Animated, "Deleting record");
+      try {
+        await mutate(
+          fetch(`${API_URL}dns/records/${domain.name}`, {
+            method: "DELETE",
+            headers: API_HEADERS,
+            body: JSON.stringify({
+              type: record.type,
+              address: record.address,
+              name: record.name
+            })
+          }).then(async (response) => {
+            if (!response.ok) {
+              const res: ErrorResult = await response.json();
+              throw new Error(res.detail);
+            }
+          }), {
+            optimisticUpdate(data) {
+              return data.filter(r => r.type!==record.type && r.address!==record.address && r.name!==record.name);
+            },
+            shouldRevalidateAfter: false
+          }
+        )
+        toast.style = Toast.Style.Success;
+        toast.title = "Deleted record";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Could not delete record";
+        toast.message = `${error}`;
+      }
+    }
   }
 
   return (
@@ -106,6 +158,7 @@ function ManageDNSRecords({ domain }: { domain: DomainInfo }) {
           description="To manage your records here, change nameservers back to Spaceship DNS. You can even choose to see your inactive records and prepare them before changing back."
         />
       )}
+      <List.Section title={domain.nameservers.provider === "custom" ? "Inactive records" : "Active records"}>
       {records.map((record, index) => (
         <List.Item
           key={index}
@@ -113,8 +166,52 @@ function ManageDNSRecords({ domain }: { domain: DomainInfo }) {
           title={record.name}
           subtitle={`.${domain.name}`}
           accessories={generateAccessories(record)}
+          actions={<ActionPanel>
+            <Action.Push icon={Icon.Plus} title="Add Record" target={<CreateDNSRecord domain={domain} onRecordAdded={revalidate} />} />
+            <Action icon={Icon.Trash} title={`Delete ${record.type} Record`} onAction={() => deleteRecord(record)} style={Action.Style.Destructive} />
+          </ActionPanel>}
         />
       ))}
+      </List.Section>
     </List>
   );
+}
+
+function CreateDNSRecord({domain, onRecordAdded}: { domain: DomainInfo, onRecordAdded: () => void }) {
+  const {pop} = useNavigation();
+  const { handleSubmit, itemProps } = useForm<{
+    type: string;
+  }>({
+    async onSubmit(values) {
+      const toast = await showToast(Toast.Style.Animated, "Adding record");
+      try {
+        const response = await fetch(`${API_URL}dns/records/${domain.name}`, {
+          method: "PUT",
+          headers: API_HEADERS,
+          body: JSON.stringify(values)
+        });
+        if (!response.ok) {
+          const res: ErrorResult = await response.json();
+          throw new Error(res.detail);
+        }
+        toast.style = Toast.Style.Success;
+        toast.title = "Added record";
+        onRecordAdded();
+        pop();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Could not add record";
+        toast.message = `${error}`;
+      }
+    },
+  })
+  return <Form actions={<ActionPanel>
+    <Action.SubmitForm icon={Icon.Plus} title="Add" onSubmit={handleSubmit} />
+  </ActionPanel>}>
+    <Form.Dropdown title="Type" {...itemProps.type}>
+      <Form.Dropdown.Item title="A" value="A" />
+      <Form.Dropdown.Item title="MX" value="MX" />
+      <Form.Dropdown.Item title="TXT" value="TXT" />
+    </Form.Dropdown>
+  </Form>
 }
