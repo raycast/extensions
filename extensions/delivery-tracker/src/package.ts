@@ -138,3 +138,11 @@ export function calculateDayDifference(deliveryDate: Date, comparisonDate: Date)
 
   return dayDifference;
 }
+
+export function allPackagesDeliveredForDeliveryId(deliveryId: string, packages: PackageMap): boolean {
+  const deliveryPackages = packages[deliveryId]?.packages;
+  if (!deliveryPackages) {
+    return false;
+  }
+  return deliveryPackages.every((aPackage) => aPackage.delivered); // all the packages of this delivery have been delivered
+}
