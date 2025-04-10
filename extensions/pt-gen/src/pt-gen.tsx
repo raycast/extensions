@@ -17,7 +17,11 @@ export default function GenCommand(
     .replace(/\n/g, "  \n");
 
   const titleMatch = data?.format?.match(/◎片\s+名\s+(.+?)\n/);
-  const title = titleMatch ? titleMatch[1] : "未知标题";
+  const title = isLoading
+    ? "Loading..."
+    : titleMatch
+      ? titleMatch[1]
+      : "未知标题";
 
   return (
     <Detail
