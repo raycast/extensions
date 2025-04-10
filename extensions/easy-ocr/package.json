@@ -16,7 +16,6 @@
         {
             "name": "index",
             "title": "Area OCR",
-            "subtitle": "Tesseract",
             "description": "Select screen area which you want to extract the text",
             "mode": "no-view"
         }
@@ -27,16 +26,25 @@
             "type": "textfield",
             "required": false,
             "title": "Tesseract binary path",
-            "description": "Absolute path to your tesseract binary - check documentation if default path is not correct - required only if using tesseract",
+            "description": "Absolute path to your tesseract binary - check documentation if default path is not correct",
             "placeholder": "Tesseract binary path",
             "default": "/opt/homebrew/bin/tesseract"
+        },
+        {
+            "name": "autodetect_lang",
+            "title": "Autodetect language",
+            "label": "Enable language autodetect",
+            "description": "Enable auto detection fo language, Tesseract language will be used as a fallback language if autodetect fails or doesn't find suitable lang",
+            "type": "checkbox",
+            "required": true,
+            "default": false
         },
         {
             "name": "tesseract_lang",
             "type": "textfield",
             "required": false,
             "title": "Tesseract language",
-            "description": "Language which will be used for OCR - required only if using tesseract. Check tesseract --list-langs for available languages.",
+            "description": "Language which will be used for OCR. Run tesseract --list-langs in your terminal for list of available languages.",
             "placeholder": "Tesseract language",
             "default": "eng"
         },
@@ -66,7 +74,8 @@
     "dependencies": {
         "@raycast/api": "^1.56.1",
         "@raycast/utils": "^1.10.0",
-        "node-tesseract-ocr": "^2.2.1"
+        "node-tesseract-ocr": "^2.2.1",
+        "raycast-language-detector": "^0.2.3"
     },
     "devDependencies": {
         "@raycast/eslint-config": "1.0.5",
