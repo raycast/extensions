@@ -1,6 +1,6 @@
 # Antd Changelog
 
-## [Language Support] - {PR_MERGE_DATE}
+## [Language Support] - 2025-04-10
 
 - Updated documentation to align with ant-design@5.24.6 version.
 - Updated extension dependencies.
