@@ -3,7 +3,7 @@
   "name": "pt-gen",
   "title": "Pt Gen",
   "description": "用于生成pt站资源介绍信息, 支持豆瓣和bangumi",
-  "icon": "icon.png",
+  "icon": "extension-icon.png",
   "author": "kuusei",
   "categories": [
     "Media"
