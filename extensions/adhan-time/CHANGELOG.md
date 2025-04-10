@@ -1,6 +1,6 @@
 # Adhan time Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-10
 
 - UI: Added indication for current prayer time using colored icon
 - UI: Added countdown for next prayer time
