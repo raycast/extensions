@@ -78,7 +78,7 @@ export default function MathToLatexLivePanel({ defaultWrapLatex }: MathToLatexLi
           />
           <Action.Paste
             content={wrappedLatex}
-            title="Paste Latex Code"
+            title="Paste LaTeX Code"
             shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
           />
         </ActionPanel>
