@@ -37,10 +37,12 @@ export function battPath(): string {
 
   // Try to get the exact path of batt
   try {
-    // Try with 'which' command first
-    const battPathFromWhich = execSync("which batt", { encoding: "utf8" }).toString().trim();
-    if (battPathFromWhich && existsSync(battPathFromWhich)) {
-      return battPathFromWhich;
+    // Use the sanitized commandExists function instead of direct execSync
+    if (commandExists("batt")) {
+      const battPathFromWhich = execSync("which batt", { encoding: "utf8" }).toString().trim();
+      if (battPathFromWhich && existsSync(battPathFromWhich)) {
+        return battPathFromWhich;
+      }
     }
   } catch {
     // If 'which' fails, continue to other methods
