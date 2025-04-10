@@ -11,7 +11,6 @@ This extension is inspired by [Battery Optimizer](https://www.raycast.com/Qetesh
 
 ## Requirements
 
-- macOS 15 or later
 - [Raycast](https://raycast.com/) installed
 - [batt CLI](https://github.com/charlie0129/batt) installed
 
