@@ -20,7 +20,7 @@
     {
       "name": "battery-limit",
       "title": "Battery Control Limit",
-      "subtitle": "batt limit <% battery>",
+      "subtitle": "batt limit <percentage>",
       "description": "Set upper charge limit",
       "mode": "view"
     },

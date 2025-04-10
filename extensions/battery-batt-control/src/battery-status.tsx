@@ -1,4 +1,5 @@
-import { ActionPanel, Detail, Action, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Detail, Action, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getBatteryStatus } from "./utils/batt_utils";
 
@@ -22,11 +23,7 @@ export default function Command() {
       console.error("Battery status error:", errorMessage);
       setError(errorMessage);
       setStatus("Error fetching battery status");
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to get battery status",
-        message: errorMessage.substring(0, 100),
-      });
+      await showFailureToast(error, { title: "Failed to get battery status" });
     } finally {
       setIsLoading(false);
     }

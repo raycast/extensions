@@ -1,4 +1,4 @@
-# Battery Batt Control
+# Battery batt Control
 
 This extension is inspired by [Battery Optimizer](https://www.raycast.com/Qetesh/battery-optimizer). However, instead of using `bclm` (which is currently incompatible with macOS 15+ due to the removal or alteration of the `CHWA` SMC key, which it relied upon to set battery charge limits), it uses the [batt CLI](https://github.com/charlie0129/batt) to control battery optimization on macOS.
 
