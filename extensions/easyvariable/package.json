@@ -161,7 +161,7 @@
     "@raycast/api": "^1.91.1",
     "@raycast/utils": "^1.17.0",
     "@vitalets/google-translate-api": "^9.2.1",
-    "axios": "^1.7.9",
+    "axios": "^1.8.4",
     "cheerio": "^1.0.0",
     "https-proxy-agent": "^7.0.6",
     "lodash": "^4.17.21",

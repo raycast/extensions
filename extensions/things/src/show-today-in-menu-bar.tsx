@@ -11,7 +11,7 @@ import {
 } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 
-import { Todo, getListTodos, getLists, setTodoProperty, updateTodo } from './api';
+import { Todo, getListTodos, getLists, setTodoProperty, updateTodo, handleError } from './api';
 import { listItems, menuBarStatusIcons } from './helpers';
 
 const TASK_NAME_LENGTH_LIMIT = 30;
@@ -41,15 +41,23 @@ export default function ShowTodayInMenuBar() {
   }
 
   async function schedule(todo: Todo, when: string) {
-    await updateTodo(todo.id, { when });
-    await mutate();
-    await showToast({ style: Toast.Style.Success, title: 'Scheduled to-do' });
+    try {
+      await updateTodo(todo.id, { when });
+      await mutate();
+      await showToast({ style: Toast.Style.Success, title: 'Scheduled to-do' });
+    } catch (error) {
+      handleError(error);
+    }
   }
 
   async function moveTo(todo: Todo, listId: string) {
-    await updateTodo(todo.id, { 'list-id': listId });
-    await mutate();
-    await showToast({ style: Toast.Style.Success, title: 'Moved to-do' });
+    try {
+      await updateTodo(todo.id, { 'list-id': listId });
+      await mutate();
+      await showToast({ style: Toast.Style.Success, title: 'Moved to-do' });
+    } catch (error) {
+      handleError(error);
+    }
   }
 
   return (

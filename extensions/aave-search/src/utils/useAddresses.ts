@@ -30,6 +30,7 @@ export const useAddresses = () => {
       const data = text
         .split("\n")
         .filter(Boolean)
+        .slice(1)
         .map((line: string) => {
           const [address, fullPath, chainId] = line.split(",");
           const parsedChainId = parseInt(chainId, 10);
