@@ -1,6 +1,6 @@
 # Delivery Tracker Changelog
 
-## [Manually Mark as Delivered and Delete All Delivered Deliveries] - {PR_MERGE_DATE}
+## [Manually Mark as Delivered and Delete All Delivered Deliveries] - 2025-04-10
 
 Deliveries that are not remotely tracked can now be manually marked as delivered.  They will no longer be automatically
 marked as delivered the day after the manual delivery date.
