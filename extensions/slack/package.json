@@ -48,6 +48,13 @@
       "mode": "view"
     },
     {
+      "name": "send-message",
+      "title": "Send Message",
+      "subtitle": "Slack",
+      "description": "Send a message to a channel or user in Slack.",
+      "mode": "view"
+    },
+    {
       "name": "open-unread-messages",
       "title": "Open Unread Messages",
       "subtitle": "Slack",
