@@ -3,7 +3,7 @@
   "name": "pt-gen",
   "title": "Pt Gen",
   "description": "用于生成pt站资源介绍信息, 支持豆瓣和bangumi",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "kuusei",
   "categories": [
     "Media"
@@ -15,6 +15,7 @@
       "title": "Pt Gen",
       "description": "用于生成pt站资源介绍信息",
       "mode": "view",
+      "icon": "icon.png",
       "arguments": [
         {
           "name": "url",
@@ -29,6 +30,7 @@
       "title": "Pt Gen Search",
       "description": "用于搜索pt站资源, 支持豆瓣和bangumi",
       "mode": "view",
+      "icon": "icon.png",
       "arguments": [
         {
           "name": "query",
