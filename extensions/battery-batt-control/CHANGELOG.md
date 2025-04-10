@@ -1,3 +1,3 @@
-# batter-batt-control Changelog
+# battery-batt-control Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
