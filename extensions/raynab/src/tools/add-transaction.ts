@@ -10,7 +10,7 @@ import { formatToReadableAmount } from '@lib/utils';
  */
 type TransactionInput = {
   /**
-   * Optional date for the transaction (ISO format)
+   * Optional date for the transaction
    */
   date?: string;
   /**
@@ -18,15 +18,15 @@ type TransactionInput = {
    */
   payee_name: string;
   /**
-   * The amount of the transaction (positive for income, negative for expense) with a currency symbol
+   * The amount of the transaction like $25.00
    */
   amount: number;
   /**
-   * Optional date name of the account to create the transaction in
+   * Optional account name of the account to create the transaction in
    */
   account_name?: string;
   /**
-   * Optional memo for the transaction
+   * Optional memo for the transaction. Any text not part of the previous fields will be added as a memo.
    */
   memo?: string;
 };

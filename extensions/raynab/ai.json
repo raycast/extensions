@@ -1,0 +1,210 @@
+{
+  "instructions": "You are a helpful assistant for managing YNAB (You Need A Budget) transactions. Always format amounts correctly and handle dates in ISO format. Be precise with payee names and account names. When showing transactions, format the information clearly and concisely.\n\nFor transaction queries, you can specify time periods using natural language. The following time periods are supported:\n- 'last year' or 'past year' for the last 12 months\n- 'last quarter' or 'past quarter' for the last 3 months\n- 'last month' or 'past month' for the last 30 days\n- 'last week' or 'past week' for the last 7 days\n- 'last day', 'past day', 'yesterday', or 'today' for the last 24 hours\n\nIf no time period is specified, the default is the last month.",
+  "tools": [
+    {
+      "name": "add-transaction",
+      "title": "Add Transaction",
+      "description": "Add a new YNAB transaction using AI",
+      "input": {
+        "date": "string",
+        "payee_name": "string",
+        "amount": "number",
+        "account_name": "string",
+        "memo": "string"
+      },
+      "output": {
+        "success": "boolean",
+        "error": "string",
+        "debug": "any"
+      }
+    },
+    {
+      "name": "get-transactions",
+      "title": "Get Transactions",
+      "description": "Get YNAB transactions using AI",
+      "input": {
+        "filter": "string"
+      },
+      "output": {
+        "transactions": "array"
+      }
+    },
+    {
+      "name": "get-transaction-details",
+      "title": "Get Transaction Details",
+      "description": "Get details of a specific YNAB transaction using AI",
+      "input": {
+        "transaction_id": "string"
+      },
+      "output": {
+        "transaction": "object"
+      }
+    }
+  ],
+  "evals": [
+    {
+      "input": "@ynab add a transaction for $25.50 at Starbucks",
+      "mocks": {
+        "add-transaction": {
+          "success": true,
+          "transaction": {
+            "date": "2024-03-15",
+            "payee_name": "Starbucks",
+            "amount": -25.50,
+            "account_name": "Checking",
+            "memo": "Morning coffee"
+          }
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "add-transaction",
+            "arguments": {
+              "date": "2024-03-15",
+              "payee_name": "Starbucks",
+              "amount": -25.50,
+              "account_name": "Checking",
+              "memo": "Morning coffee"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@ynab show me my recent transactions",
+      "mocks": {
+        "get-transactions": [
+          {
+            "id": "123",
+            "date": "2024-03-14",
+            "payee_name": "Amazon",
+            "amount": -99.99,
+            "account_name": "Credit Card",
+            "memo": "Office supplies",
+            "category_name": "Office Supplies",
+            "cleared": true
+          },
+          {
+            "id": "124",
+            "date": "2024-03-13",
+            "payee_name": "Whole Foods",
+            "amount": -75.25,
+            "account_name": "Checking",
+            "memo": "Groceries",
+            "category_name": "Groceries",
+            "cleared": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-transactions",
+            "arguments": {
+              "filter": "recent"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@ynab show me my Amazon purchases from last year",
+      "mocks": {
+        "get-transactions": [
+          {
+            "id": "123",
+            "date": "2023-12-14",
+            "payee_name": "Amazon",
+            "amount": -99.99,
+            "account_name": "Credit Card",
+            "memo": "Office supplies",
+            "category_name": "Office Supplies",
+            "cleared": true
+          },
+          {
+            "id": "124",
+            "date": "2023-06-13",
+            "payee_name": "Amazon",
+            "amount": -75.25,
+            "account_name": "Credit Card",
+            "memo": "Books",
+            "category_name": "Entertainment",
+            "cleared": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-transactions",
+            "arguments": {
+              "filter": "recent",
+              "payee": "Amazon",
+              "query": "last year"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@ynab what did I spend at Target in the past month?",
+      "mocks": {
+        "get-transactions": [
+          {
+            "id": "125",
+            "date": "2024-03-10",
+            "payee_name": "Target",
+            "amount": -150.00,
+            "account_name": "Credit Card",
+            "memo": "Household items",
+            "category_name": "Household",
+            "cleared": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-transactions",
+            "arguments": {
+              "filter": "recent",
+              "payee": "Target",
+              "query": "past month"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@ynab what was my Amazon purchase on March 14th?",
+      "mocks": {
+        "get-transaction-details": {
+          "id": "123",
+          "date": "2024-03-14",
+          "payee_name": "Amazon",
+          "amount": -99.99,
+          "account_name": "Credit Card",
+          "memo": "Office supplies",
+          "category_name": "Office Supplies",
+          "cleared": true
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-transaction-details",
+            "arguments": {
+              "transaction_id": "123"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    }
+  ]
+} 

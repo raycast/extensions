@@ -66,7 +66,44 @@
     {
       "name": "add-transaction",
       "title": "Add Transaction",
-      "description": "Adds a new YNAB transaction using AI"
+      "description": "Add a new YNAB transaction using AI",
+      "type": "ai",
+      "input": {
+        "date": "string",
+        "payee_name": "string",
+        "amount": "number",
+        "account_name": "string",
+        "memo": "string"
+      },
+      "output": {
+        "success": "boolean",
+        "error": "string",
+        "debug": "any"
+      }
+    },
+    {
+      "name": "get-transactions",
+      "title": "Get Transactions",
+      "description": "Get YNAB transactions using AI",
+      "type": "ai",
+      "input": {
+        "filter": "string"
+      },
+      "output": {
+        "transactions": "array"
+      }
+    },
+    {
+      "name": "get-transaction-details",
+      "title": "Get Transaction Details",
+      "description": "Get details of a specific YNAB transaction using AI",
+      "type": "ai",
+      "input": {
+        "transaction_id": "string"
+      },
+      "output": {
+        "transaction": "object"
+      }
     }
   ],
   "keywords": [
@@ -88,7 +125,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "^20.17.12",
-    "@types/react": "^18.3.18",
+    "@types/react": "^19.1.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^3.4.2",
