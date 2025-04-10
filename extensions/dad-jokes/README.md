@@ -1,3 +1,3 @@
 # Dad Jokes
 
-Generate a random dad joke.
+Gets a random dad joke.
