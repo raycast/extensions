@@ -41,7 +41,6 @@ export default function TrackDeliveriesCommand() {
   const [trackingIsLoading, setTrackingIsLoading] = useState(false);
 
   useEffect(() => {
-    console.log("useEffect");
     refreshTracking(false, deliveries, packages, setPackages, setTrackingIsLoading);
   }, [deliveries]);
 
@@ -159,7 +158,7 @@ async function refreshTracking(
     // don't do anything until both deliveries and packages are initialized
     return;
   }
-  console.log("refreshTracking");
+
   setTrackingIsLoading(true);
 
   const now = new Date();
