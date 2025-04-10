@@ -5,6 +5,7 @@ import { promisify } from "util";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 
 import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
+import { useMemo } from "react";
 
 const ARC_BOOKMARKS_PATH = `${os.homedir()}/Library/Application Support/Arc`;
 
@@ -216,29 +217,38 @@ export default function useArcBookmarks(enabled: boolean) {
     [currentProfile, enabled],
   );
 
-  const container = data?.sidebar.containers.find((container) => container.items);
-  const containerIds = container ? getContainerIds(container, currentProfile) : [];
-  const root = (container?.items ?? []).filter((value): value is BookmarkItem => typeof value !== "string");
+  const container = useMemo(() => data?.sidebar.containers.find((container) => container.items), [data]);
+  const containerIds = useMemo(
+    () => (container ? getContainerIds(container, currentProfile) : []),
+    [container, currentProfile],
+  );
+  const root = useMemo(() => {
+    return (container?.items ?? []).filter((value): value is BookmarkItem => typeof value !== "string");
+  }, [container]);
 
-  const folders = root
-    .filter((item) => containerIds.includes(item.parentID ?? ""))
-    .flatMap((item) => getFolders(root, item));
+  const folders = useMemo(() => {
+    return root.filter((item) => containerIds.includes(item.parentID ?? "")).flatMap((item) => getFolders(root, item));
+  }, [root, containerIds]);
 
-  const parentIds = folders
-    .map((folder) => [folder.id, folder.childrenIds])
-    .concat(containerIds)
-    .flat(Infinity);
+  const parentIds = useMemo(() => {
+    return folders
+      .map((folder) => [folder.id, folder.childrenIds])
+      .concat(containerIds)
+      .flat(Infinity);
+  }, [folders, containerIds]);
 
-  const bookmarks = root
-    .filter((item) => parentIds.includes(item.parentID ?? ""))
-    .flatMap((item) => getBookmarks(folders, item))
-    .map((bookmark) => {
-      return {
-        ...bookmark,
-        id: `${bookmark.id}-${BROWSERS_BUNDLE_ID.arc}`,
-        browser: BROWSERS_BUNDLE_ID.arc,
-      };
-    });
+  const bookmarks = useMemo(() => {
+    return root
+      .filter((item) => parentIds.includes(item.parentID ?? ""))
+      .flatMap((item) => getBookmarks(folders, item))
+      .map((bookmark) => {
+        return {
+          ...bookmark,
+          id: `${bookmark.id}-${BROWSERS_BUNDLE_ID.arc}`,
+          browser: BROWSERS_BUNDLE_ID.arc,
+        };
+      });
+  }, [root, folders, parentIds]);
 
   return {
     bookmarks,

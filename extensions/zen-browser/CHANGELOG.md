@@ -1,5 +1,9 @@
 # Zen Changelog
 
+## [Changing the name of app called] - 2025-03-21
+
+- Changed name of app being called from "Zen Browser" to "Zen"
+
 ## [Add custom new tab shortcut] - 2025-03-10
 
 - Add ability to set a custom new tab shortcut.

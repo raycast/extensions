@@ -214,6 +214,7 @@ const sendToNotisAPI = async (input: string): Promise<NotisApiResult> => {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify(payload),
+      timeout: 750000,
     });
 
     const data = await response.json().catch(() => null);

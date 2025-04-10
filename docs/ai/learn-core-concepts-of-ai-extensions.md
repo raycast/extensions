@@ -267,9 +267,7 @@ The structure of the AI file is the same as in the `package.json` file.
 
 ```json
 {
-  "ai": {
-    "instructions": "When you don't know the user's first name, ask for it."
-  }
+  "instructions": "When you don't know the user's first name, ask for it."
 }
 ```
 
@@ -278,9 +276,8 @@ The structure of the AI file is the same as in the `package.json` file.
 {% tab title="ai.yaml" %}
 
 ```yaml
-ai:
-  instructions: |
-    When you don't know the user's first name, ask for it.
+instructions: |
+  When you don't know the user's first name, ask for it.
 ```
 
 {% endtab %}
@@ -289,12 +286,10 @@ ai:
 
 ```json5
 {
-  ai: {
-    instructions: "When you don't know the user's first name, ask for it.",
-  },
+  instructions: "When you don't know the user's first name, ask for it.",
 }
 ```
-
+{% endtab %}
 {% endtabs %}
 
 {% hint style="info" %}

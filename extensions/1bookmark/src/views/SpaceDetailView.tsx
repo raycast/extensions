@@ -1,12 +1,11 @@
-import { List, Icon, ActionPanel, Action } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { trpc } from "@/utils/trpc.util";
 import { useMe } from "../hooks/use-me.hook";
-import { useAtom } from "jotai";
-import { sessionTokenAtom } from "../states/session-token.state";
 import { EditSpaceOneValueForm, KeyToEdit } from "./EditSpaceOneValueForm";
 import { SpaceMembersView } from "./SpaceMembersView";
 import { SpaceTagsView } from "./SpaceTagsView";
+import { useEnabledSpaces } from "../hooks/use-enabled-spaces.hook";
 
 const EditAction = (props: { spaceId: string; keyToEdit: KeyToEdit; value: string; refetch: () => void }) => {
   const { spaceId, keyToEdit, value, refetch } = props;
@@ -23,10 +22,10 @@ const EditAction = (props: { spaceId: string; keyToEdit: KeyToEdit; value: strin
 function Body(props: { spaceId: string }) {
   const { spaceId } = props;
   const { data, isLoading, refetch } = trpc.space.get.useQuery({ spaceId });
-  const [sessionToken] = useAtom(sessionTokenAtom);
-  const me = useMe(sessionToken);
+  const me = useMe();
+  const { enabledSpaceIds, toggleEnableDisable } = useEnabledSpaces();
 
-  if (isLoading || !data || me.isLoading || !me.data) {
+  if (isLoading || !data || !me.data || !enabledSpaceIds) {
     return <List isLoading />;
   }
 
@@ -34,7 +33,7 @@ function Body(props: { spaceId: string }) {
   const image = data.image ? data.image : data.type === "TEAM" ? Icon.TwoPeople : Icon.Person;
 
   return (
-    <List>
+    <List isLoading={me.isFetching}>
       <List.Item
         title="Name"
         subtitle={data.name}
@@ -93,6 +92,25 @@ function Body(props: { spaceId: string }) {
         }
       />
       <List.Item title="Bookmarks" subtitle={data._count.bookmarks.toString()} icon={Icon.Bookmark} />
+
+      <List.Item
+        title="Enable/Disable"
+        icon={Icon.Bookmark}
+        accessories={
+          enabledSpaceIds.includes(spaceId)
+            ? [{ tag: { value: "Enabled", color: Color.Green } }]
+            : [{ tag: { value: "Disabled" } }]
+        }
+        actions={
+          <ActionPanel>
+            <Action
+              title={enabledSpaceIds.includes(spaceId) ? "Disable" : "Enable"}
+              icon={Icon.Bookmark}
+              onAction={() => toggleEnableDisable(spaceId)}
+            />
+          </ActionPanel>
+        }
+      />
 
       <List.Section title="My Info in this space">
         <List.Item title="My Role" subtitle={spaceInMe?.myRole || ""} icon={Icon.CreditCard} />

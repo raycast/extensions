@@ -9,7 +9,7 @@ const cache = new Cache();
 
 export const emptyResult = { languageCode: "", languageName: "Unknown" };
 
-export const supportedDetectors: Detector[] = [Detector.AI, Detector.LanguageDetect, Detector.TinyLD];
+export const supportedDetectors: Detector[] = Object.values(Detector);
 
 export const detectLanguage = async (text: string, detector: Detector, model: string) => {
   const detectors = supportedDetectors.slice().sort((a, b) => {

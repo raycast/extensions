@@ -1,5 +1,9 @@
 # Bitbucket Changelog
 
+## [Update] - 2025-04-04
+
+- Added the ability to favorite repositories
+
 ## [Update] - 2024-12-02
 
 - Added Prettier to the project as newly required by Raycast
