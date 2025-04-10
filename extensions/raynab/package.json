@@ -55,11 +55,18 @@
     },
     {
       "name": "unreviewed",
-      "title": "Unreviewed transactions",
+      "title": "Unreviewed Transactions",
       "subtitle": "YNAB",
       "description": "Easily track unapproved or uncategorized transactions.",
       "mode": "menu-bar",
       "interval": "2h"
+    }
+  ],
+  "tools": [
+    {
+      "name": "add-transaction",
+      "title": "Add Transaction",
+      "description": "Adds a new YNAB transaction using AI"
     }
   ],
   "keywords": [
