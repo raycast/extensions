@@ -132,6 +132,13 @@ export default function TrackDeliveriesCommand() {
                     refreshTracking(true, deliveries, packages, setPackages, setTrackingIsLoading);
                   }}
                 />
+                <Action
+                  title="Delete All Delivered"
+                  icon={Icon.Trash}
+                  shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                  style={Action.Style.Destructive}
+                  onAction={() => deleteTracking(delivery.id, deliveries, setDeliveries, setPackages)}
+                />
               </ActionPanel>
             }
           />
