@@ -1,6 +1,6 @@
 import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { Alert, confirmAlert, getPreferenceValues } from "@raycast/api";
+import { Alert, confirmAlert, getPreferenceValues, open } from "@raycast/api";
 
 interface Preferences {
   customBattPath?: string;
@@ -77,8 +77,8 @@ export async function confirmAlertBatt(): Promise<boolean> {
       message: "The batt CLI tool is required but was not found on your system.",
       primaryAction: {
         title: "Learn How to Install",
-        onAction: () => {
-          execSync("open https://github.com/charlie0129/batt");
+        onAction: async () => {
+          await open("https://github.com/charlie0129/batt");
         },
       },
       dismissAction: {
