@@ -1,7 +1,7 @@
 import fuzzysort from "fuzzysort";
 import { Bookmark } from "../types";
 import { useMemo } from "react";
-import { PreparedBookmarkSearch, PreparedBookmarkItem } from "./use-prepare-bookmark-search.hook";
+import { PreparedBookmark } from "./use-prepare-bookmark-search.hook";
 
 // Maximum number of search results
 const MAX_SEARCH_RESULTS = 30;
@@ -11,14 +11,15 @@ const MAX_SEARCH_RESULTS = 30;
  */
 function searchByField(params: {
   keyword: string;
-  searchTargets: Array<{ prepared: Fuzzysort.Prepared; originalIndex: number }>;
-  preparedItems: PreparedBookmarkItem[];
+  key: "name" | "url";
+  preparedBookmarks: PreparedBookmark[];
+  bookmarks: Bookmark[];
 }) {
-  const { keyword, searchTargets, preparedItems } = params;
+  const { keyword, key, preparedBookmarks, bookmarks } = params;
 
   // Execute search
-  const results = fuzzysort.go(keyword, searchTargets, {
-    key: "prepared",
+  const results = fuzzysort.go(keyword, preparedBookmarks, {
+    key,
     limit: MAX_SEARCH_RESULTS,
     threshold: 0.25,
   });
@@ -27,7 +28,7 @@ function searchByField(params: {
   return results.map((result) => {
     const originalIndex = result.obj.originalIndex;
     return {
-      item: preparedItems[originalIndex].original,
+      item: bookmarks[originalIndex],
       score: result.score,
     };
   });
@@ -65,31 +66,20 @@ function combineSearchResults(...searchResults: Array<Array<{ item: Bookmark; sc
  */
 function processSearchResults(params: {
   keyword: string;
-  searchTarget: {
-    nameSearchTargets: Array<{ prepared: Fuzzysort.Prepared; originalIndex: number }>;
-    urlSearchTargets: Array<{ prepared: Fuzzysort.Prepared; originalIndex: number }>;
-    prepared: PreparedBookmarkItem[];
-  };
+  preparedBookmarks: PreparedBookmark[];
+  bookmarks: Bookmark[];
 }) {
-  const { keyword, searchTarget } = params;
-  const { nameSearchTargets, urlSearchTargets, prepared: preparedItems } = searchTarget;
+  const { keyword, preparedBookmarks, bookmarks } = params;
 
-  // Search by name
-  const nameMatches = searchByField({
-    keyword,
-    searchTargets: nameSearchTargets,
-    preparedItems,
-  });
+  const nameMatches = searchByField({ keyword, key: "name", preparedBookmarks, bookmarks });
+  const urlMatches = searchByField({ keyword, key: "url", preparedBookmarks, bookmarks });
 
-  // Search by URL
-  const urlMatches = searchByField({
-    keyword,
-    searchTargets: urlSearchTargets,
-    preparedItems,
-  });
+  // 0.25 점 아래인것은 버린다.
+  const filteredNameMatches = nameMatches.filter((match) => match.score >= 0.25);
+  const filteredUrlMatches = urlMatches.filter((match) => match.score >= 0.25);
 
   // Combine and sort search results (add new fields here when needed)
-  return combineSearchResults(nameMatches, urlMatches);
+  return combineSearchResults(filteredNameMatches, filteredUrlMatches);
 }
 
 /**
@@ -97,38 +87,47 @@ function processSearchResults(params: {
  * It receives prepared data from usePrepareBookmarkSearch and returns search results.
  * The prepare operation is performed only once if the data doesn't change.
  */
-export const useBookmarkSearch = (params: { keyword: string; searchData: PreparedBookmarkSearch }) => {
-  const { keyword, searchData } = params;
-  const { searchInTags, searchInUntagged, taggedBookmarks, untaggedBookmarks } = searchData;
+export const useBookmarkSearch = (params: {
+  keyword: string;
+  taggedPrepare: PreparedBookmark[];
+  untaggedPrepare: PreparedBookmark[];
+  taggedBookmarks: Bookmark[];
+  untaggedBookmarks: Bookmark[];
+}): {
+  searchedTaggedList: Bookmark[];
+  searchedUntaggedList: Bookmark[];
+  hasSearch: boolean;
+} => {
+  const { keyword, taggedPrepare, untaggedPrepare, taggedBookmarks, untaggedBookmarks } = params;
 
   return useMemo(() => {
     // Return all bookmarks if no search keyword is provided
     if (keyword === "") {
       return {
-        filteredTaggedList: taggedBookmarks,
-        filteredUntaggedList: untaggedBookmarks,
+        searchedTaggedList: taggedPrepare.map((r) => taggedBookmarks[r.originalIndex]),
+        searchedUntaggedList: untaggedPrepare.map((r) => untaggedBookmarks[r.originalIndex]),
+        hasSearch: false,
       };
     }
 
     // Process tagged bookmarks if available
-    const taggedResults = searchInTags
-      ? processSearchResults({
-          keyword,
-          searchTarget: searchInTags,
-        })
-      : taggedBookmarks;
+    const taggedResults = processSearchResults({
+      keyword,
+      preparedBookmarks: taggedPrepare,
+      bookmarks: taggedBookmarks,
+    });
 
     // Process untagged bookmarks if available
-    const untaggedResults = searchInUntagged
-      ? processSearchResults({
-          keyword,
-          searchTarget: searchInUntagged,
-        })
-      : untaggedBookmarks;
+    const untaggedResults = processSearchResults({
+      keyword,
+      preparedBookmarks: untaggedPrepare,
+      bookmarks: untaggedBookmarks,
+    });
 
     return {
-      filteredTaggedList: taggedResults,
-      filteredUntaggedList: untaggedResults,
+      searchedTaggedList: taggedResults,
+      searchedUntaggedList: untaggedResults,
+      hasSearch: true,
     };
-  }, [searchInTags, searchInUntagged, keyword, taggedBookmarks, untaggedBookmarks]);
+  }, [keyword, taggedBookmarks, untaggedBookmarks, taggedPrepare, untaggedPrepare]);
 };

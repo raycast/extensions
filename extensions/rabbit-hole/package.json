@@ -53,7 +53,7 @@
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
-    "axios": "^1.7.2",
+    "axios": "^1.8.4",
     "eslint": "^8.51.0",
     "prettier": "^3.3.1",
     "typescript": "^5.2.2",

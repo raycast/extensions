@@ -1,5 +1,9 @@
 # Groq Changelog
 
+## [Updated Models] - 2025-04-07
+
+- Added `Llama 4 Scout` and `Llama 4 Maverick`
+
 ## [Updated Models] - 2025-03-29
 
 - Removed deprecated `Mixtral 8x7B 32k`

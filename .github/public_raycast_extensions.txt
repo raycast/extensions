@@ -53,4 +53,5 @@ resend
 terminaldotshop
 fabric
 awork
+laravel-herd
 exa

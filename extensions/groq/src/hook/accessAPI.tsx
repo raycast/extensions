@@ -22,7 +22,7 @@ export default function ResultView(props: ResultViewProps) {
     cumulativeTokens: 0,
     cumulativeCost: 0,
     model: model_override === "global" ? global_model : model_override,
-    temp: temperature ?? 0.8,
+    temp: temperature ?? 0.7,
   });
 
   async function getChatResponse(sysPrompt: string, selectedText: string, model: string, temp: number) {
@@ -195,7 +195,7 @@ export default function ResultView(props: ResultViewProps) {
         show_metadata && (
           <Detail.Metadata>
             <Detail.Metadata.Label title="Model" text={changeModels.filter((m) => m.id === metrics.model)[0].name} />
-            <Detail.Metadata.Label title="Temperature" text={metrics.temp.toFixed(1)} />
+            <Detail.Metadata.Label title="Temperature" text={metrics.temp.toFixed(2)} />
             <Detail.Metadata.Label title="Prompt Tokens" text={metrics.promptTokens.toString()} />
             <Detail.Metadata.Label title="Response Tokens" text={metrics.responseTokens.toString()} />
             <Detail.Metadata.Separator />

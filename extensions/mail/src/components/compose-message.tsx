@@ -27,7 +27,7 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
 
   const { handleSubmit, itemProps, values, setValue } = useForm<OutgoingMessageForm>({
     initialValues: {
-      account: draftValues?.account || defaultAccount?.email,
+      account: draftValues?.account || defaultAccount?.emails[0],
       to: draftValues?.to,
       cc: draftValues?.cc,
       bcc: draftValues?.bcc,
@@ -106,9 +106,9 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
       }
     >
       <Form.Dropdown title="From" placeholder="Select account" {...itemProps.account}>
-        {(account ? [account] : accounts)?.map((account: Account, index: number) => (
-          <Form.Dropdown.Item key={index} value={account.email} title={account.email} />
-        ))}
+        {(account ? [account] : accounts)?.flatMap((account: Account) =>
+          account.emails.map((email: string) => <Form.Dropdown.Item key={email} value={email} title={email} />),
+        )}
       </Form.Dropdown>
 
       <Form.TextField
