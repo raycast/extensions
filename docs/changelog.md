@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.94.0 - 2025-03-19
+
+### ✨ New
+
+- The extensions now run on Nodejs 22 and react 19. Among other benefits, this makes `fetch` globally available. There shouldn’t be any breaking change - but if you find some, please let us know!
+  Additionally, new extensions will be bootstrapped with ESLint 9
+- **Tools**: Tools can now specify some preferences, the same way Commands can
+
+### 💎 Improvements
+
+- **CLI**: When a tool or a command (when running in the background) times out, an error message will be printed in the terminal
+- **CLI**: When publishing an extension, the PR to the extensions repository will be created as draft so you can fill the description up before submitting it
+
 ## 1.93.0 - 2025-02-26
 
 ### ✨ New

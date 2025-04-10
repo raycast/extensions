@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Add the ability to search for collaborators in the pull request actions] - 2025-03-19
+
+- Add the ability to search for collaborators in the pull request actions, instead of just showing the first 25.
+
 ## [Add repository filtering for menu bar commands] - 2025-03-11
 
 - Add the ability to include or exclude specific repositories from the results for the `My Pull Requests` and `Unread Notifications` Menu Bar commands.

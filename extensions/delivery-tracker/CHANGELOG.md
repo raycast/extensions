@@ -1,5 +1,15 @@
 # Delivery Tracker Changelog
 
+## [Allow FedEx and UPS Offline Tracking] - 2025-03-26
+
+Offline tracking of FedEx and UPS deliveries are now allowed.
+
+Dependencies have been updated.
+
+## [Prevent Duplicate Deliveries] - 2025-03-17
+
+Duplicate deliveries are no longer allowed to be added.
+
 ## [FedEx Delivery Date Bug Fix] - 2025-03-07
 
 Fixed a bug for the delivery date from FedEx.  People living in timezones with a negative UTC offset incorrectly saw

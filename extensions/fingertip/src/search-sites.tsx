@@ -25,7 +25,7 @@ export default function Command() {
 
   const { isLoading, data, pagination } = useFetch(
     (options) => {
-      return `https://ap1-production-creator-api.fingertip.com/api/v1/sites?${new URLSearchParams({ search: searchText, ...(options?.cursor ? { cursor: options?.cursor } : {}) }).toString()}`;
+      return `https://api.fingertip.com/v1/sites?${new URLSearchParams({ search: searchText, ...(options?.cursor ? { cursor: options?.cursor } : {}) }).toString()}`;
     },
     {
       headers: {
@@ -42,7 +42,7 @@ export default function Command() {
           message: error.message || "Unknown error occurred",
         });
       },
-      mapResult(result: Fingertip.API.V1.Sites.SiteListResponsesMyCursorPage) {
+      mapResult(result: Fingertip.V1.Sites.SiteListResponsesMyCursorPage) {
         const {
           items,
           pageInfo: { endCursor, hasNextPage },
@@ -102,17 +102,12 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://fingertip.com/sites/${site.slug}`} title="Home" icon={Icon.House} />
+                <Action.OpenInBrowser url={`https://fingertip.com/${site.slug}`} title="Open Site" icon={Icon.Link} />
                 <Action.OpenInBrowser
                   url={`https://fingertip.com/sites/${site.slug}/pages`}
                   title="Pages"
                   icon={Icon.Document}
                 />
-                <Action.OpenInBrowser
-                  url={`https://fingertip.com/sites/${site.slug}/settings`}
-                  title="Settings"
-                  icon={Icon.Cog}
-                />
-                <Action.OpenInBrowser url={`https://fingertip.com/${site.slug}`} title="Open Site" icon={Icon.Link} />
                 <Action.OpenInBrowser
                   url={`https://fingertip.com/sites/${site.slug}/calendar`}
                   title="Scheduling"
@@ -124,7 +119,7 @@ export default function Command() {
                   icon={Icon.TwoPeople}
                 />
                 <Action.OpenInBrowser
-                  url={`https://fingertip.com/sites/${site.slug}/invoicing`}
+                  url={`https://fingertip.com/sites/${site.slug}/invoices`}
                   title="Invoicing"
                   icon={Icon.Coins}
                 />
@@ -143,7 +138,19 @@ export default function Command() {
                   title="Blog"
                   icon={Icon.Pencil}
                 />
+                <Action.OpenInBrowser
+                  url={`https://fingertip.com/sites/${site.slug}/analytics`}
+                  title="Analytics"
+                  icon={Icon.BarChart}
+                />
+                <Action.OpenInBrowser
+                  url={`https://fingertip.com/sites/${site.slug}/settings`}
+                  title="Settings"
+                  icon={Icon.Cog}
+                />
                 <Action.CopyToClipboard content={`https://fingertip.com/${site.slug}`} title="Copy Site URL" />
+                <Action.CopyToClipboard content={site.slug} title="Copy Site Slug" />
+                <Action.CopyToClipboard content={site.id} title={`Copy Site ID`} />
               </ActionPanel>
             }
           />

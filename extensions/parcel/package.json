@@ -5,6 +5,9 @@
   "description": "Allow Parcel users to see upcoming and active deliveries",
   "icon": "extension-icon.png",
   "author": "marcmagn1",
+  "contributors": [
+    "omarshahine"
+  ],
   "categories": [
     "Productivity",
     "Applications"
@@ -15,6 +18,12 @@
       "name": "my-deliveries",
       "title": "My Deliveries",
       "description": "Display active deliveries",
+      "mode": "view"
+    },
+    {
+      "name": "add-delivery",
+      "title": "Add Delivery",
+      "description": "Add a new delivery to track",
       "mode": "view"
     }
   ],

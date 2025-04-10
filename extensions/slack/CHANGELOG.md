@@ -1,5 +1,7 @@
 # Slack Changelog
 
+## [Moved contributor] - 2025-03-31
+
 ## [Update README with improved manifest.yaml] - 2025-03-05
 
 ## [Added new scope] - 2025-02-26

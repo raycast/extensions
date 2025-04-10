@@ -1,5 +1,13 @@
 # Connect to VPN Changelog
 
+## [Performance Improvements] 2025-03-19
+
+- Significantly improved menubar icon update speed when connecting/disconnecting via main Raycast interface
+- Fixed synchronization issues between main extension and menubar
+- Added direct communication between commands for instant status updates
+- Optimized status checking for faster response time
+- Contributed by @borzov
+
 ## [Bug fix] - 2024-12-22
 
 - Fixed spawning zombie process while updating services status in background

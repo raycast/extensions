@@ -1,5 +1,17 @@
 # Linkding Changelog
 
+## [Enhancements] - 2025-03-20
+
+### Create Bookmark
+
+- feat: add option to create bookmarks as unread by default
+- feat: hide account dropdown if only one account
+- feat: allow adding tags when creating bookmark
+
+### Search Bookmarks
+
+- feat: allow customizing search results display
+
 ## [Fixes & Enhancements] - 2025-02-20
 
 ### General

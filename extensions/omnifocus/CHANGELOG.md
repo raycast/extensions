@@ -1,5 +1,14 @@
 # OmniFocus Changelog
 
+## [1.2.0] - 2025-03-14
+
+### Added
+
+- General quality of life improvements, specifically:
+  - Two new Preferences options for controlling List Task behavior
+  - Ability to group tasks by various categories
+  - Ability to perform a Clean Up of completed tasks
+
 ## [1.1.0] - 2025-02-26
 
 ### Removed

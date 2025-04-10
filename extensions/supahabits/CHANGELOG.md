@@ -1,5 +1,15 @@
 # SupaHabits Changelog
 
+### [Habit Colors & Manage habits features] - 2025-03-19
+
+- Habits use colors to identify them
+- User can edit/delete habits
+- Fix track repeatable habit
+
+### [Unmark as Done & Feedback] - 2025-03-14
+
+Added the ability to unmark a habit as done and added a feedback form.
+
 ### [Create and track repeatable habits] - 2025-01-10
 
 Added the ability to create and track repeatable habits.
