@@ -1,4 +1,16 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, Form, useNavigation, Color, Cache } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  getPreferenceValues,
+  showToast,
+  Toast,
+  Icon,
+  Form,
+  useNavigation,
+  Color,
+  Cache,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -10,12 +22,11 @@ import CachedProjectView from "./views/CachedProjectView";
 import { authenticateWithBrowser } from "./gcloud";
 
 const execPromise = promisify(exec);
-const GCLOUD_PATH = "/usr/local/bin/gcloud";
+const GCLOUD_PATH = getPreferenceValues<ExtensionPreferences>().gcloudPath;
 
-// Create a navigation cache instance
 const navigationCache = new Cache({ namespace: "navigation-state" });
 
-interface Preferences {
+interface StatePreferences {
   projectId?: string;
 }
 
@@ -24,7 +35,7 @@ export default function Command() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [preferences, setPreferences] = useState<Preferences>({});
+  const [preferences, setPreferences] = useState<StatePreferences>({});
   const [showCachedProjectView, setShowCachedProjectView] = useState(false);
   const [shouldNavigateToProject, setShouldNavigateToProject] = useState<string | null>(null);
   const { push, pop } = useNavigation();

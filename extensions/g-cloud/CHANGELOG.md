@@ -1,5 +1,8 @@
 # G-Cloud Changelog
 
+## [0.1.30] - {MERGE_DATE}
+- fix: SDK path now is not using Homebrew default path, allowing users to have full control.
+
 ## [0.1.29] - 2025-02-04
 - Initial release
 - Google Cloud IAM management features
