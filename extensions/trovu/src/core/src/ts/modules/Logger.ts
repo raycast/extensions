@@ -5,10 +5,13 @@
 /** Logs errors and warnings. */
 
 export default class Logger {
+  logs: Array<{ level: string; message: string }>;
+  logElement: HTMLElement | null;
+
   /**
    * Set helper variables.
    */
-  constructor(logElementSelector) {
+  constructor(logElementSelector: string) {
     this.logs = [];
     if (!(typeof document === "undefined")) {
       this.logElement = document.querySelector(logElementSelector);

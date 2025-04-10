@@ -12,7 +12,7 @@ export default class ShortcutVerifier {
     }
   }
   static checkIfArgCountMatches(shortcut) {
-    if (shortcut.url && shortcut.argumentCount != Object.keys(shortcut.arguments).length) {
+    if (shortcut.url && shortcut.arguments && shortcut.argumentCount != Object.keys(shortcut.arguments).length) {
       return `Mismatch in argumentCount of key and arguments.length of url in "${shortcut.namespace}.${shortcut.key}".`;
     }
   }

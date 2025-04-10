@@ -1,6 +1,6 @@
 # Trovu Changelog
 
-## [1.2.1] - 2024-03-29
+## [1.2.1] - {PR_MERGE_DATE}
 
 - Fix error when loading environment [#508](https://github.com/trovu/trovu/issues/508)
 

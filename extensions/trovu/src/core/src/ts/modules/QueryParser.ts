@@ -94,7 +94,7 @@ export default class QueryParser {
       [extraNamespaceName, keyword] = splitLimit(keyword, ".", 2);
       // If extraNamespace started with a dot, it will be empty
       // so let's split it again, and add the dot.
-      if (extraNamespaceName == "") {
+      if (extraNamespaceName === "") {
         [extraNamespaceName, keyword] = splitLimit(keyword, ".", 2);
         extraNamespaceName = "." + extraNamespaceName;
       }
