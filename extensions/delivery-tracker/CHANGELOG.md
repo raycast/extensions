@@ -1,9 +1,11 @@
 # Delivery Tracker Changelog
 
-## [Manually Mark as Delivered] - {PR_MERGE_DATE}
+## [Manually Mark as Delivered and Delete All Delivered Deliveries] - {PR_MERGE_DATE}
 
 Deliveries that are not remotely tracked can now be manually marked as delivered.  They will no longer be automatically
 marked as delivered the day after the manual delivery date.
+
+Added the ability to delete all the delivered deliveries.
 
 ## [Allow FedEx and UPS Offline Tracking] - 2025-03-26
 
