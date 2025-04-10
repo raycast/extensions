@@ -51,6 +51,8 @@ export default function Command() {
                 shortcut={Keyboard.Shortcut.Common.CopyName}
               />
               <Action.CopyToClipboard
+                // "IP" is a common acronym, so I'll ignore the lint rule for title case
+                // eslint-disable-next-line @raycast/prefer-title-case
                 title="Copy IP Address"
                 content={stream.ip_address_public}
                 shortcut={{ modifiers: ["cmd"], key: "i" }}
