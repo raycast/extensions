@@ -43,9 +43,9 @@ export default function MathToLatexLivePanel({ defaultWrapLatex }: MathToLatexLi
   function handleWrapChange(value: string) {
     setWrapStyle(value as WrapStyle);
     // Re-convert to update wrapping
-    // No need to reconvert, just update the wrap style
-    setWrapStyle(value as WrapStyle);
-    setError(null);
+    try {
+      const latexResult = convertAsciiMathToLatex(input);
+      setLatex(latexResult);
       setError(null);
     } catch (e: unknown) {
       setLatex("");
