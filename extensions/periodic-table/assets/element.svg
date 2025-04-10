@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" fill="none">
+  <path fill="#{{ CPKHexColor }}" d="M0 0h256v256H0z" />
+  <text
+    xml:space="preserve"
+    fill="#{TextColor}"
+    font-family="Inter"
+    font-size="64"
+    letter-spacing="0em"
+    style="white-space: pre"
+  >
+    <tspan x="10" y="129.273">{{ Symbol }}</tspan>
+  </text>
+  <text
+    xml:space="preserve"
+    fill="#{TextColor}"
+    font-family="Inter"
+    font-size="64"
+    letter-spacing="0em"
+    style="white-space: pre"
+  >
+    <tspan x="10" y="237.273">{{ AtomicMass }}</tspan>
+  </text>
+  <text
+    xml:space="preserve"
+    fill="#{TextColor}"
+    font-family="Inter"
+    font-size="36"
+    letter-spacing="0em"
+    style="white-space: pre"
+  >
+    <tspan x="10" y="173.091">{{ Name }}</tspan>
+  </text>
+  <text
+    xml:space="preserve"
+    fill="#{TextColor}"
+    font-family="Inter"
+    font-size="64"
+    letter-spacing="0em"
+    style="white-space: pre"
+  >
+    <tspan x="10" y="65.273">{{ AtomicNumber }}</tspan>
+  </text>
+</svg>
