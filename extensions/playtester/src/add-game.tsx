@@ -1,6 +1,7 @@
 import { ActionPanel, Form, Action, showToast, Toast, Detail, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import fetch from "node-fetch";
+import { showFailureToast } from "@raycast/utils";
 
 interface SubmissionResponse {
   message?: string;
@@ -60,8 +61,10 @@ function SubmitGameForm() {
         }),
       });
 
+      // Get the response data first (before any conditional logic)
+      const data = (await response.json()) as SubmissionResponse;
+
       if (!response.ok) {
-        const data = (await response.json()) as SubmissionResponse;
         const errorMessage = data.message || "Failed to submit game";
         await showToast({
           style: Toast.Style.Failure,
@@ -71,8 +74,6 @@ function SubmitGameForm() {
         setIsSubmitting(false);
         return;
       }
-
-      const data = (await response.json()) as SubmissionResponse;
 
       // Handle different response cases
       if (data.exists && data.status === "approved" && data.game) {
@@ -96,11 +97,7 @@ function SubmitGameForm() {
       }
     } catch (error) {
       console.error("Error submitting game:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Submission Failed",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
-      });
+      await showFailureToast(error, { title: "Submission Failed" });
     } finally {
       setIsSubmitting(false);
     }
@@ -111,7 +108,7 @@ function SubmitGameForm() {
       isLoading={isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Submit Game" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

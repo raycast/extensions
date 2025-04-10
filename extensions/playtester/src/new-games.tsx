@@ -1,6 +1,7 @@
-import { ActionPanel, Grid, Action, showToast, Toast, Icon, Detail } from "@raycast/api";
+import { ActionPanel, Grid, Action, Icon, Detail } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
+import { showFailureToast } from "@raycast/utils";
 
 interface Game {
   id: number;
@@ -120,8 +121,7 @@ export default function Command() {
           combinedGames.push(...page1Result.data.games);
         } else if (!page1Result.success) {
           console.error("Error fetching page 1:", page1Result.error);
-          await showToast({
-            style: Toast.Style.Failure,
+          await showFailureToast(new Error(page1Result.error), {
             title: "Partially failed to load games",
             message: "Page 1 could not be loaded. Some games might be missing.",
           });
@@ -131,8 +131,7 @@ export default function Command() {
           combinedGames.push(...page2Result.data.games);
         } else if (!page2Result.success) {
           console.error("Error fetching page 2:", page2Result.error);
-          await showToast({
-            style: Toast.Style.Failure,
+          await showFailureToast(new Error(page2Result.error), {
             title: "Partially failed to load games",
             message: "Page 2 could not be loaded. Some games might be missing.",
           });
@@ -142,10 +141,8 @@ export default function Command() {
       } catch (error) {
         console.error("Error fetching games:", error);
         setError(error instanceof Error ? error.message : "An unknown error occurred");
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast(error instanceof Error ? error : new Error("An unknown error occurred"), {
           title: "Failed to fetch games",
-          message: error instanceof Error ? error.message : "An unknown error occurred",
         });
       } finally {
         setIsLoading(false);

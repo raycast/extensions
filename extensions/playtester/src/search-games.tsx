@@ -1,6 +1,7 @@
-import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
+import { showFailureToast } from "@raycast/utils";
 
 interface Game {
   title: string;
@@ -23,10 +24,8 @@ export default function Command() {
           const response = await fetch("https://playtester.io/api/games/search");
 
           if (!response.ok) {
-            await showToast({
-              style: Toast.Style.Failure,
+            await showFailureToast(new Error(`HTTP error: ${response.status}`), {
               title: "Error loading trending games",
-              message: `HTTP error: ${response.status}`,
             });
             setGames([]);
             return;
@@ -36,11 +35,7 @@ export default function Command() {
           setGames(data);
         } catch (error) {
           console.error("Error fetching trending games:", error);
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to load trending games",
-            message: error instanceof Error ? error.message : "Unknown error",
-          });
+          await showFailureToast(error, { title: "Failed to load trending games" });
           setGames([]);
         } finally {
           setIsLoading(false);
@@ -58,10 +53,8 @@ export default function Command() {
         const response = await fetch(`https://playtester.io/api/games/search?q=${encodeURIComponent(searchText)}`);
 
         if (!response.ok) {
-          await showToast({
-            style: Toast.Style.Failure,
+          await showFailureToast(new Error(`HTTP error: ${response.status}`), {
             title: "Error searching games",
-            message: `HTTP error: ${response.status}`,
           });
           setGames([]);
           return;
@@ -71,11 +64,7 @@ export default function Command() {
         setGames(data);
       } catch (error) {
         console.error("Error searching games:", error);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Search failed",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
+        await showFailureToast(error, { title: "Search failed" });
         setGames([]);
       } finally {
         setIsLoading(false);
@@ -92,27 +81,25 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search games..." throttle>
-      <List.Section title={searchText ? "Search Results" : "Trending Games"}>
-        {games.length === 0 ? (
-          <List.EmptyView
-            title={searchText ? "No games found" : "No trending games available"}
-            description={searchText ? "Try a different search term" : "Check back later for trending games"}
+      {games.length === 0 ? (
+        <List.EmptyView
+          title={searchText ? "No games found" : "No trending games available"}
+          description={searchText ? "Try a different search term" : "Check back later for trending games"}
+        />
+      ) : (
+        games.map((game) => (
+          <List.Item
+            key={game.slug}
+            title={game.title}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser title="View on Playtester" url={`https://playtester.io/${game.slug}`} />
+                <Action.CopyToClipboard title="Copy URL" content={`https://playtester.io/${game.slug}`} />
+              </ActionPanel>
+            }
           />
-        ) : (
-          games.map((game) => (
-            <List.Item
-              key={game.slug}
-              title={game.title}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser title="View on Playtester" url={`https://playtester.io/${game.slug}`} />
-                  <Action.CopyToClipboard title="Copy URL" content={`https://playtester.io/${game.slug}`} />
-                </ActionPanel>
-              }
-            />
-          ))
-        )}
-      </List.Section>
+        ))
+      )}
     </List>
   );
 }
