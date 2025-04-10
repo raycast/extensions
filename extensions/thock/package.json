@@ -5,6 +5,9 @@
   "description": "Control Thock with Raycast",
   "icon": "AppIcon.png",
   "author": "shail_antani",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Applications",
     "Fun"
@@ -27,8 +30,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.94.2",
-    "@raycast/utils": "^1.17.0",
-    "util": "^0.12.5"
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
