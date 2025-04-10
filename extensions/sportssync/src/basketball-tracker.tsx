@@ -13,7 +13,7 @@ const displayTrackerInformation = () => {
 
   useEffect(() => {
     async function loadStoredDropdown() {
-      const storedValue = await LocalStorage.getItem("selectedDropdown");
+      const storedValue = await LocalStorage.getItem("basketballTrackerDropdown");
 
       if (typeof storedValue === "string") {
         displaySelectLeague(storedValue);
@@ -57,7 +57,7 @@ const displayTrackerInformation = () => {
           tooltip="Sort by"
           onChange={async (newValue) => {
             displaySelectLeague(newValue);
-            await LocalStorage.setItem("selectedDropdown", newValue);
+            await LocalStorage.setItem("basketballTrackerDropdown", newValue);
           }}
           value={currentLeague}
           defaultValue="NBA Articles"

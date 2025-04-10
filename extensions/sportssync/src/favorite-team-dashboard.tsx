@@ -20,7 +20,7 @@ const Command = () => {
   const [currentType, displaySelectType] = useState("Scheduled Games");
   useEffect(() => {
     async function loadStoredDropdown() {
-      const storedValue = await LocalStorage.getItem("selectedDropdown");
+      const storedValue = await LocalStorage.getItem("favoriteTeamDropdown");
 
       if (typeof storedValue === "string") {
         displaySelectType(storedValue);
@@ -54,7 +54,7 @@ const Command = () => {
           tooltip="Sort by"
           onChange={async (newValue) => {
             displaySelectType(newValue);
-            await LocalStorage.setItem("selectedDropdown", newValue);
+            await LocalStorage.setItem("favoriteTeamDropdown", newValue);
           }}
           value={currentType}
           defaultValue="Scheduled Games"

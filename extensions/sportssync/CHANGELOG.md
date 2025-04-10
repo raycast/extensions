@@ -12,7 +12,7 @@
 - Added country icons for every track in the f1 results and schedule command
 - Combined basketball scores and schedule with college basketball scores and schedule. Also added NCAA M and W articles to the basketball tracker command.
 - Renamed College Basketball Dropdowns to NCAA M and NCAA W instead of MNCAA and WNCAA for clarity
-- Added Dropdown Saving - Commands will now save the last dropdown you accessed (on a global not per command basis).
+- Added Dropdown Saving - Commands will now save the last dropdown you accessed (on a per command basis).
 - Globally added a new refresh action - Using the keyboard shortcut "CMD" + "R" you can refresh any command and view
 - Updated action titles in every command to now be context aware (ex: it will say view Toronto Maple Leaf details instead of Team Details)
 - Added a new empty view that will display when no data is found

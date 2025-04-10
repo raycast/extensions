@@ -9,7 +9,7 @@ const displaySchedule = () => {
 
   useEffect(() => {
     async function loadStoredDropdown() {
-      const storedValue = await LocalStorage.getItem("selectedDropdown");
+      const storedValue = await LocalStorage.getItem("footballScoresDropdown");
 
       if (typeof storedValue === "string") {
         displaySelectLeague(storedValue);
@@ -32,7 +32,7 @@ const displaySchedule = () => {
           tooltip="Sort by"
           onChange={async (newValue) => {
             displaySelectLeague(newValue);
-            await LocalStorage.setItem("selectedDropdown", newValue);
+            await LocalStorage.setItem("footballScoresDropdown", newValue);
           }}
           value={currentLeague}
           defaultValue="nfl"
@@ -43,7 +43,7 @@ const displaySchedule = () => {
       }
       isLoading={scheduleLoading}
     >
-      <DisplayScoresAndSchedule />;
+      <DisplayScoresAndSchedule />
     </List>
   );
 };

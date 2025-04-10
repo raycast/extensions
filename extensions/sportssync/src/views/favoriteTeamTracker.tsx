@@ -75,7 +75,7 @@ interface Injury {
   details?: { returnDate: string };
 }
 
-interface Response {
+interface InjuryResponse {
   season: { displayName: string };
   injuries: Injury[];
 }
@@ -95,7 +95,7 @@ interface Franchise {
   team: Team;
 }
 
-interface Response {
+interface TransactionResponse {
   transactions: Transaction[];
 }
 
@@ -424,7 +424,9 @@ export default function TeamInjuries() {
     isLoading: injuryLoading,
     data: injuryData,
     revalidate: injuryRevalidate,
-  } = useFetch<Response>(`https://site.api.espn.com/apis/site/v2/sports/${favoriteSport}/${favoriteLeague}/injuries`);
+  } = useFetch<InjuryResponse>(
+    `https://site.api.espn.com/apis/site/v2/sports/${favoriteSport}/${favoriteLeague}/injuries`,
+  );
 
   const injuryItems = injuryData?.injuries.flatMap((injuryItem) => injuryItem.injuries) || [];
   const injuryArray = injuryItems?.map((injury, index) => {
@@ -498,7 +500,7 @@ export default function TeamInjuries() {
     isLoading: transactionLoading,
     data: transactionsData,
     revalidate: transactionRevalidate,
-  } = useFetch<Response>(
+  } = useFetch<TransactionResponse>(
     `https://site.api.espn.com/apis/site/v2/sports/${favoriteSport}/${favoriteLeague}/transactions?limit=200`,
   );
 
