@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { showHUD, Action, ActionPanel, List } from "@raycast/api";
+import { showHUD, Action, ActionPanel, List, Color, Icon } from "@raycast/api";
 import { shellScript } from "./shellScript";
+import { useCachedState } from "@raycast/utils";
 
 const THOCK_CLI_PATH = "/opt/homebrew/bin/thock-cli";
 
@@ -130,7 +131,7 @@ export async function setSwitchSet(brand: string, author: string, switchSet: str
 export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
   const [filteredList, setFilteredList] = useState<typeof brands>(brands);
-  const [currentSwitchSet, setCurrentSwitchSet] = useState<string>("");
+  const [currentSwitchSet, setCurrentSwitchSet] = useCachedState<string>("thock-switch-set", "");
 
   useEffect(() => {
     const filtered = brands
@@ -169,10 +170,19 @@ export default function Command() {
               <List.Item
                 key={`${brand.name}-${author.name}-${switchSet.name}`}
                 title={switchSet.name}
-                subtitle={`Author: ${author.name} ${switchSet.name.toLowerCase() === currentSwitchSet ? "(Current)" : ""}`}
+                subtitle={`Author: ${author.name}`}
+                accessories={
+                  switchSet.name.toLowerCase() === currentSwitchSet
+                    ? [{ tag: { value: "Selected", color: Color.Green } }]
+                    : []
+                }
                 actions={
                   <ActionPanel>
-                    <Action title="Select" onAction={() => handleAction(brand.name, author.name, switchSet.name)} />
+                    <Action
+                      title="Select"
+                      icon={Icon.Keyboard}
+                      onAction={() => handleAction(brand.name, author.name, switchSet.name)}
+                    />
                   </ActionPanel>
                 }
               />
