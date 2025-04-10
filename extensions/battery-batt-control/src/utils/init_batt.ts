@@ -37,11 +37,15 @@ export function battPath(): string {
 
   // Try to get the exact path of batt
   try {
-    // Use the sanitized commandExists function instead of direct execSync
+    // Use the sanitized commandExists function
     if (commandExists("batt")) {
-      const battPathFromWhich = execSync("which batt", { encoding: "utf8" }).toString().trim();
-      if (battPathFromWhich && existsSync(battPathFromWhich)) {
-        return battPathFromWhich;
+      // Use the same sanitized approach to get the path
+      const sanitizedCommand = "batt";
+      if (/^[a-zA-Z0-9_\-/.\s]+$/.test(sanitizedCommand)) {
+        const battPathFromWhich = execSync(`which ${sanitizedCommand}`, { encoding: "utf8" }).toString().trim();
+        if (battPathFromWhich && existsSync(battPathFromWhich)) {
+          return battPathFromWhich;
+        }
       }
     }
   } catch {
