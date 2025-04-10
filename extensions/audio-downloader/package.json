@@ -1,0 +1,141 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "audio-downloader",
+  "title": "Audio Downloader",
+  "description": "Download audio from YouTube, Twitter, Twitch, Instagram, Bilibili and more using yt-dlp CLI",
+  "type": "module",
+  "icon": "audio.png",
+  "author": "charlie_privette",
+  "contributors": [
+    "pernielsentikaer",
+    "d2a",
+    "ridemountainpig",
+    "xmorse",
+    "litomore",
+    "anwarulislam"
+  ],
+  "categories": [
+    "Applications",
+    "Data",
+    "Productivity"
+  ],
+  "keywords": [
+    "audio",
+    "downloader",
+    "youtube",
+    "bilibili",
+    "yt-dlp"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Download Audio",
+      "subtitle": "Audio Downloader",
+      "description": "Download audio with parameters",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadPath",
+      "title": "Download Path",
+      "description": "Path to download audio",
+      "type": "directory",
+      "default": "~/Downloads",
+      "required": true
+    },
+    {
+      "name": "homebrewPath",
+      "title": "Homebrew Path",
+      "description": "Path to the Homebrew executable. You can enter `which brew` to terminal to find its path.",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/brew",
+      "required": false
+    },
+    {
+      "name": "ytdlPath",
+      "title": "yt-dlp Path",
+      "description": "Path to the yt-dlp executable. You can enter `which yt-dlp` to terminal to find its path.",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/yt-dlp",
+      "required": false
+    },
+    {
+      "name": "ffmpegPath",
+      "title": "ffmpeg Path",
+      "description": "Path to the ffmpeg executable. You can enter `which ffmpeg` to terminal to find its path.",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/ffmpeg",
+      "required": false
+    },
+    {
+      "name": "ffprobePath",
+      "title": "ffprobe Path",
+      "description": "Path to the ffprobe executable. Usually installed along with ffmpeg. You can enter `which ffprobe` to terminal to find its path.",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/ffprobe",
+      "required": false
+    },
+    {
+      "name": "autoLoadUrlFromClipboard",
+      "title": "Auto Load URL from Clipboard",
+      "description": "Automatically load the URL from the clipboard when the command is executed",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "autoLoadUrlFromSelectedText",
+      "title": "Auto Load URL from Selected Text",
+      "description": "Automatically load the URL from the selected text when the command is executed",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableBrowserExtensionSupport",
+      "title": "Enable Browser Extension Support",
+      "description": "Enable browser extension support for reading video URLs from the browser",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "forceIpv4",
+      "title": "Force IPv4 (Experimental)",
+      "description": "Force IPv4 for network requests, this can be useful if you have some network issues. But this should be a temporary solution. We might remove this option in the future.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.18.1",
+    "date-fns": "^4.1.0",
+    "execa": "^9.5.2",
+    "is-url-superb": "^6.1.0",
+    "pretty-bytes": "^6.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "22.13.4",
+    "@types/react": "^18.3.18",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.1",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "pull": "ray pull-contributions",
+    "publish": "ray publish"
+  }
+}
