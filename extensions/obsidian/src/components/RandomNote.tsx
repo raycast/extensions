@@ -1,5 +1,5 @@
+import { Vault } from "../api/vault/vault.types";
 import { useNotes } from "../utils/hooks";
-import { Vault } from "../utils/interfaces";
 import { NoteQuickLook } from "./NoteQuickLook";
 
 export function RandomNote(props: { vault: Vault; showTitle: boolean }) {

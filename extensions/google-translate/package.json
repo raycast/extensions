@@ -18,7 +18,8 @@
     "pernielsentikaer",
     "rasitayaz",
     "popalay",
-    "litomore"
+    "litomore",
+    "ChanningKuo"
   ],
   "license": "MIT",
   "commands": [
@@ -963,10 +964,17 @@
           "value": "paste"
         }
       ]
+    },
+    {
+      "name": "proxy",
+      "title": "HTTP Proxy URL",
+      "description": "HTTP proxy URL to use for translation requests (e.g. http://proxy.example.com:8080)",
+      "type": "textfield",
+      "required": false
     }
   ],
   "dependencies": {
-    "@iamtraction/google-translate": "^2.0.1",
+    "undici": "^5.12.0",
     "@raycast/api": "^1.47.3",
     "@raycast/utils": "^1.4.16",
     "google-tts-api": "^2.0.2"

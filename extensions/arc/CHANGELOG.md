@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Suggest opening URL] - 2025-03-31
+
+When searching for a URL, offer to open the URL 
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 AI Tools to:

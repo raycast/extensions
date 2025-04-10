@@ -1,5 +1,10 @@
 # Google Gemini Changelog
 
+## [New Model and Code Improvements] - 2025-03-26
+
+- 🆕 New Model: Gemini 2.5 Pro Experimental
+- 🛠️ Code Improvements: show error messages, and add new error code handling
+
 ## [Fix Create Chat Functionality] - 2025-03-24
 
 - 🛠️ aiChat - Fixed the issue where the "Create Chat" functionality always set the chat name to "New Chat X" instead of using the name provided by the user.

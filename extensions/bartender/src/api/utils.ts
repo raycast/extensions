@@ -1,3 +1,5 @@
+import * as fs from "node:fs";
+import * as os from "node:os";
 import { Result } from "../types";
 
 export function createResultFromAppleScriptError(error: unknown, defaultMessage: string): Result<never> {
@@ -15,4 +17,16 @@ export function createResultFromAppleScriptError(error: unknown, defaultMessage:
     status: "error",
     error: error instanceof Error ? error.message : defaultMessage,
   };
+}
+
+export function getTellApplication() {
+  const homeDir = os.homedir();
+  const setappPaths = ["/Applications/Setapp/Bartender.app", `${homeDir}/Applications/Setapp/Bartender.app`];
+  console.log("Checking for Setapp installation at:", setappPaths);
+  for (const path of setappPaths) {
+    if (fs.existsSync(path)) {
+      return `tell application "Bartender"`;
+    }
+  }
+  return `tell application "Bartender 5"`;
 }

@@ -2,7 +2,7 @@
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "easy-ocr",
     "title": "Easy OCR",
-    "description": "Use Tesseract or Google Cloud Vision OCR to extract text from screenshot",
+    "description": "Use Tesseract OCR to extract text from screenshot",
     "icon": "command-icon.png",
     "author": "Rafo94",
     "contributors": [

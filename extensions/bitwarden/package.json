@@ -49,12 +49,12 @@
           "default": "copy",
           "data": [
             {
-              "title": "Paste to Active App",
-              "value": "paste"
-            },
-            {
               "title": "Copy to Clipboard",
               "value": "copy"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
             }
           ]
         },
@@ -79,15 +79,38 @@
               "value": "never"
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "name": "authenticator",
+      "title": "Authenticator",
+      "subtitle": "Bitwarden",
+      "description": "Search all items with TOTP and generate codes.",
+      "icon": "authenticator.png",
+      "mode": "view",
+      "keywords": [
+        "totp",
+        "otp"
+      ],
+      "preferences": [
         {
-          "name": "shouldCacheVaultItems",
-          "type": "checkbox",
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "The primary action to perform on an authenticator code.",
           "required": false,
-          "default": true,
-          "title": "Improved Load Times",
-          "label": "Enable Caching",
-          "description": "Whether to cache vault items for faster access. This will NOT cache the actual passwords and other sensitive values, only usernames/emails and other labels."
+          "title": "Primary Code Action",
+          "default": "copy",
+          "data": [
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            }
+          ]
         }
       ]
     },
@@ -364,19 +387,29 @@
           "value": "closeAndPopToRoot"
         }
       ]
+    },
+    {
+      "name": "shouldCacheVaultItems",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Improved Load Times",
+      "label": "Enable Caching",
+      "description": "Whether to cache vault items for faster access. This will NOT cache the actual passwords and other sensitive values, only usernames/emails and other non-sensitive labels."
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.83.2",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/utils": "^1.19.1",
     "execa": "^7.0.0",
     "fast-fuzzy": "^1.12.0",
-    "node-stream-zip": "^1.15.0"
+    "node-stream-zip": "^1.15.0",
+    "otpauth": "^9.4.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
     "@types/jest": "^29.5.0",
-    "@types/node": "~18.14.2",
+    "@types/node": "~22.14.0",
     "@types/react": "^18.0.28",
     "@typescript-eslint/eslint-plugin": "^7.17.0",
     "@typescript-eslint/parser": "^7.17.0",

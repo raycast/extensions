@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiBaseUrl } from "./constants";
 import fetch from "node-fetch";
 import { useMemo } from "react";
+import { showFailureToast } from "@raycast/utils";
 
 export type CoinData = {
   id: string;
@@ -33,8 +34,13 @@ export type CoinData = {
 };
 
 const getCoins = async (page: number): Promise<CoinData[]> => {
-  const response = await fetch(`${apiBaseUrl}/coins?page=${page}`);
-  return response.json() as Promise<CoinData[]>;
+  try {
+    const response = await fetch(`${apiBaseUrl}/coins?page=${page}`);
+    return response.json() as Promise<CoinData[]>;
+  } catch (error) {
+    showFailureToast("Failed to fetch coins");
+    return [];
+  }
 };
 
 export default function useCoins() {

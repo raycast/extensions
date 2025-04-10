@@ -6,10 +6,12 @@
   "icon": "slack-icon-rounded.png",
   "author": "mommertf",
   "contributors": [
-    "Elliot67",
     "stelo",
     "thomaslombart",
     "Rob"
+  ],
+  "pastContributors": [
+    "Elliot67"
   ],
   "categories": [
     "Communication",
@@ -43,6 +45,13 @@
       "title": "Search Messages",
       "subtitle": "Slack",
       "description": "Search for Slack messages.",
+      "mode": "view"
+    },
+    {
+      "name": "send-message",
+      "title": "Send Message",
+      "subtitle": "Slack",
+      "description": "Send a message to a channel or user in Slack.",
       "mode": "view"
     },
     {

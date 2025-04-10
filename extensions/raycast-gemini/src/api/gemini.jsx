@@ -55,7 +55,18 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
       let response = await gemini.ask(query, {
         model: model === "default" ? defaultModel : model,
         stream: (x) => {
-          setMarkdown((markdown) => markdown + x);
+          try {
+            if (x !== undefined && x !== null) {
+              setMarkdown((markdown) => markdown + x);
+            }
+          } catch (streamError) {
+            console.error("Error in stream callback:", streamError);
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Response Failed",
+              message: streamError.message, // Display the error message in the toast notification
+            });
+          }
         },
         data: data ?? buffer,
       });
@@ -79,11 +90,20 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
           message: "Please slow down.",
         });
         setMarkdown("## Could not access Gemini.\n\nYou have been rate limited. Please slow down and try again later.");
+      } else if (e.message.includes("The model is overloaded")) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Model Overloaded",
+          message: "The model is currently overloaded. Please try again later.",
+        });
+        setMarkdown("## Could not access Gemini.\n\nThe model is currently overloaded. Please try again later.");
       } else {
+        console.error(e);
         await showToast({
           style: Toast.Style.Failure,
           title: "Response Failed",
-          message: `${(Date.now() - start) / 1000} seconds`,
+          // message: `${(Date.now() - start) / 1000} seconds`,
+          message: e.message, // Display the error message in the toast notification
         });
         setMarkdown(
           "## Could not access Gemini.\n\nThis may be because Gemini has decided that your prompt did not comply with its regulations. Please try another prompt, and if it still does not work, create an issue on GitHub."
