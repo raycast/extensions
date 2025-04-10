@@ -3,7 +3,6 @@ import { Detail, ActionPanel, Action } from "@raycast/api";
 type WrapStyle = "none" | "single" | "double";
 
 interface LatexPreviewDetailProps {
-  input: string;
   latex: string;
   wrapStyle: WrapStyle;
   onEdit: () => void;
