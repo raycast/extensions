@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [New "Send Message" command] - {PR_MERGE_DATE}
+## [New "Send Message" command] - 2025-04-10
 
 - Add a new command to send a message to a channel or user in Slack. Can send the message immediately or schedule it to arrive at a certain date or time. In order for this to work, you will need to add `chat:write` scope to the manifest, and re-install the application in your Slack space.
 - Updated README with updated scopes instructions.
