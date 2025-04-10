@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, Form, useNavigation, Color, Cache } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, Form, useNavigation, Color, Cache, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -10,7 +10,7 @@ import CachedProjectView from "./views/CachedProjectView";
 import { authenticateWithBrowser } from "./gcloud";
 
 const execPromise = promisify(exec);
-const GCLOUD_PATH = "/usr/local/bin/gcloud";
+const GCLOUD_PATH = getPreferenceValues<{ gcloudPath: string }>().gcloudPath;
 
 // Create a navigation cache instance
 const navigationCache = new Cache({ namespace: "navigation-state" });
