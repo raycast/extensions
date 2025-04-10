@@ -1,8 +1,8 @@
-# Image Flow
-
-## Description
+# ImageFlow
 
 Process images using workflow.
+
+## Description
 
 Imageflow is a Raycast extension for processing images with custom pipelines, you can organize operations such as resizing, uploading, and compressing into a pipeline to process images in your own way.
 
