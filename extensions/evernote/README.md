@@ -1,6 +1,6 @@
 # Evernote Instant Search
 
-Search your Evernote notes instantly using the local database of the Mac official Evernote client.
+Search your Evernote notes iand open tasks nstantly using the local database of the Mac official Evernote client.
 Evernote stores your notes in a SQLite database (`Library/Application Support/Evernote/conduit-storage/https%3A%2F%2Fwww.evernote.com`). This extension allows you to search for your notes using Raycast.
 
 ## Features
@@ -14,7 +14,7 @@ Evernote stores your notes in a SQLite database (`Library/Application Support/Ev
 - Install official Evernote client from https://evernote.com/download
 - Install this extension from Raycast
 - Run the extension. It will automatically detect the path to your Evernote database.
-- Search for your notes for the keywords in titles.
+- Search for your notes and open tasks for the keywords in titles.
 - Profit
 
 
