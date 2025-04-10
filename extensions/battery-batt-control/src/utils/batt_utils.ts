@@ -111,6 +111,13 @@ export async function executeBattCommand(command: string, requireAdmin = false, 
     if (showOutput) {
       await showHUD(`Error: ${errorMessage}`);
     }
+    // You might want to include details from the original error if available
+    if (error instanceof Error) {
+      const stderr = (error as { stderr?: unknown })?.stderr;
+      if (stderr) {
+        console.error(`Stderr from failed command: ${String(stderr)}`);
+      }
+    }
     throw error;
   }
 }
@@ -231,8 +238,11 @@ export async function getBatteryStatus(): Promise<string> {
     const errorMessage = error instanceof Error ? error.message : `Unknown error: ${String(error)}`;
     console.error("Failed to get battery status:", errorMessage);
     // You might want to include details from the original error if available
-    if (error instanceof Error && "stderr" in error) {
-      console.error(`Stderr from failed command: ${String((error as { stderr: unknown }).stderr)}`);
+    if (error instanceof Error) {
+      const stderr = (error as { stderr?: unknown })?.stderr;
+      if (stderr) {
+        console.error(`Stderr from failed command: ${String(stderr)}`);
+      }
     }
     throw new Error(`Failed to get battery status: ${errorMessage}`);
   }
