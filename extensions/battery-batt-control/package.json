@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "battery-batt-control",
   "title": "Battery-batt-control",
-  "description": "This extension using the batt cli to control battery optimization",
+  "description": "This extension uses the batt cli to control battery optimization",
   "icon": "icon-battery.png",
   "author": "vatsalsanjay",
   "categories": [
