@@ -1,0 +1,41 @@
+{
+  "name": "extract-links",
+  "title": "提取网页链接",
+  "description": "提取当前浏览器所打开网页内的所有链接，转换为Markdown格式并复制到剪贴板",
+  "icon": "command-icon.png",
+  "author": "raycast-user",
+  "categories": ["Web", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "extract-links",
+      "title": "提取网页链接",
+      "subtitle": "获取并复制当前浏览器页面中的所有链接",
+      "description": "提取当前浏览器所打开网页内的所有链接，转换为Markdown格式并复制到剪贴板",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.22.5",
+    "@babel/preset-env": "^7.22.5",
+    "@babel/preset-react": "^7.22.5",
+    "@babel/preset-typescript": "^7.22.5",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "~18.16.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
+    "eslint": "^8.39.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.0.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix"
+  }
+}
