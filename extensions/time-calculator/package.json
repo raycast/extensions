@@ -16,7 +16,7 @@
     {
       "name": "tc",
       "title": "Time Calculator",
-      "subtitle": "Try something like \"1h + 30m\" or \"at next monday\"",
+      "subtitle": "Calculator",
       "description": "Calculate time expressions like \"1h + 30m\" and get human-readable results",
       "mode": "view"
     }
