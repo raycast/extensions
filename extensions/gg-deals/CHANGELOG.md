@@ -1,5 +1,14 @@
 # gg.deals Changelog
 
+## [Fixes] - 2025-04-11
+
+- Fix prices on search
+- Fix genres on search
+- Add platforms on search
+- Add discount on search
+- Improve overview subtitle with historical lows formated as HL
+- Add platforms on detail page
+
 ## [Fixes] - 2024-05-06
 
 - Fix the thumbnail images

@@ -37,7 +37,7 @@ export default function Command() {
   const renderListDetail = (deals: DealEntry[]) => {
     const genreList = deals.map(({ genres }) => genres.split(",").map((genre) => genre.trim()));
 
-    return deals.map(({ gameName, imageUrl, price, priceKeyshop, url, releaseDate }, index) => (
+    return deals.map(({ gameName, imageUrl, price, url, releaseDate, platforms }, index) => (
       <List.Item
         key={index}
         title={gameName}
@@ -47,8 +47,7 @@ export default function Command() {
             markdown={`![Illustration](${imageUrl})`}
             metadata={
               <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label title="Official Stores" text={price} />
-                <List.Item.Detail.Metadata.Label title="Keyshops" text={priceKeyshop} />
+                <List.Item.Detail.Metadata.Label title="Price" text={price} />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Release Date" text={releaseDate} />
                 <List.Item.Detail.Metadata.TagList title="Genres">
@@ -57,6 +56,16 @@ export default function Command() {
                       key={index}
                       text={genre}
                       color={genreColors[genre] || "#eed535"}
+                    />
+                  ))}
+                </List.Item.Detail.Metadata.TagList>
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.TagList title="Platforms">
+                  {platforms.map((platform, index) => (
+                    <List.Item.Detail.Metadata.TagList.Item
+                      key={index}
+                      text={""}
+                      icon={{ source: "platform-icons/" + platform + ".svg" }}
                     />
                   ))}
                 </List.Item.Detail.Metadata.TagList>
@@ -233,21 +242,35 @@ function populateSearch($: CheerioAPI, selector: string, deals: DealEntry[]) {
   $(selector).each(function () {
     const gameName: string = $(this).find(".game-info-title.title").text();
     const imageUrl: string = $(this).find("img")[0].attribs.src;
-    const price: string = $(this).find(".shop-price-retail .numeric").text();
+    const price: string = $(this).find(".price-content").text();
     const priceKeyshop: string = $(this).find(".shop-price-keyshops .numeric").text();
     const url = $(this).find("a").attr("href") ?? "";
-    const releaseDate = $(this).find(".game-tags-deal .date-tag .value").text();
-    const genres = $(this).find(".game-tags-deal .date-tag").next().find(".value").text();
+    const releaseDate = $(this).find(".date-tag .value").text();
+    const genres = $(this).find(".genres-tag .value").text();
+    const discount = $(this).find(".price-widget").text();
+    const platforms = $(this)
+      .find(".platforms-tag .value .platform-link-icon svg")
+      .map(function () {
+        const svg = $(this).children("use").attr("href");
+        return svg ? svg.split("#").pop() : "";
+      })
+      .toArray();
 
-    deals.push(new DealEntry(gameName, imageUrl, price, priceKeyshop, url, releaseDate, genres));
+    deals.push(new DealEntry(gameName, imageUrl, price, priceKeyshop, url, releaseDate, genres, discount, platforms));
   });
 }
 
 function populateDeals($: CheerioAPI, selector: string, deals: DealEntry[]) {
   $(selector).each(function () {
     const gameName = $(this).find(".title-line").text().trim();
-    const price = $(this).find(".price-wrap").text();
     const url = $(this).find("a").attr("href") ?? "";
+
+    const priceWrap = $(this).find(".price-wrap");
+    const price = priceWrap.find(".price-inner.numeric").text();
+    const hl = priceWrap.find("span").hasClass("historical");
+    const discount = priceWrap.find(".discount").text();
+
+    const priceText = price === "Free" ? "Free" : discount + (hl ? " HL " : " ") + price;
 
     let imageUrl = "";
     const srcsetAttribute = $(this).find(".main-image").find("img").attr("srcset");
@@ -264,6 +287,6 @@ function populateDeals($: CheerioAPI, selector: string, deals: DealEntry[]) {
       imageUrl = $(this).find("img")[0].attribs.src;
     }
 
-    deals.push(new DealEntry(gameName, imageUrl, price, "", url, "", ""));
+    deals.push(new DealEntry(gameName, imageUrl, priceText, "", url, "", "", discount, []));
   });
 }
