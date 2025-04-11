@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "go-to-rewind-timestamp",
   "title": "Go to Rewind Timestamp",
-  "description": "Opens your rewind history at the time you choose using natural language",
+  "description": "Open Rewind AI at a specific timestamp",
   "icon": "rewind-ai.png",
   "author": "haseab",
   "categories": [
@@ -13,7 +13,7 @@
     {
       "name": "go-to-rewind-timestamp",
       "title": "Go to Rewind Timestamp",
-      "subtitle": "Opens your rewind history at the time you choose using natural language",
+      "subtitle": "Open Rewind AI at a specific timestamp",
       "description": "Enter a time in natural language (e.g. '2nd day of march', '3 minutes ago', 'Feb 1 2am', 'yesterday 8am')",
       "mode": "no-view",
       "arguments": [
@@ -24,6 +24,13 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "go-to-last-timestamp",
+      "title": "Go to Last Timestamp",
+      "subtitle": "Launches Previous Rewind Timestamp",
+      "description": "Launches Previous Rewind Timestamp",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

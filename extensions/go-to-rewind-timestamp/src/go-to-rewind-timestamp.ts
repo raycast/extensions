@@ -1,4 +1,4 @@
-import { open } from "@raycast/api";
+import { LocalStorage, open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import * as chrono from "chrono-node";
 
@@ -21,6 +21,9 @@ export default async function Command(props: { arguments: { time: string } }) {
 
     // Convert to Unix timestamp in milliseconds
     const timestamp = Math.floor(parsedDate.getTime() / 1000);
+
+    // Store the timestamp for future use
+    await LocalStorage.setItem("lastRewindTimestamp", timestamp);
 
     // Create the Rewind AI deeplink
     const deeplink = `rewindai://show-moment?timestamp=${timestamp}`;
