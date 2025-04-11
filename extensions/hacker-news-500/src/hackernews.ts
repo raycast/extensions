@@ -15,35 +15,56 @@ type GetStoriesProps = {
 export async function getStories(points = "500", { cache }: GetStoriesProps["options"]): Promise<CacheEntry["items"]> {
   const cachedResponse = cache.get(cacheKey);
   if (cachedResponse) {
-    const parsed: CacheEntry = JSON.parse(cachedResponse);
-    const elapsed = Date.now() - parsed.timestamp;
+    try {
+      const parsed: CacheEntry = JSON.parse(cachedResponse);
+      const elapsed = Date.now() - parsed.timestamp;
 
-    if (elapsed <= CACHE_DURATION_IN_MS) {
-      return parsed.items;
+      if (elapsed <= CACHE_DURATION_IN_MS) {
+        return parsed.items;
+      }
+    } catch (error) {
+      console.error("Failed to parse cached response:", error);
+      // Clear invalid cache
+      cache.remove(cacheKey);
     }
   }
 
-  const response = await fetch(`https://hnrss.org/newest.jsonfeed?points=${points}`, {
-    headers: {
-      "User-Agent": `Hacker News Extension, Raycast/${environment.raycastVersion} (${os.type()} ${os.release()})`,
-    },
-  });
-  if (!response.ok) {
-    console.error("Failed to fetch stories:", response.statusText);
-    throw new Error(response.statusText);
-  }
   try {
-    const { items = [] } = (await response.json()) as { items?: Story[] };
-    cache.set(cacheKey, JSON.stringify({ timestamp: Date.now(), items }));
-    const now = new Date();
-    return items.filter((item: Story) => {
-      const publishedDate = new Date(item.date_published);
-      const oneWeekAgo = new Date(now.setDate(now.getDate() - 7));
-      // limit items to a week
-      return publishedDate >= oneWeekAgo;
+    const response = await fetch(`https://hnrss.org/newest.jsonfeed?points=${points}`, {
+      headers: {
+        "User-Agent": `Hacker News Extension, Raycast/${environment.raycastVersion} (${os.type()} ${os.release()})`,
+      },
     });
+    if (!response.ok) {
+      console.error("Failed to fetch stories:", response.statusText);
+      throw new Error(response.statusText);
+    }
+
+    const data = (await response.json()) as { items?: Story[] };
+    if (!data || !data.items) {
+      console.warn("No stories found in response");
+      return [];
+    }
+
+    const { items = [] } = data;
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const filteredItems = items.filter((item: Story) => {
+      try {
+        if (!item.date_published) return false;
+        const publishedDate = new Date(item.date_published);
+        return publishedDate >= oneWeekAgo;
+      } catch (error) {
+        console.warn("Failed to parse date for item:", item.id, error);
+        return false;
+      }
+    });
+
+    cache.set(cacheKey, JSON.stringify({ timestamp: Date.now(), items: filteredItems }));
+    return filteredItems;
   } catch (error) {
-    console.error("Failed to parse response:", error);
-    throw new Error("Failed to parse response");
+    console.error("Failed to fetch or parse stories:", error);
+    return [];
   }
 }

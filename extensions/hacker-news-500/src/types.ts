@@ -1,7 +1,3 @@
-export interface Preferences {
-  points: string;
-}
-
 export type Story = {
   id: string;
   title: string;
