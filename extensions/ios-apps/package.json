@@ -1,0 +1,193 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ios-apps",
+  "title": "iOS App Search",
+  "description": "Search, download, and view iOS apps from the App Store.",
+  "icon": "extension-icon.png",
+  "author": "chrismessina",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Apps",
+      "subtitle": "iOS App Search",
+      "description": "Search for iOS apps on the App Store",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-apps",
+      "title": "Search iOS Apps",
+      "description": "Search for iOS apps on the App Store by name or keyword",
+      "path": "./src/tools/search-apps.ts",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "string",
+          "description": "The search query for finding iOS apps",
+          "required": true
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "description": "Maximum number of results to return (default: 10, max: 20)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "get-app-details",
+      "title": "Get iOS App Details",
+      "description": "Get detailed information about an iOS app by name or search term",
+      "path": "./src/tools/get-app-details.ts",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "string",
+          "description": "The name or search term for the iOS app",
+          "required": true
+        },
+        {
+          "name": "bundleId",
+          "type": "string",
+          "description": "Optional bundle ID if known (will skip search step)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "download-app",
+      "title": "Download iOS App",
+      "description": "Download an iOS app",
+      "path": "./src/tools/download-app.ts",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "string",
+          "description": "The name or search term for the iOS app",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "appleId",
+      "title": "Apple ID",
+      "description": "Your Apple ID email for authentication",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "description": "Your Apple ID password",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "downloadPath",
+      "title": "Download Path",
+      "description": "Path to download app files",
+      "type": "directory",
+      "default": "~/Downloads",
+      "required": false
+    },
+    {
+      "name": "homebrewPath",
+      "title": "Homebrew Path",
+      "description": "Path to the Homebrew executable. You can enter `which brew` in terminal to find its path.",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/brew",
+      "required": false
+    },
+    {
+      "name": "ipatoolPath",
+      "title": "ipatool Path",
+      "description": "Path to the ipatool executable. You can enter `which ipatool` in terminal to find its path.",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/ipatool",
+      "required": false
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@ios-apps search for Twitter",
+        "mocks": {
+          "search-apps": "Here are iOS apps matching \"Twitter\":\n\n- **X**\n  Developer: X Corp.\n  Category: Social Networking\n  Rating: 4.5/5 (2.3M reviews)\n  Price: Free\n  [View on App Store](https://apps.apple.com/us/app/x/id333903271)\n\n- **Threads**\n  Developer: Instagram, Inc.\n  Category: Social Networking\n  Rating: 4.2/5 (245K reviews)\n  Price: Free\n  [View on App Store](https://apps.apple.com/us/app/threads/id6446901002)\n\n- **Bluesky Social**\n  Developer: Bluesky PBC\n  Category: Social Networking\n  Rating: 4.6/5 (42K reviews)\n  Price: Free\n  [View on App Store](https://apps.apple.com/us/app/bluesky-social/id6444370199)"
+        },
+        "expected": [
+          {
+            "callsTool": "search-apps"
+          }
+        ]
+      },
+      {
+        "input": "@ios-apps tell me about Minecraft",
+        "mocks": {
+          "get-app-details": "# Minecraft\n\n**Developer**: Mojang\n**Category**: Games\n**Size**: 456.8 MB\n**Age Rating**: 9+\n**Price**: $6.99\n**Rating**: ★★★★★ (4.8) based on 1.2M reviews\n\n**Version**: 1.20.51\n**Last Updated**: March 5, 2025\n\n**Description**:\nExplore infinite worlds and build everything from the simplest of homes to the grandest of castles. Create, explore and survive alone or with friends on mobile devices or Windows 10.\n\n**What's New in the Latest Version**:\n- Added new biomes: Cherry Grove and Bamboo Jungle\n- New mobs: Camels and Sniffers\n- Performance improvements and bug fixes\n\n**Screenshots**:\n[View Screenshots on App Store]\n\n**Links**:\n- [View on App Store](https://apps.apple.com/us/app/minecraft/id479516143)\n- [Developer Website](https://www.minecraft.net/)"
+        },
+        "expected": [
+          {
+            "callsTool": "get-app-details"
+          }
+        ]
+      },
+      {
+        "input": "@ios-apps download Spotify",
+        "mocks": {
+          "download-app": "Downloading Spotify...\n\nApp found: Spotify - Music and Podcasts\nDeveloper: Spotify AB\nBundle ID: com.spotify.client\n\nDownload started to ~/Downloads/Spotify.ipa\nDownload completed successfully!\n\nYou can install this app using:\n1. Sideloadly (https://sideloadly.io/)\n2. AltStore (https://altstore.io/)\n3. Apple Configurator 2 (for developers)\n\nThe IPA file is located at: ~/Downloads/Spotify.ipa"
+        },
+        "expected": [
+          {
+            "callsTool": "download-app"
+          }
+        ]
+      },
+      {
+        "input": "@ios-apps search for games with limit 5",
+        "mocks": {
+          "search-apps": "Here are top iOS games:\n\n- **Roblox**\n  Developer: Roblox Corporation\n  Category: Games\n  Rating: 4.4/5 (3.8M reviews)\n  Price: Free (In-App Purchases)\n  [View on App Store](https://apps.apple.com/us/app/roblox/id431946152)\n\n- **Minecraft**\n  Developer: Mojang\n  Category: Games\n  Rating: 4.8/5 (1.2M reviews)\n  Price: $6.99\n  [View on App Store](https://apps.apple.com/us/app/minecraft/id479516143)\n\n- **Genshin Impact**\n  Developer: miHoYo Limited\n  Category: Games\n  Rating: 4.7/5 (278K reviews)\n  Price: Free (In-App Purchases)\n  [View on App Store](https://apps.apple.com/us/app/genshin-impact/id1517783697)\n\n- **Candy Crush Saga**\n  Developer: King\n  Category: Games\n  Rating: 4.7/5 (1.5M reviews)\n  Price: Free (In-App Purchases)\n  [View on App Store](https://apps.apple.com/us/app/candy-crush-saga/id553834731)\n\n- **Among Us!**\n  Developer: InnerSloth LLC\n  Category: Games\n  Rating: 4.3/5 (635K reviews)\n  Price: Free (In-App Purchases)\n  [View on App Store](https://apps.apple.com/us/app/among-us/id1351168404)"
+        },
+        "expected": [
+          {
+            "callsTool": "search-apps"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.17.0",
+    "@types/stream-json": "^1.7.8",
+    "child_process": "^1.0.2",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2",
+    "stream-chain": "^2.2.5",
+    "stream-json": "^1.9.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "^20.10.2",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
