@@ -1,9 +1,10 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { State } from "@lib/haapi";
 import { Action, ActionPanel, Color, Icon } from "@raycast/api";
+import React from "react";
 import { InputTextForm } from "./form";
 
-export function InputTextSetValueAction(props: { state: State }): JSX.Element | null {
+export function InputTextSetValueAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("input_text")) {
     return null;

@@ -3,9 +3,9 @@ import { useStateSearch } from "@components/state/hooks";
 import { StateListItem } from "@components/state/list";
 import { State } from "@lib/haapi";
 import { List, Toast, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-export function ZoneList(props: { state: State }): JSX.Element {
+export function ZoneList(props: { state: State }): React.ReactElement {
   const s = props.state;
   const { states: allStates, isLoading } = useHAStates();
   const persons = s.attributes.persons as string[] | undefined;
@@ -33,7 +33,7 @@ export function ZoneList(props: { state: State }): JSX.Element {
   );
 }
 
-export function ZonesList(): JSX.Element {
+export function ZonesList(): React.ReactElement {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useStateSearch(searchText, "zone", "", allStates);

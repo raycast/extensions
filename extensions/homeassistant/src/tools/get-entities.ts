@@ -12,15 +12,15 @@ type EntityState = {
 type Entity = {
   entity_id: string;
   friendly_name: string;
-  state: string;
-  attributes: Record<string, unknown>;
 };
 
 /**
- * Get all entities from Home Assistant.
- * @returns {Promise<{ entities: Entity[] }>}
+ * Get basic entity information (ID and friendly name) from Home Assistant.
+ * IMPORTANT: This tool should be called ONLY ONCE per conversation.
+ * Entity list doesn't change during a conversation, so caching the results is recommended.
+ * @returns {Promise<{ entities: Entity[] }>} A list of all entities with their IDs and friendly names
  */
-export default async function (): Promise<{ entities: Entity[] }> {
+export default async function tool(): Promise<{ entities: Entity[] }> {
   try {
     // Get states from REST API
     const statesResponse = await ha.fetch("states");
@@ -30,12 +30,10 @@ export default async function (): Promise<{ entities: Entity[] }> {
       throw new Error("Invalid response from Home Assistant: expected array of states");
     }
 
-    // Map states to entities
+    // Map states to basic entity info
     const entities = statesResponse.map((state: EntityState) => ({
       entity_id: state.entity_id,
       friendly_name: state.attributes.friendly_name || state.entity_id,
-      state: state.state,
-      attributes: state.attributes,
     }));
 
     return { entities };
