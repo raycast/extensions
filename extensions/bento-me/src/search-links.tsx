@@ -31,7 +31,7 @@ const userInterfaceFavicon = Boolean(preferences.userInterfaceFavicon);
  */
 export default function Command() {
   const [entries, setEntries] = useState<string[]>([]);
-  const [filteredEntries, setFilterdEntries] = useState<string[]>([]);
+  const [filteredEntries, setFilteredEntries] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
 
@@ -40,7 +40,7 @@ export default function Command() {
       .then(
         (links) => {
           setEntries(links);
-          setFilterdEntries(links);
+          setFilteredEntries(links);
         },
         (e: { message: string }) => {
           showToast(Toast.Style.Failure, "Error", e.message);
@@ -50,7 +50,7 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    setFilterdEntries(entries.filter((item) => item.includes(searchText)));
+    setFilteredEntries(entries.filter((item) => item.includes(searchText)));
   }, [searchText]);
 
   return (
