@@ -1,5 +1,10 @@
 # Unsplash Changelog
 
+## [Add Pagination to Search] - 2025-04-09
+
+- Added pagination and basic caching to "Search Images" and "Search Collections" (ref: [Issue #18189](https://github.com/raycast/extensions/issues/18189))
+- Modernize extension: caching + clean up deps
+
 ## [Chore] - 2024-09-02
 
 - Added missing contributor

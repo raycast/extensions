@@ -3,13 +3,16 @@
  * Combines and displays 2FA codes from both iMessage and Email sources
  */
 
-import { List, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, getPreferenceValues, closeMainWindow } from "@raycast/api";
 import useInterval from "@use-it/interval";
 import { useState, useCallback, useEffect } from "react";
 import { useMessages } from "./messages";
 import { useEmails } from "./emails";
 import { Message, SearchType, MessageSource, Preferences } from "./types";
 import { extractCode, formatDate } from "./utils";
+import applescript from "applescript";
+import { promisify } from "util";
+import { runAppleScript } from "@raycast/utils";
 
 // Interval for polling new messages (1 second)
 const POLLING_INTERVAL = 1_000;
@@ -185,8 +188,9 @@ function Actions(props: { message: Message; code: string }) {
   return (
     <ActionPanel title="Action">
       <ActionPanel.Section>
-        <Action.Paste content={props.code} title="Paste Code" />
-        <Action.CopyToClipboard content={props.code} title="Copy Code" />
+        <Action.Paste title="Paste Code" content={props.code} />
+        <Action.CopyToClipboard title="Copy Code" content={props.code} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+        <TypeCode code={props.code} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.CopyToClipboard
@@ -202,4 +206,32 @@ function Actions(props: { message: Message; code: string }) {
       </ActionPanel.Section>
     </ActionPanel>
   );
+}
+
+function TypeCode(props: { code: string }) {
+  async function handleAction() {
+    await closeMainWindow();
+    await type(props.code);
+  }
+
+  return <Action title="Type Code" icon={Icon.Keyboard} onAction={handleAction} />;
+}
+
+async function type(text: string) {
+  const script = `
+    tell application "System Events"
+      delay 0.3
+      ${text
+        .split("")
+        .map(
+          (char, i) => `
+        delay 0.15
+        keystroke "${char}"
+      `
+        )
+        .join("")}
+    end tell
+  `;
+
+  await runAppleScript(script);
 }

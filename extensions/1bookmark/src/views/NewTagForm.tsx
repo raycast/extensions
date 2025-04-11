@@ -1,35 +1,31 @@
 import { CachedQueryClientProvider } from "@/components/CachedQueryClientProvider";
 import { useState } from "react";
-import { useAtom } from "jotai";
 import { trpc } from "@/utils/trpc.util";
 import { Form, ActionPanel, Action, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 import { useMe } from "../hooks/use-me.hook";
-import { sessionTokenAtom } from "../states/session-token.state";
 
 function Body(props: { spaceId: string }) {
   const { spaceId } = props;
   const [selectedSpaceId, setSelectedSpaceId] = useState(spaceId);
-  const [sessionToken] = useAtom(sessionTokenAtom);
-  const me = useMe(sessionToken);
+  const me = useMe();
 
   const { pop } = useNavigation();
   const create = trpc.tag.create.useMutation();
   const [tag, setTag] = useState("");
 
-  async function handleSubmit() {
-    try {
-      await create.mutateAsync({ spaceId: selectedSpaceId, name: tag });
-      showToast({
-        style: Toast.Style.Success,
-        title: "Created tag",
-      });
-      pop();
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to create tag",
-      });
-    }
+  function handleSubmit() {
+    create.mutate(
+      { spaceId: selectedSpaceId, name: tag },
+      {
+        onSuccess: () => {
+          showToast({
+            style: Toast.Style.Success,
+            title: "Created tag",
+          });
+          pop();
+        },
+      },
+    );
   }
 
   return (

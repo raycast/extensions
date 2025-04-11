@@ -6,7 +6,8 @@
   "icon": "wechat.png",
   "author": "raffeyang",
   "contributors": [
-    "JokeNeverSOke"
+    "JokeNeverSOke",
+    "litomore"
   ],
   "categories": [
     "Communication"
@@ -24,15 +25,14 @@
   "dependencies": {
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.19.1",
-    "node-fetch": "^3.0.0"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.38.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/react": "^18.3.18",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

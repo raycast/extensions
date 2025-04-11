@@ -1,0 +1,15 @@
+# raycast
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+
+# npm
+node_modules
+
+# vim
+.*.swp
+
+# other
+.idea
+.DS_Store
