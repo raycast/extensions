@@ -5,6 +5,7 @@ import { homedir } from "os";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
+import { showFailureToast } from "@raycast/utils";
 
 // Create a unique process ID
 const generateProcessId = () => uuidv4();
@@ -18,7 +19,9 @@ if (!existsSync(PROCESS_DIR)) {
   try {
     mkdirSync(PROCESS_DIR, { recursive: true });
   } catch (error) {
-    console.error("Failed to create process directory:", error);
+    showFailureToast(error, {
+      title: "Failed to create process directory",
+    });
   }
 }
 
@@ -26,7 +29,9 @@ if (!existsSync(LOG_DIR)) {
   try {
     mkdirSync(LOG_DIR, { recursive: true });
   } catch (error) {
-    console.error("Failed to create log directory:", error);
+    showFailureToast(error, {
+      title: "Failed to create log directory",
+    });
   }
 }
 
@@ -170,11 +175,8 @@ export default function Command() {
 
       setAliases(parsedAliases);
     } catch (error) {
-      console.error("Error reading aliases:", error);
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Failed to load aliases",
-        message: String(error),
       });
     } finally {
       setIsLoading(false);
@@ -187,7 +189,9 @@ export default function Command() {
       const processFilePath = join(PROCESS_DIR, `${processInfo.id}.json`);
       writeFileSync(processFilePath, JSON.stringify(processInfo));
     } catch (error) {
-      console.error("Failed to save process info:", error);
+      showFailureToast(error, {
+        title: "Failed to save process info",
+      });
     }
   };
 
@@ -279,7 +283,9 @@ echo $! > "${join(tmpDir, `${processId}.pid`)}"
             title: `Command opened in ${terminalApp}`,
           });
         } catch (terminalError) {
-          console.error("Error opening terminal:", terminalError);
+          showFailureToast(terminalError, {
+            title: "Error opening terminal",
+          });
 
           // If the primary method fails, try an alternative approach with a different terminal
           try {
@@ -300,23 +306,15 @@ echo $! > "${join(tmpDir, `${processId}.pid`)}"
               title: `Command opened in ${fallbackTerminal}`,
             });
           } catch (fallbackError) {
-            // If all else fails, suggest manual execution
-            console.error("Error with fallback terminal:", fallbackError);
+            showFailureToast(fallbackError, {
+              title: "Error opening fallback terminal",
+            });
+
+            // If all else fails, copy to clipboard
+            execSync(`echo '${command.replace(/'/g, "\\'")}' | pbcopy`);
             showToast({
-              style: Toast.Style.Failure,
-              title: "Failed to open terminal",
-              message: "Please try running the command manually",
-              primaryAction: {
-                title: "Copy Command",
-                onAction: () => {
-                  // Copy the command to clipboard for manual execution
-                  execSync(`echo '${command.replace(/'/g, "\\'")}' | pbcopy`);
-                  showToast({
-                    style: Toast.Style.Success,
-                    title: "Command copied to clipboard",
-                  });
-                },
-              },
+              style: Toast.Style.Success,
+              title: "Command copied to clipboard",
             });
           }
         }
@@ -364,7 +362,9 @@ echo $! > "${join(tmpDir, `${processId}.pid`)}"
         pid = parseInt(readFileSync(pidFile, "utf-8").trim());
         execSync(`rm ${pidFile}`);
       } catch (pidError) {
-        console.error("Error reading PID file:", pidError);
+        showFailureToast(pidError, {
+          title: "Error reading PID file",
+        });
       }
 
       // Clean up the script
@@ -394,13 +394,16 @@ echo $! > "${join(tmpDir, `${processId}.pid`)}"
         },
       });
     } catch (error) {
-      console.error("Error executing command:", error);
-
       // Display more helpful error message
       const errorMsg = String(error);
       const friendlyMessage = errorMsg.includes("status 2")
         ? "Syntax error in command - try opening in Terminal"
         : errorMsg;
+
+      showFailureToast(error, {
+        title: "Failed to execute command",
+        message: friendlyMessage,
+      });
 
       showToast({
         style: Toast.Style.Failure,
@@ -418,7 +421,9 @@ echo $! > "${join(tmpDir, `${processId}.pid`)}"
                 `osascript -e 'tell application "${terminalApp}" to activate' -e 'tell application "${terminalApp}" to do script "source \\"${resolvedAliasFilePath}\\" && ${escapedCommand}"'`,
               );
             } catch (terminalError) {
-              console.error("Error opening terminal:", terminalError);
+              showFailureToast(terminalError, {
+                title: "Error opening terminal",
+              });
 
               // Try with the default Terminal app as fallback
               try {
@@ -432,8 +437,15 @@ echo $! > "${join(tmpDir, `${processId}.pid`)}"
                 execSync(
                   `osascript -e 'tell application "${fallbackTerminal}" to activate' -e 'tell application "${fallbackTerminal}" to do script "source \\"${resolvedAliasFilePath}\\" && ${escapedCommand}"'`,
                 );
+
+                showToast({
+                  style: Toast.Style.Success,
+                  title: `Command opened in ${fallbackTerminal}`,
+                });
               } catch (fallbackError) {
-                console.error("Error with fallback terminal:", fallbackError);
+                showFailureToast(fallbackError, {
+                  title: "Error opening fallback terminal",
+                });
 
                 // If all else fails, copy to clipboard
                 execSync(`echo '${command.replace(/'/g, "\\'")}' | pbcopy`);
@@ -495,8 +507,16 @@ echo $! > "${join(tmpDir, `${processId}.pid`)}"
               <Action
                 title="Start Command"
                 icon={Icon.ArrowClockwise}
-                onAction={() => executeCommand(alias.command, alias.name, true)}
-                shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                onAction={() => {
+                  try {
+                    executeCommand(alias.command, alias.name, true);
+                  } catch (error) {
+                    showFailureToast(error, {
+                      title: "Failed to execute command",
+                    });
+                  }
+                }}
+                shortcut={{ modifiers: ["cmd"], key: "b" }}
               />
               <Action
                 title="Execute in Terminal"
@@ -514,7 +534,9 @@ echo $! > "${join(tmpDir, `${processId}.pid`)}"
                       `osascript -e 'tell application "${terminalApp}" to activate' -e 'tell application "${terminalApp}" to do script "source \\"${resolvedAliasFilePath}\\" && ${escapedCommand}"'`,
                     );
                   } catch (error) {
-                    console.error("Error opening in terminal:", error);
+                    showFailureToast(error, {
+                      title: "Error opening terminal",
+                    });
 
                     // Try with the default Terminal app as fallback
                     try {
@@ -531,15 +553,21 @@ echo $! > "${join(tmpDir, `${processId}.pid`)}"
                       execSync(
                         `osascript -e 'tell application "${fallbackTerminal}" to activate' -e 'tell application "${fallbackTerminal}" to do script "source \\"${resolvedAliasFilePath}\\" && ${escapedCommand}"'`,
                       );
+
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: `Command opened in ${fallbackTerminal}`,
+                      });
                     } catch (fallbackError) {
-                      console.error("Error with fallback terminal:", fallbackError);
+                      showFailureToast(fallbackError, {
+                        title: "Error opening fallback terminal",
+                      });
 
                       // If all else fails, copy to clipboard
                       execSync(`echo '${alias.command.replace(/'/g, "\\'")}' | pbcopy`);
                       showToast({
-                        style: Toast.Style.Failure,
-                        title: "Failed to open terminal",
-                        message: "Command copied to clipboard instead",
+                        style: Toast.Style.Success,
+                        title: "Command copied to clipboard instead",
                       });
                     }
                   }

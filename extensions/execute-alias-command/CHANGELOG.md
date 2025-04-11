@@ -1,6 +1,6 @@
 # Execute Alias Command Changelog
 
-## [Initial Version] - 2025-04-11
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 

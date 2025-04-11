@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { homedir } from "os";
 import { readFileSync, existsSync, mkdirSync, readdirSync } from "fs";
 import { join } from "path";
+import { showFailureToast } from "@raycast/utils";
 
 interface RunningProcess {
   id: string;
@@ -22,7 +23,9 @@ if (!existsSync(PROCESS_DIR)) {
   try {
     mkdirSync(PROCESS_DIR, { recursive: true });
   } catch (error) {
-    console.error("Failed to create process directory:", error);
+    showFailureToast(error, {
+      title: "Failed to create process directory",
+    });
   }
 }
 
@@ -58,7 +61,9 @@ export default function Command() {
                 loadLogFile(selectedProcess.logFile);
               }
             } catch (refreshError) {
-              console.error("Error refreshing log file:", refreshError);
+              showFailureToast(refreshError, {
+                title: "Error refreshing log file",
+              });
             }
           }, 2000);
 
@@ -121,17 +126,23 @@ export default function Command() {
                 execSync(`rm "${processData.logFile}"`);
               }
             } catch (rmError) {
-              console.error(`Failed to remove process file: ${rmError}`);
+              showFailureToast(rmError, {
+                title: "Failed to remove process file",
+              });
             }
           }
         } catch (parseError) {
-          console.error(`Failed to parse process file ${file}: ${parseError}`);
+          showFailureToast(parseError, {
+            title: `Failed to parse process file ${file}`,
+          });
         }
       }
 
       setProcesses(loadedProcesses);
     } catch (error) {
-      console.error("Failed to load processes:", error);
+      showFailureToast(error, {
+        title: "Failed to load processes",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -166,11 +177,8 @@ export default function Command() {
       // Refresh the list
       loadProcesses();
     } catch (error) {
-      console.error(`Failed to terminate process: ${error}`);
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Failed to terminate process",
-        message: String(error),
       });
     }
   };
@@ -212,7 +220,7 @@ export default function Command() {
               setTailMode(false);
             } else {
               setTailMode(true);
-              setMaxLines(parseInt(value));
+              setMaxLines(parseInt(value, 10));
             }
           }}
         >
