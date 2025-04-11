@@ -1,6 +1,6 @@
 # Obsidian Tasks Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-04-11
 
 - List tasks with sorting and filtering
 - Add new tasks with due dates, priorities, and tags
