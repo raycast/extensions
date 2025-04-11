@@ -1,6 +1,6 @@
 # Clockify Changelog
 
-## [Fix description requirement] - {PR_MERGE_DATE}
+## [Fix description requirement] - 2025-04-11
 
 - Made description on new tasks optional.
 
