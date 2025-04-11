@@ -1,5 +1,9 @@
 # Things Changelog
 
+## [✨ Menu Bar Todo] - {PR_MERGE_DATE}
+
+- Update the menu bar to display only incomplete todos from today’s list
+
 ## [Detect URL in Notes] - 2025-04-11
 
 - Detect a URL in todo notes and offer `Open URL From Notes` and `Copy URL From Notes` actions.
