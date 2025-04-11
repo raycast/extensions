@@ -99,7 +99,6 @@ function ViewConfigs({ project }: { project: string }) {
                       icon={Icon.Globe}
                       title="Open in Doppler"
                       url={`https://dashboard.doppler.com/workplace/projects/${project}/configs/${config.name}`}
-                      shortcut={{ modifiers: ["shift"], key: "return" }}
                     />
                   </ActionPanel>
                 }
