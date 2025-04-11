@@ -1,10 +1,10 @@
 import { ActionPanel, List, Action, Icon, Toast, showToast } from '@raycast/api'
 import { paystackDashboardUrl } from './utils/urls'
-
-import { useEffect, useState } from 'react'
+import { useState, useMemo } from 'react'
 import { usePaystack } from './hooks/paystack'
 import { useDate } from './hooks/date'
 import { PaystackResponse } from './utils/types'
+import { useCachedPromise } from '@raycast/utils'
 
 interface Customer {
   id: string
@@ -23,68 +23,36 @@ interface Customer {
 }
 export default function Command() {
   const { parseDate } = useDate()
-  const { get, isLoading } = usePaystack()
-  const [customers, setCustomers] = useState<Array<Customer>>([])
-  const [filteredCustomers, setFilteredCustomers] = useState<Array<Customer>>(
-    [],
-  )
+  const { get } = usePaystack()
   const [searchText, setSearchText] = useState<string>('')
-  useEffect(() => {
-    async function getTransactions() {
-      try {
-        const customers = (await get('/customer')) as PaystackResponse<
-          Customer[]
-        >
-        if (customers.status) {
-          showToast({
-            style: Toast.Style.Success,
-            title: 'Customers fetched successfully!',
-          })
-        }
-        setCustomers(customers.data)
-        setFilteredCustomers(customers.data)
-      } catch (error) {
-        console.error('Error fetching customers:', error)
-        showToast({
-          style: Toast.Style.Failure,
-          title: 'Error fetching customers',
-          message: (error as Error).message,
-        })
-        setCustomers([])
-        setFilteredCustomers([])
-      }
-    }
-    getTransactions()
-  }, [])
 
-  useEffect(() => {
-    if (isLoading) {
+  const { data: customers, isLoading } = useCachedPromise(async () => {
+    const response = (await get('/customer')) as PaystackResponse<Customer[]>
+    if (response.status) {
       showToast({
-        style: Toast.Style.Animated,
-        title: 'Loading customers...',
+        style: Toast.Style.Success,
+        title: 'Customers fetched successfully!',
       })
     }
-  }, [isLoading])
+    return response.data
+  })
 
-  function filterCustomers(text: string) {
-    const searchLower = text.toLowerCase()
+  const filteredCustomers = useMemo(() => {
+    if (!customers) return []
+    const searchLower = searchText.toLowerCase()
     return customers.filter((customer) => {
       const matchesSearch =
         customer.id.toString().includes(searchLower) ||
         customer.customer_code.includes(searchLower) ||
         customer.email.includes(searchLower) ||
-        customer.first_name.includes(searchLower) ||
-        customer.last_name.includes(searchLower)
+        customer.first_name?.includes(searchLower) ||
+        customer.last_name?.includes(searchLower)
       return matchesSearch
     })
-  }
-
-  useEffect(() => {
-    setFilteredCustomers(filterCustomers(searchText))
   }, [searchText, customers])
 
   return (
-    <List onSearchTextChange={setSearchText}>
+    <List onSearchTextChange={setSearchText} isLoading={isLoading}>
       {filteredCustomers.map((customer) => (
         <List.Item
           key={customer.id}
