@@ -1,11 +1,15 @@
 import { getPreferenceValues } from "@raycast/api";
-import https from "https";
 
 interface Preferences {
   apiKey: string;
 }
 
-interface Event {
+export enum FilterMode {
+  ACTIVE = "active",
+  RECENT = "recent",
+}
+
+export interface Event {
   event: string;
   date: string;
   location?: string;
@@ -25,7 +29,7 @@ export interface Delivery {
   timestamp_expected_end?: number;
 }
 
-interface ParcelApiResponse {
+export interface ParcelApiResponse {
   success: boolean;
   error_message?: string;
   deliveries: Delivery[];
@@ -44,6 +48,10 @@ export const STATUS_DESCRIPTIONS: Record<number, string> = {
   8: "Info Received",
 };
 
+export function getStatusDescription(statusCode: number): string {
+  return STATUS_DESCRIPTIONS[statusCode] || "Unknown Status";
+}
+
 // Map status codes to icons
 export const STATUS_ICONS: Record<number, string> = {
   0: "✅",
@@ -57,60 +65,50 @@ export const STATUS_ICONS: Record<number, string> = {
   8: "ℹ️",
 };
 
-export async function fetchDeliveries(filterMode: "active" | "recent" = "active"): Promise<Delivery[]> {
+export function getApiKey(): string {
   const preferences = getPreferenceValues<Preferences>();
 
   if (!preferences.apiKey) {
     throw new Error("API key not found. Please add your Parcel API key in extension preferences.");
   }
 
-  const url = `https://api.parcel.app/external/deliveries/?filter_mode=${filterMode}`;
+  return preferences.apiKey;
+}
 
-  return new Promise<Delivery[]>((resolve, reject) => {
-    const req = https.get(
-      url,
-      {
-        headers: {
-          "api-key": preferences.apiKey,
-        },
-      },
-      (res) => {
-        const chunks: Buffer[] = [];
+export function getDeliveriesUrl(filterMode: FilterMode): string {
+  return `https://api.parcel.app/external/deliveries/?filter_mode=${filterMode}`;
+}
 
-        res.on("data", (chunk) => {
-          chunks.push(chunk);
-        });
+export function getAPIHeaders(): HeadersInit {
+  return {
+    "api-key": getApiKey(),
+  };
+}
 
-        res.on("end", () => {
-          const body = Buffer.concat(chunks).toString();
-
-          if (res.statusCode !== 200) {
-            reject(new Error(`API request failed with status ${res.statusCode}`));
-            return;
-          }
-
-          try {
-            const data = JSON.parse(body) as ParcelApiResponse;
-
-            if (!data.success) {
-              reject(new Error(data.error_message || "Unknown API error"));
-              return;
-            }
-
-            resolve(data.deliveries);
-          } catch (error) {
-            console.error("Error parsing JSON:", error);
-            reject(new Error("Invalid response from Parcel API"));
-          }
-        });
-      },
-    );
-
-    req.on("error", (error) => {
-      console.error("Error fetching deliveries:", error);
-      reject(error);
-    });
-
-    req.end();
+export async function fetchDeliveries(filterMode: FilterMode): Promise<Delivery[]> {
+  const url = getDeliveriesUrl(filterMode);
+  const response = await fetch(url, {
+    headers: getAPIHeaders(),
   });
+
+  if (!response.ok) {
+    throw new Error(`API request failed with status ${response.status} (${await response.text()})`);
+  }
+
+  const data = (await response.json()) as ParcelApiResponse;
+
+  const err = getAPIError(data);
+  if (err) {
+    throw err;
+  }
+
+  return data.deliveries;
+}
+
+export function getAPIError(data: ParcelApiResponse): Error | null {
+  if (!data.success) {
+    return new Error(data?.error_message || "Unknown API error");
+  }
+
+  return null;
 }

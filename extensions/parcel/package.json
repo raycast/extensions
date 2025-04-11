@@ -6,7 +6,8 @@
   "icon": "extension-icon.png",
   "author": "marcmagn1",
   "contributors": [
-    "omarshahine"
+    "omarshahine",
+    "bendrucker"
   ],
   "categories": [
     "Productivity",
@@ -34,7 +35,7 @@
       "description": "Get a list of your active or recent deliveries."
     },
     {
-      "name": "get-delivery-details", 
+      "name": "get-delivery-details",
       "title": "Get Delivery Details",
       "description": "Get detailed information about a specific delivery by tracking number."
     }

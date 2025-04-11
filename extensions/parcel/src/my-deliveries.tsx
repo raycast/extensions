@@ -1,6 +1,7 @@
 import { ActionPanel, Action, List, Toast, showToast, Icon, open, Color } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { fetchDeliveries, Delivery, STATUS_DESCRIPTIONS } from "./api";
+import { useState, useEffect } from "react";
+import { Delivery, STATUS_DESCRIPTIONS, FilterMode } from "./api";
+import { useDeliveries } from "./hooks/useDeliveries";
 
 // Map status codes to icons that represent state
 const STATUS_ICONS_UI: Record<number, Icon> = {
@@ -16,32 +17,8 @@ const STATUS_ICONS_UI: Record<number, Icon> = {
 };
 
 export default function Command() {
-  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [filterMode, setFilterMode] = useState<"active" | "recent">("active");
-
-  useEffect(() => {
-    async function loadDeliveries() {
-      try {
-        setIsLoading(true);
-        const fetchedDeliveries = await fetchDeliveries(filterMode);
-        setDeliveries(fetchedDeliveries);
-        setError(null);
-      } catch (e) {
-        setError(e as Error);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load deliveries",
-          message: (e as Error).message,
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadDeliveries();
-  }, [filterMode]);
+  const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.ACTIVE);
+  const { deliveries, isLoading, error } = useDeliveries(filterMode);
 
   // Calculate days until delivery
   const getDaysUntilDelivery = (delivery: Delivery): number | null => {
@@ -157,6 +134,16 @@ export default function Command() {
     return markdown;
   };
 
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load deliveries",
+        message: error.message,
+      });
+    }
+  }, [error]);
+
   return (
     <List
       isLoading={isLoading}
@@ -166,10 +153,10 @@ export default function Command() {
         <List.Dropdown
           tooltip="Filter Deliveries"
           value={filterMode}
-          onChange={(newValue) => setFilterMode(newValue as "active" | "recent")}
+          onChange={(newValue) => setFilterMode(newValue as FilterMode)}
         >
-          <List.Dropdown.Item title="Active Deliveries" value="active" />
-          <List.Dropdown.Item title="Recent Deliveries" value="recent" />
+          <List.Dropdown.Item title="Active Deliveries" value={FilterMode.ACTIVE} />
+          <List.Dropdown.Item title="Recent Deliveries" value={FilterMode.RECENT} />
         </List.Dropdown>
       }
     >
@@ -195,7 +182,7 @@ export default function Command() {
           icon={Icon.Box}
           title="No deliveries found"
           description={
-            filterMode === "active"
+            filterMode === FilterMode.ACTIVE
               ? "You don't have any active deliveries at the moment."
               : "You don't have any recent deliveries."
           }
@@ -204,7 +191,7 @@ export default function Command() {
               <Action
                 title="Switch to Recent Deliveries"
                 icon={Icon.Clock}
-                onAction={() => setFilterMode(filterMode === "active" ? "recent" : "active")}
+                onAction={() => setFilterMode(filterMode === FilterMode.ACTIVE ? FilterMode.RECENT : FilterMode.ACTIVE)}
               />
               <Action
                 title="Open Parcel Web"
@@ -249,12 +236,18 @@ export default function Command() {
               detail={<List.Item.Detail markdown={generateDetailMarkdown(delivery, daysUntil)} />}
               actions={
                 <ActionPanel>
+                  <Action.OpenInBrowser
+                    title="Track on Website"
+                    url={`https://parcel.app/webtrack.php?platform=mac&type=${delivery.carrier_code}&code=${delivery.tracking_number}`}
+                  />
                   <Action.CopyToClipboard title="Copy Tracking Number" content={delivery.tracking_number} />
                   <Action.OpenInBrowser title="Open Parcel Web" url="https://web.parcelapp.net/" />
                   <Action
-                    title={filterMode === "active" ? "View Recent Deliveries" : "View Active Deliveries"}
+                    title={filterMode === FilterMode.ACTIVE ? "View Recent Deliveries" : "View Active Deliveries"}
                     icon={Icon.Switch}
-                    onAction={() => setFilterMode(filterMode === "active" ? "recent" : "active")}
+                    onAction={() =>
+                      setFilterMode(filterMode === FilterMode.ACTIVE ? FilterMode.RECENT : FilterMode.ACTIVE)
+                    }
                   />
                 </ActionPanel>
               }
