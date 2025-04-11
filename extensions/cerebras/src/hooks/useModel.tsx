@@ -22,7 +22,7 @@ export function useModel(): ModelHook {
   const [isFetching, setFetching] = useState<boolean>(true);
   const gpt = useChatGPT();
   const proxy = useProxy();
-  const { useAzure, isCustomModel } = getConfiguration();
+  const { isCustomModel } = getConfiguration();
   const [option, setOption] = useState<Model["option"][]>(["llama3.1-8b"]);
   const isInitialMount = useRef(true);
 
@@ -32,48 +32,44 @@ export function useModel(): ModelHook {
       setFetching(false);
       return;
     }
-    if (!useAzure) {
-      gpt.models
-        .list({ httpAgent: proxy })
-        .then((res) => {
-          let models = res.data;
-          // some provider return text/plain content type
-          // and the sdk `defaultParseResponse` simply return `text`
-          if (models.length === 0) {
-            try {
-              const body = JSON.parse((res as unknown as { body: string }).body);
-              models = body.data;
-            } catch (e) {
-              // ignore try to parse it
-            }
+    gpt.models
+      .list({ httpAgent: proxy })
+      .then((res) => {
+        let models = res.data;
+        // some provider return text/plain content type
+        // and the sdk `defaultParseResponse` simply return `text`
+        if (models.length === 0) {
+          try {
+            const body = JSON.parse((res as unknown as { body: string }).body);
+            models = body.data;
+          } catch (e) {
+            // ignore try to parse it
           }
-          setOption(models.map((x) => x.id));
-        })
-        .catch(async (err) => {
-          console.error(err);
-          if (!(err instanceof Error || err.message)) {
-            return;
-          }
-          await showToast(
-            err.message.includes("401")
-              ? {
-                  title: "Could not authenticate to API",
-                  message: "Please ensure that your API token is valid",
-                  style: Toast.Style.Failure,
-                }
-              : {
-                  title: "Error",
-                  message: err.message,
-                  style: Toast.Style.Failure,
-                },
-          );
-        })
-        .finally(() => {
-          setFetching(false);
-        });
-    } else {
-      setFetching(false);
-    }
+        }
+        setOption(models.map((x) => x.id));
+      })
+      .catch(async (err) => {
+        console.error(err);
+        if (!(err instanceof Error || err.message)) {
+          return;
+        }
+        await showToast(
+          err.message.includes("401")
+            ? {
+                title: "Could not authenticate to API",
+                message: "Please ensure that your API token is valid",
+                style: Toast.Style.Failure,
+              }
+            : {
+                title: "Error",
+                message: err.message,
+                style: Toast.Style.Failure,
+              },
+        );
+      })
+      .finally(() => {
+        setFetching(false);
+      });
   }, [gpt]);
 
   useEffect(() => {
