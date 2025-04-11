@@ -18,9 +18,7 @@ export const LAUNCH_CONFIGS_URL = "https://docs.warp.dev/features/sessions/launc
 
 // Error and information messages
 export const NO_LAUNCH_CONFIGS_TITLE = "No Launch Configurations found";
-export const getNoLaunchConfigsMessage = (): string => {
-  return `You need to create at least one Launch Configuration before launching.`;
-};
+export const NO_LAUNCH_CONFIGS_MESSAGE = "You need to create at least one Launch Configuration before launching.";
 
 // Action titles
 export const VIEW_DOCS_ACTION_TITLE = "View Launch Configuration Docs";

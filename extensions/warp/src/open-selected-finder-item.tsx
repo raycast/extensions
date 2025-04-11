@@ -3,7 +3,7 @@ import path from "node:path";
 import { getSelectedFinderItems, showToast, Toast, open, getFrontmostApplication } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { getNewTabUri } from "./uri";
-import { getAppName } from "./contants";
+import { getAppName } from "./constants";
 
 const getSelectedPathFinderItems = async () => {
   const script = `

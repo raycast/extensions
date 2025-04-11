@@ -6,7 +6,7 @@ import { usePromise } from "@raycast/utils";
 import { Category, SearchResult } from "./types";
 import useLocalStorage from "./hooks/useLocalStorage";
 import { getNewTabUri, getNewWindowUri } from "./uri";
-import { getAppName } from "./contants";
+import { getAppName } from "./constants";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");

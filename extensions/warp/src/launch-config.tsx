@@ -11,9 +11,9 @@ import {
   NO_LAUNCH_CONFIGS_TITLE,
   VIEW_DOCS_ACTION_TITLE,
   OPEN_CONFIGS_DIR_ACTION_TITLE,
-  getNoLaunchConfigsMessage,
-  getAppName,
-} from "./contants";
+  NO_LAUNCH_CONFIGS_MESSAGE,
+  getAppName
+} from "./constants";
 
 interface SearchResult {
   name: string;
@@ -72,7 +72,7 @@ export default function Command() {
     );
 
     if (fileList.length === 0) {
-      return showError(NO_LAUNCH_CONFIGS_TITLE, getNoLaunchConfigsMessage());
+      return showError(NO_LAUNCH_CONFIGS_TITLE, NO_LAUNCH_CONFIGS_MESSAGE);
     }
 
     const allFileNames = fileList.map(({ name }) => name);
@@ -127,7 +127,7 @@ export default function Command() {
     >
       <List.EmptyView
         title={NO_LAUNCH_CONFIGS_TITLE}
-        description={getNoLaunchConfigsMessage()}
+        description={NO_LAUNCH_CONFIGS_MESSAGE}
         icon={Icon.Terminal}
         actions={
           <ActionPanel>
