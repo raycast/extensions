@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Detect URL in Notes] - {PR_MERGE_DATE}
+## [Detect URL in Notes] - 2025-04-11
 
 - Detect a URL in todo notes and offer `Open URL From Notes` and `Copy URL From Notes` actions.
 
