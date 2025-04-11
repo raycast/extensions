@@ -169,7 +169,7 @@ function ViewSecrets({ project, config }: { project: string; config: string }) {
       searchBarPlaceholder="Search for a secret"
     >
       {Object.entries(secrets).map(([key, secret]) => {
-        const markdown = `## RAW \n ${secret.raw} \n\n ## COMPUTED \n ${secret.computed} \n\n ### NOTE \n ${secret.note}`;
+        const markdown = `## ${key} \n---\n ## RAW \n ${secret.raw} \n\n ## COMPUTED \n ${secret.computed} \n\n ### NOTE \n ${secret.note}`;
         return (
           <List.Item
             key={key}
