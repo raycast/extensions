@@ -1,10 +1,7 @@
 import axios from "axios";
 import BonjourService from "bonjour-service";
 import { waitUntil } from "./utils";
-import fs from "fs";
-import os from "os";
-import path from "path";
-import { environment, showHUD } from "@raycast/api";
+import { environment, showHUD, Cache, showToast, Toast } from "@raycast/api";
 
 // Define the ElgatoService interface - represents the service returned by bonjour
 interface ElgatoService {
@@ -74,18 +71,30 @@ export type KeyLightSettings = {
 interface CacheData {
   lights: Array<{ service: ElgatoService }>;
   lastDiscoveryTime: number;
+  expiresAt: number; // Unix timestamp in milliseconds
 }
 
+const CACHE_KEY = "elgato-keylights";
+const CACHE_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 1 week in milliseconds (7 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds)
+
 export class KeyLight {
-  private static CACHE_FILE = path.join(os.tmpdir(), "raycast-elgato-keylights.json");
+  private static cache = new Cache();
   static keyLights: Array<KeyLight>;
 
-  private static loadCache(): CacheData | null {
+  private static async loadCache(): Promise<CacheData | null> {
     try {
-      if (fs.existsSync(this.CACHE_FILE)) {
-        const data = JSON.parse(fs.readFileSync(this.CACHE_FILE, "utf8"));
-        return data;
+      const data = await this.cache.get(CACHE_KEY);
+      if (!data) return null;
+
+      const cacheData = JSON.parse(data) as CacheData;
+
+      // Check if cache has expired
+      if (Date.now() > cacheData.expiresAt) {
+        await this.clearCache();
+        return null;
       }
+
+      return cacheData;
     } catch (e) {
       if (environment.isDevelopment) {
         console.error("Failed to load cache:", e);
@@ -94,13 +103,14 @@ export class KeyLight {
     return null;
   }
 
-  private static saveCache(lights: Array<KeyLight>) {
+  private static async saveCache(lights: Array<KeyLight>) {
     try {
       const data: CacheData = {
         lights: lights.map((light) => ({ service: light.service })),
         lastDiscoveryTime: Date.now(),
+        expiresAt: Date.now() + CACHE_EXPIRY,
       };
-      fs.writeFileSync(this.CACHE_FILE, JSON.stringify(data));
+      await this.cache.set(CACHE_KEY, JSON.stringify(data));
     } catch (e) {
       if (environment.isDevelopment) {
         console.error("Failed to save cache:", e);
@@ -108,11 +118,9 @@ export class KeyLight {
     }
   }
 
-  private static clearCache() {
+  private static async clearCache() {
     try {
-      if (fs.existsSync(this.CACHE_FILE)) {
-        fs.unlinkSync(this.CACHE_FILE);
-      }
+      await this.cache.remove(CACHE_KEY);
     } catch (e) {
       if (environment.isDevelopment) {
         console.error("Failed to clear cache:", e);
@@ -124,7 +132,7 @@ export class KeyLight {
   static async discover(forceRefresh = false) {
     // Try to load from cache first
     if (!forceRefresh) {
-      const cache = this.loadCache();
+      const cache = await this.loadCache();
       if (cache) {
         if (environment.isDevelopment) {
           console.log("Found cached lights, creating instances...");
@@ -133,7 +141,7 @@ export class KeyLight {
         if (environment.isDevelopment) {
           console.log(
             "Using cached Key Lights:",
-            this.keyLights.map((light) => `${light.service.name} at ${light.service.referer.address}`).join(", ")
+            this.keyLights.map((light) => `${light.service.name} at ${light.service.referer.address}`).join(", "),
           );
         }
         return this.keyLights[0];
@@ -143,9 +151,11 @@ export class KeyLight {
     const bonjour = new BonjourService();
     this.keyLights = [];
 
-    if (environment.isDevelopment) {
-      console.log("Starting Bonjour discovery for Key Lights...");
-    }
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Discovering Key Lights...",
+      message: "Searching for Elgato Key Lights on your network",
+    });
 
     let discoveryTimeout: NodeJS.Timeout;
     let discoveryComplete = false;
@@ -168,8 +178,8 @@ export class KeyLight {
                 fqdn: service.fqdn,
               },
               null,
-              2
-            )
+              2,
+            ),
           );
         }
 
@@ -186,7 +196,7 @@ export class KeyLight {
 
         // Filter out invalid addresses
         const validAddresses = addresses.filter(
-          (addr: string) => addr && addr !== "0.0.0.0" && addr !== "127.0.0.1" && !addr.startsWith("fe80:") // Filter out link-local IPv6
+          (addr: string) => addr && addr !== "0.0.0.0" && addr !== "127.0.0.1" && !addr.startsWith("fe80:"), // Filter out link-local IPv6
         );
 
         if (environment.isDevelopment) {
@@ -208,7 +218,7 @@ export class KeyLight {
 
         // Check if we already have this light
         const isDuplicate = this.keyLights.some(
-          (light) => light.service.name === service.name && light.service.referer.address === address
+          (light) => light.service.name === service.name && light.service.referer.address === address,
         );
 
         if (isDuplicate) {
@@ -229,9 +239,13 @@ export class KeyLight {
 
         const keyLight = new KeyLight(serviceWithAddress);
         this.keyLights.push(keyLight);
-        if (environment.isDevelopment) {
-          console.log(`Added Key Light to list. Total lights found: ${this.keyLights.length}`);
-        }
+
+        // Update toast with found light
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Found Key Light",
+          message: `Discovered ${service.name} at ${address}`,
+        });
 
         // Save to cache as soon as we find lights
         this.saveCache(this.keyLights);
@@ -241,6 +255,11 @@ export class KeyLight {
           if (environment.isDevelopment) {
             console.log(`Discovery complete. Found ${this.keyLights.length} Key Light(s)`);
           }
+          showToast({
+            style: Toast.Style.Success,
+            title: "Discovery Complete",
+            message: `Found ${this.keyLights.length} Key Light(s)`,
+          });
           resolve(keyLight);
           browser.stop();
           bonjour.destroy();
@@ -264,6 +283,11 @@ export class KeyLight {
         if (environment.isDevelopment) {
           console.error("Bonjour browser error:", error);
         }
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Discovery Failed",
+          message: error.message,
+        });
         reject(new Error(`Bonjour discovery error: ${error.toString()}`));
       });
 
@@ -277,13 +301,23 @@ export class KeyLight {
           if (environment.isDevelopment) {
             console.log(
               "Successfully discovered Key Lights:",
-              this.keyLights.map((light) => `${light.service.name} at ${light.service.referer.address}`).join(", ")
+              this.keyLights.map((light) => `${light.service.name} at ${light.service.referer.address}`).join(", "),
             );
           }
+          showToast({
+            style: Toast.Style.Success,
+            title: "Discovery Complete",
+            message: `Found ${this.keyLights.length} Key Light(s)`,
+          });
           resolve(this.keyLights[0]);
           browser.stop();
           bonjour.destroy();
         } else {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "No Key Lights Found",
+            message: "Could not discover any Key Lights on your network",
+          });
           reject(new Error("Cannot discover any Key Lights in the network"));
         }
       }, 5000);
@@ -295,6 +329,11 @@ export class KeyLight {
       if (environment.isDevelopment) {
         console.error("Discovery failed:", error);
       }
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Discovery Failed",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
+      });
       throw error;
     }
   }
@@ -326,50 +365,59 @@ export class KeyLight {
       throw new Error("No Key Lights were discovered");
     }
 
-    let newState;
-    for (let x = 0; x < KeyLight.keyLights.length; x++) {
-      try {
-        const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-        if (environment.isDevelopment) {
-          console.log(`Current state of Key Light ${x + 1}: ${keyLight.on ? "ON" : "OFF"}`);
-        }
-        newState = !keyLight.on;
-        await this.updateKeyLight(KeyLight.keyLights[x].service, { on: newState });
-        if (environment.isDevelopment) {
-          console.log(`Successfully toggled Key Light ${x + 1} to: ${newState ? "ON" : "OFF"}`);
-        }
-      } catch (e) {
-        const error = e as Error;
-        // Only clear cache and retry for connection errors
-        if (
-          error.message.includes("ECONNREFUSED") ||
-          error.message.includes("ETIMEDOUT") ||
-          error.message.includes("EHOSTUNREACH")
-        ) {
-          if (environment.isDevelopment) {
-            console.error(`Connection error for Key Light ${x + 1}, attempting rediscovery...`);
-          }
-          KeyLight.clearCache();
-          try {
+    // First, get the current state of all lights
+    const currentStates = await Promise.all(
+      KeyLight.keyLights.map(async (light) => {
+        try {
+          const keyLight = await this.getKeyLight(light.service);
+          return { light, state: keyLight.on };
+        } catch (e) {
+          const error = e as Error;
+          if (
+            error.message.includes("ECONNREFUSED") ||
+            error.message.includes("ETIMEDOUT") ||
+            error.message.includes("EHOSTUNREACH")
+          ) {
+            if (environment.isDevelopment) {
+              console.error("Connection error, attempting rediscovery...");
+            }
+            await KeyLight.clearCache();
             await KeyLight.discover(true);
-            const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-            if (environment.isDevelopment) {
-              console.log(`Current state of Key Light ${x + 1}: ${keyLight.on ? "ON" : "OFF"}`);
-            }
-            newState = !keyLight.on;
-            await this.updateKeyLight(KeyLight.keyLights[x].service, { on: newState });
-            if (environment.isDevelopment) {
-              console.log(`Successfully toggled Key Light ${x + 1} to: ${newState ? "ON" : "OFF"}`);
-            }
-          } catch (retryError) {
-            throw new Error(`Failed toggling Key Light ${x + 1}: ${(retryError as Error).message}`);
+            const keyLight = await this.getKeyLight(light.service);
+            return { light, state: keyLight.on };
           }
-        } else {
-          // For other errors, just propagate them without clearing cache
-          throw new Error(`Failed toggling Key Light ${x + 1}: ${error.message}`);
+          throw error;
         }
-      }
-    }
+      }),
+    );
+
+    // Determine the new state based on the first light's current state
+    const newState = !currentStates[0].state;
+
+    // Update all lights in parallel
+    await Promise.all(
+      currentStates.map(async ({ light }) => {
+        try {
+          await this.updateKeyLight(light.service, { on: newState });
+        } catch (e) {
+          const error = e as Error;
+          if (
+            error.message.includes("ECONNREFUSED") ||
+            error.message.includes("ETIMEDOUT") ||
+            error.message.includes("EHOSTUNREACH")
+          ) {
+            if (environment.isDevelopment) {
+              console.error("Connection error, attempting rediscovery...");
+            }
+            await KeyLight.clearCache();
+            await KeyLight.discover(true);
+            await this.updateKeyLight(light.service, { on: newState });
+          } else {
+            throw error;
+          }
+        }
+      }),
+    );
 
     return newState;
   }
@@ -413,7 +461,7 @@ export class KeyLight {
           if (environment.isDevelopment) {
             console.error(`Connection error for Key Light ${x + 1}, attempting rediscovery...`);
           }
-          KeyLight.clearCache();
+          await KeyLight.clearCache();
           try {
             await KeyLight.discover(true);
             const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
@@ -450,7 +498,7 @@ export class KeyLight {
           if (environment.isDevelopment) {
             console.error(`Connection error for Key Light ${x + 1}, attempting rediscovery...`);
           }
-          KeyLight.clearCache();
+          await KeyLight.clearCache();
           try {
             await KeyLight.discover(true);
             const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
@@ -487,7 +535,7 @@ export class KeyLight {
           if (environment.isDevelopment) {
             console.error(`Connection error for Key Light ${x + 1}, attempting rediscovery...`);
           }
-          KeyLight.clearCache();
+          await KeyLight.clearCache();
           try {
             await KeyLight.discover(true);
             const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
@@ -511,7 +559,7 @@ export class KeyLight {
     for (let x = 0; x < KeyLight.keyLights.length; x++) {
       try {
         const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-        newTemperature = Math.max(keyLight.temperature - TEMPERATURE_STEP, COLD_TEMPERATURE);
+        newTemperature = Math.min(keyLight.temperature - TEMPERATURE_STEP, WARM_TEMPERATURE);
         await this.updateKeyLight(KeyLight.keyLights[x].service, { temperature: newTemperature });
       } catch (e) {
         const error = e as Error;
@@ -524,11 +572,11 @@ export class KeyLight {
           if (environment.isDevelopment) {
             console.error(`Connection error for Key Light ${x + 1}, attempting rediscovery...`);
           }
-          KeyLight.clearCache();
+          await KeyLight.clearCache();
           try {
             await KeyLight.discover(true);
             const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-            newTemperature = Math.max(keyLight.temperature - TEMPERATURE_STEP, COLD_TEMPERATURE);
+            newTemperature = Math.min(keyLight.temperature - TEMPERATURE_STEP, WARM_TEMPERATURE);
             await this.updateKeyLight(KeyLight.keyLights[x].service, { temperature: newTemperature });
           } catch (retryError) {
             throw new Error(`Failed decreasing temperature: ${(retryError as Error).message}`);
@@ -544,45 +592,21 @@ export class KeyLight {
   }
 
   private async getKeyLight(service: ElgatoService) {
-    const url = `http://${service.referer.address}:${service.port}/elgato/lights`;
-    if (environment.isDevelopment) {
-      console.log(`Fetching Key Light state from: ${url}`);
-    }
-    try {
-      const response = await axios.get(url);
-      return response.data.lights[0];
-    } catch (e) {
-      const error = e as Error;
-      if (environment.isDevelopment) {
-        console.error(`Failed to get Key Light state: ${error.message}`);
-      }
-      throw error;
-    }
+    const response = await axios.get(`http://${service.referer.address}:${service.port}/elgato/lights`);
+    return response.data.lights[0];
   }
 
-  private async updateKeyLight(
-    service: ElgatoService,
-    options: { brightness?: number; temperature?: number; on?: boolean }
-  ) {
-    const url = `http://${service.referer.address}:${service.port}/elgato/lights`;
-    if (environment.isDevelopment) {
-      console.log(`Updating Key Light at ${url} with options:`, options);
-    }
-    try {
-      await axios.put(url, {
-        lights: [
-          {
-            ...options,
-          },
-        ],
-      });
-    } catch (e) {
-      const error = e as Error;
-      if (environment.isDevelopment) {
-        console.error(`Failed to update Key Light: ${error.message}`);
-      }
-      throw error;
-    }
+  private async updateKeyLight(service: ElgatoService, options: KeyLightSettings) {
+    const response = await axios.put(`http://${service.referer.address}:${service.port}/elgato/lights`, {
+      lights: [
+        {
+          on: options.on,
+          brightness: options.brightness,
+          temperature: options.temperature,
+        },
+      ],
+    });
+    return response.data.lights[0];
   }
 }
 

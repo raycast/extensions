@@ -19,7 +19,7 @@
     },
     {
       "name": "toggle",
-      "title": "Toggle On/off",
+      "title": "Toggle Lights",
       "subtitle": "Elgato Key Light",
       "description": "Toggles all connected Key Lights on or off",
       "mode": "no-view"
@@ -99,6 +99,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.57.0",
+    "@raycast/utils": "^1.5.0",
     "axios": "^1.6.2",
     "bonjour-service": "^1.1.1"
   },

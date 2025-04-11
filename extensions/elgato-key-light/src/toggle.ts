@@ -1,9 +1,15 @@
 import { KeyLight } from "./elgato";
 import { showHUD } from "@raycast/api";
+import { discoverKeyLights } from "./utils";
 
 const command = async () => {
   try {
-    const keyLight = await KeyLight.discover();
+    const keyLight = await discoverKeyLights();
+    if (!keyLight) {
+      await showHUD("No Key Lights found");
+      return;
+    }
+
     try {
       const isOn = await keyLight.toggle();
       await showHUD(isOn ? "Key Light turned on" : "Key Light turned off");
