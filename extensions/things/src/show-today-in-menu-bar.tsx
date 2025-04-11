@@ -21,7 +21,7 @@ export default function ShowTodayInMenuBar() {
   const { data: todos, isLoading, mutate } = useCachedPromise(() => getListTodos('today'));
   const { data: lists } = useCachedPromise(() => getLists());
 
-  const firstIncompleteTodo = todos?.find(item => item.status === 'open');
+  const firstIncompleteTodo = todos?.find((item) => item.status === 'open');
   const tooltip = firstIncompleteTodo?.name || '';
 
   let title = '';
