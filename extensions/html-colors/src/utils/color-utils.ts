@@ -16,17 +16,12 @@ const EMPTY_GROUPS: Record<ShadeCategory, ColorResult[]> = Object.freeze({
   orange: [],
   yellow: [],
   brown: [],
-  purple: [],
-  indigo: [],
+  'purple, violet and magenta': [],
   blue: [],
   cyan: [],
-  teal: [],
   green: [],
-  lime: [],
-  mint: [],
   white: [],
-  gray: [],
-  black: [],
+  'black and gray': [],
 });
 
 /**
