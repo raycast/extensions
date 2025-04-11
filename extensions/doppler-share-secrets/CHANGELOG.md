@@ -1,5 +1,12 @@
 # Doppler Changelog
 
+## [Increase max projects listed + change project list icon] - {PR_MERGE_DATE}
+
+- chore: update project listing to fetch a maximum of 100 projects per request
+- feat: add 'Open in Doppler' action to project and config views
+- chore: change project icon from Dot to Folder in project listing
+- feat: add option to copy secret key
+
 ## [Routine Maintenance] - {PR_MERGE_DATE}
 
 - Migrate to `@raycast/api@1.94.0`

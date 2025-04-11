@@ -8,7 +8,9 @@ import { useState } from "react";
 export default function SearchProjects() {
   const { isLoading, data: projects = [] } = useCachedPromise(
     async () => {
-      const res = await doppler.projects.list();
+      const res = await doppler.projects.list({
+        perPage: 100,
+      });
       return res.projects;
     },
     [],
@@ -22,7 +24,7 @@ export default function SearchProjects() {
       {projects.map((project) => (
         <List.Item
           key={project.id}
-          icon={Icon.Dot}
+          icon={Icon.Folder}
           title={`${project.name}`}
           accessories={[{ date: new Date(project.created_at as string) }]}
           detail={
@@ -39,6 +41,12 @@ export default function SearchProjects() {
           actions={
             <ActionPanel>
               <Action.Push icon={Icon.Eye} title="View Configs" target={<ViewConfigs project={`${project.name}`} />} />
+              <Action.OpenInBrowser
+                icon={Icon.Globe}
+                title="Open in Doppler"
+                url={`https://dashboard.doppler.com/workplace/projects/${project.name}`}
+                shortcut={{ modifiers: ["shift"], key: "return" }}
+              />
             </ActionPanel>
           }
         />
@@ -86,6 +94,12 @@ function ViewConfigs({ project }: { project: string }) {
                       icon={Icon.List}
                       title="View Secrets"
                       target={<ViewSecrets project={project} config={`${config.name}`} />}
+                    />
+                    <Action.OpenInBrowser
+                      icon={Icon.Globe}
+                      title="Open in Doppler"
+                      url={`https://dashboard.doppler.com/workplace/projects/${project}/configs/${config.name}`}
+                      shortcut={{ modifiers: ["shift"], key: "return" }}
                     />
                   </ActionPanel>
                 }
@@ -170,6 +184,7 @@ function ViewSecrets({ project, config }: { project: string; config: string }) {
                 <ActionPanel>
                   <Action.CopyToClipboard title="Copy Raw Secret" content={secret.raw} />
                   <Action.CopyToClipboard title="Copy Computed Secret" content={secret.computed} />
+                  <Action.CopyToClipboard title="Copy Secret Key" content={key} />
                   <Action.Push
                     icon={Icon.Pencil}
                     title="Update Note"
@@ -186,7 +201,6 @@ function ViewSecrets({ project, config }: { project: string; config: string }) {
                   <ActionPanel.Section>
                     <Action
                       icon={Icon.Download}
-                      // eslint-disable-next-line @raycast/prefer-title-case
                       title="Download (Copy) Secrets"
                       onAction={() => setDownload(true)}
                       shortcut={{ modifiers: ["cmd"], key: "s" }}
