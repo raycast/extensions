@@ -93,6 +93,13 @@
       "mode": "no-view"
     },
     {
+      "name": "toggle",
+      "title": "Toggle Connection",
+      "subtitle": "Tailscale",
+      "description": "Toggle Tailscale connection on/off",
+      "mode": "no-view"
+    },
+    {
       "name": "netcheck",
       "title": "Netcheck",
       "subtitle": "Tailscale",
