@@ -79,16 +79,17 @@ export default function SearchCommand(
                     text={item.subtitle}
                   />
                   <List.Item.Detail.Metadata.Label
-                    title="link"
-                    text={item.link}
-                  />
-                  <List.Item.Detail.Metadata.Label
                     title="year"
                     text={item.year}
                   />
                   <List.Item.Detail.Metadata.Label
                     title="subtype"
                     text={item.subtype}
+                  />
+                  <List.Item.Detail.Metadata.Separator />
+                  <List.Item.Detail.Metadata.Label
+                    title="link"
+                    text={item.link}
                   />
                 </List.Item.Detail.Metadata>
               }
