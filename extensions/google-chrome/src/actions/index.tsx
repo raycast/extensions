@@ -196,3 +196,13 @@ export async function createNewTabToWebsite(website: string): Promise<void> {
     return true
   `);
 }
+
+export async function createNewIncognitoWindow(): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      make new window with properties {mode:"incognito"}
+      activate
+    end tell
+    return true
+  `);
+}
