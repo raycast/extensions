@@ -15,10 +15,6 @@ export interface FilePickerProps {
   children?: ReactNode;
 }
 
-/**
- * A reusable file picker component that allows users to paste file paths
- * or use the native macOS file picker
- */
 export function FilePicker({
   onFilePicked,
   title = "Select File",
@@ -72,7 +68,7 @@ export function FilePicker({
 
     try {
       setError(undefined);
-      // Validate the file before proceeding
+
       const isValid = await validateFile(values.filePath);
       if (isValid) {
         onFilePicked(values.filePath);
@@ -133,9 +129,6 @@ export function FilePicker({
   );
 }
 
-/**
- * A specialized version of FilePicker for uploading files to cloud storage
- */
 export function CloudStorageUploader({
   onFilePicked,
   destinationInfo,

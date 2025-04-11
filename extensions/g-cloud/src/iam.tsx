@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, List, getPreferenceValues, showToast, Toast, Icon, useNavigation } from "@raycast/api";
-import { CacheManager, Project } from "./utils/CacheManager";
+import { List, Icon, getPreferenceValues, showToast, Toast, useNavigation } from "@raycast/api";
+import { CacheManager } from "./utils/CacheManager";
+import { initializeQuickLink } from "./utils/QuickLinks";
+import IAMView from "./services/iam/IAMView";
 
 interface ExtensionPreferences {
   gcloudPath: string;
@@ -8,27 +10,48 @@ interface ExtensionPreferences {
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
-  const [projects, setProjects] = useState<Project[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { push } = useNavigation();
   const GCLOUD_PATH = getPreferenceValues<ExtensionPreferences>().gcloudPath;
 
   useEffect(() => {
-    loadCachedProjects();
+    loadLastUsedProject();
   }, []);
 
-  async function loadCachedProjects() {
-    // Try to get cached projects list
-    const cachedProjects = CacheManager.getProjectsList();
-    
-    if (cachedProjects) {
-      setProjects(cachedProjects.projects);
-      setIsLoading(false);
+  async function loadLastUsedProject() {
+    // First check for a selected project in the cache
+    const selectedProject = CacheManager.getSelectedProject();
+
+    if (selectedProject && selectedProject.projectId) {
+      // Use the selected project
+      const projectId = selectedProject.projectId;
+
+      // Mark project as used in the quick link
+      initializeQuickLink(projectId);
+
+      // Navigate directly to IAM for this project
+      viewIAMPermissions(projectId);
+      return;
+    }
+
+    // Fall back to recently used projects if no selected project found
+    const recentlyUsed = CacheManager.getRecentlyUsedProjects();
+
+    if (recentlyUsed.length > 0) {
+      // Use the most recently used project
+      const lastProjectId = recentlyUsed[0];
+
+      // Mark project as used in the quick link
+      initializeQuickLink(lastProjectId);
+
+      // Navigate directly to IAM for this project
+      viewIAMPermissions(lastProjectId);
     } else {
-      setError("No cached projects found. Please open the main extension first to cache your projects.");
+      // If no recent projects, show error
+      setError("No recent projects found. Please open the main extension first.");
       showToast({
         style: Toast.Style.Failure,
-        title: "No cached projects",
+        title: "No recent projects",
         message: "Please open the main extension first",
       });
       setIsLoading(false);
@@ -36,45 +59,22 @@ export default function Command() {
   }
 
   function viewIAMPermissions(projectId: string) {
-    // This should be implemented based on your IAM service view
-    // For now, we'll just show a toast message
-    showToast({
-      style: Toast.Style.Success,
-      title: "IAM Access",
-      message: `Viewing IAM for project ${projectId}`,
-    });
-    
-    // In the future, implement:
-    // push(<IAMView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
+    // Navigate to the IAM view component
+    push(<IAMView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
+    setIsLoading(false);
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search projects...">
+    <List isLoading={isLoading} searchBarPlaceholder="Loading IAM...">
       {error ? (
-        <List.EmptyView
-          icon={{ source: Icon.Warning, tintColor: "red" }}
-          title="Error"
-          description={error}
-        />
+        <List.EmptyView icon={{ source: Icon.Warning, tintColor: "red" }} title="Error" description={error} />
       ) : (
-        projects.map((project: Project) => (
-          <List.Item
-            key={project.id}
-            title={project.name}
-            subtitle={project.id}
-            icon={{ source: Icon.PersonCircle }}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Item
-                  title="View IAM Permissions"
-                  onAction={() => viewIAMPermissions(project.id)}
-                  icon={{ source: Icon.PersonCircle }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))
+        <List.EmptyView
+          icon={{ source: Icon.PersonCircle }}
+          title="Loading IAM Permissions"
+          description="Please wait while we load IAM permissions..."
+        />
       )}
     </List>
   );
-} 
+}

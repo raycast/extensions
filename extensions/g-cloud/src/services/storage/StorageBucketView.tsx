@@ -20,7 +20,9 @@ import BucketIAMView from "./BucketIAMView";
 import IAMMembersView from "./IAMMembersView";
 import { IAMMembersByPrincipalView } from "../iam";
 import StorageStatsView from "./StorageStatsView";
+import { ServiceViewBar } from "../../utils/ServiceViewBar";
 import { showFailureToast } from "@raycast/utils";
+import { initializeQuickLink } from "../../utils/QuickLinks";
 
 const execPromise = promisify(exec);
 
@@ -45,12 +47,12 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
   const { push, pop } = useNavigation();
 
   useEffect(() => {
+    initializeQuickLink(projectId);
+
     fetchBuckets();
   }, []);
 
-  // Function to generate a unique bucket name with a random suffix
   function generateUniqueBucketName(purpose: string = "storage"): string {
-    // Generate a random 6-character alphanumeric string
     const randomSuffix = Math.random().toString(36).substring(2, 8);
     return `${projectId}-${purpose}-${randomSuffix}`.toLowerCase();
   }
@@ -65,11 +67,9 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
     });
 
     try {
-      // First, verify the current project
       const { stdout: projectInfo } = await execPromise(`${gcloudPath} config get-value project`);
       const currentProject = projectInfo.trim();
 
-      // Check if the project is valid
       if (!currentProject || currentProject === "(unset)" || currentProject === "undefined") {
         setError("No project selected. Please select a project first.");
         setIsLoading(false);
@@ -81,14 +81,11 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
         return;
       }
 
-      // Log debug info
       let debugText = `Current project: ${currentProject}\n`;
 
       try {
-        // Use the buckets list command instead of storage ls
         const command = `${gcloudPath} storage buckets list --project=${projectId} --format=json`;
 
-        // console.log(`Executing bucket list command: ${command}`);
         debugText += `Executing command: ${command}\n`;
 
         const { stdout, stderr } = await execPromise(command);
@@ -110,11 +107,9 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
           return;
         }
 
-        // Parse the JSON response
         const bucketList = JSON.parse(stdout);
         debugText += `Found ${bucketList.length} buckets\n`;
 
-        // Map the response to our Bucket interface
         const mappedBuckets = bucketList.map(
           (bucket: { id: string; name: string; location: string; storageClass: string; timeCreated: string }) => ({
             id: bucket.id || bucket.name,
@@ -156,10 +151,7 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
 
   async function createBucket(values: { name: string; location: string; storageClass: string }) {
     try {
-      // Build the command with all options
-      const command = `${gcloudPath} storage buckets create gs://${values.name} --project=${projectId} --location=${values.location} --default-storage-class=${values.storageClass}`;
-
-      // console.log(`Creating bucket with command: ${command}`);
+      const command = `${gcloudPath} storage buckets create gs://${values.name} --location=${values.location} --storage-class=${values.storageClass} --project=${projectId}`;
 
       const { stderr } = await execPromise(command);
 
@@ -173,7 +165,6 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
         message: `Created bucket: ${values.name}`,
       });
 
-      // Refresh the bucket list
       fetchBuckets();
     } catch (error: unknown) {
       console.error("Error creating bucket:", error);
@@ -202,9 +193,7 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
       });
 
       try {
-        const command = `${gcloudPath} storage buckets delete gs://${bucketName} --project=${projectId} --quiet`;
-
-        // console.log(`Deleting bucket with command: ${command}`);
+        const command = `${gcloudPath} storage buckets delete gs://${bucketName} --project=${projectId} --force-delete-object`;
 
         const { stderr } = await execPromise(command);
 
@@ -219,7 +208,6 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
           message: `Deleted bucket: ${bucketName}`,
         });
 
-        // Refresh the bucket list
         fetchBuckets();
       } catch (error: unknown) {
         console.error("Error deleting bucket:", error);
@@ -285,7 +273,6 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
   function showCreateBucketForm() {
     const suggestedName = generateUniqueBucketName();
 
-    // Validation function for bucket name
     const validateBucketName = (value: string) => {
       return value.length > 0 ? "" : "Bucket name is required";
     };
@@ -384,13 +371,16 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search buckets..."
-      navigationTitle="Browse Buckets"
-      isShowingDetail
+      navigationTitle={`Cloud Storage Buckets - ${projectId}`}
+      searchBarAccessory={<ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} serviceName="storage" />}
       actions={
         <ActionPanel>
           <Action title="Create Bucket" icon={Icon.Plus} onAction={showCreateBucketForm} />
-          <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchBuckets} />
+          <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchBuckets} />
           <Action title="Show Debug Info" icon={Icon.Terminal} onAction={showDebugInfo} />
+          <Action title="View Storage Statistics" icon={Icon.BarChart} onAction={() => viewBucketStats("")} />
+          <Action title="View Iam Members" icon={Icon.Person} onAction={viewIAMMembers} />
+          <Action title="View Iam Members by Principal" icon={Icon.Person} onAction={viewIAMMembersByPrincipal} />
         </ActionPanel>
       }
     >

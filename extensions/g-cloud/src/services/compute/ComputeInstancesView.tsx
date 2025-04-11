@@ -15,6 +15,9 @@ import {
 import { ComputeService, ComputeInstance } from "./ComputeService";
 import ComputeInstanceDetailView from "./ComputeInstanceDetailView";
 import CreateVMForm from "./components/CreateVMForm";
+import InstanceListItem from "./components/InstanceListItem";
+import { ServiceViewBar } from "../../utils/ServiceViewBar";
+import { showFailureToast } from "@raycast/utils";
 
 interface ComputeInstancesViewProps {
   projectId: string;
@@ -111,7 +114,27 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
     };
 
     initializeData();
-  }, [gcloudPath, projectId]);
+
+    return () => {
+      // Cleanup
+    };
+  }, [projectId, gcloudPath]);
+
+  useEffect(() => {
+    if (!service || !instances.length) return;
+
+    const hasTransitionalInstances = instances.some(
+      (instance) => instance.status.toLowerCase() === "stopping" || instance.status.toLowerCase() === "starting",
+    );
+
+    if (!hasTransitionalInstances) return;
+
+    const refreshTimer = setInterval(() => {
+      //console.log("Auto-refreshing instances in transitional state...");
+      fetchInstances(service);
+    }, 30000);
+    return () => clearInterval(refreshTimer);
+  }, [instances, service]);
 
   useEffect(() => {
     // Filter instances whenever searchText or instances change
@@ -135,7 +158,6 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       setZones(zonesList);
     } catch (error) {
       console.error("Error fetching zones:", error);
-      // Don't show errors for background fetches to avoid overwhelming the user
     }
   };
 
@@ -148,14 +170,12 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         title: "Refreshing instances...",
       });
 
-      // Fetch instances based on selected zone or all zones
       const fetchedInstances = await computeService.getInstances(selectedZone);
 
       setInstances(fetchedInstances);
 
       fetchingToast.hide();
 
-      // Show toast with number of instances found
       showToast({
         style: Toast.Style.Success,
         title: "Instances refreshed",
@@ -163,9 +183,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       });
     } catch (error: unknown) {
       console.error("Error fetching instances:", error);
-
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to refresh instances",
         message: error instanceof Error ? error.message : "An unknown error occurred",
       });
@@ -208,9 +226,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       });
     } catch (error: unknown) {
       console.error("Error fetching instances:", error);
-
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to load instances",
         message: error instanceof Error ? error.message : "An unknown error occurred",
       });
@@ -221,8 +237,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
 
   const startInstance = async (instance: ComputeInstance) => {
     if (!service) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Service not initialized",
         message: "Please try again",
       });
@@ -266,9 +281,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       setTimeout(() => fetchInstances(service), 3000);
     } catch (error: unknown) {
       console.error("Error starting instance:", error);
-
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to start instance",
         message: error instanceof Error ? error.message : "An unknown error occurred",
       });
@@ -277,8 +290,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
 
   const stopInstance = async (instance: ComputeInstance) => {
     if (!service) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Service not initialized",
         message: "Please try again",
       });
@@ -308,23 +320,39 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         message: `Zone: ${zone}`,
       });
 
-      await service.stopInstance(name, zone);
+      const result = await service.stopInstance(name, zone);
 
       stoppingToast.hide();
 
-      showToast({
-        style: Toast.Style.Success,
-        title: "Instance stopped",
-        message: `${name} is stopping. It may take a few moments to stop completely.`,
-      });
+      if (result.success) {
+        if (result.isTimedOut) {
+          showToast({
+            style: Toast.Style.Success,
+            title: "Instance stopping",
+            message: `${name} is in the process of stopping. This may take several minutes to complete.`,
+          });
+        } else {
+          showToast({
+            style: Toast.Style.Success,
+            title: "Instance stopped",
+            message: `${name} is stopping. It may take a few moments to stop completely.`,
+          });
+        }
 
-      // Refresh instances after a short delay to allow the status to update
-      setTimeout(() => fetchInstances(service), 3000);
+        // Force instance refresh immediately to show updated status
+        await fetchInstances(service);
+
+        // Schedule another refresh after a delay to catch final state
+        setTimeout(() => fetchInstances(service), 10000);
+      } else {
+        showFailureToast({
+          title: "Failed to stop instance",
+          message: "An error occurred while trying to stop the VM",
+        });
+      }
     } catch (error: unknown) {
       console.error("Error stopping instance:", error);
-
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to stop instance",
         message: error instanceof Error ? error.message : "An unknown error occurred",
       });
@@ -362,7 +390,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
     });
   };
 
-  const createVMInstance = async () => {
+  async function createVMInstance() {
     if (!service) {
       return;
     }
@@ -386,8 +414,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         });
       } catch (error) {
         refreshToast.hide();
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "Failed to refresh instances",
           message: error instanceof Error ? error.message : String(error),
         });
@@ -395,136 +422,85 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
     };
 
     push(<CreateVMForm projectId={projectId} gcloudPath={gcloudPath} onVMCreated={createdCallback} />);
-  };
-
-  const getStatusIcon = (status: string) => {
-    const lowerStatus = status.toLowerCase();
-    if (lowerStatus === "running") {
-      return { source: Icon.Circle, tintColor: Color.Green };
-    } else if (lowerStatus === "terminated" || lowerStatus === "stopped") {
-      return { source: Icon.Circle, tintColor: Color.Red };
-    } else if (lowerStatus === "stopping" || lowerStatus === "starting") {
-      return { source: Icon.Circle, tintColor: Color.Orange };
-    }
-    return { source: Icon.Circle, tintColor: Color.SecondaryText };
-  };
+  }
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search VM instances..."
+      searchBarPlaceholder="Search VM instances by name, zone, IP, etc..."
+      searchText={searchText}
       onSearchTextChange={setSearchText}
-      filtering={{ keepSectionOrder: true }}
-      navigationTitle="Compute Engine Instances"
-      searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select Zone"
-          value={selectedZone || "all"}
-          onChange={(newValue) => handleZoneChange(newValue === "all" ? undefined : newValue)}
-        >
-          <List.Dropdown.Item title="All Zones" value="all" />
+      navigationTitle={`VM Instances - ${projectId}`}
+      searchBarAccessory={<ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} />}
+      actions={
+        <ActionPanel>
+          <Action title="Create Vm Instance" icon={{ source: Icon.Plus }} onAction={createVMInstance} />
+          <Action
+            title="Refresh Instances"
+            icon={{ source: Icon.RotateClockwise }}
+            onAction={() => service && fetchInstances(service)}
+          />
+          <Action
+            title={selectedZone ? `Clear Zone Filter: ${selectedZone}` : "Filter by Zone"}
+            icon={{ source: selectedZone ? Icon.XmarkCircle : Icon.LightBulb }}
+            shortcut={{ modifiers: ["cmd"], key: "f" }}
+            onAction={() => selectedZone && handleZoneChange(undefined)}
+          />
           {zones.map((zone) => (
-            <List.Dropdown.Item key={zone} title={zone} value={zone} />
+            <Action
+              key={zone}
+              title={`Zone: ${zone}`}
+              icon={{ source: Icon.LightBulb }}
+              onAction={() => handleZoneChange(zone)}
+            />
           ))}
-        </List.Dropdown>
+        </ActionPanel>
       }
     >
       <List.EmptyView
-        title="No VM instances found"
-        description={isLoading ? "Loading instances..." : "No VM instances found in the selected zone"}
-        icon={{ source: Icon.Desktop, tintColor: Color.Blue }}
-        actions={
-          <ActionPanel>
-            <Action title="Create Vm Instance" icon={Icon.Plus} onAction={createVMInstance} />
-            <Action
-              title="Refresh"
-              icon={Icon.ArrowClockwise}
-              onAction={() => service && fetchInstances(service)}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-            />
-          </ActionPanel>
+        icon={{ source: isLoading ? Icon.CircleProgress : Icon.Desktop, tintColor: Color.SecondaryText }}
+        title={isLoading ? "Loading instances..." : "No instances found"}
+        description={
+          isLoading
+            ? "Please wait while we fetch the VM instances"
+            : "There are no VM instances in this project or zone. Create one to get started."
         }
       />
-      {service && (
-        <List.Section
-          title="VM Instances"
-          subtitle={filteredInstances.length > 0 ? `${filteredInstances.length} instances` : undefined}
-        >
-          {filteredInstances.map((instance) => {
-            const zone = service.formatZone(instance.zone);
-            const machineType = service.formatMachineType(instance.machineType);
-            const networkIP = instance.networkInterfaces?.[0]?.networkIP || "No IP";
-            const externalIP = instance.networkInterfaces?.[0]?.accessConfigs?.[0]?.natIP || "No external IP";
 
-            return (
-              <List.Item
-                key={instance.id}
-                title={instance.name}
-                subtitle={`${machineType} in ${zone}`}
-                accessories={[
-                  { text: instance.status, icon: getStatusIcon(instance.status) },
-                  { text: externalIP !== "No external IP" ? externalIP : networkIP },
-                ]}
-                actions={
-                  <ActionPanel>
-                    <ActionPanel.Section title="Instance Actions">
-                      <Action
-                        title="View Instance Details"
-                        icon={Icon.Eye}
-                        onAction={() => viewInstanceDetails(instance)}
-                      />
-                      {instance.status.toLowerCase() === "running" && (
-                        <Action
-                          title="Copy Connection Command"
-                          icon={Icon.Terminal}
-                          onAction={() => copyConnectionCommand(instance)}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-                        />
-                      )}
-                      {instance.status.toLowerCase() === "running" ? (
-                        <Action
-                          title="Stop Instance"
-                          icon={{ source: Icon.Stop, tintColor: Color.Red }}
-                          onAction={() => stopInstance(instance)}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                        />
-                      ) : (
-                        instance.status.toLowerCase() === "terminated" && (
-                          <Action
-                            title="Start Instance"
-                            icon={{ source: Icon.Play, tintColor: Color.Green }}
-                            onAction={() => startInstance(instance)}
-                            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                          />
-                        )
-                      )}
-                    </ActionPanel.Section>
-                    <ActionPanel.Section title="Management">
-                      <Action
-                        title="Create Vm Instance"
-                        icon={Icon.Plus}
-                        onAction={createVMInstance}
-                        shortcut={{ modifiers: ["cmd"], key: "n" }}
-                      />
-                      <Action
-                        title="Refresh"
-                        icon={Icon.ArrowClockwise}
-                        onAction={() => fetchInstances(service)}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
-                      />
-                    </ActionPanel.Section>
-                    <Action
-                      title="Copy to Clipboard"
-                      icon={Icon.CopyClipboard}
-                      onAction={() => Clipboard.copy(instance.name)}
-                    />
-                  </ActionPanel>
-                }
-              />
-            );
-          })}
-        </List.Section>
-      )}
+      {/* Instance sections by status */}
+      <List.Section title="Running Instances">
+        {filteredInstances
+          .filter((instance) => instance.status.toLowerCase() === "running")
+          .map((instance) => (
+            <InstanceListItem
+              key={instance.id}
+              instance={instance}
+              service={service}
+              onViewDetails={viewInstanceDetails}
+              onStart={startInstance}
+              onStop={stopInstance}
+              onSshCommand={copyConnectionCommand}
+              onCreateVM={createVMInstance}
+            />
+          ))}
+      </List.Section>
+
+      <List.Section title="Other Instances">
+        {filteredInstances
+          .filter((instance) => instance.status.toLowerCase() !== "running")
+          .map((instance) => (
+            <InstanceListItem
+              key={instance.id}
+              instance={instance}
+              service={service}
+              onViewDetails={viewInstanceDetails}
+              onStart={startInstance}
+              onStop={stopInstance}
+              onSshCommand={copyConnectionCommand}
+              onCreateVM={createVMInstance}
+            />
+          ))}
+      </List.Section>
     </List>
   );
 }
