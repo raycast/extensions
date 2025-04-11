@@ -1,7 +1,6 @@
 ### 🕒 **Time Calculator – Raycast extension**
 
-This extension allows you to **quickly calculate time expressions** like `"1h + 30m"` and get **human-readable results
-**.
+This extension allows you to **quickly calculate time expressions** like `"1h + 30m"` and get **human-readable results**.
 
 ---
 
