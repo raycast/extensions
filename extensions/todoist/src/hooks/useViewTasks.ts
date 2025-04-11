@@ -27,7 +27,6 @@ import {
   sortByName,
   sortByPriority,
   sortByProject,
-  sortByDefault,
 } from "../helpers/sortBy";
 
 type ViewProp<T, U> = {
@@ -59,7 +58,7 @@ export default function useViewTasks(name: string, { tasks, optionsToExclude, da
   const [orderBy, setOrderBy] = useCachedState<OrderByOption>(name + "orderby", "asc");
 
   const { sortByProp, sortedTasks, orderByProp } = useMemo(() => {
-    const sortedTasks = [...tasks].sort(sortByDefault);
+    const sortedTasks = [...tasks];
 
     switch (sortBy) {
       case "name":

@@ -4,31 +4,13 @@ import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 
-import { environment, LaunchType, showHUD, showToast, Toast } from "@raycast/api";
 import FormData from "form-data";
 import mime from "mime";
 import { Dispatch, SetStateAction } from "react";
 
-import { getTodoistApi, getTodoistRestApi } from "./helpers/withTodoistApi";
+import { getTodoistApi } from "./helpers/withTodoistApi";
 
 export let sync_token = "*";
-
-type HandleErrorArgs = {
-  error: unknown;
-  title: string;
-};
-
-export function handleError({ error, title }: HandleErrorArgs) {
-  if (environment.commandMode === "menu-bar" && environment.launchType === LaunchType.UserInitiated) {
-    return showHUD(title);
-  }
-
-  return showToast({
-    style: Toast.Style.Failure,
-    title: title,
-    message: error instanceof Error ? error.message : "",
-  });
-}
 
 export type ProjectViewStyle = "list" | "board";
 
@@ -84,21 +66,36 @@ export async function syncRequest(params: Record<string, unknown>) {
   }
 
   sync_token = data.sync_token;
+
   return data;
 }
 
 export async function getFilterTasks(query: string) {
-  const todoistApi = getTodoistRestApi();
+  const todoistApi = getTodoistApi();
   try {
-    const { data } = await todoistApi.get<Task[]>("/tasks", { params: { filter: query } });
-    return data as Task[];
+    const { data } = await todoistApi.get<{ results: Task[] }>("/tasks/filter", { params: { query } });
+    return data.results;
   } catch (error) {
     throw new Error("Error fetching filter tasks:" + error);
   }
 }
 
 export async function initialSync() {
-  return syncRequest({ sync_token: "*", resource_types: ["all"] });
+  return syncRequest({
+    sync_token: "*",
+    resource_types: [
+      "user",
+      "projects",
+      "items",
+      "sections",
+      "labels",
+      "filters",
+      "collaborators",
+      "reminders",
+      "locations",
+      "notes",
+    ],
+  });
 }
 
 export type AddProjectArgs = {
@@ -257,7 +254,7 @@ type QuickAddTaskArgs = {
 
 export async function quickAddTask(args: QuickAddTaskArgs) {
   const todoistApi = getTodoistApi();
-  const { data } = await todoistApi.post<Task>("/quick/add", args);
+  const { data } = await todoistApi.post<Task>("/tasks/quick", args);
   return data;
 }
 
@@ -783,9 +780,9 @@ export type Event = {
 
 export async function getActivity() {
   const todoistApi = getTodoistApi();
-  const { data } = await todoistApi.get<{ events: Event[] }>("/activity/get?event_type=completed");
+  const { data } = await todoistApi.get<{ results: Event[] }>("/activities", { params: { event_type: "completed" } });
 
-  return data.events;
+  return data.results;
 }
 
 type Day = {
@@ -800,7 +797,7 @@ export type Stats = {
 
 export async function getProductivityStats() {
   const todoistApi = getTodoistApi();
-  const { data } = await todoistApi.get<Stats>("/completed/get_stats");
+  const { data } = await todoistApi.get<Stats>("/tasks/completed/stats");
   return data;
 }
 
@@ -826,22 +823,18 @@ export async function uploadFile(filePath: string) {
   formData.append("file_type", mimeType);
   formData.append("file", stream);
 
-  const { data } = await todoistApi.post<File>("/uploads/add", formData);
+  const { data } = await todoistApi.post<File>("/uploads", formData);
   return data;
 }
 
-export async function getTask(id: string): Promise<Task> {
+export async function getTask(id: string) {
   const todoistApi = getTodoistApi();
-  const { data } = await todoistApi.get<{ item: Task }>("/items/get", {
-    params: { item_id: id },
-  });
-  return data.item;
+  const { data } = await todoistApi.get<Task>(`/tasks/${id}`);
+  return data;
 }
 
-export async function getProject(id: string): Promise<Project> {
+export async function getProject(id: string) {
   const todoistApi = getTodoistApi();
-  const { data } = await todoistApi.get<{ project: Project }>("/projects/get", {
-    params: { project_id: id },
-  });
-  return data.project;
+  const { data } = await todoistApi.get<Project>(`/projects/${id}`);
+  return data;
 }

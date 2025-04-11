@@ -1,4 +1,4 @@
-import { withTodoistApi, getTodoistRestApi } from "../helpers/withTodoistApi";
+import { withTodoistApi, getTodoistApi } from "../helpers/withTodoistApi";
 
 type Input = {
   /**
@@ -15,7 +15,7 @@ type Input = {
 };
 
 export default withTodoistApi(async (input: Input) => {
-  const todoistApi = getTodoistRestApi();
+  const todoistApi = getTodoistApi();
 
   const { data } = await todoistApi.get("/comments", { params: input });
   return data;

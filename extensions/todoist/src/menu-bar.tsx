@@ -6,21 +6,20 @@ import {
   LaunchType,
   launchCommand,
   Icon,
-  Color,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { addDays, format, isBefore, isSameDay } from "date-fns";
+import { addDays, format, isBefore } from "date-fns";
 import { useEffect, useMemo } from "react";
 import removeMarkdown from "remove-markdown";
 
 import { SyncData, Task, getProductivityStats } from "./api";
 import MenuBarTask from "./components/MenubarTask";
-import View from "./components/View";
 import { getToday } from "./helpers/dates";
 import { groupByDates } from "./helpers/groupBy";
 import { truncateMiddle } from "./helpers/menu-bar";
 import { sortByDefault } from "./helpers/sortBy";
-import { getTasksForTodayOrUpcomingView } from "./helpers/tasks";
+import { getTasksForTodayView, getTasksForUpcomingView } from "./helpers/tasks";
+import { withTodoistApi } from "./helpers/withTodoistApi";
 import useFilterTasks from "./hooks/useFilterData";
 import { useFocusedTask } from "./hooks/useFocusedTask";
 import useSyncData from "./hooks/useSyncData";
@@ -42,20 +41,12 @@ function MenuBar(props: MenuBarProps) {
       return data?.items.filter((t) => t.project_id === inboxProject?.id) ?? [];
     }
 
-    const tasks = data ? getTasksForTodayOrUpcomingView(data.items, data.user.id) : [];
-
     if (view === "today") {
-      return tasks.filter((t) => {
-        if (!t.due) {
-          return false;
-        }
-
-        return isBefore(new Date(t.due.date), getToday()) || isSameDay(new Date(t.due.date), getToday());
-      });
+      return getTasksForTodayView(data?.items ?? [], data?.user.id ?? "");
     }
 
     if (upcomingDays && !isNaN(Number(upcomingDays))) {
-      return tasks.filter((t) => {
+      return getTasksForUpcomingView(data?.items ?? [], data?.user.id ?? "").filter((t) => {
         if (!t.due) {
           return false;
         }
@@ -137,21 +128,21 @@ function MenuBar(props: MenuBarProps) {
 
         <MenuBarExtra.Item
           title="Inbox"
-          icon={{ source: Icon.Tray, tintColor: Color.Blue }}
+          icon={Icon.Tray}
           shortcut={{ modifiers: ["cmd"], key: "i" }}
           onAction={() => launchCommand({ name: "home", type: LaunchType.UserInitiated, context: { view: "inbox" } })}
         />
 
         <MenuBarExtra.Item
           title="Today"
-          icon={{ source: Icon.Calendar, tintColor: Color.Green }}
+          icon={Icon.Calendar}
           shortcut={{ modifiers: ["cmd"], key: "t" }}
           onAction={() => launchCommand({ name: "home", type: LaunchType.UserInitiated, context: { view: "today" } })}
         />
 
         <MenuBarExtra.Item
           title="Upcoming"
-          icon={{ source: Icon.Calendar, tintColor: Color.Purple }}
+          icon={Icon.Calendar}
           shortcut={{ modifiers: ["cmd"], key: "u" }}
           onAction={() =>
             launchCommand({ name: "home", type: LaunchType.UserInitiated, context: { view: "upcoming" } })
@@ -160,7 +151,7 @@ function MenuBar(props: MenuBarProps) {
 
         <MenuBarExtra.Item
           title="Completed Tasks"
-          icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+          icon={Icon.CheckCircle}
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           onAction={() =>
             launchCommand({ name: "home", type: LaunchType.UserInitiated, context: { view: "completed" } })
@@ -209,7 +200,7 @@ const TodayView = ({ tasks, data, setData }: TaskViewProps) => {
   const completedToday = todayStats?.total_completed ?? 0;
 
   const sections = useMemo(() => {
-    const sortedTasks = [...tasks].sort(sortByDefault);
+    const sortedTasks = [...tasks];
     return groupByDates(sortedTasks);
   }, [tasks]);
 
@@ -266,12 +257,12 @@ const FilterView = ({ tasks, data, setData }: TaskViewProps) => {
   return <MenuBarExtra.Item title="No tasks matching filter." />;
 };
 
-const UpcomingView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
+const UpcomingView = ({ tasks, data, setData }: TaskViewProps) => {
   const { upcomingDays } = getPreferenceValues<Preferences.MenuBar>();
   const isUpcomingDaysView = upcomingDays !== "" && !isNaN(Number(upcomingDays));
 
   const sections = useMemo(() => {
-    const sortedTasks = [...tasks].sort(sortByDefault);
+    const sortedTasks = [...tasks];
     return groupByDates(sortedTasks);
   }, [tasks]);
 
@@ -296,7 +287,7 @@ const UpcomingView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
   );
 };
 
-const InboxView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
+const InboxView = ({ tasks, data, setData }: TaskViewProps) => {
   const transformedTasks = useMemo(() => {
     const sortedTasks = [...tasks].sort(sortByDefault);
     return sortedTasks;
@@ -313,10 +304,4 @@ const InboxView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
   );
 };
 
-export default function Command(props: MenuBarProps) {
-  return (
-    <View>
-      <MenuBar {...props} />
-    </View>
-  );
-}
+export default withTodoistApi(MenuBar);

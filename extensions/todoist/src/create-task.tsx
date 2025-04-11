@@ -12,20 +12,20 @@ import {
   popToRoot,
   getPreferenceValues,
 } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 
-import { addComment, addTask, AddTaskArgs, handleError, uploadFile } from "./api";
+import { addComment, addTask, AddTaskArgs, uploadFile } from "./api";
 import RefreshAction from "./components/RefreshAction";
 import TaskDetail from "./components/TaskDetail";
-import View from "./components/View";
 import { getCollaboratorIcon, getProjectCollaborators } from "./helpers/collaborators";
 import { getColorByKey } from "./helpers/colors";
 import { getAPIDate } from "./helpers/dates";
-import { isTodoistInstalled } from "./helpers/isTodoistInstalled";
 import { priorities } from "./helpers/priorities";
 import { getPriorityIcon } from "./helpers/priorities";
 import { getProjectIcon } from "./helpers/projects";
 import { getTaskAppUrl, getTaskUrl } from "./helpers/tasks";
+import { withTodoistApi } from "./helpers/withTodoistApi";
+import { isTodoistInstalled } from "./hooks/useIsTodoistInstalled";
 import useSyncData from "./hooks/useSyncData";
 
 type CreateTaskValues = {
@@ -128,11 +128,12 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
             onAction: () => push(<TaskDetail taskId={id} />),
           };
 
+          const isInstalled = await isTodoistInstalled();
           toast.secondaryAction = {
-            title: `Open Task ${isTodoistInstalled ? "in Todoist" : "in Browser"}`,
+            title: `Open Task`,
             shortcut: { modifiers: ["cmd", "shift"], key: "o" },
             onAction: async () => {
-              open(isTodoistInstalled ? getTaskAppUrl(id) : getTaskUrl(id));
+              open(isInstalled ? getTaskAppUrl(id) : getTaskUrl(id));
             },
           };
 
@@ -142,7 +143,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
               const file = await uploadFile(values.files[0]);
               await addComment({ item_id: id, file_attachment: file, content: "" }, { data: newData, setData });
               toast.message = "File uploaded and added to comment";
-            } catch (error) {
+            } catch {
               toast.message = `Failed uploading file and adding to comment`;
             }
           }
@@ -168,7 +169,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
         focus("content");
       } catch (error) {
-        handleError({ error, title: "Unable to create task" });
+        await showFailureToast(error, { title: "Unable to create task" });
       } finally {
         if (shouldCloseMainWindow) {
           await popToRoot();
@@ -322,10 +323,4 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
   );
 }
 
-export default function Command(props: CreateTaskProps) {
-  return (
-    <View>
-      <CreateTask {...props} />
-    </View>
-  );
-}
+export default withTodoistApi(CreateTask);

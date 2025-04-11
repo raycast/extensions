@@ -7,10 +7,10 @@ import ProjectListItem from "./components/ProjectListItem";
 import TaskComments from "./components/TaskComments";
 import TaskDetail from "./components/TaskDetail";
 import TaskListItem from "./components/TaskListItem";
-import View from "./components/View";
 import { getCollaboratorIcon, getUserIcon } from "./helpers/collaborators";
 import { getPriorityIcon } from "./helpers/priorities";
 import { ViewMode, searchBarPlaceholder } from "./helpers/tasks";
+import { withTodoistApi } from "./helpers/withTodoistApi";
 import useSyncData from "./hooks/useSyncData";
 
 function SearchTasks() {
@@ -95,10 +95,4 @@ function SearchTasks() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <SearchTasks />
-    </View>
-  );
-}
+export default withTodoistApi(SearchTasks);
