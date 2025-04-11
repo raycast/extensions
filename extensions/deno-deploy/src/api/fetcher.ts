@@ -4,17 +4,17 @@ import { useErrorBoundary } from "@/context/ErrorBoundary";
 import { getAccessToken, withValidToken } from "@/utils/accesstoken";
 import { Fetcher } from "@/utils/fetch";
 
-export const createFetcher = withValidToken(() => {
+export const createUrlFetcher = withValidToken((url: string) => {
   const token = getAccessToken();
   const { throwError } = useErrorBoundary();
-  return new Fetcher(token, "https://dash.deno.com/api", throwError);
+  return new Fetcher(token, url, throwError);
 });
 
-export const createWindowLessFetcher = withValidToken(() => {
+export const createUrlWindowLessFetcher = withValidToken((url: string) => {
   const token = getAccessToken();
   const throwError = (error: Error) => {
-    showFailureToast("An error occurred using Deno Dash API", error);
+    showFailureToast("An error occurred using Deno API", error);
     throw error;
   };
-  return new Fetcher(token, "https://dash.deno.com/api", throwError);
+  return new Fetcher(token, url, throwError);
 });
