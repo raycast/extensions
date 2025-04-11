@@ -8,12 +8,13 @@ import {
   openExtensionPreferences,
 } from '@raycast/api'
 
-import { useEffect, useState } from 'react'
+import { useState, useMemo } from 'react'
 import { usePaystack } from './hooks/paystack'
 import { useCurrencyFormatter } from './hooks/currency'
 import { useDate } from './hooks/date'
 import { Currency, PaystackResponse } from './utils/types'
 import { paystackDashboardUrl } from './utils/urls'
+import { useCachedPromise } from '@raycast/utils'
 
 interface Payout {
   id: number
@@ -34,62 +35,34 @@ interface Payout {
 export default function Command() {
   const formatCurrency = useCurrencyFormatter()
   const { parseDate } = useDate()
-  const { get, isLoading } = usePaystack()
-  const [payouts, setPayouts] = useState<Array<Payout>>([])
-  const [filteredPayouts, setFilteredPayouts] = useState<Array<Payout>>([])
+  const { get } = usePaystack()
   const [searchText, setSearchText] = useState<string>('')
   const [currentStatus, setCurrentStatus] = useState<string>('all')
 
-  useEffect(() => {
-    async function getPayouts() {
-      try {
-        const payouts = (await get('/settlement')) as PaystackResponse<Payout[]>
-        if (payouts.status) {
-          showToast({
-            style: Toast.Style.Success,
-            title: 'Payouts fetched successfully!',
-          })
-        }
-        setPayouts(payouts.data)
-        setFilteredPayouts(payouts.data)
-      } catch (error) {
-        console.error('Error fetching payouts:', error)
-        showToast({
-          style: Toast.Style.Failure,
-          title: 'Error fetching payouts',
-          message: (error as Error).message,
-        })
-        setPayouts([])
-        setFilteredPayouts([])
-      }
-    }
-    getPayouts()
-  }, [])
-
-  useEffect(() => {
-    if (isLoading) {
+  const { data: payouts, isLoading } = useCachedPromise(async () => {
+    const response = (await get('/settlement')) as PaystackResponse<Payout[]>
+    if (response.status) {
       showToast({
-        style: Toast.Style.Animated,
-        title: 'Loading payouts...',
+        style: Toast.Style.Success,
+        title: 'Payouts fetched successfully!',
       })
     }
-  }, [isLoading])
+    return response.data
+  })
 
-  const filterPayouts = (text: string, status: string) => {
-    const searchLower = text.toLowerCase()
+  const filteredPayouts = useMemo(() => {
+    if (!payouts) return []
+    const searchLower = searchText.toLowerCase()
     return payouts.filter((payout) => {
       const matchesSearch =
         payout.id.toString().includes(searchLower) ||
         payout.currency?.includes(searchLower)
 
-      const matchesStatus = status === 'all' || payout.status === status
+      const matchesStatus =
+        currentStatus === 'all' || payout.status === currentStatus
 
       return matchesSearch && matchesStatus
     })
-  }
-
-  useEffect(() => {
-    setFilteredPayouts(filterPayouts(searchText, currentStatus))
   }, [searchText, currentStatus, payouts])
 
   function onStatusChange(status: string) {
@@ -101,6 +74,7 @@ export default function Command() {
       searchBarPlaceholder="Search payouts by ID, currency, or, status."
       onSearchTextChange={setSearchText}
       searchBarAccessory={StatusDropdown(onStatusChange)}
+      isLoading={isLoading}
     >
       {filteredPayouts.map((payout) => (
         <List.Item
