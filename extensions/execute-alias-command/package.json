@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "execute-alias-command",
+  "title": "Execute Alias Command",
+  "description": "List and execute aliased commands from your shell config. Detach instantly (⌘↩) or run in terminal (⌘⇧↩).",
+  "icon": "extension-icon.png",
+  "author": "felix_wortmann",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "execute-alias-command",
+      "title": "Execute Alias Command",
+      "subtitle": "List and execute aliased commands from your shell config file",
+      "description": "Search and execute shell aliases from your config file. Detach instantly (⌘↩) or run in terminal (⌘⇧↩)",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "terminalApp",
+          "title": "Terminal Emulator",
+          "description": "The terminal application to use for commands that require a terminal. Default is 'Terminal'",
+          "type": "textfield",
+          "required": false,
+          "default": "Terminal",
+          "placeholder": "Terminal, iTerm, Alacritty, etc."
+        },
+        {
+          "name": "aliasFilePath",
+          "title": "Alias File Path",
+          "description": "Path to the shell config file containing aliases. Default is ~/.zshrc",
+          "type": "textfield",
+          "required": false,
+          "default": "~/.zshrc",
+          "placeholder": "~/.zshrc, ~/.bashrc, etc."
+        }
+      ]
+    },
+    {
+      "name": "manage-running-commands",
+      "title": "Manage Running Commands",
+      "subtitle": "View and manage commands started by Execute Alias Command",
+      "description": "View, monitor and terminate processes launched through the Execute Alias Command extension",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.95.0",
+    "@raycast/utils": "^1.17.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
