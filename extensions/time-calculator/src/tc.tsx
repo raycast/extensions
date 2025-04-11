@@ -9,7 +9,7 @@ export default function Command() {
   const result = calculate(deferredSearchText);
 
   return (
-    <List onSearchTextChange={setSearchText} searchBarPlaceholder="Search npm packages..." throttle>
+    <List onSearchTextChange={setSearchText} searchBarPlaceholder="Calculate time expressions (e.g., 1h + 30m)..." throttle>
       <List.Section>
         <SearchListItem key={result.text} result={result} />
       </List.Section>
