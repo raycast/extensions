@@ -1,5 +1,20 @@
 # Bear Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
+- Add AI Tool to "Create Note"
+- Add AI Tool to "Search Notes"
+- chore: update deps
+
+## [Fixes] - 2024-07-03
+
+- Tags don't appear in dropdown if all associated notes are either trashed or archived: [#13297](https://github.com/raycast/extensions/issues/13297)
+
+## [Connect note pinning form value to API call] - 2024-06-08
+- When creating a new note, checking the option to "pin to top" is now taken into account within the API call
+- When hovering over the preference for "Pin note in notes list", the description is now accurate to the purpose
+- Fixes issue where a note's title, body and tags would show as URL encoded
+
 ## [Menu Bar Command and Improvements] - 2024-06-04
 
 - Added a menu bar command to easily open notes.

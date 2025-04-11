@@ -8,15 +8,17 @@ export async function getChargeThreshold(HUDMessage?: string) {
   const detectBrew = await confirmAlertBrew();
 
   if (!detectBrew) {
-    return; // Return if bclm is not detected and user does not confirm installation
+    return ""; // Return if bclm is not detected and user does not confirm installation
   }
 
   const batteryLevel = execSync(`${bclmPath()} read`).toString().trim();
-  console.log(HUDMessage + batteryLevel + "%");
+  console.log((HUDMessage ?? "") + batteryLevel + "%");
   if (HUDMessage) {
     await showHUD(HUDMessage + batteryLevel + "%");
     console.log("end getChargeThreshold");
   }
+
+  return batteryLevel;
 }
 
 export async function setBatteryThreshold(threshold: number, HUDMessage?: string) {

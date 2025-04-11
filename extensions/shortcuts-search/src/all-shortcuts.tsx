@@ -1,7 +1,7 @@
 import { Action, ActionPanel, List, useNavigation } from "@raycast/api";
 import AppShortcuts from "./app-shortcuts";
 import useAllShortcuts from "./load/shortcuts-provider";
-import { removeHiddenBundleId } from "./model/internal/bundle-id-remover";
+import { formatSubtitle } from "./model/internal/subtitle-formatter";
 import { getAvatarIcon, useFrecencySorting } from "@raycast/utils";
 
 export default function AllShortcutsCommand() {
@@ -19,7 +19,7 @@ export default function AllShortcutsCommand() {
             key={app.slug}
             icon={getAvatarIcon(app.name)}
             title={app.name}
-            subtitle={removeHiddenBundleId(app.bundleId)}
+            subtitle={formatSubtitle(app)}
             actions={
               <ActionPanel>
                 <Action

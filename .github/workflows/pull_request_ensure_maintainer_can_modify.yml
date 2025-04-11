@@ -1,0 +1,31 @@
+name: Ensure Maintainer Can Modify
+
+on:
+  pull_request:
+    paths:
+      - "extensions/**"
+    branches: [main, master]
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    name: Check
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Get changed extensions
+        uses: raycast/github-actions/get-changed-extensions@master
+        with:
+          pull_request_number: "${{ github.event.pull_request.number }}"
+      - name: Check 'maintainerCanModify'
+        run: |
+          pr_info=$(gh pr view ${{ github.event.pull_request.number }} --json maintainerCanModify,headRepository)
+          can_modify=$(echo $pr_info | jq -r .maintainerCanModify)
+
+          # only check maintainerCanModify for PR coming from forked repositories
+          head_repo_id=$(echo $pr_info | jq -r .headRepository.id)
+          current_repo_id=$(gh repo view --json id | jq -r .id)
+          if [[ "$head_repo_id" != "$current_repo_id" && "$can_modify" == "false" ]]; then
+            echo "::error::Edits from maintainers must be enabled. For more information, visit: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/allowing-changes-to-a-pull-request-branch-created-from-a-fork#enabling-repository-maintainer-permissions-on-existing-pull-requests"
+            exit 1
+          fi

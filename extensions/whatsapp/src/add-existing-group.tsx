@@ -1,7 +1,7 @@
 import { ActionPanel, Form, popToRoot, showToast, Action, Toast } from "@raycast/api";
-import { GroupChat, isGroupChat } from "./utils/types";
+import { GroupChat } from "./utils/types";
 import { useWhatsAppChats } from "./utils/use-whatsapp-chats";
-import { nanoid as randomId } from "nanoid";
+import { saveWhatsappGroup } from "./services/saveWhatsappGroup";
 
 interface WhatsAppGroupChatFormProps {
   defaultValue?: GroupChat;
@@ -13,41 +13,23 @@ interface FormValues extends Omit<GroupChat, "id" | "pinned"> {
 
 export default function WhatsAppGroupChatForm({ defaultValue }: WhatsAppGroupChatFormProps) {
   const [chats, setChats] = useWhatsAppChats();
-  const isCreation = !defaultValue;
 
   async function handleSubmit(formValues: FormValues) {
-    const savedChat: GroupChat = {
-      id: isCreation ? randomId() : defaultValue.id,
-      name: formValues.name,
-      pinned: !!formValues.pinned,
-      groupCode: formValues.groupCode,
-    };
-
-    const isNewGroupCode = isCreation || savedChat.groupCode !== defaultValue.groupCode;
-    const doesPhoneNumberAlreadyExist = chats
-      .filter(isGroupChat)
-      .some((chat) => chat.groupCode === savedChat.groupCode);
-
-    if (isNewGroupCode && doesPhoneNumberAlreadyExist) {
-      await showToast(Toast.Style.Failure, "Chat already exists");
-      return;
-    }
-
-    if (isCreation) {
-      setChats([...chats, savedChat]);
-      await showToast(Toast.Style.Success, `Created new group`, savedChat.name);
-    } else {
-      const newChats = chats.map((chat) => {
-        if (chat.id === savedChat.id) {
-          return savedChat;
-        }
-        return chat;
+    try {
+      await saveWhatsappGroup({
+        chat: {
+          ...defaultValue,
+          ...formValues,
+          pinned: !!formValues.pinned,
+        },
+        chats,
+        setChats,
       });
-      setChats(newChats);
-      await showToast(Toast.Style.Success, `Updated existing group`, savedChat.name);
+      await showToast(Toast.Style.Success, `Saved group`, formValues.name);
+      await popToRoot({ clearSearchBar: true });
+    } catch (error) {
+      await showToast(Toast.Style.Failure, (error as Error).message);
     }
-
-    await popToRoot({ clearSearchBar: true });
   }
 
   return (

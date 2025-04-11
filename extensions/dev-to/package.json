@@ -5,6 +5,9 @@
   "description": "Search and create articles to DEV Community. Read saved article list",
   "icon": "dev-to.png",
   "author": "lin",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Documentation",
     "Media",
@@ -16,8 +19,9 @@
       "name": "access-token",
       "type": "password",
       "required": true,
-      "title": "Personal access token",
-      "description": "DEV communit personal access token."
+      "title": "Personal Access Token",
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxx",
+      "description": "DEV community personal access token."
     }
   ],
   "commands": [
@@ -25,7 +29,27 @@
       "name": "search-article",
       "title": "Search Article",
       "description": "List dev.to articles",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primary-action",
+          "title": "Primary Action",
+          "description": "Choose to Prioritize Copy or Paste",
+          "type": "dropdown",
+          "default": "paste",
+          "required": true,
+          "data": [
+            {
+              "title": "Copy",
+              "value": "copy"
+            },
+            {
+              "title": "Paste",
+              "value": "paste"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "create-article",
@@ -41,19 +65,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.3",
-    "node-fetch": "^3.2.10",
-    "zustand": "^4.0.0"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.2.10"
   },
   "devDependencies": {
-    "@types/node": "^18.7.4",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
     "@types/node-fetch": "^2.6.2",
-    "@types/react": "^18.0.17",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.7.4"
   },
   "scripts": {
@@ -61,6 +84,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

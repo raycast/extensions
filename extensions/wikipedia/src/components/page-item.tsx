@@ -20,33 +20,38 @@ export function PageItem({ search, title, language }: { search: string; title: s
       subtitle={page?.description ? toSentenceCase(page.description) : ""}
       actions={
         <ActionPanel>
-          {openInBrowser ? (
-            <>
-              <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
-              <Action.Push icon={Icon.Window} title="Show Details" target={<WikipediaPage title={title} />} />
-            </>
-          ) : (
-            <>
-              <Action.Push icon={Icon.Window} title="Show Details" target={<WikipediaPage title={title} />} />
-              <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
-            </>
-          )}
+          {page?.content_urls &&
+            (openInBrowser ? (
+              <>
+                <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
+                <Action.Push icon={Icon.Window} title="Show Details" target={<WikipediaPage title={title} />} />
+              </>
+            ) : (
+              <>
+                <Action.Push icon={Icon.Window} title="Show Details" target={<WikipediaPage title={title} />} />
+                <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
+              </>
+            ))}
           <Action.OpenInBrowser
             title="Search in Browser"
             url={`https://${language}.wikipedia.org/w/index.php?fulltext=1&profile=advanced&search=${search}&title=Special%3ASearch&ns0=1`}
             shortcut={{ modifiers: ["cmd"], key: "o" }}
           />
           <ActionPanel.Section>
-            <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd"], key: "." }}
-              title="Copy URL"
-              content={page?.content_urls.desktop.page || ""}
-            />
-            <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-              title="Copy Title"
-              content={title}
-            />
+            {page?.content_urls && (
+              <Action.CopyToClipboard
+                shortcut={{ modifiers: ["cmd"], key: "." }}
+                title="Copy URL"
+                content={page?.content_urls.desktop.page || ""}
+              />
+            )}
+            {page?.content_urls && (
+              <Action.CopyToClipboard
+                shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                title="Copy Title"
+                content={title}
+              />
+            )}
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               title="Copy Subtitle"

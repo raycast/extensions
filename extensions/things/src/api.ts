@@ -102,6 +102,33 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
 `);
 };
 
+export const getTodo = (todoId: string) =>
+  executeJxa(`
+  const things = Application('Things3');
+  const lists = ['Inbox', 'Today', 'Anytime', 'Upcoming', 'Someday', 'Logbook', 'Trash'];
+  let foundTodo = null;
+  
+  // Search through all lists
+  for (const listName of lists) {
+    const todos = things.lists.byName(listName).toDos();
+    for (const todo of todos) {
+      if (todo.id() === '${todoId}') {
+        foundTodo = {
+          id: todo.id(),
+          name: todo.name(),
+          notes: todo.notes(),
+          status: todo.status(),
+          dueDate: todo.dueDate()
+        };
+        break;
+      }
+    }
+    if (foundTodo) break;
+  }
+  
+  return foundTodo;
+`);
+
 export const setTodoProperty = (todoId: string, key: string, value: string) =>
   executeJxa(`
   const things = Application('${preferences.thingsAppIdentifier}');
@@ -120,7 +147,7 @@ export const getTags = (): Promise<string[]> =>
   return things.tags().map(tag => tag.name());
 `);
 
-type Project = {
+export type Project = {
   id: string;
   name: string;
   area?: { id: string } | null;
@@ -141,7 +168,7 @@ export const getProjects = async (): Promise<Project[]> => {
   `);
 };
 
-type Area = {
+export type Area = {
   id: string;
   name: string;
 };
@@ -187,21 +214,20 @@ export const getLists = async (): Promise<List[]> => {
   return [...projectsWithoutAreas, ...organizedAreasAndProjects];
 };
 
-export type UpdateTodoParams = {
+export type TodoParams = {
   title?: string;
   notes?: string;
   'prepend-notes'?: string;
   'append-notes'?: string;
-  when?: string | null;
+  when?: string;
   deadline?: string;
   tags?: string;
   'add-tags'?: string;
   'checklist-items'?: string;
   'prepend-checklist-items'?: string;
   'append-checklist-items'?: string;
-  'list-id'?: string;
   list?: string;
-  'heading-id'?: string;
+  'list-id'?: string;
   heading?: string;
   completed?: boolean;
   canceled?: boolean;
@@ -216,7 +242,7 @@ export async function silentlyOpenThingsURL(url: string) {
   await asyncExec(`open -g "${url}"`);
 }
 
-export async function updateTodo(id: string, todoParams: UpdateTodoParams) {
+export async function updateTodo(id: string, todoParams: TodoParams) {
   const { authToken } = getPreferenceValues<Preferences>();
 
   if (!authToken) throw new Error('unauthorized');
@@ -228,6 +254,31 @@ export async function updateTodo(id: string, todoParams: UpdateTodoParams) {
       ...todoParams,
     })}`,
   );
+}
+
+export async function addTodo(todoParams: TodoParams) {
+  await silentlyOpenThingsURL(`things:///add?${qs.stringify(todoParams)}`);
+}
+
+export type ProjectParams = {
+  /* The title of the project. */
+  title: string;
+  /* The notes of the project. */
+  notes?: string;
+  /* Possible values for due date: "today", "tomorrow", "evening", "anytime", "someday", natural language dates such as "in 3 days" or "next tuesday", or a date time string (natural language dates followed by the @ symbol and then followed by a time string. E.g. "this friday@14:00".) */
+  when: string;
+  /* The area id of the project which can be found in get-lists */
+  'area-id'?: string;
+  /* The deadline of the project. */
+  deadline?: string;
+  /* Comma separated strings corresponding to the titles of tags. Does not apply a tag if the specified tag doesn’t exist. */
+  tags?: string[];
+  /* String separated by new lines (encoded to %0a). Titles of to-dos to create inside the project. */
+  'to-dos'?: string;
+};
+
+export async function addProject(projectParams: ProjectParams) {
+  await silentlyOpenThingsURL(`things:///add-project?${qs.stringify(projectParams)}`);
 }
 
 export function handleError(error: unknown, title?: string) {

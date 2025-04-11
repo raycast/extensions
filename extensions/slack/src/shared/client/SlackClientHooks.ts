@@ -13,5 +13,7 @@ export const useChannels = () =>
     },
   );
 
+export const useMe = () => useCachedPromise(SlackClient.getMe);
+
 export const useUnreadConversations = (conversationIds: string[] | undefined) =>
   useCachedPromise((ids) => SlackClient.getUnreadConversations(ids), [conversationIds ?? []]);

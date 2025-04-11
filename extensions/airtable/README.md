@@ -19,7 +19,7 @@ The software made available from this folder is not supported by Formagrid Inc (
 
 ## Setup
 
-1. **Install extensions**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/marks/raycast-airtable-extension)
+1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/marks/raycast-airtable-extension)
 
 2. **Authenticate with Airtable**: The first time you use the extension, you'll need to follow a few steps to authenticate with Airtable:
 
@@ -33,6 +33,33 @@ The software made available from this folder is not supported by Formagrid Inc (
 
     e. You're done! You can now use the `List Airtable Bases` command directly without going through these setup/configuration steps in the future)
 
+## 🗒️ NOTE
+
+If you prefer to use your own OAuth, do the following:
+
+1. **Log In to Airtable**
+
+2. **Go to Builder Hub > OAuth integrations** https://airtable.com/create/oauth
+
+3. **Register new OAuth integration**
+
+4. **Fill Details**
+
+    a. Name e.g. "Raycast Airtable"
+
+    b. OAuth redirect URL - https://www.raycast.com/redirect?packageName=Extension
+
+5. **Scopes** - Tick the following
+
+    a. `schema.bases:read` - needed to view a Base
+
+    b. `data.records:read` - needed to view Records of a Base
+
+    c. `data.records:write` - needed to edit Records of a Baase
+
+6. **Copy the Client ID** and **Paste** in Preferences
+
+7. Follow the steps from the previous section 
 
 ## Acknowledgement/Thank yous
 
@@ -42,3 +69,4 @@ Many thanks to the following resources and people:
 - [Raycast Slack community](https://www.raycast.com/community)
 - Airtable Developer Platform & Ecosystem team
 - @marks and @SeanKeenan-at built this extension
+- @xmok currently managing the OAuth App

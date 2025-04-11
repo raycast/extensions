@@ -1,4 +1,4 @@
-import { useForm } from "@raycast/utils";
+import { MutatePromise, useForm } from "@raycast/utils";
 import {
   Action,
   ActionPanel,
@@ -12,8 +12,9 @@ import {
   Toast,
   useNavigation,
   Clipboard,
+  Keyboard,
 } from "@raycast/api";
-import { DeleteItemCommand, DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DeleteItemCommand, DeleteItemCommandInput, DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { Table } from "../../dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { getErrorMessage } from "../../util";
@@ -31,9 +32,11 @@ interface DeleteItemFormValues {
 
 export const DeleteItemForm = ({
   table,
+  mutate,
   retryInitValues,
 }: {
   table: Table;
+  mutate: MutatePromise<Table[] | undefined>;
   retryInitValues?: DeleteItemFormValues;
 }) => {
   const { pop, push } = useNavigation();
@@ -49,32 +52,40 @@ export const DeleteItemForm = ({
           title: "Delete",
           style: Alert.ActionStyle.Destructive,
           onAction: async () => {
+            const input: DeleteItemCommandInput = {
+              TableName: table.TableName,
+              ReturnConsumedCapacity: "TOTAL",
+              Key: marshall({
+                [tablePrimaryKey.hashKey.name]:
+                  tablePrimaryKey.hashKey.type === "N" ? Number(values.hashKey) : values.hashKey,
+                ...(hasRangeKey && {
+                  [tablePrimaryKey.rangeKey!.name]:
+                    tablePrimaryKey.rangeKey!.type === "N" ? Number(values.rangeKey) : values.rangeKey,
+                }),
+              }),
+              ...(values.useConditionExpression && { ConditionExpression: values.conditionExpression }),
+              ...(values.useExpressionAttributeNames && {
+                ExpressionAttributeNames: JSON.parse(values.expressionAttributeNames),
+              }),
+              ...(values.useExpressionAttributeValues && {
+                ExpressionAttributeValues: marshall(JSON.parse(values.expressionAttributeValues)),
+              }),
+            };
+
             const toast = await showToast({
               style: Toast.Style.Animated,
               title: `❗Deleting item in ${table.TableName}`,
             });
-            new DynamoDBClient({})
-              .send(
-                new DeleteItemCommand({
-                  TableName: table.TableName,
-                  ReturnConsumedCapacity: "TOTAL",
-                  Key: marshall({
-                    [tablePrimaryKey.hashKey.name]:
-                      tablePrimaryKey.hashKey.type === "N" ? Number(values.hashKey) : values.hashKey,
-                    ...(hasRangeKey && {
-                      [tablePrimaryKey.rangeKey!.name]:
-                        tablePrimaryKey.rangeKey!.type === "N" ? Number(values.rangeKey) : values.rangeKey,
-                    }),
-                  }),
-                  ...(values.useConditionExpression && { ConditionExpression: values.conditionExpression }),
-                  ...(values.useExpressionAttributeNames && {
-                    ExpressionAttributeNames: JSON.parse(values.expressionAttributeNames),
-                  }),
-                  ...(values.useExpressionAttributeValues && {
-                    ExpressionAttributeValues: marshall(JSON.parse(values.expressionAttributeValues)),
-                  }),
-                }),
-              )
+
+            mutate(new DynamoDBClient({}).send(new DeleteItemCommand(input)), {
+              optimisticUpdate: (tables) => {
+                if (!tables) return undefined;
+                return tables.map((t) =>
+                  t.TableName !== table.TableName ? t : { ...t, ItemCount: Math.max((t.ItemCount ?? 0) - 1, 0) },
+                );
+              },
+              shouldRevalidateAfter: false,
+            })
               .then(({ ConsumedCapacity }) => {
                 toast.style = Toast.Style.Success;
                 toast.title = "✅ Item deleted";
@@ -87,14 +98,15 @@ export const DeleteItemForm = ({
                 toast.message = getErrorMessage(err);
                 toast.primaryAction = {
                   title: "Retry",
-                  shortcut: { modifiers: ["cmd"], key: "r" },
+                  shortcut: Keyboard.Shortcut.Common.Refresh,
                   onAction: () => {
-                    push(<DeleteItemForm table={table} retryInitValues={values} />);
+                    push(<DeleteItemForm {...{ table, mutate, retryInitValues: values }} />);
                     toast.hide();
                   },
                 };
                 toast.secondaryAction = {
                   title: "Copy Error",
+                  shortcut: Keyboard.Shortcut.Common.Copy,
                   onAction: () => {
                     Clipboard.copy(getErrorMessage(err));
                     toast.hide();

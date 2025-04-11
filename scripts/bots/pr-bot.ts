@@ -29,7 +29,8 @@ export default async ({ github, context }: API) => {
     return;
   }
 
-  const expectations = "We're currently experiencing high demand and limited capacity. As a result, extension reviews might take longer than usual to get the initial review. Please expect an initial review within 5-10 business days."; 
+  // Due to our current reduced availability, the initial review may take up to 10-15 business days.
+  const expectations = "You can expect an initial review within five business days.";
 
   const codeowners = await getCodeOwners({ github, context });
 
@@ -70,7 +71,7 @@ export default async ({ github, context }: API) => {
       await comment({
         github,
         context,
-        comment: `Congratulations on your new Raycast extension! :rocket:\n\n${expectations}\n\nOnce the PR is approved and merged, the extension will be available on our Store.\n\nSorry for the inconvenience`,
+        comment: `Congratulations on your new Raycast extension! :rocket:\n\n${expectations}\n\nOnce the PR is approved and merged, the extension will be available on our Store.`,
       });
       return;
     }

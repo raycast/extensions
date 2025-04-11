@@ -70,8 +70,7 @@ export const OpenChatInSlack = ({
       {conversationId && conversationId.trim().length > 0 && (
         <Action.OpenInBrowser
           url={`https://app.slack.com/client/${workspaceId}/${conversationId}`}
-          title={"Open in Browser"}
-          onOpen={async () => await closeMainWindow()}
+          onOpen={() => closeMainWindow()}
         />
       )}
     </>

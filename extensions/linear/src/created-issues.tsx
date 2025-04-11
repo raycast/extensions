@@ -5,7 +5,6 @@ import { getCreatedIssues } from "./api/getIssues";
 import useIssues from "./hooks/useIssues";
 import usePriorities from "./hooks/usePriorities";
 import useMe from "./hooks/useMe";
-import useUsers from "./hooks/useUsers";
 
 import StateIssueList from "./components/StateIssueList";
 import CreateIssueForm from "./components/CreateIssueForm";
@@ -15,11 +14,10 @@ function CreatedIssues() {
   const { issues, isLoadingIssues, mutateList } = useIssues(getCreatedIssues);
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
-  const { users, isLoadingUsers } = useUsers();
 
   return (
     <List
-      isLoading={isLoadingIssues || isLoadingPriorities || isLoadingMe || isLoadingUsers}
+      isLoading={isLoadingIssues || isLoadingPriorities || isLoadingMe}
       searchBarPlaceholder="Filter by ID, title, status, assignee or priority"
       filtering={{ keepSectionOrder: true }}
     >
@@ -28,14 +26,11 @@ function CreatedIssues() {
         description="There are no issues created by you."
         actions={
           <ActionPanel>
-            <Action.Push
-              title="Create Issue"
-              target={<CreateIssueForm priorities={priorities} users={users} me={me} />}
-            />
+            <Action.Push title="Create Issue" target={<CreateIssueForm priorities={priorities} me={me} />} />
           </ActionPanel>
         }
       />
-      <StateIssueList mutateList={mutateList} issues={issues} priorities={priorities} users={users} me={me} />
+      <StateIssueList mutateList={mutateList} issues={issues} priorities={priorities} me={me} />
     </List>
   );
 }

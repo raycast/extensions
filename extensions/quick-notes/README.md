@@ -1,6 +1,6 @@
 # Quick Notes
 
-Create simple markdown notes in Raycast stored locally. No integrations required!
+Create simple markdown notes in Raycast stored locally. No integrations required! Allows you to sync with a folder of your choice.
 
 ### Features
 
@@ -13,8 +13,9 @@ Create simple markdown notes in Raycast stored locally. No integrations required
 - Emoji Support everywhere using `:` 😁
 - Setup auto-save to a folder of your choice, set in preferences
 - Tag manager
+- Summarize note using AI (Raycast Pro)
 
-If you’d like, you can export or auto-sync your notes as markdown to a directory to use in a 3rd-party app like Obisidian, VS Code, or Notion. This is completely optional though and notes will still save locally.
+If you'd like, you can export or auto-sync your notes as markdown to a directory to use in a 3rd-party app like Obsidian, VS Code, or Notion. This is **completely optional** though and notes will still save locally.
 
 ### Commands
 
@@ -30,6 +31,22 @@ If you’d like, you can export or auto-sync your notes as markdown to a directo
 - `^ + ⇧ + T` - Delete tags
 - `⌘ + M` - Toggle note metadata
 - `⌘ + S` - Sort notes
+- `⌘ + I` - Summarize note with AI
+- `⌘ + ⇧ + I` - Clear AI summary
+
+**Create Note**
+
+- `title` - Title of note
+- `note` - Body of note
+
+**Create Tag**
+
+- `tag` - Name of tag
+
+**Search Notes**
+
+- `text` - Text to search in both title and body
+- `tag` - Search by tag
 
 **Export Notes (1-way sync)**
 

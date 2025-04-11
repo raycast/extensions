@@ -2,7 +2,7 @@ import { ProjectsClient } from "@google-cloud/resource-manager";
 import { getPreferenceValues } from "@raycast/api";
 import { Project } from "./types";
 
-const client = new ProjectsClient();
+const client = new ProjectsClient({ fallback: true });
 
 export async function fetchProjects() {
   const projects = [];

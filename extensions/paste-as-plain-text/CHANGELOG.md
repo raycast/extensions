@@ -1,5 +1,9 @@
 # Paste as Plain text Changelog
 
+## [Fix Paste as Number] - :2024-12-03
+
+-  Fix Paste as Number
+
 ## [Optional No Prompt] - 2024-06-17
 
 -  Optional No Prompt after pasting

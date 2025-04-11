@@ -44,7 +44,7 @@ export const MessageList = (props: MessageListProps) => {
           const messages = Cache.getMessages(account.id, mailbox.name);
           return messages;
         },
-      }
+      },
     );
   }, []);
 

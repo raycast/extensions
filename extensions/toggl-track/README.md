@@ -45,3 +45,9 @@ This command is a view-only list of all the workspaces you're a part of.
 It is disabled by default, but can enabled from Raycast's extensions settings.
 
 <img width="600" alt="Manage Workspaces Command" src="./assets/view-workspaces.png">
+
+### Menu Bar
+
+See what time entry is currently in your Menu Bar. Click to see the list of recent time entries, which allows you to resume them.
+
+You can easily stop the running time entry by clicking on it or using the enter command.

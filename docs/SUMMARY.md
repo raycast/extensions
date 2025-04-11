@@ -2,14 +2,6 @@
 
 - [Introduction](README.md)
 
-## Links
-
-- [Community](https://raycast.com/community)
-- [GitHub](https://github.com/raycast/extensions)
-- [Store](https://raycast.com/store)
-- [Icon Generator](https://icon.ray.so)
-- [Extension Icon Template](https://www.figma.com/community/file/1030764827259035122)
-
 ## Basics
 
 - [Getting Started](basics/getting-started.md)
@@ -20,6 +12,14 @@
 - [Debug an Extension](basics/debug-an-extension.md)
 - [Install an Extension](basics/install-an-extension.md)
 - [Review an Extension in a Pull Request](basics/review-pullrequest.md)
+
+## AI
+
+- [Getting Started](ai/getting-started.md)
+- [Create an AI Extension](ai/create-an-ai-extension.md)
+- [Learn Core Concepts of AI Extensions](ai/learn-core-concepts-of-ai-extensions.md)
+- [Write Evals for Your AI Extension](ai/write-evals-for-your-ai-extension.md)
+- [Follow Best Practices for AI Extensions](ai/follow-best-practices-for-ai-extensions.md)
 
 ## Teams
 
@@ -36,19 +36,21 @@
 
 ## Information
 
-- [Best Practices](information/best-practices.md)
-- [Tools](information/tools/README.md)
-  - [CLI](information/tools/cli.md)
-  - [ESLint](information/tools/eslint.md)
-  - [VS Code (community tool)](information/tools/vscode.md)
+- [Terminology](information/terminology.md)
 - [File Structure](information/file-structure.md)
+- [Manifest](information/manifest.md)
 - [Lifecycle](information/lifecycle/README.md)
   - [Arguments](information/lifecycle/arguments.md)
   - [Background Refresh](information/lifecycle/background-refresh.md)
   - [Deeplinks](information/lifecycle/deeplinks.md)
-- [Manifest](information/manifest.md)
+- [Best Practices](information/best-practices.md)
+- [Developer Tools](information/developer-tools/README.md)
+  - [Manage Extensions Command](information/developer-tools/manage-extensions-command.md)
+  - [CLI](information/developer-tools/cli.md)
+  - [ESLint](information/developer-tools/eslint.md)
+  - [VS Code (community tool)](information/developer-tools/vscode.md)
+  - [Templates](information/developer-tools/templates.md)
 - [Security](information/security.md)
-- [Terminology](information/terminology.md)
 - [Versioning](information/versioning.md)
 
 ## API Reference
@@ -79,9 +81,11 @@
   - [Colors](api-reference/user-interface/colors.md)
   - [Icons & Images](api-reference/user-interface/icons-and-images.md)
   - [Navigation](api-reference/user-interface/navigation.md)
-- [Window & Search Bar](api-reference/window-and-search-bar.md)
+- [Raycast Window & Search Bar](api-reference/window-and-search-bar.md)
+- [Tool](api-reference/tool.md)
+- [Window Management](api-reference/window-management.md)
 
----
+## Misc
 
 - [Changelog](changelog.md)
 - [Migration](migration/README.md)

@@ -3,6 +3,7 @@ import { Color, Icon, List } from "@raycast/api";
 
 import { ChannelScheduleDto, ProgramDto } from "../modules/tv/domain/tvScheduleDto";
 import { getTime } from "../utils/dateUtils";
+import { truncate } from "../utils/stringUtils";
 
 const { Item } = List;
 
@@ -24,7 +25,7 @@ const Program = ({ program }: { program: ProgramDto }) => {
   return (
     <Fragment>
       <Item.Detail.Metadata.Label
-        title={program.title}
+        title={truncate(program.name)}
         icon={program.isCurrentlyLive ? Icon.Clock : ""}
         text={{ value: getTime(program.startTime), color: Color.SecondaryText }}
       />

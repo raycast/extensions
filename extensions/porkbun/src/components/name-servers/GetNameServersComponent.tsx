@@ -1,7 +1,5 @@
-import { Action, ActionPanel, Detail, Icon, Toast, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { getNameServersByDomain } from "../../utils/api";
-import { ErrorResponse } from "../../utils/types";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { useGetNameServersByDomain } from "../../utils/api";
 import { API_DOCS_URL } from "../../utils/constants";
 import UpdateNameServersComponent from "./UpdateNameServersComponent";
 import ErrorComponent from "../ErrorComponent";
@@ -10,29 +8,7 @@ type GetNameServersComponentProps = {
   domain: string;
 };
 export default function GetNameServersComponent({ domain }: GetNameServersComponentProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [ns, setNS] = useState<string[]>();
-  const [error, setError] = useState<ErrorResponse>();
-
-  async function getFromApi() {
-    setIsLoading(true);
-    const response = await getNameServersByDomain(domain);
-    if (response.status === "SUCCESS") {
-      setNS(response.ns);
-      showToast({
-        style: Toast.Style.Success,
-        title: "SUCCESS",
-        message: `Fetched ${response.ns.length} Name Servers`,
-      });
-    } else {
-      setError(response);
-    }
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-    getFromApi();
-  }, []);
+  const { isLoading, data, error, revalidate } = useGetNameServersByDomain(domain);
 
   return error ? (
     <ErrorComponent error={error} />
@@ -44,14 +20,16 @@ export default function GetNameServersComponent({ domain }: GetNameServersCompon
     
 ---
 
-${!ns ? "" : ns.join(`\n\n`)}`}
+${!data ? "" : data.ns.join(`\n\n`)}`}
       actions={
         <ActionPanel>
-          {ns && <Action.CopyToClipboard content={ns.join()} />}
+          {data && <Action.CopyToClipboard content={data.ns.join()} />}
           <Action.Push
             title="Update Name Servers"
             icon={Icon.Pencil}
-            target={<UpdateNameServersComponent domain={domain} initialNS={ns} onNameServersUpdated={getFromApi} />}
+            target={
+              <UpdateNameServersComponent domain={domain} initialNS={data?.ns} onNameServersUpdated={revalidate} />
+            }
           />
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Go to API Reference" url={`${API_DOCS_URL}Domain%20Get%20Name%20Servers`} />

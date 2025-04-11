@@ -1,9 +1,9 @@
 import * as os from "os";
-import { Cache, showToast, Toast } from "@raycast/api";
+import { Cache } from "@raycast/api";
 import axios from "axios";
 import { IP_GEOLOCATION_API } from "./constants";
 import { IPGeolocation } from "../types/ip-geolocation";
-import Style = Toast.Style;
+import { language } from "../types/preferences";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -44,22 +44,20 @@ export function getIPV6Address() {
   return null;
 }
 
-export function getIPGeolocation(ipv4 = "", language = "en") {
-  return axios({
-    method: "GET",
-    url: IP_GEOLOCATION_API + ipv4,
-    params: {
-      lang: language,
-      fields: "585727",
-    },
-  })
-    .then((response) => {
-      return response.data as IPGeolocation;
-    })
-    .catch((reason) => {
-      showToast(Style.Failure, String(reason)).then();
-      return { status: "fail" } as IPGeolocation;
+export async function getIPGeolocation(ipv4: string) {
+  try {
+    const response = await axios({
+      method: "GET",
+      url: IP_GEOLOCATION_API + ipv4,
+      params: {
+        lang: language,
+        fields: "585727",
+      },
     });
+    return response.data as IPGeolocation;
+  } catch (reason) {
+    return { status: "fail" } as IPGeolocation;
+  }
 }
 
 export const getArgument = (arg: string, argKey: string) => {

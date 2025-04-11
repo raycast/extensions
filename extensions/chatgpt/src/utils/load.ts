@@ -84,7 +84,7 @@ tell application "Finder"
     end repeat
     return thePaths
   end if
-end tell`
+end tell`,
   );
   return result.split(/,\s+/g).filter((item) => !!item);
 };

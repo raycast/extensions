@@ -1,6 +1,6 @@
-import { useCachedPromise, withAccessToken } from "@raycast/utils";
+import { useCachedPromise, useLocalStorage, withAccessToken } from "@raycast/utils";
 import { getClubActivities, getClubs, provider } from "./api/client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { formatDistance, formatDuration, getSportTypesFromActivityTypes, getStartOfWeekUnix } from "./utils";
 import { StravaClubActivity, StravaSummaryClub } from "./api/types";
@@ -39,7 +39,7 @@ function withClubs(Component: React.FC<{ clubs: StravaSummaryClub[] }>) {
   };
 }
 
-type AthleteActivities = {
+export type AthleteActivities = {
   [key: string]: {
     name: string;
     elapsed_time: number;
@@ -50,7 +50,8 @@ type AthleteActivities = {
 };
 
 function Leaderboard({ clubs }: { clubs: StravaSummaryClub[] }) {
-  const [clubId, setClubId] = useState(clubs[0].id.toString());
+  const { value, setValue: setClubId } = useLocalStorage("lastClubId", clubs[0].id.toString());
+  const clubId = value || "";
 
   const startOfWeek = getStartOfWeekUnix();
   const weekString = `${new Date(startOfWeek * 1000).toLocaleDateString("en-US", {
@@ -65,6 +66,7 @@ function Leaderboard({ clubs }: { clubs: StravaSummaryClub[] }) {
     error,
   } = useCachedPromise(
     (club: string) => async (options: { page: number }) => {
+      if (!club) return { data: [], hasMore: false };
       const newData = await getClubActivities(club, options.page + 1, PAGE_SIZE, startOfWeek);
       return { data: newData, hasMore: newData.length === PAGE_SIZE };
     },

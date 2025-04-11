@@ -1,4 +1,4 @@
-import { LaunchProps, closeMainWindow, showHUD } from "@raycast/api";
+import { closeMainWindow, LaunchProps, showToast, Toast } from "@raycast/api";
 import { getValidatedSpaceTitle, makeNewTab } from "./arc";
 import { newTabPreferences } from "./preferences";
 import { URLArguments } from "./types";
@@ -17,7 +17,10 @@ const handleOpenNewTab = async (newTabUrl: string, space?: string) => {
   } catch (e) {
     console.error(e);
 
-    await showHUD("❌ Failed opening a new tab");
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed opening a new tab",
+    });
   }
 };
 

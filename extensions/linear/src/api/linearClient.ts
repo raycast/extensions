@@ -1,5 +1,6 @@
 import { OAuthService } from "@raycast/utils";
 import { LinearClient, LinearGraphQLClient } from "@linear/sdk";
+import { environment } from "@raycast/api";
 
 let linearClient: LinearClient | null = null;
 
@@ -10,6 +11,7 @@ export const linear = OAuthService.linear({
       accessToken: token,
       headers: {
         "public-file-urls-expire-in": "60",
+        "linear-raycast-extension-name": environment.extensionName,
       },
     });
   },

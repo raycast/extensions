@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "research",
+  "title": "Deep Research",
+  "description": "Iterative Deep Research powered by Raycast AI Extensions.",
+  "icon": "deep-research-icon.png",
+  "author": "EvanZhouDev",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-research-topics",
+      "title": "Browse Research Topics",
+      "description": "View previous research results",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "research",
+      "title": "Deep Research",
+      "description": "Triggers iterative deep research."
+    }
+  ],
+  "ai": {
+    "instructions": "You should use this tool to help you plan out an thought process. When the user provides another tool with @, you should first call this tool to plan out what you want to do with the correct parameters. Next, based on the steps, you should call the other tools for research. Ensure you are calling those other tools with the correct syntax. Then, you should call this tool again to get the next step. You should REPEATEDLY CALL THIS TOOL AND ANY OTHER TOOLS IN A TOOL-CALL CYCLE UNTIL YOU RECEIVE nextThoughtNeeded: false. You should repeat this process until you have a satisfactory answer (Call thinking, optionally call other tools, continue calling tool).\nWhen you're done with the thinking process, you must write a comprehensive markdown report on everything you've learned. Include as many details and options to the user as you can. Use tables, and other markdown features to make the report as clear as possible. Do not say anything between tool calls. Say everything at the end. NEVER stop your response before you have reported your findings to the user after the last step and last toolcall. If you cannot find relevant information, try other methods or strategies. NEVER say you are unable to find information and/or quit the research process until you've tried multiple approaches. \n\nWhen to use this tool\n- Breaking down complex problems into steps\n- Planning and design with room for revision\n- Analysis that might need course correction\n- Problems where the full scope might not be clear initially\n- Problems that require a multi-step solution\n- Tasks that need to maintain context over multiple steps\n- Situations where irrelevant information needs to be filtered out\n\nKey Features: - You should write down all the questions you want to investigate at every step in the \"questions\" field. You should refine these questions, changing them as you progress in your research\n- You should write down all the learnings you have made at every step in the \"learnings\" field. You should only add to these learnings, not remove existing ones. You should use these learnings to inform your next steps\n- You should write down all the goals you have at every step in the \"goals\" field. You should refine these goals, changing them as you progress in your research. They should contain what the user wishes to achieve as a \"large picture\", be as specific as possible\n- You can adjust totalThoughts up or down as you progress\n- You can question or revise previous thoughts\n- You can add more thoughts even after reaching what seemed like the end. You should always do this until you've completely achieved all your goals.\n- You can express uncertainty and explore alternative approaches\n- Generates a solution hypothesis\n- Verifies the hypothesis based on the Chain of Thought steps\n- Repeats the process until satisfied\n- Provides a correct answer\n\nInstructions:\nStart with an initial estimate of needed thoughts, but be ready to adjust\nFeel free to question or revise previous thoughts\nDon't hesitate to add more thoughts if needed, even at the \"end\"\nExpress uncertainty when present\nMark thoughts that revise previous thinking or branch into new paths\nIgnore information that is irrelevant to the current step\nGenerate a solution hypothesis when appropriate\nVerify the hypothesis based on the Chain of Thought steps\nRepeat the process until satisfied with the solution\nProvide a single, ideally correct answer as the final output\nOnly set nextThoughtNeeded to false when truly done and a satisfactory answer is reached"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\n\nIt seems like you are trying to publish the Raycast extension to npm.\n\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\n\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

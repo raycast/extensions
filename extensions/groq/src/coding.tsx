@@ -67,6 +67,7 @@ export default function AskView(props: { arguments: { query?: string }; fallback
                 user_extra_msg={question ? question : default_question}
                 model_override={model_override}
                 toast_title={toast_title}
+                temperature={0.4}
               />
             }
           />

@@ -15,3 +15,7 @@ export function getBalance(walletBalance: Wallet['balance']) {
 
   return { balance, currency: currency as Currency };
 }
+
+export function getIcon(icon: string) {
+  return `https://static.moneylover.me/img/icon/${icon}.png`;
+}

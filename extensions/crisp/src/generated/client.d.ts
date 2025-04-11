@@ -17,34 +17,27 @@ export declare function createClient({
           input: {};
           output: {
             ok: boolean;
-            operator:
-              | {
-                  name: string | null;
-                  userId: string | null;
-                  createdAt: string;
-                  crispEmail: string;
-                  crispUserId: string;
-                }
-              | undefined;
             websites: {
-              websiteId: string;
               domain: string;
+              websiteId: string;
               userId: string | null;
-              createdAt: string;
-              crispUserId: string;
+              crispPluginId: string;
               crispRole: string;
+              crispUserId: string;
+              createdAt: string;
               crispToken: string;
               logo: string | null;
             }[];
             conversations: {
               site:
                 | {
-                    websiteId: string;
                     domain: string;
+                    websiteId: string;
                     userId: string | null;
-                    createdAt: string;
-                    crispUserId: string;
+                    crispPluginId: string;
                     crispRole: string;
+                    crispUserId: string;
+                    createdAt: string;
                     crispToken: string;
                     logo: string | null;
                   }

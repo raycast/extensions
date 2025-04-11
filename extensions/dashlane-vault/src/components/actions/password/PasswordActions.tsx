@@ -3,6 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 
 import { SENSITIVE_VALUE_PLACEHOLDER } from "@/constants";
 import { useCurrentApplicationContext } from "@/context/current-application";
+import { usePasswordContext } from "@/context/passwords";
 import { getErrorAction } from "@/helper/error";
 import { getPassword } from "@/lib/dcli";
 import { VaultCredential } from "@/types/dcli";
@@ -13,9 +14,16 @@ type Props = {
 
 export default function PasswordActions({ item }: Props) {
   const { currentApplication } = useCurrentApplicationContext();
+  const { visitItem } = usePasswordContext();
 
-  const copyPassword = () => copy(item);
-  const pastePassword = () => paste(item);
+  const copyPassword = () => {
+    copy(item);
+    visitItem(item);
+  };
+  const pastePassword = () => {
+    paste(item);
+    visitItem(item);
+  };
 
   return (
     <>

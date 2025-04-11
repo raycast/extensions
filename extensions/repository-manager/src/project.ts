@@ -47,6 +47,7 @@ export class Project {
     hasConfig = false
     config: ProjectConfig = {}
     gitRemotes: Repo[] = []
+    isFavorite = false
 
     constructor(cachedProject?: Project, path?: string) {
         if (cachedProject) {
@@ -246,4 +247,29 @@ export function groupByDirectory(projects: ProjectList): GroupedProjectList {
         acc[key].push(project)
         return acc
     }, {})
+}
+
+export function sortGroupedProjectsByFavorite(groupedProjects: GroupedProjectList): GroupedProjectList {
+    const sortedGroupedProjects: GroupedProjectList = { favorites: [] }
+
+    for (const directory in groupedProjects) {
+        if (Object.prototype.hasOwnProperty.call(groupedProjects, directory)) {
+            const [favorites, nonFavorites] = groupedProjects[directory].reduce(
+                ([fav, nonFav], project) => {
+                    if (project.isFavorite) {
+                        fav.push(project)
+                    } else {
+                        nonFav.push(project)
+                    }
+                    return [fav, nonFav]
+                },
+                [[], []] as [Project[], Project[]],
+            )
+
+            sortedGroupedProjects.favorites.push(...favorites)
+            sortedGroupedProjects[directory] = nonFavorites
+        }
+    }
+
+    return sortedGroupedProjects
 }

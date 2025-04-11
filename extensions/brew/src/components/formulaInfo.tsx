@@ -1,4 +1,4 @@
-import { Color, Detail, useNavigation } from "@raycast/api";
+import { Detail, useNavigation } from "@raycast/api";
 import { FormulaActionPanel } from "./actionPanels";
 import { Formula, brewIsInstalled, brewPrefix } from "../brew";
 import { Dependencies } from "./dependencies";
@@ -12,11 +12,11 @@ export function FormulaInfo(props: {
   const formula = props.formula;
   return (
     <Detail
-      markdown={formatInfo(formula, props.isInstalled)}
+      markdown={formatInfo(formula)}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Link title="Homepage" text={formula.homepage} target={formula.homepage} />
-          <Detail.Metadata.Label title="License" text={formula.license} />
+          {formula.license && <Detail.Metadata.Label title="License" text={formula.license} />}
           <Detail.Metadata.Label title="Versions" text={formatVersions(formula)} />
           {formula.versions.head && <Detail.Metadata.Label title="" text={formula.versions.head} />}
           <Dependencies title="Dependencies" dependencies={formula.dependencies} isInstalled={props.isInstalled} />
@@ -47,7 +47,7 @@ export function FormulaInfo(props: {
 
 /// Private
 
-function formatInfo(formula: Formula, isInstalled: (name: string) => boolean): string {
+function formatInfo(formula: Formula): string {
   return `
 # ${formula.name}
 ${formula.desc}

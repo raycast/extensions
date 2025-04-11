@@ -4,11 +4,16 @@ import { getEnumKeysExcludingCurrent } from "../../util";
 export class AwsAction {
   public static Console = ({ url, onAction }: { url: string; onAction?: () => void }) => (
     <ActionPanel.Section title="Console">
-      <Action.OpenInBrowser key="openConsoleLink" title="Open in Browser" url={url} onOpen={() => onAction?.()} />
+      <Action.OpenInBrowser
+        key="openConsoleLink"
+        title="Open in Browser"
+        url={createSsoLoginUri(url)}
+        onOpen={() => onAction?.()}
+      />
       <Action.CopyToClipboard
         key="copyConsoleLink"
         title="Copy Link"
-        content={url}
+        content={createSsoLoginUri(url)}
         shortcut={Keyboard.Shortcut.Common.Copy}
         onCopy={() => onAction?.()}
       />
@@ -53,4 +58,25 @@ export class AwsAction {
       </ActionPanel.Section>
     );
   }
+}
+
+function createSsoLoginUri(uri: string): string {
+  // from AWS SSO start page, start_url is https://my-sso-portal.awsapps.com/start/#
+  // but in sso documentation its "https://my-sso-portal.awsapps.com/start",
+  // so we should support both variants
+  // https://docs.aws.amazon.com/cli/latest/userguide/sso-configure-profile-token.html#sso-configure-profile-token-auto-sso
+  let sso_start_url: string = "";
+  if (process.env.AWS_SSO_ACCOUNT_ID && process.env.AWS_SSO_ROLE_NAME && process.env.AWS_SSO_START_URL) {
+    if (process.env.AWS_SSO_START_URL!.endsWith("start")) {
+      sso_start_url = process.env.AWS_SSO_START_URL! + "/#";
+    } else if (process.env.AWS_SSO_START_URL!.endsWith("start/")) {
+      sso_start_url = process.env.AWS_SSO_START_URL! + "#";
+    } else if (process.env.AWS_SSO_START_URL!.endsWith("start/#")) {
+      sso_start_url = process.env.AWS_SSO_START_URL!;
+    } else {
+      return uri;
+    }
+    return `${sso_start_url}/console?account_id=${encodeURI(process.env.AWS_SSO_ACCOUNT_ID!)}&role_name=${encodeURI(process.env.AWS_SSO_ROLE_NAME!)}&destination=${encodeURIComponent(uri)}`;
+  }
+  return uri;
 }

@@ -1,21 +1,37 @@
-import { Toast, open } from "@raycast/api";
-import { getInstallStatus, stopBreak } from "./utils";
+import { Toast, showToast } from "@raycast/api";
+import { getProfileNames, stopBreak, stopBreakWithProfile } from "./utils";
+import { ensureFocusIsRunning } from "./helpers";
 
-export default async function () {
-  const toast = new Toast({
-    title: "Stopping break",
+export default async function Command() {
+  const toast = await showToast({
     style: Toast.Style.Animated,
+    title: "Stopping break...",
   });
 
-  await toast.show();
-
-  if (!(await getInstallStatus())) {
-    toast.title = "Focus is not installed";
-    toast.message = "Install Focus app from: https://heyfocus.com";
-    toast.style = Toast.Style.Failure;
-    await toast.show();
+  if (!(await ensureFocusIsRunning())) {
     return;
   }
 
-  await stopBreak();
+  const profiles = await getProfileNames();
+  const firstProfile = profiles[0];
+
+  try {
+    if (profiles.length === 0) {
+      await stopBreak();
+    } else {
+      await stopBreakWithProfile(firstProfile);
+    }
+    await toast.hide();
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Break stopped",
+    });
+  } catch (error) {
+    await toast.hide();
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to stop break",
+      message: error instanceof Error ? error.message : "An unknown error occurred",
+    });
+  }
 }

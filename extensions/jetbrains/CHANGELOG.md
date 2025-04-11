@@ -1,9 +1,24 @@
 # Jetbrains Changelog
 
+## [Bugfix] - 2024-12-16
+
+- Fix crashing search recent projects command
+
+## [Bugfix] - 2024-12-13
+
+- Bugfix for older v2 installations
+
+## [Better Toolbox Integrations] - 2024-12-12
+
+- Better integration with toolbox configs
+- Remove Toolbox V1 support
+- Add optional frecency sorting
+- Hook into toolbox hidden project feature
+
 ## [Shell Script Fixes] - 2024-01-23
 
 - Use correct script name from config
-- Better handling of missing scripts 
+- Better handling of missing scripts
 
 ## [Toolbox 2.0 Updates] - 2023-07-22
 
@@ -38,18 +53,18 @@
   - uses new `.shellLink` file for tool name
 - Faster opening of project when app is closed
 - Include apps that have empty project lists
-  - you can open apps with no projects from the menubar 
+  - you can open apps with no projects from the menubar
   - you can now open projects in Fleet (Fleet projects are still not populated)
 
 ## [Better open when closed, MenuBarExtra and more] - 2022-09-11
 
 - Added workaround for environment variable issues when opening a closed Application
-  - Tries to finds the correct tool in the Application Support folder 
+  - Tries to finds the correct tool in the Application Support folder
   - Uses Raycast `open` to open with the parent's environment variables
   - Uses sleep to give script time to work
 - Added new MenuBarExtra
-- Added check for `.settings.json` file to auto determine scripts dir 
-- Fixed issues opening apps when scripts path contains a space 
+- Added check for `.settings.json` file to auto determine scripts dir
+- Fixed issues opening apps when scripts path contains a space
 - Improved help for missing scripts
 - Updated to latest api version
 
@@ -58,7 +73,7 @@
 - Handle cases when projects xml files are corrupted
 - Add ability to choose sort order for apps
 
- ## [Update] - 2022-06-11
+## [Update] - 2022-06-11
 
 Improve keywords to match dashes and low-dashes when searching
 

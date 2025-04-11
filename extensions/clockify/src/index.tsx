@@ -1,26 +1,13 @@
-import {
-  OpenInBrowserAction,
-  ActionPanel,
-  ActionPanelItem,
-  Form,
-  getLocalStorageItem,
-  Icon,
-  List,
-  setLocalStorageItem,
-  showToast,
-  SubmitFormAction,
-  ToastStyle,
-  useNavigation,
-} from "@raycast/api";
+import { ActionPanel, Form, Icon, List, showToast, useNavigation, Toast, Action, LocalStorage } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import isEmpty from "lodash.isempty";
 import uniqWith from "lodash.uniqwith";
 import useConfig from "./useConfig";
 import { fetcher, isInProgress, showElapsedTime } from "./utils";
-import { TimeEntry, Project } from "./types";
+import { TimeEntry, Project, Task } from "./types";
 
 function OpenWebPage() {
-  return <OpenInBrowserAction title="Open Website" url="https://app.clockify.me" />;
+  return <Action.OpenInBrowser title="Open Website" url="https://app.clockify.me" />;
 }
 
 function useClock(entry: TimeEntry) {
@@ -41,14 +28,15 @@ function ItemInProgress({ entry, updateTimeEntries }: { entry: TimeEntry; update
     <List.Item
       id={entry.id}
       title={entry.project?.clientName || "No Client"}
-      subtitle={`${entry.description || "No Description"}`}
-      accessoryTitle={`${time}  -  ${entry.project?.name}`}
+      subtitle={`${[entry.description || "No Description", entry.task?.name].filter(Boolean).join(" • ")}`}
+      accessories={[
+        { text: `${time}  -  ${entry.project?.name}`, icon: { source: Icon.Dot, tintColor: entry.project?.color } },
+      ]}
       icon={{ source: Icon.Clock, tintColor: entry.project?.color }}
       keywords={[...(entry.description?.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
-      accessoryIcon={{ source: Icon.Dot, tintColor: entry.project?.color }}
       actions={
         <ActionPanel>
-          <ActionPanelItem title="Stop Timer" onAction={() => stopCurrentTimer().then(() => updateTimeEntries())} />
+          <Action title="Stop Timer" onAction={() => stopCurrentTimer().then(() => updateTimeEntries())} />
           <OpenWebPage />
         </ActionPanel>
       }
@@ -68,7 +56,7 @@ export default function Main() {
     async function fetchTimeEntries() {
       setIsLoading(true);
 
-      const storedEntries: string | undefined = await getLocalStorageItem("entries");
+      const storedEntries: string | undefined = await LocalStorage.getItem("entries");
 
       if (storedEntries) {
         setEntries(JSON.parse(storedEntries));
@@ -78,7 +66,7 @@ export default function Main() {
 
       if (filteredEntries) {
         setEntries(filteredEntries);
-        setLocalStorageItem("entries", JSON.stringify(filteredEntries));
+        LocalStorage.setItem("entries", JSON.stringify(filteredEntries));
       }
 
       setIsLoading(false);
@@ -94,7 +82,7 @@ export default function Main() {
       .then((entries) => {
         if (entries) {
           setEntries(entries);
-          setLocalStorageItem("entries", JSON.stringify(entries));
+          LocalStorage.setItem("entries", JSON.stringify(entries));
         }
 
         setIsLoading(false);
@@ -108,7 +96,7 @@ export default function Main() {
         <List.Item
           icon={Icon.ExclamationMark}
           title="Invalid API Key Detected"
-          accessoryTitle={`Go to Extensions → Clockify`}
+          accessories={[{ text: `Go to Extensions → Clockify` }]}
         />
       ) : (
         <>
@@ -118,7 +106,7 @@ export default function Main() {
               title="Start New Timer"
               actions={
                 <ActionPanel>
-                  <ActionPanel.Item
+                  <Action
                     title="Start New Timer"
                     onAction={() => push(<NewEntry updateTimeEntries={updateTimeEntries} />)}
                   />
@@ -136,17 +124,20 @@ export default function Main() {
                   id={entry.id}
                   key={entry.id}
                   title={entry.project?.clientName || "No Client"}
-                  subtitle={entry.description || "No Description"}
-                  accessoryTitle={entry.project?.name}
+                  subtitle={`${[entry.description || "No Description", entry.task?.name].filter(Boolean).join(" • ")}`}
+                  accessories={[
+                    { text: entry.project?.name, icon: { source: Icon.Dot, tintColor: entry.project?.color } },
+                  ]}
                   icon={{ source: Icon.Circle, tintColor: entry.project?.color }}
                   keywords={[...(entry.description?.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
-                  accessoryIcon={{ source: Icon.Dot, tintColor: entry.project?.color }}
                   actions={
                     <ActionPanel>
-                      <ActionPanelItem
+                      <Action
                         title="Start Timer"
                         onAction={() => {
-                          addNewTimeEntry(entry.description, entry.projectId).then(() => updateTimeEntries());
+                          addNewTimeEntry(entry.description, entry.projectId, entry.taskId).then(() =>
+                            updateTimeEntries(),
+                          );
                         }}
                       />
                       <OpenWebPage />
@@ -165,6 +156,7 @@ export default function Main() {
 function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
   const { config } = useConfig();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [tasks, setTasks] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { pop } = useNavigation();
 
@@ -174,13 +166,13 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
     async function getAllProjectsOnWorkspace(): Promise<void> {
       setIsLoading(true);
 
-      const storedProjects: string | undefined = await getLocalStorageItem("projects");
+      const storedProjects: string | undefined = await LocalStorage.getItem("projects");
       if (storedProjects) setProjects(JSON.parse(storedProjects));
 
-      const { data } = await fetcher(`/workspaces/${config.workspaceId}/projects?page-size=1000`);
+      const { data } = await fetcher(`/workspaces/${config.workspaceId}/projects?page-size=1000&archived=false`);
 
       setProjects(data || []);
-      setLocalStorageItem("projects", JSON.stringify(data));
+      LocalStorage.setItem("projects", JSON.stringify(data));
       setIsLoading(false);
     }
 
@@ -193,22 +185,45 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <SubmitFormAction
+          <Action.SubmitForm
             title="Start"
-            onSubmit={({ description, projectId }) => {
-              if (description && projectId) {
-                addNewTimeEntry(description, projectId).then(() => updateTimeEntries());
+            onSubmit={({ description, projectId, taskId }) => {
+              if (projectId) {
+                addNewTimeEntry(description, projectId, taskId === "-1" ? null : taskId).then(() =>
+                  updateTimeEntries(),
+                );
                 pop();
               } else {
-                showToast(ToastStyle.Failure, "All fields are required");
+                showToast(Toast.Style.Failure, "Project is required.");
               }
             }}
           />
-          <ActionPanelItem title="Discard" onAction={pop} />
+          <Action.SubmitForm title="Discard" onSubmit={pop} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="projectId" title="Project">
+      <Form.Dropdown
+        id="projectId"
+        title="Project"
+        onChange={(projectId) => {
+          async function getAllTasksForProject(projectId: string): Promise<void> {
+            setIsLoading(true);
+
+            const storedTasks: string | undefined = await LocalStorage.getItem(`project[${projectId}]`);
+            if (storedTasks) setTasks(JSON.parse(storedTasks));
+
+            const { data } = await fetcher(
+              `/workspaces/${config.workspaceId}/projects/${projectId}/tasks?page-size=1000`,
+            );
+
+            setTasks(data || []);
+            LocalStorage.setItem(`project[${projectId}]`, JSON.stringify(data));
+            setIsLoading(false);
+          }
+
+          getAllTasksForProject(projectId);
+        }}
+      >
         {projects.map((project: Project) => (
           <Form.Dropdown.Item
             key={project.id}
@@ -218,14 +233,34 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
           />
         ))}
       </Form.Dropdown>
+
+      {tasks.length ? (
+        <Form.Dropdown id="taskId" title="Task">
+          <Form.Dropdown.Section>
+            <Form.Dropdown.Item key={-1} value={"-1"} title={"Without task"} icon={{ source: Icon.TextDocument }} />
+          </Form.Dropdown.Section>
+
+          <Form.Dropdown.Section title="Project tasks">
+            {tasks.map((task: Task) => (
+              <Form.Dropdown.Item
+                key={task.id}
+                value={task.id}
+                title={task.name}
+                icon={{ source: Icon.TextDocument }}
+              />
+            ))}
+          </Form.Dropdown.Section>
+        </Form.Dropdown>
+      ) : null}
+
       <Form.TextField id="description" defaultValue="" title="Description" />
     </Form>
   );
 }
 
 async function getTimeEntries({ onError }: { onError?: (state: boolean) => void }): Promise<TimeEntry[]> {
-  const workspaceId = await getLocalStorageItem("workspaceId");
-  const userId = await getLocalStorageItem("userId");
+  const workspaceId = await LocalStorage.getItem("workspaceId");
+  const userId = await LocalStorage.getItem("userId");
 
   const { data, error } = await fetcher(
     `/workspaces/${workspaceId}/user/${userId}/time-entries?hydrated=true&page-size=500`,
@@ -239,7 +274,8 @@ async function getTimeEntries({ onError }: { onError?: (state: boolean) => void 
   if (data?.length) {
     const filteredEntries: TimeEntry[] = uniqWith(
       data,
-      (a: TimeEntry, b: TimeEntry) => a.projectId === b.projectId && a.description === b.description,
+      (a: TimeEntry, b: TimeEntry) =>
+        a.projectId === b.projectId && a.taskId === b.taskId && a.description === b.description,
     );
 
     return filteredEntries;
@@ -249,10 +285,10 @@ async function getTimeEntries({ onError }: { onError?: (state: boolean) => void 
 }
 
 async function stopCurrentTimer(): Promise<void> {
-  showToast(ToastStyle.Animated, "Stopping…");
+  showToast(Toast.Style.Animated, "Stopping…");
 
-  const workspaceId = await getLocalStorageItem("workspaceId");
-  const userId = await getLocalStorageItem("userId");
+  const workspaceId = await LocalStorage.getItem("workspaceId");
+  const userId = await LocalStorage.getItem("userId");
 
   const { data, error } = await fetcher(`/workspaces/${workspaceId}/user/${userId}/time-entries`, {
     method: "PATCH",
@@ -260,22 +296,26 @@ async function stopCurrentTimer(): Promise<void> {
   });
 
   if (!error && data) {
-    showToast(ToastStyle.Success, "Timer stopped");
+    showToast(Toast.Style.Success, "Timer stopped");
   } else {
-    showToast(ToastStyle.Failure, "No timer running");
+    showToast(Toast.Style.Failure, "No timer running");
   }
 }
 
-async function addNewTimeEntry(description: string, projectId: string): Promise<void> {
-  showToast(ToastStyle.Animated, "Starting…");
+async function addNewTimeEntry(
+  description: string | undefined | null,
+  projectId: string,
+  taskId: string | undefined | null,
+): Promise<void> {
+  showToast(Toast.Style.Animated, "Starting…");
 
-  const workspaceId = await getLocalStorageItem("workspaceId");
+  const workspaceId = await LocalStorage.getItem("workspaceId");
 
   const { data } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
     method: "POST",
     body: {
       description,
-      taskId: null,
+      taskId,
       projectId,
       timeInterval: {
         start: new Date().toISOString(),
@@ -287,8 +327,8 @@ async function addNewTimeEntry(description: string, projectId: string): Promise<
   });
 
   if (data?.id) {
-    showToast(ToastStyle.Success, "Timer is running");
+    showToast(Toast.Style.Success, "Timer is running");
   } else {
-    showToast(ToastStyle.Failure, "Timer could not be started");
+    showToast(Toast.Style.Failure, "Timer could not be started");
   }
 }

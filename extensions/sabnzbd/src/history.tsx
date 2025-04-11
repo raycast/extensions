@@ -1,93 +1,77 @@
-import {
-  List,
-  showToast,
-  ToastStyle,
-  preferences,
-  Icon,
-  ImageLike,
-  ActionPanel,
-  Detail,
-  useNavigation,
-} from "@raycast/api";
-import { useState, useEffect } from "react";
-import { Client, History, HistorySlots, Results } from "sabnzbd-api";
-import moment from "moment";
+import { List, showToast, Icon, ActionPanel, Detail, Action, Image, Toast, Color } from "@raycast/api";
+import { type History, HistorySlots } from "sabnzbd-api";
+import { MutatePromise, useCachedPromise } from "@raycast/utils";
+import { client } from "./sabnzbd";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(relativeTime);
+
+type Mutate = MutatePromise<HistorySlots[]>;
 
 export default function History() {
-  const [init, setInit] = useState<boolean>(false);
-  const [historySlots, setHistorySlots] = useState<HistorySlots[]>([]);
-
-  useEffect(() => {
-    async function fetch() {
-      const historySlots = await fetchHistorySlots();
-
-      setHistorySlots(historySlots);
-      setInit(true);
-    }
-
-    fetch();
-  }, []);
-
-  const onSearchTextChange = async (text: string) => {
-    let historySlots = await fetchHistorySlots();
-    historySlots = historySlots.filter((slot) => {
-      return slot.name.includes(text);
-    });
-
-    setHistorySlots(historySlots);
-  };
+  const {
+    isLoading,
+    data: historySlots,
+    mutate,
+  } = useCachedPromise(
+    async () => {
+      const history = await client.history();
+      return history.slots;
+    },
+    [],
+    {
+      keepPreviousData: true,
+      initialData: [],
+      failureToastOptions: {
+        title: "Could not load History Slots",
+      },
+    },
+  );
 
   return (
-    <List isLoading={!init} searchBarPlaceholder="Filter slots by name..." onSearchTextChange={onSearchTextChange}>
+    <List isLoading={isLoading} searchBarPlaceholder="Filter slots by name">
       {historySlots.map((slot) => (
-        <HistorySlotListItem key={slot.nzo_id} slot={slot} setHistorySlots={setHistorySlots} />
+        <HistorySlotListItem key={slot.nzo_id} slot={slot} mutate={mutate} />
       ))}
     </List>
   );
 }
 
-function HistorySlotListItem(props: { slot: HistorySlots; setHistorySlots: any }) {
-  const { push } = useNavigation();
-
+function HistorySlotListItem(props: { slot: HistorySlots; mutate: Mutate }) {
   const slot = props.slot;
-  const setHistorySlots = props.setHistorySlots;
+  const mutate = props.mutate;
 
-  let icon: ImageLike;
+  let icon: Image.ImageLike;
 
   const actions = (
     <ActionPanel>
-      <ActionPanel.Item
-        title="Details"
-        icon={{ source: { light: "file-light.png", dark: "file-dark.png" } }}
-        onAction={() => push(<Details slot={slot} setHistorySlots={setHistorySlots} />)}
-      />
-      <ActionPanel.Item
-        title={"Delete"}
-        onAction={() => onDelete(slot, setHistorySlots)}
-        icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
+      <Action.Push title="Details" icon={Icon.Document} target={<Details slot={slot} />} />
+      <Action
+        title="Delete"
+        onAction={() => onDelete(slot, mutate)}
+        icon={Icon.Trash}
+        style={Action.Style.Destructive}
       />
     </ActionPanel>
   );
 
   if (slot.status == "Completed") {
-    icon = { source: { light: "ok-light.png", dark: "ok-dark.png" } };
+    icon = Icon.Check;
   } else if (slot.status == "Extracting") {
-    icon = { source: { light: "bolt-light.png", dark: "bolt-dark.png" } };
+    icon = Icon.Bolt;
   } else if (slot.status == "Verifying") {
-    icon = { source: { light: "key-light.png", dark: "key-dark.png" } };
+    icon = Icon.Key;
   } else if (slot.status == "Queued") {
-    icon = { source: { light: "pause-light.png", dark: "pause-dark.png" } };
+    icon = Icon.Pause;
   } else if (slot.status == "Repairing") {
-    icon = { source: { light: "tool-light.png", dark: "tool-dark.png" } };
+    icon = Icon.WrenchScrewdriver;
   } else if (slot.status == "Failed") {
-    icon = { source: { light: "error-light.png", dark: "error-dark.png" } };
+    icon = { source: Icon.Info, tintColor: Color.Red };
   } else {
-    console.log(`Unknown slot status: ${slot.status}`);
-
     icon = Icon.QuestionMark;
   }
 
-  const completed = moment.unix(slot.completed).fromNow();
+  const completed = dayjs().to(dayjs.unix(slot.completed));
 
   return (
     <List.Item
@@ -101,43 +85,33 @@ function HistorySlotListItem(props: { slot: HistorySlots; setHistorySlots: any }
   );
 }
 
-function Details(props: { slot: HistorySlots; setHistorySlots: any }) {
+function Details(props: { slot: HistorySlots }) {
   const slot = props.slot;
 
-  const completed = moment.unix(slot.completed).fromNow();
+  const completed = dayjs().to(dayjs.unix(slot.completed));
 
   const markdown = `# ${slot.name}\n\nStatus: ${slot.status}\n\nCategory: ${slot.category}\n\nStorage: ${slot.storage}\n\nCompleted: ${completed}`;
 
   return <Detail markdown={markdown} navigationTitle={slot.name} />;
 }
 
-async function onDelete(slot: HistorySlots, setHistorySlots: any) {
-  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
-
+async function onDelete(slot: HistorySlots, mutate: Mutate) {
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting History Item" });
   try {
-    const results = (await client.historyDelete(slot.nzo_id)) as Results;
-
-    const slots = await fetchHistorySlots();
-
-    setHistorySlots(slots);
-
-    showToast(ToastStyle.Success, "Deleted history item");
+    await mutate(
+      client.historyDelete(slot.nzo_id).then((result) => {
+        if (!result.status || result.error) throw new Error();
+      }),
+      {
+        optimisticUpdate(data) {
+          return data.filter((item) => item.nzo_id !== slot.nzo_id);
+        },
+      },
+    );
+    toast.style = Toast.Style.Success;
+    toast.title = "Deleted History Item";
   } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Could not delete history item");
-  }
-}
-
-async function fetchHistorySlots(): Promise<HistorySlots[]> {
-  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
-
-  try {
-    const history = (await client.history()) as History;
-
-    return Promise.resolve(history.slots);
-  } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Could not load history slots");
-    return Promise.resolve([]);
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could not delete History Item";
   }
 }

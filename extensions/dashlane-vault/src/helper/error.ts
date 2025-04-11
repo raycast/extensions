@@ -1,4 +1,4 @@
-import { Toast, open, openExtensionPreferences } from "@raycast/api";
+import { Toast, captureException as captureExceptionInternal, open, openExtensionPreferences } from "@raycast/api";
 
 export const OpenPreferencesAction: Toast.ActionOptions = {
   title: "Open Preferences",
@@ -73,6 +73,25 @@ export class TimeoutError extends DisplayableError {
   constructor(stack: string) {
     super("Timeout", stack);
   }
+}
+
+/**
+ * These errors are shown buz should not be send to raycast
+ */
+const uncapturedErrors = [
+  CLIVersionNotSupportedError,
+  CLINotLoggedInError,
+  MasterPasswordMissingError,
+  TimeoutError,
+  CLINotFoundError,
+];
+
+/**
+ * Captures unexpected errors to raycast
+ */
+export function captureException(error: unknown) {
+  if (uncapturedErrors.some((errorClass) => error instanceof errorClass)) return;
+  captureExceptionInternal(error);
 }
 
 export function getErrorAction(error: unknown) {

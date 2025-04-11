@@ -6,7 +6,7 @@
 
 ## Description
 
-This mod provides several commands centered around opening your common files and folders. It provides quite a few commands for varying uses so there should be something for everyone! Take a look at the schenarios below to get a feel for how you might use the extension.
+This mod provides several commands centered around opening your common files and folders. It provides quite a few commands for varying uses, so there should be something for everyone! Take a look at the scenarios below to get a feel for how you might use the extension.
 
 *Not all commands will be useful to everyone. To avoid command clutter, turn off any individual commands you won't use.*
 

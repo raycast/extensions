@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { columns, itemInset, layout } from "./types/preferences";
 import { useFrecencySorting } from "@raycast/utils";
-import { Grid, Icon, List } from "@raycast/api";
+import { Color, Grid, Icon, List } from "@raycast/api";
 import { OpenLinkInEmptyView } from "./components/open-link-in-empty-view";
 import { ActionOnBrowser } from "./components/action-on-browser";
 import { isEmpty } from "./utils/common-utils";
@@ -79,7 +79,9 @@ export default function OpenLinkInSpecificBrowser() {
             content={{ fileIcon: browser.path }}
             quickLook={{ path: browser.path, name: browser.name }}
             accessory={
-              defaultBrowser?.path === browser.path ? { icon: Icon.Compass, tooltip: "Default Browser" } : undefined
+              defaultBrowser?.path === browser.path
+                ? { icon: { source: Icon.Compass, tintColor: Color.SecondaryText }, tooltip: "Default Browser" }
+                : undefined
             }
             actions={
               <ActionOnBrowser

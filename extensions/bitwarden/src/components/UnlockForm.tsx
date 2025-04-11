@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
+import { DebuggingBugReportingActionSection } from "~/components/actions";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
 import { treatError } from "~/utils/debug";
@@ -19,9 +20,11 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
 
   const [isLoading, setLoading] = useState(false);
   const [unlockError, setUnlockError] = useState<string | undefined>(undefined);
+  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
   const [lockReason, { remove: clearLockReason }] = useLocalStorageItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
 
-  async function onSubmit({ password }: { password: string }) {
+  async function onSubmit() {
     if (password.length === 0) return;
 
     const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
@@ -69,17 +72,27 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
     await showToast(Toast.Style.Success, "Error copied to clipboard");
   };
 
+  let PasswordField = Form.PasswordField;
+  let passwordFieldId = "password";
+  if (showPassword) {
+    PasswordField = Form.TextField;
+    passwordFieldId = "plainPassword";
+  }
+
   return (
     <Form
       actions={
         <ActionPanel>
           {!isLoading && (
-            <Action.SubmitForm
-              icon={Icon.LockUnlocked}
-              title="Unlock"
-              onSubmit={onSubmit}
-              shortcut={{ key: "enter", modifiers: [] }}
-            />
+            <>
+              <Action.SubmitForm icon={Icon.LockUnlocked} title="Unlock" onSubmit={onSubmit} />
+              <Action
+                icon={showPassword ? Icon.EyeDisabled : Icon.Eye}
+                title={showPassword ? "Hide Password" : "Show Password"}
+                onAction={() => setShowPassword((prev) => !prev)}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
+              />
+            </>
           )}
           {!!unlockError && (
             <Action
@@ -89,12 +102,20 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
               style={Action.Style.Destructive}
             />
           )}
+          <DebuggingBugReportingActionSection />
         </ActionPanel>
       }
     >
       {shouldShowServer && <Form.Description title="Server URL" text={serverMessage} />}
       <Form.Description title="Vault Status" text={userMessage} />
-      <Form.PasswordField autoFocus id="password" title="Master Password" />
+      <PasswordField
+        id={passwordFieldId}
+        title="Master Password"
+        value={password}
+        onChange={setPassword}
+        ref={(field) => field?.focus()}
+      />
+      <Form.Description title="" text={`Press ⌘E to ${showPassword ? "hide" : "show"} password`} />
       {!!lockReason && (
         <>
           <Form.Description title="ℹ️" text={lockReason} />
@@ -106,7 +127,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
 };
 
 function TimeoutInfoDescription() {
-  const vaultTimeoutMs = getPreferenceValues<Preferences>().repromptIgnoreDuration;
+  const vaultTimeoutMs = getPreferenceValues<AllPreferences>().repromptIgnoreDuration;
   const timeoutLabel = getLabelForTimeoutPreference(vaultTimeoutMs);
 
   if (!timeoutLabel) return null;

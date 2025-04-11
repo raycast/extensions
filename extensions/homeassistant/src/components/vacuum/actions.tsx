@@ -35,8 +35,7 @@ export function VacuumStartAction(props: { state: State }): JSX.Element | null {
     <Action
       title="Start"
       onAction={() => callVacuumStartService(s)}
-      shortcut={{ modifiers: ["cmd"], key: "p" }}
-      icon={{ source: "play.png", tintColor: Color.PrimaryText }}
+      icon={{ source: "play.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -51,7 +50,7 @@ export function VacuumPauseAction(props: { state: State }): JSX.Element | null {
       title="Pause"
       onAction={() => callVacuumPauseService(s)}
       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-      icon={{ source: "pause.png", tintColor: Color.PrimaryText }}
+      icon={{ source: "pause.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -66,7 +65,7 @@ export function VacuumStopAction(props: { state: State }): JSX.Element | null {
       title="Stop"
       onAction={() => callVacuumStopService(s)}
       shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-      icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
+      icon={{ source: "stop.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -81,7 +80,7 @@ export function VacuumTurnOnAction(props: { state: State }): JSX.Element | null 
       title="Turn On"
       onAction={() => callVacuumTurnOnService(s)}
       shortcut={{ modifiers: ["cmd"], key: "o" }}
-      icon={{ source: "power-btn.png", tintColor: Color.Green }}
+      icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -96,7 +95,7 @@ export function VacuumTurnOffAction(props: { state: State }): JSX.Element | null
       title="Turn Off"
       onAction={() => callVacuumTurnOffService(s)}
       shortcut={{ modifiers: ["cmd"], key: "f" }}
-      icon={{ source: "power-btn.png", tintColor: Color.Red }}
+      icon={{ source: "power-off.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -111,7 +110,7 @@ export function VacuumReturnToBaseAction(props: { state: State }): JSX.Element |
       title="Return to Base"
       onAction={() => callVacuumReturnToBaseService(s)}
       shortcut={{ modifiers: ["cmd"], key: "b" }}
-      icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
+      icon={{ source: "home.svg", tintColor: Color.PrimaryText }}
     />
   );
 }

@@ -1,5 +1,12 @@
 # Authy Extension Changelog
 
+## [Refactoring] - 2024-07-09
+
+- Code refactoring
+- Assets cleanup 
+- Speed extension loading
+- Add Export Tokens action
+
 ## [API Update, Accuracy and UI] - 2024-06-24
 
 - Update decoding in line with updated API response

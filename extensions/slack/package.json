@@ -6,9 +6,12 @@
   "icon": "slack-icon-rounded.png",
   "author": "mommertf",
   "contributors": [
-    "Elliot67",
     "stelo",
-    "thomaslombart"
+    "thomaslombart",
+    "Rob"
+  ],
+  "pastContributors": [
+    "Elliot67"
   ],
   "categories": [
     "Communication",
@@ -18,9 +21,37 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search",
+      "title": "Open Channel",
       "subtitle": "Slack",
+      "keywords": [
+        "search"
+      ],
       "description": "Search for all workspace members, group chats, and channels and open them directly in your Slack app.",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Channel Metadata",
+          "label": "Display extra metadata in results",
+          "description": "Show team member's titles, time zone, and current time in Open Channel results",
+          "name": "displayExtraMetadata",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "search-messages",
+      "title": "Search Messages",
+      "subtitle": "Slack",
+      "description": "Search for Slack messages.",
+      "mode": "view"
+    },
+    {
+      "name": "send-message",
+      "title": "Send Message",
+      "subtitle": "Slack",
+      "description": "Send a message to a channel or user in Slack.",
       "mode": "view"
     },
     {
@@ -50,6 +81,13 @@
       "subtitle": "Slack",
       "description": "Let Slack decide automatically how to show your presence status or force it to be shown as offline.",
       "mode": "view"
+    },
+    {
+      "name": "search-emojis",
+      "title": "Search Emojis",
+      "subtitle": "Slack",
+      "description": "Search custom emojis in your Slack team.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -71,22 +109,87 @@
       "default": true
     }
   ],
+  "tools": [
+    {
+      "title": "Get Channels",
+      "name": "get-channels",
+      "description": "Lists all channels in the Slack team"
+    },
+    {
+      "title": "Get Channel History",
+      "name": "get-channel-history",
+      "description": "Fetches a channel's history of messages and events."
+    },
+    {
+      "title": "Get Users",
+      "name": "get-users",
+      "description": "List all users in the Slack team"
+    },
+    {
+      "title": "Set Status",
+      "name": "set-status",
+      "description": "Set or unset the status of the current user"
+    },
+    {
+      "title": "Get Emojis",
+      "name": "get-emojis",
+      "description": "List all custom emojis in the Slack team"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@slack set my status to away",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "set-status",
+              "arguments": {
+                "text": {
+                  "includes": "away"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "set-status": "success"
+        }
+      },
+      {
+        "input": "@slack summarize what happened in #general yesterday",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-channels"
+            }
+          }
+        ],
+        "mocks": {
+          "get-channels": []
+        }
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.76.0",
-    "@raycast/utils": "^1.16.0",
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.18.0",
     "@slack/web-api": "^7.0.4",
     "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.1.3",
     "lodash": "^4.17.21",
     "node-emoji": "^2.1.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/lodash": "^4.17.5",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
+    "@types/node": "^22.13.10",
+    "@types/node-emoji": "^2.1.0",
+    "@types/react": "^19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.2",
     "react": "^18.2.0",
+    "react-devtools": "^6.1.1",
     "typescript": "^5.4.5"
   },
   "scripts": {

@@ -189,5 +189,5 @@ export function createPemString(cert: PeerCertificate): string {
     return str.replace(regex, "$1\n");
   };
   const base64 = cert.raw.toString("base64");
-  return `-----BEGIN CERTIFICATE-----\n${insertNewlines(base64)}\n-----END CERTIFICATE-----\n`;
+  return `-----BEGIN CERTIFICATE-----\n${insertNewlines(base64)}-----END CERTIFICATE-----\n`;
 }

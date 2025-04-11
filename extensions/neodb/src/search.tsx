@@ -3,6 +3,7 @@ import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 import { Category, Item } from "./types";
 import ItemDetail from "./ItemDetail";
 import useSearch from "./hooks/useSearch";
+import getItemTitle from "./utils/getItemTitle";
 
 interface SectionProps {
   items: Item[];
@@ -26,7 +27,7 @@ const Section: React.FC<SectionProps> = ({ items, category, aspectRatio }) => {
         <Grid.Item
           key={item.uuid}
           content={{ value: { source: item.cover_image_url }, tooltip: item.brief }}
-          title={item.display_title}
+          title={getItemTitle(item)}
           subtitle={item.brief}
           actions={
             <ActionPanel>
@@ -68,14 +69,18 @@ export default function Command() {
 
   return (
     <Grid throttle columns={7} isLoading={isLoading} onSearchTextChange={setSearchText}>
-      {categories.map((category) => (
-        <Section
-          key={category}
-          items={categorizedItems[category]}
-          category={category}
-          aspectRatio={aspectRatios[category]}
-        />
-      ))}
+      {!isLoading && !categories.length ? (
+        <Grid.EmptyView title="No items matching your search query." />
+      ) : (
+        categories.map((category) => (
+          <Section
+            key={category}
+            items={categorizedItems[category]}
+            category={category}
+            aspectRatio={aspectRatios[category]}
+          />
+        ))
+      )}
     </Grid>
   );
 }

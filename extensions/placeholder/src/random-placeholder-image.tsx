@@ -1,17 +1,15 @@
-import { Clipboard, LaunchProps, showHUD } from "@raycast/api";
-import { PicsumConfig } from "./types/types";
-import {
-  blur,
-  defaultHeight,
-  defaultWidth,
-  grayscale,
-  jpg,
-  noCache,
-  PlaceholderArguments,
-  staticRandom,
-} from "./types/preferences";
-import { getArguments, isEmpty } from "./utils/common-utils";
 import { Picsum } from "picsum-photos/dist";
+import type { LaunchProps } from "@raycast/api";
+import { Clipboard, showHUD } from "@raycast/api";
+import type { PicsumConfig } from "@/types/types";
+import { getArguments, isEmpty } from "@/utils/common-utils";
+import { getBlur } from "@/utils/parse";
+import { blur, defaultHeight, defaultWidth, grayscale, jpg, noCache, staticRandom } from "@/utils/preferences";
+
+interface PlaceholderArguments {
+  height: string;
+  width: string;
+}
 
 export default async (props: LaunchProps<{ arguments: PlaceholderArguments }>) => {
   const { args } = getArguments([props.arguments.width, props.arguments.height], ["Width", "Height"]);
@@ -43,15 +41,4 @@ export default async (props: LaunchProps<{ arguments: PlaceholderArguments }>) =
 
   await Clipboard.copy(_imageURL);
   await showHUD(`✨ ${_imageURL}`);
-};
-
-const getBlur = (blur: string): number => {
-  let _blur = parseFloat(blur);
-  if (isNaN(_blur) || _blur < 0) {
-    _blur = 0;
-  }
-  if (_blur > 10) {
-    _blur = 10;
-  }
-  return _blur;
 };

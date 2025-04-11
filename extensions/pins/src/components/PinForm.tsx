@@ -18,8 +18,8 @@ import {
 } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
-import { KEYBOARD_SHORTCUT } from "../lib/constants";
-import { useGroups } from "../lib/Groups";
+import { KEYBOARD_SHORTCUT, PinAction, Visibility } from "../lib/constants";
+import { Group, useGroups } from "../lib/Groups";
 import { iconMap } from "../lib/icons";
 import { createNewPin, getPins, getPinStatistics, modifyPin, Pin } from "../lib/Pins";
 import { ExtensionPreferences } from "../lib/preferences";
@@ -43,12 +43,16 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
   const [placeholderTooltip, setPlaceholderTooltip] = useState<string>("");
   const [urlError, setUrlError] = useState<string | undefined>();
   const [shortcutError, setShortcutError] = useState<string | undefined>();
-  const [values, setValues] = useState<Record<string, unknown>>({
+  const [values, setValues] = useState({
     url: pin ? pin.url : undefined,
     icon: pin ? pin.icon : undefined,
     iconColor: pin ? pin.iconColor : undefined,
     isFragment: pin && pin.fragment ? true : false,
     application: pin ? pin.application : undefined,
+    expireDate: pin ? pin.expireDate : undefined,
+    expirationAction: pin ? pin.expirationAction : undefined,
+    tags: pin ? pin.tags?.join(", ") : undefined,
+    aliases: pin ? pin.aliases?.join(", ") : undefined,
   });
 
   const iconList = Object.keys(Icon);
@@ -160,50 +164,77 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
                 }
               }
 
+              let expirationAction = values.expirationActionField || PinAction.DELETE;
+              if (expirationAction === PinAction.MOVE) {
+                const targetGroup = values.expirationActionDestinationField || "Expired Pins";
+                expirationAction = `custom-move:{{movePin:${values.nameField || values.urlField.substring(0, 50)}:${targetGroup}}}`;
+              } else if (expirationAction === "custom") {
+                expirationAction = `custom:${values.expirationActionCustomField}`;
+              }
+
               if (pin && setPins) {
                 await modifyPin(
                   pin,
-                  values.nameField,
-                  values.urlField,
-                  values.iconField,
-                  values.groupField || "None",
-                  values.openWithField,
-                  values.dateField,
-                  values.execInBackgroundField,
-                  values.fragmentField,
-                  values.modifiersField.length ? { modifiers: values.modifiersField, key: values.keyField } : undefined,
-                  pin.lastOpened ? new Date(pin.lastOpened) : undefined,
-                  pin.timesOpened,
-                  pin.dateCreated ? new Date(pin.dateCreated) : new Date(),
-                  values.iconColorField,
-                  (values.tagsField as string)
-                    .split(",")
-                    .map((tag) => tag.trim())
-                    .filter((tag) => tag.length > 0),
-                  values.notesField,
-                  values.tooltipField,
-                  pin.averageExecutionTime,
-                  pop,
+                  {
+                    ...pin,
+                    name: values.nameField,
+                    url: values.urlField,
+                    icon: values.iconField,
+                    group: values.groupField || "None",
+                    application: values.openWithField,
+                    expireDate: values.dateField ? new Date(values.dateField).toUTCString() : undefined,
+                    execInBackground: values.execInBackgroundField,
+                    fragment: values.fragmentField,
+                    iconColor: values.iconColorField,
+                    tags: (values.tagsField as string)
+                      .split(",")
+                      .map((tag) => tag.trim())
+                      .filter((tag) => tag.length > 0),
+                    notes: values.notesField,
+                    tooltip: values.tooltipField,
+                    visibility: values.visibilityField,
+                    expirationAction: expirationAction,
+                    shortcut: values.modifiersField.length
+                      ? { modifiers: values.modifiersField, key: values.keyField }
+                      : undefined,
+                    lastOpened: pin.lastOpened ? new Date(pin.lastOpened).toUTCString() : undefined,
+                    dateCreated: pin.dateCreated ? new Date(pin.dateCreated).toUTCString() : new Date().toUTCString(),
+                    aliases: (values.aliasesField as string)
+                      .split(",")
+                      .map((alias) => alias.trim())
+                      .filter((alias) => alias.length > 0),
+                  },
                   setPins,
+                  pop,
                 );
               } else {
-                await createNewPin(
-                  values.nameField || values.urlField.substring(0, 50),
-                  values.urlField,
-                  values.iconField,
-                  values.groupField || "None",
-                  values.openWithField,
-                  values.dateField,
-                  values.execInBackgroundField,
-                  values.fragmentField,
-                  { modifiers: values.modifiersField, key: values.keyField },
-                  values.iconColorField,
-                  (values.tagsField as string)
+                await createNewPin({
+                  ...pin,
+                  name: values.nameField || values.urlField.substring(0, 50),
+                  url: values.urlField,
+                  icon: values.iconField,
+                  group: values.groupField || "None",
+                  application: values.openWithField,
+                  expireDate: values.dateField ? new Date(values.dateField).toUTCString() : undefined,
+                  execInBackground: values.execInBackgroundField,
+                  fragment: values.fragmentField,
+                  iconColor: values.iconColorField,
+                  tags: (values.tagsField as string)
                     .split(",")
                     .map((tag) => tag.trim())
                     .filter((tag) => tag.length > 0),
-                  values.notesField,
-                );
+                  notes: values.notesField,
+                  tooltip: values.tooltipField,
+                  visibility: values.visibilityField,
+                  expirationAction: expirationAction,
+                  shortcut: values.modifiersField.length
+                    ? { modifiers: values.modifiersField, key: values.keyField }
+                    : undefined,
+                  aliases: (values.aliasesField as string)
+                    .split(",")
+                    .map((alias) => alias.trim())
+                    .filter((alias) => alias.length > 0),
+                });
                 if (setPins) {
                   setPins(await getPins());
                 }
@@ -212,14 +243,16 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
               }
             }}
           />
+
           <Action.Open
             title="Open Placeholders Guide"
             icon={Icon.Info}
             target={path.resolve(environment.assetsPath, "placeholders_guide.md")}
             shortcut={{ modifiers: ["cmd"], key: "g" }}
           />
-          {pin && setPins ? <DeletePinAction pin={pin} setPins={setPins} pop={pop} /> : null}
+
           {pin && pins ? <CopyPinActionsSubmenu pin={pin} pins={pins} /> : null}
+          {pin && setPins ? <DeletePinAction pin={pin} setPins={setPins} pop={pop} /> : null}
         </ActionPanel>
       }
     >
@@ -327,7 +360,7 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
               <Form.Dropdown.Item
                 key={key}
                 title={key}
-                value={color as string}
+                value={color.toString()}
                 icon={{ source: Icon.Circle, tintColor: color }}
               />
             );
@@ -359,12 +392,34 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
         </Form.Dropdown>
       ) : null}
 
-      <Form.DatePicker
-        id="dateField"
-        title="Expiration Date"
-        info="The date and time at which the pin will be automatically removed"
-        defaultValue={pin && pin.expireDate ? new Date(pin.expireDate) : undefined}
-      />
+      <Form.Dropdown
+        id="visibilityField"
+        title="Visibility"
+        info="Controls the visibility of the pin in the 'View Pins' command and the menu bar dropdown. If set to 'Hidden', you can find the pin by using the 'Show Hidden Pins' action of the 'View Pins' command. Hidden pins can still be opened using deeplinks, while disabled pins cannot be opened at all."
+        defaultValue={pin ? pin.visibility : Visibility.USE_PARENT}
+      >
+        <Form.Dropdown.Item
+          key="use_parent"
+          title="Use Parent Setting"
+          value={Visibility.USE_PARENT}
+          icon={Icon.Gear}
+        />
+        <Form.Dropdown.Item key="visible" title="Visible" value={Visibility.VISIBLE} icon={Icon.Eye} />
+        <Form.Dropdown.Item
+          key="menubarOnly"
+          title="Show in Menubar Only"
+          value={Visibility.MENUBAR_ONLY}
+          icon={Icon.Window}
+        />
+        <Form.Dropdown.Item
+          key="raycastOnly"
+          title="Show in 'View Pins' Only"
+          value={Visibility.VIEW_PINS_ONLY}
+          icon={Icon.AppWindowList}
+        />
+        <Form.Dropdown.Item key="hidden" title="Hidden" value={Visibility.HIDDEN} icon={Icon.EyeDisabled} />
+        <Form.Dropdown.Item key="disabled" title="Disabled" value={Visibility.DISABLED} icon={Icon.XMarkCircle} />
+      </Form.Dropdown>
 
       {groups?.length ? (
         <Form.Dropdown
@@ -381,14 +436,23 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
         </Form.Dropdown>
       ) : null}
 
+      <Form.Separator />
+
       <Form.TextField
         id="tagsField"
         title="Tags"
         info="The comma-separated list of tags associated with the pin. Tags can be used to filter pins in the 'View Pins' command."
-        defaultValue={pin ? pin.tags?.join(", ") : ""}
+        value={values.tags || ""}
+        onChange={(value) => setValues({ ...values, tags: value })}
       />
 
-      <Form.Separator />
+      <Form.TextField
+        id="aliasesField"
+        title="Aliases"
+        info="The comma-separated list of aliases that can be used to find the pin."
+        value={values.aliases}
+        onChange={(value) => setValues({ ...values, aliases: value })}
+      />
 
       <Form.TextField
         id="tooltipField"
@@ -404,6 +468,76 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
         defaultValue={pin ? pin.notes : undefined}
         enableMarkdown={true}
       />
+
+      <Form.Separator />
+
+      <Form.DatePicker
+        id="dateField"
+        title="Expiration Date"
+        info="The date and time at which the pin will be automatically removed"
+        defaultValue={pin && pin.expireDate ? new Date(pin.expireDate) : undefined}
+        onChange={(value) => setValues({ ...values, expireDate: value?.toDateString() })}
+      />
+
+      {values.expireDate ? (
+        <Form.Dropdown
+          id="expirationActionField"
+          title="Expiration Action"
+          info="The action to take when the pin expires"
+          defaultValue={
+            pin
+              ? pin.expirationAction?.startsWith("custom")
+                ? pin.expirationAction?.startsWith("custom-move")
+                  ? "move"
+                  : "custom"
+                : pin.expirationAction
+              : "delete"
+          }
+          onChange={(value) => setValues({ ...values, expirationAction: value })}
+        >
+          <Form.Dropdown.Item key="delete" title="Delete" value={PinAction.DELETE} icon={Icon.Trash} />
+          <Form.Dropdown.Item key="hide" title="Hide" value={PinAction.HIDE} icon={Icon.EyeDisabled} />
+          <Form.Dropdown.Item key="disable" title="Disable" value={PinAction.DISABLE} icon={Icon.XMarkCircle} />
+          <Form.Dropdown.Item key="move" title="Move to Group" value={PinAction.MOVE} icon={Icon.Folder} />
+          <Form.Dropdown.Item key="custom" title="Custom Action" value="custom" icon={Icon.Gear} />
+        </Form.Dropdown>
+      ) : null}
+
+      {(values.expirationAction?.startsWith("custom-move") || values.expirationAction === PinAction.MOVE) &&
+      values.expireDate ? (
+        <Form.Dropdown
+          id="expirationActionDestinationField"
+          title="Expiration Destination"
+          info="The group to move the pin to when it expires"
+          defaultValue={
+            pin
+              ? pin.expirationAction?.startsWith("custom-move")
+                ? pin.expirationAction.match(/:(.*?):(.*?):(.*?)/)?.[3] || "Expired Pins"
+                : "Expired Pins"
+              : "Expired Pins"
+          }
+        >
+          {[{ name: "Expired Pins", icon: "BellDisabled", id: -1 } as Group].concat(groups).map((group) => {
+            return (
+              <Form.Dropdown.Item
+                key={group.name}
+                title={group.name}
+                value={group.name}
+                icon={group.icon === "None" ? Icon.Minus : { source: iconMap[group.icon], tintColor: group.iconColor }}
+              />
+            );
+          })}
+        </Form.Dropdown>
+      ) : null}
+
+      {values.expirationAction === "custom" ? (
+        <Form.TextArea
+          id="expirationActionCustomField"
+          title="Custom Action"
+          info="The custom action to take when the pin expires"
+          defaultValue={pin ? pin.expirationAction?.replace("custom-move:", "").replace("custom:", "") : undefined}
+        />
+      ) : null}
 
       <Form.Separator />
 

@@ -34,9 +34,9 @@ async function GetOllamaServersLocalStorage(): Promise<Map<string, OllamaServer>
 export async function GetOllamaServerByName(name: string): Promise<OllamaServer> {
   if (name === "Local") return { url: "http://127.0.0.1:11434" };
   const j = await LocalStorage.getItem(`settings_ollama_servers`);
-  if (!j) throw "Given Ollama Server doesn't exist";
+  if (!j) throw new Error("Given Ollama Server doesn't exist");
   const s: Map<string, OllamaServer> = new Map([...JSON.parse(j as string)]);
-  if (!s.has(name)) throw "Given Ollama Server doesn't exist";
+  if (!s.has(name)) throw new Error("Given Ollama Server doesn't exist");
   return s.get(name) as OllamaServer;
 }
 
@@ -52,7 +52,7 @@ export async function AddOllamaServers(name: string, server: OllamaServer): Prom
     await LocalStorage.setItem(`settings_ollama_servers`, JSON.stringify([...j.entries()]));
     return;
   }
-  throw "Name Already used";
+  throw new Error("Name Already used");
 }
 
 /**
@@ -84,7 +84,7 @@ export async function DeleteOllamaServers(name: string): Promise<void> {
 export async function GetSettingsCommandAnswer(command: Enum.CommandAnswer): Promise<Types.SettingsCommandAnswer> {
   const j = await LocalStorage.getItem(`settings_command_${command}`);
   if (j) return JSON.parse(j as string);
-  throw "Settings for this Command unavailable";
+  throw new Error("Settings for this Command unavailable");
 }
 
 /**
@@ -105,7 +105,7 @@ export async function SetSettingsCommandAnswer(
  */
 export async function GetSettingsCommandChatNames(): Promise<string[]> {
   const c = await GetSettingsCommandChat();
-  if (c.length === 0) throw "No Saved Chat";
+  if (c.length === 0) throw new Error("No Saved Chat");
   return c.map((v): string => v.name);
 }
 
@@ -117,7 +117,7 @@ export async function GetSettingsCommandChatNames(): Promise<string[]> {
 export async function GetSettingsCommandChatByIndex(i: number): Promise<Types.RaycastChat> {
   const c = await GetSettingsCommandChat();
   if (c[i]) return c[i];
-  throw "Chat on given index doesn't exist";
+  throw new Error("Chat on given index doesn't exist");
 }
 
 /**
@@ -127,7 +127,7 @@ export async function GetSettingsCommandChatByIndex(i: number): Promise<Types.Ra
  */
 export async function SetSettingsCommandChatByIndex(i: number, chat: Types.RaycastChat): Promise<void> {
   const c = await GetSettingsCommandChat();
-  if (!c[i]) throw "Chat on given index doesn't exist";
+  if (!c[i]) throw new Error("Chat on given index doesn't exist");
   c[i] = chat;
   await SetSettingsCommandChat(c);
 }
@@ -163,7 +163,7 @@ async function GetSettingsCommandChat(): Promise<Types.RaycastChat[]> {
   if (j) return JSON.parse(j as string);
   const jl = await GetLegacySettingsCommandChat().catch(() => undefined);
   if (jl) return jl;
-  throw "No saved chat";
+  throw new Error("No saved chat");
 }
 
 /**
@@ -224,5 +224,5 @@ async function GetLegacySettingsCommandChat(): Promise<Types.RaycastChat[]> {
       };
     });
   }
-  throw "No saved chat";
+  throw new Error("No saved chat");
 }

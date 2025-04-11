@@ -5,6 +5,9 @@
   "description": "Set of commands to interact with iLovePDF",
   "icon": "command-icon.png",
   "author": "mohamedk1",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Data"
   ],
@@ -65,6 +68,62 @@
       "subtitle": "iLovePDF",
       "description": "Converts an HTML page to PDF using iLovePDF API.",
       "mode": "view"
+    },
+    {
+      "name": "repair-pdf",
+      "title": "Repair PDF",
+      "subtitle": "iLovePDF",
+      "description": "Tries to repair a PDF using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "rotate-pdf",
+      "title": "Rotate PDF",
+      "subtitle": "iLovePDF",
+      "description": "Rotate a PDF using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "protect-pdf",
+      "title": "Protect PDF",
+      "subtitle": "iLovePDF",
+      "description": "Protects a PDF with a password using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "add-page-number",
+      "title": "Add Page Number",
+      "subtitle": "iLovePDF",
+      "description": "Add page number to PDF using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "add-watermark-to-pdf",
+      "title": "Add Watermark to PDF",
+      "subtitle": "iLovePDF",
+      "description": "Adds watermark to PDF using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "unlock-pdf",
+      "title": "Unlock PDF",
+      "subtitle": "iLovePDF",
+      "description": "Unlocks a PDF using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "validate-pdfa",
+      "title": "Validate PDF/A",
+      "subtitle": "iLovePDF",
+      "description": "Validates a PDF/A with using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "pdf-to-pdfa",
+      "title": "PDF to PDF/A",
+      "subtitle": "iLovePDF",
+      "description": "Converts a PDF to PDF/A format using iLovePDF API.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -99,6 +158,15 @@
       "required": false,
       "default": false,
       "label": "Ask before download"
+    },
+    {
+      "name": "SelectFileInFinder",
+      "title": "Select files in Finder",
+      "description": "Select files in Finder",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Select file in Finder"
     }
   ],
   "dependencies": {

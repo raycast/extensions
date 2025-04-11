@@ -10,17 +10,17 @@ All published extensions are discoverable in the Raycast Store. Use the [web int
 
 The easiest way to discover extensions is the in-app store. Open the Store command in Raycast and search for an extension. Press `⌘` `↵` to install the selected extension or press `↵` to see more details about it.
 
-![Store in Raycast](../.gitbook/assets/basics-inapp-store.png)
+![Store in Raycast](../.gitbook/assets/basics-inapp-store.webp)
 
 ## Web Store
 
 Alternatively, you can use our [web store](https://raycast.com/store). Press `⌘` `K` to open the command palette, search for an extension and open it.
 
-![Web Store](../.gitbook/assets/basics-web-store.png)
+![Web Store](../.gitbook/assets/basics-web-store.webp)
 
 Then press the Install Extension button in the top right corner and follow the steps in Raycast.
 
-![Install extension from the Web Store](../.gitbook/assets/basics-install-extension.png)
+![Install extension from the Web Store](../.gitbook/assets/basics-install-extension.webp)
 
 ## Use installed extensions
 

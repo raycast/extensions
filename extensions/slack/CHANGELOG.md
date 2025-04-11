@@ -1,6 +1,45 @@
 # Slack Changelog
 
-### [OAuth + Many Improvements] - 2024-06-18
+## [New Emoji Features and Improvements] - {PR_MERGE_DATE}
+
+- Add new `Search Emojis` command to browse and copy Slack emojis
+- Add `get-emojis` tool to fetch emojis with AI
+- Improve getting channel history with AI
+- Update tool titles and improve overall functionality
+
+## [New "Send Message" command] - 2025-04-10
+
+- Add a new command to send a message to a channel or user in Slack. Can send the message immediately or schedule it to arrive at a certain date or time. In order for this to work, you will need to add `chat:write` scope to the manifest, and re-install the application in your Slack space.
+- Updated README with updated scopes instructions.
+
+## [Moved contributor] - 2025-03-31
+
+## [Update README with improved manifest.yaml] - 2025-03-05
+
+## [Added new scope] - 2025-02-26
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [New "Copy Message URL" action] - 2025-02-10
+
+- Add `Copy Message URL` action to copy the URL of a message to the clipboard from the `Search Messages` command
+
+## [New "Copy Huddle Link" action] - 2025-01-13
+
+- Add `Copy Huddle Link` action to copy the huddle link of a chat to the clipboard
+
+## [Adds Optional Metadata to Open Channel Command] - 2024-07-30
+
+- Now includes job title, timezone, current time, and Slack status in the list returned by the Open Channel command.
+- Adds user preferences to display this new metadata.
+
+## [Search Messages command] - 2024-07-08
+
+- Add a new command to search through your Slack's workspace messages.
+- ⚠️ The previous `Search` command is renamed as `Open Channel` to differentiate from `Search Messages`
+- Add `Save as Quicklink` action in `Open Channel` command
+
+## [OAuth + Many Improvements] - 2024-06-18
 
 - **Added OAuth Support:** Users can now log in using OAuth, making it a more secure and streamlined authentication process.
 - **Improved Search Functionality:** Recently opened channels now appear at the top of search results, making it easier to find what you need quickly.

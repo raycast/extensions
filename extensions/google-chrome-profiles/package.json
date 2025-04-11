@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "frouo",
   "contributors": [
-    "erics118"
+    "erics118",
+    "jschmidtcordeiro"
   ],
   "license": "MIT",
   "commands": [

@@ -12,7 +12,7 @@ A personal access token is a more preferable and flexible method of authorizatio
 ## How to get an access token?
 
 You can learn more about how to create your token in the official documentation:
-https://docs.mattermost.com/developer/personal-access-tokens.html#creating-a-personal-access-token
+https://developers.mattermost.com/integrate/reference/personal-access-token/
 
 ## Settings
 
@@ -21,6 +21,7 @@ This can be extracted from the browser address bar by opening the messenger in y
 
 2. If you are a member of several teams at the same time, you must explicitly specify the default team name in the extension settings
 
+3. You can choose to open deep links in browser or Mattermost application (default)
 
 ## Commands
 
@@ -29,13 +30,13 @@ This can be extracted from the browser address bar by opening the messenger in y
 - Get all user channels by category: favorites, channels, direct messages
 - Search channels by channel name or username
 - Display direct chat member status
-- Open chat in mattermost app (note: require preliminary opening)
+- Open chat in Mattermost app (note: require preliminary opening)
 
 #### Set Custom Status
 
 - Get and set custom user status with emoji + title + expiration date
 - Save custom status templates/presets for later reuse
 
-#### Set Precense Status
+#### Set Presence Status
 
-- Get and set precense status: online, away, offline, do not distrub
+- Get and set presence status: online, away, offline, do not distrub

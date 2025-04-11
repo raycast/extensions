@@ -1,18 +1,44 @@
 # Unicode Symbols
 
+## [Improvements] - 2024-12-17
+
+- Added option to set Primary Action (`copy`/`paste`) - ([#15901](https://github.com/raycast/extensions/issues/15901))
+- Updated (dev) dependencies
+
+## [Improvements] - 2024-10-11
+
+- Updated the paste action to dynamically show the name and icon of the frontmost application.
+
+## [Improvements] - 2024-09-30
+
+- Added full dataset with option in settings to enable/disable. Full Dataset contains +40.000 characters. This is only supported in Grid view.
+- Added option to copy the optional `HTML` entity of the selected character (e.g. `&amp;`)
+- Added a browser view for the character in [compart](https://www.compart.com/en/unicode/)
+- Made the JSON files smaller by renaming the fields. This does break the cache, so the cache key is renamed to `recently-used-v2`
+
+## [Improvements] - 2024-09-20
+
+- Added extra characters to Superscript and Subscript set ([#14533](https://github.com/raycast/extensions/issues/14533))
+  - This is purely a visual thing, doesn't change the actual character sets
+  - Also added an indicator to show that this character is actually in a different set
+- Fixed an issue where the extension breaks on `Ancient Symbols` in List Mode ([#14562](https://github.com/raycast/extensions/issues/14562))
+- Improved search, wasn't properly filtering characters in Fuse.js
+- Updated to `unidata16`, which uses the latest `16.0.0` Unicode data
+- Updated dependencies
+
 ## [Filter irrelevant characters] - 2024-05-21
 
 - Added a filter to remove irrelevant characters from the list (#12487)
 
-## [Add Latin Extended Additional] - 2024-03-11
+## [Added Latin Extended Additional] - 2024-03-11
 
 - Added the Latin Extended Additional character set, totalling to 5195 characters
 - Updated dependencies
 
-## [Add symbol search] - 2024-02-08
+## [Added symbol search] - 2024-02-08
 
 - Added the ability to search for the exact symbol. This works with the integer code (e.g. `U+1F600`), the hex code (e.g. `1F600`) or the symbol itself (e.g. `😀`).
-- Bump dependencies
+- Bumped dependencies
 - Minor bugfix: Not showing the following symbols correctly in grid: `&<>`
 
 ## [Minor bugfix] - 2023-12-13

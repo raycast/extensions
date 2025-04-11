@@ -15,8 +15,8 @@ const CopySvgActions = ({ svg }: { svg: Svg }) => {
     return (
       <Action
         icon={Icon.Clipboard}
-        title="Copy SVG File"
-        onAction={() => handleAction(svg.route as string, "Copied SVG to clipboard")}
+        title="Copy SVG Text"
+        onAction={() => handleAction(svg.route as string, "Copied SVG text to clipboard")}
       />
     );
   }
@@ -25,25 +25,28 @@ const CopySvgActions = ({ svg }: { svg: Svg }) => {
     <>
       <Action
         icon={Icon.Clipboard}
-        title="Copy Light SVG File"
+        title="Copy Light SVG Text"
         shortcut={{
           modifiers: ["cmd"],
           key: "l",
         }}
         onAction={() =>
-          handleAction(typeof svg.route === "string" ? svg.route : svg.route.light, "Copied Light SVG to clipboard")
+          handleAction(
+            typeof svg.route === "string" ? svg.route : svg.route.light,
+            "Copied Light SVG text to clipboard",
+          )
         }
       />
 
       <Action
         icon={Icon.Clipboard}
-        title="Copy Dark SVG File"
+        title="Copy Dark SVG Text"
         shortcut={{
           modifiers: ["cmd"],
           key: "d",
         }}
         onAction={() =>
-          handleAction(typeof svg.route === "string" ? svg.route : svg.route.dark, "Copied Dark SVG to clipboard")
+          handleAction(typeof svg.route === "string" ? svg.route : svg.route.dark, "Copied Dark SVG text to clipboard")
         }
       />
     </>

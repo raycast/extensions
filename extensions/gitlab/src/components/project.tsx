@@ -26,6 +26,11 @@ import { GitLabIcons, getTextIcon, useImage } from "../icons";
 import { useCache } from "../cache";
 import { CacheActionPanelSection } from "./cache_actions";
 
+export enum ProjectScope {
+  membership = "membership",
+  all = "all",
+}
+
 function getProjectTextIcon(project: Project): Image.ImageLike | undefined {
   return getTextIcon((project.name ? getFirstChar(project.name) : "?").toUpperCase());
 }

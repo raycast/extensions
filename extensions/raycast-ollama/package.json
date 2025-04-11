@@ -137,7 +137,7 @@
       "name": "ollama-longer",
       "title": "Make Longer",
       "subtitle": "Ollama",
-      "description": "Make selected text longher",
+      "description": "Make selected text longer",
       "mode": "view"
     },
     {
@@ -184,6 +184,13 @@
       "mode": "view"
     },
     {
+      "name": "ollama-ps",
+      "title": "Loaded Models",
+      "subtitle": "Ollama",
+      "description": "Show models loaded on ram",
+      "mode": "view"
+    },
+    {
       "name": "ollama-custom-create",
       "title": "Create Custom Command",
       "subtitle": "Ollama",
@@ -213,7 +220,7 @@
           "name": "parameters",
           "placeholder": "Parameters",
           "type": "text",
-          "required": false
+          "required": true
         }
       ]
     }

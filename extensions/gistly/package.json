@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gistly",
+  "version": "0.0.2",
+  "title": "Gistly",
+  "description": "YouTube AI Summaries & Transcripts",
+  "icon": "command-icon.png",
+  "author": "rafal_zawadzki",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "get-insights",
+      "title": "Get YouTube Insights",
+      "subtitle": "Gistly",
+      "description": "Get key insights from any YouTube video.",
+      "subtitle": "Gistly For YouTube",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "video",
+          "placeholder": "Video URL or ID",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-transcript",
+      "title": "Get YouTube Transcript",
+      "subtitle": "Gistly",
+      "description": "Get a transcript of any YouTube video.",
+      "subtitle": "Gistly For YouTube",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "video",
+          "placeholder": "Video URL or ID",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-summary",
+      "title": "Get YouTube Summary",
+      "subtitle": "Gistly",
+      "description": "Get a timestamped summary of any YouTube video.",
+      "subtitle": "Gistly For YouTube",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "video",
+          "placeholder": "Video URL or ID",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Gistly API Key to increase limits",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.67.1",
+    "@raycast/utils": "^1.12.4",
+    "date-fns": "^4.1.0",
+    "ytdl-core": "^4.11.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

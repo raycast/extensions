@@ -1,0 +1,98 @@
+[
+  {
+    "Name": "Mercury",
+    "Appearance": "planet_mercury.png",
+    "Celestial Body": "Planet",
+    "HandType": "Pair",
+    "Effect": "+1 Mult and +15 Chips",
+    "UnlockRequirement": "No requirement needed."
+  },
+  {
+    "Name": "Venus",
+    "Appearance": "planet_venus.png",
+    "Celestial Body": "Planet",
+    "HandType": "Three of a Kind",
+    "Effect": "+2 Mult +20 Chips",
+    "UnlockRequirement": "No requirement needed."
+  },
+  {
+    "Name": "Earth",
+    "Appearance": "planet_earth.png",
+    "Celestial Body": "Planet",
+    "HandType": "Full House",
+    "Effect": "+2 Mult and 25 Chips",
+    "UnlockRequirement": "No requirement needed."
+  },
+  {
+    "Name": "Mars",
+    "Appearance": "planet_mars.png",
+    "Celestial Body": "Planet",
+    "HandType": "Four of a Kind",
+    "Effect": "+3 Mult and +30 Chips",
+    "UnlockRequirement": "No requirement needed."
+  },
+  {
+    "Name": "Jupiter",
+    "Appearance": "planet_jupiter.png",
+    "Celestial Body": "Planet",
+    "HandType": "Flush",
+    "Effect": "+2 Mult and +15 Chips",
+    "UnlockRequirement": "No requirement needed."
+  },
+  {
+    "Name": "Saturn",
+    "Appearance": "planet_saturn.png",
+    "Celestial Body": "Planet",
+    "HandType": "Straight",
+    "Effect": "+2 Mult and +30 Chips",
+    "UnlockRequirement": "No requirement needed."
+  },
+  {
+    "Name": "Uranus",
+    "Appearance": "planet_uranus.png",
+    "Celestial Body": "Planet",
+    "HandType": "Two Pair",
+    "Effect": "+1 Mult and +20 Chips",
+    "UnlockRequirement": "No requirement needed."
+  },
+  {
+    "Name": "Neptune",
+    "Appearance": "planet_neptune.png",
+    "Celestial Body": "Planet",
+    "HandType": "Straight Flush",
+    "Effect": "+3 Mult and +40 Chips",
+    "UnlockRequirement": "No requirement needed."
+  },
+  {
+    "Name": "Pluto",
+    "Appearance": "planet_pluto.png",
+    "Celestial Body": "Dwarf Planet",
+    "HandType": "High Card",
+    "Effect": "+1 Mult and +10 Chips",
+    "UnlockRequirement": ""
+  },
+  {
+    "Name": "Planet X",
+    "Appearance": "planet_x.png",
+    "Celestial Body": "Planet X",
+    "HandType": "Five of a Kind",
+    "Effect": "+3 Mult and +35 Chips",
+    "UnlockRequirement": "This Planet card will not show up in Celestial Packs or the shop until its related secret hand has been played at least once during the run"
+  },
+  {
+    "Name": "Ceres",
+    "Appearance": "planet_ceres.png",
+    "Celestial Body": "Dwarf Planet",
+    "HandType": "Flush House",
+    "Effect": "+3 Mult and +40 Chips",
+    "UnlockRequirement": "This Planet card will not show up in Celestial Packs or the shop until its related secret hand has been played at least once during the run"
+  },
+  {
+    "Name": "Eris",
+    "Appearance": "planet_eris.png",
+    "Celestial Body": "Dwarf Planet",
+    "HandType": "Flush Five",
+    "Effect": "+3 Mult and +35 Chips",
+    "UnlockRequirement": "This Planet card will not show up in Celestial Packs or the shop until its related secret hand has been played at least once during the run"
+  }
+]

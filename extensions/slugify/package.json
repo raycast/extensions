@@ -5,6 +5,9 @@
   "description": "A quick way to slugify text",
   "icon": "slugify.png",
   "author": "unreadablename",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity",
@@ -22,21 +25,38 @@
       "name": "slugify",
       "title": "Slugify Clipboard",
       "description": "Overwrite the clipboard contents with an slugified string",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "strict",
+          "placeholder": "Strict",
+          "required": false,
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Not Strict",
+              "value": "0"
+            },
+            {
+              "title": "Strict",
+              "value": "1"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.3",
-    "slugify": "^1.6.5"
+    "@raycast/api": "^1.79.0",
+    "slugify": "^1.6.6"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -44,6 +64,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

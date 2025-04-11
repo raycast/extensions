@@ -1,8 +1,7 @@
 import { ActionPanel, Form, showToast, Icon, Action, Toast, LaunchProps, Color, AI, Detail } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
-import qs from 'qs';
 
-import { getAreas, getTags, silentlyOpenThingsURL, thingsNotRunningError } from './api';
+import { addProject, getAreas, getTags, thingsNotRunningError } from './api';
 import { listItems } from './helpers';
 import { getDateString } from './utils';
 
@@ -38,7 +37,7 @@ export function AddNewProject({ draftValues }: AddNewProjectProps) {
         'to-dos': values.toDos,
       };
 
-      await silentlyOpenThingsURL(`things:///add-project?${qs.stringify(json)}`);
+      await addProject(json);
 
       showToast({ style: Toast.Style.Success, title: 'Added new project', message: values.title });
       reset({ title: '', notes: '', tags: [], when: '', areaId: '', toDos: '', deadline: null });
@@ -99,6 +98,50 @@ Tasks:`);
         <ActionPanel>
           <Action.SubmitForm title="Add New Project" onSubmit={handleSubmit} icon={Icon.Plus} />
           <Action title="Generate To-Dos with AI" icon={Icon.BulletPoints} onAction={generateToDos} />
+          <ActionPanel.Section>
+            <Action
+              title="Focus Title"
+              icon={Icon.TextInput}
+              onAction={() => focus('title')}
+              shortcut={{ modifiers: ['cmd'], key: '1' }}
+            />
+            <Action
+              title="Focus Notes"
+              icon={Icon.TextInput}
+              onAction={() => focus('notes')}
+              shortcut={{ modifiers: ['cmd'], key: '2' }}
+            />
+            <Action
+              title="Focus When"
+              icon={Icon.TextInput}
+              onAction={() => focus('when')}
+              shortcut={{ modifiers: ['cmd'], key: 's' }}
+            />
+            <Action
+              title="Focus List"
+              icon={Icon.TextInput}
+              onAction={() => focus('areaId')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'm' }}
+            />
+            <Action
+              title="Focus Tags"
+              icon={Icon.TextInput}
+              onAction={() => focus('tags')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 't' }}
+            />
+            <Action
+              title="Focus Checklist"
+              icon={Icon.TextInput}
+              onAction={() => focus('toDos')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+            />
+            <Action
+              title="Focus Deadline"
+              icon={Icon.TextInput}
+              onAction={() => focus('deadline')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'd' }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >

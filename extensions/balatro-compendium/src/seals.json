@@ -1,0 +1,22 @@
+[
+  {
+    "Appearance": "enhancer_sealgold.png",
+    "Name": "Gold Seal",
+    "Effect": "Earn $3 when this card is played and scores"
+  },
+  {
+    "Appearance": "enhancer_sealred.png",
+    "Name": "Red Seal",
+    "Effect": "Retrigger this card 1 time"
+  },
+  {
+    "Appearance": "enhancer_sealblue.png",
+    "Name": "Blue Seal",
+    "Effect": "Creates a Planet card if this card is held in hand at end of round"
+  },
+  {
+    "Appearance": "enhancer_sealpurple.png",
+    "Name": "Purple Seal",
+    "Effect": "Creates a Tarot card when discarded. Must have room"
+  }
+]

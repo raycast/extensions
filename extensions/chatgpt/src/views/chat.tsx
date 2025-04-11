@@ -5,7 +5,6 @@ import { CopyActionSection } from "../actions/copy";
 import { FormInputActionSection } from "../actions/form-input";
 import { PreferencesActionSection } from "../actions/preferences";
 import { SaveActionSection } from "../actions/save";
-import { DEFAULT_MODEL } from "../hooks/useModel";
 import { Chat, ChatViewProps } from "../type";
 import { AnswerDetailView } from "./answer-detail";
 import { EmptyView } from "./empty";
@@ -36,8 +35,8 @@ export const ChatView = ({
               isAutoSaveConversation
                 ? undefined
                 : use.conversations.data.find((x) => x.id === conversation.id)
-                ? undefined
-                : () => use.conversations.add(conversation)
+                  ? undefined
+                  : () => use.conversations.add(conversation)
             }
           />
           <ActionPanel.Section title="Output">
@@ -65,7 +64,7 @@ export const ChatView = ({
               setConversation({
                 id: uuidv4(),
                 chats: [],
-                model: DEFAULT_MODEL,
+                model: conversation.model,
                 pinned: false,
                 updated_at: "",
                 created_at: new Date().toISOString(),

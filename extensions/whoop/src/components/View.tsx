@@ -1,5 +1,5 @@
 import { withWhoopClient } from "../helpers/withWhoopClient";
 
-export function View({ children }: { children: JSX.Element }) {
-  return withWhoopClient(children);
-}
+export const View = withWhoopClient(({ children }: { children: JSX.Element }) => {
+  return children;
+});

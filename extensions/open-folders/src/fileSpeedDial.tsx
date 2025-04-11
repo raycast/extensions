@@ -1,4 +1,4 @@
-import { open, getPreferenceValues, Grid, ActionPanel, Action } from "@raycast/api";
+import { Action, ActionPanel, Grid, getPreferenceValues, open } from "@raycast/api";
 
 const preferences = getPreferenceValues<Preferences.FileSpeedDial>();
 
@@ -30,19 +30,19 @@ export default function Command() {
       filtering={false}
       onSearchTextChange={(text) => {
         const number: number = Number.parseInt(text);
-        if (number != null && number >= 0 && number < 9) {
-          open(files.get(number - 1)!);
+        if (number != null && number > 0 && number < 9) {
+          const path = files.get(number - 1);
+          if (path) {
+            open(path);
+          }
         }
       }}
     >
       {Array.from(files, ([key, value]) => (
         <Grid.Item
           key={key.valueOf()}
-          title={`| ${key + 1} | value.substring(value.lastIndexOf('/') + 1, value.length)`}
-          content={
-            //source: `https://api.iconify.design/material-symbols-light/counter-${key + 1}.svg`
-            { fileIcon: value }
-          }
+          title={`| ${key + 1} | ${value.substring(value.lastIndexOf("/") + 1, value.length)}`}
+          content={{ fileIcon: value }}
           actions={
             <ActionPanel>
               <Action.Open title={`Open ${value.substring(value.lastIndexOf("/") + 1, value.length)}`} target={value} />

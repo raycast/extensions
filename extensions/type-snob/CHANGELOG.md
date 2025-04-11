@@ -1,5 +1,11 @@
 # Type Snob Changelog
 
+## [Update] - 2024-11-06
+
+- Added feminine and masculine ordinal indicators
+- Added some currency symbols
+- Added a few more math symbols
+
 ## [Update] - 2024-01-08
 
 - Added zero-width space character

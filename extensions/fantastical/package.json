@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fantastical",
   "title": "Fantastical",
-  "description": "Create Fantastical events and reminders using Fantasticals natural language processing.",
+  "description": "Create Fantastical events and reminders using Fantastical's natural language processing.",
   "icon": "fantastical.png",
   "author": "devahschaefers",
   "contributors": [
@@ -40,8 +40,7 @@
       "arguments": [
         {
           "type": "text",
-          "name": "add",
-          "title": "Add Event",
+          "name": "inputText",
           "placeholder": "event",
           "required": true
         }
@@ -63,8 +62,7 @@
       "arguments": [
         {
           "type": "text",
-          "name": "add",
-          "title": "Add Reminder",
+          "name": "inputText",
           "placeholder": "reminder",
           "required": true
         }
@@ -86,8 +84,7 @@
       "arguments": [
         {
           "type": "text",
-          "name": "add",
-          "title": "Add Reminder",
+          "name": "inputText",
           "placeholder": "reminder",
           "required": true
         }
@@ -110,8 +107,7 @@
       "arguments": [
         {
           "type": "text",
-          "name": "add",
-          "title": "Add Event",
+          "name": "inputText",
           "placeholder": "event",
           "required": true
         }
@@ -128,15 +124,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.76.0",
-    "@raycast/utils": "^1.16.0",
+    "@raycast/api": "^1.81.0",
+    "@raycast/utils": "^1.16.4",
     "default-browser-id": "^5.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "eslint": "^8.56.0",
-    "prettier": "^3.3.2",
-    "typescript": "^5.3.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,9 +1,8 @@
 import OpenAI from "openai";
-import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
 
 export type Set<T> = React.Dispatch<React.SetStateAction<T>>;
 
-export type Message = ChatCompletionMessageParam;
+export type Message = OpenAI.ChatCompletionMessageParam;
 
 export interface Question {
   id: string;
@@ -35,12 +34,25 @@ export interface Model {
   created_at: string;
   name: string;
   prompt: string;
-  option: "gpt-3.5-turbo" | "gpt-3.5-turbo-0301" | "gpt-4" | "gpt-4-0314" | "gpt-4-32k" | "gpt-4-32k-0314" | string;
+  option: string;
   temperature: string;
   pinned: boolean;
   vision?: boolean;
 }
 
+export type CommandContentSource = "clipboard" | "selectedText" | "browserTab";
+
+export interface Command {
+  id: string;
+  name: string;
+  prompt: string;
+  model: string;
+  temperature: string;
+  contentSource: CommandContentSource;
+  isDisplayInput: boolean;
+}
+
+type FunctionNoArg = () => void;
 type PromiseFunctionNoArg = () => Promise<void>;
 type PromiseFunctionWithOneArg<T> = (arg: T) => Promise<void>;
 // type PromiseFunctionWithTwoArg<T, V> = (arg_1: T, arg_2: V) => Promise<void>;
@@ -63,27 +75,43 @@ export type HistoryHook = Hook<Chat>;
 
 export type SavedChatHook = Hook<SavedChat>;
 
-export type ConversationsHook = Hook<Conversation> & { update: PromiseFunctionWithOneArg<Conversation> };
+export type ConversationsHook = Hook<Conversation> & {
+  update: PromiseFunctionWithOneArg<Conversation>;
+  setConversations: PromiseFunctionWithOneArg<Conversation[]>;
+};
 
 export type QuestionHook = BaseHook<string> & { update: PromiseFunctionWithOneArg<string> };
 
-export type ModelHook = Hook<Model> & {
-  update: PromiseFunctionWithOneArg<Model>;
-  option: Model["option"][];
-  isFetching: boolean;
-};
+export type ModelHook = BaseHook<Record<string, Model>> &
+  BaseFunctionHook<Model> & {
+    setModels: PromiseFunctionWithOneArg<Record<string, Model>>;
+    update: PromiseFunctionWithOneArg<Model>;
+    option: Model["option"][];
+    isFetching: boolean;
+  };
 
 export interface ChatHook {
   data: Chat[];
+  errorMsg: string | null;
   setData: Set<Chat[]>;
   isLoading: boolean;
+  isAborted: boolean;
   setLoading: Set<boolean>;
   selectedChatId: string | null;
   setSelectedChatId: Set<string | null>;
   ask: PromiseFunctionWithThreeArg<string, string[], Model>;
   clear: PromiseFunctionNoArg;
+  abort: FunctionNoArg;
   streamData: Chat | undefined;
 }
+
+export type CommandHook = BaseHook<Record<string, Command>> &
+  BaseFunctionHook<Command> & {
+    setCommand: PromiseFunctionWithOneArg<Record<string, Command>>;
+    update: PromiseFunctionWithOneArg<Command>;
+    clear: PromiseFunctionNoArg;
+    isDefault: (id: string) => boolean;
+  };
 
 export interface ChangeModelProp {
   models: Model[];

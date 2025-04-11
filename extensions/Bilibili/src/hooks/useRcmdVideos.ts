@@ -1,4 +1,4 @@
-import { getRcmd } from "../utils";
+import { getRcmd } from "../apis";
 
 import { useState, useEffect } from "react";
 import { showToast, Toast } from "@raycast/api";

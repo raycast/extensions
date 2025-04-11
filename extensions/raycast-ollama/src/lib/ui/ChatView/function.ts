@@ -14,7 +14,7 @@ import {
   OllamaServerAuth,
 } from "../../ollama/types";
 import { AddSettingsCommandChat, GetSettingsCommandChatByIndex } from "../../settings/settings";
-import { RaycastChat, SettingsChatModel } from "../../settings/types";
+import { RaycastChat, RaycastChatMessage, SettingsChatModel } from "../../settings/types";
 import { Preferences, RaycastImage } from "../../types";
 import { GetAvailableModel, PromptTokenParser } from "../function";
 import "../../polyfill/node-fetch";
@@ -264,7 +264,8 @@ async function Inference(
   image: RaycastImage[] | undefined,
   documents: Document<Record<string, any>>[] | undefined,
   chat: RaycastChat,
-  setChat: React.Dispatch<React.SetStateAction<RaycastChat | undefined>>
+  setChat: React.Dispatch<React.SetStateAction<RaycastChat | undefined>>,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
 ): Promise<void> {
   await showToast({ style: Toast.Style.Animated, title: "🧠 Inference..." });
 
@@ -287,48 +288,61 @@ async function Inference(
     keep_alive: model.keep_alive,
   };
 
-  setChat((prevState) => {
-    if (prevState) {
-      prevState.messages.push({
-        model: chat.models.main.tag,
-        created_at: "",
-        images: image,
-        files: documents && documents.map((d) => d.metadata.source).filter((v, i) => i === documents.indexOf(v)),
-        messages: [
-          { role: OllamaApiChatMessageRole.USER, content: query },
-          { role: OllamaApiChatMessageRole.ASSISTANT, content: "" },
-        ],
-        done: false,
-      });
-      return { ...prevState };
-    }
-  });
-
+  const ml = chat.messages.length;
   const o = new Ollama(model.server);
-  o.OllamaApiChat(body).then(async (emiter) => {
-    emiter.on("data", (data: OllamaApiChatResponse) => {
-      setChat((prevState) => {
-        if (prevState) {
-          prevState.messages[prevState.messages.length - 1].messages[1].content += data;
-          return { ...prevState };
-        }
+  o.OllamaApiChat(body)
+    .then(async (emiter) => {
+      emiter.on("data", (data: string) => {
+        setChat((prevState) => {
+          if (prevState) {
+            if (prevState.messages.length === ml) {
+              return {
+                ...prevState,
+                messages: prevState.messages.concat({
+                  model: chat.models.main.tag,
+                  created_at: "",
+                  images: image,
+                  files:
+                    documents && documents.map((d) => d.metadata.source).filter((v, i) => i === documents.indexOf(v)),
+                  messages: [
+                    { role: OllamaApiChatMessageRole.USER, content: query },
+                    { role: OllamaApiChatMessageRole.ASSISTANT, content: data },
+                  ],
+                  done: false,
+                }),
+              };
+            } else {
+              const m: RaycastChat = JSON.parse(JSON.stringify(prevState));
+              m.messages[m.messages.length - 1].messages[1].content += data;
+              return {
+                ...prevState,
+                messages: m.messages,
+              };
+            }
+          }
+        });
       });
-    });
-    emiter.on("done", async (data: OllamaApiChatResponse) => {
-      await showToast({ style: Toast.Style.Success, title: "🧠 Inference Done." });
-      setChat((prevState) => {
-        if (prevState) {
-          prevState.messages[prevState.messages.length - 1] = {
-            ...data,
-            images: image,
-            files: documents && documents.map((d) => d.metadata.source).filter((v, i) => i === documents.indexOf(v)),
-            messages: prevState.messages[prevState.messages.length - 1].messages,
-          };
-          return { ...prevState };
-        }
+      emiter.on("done", async (data: OllamaApiChatResponse) => {
+        await showToast({ style: Toast.Style.Success, title: "🧠 Inference Done." });
+        setChat((prevState) => {
+          if (prevState) {
+            const m: RaycastChat = JSON.parse(JSON.stringify(prevState));
+            m.messages[m.messages.length - 1] = {
+              ...data,
+              images: image,
+              files: documents && documents.map((d) => d.metadata.source).filter((v, i) => i === documents.indexOf(v)),
+              messages: m.messages[m.messages.length - 1].messages,
+            };
+            setLoading(false);
+            return { ...m };
+          }
+        });
       });
+    })
+    .catch(async (e: Error) => {
+      await showToast({ style: Toast.Style.Failure, title: "Error:", message: e.message });
+      setLoading(false);
     });
-  });
 }
 
 export async function Run(
@@ -336,9 +350,11 @@ export async function Run(
   image: RaycastImage[] | undefined,
   documents: Document<Record<string, any>>[] | undefined,
   chat: RaycastChat,
-  setChat: React.Dispatch<React.SetStateAction<RaycastChat | undefined>>
+  setChat: React.Dispatch<React.SetStateAction<RaycastChat | undefined>>,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
 ): Promise<void> {
+  setLoading(true);
   query = await PromptTokenParser(query);
   if (documents) query = await PromptAddDocuments(query, chat, documents, image);
-  await Inference(query, image, documents, chat, setChat);
+  await Inference(query, image, documents, chat, setChat, setLoading);
 }

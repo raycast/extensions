@@ -1,9 +1,4 @@
-import type { Character, Dataset } from "@/lib/dataset-manager";
-
-export interface CharacterSet {
-  sectionTitle: string;
-  items: Character[];
-}
+import type { Character, CharacterSection, Dataset } from "@/types";
 
 /**
  * Maps an unicode characters dataset + the list of recently used characters to a section list
@@ -18,18 +13,31 @@ export function buildList(
   recentlyUsedCharacters: Character[],
   isFilterEmpty: boolean,
   datasetFilter: string | null,
-): CharacterSet[] {
-  const datasetListSections = dataset.blocks.map((block) => {
-    const items: Character[] = dataset.characters.filter(
-      (character) => block.startCode <= character.code && block.endCode >= character.code,
-    );
-    const lowestScore = items.reduce((acc, item) => Math.min(acc, item.score || 1), 1);
-    return {
-      sectionTitle: block.blockName,
-      lowestScore,
-      items,
-    };
-  });
+): CharacterSection[] {
+  const datasetListSections = dataset.blocks
+    .filter((block) => !dataset.selectedBlock || block.blockName === dataset.selectedBlock.blockName)
+    .map((block) => {
+      const items: Character[] = dataset.characters
+        .filter(
+          (character) =>
+            (block.startCode <= character.c && block.endCode >= character.c) || block.extra?.includes(character.c),
+        )
+        .map((character) => {
+          if (block.extra?.includes(character.c)) {
+            return {
+              ...character,
+              isExtra: true,
+            };
+          }
+          return character;
+        });
+      const lowestScore = items.reduce((acc, item) => Math.min(acc, item.score || 1), 1);
+      return {
+        sectionTitle: block.blockName,
+        lowestScore,
+        items,
+      };
+    });
   if (recentlyUsedCharacters.length && !datasetFilter) {
     datasetListSections.unshift({
       sectionTitle: "Recently Used",
@@ -37,7 +45,7 @@ export function buildList(
       items: isFilterEmpty
         ? recentlyUsedCharacters
         : recentlyUsedCharacters.filter((recentlyUsedCharacter) =>
-            dataset.characters.find((character) => character.code === recentlyUsedCharacter.code),
+            dataset.characters.find((character) => character.c === recentlyUsedCharacter.c),
           ),
     });
   }

@@ -1,4 +1,3 @@
-import React from "react";
 import { List } from "@raycast/api";
 import { Environment } from "../../types";
 import { useEnvContext } from "../../hooks";

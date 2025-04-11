@@ -43,8 +43,8 @@ export function displayError(error: Error | ScriptError) {
       onAction: async () => {
         await open(
           `https://github.com/raycast/extensions/issues/new?template=extension_bug_report.yml&extension-url=https%3A%2F%2Fraycast.com%2Ffedevitaledev%2Fmusic&description=${encodeURIComponent(
-            error.message
-          )}&title=${encodeURIComponent("[Music]: ")}`
+            error.message,
+          )}&title=${encodeURIComponent("[Music]: ")}`,
         );
 
         await showHUD(`Thanks for reporting this bug!`);
@@ -70,6 +70,19 @@ function handleTaskEitherError<E extends Error, T>(error?: string | VoidFn<E>, s
     pipe(te, TE.tap(onSuccess), TE.tapLeft(onError), TE.tapLeft(console.error), TE.mapLeft(displayError));
 }
 
-export { handleTaskEitherError };
+/**
+ *
+ * @param error - Function or error message
+ * @param success - Function or success message
+ */
+function handleTaskEitherErrorWithoutHUD<E extends Error, T>(error?: string | VoidFn<E>, success?: string | VoidFn<T>) {
+  const onSuccess = typeof success === "string" ? () => undefined : success;
+  const onError = typeof error === "string" ? () => undefined : error;
+
+  return (te: TE.TaskEither<E, T>) =>
+    pipe(te, TE.tap(onSuccess), TE.tapLeft(onError), TE.tapLeft(console.error), TE.mapLeft(displayError));
+}
+
+export { handleTaskEitherError, handleTaskEitherErrorWithoutHUD };
 
 export const minMax = (min: number, max: number) => (value: number) => Math.max(Math.min(value, max), min);

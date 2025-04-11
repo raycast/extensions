@@ -7,8 +7,8 @@ A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your
 
 ## Requirement
 
-1. Install [WeChat for Mac](https://www.wechat.com) 
-2. Install [WeChatTweak-macOS](https://github.com/Sunnyyoung/WeChatTweak-macOS) 
+1. Install [WeChat for Mac](https://www.wechat.com)
+2. Install [WeChatTweak-macOS](https://github.com/Sunnyyoung/WeChatTweak-macOS)
 
 ## Todo
 

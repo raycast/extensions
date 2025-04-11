@@ -4,7 +4,6 @@ import { readFile } from "fs/promises";
 import { AwsAction } from "./components/common/action";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { AWS_URL_BASE } from "./constants";
-import { normalizeUrl } from "./util";
 
 export default function Console() {
   const { data: services, isLoading, revalidate } = useCachedPromise(loadJSON);
@@ -32,14 +31,7 @@ export default function Console() {
           keywords={service.match.split(" ")}
           actions={
             <ActionPanel>
-              <AwsAction.Console
-                url={
-                  process.env.AWS_SSO_ACCOUNT_ID && process.env.AWS_SSO_ROLE_NAME && process.env.AWS_SSO_START_URL
-                    ? `${normalizeUrl(process.env.AWS_SSO_START_URL!)}console?account_id=${encodeURI(process.env.AWS_SSO_ACCOUNT_ID!)}&role_name=${encodeURI(process.env.AWS_SSO_ROLE_NAME!)}&destination=${encodeURI(AWS_URL_BASE + service.arg)}`
-                    : `${AWS_URL_BASE}${service.arg}`
-                }
-                onAction={() => visitItem(service)}
-              />
+              <AwsAction.Console url={`${AWS_URL_BASE}${service.arg}`} onAction={() => visitItem(service)} />
               <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(service)} />
             </ActionPanel>
           }

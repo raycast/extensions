@@ -1,73 +1,75 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
 import { LinkdingAccount, LinkdingAccountForm, LinkdingAccountMap, LinkdingBookmark } from "./types/linkding-types";
 
-import { getPersistedLinkdingAccounts } from "./service/user-account-service";
+import { getFavicon, usePromise } from "@raycast/utils";
+import NoAccountsList from "./components/no-accounts-list";
 import { deleteBookmark, searchBookmarks } from "./service/bookmark-service";
-import { showErrorToast, showSuccessToast } from "./util/bookmark-util";
+import { getPersistedLinkdingAccounts } from "./service/user-account-service";
 import { LinkdingShortcut } from "./types/linkding-shortcuts";
+import { showSuccessToast } from "./util/bookmark-util";
 
 export default function searchLinkding() {
+  const preferences = getPreferenceValues<Preferences>();
   const [selectedLinkdingAccount, setSelectedLinkdingAccount] = useState<LinkdingAccountForm | LinkdingAccount | null>(
     null
   );
   const [linkdingAccountMap, setLinkdingAccountMap] = useState<LinkdingAccountMap>({});
-  const [isLoading, setLoading] = useState(true);
-  const [hasLinkdingAccounts, setHasLindingAccounts] = useState(false);
-  const [linkdingBookmarks, setLinkdingBookmarks] = useState<LinkdingBookmark[]>([]);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const [hasLinkdingAccounts, setHasLinkdingAccounts] = useState(false);
+  const [numberOfAccounts, setNumberOfAccounts] = useState(0);
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     getPersistedLinkdingAccounts().then((linkdingMap) => {
       if (linkdingMap) {
         setLinkdingAccountMap(linkdingMap);
-        setHasLindingAccounts(Object.keys(linkdingMap).length > 0);
+        const accountNames = Object.keys(linkdingMap);
+        setNumberOfAccounts(accountNames.length);
+        setHasLinkdingAccounts(accountNames.length > 0);
+        if (accountNames.length > 0) {
+          setSelectedLinkdingAccount(linkdingMap[accountNames[0]]);
+        }
       }
     });
   }, [setLinkdingAccountMap]);
 
-  useEffect(() => {
-    fetchBookmarks(searchText, selectedLinkdingAccount);
-  }, [selectedLinkdingAccount, searchText]);
+  const {
+    isLoading,
+    revalidate,
+    data: linkdingBookmarks,
+    mutate,
+  } = usePromise(
+    async (account: LinkdingAccount | null, searchText: string) => {
+      if (!account) return [];
+      const bookmarks = await searchBookmarks(account, searchText);
+      return bookmarks.data.results;
+    },
+    [selectedLinkdingAccount, searchText],
+    { execute: !!selectedLinkdingAccount }
+  );
 
-  function createAbortController(timeoutMs: number) {
-    abortControllerRef.current?.abort();
-    const abortController = new AbortController();
-    setTimeout(() => abortController.abort(), timeoutMs || 0);
-    abortControllerRef.current = abortController;
-    return abortController;
-  }
-
-  function fetchBookmarks(searchText: string, linkdingAccount: LinkdingAccountForm | null) {
-    if (linkdingAccount) {
-      createAbortController(5000);
-      setLoading(true);
-      searchBookmarks(linkdingAccount, searchText, abortControllerRef)
-        .then((data) => {
-          setLinkdingBookmarks(data.data.results);
-        })
-        .catch(showErrorToast)
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-  }
-
-  function deleteBookmarkCallback(bookmarkId: number) {
+  async function deleteBookmarkCallback(bookmarkId: number) {
     if (selectedLinkdingAccount) {
-      deleteBookmark(selectedLinkdingAccount, bookmarkId).then(() => {
-        showSuccessToast("Bookmark deleted");
-        fetchBookmarks(searchText, selectedLinkdingAccount);
-      });
+      const toast = await showToast(Toast.Style.Animated, "Deleting bookmark", bookmarkId.toString());
+      try {
+        await mutate(deleteBookmark(selectedLinkdingAccount, bookmarkId));
+        toast.style = Toast.Style.Success;
+        toast.title = "Bookmark deleted";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Could not delete";
+        toast.message = `${error}`;
+      }
     }
   }
 
   function LinkdingAccountDropdown() {
+    if (numberOfAccounts < 2) return;
+
     function setSelectedAccount(name: string): void {
       const linkdingAccount = { name, ...linkdingAccountMap[name] };
       setSelectedLinkdingAccount(linkdingAccount);
-      fetchBookmarks("", linkdingAccount);
+      revalidate();
     }
 
     return (
@@ -79,61 +81,74 @@ export default function searchLinkding() {
     );
   }
 
-  if (hasLinkdingAccounts) {
-    return (
-      <List
-        isLoading={isLoading}
-        onSearchTextChange={setSearchText}
-        searchBarPlaceholder="Search through bookmarks..."
-        searchBarAccessory={<LinkdingAccountDropdown />}
-        throttle
-      >
-        <List.Section title="Results" subtitle={linkdingBookmarks?.length + ""}>
-          {linkdingBookmarks?.map((linkdingBookmark) => (
-            <SearchListItem
-              key={linkdingBookmark.id}
-              linkdingBookmark={linkdingBookmark}
-              deleteBookmarkCallback={deleteBookmarkCallback}
-            />
-          ))}
-        </List.Section>
-      </List>
-    );
-  } else {
-    return (
-      <List>
-        <List.EmptyView
-          title="You dont have a Linkding Account"
-          description="Please create a linking account before searching for bookmarks."
-        />
-      </List>
-    );
+  if (!hasLinkdingAccounts) {
+    return <NoAccountsList />;
   }
+
+  return (
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search through bookmarks..."
+      searchBarAccessory={<LinkdingAccountDropdown />}
+      throttle
+    >
+      <List.Section title="Results" subtitle={linkdingBookmarks?.length + ""}>
+        {linkdingBookmarks?.map((linkdingBookmark) => (
+          <SearchListItem
+            key={linkdingBookmark.id}
+            linkdingBookmark={linkdingBookmark}
+            deleteBookmarkCallback={deleteBookmarkCallback}
+            preferences={preferences}
+          />
+        ))}
+      </List.Section>
+    </List>
+  );
 }
 
 function SearchListItem({
   linkdingBookmark,
   deleteBookmarkCallback,
+  preferences,
 }: {
   linkdingBookmark: LinkdingBookmark;
   deleteBookmarkCallback: (bookmarkId: number) => void;
+  preferences: Preferences;
 }) {
   function showCopyToast() {
     showSuccessToast("Copied to Clipboard");
   }
 
+  const subtitle = useMemo(() => {
+    if (!preferences.showDescription) {
+      return "";
+    }
+    if (linkdingBookmark.description && linkdingBookmark.description.length > 0) {
+      return linkdingBookmark.description;
+    }
+    return linkdingBookmark.website_description;
+  }, [linkdingBookmark, preferences]);
+
+  const tags = useMemo(() => {
+    if (!preferences.showTags) {
+      return [];
+    }
+    return linkdingBookmark.tag_names.map((tag) => ({
+      tag: "#" + tag,
+    }));
+  }, [linkdingBookmark, preferences]);
+
   return (
     <List.Item
+      icon={getFavicon(linkdingBookmark.url, { fallback: Icon.Globe })}
       title={
         linkdingBookmark.title.length > 0
           ? linkdingBookmark.title
           : linkdingBookmark.website_title ?? linkdingBookmark.url
       }
-      subtitle={
-        linkdingBookmark.description && linkdingBookmark.description.length > 0
-          ? linkdingBookmark.description
-          : linkdingBookmark.website_description
-      }
+      subtitle={subtitle}
+      accessories={tags}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -148,6 +163,7 @@ function SearchListItem({
               icon={{ source: Icon.Trash }}
               title="Delete"
               shortcut={LinkdingShortcut.DELETE_SHORTCUT}
+              style={Action.Style.Destructive}
             />
           </ActionPanel.Section>
         </ActionPanel>

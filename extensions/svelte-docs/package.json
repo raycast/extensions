@@ -23,7 +23,7 @@
   "dependencies": {
     "@raycast/api": "^1.64.4",
     "@raycast/utils": "^1.10.1",
-    "valibot": "^0.25.0"
+    "valibot": "^0.42.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

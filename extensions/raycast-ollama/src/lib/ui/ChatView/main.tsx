@@ -48,7 +48,7 @@ export function ChatView(): JSX.Element {
 
   // Save Chat To LocalStoarge on Inference Done.
   React.useEffect(() => {
-    if (IsLoading && Chat && Chat.messages.length > 0 && Chat.messages[Chat.messages.length - 1].done) {
+    if (!IsLoading && Chat && Chat.messages.length > 0 && Chat.messages[Chat.messages.length - 1].done) {
       SetQuery("");
       SetIsLoading(false);
       if (Image) SetImage(undefined);
@@ -105,10 +105,8 @@ export function ChatView(): JSX.Element {
             title="Get Answer"
             icon={Icon.SpeechBubbleActive}
             onAction={() => {
-              SetIsLoading(true);
-              Run(Query, Image, Document, Chat, SetChat).catch((e) => {
-                showToast({ style: Toast.Style.Failure, title: "Error:", message: e });
-                console.error(e);
+              Run(Query, Image, Document, Chat, SetChat, SetIsLoading).catch(async (e: Error) => {
+                await showToast({ style: Toast.Style.Failure, title: "Error:", message: e.message });
                 SetIsLoading(false);
               });
             }}
@@ -133,7 +131,7 @@ export function ChatView(): JSX.Element {
             <Action.CopyToClipboard
               title="Copy Answer"
               content={props.message.messages[1].content as string}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
           )}
           {props.message && <Action.CopyToClipboard title="Copy Conversation" content={ClipboardConversation(Chat)} />}

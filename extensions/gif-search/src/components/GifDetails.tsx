@@ -3,16 +3,18 @@ import FileSizeFormat from "@saekitominaga/file-size-format";
 
 import { GifActions } from "./GifActions";
 import { IGif, renderGifMarkdownDetails } from "../models/gif";
-import { getServiceTitle, ServiceName } from "../preferences";
+import { getServiceFromUrl } from "../lib/getServiceFromUrl";
+import { getServiceTitle } from "../preferences";
 
 type GifDetailsProps = {
   item: IGif;
-  service?: ServiceName;
   mutate: () => Promise<void>;
 };
 
 export function GifDetails(props: GifDetailsProps) {
   const { title, metadata, attribution } = props.item;
+
+  const service = getServiceFromUrl(props.item);
 
   const tags = [];
   if (metadata?.tags?.length) {
@@ -36,7 +38,7 @@ export function GifDetails(props: GifDetailsProps) {
   return (
     <Detail
       markdown={renderGifMarkdownDetails(props.item)}
-      actions={<GifActions item={props.item} showViewDetails={false} service={props.service} mutate={props.mutate} />}
+      actions={<GifActions item={props.item} showViewDetails={false} mutate={props.mutate} />}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Title" text={title} />
@@ -46,7 +48,7 @@ export function GifDetails(props: GifDetailsProps) {
           {labels}
           {links}
           {tags}
-          <Detail.Metadata.Label title="Source" text={getServiceTitle(props.service)} icon={attribution} />
+          {service ? <Detail.Metadata.Label title="Source" text={getServiceTitle(service)} icon={attribution} /> : null}
         </Detail.Metadata>
       }
     />

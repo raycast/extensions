@@ -49,6 +49,7 @@ export default function Command() {
       />
     );
   }
+
   return (
     <List isLoading={isLoading}>
       {profiles?.map((profile) => (

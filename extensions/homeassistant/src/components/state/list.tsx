@@ -27,15 +27,19 @@ import { ZoneActionPanel } from "@components/zone/actions";
 import { ha, shouldDisplayEntityID } from "@lib/common";
 import { State } from "@lib/haapi";
 import { getStateTooltip } from "@lib/utils";
-import { ActionPanel, Image, List, Toast, showToast } from "@raycast/api";
+import { ActionPanel, Color, Image, List, Toast, showToast } from "@raycast/api";
 import { useState } from "react";
 import { useStateSearch } from "./hooks";
 import { getIcon, getStateValue } from "./utils";
 
-export function StatesList(props: { domain: string; deviceClass?: string | undefined }): JSX.Element {
+export function StatesList(props: {
+  domain: string;
+  deviceClass?: string | undefined;
+  entitiesState?: State[] | undefined;
+}): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
-  const { states } = useStateSearch(searchText, props.domain, props.deviceClass, allStates);
+  const { states } = useStateSearch(searchText, props.domain, props.deviceClass, props.entitiesState ?? allStates);
 
   if (error) {
     showToast({
@@ -62,22 +66,6 @@ export function StatesList(props: { domain: string; deviceClass?: string | undef
 
 export function StateListItem(props: { state: State }): JSX.Element {
   const state = props.state;
-  const extraTitle = (state: State): string => {
-    try {
-      const e = state.entity_id;
-      if (e.startsWith("cover") && "current_position" in state.attributes) {
-        const p = state.attributes.current_position;
-        if (p > 0 && p < 100) {
-          return `${p}% | `;
-        }
-      } else if (e.startsWith("climate") && "current_temperature" in state.attributes) {
-        return `${state.attributes.current_temperature} | `;
-      }
-    } catch (e) {
-      // ignore
-    }
-    return "";
-  };
 
   let icon: Image.ImageLike | undefined;
   const subtitle = (state: State): string | undefined => {
@@ -108,6 +96,44 @@ export function StateListItem(props: { state: State }): JSX.Element {
     return state.entity_id;
   };
 
+  const firstAccessoryTitle = (state: State): string => {
+    try {
+      const e = state.entity_id;
+      if (e.startsWith("cover") && "current_position" in state.attributes) {
+        const p = state.attributes.current_position;
+        return `${p}%`;
+      } else if (e.startsWith("climate") && "current_temperature" in state.attributes) {
+        return `${state.attributes.current_temperature}°`;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return "";
+  };
+
+  const firstAccessoryIcon = (state: State): Image.ImageLike | undefined => {
+    try {
+      const e = state.entity_id;
+      if (e.startsWith("cover") && "current_position" in state.attributes) {
+        return { source: "window-open.svg", tintColor: Color.SecondaryText };
+      } else if (e.startsWith("climate") && "current_temperature" in state.attributes) {
+        return { source: "thermometer.svg", tintColor: Color.SecondaryText };
+      }
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  const secondAccessoryIcon = (state: State): Image.ImageLike | undefined => {
+    try {
+      if (state.attributes.hvac_modes) {
+        return { source: "cog.svg", tintColor: Color.SecondaryText };
+      }
+    } catch (e) {
+      // ignore
+    }
+  };
+
   return (
     <List.Item
       key={state.entity_id}
@@ -117,7 +143,13 @@ export function StateListItem(props: { state: State }): JSX.Element {
       icon={icon || getIcon(state)}
       accessories={[
         {
-          text: extraTitle(state) + getStateValue(state),
+          text: firstAccessoryTitle(state),
+          icon: firstAccessoryIcon(state),
+          tooltip: getStateTooltip(state),
+        },
+        {
+          text: getStateValue(state),
+          icon: secondAccessoryIcon(state),
           tooltip: getStateTooltip(state),
         },
       ]}

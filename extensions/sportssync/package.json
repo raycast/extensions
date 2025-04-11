@@ -1,0 +1,165 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sportssync",
+  "title": "Sportssync",
+  "description": "View live scores, standings, and news across your favorite sports leagues",
+  "icon": "Sportssync.png",
+  "author": "daniyal_master",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "nhl-scores-and-schedule",
+      "title": "NHL Scores and Schedule",
+      "description": "View scores and upcoming games across the NHL",
+      "mode": "view"
+    },
+    {
+      "name": "nhl-standings",
+      "title": "NHL Standings",
+      "description": "View the standings across the NHL",
+      "mode": "view"
+    },
+    {
+      "name": "nhl-news",
+      "title": "NHL News",
+      "description": "View news articles across the NHL",
+      "mode": "view"
+    },
+    {
+      "name": "basketball-scores-and-schedule",
+      "title": "Basketball Scores and Schedule",
+      "subtitle": "NBA & WNBA",
+      "description": "View scores and upcoming games across the NBA and WNBA",
+      "mode": "view"
+    },
+    {
+      "name": "basketball-standings",
+      "title": "Basketball Standings",
+      "subtitle": "NBA & WNBA",
+      "description": "View the standings across the NBA and WNBA",
+      "mode": "view"
+    },
+    {
+      "name": "basketball-news",
+      "title": "Basketball News",
+      "subtitle": "NBA & WNBA",
+      "description": "View news articles across the NBA and WNBA",
+      "mode": "view"
+    },
+    {
+      "name": "college-basketball",
+      "title": "College Basketball Scores and Schedule",
+      "subtitle": "NCAA Men's & Women's",
+      "description": "View scores and upcoming games across the NCAA Men's and Women's League",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "college-basketball-news",
+      "title": "College Basketball News",
+      "subtitle": "NCAA Men's & Women's",
+      "description": "View news articles across the NCAA Men's and Women's League",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "football-scores-and-schedule",
+      "title": "Football Scores and Schedule",
+      "subtitle": "NFL & NCAA",
+      "description": "View scores and upcoming games across the NFL and NCAA",
+      "mode": "view"
+    },
+    {
+      "name": "football-standings",
+      "title": "Football Standings",
+      "subtitle": "NFL",
+      "description": "View the standings across the NFL",
+      "mode": "view"
+    },
+    {
+      "name": "football-news",
+      "title": "Football News",
+      "subtitle": "NFL & NCAA",
+      "description": "View news articles across the NFL and NCAA",
+      "mode": "view"
+    },
+    {
+      "name": "mlb-scores-and-schedule",
+      "title": "MLB Scores and Schedule",
+      "description": "View scores and upcoming games across the MLB",
+      "mode": "view"
+    },
+    {
+      "name": "mlb-standings",
+      "title": "MLB Standings",
+      "description": "View the standings across the MLB",
+      "mode": "view"
+    },
+    {
+      "name": "mlb-news",
+      "title": "MLB News",
+      "description": "View news articles across the MLB",
+      "mode": "view"
+    },
+    {
+      "name": "soccer-scores-and-schedule",
+      "title": "Soccer Scores and Schedule",
+      "description": "View scores and upcoming games across the EPL, SLL, GER, and ITA leagues",
+      "mode": "view"
+    },
+    {
+      "name": "soccer-standings",
+      "title": "Soccer Standings",
+      "description": "View the standings across the EPL, SLL, GER, and ITA Leagues",
+      "mode": "view"
+    },
+    {
+      "name": "soccer-news",
+      "title": "Soccer News",
+      "description": "View news articles across the EPL, SLL, GER, and ITA Leagues",
+      "mode": "view"
+    },
+    {
+      "name": "f1-results-and-schedule",
+      "title": "F1 Results and Schedule",
+      "description": "View race results and upcoming races across F1",
+      "mode": "view"
+    },
+    {
+      "name": "f1-standings",
+      "title": "F1 Standings",
+      "subtitle": "Driver & Constructor",
+      "description": "View the driver and constructor standings across the F1",
+      "mode": "view"
+    },
+    {
+      "name": "f1-news",
+      "title": "F1 News",
+      "description": "View news articles across the F1",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

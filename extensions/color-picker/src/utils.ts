@@ -1,25 +1,13 @@
 import { getPreferenceValues, Icon, Image, Keyboard, List } from "@raycast/api";
-import { HistoryColor, HistoryItem } from "./types";
 import ColorJS from "colorjs.io";
+import { Colors, Palette } from "color-namer";
+import uniqBy from "lodash/uniqBy";
+import { HistoryColor, HistoryItem } from "./types";
+import { ColorFormatType } from "./types";
 
-const preferences: Preferences = getPreferenceValues();
+const preferences = getPreferenceValues<ExtensionPreferences>();
 
-export function getFormattedColor(
-  _color: HistoryColor,
-  format?:
-    | "hex"
-    | "hex-lower-case"
-    | "hex-no-prefix"
-    | "rgb"
-    | "rgb-percentage"
-    | "rgba"
-    | "rgba-percentage"
-    | "hsla"
-    | "hsva"
-    | "oklch"
-    | "lch"
-    | "p3",
-) {
+export function getFormattedColor(_color: HistoryColor, format?: ColorFormatType) {
   let color;
   if (typeof _color === "string") {
     color = new ColorJS(_color);
@@ -113,4 +101,39 @@ export function getAccessories(historyItem: HistoryItem) {
   const accessories = new Array<List.Item.Accessory>();
   accessories.push({ date: new Date(historyItem.date), tooltip: new Date(historyItem.date).toLocaleString() });
   return accessories;
+}
+
+export function normalizeColorHex(colorInput: string) {
+  let hex = colorInput.replace(/^#/, "");
+  const validHexPattern = /^([a-f\d]{3,4}|[a-f\d]{6}|[a-f]\d{8})$/i;
+  if (validHexPattern.test(hex)) {
+    switch (hex.length) {
+      case 3:
+      case 4:
+        hex = hex
+          .slice(0, 3)
+          .split("")
+          .map((x) => x.repeat(2))
+          .join("");
+        break;
+      case 8:
+        hex = hex.slice(0, 6);
+        break;
+    }
+  }
+  return "#" + hex.toUpperCase();
+}
+
+export function getColorByPlatform(normalizedSearchString: string, colors?: Colors<Palette>) {
+  return Object.entries(colors ?? {}).sort(([, a], [, b]) => {
+    if (normalizeColorHex(a[0].hex) === normalizeColorHex(b[0].hex)) return 0;
+    if (normalizedSearchString === normalizeColorHex(a[0].hex)) return -1;
+    return 1;
+  });
+}
+
+export function getColorByProximity(colors?: Colors<Palette>) {
+  return uniqBy(Object.values(colors ?? {}).flat(), (x) => x.name.toLowerCase()).sort(
+    (a, b) => a.distance - b.distance,
+  );
 }

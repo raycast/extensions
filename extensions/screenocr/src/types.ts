@@ -1,6 +1,6 @@
 export interface Preferences {
   primaryLanguage: string;
-  languageCorrection: string;
+  languageCorrection: boolean;
   ocrMode: string;
   ignoreLineBreaks: boolean;
   keepImage: boolean;

@@ -43,6 +43,10 @@ describe("Testing matching logic", () => {
         "Chase: DON'T share. Use code 89050683. Only use this online. Code expires in 10 min. We'll NEVER call to ask for this code. Call us if you didn't request it."
       )
     ).toBe("89050683");
+    expect(extractCode("Código de Autorização: 12345678")).toBe("12345678");
+    expect(extractCode("O seu código: 12345678")).toBe("12345678");
+    expect(extractCode("Codigo de Autorizacao: 87654321")).toBe("87654321");
+    expect(extractCode("O seu codigo: 87654321")).toBe("87654321");
   });
 
   test("Codes with dash", () => {

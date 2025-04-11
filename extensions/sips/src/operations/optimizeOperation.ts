@@ -5,23 +5,24 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-05 23:49:16
- * Last modified  : 2024-06-26 21:37:46
  */
 
 import { execSync } from "child_process";
 import * as fs from "fs";
 import path from "path";
+
+import { environment, getPreferenceValues } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { optimize as svgoOptimize } from "svgo";
 
+import { getAVIFEncPaths } from "../utilities/avif";
 import {
-  cleanup,
+  expandTilde,
   getDestinationPaths,
+  getScopedTempFile,
   getWebPBinaryPath,
   moveImageResultsToFinalDestination,
-  scopedTempFile,
 } from "../utilities/utils";
-import { getAVIFEncPaths } from "../utilities/avif";
-import { runAppleScript } from "@raycast/utils";
 
 /**
  * Optimizes a JPEG image by applying lossy compression.
@@ -49,23 +50,21 @@ const optimizeJPEG = async (jpegPath: string, newPath: string, amount: number) =
 };
 
 /**
- * Optimizes a WebP image by converting it to a JPEG, optimizing the JPEG, and then converting it back to a WebP.
+ * Optimizes a WebP image by applying lossless compression (if the amount is less than 75) or lossy compression (if the amount is 75 or greater).
  *
  * @param webpPath The path of the WebP image to optimize.
  * @param amount The amount of compression to apply to the JPEG image.
  * @returns The path of the optimized WebP image.
  */
 const optimizeWEBP = async (webpPath: string, amount: number) => {
-  const jpegPath = await scopedTempFile("tmp", "jpeg");
+  const preferences = getPreferenceValues<Preferences>();
+  const optimizedPath = `${path.dirname(webpPath)}/${path.basename(webpPath, path.extname(webpPath))}-optimized.webp`;
+  const newPath = (await getDestinationPaths([optimizedPath]))[0];
 
-  let newPath = (await getDestinationPaths([webpPath]))[0];
-  newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + " (Optimized).webp");
-
-  const [dwebpPath, cwebpPath] = await getWebPBinaryPath();
-
-  execSync(`${dwebpPath} "${webpPath}" -o "${jpegPath}"`);
-  await optimizeJPEG(jpegPath, newPath, amount);
-  execSync(`${cwebpPath} "${jpegPath}" -o "${newPath}"`);
+  const [cwebpPath] = await getWebPBinaryPath();
+  execSync(
+    `${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} -q ${amount} "${webpPath}" -o "${newPath}"`,
+  );
   return newPath;
 };
 
@@ -76,8 +75,8 @@ const optimizeWEBP = async (webpPath: string, amount: number) => {
  * @returns The path of the optimized SVG image.
  */
 const optimizeSVG = async (svgPath: string) => {
-  let newPath = (await getDestinationPaths([svgPath]))[0];
-  newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + " (Optimized).svg");
+  const optimizedPath = `${path.dirname(svgPath)}/${path.basename(svgPath, path.extname(svgPath))}-optimized.svg`;
+  const newPath = (await getDestinationPaths([optimizedPath]))[0];
 
   const data = fs.readFileSync(svgPath);
   const result = svgoOptimize(data.toString(), {
@@ -85,6 +84,17 @@ const optimizeSVG = async (svgPath: string) => {
     multipass: true,
   });
   fs.writeFileSync(newPath, result.data);
+  return newPath;
+};
+
+const optimizePNG = async (pngPath: string, optimizationAmount: number) => {
+  const strategy = Math.floor(5 - optimizationAmount / 20);
+  const optimizedPath = `${path.dirname(pngPath)}/${path.basename(pngPath, path.extname(pngPath))}-optimized.png`;
+  const newPath = (await getDestinationPaths([optimizedPath]))[0];
+
+  const pngoutPath = `${environment.assetsPath}/pngout/pngout`;
+  execSync(`chmod +x ${pngoutPath}`);
+  execSync(`${pngoutPath} -s${strategy} -y -force "${pngPath}" "${newPath}"`);
   return newPath;
 };
 
@@ -96,10 +106,11 @@ const optimizeSVG = async (svgPath: string) => {
  * @returns A promise that resolves when optimization is complete.
  */
 export default async function optimize(sourcePaths: string[], amount: number) {
-  const newPaths = await getDestinationPaths(sourcePaths);
+  const expandedPaths = sourcePaths.map((path) => expandTilde(path));
+  const newPaths = await getDestinationPaths(expandedPaths);
 
   const resultPaths = [];
-  for (const imgPath of sourcePaths) {
+  for (const imgPath of expandedPaths) {
     if (imgPath.toLowerCase().endsWith("webp")) {
       // Convert to JPEG, optimize, and restore to WebP
       resultPaths.push(await optimizeWEBP(imgPath, amount));
@@ -108,39 +119,53 @@ export default async function optimize(sourcePaths: string[], amount: number) {
       resultPaths.push(await optimizeSVG(imgPath));
     } else if (imgPath.toLowerCase().endsWith("jpg") || imgPath.toLowerCase().endsWith("jpeg")) {
       // Optimize JPEG images using NSBitmapImageRep compression
-      let newPath = newPaths[sourcePaths.indexOf(imgPath)];
-      newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + " (Optimized).jpeg");
+      let newPath = newPaths[expandedPaths.indexOf(imgPath)];
+      newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + "-optimized.jpeg");
       resultPaths.push(newPath);
       await optimizeJPEG(imgPath, newPath, amount);
     } else if (imgPath.toLowerCase().endsWith("avif")) {
       // Optimize AVIF images using avifenc
+      const preferences = getPreferenceValues<Preferences>();
       const { encoderPath, decoderPath } = await getAVIFEncPaths();
 
       // Convert to JPEG
-      const jpegPath = await scopedTempFile("tmp", "jpeg");
-      execSync(`${decoderPath} -q ${amount} "${imgPath}" "${jpegPath}"`);
+      await using jpegFile = await getScopedTempFile("tmp", "jpeg");
+      execSync(`${decoderPath} -q ${amount} "${imgPath}" "${jpegFile.path}"`);
 
       // Convert back to AVIF
-      let newPath = newPaths[sourcePaths.indexOf(imgPath)];
-      newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + " (Optimized).avif");
+      let newPath = newPaths[expandedPaths.indexOf(imgPath)];
+      newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + "-optimized.avif");
       resultPaths.push(newPath);
-      execSync(`${encoderPath} "${jpegPath}" "${newPath}"`);
+      execSync(
+        `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""} "${jpegFile.path}" "${newPath}"`,
+      );
     } else if (imgPath.toLowerCase().endsWith("pdf")) {
       // PDF -> JPEG -> PDF
       throw new Error(
         "PDF optimization is not yet supported in this version of the extension, but it will be added in a future update.",
       );
+    } else if (
+      imgPath.toLowerCase().endsWith("png") ||
+      imgPath.toLowerCase().endsWith("gif") ||
+      imgPath.toLowerCase().endsWith("bmp") ||
+      imgPath.toLowerCase().endsWith("tga")
+    ) {
+      resultPaths.push(await optimizePNG(imgPath, amount));
     } else {
       // Optimize any other SIPS-compatible image type
-      const jpegPath = await scopedTempFile("tmp", "jpeg");
-      let newPath = newPaths[sourcePaths.indexOf(imgPath)];
-      newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + " (Optimized).jpeg");
+      await using jpegFile = await getScopedTempFile("tmp", "jpeg");
+      let newPath = newPaths[expandedPaths.indexOf(imgPath)];
+      newPath = path.join(
+        path.dirname(newPath),
+        path.basename(newPath, path.extname(newPath)) + "-optimized" + path.extname(newPath),
+      );
       resultPaths.push(newPath);
 
-      await optimizeJPEG(imgPath, jpegPath, amount);
-      execSync(`sips --setProperty format jpeg "${jpegPath}" --out "${newPath}"`);
+      await optimizeJPEG(imgPath, jpegFile.path, amount);
+      const format = path.extname(newPath).slice(1).toLowerCase();
+      execSync(`sips --setProperty format ${format} "${jpegFile.path}" --out "${newPath}"`);
     }
   }
   await moveImageResultsToFinalDestination(resultPaths);
-  await cleanup();
+  return resultPaths;
 }

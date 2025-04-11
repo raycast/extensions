@@ -61,7 +61,7 @@ export const DestructiveAction = ({
   title: string;
   dialog: { title?: string; message?: string; primaryButton?: string };
   onAction: () => void;
-  shortcut?: Keyboard.Shortcut;
+  shortcut?: Keyboard.Shortcut | null;
 }) => (
   <Action
     style={Action.Style.Destructive}

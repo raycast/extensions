@@ -43,20 +43,12 @@ export default function TabQuickPin(props: TabQuickPinProps) {
       tooltip="Add a pin whose target URL is the URL of the current browser tab"
       shortcut={KEYBOARD_SHORTCUT.PIN_CURRENT_TAB}
       onAction={async () => {
-        await createNewPin(
-          tab.name,
-          tab.url,
-          "Favicon / File Icon",
-          targetGroup?.name || "None",
-          app.name,
-          undefined,
-          undefined,
-          false,
-          undefined,
-          undefined,
-          [],
-          "",
-        );
+        await createNewPin({
+          name: tab.name,
+          url: tab.url,
+          application: app.name,
+          group: targetGroup?.name || "None",
+        });
       }}
     />
   );

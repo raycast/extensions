@@ -1,6 +1,6 @@
 # Crisp
 
-Manage Crisp conversations quickly with all websites conversations in one place. https://crispyraycast.com
+Manage [Crisp](https://crisp.chat/en/) customer support chat quickly with all websites conversations in one place. https://crispyraycast.com
 
 ## Screenshots:
 

@@ -9,7 +9,7 @@ import {
   SectionWithTasks,
   getGroupByOptions,
   groupByAssignees,
-  groupByDueDates,
+  groupByDates,
   groupByLabels,
   groupByPriorities,
   groupByProjects,
@@ -27,6 +27,7 @@ import {
   sortByName,
   sortByPriority,
   sortByProject,
+  sortByDefault,
 } from "../helpers/sortBy";
 
 type ViewProp<T, U> = {
@@ -58,7 +59,7 @@ export default function useViewTasks(name: string, { tasks, optionsToExclude, da
   const [orderBy, setOrderBy] = useCachedState<OrderByOption>(name + "orderby", "asc");
 
   const { sortByProp, sortedTasks, orderByProp } = useMemo(() => {
-    const sortedTasks = [...tasks];
+    const sortedTasks = [...tasks].sort(sortByDefault);
 
     switch (sortBy) {
       case "name":
@@ -105,13 +106,13 @@ export default function useViewTasks(name: string, { tasks, optionsToExclude, da
         sections = groupByAssignees({ tasks, collaborators, user });
         break;
       case "date": {
-        const [upcomingTasks, noDueDatesTasks] = partition(tasks, (task) => task.due);
+        const [upcomingTasks, noDatesTasks] = partition(tasks, (task) => task.due);
 
-        sections = groupByDueDates(upcomingTasks);
+        sections = groupByDates(upcomingTasks);
 
         sections.push({
-          name: "No due date",
-          tasks: noDueDatesTasks,
+          name: "No date",
+          tasks: noDatesTasks,
         });
         break;
       }

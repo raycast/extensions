@@ -8,5 +8,5 @@ export const hud =
   <T, E extends Error>(te: TE.TaskEither<E, T>) =>
     pipe(
       te,
-      TE.chain(() => TE.tryCatch(() => showHUD(text), E.toError))
+      TE.chain(() => TE.tryCatch(() => showHUD(text), E.toError)),
     );

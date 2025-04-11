@@ -136,7 +136,6 @@ const TaskItem: React.FC<{
               togglingRef.current = false;
             }}
             icon={Icon.CheckCircle}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
           />
           <Action.CopyToClipboard title="Copy" content={copyContent} icon={Icon.Clipboard} />
         </ActionPanel>

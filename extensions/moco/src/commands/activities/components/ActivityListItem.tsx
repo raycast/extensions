@@ -14,7 +14,7 @@ interface Props {
 
 export const ActivityListItem: React.FC<Props> = ({ index, activity, modifyActivity }) => {
   const [time, setTime] = useState<number>(
-    activity.timer_started_at !== null ? activity.seconds + timeDelta(activity.timer_started_at) : activity.seconds
+    activity.timer_started_at !== null ? activity.seconds + timeDelta(activity.timer_started_at) : activity.seconds,
   );
   const [parsedTime, setParsedTime] = useState<string>(secondsParser(time));
   const refreshTime = () => {
@@ -82,8 +82,8 @@ export const ActivityListItem: React.FC<Props> = ({ index, activity, modifyActiv
                       ...activity,
                       timer_started_at: activity.timer_started_at === null ? new Date().toISOString() : null,
                     },
-                    Actions.update
-                  )
+                    Actions.update,
+                  ),
                 )
               }
             />

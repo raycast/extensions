@@ -5,17 +5,18 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-09-03 08:28:07
- * Last modified  : 2023-11-01 00:44:28
+ * Last modified  : 2024-07-05 01:57:20
  */
 
 import path from "path";
 
 import { Color, Icon, List } from "@raycast/api";
 
-import { SORT_STRATEGY } from "./constants";
-import { Group } from "./Groups";
+import { SORT_STRATEGY, Visibility } from "./constants";
+import { Group, isGroup } from "./Groups";
 import { getLinkedPins, Pin } from "./Pins";
 import { pluralize } from "./utils";
+import PinsPlaceholders from "./placeholders";
 
 /**
  * Maps an amount to a color, based on the maximum amount, hinting at relative intensity.
@@ -136,7 +137,36 @@ export const addApplicationAccessory = (pin: Pin, accessories: List.Item.Accesso
     !pin.url?.startsWith("~") &&
     !pin.url?.match(/^[a-zA-Z0-9]*?:.*/g)
   ) {
-    accessories.push({ icon: Icon.Terminal, tooltip: "Runs Terminal Command" });
+    const regexes = PinsPlaceholders.map((placeholder) => placeholder.regex);
+    const urlAfterRemovingPlaceholders = regexes.reduce((acc, regex) => acc.replace(regex, ""), pin.url);
+    if (urlAfterRemovingPlaceholders.trim().length > 0) {
+      accessories.push({ icon: Icon.Terminal, tooltip: "Runs Terminal Command" });
+    }
+  }
+};
+
+/**
+ * Adds a visibility accessory to the given list of accessories.
+ * @param pin The pin to add the accessory for.
+ * @param accessories The list of accessories to add the visibility accessory to.
+ */
+export const addVisibilityAccessory = (
+  item: Pin | Group,
+  accessories: List.Item.Accessory[],
+  showingHidden: boolean,
+) => {
+  if (item.visibility === Visibility.MENUBAR_ONLY) {
+    accessories.push({ tag: { value: "Menubar Only", color: Color.Blue }, tooltip: "Visible in Menubar Only" });
+  } else if (item.visibility === Visibility.VIEW_PINS_ONLY && showingHidden) {
+    accessories.push({
+      tag: { value: "'View Pins' Only", color: Color.Purple },
+      tooltip: "Visible in 'View Pins' Only",
+    });
+  } else if (item.visibility === Visibility.HIDDEN) {
+    accessories.push({ tag: "Hidden", tooltip: `Hidden — Use Deeplinks to Open${isGroup(item) ? " Pins" : ""}` });
+  } else if (item.visibility === Visibility.DISABLED) {
+    const tooltip = isGroup(item) ? "Group Disabled — Member Pins Cannot be Opened" : "Pin Disabled — Cannot be Opened";
+    accessories.push({ tag: { value: "Disabled", color: Color.Red }, tooltip });
   }
 };
 
@@ -152,10 +182,14 @@ export const addExecutionVisibilityAccessory = (pin: Pin, accessories: List.Item
     !pin.url?.startsWith("~") &&
     !pin.url?.match(/^[a-zA-Z0-9]*?:.*/g)
   ) {
-    accessories.push({
-      icon: pin.execInBackground ? Icon.EyeDisabled : Icon.Eye,
-      tooltip: pin.execInBackground ? "Executes in Background" : "Executes In New Terminal Tab",
-    });
+    const regexes = PinsPlaceholders.map((placeholder) => placeholder.regex);
+    const urlAfterRemovingPlaceholders = regexes.reduce((acc, regex) => acc.replace(regex, ""), pin.url);
+    if (urlAfterRemovingPlaceholders.trim().length > 0) {
+      accessories.push({
+        icon: pin.execInBackground ? Icon.EyeDisabled : Icon.Eye,
+        tooltip: pin.execInBackground ? "Executes in Background" : "Executes In New Terminal Tab",
+      });
+    }
   }
 };
 
@@ -176,7 +210,7 @@ export const addTextFragmentAccessory = (pin: Pin, accessories: List.Item.Access
  * @param accessories The list of accessories to add the sorting strategy accessory to.
  */
 export const addSortingStrategyAccessory = (group: Group, accessories: List.Item.Accessory[]) => {
-  if (group.sortStrategy !== undefined) {
+  if (group.sortStrategy !== undefined && group.sortStrategy !== SORT_STRATEGY.manual) {
     accessories.push({
       tag: {
         value: SORT_STRATEGY[group.sortStrategy],

@@ -21,6 +21,37 @@
       "placeholder": "~/dev"
     },
     {
+      "type": "dropdown",
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "The primary action to perform when pressing Enter on a project",
+      "required": false,
+      "default": "open-in-editor",
+      "placeholder": "open-in-editor",
+      "data": [
+        {
+          "title": "Open in Editor",
+          "value": "open-in-editor"
+        },
+        {
+          "title": "Open in Terminal",
+          "value": "open-in-terminal"
+        },
+        {
+          "title": "Start Development",
+          "value": "start-development"
+        },
+        {
+          "title": "Open in Browser",
+          "value": "open-url"
+        },
+        {
+          "title": "Open Git Remotes",
+          "value": "open-git-remotes"
+        }
+      ]
+    },
+    {
       "type": "textfield",
       "name": "maxScanningLevels",
       "title": "Max Scanning Levels (folder recursion)",

@@ -22,8 +22,13 @@ export interface SlackMember {
     first_name?: string;
     last_name?: string;
     image_24?: string;
+    title?: string;
+    phone?: string;
+    status_text?: string;
+    status_emoji?: string;
+    status_expiration?: number;
   };
-
+  tz?: string;
   deleted?: boolean;
   is_bot?: boolean;
   is_workflow_bot?: boolean;
@@ -34,10 +39,10 @@ let slackWebClient: WebClient | null = null;
 
 export const slack = OAuthService.slack({
   scope:
-    "users:read channels:read groups:read im:read mpim:read channels:history groups:history im:history mpim:history channels:write groups:write im:write mpim:write users:write dnd:read dnd:write",
+    "users:read channels:read groups:read im:read mpim:read channels:history groups:history im:history mpim:history channels:write groups:write im:write mpim:write users:write dnd:read dnd:write search:read users.profile:write",
   personalAccessToken: accessToken,
   onAuthorize({ token }) {
-    slackWebClient = new WebClient(token);
+    slackWebClient = new WebClient(token, { rejectRateLimitedCalls: true });
   },
 });
 

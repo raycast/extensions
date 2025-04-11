@@ -25,6 +25,16 @@ export interface DirectoryWithFileInfo {
   files: FileInfo[];
 }
 
+export interface TypeDirectory {
+  type: string;
+  directories: DirectoryWithFileInfo[];
+}
+
+export enum TypeDirectoryEnum {
+  OpenFolder = "Open Folder",
+  PinnedFolder = "Pinned Folder",
+}
+
 export enum FileType {
   FOLDER = "Folder",
   FILE = "File",

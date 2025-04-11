@@ -2,6 +2,12 @@ import { open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { CodedError, ErrorCode } from "@slack/web-api";
 import { formatDistance } from "date-fns";
+import { slack } from "./client/WebClient";
+import * as emoji from "node-emoji";
+
+function convertSlackEmojiToUnicode(text: string): string {
+  return emoji.emojify(text);
+}
 
 const timeDifference = (date: Date): string => {
   const now = new Date();
@@ -12,6 +18,12 @@ const timeDifference = (date: Date): string => {
   const distance = formatDistance(nowMs, dateMs, { includeSeconds: true });
 
   return dateMs <= nowMs ? `${distance} ago` : `in ${distance}`;
+};
+
+const convertTimestampToDate = (ts: string) => {
+  const [seconds, microseconds] = ts.split(".").map(Number);
+  const milliseconds = seconds * 1000 + Math.floor(microseconds / 1000);
+  return new Date(milliseconds);
 };
 
 const buildScriptEnsuringSlackIsRunning = (commandsToRunAfterSlackIsRunning: string): string => {
@@ -54,15 +66,25 @@ const handleError = async (error: CodedError | Error | unknown, title?: string) 
     }
 
     if (error.message.includes("missing_scope")) {
+      const isUsingOAuth = !!(await slack.client.getTokens());
+
       return showFailureToast(error, {
         title: "Missing Scopes",
         message: "Please make sure your Slack app has all of the required scopes.",
-        primaryAction: {
-          title: "Open Slack Apps",
-          onAction: () => {
-            open("https://api.slack.com/apps");
-          },
-        },
+        primaryAction: isUsingOAuth
+          ? {
+              title: "Re-authorize Slack",
+              onAction: async () => {
+                await slack.client.removeTokens();
+                await slack.authorize();
+              },
+            }
+          : {
+              title: "Open Slack Apps",
+              onAction: () => {
+                open("https://api.slack.com/apps");
+              },
+            },
       });
     }
   }
@@ -70,4 +92,10 @@ const handleError = async (error: CodedError | Error | unknown, title?: string) 
   return showFailureToast(error, { title: title ?? "Something unexpected happened" });
 };
 
-export { timeDifference, buildScriptEnsuringSlackIsRunning, handleError };
+export {
+  timeDifference,
+  convertTimestampToDate,
+  buildScriptEnsuringSlackIsRunning,
+  handleError,
+  convertSlackEmojiToUnicode,
+};

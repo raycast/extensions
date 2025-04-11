@@ -8,17 +8,28 @@ import { parse } from "csv-parse/sync";
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
   const { use, model } = props;
   const { pop } = useNavigation();
+  const [selectedModel, setSelectedModel] = useState(model?.option ?? "claude-3-5-haiku-latest");
 
   const { handleSubmit, itemProps, setValue } = useForm<Model>({
     onSubmit: async (model) => {
-      let updatedModel: Model = { ...model, updated_at: new Date().toISOString() };
-      updatedModel = { ...updatedModel, temperature: updatedModel.temperature };
+      let updatedModel: Model = {
+        ...model,
+        updated_at: new Date().toISOString(),
+      };
+      updatedModel = {
+        ...updatedModel,
+        temperature: updatedModel.temperature,
+      };
       if (props.model) {
         const toast = await showToast({
           title: "Update your model...",
           style: Toast.Style.Animated,
         });
-        use.models.update({ ...updatedModel, id: props.model.id, created_at: props.model.created_at });
+        use.models.update({
+          ...updatedModel,
+          id: props.model.id,
+          created_at: props.model.created_at,
+        });
         toast.title = "Model updated!";
         toast.style = Toast.Style.Success;
       } else {
@@ -41,42 +52,49 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
     validation: {
       name: FormValidation.Required,
       temperature: (value) => {
-        if (value !== undefined && value !== null) {
-          const numValue = Number(value);
-          if (!isNaN(numValue)) {
-            if (numValue < 0) {
-              return "Minimal value is 0";
-            } else if (numValue > 1) {
-              return "Maximum value is 1";
-            }
-          }
-        } else {
-          return FormValidation.Required;
+        if (value === undefined || value === null || value === "") {
+          return "Temperature is required";
         }
+        const numValue = Number(value);
+        if (Number.isNaN(numValue)) {
+          return "Temperature must be a number";
+        }
+        if (numValue < 0) {
+          return "Minimal value is 0";
+        }
+        if (numValue > 1) {
+          return "Maximum value is 1";
+        }
+        return undefined; // Valid input
       },
       max_tokens: (value) => {
-        if (value !== undefined && value !== null) {
-          const numValue = Number(value);
-          if (!isNaN(numValue)) {
-            if (numValue % 1 !== 0) {
-              return "Value must be an integer";
-            }
-            if (numValue < 0) {
-              return "Minimal value is 0";
-            } else if (numValue > 4096) {
-              return "Maximum value is 4096";
-            }
-          }
-        } else {
-          return FormValidation.Required;
+        if (value === undefined || value === null || value === "") {
+          return "Max tokens is required";
         }
+        const numValue = Number(value);
+        if (Number.isNaN(numValue)) {
+          return "Max tokens must be a number";
+        }
+        if (numValue % 1 !== 0) {
+          return "Value must be an integer";
+        }
+        if (numValue < 0) {
+          return "Minimal value is 0";
+        }
+
+        const maxAllowed = selectedModel.startsWith("claude-3-5") ? 8192 : 4096;
+
+        if (numValue > maxAllowed) {
+          return `Maximum value is ${maxAllowed}`;
+        }
+        return undefined; // Valid input
       },
     },
     initialValues: {
       name: model?.name ?? "",
       temperature: model?.temperature.toString() ?? "1",
       max_tokens: model?.max_tokens ?? "4096",
-      option: model?.option ?? "claude-3-haiku-20240307",
+      option: model?.option ?? "claude-3-5-haiku-latest",
       prompt: model?.prompt ?? "",
       pinned: model?.pinned ?? false,
     },
@@ -140,10 +158,20 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
       />
       <Form.TextField
         title="Max token output"
-        placeholder="Set he maximum number of tokens to generate before stopping (0 - 4096)"
+        placeholder={`Set the maximum number of tokens to generate before stopping (0 - ${
+          selectedModel.startsWith("claude-3-5") ? "8192" : "4096"
+        })`}
         {...itemProps.max_tokens}
       />
-      <Form.Dropdown title="Model" placeholder="Choose model option" {...itemProps.option}>
+      <Form.Dropdown
+        title="Model"
+        placeholder="Choose model option"
+        {...itemProps.option}
+        onChange={(newValue) => {
+          setSelectedModel(newValue);
+          setValue("option", newValue);
+        }}
+      >
         {MODEL_OPTIONS.map((option) => (
           <Form.Dropdown.Item value={option} title={option} key={option} />
         ))}

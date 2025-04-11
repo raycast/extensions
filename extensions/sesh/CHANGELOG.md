@@ -1,5 +1,9 @@
 # Sesh Changelog
 
+## [Add nix-darwin support] - 2024-12-04
+
+- Add [nix-darwin](https://github.com/LnL7/nix-darwin) support by adding `/run/current-system/sw/bin/` to the PATH
+
 ## Add config source - 03-28-24
 
 - Add config section between tmux and zoxide in list items

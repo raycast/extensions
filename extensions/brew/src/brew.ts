@@ -51,7 +51,7 @@ export interface CaskDependency {
 }
 
 export interface Formula extends Installable, Nameable {
-  license: string;
+  license: string | null;
   aliases: string[];
   dependencies: string[];
   build_dependencies: string[];
@@ -126,7 +126,7 @@ const caskCachePath = utils.cachePath("cask.json");
 
 export async function brewFetchInstalled(
   useCache: boolean,
-  cancel?: AbortController
+  cancel?: AbortController,
 ): Promise<InstalledMap | undefined> {
   const results = await brewFetchInstallableResults(useCache, cancel);
   return brewMapInstalled(results);
@@ -134,7 +134,7 @@ export async function brewFetchInstalled(
 
 async function brewFetchInstallableResults(
   useCache: boolean,
-  cancel?: AbortController
+  cancel?: AbortController,
 ): Promise<InstallableResults | undefined> {
   async function installed(): Promise<string> {
     return (await execBrew(`info --json=v2 --installed`, cancel)).stdout;
@@ -242,7 +242,7 @@ export async function brewFetchCasks(): Promise<Cask[]> {
 export async function brewSearch(
   searchText: string,
   limit?: number,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<InstallableResults> {
   searchQuery = searchText;
 

@@ -11,14 +11,26 @@
   ],
   "owner": "raycast",
   "access": "public",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "create-task",
       "title": "Create Task",
       "description": "Create and assign new tasks.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showStartDate",
+          "type": "checkbox",
+          "label": "Show the \"Start Date\" field",
+          "description": "When enabled, the \"Start Date\" field will be shown in the \"Create Task\" command.",
+          "required": false,
+          "default": true
+        }
+      ]
     },
     {
       "name": "my-tasks",

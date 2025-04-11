@@ -1,9 +1,11 @@
 import useGemini from "./api/gemini";
+import { getPreferenceValues } from "@raycast/api";
 
 export default function FindSynonym(props) {
+  const { prompt } = getPreferenceValues();
   return useGemini(props, {
-    context:
-      "Find one synonym for the given word. Only return that the synonym, and add nothing else. Keep the casing of the word the same. Your response should only have ONE WORD",
+    context: prompt,
     allowPaste: true,
+    useSelected: true,
   });
 }

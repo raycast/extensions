@@ -39,6 +39,7 @@ export default function TaskEdit({ task }: TaskEditProps) {
       <Form.TextField id="content" title="Title" placeholder="Buy fruits" value={content} onChange={setContent} />
 
       <Form.TextArea
+        enableMarkdown
         id="description"
         title="Description"
         placeholder="Apples, pears, and **strawberries**"

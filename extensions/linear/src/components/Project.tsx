@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { IssuePriorityValue, User } from "@linear/sdk";
 import { getProgressIcon, MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
@@ -16,16 +16,16 @@ import { getDateIcon } from "../helpers/dates";
 import CreateMilestoneForm from "./CreateMilestoneForm";
 import OpenInLinear from "./OpenInLinear";
 import ProjectUpdates from "./ProjectUpdates";
+import { DocumentList } from "./docs/DocumentList";
 
 type ProjectProps = {
   project: ProjectResult;
   priorities: IssuePriorityValue[] | undefined;
-  users: User[] | undefined;
   me: User | undefined;
-  mutateProjects: MutatePromise<ProjectResult[] | undefined>;
+  mutateProjects: MutatePromise<ProjectResult[], ProjectResult[]>;
 };
 
-export default function Project({ project, priorities, users, me, mutateProjects }: ProjectProps) {
+export default function Project({ project, priorities, me, mutateProjects }: ProjectProps) {
   const { linearClient } = getLinearClient();
 
   const progress = `${Math.round(project.progress * 100)}%`;
@@ -36,40 +36,40 @@ export default function Project({ project, priorities, users, me, mutateProjects
     keywords.push(project.lead.displayName, project.lead?.email);
   }
 
-  async function deleteProject() {
-    if (
-      await confirmAlert({
-        title: "Delete Project",
-        message: "Are you sure you want to delete the selected project?",
-        icon: { source: Icon.Trash, tintColor: Color.Red },
+  const deleteProject = () =>
+    confirmAlert({
+      title: "Delete Project",
+      message: "Are you sure you want to delete the selected project?",
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive, onAction: tryDeleteProject },
+    });
+
+  async function tryDeleteProject() {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting project" });
+    mutateProjects(linearClient.archiveProject(project.id), {
+      optimisticUpdate(data) {
+        if (!data) {
+          return data;
+        }
+
+        return data?.filter((p) => p.id !== project.id);
+      },
+    })
+      .then(() => {
+        toast.style = Toast.Style.Success;
+        toast.title = "Project deleted";
+        toast.message = `"${project.name}" is deleted`;
       })
-    ) {
-      try {
-        await showToast({ style: Toast.Style.Animated, title: "Deleting project" });
-
-        await mutateProjects(linearClient.archiveProject(project.id), {
-          optimisticUpdate(data) {
-            if (!data) {
-              return data;
-            }
-
-            return data?.filter((p) => p.id !== project.id);
-          },
-        });
-
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Project deleted",
-          message: `"${project.name}" is deleted`,
-        });
-      } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to delete project",
-          message: getErrorMessage(error),
-        });
-      }
-    }
+      .catch((err) => {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to delete project";
+        toast.message = getErrorMessage(err);
+        toast.primaryAction = {
+          title: "Retry",
+          onAction: tryDeleteProject,
+          shortcut: Keyboard.Shortcut.Common.Refresh,
+        };
+      });
   }
 
   const teams = project.teams.nodes;
@@ -106,7 +106,7 @@ export default function Project({ project, priorities, users, me, mutateProjects
       actions={
         <ActionPanel title={project.name}>
           <Action.Push
-            target={<ProjectIssues projectId={project.id} priorities={priorities} users={users} me={me} />}
+            target={<ProjectIssues projectId={project.id} priorities={priorities} me={me} />}
             title="Show Issues"
             icon={Icon.List}
           />
@@ -135,12 +135,19 @@ export default function Project({ project, priorities, users, me, mutateProjects
               target={<ProjectUpdates project={project} />}
             />
 
+            <Action.Push
+              title="See Project Documents"
+              icon={Icon.Document}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              target={<DocumentList project={project} />}
+            />
+
             <Action
               title="Delete Project"
               onAction={deleteProject}
               style={Action.Style.Destructive}
               icon={Icon.Trash}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
             />
           </ActionPanel.Section>
 

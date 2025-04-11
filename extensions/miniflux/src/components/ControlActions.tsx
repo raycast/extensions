@@ -6,27 +6,65 @@ import { MinifluxEntry, MinifluxApiError, ReadwiseError } from "../utils/types";
 import FeedInDetail from "./FeedInDetail";
 import { useErrorHandler } from "../utils/useErrorHandler";
 
-const ControlActions = ({ entry }: { entry: MinifluxEntry }) => {
+const ControlActions = ({
+  entry,
+  onRefresh,
+  entries,
+}: {
+  entry: MinifluxEntry;
+  onRefresh?: () => Promise<void>;
+  entries?: MinifluxEntry[];
+}) => {
   const handleError = useErrorHandler();
-  const handleBookmarkd = useCallback(
+
+  const handleBookmarked = useCallback(
     async (entry: MinifluxEntry): Promise<void> => {
       try {
-        showToast(Toast.Style.Animated, `${entry.starred ? "Unstarred" : "Starred"} entry`);
+        showToast(Toast.Style.Animated, `Marking entry as ${entry.starred ? "unstarred" : "starred"}...`);
         await apiServer.toggleBookmark(entry);
-
         showToast(Toast.Style.Success, `The entry has been ${entry.starred ? "unstarred" : "starred"}`);
       } catch (error) {
-        showToast(Toast.Style.Failure, `Failed to ${entry.starred ? "unstar" : "star"} the article`);
+        showToast(Toast.Style.Failure, `Failed to ${entry.starred ? "unstar" : "star"} the entry`);
       }
     },
     [entry]
   );
 
-  const hanleRefresh = useCallback(async () => {
+  const handleMarkAsRead = useCallback(
+    async (entry: MinifluxEntry): Promise<void> => {
+      try {
+        showToast(Toast.Style.Animated, "Marking entry as read...");
+        await apiServer.updateEntry(entry.id, "read");
+        showToast(Toast.Style.Success, "Marked as read");
+        if (onRefresh) await onRefresh();
+      } catch (error) {
+        handleError(error as MinifluxApiError);
+      }
+    },
+    [entry, onRefresh]
+  );
+
+  const handleMarkPageAsRead = useCallback(
+    async (entries: MinifluxEntry[]): Promise<void> => {
+      const entryIDs = entries.map((entry) => entry.id);
+
+      try {
+        showToast(Toast.Style.Animated, "Marking entries as read...");
+        await apiServer.updateEntries(entryIDs, "read");
+        showToast(Toast.Style.Success, "Marked as read");
+        if (onRefresh) await onRefresh();
+      } catch (error) {
+        handleError(error as MinifluxApiError);
+      }
+    },
+    [entries, onRefresh]
+  );
+
+  const handleRefresh = useCallback(async () => {
     try {
       showToast(Toast.Style.Animated, "Refreshing all feeds...");
       await apiServer.refreshAllFeed();
-      showToast(Toast.Style.Success, "Feeds have been refreshed!");
+      showToast(Toast.Style.Success, "Feeds have been refreshed");
     } catch (error) {
       handleError(error as MinifluxApiError);
     }
@@ -35,9 +73,9 @@ const ControlActions = ({ entry }: { entry: MinifluxEntry }) => {
   const saveToReadwise = useCallback(
     async ({ url }: MinifluxEntry) => {
       try {
-        showToast(Toast.Style.Animated, "Saving to Readwise Reader ...");
+        showToast(Toast.Style.Animated, "Saving to Readwise Reader...");
         await apiServer.saveToReadwise({ url });
-        showToast(Toast.Style.Success, "Saved!");
+        showToast(Toast.Style.Success, "Saved");
       } catch (error) {
         const newError = error as ReadwiseError;
         showToast(Toast.Style.Failure, newError.detail);
@@ -51,7 +89,21 @@ const ControlActions = ({ entry }: { entry: MinifluxEntry }) => {
       <Action.OpenInBrowser url={entry.url} title="Open in Browser with Original URL" />
       <Action.Push title="Read the Original Content" target={<FeedInDetail entry={entry} />} icon={Icon.Glasses} />
       <Action
-        onAction={() => handleBookmarkd(entry)}
+        onAction={() => handleMarkAsRead(entry)}
+        title={"Mark as Read"}
+        icon={Icon.Checkmark}
+        shortcut={{ modifiers: ["opt"], key: "m" }}
+      />
+      {entries && (
+        <Action
+          onAction={() => handleMarkPageAsRead(entries)}
+          title={"Mark Page as Read"}
+          icon={Icon.CheckCircle}
+          shortcut={{ modifiers: ["opt", "shift"], key: "m" }}
+        />
+      )}
+      <Action
+        onAction={() => handleBookmarked(entry)}
         title={`${entry.starred ? "Unstar" : "Star"}`}
         icon={entry.starred ? Icon.StarDisabled : Icon.Star}
         shortcut={{ modifiers: ["opt"], key: "s" }}
@@ -68,7 +120,7 @@ const ControlActions = ({ entry }: { entry: MinifluxEntry }) => {
         url={apiServer.getEntryUrlInMiniflux(entry)}
         icon={{ source: "miniflux-icon.png" }}
       />
-      <Action onAction={hanleRefresh} title={"Fresh All Feeds"} icon={Icon.RotateClockwise} />
+      <Action onAction={handleRefresh} title={"Refresh All Feeds"} icon={Icon.RotateClockwise} />
     </ActionPanel>
   );
 };

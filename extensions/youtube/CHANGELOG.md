@@ -1,5 +1,13 @@
 # YouTube Changelog
 
+## [Enhancement] - 2024-10-22
+
+- Update the cache in the `search-videos` and `search-channels` commands to use local storage
+
+## [Chore] - 2024-09-02
+
+- Added missing contributor
+
 ## [Enhancement] - 2024-03-17
 
 - Update shortcuts for remove/clear actions to conform with Raycast's `⌃X` and `⌃⇧X` convention for such operations.

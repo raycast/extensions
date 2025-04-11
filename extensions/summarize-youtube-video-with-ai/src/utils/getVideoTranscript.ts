@@ -1,7 +1,7 @@
 import { Toast, popToRoot, showToast } from "@raycast/api";
 import { YoutubeTranscript } from "youtube-transcript";
 
-async function getVideoTranscript(video: string) {
+export async function getVideoTranscript(video: string) {
   const transcript = await YoutubeTranscript.fetchTranscript(video)
     .then((result) => {
       const joinedTranscription = result
@@ -23,5 +23,3 @@ async function getVideoTranscript(video: string) {
 
   return transcript;
 }
-
-export default getVideoTranscript;

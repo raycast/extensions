@@ -38,13 +38,13 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       pinned: false,
       updated_at: "",
       created_at: new Date().toISOString(),
-    }
+    },
   );
 
   const [isLoading, setLoading] = useState<boolean>(true);
 
   const [selectedModelId, setSelectedModelId] = useState<string>(
-    props.conversation ? props.conversation.model.id : "default"
+    props.conversation ? props.conversation.model.id : "default",
   );
 
   const [{ isAutoFullInput, isAutoLoadText }] = useState(() => {
@@ -84,11 +84,11 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
             chats.ask(question, files, conversation.model);
             pop();
           }}
-          models={models.data}
+          models={Object.values(models.data)}
           selectedModel={selectedModelId}
           onModelChange={setSelectedModelId}
           isFirstCall={conversation.chats.length === 0}
-        />
+        />,
       );
     }
 
@@ -110,7 +110,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       return;
     }
     if (models.data && conversation.chats.length === 0) {
-      const defaultUserModel = models.data.find((x) => x.id === DEFAULT_MODEL.id) ?? conversation.model;
+      const defaultUserModel = models.data[DEFAULT_MODEL.id] ?? conversation.model;
       setConversation({ ...conversation, model: defaultUserModel, updated_at: new Date().toISOString() });
     }
   }, [models.isLoading, models.data]);
@@ -126,7 +126,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
     }
     // as long as this side effect under the bottom stack, we should stick `state` in this position
     setIsConversationDone(false);
-    const selectedModel = models.data.find((x) => x.id === selectedModelId);
+    const selectedModel = models.data[selectedModelId];
     // console.debug("selectedModel: ", selectedModelId, selectedModel?.option);
     setConversation({
       ...conversation,
@@ -142,7 +142,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       <FormInputActionSection
         initialQuestion={question}
         onSubmit={(question, files) => chats.ask(question, files, model)}
-        models={models.data}
+        models={Object.values(models.data)}
         selectedModel={selectedModelId}
         onModelChange={setSelectedModelId}
       />
@@ -165,7 +165,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
             <FormInputActionSection
               initialQuestion={question.data}
               onSubmit={(question, files) => chats.ask(question, files, conversation.model)}
-              models={models.data}
+              models={Object.values(models.data)}
               selectedModel={selectedModelId}
               onModelChange={setSelectedModelId}
             />
@@ -177,7 +177,11 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       }
       selectedItemId={chats.selectedChatId || undefined}
       searchBarAccessory={
-        <ModelDropdown models={models.data} onModelChange={setSelectedModelId} selectedModel={selectedModelId} />
+        <ModelDropdown
+          models={Object.values(models.data)}
+          onModelChange={setSelectedModelId}
+          selectedModel={selectedModelId}
+        />
       }
       // https://github.com/raycast/extensions/issues/10844
       // `onSelectionChange` may cause race condition
@@ -190,7 +194,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
         setConversation={setConversation}
         use={{ chats, conversations, savedChats }}
         conversation={conversation}
-        models={models.data}
+        models={Object.values(models.data)}
         selectedModel={selectedModelId}
         onModelChange={setSelectedModelId}
       />

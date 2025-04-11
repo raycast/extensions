@@ -5,7 +5,6 @@ import { CopyActionSection } from "../actions/copy";
 import { FormInputActionSection } from "../actions/form-input";
 import { PreferencesActionSection } from "../actions/preferences";
 import { SaveActionSection } from "../actions/save";
-import { DEFAULT_MODEL } from "../hooks/useModel";
 import { useSavedChat } from "../hooks/useSavedChat";
 import { Chat, ChatViewProps } from "../type";
 import { AnswerDetailView } from "./answer-detail";
@@ -29,10 +28,10 @@ export const ChatView = ({
     <ActionPanel>
       {question.length > 0 ? (
         <PrimaryAction title="Get Answer" onAction={() => use.chats.ask(question, model)} />
-      ) : selectedChat.answer && use.chats.selectedChatId === selectedChat.id ? (
+      ) : (selectedChat.question || selectedChat.answer) && use.chats.selectedChatId === selectedChat.id ? (
         <>
           <CopyActionSection answer={selectedChat.answer} question={selectedChat.question} />
-          <SaveActionSection onSaveAnswerAction={() => savedChat.add(selectedChat)} />
+          {selectedChat.answer ? <SaveActionSection onSaveAnswerAction={() => savedChat.add(selectedChat)} /> : null}
           <ActionPanel.Section title="Output"></ActionPanel.Section>
         </>
       ) : null}
@@ -56,7 +55,7 @@ export const ChatView = ({
               setConversation({
                 id: uuidv4(),
                 chats: [],
-                model: DEFAULT_MODEL,
+                model: model,
                 pinned: false,
                 updated_at: "",
                 created_at: new Date().toISOString(),

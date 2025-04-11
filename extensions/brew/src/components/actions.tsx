@@ -37,7 +37,8 @@ export function FormulaUninstallAction(props: {
     <Action
       title="Uninstall"
       icon={Icon.Trash}
-      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      shortcut={Keyboard.Shortcut.Common.Remove}
+      style={Action.Style.Destructive}
       onAction={async () => {
         const result = await uninstall(props.formula);
         props.onAction(result);

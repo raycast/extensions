@@ -10,7 +10,7 @@ The source code of the example can be found [here](https://github.com/raycast/ex
 
 This example shows how to build commands that don't show a UI in Raycast. This type of command is useful for interactions with other apps such as skipping songs in Spotify or just simply running some scripts that don't need visual confirmation.
 
-![Example: Control the Spotify macOS app from Raycast](../.gitbook/assets/example-spotify-controls.png)
+![Example: Control the Spotify macOS app from Raycast](../.gitbook/assets/example-spotify-controls.webp)
 
 ## Control Spotify macOS app
 

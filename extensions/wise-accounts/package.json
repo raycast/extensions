@@ -5,6 +5,9 @@
   "description": "View Wise Profiles, Balances, and Transactions",
   "icon": "command-icon.png",
   "author": "robsel118",
+  "contributors": [
+    "imvasen"
+  ],
   "categories": [
     "Productivity",
     "Finance"
@@ -61,7 +64,7 @@
           "type": "text",
           "placeholder": "Profile ID",
           "description": "The profile ID to get the balances from",
-          "required": true
+          "required": false
         }
       ],
       "mode": "view"
@@ -77,7 +80,7 @@
           "type": "text",
           "placeholder": "Profile ID",
           "description": "The profile ID to get the balances from",
-          "required": true
+          "required": false
         }
       ],
       "mode": "view"

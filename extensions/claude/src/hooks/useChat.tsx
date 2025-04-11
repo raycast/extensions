@@ -41,6 +41,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     });
 
     if (useStream) {
+      const streamedChat = { ...chat, answer: "" };
       chatAnthropic.messages
         .stream({
           model: model.option,
@@ -50,24 +51,24 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           messages: [...chatTransformer(data), { role: "user", content: question }],
         })
         .on("text", (res) => {
-          chat.answer += res;
-          setStreamData({ ...chat, answer: chat.answer });
+          streamedChat.answer += res;
+          setStreamData({ ...streamedChat });
+          setData((prev) => prev.map((a) => (a.id === chat.id ? { ...streamedChat } : a)));
+        })
+        .on("end", () => {
+          // Use the final accumulated answer
+          // setData((prev) => prev.map(a => a.id === chat.id ? { ...streamedChat } : a));
+          setStreamData(undefined);
+          history.add({ ...streamedChat }); // Add final version to history
+          setLoading(false);
+          toast.title = "Got your answer!";
+          toast.style = Toast.Style.Success;
         })
         .on("error", (err) => {
           toast.title = "Error";
           toast.message = `Couldn't stream message: ${err}`;
           toast.style = Toast.Style.Failure;
           setLoading(false);
-        })
-        .on("end", () => {
-          setData((prev) => {
-            return prev.map((a) => {
-              if (a.id === chat.id) {
-                return { ...chat, answer: chat.answer };
-              }
-              return a;
-            });
-          });
         });
     } else {
       await chatAnthropic.messages
@@ -82,6 +83,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           if ("content" in res) {
             chat = { ...chat, answer: res.content[0].text };
           }
+
+          toast.title = "Got your answer!";
+          toast.style = Toast.Style.Success;
+          setLoading(false);
         })
         .catch((err) => {
           toast.title = "Error";
@@ -89,6 +94,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
             toast.message = err?.message;
           }
           toast.style = Toast.Style.Failure;
+          setLoading(false);
         });
     }
 
@@ -100,11 +106,6 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         return a;
       });
     });
-
-    setLoading(false);
-
-    toast.title = "Got your answer!";
-    toast.style = Toast.Style.Success;
 
     history.add(chat);
   }

@@ -1,7 +1,6 @@
-import React from "react";
-import { handleLiveTemplate, runShortcut, Shortcut } from "../util/shortcut";
 import { Action, Clipboard, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import { fetchItemInput } from "../util/input";
+import { handleLiveTemplate, runShortcut, Shortcut } from "../util/shortcut";
 
 export function ActionRunShortcut(props: {
   primaryAction: string;

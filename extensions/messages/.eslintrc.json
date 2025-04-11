@@ -1,4 +1,16 @@
 {
   "root": true,
-  "extends": ["@raycast"]
+  "plugins": ["import"],
+  "extends": ["@raycast", "plugin:react-hooks/recommended"],
+  "rules": {
+    "import/order": [
+      "error",
+      {
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc"
+        }
+      }
+    ]
+  }
 }

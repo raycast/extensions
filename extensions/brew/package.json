@@ -11,7 +11,12 @@
     "ashokbaruaakas",
     "millerapps",
     "pernielsentikaer",
-    "vyacheslav"
+    "stelo",
+    "vyacheslav",
+    "j3lte",
+    "alexandercato",
+    "ViGeng",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "icon": "icon.png",
@@ -75,19 +80,40 @@
       "name": "terminalApp",
       "type": "dropdown",
       "required": false,
+      "default": "terminal",
       "title": "Terminal Application",
       "data": [
         {
-          "title": "Terminal",
-          "value": "terminal"
+          "title": "Alacritty",
+          "value": "alacritty"
+        },
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
+        },
+        {
+          "title": "Hyper",
+          "value": "hyper"
         },
         {
           "title": "iTerm",
           "value": "iterm"
         },
         {
+          "title": "kitty",
+          "value": "kitty"
+        },
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        },
+        {
           "title": "Warp",
           "value": "warp"
+        },
+        {
+          "title": "WezTerm",
+          "value": "wezterm"
         }
       ],
       "description": "The terminal application/emulator to use when using any Run in Terminal action."
@@ -120,27 +146,29 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.70.0",
-    "@raycast/utils": "^1.13.4",
-    "@types/stream-json": "^1.7.2",
-    "node-fetch": "^2.6.7",
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1",
+    "@types/stream-json": "^1.7.8",
+    "node-fetch": "^3.3.2",
     "stream-chain": "^2.2.5",
-    "stream-json": "^1.7.4"
+    "stream-json": "^1.9.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^20.8.10",
-    "@types/node-fetch": "^2.6.1",
-    "@types/react": "^18.2.27",
-    "eslint": "^7.32.0",
-    "react": "^18.2.0",
-    "typescript": "^4.6.2"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.2",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "^18.3.18",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "react": "^19.0.0",
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

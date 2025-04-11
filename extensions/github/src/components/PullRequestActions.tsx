@@ -11,11 +11,13 @@ import {
   UserFieldsFragment,
 } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
+import { PR_SORT_TYPES_TO_QUERIES } from "../helpers/pull-request";
 import { getGitHubUser } from "../helpers/users";
 import { useMyPullRequests } from "../hooks/useMyPullRequests";
 
 import AddPullRequestReview from "./AddPullRequestReview";
 import PullRequestCommits from "./PullRequestCommits";
+import { SortAction, SortActionProps } from "./SortAction";
 
 export type PullRequest =
   | PullRequestFieldsFragment
@@ -36,7 +38,9 @@ export default function PullRequestActions({
   mutateList,
   mutateDetail,
   children,
-}: PullRequestActionsProps) {
+  sortQuery,
+  setSortQuery,
+}: PullRequestActionsProps & SortActionProps) {
   const { github } = getGitHubClient();
 
   async function mutate() {
@@ -235,7 +239,7 @@ export default function PullRequestActions({
 
         {viewer ? (
           <Action
-            title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
+            title={isAssignedToMe ? "Unassign from Me" : "Assign to Me"}
             icon={viewerUser.icon}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
             onAction={() => (isAssignedToMe ? unassignFromMe(viewer.id) : assignToMe(viewer.id))}
@@ -305,6 +309,7 @@ export default function PullRequestActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section>
+        <SortAction data={PR_SORT_TYPES_TO_QUERIES} {...{ sortQuery, setSortQuery }} />
         <Action
           icon={Icon.ArrowClockwise}
           title="Refresh"
@@ -323,18 +328,19 @@ type SubmenuProps = {
 
 function RequestReviewSubmenu({ pullRequest, mutate }: SubmenuProps) {
   const { github } = getGitHubClient();
-
   const [load, setLoad] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data, isLoading } = useCachedPromise(
-    async (pullRequest) => {
+    async (pullRequest, searchQuery) => {
       return github.repositoryCollaboratorsForPullRequests({
         owner: pullRequest.repository.owner.login,
         name: pullRequest.repository.name,
         pullRequestNumber: pullRequest.number,
+        searchQuery,
       });
     },
-    [pullRequest],
+    [pullRequest, searchQuery],
     { execute: load },
   );
 
@@ -368,29 +374,27 @@ function RequestReviewSubmenu({ pullRequest, mutate }: SubmenuProps) {
       icon={Icon.AddPerson}
       shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
       onOpen={() => setLoad(true)}
+      onSearchTextChange={setSearchQuery}
+      isLoading={isLoading}
     >
-      {isLoading ? (
-        <Action title="Loading..." />
-      ) : (
-        data?.repository?.collaborators?.nodes
-          ?.filter((collaborator) => !collaborator?.isViewer)
-          .map((collaborator) => {
-            if (!collaborator) {
-              return null;
-            }
+      {data?.repository?.collaborators?.nodes
+        ?.filter((collaborator) => !collaborator?.isViewer)
+        .map((collaborator) => {
+          if (!collaborator) {
+            return null;
+          }
 
-            const user = getGitHubUser(collaborator);
+          const user = getGitHubUser(collaborator);
 
-            return (
-              <Action
-                key={collaborator.id}
-                title={user.text}
-                icon={user.icon}
-                onAction={() => requestReview({ id: collaborator.id, text: user.text })}
-              />
-            );
-          })
-      )}
+          return (
+            <Action
+              key={collaborator.id}
+              title={user.text}
+              icon={user.icon}
+              onAction={() => requestReview({ id: collaborator.id, text: user.text })}
+            />
+          );
+        })}
     </ActionPanel.Submenu>
   );
 }
@@ -449,7 +453,7 @@ function AddAssigneeSubmenu({ pullRequest, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         data?.repository?.collaborators?.nodes?.map((collaborator) => {
           if (!collaborator) {
@@ -521,7 +525,7 @@ function AddProjectSubmenu({ pullRequest, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         data?.repository?.projectsV2.nodes?.map((project) => {
           if (!project) {
@@ -612,7 +616,7 @@ function SetMilestoneSubmenu({ pullRequest, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         <>
           <Action title="No Milestone" onAction={() => unsetMilestone()} />
@@ -668,7 +672,7 @@ function OpenPreviewSubmenu({ pullRequest }: SubmenuProps) {
   return (
     <>
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         data && (
           <Action.OpenInBrowser

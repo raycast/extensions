@@ -1,5 +1,20 @@
 # Quick Notes Changelog
 
+## [New Commands] - 2025-04-08
+
+- 3 new commands to use outside of `View Notes`: `Create Note`, `Create Tag`, `Search Notes`
+- Can now use these commands to intake note from clipboard, selected text, etc. using Raycast Quicklinks
+
+## [AI Summary] - 2024-08-03
+
+- Raycast Pro users can now summarize notes using AI
+- Summarize a note using `⌘ + I`
+- Clear note summary using `⌘ + ⇧ + I`
+
+## [Performance] - 2024-07-18
+
+- Reduce lag when loading and searching
+
 ## [Bugfix] - 2024-06-07
 
 - Fix to respect sort when filtering by tag

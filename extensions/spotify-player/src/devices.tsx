@@ -40,7 +40,7 @@ function Devices() {
     </List>;
   }
 
-  if (myDevicesData?.devices?.length === 0) {
+  if (!Array.isArray(myDevicesData?.devices)) {
     return (
       <List isLoading={myDevicesIsLoading}>
         <List.EmptyView
@@ -65,7 +65,7 @@ function Devices() {
 
   return (
     <List isLoading={myDevicesIsLoading}>
-      {myDevicesData?.devices!.map((device) => (
+      {myDevicesData.devices.map((device) => (
         <List.Item
           key={device.id}
           title={device.name ?? "Unknown"}

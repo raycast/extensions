@@ -2,9 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cricketcast",
   "title": "CricketCast",
-  "description": "Check the cricket score through Raycast!",
+  "description": "Check the cricket score and news through Raycast!",
   "icon": "command-icon.png",
   "author": "sampoder",
+  "categories": ["News"],
+  "contributors": [
+    "xmok"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -12,26 +16,33 @@
       "title": "Cricket Scores",
       "description": "View all of the ongoing cricket scores",
       "mode": "view"
+    },
+    {
+      "name": "news",
+      "title": "Cricket News",
+      "description": "View all of the ongoing cricket news",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.3",
     "node-fetch": "^3.1.0",
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "react": "^18.2.0",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

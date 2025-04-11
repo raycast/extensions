@@ -17,6 +17,7 @@ export type DomainPricing = {
           renewal?: Coupon;
           transfer?: Coupon;
         };
+    specialType?: string;
   };
 };
 
@@ -47,7 +48,8 @@ export type RequestBody =
   | CreateDNSRecordRequest
   | EditDNSRecordByDomainSubdomainAndIdRequest
   | UpdateNameServersRequest
-  | AddUrlForwardingRequest;
+  | AddUrlForwardingRequest
+  | RetrieveAllDomainsRequest;
 
 export type ErrorResponse = {
   status: "ERROR";
@@ -77,6 +79,11 @@ export type RetrieveDNSRecordsResponse = {
   records: DNSRecord[];
 };
 
+type Label = {
+  id: string;
+  title: string;
+  color: string;
+};
 export type Domain = {
   domain: string;
   status: string;
@@ -87,6 +94,10 @@ export type Domain = {
   whoisPrivacy: 0 | "1";
   autoRenew: 0 | "1";
   notLocal: 0 | "1";
+  labels?: Label[];
+};
+type RetrieveAllDomainsRequest = {
+  includeLabels: "yes";
 };
 export type RetrieveAllDomainsResponse = {
   status: "SUCCESS";

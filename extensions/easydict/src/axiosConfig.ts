@@ -11,7 +11,7 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import EventEmitter from "events";
-import { HttpsProxyAgent } from "hpagent";
+import { HttpProxyAgent, HttpsProxyAgent } from "hpagent";
 import { getMacSystemProxy } from "mac-system-proxy";
 import { networkTimeout } from "./consts";
 
@@ -28,6 +28,7 @@ configDefaultAxios();
 export const requestCostTime = "requestCostTime";
 
 export let httpsAgent: HttpsProxyAgent | undefined;
+export let httpAgent: HttpProxyAgent | undefined;
 
 /**
  * Becacuse get system proxy will block 0.4s, we need to get it after finish query.
@@ -184,12 +185,15 @@ export function getSystemProxyURL(): Promise<string | undefined> {
  *
  * * Note: this function will block ~0.4s, so should call it at the right time.
  */
-export function getProxyAgent(): Promise<HttpsProxyAgent | undefined> {
+export function getProxyAgent(isHttps: boolean = true): Promise<HttpsProxyAgent | HttpProxyAgent | undefined> {
   console.log(`---> start getProxyAgent`);
 
-  if (httpsAgent) {
+  if (isHttps && httpsAgent) {
     console.log(`---> return cached httpsAgent`);
     return Promise.resolve(httpsAgent);
+  } else if (!isHttps && httpAgent) {
+    console.log(`---> return cached httpAgent`);
+    return Promise.resolve(httpAgent);
   }
 
   return new Promise((resolve) => {
@@ -203,17 +207,27 @@ export function getProxyAgent(): Promise<HttpsProxyAgent | undefined> {
         }
 
         console.log(`---> get system proxy url: ${systemProxyURL}`);
-        const agent = new HttpsProxyAgent({
-          keepAlive: true,
-          proxy: systemProxyURL,
-        });
-
-        httpsAgent = agent;
-        resolve(agent);
+        if (isHttps) {
+          httpsAgent = new HttpsProxyAgent({
+            keepAlive: true,
+            proxy: systemProxyURL,
+          });
+          resolve(httpsAgent);
+        } else {
+          httpAgent = new HttpProxyAgent({
+            keepAlive: true,
+            proxy: systemProxyURL,
+          });
+          resolve(httpAgent);
+        }
       })
       .catch((error) => {
         console.error(`---> get system proxy url error: ${error}`);
-        httpsAgent = undefined;
+        if (isHttps) {
+          httpsAgent = undefined;
+        } else {
+          httpAgent = undefined;
+        }
         resolve(undefined);
       });
   });

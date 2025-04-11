@@ -1,0 +1,145 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "password-strength",
+  "title": "Password Strength",
+  "description": "Check your passwords",
+  "icon": "extension-icon.png",
+  "author": "j3lte",
+  "categories": [
+    "Web",
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-password-strength",
+      "title": "Check Password Strength",
+      "subtitle": "Password Strength",
+      "description": "Check the strength of your password",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "password",
+          "type": "password",
+          "placeholder": "Password",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "offline-dictionary-en",
+          "title": "Offline Check Dictionary: English",
+          "type": "checkbox",
+          "required": false,
+          "label": "Use English words",
+          "description": "Use an offline dictionary for English words. If no dictionaries are selected, English will be used by default."
+        },
+        {
+          "name": "offline-dictionary-de",
+          "title": "Offline Check Dictionary: German",
+          "type": "checkbox",
+          "required": false,
+          "label": "Use German words",
+          "description": "Use an offline dictionary for German words."
+        },
+        {
+          "name": "offline-dictionary-es-es",
+          "title": "Offline Check Dictionary: Spanish (Spain)",
+          "type": "checkbox",
+          "required": false,
+          "label": "Use Spanish (Spain) words",
+          "description": "Use an offline dictionary for Spanish (Spain) words."
+        },
+        {
+          "name": "offline-dictionary-fi",
+          "title": "Offline Check Dictionary: Finnish",
+          "type": "checkbox",
+          "required": false,
+          "label": "Use Finnish words",
+          "description": "Use an offline dictionary for Finnish words."
+        },
+        {
+          "name": "offline-dictionary-fr",
+          "title": "Offline Check Dictionary: French",
+          "type": "checkbox",
+          "required": false,
+          "label": "Use French words",
+          "description": "Use an offline dictionary for French words."
+        },
+        {
+          "name": "offline-dictionary-id",
+          "title": "Offline Check Dictionary: Indonesia",
+          "type": "checkbox",
+          "required": false,
+          "label": "Use Indonesian words",
+          "description": "Use an offline dictionary for Indonesian words."
+        },
+        {
+          "name": "offline-dictionary-it",
+          "title": "Offline Check Dictionary: Italian",
+          "type": "checkbox",
+          "required": false,
+          "label": "Use Italian words",
+          "description": "Use an offline dictionary for Italian words."
+        },
+        {
+          "name": "offline-dictionary-ja",
+          "title": "Offline Check Dictionary: Japanese",
+          "type": "checkbox",
+          "required": false,
+          "label": "Use Japanese words",
+          "description": "Use an offline dictionary for Japanese words."
+        },
+        {
+          "name": "offline-dictionary-nl-be",
+          "title": "Offline Check Dictionary: Dutch (Belgium)",
+          "type": "checkbox",
+          "required": false,
+          "label": "Use Dutch (Belgium) words",
+          "description": "Use an offline dictionary for Dutch (Belgium) words."
+        },
+        {
+          "name": "offline-dictionary-pl",
+          "title": "Offline Check Dictionary: Polish",
+          "type": "checkbox",
+          "required": false,
+          "label": "Use Polish words",
+          "description": "Use an offline dictionary for Polish words."
+        },
+        {
+          "name": "offline-dictionary-pt-br",
+          "title": "Offline Check Dictionary: Portuguese (Brazilian)",
+          "type": "checkbox",
+          "required": false,
+          "label": "Use Portuguese (Brazilian) words",
+          "description": "Use an offline dictionary for Portuguese (Brazilian) words."
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "@zxcvbn-ts/core": "^3.0.4",
+    "@zxcvbn-ts/language-common": "^3.0.4",
+    "@zxcvbn-ts/language-en": "^3.0.2",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,8 +1,15 @@
 import { getApplications, showToast, Toast, open } from "@raycast/api";
 
-async function isRectangleInstalled() {
+export type DetectedInstallation = "rectangle" | "rectangle-pro" | "none";
+
+async function detectInstallation(): Promise<DetectedInstallation> {
   const applications = await getApplications();
-  return applications.some(({ bundleId }) => bundleId === "com.knollsoft.Rectangle");
+  if (applications.some(({ bundleId }) => bundleId === "com.knollsoft.Hookshot")) {
+    return "rectangle-pro";
+  } else if (applications.some(({ bundleId }) => bundleId === "com.knollsoft.Rectangle")) {
+    return "rectangle";
+  }
+  return "none";
 }
 
 /**
@@ -10,11 +17,11 @@ async function isRectangleInstalled() {
  *
  * If Rectangle is not installed, displays a toast notification prompting the user to download it from rectangleapp.com.
  *
- * @returns {boolean} Whether Rectangle installation was detected.
+ * @returns {DetectedInstallation} Which version of Rectangle (if any) is installed.
  */
-export async function ensureRectangleIsInstalled(): Promise<boolean> {
-  const isInstalled = await isRectangleInstalled();
-  if (!isInstalled) {
+export async function ensureRectangleIsInstalled(): Promise<DetectedInstallation> {
+  const detectedInstallation = await detectInstallation();
+  if (detectedInstallation === "none") {
     const options: Toast.Options = {
       style: Toast.Style.Failure,
       title: "Rectangle is not installed.",
@@ -30,5 +37,5 @@ export async function ensureRectangleIsInstalled(): Promise<boolean> {
 
     await showToast(options);
   }
-  return isInstalled;
+  return detectedInstallation;
 }

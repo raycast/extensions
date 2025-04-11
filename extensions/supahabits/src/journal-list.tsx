@@ -64,7 +64,7 @@ export default function JournalListCommand() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title="View/Edit Entry"
+                title="View/edit Entry"
                 url={`https://www.supahabits.com/dashboard/journal/${item.id}`}
                 shortcut={{ modifiers: ["cmd"], key: "h" }}
               />

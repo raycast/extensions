@@ -21,6 +21,7 @@ import {
   VerifyDomainResponse,
 } from "./types";
 import fetch from "node-fetch";
+import "cross-fetch/polyfill";
 import { API_HEADERS, API_URL } from "./constants";
 
 const headers = API_HEADERS;
@@ -75,9 +76,8 @@ export async function deleteApiKey(id: string) {
 }
 
 // DOMAINS
-export async function getDomains() {
-  return (await callApi(`domains`, "GET", undefined, "Fetching Domains")) as ErrorResponse | GetDomainsResponse;
-}
+// export async function getDomains() { -> MOVED TO HOOK
+
 export async function addDomain(newDomain: AddDomainRequest) {
   return (await callApi(`domains`, "POST", { ...newDomain }, "Adding Domain")) as ErrorResponse | AddDomainResponse;
 }

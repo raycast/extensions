@@ -17,7 +17,7 @@ function NewTabActions({ query }: { query?: string }): ReactElement {
 
   return (
     <ActionPanel title="New Tab">
-      <ActionPanel.Item
+      <Action
         onAction={() => openNewTab({ query, profileCurrent, openTabInProfile })}
         title={query ? `Search "${query}"` : "Open Empty Tab"}
       />
@@ -30,6 +30,11 @@ function TabListItemActions({ tab, onTabClosed }: { tab: Tab; onTabClosed?: () =
     <ActionPanel title={tab.title}>
       <GoToTab tab={tab} />
       <Action.CopyToClipboard title="Copy URL" content={tab.url} />
+      <Action.CopyToClipboard
+        title="Copy Title"
+        content={tab.title}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+      />
       <CloseTab tab={tab} onTabClosed={onTabClosed} />
       <ActionPanel.Section>
         <Action.CreateQuicklink
@@ -55,12 +60,9 @@ function HistoryItemActions({
 
   return (
     <ActionPanel title={title}>
-      <ActionPanel.Item
-        onAction={() => openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile })}
-        title={"Open"}
-      />
+      <Action onAction={() => openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile })} title={"Open"} />
       <ActionPanel.Section title={"Open in profile"}>
-        <ActionPanel.Item
+        <Action
           onAction={() =>
             openNewTab({
               url,
@@ -71,7 +73,7 @@ function HistoryItemActions({
           }
           title={"Open in current profile"}
         />
-        <ActionPanel.Item
+        <Action
           onAction={() =>
             openNewTab({
               url,
@@ -113,7 +115,7 @@ function CloseTab(props: { tab: Tab; onTabClosed?: () => void }) {
   }
 
   return (
-    <ActionPanel.Item
+    <Action
       title="Close Tab"
       icon={{ source: Icon.XMarkCircle }}
       onAction={handleAction}

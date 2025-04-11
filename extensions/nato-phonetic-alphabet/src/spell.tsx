@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Detail, LaunchProps } from "@raycast/api";
+import { ActionPanel, Action, Detail, LaunchProps, List, Icon } from "@raycast/api";
 import { DICTIONARY } from "./dictionary";
 
 interface Arguments {
@@ -8,7 +8,15 @@ interface Arguments {
 const NEW_LINE = "\r\n\r\n";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
-  const term = props.arguments["Term"];
+  const term = (props.arguments["Term"] || props.fallbackText || "").trim();
+
+  if (!term) {
+    return (
+      <List>
+        <List.EmptyView title="Error" description="Please enter text to spell" icon={Icon.Warning} />
+      </List>
+    );
+  }
 
   const words = term.split(" ");
 
@@ -20,8 +28,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
       if (c in DICTIONARY) {
         return {
           character: c,
-          telephony: DICTIONARY[c][0] as string,
-          pronunciation: DICTIONARY[c][1] as string,
+          telephony: DICTIONARY[c][0],
+          pronunciation: DICTIONARY[c][1],
         };
       } else {
         return {

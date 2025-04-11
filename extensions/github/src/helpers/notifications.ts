@@ -1,11 +1,12 @@
-import { Endpoints } from "@octokit/types";
-import { Color, Icon } from "@raycast/api";
+import { RestEndpointMethodTypes } from "@octokit/rest";
+import { Color, Icon, Image } from "@raycast/api";
 import { format } from "date-fns";
 
 import { getGitHubClient } from "../api/githubClient";
 import { Discussion } from "../generated/graphql";
 
-type Notification = Endpoints["GET /notifications"]["response"]["data"][0];
+export type Notification =
+  RestEndpointMethodTypes["activity"]["listNotificationsForAuthenticatedUser"]["response"]["data"][0];
 
 // from https://github.com/manosim/gitify/blob/c3683dcfd84afc74fd391b2b17ae7b36dfe779a7/src/utils/helpers.ts#L19-L27
 function generateNotificationReferrerId(notificationId: string, userId: string) {
@@ -67,10 +68,10 @@ export async function getGitHubURL(notification: Notification, userId?: string) 
   return notification.url;
 }
 
-export async function getNotificationIcon(notification: Notification) {
+export async function getNotificationIcon(notification: Notification): Promise<{ value: Image; tooltip: string }> {
   if (notification.subject.type === "PullRequest") {
     const { octokit } = getGitHubClient();
-    const pullRequest = await octokit.rest.pulls.get({
+    const pullRequest = await octokit.pulls.get({
       owner: notification.repository.owner.login,
       repo: notification.repository.name,
       pull_number: parseInt(notification.subject.url.split("/").at(-1)!),

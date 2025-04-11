@@ -1,5 +1,42 @@
 # Brew Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Add a new action to open the Brew formula/cask page in the browser
+
+## [Improvements] - 2025-01-07
+
+- Optimized checkmark icon
+- Minor change on tint color and minor fixes
+- Updated metadata
+
+## [Improvements] - 2025-01-02
+
+- Add terminal option for Ghostty
+- Updated dependencies
+- Fixed linter error
+- Organized code
+
+## [Improvements & Bugfix] - 2024-09-22
+
+- Fix detail panel for tap that doesn't have a license ([#12507](https://github.com/raycast/extensions/issues/12507))
+- Add JSON Debug Info Action
+
+## [Improvements] - 2024-07-29
+
+- Added new terminal options for Alacritty, kitty, WezTerm and Hyper.
+- Used app icons for actions to run commands in terminals.
+- Apply Destructive style to Uninstall actions.
+- Fallback to Terminal.App in case the selected terminal app is not installed.
+
+## [Improvements] - 2024-06-14
+
+- Updated dependencies
+
+## [Bug Fix] - 2024-07-03
+
+- Fix a crash that could occur when showing installed formula or cask
+
 ## [Improvements] - 2024-06-24
 
 - Search now includes cask names

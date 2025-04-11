@@ -33,3 +33,19 @@ export type PickColorCommandLaunchProps = LaunchProps<{
     callbackLaunchOptions?: LaunchOptions;
   };
 }>;
+
+export type SortType = "platform" | "proximity";
+
+export type ColorFormatType =
+  | "hex"
+  | "hex-lower-case"
+  | "hex-no-prefix"
+  | "rgb"
+  | "rgb-percentage"
+  | "rgba"
+  | "rgba-percentage"
+  | "hsla"
+  | "hsva"
+  | "oklch"
+  | "lch"
+  | "p3";

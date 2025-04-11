@@ -5,6 +5,9 @@
   "description": "Copy the path of the open folder, selected file or the URL of the current browser tab.",
   "icon": "copy-path.png",
   "author": "koinzhang",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity",
@@ -40,7 +43,7 @@
       "required": false,
       "label": "Show Last Copy",
       "description": "Show the path or URL of the most recent copy in the subtitle of the command.",
-      "default": false
+      "default": true
     },
     {
       "name": "showTabTitle",
@@ -51,10 +54,18 @@
       "default": false
     },
     {
+      "name": "useTildeForHome",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use Tilde for Home Directory",
+      "description": "Replace the home directory in copied paths with '~' for a cleaner look.",
+      "default": false
+    },
+    {
       "name": "multiPathSeparator",
       "type": "dropdown",
       "required": false,
-      "title": "Multi-path separator",
+      "title": "Multi-path Separator",
       "description": "The separator between paths when copying multiple file paths.",
       "default": "\n",
       "data": [
@@ -84,7 +95,7 @@
       "name": "copyUrlContent",
       "type": "dropdown",
       "required": false,
-      "title": "Copy which part of the URL",
+      "title": "URL Format",
       "description": "When copying URLs, select what to copy.",
       "default": "Original",
       "data": [
@@ -105,22 +116,50 @@
           "value": "Host"
         }
       ]
+    },
+    {
+      "name": "copyWhenUnSupported",
+      "type": "dropdown",
+      "required": false,
+      "title": "Unsupported App Action",
+      "description": "When copying, select what to copy when the app is not supported.",
+      "default": "windowTitle",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Window Title",
+          "value": "windowTitle"
+        },
+        {
+          "title": "App Name",
+          "value": "appName"
+        },
+        {
+          "title": "App Path",
+          "value": "appPath"
+        },
+        {
+          "title": "Bundle ID",
+          "value": "bundleId"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.0",
-    "@raycast/utils": "^1.16.0",
+    "@raycast/api": "^1.84.6",
+    "@raycast/utils": "^1.18.0",
     "parse-url": "^9.2.0"
   },
   "devDependencies": {
-    "@types/node": "~20.14.6",
-    "@types/react": "^18.3.3",
-    "@typescript-eslint/eslint-plugin": "^7.13.1",
-    "@typescript-eslint/parser": "^7.13.1",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.8.2",
+    "@types/react": "18.3.12",
     "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.3.2",
-    "typescript": "^5.4.5"
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
   },
   "scripts": {
     "build": "ray build -e dist",

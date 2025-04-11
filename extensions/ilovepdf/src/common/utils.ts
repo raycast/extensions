@@ -73,3 +73,35 @@ export const handleOpenNow = async (openNow: boolean, destinationFile: string, t
     };
   }
 };
+
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
+export const getErrorMessage = (error: any) => {
+  if (typeof error !== "object") {
+    return error;
+  }
+
+  if (error?.response?.data?.message) {
+    return ((error?.response?.data?.name + " " || "") + error?.response?.data?.message) as string;
+  }
+
+  if (error?.response?.data?.error) {
+    const errorResponse = error.response.data.error;
+
+    const message: string[] = [];
+
+    message.push(errorResponse?.type || "");
+
+    let params = errorResponse?.param;
+    if (params && Array.isArray(params) && params.length > 0) {
+      params = params[0];
+    }
+    message.push(params?.error || "");
+    message.push(params?.std_out || "");
+    // fallback
+    if (params && !params?.error && !params?.std_out) {
+      message.push(`Parameters: ${JSON.stringify(params)}`);
+    }
+    return message.filter((msg) => msg.length > 0).join(" ") || errorResponse;
+  }
+  return error;
+};

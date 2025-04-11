@@ -29,11 +29,11 @@ export default function OpenGitRemotes({ project }: OpenGitRemotesProps) {
             shortcut={{ modifiers: ['cmd', 'shift'], key: 'o' }}
             icon={Icon.Globe}
         >
-            {project.gitRemotes.map((remote) => {
+            {project.gitRemotes.map((remote, i) => {
                 return (
                     <Action.OpenInBrowser
                         title={`Open on ${remote.hostDisplayName} (${remote.name})`}
-                        key={`open remote ${remote.name}`}
+                        key={`open remote ${remote.name}-${i}`}
                         url={remote.url}
                         icon={remote.icon}
                     />

@@ -5,6 +5,9 @@
   "description": "Search for movies on Letterboxd",
   "icon": "icon.png",
   "author": "rafael_garcia",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Media"
   ],

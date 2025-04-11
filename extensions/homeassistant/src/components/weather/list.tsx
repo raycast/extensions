@@ -1,6 +1,6 @@
 import { State } from "@lib/haapi";
 import { Action, Color, List } from "@raycast/api";
-import { ReactElement } from "react";
+import { useWeatherForecast } from "./hooks";
 import {
   Forecast,
   getHumidityFromState,
@@ -10,10 +10,10 @@ import {
   isDailyForecast,
   weatherConditionToIcon,
   weatherConditionToText,
+  WeatherForecastType,
 } from "./utils";
 
-function WeatherTemperature(props: { state: State }): ReactElement | null {
-  const s = props.state;
+function WeatherTemperature({ state: s }: { state: State }) {
   const val = getTemperatureFromState(s);
   if (val === undefined) {
     return null;
@@ -21,14 +21,13 @@ function WeatherTemperature(props: { state: State }): ReactElement | null {
   return (
     <List.Item
       title="Temperature"
-      icon={{ source: "temperature.png", tintColor: Color.PrimaryText }}
+      icon={{ source: "thermometer.svg", tintColor: Color.PrimaryText }}
       accessories={[{ text: `${val}` }]}
     />
   );
 }
 
-function WeatherHumidity(props: { state: State }): ReactElement | null {
-  const s = props.state;
+function WeatherHumidity({ state: s }: { state: State }) {
   const val = getHumidityFromState(s);
   if (val === undefined) {
     return null;
@@ -36,8 +35,7 @@ function WeatherHumidity(props: { state: State }): ReactElement | null {
   return <List.Item title="Humidity" icon="💧" accessories={[{ text: `${val}` }]} />;
 }
 
-function WeatherPressure(props: { state: State }): ReactElement | null {
-  const s = props.state;
+function WeatherPressure({ state: s }: { state: State }) {
   const val = getPressureFromState(s);
   if (val === undefined) {
     return null;
@@ -45,8 +43,7 @@ function WeatherPressure(props: { state: State }): ReactElement | null {
   return <List.Item title="Pressure" icon="📈" accessories={[{ text: `${val}` }]} />;
 }
 
-function WeatherWindBearing(props: { state: State }): ReactElement | null {
-  const s = props.state;
+function WeatherWindBearing({ state: s }: { state: State }) {
   const val = s.attributes.wind_bearing as number | undefined;
   if (val === undefined) {
     return null;
@@ -54,8 +51,7 @@ function WeatherWindBearing(props: { state: State }): ReactElement | null {
   return <List.Item title="Wind Bearing" icon="↗️" accessories={[{ text: `${val}` }]} />;
 }
 
-function WeatherWindSpeed(props: { state: State }): ReactElement | null {
-  const s = props.state;
+function WeatherWindSpeed({ state: s }: { state: State }) {
   const val = getWindspeedFromState(s);
   if (val === undefined) {
     return null;
@@ -63,13 +59,12 @@ function WeatherWindSpeed(props: { state: State }): ReactElement | null {
   return <List.Item title="Wind Speed" icon="💨" accessories={[{ text: `${val}` }]} />;
 }
 
-function WeatherCondition(props: { condition: string }): ReactElement | null {
-  const c = props.condition;
+function WeatherCondition({ condition: c }: { condition: string }) {
   const source = weatherConditionToIcon(c);
   return <List.Item title="Condition" icon={source} accessories={[{ text: `${c}` }]} />;
 }
 
-function WeatherForecastItem(props: { forecast: Forecast; isDaily: boolean; tempUnit?: string }): ReactElement {
+function WeatherForecastItem(props: { forecast: Forecast; isDaily: boolean; tempUnit?: string }) {
   const f = props.forecast;
   const tostr = (val: number | undefined, param?: { prefix?: string; suffix?: string }): string | undefined => {
     if (val === undefined) {
@@ -96,13 +91,21 @@ function WeatherForecastItem(props: { forecast: Forecast; isDaily: boolean; temp
   );
 }
 
-function WeatherList(props: { state: State }): ReactElement {
-  const s = props.state;
-  const forecast = s.attributes.forecast as Forecast[] | undefined;
-  const isDaily = isDailyForecast(forecast);
+function WeatherList({ state: s }: { state: State }) {
+  const forecastAttribute = s.attributes.forecast as Forecast[] | undefined;
+  const { isLoading: dailyLoading, data: daily } = useWeatherForecast(s.entity_id, {
+    data: forecastAttribute,
+    type: WeatherForecastType.Daily,
+  });
+  const isDaily = isDailyForecast(daily);
+  const { isLoading: hourlyLoading, data: hourly } = useWeatherForecast(s.entity_id, {
+    data: forecastAttribute,
+    type: WeatherForecastType.Hourly,
+  });
+  const isLoading = dailyLoading || hourlyLoading;
   const tempUnit = s.attributes.temperature_unit as string | undefined;
   return (
-    <List>
+    <List isLoading={isLoading}>
       <List.Section title="Current">
         <WeatherCondition condition={s.state} />
         <WeatherTemperature state={s} />
@@ -111,13 +114,16 @@ function WeatherList(props: { state: State }): ReactElement {
         <WeatherWindBearing state={s} />
         <WeatherWindSpeed state={s} />
       </List.Section>
-      <List.Section title="Forecast">
-        {forecast?.map((f) => <WeatherForecastItem forecast={f} isDaily={isDaily} tempUnit={tempUnit} />)}
+      <List.Section title="Forecast (Hourly)">
+        {hourly?.slice(0, 4).map((f) => <WeatherForecastItem forecast={f} isDaily={false} tempUnit={tempUnit} />)}
+      </List.Section>
+      <List.Section title="Forecast (Daily)">
+        {daily?.map((f) => <WeatherForecastItem forecast={f} isDaily={isDaily} tempUnit={tempUnit} />)}
       </List.Section>
     </List>
   );
 }
 
-export function ShowWeatherAction(props: { state: State }): ReactElement {
-  return <Action.Push title="Show Weather" target={<WeatherList state={props.state} />} />;
+export function ShowWeatherAction({ state }: { state: State }) {
+  return <Action.Push title="Show Weather" target={<WeatherList state={state} />} />;
 }

@@ -5,6 +5,9 @@
   "description": "Search for chats, see unread messages, and set your presence status.",
   "icon": "mattermost-icon-rounded.png",
   "author": "ernest0n",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Communication",
     "Productivity"
@@ -17,8 +20,8 @@
     {
       "name": "channels",
       "title": "Search Channel",
-      "subtitle": "Mattremost",
-      "description": "Search for all team directs, and channels and open them directly in your Mattremost app.",
+      "subtitle": "Mattermost",
+      "description": "Search for all team directs, and channels and open them directly in your Mattermost app.",
       "mode": "view",
       "keywords": [
         "chat"
@@ -27,15 +30,15 @@
     {
       "name": "set-custom-status",
       "title": "Set Custom Status",
-      "subtitle": "Mattremost",
+      "subtitle": "Mattermost",
       "description": "Set custom user status.",
       "mode": "view"
     },
     {
       "name": "set-precense-status",
-      "title": "Set Precense Status",
-      "subtitle": "Mattremost",
-      "description": "Set user precense status.",
+      "title": "Set Presence Status",
+      "subtitle": "Mattermost",
+      "description": "Set user presence status.",
       "mode": "view"
     }
   ],
@@ -43,7 +46,7 @@
     {
       "name": "baseUrl",
       "description": "Mattermost host server.",
-      "placeholder": "https://www.your-mattermost-url.com/api/v4",
+      "placeholder": "https://www.your-mattermost-url.com",
       "required": true,
       "title": "URL",
       "type": "textfield"
@@ -76,30 +79,45 @@
     {
       "name": "teamName",
       "description": "Mattermost team name that should open by default if you are on multiple teams",
-      "placeholder": "MySuperComany",
+      "placeholder": "MySuperCompany",
       "required": false,
       "title": "Default team name",
       "type": "textfield"
+    },
+    {
+      "name": "deepLinkType",
+      "type": "dropdown",
+      "required": false,
+      "title": "Open In",
+      "data": [
+        {
+          "title": "Mattermost Application",
+          "value": "application"
+        },
+        {
+          "title": "Browser",
+          "value": "browser"
+        }
+      ],
+      "description": "How to open a deep link",
+      "default": "mattermost"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.2",
-    "@raycast/utils": "^1.7.1",
-    "luxon": "^3.1.1",
-    "mattermost-redux": "5.31.2",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.0",
     "axios": "^0.26.1",
-    "run-applescript": "^6.0.0"
+    "luxon": "^3.1.1",
+    "mattermost-redux": "5.31.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "1.0.5",
     "@types/luxon": "^3.1.0",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -107,10 +125,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "volta": {
-    "node": "18.16.0",
-    "npm": "9.6.4"
   }
 }

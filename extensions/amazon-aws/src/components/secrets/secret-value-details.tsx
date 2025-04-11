@@ -1,10 +1,10 @@
-import { SecretListEntry } from "@aws-sdk/client-secrets-manager";
 import { useSecretValue } from "../../hooks/use-secrets";
-import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import { AwsAction } from "../common/action";
 import { resourceToConsoleLink } from "../../util";
+import { SecretCopyActions, SecretDetailsMetadata, SecretProps } from "./common-components";
 
-export const SecretValueDetails = ({ secret }: { secret: SecretListEntry }) => {
+export const SecretValueDetails = ({ secret }: SecretProps) => {
   const { secret: sec, isLoading } = useSecretValue(secret.ARN!);
 
   return (
@@ -12,77 +12,20 @@ export const SecretValueDetails = ({ secret }: { secret: SecretListEntry }) => {
       markdown={sec?.markdown}
       isLoading={isLoading}
       navigationTitle={"Secret Value"}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Name" text={secret.Name} />
-          <Detail.Metadata.Label title="Description" text={secret.Description} />
-          {secret.PrimaryRegion && <Detail.Metadata.Label title="Primary Region" text={secret.PrimaryRegion} />}
-          {secret.OwningService && <Detail.Metadata.Label title="Owning Service" text={secret.OwningService} />}
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Creation Date" text={secret.CreatedDate?.toISOString()} icon={Icon.Calendar} />
-          {secret.LastAccessedDate && (
-            <Detail.Metadata.Label
-              title="Last Accessed"
-              text={secret.LastAccessedDate?.toISOString()}
-              icon={Icon.Calendar}
-            />
-          )}
-          {secret.LastRotatedDate && (
-            <Detail.Metadata.Label
-              title="Last Rotated"
-              text={secret.LastRotatedDate?.toISOString()}
-              icon={Icon.Calendar}
-            />
-          )}
-          {secret.LastChangedDate && (
-            <Detail.Metadata.Label
-              title="Last Changed"
-              text={secret.LastChangedDate?.toISOString()}
-              icon={Icon.Calendar}
-            />
-          )}
-          {secret.DeletedDate && (
-            <Detail.Metadata.Label title="Deleted" text={secret.DeletedDate?.toISOString()} icon={Icon.Calendar} />
-          )}
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="Rotation"
-            icon={
-              secret.RotationEnabled
-                ? { source: Icon.Checkmark, tintColor: Color.Green }
-                : { source: Icon.Xmark, tintColor: Color.Red }
-            }
-          />
-          {secret.RotationRules?.Duration && (
-            <Detail.Metadata.Label
-              title="Rotation Duration"
-              text={secret.RotationRules.Duration}
-              icon={{ source: Icon.Clock, tintColor: Color.Blue }}
-            />
-          )}
-          {secret.RotationRules?.AutomaticallyAfterDays && (
-            <Detail.Metadata.Label
-              title="Rotation After Days"
-              text={`${secret.RotationRules.AutomaticallyAfterDays}`}
-              icon={{ source: Icon.Clock, tintColor: Color.Blue }}
-            />
-          )}
-          {secret.RotationRules?.ScheduleExpression && (
-            <Detail.Metadata.Label
-              title="Rotation Schedule"
-              text={secret.RotationRules.ScheduleExpression}
-              icon={{ source: Icon.Clock, tintColor: Color.Blue }}
-            />
-          )}
-        </Detail.Metadata>
-      }
+      metadata={<SecretDetailsMetadata secret={secret} />}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Secret Value" content={sec?.value || ""} />
           <AwsAction.Console url={resourceToConsoleLink(secret.Name, "AWS::SecretsManager::Secret")} />
+          {sec?.json && (
+            <ActionPanel.Section title={"Individual Secret Actions"}>
+              {Object.keys(sec.json).map((key) => (
+                <Action.CopyToClipboard key={key} title={`Copy '${key}' Value`} content={sec.json[key]} />
+              ))}
+            </ActionPanel.Section>
+          )}
           <ActionPanel.Section title={"Secret Actions"}>
-            <Action.CopyToClipboard title="Copy Name" content={secret.Name || ""} />
-            <Action.CopyToClipboard title="Copy ARN" content={secret.ARN || ""} />
+            <SecretCopyActions {...{ secret }} />
           </ActionPanel.Section>
         </ActionPanel>
       }

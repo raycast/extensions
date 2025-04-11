@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
-import { modelIdToName, schedulerIdToName } from "@ts/constants";
+import { modelIdToName } from "@ts/constants";
 import { saveImage } from "@ts/helpers";
 import { TOutput } from "@ts/types";
 
@@ -27,27 +27,22 @@ function GalleryItemDetail({ item }: { item: TOutput }) {
           <Action.OpenInBrowser url={item.upscaled_image_url ?? item.image_url}></Action.OpenInBrowser>
         </ActionPanel>
       }
-      markdown={`![${item.prompt_text}](${item.upscaled_image_url ?? item.image_url})`}
+      markdown={`![${item.generation.prompt.text}](${item.upscaled_image_url ?? item.image_url})`}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Prompt" text={item.prompt_text}></Detail.Metadata.Label>
-          <Detail.Metadata.Label title="Model" text={modelIdToName[item.model_id]}></Detail.Metadata.Label>
+          <Detail.Metadata.Label title="Prompt" text={item.generation.prompt.text}></Detail.Metadata.Label>
+          <Detail.Metadata.Label title="Model" text={modelIdToName[item.generation.model_id]}></Detail.Metadata.Label>
           <Detail.Metadata.Label
             title="Guidance Scale"
-            text={item.guidance_scale.toLocaleString()}
+            text={item.generation.guidance_scale.toLocaleString()}
           ></Detail.Metadata.Label>
-          <Detail.Metadata.Label
-            title="Inference Steps"
-            text={item.inference_steps.toLocaleString()}
-          ></Detail.Metadata.Label>
-          <Detail.Metadata.Label title="Scheduler" text={schedulerIdToName[item.scheduler_id]}></Detail.Metadata.Label>
           <Detail.Metadata.Label
             title="Width"
-            text={(item.width * (item.upscaled_image_url ? 4 : 1)).toLocaleString()}
+            text={(item.generation.width * (item.upscaled_image_url ? 4 : 1)).toLocaleString()}
           ></Detail.Metadata.Label>
           <Detail.Metadata.Label
             title="Height"
-            text={(item.height * (item.upscaled_image_url ? 4 : 1)).toLocaleString()}
+            text={(item.generation.height * (item.upscaled_image_url ? 4 : 1)).toLocaleString()}
           ></Detail.Metadata.Label>
         </Detail.Metadata>
       }

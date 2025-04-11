@@ -1,5 +1,24 @@
 # Copy Path Changelog
 
+## [Update] - 2025-03-14
+
+- Update the Zen Browser name.
+- Update the AppleScript for Firefox-based browsers.
+
+## [Add Preference: Use tilde for home directory] - 2024-11-26
+
+- Add Preference _Use tilde for home directory_: Use a tilde for the home directory in the copied path.
+
+## [Support Zen Browser] - 2024-10-29
+
+- Support Zen Browser
+
+## [Support More Browsers] - 2024-07-04
+
+- Now that there is no browser restriction, you can try to copy the URL in any Webkit or Chromium-based browser
+- Copy the name, path or bundle identifier of the current window by setting the preference
+- Other detail optimisation
+
 ## [Support More Browsers] - 2024-06-25
 
 - Support Safari Web App and Firefox browser by using an alternative method

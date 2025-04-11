@@ -5,6 +5,9 @@
   "description": "Mailboxes, Identities, Aliases, Rewrites in Migadu",
   "icon": "migadu.png",
   "author": "xmok",
+  "contributors": [
+    "LBBO"
+  ],
   "categories": [
     "Communication"
   ],
@@ -56,20 +59,27 @@
       "subtitle": "Migadu",
       "description": "View, Create, Update or Delete Rewrites in your Migadu Account",
       "mode": "view"
+    },
+    {
+      "name": "create-copy-anonymous-identity",
+      "title": "Create Anonymous Identity (Custom Hide My Email)",
+      "description": "Creates an anonymous identity for a selected mailbox and copies the email address to your clipboard. This can be used as an equivalent to Apple's Hide My Email.",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.2",
-    "@raycast/utils": "^1.5.2",
-    "node-fetch": "^3.3.1"
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.16.3",
+    "node-fetch": "^3.3.1",
+    "unique-names-generator": "^4.7.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",

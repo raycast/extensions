@@ -1,5 +1,14 @@
 # HubSpot Changelog
 
+## [Updates] - 2025-03-12
+- Added option in settings to choose custom company properties to display in company search
+- Added option to choose how to format said properties, eg currency, percentage
+
+## [Updates] - 2024-07-23
+
+- Update dependencies, linting code
+- Add search through descriptions for companies ([#13602](https://github.com/raycast/extensions/issues/13602))
+
 ## [Added new commands] - 2024-02-02
 - Search Companies
 

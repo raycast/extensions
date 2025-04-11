@@ -4,6 +4,7 @@ import invariant from "tiny-invariant";
 
 interface Preferences {
   ttl: string;
+  domain: string;
 }
 
 export default async function main() {
@@ -50,6 +51,18 @@ const getTTL = () => {
   return ttl > 0 ? ttl : null;
 };
 
+const getEndpoint = () => {
+  const preferences = getPreferenceValues<Preferences>();
+  const domain = String(preferences.domain);
+  invariant(domain, "domain is undefined");
+
+  const endpoint = new URL(domain);
+  endpoint.pathname = "/api/create.json";
+  endpoint.searchParams.append("utm_source", "raycast");
+
+  return endpoint.toString();
+};
+
 async function createNewDocument(title: string, json: unknown): Promise<{ id: string; location: string }> {
   const options = {
     method: "POST",
@@ -64,7 +77,9 @@ async function createNewDocument(title: string, json: unknown): Promise<{ id: st
     }),
   };
 
-  const response = await fetch(`https://jsonhero.io/api/create.json?utm_source=raycast`, options);
+  const endpoint = getEndpoint();
+
+  const response = await fetch(endpoint, options);
   const jsonResponse = await response.json();
 
   invariant(jsonResponse, "jsonResponse is undefined");

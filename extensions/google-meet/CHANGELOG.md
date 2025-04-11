@@ -1,5 +1,13 @@
 # Google Meet Changelog
 
+## [Improvement] - 2024-10-22
+
+- Add delay before reading meeting URL from browser
+
+## [Improvement] - 2024-07-19
+
+- Change the way to get the URL in some Chromium-based browsers
+
 ## [Improvement] - 2024-05-29
 
 - Change the way to get the URL in Arc Browser

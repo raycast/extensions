@@ -1,5 +1,31 @@
 # raycast-ollama Changelog
 
+## [Fix] - 2025-02-24
+
+- Improved Ollama streaming processing leading to better performance when using remote Ollama server.
+
+## [Fix] - 2025-01-26
+
+- Corrected typos
+
+## [Improvement] - 2025-01-02
+
+- New Command 'Loaded Models': lists currently models loaded on memory. Data are auto updated every 3 seconds.
+- Command 'Manage Models': model currently loaded in memory flagged with tag 'In Memory'.
+- Command 'Manage Models': added Action 'Update Model', pull selected model from registry updating it. 
+- Command 'Manage Models': added Action 'Model Library', open Ollama Library Web page for listing available models.
+- Command 'Chat with Ollama': modified copy keybinds to 'cmd+shift+c' from 'cmd+c'.
+
+## [Improvement and BugFix] - 2024-08-05
+
+- [Improvement] New action "Continue as Chat" on single shot commands allow continuing conversation on "Chat with Ollama".
+- [BugFix] Custom commands created before "2024-06-03" update, or with incorrect parameters now display error message instead of crashing.
+- [BugFix] Typo fixed on "Make Longer" command.
+
+## [BugFix] - 2024-06-30
+
+- Fixed typo on error code 'Raycast Browser Extensions Needed for This Feature'.
+
 ## [BugFix] - 2024-06-20
 
 - Fixed Error `keep alive, error missing unit in duration` on **Command 'Create Custom Command'**.

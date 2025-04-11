@@ -76,6 +76,15 @@ function IssueDetails(props: {
         <Detail.Metadata>
           <Detail.Metadata.Label title="Created" text={issue.created} />
           <Detail.Metadata.Label
+            title="Assignee"
+            text={issue.assignee?.fullName}
+            icon={
+              isURL(issue.assignee?.avatarUrl ?? "")
+                ? issue.assignee?.avatarUrl
+                : `${props.instance}${issue.assignee?.avatarUrl}`
+            }
+          />
+          <Detail.Metadata.Label
             title="Author"
             text={issue.reporter?.fullName}
             icon={

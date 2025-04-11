@@ -1,19 +1,16 @@
-import { ActionPanel, Action, Grid } from "@raycast/api";
-import { useFetch, Response } from "@raycast/utils";
-import React from "react";
-import { useState, useEffect } from "react";
-import { ENDPOINTS, plex_token } from "../utils/constants";
+import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useMemo, useState } from "react";
 import { SectionItemsApiResponse } from "../types/types";
+import { ENDPOINTS, plex_token } from "../utils/constants";
 import thumbLinks from "../utils/thumbLinks";
 import { MediaItem } from "./mediaItem";
 
 export function GetSectionItems({ sectionId, sectionName }: { sectionId: string; sectionName: string }) {
-  const [searchText, setSearchText] = useState("");
-  const [filteredList, filterList] = useState([]);
+  const [searchText, setSearchText] = useState<string>("");
+  const [sort, setSort] = useState("title:asc");
 
-  // TODO: Search functionality still not working fix it.
-
-  const endpoint = `${ENDPOINTS.librarySections}${sectionId}/all`;
+  const endpoint = `${ENDPOINTS.librarySections}${sectionId}/all?sort=${sort}`;
 
   const { data, isLoading } = useFetch(endpoint, {
     headers: { "X-Plex-Token": plex_token, Accept: "application/json" },
@@ -22,16 +19,10 @@ export function GetSectionItems({ sectionId, sectionName }: { sectionId: string;
     keepPreviousData: true,
   });
 
-  useEffect(() => {
-    if (Array.isArray(data)) {
-      filterList(
-        data.filter(
-          (item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) =>
-            Array.isArray(item.title) && item.title.some((keyword: string) => keyword.includes(searchText)),
-        ),
-      );
-    }
-  }, [searchText, filteredList, data]);
+  const filteredItems = useMemo(() => {
+    const items = Array.isArray(data) ? data : [];
+    return filterItems(items, searchText);
+  }, [searchText, data]);
 
   return (
     <Grid
@@ -45,9 +36,21 @@ export function GetSectionItems({ sectionId, sectionName }: { sectionId: string;
       onSearchTextChange={setSearchText}
       navigationTitle={sectionName}
       searchBarPlaceholder={"Search " + sectionName}
+      searchBarAccessory={
+        <Grid.Dropdown tooltip="Sort" onChange={setSort}>
+          <Grid.Dropdown.Item icon={Icon.Text} title="By Title (↑)" value="title:asc" />
+          <Grid.Dropdown.Item icon={Icon.Text} title="By Title (↓)" value="title:desc" />
+          <Grid.Dropdown.Item icon={Icon.Calendar} title="By Year (↑)" value="year:asc" />
+          <Grid.Dropdown.Item icon={Icon.Calendar} title="By Year (↓)" value="year:desc" />
+          <Grid.Dropdown.Item icon={Icon.Plus} title="By Date Added (↑)" value="addedAt:asc" />
+          <Grid.Dropdown.Item icon={Icon.Plus} title="By Date Added (↓)" value="addedAt:desc" />
+          <Grid.Dropdown.Item icon={Icon.CircleProgress} title="By Progress" value="viewOffset" />
+          <Grid.Dropdown.Item icon={Icon.QuestionMark} title="By Randomly" value="random" />
+        </Grid.Dropdown>
+      }
     >
-      {Array.isArray(data) &&
-        data.map((item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) => (
+      {Array.isArray(filteredItems) &&
+        filteredItems.map((item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) => (
           <Grid.Item
             key={item.guid}
             content={{
@@ -56,7 +59,7 @@ export function GetSectionItems({ sectionId, sectionName }: { sectionId: string;
             title={item.title}
             actions={
               <ActionPanel>
-                <Action.Push title="Show Details" target={<MediaItem item={item} />} />
+                <Action.Push icon={Icon.Eye} title="Show Details" target={<MediaItem item={item} />} />
               </ActionPanel>
             }
           />
@@ -73,4 +76,14 @@ async function parseResponse(response: Response): Promise<SectionItemsApiRespons
   }
 
   return json.MediaContainer.Metadata;
+}
+
+function filterItems(items: SectionItemsApiResponse["MediaContainer"]["Metadata"][], filter: string) {
+  if (filter.length === 0) {
+    return items;
+  }
+
+  return items.filter((item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) =>
+    item.title.toLowerCase().includes(filter.toLowerCase()),
+  );
 }

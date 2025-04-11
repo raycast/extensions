@@ -24,10 +24,10 @@ export type Group = {
 };
 
 type Environment = Connection["Environment"];
-export const tintColors: { [key: Environment]: Color } = {
+export const tintColors: { [key: Environment]: Color | string } = {
   local: Color.Green,
-  development: Color.Blue,
-  testing: Color.Purple,
-  staging: Color.Orange,
+  development: "#4CE3DE",
+  testing: Color.Orange,
+  staging: Color.Blue,
   production: Color.Red,
 };

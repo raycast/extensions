@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "anna-s-archive",
+  "title": "Anna's Archive",
+  "description": "Search Anna's Archive, the largest truly open library in human history",
+  "icon": "command-icon.png",
+  "author": "j3lte",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-archives",
+      "title": "Search Archives",
+      "subtitle": "Anna's Archive",
+      "description": "Search Anna's Archive, the largest truly open library in human history",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "mirror",
+      "title": "Mirror",
+      "type": "dropdown",
+      "default": "https://annas-archive.org",
+      "description": "Choose a mirror to use",
+      "required": false,
+      "data": [
+        {
+          "value": "https://annas-archive.org",
+          "title": "https://annas-archive.org"
+        },
+        {
+          "value": "https://annas-archive.se",
+          "title": "https://annas-archive.se"
+        },
+        {
+          "value": "https://annas-archive.li",
+          "title": "https://annas-archive.li"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.5",
+    "@raycast/utils": "^1.17.0",
+    "cheerio": "^1.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "22.5.5",
+    "@types/react": "18.3.5",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx -y @raycast/api@latest publish"
+  }
+}

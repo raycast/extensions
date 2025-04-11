@@ -1,4 +1,4 @@
-import { Application, Icon, MenuBarExtra } from "@raycast/api";
+import { Application, MenuBarExtra } from "@raycast/api";
 import { FileRef } from "../../../lib/LocalData";
 import { createNewPin } from "../../../lib/Pins";
 import { Group, createNewGroup } from "../../../lib/Groups";
@@ -52,20 +52,11 @@ export default function FilesQuickPin(props: FilesQuickPinProps) {
       shortcut={KEYBOARD_SHORTCUT.PIN_SELECTED_FILES}
       onAction={async () => {
         if (selectedFiles.length == 1) {
-          await createNewPin(
-            selectedFiles[0].name,
-            selectedFiles[0].path,
-            "Favicon / File Icon",
-            targetGroup?.name || "None",
-            "None",
-            undefined,
-            undefined,
-            false,
-            undefined,
-            undefined,
-            [],
-            "",
-          );
+          await createNewPin({
+            name: selectedFiles[0].name,
+            url: selectedFiles[0].path,
+            group: targetGroup?.name || "None",
+          });
         } else {
           let newGroupName = "New File Group";
           if (targetGroup) {
@@ -76,26 +67,17 @@ export default function FilesQuickPin(props: FilesQuickPinProps) {
               newGroupName = `New File Group (${iter})`;
               iter++;
             }
-            await createNewGroup(
-              newGroupName,
-              Object.entries(Icon).find((entry) => entry[1] == Icon.Document)?.[0] || "None",
-            );
+            await createNewGroup({
+              name: newGroupName,
+              icon: "blank-document-16",
+            });
           }
           for (const file of selectedFiles) {
-            await createNewPin(
-              file.name,
-              file.path,
-              "Favicon / File Icon",
-              newGroupName,
-              "None",
-              undefined,
-              undefined,
-              false,
-              undefined,
-              undefined,
-              [],
-              "",
-            );
+            await createNewPin({
+              name: file.name,
+              url: file.path,
+              group: newGroupName,
+            });
           }
         }
       }}

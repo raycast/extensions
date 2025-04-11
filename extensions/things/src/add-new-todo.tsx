@@ -9,11 +9,12 @@ import {
   LaunchProps,
   Color,
   Detail,
+  environment,
+  AI,
 } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
-import qs from 'qs';
 
-import { CommandListName, getLists, getTags, silentlyOpenThingsURL, thingsNotRunningError } from './api';
+import { addTodo, CommandListName, getLists, getTags, thingsNotRunningError } from './api';
 import TodoList from './components/TodoList';
 import { getChecklistItemsWithAI, listItems } from './helpers';
 import { getDateString } from './utils';
@@ -38,8 +39,8 @@ type AddNewTodoProps = {
 
 export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoProps) {
   const { push } = useNavigation();
-  const { data: tags, isLoading: isLoadingTags } = useCachedPromise(() => getTags());
-  const { data: lists, isLoading: isLoadingLists } = useCachedPromise(() => getLists());
+  const { data: tags, isLoading: isLoadingTags } = useCachedPromise(getTags);
+  const { data: lists, isLoading: isLoadingLists } = useCachedPromise(getLists);
   const { handleSubmit, itemProps, values, reset, focus, setValue } = useForm<FormValues>({
     async onSubmit() {
       const json = {
@@ -48,13 +49,13 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
         when: values.when === 'upcoming' && values.date ? getDateString(values.date) : values.when,
         'list-id': values.listId,
         deadline: values.deadline ? getDateString(values.deadline) : '',
-        tags: values.tags,
+        ...(values.tags.length > 0 && { tags: values.tags.join(',') }),
         'checklist-items': values['checklist-items'],
       };
 
-      await silentlyOpenThingsURL(`things:///add?${qs.stringify(json)}`);
+      await addTodo(json);
 
-      showToast({
+      await showToast({
         style: Toast.Style.Success,
         title: 'Added new to-do',
 
@@ -115,7 +116,7 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
       const items = await getChecklistItemsWithAI(values.title, values.notes);
       setValue('checklist-items', items.trim());
       focus('checklist-items');
-      toast.hide();
+      await toast.hide();
     } catch (error) {
       await showToast({ style: Toast.Style.Failure, title: 'Failed to generate check-list' });
     }
@@ -133,7 +134,53 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add New To-Do" onSubmit={handleSubmit} icon={Icon.Plus} />
-          <Action title="Generate Checklist with AI" icon={Icon.BulletPoints} onAction={generateChecklist} />
+          {environment.canAccess(AI) && (
+            <Action title="Generate Checklist with AI" icon={Icon.BulletPoints} onAction={generateChecklist} />
+          )}
+          <ActionPanel.Section>
+            <Action
+              title="Focus Title"
+              icon={Icon.TextInput}
+              onAction={() => focus('title')}
+              shortcut={{ modifiers: ['cmd'], key: '1' }}
+            />
+            <Action
+              title="Focus Notes"
+              icon={Icon.TextInput}
+              onAction={() => focus('notes')}
+              shortcut={{ modifiers: ['cmd'], key: '2' }}
+            />
+            <Action
+              title="Focus When"
+              icon={Icon.TextInput}
+              onAction={() => focus('when')}
+              shortcut={{ modifiers: ['cmd'], key: 's' }}
+            />
+            <Action
+              title="Focus List"
+              icon={Icon.TextInput}
+              onAction={() => focus('listId')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'm' }}
+            />
+            <Action
+              title="Focus Tags"
+              icon={Icon.TextInput}
+              onAction={() => focus('tags')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 't' }}
+            />
+            <Action
+              title="Focus Checklist"
+              icon={Icon.TextInput}
+              onAction={() => focus('checklist-items')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+            />
+            <Action
+              title="Focus Deadline"
+              icon={Icon.TextInput}
+              onAction={() => focus('deadline')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'd' }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       // Don't enable drafts if coming from another list or an empty view

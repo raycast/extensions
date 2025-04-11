@@ -13,6 +13,7 @@ struct Reminder: Codable {
     let id: String
     let openUrl: String
     let title: String
+    let url: String?
     let notes: String
     let dueDate: String?
     let isCompleted: Bool
@@ -44,9 +45,10 @@ enum RemindersError: Error {
     case other
 }
 
-@raycast func getData() async throws -> RemindersData {
+
+@raycast func getReminderList() async throws -> [ReminderList] {
     let eventStore = EKEventStore()
-    
+
     let granted: Bool
     if #available(macOS 14.0, *) {
         granted = try await eventStore.requestFullAccessToReminders()
@@ -56,7 +58,29 @@ enum RemindersError: Error {
     guard granted else {
         throw RemindersError.accessDenied
     }
-    
+
+    let calendars = eventStore.calendars(for: .reminder)
+    let defaultList = eventStore.defaultCalendarForNewReminders()
+
+    let listsData = calendars.map { $0.toStruct(defaultCalendarId: defaultList?.calendarIdentifier) }
+
+    return listsData
+}
+
+
+@raycast func getData() async throws -> RemindersData {
+    let eventStore = EKEventStore()
+
+    let granted: Bool
+    if #available(macOS 14.0, *) {
+        granted = try await eventStore.requestFullAccessToReminders()
+    } else {
+        granted = try await eventStore.requestAccess(to: .reminder)
+    }
+    guard granted else {
+        throw RemindersError.accessDenied
+    }
+
     let predicate = eventStore.predicateForIncompleteReminders(
         withDueDateStarting: nil,
         ending: nil,
@@ -65,20 +89,20 @@ enum RemindersError: Error {
     guard let reminders = await eventStore.fetchReminders(matching: predicate) else {
         throw RemindersError.noRemindersFound
     }
-    
+
     let remindersData = reminders.prefix(1000).map { $0.toStruct() }
-    
+
     let calendars = eventStore.calendars(for: .reminder)
     let defaultList = eventStore.defaultCalendarForNewReminders()
-    
+
     let listsData = calendars.map { $0.toStruct(defaultCalendarId: defaultList?.calendarIdentifier) }
-    
+
     return RemindersData(reminders: remindersData, lists: listsData)
 }
 
 @raycast func getCompletedReminders(listId: String?) async throws -> [Reminder] {
     let eventStore = EKEventStore()
-    
+
     let granted: Bool
     if #available(macOS 14.0, *) {
         granted = try await eventStore.requestFullAccessToReminders()
@@ -88,14 +112,14 @@ enum RemindersError: Error {
     guard granted else {
         throw RemindersError.accessDenied
     }
-    
+
     let calendars: [EKCalendar]?
     if let listId {
         calendars = [eventStore.calendar(withIdentifier: listId)].compactMap { $0 }
     } else {
         calendars = nil
     }
-    
+
     let predicate = eventStore.predicateForCompletedReminders(
         withCompletionDateStarting: nil,
         ending: nil,
@@ -105,7 +129,7 @@ enum RemindersError: Error {
     guard let reminders = reminders else {
         throw RemindersError.noRemindersFound
     }
-    
+
     let remindersData = reminders.prefix(1000).map { $0.toStruct() }
     return remindersData
 }
@@ -131,13 +155,13 @@ struct Recurrence: Decodable {
 @raycast func createReminder(newReminder: NewReminder) async throws -> Reminder {
     let eventStore = EKEventStore()
     let reminder = EKReminder(eventStore: eventStore)
-    
+
     reminder.title = newReminder.title
-    
+
     if let notes = newReminder.notes {
         reminder.notes = notes
     }
-    
+
     if let listId = newReminder.listId {
         let calendars = eventStore.calendars(for: .reminder)
         guard let calendar = (calendars.first { $0.calendarIdentifier == listId }) else {
@@ -147,7 +171,7 @@ struct Recurrence: Decodable {
     } else {
         reminder.calendar = eventStore.defaultCalendarForNewReminders()
     }
-    
+
     if let dueDateString = newReminder.dueDate {
         if dueDateString.contains("T"), let dueDate = isoDateFormatter.date(from: dueDateString) {
             reminder.dueDateComponents = Calendar.current.dateComponents(
@@ -162,9 +186,9 @@ struct Recurrence: Decodable {
             )
         }
     }
-    
+
     if let recurrence = newReminder.recurrence {
-        
+
         var recurrenceEnd: EKRecurrenceEnd? = nil
         if let endDateString = recurrence.endDate {
             let dateFormatter = DateFormatter()
@@ -173,7 +197,7 @@ struct Recurrence: Decodable {
                 recurrenceEnd = EKRecurrenceEnd(end: endDate)
             }
         }
-        
+
         var recurrenceFrequency: EKRecurrenceFrequency
         switch recurrence.frequency {
         case "daily":
@@ -187,7 +211,7 @@ struct Recurrence: Decodable {
         default:
             throw RemindersError.other
         }
-        
+
         let recurrenceRule = EKRecurrenceRule(
             recurrenceWith: recurrenceFrequency,
             interval: recurrence.interval,
@@ -195,7 +219,7 @@ struct Recurrence: Decodable {
         )
         reminder.addRecurrenceRule(recurrenceRule)
     }
-    
+
     if let priorityString = newReminder.priority {
         switch priorityString {
         case "high":
@@ -208,7 +232,7 @@ struct Recurrence: Decodable {
             reminder.priority = Int(EKReminderPriority.none.rawValue)
         }
     }
-    
+
     if let address = newReminder.address {
         do {
             let alarm = try await createLocationAlarm(
@@ -218,14 +242,14 @@ struct Recurrence: Decodable {
             // If the alarm cannot be created, we catch the error and continue without handling it (silent failure).
         }
     }
-    
+
     do {
         try eventStore.save(reminder, commit: true)
         return reminder.toStruct()
     } catch {
         throw RemindersError.unableToSaveReminder
     }
-    
+
 }
 
 struct SetTitleAndNotesPayload: Decodable {
@@ -236,29 +260,29 @@ struct SetTitleAndNotesPayload: Decodable {
 
 @raycast func setTitleAndNotes(payload: SetTitleAndNotesPayload) throws {
     let eventStore = EKEventStore()
-    
+
     guard let item = eventStore.calendarItem(withIdentifier: payload.reminderId) as? EKReminder else {
         throw RemindersError.noReminderFound
     }
-    
+
     item.title = payload.title
-    
+
     if let notes = payload.notes {
         item.notes = notes
     }
-    
+
     try eventStore.save(item, commit: true)
 }
 
 @raycast func toggleCompletionStatus(reminderId: String) throws {
     let eventStore = EKEventStore()
-    
+
     guard let item = eventStore.calendarItem(withIdentifier: reminderId) as? EKReminder else {
         throw RemindersError.noReminderFound
     }
-    
+
     item.isCompleted = !item.isCompleted
-    
+
     do {
         try eventStore.save(item, commit: true)
     } catch {
@@ -273,11 +297,11 @@ struct SetPriorityStatusPayload: Decodable {
 
 @raycast func setPriorityStatus(payload: SetPriorityStatusPayload) throws {
     let eventStore = EKEventStore()
-    
+
     guard let item = eventStore.calendarItem(withIdentifier: payload.reminderId) as? EKReminder else {
         throw RemindersError.noReminderFound
     }
-    
+
     switch payload.priority {
     case "high":
         item.priority = Int(EKReminderPriority.high.rawValue)
@@ -288,7 +312,7 @@ struct SetPriorityStatusPayload: Decodable {
     default:
         item.priority = Int(EKReminderPriority.none.rawValue)
     }
-    
+
     do {
         try eventStore.save(item, commit: true)
     } catch {
@@ -303,18 +327,18 @@ struct SetDueDatePayload: Decodable {
 
 @raycast func setDueDate(payload: SetDueDatePayload) throws {
     let eventStore = EKEventStore()
-    
+
     guard let item = eventStore.calendarItem(withIdentifier: payload.reminderId) as? EKReminder else {
         throw RemindersError.noReminderFound
     }
-    
+
     // Remove all alarms, otherwise overdue reminders won't be properly updated natively
     if let alarms = item.alarms {
         for alarm in alarms {
             item.removeAlarm(alarm)
         }
     }
-    
+
     if let dueDateString = payload.dueDate {
         if dueDateString.contains("T"), let dueDate = isoDateFormatter.date(from: dueDateString) {
             item.dueDateComponents = Calendar.current.dateComponents(
@@ -331,7 +355,7 @@ struct SetDueDatePayload: Decodable {
     } else {
         item.dueDateComponents = nil
     }
-    
+
     do {
         try eventStore.save(item, commit: true)
     } catch {
@@ -341,11 +365,11 @@ struct SetDueDatePayload: Decodable {
 
 @raycast func deleteReminder(reminderId: String) throws {
     let eventStore = EKEventStore()
-    
+
     guard let item = eventStore.calendarItem(withIdentifier: reminderId) as? EKReminder else {
         throw RemindersError.noReminderFound
     }
-    
+
     try eventStore.remove(item, commit: true)
 }
 
@@ -359,22 +383,22 @@ func createLocationAlarm(address: String, proximity: String?, radius: Double?) a
 -> EKAlarm
 {
     let geocoder = CLGeocoder()
-    
+
     let geocodedPlacemarks = try await geocoder.geocodeAddressString(address)
     guard let placemark = geocodedPlacemarks.first, let location = placemark.location else {
         throw LocationError.geocodingFailed
     }
-    
+
     let structuredLocation = EKStructuredLocation(title: placemark.name ?? address)
     structuredLocation.geoLocation = location
-    
+
     if let radius = radius {
         structuredLocation.radius = radius
     }
-    
+
     let alarm = EKAlarm()
     alarm.structuredLocation = structuredLocation
-    
+
     if let proximity = proximity {
         switch proximity {
         case "enter":
@@ -385,7 +409,7 @@ func createLocationAlarm(address: String, proximity: String?, radius: Double?) a
             throw LocationError.invalidProximityValue
         }
     }
-    
+
     return alarm
 }
 
@@ -404,18 +428,18 @@ async throws
     else {
         throw RemindersError.noReminderFound
     }
-    
+
     do {
         let alarm = try await createLocationAlarm(
             address: payload.address, proximity: payload.proximity, radius: payload.radius)
-        
+
         // Remove only location-based alarms otherwise the reminder in the native app won't be updated
         if let alarms = reminder.alarms {
             for alarm in alarms where alarm.isLocationAlarm {
                 reminder.removeAlarm(alarm)
             }
         }
-        
+
         reminder.addAlarm(alarm)
         try eventStore.save(reminder, commit: true)
     } catch {

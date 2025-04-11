@@ -1,6 +1,6 @@
 import { List, Image } from "@raycast/api";
 
-import { notionColorToTintColor, Page, DatabaseProperty, DatabasePropertyOption, User } from "../utils/notion";
+import { notionColorToTintColor, isType, Page, DatabaseProperty, PropertyConfig, User } from "../utils/notion";
 import type { DatabaseView } from "../utils/types";
 
 import { PageListItem } from "./PageListItem";
@@ -36,7 +36,7 @@ export function DatabaseView(props: DatabaseViewProps) {
   const propertyId = databaseView?.kanban?.property_id;
   const statusProperty = databaseProperties.find((dp) => dp.id === propertyId);
 
-  if (viewType === "list" || !propertyId || !statusProperty) {
+  if (viewType === "list" || !propertyId || !statusProperty || !isType(statusProperty, "status", "select")) {
     return (
       <>
         {databasePages?.map((p) => (
@@ -110,26 +110,16 @@ export function DatabaseView(props: DatabaseViewProps) {
     const prop = Object.values(p.properties).find((x) => x.id === propertyId);
     let propId = "_select_null_";
 
-    if (prop) {
-      if (prop.type == "select" && prop.select?.id) {
-        propId = prop.select.id;
-      } else if (prop.type == "status" && prop.status?.id) {
-        propId = prop.status.id;
-      }
-    }
+    if (prop && (prop.type == "select" || prop.type == "status") && prop.value) propId = prop.value.id;
 
-    if (!tempSections[propId]) {
-      tempSections[propId] = [];
-    }
+    if (!tempSections[propId]) tempSections[propId] = [];
 
     tempSections[propId].push(p);
   });
 
-  const optionsMap: Record<string, DatabasePropertyOption> = {};
-  const customOptions: DatabasePropertyOption[] = [];
-
-  statusProperty.options
-    ?.filter((x) => x.id)
+  const optionsMap: Record<string, PropertyConfig<"status">["options"][number]> = {};
+  const customOptions = statusProperty.config.options
+    .filter((opt) => opt.id)
     .sort((dpa, dpb) => {
       const value_a = dpa.id ? actionEditIds.indexOf(dpa.id) : -1;
       const value_b = dpb.id ? actionEditIds.indexOf(dpb.id) : -1;
@@ -144,17 +134,15 @@ export function DatabaseView(props: DatabaseViewProps) {
 
       return 0;
     })
-    .forEach((option) => {
-      if (!option.id) {
-        return;
-      }
+    .map((option) => {
       optionsMap[option.id] = option;
-      customOptions.push({
+      return {
         icon: statusSourceIcon(option.id),
         color: option.color,
         name: option.name,
         id: option.id,
-      });
+        description: option.description,
+      };
     });
 
   sectionIds.forEach((sectionId) => {
@@ -189,7 +177,7 @@ export function DatabaseView(props: DatabaseViewProps) {
               <ActionEditPageProperty
                 key={`kanban-section-${ds.id}-page-${p.id}-custom-edit-status-action`}
                 databaseProperty={statusProperty}
-                customOptions={customOptions}
+                options={customOptions}
                 pageId={p.id}
                 pageProperty={p.properties[propertyId]}
                 icon="./icon/kanban_status_started.png"

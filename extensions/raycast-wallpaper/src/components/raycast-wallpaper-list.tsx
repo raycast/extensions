@@ -1,10 +1,10 @@
-import { getPreferenceValues, Icon, List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import React from "react";
 import { RaycastWallpaperWithInfo } from "../types/types";
 import { RaycastWallpaperEmptyView } from "./raycast-wallpaper-empty-view";
-import { Preferences } from "../types/preferences";
 import { ActionOnRaycastWallpaper } from "./action-on-raycast-wallpaper";
 import { getThumbnailUrl } from "../utils/common-utils";
+import { layout } from "../types/preferences";
 
 export function RaycastWallpaperList(props: {
   raycastWallpapers: RaycastWallpaperWithInfo[];
@@ -12,7 +12,6 @@ export function RaycastWallpaperList(props: {
   selectedItem: string;
   setSelectedItem: React.Dispatch<React.SetStateAction<string>>;
 }) {
-  const preferences = getPreferenceValues<Preferences>();
   const { raycastWallpapers, setRefresh, selectedItem, setSelectedItem } = props;
 
   return (
@@ -27,7 +26,7 @@ export function RaycastWallpaperList(props: {
       }}
       searchBarPlaceholder={"Search wallpapers"}
     >
-      <RaycastWallpaperEmptyView layout={preferences.layout} />
+      <RaycastWallpaperEmptyView layout={layout} />
       {raycastWallpapers.map((value, index) => {
         return (
           <List.Item

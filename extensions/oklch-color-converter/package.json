@@ -1,0 +1,46 @@
+{
+  "name": "oklch-color-converter",
+  "title": "OKLCH Color Converter",
+  "description": "Convert colors between formats with wide gamut support",
+  "version": "1.0.0",
+  "author": "strongeron",
+  "icon": "icon.png",
+  "categories": ["Design Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-color",
+      "title": "Convert Color",
+      "subtitle": "OKLCH Color Converter",
+      "description": "Convert colors between different color spaces and formats",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.87.4",
+    "culori": "^3.2.0"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/utils": "^1.9.0",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "react": "^18.2.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "eslint": "^8.51.0",
+    "eslint-config-prettier": "^8.10.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

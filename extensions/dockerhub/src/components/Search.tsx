@@ -2,12 +2,12 @@ import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@rayca
 import { useCallback, useState, useEffect } from "react";
 import { Hub } from "../lib/hub/hub";
 import SearchTags from "./SearchTags";
-import { SearchTypeEnum, Summary, ItemAccessory } from "../lib/hub/types";
+import { SearchTypeEnum, ImageSearchResult, ItemAccessory } from "../lib/hub/types";
 import { mapFromToIcon } from "../lib/hub/utils";
 import { pullImage, checkImageExists } from "../lib/hub/docker";
 
 export default function Search(props: { searchType: SearchTypeEnum }) {
-  const [images, setImages] = useState<Summary[]>([]);
+  const [images, setImages] = useState<ImageSearchResult[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [existingImages, setExistingImages] = useState<Set<string>>(new Set());
 
@@ -17,8 +17,8 @@ export default function Search(props: { searchType: SearchTypeEnum }) {
       setLoading(true);
       try {
         const hub = new Hub();
-        const result = await hub.search({ q: text, page_size: 100, type: props.searchType }, abortCtrl.signal);
-        setImages(result.summaries ?? []);
+        const response = await hub.search({ query: text, size: 100, type: props.searchType }, abortCtrl.signal);
+        setImages(response.results ?? []);
       } catch (err) {
         showToast({
           style: Toast.Style.Failure,
@@ -56,7 +56,7 @@ export default function Search(props: { searchType: SearchTypeEnum }) {
       {images.map((item) => (
         <List.Item
           key={item.slug}
-          icon={mapFromToIcon(item.from)}
+          icon={mapFromToIcon(item.source)}
           title={item.name}
           subtitle={item.short_description}
           actions={
@@ -92,9 +92,9 @@ export default function Search(props: { searchType: SearchTypeEnum }) {
                 tooltip: `${item.star_count} Stars`,
               },
               {
-                text: item.pull_count,
+                text: item.rate_plans[0].repositories[0].pull_count,
                 icon: Icon.Download,
-                tooltip: `${item.pull_count} Downloads`,
+                tooltip: `${item.rate_plans[0].repositories[0].pull_count} Downloads`,
               },
             ].filter((item) => item !== null) as ItemAccessory[]
           }

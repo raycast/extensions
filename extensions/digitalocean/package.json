@@ -5,6 +5,9 @@
   "description": "Quickly find resources in your DigitalOcean team",
   "icon": "command-icon.png",
   "author": "shukantpal",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -51,17 +54,24 @@
       "subtitle": "DigitalOcean",
       "description": "Search your projects in DigitalOcean, and go to them directly in your browser.",
       "mode": "view"
+    },
+    {
+      "name": "search-app-platform",
+      "title": "Search App Platform",
+      "subtitle": "DigitalOcean",
+      "description": "Search your apps in DigitalOcean, and go to them directly in your browser.",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.76.0",
+    "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.16.0",
-    "axios": "^1.5.1"
+    "axios": "^1.8.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "^20.8.10",
-    "@types/react": "18.2.27",
+    "@types/react": "^18.3.3",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
@@ -72,7 +82,8 @@
       "type": "password",
       "title": "Personal Access Token",
       "description": "Please enter your DigitalOcean PAT",
-      "required": true
+      "required": true,
+      "placeholder": "dop_v1_xxx..xxx"
     }
   ],
   "scripts": {

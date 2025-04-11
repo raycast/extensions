@@ -1,75 +1,81 @@
+import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 
-export const backboardUrl = "https://backboard.railway.app/graphql/v2";
+const backboardUrl = "https://backboard.railway.app/graphql/v2";
 export const railwayWebUrl = "https://railway.app";
 
 export const projectUrl = (projectId: string, page?: string): string =>
-  `${railwayWebUrl}/project/${projectId}/${page ?? "settings"}`;
+  `${railwayWebUrl}/project/${projectId}/${page ?? ""}`;
 
-export interface ProjectGQL {
+const token = getPreferenceValues<Preferences>().railwayApiKey;
+
+interface ProjectGQL {
   id: string;
   name: string;
   updatedAt: string;
   description: string;
+  isPublic: boolean;
 }
 
 interface ProjectEdgeGQL {
-  edges: [
-    {
-      node: {
-        id: string;
-        name: string;
-        updatedAt: string;
-        description: string;
-      };
-    },
-  ];
+  edges: Array<{
+    node: ProjectGQL;
+  }>;
 }
 
-export const gqlRequest = async <T = any>(query: string, token?: string): Promise<T | null> => {
+interface Error {
+  message: string;
+  locations?: Array<{
+    line: number;
+    column: number;
+  }>;
+  path?: string[];
+  extensions?: {
+    code: string;
+  };
+  traceId: string;
+}
+
+export const gqlRequest = async <T>(query: string): Promise<T | null> => {
   const res = await fetch(backboardUrl, {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...(token != null ? { Authorization: `Bearer ${token}` } : {}) },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify({ query }),
   });
 
-  const json = (await res.json()) as any;
-  const data: T | null = json?.data;
+  const json = (await res.json()) as { errors: Error[]; data?: null } | { data: T };
+  if ("errors" in json) throw new Error(json.errors[0].message);
+  const data = json?.data || null;
 
   return data;
 };
 
 export interface FetchProjectsQuery {
-  me: {
-    projects: ProjectEdgeGQL;
-  };
+  projects: ProjectEdgeGQL;
 }
 
-export const fetchProjects = async (token: string): Promise<ProjectGQL[]> => {
+export const fetchProjects = async (): Promise<ProjectGQL[]> => {
   const res = await gqlRequest<FetchProjectsQuery>(
-    `query { 
-      me{
+    `query {
         projects{
           edges{
             node{
               id
               name
               description
-              createdAt
+              updatedAt
+              isPublic
             }
           }
-        }
       }
   }`,
-    token,
   );
-  const user = res?.me;
 
-  if (user == null) {
+  if (res == null) {
     return [];
   }
 
-  const projects = [...user.projects.edges.map((p) => p.node)];
+  const projects = [...res.projects.edges.map((p) => p.node)];
 
   return projects;
 };

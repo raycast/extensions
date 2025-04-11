@@ -7,6 +7,7 @@ import { getRecipients, sendMessage } from "../scripts/messages";
 import { getAccounts } from "../scripts/accounts";
 import { Validation } from "../utils/validation";
 import { OutgoingMessageIcon } from "../utils/presets";
+import { Cache } from "../utils/cache";
 
 export type ComposeMessageProps = {
   account?: Account;
@@ -22,9 +23,11 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const defaultAccount = Cache.getDefaultAccount();
+
   const { handleSubmit, itemProps, values, setValue } = useForm<OutgoingMessageForm>({
     initialValues: {
-      account: draftValues?.account,
+      account: draftValues?.account || defaultAccount?.emails[0],
       to: draftValues?.to,
       cc: draftValues?.cc,
       bcc: draftValues?.bcc,
@@ -74,14 +77,14 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
         }
       }
 
-      return [draftValues?.to] || [];
+      return draftValues?.to ? [draftValues?.to] : [];
     },
     [],
     {
       onData: (data) => {
         setValue("to", data?.join(","));
       },
-    }
+    },
   );
 
   const shouldEnableDrafts = !!values.subject || !!values.content || !!values.attachments;
@@ -103,9 +106,9 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
       }
     >
       <Form.Dropdown title="From" placeholder="Select account" {...itemProps.account}>
-        {(account ? [account] : accounts)?.map((account: Account, index: number) => (
-          <Form.Dropdown.Item key={index} value={account.email} title={account.email} />
-        ))}
+        {(account ? [account] : accounts)?.flatMap((account: Account) =>
+          account.emails.map((email: string) => <Form.Dropdown.Item key={email} value={email} title={email} />),
+        )}
       </Form.Dropdown>
 
       <Form.TextField

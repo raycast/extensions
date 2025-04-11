@@ -1,0 +1,31 @@
+<svg viewBox="0 0 143 145" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <g id="link" transform="translate(-25 25)">
+      <mask id="mask" x="-50%" width="100" height="100">
+        <rect x="-50%" y="-50%" width="100%" height="100%" fill="white" />
+        <line x1="0" y1="0" x2="100" stroke="black" stroke-width="30" transform="
+          translate(25 7)
+          rotate(210)
+        " />
+        <line x1="0" y1="0" x2="100" stroke="black" stroke-width="30" transform="
+          translate(-20 -27)
+          rotate(330)
+        " />
+      </mask>
+      <path fill="none" stroke="#fff" stroke-width="16" mask="url(#mask)" d="
+        m 0 0
+        v 21
+        a 1 1 0 0 0 50 0
+        v -48
+        a 22 22 0 0 0 -11 -19
+        l -12 -7
+      " />
+    </g>
+    <g id="chain" transform="rotate(-17)">
+      <use xlink:href="#link" transform="rotate(0)" />
+      <use xlink:href="#link" transform="rotate(120)" />
+      <use xlink:href="#link" transform="rotate(240)" />
+    </g>
+  </defs>
+  <use transform="translate(78 67)" xlink:href="#chain" />
+</svg>

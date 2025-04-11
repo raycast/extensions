@@ -13,6 +13,11 @@ export const spotLinks = {
         url: "https://www.bybit.com/trade/spot/TON/USDT",
       },
       {
+        title: "MEXC",
+        subtitle: "TON/USDT",
+        url: "https://www.mexc.com/exchange/TON_USDT",
+      },
+      {
         title: "HTX",
         subtitle: "TON/USDT",
         url: "https://www.htx.com/trade/ton_usdt",

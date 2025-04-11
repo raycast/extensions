@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hakuna",
+  "title": "Hakuna",
+  "description": "Raycast extention for hakuna.ch. Get your personal API token from app.hakuna.ch/token.",
+  "icon": "icon.png",
+  "author": "fratoro",
+  "license": "MIT",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+ "commands": [
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "description": "Start a Hakuna timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "description": "Stop the running Hakuna timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "get-worktime",
+      "title": "Get Today's Time Balance",
+      "description": "Get today's total worktime, including active timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "get-overtime",
+      "title": "Get Overtime",
+      "description": "Get total overtime",
+      "mode": "no-view"
+    },
+    {
+      "name": "get-vacation-days",
+      "title": "Get Vacation Days",
+      "description": "Get used and remaining vacation days",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "Hakuna API Token",
+      "description": "Your Hakuna API token"
+    },
+    {
+      "name": "defaultTaskId",
+      "type": "textfield",
+      "required": true,
+      "title": "Default Task ID",
+      "description": "The default task ID to use when starting a timer"
+    },
+    {
+      "name": "defaultProjectId",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Project ID (optional)",
+      "description": "The default project ID to use when starting a timer"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

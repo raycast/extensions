@@ -5,18 +5,26 @@ import type {
   SortNames,
   SortTypes,
   sortOrder,
-  ViewAction,
-  ViewState,
+  TransactionViewAction,
+  TransactionViewState,
   TransactionDetail,
   TransactionDetailMap,
 } from '@srcTypes';
 
 import { nanoid as randomId } from 'nanoid';
 import Fuse from 'fuse.js';
+import { formatToYnabAmount, isNumberLike } from '@lib/utils';
 
-const MODIFIERS_REGEX = /(-?(?:account|type|category):[\w-]+)/g;
+const VALID_MODIFIERS = ['account', 'amount', 'type', 'category'] as const;
+const MODIFIERS_REGEX = new RegExp(
+  `(-?(?:${VALID_MODIFIERS.join('|')}):[\\w.'"-\\s]+?)(?=\\s+(?:-?(?:${VALID_MODIFIERS.join('|')}):)|$)`,
+  'gi',
+);
 
-export function transactionViewReducer(state: ViewState, action: ViewAction): ViewState {
+export function transactionViewReducer(
+  state: TransactionViewState,
+  action: TransactionViewAction,
+): TransactionViewState {
   switch (action.type) {
     case 'reset': {
       const initialItems = action.initialCollection ?? state.initialCollection;
@@ -30,6 +38,7 @@ export function transactionViewReducer(state: ViewState, action: ViewAction): Vi
         search: state.search,
         collection: initialItems,
         initialCollection: initialItems,
+        isShowingDetails: state.isShowingDetails,
       };
     }
     case 'group': {
@@ -58,7 +67,7 @@ export function transactionViewReducer(state: ViewState, action: ViewAction): Vi
     }
     case 'filter': {
       const { filterBy: newFilter } = action;
-      const { collection, filter: currentFilter, group, initialCollection } = state;
+      const { filter: currentFilter, group, initialCollection } = state;
 
       if (newFilter === null || isSameFilter(newFilter, currentFilter)) {
         const collection = group ? initialCollection.reduce(groupToMap(group), new Map()) : initialCollection;
@@ -69,10 +78,7 @@ export function transactionViewReducer(state: ViewState, action: ViewAction): Vi
         };
       }
 
-      const filteredCollection = Array.isArray(collection)
-        ? initialCollection.filter(filterCollectionBy(newFilter))
-        : // TODO improve performance. Most .reduce calls could be replaced by for loops (?)
-          initialCollection.filter(filterCollectionBy(newFilter)).reduce(groupToMap(group), new Map());
+      const filteredCollection = filterCollectionAndGroup(initialCollection, newFilter, group);
 
       return {
         ...state,
@@ -102,15 +108,21 @@ export function transactionViewReducer(state: ViewState, action: ViewAction): Vi
     }
     case 'search': {
       const { query } = action;
-      const { initialCollection } = state;
+      const { initialCollection, group } = state;
 
       // Do not bother matching empty queries
-      if (query === '') return { ...state, collection: initialCollection, search: '' };
+      if (query === '') {
+        return {
+          ...state,
+          search: '',
+          collection: filterCollectionAndGroup(initialCollection, state.filter, group),
+        };
+      }
 
       // Find the position of a match if it exists
       const modifiersPosition = query.search(MODIFIERS_REGEX);
 
-      // Loacte the part of the query which isn't a modifier
+      // Locate the part of the query which isn't a modifier
       // This assumes that part to be at the beginning of the query
       // TODO Other methods could be used but they are either slower, or require more complex regex
       const nonModifierString = modifiersPosition == -1 ? query : query.substring(0, modifiersPosition).trim();
@@ -128,17 +140,29 @@ export function transactionViewReducer(state: ViewState, action: ViewAction): Vi
         modifiers && modifiers.size > 0 ? initialCollection.filter(filterByModifiers(modifiers)) : initialCollection;
 
       // If only modifiers exists within the query, do not bother searching for it
-      if (nonModifierString === '') return { ...state, collection: filteredCollection, search: query };
+      if (nonModifierString === '')
+        return {
+          ...state,
+          collection: filterCollectionAndGroup(filteredCollection, state.filter, group),
+          search: query,
+        };
 
       // Search within the reduced collection which satisfies the conditions of the modifiers
       const fuse = new Fuse(filteredCollection, { keys: ['payee_name'], threshold: 0 });
 
       const newCollection = fuse.search(nonModifierString).flatMap((result) => result.item);
 
+      // Apply previous grouping and filtering to the new collection
       return {
         ...state,
         search: query,
-        collection: newCollection,
+        collection: filterCollectionAndGroup(newCollection, state.filter, group),
+      };
+    }
+    case 'toggleDetails': {
+      return {
+        ...state,
+        isShowingDetails: !state.isShowingDetails,
       };
     }
     default:
@@ -156,12 +180,14 @@ export function initView({
   sort = null,
   search = '',
   initialCollection: initialItems,
-}: ViewState): ViewState {
+  isShowingDetails: isShowingDetail = false,
+}: TransactionViewState): TransactionViewState {
   return {
     filter,
     group,
     sort,
     search,
+    isShowingDetails: isShowingDetail,
     collection: initialItems,
     initialCollection: initialItems,
   };
@@ -186,7 +212,7 @@ function groupToMap(groupBy: GroupNames | null) {
     }
 
     const previousGroup = groupMap.get(groupName) as Group<TransactionDetail>;
-    groupMap.set(groupName, { ...previousGroup, items: [...previousGroup?.items, currentTransaction] });
+    groupMap.set(groupName, { ...previousGroup, items: [...previousGroup.items, currentTransaction] });
 
     return groupMap;
   };
@@ -209,6 +235,12 @@ function sortCollectionBy(sortOrder: SortNames) {
   };
 }
 
+/**
+ * Returns a filter function that evaluates transactions based on the provided filter criteria.
+ *
+ * @param newFilter - Filter object containing key and optional value to filter by.
+ * @returns A predicate function that returns true if the transaction matches the filter criteria
+ */
 function filterCollectionBy(newFilter: Filter) {
   return (item: TransactionDetail) => {
     if (!newFilter) return true;
@@ -218,8 +250,30 @@ function filterCollectionBy(newFilter: Filter) {
       else if (newFilter.value == 'outflow') return item.amount < 0;
     }
 
+    if (newFilter.key === 'unreviewed') {
+      return !item.approved;
+    }
+
     return item[newFilter.key] === newFilter.value;
   };
+}
+
+/**
+ * Filters a collection of transactions based on a filter and optional grouping.
+ *
+ * @param collection - Array of transaction details to filter
+ * @param filter - Filter criteria to apply to the collection
+ * @param group - Optional grouping to apply after filtering
+ * @returns Either a filtered array of transactions or a grouped map of filtered transactions
+ */
+function filterCollectionAndGroup(
+  collection: TransactionDetail[],
+  filter: Filter,
+  group: TransactionViewState['group'],
+) {
+  return group
+    ? (collection.filter(filterCollectionBy(filter)).reduce(groupToMap(group), new Map()) as TransactionDetailMap)
+    : collection.filter(filterCollectionBy(filter));
 }
 
 /**
@@ -241,15 +295,29 @@ function isSameFilter(filterA: Filter, filterB: Filter) {
   return isSameObject;
 }
 
-type ModifierType = 'account' | 'type' | 'category';
+type ModifierType = 'account' | 'type' | 'category' | 'amount';
 // Narrow this type down depending on modifier type w/ typeguard
 type Modifier = Map<ModifierType, { value: string; isNegative: boolean }>;
 
 /**
- * Given a set of positive or negative modifiers, this function filters the collection for items
- * that match them.
- * Each modifier is only applied once to the collection.
- * */
+ * Filters a collection based on search modifiers like account:, type:, amount:, and category:.
+ * Except for amount, each modifier can be positive (include matches) or negative (exclude matches).
+ * @param modifiers - Map of search modifiers and their values
+ * @returns Filter function that returns true if a transaction matches all modifiers
+ *
+ * @example
+ * // Include transactions from "Checking" account
+ * account:checking
+ *
+ * // Exclude transactions from "Savings" account
+ * account:savings
+ *
+ * // Only show inflow transactions
+ * type:inflow
+ *
+ * // Only show transactions in "Groceries" category
+ * category:groceries
+ */
 function filterByModifiers(modifiers: Modifier) {
   return (t: TransactionDetail) => {
     let isMatch = false;
@@ -283,15 +351,24 @@ function filterByModifiers(modifiers: Modifier) {
           break;
         }
         case 'account': {
-          const accountName = value.toLowerCase().replace('-', ' ');
+          const accountName = value.toLowerCase();
           isMatch = t.account_name.toLowerCase().search(accountName) !== -1;
           isMatch = isNegative ? !isMatch : isMatch;
           break;
         }
         case 'category': {
-          const categoryName = value.toLocaleLowerCase().replace('-', ' ');
+          const categoryName = value.toLocaleLowerCase();
           isMatch = t.category_name != undefined && t.category_name.toLocaleLowerCase().search(categoryName) !== -1;
           isMatch = isNegative ? !isMatch : isMatch;
+          break;
+        }
+        case 'amount': {
+          // Don't change the match statement if we can't safely convert to a number
+          if (!isNumberLike(value)) break;
+
+          const valueAsMilliUnit = formatToYnabAmount(value);
+
+          isMatch = t.amount === valueAsMilliUnit;
           break;
         }
         default:

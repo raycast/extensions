@@ -1,6 +1,6 @@
-# Say - Spoken Content
+# Say - Text to Speech
 
-This extension uses the macOS built-in [Spoken Content](https://www.youtube.com/watch?v=yiZzm24uSsE) feature to say the text you provide. No network connection is needed.
+This extension uses the macOS built-in TTS ([Spoken Content](https://www.youtube.com/watch?v=yiZzm24uSsE)) feature to say the text you provide. No network connection is needed.
 
 [![raycast-cross-extension-badge]][raycast-cross-extension-link]
 
@@ -70,11 +70,30 @@ launchCommand({
 });
 ```
 
+### Use Deeplinks
+
+```shell
+arguments=$(jq -rR @uri <<< '{"content":"Hello from Deeplinks!"}')
+launchContext=$(jq -rR @uri <<< '{"sayOptions":{"voice":"Cello"}}')
+deeplink="raycast://extensions/litomore/say/typeToSay?launchType=background&arguments=$arguments&launchContext=$launchContext"
+open $deeplink
+```
+
 ### Use `mac-say`
 
 Get it from https://github.com/LitoMore/mac-say.
 
-It's the macOS built-in `say` interface for JavaScript. You can use this if want some advanced API usage.
+It's the macOS built-in `say` interface for JavaScript. You can use this if you want some advanced API usage.
+
+## FAQ
+
+### 1. How to stop a speaking agent?
+
+You could type a space or any other new contents to the `Type to Say` command to abort current speaking agent.
+
+### 2. Some voices can be found in the System Settings but not listed in the Configure Say command
+
+Yes. Not all voices are listed in the Configure Say command, because it's limited by the OS. But You can choose those voices from System Settings.
 
 ## License
 

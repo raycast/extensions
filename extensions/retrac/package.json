@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "retrac",
+  "title": "Retrac",
+  "description": "Retrac is an inventory management tool for business owners. This extension allows you to create and retrieve your items directly inside Raycast.",
+  "icon": "command-icon.png",
+  "author": "adi_amar",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Data",
+    "Applications",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-item",
+      "title": "Add Item",
+      "subtitle": "Retrac",
+      "description": "Add a new item to your inventory on Retrac.",
+      "mode": "view"
+    },
+    {
+      "name": "search-items",
+      "title": "Search Inventory Items",
+      "subtitle": "Retrac",
+      "description": "Browse items in your inventory on Retrac.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.61.2",
+    "@raycast/utils": "^1.16.0",
+    "axios": "^1.8.4",
+    "react-dom": "^18.2.0",
+    "react-query": "^3.39.3"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Retrac API key."
+    }
+  ],
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

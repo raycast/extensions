@@ -1,5 +1,11 @@
 # Placeholder Changelog
 
+## [Refactoring] - 2024-07-23
+
+- Refactoring codebase, updated code style
+- Updated dependencies
+- Removed `axios` in favor of `node-fetch`
+
 ## [Simplify Command] - 2024-06-11
 
 - Simplifying the Random Placeholder Image Command

@@ -42,20 +42,11 @@ export default function DocumentQuickPin(props: DocumentQuickPinProps) {
       tooltip="Create a pin whose target path is the document currently open in the frontmost application"
       shortcut={KEYBOARD_SHORTCUT.PIN_CURRENT_DOCUMENT}
       onAction={async () => {
-        await createNewPin(
-          document.name,
-          document.path,
-          app.path,
-          targetGroup?.name || "None",
-          "None",
-          undefined,
-          undefined,
-          false,
-          undefined,
-          undefined,
-          [],
-          "",
-        );
+        await createNewPin({
+          name: document.name,
+          url: document.path,
+          group: targetGroup?.name || "None",
+        });
       }}
     />
   );

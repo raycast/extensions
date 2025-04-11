@@ -1,16 +1,19 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { showFailureToast } from "@raycast/utils";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import {
-  EPLStanding,
-  EPLFixture,
-  Content,
-  Table,
-  TeamTeam,
+  EPLAward,
+  EPLContent,
+  EPLFixtureEvents,
   EPLPlayer,
-  EPLClub,
-  EPLStaff,
-  PlayerContent,
   EPLPlayerSearch,
+  EPLStaff,
+  EPLStanding,
+  Fixture,
+  FixtureEvent,
+  Player,
+  Stat,
+  Table,
+  Team,
 } from "../types";
 
 const endpoint = "https://footballapi.pulselive.com/football";
@@ -20,12 +23,14 @@ const headers = {
 
 const pageSize = 50;
 
-interface PlayerResult {
-  players: PlayerContent[];
-  lastPage: boolean;
+interface Pagination<T> {
+  data: T[];
+  hasMore: boolean;
 }
 
-export const getSeasons = async (comps: string) => {
+export const getSeasons = async (
+  comps: string = "1",
+): Promise<{ label: string; id: number }[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/competitions/${comps}/compseasons`,
@@ -47,7 +52,30 @@ export const getSeasons = async (comps: string) => {
   }
 };
 
-export const getClubs = async (compSeasons: string): Promise<TeamTeam[]> => {
+export const getAwards = async (compSeasons: string) => {
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `${endpoint}/compseasons/${compSeasons}/awards`,
+    params: {
+      altIds: true,
+    },
+    headers: {
+      ...headers,
+    },
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLAward> = await axios(config);
+
+    return data;
+  } catch (e) {
+    showFailureToast(e);
+
+    return undefined;
+  }
+};
+
+export const getClubs = async (compSeasons: string): Promise<Team[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/teams`,
@@ -65,7 +93,7 @@ export const getClubs = async (compSeasons: string): Promise<TeamTeam[]> => {
   };
 
   try {
-    const { data }: AxiosResponse<EPLClub> = await axios(config);
+    const { data }: AxiosResponse<EPLContent<Team>> = await axios(config);
 
     return data.content;
   } catch (e) {
@@ -75,7 +103,9 @@ export const getClubs = async (compSeasons: string): Promise<TeamTeam[]> => {
   }
 };
 
-export const getTeams = async (season: string) => {
+export const getTeams = async (
+  season: string,
+): Promise<{ title: string; value: string }[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/compseasons/${season}/teams`,
@@ -83,9 +113,19 @@ export const getTeams = async (season: string) => {
   };
 
   try {
-    const { data }: AxiosResponse<TeamTeam[]> = await axios(config);
+    const { data }: AxiosResponse<Team[]> = await axios(config);
 
-    return data;
+    const teams = data.map((team) => ({
+      title: team.name,
+      value: team.id.toString(),
+    }));
+
+    teams.unshift({
+      title: "All Clubs",
+      value: "-1",
+    });
+
+    return teams;
   } catch (e) {
     showFailureToast(e);
 
@@ -102,6 +142,7 @@ export const getTables = async (seasonId: string): Promise<Table[]> => {
       altIds: true,
       detail: 2,
       FOOTBALL_COMPETITION: 1,
+      live: true,
     },
     headers,
   };
@@ -123,7 +164,8 @@ export const getFixtures = async (props: {
   sort: string;
   statuses: string;
   comps: string;
-}): Promise<[Content[], boolean]> => {
+  compSeasons: string;
+}): Promise<Pagination<Fixture>> => {
   if (props.teams === "-1") {
     delete props.teams;
   }
@@ -140,14 +182,65 @@ export const getFixtures = async (props: {
   };
 
   try {
-    const { data }: AxiosResponse<EPLFixture> = await axios(config);
-    const lastPage = data.pageInfo.page === data.pageInfo.numPages - 1;
+    const { data }: AxiosResponse<EPLContent<Fixture>> = await axios(config);
+    const hasMore = data.pageInfo.numPages > data.pageInfo.page + 1;
 
-    return [data.content, lastPage];
+    return { data: data.content, hasMore };
   } catch (e) {
     showFailureToast(e);
 
-    return [[], false];
+    return { data: [], hasMore: false };
+  }
+};
+
+export const getFixture = async (
+  fixtureId: number,
+): Promise<Fixture | undefined> => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${endpoint}/fixtures/${fixtureId}`,
+    params: {
+      altIds: true,
+    },
+    headers,
+  };
+
+  try {
+    const { data }: AxiosResponse<Fixture> = await axios(config);
+
+    return data;
+  } catch (e) {
+    showFailureToast(e);
+
+    return undefined;
+  }
+};
+
+export const getMatchCommentary = async (
+  fixtureId: string,
+  page: number,
+): Promise<Pagination<FixtureEvent>> => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${endpoint}/fixtures/${fixtureId}/textstream/EN`,
+    params: {
+      pageSize: 40,
+      sort: "desc",
+      page,
+    },
+    headers,
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLFixtureEvents> = await axios(config);
+    const hasMore =
+      data.events.pageInfo.numPages > data.events.pageInfo.page + 1;
+
+    return { data: data.events.content, hasMore };
+  } catch (e) {
+    showFailureToast(e);
+
+    return { data: [], hasMore: false };
   }
 };
 
@@ -155,8 +248,8 @@ export const getPlayers = async (
   teams: string,
   season: string,
   page: number,
-): Promise<PlayerResult> => {
-  const params: { [key: string]: string | number | boolean } = {
+): Promise<Pagination<Player>> => {
+  const params: Record<string, string | number | boolean> = {
     pageSize,
     compSeasons: season,
     altIds: true,
@@ -178,21 +271,39 @@ export const getPlayers = async (
   };
 
   try {
-    const { data }: AxiosResponse<EPLPlayer> = await axios(config);
-    const lastPage = data.pageInfo.page === data.pageInfo.numPages - 1;
+    const { data }: AxiosResponse<EPLContent<Player>> = await axios(config);
+    const hasMore = data.pageInfo.numPages > data.pageInfo.page + 1;
 
-    return { players: data.content, lastPage };
+    return { data: data.content, hasMore };
   } catch (e) {
     showFailureToast(e);
 
-    return { players: [], lastPage: true };
+    return { data: [], hasMore: false };
   }
 };
 
-export const getStaffs = async (
-  team: string,
-  season: string,
-): Promise<PlayerResult> => {
+export const getPlayerStats = async (playerId: number): Promise<Stat[]> => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${endpoint}/stats/player/${playerId}`,
+    params: {
+      comps: 1,
+    },
+    headers,
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLPlayer> = await axios(config);
+
+    return data.stats;
+  } catch (e) {
+    showFailureToast(e);
+
+    return [];
+  }
+};
+
+export const getStaffs = async (team: number, season: string) => {
   const config: AxiosRequestConfig = {
     method: "get",
     url: `${endpoint}/teams/${team}/compseasons/${season}/staff`,
@@ -209,11 +320,11 @@ export const getStaffs = async (
   try {
     const { data }: AxiosResponse<EPLStaff> = await axios(config);
 
-    return { players: data.players, lastPage: true };
+    return data;
   } catch (e) {
     showFailureToast(e);
 
-    return { players: [], lastPage: true };
+    return undefined;
   }
 };
 
@@ -234,7 +345,7 @@ export const getManagers = async (compSeasons: string) => {
   };
 
   try {
-    const { data }: AxiosResponse<EPLPlayer> = await axios(config);
+    const { data }: AxiosResponse<EPLContent<Player>> = await axios(config);
 
     return data.content;
   } catch (e) {
@@ -247,7 +358,7 @@ export const getManagers = async (compSeasons: string) => {
 export const getPlayersWithTerms = async (
   terms: string,
   page: number,
-): Promise<PlayerResult> => {
+): Promise<Pagination<Player>> => {
   const config: AxiosRequestConfig = {
     method: "get",
     url: `https://footballapi.pulselive.com/search/PremierLeague`,
@@ -263,13 +374,13 @@ export const getPlayersWithTerms = async (
 
   try {
     const { data }: AxiosResponse<EPLPlayerSearch> = await axios(config);
-    const lastPage = data.hits.found === data.hits.start + data.hits.hit.length;
+    const hasMore = data.hits.found !== data.hits.start + data.hits.hit.length;
     const players = data.hits.hit.map((h) => h.response).filter((p) => !!p);
 
-    return { players, lastPage };
+    return { data: players, hasMore };
   } catch (e) {
     showFailureToast(e);
 
-    return { players: [], lastPage: true };
+    return { data: [], hasMore: false };
   }
 };

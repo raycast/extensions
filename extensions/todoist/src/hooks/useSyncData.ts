@@ -8,7 +8,6 @@ import useCachedData from "./useCachedData";
 export default function useSyncData(shouldSync = true) {
   const { data: syncData, ...rest } = usePromise(async () => {
     if (shouldSync) {
-      console.log("full sync");
       const data = await initialSync();
       return data as SyncData;
     }

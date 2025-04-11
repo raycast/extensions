@@ -5,6 +5,9 @@
   "description": "Convert a music link to another provider, for example you can convert Spotify links to Apple music links (also works with many other providers), using song.link service.",
   "icon": "extension_icon.png",
   "author": "Quentin23Soleil",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Media"
   ],
