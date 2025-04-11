@@ -1,10 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "hacker-news-500",
+  "name": "hacker-news-top-stories",
   "title": "Hacker News Top Stories",
   "description": "A menubar extension to view stories on Hacker News that hit 500 points, points can be set in preferences.",
   "icon": "icon.png",
   "author": "KevinBatdorf",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "News"
   ],
