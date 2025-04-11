@@ -29,7 +29,7 @@ const getHost = () => {
   return host;
 };
 
-export const getDetail = (url: string) => {
+export const useDetail = (url: string) => {
   const baseParams: Record<string, string> = {};
 
   const params = new URLSearchParams({
@@ -46,7 +46,7 @@ export const getDetail = (url: string) => {
   });
 };
 
-export const getSearch = (query: string, source: Source = Source.Douban) => {
+export const useSearch = (query: string, source: Source = Source.Douban) => {
   const baseParams: Record<string, string> = {};
 
   const params = new URLSearchParams({

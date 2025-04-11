@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, LaunchProps } from "@raycast/api";
-import { getDetail } from "./api";
+import { useDetail } from "./api";
+import { showFailureToast } from "@raycast/utils";
 
 interface SearchArguments {
   url: string;
@@ -10,7 +11,13 @@ export default function GenCommand(
 ) {
   const url = props.arguments.url ?? props.fallbackText;
 
-  const { data, isLoading } = getDetail(url);
+  const { data, isLoading, error } = useDetail(url);
+
+  if (error || data?.error) {
+    showFailureToast(error?.message ?? data?.error ?? "Unknown error", {
+      title: "Failed to fetch details",
+    });
+  }
 
   const format = data?.format
     ?.replace(/\[img\](.*?)\[\/img\]/, '<img src="$1" width="100" />')
