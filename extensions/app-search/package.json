@@ -1,0 +1,237 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "app-search",
+  "title": "App Search",
+  "description": "Open or move to an app",
+  "icon": "extension-icon.png",
+  "author": "miles_fritzmather",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open",
+      "title": "Open",
+      "subtitle": "search apps",
+      "description": "Opens a window with active apps that you can search through",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.17.0",
+    "fuse.js": "^7.1.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "fastMode",
+      "title": "Fast Mode",
+      "label": "Enable/Disable Fast Mode (Default off)",
+      "description": "Disable to speed up loading times by not gathering app icons and running status",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showSortOptions",
+      "label": "Whether or not to show the sort options",
+      "title": "Show Sort Options",
+      "description": "Show the sort options in the search bar",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "timeScaleDropdown",
+      "title": "Time Scale For Frecency",
+      "description": "The time scale for the frecency algorithm",
+      "type": "dropdown",
+      "default": "6",
+      "required": false,
+      "data": [
+        {
+          "title": "30 minutes",
+          "value": "0.5"
+        },
+        {
+          "title": "1 hour",
+          "value": "1"
+        },
+        {
+          "title": "3 hours",
+          "value": "3"
+        },
+        {
+          "title": "6 hours",
+          "value": "6"
+        },
+        {
+          "title": "12 hours",
+          "value": "12"
+        },
+        {
+          "title": "1 day",
+          "value": "24"
+        },
+        {
+          "title": "2 days",
+          "value": "48"
+        },
+        {
+          "title": "1 week",
+          "value": "168"
+        }
+      ]
+    },
+    {
+      "name": "lambdaDecayDropdown",
+      "title": "Frecency Decay Rate",
+      "description": "The decay rate for the frecency algorithm",
+      "type": "dropdown",
+      "default": "10",
+      "required": false,
+      "data": [
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "7",
+          "value": "7"
+        },
+        {
+          "title": "10",
+          "value": "10"
+        },
+        {
+          "title": "15",
+          "value": "15"
+        },
+        {
+          "title": "20",
+          "value": "20"
+        },
+        {
+          "title": "30",
+          "value": "30"
+        }
+      ]
+    },
+    {
+      "name": "fuzzySearchThresholdDropdown",
+      "title": "Fuzzy Search Threshold",
+      "description": "Threshold for fuzzy search. From 0-1, default is 0.4. Lower is more strict",
+      "type": "dropdown",
+      "default": "0.4",
+      "required": false,
+      "data": [
+        {
+          "title": "0.1",
+          "value": "0.1"
+        },
+        {
+          "title": "0.2",
+          "value": "0.2"
+        },
+        {
+          "title": "0.3",
+          "value": "0.3"
+        },
+        {
+          "title": "0.4",
+          "value": "0.4"
+        },
+        {
+          "title": "0.5",
+          "value": "0.5"
+        },
+        {
+          "title": "0.6",
+          "value": "0.6"
+        },
+        {
+          "title": "0.7",
+          "value": "0.7"
+        },
+        {
+          "title": "0.8",
+          "value": "0.8"
+        },
+        {
+          "title": "0.9",
+          "value": "0.9"
+        },
+        {
+          "title": "1",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "showBoltIconForRunningApps",
+      "label": "Whether or not to show the bolt icon for running apps",
+      "title": "Show Bolt Icon For Running Apps",
+      "description": "Show the bolt icon for running apps in the search bar",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showPinIconForPinnedApps",
+      "label": "Whether or not to show the pin icon for pinned apps",
+      "title": "Show Pin Icon For Pinned Apps",
+      "description": "Show the pin icon for pinned apps in the search bar",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showEyeIconForHiddenApps",
+      "label": "Whether or not to show the eye icon for hidden apps",
+      "title": "Show Eye Icon For Hidden Apps",
+      "description": "Show the eye icon for hidden apps in the search bar",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showIdentifierForWebsitesAndDirectories",
+      "label": "Whether or not to show the identifier for websites and directories",
+      "title": "Show Identifier For Websites And Directories",
+      "description": "Show the identifier for websites and directories in the search bar",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ]
+}
