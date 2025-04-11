@@ -1,6 +1,6 @@
 # Social Network Trends Changelog
 
-## [Switched to the new service API and bug fixed] - 2025-04-05
+## [Switched to the new service API and bug fixed] - {PR_MERGE_DATE}
 
 - Switched to the new service API
 - Fixed all data unavailable bugs
