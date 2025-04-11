@@ -1,4 +1,4 @@
-import { Action, ActionPanel, AI, Color, environment, Grid, Icon } from "@raycast/api";
+import { Action, ActionPanel, AI, Color, environment, Grid, Icon, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import { useAISearch } from "../hooks/useAISearch";
 import { useFetchIcons } from "../hooks/useFetchIcons";
@@ -7,6 +7,7 @@ import { toPascalCase } from "../utils";
 import { LoadingAnimation } from "./LoadingAnimation";
 
 export function IconGrid() {
+  const preferences = getPreferenceValues();
   const { data: allIcons, isLoading: isLoadingIcons } = useFetchIcons();
   const [colorName, setColorName] = useState<string>("PrimaryText");
   const [searchText, setSearchText] = useState("");
@@ -71,7 +72,17 @@ export function IconGrid() {
               keywords={icon.keywords}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard title="Copy Name" content={icon.name} />
+                  <Action.CopyToClipboard
+                    title="Copy Name"
+                    content={
+                      preferences.pascalCaseName
+                        ? icon.name
+                            .split("-")
+                            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                            .join("")
+                        : icon.name
+                    }
+                  />
                   <Action.CopyToClipboard title="Copy SVG" content={icon.content} />
                   <Action.CopyToClipboard
                     title="Copy Component"
