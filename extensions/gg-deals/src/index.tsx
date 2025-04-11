@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ActionPanel, Action, Grid, List, Icon, useNavigation, showToast, Toast } from "@raycast/api";
 import { load, CheerioAPI } from "cheerio";
 import { Details } from "./detail";
@@ -41,7 +41,6 @@ export default function Command() {
       <List.Item
         key={index}
         title={gameName}
-        subtitle={price}
         detail={
           <List.Item.Detail
             markdown={`![Illustration](${imageUrl})`}
@@ -173,8 +172,12 @@ function useSearch() {
     searchText: "",
   });
 
+  const searchIdRef = useRef(0);
+
   const search = useCallback(
     async function search(searchText: string) {
+      const currentSearchId = ++searchIdRef.current;
+
       setState((oldState) => ({
         ...oldState,
         isLoading: true,
@@ -197,6 +200,11 @@ function useSearch() {
         const html = await fetchHtml(searchUrl);
         const $ = load(html);
 
+        if (currentSearchId !== searchIdRef.current) {
+          // Ignore outdated results
+          return;
+        }
+
         if (searchText) {
           populateSearch($, "#games-list .game-item", results);
         } else {
@@ -218,11 +226,13 @@ function useSearch() {
           isLoading: false,
         }));
       } catch (error) {
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: false,
-        }));
-        showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
+        if (currentSearchId === searchIdRef.current) {
+          setState((oldState) => ({
+            ...oldState,
+            isLoading: false,
+          }));
+          showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
+        }
       }
     },
     [setState]
@@ -242,12 +252,18 @@ function populateSearch($: CheerioAPI, selector: string, deals: DealEntry[]) {
   $(selector).each(function () {
     const gameName: string = $(this).find(".game-info-title.title").text();
     const imageUrl: string = $(this).find("img")[0].attribs.src;
-    const price: string = $(this).find(".price-content").text();
     const priceKeyshop: string = $(this).find(".shop-price-keyshops .numeric").text();
     const url = $(this).find("a").attr("href") ?? "";
     const releaseDate = $(this).find(".date-tag .value").text();
     const genres = $(this).find(".genres-tag .value").text();
-    const discount = $(this).find(".price-widget").text();
+
+    const priceWrap = $(this).find(".price-content");
+    const price = priceWrap.find(".price-inner.numeric").text();
+    const hl = priceWrap.find("span").hasClass("historical");
+    const discount = priceWrap.find(".discount").text();
+
+    const priceText = price === "Free" ? "Free" : discount + (hl ? " HL " : " ") + price;
+
     const platforms = $(this)
       .find(".platforms-tag .value .platform-link-icon svg")
       .map(function () {
@@ -256,7 +272,9 @@ function populateSearch($: CheerioAPI, selector: string, deals: DealEntry[]) {
       })
       .toArray();
 
-    deals.push(new DealEntry(gameName, imageUrl, price, priceKeyshop, url, releaseDate, genres, discount, platforms));
+    deals.push(
+      new DealEntry(gameName, imageUrl, priceText, priceKeyshop, url, releaseDate, genres, discount, platforms)
+    );
   });
 }
 
