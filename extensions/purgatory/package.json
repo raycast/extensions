@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "purgatory",
+  "title": "Purgatory",
+  "description": "idea purgatory to save ideas for later",
+  "icon": "icon.png",
+  "author": "arnav_surve",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "log-purgatory",
+      "title": "Send to Purgatory",
+      "description": "Send an idea to the purgatory",
+      "mode": "view",
+      "path": "log-purgatory.tsx"
+    },
+    {
+      "name": "view-purgatory",
+      "title": "View Purgatory",
+      "description": "View purgatory inhabitants",
+      "mode": "view",
+      "path": "view-purgatory.tsx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
