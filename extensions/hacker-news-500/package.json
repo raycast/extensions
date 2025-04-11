@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hacker-news-500",
-  "title": "Hacker News 500",
-  "description": "A menubar extension to view stories on Hacker News that hit 500 points.",
+  "title": "Hacker News Top Stories",
+  "description": "A menubar extension to view stories on Hacker News that hit 500 points, points can be set in preferences.",
   "icon": "icon.png",
   "author": "KevinBatdorf",
   "categories": [
@@ -11,8 +11,8 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "view-500",
-      "title": "Hacker News 500",
+      "name": "view-top-stories",
+      "title": "Hacker News Top Stories Menu Bar",
       "description": "View Hacker News stories with 500+ points submitted over the last 24 hours.",
       "mode": "menu-bar",
       "interval": "10m"
