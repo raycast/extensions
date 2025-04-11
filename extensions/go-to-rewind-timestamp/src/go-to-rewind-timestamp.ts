@@ -24,7 +24,6 @@ export default async function Command(props: { arguments: { time: string } }) {
     // Create the Rewind AI deeplink
     const deeplink = `rewindai://show-moment?timestamp=${timestamp}`;
 
-    console.log(deeplink);
 
     // Open the deeplink
     await open(deeplink);
