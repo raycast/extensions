@@ -268,13 +268,14 @@ function UsersSubmenu({ workspace, task, mutate }: UsersSubmenuProps) {
 
   return (
     <ActionPanel.Submenu
+      // eslint-disable-next-line @raycast/prefer-title-case
       title="Assign To"
       icon={Icon.AddPerson}
       shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         <>
           <Action title="Unassigned" icon={Icon.Person} onAction={() => changeAssignee(null)} />
@@ -337,7 +338,7 @@ function ProjectsSubmenu({ workspace, task, mutate }: ProjectsSubmenuProps) {
   return (
     <ActionPanel.Submenu title="Change Project" icon={Icon.Folder} shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}>
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         <>
           {projectsToAdd && projectsToAdd.length > 0 ? (
