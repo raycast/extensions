@@ -1,6 +1,14 @@
 # Warp Changelog
 
-## [Improvments] - 2024-08-14
+## [Improvements] - {PR_MERGE_DATE}}
+
+- Added build preference to select between [Warp](https://www.warp.dev) and [Warp Preview](https://www.warp.dev/blog/warp-preview) Releases.
+- Updated extension icon.
+- Cleaned up empty Launch Configuration view and made it easier to get to related docs.
+- Capitalized "Launch Configurations" throughout.
+- Added several constants and improved naming convention consistency.
+
+## [Improvements] - 2024-08-14
 
 - "Open Launch Configuration" command now supports setting order of items. To move item up or down, use "Move up" (⌘⇧↑) or "Move down" (⌘⇧↓) actions.
 
