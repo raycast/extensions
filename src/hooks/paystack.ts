@@ -1,11 +1,6 @@
 import { getPreferenceValues } from '@raycast/api'
 import { useState } from 'react'
 import { PaystackResponse } from '../utils/types'
-interface Preferences {
-  liveSecretKey: string
-  testSecretKey: string
-  mode: 'live' | 'test'
-}
 
 interface PaystackError {
   status: boolean
