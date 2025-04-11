@@ -132,7 +132,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         title="Prompt"
         placeholder="Describe your prompt"
         {...itemProps.prompt}
-        info="If you encounter issues while using certain models(o1-mini, o1-preview, etc.), you can leave this item blank."
+        info="If you encounter issues while using certain models (o1-mini, o1-preview, etc.), you can leave this item blank."
       />
       <Form.TextField
         title="Temperature"
