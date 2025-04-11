@@ -22,7 +22,6 @@ function SearchListItem({ result }: { result: TimeCalculatorResult }) {
     <List.Item
       title={result.text}
       subtitle={result.info}
-      // accessories={[{ text: searchResult.username }]}
       actions={
         result.ok && (
           <ActionPanel>
