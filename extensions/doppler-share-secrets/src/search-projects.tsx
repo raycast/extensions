@@ -45,7 +45,6 @@ export default function SearchProjects() {
                 icon={Icon.Globe}
                 title="Open in Doppler"
                 url={`https://dashboard.doppler.com/workplace/projects/${project.name}`}
-                shortcut={{ modifiers: ["shift"], key: "return" }}
               />
             </ActionPanel>
           }
