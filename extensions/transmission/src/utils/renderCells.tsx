@@ -1,6 +1,5 @@
 import { splitEvery } from "ramda";
 import BitField from "bitfield";
-import { renderToString } from "react-dom/server";
 import { environment } from "@raycast/api";
 import { darken, mix } from "polished";
 
@@ -28,7 +27,7 @@ interface CellProps {
   rowIndex: number;
 }
 
-const Cell = ({ alpha, complete, colors, cellSize, px, colIndex, rowIndex }: CellProps) => {
+const cell_string = ({ alpha, complete, colors, cellSize, px, colIndex, rowIndex }: CellProps) => {
   if (complete) alpha = 1;
 
   const radius = px * 5;
@@ -37,20 +36,18 @@ const Cell = ({ alpha, complete, colors, cellSize, px, colIndex, rowIndex }: Cel
   const opacity = alpha < 0.1 ? 1 : Math.max(0.5, alpha);
   const color = mix(opacity, fill, colors.gray);
   const size = cellSize - margin * 2;
-  return (
-    <rect
-      fill={color}
-      fillOpacity={opacity}
-      x={colIndex * cellSize + margin}
-      y={rowIndex * cellSize}
-      stroke={darken(0.1, color)}
-      strokeWidth={px}
-      width={size}
-      height={size}
-      rx={radius}
-      ry={radius}
-    />
-  );
+  return `<rect
+      fill="${color}"
+      x="${colIndex * cellSize + margin}"
+      y="${rowIndex * cellSize}"
+      fill-opacity="${opacity}"
+      stroke="${darken(0.1, color)}"
+      stroke-width="${px}"
+      width="${size}"
+      height="${size}"
+      rx="${radius}"
+      ry="${radius}"
+    />`;
 };
 
 // Greatest common divisor of 2 integers
@@ -104,24 +101,21 @@ export async function renderPieces({
 
   const cellsMarkup = splitEvery(cols, cells)
     .map((row: number[], rowIndex: number) =>
-      row.map((alpha, colIndex) => (
-        <Cell
-          key={`${rowIndex}-${colIndex}`}
-          alpha={alpha}
-          complete={complete}
-          colors={colors}
-          cellSize={cellSize}
-          px={px}
-          colIndex={colIndex}
-          rowIndex={rowIndex}
-        />
-      )),
+      row.map((alpha, colIndex) =>
+        cell_string({
+          alpha,
+          complete,
+          colors,
+          cellSize,
+          px,
+          colIndex,
+          rowIndex,
+        }),
+      ),
     )
     .flat();
 
-  return renderToString(
-    <svg viewBox={`0 0 ${width} ${width}`} xmlns="http://www.w3.org/2000/svg">
-      {cellsMarkup}
-    </svg>,
-  );
+  return `<svg viewBox="0 0 ${width} ${width}" xmlns="http://www.w3.org/2000/svg">
+      ${cellsMarkup.join(" ")}
+    </svg>`;
 }

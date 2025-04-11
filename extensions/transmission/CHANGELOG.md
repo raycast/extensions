@@ -1,5 +1,9 @@
 # Transmission Changelog
 
+## [Fix failure in listTorrents] - {PR_MERGE_DATE}
+
+- Replace renderToString with functions
+
 ## [Usability improvements] - 2024-05-22
 
 - Add a dedicated default download directory 
