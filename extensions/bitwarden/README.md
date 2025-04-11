@@ -28,9 +28,9 @@ Access your Bitwarden vault directly from Raycast
 
 You're all set! 🎉
 
-### Local installation
+### Local Installation
 
-If you wish to use your own local Bitwarden CLI, you can do so by using the `Bitwarden CLI Path` field to the corresponding path (tip: `which bw`).
+If you wish to use your own local Bitwarden CLI, you can do so by entering the corresponding path in the `Bitwarden CLI Path` field (tip: use the `which bw` command to find the path).
 
 ### Self-hosted Instance
 

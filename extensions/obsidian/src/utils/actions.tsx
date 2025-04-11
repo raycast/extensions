@@ -1,27 +1,27 @@
 import {
   Action,
-  getPreferenceValues,
-  Icon,
-  Color,
-  List,
   ActionPanel,
+  Color,
   confirmAlert,
   getDefaultApplication,
+  getPreferenceValues,
+  Icon,
+  List,
 } from "@raycast/api";
-
 import React, { useEffect, useState } from "react";
-
+import { appendSelectedTextTo, getCodeBlocks } from "../api/vault/notes/notes.service";
+import { Note } from "../api/vault/notes/notes.types";
+import { vaultPluginCheck } from "../api/vault/plugins/plugins.service";
+import { Vault } from "../api/vault/vault.types";
 import { AppendNoteForm } from "../components/AppendNoteForm";
 import { EditNote } from "../components/EditNote";
-import { Note, Vault } from "./interfaces";
-
-import { NoteQuickLook } from "../components/NoteQuickLook";
-import { appendSelectedTextTo, getObsidianTarget, vaultPluginCheck, getCodeBlocks, ObsidianTargetType } from "./utils";
-import { ObsidianIcon, PrimaryAction } from "./constants";
 import { NoteList } from "../components/NoteList/NoteList";
-import { SearchNotePreferences } from "./preferences";
-import { NoteReducerActionType } from "./data/reducers";
+import { NoteQuickLook } from "../components/NoteQuickLook";
+import { ObsidianIcon, PrimaryAction } from "./constants";
 import { useNotesDispatchContext } from "./hooks";
+import { SearchNotePreferences } from "./preferences";
+import { NoteReducerActionType } from "./reducers";
+import { getObsidianTarget, ObsidianTargetType } from "./utils";
 
 //--------------------------------------------------------------------------------
 // All actions for all commands should be defined here.
@@ -128,7 +128,7 @@ export function CopyObsidianURIAction(props: { note: Note }) {
 
   return (
     <Action.CopyToClipboard
-      title="Copy Obsidian URI"
+      title="Copy Obsidian Link"
       icon={Icon.Link}
       content={target}
       shortcut={{ modifiers: ["opt"], key: "u" }}

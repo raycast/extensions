@@ -34,6 +34,14 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
             },
@@ -110,6 +118,14 @@
             {
               "title": "Follow global model",
               "value": "global"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
             },
             {
               "value": "deepseek-r1-distill-llama-70b",
@@ -190,6 +206,14 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
             },
@@ -266,6 +290,14 @@
             {
               "title": "Follow global model",
               "value": "global"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
             },
             {
               "value": "deepseek-r1-distill-llama-70b",
@@ -346,6 +378,14 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
             },
@@ -422,6 +462,14 @@
             {
               "title": "Follow global model",
               "value": "global"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
             },
             {
               "value": "deepseek-r1-distill-llama-70b",
@@ -516,6 +564,14 @@
             {
               "title": "Follow global model",
               "value": "global"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
             },
             {
               "value": "deepseek-r1-distill-llama-70b",
@@ -613,6 +669,14 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
             },
@@ -690,6 +754,14 @@
             {
               "title": "Follow global model",
               "value": "global"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
             },
             {
               "value": "deepseek-r1-distill-llama-70b",
@@ -771,6 +843,14 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
             },
@@ -848,6 +928,14 @@
             {
               "title": "Follow global model",
               "value": "global"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
             },
             {
               "value": "deepseek-r1-distill-llama-70b",
@@ -929,6 +1017,14 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
             },
@@ -1006,6 +1102,14 @@
             {
               "title": "Follow global model",
               "value": "global"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
             },
             {
               "value": "deepseek-r1-distill-llama-70b",
@@ -1087,6 +1191,14 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
             },
@@ -1156,6 +1268,14 @@
       "required": true,
       "default": "llama-3.3-70b-versatile",
       "data": [
+        {
+          "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "title": "Llama 4 Scout 131k"
+        },
+        {
+          "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+          "title": "Llama 4 Maverick 131k"
+        },
         {
           "value": "deepseek-r1-distill-llama-70b",
           "title": "DeepSeek R1 70B 128k"

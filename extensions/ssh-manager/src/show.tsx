@@ -374,6 +374,77 @@ async function runTerminal(item: ISSHConnection) {
   call_forward()
   `;
 
+  const scriptGhostty = `
+  -- Set this property to true to open in a new window instead of a new tab
+  property open_in_new_window : ${openIn == "newWindow"}
+
+  on new_window()
+      tell application "Ghostty"
+          activate
+          tell application "System Events" to tell process "Ghostty"
+              keystroke "n" using {command down}
+          end tell
+      end tell
+      delay 0.5
+  end new_window
+
+  on new_tab()
+      tell application "Ghostty"
+          activate
+          tell application "System Events" to tell process "Ghostty"
+              keystroke "t" using {command down}
+          end tell
+      end tell
+      delay 0.5
+  end new_tab
+
+  on call_forward()
+      tell application "Ghostty" to activate
+  end call_forward
+
+  on is_running()
+      application "Ghostty" is running
+  end is_running
+
+  on has_windows()
+      if not is_running() then return false
+      tell application "System Events"
+          if windows of process "Ghostty" is {} then return false
+      end tell
+      true
+  end has_windows
+
+  on send_text(custom_text)
+      tell application "System Events" to tell process "Ghostty"
+          keystroke custom_text & return
+      end tell
+  end send_text
+
+  -- Main
+  if has_windows() then
+      if open_in_new_window then
+          new_window()
+      else
+          new_tab()
+      end if
+  else
+      if is_running() then
+          new_window()
+      else
+          call_forward()
+      end if
+  end if
+
+  -- Give Ghostty some time to load
+  repeat until has_windows()
+      delay 0.5
+  end repeat
+  delay 0.5
+
+  send_text("${command}")
+  call_forward()
+  `;
+
   if (terminal == "iTerm") {
     try {
       await runAppleScript(scriptIterm);
@@ -399,6 +470,13 @@ async function runTerminal(item: ISSHConnection) {
   } else if (terminal == "Hyper") {
     try {
       await runAppleScript(scriptHyper);
+    } catch (error) {
+      await runAppleScript(scriptTerminal);
+      console.log(error);
+    }
+  } else if (terminal == "Ghostty") {
+    try {
+      await runAppleScript(scriptGhostty);
     } catch (error) {
       await runAppleScript(scriptTerminal);
       console.log(error);
