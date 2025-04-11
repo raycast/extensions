@@ -6,15 +6,15 @@
   "icon": "extension-icon.png",
   "author": "connor_pink",
   "categories": [
-    "Web"
+    "Media"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "request-movie-overseerr",
-      "title": "Request Movie Overseerr",
+      "name": "media-browser",
+      "title": "Overseerr Requester",
       "subtitle": "Request a movie on the Overseerr instance",
-      "description": "using overseerr instance api search for movie and allow adding a request",
+      "description": "Using overseerr instance api search and request movies/shows and allow adding a request",
       "mode": "view",
       "preferences": [
         {
