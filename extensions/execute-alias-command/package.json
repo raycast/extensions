@@ -13,7 +13,6 @@
     {
       "name": "execute-alias-command",
       "title": "Execute Alias Command",
-      "subtitle": "List and execute aliased commands from your shell config file",
       "description": "Search and execute shell aliases from your config file. Detach instantly (⌘↩) or run in terminal (⌘⇧↩)",
       "mode": "view",
       "preferences": [
@@ -40,7 +39,6 @@
     {
       "name": "manage-running-commands",
       "title": "Manage Running Commands",
-      "subtitle": "View and manage commands started by Execute Alias Command",
       "description": "View, monitor and terminate processes launched through the Execute Alias Command extension",
       "mode": "view"
     }
