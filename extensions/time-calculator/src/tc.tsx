@@ -19,7 +19,7 @@ const examples = [
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const deferredSearchText = useDeferredValue(searchText.trim());
-  const result = calculate(deferredSearchText);
+  const result = useMemo(() => calculate(deferredSearchText), [deferredSearchText]);
 
   const randomSubtitle = useMemo(() => {
     return `Try: ${examples[Math.floor(Math.random() * examples.length)]}`;
