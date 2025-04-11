@@ -70,13 +70,6 @@
       "mode": "view"
     }
   ],
-  "tools": [
-    {
-      "name": "search-transactions",
-      "title": "Search Transactions",
-      "description": "Search Transactions"
-    }
-  ],
   "preferences": [
     {
       "name": "liveSecretKey",
