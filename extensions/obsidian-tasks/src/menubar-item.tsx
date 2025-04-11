@@ -5,6 +5,7 @@ import {
   getPreferenceValues,
   launchCommand,
   LaunchType,
+  openExtensionPreferences,
 } from "@raycast/api";
 import { getFormattedDescription } from "./utils";
 import { Preferences, PRIORITY_VALUES, Task } from "./types";
@@ -78,6 +79,12 @@ const Command = () => {
         title="Open Tasks File in Obsidian"
         icon={Icon.Link}
         onAction={handleOpenInObsidian}
+      />
+      <MenuBarExtra.Item
+        title="Open Extension Preferences"
+        icon={Icon.Gear}
+        onAction={openExtensionPreferences}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
       />
     </>
   );
