@@ -13,3 +13,4 @@ compiled_raycast_swift
 .DS_Store
 pnpm-lock.yaml
 # package-lock.json
+DOCS/screen_recording_no_audio.mov

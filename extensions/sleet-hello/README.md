@@ -29,10 +29,11 @@ check mark for if they are implemented!
 hello.sleet
 - [x] get the greeting from hello.sleet.near/.testnet on mainnet and testnet
 - [X] update the greeting
+- [x] discover near dapps and open in the browser
 - [ ] create new near account, a *.user.raycast.near account
 - [ ] my own meme token launchpad, maybe a separte extention
 - [ ] interact with near contracts, some samples and options for devlopmental
-- [x] discover near dapps and open in the browser
+- [ ] check near balance and protfolio
 
 web4, awesomeweb4
 - [x] discover and open web4 sites in browser
