@@ -1,0 +1,32 @@
+{
+  "branches": [
+    "main"
+  ],
+  "debug": true,
+  "plugins": [
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        "preset": "angular",
+        "releaseRules": [
+          { "type": "refactor", "release": "patch" },
+          { "type": "build", "release": "patch" }
+        ]
+      }
+    ],
+    "@semantic-release/release-notes-generator",
+    ["@semantic-release/changelog", {
+
+    }],
+    [
+      "@semantic-release/git",
+      {
+        "assets": [
+          "package.json",
+          "CHANGELOG.md"
+        ],
+        "message": "chore(release): ${nextRelease.version}"
+      }
+    ]
+  ]
+}
