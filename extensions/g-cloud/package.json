@@ -32,6 +32,41 @@
           "title": "Resource Management"
         }
       ]
+    },
+    {
+      "name": "storage",
+      "title": "Cloud Storage",
+      "subtitle": "Google Cloud CLI",
+      "description": "Manage Google Cloud Storage buckets",
+      "mode": "view"
+    },
+    {
+      "name": "compute",
+      "title": "Compute Engine",
+      "subtitle": "Google Cloud CLI",
+      "description": "Manage Google Cloud Compute instances",
+      "mode": "view"
+    },
+    {
+      "name": "iam",
+      "title": "IAM & Admin",
+      "subtitle": "Google Cloud CLI",
+      "description": "Manage Google Cloud IAM permissions",
+      "mode": "view"
+    },
+    {
+      "name": "network",
+      "title": "VPC Network",
+      "subtitle": "Google Cloud CLI",
+      "description": "Manage Google Cloud VPC networks",
+      "mode": "view"
+    },
+    {
+      "name": "services",
+      "title": "Service Management",
+      "subtitle": "Google Cloud CLI",
+      "description": "Manage Google Cloud services and APIs",
+      "mode": "view"
     }
   ],
   "preferences": [
