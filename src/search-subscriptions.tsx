@@ -1,85 +1,58 @@
 import { ActionPanel, List, Action, Icon, Toast, showToast } from '@raycast/api'
 import { paystackDashboardUrl } from './utils/urls'
-import { useEffect, useState } from 'react'
+import { useState, useMemo } from 'react'
 import { usePaystack } from './hooks/paystack'
 import { useDate } from './hooks/date'
 import { useCurrencyFormatter } from './hooks/currency'
 import { PaystackResponse, Subscription } from './utils/types'
+import { useCachedPromise } from '@raycast/utils'
 
 export default function Command() {
   const { parseDate } = useDate()
   const formatCurrency = useCurrencyFormatter()
-  const { get, isLoading } = usePaystack()
-  const [subscriptions, setSubscriptions] = useState<Array<Subscription>>([])
-  const [filteredSubscriptions, setFilteredSubscriptions] = useState<
-    Array<Subscription>
-  >([])
+  const { get } = usePaystack()
   const [searchText, setSearchText] = useState<string>('')
   const [currentStatus, setCurrentStatus] = useState<string>('all')
 
-  useEffect(() => {
-    async function getSubscriptions() {
-      try {
-        const subscriptions = (await get('/subscription')) as PaystackResponse<
-          Subscription[]
-        >
-        if (subscriptions.status) {
-          showToast({
-            style: Toast.Style.Success,
-            title: 'Subscriptions fetched successfully!',
-          })
-        }
-        setSubscriptions(subscriptions.data)
-        setFilteredSubscriptions(subscriptions.data)
-      } catch (error) {
-        console.error('Error fetching subscriptions:', error)
-        showToast({
-          style: Toast.Style.Failure,
-          title: 'Error fetching subscriptions',
-          message: (error as Error).message,
-        })
-        setSubscriptions([])
-        setFilteredSubscriptions([])
-      }
+  const { data: subscriptions, isLoading } = useCachedPromise(async () => {
+    const response = (await get('/subscription')) as PaystackResponse<
+      Subscription[]
+    >
+    if (response.status) {
+      showToast({
+        style: Toast.Style.Success,
+        title: 'Subscriptions fetched successfully!',
+      })
     }
-    getSubscriptions()
-  }, [])
+    return response.data
+  })
 
-  const filterSubscriptions = (text: string, status: string) => {
-    const searchLower = text.toLowerCase()
+  const filteredSubscriptions = useMemo(() => {
+    if (!subscriptions) return []
+    const searchLower = searchText.toLowerCase()
     return subscriptions.filter((subscription) => {
       const matchesSearch =
         subscription.customer.email.toLowerCase().includes(searchLower) ||
         subscription.subscription_code.toLowerCase().includes(searchLower) ||
         subscription.plan.name.toLowerCase().includes(searchLower)
 
-      const matchesStatus = status === 'all' || subscription.status === status
+      const matchesStatus =
+        currentStatus === 'all' || subscription.status === currentStatus
 
       return matchesSearch && matchesStatus
     })
-  }
-
-  useEffect(() => {
-    setFilteredSubscriptions(filterSubscriptions(searchText, currentStatus))
   }, [searchText, currentStatus, subscriptions])
 
   function onStatusChange(status: string) {
     setCurrentStatus(status)
   }
-  useEffect(() => {
-    if (isLoading) {
-      showToast({
-        style: Toast.Style.Animated,
-        title: 'Loading subscriptions...',
-      })
-    }
-  }, [isLoading])
 
   return (
     <List
       searchBarPlaceholder="Search subscriptions by email, code or plan name"
       onSearchTextChange={setSearchText}
       searchBarAccessory={StatusDropdown(onStatusChange)}
+      isLoading={isLoading}
     >
       {filteredSubscriptions.map((subscription) => (
         <List.Item
