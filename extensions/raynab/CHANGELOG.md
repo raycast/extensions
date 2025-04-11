@@ -1,5 +1,28 @@
 # Raynab Changelog
 
+## [Improvements & AI Integration] - {PR_MERGE_DATE}
+
+### ✨ New Features
+- Added error UX for budget selection with clear error messages
+- Added support for AI Extensions with transaction management tools
+
+### 💎 Improvements
+- Removed hidden categories in transaction forms
+- Improved error handling and user feedback for API calls
+- Enhanced transaction form validation and error messages
+
+### 🐞 Bug Fixes
+- Fixed relative time of locally created transactions being set at midnight
+- Fixed error messages of certain API calls being swallowed without proper error toast
+- Fixed transaction form validation issues
+- Resolved issues with transaction form state management
+
+### 🔧 Technical Updates
+- Updated dependencies to latest versions
+- Added AI tools configuration with TypeScript types
+- Implemented error handling for AI tool operations
+- Added comprehensive evals for AI tool testing
+
 ## [Improvements & Bug fixes] - 2025-02-14
 
 - Add a dropdown to choose the transaction's payee. Optionally allow manual input

@@ -22,9 +22,7 @@
       "name": "get-transactions",
       "title": "Get Transactions",
       "description": "Get YNAB transactions using AI",
-      "input": {
-        "filter": "string"
-      },
+      "input": {},
       "output": {
         "transactions": "array"
       }
@@ -82,7 +80,6 @@
             "payee_name": "Amazon",
             "amount": -99.99,
             "account_name": "Credit Card",
-            "memo": "Office supplies",
             "category_name": "Office Supplies",
             "cleared": true
           },
@@ -92,7 +89,6 @@
             "payee_name": "Whole Foods",
             "amount": -75.25,
             "account_name": "Checking",
-            "memo": "Groceries",
             "category_name": "Groceries",
             "cleared": true
           }
@@ -102,9 +98,7 @@
         {
           "callsTool": {
             "name": "get-transactions",
-            "arguments": {
-              "filter": "recent"
-            }
+            "arguments": {}
           }
         }
       ],
@@ -120,7 +114,6 @@
             "payee_name": "Amazon",
             "amount": -99.99,
             "account_name": "Credit Card",
-            "memo": "Office supplies",
             "category_name": "Office Supplies",
             "cleared": true
           },
@@ -130,7 +123,6 @@
             "payee_name": "Amazon",
             "amount": -75.25,
             "account_name": "Credit Card",
-            "memo": "Books",
             "category_name": "Entertainment",
             "cleared": true
           }
@@ -141,7 +133,6 @@
           "callsTool": {
             "name": "get-transactions",
             "arguments": {
-              "filter": "recent",
               "payee": "Amazon",
               "query": "last year"
             }
@@ -155,13 +146,10 @@
       "mocks": {
         "get-transactions": [
           {
-            "id": "125",
             "date": "2024-03-10",
             "payee_name": "Target",
             "amount": -150.00,
             "account_name": "Credit Card",
-            "memo": "Household items",
-            "category_name": "Household",
             "cleared": true
           }
         ]
@@ -171,7 +159,6 @@
           "callsTool": {
             "name": "get-transactions",
             "arguments": {
-              "filter": "recent",
               "payee": "Target",
               "query": "past month"
             }
@@ -189,8 +176,6 @@
           "payee_name": "Amazon",
           "amount": -99.99,
           "account_name": "Credit Card",
-          "memo": "Office supplies",
-          "category_name": "Office Supplies",
           "cleared": true
         }
       },
