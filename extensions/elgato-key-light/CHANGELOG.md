@@ -22,7 +22,7 @@
 - Add comprehensive error messages for connection issues
 - Add development mode logging for better debugging
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2025-04-11
 
 - Added support for creating and saving custom presets
   - Quick access to default presets (Default, Night, Day, Warm, Cold)
