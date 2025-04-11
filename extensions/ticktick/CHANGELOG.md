@@ -1,5 +1,9 @@
 # TickTick Changelog
 
+## [Improve] - {PR_MERGE_DATE}
+
+- support AI Extension
+
 ## [Improve] - 2024-11-21
 
 - `Add Task` command support selecting task priority.
