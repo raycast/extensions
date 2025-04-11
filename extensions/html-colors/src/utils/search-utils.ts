@@ -23,9 +23,12 @@ export function getMatchScore(text: string, searchTerm: string): number {
   if (normalizedText === normalizedSearch) return 0;
 
   // Match at word boundary
-  if (normalizedText.startsWith(normalizedSearch + " ") || 
-      normalizedText.includes(" " + normalizedSearch) || 
-      normalizedText.endsWith(" " + normalizedSearch)) return 0.2;
+  if (
+    normalizedText.startsWith(normalizedSearch + " ") ||
+    normalizedText.includes(" " + normalizedSearch) ||
+    normalizedText.endsWith(" " + normalizedSearch)
+  )
+    return 0.2;
 
   // Match at start
   if (normalizedText.startsWith(normalizedSearch)) return 0.4;
@@ -34,7 +37,7 @@ export function getMatchScore(text: string, searchTerm: string): number {
   if (normalizedText.includes(normalizedSearch)) {
     // Score based on position (earlier is better)
     const position = normalizedText.indexOf(normalizedSearch);
-    return 0.6 + (position / normalizedText.length * 0.2);
+    return 0.6 + (position / normalizedText.length) * 0.2;
   }
 
   return 1;

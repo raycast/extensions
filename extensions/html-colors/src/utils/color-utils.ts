@@ -16,12 +16,12 @@ const EMPTY_GROUPS: Record<ShadeCategory, ColorResult[]> = Object.freeze({
   orange: [],
   yellow: [],
   brown: [],
-  'purple, violet and magenta': [],
+  "purple, violet and magenta": [],
   blue: [],
   cyan: [],
   green: [],
   white: [],
-  'black and gray': [],
+  "black and gray": [],
 });
 
 /**
@@ -56,8 +56,11 @@ export function getCategoryIcons(categories: ColorWithCategories["categories"]) 
  * Group colors by their shade categories
  */
 export function groupColorsByShade(colors: ColorResult[]): Record<ShadeCategory, ColorResult[]> {
-  return colors.reduce((groups, color) => ({
-    ...groups,
-    [color.shade]: [...groups[color.shade], color]
-  }), { ...EMPTY_GROUPS });
+  return colors.reduce(
+    (groups, color) => ({
+      ...groups,
+      [color.shade]: [...groups[color.shade], color],
+    }),
+    { ...EMPTY_GROUPS },
+  );
 }

@@ -38,4 +38,4 @@ export function ColorSection({
       ))}
     </List.Section>
   );
-} 
+}

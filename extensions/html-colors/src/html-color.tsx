@@ -95,32 +95,30 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {viewOption === "grouped" && groupedColors ? (
-        sortedSections.map(([shade, colors]) => (
-          <ColorSection
-            key={shade}
-            shade={shade}
-            colors={colors}
-            showHex={showHex}
-            isDetailVisible={isDetailVisible}
-            onColorSelect={handleColorSelect}
-            onToggleFormat={handleToggleFormat}
-            onToggleDetail={handleToggleDetail}
-          />
-        ))
-      ) : (
-        filteredColors.map((color) => (
-          <ColorListItem
-            key={`${color.categories[0]}-${color.name}-${color.hex}-${color.rgb}-${color.format}`}
-            color={color}
-            onSelect={handleColorSelect}
-            showHex={showHex}
-            onToggleFormat={handleToggleFormat}
-            isDetailVisible={isDetailVisible}
-            onToggleDetail={handleToggleDetail}
-          />
-        ))
-      )}
+      {viewOption === "grouped" && groupedColors
+        ? sortedSections.map(([shade, colors]) => (
+            <ColorSection
+              key={shade}
+              shade={shade}
+              colors={colors}
+              showHex={showHex}
+              isDetailVisible={isDetailVisible}
+              onColorSelect={handleColorSelect}
+              onToggleFormat={handleToggleFormat}
+              onToggleDetail={handleToggleDetail}
+            />
+          ))
+        : filteredColors.map((color) => (
+            <ColorListItem
+              key={`${color.categories[0]}-${color.name}-${color.hex}-${color.rgb}-${color.format}`}
+              color={color}
+              onSelect={handleColorSelect}
+              showHex={showHex}
+              onToggleFormat={handleToggleFormat}
+              isDetailVisible={isDetailVisible}
+              onToggleDetail={handleToggleDetail}
+            />
+          ))}
     </List>
   );
 }
