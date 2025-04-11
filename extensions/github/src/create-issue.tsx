@@ -8,6 +8,7 @@ import { getErrorMessage } from "./helpers/errors";
 import { getGitHubUser } from "./helpers/users";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyRepositories } from "./hooks/useRepositories";
+import { useSharedSelections } from "./hooks/useSharedSelections";
 
 type IssueFormValues = {
   repository: string;
@@ -115,13 +116,14 @@ export function IssueForm({ draftValues }: IssueFormProps) {
   );
 
   const collaborators = data?.repository?.collaborators?.nodes;
-
   const labels = data?.repository?.labels?.nodes;
-
   const projects = data?.repository?.projectsV2?.nodes;
-
   const milestones = data?.repository?.milestones?.nodes;
 
+  // Use the custom hook to share selections across commands
+  useSharedSelections(values, setValue, { collaborators, projects });
+
+  // Reset fields when repository changes
   useEffect(() => {
     setValue("description", "");
     setValue("assignees", []);
@@ -199,7 +201,6 @@ export function IssueForm({ draftValues }: IssueFormProps) {
           if (!project) {
             return null;
           }
-
           return <Form.TagPicker.Item key={project.id} title={project.title} value={project.id} />;
         })}
       </Form.TagPicker>
