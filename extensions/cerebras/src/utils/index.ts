@@ -50,12 +50,6 @@ export function chatTransformer(chat: Chat[], prompt: string): Message[] {
   return messages;
 }
 
-export const getConfigUrl = (params: Preferences) => {
-  if (params.useAzure) return params.azureEndpoint + "/openai/deployments/" + params.azureDeployment;
-  if (params.useApiEndpoint) return params.apiEndpoint;
-  return "https://api.openai.com/v1";
-};
-
 export const checkFileValidity = (file: string): boolean => {
   const fileExtension = path.extname(file);
   const acceptedFileExtensions = Object.keys(formats);
