@@ -7,7 +7,8 @@
 - Filter links on subtitles as well.
 - Use `tldts` to get the domain of a link.
 - Use the top-level domain instead of the full domain to retrieve favicons.
-- Bento-profile url in the `Search Links` command.
+- Bento-profile url in the available links.
+- Display the top-level domain as title and the full link as subtitle.
 
 ### Fixed
 
