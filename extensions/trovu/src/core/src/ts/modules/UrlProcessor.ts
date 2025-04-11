@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+
 /** @module UrlProcessor */
-import CityType from "./type/city.js";
-import DateType from "./type/date.js";
-import TimeType from "./type/time.js";
+import CityType from "./type/city";
+import DateType from "./type/date";
+import TimeType from "./type/time";
 import dayjs from "dayjs";
 import escapeStringRegexp from "escape-string-regexp";
 import jsyaml from "js-yaml";

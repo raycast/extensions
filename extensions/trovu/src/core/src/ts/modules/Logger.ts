@@ -1,15 +1,19 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 /** @module Logger */
 
 /** Logs errors and warnings. */
 
 export default class Logger {
+  logs: Array<{ level: string; message: string }>;
+  logElement: HTMLElement | null;
+
   /**
    * Set helper variables.
    */
-  constructor(logElementSelector) {
+  constructor(logElementSelector: string) {
     this.logs = [];
     if (!(typeof document === "undefined")) {
-      // eslint-disable-next-line no-undef
       this.logElement = document.querySelector(logElementSelector);
     }
   }

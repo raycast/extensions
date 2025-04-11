@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+
 /** @module Env */
-import Helper from "./Helper.js";
-import Logger from "./Logger.js";
-import NamespaceFetcher from "./NamespaceFetcher.js";
-import QueryParser from "./QueryParser.js";
-import UrlProcessor from "./UrlProcessor.js";
+import Helper from "./Helper";
+import Logger from "./Logger";
+import NamespaceFetcher from "./NamespaceFetcher";
+import QueryParser from "./QueryParser";
+import UrlProcessor from "./UrlProcessor";
 import countriesList from "countries-list";
 import jsyaml from "js-yaml";
 
@@ -24,7 +27,6 @@ export default class Env {
 
   setGit() {
     if (typeof GIT_INFO === "object") {
-      // eslint-disable-next-line no-undef
       this.gitInfo = GIT_INFO;
     } else {
       this.gitInfo = {
@@ -73,10 +75,10 @@ export default class Env {
     if (this.debug) {
       params.debug = 1;
     }
-    for (const property of ["alternative", "key", "namespace", "status", "query"]) {
-      if (this[property]) {
-        params[property] = this[property];
-      }
+    for (const property of ["alternative", "context", "key", "namespace", "status", "query"]) {
+      if (!this[property]) continue;
+      if (property === "context" && this[property] === "index") continue;
+      params[property] = this[property];
     }
     Object.assign(params, moreParams);
     return params;
@@ -89,7 +91,9 @@ export default class Env {
     const originalParams = Env.getParamsFromUrl();
     const params = this.buildUrlParams(originalParams, moreParams);
     const urlSearchParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => urlSearchParams.set(key, value));
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined) urlSearchParams.set(key, value);
+    });
     urlSearchParams.sort();
     const paramStr = urlSearchParams.toString();
     return paramStr;
@@ -101,21 +105,38 @@ export default class Env {
     return processUrl;
   }
 
+  async setContext() {
+    const params = Env.getParamsFromUrl();
+    if (params.context) {
+      this.context = params.context;
+    }
+  }
+
   /**
    * Set the initial class environment vars either from params or from GET hash string.
    *
    * @param {array} params - List of parameters to be used in environment.
    */
-  async populate(params) {
-    this.fetch = await this.getFetch();
+  async populate(params, options = {}) {
+    this.namespaces = undefined;
+    this.github = undefined;
+    this.configUrl = undefined;
+    this.language = undefined;
+    this.country = undefined;
+
     this.data = this.data || (await this.getData());
+
+    // Raycast cannot handle too much data.
+    if (options && options.removeNamespaces) {
+      for (const namespace of options.removeNamespaces) {
+        if (namespace in this.data.shortcuts) {
+          delete this.data.shortcuts[namespace];
+        }
+      }
+    }
 
     if (this.data.config.defaultKeyword) {
       this.defaultKeyword = this.data.config.defaultKeyword;
-    }
-
-    if (!params) {
-      params = Env.getParamsFromUrl();
     }
 
     const boolParams = Env.getBoolParams(params);
@@ -123,6 +144,7 @@ export default class Env {
 
     // Assign before, to also catch "debug" and "reload" in params and query.
     Object.assign(this, params);
+
     const params_from_query = QueryParser.parse(this.query);
     Object.assign(this, params_from_query);
 
@@ -164,7 +186,6 @@ export default class Env {
   }
 
   setToLocalStorage() {
-    /* eslint-disable no-undef */
     if (typeof localStorage === "undefined") {
       return;
     }
@@ -177,18 +198,15 @@ export default class Env {
       localStorage.setItem("country", this.country);
       localStorage.removeItem("github");
     }
-    /* eslint-enable no-undef */
   }
 
   getFromLocalStorage() {
-    /* eslint-disable no-undef */
     if (typeof localStorage === "undefined") {
       return;
     }
     this.language ||= localStorage.getItem("language");
     this.country ||= localStorage.getItem("country");
     this.github ||= localStorage.getItem("github");
-    /* eslint-enable no-undef */
   }
 
   static getBoolParams(params) {
@@ -332,7 +350,6 @@ export default class Env {
     if (typeof navigator === "undefined") {
       return "";
     }
-    // eslint-disable-next-line no-undef
     const languageStr = navigator.language;
     return languageStr;
   }
@@ -361,17 +378,24 @@ export default class Env {
   async getData() {
     let text;
     let url;
+    let prefix;
     switch (this.context) {
-      case "browser":
-        url = `/data.json?${this.gitInfo.commit.hash}`;
+      case "index":
+      case "process":
+      case "web-ext":
+        prefix = "/";
+        url = `${prefix}data.json?version=${this.gitInfo.commit.hash}`;
+        Env.fetchLog(this.context, prefix);
         text = await Helper.fetchAsync(url, this);
         break;
       case "raycast":
-        url = "https://trovu.net/data.json";
+        prefix = "https://trovu.net/";
+        url = `${prefix}data.json`;
+        Env.fetchLog(this.context, prefix);
         text = await Helper.fetchAsync(url, this);
         break;
       case "node": {
-        // eslint-disable-next-line no-undef, @typescript-eslint/no-var-requires
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const fs = require("fs");
         url = "./dist/public/data.json";
         text = fs.readFileSync(url, "utf8");
@@ -391,6 +415,16 @@ export default class Env {
   }
 
   /**
+   * Fetches log.json with context.
+   *
+   * @param context
+   */
+  static fetchLog(context, prefix) {
+    const url = `${prefix}log.json?context=${context}`;
+    fetch(url);
+  }
+
+  /**
    * From 'http://example.com/foo#bar=baz' get 'bar=baz'.
    *
    * @return {string} hash - The hash string.
@@ -399,7 +433,6 @@ export default class Env {
     if (typeof window === "undefined") {
       return "";
     }
-    // eslint-disable-next-line no-undef
     const hash = window.location.hash.substr(1);
     return hash;
   }
@@ -420,21 +453,6 @@ export default class Env {
   }
 
   isRunningStandalone() {
-    /* eslint-disable no-undef */
     return window.navigator.standalone || window.matchMedia("(display-mode: standalone)").matches;
-    /* eslint-enable no-undef */
-  }
-  async getFetch() {
-    // Can't work with this.context here
-    // as rollup seems not able to handle it.
-    if (typeof fetch !== "undefined") {
-      // Browser and Node
-      // eslint-disable-next-line no-undef
-      return fetch.bind(window);
-    } else {
-      // Raycast
-      const { default: nodeFetch } = await import("node-fetch");
-      return nodeFetch;
-    }
   }
 }
