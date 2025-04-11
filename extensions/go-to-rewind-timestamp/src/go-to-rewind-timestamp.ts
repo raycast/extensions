@@ -28,7 +28,6 @@ export default async function Command(props: { arguments: { time: string } }) {
     // Open the deeplink
     await open(deeplink);
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    await showToast(ToastStyle.Failure, "Error processing time input", errorMessage);
+    await showFailureToast(error, { title: "Error processing time input" });
   }
 }
