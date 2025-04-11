@@ -1,56 +1,32 @@
 import { ActionPanel, List, Action, Icon, Toast, showToast } from '@raycast/api'
 import { paystackDashboardUrl } from './utils/urls'
-import { useEffect, useState } from 'react'
+import { useState, useMemo } from 'react'
 import { usePaystack } from './hooks/paystack'
 import { useDate } from './hooks/date'
 import { useCurrencyFormatter } from './hooks/currency'
 import { PaystackResponse, Plan } from './utils/types'
+import { useCachedPromise } from '@raycast/utils'
 
 export default function Command() {
   const { parseDate } = useDate()
   const formatCurrency = useCurrencyFormatter()
-  const { get, isLoading } = usePaystack()
-  const [plans, setPlans] = useState<Array<Plan>>([])
-  const [filteredPlans, setFilteredPlans] = useState<Array<Plan>>([])
+  const { get } = usePaystack()
   const [searchText, setSearchText] = useState<string>('')
 
-  useEffect(() => {
-    async function getPlans() {
-      try {
-        const plans = (await get('/plan')) as PaystackResponse<Plan[]>
-        if (plans.status) {
-          showToast({
-            style: Toast.Style.Success,
-            title: 'Plans fetched successfully!',
-          })
-        }
-        setPlans(plans.data)
-        setFilteredPlans(plans.data)
-      } catch (error) {
-        console.error('Error fetching plans:', error)
-        showToast({
-          style: Toast.Style.Failure,
-          title: 'Error fetching plans',
-          message: (error as Error).message,
-        })
-        setPlans([])
-        setFilteredPlans([])
-      }
-    }
-    getPlans()
-  }, [])
-
-  useEffect(() => {
-    if (isLoading) {
+  const { data: plans, isLoading } = useCachedPromise(async () => {
+    const response = (await get('/plan')) as PaystackResponse<Plan[]>
+    if (response.status) {
       showToast({
-        style: Toast.Style.Animated,
-        title: 'Loading plans...',
+        style: Toast.Style.Success,
+        title: 'Plans fetched successfully!',
       })
     }
-  }, [isLoading])
+    return response.data
+  })
 
-  function filterPlans(text: string) {
-    const searchLower = text.toLowerCase()
+  const filteredPlans = useMemo(() => {
+    if (!plans) return []
+    const searchLower = searchText.toLowerCase()
     return plans.filter((plan) => {
       return (
         plan.name.toLowerCase().includes(searchLower) ||
@@ -58,16 +34,13 @@ export default function Command() {
         plan.description?.toLowerCase().includes(searchLower)
       )
     })
-  }
-
-  useEffect(() => {
-    setFilteredPlans(filterPlans(searchText))
   }, [searchText, plans])
 
   return (
     <List
       searchBarPlaceholder="Search plans by name or plan code"
       onSearchTextChange={setSearchText}
+      isLoading={isLoading}
     >
       {filteredPlans.map((plan) => (
         <List.Item
