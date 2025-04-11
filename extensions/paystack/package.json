@@ -16,65 +16,58 @@
     {
       "name": "check-balance",
       "title": "Check Balance",
-      "subtitle": "View your current Paystack account balance instantly.",
+      "subtitle": "Paystack",
       "description": "Fetch your latest account balance in NGN or other currencies. Quickly copy the balance for sharing or record-keeping.",
       "mode": "view"
     },
     {
       "name": "search-transactions",
       "title": "Search Transactions",
-      "subtitle": "Look up transactions by email, reference, or date.",
+      "subtitle": "Paystack",
       "description": "Easily search your Paystack transaction history using an email, transaction reference, or status filter. Open details in the Paystack dashboard if needed.",
       "mode": "view"
     },
     {
       "name": "generate-payment-link",
       "title": "Generate Payment Link",
-      "subtitle": "Create and copy Paystack payment link in seconds.",
+      "subtitle": "Paystack",
       "description": "Generate a new Paystack payment link instantly, copy it to your clipboard, and share it with customers—all from Raycast.",
       "mode": "view"
     },
     {
       "name": "issue-refund",
       "title": "Issue Refund",
-      "subtitle": "Process refunds quickly with a single command.",
+      "subtitle": "Paystack",
       "description": "Find a transaction and refund it directly through Raycast. A confirmation step ensures you don’t issue refunds by mistake.",
       "mode": "view"
     },
     {
       "name": "search-payouts",
       "title": "Search Payouts",
-      "subtitle": "Find payouts by ID, currency, or status.",
+      "subtitle": "Paystack",
       "description": "Search for payouts in your Paystack account by date or status. View details directly from Raycast.",
       "mode": "view"
     },
     {
       "name": "search-customers",
       "title": "Search Customers",
-      "subtitle": "Find customers by email or ID.",
+      "subtitle": "Paystack",
       "description": "Quickly search for customers in your Paystack account using their email or ID. View customer details and transaction history.",
       "mode": "view"
     },
     {
       "name": "search-plans",
       "title": "Search Plans",
-      "subtitle": "Find subscription plans by name or ID.",
+      "subtitle": "Paystack",
       "description": "Quickly search for subscription plans in your Paystack account using their name or ID. View plan details and pricing information.",
       "mode": "view"
     },
     {
       "name": "search-subscriptions",
       "title": "Search Subscriptions",
-      "subtitle": "Find subscriptions by customer or plan ID.",
+      "subtitle": "Paystack",
       "description": "Quickly search for active or inactive subscriptions in your Paystack account using customer or plan ID. View subscription details and status.",
       "mode": "view"
-    }
-  ],
-  "tools": [
-    {
-      "name": "search-transactions",
-      "title": "Search Transactions",
-      "description": "Search Transactions"
     }
   ],
   "preferences": [

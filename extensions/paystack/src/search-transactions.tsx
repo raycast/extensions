@@ -8,78 +8,50 @@ import {
   openExtensionPreferences,
 } from '@raycast/api'
 
-import { useEffect, useState } from 'react'
+import { useState, useMemo } from 'react'
 import { usePaystack } from './hooks/paystack'
 import { useCurrencyFormatter } from './hooks/currency'
 import { useDate } from './hooks/date'
 import { Currency, PaystackResponse, Transaction } from './utils/types'
 import { paystackDashboardUrl } from './utils/urls'
+import { useCachedPromise } from '@raycast/utils'
 
 import IssueRefund from './issue-refund'
+
 export default function Command() {
   const formatCurrency = useCurrencyFormatter()
   const { parseDate } = useDate()
-  const { get, isLoading } = usePaystack()
-  const [transactions, setTransactions] = useState<Array<Transaction>>([])
-  const [filteredTransactions, setFilteredTransactions] = useState<
-    Array<Transaction>
-  >([])
+  const { get } = usePaystack()
   const [searchText, setSearchText] = useState<string>('')
   const [currentStatus, setCurrentStatus] = useState<string>('all')
 
-  useEffect(() => {
-    async function getTransactions() {
-      try {
-        const transactions = (await get('/transaction')) as PaystackResponse<
-          Transaction[]
-        >
-        if (transactions.status) {
-          showToast({
-            style: Toast.Style.Success,
-            title: 'Transactions fetched successfully!',
-          })
-        }
-        setTransactions(transactions.data)
-        setFilteredTransactions(transactions.data)
-      } catch (error) {
-        console.error('Error fetching transactions:', error)
-        showToast({
-          style: Toast.Style.Failure,
-          title: 'Error fetching transactions',
-          message: (error as Error).message,
-        })
-        setTransactions([])
-        setFilteredTransactions([])
-      }
-    }
-    getTransactions()
-  }, [])
-
-  useEffect(() => {
-    if (isLoading) {
+  const { data: transactions, isLoading } = useCachedPromise(async () => {
+    const response = (await get('/transaction')) as PaystackResponse<
+      Transaction[]
+    >
+    if (response.status) {
       showToast({
-        style: Toast.Style.Animated,
-        title: 'Loading transactions...',
+        style: Toast.Style.Success,
+        title: 'Transactions fetched successfully!',
       })
     }
-  }, [isLoading])
+    return response.data
+  })
 
-  const filterTransactions = (text: string, status: string) => {
-    const searchLower = text.toLowerCase()
+  const filteredTransactions = useMemo(() => {
+    if (!transactions) return []
+    const searchLower = searchText.toLowerCase()
     return transactions.filter((transaction) => {
       const matchesSearch =
         transaction.id.toString().includes(searchLower) ||
         transaction.reference.includes(searchLower) ||
         transaction.customer?.email?.includes(searchLower)
 
-      const matchesStatus = status === 'all' || transaction.status === status
+      const matchesStatus =
+        currentStatus === 'all' || transaction.status === currentStatus
 
       return matchesSearch && matchesStatus
     })
-  }
-
-  useEffect(() => {
-    setFilteredTransactions(filterTransactions(searchText, currentStatus))
   }, [searchText, currentStatus, transactions])
 
   function onStatusChange(status: string) {
@@ -91,6 +63,7 @@ export default function Command() {
       searchBarPlaceholder="Search transactions by ID, reference, or email"
       onSearchTextChange={setSearchText}
       searchBarAccessory={StatusDropdown(onStatusChange)}
+      isLoading={isLoading}
     >
       {filteredTransactions.map((transaction) => (
         <List.Item

@@ -7,69 +7,38 @@ import {
   openExtensionPreferences,
   Icon,
 } from '@raycast/api'
-import { useEffect, useState } from 'react'
+import { useCachedPromise } from '@raycast/utils'
 import { usePaystack } from './hooks/paystack'
 import { useCurrencyFormatter } from './hooks/currency'
 
 export default function Command() {
   const formatCurrency = useCurrencyFormatter()
-  const { get, isLoading } = usePaystack()
-  interface Balance {
-    currency: string
-    balance: number
-  }
+  const { get } = usePaystack()
 
-  const [balances, setBalance] = useState<Array<Balance>>([])
-
-  useEffect(() => {
-    async function getBalance() {
-      try {
-        const balance = (await get('/balance')) as {
-          status: boolean
-          message: string
-          data: { currency: string; balance: number }[]
-        }
-        if (balance.status) {
-          showToast({
-            style: Toast.Style.Success,
-            title: 'Balances fetched successfully!',
-          })
-        }
-        if (balance.status) {
-          showToast({
-            style: Toast.Style.Success,
-            title: 'Balances fetched successfully!',
-          })
-          setBalance(balance.data)
-        } else {
-          showToast({
-            style: Toast.Style.Failure,
-            title: 'Failed to fetch balances',
-            message: balance.message,
-          })
-        }
-      } catch (error) {
-        console.error('Error fetching balance:', error)
-        showToast({
-          style: Toast.Style.Failure,
-          title: 'Error fetching balance',
-          message: (error as Error).message,
-        })
-        setBalance([])
-      }
+  const { data: balances, isLoading } = useCachedPromise(async () => {
+    const response = (await get('/balance')) as {
+      status: boolean
+      message: string
+      data: { currency: string; balance: number }[]
     }
-    getBalance()
-  }, [])
-
-  useEffect(() => {
-    if (isLoading) {
-      showToast({ style: Toast.Style.Animated, title: 'Loading balances...' })
+    if (response.status) {
+      showToast({
+        style: Toast.Style.Success,
+        title: 'Balances fetched successfully!',
+      })
+    } else {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Failed to fetch balances',
+        message: response.message,
+      })
     }
-  }, [isLoading])
+    return response.data
+  })
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search balances...">
-      {balances.map((balance, index) => (
+      {(balances || []).map((balance, index) => (
         <List.Item
           key={index}
           title={formatCurrency(balance.balance, balance.currency)}
