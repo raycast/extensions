@@ -33,7 +33,7 @@ export function getMatchScore(text: string, searchTerm: string): number {
   // Match at start
   if (normalizedText.startsWith(normalizedSearch)) return 0.4;
 
-  // Contains as a whole word
+  // Contains a subset of the search term
   if (normalizedText.includes(normalizedSearch)) {
     // Score based on position (earlier is better)
     const position = normalizedText.indexOf(normalizedSearch);
