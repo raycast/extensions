@@ -3,6 +3,7 @@
 ## [Improvement] - {PR_MERGE_DATE}
 
 - Improved title generation for bookmarks
+- Added support for drafts
 - Extracted service name and host URL into reusable constants
 - Added constants.ts file for global constants management
 - Refactored create-bookmark.tsx to use the new constants

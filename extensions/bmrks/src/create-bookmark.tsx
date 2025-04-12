@@ -161,15 +161,39 @@ function CreateBookmark({ user }: { user: User }) {
     }
   }, [activeTab]);
 
+  // Store the previous URL to detect changes
+  const previousUrlRef = React.useRef("");
+
   React.useEffect(() => {
     if (values.value === "") {
       setValue("title", undefined);
+      previousUrlRef.current = "";
       return;
+    }
+
+    // Check if the URL has changed significantly (different domain)
+    const urlChanged = () => {
+      if (!isUrlLike(values.value) || !isUrlLike(previousUrlRef.current)) {
+        return true; // Consider it changed if either isn't a URL
+      }
+
+      try {
+        const currentDomain = new URL(ensureValidUrl(values.value)).hostname;
+        const previousDomain = new URL(ensureValidUrl(previousUrlRef.current)).hostname;
+        return currentDomain !== previousDomain;
+      } catch {
+        return true; // If URL parsing fails, consider it changed
+      }
+    };
+
+    // Reset title if URL domain has changed
+    if (isUrlLike(values.value) && urlChanged()) {
+      setValue("title", undefined);
     }
 
     // Auto-fetch title and favicon when a URL is entered
     const fetchMetadataForUrl = async () => {
-      if (isUrlLike(values.value) && !values.title) {
+      if (isUrlLike(values.value) && (!values.title || urlChanged())) {
         try {
           const validUrl = ensureValidUrl(values.value);
           const response = await fetch(
@@ -187,6 +211,9 @@ function CreateBookmark({ user }: { user: User }) {
           // Silently fail - we don't want to interrupt the user experience
         }
       }
+
+      // Update the previous URL reference
+      previousUrlRef.current = values.value;
     };
 
     // Add a small delay to avoid excessive API calls while typing
