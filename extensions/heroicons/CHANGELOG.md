@@ -1,6 +1,6 @@
 # Heroicons Changelog
 
-## [v.1.2.3] - {PR_MERGE_DATE}
+## [v.1.2.3] - 2025-04-12
 
 - Fixed 404 error by replacing the repo where we get the name from
 
