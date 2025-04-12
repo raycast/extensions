@@ -60,7 +60,7 @@ export default function Command({ projectId }: { projectId?: string }) {
 
     return (
       <List isLoading={isLoadingProjects}>
-        <Worktree.List worktrees={project.worktrees} revalidateProjects={revalidateProjects} worktreeTitle="name" />
+        <Worktree.List project={project} worktrees={project.worktrees} revalidateProjects={revalidateProjects} />
       </List>
     );
   }

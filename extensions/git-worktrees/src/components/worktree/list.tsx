@@ -10,13 +10,11 @@ export const List = memo(
     worktrees: incomingWorktrees,
     rankBareRepository,
     revalidateProjects,
-    worktreeTitle = "path",
   }: {
     project?: BareRepository;
     worktrees: Worktree[];
     rankBareRepository?: (key: "increment" | "reset") => void;
     revalidateProjects: () => void;
-    worktreeTitle?: "name" | "path";
   }) => {
     const { enableWorktreesFrequencySorting } = getPreferences();
 
@@ -52,7 +50,6 @@ export const List = memo(
               : undefined
           }
           revalidateProjects={revalidateProjects}
-          worktreeTitle={worktreeTitle}
         />
       );
     });

@@ -22,14 +22,12 @@ export const Item = memo(
     rankBareRepository,
     rankWorktree,
     revalidateProjects,
-    worktreeTitle = "path",
   }: {
     project?: BareRepository;
     worktree: Worktree;
     rankBareRepository?: (key: "increment" | "reset") => void;
     rankWorktree?: (key: "increment" | "reset") => void;
     revalidateProjects: () => void;
-    worktreeTitle: "name" | "path";
   }) => {
     const selectedWorktree = useViewingWorktreesStore((state) => state.selectedWorktree);
 
@@ -53,9 +51,7 @@ export const Item = memo(
         id={worktree.id}
         key={worktree.branch}
         icon={Icon.Tree}
-        title={
-          worktreeTitle === "name" ? (project?.name ?? "") : relative(project?.fullPath ?? projectsPath, worktree.path)
-        }
+        title={relative(project?.fullPath ?? projectsPath, worktree.path)}
         subtitle={`${worktree.branch ?? "detached"} @ ${currentCommit?.slice(0, 7) ?? "none"}`}
         accessories={[
           ...(isDirty ? [{ text: { value: "U", color: Color.Yellow }, tooltip: "Unsaved Changes" }] : []),
