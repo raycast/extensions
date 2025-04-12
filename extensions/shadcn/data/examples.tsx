@@ -1878,7 +1878,7 @@ export function SelectDemo() {
 }
 `
 
-export const Seperator = () => `
+export const Separator = () => `
 import { Separator } from "@/components/ui/separator"
 
 export function SeparatorDemo() {

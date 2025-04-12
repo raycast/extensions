@@ -32,7 +32,7 @@ export const getBlocks = (): blockType[] => [
 		name: "Accordion",
 		description: "A vertically stacked set of interactive headings that each reveal a section of content.",
 		component: "accordion",
-		url: "https://ui.shadcn.com/docs/components/alert",
+		url: "https://ui.shadcn.com/docs/components/accordion",
 		docs: "https://www.radix-ui.com/docs/primitives/components/accordion",
 		api: "https://www.radix-ui.com/docs/primitives/components/accordion#api-reference",
 		example: example.Accordion()
@@ -41,7 +41,7 @@ export const getBlocks = (): blockType[] => [
 		name: "Alert",
 		description: "Displays a callout for user attention.",
 		component: "alert",
-		url: "https://ui.shadcn.com/docs/components/accordion",
+		url: "https://ui.shadcn.com/docs/components/alert",
 		example: example.Alert()
 	},
 	{
@@ -55,7 +55,7 @@ export const getBlocks = (): blockType[] => [
 	},
 	{
 		name: "Aspect Ratio",
-		description: "A modal dialog that interrupts the user with important content and expects a response.",
+		description: "Displays content within a desired ratio.",
 		component: "aspect-ratio",
 		url: "https://ui.shadcn.com/docs/components/aspect-ratio",
 		docs: "https://www.radix-ui.com/docs/primitives/components/aspect-ratio",
@@ -333,7 +333,7 @@ export const getBlocks = (): blockType[] => [
 		url: "https://ui.shadcn.com/docs/components/separator",
 		docs: "https://www.radix-ui.com/docs/primitives/components/separator",
 		api: "https://www.radix-ui.com/docs/primitives/components/separator#api-reference",
-		example: example.Seperator()
+		example: example.Separator()
 	},
 	{
 		name: "Sheet",

@@ -10,10 +10,10 @@ export default function Command() {
 
   useEffect(() => {
     setBlocks(getBlocks());
-  }, [activeManager, setBlocks]);
+  }, [activeManager]);
 
   return (
-    <List>
+    <List isLoading={false}>
       {blocks.map((item) => (
         <List.Item
           key={item.name}

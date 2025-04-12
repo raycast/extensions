@@ -16,7 +16,7 @@ export default function Command() {
           icon={activeManager === item ? Icon.CheckCircle : Icon.Circle}
           title={item}
           subtitle={`Set preferred package manager to ${item}`}
-          keywords={["nice"]}
+          keywords={["package", "manager", "npm", "yarn", "pnpm", "bun"]}
           actions={
             <ActionPanel>
               <Action.SubmitForm

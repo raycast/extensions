@@ -19,7 +19,7 @@
     {
       "name": "search-docs",
       "title": "Search Docs",
-      "description": "Search the Shadcn Documentaion",
+      "description": "Search the Shadcn Documentation",
       "mode": "view"
     }
   ],
