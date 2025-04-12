@@ -14,9 +14,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "Manage Google Cloud",
+      "title": "Manage Your Google Cloud",
       "subtitle": "Google Cloud CLI",
-      "description": "Manage your Google Cloud resources",
+      "description": "Manage Your Google Cloud resources",
       "mode": "view",
       "screenshots": [
         {
@@ -49,14 +49,14 @@
     },
     {
       "name": "iam",
-      "title": "IAM & Admin",
+      "title": "Iam & Admin",
       "subtitle": "Google Cloud CLI",
       "description": "Manage Google Cloud IAM permissions",
       "mode": "view"
     },
     {
       "name": "network",
-      "title": "VPC Network",
+      "title": "Vpc Network",
       "subtitle": "Google Cloud CLI",
       "description": "Manage Google Cloud VPC networks",
       "mode": "view"

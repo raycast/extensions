@@ -1,7 +1,8 @@
-import { List, useNavigation } from "@raycast/api";
-import { useState, useEffect, useMemo } from "react";
+import { List, useNavigation, showToast, Toast } from "@raycast/api";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { CacheManager, Project } from "./CacheManager";
 import ProjectView from "../ProjectView";
+import { getProjects } from "../gcloud";
 
 interface QuickProjectSwitcherProps {
   gcloudPath: string;
@@ -11,35 +12,75 @@ interface QuickProjectSwitcherProps {
 export function QuickProjectSwitcher({ gcloudPath, onProjectSelect }: QuickProjectSwitcherProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
+  const initialSetupDone = useRef(false);
   const { push } = useNavigation();
 
   useEffect(() => {
-    const cachedProjects = CacheManager.getProjectsList();
-    if (cachedProjects) {
-      setProjects(cachedProjects.projects);
+    async function loadProjects() {
+      const cachedProjects = CacheManager.getProjectsList();
+      if (cachedProjects) {
+        setProjects(cachedProjects.projects);
+        setIsLoading(false);
 
-      const cachedProject = CacheManager.getSelectedProject();
-      if (cachedProject) {
-        setSelectedProject(cachedProject.projectId);
+        const cachedProject = CacheManager.getSelectedProject();
+        if (cachedProject) {
+          setSelectedProject(cachedProject.projectId);
+          initialSetupDone.current = true;
+        }
+      } else {
+        // No cached projects, fetch them
+        try {
+          const loadingToast = await showToast({
+            style: Toast.Style.Animated,
+            title: "Loading projects...",
+          });
+
+          const fetchedProjects = await getProjects(gcloudPath);
+          CacheManager.saveProjectsList(fetchedProjects);
+          setProjects(fetchedProjects);
+
+          loadingToast.hide();
+
+          if (!initialSetupDone.current) {
+            const recentlyUsed = CacheManager.getRecentlyUsedProjects();
+            if (recentlyUsed.length > 0) {
+              setSelectedProject(recentlyUsed[0]);
+              initialSetupDone.current = true;
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching projects:", error);
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to load projects",
+            message: error instanceof Error ? error.message : "Unknown error occurred",
+          });
+        } finally {
+          setIsLoading(false);
+        }
       }
     }
 
-    const recentlyUsed = CacheManager.getRecentlyUsedProjects();
-
-    if (recentlyUsed.length > 0 && !selectedProject) {
-      setSelectedProject(recentlyUsed[0]);
-    }
-  }, []);
+    loadProjects();
+  }, [gcloudPath]);
 
   const handleProjectChange = (projectId: string) => {
     setSelectedProject(projectId);
-
     CacheManager.saveSelectedProject(projectId);
 
     if (onProjectSelect) {
       onProjectSelect(projectId);
     } else {
-      push(<ProjectView projectId={projectId} gcloudPath={gcloudPath} />);
+      try {
+        push(<ProjectView projectId={projectId} gcloudPath={gcloudPath} />);
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to open project view",
+          message: error instanceof Error ? error.message : "Unknown error occurred",
+        });
+      }
     }
   };
 
@@ -64,9 +105,14 @@ export function QuickProjectSwitcher({ gcloudPath, onProjectSelect }: QuickProje
   }, [projects]);
 
   return (
-    <List.Dropdown tooltip="Switch Project" value={selectedProject} onChange={handleProjectChange}>
+    <List.Dropdown
+      tooltip="Search and switch projects"
+      value={selectedProject}
+      onChange={handleProjectChange}
+      isLoading={isLoading}
+    >
       {sortedProjects.map((project) => (
-        <List.Dropdown.Item key={project.id} title={project.name || project.id} value={project.id} />
+        <List.Dropdown.Item key={project.id} title={`${project.name || ""}`} value={project.id} />
       ))}
     </List.Dropdown>
   );

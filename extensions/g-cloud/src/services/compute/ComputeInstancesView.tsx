@@ -440,12 +440,14 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
             icon={{ source: Icon.RotateClockwise }}
             onAction={() => service && fetchInstances(service)}
           />
-          <Action
-            title={selectedZone ? `Clear Zone Filter: ${selectedZone}` : "Filter by Zone"}
-            icon={{ source: selectedZone ? Icon.XmarkCircle : Icon.LightBulb }}
-            shortcut={{ modifiers: ["cmd"], key: "f" }}
-            onAction={() => selectedZone && handleZoneChange(undefined)}
-          />
+          {selectedZone && (
+            <Action
+              title={`Clear Zone Filter: ${selectedZone}`}
+              icon={{ source: Icon.XmarkCircle }}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              onAction={() => handleZoneChange(undefined)}
+            />
+          )}
           {zones.map((zone) => (
             <Action
               key={zone}

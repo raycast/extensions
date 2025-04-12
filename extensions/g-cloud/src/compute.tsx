@@ -19,15 +19,24 @@ export default function Command() {
     loadLastUsedProject();
   }, []);
 
-  async function loadLastUsedProject() {
+  function loadLastUsedProject() {
     const recentlyUsed = CacheManager.getRecentlyUsedProjects();
 
     if (recentlyUsed.length > 0) {
       const lastProjectId = recentlyUsed[0];
 
-      initializeQuickLink(lastProjectId);
+      try {
+        initializeQuickLink(lastProjectId);
+      } catch (error) {
+        console.error("Failed to initialize quick link:", error);
+        showFailureToast({
+          title: "Warning: Quick Link Initialization Failed",
+          message: "Some features may be limited",
+        });
+      }
 
       viewComputeInstances(lastProjectId);
+      setIsLoading(false);
     } else {
       setError("No recent projects found. Please open the main extension first.");
       showFailureToast({

@@ -18,7 +18,17 @@ export default function Command() {
     if (recentlyUsed.length > 0) {
       const lastProjectId = recentlyUsed[0];
 
-      initializeQuickLink(lastProjectId);
+      try {
+        await initializeQuickLink(lastProjectId);
+      } catch (error) {
+        console.error("Failed to initialize quick link:", error);
+        // Don't block the main flow, just show a warning toast
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Warning: Quick Link Initialization Failed",
+          message: "Some features may be limited",
+        });
+      }
 
       viewServices(lastProjectId);
     } else {

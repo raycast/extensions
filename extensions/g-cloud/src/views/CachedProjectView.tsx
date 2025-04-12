@@ -224,8 +224,6 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
         activeToast.hide();
       }
     };
-
-    setShouldNavigate(null);
   }, [shouldNavigate, cachedProject, gcloudPath, push, pop]);
 
   function continueWithCachedProject() {
