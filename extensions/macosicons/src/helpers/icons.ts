@@ -43,7 +43,12 @@ export async function getDefaultIconPath(app: Application) {
     `defaults read '${app.path}/Contents/Info' CFBundleIconFile`,
   );
 
-  return `${app.path}/Contents/Resources/${stdout.trim()}`;
+  const iconName = stdout.trim();
+  const iconNameWithExtension = iconName.endsWith(".icns")
+    ? iconName
+    : `${iconName}.icns`;
+
+  return `${app.path}/Contents/Resources/${iconNameWithExtension}`;
 }
 
 export async function relaunchApplication(app: Application) {
