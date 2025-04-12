@@ -12,14 +12,20 @@
   "commands": [
     {
       "name": "set-install",
-      "title": "Set Preferred Package Manager",
+      "title": "Package Manager",
       "description": "Set your preferred package manager for Shadcn",
       "mode": "view"
     },
     {
       "name": "search-docs",
-      "title": "Search Docs",
+      "title": "Components",
       "description": "Search the Shadcn Documentation",
+      "mode": "view"
+    },
+    {
+      "name": "resources",
+      "title": "Resources",
+      "description": "Access external resources related to Shadcn",
       "mode": "view"
     }
   ],
