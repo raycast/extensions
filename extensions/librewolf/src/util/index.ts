@@ -70,7 +70,7 @@ export const getSessionActivePath = async () => {
   const userDirectoryPath = userDataDirectoryPath();
   return path.join(
     userDirectoryPath,
-    await getProfileName(userDirectoryPath),
+    getProfileName(userDirectoryPath),
     "sessionstore-backups",
     "recovery.jsonlz4",
   );
