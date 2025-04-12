@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { LocalStorage, Toast, environment, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { FolderSearchPlugin, SpotlightSearchResult } from "../types";
-import { loadPlugins, lastUsedSort, fixDoubleConcat } from "../utils";
+import { loadPlugins, lastUsedSort } from "../utils";
 import { searchSpotlight } from "../search-spotlight";
 
 export function useFolderSearch() {
