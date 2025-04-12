@@ -1,5 +1,7 @@
 # Shortcut Changelog
 
+## [✨ AI Enhancements] - {PR_MERGE_DATE}
+
 ## [Improvement] - 2024-03-20
 
 Adds copy actions to a story.
