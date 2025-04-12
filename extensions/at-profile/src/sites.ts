@@ -17,10 +17,10 @@ export const defaultSites: Site[] = [
     value: "threads",
     urlTemplate: "https://www.threads.net/@{profile}",
   },
-  { 
-    name: "X", 
-    value: "x", 
-    urlTemplate: "https://x.com/{profile}"
+  {
+    name: "X",
+    value: "x",
+    urlTemplate: "https://x.com/{profile}",
   },
   {
     name: "GitHub",
