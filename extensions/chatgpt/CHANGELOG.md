@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix: Actions such as copy, save, and speak were unavailable in chat messages of previous conversations.
+
 ## [Feature] - 2025-02-23
 
 - Fix: Fixed the error display issue: errors are now always fully readable and rendered correctly in their respective places.
