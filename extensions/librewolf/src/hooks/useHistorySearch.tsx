@@ -11,6 +11,7 @@ const whereClauses = (terms: string[]) => {
 };
 
 const getHistoryQuery = (query?: string) => {
+  interface Preferences { limitResults: number }
   const preferences = getPreferenceValues<Preferences>();
   const terms = query ? query.trim().split(" ") : [];
   const whereClause = terms.length > 0 ? `WHERE ${whereClauses(terms)}` : "";
