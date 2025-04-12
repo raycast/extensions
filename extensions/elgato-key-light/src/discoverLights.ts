@@ -21,10 +21,6 @@ export default async function Command() {
       message: lightNames,
     });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to discover Key Lights",
-      message: (error as Error).message,
-    });
+    showFailureToast(error, { title: "Failed to discover Key Lights" });
   }
 }
