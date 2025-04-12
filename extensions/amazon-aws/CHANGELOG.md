@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [S3 command] - {PR_MERGE_DATE}
+
+- Add "Copy S3 URI" action
+
 ## [Secrets command] - 2024-12-06
 
 - Add actions to copy individual secret values [#14582](https://github.com/raycast/extensions/issues/14582)
