@@ -6,7 +6,7 @@ import { timeEntriesLookbackNumber, timeEntriesLookbackUnit } from "@/helpers/pr
 import { useSafeCachedPromise } from "@/hooks/useSafeCachedPromise";
 
 export function useTimeEntries() {
-  const lookbackNumber = parseInt(timeEntriesLookbackNumber || "2");
+  const lookbackNumber = timeEntriesLookbackNumber || 2;
   const lookbackUnit = timeEntriesLookbackUnit || "week";
 
   const startDateRef = useRef(dayjs().subtract(lookbackNumber, lookbackUnit).toDate());

@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Enhancements] - 2025-04-12
+## [Enhancements] - {PR_MERGE_DATE}
 
 - Add preferences to select the history lookback window
 

@@ -17,6 +17,6 @@ interface Preferences {
   showProjectsInForm: boolean;
   showTasksInForm: boolean;
   showTagsInForm: boolean;
-  timeEntriesLookbackNumber: string;
+  timeEntriesLookbackNumber: number;
   timeEntriesLookbackUnit: "day" | "week" | "month";
 }
