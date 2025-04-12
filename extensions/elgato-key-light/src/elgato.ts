@@ -338,7 +338,7 @@ export class KeyLight {
     }
   }
 
-  private service: ElgatoService;
+  protected service: ElgatoService;
 
   private constructor(service: ElgatoService) {
     this.service = service;
