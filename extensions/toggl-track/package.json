@@ -17,7 +17,8 @@
     "teziovsky",
     "lukebars",
     "AlanHuang",
-    "alexs"
+    "alexs",
+    "ARui"
   ],
   "license": "MIT",
   "commands": [
@@ -148,6 +149,37 @@
       "description": "Whether or not to show the tags field in the create and update time entry forms.",
       "label": "Show tags",
       "default": true
+    },
+    {
+      "name": "timeEntriesLookbackNumber",
+      "type": "textfield",
+      "required": false,
+      "title": "Time Entries Lookback Amount",
+      "description": "Number of time units to look back when fetching time entries",
+      "placeholder": "Enter a number (e.g. 2)",
+      "default": "1"
+    },
+    {
+      "name": "timeEntriesLookbackUnit",
+      "type": "dropdown",
+      "required": false,
+      "title": "Time Entries Lookback Unit",
+      "description": "Time unit to use for lookback period",
+      "data": [
+        {
+          "title": "Days",
+          "value": "day"
+        },
+        {
+          "title": "Weeks",
+          "value": "week"
+        },
+        {
+          "title": "Months",
+          "value": "month"
+        }
+      ],
+      "default": "week"
     }
   ],
   "dependencies": {
