@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { getDomain } from "tldts";
 import * as https from "https";
 import * as cheerio from "cheerio";
 
@@ -30,6 +31,12 @@ function getLinks() {
             if (link && link.trim() !== "") {
               links.push(link);
             }
+          });
+          links.push(`https://bento.me/${username}`);
+          links.sort((a, b) => {
+            const domainA = getDomain(a) || "";
+            const domainB = getDomain(b) || "";
+            return domainA.localeCompare(domainB);
           });
           resolve(links);
         });

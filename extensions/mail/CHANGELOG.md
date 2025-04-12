@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [New Feature] - 2025-04-07
+
+- Add russian aliases for folders
+
 ## [Fix] - 2025-04-02
 
 - Support for mail accounts with multiple sender addresses.
