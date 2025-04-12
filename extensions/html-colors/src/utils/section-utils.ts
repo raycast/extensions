@@ -30,14 +30,16 @@ export function sortSectionsByRelevance(sections: ColorSection[], searchText: st
   // Sort sections based on the best match score within each section
   return nonEmptySections.sort(([shadeA, colorsA], [shadeB, colorsB]) => {
     // Get the best match score for each section
-    const scoreA = Math.min(
-      ...colorsA.map((color) => {
+    const getBestScore = (colors: ColorResult[]) => Math.min(
+      ...colors.map((color) => {
         const nameScore = getMatchScore(color.name, searchText);
         const hexScore = getMatchScore(color.hex, searchText);
         const rgbScore = getMatchScore(color.rgb, searchText);
         return Math.min(nameScore, hexScore, rgbScore);
       }),
     );
+
+    const scoreA = getBestScore(colorsA);
 
     const scoreB = Math.min(
       ...colorsB.map((color) => {
