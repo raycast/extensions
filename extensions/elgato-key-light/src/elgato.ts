@@ -522,7 +522,7 @@ export class KeyLight {
     for (let x = 0; x < KeyLight.keyLights.length; x++) {
       try {
         const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-        newTemperature = Math.max(keyLight.temperature + TEMPERATURE_STEP, COLD_TEMPERATURE);
+        newTemperature = Math.min(keyLight.temperature + TEMPERATURE_STEP, WARM_TEMPERATURE);
         await this.updateKeyLight(KeyLight.keyLights[x].service, { temperature: newTemperature });
       } catch (e) {
         const error = e as Error;
