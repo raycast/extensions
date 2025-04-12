@@ -1,5 +1,10 @@
 # Chatwork Search Changelog
 
+## [Enhancements] - 2025-04-12
+
+- Modify scope of OAuth to use "Search Contacts" `command` via OAuth
+- Update some packages to eliminate vulnerabilities
+
 ## [Enhancements] - 2024-11-19
 
 - _Cache_ "Rooms" with the help of `useCachedPromise`
