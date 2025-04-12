@@ -148,12 +148,8 @@
       "description": "Choose your favorite sport, league, and team (the team selected must be in the correct sport and league)",
       "type": "dropdown",
       "required": true,
-      "default": "default",
+      "default": "hockey",
       "data": [
-        {
-          "title": "None",
-          "value": "default"
-        },
         {
           "title": "Hockey",
           "value": "hockey"
@@ -186,12 +182,8 @@
       "description": "Choose a league (must be the same as the team and league you select)",
       "type": "dropdown",
       "required": true,
-      "default": "default",
+      "default": "nhl",
       "data": [
-        {
-          "title": "None",
-          "value": "default"
-        },
         {
           "title": "NHL",
           "value": "nhl"
@@ -240,12 +232,8 @@
       "description": "Choose your favorite team (must be the same as the league and sport your select)",
       "type": "dropdown",
       "required": true,
-      "default": "default",
+      "default": "25",
       "data": [
-        {
-          "title": "None",
-          "value": "default"
-        },
         {
           "title": "Anaheim Ducks",
           "value": "25"
