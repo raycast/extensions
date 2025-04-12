@@ -27,7 +27,9 @@ export function NotInstalledError() {
                 } catch (error) {
                   await toast.hide();
                   await showFailureToast(error, { title: "Failed to install LibreWolf" });
-                setIsLoading(false);
+                } finally {
+                  setIsLoading(false);
+                }
               }}
             />
           )}
