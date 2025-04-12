@@ -8,7 +8,7 @@ export default function Command() {
     async () => {
       const toast = await showToast(Toast.Style.Animated, `Fetching latest scores`);
 
-      const r = await fetch("http://static.cricinfo.com/rss/livescores.xml");
+      const r = await fetch("https://static.cricinfo.com/rss/livescores.xml");
       if (!r.ok) throw new Error("Error fetching scores");
       const XMLdata = await r.text();
       const JSONdata: RSS<MatchItem> = JSON.parse(convert.xml2json(XMLdata, { compact: true, spaces: 4 }));
@@ -51,7 +51,7 @@ export default function Command() {
         await showToast(Toast.Style.Success, `Fetched ${data.length} scores`);
       },
       keepPreviousData: true,
-      initialData: []
+      initialData: [],
     },
   );
 

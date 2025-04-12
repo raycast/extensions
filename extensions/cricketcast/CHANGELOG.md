@@ -3,6 +3,7 @@
 ## [Modernize + Better Score Error Handling] - {PR_MERGE_DATE}
 
 - If Scores not fetched, extension does not crash
+- Use "https" link for the Livescores
 - Modernize extension: remove `node-fetch`
 
 ## [Add Latest News + Cache + TS Support] - 2024-08-07
