@@ -37,8 +37,12 @@ function TabListItemAction(props: { tab: Tab }) {
 
 function LibrewolfGoToTab(props: { tab: Tab }) {
   async function handleAction() {
-    await setActiveTab(props.tab);
-    await closeMainWindow();
+    try {
+      await setActiveTab(props.tab);
+      await closeMainWindow();
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to open tab" });
+    }
   }
   return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
