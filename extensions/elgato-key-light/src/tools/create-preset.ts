@@ -45,6 +45,7 @@ export default async function tool(input: {
       data: {
         id: "",
         name: "",
+        icon: input.icon,
         settings: {
           brightness: 0,
           temperature: 0,
