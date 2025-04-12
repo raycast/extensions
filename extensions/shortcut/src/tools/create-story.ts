@@ -65,7 +65,7 @@ const mapInputToStoryParams = (input: Input): CreateStoryParams => {
       case "owner_ids":
         return {
           ...acc,
-          [key]: (value as string[]) || [], // Ensure it's an array or default to an empty array
+          [key]: value as string[],
         };
       default:
         return {
