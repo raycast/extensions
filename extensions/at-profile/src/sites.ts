@@ -48,6 +48,11 @@ export const defaultSites: Site[] = [
     value: "linkedin",
     urlTemplate: "https://www.linkedin.com/in/{profile}",
   },
+  {
+    name: "TikTok",
+    value: "tiktok",
+    urlTemplate: "https://www.tiktok.com/@{profile}",
+  },
 ];
 
 export async function getAllSites(): Promise<Site[]> {
