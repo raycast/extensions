@@ -28,7 +28,12 @@ export async function openNewTab(queryText: string | null | undefined): Promise<
     end tell
   `;
 
-  return await runAppleScript(script);
+  try {
+    return await runAppleScript(script);
+  } catch (error) {
+    showFailureToast(error, { title: "Could not run AppleScript" });
+    return false;
+  }
 }
 
 export async function openHistoryTab(url: string): Promise<boolean | string> {
