@@ -23,6 +23,7 @@ export function NotInstalledError() {
                 try {
                   execSync(`brew install --cask librewolf`);
                   await toast.hide();
+                  await showToast(Toast.Style.Success, "LibreWolf installed successfully");
                 } catch {
                   await toast.hide();
                   await showToast(
