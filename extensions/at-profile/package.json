@@ -5,12 +5,9 @@
   "description": "Quickly open profiles on social platforms.",
   "icon": "at-icon.png",
   "author": "chrismessina",
-<<<<<<< HEAD
-=======
   "contributors": [
     "pedrecal"
   ],
->>>>>>> contributions/merge-1744482687650
   "categories": [
     "Web"
   ],
@@ -75,23 +72,16 @@
             {
               "title": "LinkedIn",
               "value": "linkedin"
-<<<<<<< HEAD
-=======
             },
             {
               "title": "TikTok",
               "value": "tiktok"
->>>>>>> contributions/merge-1744482687650
             }
           ]
         }
       ]
     }
   ],
-<<<<<<< HEAD
-  "dependencies": {
-    "@raycast/api": "^1.80.0"
-=======
   "tools": [
     {
       "name": "open",
@@ -106,7 +96,7 @@
   "ai": {
     "evals": [
       {
-        "input" : "@at-profile open raycast instagram",
+        "input" : "@at-profile open raycast on instagram",
         "mocks" : {
           "open" : "Successfully called \"open\""
         },
@@ -121,9 +111,25 @@
             }
           }
         ]
+      },
+      {
+        "input" : "@at-profile open chrismessina on x",
+        "mocks" : {
+          "open" : "Successfully called \"open\""
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "profile" : "chrismessina",
+                "site" : "x"
+              },
+              "name" : "open"
+            }
+          }
+        ]
       }
     ]
->>>>>>> contributions/merge-1744482687650
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
@@ -139,6 +145,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "evals": "npx ray evals"
   }
 }
