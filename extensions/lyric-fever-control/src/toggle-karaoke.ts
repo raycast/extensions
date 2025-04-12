@@ -42,7 +42,7 @@ export default async () => {
     showToast({
       style: Toast.Style.Failure,
       title: "Error toggling Karaoke Mode",
-      message: error.message,
+      message: error instanceof Error ? error.message : String(error),
     });
   }
 };
