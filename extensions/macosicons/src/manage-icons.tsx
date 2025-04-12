@@ -178,7 +178,7 @@ function ApplicationSection({
         <Grid.Item
           key={icon.objectID}
           title={icon.name}
-          subtitle={`􀐫 ${timeAgo.format(icon.updatedAt, "mini-now")}  􀉩 ${icon.usersName}`}
+          subtitle={timeAgo.format(icon.updatedAt)}
           content={{
             source: icon.lowResPngUrl,
             fallback: Icon.DeleteDocument,
