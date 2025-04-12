@@ -8,7 +8,7 @@ export const SEARCH_ENGINE: { [key: string]: string } = {
 };
 
 export const DownloadText = `
-    # 🚨Error: Librewolf Browser browser is not installed
+    # 🚨Error: Librewolf Browser is not installed
     ## This extension depends on Librewolf browser. You must install it to continue.
 
     If you have [Homebrew](https://brew.sh/) installed then press ⏎ (Enter Key) to install "brew install --cask librewolf".
