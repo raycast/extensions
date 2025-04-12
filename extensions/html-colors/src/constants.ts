@@ -7,12 +7,12 @@ export type ShadeCategory =
   | "orange"
   | "yellow"
   | "brown"
-  | "purple, violet and magenta"
-  | "blue"
-  | "cyan"
   | "green"
   | "white"
-  | "black and gray";
+  | "black and gray"
+  | "purple, violet and magenta"
+  | "blue"
+  | "cyan";
 
 /**
  * Static order of shade categories for consistent sorting
