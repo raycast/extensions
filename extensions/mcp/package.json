@@ -82,7 +82,9 @@
                         "description": "Mathematical expression to evaluate"
                       }
                     },
-                    "required": ["expression"]
+                    "required": [
+                      "expression"
+                    ]
                   }
                 }
               ]
@@ -129,7 +131,9 @@
                         "description": "Number of posts to retrieve"
                       }
                     },
-                    "required": ["limit"]
+                    "required": [
+                      "limit"
+                    ]
                   }
                 }
               ]
@@ -153,12 +157,12 @@
     ]
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "1.9.0",
     "@raycast/api": "^1.95.0",
     "@raycast/utils": "^1.17.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@modelcontextprotocol/sdk": "1.9.0",
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
