@@ -6,4 +6,4 @@
 export const BMRKS_SERVICE_NAME = "bmrks.com";
 
 // Base URL for bmrks service
-export const HOST_URL = "https://bmrks.com/";
+export const HOST_URL = "https://bmrks.com";

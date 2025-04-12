@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserExtension } from "@raycast/api";
+import { BrowserExtension, Toast, showToast } from "@raycast/api";
 
 type ActiveTab = {
   url: string;
@@ -30,8 +30,8 @@ export function useActiveTab() {
           url: activeTab.url,
           title: activeTab.title || "",
         });
-      } catch (error) {
-        console.error("Error retrieving active tab:", error);
+      } catch {
+        await showToast({ style: Toast.Style.Failure, title: "Error retrieving active tab" });
       }
     })();
   }, []);

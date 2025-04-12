@@ -4,6 +4,7 @@
 
 - Improved title generation for bookmarks
 - Added support for drafts
+Replaced AppleScript with Raycast's native Browser Extension API for retrieving active tabs
 - Extracted service name and host URL into reusable constants
 - Added constants.ts file for global constants management
 - Refactored create-bookmark.tsx to use the new constants
