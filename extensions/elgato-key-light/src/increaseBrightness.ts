@@ -18,11 +18,7 @@ const command = async () => {
       await showFailureToast(error, { title: "Failed to increase brightness" });
     }
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to discover Key Lights",
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    await showFailureToast(error, { title: "Failed to discover Key Lights" });
   }
 };
 
