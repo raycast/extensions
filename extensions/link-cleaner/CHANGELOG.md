@@ -1,5 +1,15 @@
 # Link Cleaner Changelog
 
+## [Clean Current Tab URL Command] - 2025-04-11
+
+- Added new command to clean and update URLs directly in the browser tab
+- Features:
+  - Supports multiple browsers (Arc, Safari, Chrome, etc.) via preferences
+  - Optional clipboard copying of cleaned URLs
+  - Preserves essential query parameters based on site-specific rules
+  - Visual feedback with success/failure toasts
+  - Automatic window closing after successful operation
+
 ## [Add `Instagram Reel` rule] - 2024-10-14
 
 ## [New Additions] - 2023-12-08

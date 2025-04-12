@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "MisakiCoca",
   "contributors": [
-    "xmok"
+    "xmok",
+    "emlez"
   ],
   "categories": [
     "Security",
@@ -19,10 +20,17 @@
       "title": "Link Cleaner",
       "description": "Remove tracking parameters from the URL link in clipboard.",
       "mode": "no-view"
+    },
+    {
+      "name": "clean-current-tab-url",
+      "title": "Current Tab Link Cleaner",
+      "description": "Remove tracking parameters from the URL link from the current browser tab",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0"
+    "@raycast/api": "^1.95.0",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
@@ -39,5 +47,58 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "preferences": [
+    {
+      "name": "targetBrowser",
+      "title": "Target Browser",
+      "description": "Select the browser application to update the tab in.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Arc",
+          "value": "Arc"
+        },
+        {
+          "title": "Google Chrome",
+          "value": "Google Chrome"
+        },
+        {
+          "title": "Google Chrome Dev",
+          "value": "Google Chrome Dev"
+        },
+        {
+          "title": "Firefox",
+          "value": "Firefox"
+        },
+        {
+          "title": "Firefox Dev",
+          "value": "Firefox Dev"
+        },
+        {
+          "title": "Safari",
+          "value": "Safari"
+        },
+        {
+          "title": "Brave Browser",
+          "value": "Brave Browser"
+        },
+        {
+          "title": "Microsoft Edge",
+          "value": "Microsoft Edge"
+        }
+      ],
+      "default": "Arc"
+    },
+    {
+      "name": "copyToClipboard",
+      "title": "Copy current tab URL to Clipboard",
+      "description": "Copy the URL of the current tab to the clipboard.",
+      "type": "checkbox",
+      "label": "Enabled",
+      "required": false,
+      "default": true
+    }
+  ]
 }
