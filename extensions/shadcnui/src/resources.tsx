@@ -33,7 +33,7 @@ export default function Command() {
               subtitle={item.description}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser title={"Open Link"} icon={Icon.Clipboard} url={item.url} />
+                  <Action.OpenInBrowser title={"Open Link"} icon={Icon.Link} url={item.url} />
                 </ActionPanel>
               }
             />

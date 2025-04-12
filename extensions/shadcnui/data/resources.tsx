@@ -1,11 +1,11 @@
-type resource = {
+type Resource = {
 	name: string
 	description: string
 	url: string
 	section: "featured" | "library" | "blocks" | "design"
 }
 
-export const resources = (): resource[] => {
+export const resources = (): Resource[] => {
 	return [
 		{
 			name: "uipub",
