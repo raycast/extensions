@@ -6,7 +6,7 @@ type Input = {
   name: string;
   /** The description of the story. */
   description?: string;
-  // /** The type of story (feature, bug, chore). */
+  /** The type of story (feature, bug, chore). */
   story_type?: "feature" | "chore" | "bug";
   /**
    * The ID of the iteration the story belongs to.
