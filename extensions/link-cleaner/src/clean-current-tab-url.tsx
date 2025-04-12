@@ -37,7 +37,7 @@ export default async function Command() {
             const currentUrlIdentifier =
               currentUrl.hostname.replace(/^www\./, "") + currentUrl.pathname.replace(/\/$/, "");
 
-            if (currentUrlIdentifier.includes(ruleUrlIdentifier)) {
+            if (currentUrlIdentifier === ruleUrlIdentifier || currentUrlIdentifier.startsWith(ruleUrlIdentifier + '/')) {
               allowedParams = rule.allowParams;
               break;
             }
