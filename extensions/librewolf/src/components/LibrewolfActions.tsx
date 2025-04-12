@@ -49,8 +49,12 @@ function LibrewolfGoToTab(props: { tab: Tab }) {
 
 function LibrewolfHistoryTab({ url }: { url: string }) {
   async function handleAction() {
-    await openHistoryTab(url);
-    await closeMainWindow();
+    try {
+      await openHistoryTab(url);
+      await closeMainWindow();
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to open history tab" });
+    }
   }
   return <ActionPanel.Item title="Open in Librewolf" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
