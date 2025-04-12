@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "librewolf",
+  "title": "Librewolf",
+  "description": "Control Librewolf Browser: open tabs, windows, search history, bookmarks, and more.",
+  "icon": "extension-icon.png",
+  "author": "ayberkgezer",
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "LibreWolf",
+      "description": "Open a new LibreWolf tab.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "searchEngine",
+          "type": "dropdown",
+          "required": false,
+          "title": "Search Engine",
+          "description": "Search Engine for query (default: Google).",
+          "default": "Google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "Google"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "DuckDuckGo"
+            },
+            {
+              "title": "Bing",
+              "value": "Bing"
+            },
+            {
+              "title": "Baidu",
+              "value": "Baidu"
+            },
+            {
+              "title": "Brave",
+              "value": "Brave"
+            },
+            {
+              "title": "Qwant",
+              "value": "Qwant"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "LibreWolf",
+      "description": "Search browser history.",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "LibreWolf",
+      "description": "Search browser bookmarks.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "profileDirectorySuffix",
+      "title": "Profile Directory Suffix",
+      "default": "Default (alpha)",
+      "description": "The Librewolf profile directory suffix, check it with `ls ~/Library/Application Support/LibreWolf/Profiles`",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "limitResults",
+      "type": "textfield",
+      "required": false,
+      "title": "Limit Results",
+      "description": "The amount of results that are queried from the browser database.",
+      "default": "50"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.95.0",
+    "@raycast/utils": "^1.17.0",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
