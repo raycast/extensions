@@ -12,6 +12,7 @@ const userDataDirectoryPath = () => {
 
 const getProfileName = (userDirectoryPath: string) => {
   const profiles = fs.readdirSync(userDirectoryPath);
+  interface Preferences { profileDirectorySuffix: string }
   const preferences = getPreferenceValues<Preferences>();
 
   // Try to find profiles in order of preference:
