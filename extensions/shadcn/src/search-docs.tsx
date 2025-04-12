@@ -29,7 +29,7 @@ export default function Command() {
             <ActionPanel>
               {!item.setup && (
                 <Action.CopyToClipboard
-                  content={getInstallCommand(activeManager, item.name)}
+                  content={getInstallCommand(activeManager, item.component)}
                   title={"Copy Install Code"}
                   icon={Icon.Clipboard}
                   shortcut={{ modifiers: ["cmd"], key: "i" }}
