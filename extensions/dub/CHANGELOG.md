@@ -1,6 +1,6 @@
 # Dub Link Shortener Changelog
 
-## [Analytics] - {PR_MERGE_DATE}
+## [Analytics] - 2025-04-12
 
 - Added an action to open the analytics page for a link
 
