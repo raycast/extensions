@@ -24,14 +24,9 @@ export function NotInstalledError() {
                   execSync(`brew install --cask librewolf`);
                   await toast.hide();
                   await showToast(Toast.Style.Success, "LibreWolf installed successfully");
-                } catch {
+                } catch (error) {
                   await toast.hide();
-                  await showToast(
-                    Toast.Style.Failure,
-                    DEFAULT_ERROR_TITLE,
-                    "An unknown error occurred while trying to install",
-                  );
-                }
+                  await showFailureToast(error, { title: "Failed to install LibreWolf" });
                 setIsLoading(false);
               }}
             />
