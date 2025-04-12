@@ -1,6 +1,6 @@
 # gg.deals Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-04-12
 
 - Fix prices on search
 - Fix genres on search
