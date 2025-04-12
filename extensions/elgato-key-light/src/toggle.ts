@@ -1,4 +1,3 @@
-import { KeyLight } from "./elgato";
 import { showHUD } from "@raycast/api";
 import { discoverKeyLights } from "./utils";
 

@@ -1,7 +1,7 @@
 import axios from "axios";
 import BonjourService from "bonjour-service";
 import { waitUntil } from "./utils";
-import { environment, showHUD, Cache, showToast, Toast } from "@raycast/api";
+import { environment, Cache, showToast, Toast } from "@raycast/api";
 
 // Define the ElgatoService interface - represents the service returned by bonjour
 interface ElgatoService {
@@ -44,7 +44,7 @@ export function convertActualTemperatureToForm(actualTemp: number) {
 }
 
 // Export the function to avoid unused variable warning since it's a useful utility function
-export { kelvinToInternal };
+export { internalToKelvin, kelvinToInternal };
 
 export type KeyLightSettings = {
   /**
@@ -157,7 +157,6 @@ export class KeyLight {
       message: "Searching for Elgato Key Lights on your network",
     });
 
-    let discoveryTimeout: NodeJS.Timeout;
     let discoveryComplete = false;
 
     const find = new Promise<KeyLight>((resolve, reject) => {
@@ -263,6 +262,7 @@ export class KeyLight {
           resolve(keyLight);
           browser.stop();
           bonjour.destroy();
+          clearTimeout(discoveryTimeout);
         }
       });
 
@@ -278,7 +278,6 @@ export class KeyLight {
         }
       });
 
-      // @ts-ignore - Bonjour types are incomplete, error event exists but isn't typed
       browser.on("error", (error: Error) => {
         if (environment.isDevelopment) {
           console.error("Bonjour browser error:", error);
@@ -291,7 +290,7 @@ export class KeyLight {
         reject(new Error(`Bonjour discovery error: ${error.toString()}`));
       });
 
-      discoveryTimeout = setTimeout(() => {
+      const discoveryTimeout = setTimeout(() => {
         if (environment.isDevelopment) {
           console.log(`Discovery timeout reached. Found ${this.keyLights.length} light(s)`);
         }
@@ -312,6 +311,7 @@ export class KeyLight {
           resolve(this.keyLights[0]);
           browser.stop();
           bonjour.destroy();
+          clearTimeout(discoveryTimeout);
         } else {
           showToast({
             style: Toast.Style.Failure,

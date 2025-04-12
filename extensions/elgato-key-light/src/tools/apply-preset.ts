@@ -47,7 +47,7 @@ export default async function tool(input: {
     const preset = presets.find(
       (p) =>
         (input.presetId && p.id === input.presetId) ||
-        (input.presetName && p.name.toLowerCase() === input.presetName.toLowerCase())
+        (input.presetName && p.name.toLowerCase() === input.presetName.toLowerCase()),
     );
 
     if (!preset) {

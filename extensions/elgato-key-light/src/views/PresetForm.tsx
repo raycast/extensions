@@ -72,7 +72,7 @@ function useSimpleForm<T extends Record<string, string | number | boolean | unde
         error: string | undefined;
         onChange: (value: string) => void;
       }
-    >
+    >,
   );
 
   return { handleSubmit, itemProps };

@@ -19,7 +19,7 @@
     },
     {
       "name": "toggle",
-      "title": "Toggle Lights",
+      "title": "Toggle On/off",
       "subtitle": "Elgato Key Light",
       "description": "Toggles all connected Key Lights on or off",
       "mode": "no-view"
@@ -104,6 +104,7 @@
     "bonjour-service": "^1.1.1"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.0",
     "@types/node": "^20.10.5",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",

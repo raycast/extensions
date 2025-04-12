@@ -1,10 +1,9 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
 import { KeyLight } from "./elgato";
-import { environment } from "@raycast/api";
 
 export async function waitUntil<T>(
   promise: Promise<T> | (() => Promise<T>),
-  options?: { timeout?: number; timeoutMessage: string }
+  options?: { timeout?: number; timeoutMessage: string },
 ): Promise<T> {
   const timeout = new Promise<never>((_, reject) => {
     setTimeout(async () => {
