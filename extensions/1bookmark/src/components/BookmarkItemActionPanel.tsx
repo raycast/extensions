@@ -29,6 +29,7 @@ export const RequiredActions = (props: { refetch: () => void }) => {
         icon={Icon.TwoPeople}
         shortcut={{ modifiers: ["cmd"], key: "s" }}
         target={<Spaces />}
+        onPop={refetch}
       />
       {/* TODO: Add this feature later */}
       {/* <Action

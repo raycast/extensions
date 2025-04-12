@@ -23,9 +23,7 @@ export interface PackageMap {
 export function packagesFromOfflineCarrier(delivery: Delivery): Package[] {
   return [
     {
-      delivered: delivery.manualDeliveryDate
-        ? new Date().setHours(0, 0, 0, 0) > new Date(delivery.manualDeliveryDate).setHours(0, 0, 0, 0)
-        : false, // truncate the time from both now and the manual delivery date
+      delivered: delivery.manualMarkedAsDelivered ?? false,
       deliveryDate: delivery.manualDeliveryDate,
       activity: [],
     },
@@ -139,4 +137,12 @@ export function calculateDayDifference(deliveryDate: Date, comparisonDate: Date)
   }
 
   return dayDifference;
+}
+
+export function allPackagesDeliveredForDeliveryId(deliveryId: string, packages: PackageMap): boolean {
+  const deliveryPackages = packages[deliveryId]?.packages;
+  if (!deliveryPackages) {
+    return false;
+  }
+  return deliveryPackages.every((aPackage) => aPackage.delivered); // all the packages of this delivery have been delivered
 }

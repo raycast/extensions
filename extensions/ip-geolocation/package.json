@@ -150,7 +150,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.80.0",
-    "axios": "^1.7.3",
+    "axios": "^1.8.4",
     "public-ip": "^7.0.1",
     "@raycast/utils": "^1.16.3"
   },

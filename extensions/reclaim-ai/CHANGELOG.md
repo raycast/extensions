@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Fixes] - 2025-04-02
+- Don't split surrogate pairs
+
 ## [Fixes] - 2024-10-25
 - Don't hardcode task category to "work"
 

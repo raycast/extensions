@@ -1,10 +1,18 @@
-import { NoteEntry } from "./note-utilities";
+import { NoteEntry, xCallbackToOpenNoteByPath } from "./note-utilities";
 import { useNote } from "./hooks";
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 
 export const OpenNoteAction = ({ entry }: { entry: NoteEntry }) => {
-  const xCallbackUrl = `noteplan://x-callback-url/openNote?noteTitle=${encodeURIComponent(entry.fileName)}`;
-  return <Action.OpenInBrowser url={xCallbackUrl} title={"Open in NotePlan"} icon={Icon.Window} />;
+  return <Action.OpenInBrowser url={xCallbackToOpenNoteByPath(entry)} title={"Open in NotePlan"} icon={Icon.Window} />;
+};
+
+export const SaveAsQuicklinkAction = ({ entry }: { entry: NoteEntry }) => {
+  return <Action.CreateQuicklink quicklink={{ link: xCallbackToOpenNoteByPath(entry) }} />;
+};
+
+export const ShowDetailsAction = ({ entry }: { entry: NoteEntry }) => {
+  const { push } = useNavigation();
+  return <Action title="Show Details" onAction={() => push(<NoteDetail entry={entry} />)} icon={Icon.Eye} />;
 };
 
 export const NoteDetail = ({ entry }: { entry: NoteEntry }) => {
@@ -16,6 +24,7 @@ export const NoteDetail = ({ entry }: { entry: NoteEntry }) => {
       actions={
         <ActionPanel>
           <OpenNoteAction entry={entry} />
+          <SaveAsQuicklinkAction entry={entry} />
         </ActionPanel>
       }
     />

@@ -3,9 +3,10 @@ import { trpc } from "../utils/trpc.util.js";
 import { getQueryClient, getTrpcClient, setToken } from "../utils/client.util.js";
 import { useCachedState, useLocalStorage } from "@raycast/utils";
 import { useEffect } from "react";
+import { CACHED_KEY_SESSION_TOKEN } from "../utils/constants.util.js";
 
 export function CachedQueryClientProvider({ children }: { children: React.ReactNode }) {
-  const [sessionToken, setSessionToken] = useCachedState("session-token", "");
+  const [sessionToken, setSessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
   const queryClient = getQueryClient();
   const trpcClient = getTrpcClient(setSessionToken);
 

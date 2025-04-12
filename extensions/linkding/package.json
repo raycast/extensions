@@ -63,7 +63,7 @@
   "dependencies": {
     "@raycast/api": "^1.91.0",
     "@raycast/utils": "^1.18.1",
-    "axios": "^1.6.0",
+    "axios": "^1.8.4",
     "cheerio": "^1.0.0-rc.12"
   },
   "devDependencies": {
