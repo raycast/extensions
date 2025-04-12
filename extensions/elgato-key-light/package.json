@@ -19,7 +19,7 @@
     },
     {
       "name": "toggle",
-      "title": "Toggle Lights",
+      "title": "Toggle On/off",
       "subtitle": "Elgato Key Light",
       "description": "Toggles all connected Key Lights on or off",
       "mode": "no-view"
@@ -97,6 +97,109 @@
       "description": "Update the settings of your Elgato Key Lights"
     }
   ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@elgato-key-light turn lights on",
+        "mocks": {
+          "turn-on": "Successfully called \"turn-on\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "turn-on"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@elgato-key-light apply my night preset",
+        "mocks": {
+          "get-presets": [
+            {
+              "id": "default",
+              "name": "Default",
+              "settings": {
+                "brightness": 20,
+                "temperature": 50
+              }
+            },
+            {
+              "icon": "🌙",
+              "id": "night",
+              "name": "Night",
+              "settings": {
+                "brightness": 10,
+                "temperature": 10
+              }
+            },
+            {
+              "icon": "☀️",
+              "id": "day",
+              "name": "Day",
+              "settings": {
+                "brightness": 80,
+                "temperature": 60
+              }
+            },
+            {
+              "icon": "🔥",
+              "id": "warm",
+              "name": "Warm",
+              "settings": {
+                "brightness": 50,
+                "temperature": 80
+              }
+            },
+            {
+              "icon": "❄️",
+              "id": "cold",
+              "name": "Cold",
+              "settings": {
+                "brightness": 50,
+                "temperature": 20
+              }
+            }
+          ],
+          "apply-preset": "Successfully called \"apply-preset\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-presets"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "presetId": "night"
+              },
+              "name": "apply-preset"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@elgato-key-light create me a new preset for a sunny day",
+        "mocks": {
+          "create-preset": "Successfully called \"create-preset\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "icon": "☀️",
+                "name": "Sunny Day"
+              },
+              "name": "create-preset"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.57.0",
     "@raycast/utils": "^1.5.0",

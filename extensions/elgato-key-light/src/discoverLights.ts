@@ -1,5 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { KeyLight } from "./elgato";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   try {
@@ -21,10 +22,6 @@ export default async function Command() {
       message: lightNames,
     });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to discover Key Lights",
-      message: (error as Error).message,
-    });
+    showFailureToast(error, { title: "Failed to discover Key Lights" });
   }
 }
