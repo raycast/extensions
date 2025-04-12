@@ -72,7 +72,7 @@ export default function SearchIconsCommand() {
             fallback: Icon.DeleteDocument,
           }}
           title={icon.name}
-          subtitle={`􀁸 ${icon.downloads}  􀉩 ${icon.usersName}`}
+          subtitle={`⤓ ${icon.downloads}  @ ${icon.usersName}`}
           accessory={
             favorites?.find((f) => f.objectID === icon.objectID)
               ? {
