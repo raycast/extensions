@@ -1,5 +1,6 @@
 import { showHUD } from "@raycast/api";
 import { discoverKeyLights } from "./utils";
+import { showFailureToast } from "@raycast/utils";
 
 const command = async () => {
   try {

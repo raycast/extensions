@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, showToast, useNavigation } from "@raycast/api";
 import { Preset } from "../presets";
 import { rangeValidator, DEFAULT_BRIGHTNESS, DEFAULT_TEMPERATURE } from "../utils";
+import { showFailureToast } from "@raycast/utils";
 import * as React from "react";
 import { WARM_TEMPERATURE, COLD_TEMPERATURE } from "../elgato";
 
