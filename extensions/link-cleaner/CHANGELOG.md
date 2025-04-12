@@ -1,6 +1,6 @@
 # Link Cleaner Changelog
 
-## [Clean Current Tab URL Command] - 2025-04-11
+## [Clean Current Tab URL Command] - {PR_MERGE_DATE}
 
 - Added new command to clean and update URLs directly in the browser tab
 - Features:
