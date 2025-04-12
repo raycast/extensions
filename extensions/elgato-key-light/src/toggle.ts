@@ -13,7 +13,7 @@ const command = async () => {
       const isOn = await keyLight.toggle();
       await showHUD(isOn ? "Key Light turned on" : "Key Light turned off");
     } catch (error) {
-      await showHUD(`Failed to toggle Key Light: ${error instanceof Error ? error.message : "Unknown error"}`);
+      await showFailureToast(error, { title: "Failed to toggle Key Light" });
     }
   } catch (error) {
     await showHUD(`Failed to discover Key Lights: ${error instanceof Error ? error.message : "Unknown error"}`);
