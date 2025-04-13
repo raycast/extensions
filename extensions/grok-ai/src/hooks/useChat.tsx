@@ -171,7 +171,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       const response = await callGrokAPI(
         {
           model: model.option || "grok-3-mini-fast-beta",
-          messages,
+          messages: messages as unknown as string[],
           stream: useStream,
         },
         { signal: abortSignal },
