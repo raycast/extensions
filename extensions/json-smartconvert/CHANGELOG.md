@@ -10,4 +10,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- v1.0 added initial functionality to conver json (parse/stringify)
+- v1.0 added initial functionality to convert json (parse/stringify)
