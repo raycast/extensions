@@ -87,48 +87,59 @@ export async function getUpcomingMatches(): Promise<Match[]> {
 
     const timerEl = $table.find(".timer-object").first();
     const timestampAttr = timerEl.attr("data-timestamp");
-    // Ensure timestamp is valid, default to 0 if not parseable
-    const timestamp = timestampAttr ? parseInt(timestampAttr, 10) * 1000 : 0; // Convert seconds to ms
-    if (isNaN(timestamp)) {
-      console.warn("Could not parse timestamp:", timestampAttr);
-      // Decide how to handle invalid timestamp - skip match or set default?
-      // return; // Option: skip match if timestamp is invalid
-    }
-    const timeText = timerEl.text().replace(/\s+/g, " ").trim();
 
+    // Convert Unix timestamp (seconds) to milliseconds
+    const timestamp = timestampAttr ? parseInt(timestampAttr, 10) * 1000 : 0;
+    console.log("Timestamp in milliseconds:", timestamp);
+
+    // Debug date conversions
+    const matchDate = new Date(timestamp);
+    console.log("Match date object:", matchDate);
+    console.log("Match date ISO:", matchDate.toISOString());
+    console.log("Match date Local:", matchDate.toString());
+
+    // Format the time string
+    let timeText = "";
+    if (timestamp > 0) {
+      const date = new Date(timestamp);
+      timeText = date.toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false, // Use 24-hour format
+      });
+    } else {
+      timeText = timerEl.text().replace(/\s+/g, " ").trim();
+    }
+
+    // Rest of your existing code...
     const team1Logo = $table.find(".team-left img").attr("src");
     const team2Logo = $table.find(".team-right img").attr("src");
 
     const team1Icon = team1Logo ? "https://liquipedia.net" + team1Logo : undefined;
     const team2Icon = team2Logo ? "https://liquipedia.net" + team2Logo : undefined;
 
-    // --- Check against current time (start of today in local time) ---
-    // Comparison should use milliseconds since `timestamp` is in ms
+    // Current date check
     const currentDate = new Date();
     const todayStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
     const todayStartMs = todayStart.getTime();
 
-    // Skip if the match *ended* before the start of today
-    // Note: Liquipedia timestamps are usually start times.
-    // If timestamp is 0 (invalid), maybe skip or handle differently.
+    // Skip if timestamp is invalid or match is from the past
     if (timestamp === 0 || timestamp < todayStartMs) {
-      // console.log(`Skipping past match: ${team1} vs ${team2} at ${new Date(timestamp).toLocaleString()}`);
-      return; // skip past match
+      return;
     }
-    // --- End of time check ---
 
     const streams: string[] = [];
     $table.find("a[href*='/counterstrike/Special:Stream/']").each((_, el) => {
-      // Made selector more specific
       const href = $(el).attr("href");
       if (href) {
-        // Ensure it's a relative URL before prepending liquipedia domain
         const fullUrl = href.startsWith("http") ? href : "https://liquipedia.net" + href;
         streams.push(fullUrl);
       }
     });
 
-    const key = `${team1}|${team2}|${timestamp || timeText}`; // Use timestamp if valid
+    const key = `${team1}|${team2}|${timestamp}`;
     if (team1 && team2 && !seen.has(key)) {
       seen.add(key);
       matches.push({
@@ -136,17 +147,12 @@ export async function getUpcomingMatches(): Promise<Match[]> {
         team2,
         team1Icon,
         team2Icon,
-        time: timeText || new Date(timestamp).toLocaleTimeString(), // Fallback display time
-        timestamp, // Store the millisecond timestamp
+        time: timeText,
+        timestamp,
         streams,
       });
-    } else if (!team1 || !team2) {
-      // console.warn("Skipping entry with missing team names.");
-    } else if (seen.has(key)) {
-      // console.log("Skipping duplicate entry:", key);
     }
   });
-
   lastFetchTime = now;
   cachedData = matches;
 

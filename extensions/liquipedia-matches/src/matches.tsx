@@ -26,30 +26,13 @@ export default function MatchesCommand() {
       .finally(() => setLoading(false));
   }, []);
 
-  const formatTimestampToLocal = (timestamp: number) => {
-    if (!timestamp) return "TBD";
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleString(undefined, {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-  };
-
   return (
     <List isLoading={loading} searchBarPlaceholder="Search upcoming matches...">
       {matches.map((match, idx) => (
         <List.Item
           key={idx}
           title={`${match.team1} vs ${match.team2}`}
-          accessories={[
-            { icon: match.team1Icon },
-            { text: formatTimestampToLocal(match.timestamp), icon: Icon.Clock },
-            { icon: match.team2Icon },
-          ]}
+          accessories={[{ icon: match.team1Icon }, { text: match.time, icon: Icon.Clock }, { icon: match.team2Icon }]}
           actions={
             match.streams.length > 0 ? (
               <ActionPanel>
