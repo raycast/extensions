@@ -7,7 +7,6 @@ import {
   CopyUsernameAction,
   OpenUrlInBrowserAction,
   PastePasswordAction,
-  VaultManagementActions,
   ShowCardDetailsAction,
   ShowNotesAction,
   ShowIdentityDetailsAction,
@@ -23,8 +22,9 @@ import FavoriteItemActions from "~/components/searchVault/actions/FavoriteItemAc
 import { DebuggingBugReportingActionSection } from "~/components/actions";
 import CopyKeyFingerprintAction from "./actions/CopyKeyFingerprintAction";
 import CopyPrivateKeyAction from "./actions/CopyPrivateKeyAction";
+import { VaultActionsSection } from "~/components/actions";
 
-const { primaryAction } = getPreferenceValues();
+const { primaryAction } = getPreferenceValues<Preferences.Search>();
 
 const VaultItemActionPanel = () => {
   const { type, id } = useSelectedVaultItem();
@@ -33,9 +33,9 @@ const VaultItemActionPanel = () => {
     <ActionPanel>
       {type === ItemType.LOGIN && (
         <ActionPanel.Section>
-          <ComponentReverser reverse={primaryAction === "copy"}>
-            <PastePasswordAction />
+          <ComponentReverser reverse={primaryAction === "paste"}>
             <CopyPasswordAction />
+            <PastePasswordAction />
           </ComponentReverser>
           <CopyTotpAction />
           <PasteTotpAction />
@@ -89,9 +89,7 @@ const VaultItemActionPanel = () => {
       <ActionPanel.Section title="Item Actions">
         <FavoriteItemActions />
       </ActionPanel.Section>
-      <ActionPanel.Section title="Vault Management">
-        <VaultManagementActions />
-      </ActionPanel.Section>
+      <VaultActionsSection />
       <DebuggingBugReportingActionSection />
       {environment.isDevelopment && (
         <ActionPanel.Section title="Development">
