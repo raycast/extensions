@@ -22,5 +22,22 @@ export default async function (input: Input) {
 
   const { data } = (await response.json()) as ScheduleResponse;
 
-  return data;
+  return {
+    events: data.schedule.events.map((event) => ({
+      type: event.type,
+      state: event.state,
+      startTime: event.startTime,
+      blockName: event.blockName,
+      match: {
+        id: event.match.id,
+        strategy: event.match.strategy,
+        teams: event.match.teams.map((team) => ({
+          name: team.name,
+          code: team.code,
+          result: team.result,
+          record: team.record,
+        })),
+      },
+    })),
+  };
 }

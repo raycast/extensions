@@ -16,5 +16,10 @@ export default async function () {
 
   const { data } = (await response.json()) as LeaguesResponse;
 
-  return data;
+  return {
+    leagues: data.leagues.map((league) => ({
+      id: league.id,
+      name: league.name,
+    })),
+  };
 }
