@@ -67,7 +67,7 @@ export default function Command() {
   }, [searchQuery, currentNetwork]);
 
   useEffect(() => {
-    if (searchQuery == "") {
+    if (searchQuery === "") {
       setSearchResult(null);
     }
   }, [searchQuery]);
