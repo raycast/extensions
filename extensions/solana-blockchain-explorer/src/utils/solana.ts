@@ -191,36 +191,53 @@ async function getNFTMetadata(nftAddress: string, network: Network) {
   }
 }
 
+/**
+ * Detects the type of search query based on its format and content.
+ * This function helps determine whether a search query is a domain, transaction,
+ * block number, token/NFT, or regular address.
+ * 
+ * @param query - The search string to analyze
+ * @param network - The Solana network to use for validation
+ * @returns A promise that resolves to the detected search type
+ */
 export async function detectSearchType(query: string, network: Network): Promise<SearchType> {
+  // Handle empty query case
   if (!query) return "address";
 
-  // Check if it's a domain name (.sol or .solana)
+  // Check for Solana domain names (e.g., example.sol or example.solana)
+  // Domain names can contain alphanumeric characters and hyphens
   if (/^[a-zA-Z0-9-]+\.(sol|solana)$/.test(query)) {
     return "domain";
   }
 
-  // Check if it's a transaction signature (base58 encoded, 88 characters)
+  // Check for transaction signatures
+  // Solana transaction signatures are base58 encoded and typically 87-88 characters long
   if (/^[1-9A-HJ-NP-Za-km-z]{87,88}$/.test(query)) {
     return "transaction";
   }
 
-  // Check if it's a block number
+  // Check for block numbers
+  // Block numbers are simple numeric values
   if (/^\d+$/.test(query)) {
     return "block";
   }
 
-  // For addresses, check if it's a token account
+  // Check for token/NFT addresses
+  // Solana addresses are base58 encoded and typically 32-44 characters long
   if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(query)) {
+    // First verify if it's a token account
     const isToken = await isTokenAccount(query, network);
     if (isToken) {
+      // If it's a token account, try to get metadata to distinguish between token and NFT
       const tokenMetadata = await getTokenMetadata(query);
       return tokenMetadata ? "token" : "NFT";
     }
 
+    // If it's not a token account, return the appropriate type
     return isToken ? "token" : "address";
   }
 
-  // Default to address
+  // If no other patterns match, assume it's a regular address
   return "address";
 }
 
