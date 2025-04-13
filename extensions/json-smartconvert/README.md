@@ -16,7 +16,7 @@ A Raycast extension that provides smart JSON parsing and stringifying capabiliti
 1. Copy JSON content to your clipboard
 2. Open Raycast (default: `Option+Space`)
 3. Search for one of the following commands:
-   - `Parse/Stringify JSON` - parse / stringify json
+   - `JSON Smart Convert` - parse / stringify json
 4. The converted result will be copied to your clipboard and displayed in the UI
 
 ## Examples
