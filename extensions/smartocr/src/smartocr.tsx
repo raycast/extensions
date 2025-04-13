@@ -58,7 +58,7 @@ export default function SmartOCR() {
 
   useEffect(() => {
     doIt().then((r) => setResult(r));
-  }, [setResult]);
+  }, []);
 
   if (result.type === "error") {
     return <Detail markdown={result.message} />;
