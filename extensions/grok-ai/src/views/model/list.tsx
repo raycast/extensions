@@ -1,5 +1,6 @@
 import { Icon, List } from "@raycast/api";
 import { Model } from "../../type";
+import { JSX } from "react";
 
 // Debug logging utility
 function debugLog<T>(message: string, data?: T) {

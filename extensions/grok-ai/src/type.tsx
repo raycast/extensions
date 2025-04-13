@@ -5,6 +5,7 @@ export interface Chat {
   question: string;
   answer: string;
   created_at: string;
+  fils: string[];
 }
 
 export interface SavedChat extends Chat {
@@ -120,6 +121,11 @@ export interface ChatViewProps extends ChangeModelProp {
   conversation: Conversation;
   setConversation: Set<Conversation>;
   use: { chats: ChatHook; conversations: ConversationsHook; savedChats: SavedChatHook };
+}
+
+export interface CSVPrompt {
+  act: string;
+  prompt: string;
 }
 
 export type ContentFormat = "html" | "text" | "markdown";
