@@ -16,8 +16,7 @@ A Raycast extension that provides smart JSON parsing and stringifying capabiliti
 1. Copy JSON content to your clipboard
 2. Open Raycast (default: `Option+Space`)
 3. Search for one of the following commands:
-   - `Parse JSON` - Format JSON string to object
-   - `Stringify JSON` - Compact JSON object to string
+   - `Parse/Stringify JSON` - parse / stringify json
 4. The converted result will be copied to your clipboard and displayed in the UI
 
 ## Examples
@@ -26,17 +25,12 @@ A Raycast extension that provides smart JSON parsing and stringifying capabiliti
 
 Before:
 ```
-{"name":"JSON-SmartConvert","version":"1.0.0","description":"Smart JSON conversion","author":"Sachin"}
+"{\"name\":\"JSON-SmartConvert\",\"version\":\"1.0.0\",\"description\":\"Smart JSON conversion\",\"author\":\"Sachin\"}"
 ```
 
 After:
 ```json
-{
-  "name": "JSON-SmartConvert",
-  "version": "1.0.0",
-  "description": "Smart JSON conversion",
-  "author": "Sachin"
-}
+{"name":"JSON-SmartConvert","version":"1.0.0","description":"Smart JSON conversion","author":"Sachin"}
 ```
 
 ### Stringify JSON
@@ -53,14 +47,14 @@ Before:
 
 After:
 ```
-{"name":"JSON-SmartConvert","version":"1.0.0","description":"Smart JSON conversion","author":"Sachin"}
+"{\n  \"name\": \"JSON-SmartConvert\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Smart JSON conversion\",\n  \"author\": \"Sachin\"\n}"
 ```
 
 ## Installation
 
 1. Install [Raycast](https://raycast.com/)
 2. Open Raycast and search for "Extensions"
-3. Click "Store" and search for "JSON-SmartConvert"
+3. Click "Store" and search for "JSON Smart Convert"
 4. Click "Install"
 
 Alternatively, you can install it directly from the [Raycast Store](https://raycast.com/store).
