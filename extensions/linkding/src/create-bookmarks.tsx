@@ -1,36 +1,42 @@
-import { Action, ActionPanel, Form, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, popToRoot } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import useLinkding from "./hooks/use-linkding";
+import { useEffect } from "react";
+import useBookmarks from "./hooks/use-bookmarks";
+import useUrlMetadata from "./hooks/use-url-metadata";
 import { CreateLinkdingBookmarkFormValues } from "./types/linkding-types";
 import { isValidUrl } from "./util/is-valid-url";
+import parseTags from "./util/parse-tags";
 
-export default function CreateBookmarks() {
+export default function createBookmarks() {
   const preferences = getPreferenceValues<Preferences>();
-  const { createBookmark, getMetadata } = useLinkding();
+  const { createBookmark } = useBookmarks();
 
   const { handleSubmit, itemProps, setValue, values } = useForm<CreateLinkdingBookmarkFormValues>({
-    onSubmit: createBookmark,
+    onSubmit: async (values) => {
+      const { tags, ...remainingValues } = values;
+      await createBookmark({
+        ...remainingValues,
+        tag_names: parseTags(tags),
+      });
+      popToRoot();
+    },
     validation: {
       url: (value) => {
         if (!value) return "URL is required";
-        if (!isValidUrl(value)) return "URL must be a valid url";
-        getMetadata(value).then((metadata) => {
-          if (!metadata) {
-            return;
-          }
-          if (!values.title) {
-            setValue("title", metadata.title);
-          }
-          if (!values.description && metadata.description) {
-            setValue("description", metadata.description ?? "");
-          }
-        });
+        if (!isValidUrl(value)) return "URL is invalid";
       },
     },
     initialValues: {
       unread: preferences.createBookmarksAsUnread,
     },
   });
+
+  const metadata = useUrlMetadata(values.url);
+  useEffect(() => {
+    if (!metadata) return;
+    if (!values.title) setValue("title", metadata.title);
+    if (!values.description && metadata.description) setValue("description", metadata.description);
+  }, [metadata]);
 
   return (
     <Form

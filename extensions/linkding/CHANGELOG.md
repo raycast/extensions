@@ -2,6 +2,7 @@
 
 ## [Refactor & Features] - {PR_MERGE_DATE}
 
+- refactor!: use raycast fetch API (removes "Ignore SSL" option)
 - fix: surface API errors in UI
 - fix: handle bookmarks without tags
 - feat: cache bookmarks locally

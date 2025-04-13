@@ -43,14 +43,6 @@
       "required": true
     },
     {
-      "title": "Ignore SSL",
-      "name": "ignoreSSL",
-      "label": "Ignore SSL certificate from Linkding server",
-      "description": "Whether to ignore the server's SSL certificate. Useful for self-signed certificates.",
-      "type": "checkbox",
-      "required": false
-    },
-    {
       "title": "New bookmarks",
       "name": "createBookmarksAsUnread",
       "label": "Create bookmarks as unread by default",
@@ -79,7 +71,6 @@
   "dependencies": {
     "@raycast/api": "^1.91.0",
     "@raycast/utils": "^1.18.1",
-    "axios": "^1.6.0",
     "cheerio": "^1.0.0-rc.12",
     "fuse.js": "^7.1.0"
   },
