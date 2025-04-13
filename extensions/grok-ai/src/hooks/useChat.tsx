@@ -139,6 +139,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       question,
       answer: "",
       created_at: new Date().toISOString(),
+      files: [],
     };
 
     setData((prev) => {
