@@ -12,7 +12,7 @@ export default async function Command() {
       result = JSON.stringify(clipboardText, null, 2);
       await showToast({ style: Toast.Style.Success, title: "Stringified JSON" });
     } else {
-      result = JSON.parse(clipboardText);
+      result = JSON.stringify(JSON.parse(clipboardText));
       await showToast({ style: Toast.Style.Success, title: "Parsed JSON" });
     }
     await Clipboard.copy(result);
