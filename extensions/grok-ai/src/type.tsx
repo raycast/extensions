@@ -5,7 +5,7 @@ export interface Chat {
   question: string;
   answer: string;
   created_at: string;
-  fils: string[];
+  files: string[];
 }
 
 export interface SavedChat extends Chat {

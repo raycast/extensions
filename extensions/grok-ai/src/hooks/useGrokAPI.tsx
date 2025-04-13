@@ -14,6 +14,7 @@ interface Preferences {
   apiKey: string;
   useStream: boolean;
   isHistoryPaused: boolean;
+  isCustomModel: boolean;
 }
 
 export function useGrokAPI(): GrokConfig {
