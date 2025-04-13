@@ -1,4 +1,5 @@
 import { showToast, Toast, Clipboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   const clipboardText = await Clipboard.readText();
@@ -16,10 +17,11 @@ export default async function Command() {
       await showToast({ style: Toast.Style.Success, title: "Parsed JSON" });
     }
     await Clipboard.copy(result);
-  } catch {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Invalid JSON format",
+  } catch (error) {
+    showFailureToast({
+      title: "Error",
+      message: "Failed to parse or stringify JSON",
+      error,
     });
     return;
   }
