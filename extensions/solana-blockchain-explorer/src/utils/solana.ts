@@ -195,7 +195,7 @@ async function getNFTMetadata(nftAddress: string, network: Network) {
  * Detects the type of search query based on its format and content.
  * This function helps determine whether a search query is a domain, transaction,
  * block number, token/NFT, or regular address.
- * 
+ *
  * @param query - The search string to analyze
  * @param network - The Solana network to use for validation
  * @returns A promise that resolves to the detected search type
