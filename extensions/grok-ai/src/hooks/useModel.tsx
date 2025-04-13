@@ -57,7 +57,7 @@ export function useModel(): ModelHook {
   const [isLoading, setLoading] = useState<boolean>(true);
   const [isFetching] = useState<boolean>(false);
   const [option, setOption] = useState<Model["option"][]>([
-    "grok-3-fast-mini",
+    "grok-3-mini-fast-beta",
     "grok-3-beta",
     "grok-3-mini-beta",
     "grok-2",
