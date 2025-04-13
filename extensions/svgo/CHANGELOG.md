@@ -1,5 +1,10 @@
 # SVGO Changelog
 
+## [Enhance some commands] - {PR_MERGE_DATE}
+
+- Added live preview to `Configure SVGO`
+- Added file sizes (before, after) to `Optimize SVG string` success message
+
 ## [New Configuration] - 2025-04-08
 
 - Added ability to modify (`save`, `restore`) configuration for all commands
