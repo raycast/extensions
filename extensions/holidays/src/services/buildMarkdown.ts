@@ -20,8 +20,9 @@ export const buildMarkdown = (
     const upcomingHolidays = sortedHolidays.filter((holiday) => moment(holiday.start).isSameOrAfter(now));
     const pastHolidays = sortedHolidays.filter((holiday) => moment(holiday.start).isBefore(now));
 
-    upcomingHolidays.sort((a, b) => moment(a.start).diff(moment(b.start)));
-    pastHolidays.sort((a, b) => moment(a.start).diff(moment(b.start)));
+    const sortByStartDate = (a: TranslatedHoliday, b: TranslatedHoliday) => moment(a.start).diff(moment(b.start));
+    upcomingHolidays.sort(sortByStartDate);
+    pastHolidays.sort(sortByStartDate);
     sortedHolidays = [...upcomingHolidays, ...pastHolidays];
   }
 
@@ -30,12 +31,24 @@ export const buildMarkdown = (
   }
 
   return sortedHolidays
-    .map(
-      ({ start, name, englishName }) => `
+    .map(({ start, name, englishName }) => {
+      const formattedDate = moment(start).format("dddd, MMMM Do");
+      const relativeDate = moment(start).fromNow();
+
+      let dateInfo = "";
+      if (showStartDate && useRelativeDate) {
+        dateInfo = `(Started ${relativeDate})`;
+      } else if (showStartDate) {
+        dateInfo = `(Started ${relativeDate})`;
+      } else if (useRelativeDate) {
+        dateInfo = `(${relativeDate})`;
+      }
+
+      return `
 ### ${englishName ? `${englishName} (${name})` : name}
 
-${moment(start).format("dddd, MMMM Do")} ${showStartDate ? `(Started ${moment(start).fromNow()})` : ""} ${useRelativeDate ? `(${moment(start).fromNow()})` : ""}
-`,
-    )
+${formattedDate} ${dateInfo}
+`;
+    })
     .join("\n\n");
 };

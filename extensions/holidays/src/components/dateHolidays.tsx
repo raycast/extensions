@@ -11,8 +11,8 @@ export default function DateHoliday({ selectedDate }: { selectedDate: moment.Mom
   const [holidaysFound, setHolidaysFound] = useState<
     Record<string, { country: TranslatedHoliday[]; states: Record<string, TranslatedHoliday[]> }>
   >({});
-  const [state, setState] = useState<{ filter: HolidayTypeFilter; searchText: string }>({
-    filter: "" as unknown as HolidayTypeFilter,
+  const [state, setState] = useState<{ filter: HolidayTypeFilter | undefined; searchText: string }>({
+    filter: undefined,
     searchText: "",
   });
 

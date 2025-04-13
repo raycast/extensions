@@ -30,7 +30,7 @@
     },
     {
       "name": "today-holidays",
-      "title": "List Today's Holiday",
+      "title": "List Today's Holidays",
       "description": "Allows you to see all holidays happening today for a country and region (if applicable)",
       "mode": "view"
     },

@@ -1,5 +1,5 @@
 import GlobalHolidays from "./components/globalHolidays";
 
-export default function UpcomingHolidays() {
+export default function AllHolidays() {
   return <GlobalHolidays />;
 }

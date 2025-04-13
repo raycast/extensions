@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import { Country, HolidayTypeFilter, PinnedState } from "./types";
 import { loadAllPinnedStates, loadPinnedCountries, unpinCountry, unpinState } from "./services/pinManager";
 import { CountryHolidaysTemplate } from "./views/countryHolidayTemplate";
+import { showFailureToast } from "@raycast/utils";
 
 export default function PinnedLocationsCommand() {
   const [isLoading, setIsLoading] = useState(true);
   const [pinnedCountries, setPinnedCountries] = useState<Country[]>([]);
   const [pinnedStates, setPinnedStates] = useState<Record<string, PinnedState[]>>({});
-  const [state, setState] = useState<{ filter: HolidayTypeFilter; searchText: string }>({
-    filter: "" as unknown as HolidayTypeFilter,
+  const [state, setState] = useState<{ filter: HolidayTypeFilter | undefined; searchText: string }>({
+    filter: undefined,
     searchText: "",
   });
 
@@ -30,7 +31,7 @@ export default function PinnedLocationsCommand() {
         await loadCountries();
         await loadStates();
       } catch (error) {
-        console.error("Failed to load pinned locations:", error);
+        showFailureToast(error, { title: "Failed to load pinned locations" });
       } finally {
         setIsLoading(false);
       }
@@ -49,6 +50,66 @@ export default function PinnedLocationsCommand() {
     await unpinState(countryCode, stateCode);
     await loadStates();
     setState((previous) => ({ ...previous, searchText: "" }));
+  };
+
+  const renderPinnedRegions = () => {
+    return Object.entries(pinnedStates).flatMap(([countryCode, states]) =>
+      states.map(({ stateCode, stateName, country }) => (
+        <List.Item
+          title={stateName || "Unknown Region"}
+          icon={country.emoji}
+          key={stateCode}
+          detail={
+            <CountryHolidaysTemplate
+              filter={state.filter}
+              stateCode={stateCode}
+              countryCode={countryCode}
+              opts={{ relativeOrdering: true }}
+            />
+          }
+          accessories={[{ text: `${country.alpha3}` }]}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Unpin Region"
+                icon={{ source: Icon.TackDisabled }}
+                onAction={async () => {
+                  await handleUnpinState(countryCode, stateCode);
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      )),
+    );
+  };
+
+  const renderPinnedCountries = () => {
+    return pinnedCountries.map((country) => (
+      <List.Item
+        title={country.name || "Unknown Country"}
+        icon={country?.emoji}
+        key={country.alpha2}
+        detail={
+          <CountryHolidaysTemplate
+            filter={state.filter}
+            countryCode={country.alpha2}
+            opts={{ relativeOrdering: true }}
+          />
+        }
+        actions={
+          <ActionPanel>
+            <Action
+              title="Unpin Country"
+              icon={{ source: Icon.TackDisabled }}
+              onAction={async () => {
+                await handleUnpinCountry(country);
+              }}
+            />
+          </ActionPanel>
+        }
+      />
+    ));
   };
 
   if (!isLoading && pinnedCountries.length === 0 && Object.keys(pinnedStates).length === 0) {
@@ -80,66 +141,9 @@ export default function PinnedLocationsCommand() {
         </List.Dropdown>
       }
     >
-      {pinnedCountries.length > 0 && (
-        <List.Section title="Pinned Countries">
-          {pinnedCountries.map((country) => (
-            <List.Item
-              title={country.name || "Unknown Country"}
-              icon={country?.emoji}
-              key={country.alpha2}
-              detail={
-                <CountryHolidaysTemplate
-                  filter={state.filter}
-                  countryCode={country.alpha2}
-                  opts={{ relativeOrdering: true }}
-                />
-              }
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Unpin Country"
-                    icon={{ source: Icon.TackDisabled }}
-                    onAction={async () => {
-                      await handleUnpinCountry(country);
-                    }}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      )}
+      {pinnedCountries.length > 0 && <List.Section title="Pinned Countries">{renderPinnedCountries()}</List.Section>}
       {Object.keys(pinnedStates).length > 0 && (
-        <List.Section title="Pinned Regions">
-          {Object.entries(pinnedStates).map(([countryCode, states]) =>
-            states.map(({ stateCode, stateName, country }) => (
-              <List.Item
-                title={stateName || "Unknown Region"}
-                icon={country.emoji}
-                key={stateCode}
-                detail={
-                  <CountryHolidaysTemplate
-                    filter={state.filter}
-                    countryCode={countryCode}
-                    opts={{ relativeOrdering: true }}
-                  />
-                }
-                accessories={[{ text: `${country.alpha3}` }]}
-                actions={
-                  <ActionPanel>
-                    <Action
-                      title="Unpin Region"
-                      icon={{ source: Icon.TackDisabled }}
-                      onAction={async () => {
-                        await handleUnpinState(countryCode, stateCode);
-                      }}
-                    />
-                  </ActionPanel>
-                }
-              />
-            )),
-          )}
-        </List.Section>
+        <List.Section title="Pinned Regions">{renderPinnedRegions()}</List.Section>
       )}
     </List>
   );

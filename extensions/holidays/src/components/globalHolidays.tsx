@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import moment from "moment";
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { Country, HolidayTypeFilter } from "../types";
 import { CountryHolidaysTemplate } from "../views/countryHolidayTemplate";
@@ -25,8 +26,8 @@ export default function GlobalHolidays({
   const countries = useCountries();
   const [pinnedCountries, setPinnedCountries] = useState<Country[]>([]);
   const [unpinnedCountries, setUnpinnedCountries] = useState<Country[]>([]);
-  const [state, setState] = useState<{ filter: HolidayTypeFilter; searchText: string }>({
-    filter: "" as unknown as HolidayTypeFilter,
+  const [state, setState] = useState<{ filter: HolidayTypeFilter | undefined; searchText: string }>({
+    filter: undefined,
     searchText: "",
   });
   const [countriesWithStates, setCountriesWithStates] = useState<{ [key: string]: boolean }>({});

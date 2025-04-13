@@ -20,8 +20,8 @@ export const RegionalHolidays = ({
 
   const [isLoading, setIsLoading] = useState(true);
   const [pinnedStates, setPinnedStates] = useState<string[]>([]);
-  const [state, setState] = useState<{ filter: HolidayTypeFilter; searchText: string }>({
-    filter: "" as unknown as HolidayTypeFilter,
+  const [state, setState] = useState<{ filter: HolidayTypeFilter | undefined; searchText: string }>({
+    filter: undefined,
     searchText: "",
   });
   const [holidaysByState, setHolidaysByState] = useState<Record<string, TranslatedHoliday[]>>({});
