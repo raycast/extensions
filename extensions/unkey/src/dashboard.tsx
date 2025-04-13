@@ -74,11 +74,11 @@ export default function Apis() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action
+          <Action.Push
             title="Add API"
             shortcut={{ modifiers: ["cmd"], key: "n" }}
             icon={Icon.Plus}
-            onAction={() => push(<AddApi onApiAdded={(info) => addOrUpdate(info)} />)}
+            target={<AddApi onApiAdded={(info) => addOrUpdate(info)} />}
           />
         </ActionPanel>
       }
@@ -106,11 +106,11 @@ export default function Apis() {
               />
               <Action.OpenInBrowser shortcut={{ modifiers: ["cmd"], key: "o" }} url={APP_URL + api.id} />
               <ActionPanel.Section>
-                <Action
+                <Action.Push
                   title="Add API"
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                   icon={Icon.Plus}
-                  onAction={() => push(<AddApi onApiAdded={(info) => addOrUpdate(info)} />)}
+                  target={<AddApi onApiAdded={(info) => addOrUpdate(info)} />}
                 />
               </ActionPanel.Section>
             </ActionPanel>
@@ -135,7 +135,7 @@ function AddApi({ onApiAdded }: AddApiProps) {
     async onSubmit(values) {
       setIsLoading(true);
       const response = await getApiInfo(values.id);
-      if ("code" in response) {
+      if ("error" in response) {
         showToast({
           title: "Invalid API ID",
           message: "Please enter a valid API ID",
@@ -182,7 +182,7 @@ function Keys({ apiInfo }: KeysProps) {
     setIsLoading(true);
     const response = await getApiKeys(apiId, { limit: "100", offset: "0" });
 
-    if (!("code" in response)) {
+    if (!("error" in response)) {
       setKeys(response.keys);
       showToast({
         title: "SUCCESS",
@@ -373,7 +373,7 @@ function CreateKey({ apiInfo, onKeyCreated }: CreateKeyProps) {
       }
 
       const response = await createKey(req);
-      if (!("code" in response)) {
+      if (!("error" in response)) {
         showToast(Toast.Style.Success, "Created API Key", response.key);
         if (
           await confirmAlert({
@@ -404,6 +404,7 @@ function CreateKey({ apiInfo, onKeyCreated }: CreateKeyProps) {
         if (value) {
           try {
             JSON.parse(value);
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           } catch (e) {
             return "The item must be valid JSON";
           }

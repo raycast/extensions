@@ -12,7 +12,6 @@ import {
   UpdateKeyRequest,
   VerifyKeyResponse,
 } from "./types";
-import fetch from "node-fetch";
 import { API_HEADERS, API_URL } from "./constants";
 
 const callApi = async (endpoint: string, method: ApiMethod, body?: BodyRequest, animatedToastMessage = "") => {
@@ -49,6 +48,7 @@ const callApi = async (endpoint: string, method: ApiMethod, body?: BodyRequest, 
     const response = await apiResponse.json();
     await showToast(Toast.Style.Success, `Success`);
     return response;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     const error = "Failed to execute request. Please try again later.";
     await showToast(Toast.Style.Failure, `Error`, error);
@@ -58,24 +58,24 @@ const callApi = async (endpoint: string, method: ApiMethod, body?: BodyRequest, 
 
 // APIs
 export async function getApiInfo(apiId: string) {
-  return (await callApi(`apis/${apiId}`, "GET", undefined, "Retrieving API Info")) as
+  return (await callApi(`apis.getApi?apiId=${apiId}`, "GET", undefined, "Retrieving API Info")) as
     | ErrorResponse
     | GetApiInfoResponse;
 }
 export async function getApiKeys(apiId: string, query: GetApiKeysQuery) {
   if (!query.ownerId) delete query.ownerId;
-  const queryParams = new URLSearchParams({ ...query });
-  return (await callApi(`apis/${apiId}/keys?${queryParams}`, "GET", undefined, "Retrieving API Keys")) as
+  const queryParams = new URLSearchParams({ apiId, ...query });
+  return (await callApi(`apis.listKeys?${queryParams}`, "GET", undefined, "Retrieving API Keys")) as
     | ErrorResponse
     | GetApiKeysResponse;
 }
 
 // KEYs
 export async function revokeKey(keyId: string) {
-  return (await callApi(`keys/${keyId}`, "DELETE", undefined, "Revoking Key")) as ErrorResponse | RevokeKeyResponse;
+  return (await callApi(`keys.deleteKey`, "POST", { keyId }, "Revoking Key")) as ErrorResponse | RevokeKeyResponse;
 }
 export async function createKey(options: CreateKeyRequest) {
-  return (await callApi(`keys`, "POST", { ...options }, "Creating Key")) as ErrorResponse | CreateKeyResponse;
+  return (await callApi(`keys.createKey`, "POST", { ...options }, "Creating Key")) as ErrorResponse | CreateKeyResponse;
 }
 export async function verifyKey(key: string) {
   return (await callApi(`keys/verify`, "POST", { key }, "Verifying Key")) as ErrorResponse | VerifyKeyResponse;
