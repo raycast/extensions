@@ -41,8 +41,8 @@ export interface SearchResult<T> {
 
 export interface BookmarkEntry {
   id: number;
-  url: number;
-  title: number;
+  url: string;
+  title: string;
   lastModified: Date;
 }
 

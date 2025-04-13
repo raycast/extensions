@@ -5,6 +5,7 @@ import { SearchResult, HistoryEntry } from "../interfaces";
 import { getHistoryDbPath } from "../util";
 import { NotInstalledError } from "../components/error/NotInstalledError";
 import { getPreferenceValues } from "@raycast/api";
+import { Preferences } from "../interfaces";
 
 const whereClauses = (terms: string[]) => {
   return terms.map((t) => `moz_places.title LIKE '%${t}%'`).join(" AND ");

@@ -1,6 +1,7 @@
 import { Action, ActionPanel, closeMainWindow, Icon } from "@raycast/api";
 import { openHistoryTab, openNewTab, setActiveTab } from "../actions";
 import { HistoryEntry, Tab } from "../interfaces";
+import { showFailureToast } from "@raycast/utils";
 
 export class LibrewolfActions {
   public static NewTab = NewTabAction;
@@ -11,7 +12,16 @@ export class LibrewolfActions {
 function NewTabAction({ query }: { query?: string }) {
   return (
     <ActionPanel title="New Tab">
-      <ActionPanel.Item onAction={() => openNewTab(query)} title={query ? `Search "${query}"` : "Open Empty Tab"} />
+      <ActionPanel.Item
+        onAction={async () => {
+          try {
+            await openNewTab(query);
+          } catch (error) {
+            await showFailureToast(error, { title: "Failed to open new tab" });
+          }
+        }}
+        title={query ? `Search "${query}"` : "Open Empty Tab"}
+      />
     </ActionPanel>
   );
 }
@@ -37,8 +47,12 @@ function TabListItemAction(props: { tab: Tab }) {
 
 function LibrewolfGoToTab(props: { tab: Tab }) {
   async function handleAction() {
-    await setActiveTab(props.tab);
-    await closeMainWindow();
+    try {
+      await setActiveTab(props.tab);
+      await closeMainWindow();
+    } catch (error) {
+      await showFailureToast(error, { title: "Failed to switch tab" });
+    }
   }
   return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ActionPanel, Detail, showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
 import { DEFAULT_ERROR_TITLE, DownloadText } from "../../constants";
+import { showFailureToast } from "@raycast/utils";
 
 export function NotInstalledError() {
   const [isLoading, setIsLoading] = useState(false);
@@ -22,14 +23,18 @@ export function NotInstalledError() {
 
                 try {
                   execSync(`brew install --cask librewolf`);
-                  await toast.hide();
-                } catch {
-                  await toast.hide();
                   await showToast(
-                    Toast.Style.Failure,
-                    DEFAULT_ERROR_TITLE,
-                    "An unknown error occurred while trying to install",
+                    Toast.Style.Success,
+                    "Installation Successful",
+                    "Librewolf has been successfully installed",
                   );
+                  await toast.hide();
+                } catch (error) {
+                  await toast.hide();
+                  showFailureToast(error, {
+                    title: DEFAULT_ERROR_TITLE,
+                    message: "An unknown error occurred while trying to install",
+                  });
                 }
                 setIsLoading(false);
               }}

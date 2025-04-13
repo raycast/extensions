@@ -1,8 +1,9 @@
-import { Detail, showToast, Toast } from "@raycast/api";
+import { Detail } from "@raycast/api";
 import { DEFAULT_ERROR_TITLE, UnknownErrorText } from "../../constants";
+import { showFailureToast } from "@raycast/utils";
 
 export function UnknownError({ message }: { message: string }) {
-  showToast(Toast.Style.Failure, DEFAULT_ERROR_TITLE, message);
+  showFailureToast(message, { title: DEFAULT_ERROR_TITLE });
 
   return <Detail markdown={UnknownErrorText} />;
 }

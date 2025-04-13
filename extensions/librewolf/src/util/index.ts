@@ -60,19 +60,14 @@ export const getSessionManagerExtensionPath = (extensionId: string) => {
   );
 };
 
-export const getSessionInactivePath = async () => {
+export const getSessionInactivePath = () => {
   const userDirectoryPath = userDataDirectoryPath();
   return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "sessionstore.jsonlz4");
 };
 
 export const getSessionActivePath = async () => {
   const userDirectoryPath = userDataDirectoryPath();
-  return path.join(
-    userDirectoryPath,
-    await getProfileName(userDirectoryPath),
-    "sessionstore-backups",
-    "recovery.jsonlz4",
-  );
+  return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "sessionstore-backups", "recovery.jsonlz4");
 };
 
 export function decodeLZ4(buffer: Buffer) {

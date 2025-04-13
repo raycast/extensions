@@ -15,8 +15,8 @@
     {
       "name": "new-tab",
       "title": "New Tab",
-      "subtitle": "LibreWolf",
-      "description": "Open a new LibreWolf tab.",
+      "subtitle": "Librewolf",
+      "description": "Open a new Librewolf tab.",
       "mode": "view",
       "preferences": [
         {
@@ -58,14 +58,14 @@
     {
       "name": "search-history",
       "title": "Search History",
-      "subtitle": "LibreWolf",
+      "subtitle": "Librewolf",
       "description": "Search browser history.",
       "mode": "view"
     },
     {
       "name": "search-bookmarks",
       "title": "Search Bookmarks",
-      "subtitle": "LibreWolf",
+      "subtitle": "Librewolf",
       "description": "Search browser bookmarks.",
       "mode": "view"
     }
