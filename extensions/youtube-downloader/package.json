@@ -36,6 +36,18 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "download-video",
+      "title": "Download Video",
+      "description": "Downloads a video from a given URL"
+    },
+    {
+      "name": "extract-transcript",
+      "title": "Extract Video Transcript",
+      "description": "Extracts the transcript/subtitles from a video URL as Markdown"
+    }
+  ],
   "preferences": [
     {
       "name": "downloadPath",
@@ -114,21 +126,75 @@
       "required": false
     }
   ],
+  "ai": {
+    "instructions": "After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it.",
+    "evals": [
+      {
+        "input": "@youtube-downloader download the video from https://www.youtube.com/watch?v=ykaj0pS4A1A",
+        "mocks": {
+          "download-video": {
+            "downloadedPath": "/Users/path/to/video.mp4",
+            "duration": 51,
+            "fileName": "video.mp4",
+            "title": "Raycast Focus: Enter Flow State"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": "https://www.youtube.com/watch?v=ykaj0pS4A1A"
+              },
+              "name": "download-video"
+            }
+          },
+          {
+            "includes": "/Users/path/to/video.mp4"
+          },
+          {
+            "includes": "Raycast Focus: Enter Flow State"
+          }
+        ]
+      },
+      {
+        "input": "@youtube-downloader what did they say about elon musk in https://www.youtube.com/watch?v=T_5zHExXN7o",
+        "mocks": {
+          "extract-transcript": {
+            "language": "en",
+            "title": "Nvidia Earnings are the Super Bowl of Business | Prof G Markets",
+            "transcript": "...",
+            "url": "https://www.youtube.com/watch?v=T_5zHExXN7o"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": "https://www.youtube.com/watch?v=T_5zHExXN7o"
+              },
+              "name": "extract-transcript"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.92.1",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0",
     "date-fns": "^4.1.0",
     "execa": "^9.5.2",
     "is-url-superb": "^6.1.0",
-    "pretty-bytes": "^6.1.1"
+    "pretty-bytes": "^6.1.1",
+    "srt-parser-2": "^1.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.11",
-    "@types/node": "22.13.4",
+    "@types/node": "22.13.9",
     "@types/react": "^18.3.18",
     "eslint": "^8.57.1",
-    "prettier": "^3.5.1",
-    "typescript": "^5.7.3"
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

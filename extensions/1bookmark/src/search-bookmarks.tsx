@@ -1,6 +1,5 @@
 import { List, Cache, ActionPanel, Action, Icon } from "@raycast/api";
 import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
-import { trpc } from "@/utils/trpc.util";
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { sessionTokenAtom } from "@/states/session-token.state";
@@ -17,9 +16,9 @@ import { RequiredActions } from "./components/BookmarkItemActionPanel";
 const cache = new Cache();
 
 export function Body() {
-  const [sessionToken, setSessionToken] = useAtom(sessionTokenAtom);
-  const trpcUtils = trpc.useUtils();
+  const [sessionToken] = useAtom(sessionTokenAtom);
   const me = useMe(sessionToken);
+  const [keyword, setKeyword] = useState("");
 
   const spaceIds = useMemo(() => {
     return me?.data?.associatedSpaces.map((s) => s.id) || [];
@@ -42,33 +41,6 @@ export function Body() {
     setAfter1Sec(false);
     setTimeout(() => setAfter1Sec(true), 1000);
   }, [refetchBookmarks]);
-
-  const [after1Sec, setAfter1Sec] = useState(false);
-
-  useEffect(() => {
-    // If this is not here, LoginView will briefly appear.
-    setTimeout(() => setAfter1Sec(true), 1000);
-  }, []);
-
-  useEffect(() => {
-    if (!me.error) return;
-
-    // Login failed maybe due to token expiration.
-    // Clear sessionToken and send to LoginView.
-    setSessionToken("");
-  }, [me.error, setSessionToken]);
-
-  useEffect(() => {
-    // Clear data when logging out.
-    if (sessionToken) return;
-    if (!me.data && !data) return;
-    if (!after1Sec) return;
-
-    cache.remove("me");
-    cache.remove("bookmarks");
-  }, [sessionToken, trpcUtils, spaceIds, me.data, data, after1Sec]);
-
-  const [keyword, setKeyword] = useState("");
 
   const selectedTags = useMemo(() => {
     if (!me.data) return [];
@@ -113,7 +85,22 @@ export function Body() {
     };
   }, [searchInTags, searchInUntagged, keyword, taggedBookmarks, untaggedBookmarks]);
 
-  if (!sessionToken && after1Sec) {
+  const [after1Sec, setAfter1Sec] = useState(false);
+  useEffect(() => {
+    // If this is not here, LoginView will briefly appear.
+    setTimeout(() => setAfter1Sec(true), 1000);
+  }, []);
+
+  const loggedOutStatus = !sessionToken && after1Sec;
+  useEffect(() => {
+    // Clear data when logged out.
+    if (loggedOutStatus) {
+      cache.remove("me");
+      cache.remove("bookmarks");
+    }
+  }, [loggedOutStatus]);
+
+  if (loggedOutStatus) {
     return <LoginView />;
   }
 

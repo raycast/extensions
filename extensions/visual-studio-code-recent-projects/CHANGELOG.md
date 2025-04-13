@@ -1,6 +1,23 @@
 # Visual Studio Code Changelog
 
-## [Improvement] - 2025-02-27
+## [Update] - 2025-03-05
+
+- Added support for Trae CN.
+
+## [Update] - 2025-03-03
+
+- Fixed support for VSCodium - Insiders.
+- Sorted the list of builds in alphabetical order within the extension settings.
+
+## [Update] - 2025-03-02
+
+- Adds support for Positron as an option in the extension settings.
+
+## [Performance] - 2025-03-02
+
+- Fixed performance issue in ⁠Search Recent Projects command by implementing caching for application data retrieval. This significantly improves responsiveness when displaying many recent projects and eliminates rendering loop warnings.
+
+## [Improvements] - 2025-02-27
 
 - Improved UI by showing the actual editor name and icon (Windsurf, VSCodium, Cursor, etc.) in both `Search Recent Projects` and `Show Installed Extensions` commands.
 - Improved the `Uninstall Extension` action by adopting a destructive style, adding a shortcut, and enhancing the user experience by displaying the extension name in the confirmation dialog.

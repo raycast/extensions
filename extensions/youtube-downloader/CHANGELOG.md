@@ -1,5 +1,26 @@
 # Video Downloader Changelog
 
+## [Features] - 2025-03-05
+
+Enhanced extension with AI. You can now download videos and extract transcripts by @-mentioning the extension in Raycast AI.
+
+- Add a new tool for downloading videos
+- Add a new tool for extracting transcripts
+
+## [Improvements] - 2025-03-05
+
+- Add support to manage installed Homebrew libraries
+- Add support for checking if libraries outdated
+- Adjust preferences usage code to make used options more intuitive
+- Organize command views to keep entry file clean
+- Update tsconfig lib to `es2022` to match Node.js 18
+
+## [Features] - 2025-03-04
+
+- Add support for downloading all possible formats
+- Use a short & good video for placeholder
+- Update screenshot
+
 ## [Improvements & Fixes] - 2025-02-21
 
 - Use `execa` instead of `nano-spawn` for advanced usages

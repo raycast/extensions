@@ -16,10 +16,13 @@ import {
   CopyLoginUrisActions,
   CopyCustomFieldsActions,
   PasteTotpAction,
+  CopyPublicKeyAction,
 } from "~/components/searchVault/actions";
 import { ItemType } from "~/types/vault";
 import FavoriteItemActions from "~/components/searchVault/actions/FavoriteItemActions";
 import { BugReportOpenAction, CopyRuntimeErrorLog, BugReportCollectDataAction } from "~/components/actions";
+import CopyKeyFingerprintAction from "./actions/CopyKeyFingerprintAction";
+import CopyPrivateKeyAction from "./actions/CopyPrivateKeyAction";
 
 const { primaryAction } = getPreferenceValues();
 
@@ -71,6 +74,13 @@ const VaultItemActionPanel = () => {
       {type === ItemType.NOTE && (
         <ActionPanel.Section>
           <ShowNotesAction />
+        </ActionPanel.Section>
+      )}
+      {type === ItemType.SSH_KEY && (
+        <ActionPanel.Section>
+          <CopyPublicKeyAction />
+          <CopyKeyFingerprintAction />
+          <CopyPrivateKeyAction />
         </ActionPanel.Section>
       )}
       <ActionPanel.Section title="Custom Fields">

@@ -69,9 +69,12 @@ const cliPaths: Record<string, string> = {
   Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
   "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
   Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
-  VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
-  Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
+  Positron: "/Applications/Positron.app/Contents/Resources/app/bin/code",
   Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
+  "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/bin/marscode",
+  VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
+  "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app/bin/codium-insiders",
+  Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
 };
 
 export function getVSCodeCLIFilename(): string {
@@ -182,8 +185,10 @@ const buildSchemes: Record<string, string> = {
   "Code - Insiders": "vscode-insiders",
   Cursor: "cursor",
   VSCodium: "vscode-oss",
+  Positron: "positron",
   Windsurf: "windsurf",
   Trae: "trae",
+  "Trae CN": "trae-cn",
 };
 
 export function getBuildScheme(): string {

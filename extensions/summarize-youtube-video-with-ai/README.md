@@ -64,10 +64,22 @@ Choose the model you want to use. (default: `claude-3-5-sonnet-latest`).
 
 The language you want the summary to be in. Your choice will be used in a prompt like this "Answer in english". (default: `english`).
 
-## Using the extension with Ollama
+## `summarizeVideoWithOllama`
 
-It is possible to use the OpenAI compatible API endpoint from Ollama to summarize YouTube videos using a local LLM. To do this use the following preferences:
+### Preferences for Ollama
 
-- Run the command `summarizeVideoWithOpenAI`
-- Add OpenAI Endpoint to the commands preferences: `http://localhost:11434/v1/`
-- Add OpenAI Model to the commands preferences: `llama3.2:latest` or any other model from [Ollama's model catalog](https://ollama.com/search).
+### Creativity
+
+Choose how creative the AI should be.
+
+### Ollama Endpoint
+
+Choose the Ollama endpoint you want to use. (default: `http://localhost:11434/v1`).
+
+### Ollama Model
+
+Choose one of the models from Ollama's [model catalog](https://ollama.com/search). (default: `llama3.2:latest`).
+
+### Language
+
+The language you want the summary to be in. Your choice will be used in a prompt like this "Answer in english". (default: `english`).

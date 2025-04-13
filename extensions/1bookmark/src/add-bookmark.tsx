@@ -11,6 +11,7 @@ import {
   showHUD,
   getFrontmostApplication,
   Keyboard,
+  Cache,
 } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { useAtom } from "jotai";
@@ -22,6 +23,8 @@ import { recentSelectedSpaceAtom, recentSelectedTagsAtom } from "./states/recent
 import { LoginView } from "./views/LoginView";
 import { NewTagForm } from "./views/NewTagForm";
 import { useMe } from "./hooks/use-me.hook";
+
+const cache = new Cache();
 
 interface ScriptsPerBrowser {
   getURL: () => Promise<string>;
@@ -145,7 +148,7 @@ function Body(props: { onlyPop?: boolean }) {
   const [title, setTitle] = useState<string>("");
   const [url, setUrl] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [sessionToken, setSessionToken] = useAtom(sessionTokenAtom);
+  const [sessionToken] = useAtom(sessionTokenAtom);
   const [selectedSpace, setSelectedSpace] = useAtom(recentSelectedSpaceAtom);
   const [selectedTags, setSelectedTags] = useAtom(recentSelectedTagsAtom);
 
@@ -199,21 +202,21 @@ function Body(props: { onlyPop?: boolean }) {
   };
 
   const [after1Sec, setAfter1Sec] = useState(false);
-
   useEffect(() => {
     // If this is not here, will briefly appear.
     setTimeout(() => setAfter1Sec(true), 1000);
   }, []);
 
+  const loggedOutStatus = !sessionToken && after1Sec;
   useEffect(() => {
-    if (!me.error) return;
+    // Clear data when logged out.
+    if (loggedOutStatus) {
+      cache.remove("me");
+      cache.remove("bookmarks");
+    }
+  }, [loggedOutStatus]);
 
-    // Login failed maybe due to token expiration.
-    // Clear sessionToken and send to LoginView.
-    setSessionToken("");
-  }, [me.error, setSessionToken]);
-
-  if (!sessionToken && after1Sec) {
+  if (loggedOutStatus) {
     return <LoginView />;
   }
 

@@ -14,7 +14,7 @@ function Body() {
   const textAreaRef = useRef<Form.TextArea>(null);
 
   const { pop } = useNavigation();
-  const create = trpc.team.create.useMutation();
+  const create = trpc.space.create.useMutation();
 
   async function handleSubmit(form: FormValues) {
     await create.mutateAsync({

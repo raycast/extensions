@@ -1,11 +1,10 @@
 import type { AppItem } from "./lib";
 
-import { useEffect, useState } from "react";
 import { List } from "@raycast/api";
-
+import { useEffect, useState } from "react";
+import { AppManager, Uninstaller, showError } from "./lib";
 import { ListItem } from "./list-item";
 import { MissingDependency } from "./missing-dependency";
-import { AppManager, checkDependencies, showError } from "./lib";
 
 const $apps = new AppManager();
 
@@ -15,7 +14,7 @@ export default function Command() {
   const [isLoading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    checkDependencies()
+    Uninstaller.checkDependencies()
       .then(() => $apps.getApps())
       .catch(() => setDependencyError(true));
 

@@ -1,5 +1,8 @@
 # DeepSeeker - Quick Actions Changelog
 
+## [New Features] - 2025-03-05
+
+- 📜 Add history command: browse and search all your interaction histories
 
 ## [New Features] - 2025-02-25
 

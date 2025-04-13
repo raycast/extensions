@@ -127,7 +127,9 @@
     "@googleapis/people": "^3.0.9",
     "@raycast/api": "^1.90.0",
     "@raycast/utils": "^1.17.0",
-    "humanize-duration": "^3.32.1"
+    "date-fns": "^4.1.0",
+    "humanize-duration": "^3.32.1",
+    "nanoid": "^5.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

@@ -20,13 +20,13 @@ export default async function Command(props: { arguments: { endDate?: string; in
     });
 
     const endDate = props.arguments.endDate || formatDate(new Date());
-    const indexName = props.arguments.indexName;
+    const indexCode = props.arguments.indexName;
 
     const startDate = startDates.reduce(
       (minDate, date) => (new Date(date) < new Date(minDate) ? date : minDate),
       startDates[0],
     );
-    const url = `http://api.bcb.gov.br/dados/serie/bcdata.sgs.${indexName}/dados?formato=json&dataInicial=${startDate}&dataFinal=${endDate}`;
+    const url = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${indexCode}/dados?formato=json&dataInicial=${startDate}&dataFinal=${endDate}`;
 
     const response = await fetch(url);
     if (!response.ok) {

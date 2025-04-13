@@ -28,6 +28,15 @@
           "type": "checkbox",
           "required": false,
           "default": true
+        },
+        {
+          "name": "popAfterCopy",
+          "title": "Exit command after copying address",
+          "label": "Exit command after copying address from list",
+          "description": "If enabled, the command will close upon copying an address from the list.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
         }
       ]
     },

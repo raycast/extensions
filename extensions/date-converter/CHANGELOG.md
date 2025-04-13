@@ -1,5 +1,9 @@
 # Date Converter Changelog
 
+## [Update] - 2025-03-03
+
+- Support configuring primary and secondary actions
+
 ## [Update] - 2025-01-24
 
 - Support configuring the displayed date format and the format of "Human Date"

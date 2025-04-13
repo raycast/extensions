@@ -1,10 +1,13 @@
-import { Cache } from "@raycast/api";
+import { Cache, showToast, Toast } from "@raycast/api";
 import { RouterOutputs, trpc } from "@/utils/trpc.util";
 import { useEffect } from "react";
+import { useAtom } from "jotai";
+import { sessionTokenAtom } from "../states/session-token.state";
 
 const cache = new Cache();
 
 export const useMe = (sessionToken: string) => {
+  const [, setSessionToken] = useAtom(sessionTokenAtom);
   const me = trpc.user.me.useQuery(undefined, {
     enabled: !!sessionToken,
 
@@ -29,6 +32,28 @@ export const useMe = (sessionToken: string) => {
 
     cache.set("me", JSON.stringify(me.data));
   }, [me.data]);
+
+  useEffect(() => {
+    if (!me.error) return;
+
+    if (me.error.shape?.data.httpStatus !== 401) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Login failed",
+        message: "Try again later",
+      });
+      return;
+    }
+
+    // Login failed maybe due to token expiration.
+    // Clear sessionToken and send to LoginView.
+    setSessionToken("");
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Login required",
+      message: "Please login again",
+    });
+  }, [me.error, setSessionToken]);
 
   return me;
 };

@@ -2,12 +2,12 @@ import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, showTo
 import { useState } from "react";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
+import { Preferences } from "~/types/preferences";
 import { treatError } from "~/utils/debug";
 import { captureException } from "~/utils/development";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
 import { useLocalStorageItem } from "~/utils/localstorage";
 import { getLabelForTimeoutPreference } from "~/utils/preferences";
-import { Preferences } from "~/types/preferences";
 
 type UnlockFormProps = {
   pendingAction?: Promise<void>;
@@ -85,12 +85,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
         <ActionPanel>
           {!isLoading && (
             <>
-              <Action.SubmitForm
-                icon={Icon.LockUnlocked}
-                title="Unlock"
-                onSubmit={onSubmit}
-                shortcut={{ key: "enter", modifiers: [] }}
-              />
+              <Action.SubmitForm icon={Icon.LockUnlocked} title="Unlock" onSubmit={onSubmit} />
               <Action
                 icon={showPassword ? Icon.EyeDisabled : Icon.Eye}
                 title={showPassword ? "Hide Password" : "Show Password"}

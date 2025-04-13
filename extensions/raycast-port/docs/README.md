@@ -4,6 +4,7 @@
 
 - [AI.ask](https://github.com/raycast/extensions/blob/main/extensions/raycast-port/docs/ai-ask.md)
 - [BrowserExtension](https://github.com/raycast/extensions/blob/main/extensions/raycast-port/docs/browser-extension.md)
+- [WindowManagement](https://github.com/raycast/extensions/blob/main/extensions/raycast-port/docs/window-management.md)
 
 ## Tips
 

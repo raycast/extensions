@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [New Command] - 2025-03-04
+
+- Added new "Toggle Repeat" command.
+
 ## [AI Enhancements] - 2025-02-21
 
 - Added AI extensions to the Music extension.

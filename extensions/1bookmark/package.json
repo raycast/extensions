@@ -9,8 +9,7 @@
   "author": "onebookmark",
   "contributors": [
     "b6pzeusbc54tvhw5jgpyw8pwz2x6gs",
-    "lee_juwon",
-    "naru200"
+    "lee_juwon"
   ],
   "categories": [
     "Productivity",
@@ -35,8 +34,8 @@
   ],
   "preferences": [],
   "dependencies": {
-    "@raycast/api": "^1.89.1",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.19.0",
     "@tanstack/query-async-storage-persister": "^5.54.1",
     "@tanstack/react-query": "^5.55.0",
     "@tanstack/react-query-persist-client": "^5.55.0",

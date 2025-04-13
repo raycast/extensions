@@ -68,19 +68,34 @@ export default function ExplorePresets() {
                       <List.Item.Detail.Metadata>
                         <List.Item.Detail.Metadata.Label title="Name" text={preset.name} />
                         <List.Item.Detail.Metadata.Label title="Model" text={modelName} />
-                        <List.Item.Detail.Metadata.Label
-                          title="Creativity"
-                          text={
-                            preset.creativity
-                              ? preset.creativity.charAt(0).toUpperCase() + preset.creativity.slice(1)
-                              : "Not specified"
-                          }
-                          icon={getCreativityIcon(preset.creativity)}
-                        />
-                        <List.Item.Detail.Metadata.Label title="Web Search" text={preset.web_search ? "On" : "Off"} />
-                        {preset.image_generation ? (
-                          <List.Item.Detail.Metadata.Label title="Image Generation" text="On" />
-                        ) : null}
+                        {preset.tools ? (
+                          preset.tools.map((tool, i) => (
+                            <List.Item.Detail.Metadata.Label
+                              key={tool.id}
+                              title={i === 0 ? "AI Extensions" : ""}
+                              text={tool.name.charAt(0).toUpperCase() + tool.name.slice(1)}
+                            />
+                          ))
+                        ) : (
+                          <>
+                            <List.Item.Detail.Metadata.Label
+                              title="Creativity"
+                              text={
+                                preset.creativity
+                                  ? preset.creativity.charAt(0).toUpperCase() + preset.creativity.slice(1)
+                                  : "Not specified"
+                              }
+                              icon={getCreativityIcon(preset.creativity)}
+                            />
+                            <List.Item.Detail.Metadata.Label
+                              title="Web Search"
+                              text={preset.web_search ? "On" : "Off"}
+                            />
+                            {preset.image_generation ? (
+                              <List.Item.Detail.Metadata.Label title="Image Generation" text="On" />
+                            ) : null}
+                          </>
+                        )}
                         {preset.author ? (
                           <List.Item.Detail.Metadata.Label
                             title="Author"
