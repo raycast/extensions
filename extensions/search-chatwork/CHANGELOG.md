@@ -1,6 +1,6 @@
 # Chatwork Search Changelog
 
-## [Enhancements] - 2025-04-12
+## [OAuth Enhancements] - {PR_MERGE_DATE}
 
 - Modify scope of OAuth to use "Search Contacts" `command` via OAuth
 - Update some packages to eliminate vulnerabilities
