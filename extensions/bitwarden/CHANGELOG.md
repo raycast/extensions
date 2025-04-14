@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [New Preference] - 2025-04-09
+
+- Add primary action preference for authenticator command
+
 ## [New Command] - 2025-04-08
 
 - Add Authenticator command
@@ -7,7 +11,7 @@
 
 ## [Improvement] - 2025-03-24
 
-- Correct setup API key instructions 
+- Correct setup API key instructions
 - Remove local CLI mention from extension description
 - Mention local CLI option in README
 

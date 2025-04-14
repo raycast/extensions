@@ -1,5 +1,17 @@
 # Slack Changelog
 
+## [New Emoji Features and Improvements] - {PR_MERGE_DATE}
+
+- Add new `Search Emojis` command to browse and copy Slack emojis
+- Add `get-emojis` tool to fetch emojis with AI
+- Improve getting channel history with AI
+- Update tool titles and improve overall functionality
+
+## [New "Send Message" command] - 2025-04-10
+
+- Add a new command to send a message to a channel or user in Slack. Can send the message immediately or schedule it to arrive at a certain date or time. In order for this to work, you will need to add `chat:write` scope to the manifest, and re-install the application in your Slack space.
+- Updated README with updated scopes instructions.
+
 ## [Moved contributor] - 2025-03-31
 
 ## [Update README with improved manifest.yaml] - 2025-03-05
@@ -10,7 +22,7 @@
 
 ## [New "Copy Message URL" action] - 2025-02-10
 
-- Add `Copy Message URL` action to copy the URL of a message to the clipboard from the `Search Messages` command 
+- Add `Copy Message URL` action to copy the URL of a message to the clipboard from the `Search Messages` command
 
 ## [New "Copy Huddle Link" action] - 2025-01-13
 
