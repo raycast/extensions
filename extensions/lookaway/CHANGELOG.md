@@ -1,6 +1,6 @@
 # LookAway Raycast Extension Changelog
 
-## [Initial Version] - 2025-04-14
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Added initial commands based on LookAway AppleScript dictionary:
     - Start Next Break

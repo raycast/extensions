@@ -3,7 +3,7 @@ import { runAppleScript } from '@raycast/utils'
 
 export const APP_NAME = 'LookAway'
 export const REQUIRED_VERSION = '1.11.3'
-export const APP_BUNDLE_ID = 'com.mysticalbits.lookaway' // Ensure this is correct!
+export const APP_BUNDLE_ID = 'com.mysticalbits.lookaway'
 
 // Simple version comparison (e.g., "1.11.3" vs "1.10.0")
 export function compareVersions(v1: string, v2: string): number {
@@ -48,11 +48,7 @@ export async function isLookAwayInstalledAndRecent(): Promise<boolean> {
         return true
     } catch (error) {
         console.error('Error getting LookAway version:', error)
-        await showToast({
-            style: Toast.Style.Failure,
-            title: `Could not verify ${APP_NAME} version`,
-            message: `Please ensure ${APP_NAME} is running and try again.`
-        })
+        await showFailureToast(error, { title: `Could not verify ${APP_NAME} version`, message: `Please ensure ${APP_NAME} is running and try again.` })
         return false
     }
 }
@@ -116,10 +112,6 @@ export async function runLookAwayCommand(
         await showHUD(finalSuccessMessage)
     } catch (error) {
         console.error(`Error running command ${commandName}:`, error)
-        await showToast({
-            style: Toast.Style.Failure,
-            title: `Failed to run '${commandName}'`,
-            message: error instanceof Error ? error.message : 'Unknown AppleScript error'
-        })
+        await showFailureToast(error, { title: `Failed to run '${commandName}'` })
     }
 }
