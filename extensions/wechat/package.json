@@ -20,25 +20,32 @@
       "subtitle": "WeChat",
       "description": "A Raycast extension for WeChat  to quickly search your contacts and chat",
       "mode": "view"
+    },
+    {
+      "name": "manageTweak",
+      "title": "Manage WeChatTweak",
+      "description": "Install, uninstall, or manage WeChatTweak",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.19.1",
-    "node-fetch": "^3.3.2"
+    "@types/react": "^19.1.0",
+    "node-fetch": "^3.3.2",
+    "text-search-engine": "^1.4.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/react": "^18.3.18",
     "eslint": "^8.57.1",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
     "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "dev": "ray develop",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "build": "ray build -e dist"
   }
 }
