@@ -1,6 +1,6 @@
 # Netherlands Railways Train Search Changelog
 
-## [0.0.2] - {PR_MERGE_DATE}
+## [0.0.2] - 2025-04-14
 
 - Logo changed
 
