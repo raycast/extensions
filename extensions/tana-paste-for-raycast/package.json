@@ -1,0 +1,59 @@
+{
+  "name": "tana-paste-for-raycast",
+  "title": "Tana Paste for Raycast",
+  "description": "Convert text and Markdown to Tana Paste format",
+  "icon": "command-icon.png",
+  "author": "lisaross",
+  "type": "module",
+  "version": "1.5.2",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-clipboard-to-tana",
+      "title": "Quick Clipboard to Tana",
+      "description": "Instantly convert clipboard content to Tana Paste format",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-and-edit",
+      "title": "Paste and Edit for Tana",
+      "description": "Paste text, edit it, then convert to Tana Paste format",
+      "mode": "view"
+    },
+    {
+      "name": "selected-to-tana",
+      "title": "Convert Selected Text to Tana",
+      "description": "Convert currently selected text to Tana Paste format",
+      "mode": "no-view"
+    },
+    {
+      "name": "youtube-to-tana",
+      "title": "Youtube to Tana",
+      "description": "Extract YouTube video information and convert to Tana Paste format",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.3",
+    "youtube-transcript": "^1.2.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.23.0",
+    "@types/node": "^18.8.3",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.1",
+    "eslint": "^9.23.0",
+    "eslint-plugin-react": "^7.37.4",
+    "globals": "^16.0.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.29.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

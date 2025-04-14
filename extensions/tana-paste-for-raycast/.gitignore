@@ -1,0 +1,42 @@
+/node_modules
+# Dependencies
+node_modules/
+/dist
+/.raycast-swift-build
+
+# Build files
+/build
+/dist
+*.tsbuildinfo
+
+# Testing
+/coverage
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System files
+.DS_Store
+Thumbs.db
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+ehthumbs_vista.db
+*.swp
+*.swo
+
+# Editor directories and files
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.code-workspace

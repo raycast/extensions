@@ -1,0 +1,26 @@
+# Build and distribution files
+dist/
+build/
+.raycast/
+
+# Dependency directories
+node_modules/
+
+# Coverage directory
+coverage/
+
+# Log files
+*.log
+
+# Markdown files (since we might have specific formatting needs)
+*.md
+
+# Assets
+assets/
+
+# Configuration files
+*.json
+!.prettierrc
+
+# Test fixtures
+test/fixtures/ 
