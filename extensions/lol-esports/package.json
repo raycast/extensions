@@ -46,9 +46,8 @@
     {
       "name": "get-leagues",
       "title": "Get Leagues",
-      "description": "Get Leagues"
-    }
-  ,
+      "description": "Get available Leagues"
+    },
     {
       "name": "get-schedule",
       "title": "Get Schedule",
