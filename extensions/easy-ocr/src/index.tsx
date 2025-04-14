@@ -75,7 +75,7 @@ async function autoDetectedLanguage(text: string) {
   }
 
   // Detect language
-  return await detect(text, {
+  return detect(text, {
     languageCodeFormat: LanguageCodeFormat.ISO_639_3,
   });
 }
