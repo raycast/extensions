@@ -1,7 +1,7 @@
 # Tana Paste For Raycast Changelog
 
 
-## [1.5.2] - 2025-04-13
+## [1.5.2] - {PR_MERGE_DATE}
 
 ### Changed
 
