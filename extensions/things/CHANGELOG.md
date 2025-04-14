@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [✨ Menu Bar Todo] - {PR_MERGE_DATE}
+## [✨ Menu Bar Todo] - 2025-04-14
 
 - Update the menu bar to display only incomplete todos from today’s list
 
