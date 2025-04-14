@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { homedir } from "node:os";
 
 import {
   Alert,
@@ -148,6 +149,41 @@ const fixDoubleConcat = (text: string): string => {
 
   return text;
 };
+
+const CLOUD_STORAGE_PATHS = [
+  // iCloud Drive
+  `${homedir()}/Library/Mobile Documents/com~apple~CloudDocs`,
+  // Dropbox
+  `${homedir()}/Library/CloudStorage/Dropbox`,
+  // Google Drive
+  `${homedir()}/Library/CloudStorage/GoogleDrive`,
+  // OneDrive
+  `${homedir()}/Library/CloudStorage/OneDrive-Personal`,
+  `${homedir()}/Library/CloudStorage/OneDrive-Microsoft`,
+];
+
+export function isCloudStoragePath(path: string): boolean {
+  return CLOUD_STORAGE_PATHS.some((cloudPath) => path.startsWith(cloudPath));
+}
+
+export function isLibraryPath(path: string): boolean {
+  return path.includes(`${homedir()}/Library`);
+}
+
+export function shouldShowPath(path: string, showNonCloudLibraryPaths: boolean): boolean {
+  // Always show non-Library paths
+  if (!isLibraryPath(path)) {
+    return true;
+  }
+
+  // Always show cloud storage paths
+  if (isCloudStoragePath(path)) {
+    return true;
+  }
+
+  // Show other Library paths based on preference
+  return showNonCloudLibraryPaths;
+}
 
 export {
   loadPlugins,

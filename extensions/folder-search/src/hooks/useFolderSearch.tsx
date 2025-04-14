@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { LocalStorage, Toast, environment, showToast } from "@raycast/api";
+import { LocalStorage, Toast, environment, showToast, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { FolderSearchPlugin, SpotlightSearchResult } from "../types";
-import { loadPlugins, lastUsedSort } from "../utils";
+import { loadPlugins, lastUsedSort, shouldShowPath } from "../utils";
 import { searchSpotlight } from "../search-spotlight";
 
 export function useFolderSearch() {
@@ -19,7 +19,11 @@ export function useFolderSearch() {
 
   const abortable = useRef<AbortController>();
   const searchCallback = useRef((result: SpotlightSearchResult) => {
-    setResults((prevResults) => [...prevResults, result].sort(lastUsedSort));
+    const { filterLibraryFolders } = getPreferenceValues();
+    // Only add the result if it passes our visibility filter
+    if (shouldShowPath(result.path, !filterLibraryFolders)) {
+      setResults((prevResults) => [...prevResults, result].sort(lastUsedSort));
+    }
   });
 
   // check plugins
