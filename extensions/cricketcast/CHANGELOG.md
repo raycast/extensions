@@ -1,6 +1,6 @@
 # CricketCast
 
-## [Modernize + Better Score Error Handling] - {PR_MERGE_DATE}
+## [Modernize + Better Score Error Handling] - 2025-04-14
 
 - If Scores not fetched, extension does not crash
 - Use "https" link for the Livescores
