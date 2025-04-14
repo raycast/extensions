@@ -226,6 +226,71 @@ export async function getFrontpageProducts(): Promise<{ products: Product[]; err
     // Extract product data
     const productItems = featuredEdge.node.items.filter((item) => item.__typename === "Post");
 
+    // Log the leaderboard data for debugging
+    console.log(`\n--- LEADERBOARD DATA (${new Date().toISOString()}) ---`);
+    console.log(`Found ${productItems.length} featured products in Apollo data`);
+
+    // Check if we need to attempt DOM-based extraction as a fallback
+    const needsDomFallback = productItems.some((item) => item.votesCount === undefined || item.votesCount === null);
+
+    // If we need DOM fallback, try to extract vote counts from the page
+    const domVoteCounts = new Map<string, number>();
+    if (needsDomFallback) {
+      console.log("Some products missing vote counts in Apollo data, attempting DOM extraction...");
+      try {
+        // Try various selector patterns that might contain vote counts
+        const selectorPatterns = [
+          '[data-test="vote-button"]',
+          'button[data-test="vote-button"] > div > div',
+          'button:contains("▲")',
+          'div[class*="pt-header"] div[class*="flex-col"] div:nth-child(1) section:nth-child(2) button div div',
+        ];
+
+        // For each product, try to find its vote count in the DOM
+        for (const item of productItems) {
+          if (item.votesCount === undefined || item.votesCount === null) {
+            const productSlug = item.slug;
+            const productSelectors = selectorPatterns.map(
+              (selector) =>
+                `a[href="/posts/${productSlug}"] ~ ${selector}, a[href^="/posts/${productSlug}"] ~ ${selector}`,
+            );
+
+            // Try each selector
+            for (const selector of productSelectors) {
+              const voteElement = $(selector).first();
+              if (voteElement.length > 0) {
+                const voteText = voteElement.text().trim();
+                const voteCount = parseInt(voteText.replace(/[^0-9]/g, ""));
+                if (!isNaN(voteCount)) {
+                  domVoteCounts.set(item.id, voteCount);
+                  console.log(`Found DOM vote count for ${item.name}: ${voteCount}`);
+                  break;
+                }
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error extracting DOM vote counts:", error);
+      }
+    }
+
+    // Log the product data, including any DOM-extracted vote counts
+    productItems.forEach((item, index) => {
+      const domVoteCount = domVoteCounts.get(item.id);
+      const effectiveVoteCount = item.votesCount ?? domVoteCount ?? 0;
+
+      console.log(`Product ${index + 1}: ${cleanText(item.name)}`);
+      console.log(`- URL: ${HOST_URL}posts/${item.slug}`);
+      console.log(`- Votes: ${effectiveVoteCount}${domVoteCount ? " (DOM extracted)" : ""}`);
+      console.log(`- Comments: ${item.commentsCount || 0}`);
+
+      // Update the item's vote count if we found it in the DOM
+      if (domVoteCount !== undefined && (item.votesCount === undefined || item.votesCount === null)) {
+        item.votesCount = domVoteCount;
+      }
+    });
+
     // Transform to our Product type
     const products = productItems.map((item) => ({
       id: item.id,
@@ -766,12 +831,32 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
 
             // Update vote and comment counts with more accurate data
             if (postData.votesCount !== undefined) {
+              // Log any discrepancies in vote counts for debugging
+              if (product.votesCount !== postData.votesCount) {
+                console.log(`Points count discrepancy for ${product.name}:`);
+                console.log(`- Original: ${product.votesCount}`);
+                console.log(`- Updated: ${postData.votesCount}`);
+              }
               product.votesCount = postData.votesCount;
             }
 
             if (postData.commentsCount !== undefined) {
               product.commentsCount = postData.commentsCount;
             }
+
+            // Log detailed product data for debugging
+            console.log(`\n--- PRODUCT DETAIL DATA (${new Date().toISOString()}) ---`);
+            console.log(`Product: ${cleanText(product.name)}`);
+            console.log(`- URL: ${product.url}`);
+            console.log(`- Points: ${product.votesCount}`);
+            console.log(`- Comments: ${product.commentsCount}`);
+            console.log(`- Previous Launches: ${previousLaunches || 0}`);
+            if (hunter) console.log(`- Hunter: ${hunter.name}`);
+            if (makers.length > 0) console.log(`- Makers: ${makers.map((m) => m.name).join(", ")}`);
+            if (product.topics.length > 0) console.log(`- Topics: ${product.topics.map((t) => t.name).join(", ")}`);
+            if (galleryImages.length > 0) console.log(`- Gallery Images: ${galleryImages.length}`);
+            console.log(`- Timestamp: ${new Date().toISOString()}`);
+            console.log(`------------------------------------`);
 
             // Extract additional maker information if available
             if (postData.user && makers.length === 0) {
