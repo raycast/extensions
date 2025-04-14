@@ -1,6 +1,6 @@
 # Jetbrains Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-04-14
 - Fix sorting projects which doesn't have a opened value
 - Fix crashing when `projects` field in `settings.json` is not present
 
