@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-04-14
 
 - Fix: Actions such as copy, save, and speak were unavailable in chat messages of previous conversations.
 
