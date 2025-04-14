@@ -1,6 +1,6 @@
 # Cal.com Share Meeting Links Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-14
 
 - Adds created at date to bookings, to show booking date
 
