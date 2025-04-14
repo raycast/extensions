@@ -16,18 +16,23 @@ function Body() {
   const { pop } = useNavigation();
   const create = trpc.space.create.useMutation();
 
-  async function handleSubmit(form: FormValues) {
-    await create.mutateAsync({
-      name: form.name,
-      image: form.image,
-      description: form.description,
-    });
-    showToast({
-      style: Toast.Style.Success,
-      title: "Space created",
-    });
-    // TODO: Move to Spaces view.
-    pop();
+  function handleSubmit(form: FormValues) {
+    create.mutate(
+      {
+        name: form.name,
+        image: form.image,
+        description: form.description,
+      },
+      {
+        onSuccess: () => {
+          showToast({
+            style: Toast.Style.Success,
+            title: "Space created",
+          });
+          pop();
+        },
+      },
+    );
   }
 
   return (

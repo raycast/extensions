@@ -2,6 +2,7 @@ import { Detail, Icon } from "@raycast/api";
 
 // Components
 import Actions from "@/components/ActionsCollection";
+import { CollectionResult } from "@/types";
 
 export const Details: React.FC<{ result: CollectionResult }> = ({ result }) => {
   const coverImage =

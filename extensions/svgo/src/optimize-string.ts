@@ -1,16 +1,20 @@
-import { Clipboard, closeMainWindow, showHUD, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { Clipboard, closeMainWindow, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import isSvg from "is-svg";
 import { optimize } from "svgo";
+import { configHelper } from "./utils-2";
 
 export default async function Command() {
   const { paste } = getPreferenceValues();
 
   try {
+    const plugins = configHelper.getEnabledPlugins();
     const svgStr = await Clipboard.readText();
 
     if (!svgStr || !isSvg(svgStr)) throw Error("Not a valid SVG");
 
-    const res = optimize(svgStr);
+    const res = optimize(svgStr, {
+      plugins: plugins,
+    });
 
     await Clipboard[paste ? "paste" : "copy"](res.data);
     await closeMainWindow();

@@ -1,5 +1,11 @@
 # Parcel Changelog
 
+## [Track on Website, Cache] - 2025-04-12
+
+- Added "Track on Website" action to open the carrier's tracking page in the default browser
+- Use Raycast's `useFetch` hook to enable API response caching and improved/simplified error handling
+- Share API client functionality between component and AI tools
+
 ## [Added Package Tracking] - 2025-03-19
 
 - Added "Add Delivery" command with a form interface to add new deliveries to Parcel
