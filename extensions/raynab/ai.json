@@ -1,5 +1,5 @@
 {
-  "instructions": "You are a helpful assistant for managing YNAB (You Need A Budget) transactions. Always format amounts correctly and handle dates in ISO format. Be precise with payee names and account names. When showing transactions, format the information clearly and concisely.\n\nFor transaction queries, you can specify time periods using natural language. The following time periods are supported:\n- 'last year' or 'past year' for the last 12 months\n- 'last quarter' or 'past quarter' for the last 3 months\n- 'last month' or 'past month' for the last 30 days\n- 'last week' or 'past week' for the last 7 days\n- 'last day', 'past day', 'yesterday', or 'today' for the last 24 hours\n\nIf no time period is specified, the default is the last month.",
+  "instructions": "You are a helpful assistant for managing YNAB (You Need A Budget) transactions. Always format amounts correctly and handle dates in ISO format. Be precise with payee names and account names. When showing transactions, format the information clearly and concisely.\n\nFor transaction queries, you can specify time periods using natural language. The following time periods are supported:\n- 'last year' or 'past year' for the last 12 months\n- 'last quarter' or 'past quarter' for the last 3 months\n- 'last month' or 'past month' for the last 30 days\n- 'last week' or 'past week' for the last 7 days\n- 'last day', 'past day', 'yesterday', or 'today' for the last 24 hours\n\nIf no time period is specified, the default is the last month.\n\nFor account balance queries, use get-accounts or get-account-details tools, not get-transactions.",
   "tools": [
     {
       "name": "add-transaction",
@@ -36,6 +36,30 @@
       },
       "output": {
         "transaction": "object"
+      }
+    },
+    {
+      "name": "get-accounts",
+      "title": "Get Accounts",
+      "description": "Get all YNAB accounts and their balances using AI",
+      "input": {
+        "on_budget": "boolean"
+      },
+      "output": {
+        "accounts": "array",
+        "error": "string"
+      }
+    },
+    {
+      "name": "get-account-details",
+      "title": "Get Account Details",
+      "description": "Get details of a specific YNAB account using AI",
+      "input": {
+        "account_name": "string"
+      },
+      "output": {
+        "account": "object",
+        "error": "string"
       }
     }
   ],
@@ -186,6 +210,79 @@
             "arguments": {
               "transaction_id": "123"
             }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@ynab show me my account balances",
+      "mocks": {
+        "get-accounts": [
+          {
+            "name": "Checking",
+            "balance": 5000.00,
+            "on_budget": true
+          },
+          {
+            "name": "Savings",
+            "balance": 10000.00,
+            "on_budget": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-accounts",
+            "arguments": {}
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@ynab what's my checking account balance?",
+      "mocks": {
+        "get-account-details": {
+          "name": "Checking",
+          "balance": 5000.00,
+          "on_budget": true
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-account-details",
+            "arguments": {
+              "account_name": "Checking"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@ynab show me all my account balances",
+      "mocks": {
+        "get-accounts": [
+          {
+            "name": "Checking",
+            "balance": 5000.00,
+            "on_budget": true
+          },
+          {
+            "name": "Savings",
+            "balance": 10000.00,
+            "on_budget": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-accounts",
+            "arguments": {}
           }
         }
       ],

@@ -104,6 +104,16 @@
       "output": {
         "transaction": "object"
       }
+    },
+    {
+      "name": "get-accounts",
+      "title": "Get Accounts",
+      "description": "Get all YNAB accounts and their balances using AI"
+    },
+    {
+      "name": "get-account-details",
+      "title": "Get Account Details",
+      "description": "Get details of a specific YNAB account using AI"
     }
   ],
   "keywords": [
