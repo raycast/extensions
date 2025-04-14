@@ -1,6 +1,6 @@
 # Dust.tt Changelog
 
-## [fixes] - {PR_MERGE_DATE}
+## [fixes] - 2025-04-14
 
 - Upgrade dust-tt/client to fix the listing of agents.
 - Add new logo for salesforce, gong and bigquery connectors.
