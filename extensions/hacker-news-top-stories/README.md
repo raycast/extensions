@@ -1,3 +1,3 @@
-# Hacker News 500
+# Hacker News Top Stories
 
-A menubar extension to be notified when a story on Hacker News hits 500 points
+A menubar extension to view and track top stories from Hacker News
