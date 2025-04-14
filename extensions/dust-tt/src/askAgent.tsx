@@ -266,7 +266,7 @@ function AgentListItem({
           )}
           {!isFavorite && (
             <Action
-              title="Add To Favorites"
+              title="Add to Favorites"
               icon={Icon.Star}
               onAction={onSaveFavorite}
               shortcut={{ key: "d", modifiers: ["cmd"] }}
@@ -274,7 +274,7 @@ function AgentListItem({
           )}
           {isFavorite && (
             <Action
-              title="Remove From Favorites"
+              title="Remove from Favorites"
               icon={Icon.StarDisabled}
               onAction={onRemoveFavorite}
               style={Action.Style.Destructive}
