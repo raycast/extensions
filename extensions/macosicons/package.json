@@ -4,7 +4,6 @@
   "title": "macOSIcons.com",
   "description": "Raycast extension for browsing and applying icons from macOSicons.com",
   "icon": "logo.png",
-  "type": "module",
   "author": "shldk",
   "categories": [
     "System",
