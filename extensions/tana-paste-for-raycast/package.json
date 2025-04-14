@@ -28,7 +28,7 @@
     },
     {
       "name": "youtube-to-tana",
-      "title": "Youtube to Tana",
+      "title": "YouTube to Tana",
       "description": "Extract YouTube video information and convert to Tana Paste format",
       "mode": "no-view"
     }
