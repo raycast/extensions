@@ -158,6 +158,7 @@ export function CreateObjectForm({
         value={selectedSpace}
         onChange={setSelectedSpace}
         storeValue={true}
+        placeholder="Search spaces..."
         info="Select the space where the object will be created"
       >
         {spaces?.map((space) => (
@@ -171,6 +172,7 @@ export function CreateObjectForm({
         value={selectedType}
         onChange={setSelectedType}
         storeValue={true} // TODO: does not work
+        placeholder={`Search types in '${spaces.find((space) => space.id === selectedSpace)?.name}'...`}
         info="Select the type of object to create"
       >
         {types.map((type) => (
@@ -184,6 +186,7 @@ export function CreateObjectForm({
         value={selectedTemplate}
         onChange={setSelectedTemplate}
         storeValue={true}
+        placeholder={`Search templates for '${types.find((type) => type.id === selectedType)?.name}'...`}
         info="Select the template to use for the object"
       >
         <Form.Dropdown.Item key="none" value="" title="No Template" icon={Icon.Dot} />
@@ -200,6 +203,7 @@ export function CreateObjectForm({
         onSearchTextChange={setListSearchText}
         throttle={true}
         storeValue={true}
+        placeholder={`Search collections in '${spaces.find((space) => space.id === selectedSpace)?.name}'...`}
         info="Select the collection where the object will be added"
       >
         {!listSearchText && <Form.Dropdown.Item key="none" value="" title="No Collection" icon={Icon.Dot} />}

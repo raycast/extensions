@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import fetch, { Headers as FetchHeaders } from "node-fetch";
-import { errorConnectionMessage, localStorageKeys } from "./constant";
+import { currentApiVersion, errorConnectionMessage, localStorageKeys } from "./constant";
 import { checkResponseError } from "./error";
 
 interface FetchOptions {
@@ -26,8 +26,9 @@ export async function apiFetch<T>(url: string, options: FetchOptions): Promise<A
     const response = await fetch(url, {
       method: options.method,
       headers: {
-        "Content-Type": "application/json",
         Authorization: token ? `Bearer ${token}` : "",
+        "Content-Type": "application/json",
+        "Anytype-Version": currentApiVersion,
         ...options.headers,
       },
       body: options.body,

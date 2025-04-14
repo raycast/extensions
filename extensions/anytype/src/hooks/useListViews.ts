@@ -17,7 +17,7 @@ export function useListViews(spaceId: string, listId: string) {
     [spaceId, listId],
     {
       keepPreviousData: true,
-      execute: !!listId,
+      execute: !!spaceId && !!listId,
     },
   );
 

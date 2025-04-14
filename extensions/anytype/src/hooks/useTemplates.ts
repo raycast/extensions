@@ -17,6 +17,7 @@ export function useTemplates(spaceId: string, typeId: string) {
     [spaceId, typeId],
     {
       keepPreviousData: true,
+      execute: !!spaceId && !!typeId,
     },
   );
 

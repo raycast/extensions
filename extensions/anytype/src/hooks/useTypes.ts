@@ -16,8 +16,8 @@ export function useTypes(spaceId: string) {
     },
     [spaceId],
     {
-      execute: !!spaceId,
       keepPreviousData: true,
+      execute: !!spaceId,
     },
   );
 

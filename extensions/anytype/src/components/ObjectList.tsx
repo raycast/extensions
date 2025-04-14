@@ -220,7 +220,7 @@ export function ObjectList({ space }: ObjectListProps) {
       {processedPinned && processedPinned.length > 0 && (
         <List.Section
           title="Pinned"
-          subtitle={`${pluralize(processedPinned.length, currentView.slice(0, -1), { withNumber: true })}`}
+          subtitle={`${pluralize(processedPinned.length, currentView, { withNumber: true })}`}
         >
           {processedPinned.map((item) => (
             <ObjectListItem
@@ -244,8 +244,8 @@ export function ObjectList({ space }: ObjectListProps) {
       )}
       {processedRegular && processedRegular.length > 0 ? (
         <List.Section
-          title={searchText ? "Search Results" : `All ${currentView.charAt(0).toUpperCase() + currentView.slice(1)}`}
-          subtitle={`${pluralize(processedRegular.length, currentView.slice(0, -1), { withNumber: true })}`}
+          title={searchText ? "Search Results" : `All ${pluralize(2, currentView)}`}
+          subtitle={`${pluralize(processedRegular.length, currentView, { withNumber: true })}`}
         >
           {processedRegular.map((item) => (
             <ObjectListItem

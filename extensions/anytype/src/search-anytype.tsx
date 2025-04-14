@@ -151,10 +151,6 @@ function Search() {
     )
     .map((object) => processObjectWithSpaceIcon(object, false));
 
-  const subtitle = pluralize(processedRegularObjects.length, currentView, {
-    withNumber: true,
-  });
-
   return (
     <List
       isLoading={isLoadingSpaces || isLoadingPinnedObjects || isLoadingObjects}
@@ -199,7 +195,10 @@ function Search() {
       }
     >
       {processedPinnedObjects.length > 0 && (
-        <List.Section title="Pinned" subtitle={subtitle}>
+        <List.Section
+          title="Pinned"
+          subtitle={pluralize(processedPinnedObjects.length, currentView, { withNumber: true })}
+        >
           {processedPinnedObjects.map((object, index) => (
             <ObjectListItem
               key={`${object.id}-${index}`}
@@ -220,7 +219,10 @@ function Search() {
         </List.Section>
       )}
       {processedRegularObjects.length > 0 ? (
-        <List.Section title={getSectionTitle(searchText)} subtitle={subtitle}>
+        <List.Section
+          title={getSectionTitle(searchText)}
+          subtitle={pluralize(processedRegularObjects.length, currentView, { withNumber: true })}
+        >
           {processedRegularObjects.map((object, index) => (
             <ObjectListItem
               key={`${object.id}-${index}`}

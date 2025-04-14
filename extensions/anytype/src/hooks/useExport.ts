@@ -9,6 +9,9 @@ export function useExport(spaceId: string, objectId: string, format: ExportForma
       return response;
     },
     [spaceId, objectId, format],
+    {
+      execute: !!spaceId && !!objectId && !!format,
+    },
   );
 
   return {

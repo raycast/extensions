@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { getObjectWithoutMappedDetails } from "../api";
 import { Property, RawSpaceObject, SortProperty, SpaceObject } from "../models";
-import { colorMap, getIconWithFallback, typeIsList } from "../utils";
+import { colorMap, getIconWithFallback } from "../utils";
 import { mapType } from "./types";
 
 /**
@@ -18,7 +18,6 @@ export async function mapObjects(objects: RawSpaceObject[]): Promise<SpaceObject
         icon: await getIconWithFallback(object.icon, object.layout, object.type),
         name: object.name || object.snippet || "Untitled",
         type: await mapType(object.type),
-        blocks: typeIsList(object.type.recommended_layout) ? object.blocks : [], // remove blocks for non-list types
         properties: object.properties?.filter((property) => {
           if (sort === SortProperty.Name) {
             // When sorting by name, keep the 'LastModifiedDate' property for tooltip purposes
@@ -141,7 +140,6 @@ export async function mapObject(object: RawSpaceObject): Promise<SpaceObject> {
     icon,
     name: object.name || object.snippet || "Untitled",
     type: await mapType(object.type),
-    blocks: typeIsList(object.type.recommended_layout) ? object.blocks : [], // remove blocks for non-list types
     properties: mappedProperties,
   };
 }

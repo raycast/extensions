@@ -17,6 +17,7 @@ export function useMembers(spaceId: string) {
     [spaceId],
     {
       keepPreviousData: true,
+      execute: !!spaceId,
     },
   );
 

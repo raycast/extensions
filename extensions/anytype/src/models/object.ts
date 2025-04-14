@@ -21,11 +21,19 @@ export interface RawSpaceObject {
   layout: string;
   space_id: string;
   archived: boolean;
-  blocks: Block[];
   properties: Property[];
 }
 
+export interface RawSpaceObjectWithBlocks extends RawSpaceObject {
+  blocks: Block[];
+}
+
 export interface SpaceObject extends Omit<RawSpaceObject, "icon" | "type"> {
+  type: Type;
+  icon: Image.ImageLike;
+}
+
+export interface SpaceObjectWithBlocks extends Omit<RawSpaceObjectWithBlocks, "icon" | "type"> {
   type: Type;
   icon: Image.ImageLike;
 }
