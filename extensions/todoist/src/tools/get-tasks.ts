@@ -1,21 +1,6 @@
-import { getTodoistRestApi, withTodoistApi } from "../helpers/withTodoistApi";
+import { getTodoistApi, withTodoistApi } from "../helpers/withTodoistApi";
 
 type Input = {
-  /**
-   * Filter tasks by project ID
-   */
-  project_id?: string;
-
-  /**
-   * Filter tasks by section ID
-   */
-  section_id?: string;
-
-  /**
-   * Filter tasks by label name
-   */
-  label?: string;
-
   /**
    * Filter tasks by any supported filter. Supports advanced filtering with various operators and keywords.
    *
@@ -90,16 +75,10 @@ type Input = {
    * if differs from default English
    */
   lang?: string;
-
-  /**
-   * A list of the task IDs to retrieve, this should be a comma separated list.
-   */
-  ids?: string;
 };
 
 export default withTodoistApi(async (input: Input = {}) => {
-  const todoistApi = getTodoistRestApi();
-
-  const { data } = await todoistApi.get("/tasks", { params: input });
+  const todoistApi = getTodoistApi();
+  const { data } = await todoistApi.get("/tasks/filter", { params: input });
   return data;
 });
