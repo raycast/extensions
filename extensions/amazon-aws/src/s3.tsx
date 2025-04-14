@@ -138,7 +138,7 @@ function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: str
                   <Action.CopyToClipboard title="Copy Key" content={object.Key || ""} />
                   <Action.CopyToClipboard
                     title="Copy S3 URI"
-                    content={"s3://" + bucket.Name + "/" + object.Key || ""}
+                    content={"s3://" + bucket.Name + "/" + (object.Key || "")}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
                   />
                   <Action
