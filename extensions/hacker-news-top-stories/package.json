@@ -16,7 +16,7 @@
     {
       "name": "view-top-stories",
       "title": "Hacker News Top Stories Menu Bar",
-      "description": "View Hacker News stories based on a configurable points threshold which are submitted over the last 24 hours.",
+      "description": "View recent Hacker News stories based on a configurable points threshold.",
       "mode": "menu-bar",
       "interval": "10m"
     }
