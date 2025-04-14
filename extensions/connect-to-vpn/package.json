@@ -10,7 +10,8 @@
     "stonerl",
     "vyacheslav",
     "yshmeel",
-    "borzov"
+    "borzov",
+    "andrei_hudalla"
   ],
   "license": "MIT",
   "commands": [
@@ -86,7 +87,6 @@
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.3.2",
     "react": "^18.3.1",
-    "react-devtools": "^5.2.0",
     "typescript": "^5.5.2"
   },
   "scripts": {

@@ -3,7 +3,6 @@
 ## [New Additions] 2025-04-05
 
 - Implemented a new command to toggle the last used VPN connection
-- Contributed by @paranoidPhantom
 
 ## [Performance Improvements] 2025-03-19
 
