@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [New API] - {PR_MERGE_DATE}
+## [New API] - 2025-04-14
 
 - Used new Todoist API
 - Renamed `Home` to `My Tasks`
