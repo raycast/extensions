@@ -41,7 +41,7 @@
     {
       "name": "get-accounts",
       "title": "Get Accounts",
-      "description": "Get all YNAB accounts and their balances using AI",
+      "description": "Get all YNAB accounts and their balances using AI. Use this for queries about multiple accounts or all accounts.",
       "input": {
         "on_budget": "boolean"
       },
@@ -53,7 +53,7 @@
     {
       "name": "get-account-details",
       "title": "Get Account Details",
-      "description": "Get details of a specific YNAB account using AI",
+      "description": "Get details of a specific YNAB account using AI. Use this for queries about a single account's balance or details.",
       "input": {
         "account_name": "string"
       },
@@ -242,7 +242,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab what's my checking account balance?",
+      "input": "@ynab what is my checking account balance?",
       "mocks": {
         "get-account-details": {
           "name": "Checking",
@@ -263,26 +263,42 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab show me all my account balances",
+      "input": "@ynab show me my checking account",
       "mocks": {
-        "get-accounts": [
-          {
-            "name": "Checking",
-            "balance": 5000.00,
-            "on_budget": true
-          },
-          {
-            "name": "Savings",
-            "balance": 10000.00,
-            "on_budget": true
-          }
-        ]
+        "get-account-details": {
+          "name": "Checking",
+          "balance": 5000.00,
+          "on_budget": true
+        }
       },
       "expected": [
         {
           "callsTool": {
-            "name": "get-accounts",
-            "arguments": {}
+            "name": "get-account-details",
+            "arguments": {
+              "account_name": "Checking"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@ynab how much is in my checking?",
+      "mocks": {
+        "get-account-details": {
+          "name": "Checking",
+          "balance": 5000.00,
+          "on_budget": true
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-account-details",
+            "arguments": {
+              "account_name": "Checking"
+            }
           }
         }
       ],
