@@ -16,19 +16,16 @@ import { ModelDropdown } from "./views/model/dropdown";
 import { QuestionForm } from "./views/question/form";
 
 export default function Ask(props: { conversation?: Conversation; initialQuestion?: string }) {
+  // Hooks
   const conversations = useConversations();
   const models = useModel();
   const savedChats = useSavedChat();
   const isAutoSaveConversation = useAutoSaveConversation();
-  const chats = useChat<Chat>(props.conversation ? props.conversation.chats : []);
+  const chats = useChat<Chat>(props.conversation?.chats ?? []);
   const question = useQuestion({ initialQuestion: "", disableAutoLoad: !!props.conversation });
+  const { push, pop } = useNavigation();
 
-  useEffect(() => {
-    if (props.initialQuestion) {
-      chats.ask(props.initialQuestion, conversation.model);
-    }
-  }, []);
-
+  // State
   const [conversation, setConversation] = useState<Conversation>(
     props.conversation ?? {
       id: uuidv4(),
@@ -39,12 +36,10 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       created_at: new Date().toISOString(),
     },
   );
-
+  const [selectedModelId, setSelectedModelId] = useState<string>(props.conversation?.model.id ?? "grok-3");
   const [isLoading, setLoading] = useState<boolean>(true);
-  const [selectedModelId, setSelectedModelId] = useState<string>(
-    props.conversation ? props.conversation.model.id : "grok-3",
-  );
 
+  // Preferences
   const [{ isAutoFullInput, isAutoLoadText }] = useState(() => {
     return getPreferenceValues<{
       isAutoFullInput: boolean;
@@ -52,80 +47,75 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
     }>();
   });
 
-  const { push, pop } = useNavigation();
-  const [isConversationDone, setIsConversationDone] = useState(false);
-
+  // Initial question handling
   useEffect(() => {
-    if (models.isLoading || !isConversationDone) {
-      return;
+    if (props.initialQuestion) {
+      chats.ask(props.initialQuestion, conversation.model);
     }
-    if (props.initialQuestion || !isAutoFullInput) {
-      setLoading(false);
-      return;
-    }
-    if (isAutoLoadText && question.data.length === 0) {
-      setLoading(false);
-      return;
-    }
-    if (conversation.chats.length === 0 || (conversation.chats.length > 0 && question.data.length > 0)) {
-      const questionText = question.data;
-      clearSearchBar();
-      push(
-        <QuestionForm
-          initialQuestion={questionText}
-          onSubmit={(question) => {
-            chats.ask(question, conversation.model);
-            pop();
-          }}
-          models={Object.values(models.data)}
-          selectedModel={selectedModelId}
-          onModelChange={setSelectedModelId}
-          isFirstCall={conversation.chats.length === 0}
-        />,
-      );
-    }
+  }, [props.initialQuestion, conversation.model]);
 
-    setLoading(false);
-  }, [models.isLoading, models.data, question.data, conversation.model]);
-
+  // Conversation and model management
   useEffect(() => {
+    if (models.isLoading) return;
+
+    // Update conversation with latest chats
+    setConversation((prev) => ({
+      ...prev,
+      chats: chats.data,
+      updated_at: new Date().toISOString(),
+    }));
+
+    // Handle initial model setup
+    if (models.data && conversation.chats.length === 0) {
+      const defaultUserModel = models.data["grok-3"] ?? conversation.model;
+      setConversation((prev) => ({
+        ...prev,
+        model: defaultUserModel,
+        updated_at: new Date().toISOString(),
+      }));
+    }
+
+    // Handle model selection
+    const selectedModel = models.data[selectedModelId];
+    if (selectedModel) {
+      setConversation((prev) => ({
+        ...prev,
+        model: selectedModel,
+        updated_at: new Date().toISOString(),
+      }));
+    }
+
+    // Auto-save conversation
     if ((props.conversation?.id !== conversation.id || conversations.data.length === 0) && isAutoSaveConversation) {
       conversations.add(conversation);
     }
-  }, []);
 
-  useEffect(() => {
+    // Update conversation in storage
     conversations.update(conversation);
-  }, [conversation]);
 
-  useEffect(() => {
-    if (models.isLoading) {
-      return;
+    // Handle question form
+    if (!props.initialQuestion && isAutoFullInput && !isAutoLoadText && question.data.length > 0) {
+      if (conversation.chats.length === 0 || (conversation.chats.length > 0 && question.data.length > 0)) {
+        const questionText = question.data;
+        clearSearchBar();
+        push(
+          <QuestionForm
+            initialQuestion={questionText}
+            onSubmit={(question) => {
+              chats.ask(question, conversation.model);
+              pop();
+            }}
+            models={Object.values(models.data)}
+            selectedModel={selectedModelId}
+            onModelChange={setSelectedModelId}
+            isFirstCall={conversation.chats.length === 0}
+          />,
+        );
+      }
     }
-    if (models.data && conversation.chats.length === 0) {
-      const defaultUserModel = models.data["grok-3"] ?? conversation.model;
-      setConversation({ ...conversation, model: defaultUserModel, updated_at: new Date().toISOString() });
-    }
-  }, [models.isLoading, models.data]);
 
-  useEffect(() => {
-    const updatedConversation = { ...conversation, chats: chats.data, updated_at: new Date().toISOString() };
-    setConversation(updatedConversation);
-  }, [chats.data]);
-
-  useEffect(() => {
-    if (models.isLoading) {
-      return;
-    }
-    setIsConversationDone(false);
-    const selectedModel = models.data[selectedModelId];
-    setConversation({
-      ...conversation,
-      model: selectedModel ?? { ...conversation.model },
-      updated_at: new Date().toISOString(),
-    });
-    setIsConversationDone(true);
-  }, [selectedModelId, models.isLoading, models.data]);
+    setLoading(false);
+  }, [models.isLoading, models.data, chats.data, selectedModelId, question.data]);
 
   const getActionPanel = (question: string, model: Model) => (
     <ActionPanel>

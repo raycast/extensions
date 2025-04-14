@@ -22,12 +22,14 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
   const isAutoSaveConversation = useAutoSaveConversation();
   const chats = useChat<Chat>(props.conversation ? props.conversation.chats : []);
   const question = useQuestion({ initialQuestion: "", disableAutoLoad: !!props.conversation });
+  const { push, pop } = useNavigation();
 
-  useEffect(() => {
-    if (props.initialQuestion) {
-      chats.ask(props.initialQuestion, conversation.model);
-    }
-  }, []);
+  const [{ isAutoFullInput, isAutoLoadText }] = useState(() => {
+    return getPreferenceValues<{
+      isAutoFullInput: boolean;
+      isAutoLoadText: boolean;
+    }>();
+  });
 
   const [conversation, setConversation] = useState<Conversation>(
     props.conversation ?? {
@@ -40,33 +42,43 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
     },
   );
 
-  const [isLoading, setLoading] = useState<boolean>(true);
   const [selectedModelId, setSelectedModelId] = useState<string>(
     props.conversation ? props.conversation.model.id : "grok-3",
   );
 
-  const [{ isAutoFullInput, isAutoLoadText }] = useState(() => {
-    return getPreferenceValues<{
-      isAutoFullInput: boolean;
-      isAutoLoadText: boolean;
-    }>();
-  });
-
-  const { push, pop } = useNavigation();
-  const [isConversationDone, setIsConversationDone] = useState(false);
-
+  // Handle initial question and conversation setup
   useEffect(() => {
-    if (models.isLoading || !isConversationDone) {
-      return;
+    if (props.initialQuestion && conversation) {
+      chats.ask(props.initialQuestion, conversation.model);
     }
-    if (props.initialQuestion || !isAutoFullInput) {
-      setLoading(false);
-      return;
+  }, [conversation]);
+
+  // Handle model selection and conversation updates
+  useEffect(() => {
+    if (models.isLoading) return;
+
+    const selectedModel = models.data[selectedModelId];
+    const updatedConversation = {
+      ...conversation,
+      model: selectedModel ?? conversation.model,
+      chats: chats.data,
+      updated_at: new Date().toISOString(),
+    };
+
+    setConversation(updatedConversation);
+
+    if (isAutoSaveConversation && (props.conversation?.id !== conversation.id || conversations.data.length === 0)) {
+      conversations.add(updatedConversation);
+    } else {
+      conversations.update(updatedConversation);
     }
-    if (isAutoLoadText && question.data.length === 0) {
-      setLoading(false);
-      return;
-    }
+  }, [selectedModelId, models.data, chats.data]);
+
+  // Handle auto-full input and question form
+  useEffect(() => {
+    if (models.isLoading) return;
+    if (props.initialQuestion || !isAutoFullInput) return;
+    if (isAutoLoadText && question.data.length === 0) return;
     if (conversation.chats.length === 0 || (conversation.chats.length > 0 && question.data.length > 0)) {
       const questionText = question.data;
       clearSearchBar();
@@ -84,48 +96,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
         />,
       );
     }
-
-    setLoading(false);
   }, [models.isLoading, models.data, question.data, conversation.model]);
-
-  useEffect(() => {
-    if ((props.conversation?.id !== conversation.id || conversations.data.length === 0) && isAutoSaveConversation) {
-      conversations.add(conversation);
-    }
-  }, []);
-
-  useEffect(() => {
-    conversations.update(conversation);
-  }, [conversation]);
-
-  useEffect(() => {
-    if (models.isLoading) {
-      return;
-    }
-    if (models.data && conversation.chats.length === 0) {
-      const defaultUserModel = models.data["grok-3"] ?? conversation.model;
-      setConversation({ ...conversation, model: defaultUserModel, updated_at: new Date().toISOString() });
-    }
-  }, [models.isLoading, models.data]);
-
-  useEffect(() => {
-    const updatedConversation = { ...conversation, chats: chats.data, updated_at: new Date().toISOString() };
-    setConversation(updatedConversation);
-  }, [chats.data]);
-
-  useEffect(() => {
-    if (models.isLoading) {
-      return;
-    }
-    setIsConversationDone(false);
-    const selectedModel = models.data[selectedModelId];
-    setConversation({
-      ...conversation,
-      model: selectedModel ?? { ...conversation.model },
-      updated_at: new Date().toISOString(),
-    });
-    setIsConversationDone(true);
-  }, [selectedModelId, models.isLoading, models.data]);
 
   const getActionPanel = (question: string, model: Model) => (
     <ActionPanel>
@@ -146,7 +117,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       searchText={question.data}
       isShowingDetail={chats.data.length > 0}
       filtering={false}
-      isLoading={isLoading || question.isLoading || chats.isLoading || models.isLoading}
+      isLoading={models.isLoading || question.isLoading || chats.isLoading}
       onSearchTextChange={question.update}
       throttle={false}
       navigationTitle={"Ask Grok"}

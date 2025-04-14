@@ -8,12 +8,12 @@ function debugLog<T>(message: string, data?: T) {
 }
 
 export const DEFAULT_MODEL: Model = {
-  id: "grok-3-mini-fast-beta",
+  id: "grok-3-mini-beta",
   updated_at: new Date().toISOString(),
   created_at: new Date().toISOString(),
-  name: "Grok 3 Fast Mini",
-  prompt: "You are Grok, a helpful AI assistant created by xAI.",
-  option: "grok-3-mini-fast-beta",
+  name: "Grok 3 Mini Beta",
+  prompt: "You are Grok 3, a powerful AI assistant created by xAI.",
+  option: "grok-3-mini-beta",
   temperature: "1",
   pinned: false,
 };
@@ -41,12 +41,12 @@ const ADDITIONAL_MODELS: Model[] = [
     pinned: false,
   },
   {
-    id: "grok-3-mini-beta",
+    id: "grok-3-mini-fast-beta",
     updated_at: new Date().toISOString(),
     created_at: new Date().toISOString(),
-    name: "Grok 3 Mini Beta",
-    prompt: "You are Grok 3, a powerful AI assistant created by xAI.",
-    option: "grok-3-mini-beta",
+    name: "Grok 3 Fast Mini",
+    prompt: "You are Grok, a helpful AI assistant created by xAI.",
+    option: "grok-3-mini-fast-beta",
     temperature: "1",
     pinned: false,
   },
@@ -188,7 +188,7 @@ export function useModel(): ModelHook {
       ...ADDITIONAL_MODELS.reduce((acc, model) => ({ ...acc, [model.id]: model }), {}),
     };
     setData(defaultModels);
-    setOption(["grok-3-fast-mini", "grok-beta", "grok-2"]);
+    setOption(["grok-3-mini-fast-beta", "grok-3-fast-beta", "grok-3-beta", "grok-3-mini-beta"]);
     await showToast({
       title: "Grok models cleared!",
       style: Toast.Style.Success,

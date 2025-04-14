@@ -2,6 +2,7 @@ import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { useState } from "react";
 import { DEFAULT_MODEL } from "../../hooks/useModel";
 import { QuestionFormProps } from "../../type";
+import { Model } from "../../type";
 
 export const QuestionForm = ({
   initialQuestion,
@@ -13,8 +14,8 @@ export const QuestionForm = ({
   const [question, setQuestion] = useState<string>(initialQuestion ?? "");
   const [questionError, setQuestionError] = useState<string | undefined>();
 
-  const separateDefaultModel = models.filter((x) => x.id !== "grok-3");
-  const defaultModel = models.find((x) => x.id === "grok-3") ?? DEFAULT_MODEL;
+  const separateDefaultModel = models.filter((x: Model) => x.id !== DEFAULT_MODEL.id);
+  const defaultModel = models.find((x: Model) => x.id === DEFAULT_MODEL.id) ?? DEFAULT_MODEL;
 
   return (
     <Form

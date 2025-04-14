@@ -9,13 +9,10 @@ import { useSavedChat } from "./hooks/useSavedChat";
 import { Chat } from "./type";
 import { AnswerDetailView } from "./views/answer-detail";
 
-export default function History() {
+const HistoryActionPanel = ({ chat, onRemove, onClear }: { chat: Chat; onRemove: () => void; onClear: () => void }) => {
   const savedChat = useSavedChat();
-  const history = useHistory();
-  const [searchText, setSearchText] = useState<string>("");
-  const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
 
-  const getActionPanel = (chat: Chat) => (
+  return (
     <ActionPanel>
       <CopyActionSection answer={chat.answer} question={chat.question} />
       <SaveActionSection onSaveAnswerAction={() => savedChat.add(chat)} />
@@ -25,52 +22,44 @@ export default function History() {
       <ActionPanel.Section title="Delete">
         <DestructiveAction
           title="Remove"
-          dialog={{
-            title: "Are you sure you want to remove this answer from your history?",
-          }}
-          onAction={() => history.remove(chat)}
+          dialog={{ title: "Are you sure you want to remove this answer from your history?" }}
+          onAction={onRemove}
         />
         <DestructiveAction
           title="Clear History"
-          dialog={{
-            title: "Are you sure you want to clear your history?",
-          }}
-          onAction={() => history.clear()}
+          dialog={{ title: "Are you sure you want to clear your history?" }}
+          onAction={onClear}
           shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
         />
       </ActionPanel.Section>
       <PreferencesActionSection />
     </ActionPanel>
   );
+};
 
-  const sortedHistory = history.data.sort(
-    (a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime(),
-  );
+export default function History() {
+  const history = useHistory();
+  const [searchText, setSearchText] = useState("");
+  const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
 
-  const filteredHistory = sortedHistory
-    .filter((value, index, self) => index === self.findIndex((history) => history.id === value.id))
-    .filter((answer) => {
-      if (searchText === "") {
-        return true;
-      }
-      return (
+  const filteredHistory = history.data
+    .sort((a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime())
+    .filter((value, index, self) => index === self.findIndex((h) => h.id === value.id))
+    .filter(
+      (answer) =>
+        !searchText ||
         answer.question.toLowerCase().includes(searchText.toLowerCase()) ||
-        answer.answer.toLowerCase().includes(searchText.toLowerCase())
-      );
-    });
+        answer.answer.toLowerCase().includes(searchText.toLowerCase()),
+    );
 
   return (
     <List
-      isShowingDetail={filteredHistory.length === 0 ? false : true}
+      isShowingDetail={filteredHistory.length > 0}
       isLoading={history.isLoading}
       filtering={false}
       throttle={false}
       selectedItemId={selectedAnswerId || undefined}
-      onSelectionChange={(id) => {
-        if (id !== selectedAnswerId) {
-          setSelectedAnswerId(id);
-        }
-      }}
+      onSelectionChange={(id) => id !== selectedAnswerId && setSelectedAnswerId(id)}
       searchBarPlaceholder="Search answer/question..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
@@ -90,7 +79,15 @@ export default function History() {
               title={answer.question}
               accessories={[{ text: new Date(answer.created_at ?? 0).toLocaleDateString() }]}
               detail={<AnswerDetailView chat={answer} />}
-              actions={answer && selectedAnswerId === answer.id ? getActionPanel(answer) : undefined}
+              actions={
+                answer && selectedAnswerId === answer.id ? (
+                  <HistoryActionPanel
+                    chat={answer}
+                    onRemove={() => history.remove(answer)}
+                    onClear={() => history.clear()}
+                  />
+                ) : undefined
+              }
             />
           ))}
         </List.Section>

@@ -26,14 +26,14 @@
       "name": "history",
       "title": "History",
       "subtitle": "Grok AI",
-      "description": "Collection of your recent answer",
+      "description": "Collection of your recent answers",
       "mode": "view"
     },
     {
       "name": "model",
       "title": "Models",
       "subtitle": "Grok AI",
-      "description": "Collection of your custom and default model",
+      "description": "Collection of your custom and default models",
       "mode": "view"
     }
   ],

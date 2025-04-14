@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { clearSearchBar, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useCallback, useMemo, useRef, useState } from "react";
 import say from "say";
@@ -6,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Chat, ChatHook, Model } from "../type";
 import { useAutoTTS } from "./useAutoTTS";
 import { useHistory } from "./useHistory";
+import { DEFAULT_MODEL } from "./useModel";
 
 // Debug logging utility
 function debugLog<T>(message: string, data?: T) {
@@ -171,7 +173,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
 
       const response = await callGrokAPI(
         {
-          model: model.option || "grok-3-mini-fast-beta",
+          model: model.option || DEFAULT_MODEL.id,
           messages: messages as unknown as string[],
           stream: useStream,
         },

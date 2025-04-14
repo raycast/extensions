@@ -17,8 +17,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
 
   const { handleSubmit, itemProps, setValue } = useForm<Model>({
     onSubmit: async (model) => {
-      let updatedModel: Model = { ...model, updated_at: new Date().toISOString() };
-      updatedModel = { ...updatedModel, temperature: updatedModel.temperature };
+      const updatedModel: Model = { ...model, updated_at: new Date().toISOString() };
       if (props.model) {
         const toast = await showToast({
           title: "Update your model...",
@@ -126,7 +125,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
           defaultValue="none"
           onChange={setPrompt}
         >
-          <Form.Dropdown.Item value="none" title="Choose an Awesome ChatGPT Prompts" icon={"🧠"} />
+          <Form.Dropdown.Item value="none" title="Choose an Awesome ChatGPT Prompt" icon={"🧠"} />
           {(data || []).map((prompt) => (
             <Form.Dropdown.Item value={prompt.prompt} title={prompt.act} key={prompt.prompt} />
           ))}

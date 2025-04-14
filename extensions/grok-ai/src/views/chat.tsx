@@ -9,41 +9,35 @@ import { Chat, ChatViewProps } from "../type";
 import { AnswerDetailView } from "./answer-detail";
 import { EmptyView } from "./empty";
 
-export const ChatView = ({
-  data,
-  question,
-  conversation,
-  setConversation,
-  use,
-  models,
-  selectedModel,
-  isAutoSaveConversation,
-  onModelChange,
-}: ChatViewProps) => {
-  const sortedChats = data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+const sortChatsByDate = (chats: Chat[]): Chat[] =>
+  [...chats].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-  const getActionPanel = (selectedChat: Chat) => (
+const getChatActions = (selectedChat: Chat, props: ChatViewProps) => {
+  const { question, conversation, use, models, selectedModel, onModelChange, isAutoSaveConversation, setConversation } =
+    props;
+
+  if (use.chats.isLoading) return undefined;
+
+  const showAnswerActions = selectedChat.answer && use.chats.selectedChatId === selectedChat.id;
+  const canSaveConversation = !isAutoSaveConversation && !use.conversations.data.find((x) => x.id === conversation.id);
+
+  return (
     <ActionPanel>
       {question.length > 0 ? (
         <PrimaryAction title="Get Grok's Answer" onAction={() => use.chats.ask(question, conversation.model)} />
-      ) : selectedChat.answer && use.chats.selectedChatId === selectedChat.id ? (
+      ) : showAnswerActions ? (
         <>
           <CopyActionSection answer={selectedChat.answer} question={selectedChat.question} />
           <SaveActionSection
             onSaveAnswerAction={() => use.savedChats.add(selectedChat)}
-            onSaveConversationAction={
-              isAutoSaveConversation
-                ? undefined
-                : use.conversations.data.find((x) => x.id === conversation.id)
-                  ? undefined
-                  : () => use.conversations.add(conversation)
-            }
+            onSaveConversationAction={canSaveConversation ? () => use.conversations.add(conversation) : undefined}
           />
           <ActionPanel.Section title="Output">
             <TextToSpeechAction content={selectedChat.answer} />
           </ActionPanel.Section>
         </>
       ) : null}
+
       <FormInputActionSection
         initialQuestion={question}
         onSubmit={(question) => use.chats.ask(question, conversation.model)}
@@ -51,6 +45,7 @@ export const ChatView = ({
         selectedModel={selectedModel}
         onModelChange={onModelChange}
       />
+
       {use.chats.data.length > 0 && (
         <ActionPanel.Section title="Restart">
           <DestructiveAction
@@ -66,7 +61,7 @@ export const ChatView = ({
                 chats: [],
                 model: conversation.model,
                 pinned: false,
-                updated_at: "",
+                updated_at: new Date().toISOString(),
                 created_at: new Date().toISOString(),
               });
               use.chats.clear();
@@ -77,26 +72,32 @@ export const ChatView = ({
           />
         </ActionPanel.Section>
       )}
+
       <PreferencesActionSection />
     </ActionPanel>
   );
+};
 
-  return sortedChats.length === 0 ? (
-    <EmptyView />
-  ) : (
+export const ChatView = (props: ChatViewProps) => {
+  const { data, use } = props;
+  const sortedChats = sortChatsByDate(data);
+
+  if (sortedChats.length === 0) {
+    return <EmptyView />;
+  }
+
+  return (
     <List.Section title="Grok Results" subtitle={`${data.length} messages`}>
-      {sortedChats.map((sortedChat, i) => {
-        return (
-          <List.Item
-            id={sortedChat.id}
-            key={sortedChat.id}
-            accessories={[{ text: `#${use.chats.data.length - i}` }]}
-            title={sortedChat.question}
-            detail={sortedChat && <AnswerDetailView chat={sortedChat} streamData={use.chats.streamData} />}
-            actions={use.chats.isLoading ? undefined : getActionPanel(sortedChat)}
-          />
-        );
-      })}
+      {sortedChats.map((chat, i) => (
+        <List.Item
+          id={chat.id}
+          key={chat.id}
+          accessories={[{ text: `#${use.chats.data.length - i}` }]}
+          title={chat.question}
+          detail={<AnswerDetailView chat={chat} streamData={use.chats.streamData} />}
+          actions={getChatActions(chat, props)}
+        />
+      ))}
     </List.Section>
   );
 };
