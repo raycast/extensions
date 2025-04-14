@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "compress-pdf",
-      "title": "Compress Pdf",
+      "title": "Compress PDF",
       "description": "compress pdf to a small size",
       "mode": "view"
     }
