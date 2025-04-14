@@ -1,5 +1,9 @@
 # Paste as Plain text Changelog
 
+## [Function Optimisation] - {PR_MERGE_DATE}
+
+- Update Paste as JSON, support flexible JSON-like inputs.
+
 ## [Fix Paste as Number] - :2024-12-03
 
 -  Fix Paste as Number
