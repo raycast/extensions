@@ -5,6 +5,6 @@
 We're excited to release the first version of our Raycast extension for awork, the powerful, but intuitive project management software from Germany.
 – Hypercode
 
-## [Bug Fix] - {PR_Merge_Date}
+## [Bug Fix] - {PR_MERGE_DATE}
 
 - Fix error when searching in projects and tasks
