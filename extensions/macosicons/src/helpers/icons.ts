@@ -39,14 +39,10 @@ export async function setIcon(app: Application, icon: IconMetadata | null) {
 }
 
 export async function getDefaultIconPath(app: Application) {
-  const { stdout } = await execPromise(
-    `defaults read '${app.path}/Contents/Info' CFBundleIconFile`,
-  );
+  const { stdout } = await execPromise(`defaults read '${app.path}/Contents/Info' CFBundleIconFile`);
 
   const iconName = stdout.trim();
-  const iconNameWithExtension = iconName.endsWith(".icns")
-    ? iconName
-    : `${iconName}.icns`;
+  const iconNameWithExtension = iconName.endsWith(".icns") ? iconName : `${iconName}.icns`;
 
   return `${app.path}/Contents/Resources/${iconNameWithExtension}`;
 }
@@ -90,9 +86,7 @@ async function updateIcon(app: Application, icon: IconMetadata) {
 
 async function revertIcon(app: Application) {
   return Promise.allSettled([
-    execPromise(
-      `xattr -d -r com.apple.FinderInfo "${app.path}" && rm "${path.join(app.path, "Icon\r")}"`,
-    ),
+    execPromise(`xattr -d -r com.apple.FinderInfo "${app.path}" && rm "${path.join(app.path, "Icon\r")}"`),
     Store.unsetIcon(app),
   ]);
 }

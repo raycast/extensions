@@ -20,11 +20,8 @@ export function IconActions({
   onFavoritesChange?: (favorites: IconMetadata[]) => void;
   onApplied?: () => void;
 }) {
-  const { data: favorites, mutate: mutateFavorites } = usePromise(
-    Store.getFavorites,
-  );
-  const { data: applications, isLoading: isApplicationsLoading } =
-    useModifiableApplications(searchText);
+  const { data: favorites, mutate: mutateFavorites } = usePromise(Store.getFavorites);
+  const { data: applications, isLoading: isApplicationsLoading } = useModifiableApplications(searchText);
 
   const isFavorite = favorites?.find((f) => f.objectID === icon.objectID);
 
@@ -40,11 +37,7 @@ export function IconActions({
           }}
         />
       ) : (
-        <ActionPanel.Submenu
-          title="Apply Icon To"
-          icon={Icon.PlusTopRightSquare}
-          isLoading={isApplicationsLoading}
-        >
+        <ActionPanel.Submenu title="Apply Icon To" icon={Icon.PlusTopRightSquare} isLoading={isApplicationsLoading}>
           {(applications ?? []).map((app) => (
             <Action
               title={app.name}
@@ -62,9 +55,7 @@ export function IconActions({
         title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
         icon={isFavorite ? Icon.HeartDisabled : Icon.Heart}
         onAction={async () => {
-          const favorites = await mutateFavorites(
-            Store.toggleFavorite(icon, skipRefreshFavorites),
-          );
+          const favorites = await mutateFavorites(Store.toggleFavorite(icon, skipRefreshFavorites));
           onFavoritesChange?.(favorites);
         }}
         shortcut={{ modifiers: ["cmd"], key: "f" }}

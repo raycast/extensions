@@ -21,9 +21,7 @@ export class Store {
       state[bundleId] = {};
     }
 
-    const existingIcon = state[bundleId].recent?.find(
-      (i) => i.objectID === icon.objectID,
-    );
+    const existingIcon = state[bundleId].recent?.find((i) => i.objectID === icon.objectID);
 
     if (existingIcon) {
       icon = existingIcon;
