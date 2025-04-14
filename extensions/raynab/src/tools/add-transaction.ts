@@ -35,8 +35,9 @@ type TransactionInput = {
  * Helper function to find a valid account by name or ID
  */
 function findAccount(accounts: Account[], accountName?: string, accountId?: string): Account | undefined {
+  // If no account specified, we'll need to ask the user
   if (!accountName && !accountId) {
-    throw new Error('Either account_name or account_id must be provided');
+    throw new Error('Please specify an account for this transaction');
   }
 
   // First try to find by ID if provided
@@ -59,7 +60,10 @@ function findAccount(accounts: Account[], accountName?: string, accountId?: stri
   }
 
   // If we get here, no account was found
-  const availableAccounts = accounts.map((acc) => acc.name).join(', ');
+  const availableAccounts = accounts
+    .filter((acc) => !acc.closed && acc.on_budget)
+    .map((acc) => acc.name)
+    .join(', ');
   throw new Error(`Account not found. Available accounts: ${availableAccounts}`);
 }
 
@@ -91,8 +95,8 @@ function formatTransactionData(account: Account, input: TransactionInput) {
     date = new Date().toISOString().split('T')[0];
   }
 
-  // Ensure amount is positive - the form will handle the sign
-  const amount = Math.abs(input.amount);
+  // Convert amount to negative for withdrawals (positive amounts are deposits)
+  const amount = input.amount < 0 ? input.amount : -input.amount;
 
   return {
     account_id: account.id,

@@ -343,6 +343,8 @@ export function TransactionCreateForm({ accountId, transaction }: TransactionCre
               setCategoryList(newCategories);
               setSubtransactions([]);
             }
+            // Force validation reset
+            itemProps.categoryList.onChange?.(newCategories);
           }}
         >
           {categoryItems}
