@@ -14,53 +14,13 @@ export function useFolderSearch() {
   const [results, setResults] = useState<SpotlightSearchResult[]>([]);
   const [plugins, setPlugins] = useState<FolderSearchPlugin[]>([]);
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
-  const [canExecute, setCanExecute] = useState<boolean>(false);
   const [hasCheckedPlugins, setHasCheckedPlugins] = useState<boolean>(false);
   const [hasCheckedPreferences, setHasCheckedPreferences] = useState<boolean>(false);
 
   const abortable = useRef<AbortController>();
-  const searchTextRef = useRef<string>(searchText);
-  const debounceTimerRef = useRef<NodeJS.Timeout>();
-
-  // Update ref when searchText changes
-  useEffect(() => {
-    searchTextRef.current = searchText;
-  }, [searchText]);
-
-  // debounce search
-  useEffect(() => {
-    // Clear any existing timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
-    // Set a new timer
-    debounceTimerRef.current = setTimeout(() => {
-      // Only proceed if the text hasn't changed during the delay
-      if (searchTextRef.current === searchText) {
-        abortable.current?.abort();
-        setResults([]);
-
-        if (searchScope === "pinned") {
-          setResults(
-            pinnedResults.filter((pin) =>
-              pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
-            )
-          );
-          setCanExecute(false);
-          setIsQuerying(false);
-        } else {
-          setCanExecute(true);
-        }
-      }
-    }, 150); // 150ms debounce delay
-
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, [searchText, searchScope, pinnedResults]);
+  const searchCallback = useRef((result: SpotlightSearchResult) => {
+    setResults((prevResults) => [...prevResults, result].sort(lastUsedSort));
+  });
 
   // check plugins
   usePromise(
@@ -79,7 +39,6 @@ export function useFolderSearch() {
           message: "Could not read plugins",
           style: Toast.Style.Failure,
         });
-
         setHasCheckedPlugins(true);
       },
     }
@@ -89,7 +48,6 @@ export function useFolderSearch() {
   usePromise(
     async () => {
       const maybePreferences = await LocalStorage.getItem(`${environment.extensionName}-preferences`);
-
       if (maybePreferences) {
         try {
           return JSON.parse(maybePreferences as string);
@@ -112,7 +70,6 @@ export function useFolderSearch() {
           message: "Could not read preferences",
           style: Toast.Style.Failure,
         });
-
         setHasCheckedPreferences(true);
       },
     }
@@ -120,56 +77,41 @@ export function useFolderSearch() {
 
   // Save preferences
   useEffect(() => {
-    (async () => {
-      if (!(hasCheckedPlugins && hasCheckedPreferences)) {
-        return;
-      }
-
-      await LocalStorage.setItem(
-        `${environment.extensionName}-preferences`,
-        JSON.stringify({
-          pinned: pinnedResults,
-          searchScope,
-          isShowingDetail,
-        })
-      );
-    })();
+    if (!(hasCheckedPlugins && hasCheckedPreferences)) {
+      return;
+    }
+    LocalStorage.setItem(
+      `${environment.extensionName}-preferences`,
+      JSON.stringify({
+        pinned: pinnedResults,
+        searchScope,
+        isShowingDetail,
+      })
+    );
   }, [pinnedResults, searchScope, isShowingDetail, hasCheckedPlugins, hasCheckedPreferences]);
 
   // perform search
-  usePromise(
-    searchSpotlight,
-    [
-      searchText,
-      searchScope,
-      abortable,
-      (result: SpotlightSearchResult) => {
-        setResults((results) => [result, ...results].sort(lastUsedSort));
-      },
-    ],
-    {
-      onWillExecute: () => {
-        setIsQuerying(true);
-        setCanExecute(false);
-      },
-      onData: () => {
-        setIsQuerying(false);
-      },
-      onError: (e) => {
-        if (e.name !== "AbortError") {
-          showToast({
-            title: "An Error Occurred",
-            message: "Something went wrong. Try again.",
-            style: Toast.Style.Failure,
-          });
-        }
-
-        setIsQuerying(false);
-      },
-      execute: hasCheckedPlugins && hasCheckedPreferences && canExecute && !!searchText,
-      abortable,
-    }
-  );
+  usePromise(searchSpotlight, [searchText, searchScope, abortable, searchCallback.current], {
+    onWillExecute: () => {
+      setIsQuerying(true);
+      setResults([]);
+    },
+    onData: () => {
+      setIsQuerying(false);
+    },
+    onError: (e) => {
+      if (e.name !== "AbortError") {
+        showToast({
+          title: "An Error Occurred",
+          message: "Something went wrong. Try again.",
+          style: Toast.Style.Failure,
+        });
+      }
+      setIsQuerying(false);
+    },
+    execute: hasCheckedPlugins && hasCheckedPreferences && !!searchText && searchScope !== "pinned",
+    abortable,
+  });
 
   // Helper functions
   const resultIsPinned = (result: SpotlightSearchResult) => {
@@ -186,7 +128,6 @@ export function useFolderSearch() {
     } else {
       removeResultFromPinnedResults(result);
     }
-
     setSelectedItemId(`result-${resultIndex.toString()}`);
   };
 
@@ -213,14 +154,13 @@ export function useFolderSearch() {
   return {
     searchText,
     setSearchText,
-    results,
+    results: searchScope === "pinned" ? pinnedResults : results,
     isQuerying,
     isShowingDetail,
     setIsShowingDetail,
     searchScope,
     setSearchScope,
     selectedItemId,
-    setSelectedItemId,
     pinnedResults,
     plugins,
     resultIsPinned,
