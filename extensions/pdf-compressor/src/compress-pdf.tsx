@@ -431,7 +431,7 @@ export default function Command() {
                         title="打开压缩后的文件"
                         icon={Icon.Eye}
                         onAction={() =>
-                          open(path.join(path.dirname(file.path), `${path.basename(file.path, ".pdf")}_compressed.pdf`))
+                          open(path.join(path.dirname(file.path), `${path.basename(file.path, ext)}_compressed${ext}`))
                         }
                       />
                       <Action
