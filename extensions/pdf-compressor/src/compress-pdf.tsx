@@ -34,11 +34,11 @@ enum CompressionLevel {
 }
 
 const compressionLevelDescriptions = {
-  [CompressionLevel.DEFAULT]: "默认压缩级别",
-  [CompressionLevel.SCREEN]: "屏幕质量 (72dpi) - 最小文件大小",
-  [CompressionLevel.EBOOK]: "电子书质量 (150dpi)",
-  [CompressionLevel.PRINTER]: "打印质量 (300dpi)",
-  [CompressionLevel.PREPRESS]: "印刷质量 (300dpi 保留色彩) - 最高质量",
+  [CompressionLevel.DEFAULT]: "Default compression level",
+  [CompressionLevel.SCREEN]: "Screen quality (72dpi) - smallest file size",
+  [CompressionLevel.EBOOK]: "eBook quality (150dpi)",
+  [CompressionLevel.PRINTER]: "Print quality (300dpi)",
+  [CompressionLevel.PREPRESS]: "Prepress quality (300dpi with color preservation) - highest quality",
 };
 
 interface FileInfo {
