@@ -1,6 +1,6 @@
 # GitHub Profile Changelog
 
-## [Fix Style in Dark Mode] - {PR_MERGE_DATE}
+## [Fix Style in Dark Mode] - 2025-04-14
 
 - 🎨 Update style in dark appearance
 
