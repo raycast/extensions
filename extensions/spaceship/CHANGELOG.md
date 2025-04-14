@@ -1,6 +1,6 @@
 # Spaceship Changelog
 
-## [Modernize + DNS Enhancements] - {PR_MERGE_DATE}
+## [Modernize + DNS Enhancements] - 2025-04-14
 
 - In "DNS Records": 
     1. View TTL
