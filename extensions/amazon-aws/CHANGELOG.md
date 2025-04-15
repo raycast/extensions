@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [S3 command] - {PR_MERGE_DATE}
+## [S3 command] - 2025-04-15
 
 - Add "Copy S3 URI" action
 
