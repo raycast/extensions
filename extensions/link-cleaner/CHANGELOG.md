@@ -1,6 +1,6 @@
 # Link Cleaner Changelog
 
-## [Added Clean Selected Text Functionality] - {PR_MERGE_DATE}
+## [Added Clean Selected Text Functionality] - 2025-04-15
 
 - Add new command `clean-selected-text.ts`
 - Update `package.json` to include new command and update dependencies
