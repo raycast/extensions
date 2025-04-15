@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [AI Fix] - 2025-04-15
+
+- Fixed AI not being able to get tasks
+
 ## [New API] - 2025-04-14
 
 - Used new Todoist API

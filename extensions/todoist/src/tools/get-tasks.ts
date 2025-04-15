@@ -1,3 +1,4 @@
+import { Task } from "../api";
 import { getTodoistApi, withTodoistApi } from "../helpers/withTodoistApi";
 
 type Input = {
@@ -68,7 +69,7 @@ type Input = {
    *
    * Note: Multiple filters (using the comma operator) are not supported
    */
-  filter?: string;
+  query: string;
 
   /**
    * IETF language tag defining what language filter is written in,
@@ -77,8 +78,8 @@ type Input = {
   lang?: string;
 };
 
-export default withTodoistApi(async (input: Input = {}) => {
+export default withTodoistApi(async (input: Input) => {
   const todoistApi = getTodoistApi();
-  const { data } = await todoistApi.get("/tasks/filter", { params: input });
-  return data;
+  const { data } = await todoistApi.get<{ results: Task[] }>("/tasks/filter", { params: input });
+  return data.results;
 });
