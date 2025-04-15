@@ -139,11 +139,11 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
     ? 'Search scheduled transactions'
     : `Search ${dropDownValue === 'unreviewed' ? 'unreviewed ' : ''}transactions in the last ${timeline}`;
 
-  const handleTransactionDeleted = () => {
-    // Refresh the transactions list
-    mutate();
+  const handleTransactionDeleted = async () => {
+    // Wait for mutate to complete and get the updated transactions
+    const updatedTransactions = await mutate();
     // Reset the view state with the updated transactions
-    dispatch({ type: 'reset', initialCollection: transactions });
+    dispatch({ type: 'reset', initialCollection: updatedTransactions });
   };
 
   return (
