@@ -1,7 +1,6 @@
-import { Action } from '@raycast/api';
+import { Action, Icon } from '@raycast/api';
 import { URLs } from '@constants';
 import { useLocalStorage } from '@raycast/utils';
-import { Icon } from '@raycast/api';
 
 interface OpenInYnabActionProps {
   accounts?: boolean;

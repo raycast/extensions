@@ -136,6 +136,14 @@ export function TransactionCreateForm({ accountId, transaction }: TransactionCre
     ));
   }, [subtransactions, isTransfer, categories]);
 
+  // Move the handler definition here so it's before its first usage
+  const onSubcategoryAmountChange = onSubtransactionAmountChangeHandler({
+    amount,
+    currency: activeBudgetCurrency,
+    subtransactions,
+    setSubtransactions,
+  });
+
   // Form hook - always called
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: {
@@ -271,13 +279,6 @@ export function TransactionCreateForm({ accountId, transaction }: TransactionCre
   if (isLoading) {
     return <Form isLoading />;
   }
-
-  const onSubcategoryAmountChange = onSubtransactionAmountChangeHandler({
-    amount,
-    currency: activeBudgetCurrency,
-    subtransactions,
-    setSubtransactions,
-  });
 
   return (
     <Form
