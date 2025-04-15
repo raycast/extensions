@@ -46,7 +46,9 @@ export default async function (input: GetAccountDetailsInput): Promise<GetAccoun
 
   // Find the account by matching the name
   const account = (accounts || []).find(
-    (acc) => acc.name.toLowerCase().includes(searchQuery) || searchQuery.includes(acc.name.toLowerCase()),
+    (acc) => acc.name.toLowerCase() === searchQuery
+  ) || (accounts || []).find(
+    (acc) => acc.name.toLowerCase().includes(searchQuery)
   );
 
   if (!account) {
@@ -70,17 +72,6 @@ export default async function (input: GetAccountDetailsInput): Promise<GetAccoun
       on_budget: account.on_budget,
     },
   };
-
-  // Log the result with account details
-  console.log('get-account-details tool returned with:', {
-    ...result,
-    account: {
-      name: result.account.name,
-      balance: result.account.balance,
-      type: result.account.type,
-      on_budget: result.account.on_budget,
-    },
-  });
 
   return result;
 }

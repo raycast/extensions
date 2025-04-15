@@ -22,13 +22,10 @@ interface GetBudgetOutput {
 
 export default async function (input: GetBudgetInput = {}): Promise<GetBudgetOutput> {
   try {
-    console.log('get-budget tool called with:', input);
-
     const storedBudgetId = await LocalStorage.getItem<string>('activeBudgetId');
     const activeBudgetId = storedBudgetId?.replace(/["']/g, '');
 
     if (!activeBudgetId) {
-      console.log('No active budget found');
       return {
         success: false,
         month: '',
@@ -44,11 +41,9 @@ export default async function (input: GetBudgetInput = {}): Promise<GetBudgetOut
 
     const storedCurrency = await LocalStorage.getItem<string>('activeBudgetCurrency');
     const activeBudgetCurrency = storedCurrency ? (JSON.parse(storedCurrency) as CurrencyFormat) : null;
-    console.log('Using currency format:', activeBudgetCurrency?.iso_code);
 
     const budget = await fetchBudget(activeBudgetId);
     if (!budget?.months) {
-      console.log('No budget data found');
       return {
         success: false,
         month: '',
@@ -62,12 +57,6 @@ export default async function (input: GetBudgetInput = {}): Promise<GetBudgetOut
       };
     }
 
-    console.log(`Found ${budget.months.length} months of budget data`);
-    console.log(
-      'Available months:',
-      budget.months.map((m) => m.month),
-    );
-
     // If month is provided, use it; otherwise use current month
     let targetMonthStr: string;
     if (input.month) {
@@ -77,12 +66,10 @@ export default async function (input: GetBudgetInput = {}): Promise<GetBudgetOut
       const currentDate = new Date();
       targetMonthStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-01`;
     }
-    console.log('Looking for month:', targetMonthStr);
 
     const targetMonth = budget.months.find((m) => m.month === targetMonthStr);
 
     if (!targetMonth) {
-      console.log('No month data found');
       return {
         success: false,
         month: '',
@@ -96,8 +83,6 @@ export default async function (input: GetBudgetInput = {}): Promise<GetBudgetOut
       };
     }
 
-    console.log('Found month data:', targetMonth.month);
-
     const result = {
       success: true,
       month: targetMonth.month,
@@ -109,17 +94,8 @@ export default async function (input: GetBudgetInput = {}): Promise<GetBudgetOut
       age_of_money: 0, // TODO: Add age_of_money when available in API response
     };
 
-    console.log('Budget data:', {
-      ...result,
-      income: targetMonth.income,
-      budgeted: targetMonth.budgeted,
-      activity: targetMonth.activity,
-      to_be_budgeted: targetMonth.to_be_budgeted,
-    });
-
     return result;
   } catch (error) {
-    console.error('Error fetching budget:', error);
     return {
       success: false,
       month: '',

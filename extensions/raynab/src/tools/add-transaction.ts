@@ -44,7 +44,6 @@ function findAccount(accounts: Account[], accountName?: string, accountId?: stri
   if (accountId) {
     const account = accounts.find((acc) => acc.id === accountId);
     if (account) {
-      console.log('Found account by ID:', account);
       return account;
     }
   }
@@ -54,7 +53,6 @@ function findAccount(accounts: Account[], accountName?: string, accountId?: stri
     const inputNameLower = accountName.toLowerCase().trim();
     const account = accounts.find((acc) => acc.name.toLowerCase().trim().includes(inputNameLower));
     if (account) {
-      console.log('Found account by name:', account);
       return account;
     }
   }
@@ -151,14 +149,11 @@ export default async function (input: TransactionInput) {
 
     const accounts = await fetchAccounts(activeBudgetId);
     if (!accounts || accounts.length === 0) {
-      console.log('No accounts found for budget');
       throw new Error('No accounts found for the selected budget');
     }
 
-    console.log('Finding account with name:', input.account_name);
     const account = findAccount(accounts, input.account_name);
     if (!account) {
-      console.log('Account not found');
       const validAccounts = accounts
         .filter((acc) => !acc.closed && !acc.deleted && acc.on_budget)
         .map((acc) => acc.name);
@@ -166,9 +161,7 @@ export default async function (input: TransactionInput) {
       throw new Error(`Account not found. Available accounts: ${validAccounts.join(', ')}`);
     }
 
-    console.log('Found account:', account);
     const transaction = formatTransactionData(account, input);
-    console.log('Formatted transaction:', transaction);
 
     await launchCommand({
       name: 'transaction',
@@ -178,10 +171,8 @@ export default async function (input: TransactionInput) {
       },
     });
 
-    console.log('Transaction form launched successfully');
     return { success: true };
   } catch (error) {
-    console.error('Error in add-transaction tool:', error);
     await showToast({
       style: Toast.Style.Failure,
       title: 'Failed to Create Transaction',

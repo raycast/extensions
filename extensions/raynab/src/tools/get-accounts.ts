@@ -56,16 +56,5 @@ export default async function (): Promise<GetAccountsOutput> {
     accounts: formattedAccounts,
   };
 
-  // Log the result with account details
-  console.log('get-accounts tool returned with:', {
-    ...result,
-    accounts: result.accounts.map((acc) => ({
-      name: acc.name,
-      balance: acc.balance,
-      type: acc.type,
-      on_budget: acc.on_budget,
-    })),
-  });
-
   return result;
 }
