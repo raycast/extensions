@@ -7,9 +7,9 @@ export default async () => {
     if (!likeRenderer) return false;
 
     const likeStatus = likeRenderer.getAttribute('like-status');
-    
-    // Only click the like button if the song is not already liked
-    if (likeStatus !== 'LIKE') {
+
+    // Only click the like button if the song is already liked (to unlike it)
+    if (likeStatus === 'LIKE') {
       const likeButton = likeRenderer.querySelector('yt-button-shape.like button');
       if (likeButton) {
         likeButton.click();
