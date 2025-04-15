@@ -45,9 +45,10 @@ interface FormValues {
 
 interface TransactionEditFormProps {
   transaction: TransactionDetail;
+  forApproval?: boolean;
 }
 
-export function TransactionEditForm({ transaction }: TransactionEditFormProps) {
+export function TransactionEditForm({ transaction, forApproval }: TransactionEditFormProps) {
   const { pop } = useNavigation();
 
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
