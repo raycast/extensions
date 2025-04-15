@@ -10,6 +10,9 @@
     "Finance",
     "Productivity"
   ],
+  "contributors": [
+    "omarshahine"
+  ],
   "commands": [
     {
       "name": "activeBudget",

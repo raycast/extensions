@@ -33,9 +33,9 @@ You can change the active budget at any time using the command. For most people 
 
 ## Commands
 
-### AI Tools
+### AI Extensions
 
-Raynab now includes AI-powered tools for querying your budget information through natural language. You can ask questions like:
+Raynab now includes AI Extensions for querying your budget information through natural language. You can ask questions like:
 
 Here are all the sample questions from the `ai.json` evals, organized by tool with bullet points:
 

@@ -2,8 +2,8 @@
 
 ## [AI Budget Tools & Improvements] - {PR_MERGE_DATE}
 
-### ✨ New Features - Ask AI - AI Tools
-- Added new AI-powered tools for natural language budget queries:
+### ✨ New Features - AI Extensions
+- Added new AI Extensions for natural language budget queries:
   - `get-budget`: Query budget information including age of money and monthly details
     - Example: "What is the age of money in my March budget?"
     - Example: "Tell me about this month's budget?"
