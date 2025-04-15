@@ -85,7 +85,10 @@ function formatTransactionData(account: Account, input: TransactionInput) {
   if (date) {
     try {
       // Validate date format
-      new Date(date);
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(date) || isNaN(new Date(date).getTime())) {
+        throw new Error('Invalid date format. Please use YYYY-MM-DD format');
+      }
     } catch (e) {
       throw new Error('Invalid date format. Please use YYYY-MM-DD format');
     }

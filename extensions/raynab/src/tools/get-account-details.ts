@@ -45,11 +45,9 @@ export default async function (input: GetAccountDetailsInput): Promise<GetAccoun
   const searchQuery = input.account_name.toLowerCase();
 
   // Find the account by matching the name
-  const account = (accounts || []).find(
-    (acc) => acc.name.toLowerCase() === searchQuery
-  ) || (accounts || []).find(
-    (acc) => acc.name.toLowerCase().includes(searchQuery)
-  );
+  const account =
+    (accounts || []).find((acc) => acc.name.toLowerCase() === searchQuery) ||
+    (accounts || []).find((acc) => acc.name.toLowerCase().includes(searchQuery));
 
   if (!account) {
     return {

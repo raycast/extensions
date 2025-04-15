@@ -37,7 +37,7 @@ export default async function (): Promise<GetAccountsOutput> {
   const accounts = await fetchAccounts(activeBudgetId);
 
   // Format accounts to include only relevant fields and filter out closed accounts
-  const formattedAccounts = (accounts || [])
+  const formattedAccounts = (accounts ?? [])
     .filter((account) => !account.closed)
     .map((account) => ({
       id: account.id,
