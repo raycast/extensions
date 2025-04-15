@@ -139,7 +139,7 @@ export function TransactionCreateForm({ accountId, transaction }: TransactionCre
   // Form hook - always called
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: {
-      date: transaction?.date ? new Date(transaction.date) : new Date(),
+      date: transaction?.date ? new Date(transaction.date) : new Date(new Date().toLocaleDateString()),
       account_id: transaction?.account_id || accountId || '',
       amount: transaction?.amount?.toString() || '',
       payee_name: transaction?.payee_name || '',
@@ -156,7 +156,7 @@ export function TransactionCreateForm({ accountId, transaction }: TransactionCre
       try {
         const transactionData = {
           ...values,
-          date: (values.date ?? new Date()).toISOString(),
+          date: values.date ? values.date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
           amount: formatToYnabAmount(values.amount, activeBudgetCurrency),
           approved: true,
           category_id: isTransfer ? null : values.categoryList?.[0] || undefined,
@@ -247,7 +247,13 @@ export function TransactionCreateForm({ accountId, transaction }: TransactionCre
           return errorMessage;
         }
       },
-      amount: FormValidation.Required,
+      amount: (value: string | undefined) => {
+        if (!value) return 'Please enter an amount';
+        const num = Number(value);
+        if (isNaN(num)) return 'Please enter a valid number';
+        if (num === 0) return 'Amount cannot be zero';
+        return undefined;
+      },
       categoryList: (value) => {
         const errorMessage = 'Please add one or more categories to this transaction';
 
