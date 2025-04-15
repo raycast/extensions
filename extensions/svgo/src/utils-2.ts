@@ -309,14 +309,6 @@ function restore() {
   }
 }
 
-export const configHelper = {
-  getAllConfig,
-  saveConfig,
-  restore,
-  getEnabledPlugins,
-  formatBytes,
-};
-
 function formatBytes(bytes: number, decimals = 2) {
   if (!+bytes) return "0 Bytes";
 
@@ -328,3 +320,11 @@ function formatBytes(bytes: number, decimals = 2) {
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
+
+export const configHelper = {
+  getAllConfig,
+  saveConfig,
+  restore,
+  getEnabledPlugins,
+  formatBytes,
+};
