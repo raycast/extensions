@@ -76,11 +76,7 @@ export default function History() {
       onSearchTextChange={setSearchText}
     >
       {history.data.length === 0 ? (
-        <List.EmptyView
-          title="No history"
-          description="Your recent questions will show up here"
-          icon={Icon.Stars}
-        />
+        <List.EmptyView title="No history" description="Your recent questions will show up here" icon={Icon.Stars} />
       ) : (
         <List.Section title="Recent" subtitle={filteredHistory.length.toLocaleString()}>
           {filteredHistory.map((answer) => (
