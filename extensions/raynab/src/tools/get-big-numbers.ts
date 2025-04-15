@@ -1,7 +1,7 @@
 import { LocalStorage } from '@raycast/api';
 import { fetchTransactions, fetchAccounts } from '../lib/api';
 import { formatToReadableAmount } from '../lib/utils/transactions';
-import type { TransactionDetail, CurrencyFormat, Period } from '@srcTypes';
+import type { CurrencyFormat, Period } from '@srcTypes';
 
 interface BigNumbersOutput {
   success: boolean;
@@ -9,7 +9,7 @@ interface BigNumbersOutput {
   thisWeek: string;
   thisMonth: string;
   error?: string;
-  debug?: any;
+  debug?: Error | unknown;
 }
 
 export const getBigNumbers = async (): Promise<BigNumbersOutput> => {

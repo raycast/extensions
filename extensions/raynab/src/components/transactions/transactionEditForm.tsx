@@ -1,7 +1,26 @@
 import { updateTransaction } from '@lib/api';
-import { autoDistribute, easyGetColorFromId, formatToReadableAmount, formatToYnabAmount, getSubtransacionCategoryname, isSplitTransaction, onSubtransactionAmountChangeHandler } from '@lib/utils';
+import {
+  autoDistribute,
+  easyGetColorFromId,
+  formatToReadableAmount,
+  formatToYnabAmount,
+  getSubtransacionCategoryname,
+  isSplitTransaction,
+  onSubtransactionAmountChangeHandler,
+} from '@lib/utils';
 import { TransactionClearedStatus, TransactionFlagColor } from 'ynab';
-import { Action, ActionPanel, confirmAlert, Color, Form, Icon, showToast, Toast, useNavigation, getPreferenceValues, captureException } from '@raycast/api';
+import {
+  Action,
+  ActionPanel,
+  confirmAlert,
+  Color,
+  Form,
+  Icon,
+  showToast,
+  Toast,
+  useNavigation,
+  captureException,
+} from '@raycast/api';
 import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 import { CurrencyFormat, Period, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
 import { useEffect, useState } from 'react';
@@ -26,10 +45,9 @@ interface FormValues {
 
 interface TransactionEditFormProps {
   transaction: TransactionDetail;
-  forApproval?: boolean;
 }
 
-export function TransactionEditForm({ transaction, forApproval = false }: TransactionEditFormProps) {
+export function TransactionEditForm({ transaction }: TransactionEditFormProps) {
   const { pop } = useNavigation();
 
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
@@ -45,7 +63,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
   const categories = categoryGroups?.flatMap((group) => group.categories).filter((c) => !c.hidden);
 
   const [selectOwnPayee, setselectOwnPayee] = useState(false);
-  const [isTransfer, setIsTransfer] = useState(false);
+  const [isTransfer] = useState(false);
   const [amount, setAmount] = useState(() =>
     formatToReadableAmount({ amount: transaction.amount, currency: activeBudgetCurrency, includeSymbol: false }),
   );
