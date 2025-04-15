@@ -158,11 +158,6 @@ export function TransactionEditForm({ transaction }: TransactionEditFormProps) {
               : undefined,
         };
 
-        if (isReconciled) {
-          await showToast({ style: Toast.Style.Failure, title: 'Cannot edit reconciled transaction' });
-          return;
-        }
-
         await mutate(updateTransaction(activeBudgetId, transaction.id, transactionData));
         toast.style = Toast.Style.Success;
         toast.title = 'Transaction updated successfully';
