@@ -87,10 +87,15 @@
       "description": "Get YNAB transactions using AI",
       "type": "ai",
       "input": {
-        "filter": "string"
+        "filter": "string?",
+        "payee": "string?",
+        "category": "string?",
+        "period": "string?"
       },
       "output": {
-        "transactions": "array"
+        "success": "boolean",
+        "transactions": "array",
+        "error": "string"
       }
     },
     {
@@ -108,12 +113,45 @@
     {
       "name": "get-accounts",
       "title": "Get Accounts",
-      "description": "Get all YNAB accounts and their balances using AI"
+      "description": "Get all YNAB accounts and their balances using AI",
+      "type": "ai",
+      "input": {
+        "on_budget": "boolean?"
+      },
+      "output": {
+        "success": "boolean",
+        "accounts": "array",
+        "error": "string"
+      }
     },
     {
       "name": "get-account-details",
       "title": "Get Account Details",
-      "description": "Get details of a specific YNAB account using AI"
+      "description": "Get details of a specific YNAB account using AI",
+      "type": "ai",
+      "input": {
+        "account_name": "string"
+      },
+      "output": {
+        "success": "boolean",
+        "account": "object",
+        "error": "string"
+      }
+    },
+    {
+      "name": "get-big-numbers",
+      "title": "Big Numbers",
+      "description": "Get spending statistics for today, this week, and this month from budget accounts",
+      "type": "ai",
+      "input": {},
+      "output": {
+        "success": "boolean",
+        "today": "string",
+        "thisWeek": "string",
+        "thisMonth": "string",
+        "error": "string",
+        "debug": "any"
+      }
     }
   ],
   "keywords": [

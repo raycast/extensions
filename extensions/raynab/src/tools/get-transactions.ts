@@ -1,14 +1,15 @@
 import { LocalStorage } from '@raycast/api';
 import { fetchTransactions } from '../lib/api';
 import { Period } from '../types';
+import { formatToReadableAmount } from '../lib/utils/transactions';
+import type { CurrencyFormat } from '@srcTypes';
 
 type GetTransactionsInput = {
   /**
    * Filter type for transactions
    * - 'active': Shows unapproved or uncategorized transactions
-   * - 'recent': Shows the 10 most recent transactions by date
    */
-  filter: 'active' | 'recent';
+  filter?: string;
   /**
    * Optional payee name to filter transactions
    */
@@ -18,35 +19,10 @@ type GetTransactionsInput = {
    */
   category?: string;
   /**
-   * Optional query string that might contain period information
+   * Optional period to fetch transactions for
    */
-  query?: string;
+  period?: Period;
 };
-
-/**
- * Detects period from query string
- * @param query The input query string
- * @returns Detected period or 'month' as default
- */
-function detectPeriodFromQuery(query?: string): Period {
-  if (!query) return 'month';
-
-  const queryLower = query.toLowerCase();
-
-  if (queryLower.includes('last year') || queryLower.includes('past year')) return 'year';
-  if (queryLower.includes('last quarter') || queryLower.includes('past quarter')) return 'quarter';
-  if (queryLower.includes('last month') || queryLower.includes('past month')) return 'month';
-  if (queryLower.includes('last week') || queryLower.includes('past week')) return 'week';
-  if (
-    queryLower.includes('last day') ||
-    queryLower.includes('past day') ||
-    queryLower.includes('yesterday') ||
-    queryLower.includes('today')
-  )
-    return 'day';
-
-  return 'month';
-}
 
 /**
  * Get transactions from YNAB based on the specified filter
@@ -69,9 +45,11 @@ export default async function (input: GetTransactionsInput) {
       };
     }
 
-    // Detect period from query if available
-    const period = detectPeriodFromQuery(input.query);
-    console.log(`Detected period: ${period}`);
+    const storedCurrency = await LocalStorage.getItem<string>('activeBudgetCurrency');
+    const activeBudgetCurrency = storedCurrency ? (JSON.parse(storedCurrency) as CurrencyFormat) : null;
+
+    const period = input.period || 'month';
+    console.log(`Using period: ${period}`);
 
     const transactions = (await fetchTransactions(activeBudgetId, period)) || [];
     console.log(`Fetched ${transactions.length} total transactions from the last ${period}`);
@@ -108,22 +86,22 @@ export default async function (input: GetTransactionsInput) {
       console.log(`Found ${filteredTransactions.length} transactions matching category`);
     }
 
-    // Then apply the main filter
-    if (input.filter === 'recent') {
-      // Sort by date in descending order and take the 10 most recent
-      filteredTransactions = filteredTransactions
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 10);
-      console.log(`Returning ${filteredTransactions.length} most recent transactions`);
-    } else {
+    // Then apply the main filter if specified
+    if (input.filter === 'active') {
       // Get active (unapproved/uncategorized) transactions
       filteredTransactions = filteredTransactions.filter((t) => !t.approved || !t.category_id);
       console.log(`Returning ${filteredTransactions.length} active transactions`);
     }
 
+    // Sort by date in descending order
+    filteredTransactions = filteredTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
     const result = {
       success: true,
-      transactions: filteredTransactions,
+      transactions: filteredTransactions.map((t) => ({
+        ...t,
+        amount: formatToReadableAmount({ amount: t.amount, currency: activeBudgetCurrency }),
+      })),
     };
     console.log('get-transactions tool returned with:', {
       ...result,

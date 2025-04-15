@@ -1,68 +1,5 @@
 {
   "instructions": "You are a helpful assistant for managing YNAB (You Need A Budget) transactions. Always format amounts correctly and handle dates in ISO format. Be precise with payee names and account names. When showing transactions, format the information clearly and concisely.\n\nFor transaction queries, you can specify time periods using natural language. The following time periods are supported:\n- 'last year' or 'past year' for the last 12 months\n- 'last quarter' or 'past quarter' for the last 3 months\n- 'last month' or 'past month' for the last 30 days\n- 'last week' or 'past week' for the last 7 days\n- 'last day', 'past day', 'yesterday', or 'today' for the last 24 hours\n\nIf no time period is specified, the default is the last month.\n\nFor account balance queries, use get-accounts or get-account-details tools, not get-transactions.",
-  "tools": [
-    {
-      "name": "add-transaction",
-      "title": "Add Transaction",
-      "description": "Add a new YNAB transaction using AI",
-      "input": {
-        "date": "string",
-        "payee_name": "string",
-        "amount": "number",
-        "account_name": "string",
-        "memo": "string"
-      },
-      "output": {
-        "success": "boolean",
-        "error": "string",
-        "debug": "any"
-      }
-    },
-    {
-      "name": "get-transactions",
-      "title": "Get Transactions",
-      "description": "Get YNAB transactions using AI",
-      "input": {},
-      "output": {
-        "transactions": "array"
-      }
-    },
-    {
-      "name": "get-transaction-details",
-      "title": "Get Transaction Details",
-      "description": "Get details of a specific YNAB transaction using AI",
-      "input": {
-        "transaction_id": "string"
-      },
-      "output": {
-        "transaction": "object"
-      }
-    },
-    {
-      "name": "get-accounts",
-      "title": "Get Accounts",
-      "description": "Get all YNAB accounts and their balances using AI. Use this for queries about multiple accounts or all accounts.",
-      "input": {
-        "on_budget": "boolean"
-      },
-      "output": {
-        "accounts": "array",
-        "error": "string"
-      }
-    },
-    {
-      "name": "get-account-details",
-      "title": "Get Account Details",
-      "description": "Get details of a specific YNAB account using AI. Use this for queries about a single account's balance or details.",
-      "input": {
-        "account_name": "string"
-      },
-      "output": {
-        "account": "object",
-        "error": "string"
-      }
-    }
-  ],
   "evals": [
     {
       "input": "@ynab add a transaction for $25.50 at Starbucks",
@@ -298,6 +235,79 @@
             "name": "get-account-details",
             "arguments": {
               "account_name": "Checking"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@ynab what are my big three numbers?",
+      "mocks": {
+        "get-big-numbers": {
+          "success": true,
+          "today": "$150.00",
+          "thisWeek": "$750.00",
+          "thisMonth": "$2,500.00"
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-big-numbers",
+            "arguments": {}
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@ynab show me my big numbers",
+      "mocks": {
+        "get-big-numbers": {
+          "success": true,
+          "today": "$150.00",
+          "thisWeek": "$750.00",
+          "thisMonth": "$2,500.00"
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-big-numbers",
+            "arguments": {}
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@ynab what did I spend at amazon last month?",
+      "mocks": {
+        "get-transactions": [
+          {
+            "date": "2024-03-10",
+            "payee_name": "Amazon",
+            "amount": -150.00,
+            "account_name": "Credit Card",
+            "cleared": true
+          },
+          {
+            "date": "2024-03-05",
+            "payee_name": "Amazon.com",
+            "amount": -75.25,
+            "account_name": "Credit Card",
+            "cleared": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-transactions",
+            "arguments": {
+              "payee": "Amazon",
+              "query": "last month"
             }
           }
         }

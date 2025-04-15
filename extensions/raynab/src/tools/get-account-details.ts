@@ -1,6 +1,6 @@
 import { LocalStorage } from '@raycast/api';
 import { fetchAccounts } from '../lib/api';
-import { Account, CurrencyFormat } from '../types';
+import { CurrencyFormat } from '../types';
 import { formatToReadableAmount } from '../lib/utils/transactions';
 
 type GetAccountDetailsInput = {
