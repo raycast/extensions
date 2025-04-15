@@ -3,6 +3,7 @@ import { StreamedIdentifiersFromJSON } from "@pieces.app/pieces-os-client";
 import DedupeAssetQueue from "./DedupeAssetQueue";
 import { Nullable } from "../../types/nullable";
 import AssetsController from "../../controllers/AssetsController";
+import ConnectorSingleton from "../ConnectorSingleton";
 
 /**
  * Entry point for the /assets/stream/identifiers websocket
@@ -29,7 +30,11 @@ export default class AssetStream {
    * Handles the socket messages, sending them to the queue if needed.
    */
   private async connect() {
-    this.ws = new WebSocket(`ws://127.0.0.1:1000/assets/stream/identifiers`);
+    this.ws = new WebSocket(
+      ConnectorSingleton.getHost()
+        .replace("https://", "wss://")
+        .replace("http://", "ws://") + "/assets/stream/identifiers",
+    );
     let firstMessage = false;
     this.ws.onmessage = (event) => {
       const assets = StreamedIdentifiersFromJSON(

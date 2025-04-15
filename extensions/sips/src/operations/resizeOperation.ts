@@ -5,16 +5,17 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-05 23:31:23
- * Last modified  : 2024-06-26 21:37:46
  */
 
 import { execSync } from "child_process";
 import path from "path";
+import fs from "fs";
 
 import {
   execSIPSCommandOnAVIF,
   execSIPSCommandOnSVG,
   execSIPSCommandOnWebP,
+  expandTilde,
   getDestinationPaths,
   moveImageResultsToFinalDestination,
 } from "../utilities/utils";
@@ -28,8 +29,9 @@ import {
  * @returns A promise that resolves when the operation is complete.
  */
 export default async function resize(sourcePaths: string[], width: number, height: number) {
-  const pathStrings = '"' + sourcePaths.join('" "') + '"';
-  const newPaths = await getDestinationPaths(sourcePaths);
+  const expandedPaths = sourcePaths.map((path) => expandTilde(path));
+  const pathStrings = '"' + expandedPaths.join('" "') + '"';
+  const newPaths = await getDestinationPaths(expandedPaths);
 
   if (
     pathStrings.toLocaleLowerCase().includes("webp") ||
@@ -38,7 +40,7 @@ export default async function resize(sourcePaths: string[], width: number, heigh
   ) {
     // Special formats in selection -- Handle each image individually
     const resultPaths = [];
-    for (const imgPath of sourcePaths) {
+    for (const imgPath of expandedPaths) {
       if (imgPath.toLowerCase().endsWith(".webp")) {
         // Convert to PNG, rotate and restore to WebP
         if (width != -1 && height == -1) {
@@ -68,7 +70,7 @@ export default async function resize(sourcePaths: string[], width: number, heigh
         }
       } else {
         // Image is not a special format, so just rotate it using SIPS
-        const newPath = newPaths[sourcePaths.indexOf(imgPath)];
+        const newPath = newPaths[expandedPaths.indexOf(imgPath)];
         resultPaths.push(newPath);
 
         if (width != -1 && height == -1) {
@@ -81,6 +83,7 @@ export default async function resize(sourcePaths: string[], width: number, heigh
       }
     }
     await moveImageResultsToFinalDestination(resultPaths);
+    return resultPaths;
   } else {
     // No special formats -- Run commands on all images at once
     const outputLocation = newPaths.length == 1 ? newPaths[0] : path.join(path.dirname(newPaths[0]), "resized");
@@ -94,6 +97,18 @@ export default async function resize(sourcePaths: string[], width: number, heigh
     } else {
       execSync(`sips --resampleHeightWidth ${height} ${width} -o "${outputLocation}" ${pathStrings}`);
     }
+
+    if (newPaths.length > 1) {
+      await Promise.all(
+        expandedPaths.map((imgPath, index) =>
+          fs.promises.rename(path.join(outputLocation, path.basename(imgPath)), newPaths[index]),
+        ),
+      );
+
+      await fs.promises.rm(outputLocation, { recursive: true, force: true });
+    }
+
     await moveImageResultsToFinalDestination(newPaths);
   }
+  return newPaths;
 }

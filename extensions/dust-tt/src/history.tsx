@@ -1,19 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  getPreferenceValues,
-  Icon,
-  List,
-  LocalStorage,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 
-import { DustAPICredentials } from "./dust_api/api";
+import { getDustClient, withPickedWorkspace } from "./dust_api/oauth";
 
 export interface DustHistory {
   conversationId: string;
@@ -46,9 +35,9 @@ export async function addDustHistory(history: DustHistory) {
   await LocalStorage.setItem("dust_history", JSON.stringify(historyList));
 }
 
-export default function DustHistoryCommand() {
+export default withPickedWorkspace(function DustHistoryCommand() {
+  const dustApi = getDustClient();
   const [history, setHistory] = useState<DustHistory[] | null>(null);
-  const preferences = getPreferenceValues<DustAPICredentials>();
   const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
@@ -63,7 +52,7 @@ export default function DustHistoryCommand() {
     history();
   }, []);
 
-  const dustAssistantUrl = `https://dust.tt/w/${preferences.workspaceId}/assistant`;
+  const dustAssistantUrl = `${dustApi.apiUrl()}/w/${dustApi.workspaceId()}/assistant`;
 
   return (
     <List isLoading={history === null} isShowingDetail={showDetails}>
@@ -138,4 +127,4 @@ export default function DustHistoryCommand() {
       )}
     </List>
   );
-}
+});

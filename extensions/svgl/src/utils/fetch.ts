@@ -2,6 +2,9 @@ import { Clipboard, Toast, closeMainWindow, showHUD, showToast } from "@raycast/
 import fetch from "node-fetch";
 import { Category, Svg } from "../type";
 import { ONE_WEEK_MS, withCache } from "./cache";
+import { writeFileSync } from "fs";
+import path from "path";
+import os from "os";
 
 export const APP_URL = "https://svgl.app";
 export const API_URL = "https://api.svgl.app";
@@ -32,7 +35,7 @@ export const fetchCategories = async () => {
   });
 };
 
-const fetchSvg = async (url: string) => {
+export const fetchSvg = async (url: string) => {
   return withCache(
     `svgl_svg_${url}`,
     async () => {
@@ -76,6 +79,37 @@ export const fetchAndCopySvg = async (url: string, showContent: string) => {
     const svg = await fetchSvg(url);
     await toast.hide();
     Clipboard.copy(svg);
+    showHUD(showContent);
+    closeMainWindow();
+  } catch (error) {
+    if (error instanceof Error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch svg",
+        message: error.message,
+      });
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch svg",
+      });
+    }
+  }
+};
+
+export const fetchAndCopySvgFile = async (url: string, showContent: string, fileName: string) => {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Fetching svg file",
+  });
+  try {
+    const svg = await fetchSvg(url);
+    await toast.hide();
+    const filePath = path.join(os.tmpdir(), `${fileName}.svg`);
+    writeFileSync(filePath, svg, "utf-8");
+    Clipboard.copy({
+      file: filePath,
+    });
     showHUD(showContent);
     closeMainWindow();
   } catch (error) {

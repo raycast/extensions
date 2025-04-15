@@ -1,5 +1,13 @@
 # Toothpick Changelog
 
+## [AI Tools] - 2025-02-21
+
+- Added AI tools for viewing, connecting and disconnecting Bluetooth devices.
+
+## [Hotfix] - 2025-01-21
+
+- Add an action for copying the device name
+
 ## [Hotfix] - 2024-05-15
 
 - Fixed device not disconnecting sometimes on AppleScript backend.

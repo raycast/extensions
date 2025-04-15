@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Keyboard } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 
-import { Instance, Record } from "../types";
+import { Record } from "../types";
+import useInstances from "../hooks/useInstances";
 
 export default function ResultActions({ result, children }: { result: Record; children?: React.ReactNode }) {
-  const [instance] = useCachedState<Instance>("instance");
+  const { selectedInstance } = useInstances();
 
-  const instanceUrl = `https://${instance?.name}.service-now.com`;
+  const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
 
   return (
     <>

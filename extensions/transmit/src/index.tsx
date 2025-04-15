@@ -1,8 +1,7 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast, clearSearchBar, closeMainWindow, open } from "@raycast/api";
-import { useEffect, useState } from "react";
 import { run } from "@jxa/run";
-import { runAppleScript } from "run-applescript";
 import "@jxa/global-type";
+import { ActionPanel, Action, Icon, List, showToast, Toast, clearSearchBar, closeMainWindow, open } from "@raycast/api";
+import { runAppleScript, usePromise } from "@raycast/utils";
 
 export interface ConnectionEntry {
   id: number;
@@ -11,30 +10,12 @@ export interface ConnectionEntry {
   address: string;
   port: number;
   protocol: string;
-  username: number;
+  username: string;
 }
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>();
-  const [servers, setServers] = useState<ConnectionEntry[]>([]);
-
-  async function init() {
-    getServers()
-      .then((servers) => {
-        setServers(servers);
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setIsLoading(false));
-  }
-
-  useEffect(() => {
-    init();
-  }, []);
-
-  if (error) {
-    const options: Toast.Options = {
-      style: Toast.Style.Failure,
+  const { isLoading, data: servers } = usePromise(getServers, [], {
+    failureToastOptions: {
       title: "Failed to load servers",
       message: "Download from https://panic.com/transmit/",
       primaryAction: {
@@ -44,10 +25,8 @@ export default function Command() {
           toast.hide();
         },
       },
-    };
-
-    showToast(options);
-  }
+    },
+  });
 
   return (
     <List searchBarPlaceholder="Search servers..." isLoading={isLoading}>
@@ -63,7 +42,7 @@ function ListItem(props: { entry: ConnectionEntry }) {
     <List.Item
       title={props.entry.name}
       subtitle={props.entry.address}
-      accessoryTitle={props.entry.protocol}
+      accessories={[{ text: props.entry.protocol }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -99,6 +78,7 @@ function ListItem(props: { entry: ConnectionEntry }) {
               }}
             />
             <Action
+              // eslint-disable-next-line @raycast/prefer-title-case
               title="Connect in Transmit (+Tab)"
               icon={Icon.Plus}
               onAction={() => {
@@ -137,25 +117,25 @@ function ListItem(props: { entry: ConnectionEntry }) {
   );
 }
 
-export async function getServers(): Promise<ConnectionEntry[]> {
+async function getServers(): Promise<ConnectionEntry[]> {
   return run(() => {
     const Transmit = Application("Transmit");
 
     return Transmit.favorites().map(
       (
         item: {
-          identifier: { get: () => any };
-          name: { get: () => any };
-          address: { get: () => any };
-          port: { get: () => any };
-          protocol: { get: () => any };
+          identifier: { get: () => string };
+          name: { get: () => string };
+          address: { get: () => string };
+          port: { get: () => number };
+          protocol: { get: () => string };
         },
         index: number
       ) => {
         return {
           id: index + 1,
           identifier: item.identifier.get(),
-          name: item.name.get(),
+          name: item.name.get() ?? "",
           address: item.address.get(),
           port: item.port.get(),
           protocol: item.protocol.get(),

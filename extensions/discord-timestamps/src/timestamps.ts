@@ -53,7 +53,7 @@ const ensureTwoDigits = (num: number) => {
 };
 
 const amPm = (hour: number) => {
-  if (hour > 12) {
+  if (hour >= 12) {
     return "PM";
   } else {
     return "AM";

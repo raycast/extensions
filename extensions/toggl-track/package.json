@@ -15,7 +15,9 @@
     "bkeys818",
     "michaelfaisst",
     "teziovsky",
-    "lukebars"
+    "lukebars",
+    "AlanHuang",
+    "alexs"
   ],
   "license": "MIT",
   "commands": [
@@ -23,6 +25,12 @@
       "name": "index",
       "title": "Start/Stop Time Entry",
       "description": "Start a new time entry or end the running time entry.",
+      "mode": "view"
+    },
+    {
+      "name": "updateTimeEntry",
+      "title": "Update Time Entry",
+      "description": "Update the description, project, tags of recent time entries.",
       "mode": "view"
     },
     {
@@ -104,6 +112,42 @@
       "required": true,
       "title": "Toggl API Token",
       "type": "password"
+    },
+    {
+      "name": "showClientsInForm",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Clients in Form",
+      "description": "Whether or not to show the client field in the create and update time entry forms.",
+      "label": "Show clients",
+      "default": true
+    },
+    {
+      "name": "showProjectsInForm",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Projects in Form",
+      "description": "Whether or not to show the project field in the create and update time entry forms.",
+      "label": "Show projects",
+      "default": true
+    },
+    {
+      "name": "showTasksInForm",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Tasks in Form",
+      "description": "Whether or not to show the task field in the create and update time entry forms.",
+      "label": "Show tasks",
+      "default": true
+    },
+    {
+      "name": "showTagsInForm",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Tags in Form",
+      "description": "Whether or not to show the tags field in the create and update time entry forms.",
+      "label": "Show tags",
+      "default": true
     }
   ],
   "dependencies": {

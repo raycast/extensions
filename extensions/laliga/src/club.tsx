@@ -14,7 +14,7 @@ export default function Club() {
     <Grid
       throttle
       isLoading={isLoading}
-      searchBarAccessory={<CompetitionDropdown type="grid" selected={competition} onSelect={setCompetition} />}
+      searchBarAccessory={<CompetitionDropdown selected={competition} onSelect={setCompetition} />}
     >
       {clubs?.map((club) => {
         return (

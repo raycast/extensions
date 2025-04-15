@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Action, Icon, List, showToast, Toast, Color, LocalStorage, Keyboard } from "@raycast/api";
-import { useCachedState, useFetch } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
 import { filter } from "lodash";
 
@@ -12,29 +12,36 @@ import useInstances from "../hooks/useInstances";
 import { HistoryResponse, HistoryResult, Instance } from "../types";
 
 export default function SearchList() {
-  const { instances, addInstance, mutate: mutateInstances, isLoading: isLoadingInstances } = useInstances();
+  const {
+    instances,
+    addInstance,
+    mutate: mutateInstances,
+    isLoading: isLoadingInstances,
+    selectedInstance,
+    setSelectedInstance,
+  } = useInstances();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filteredTerms, setFilteredTerms] = useState<HistoryResult[]>([]);
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
   const {
     id: instanceId = "",
     alias = "",
     name: instanceName = "",
     username = "",
     password = "",
+    full,
   } = selectedInstance || {};
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
-  const { isLoading, data, mutate } = useFetch(
+  const { isLoading, data, mutate, revalidate } = useFetch(
     `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${username}^ORDERBYDESCsys_updated_on&sysparm_fields=sys_id,search_term`,
     {
       headers: {
         Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
       },
-      execute: !!selectedInstance,
+      execute: selectedInstance && full == "true",
       onError: (error) => {
         setErrorFetching(true);
         console.error(error);
@@ -50,95 +57,123 @@ export default function SearchList() {
     },
   );
 
-  async function removeAllItemsFromHistory() {
+  const _updateHistory = async (
+    request: { endpoint: string; method: string; body?: string },
+    text: { before: string; success: string; failure: string },
+    updateData: (data: HistoryResult[]) => HistoryResult[],
+    successCallBack?: () => void,
+  ) => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: text.before });
     try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Removing all items from history",
-      });
-
-      const promises = data?.map((item: HistoryResult) =>
-        fetch(`${instanceUrl}/api/now/table/ts_query/${item.sys_id}`, {
-          method: "DELETE",
+      const response = await mutate(
+        fetch(`${instanceUrl}${request.endpoint}`, {
+          method: request.method,
           headers: {
             Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+            "Content-Type": "application/json",
           },
+          body: request.body,
         }),
-      );
-
-      if (promises) {
-        const responses = await Promise.all(promises);
-        const success = responses.every((res) => res.ok);
-
-        if (success) {
-          await mutate(Promise.resolve([]));
-          await showToast({
-            style: Toast.Style.Success,
-            title: `All terms removed from history`,
-          });
-        } else {
-          const failedResponses = responses.filter((res) => !res.ok);
-          const messages = failedResponses.map((res) => res.statusText);
-          await mutate(Promise.resolve([]));
-          showToast(Toast.Style.Failure, "Could not remove all items from history", messages.join("\n"));
-        }
-      }
-    } catch (error) {
-      console.error(error);
-
-      await mutate(Promise.resolve([]));
-      showToast(
-        Toast.Style.Failure,
-        "Could not remove all items from history",
-        error instanceof Error ? error.message : "",
-      );
-    }
-  }
-
-  async function removeItemFromHistory(item: HistoryResult) {
-    try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: `Removing "${item.search_term}" from history`,
-      });
-
-      const response = await fetch(`${instanceUrl}/api/now/table/ts_query/${item.sys_id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+        {
+          optimisticUpdate(data) {
+            return updateData(data || []);
+          },
         },
-      });
+      );
 
       if (response.ok) {
-        await mutate();
-
-        await showToast({
-          style: Toast.Style.Success,
-          title: `Term "${item.search_term}" removed from history`,
-        });
+        successCallBack?.();
+        toast.style = Toast.Style.Success;
+        toast.title = text.success;
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed removing term from history",
-          message: response.statusText,
-        });
+        toast.style = Toast.Style.Failure;
+        toast.title = text.failure;
+        toast.message = response.statusText;
       }
     } catch (error) {
       console.error(error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed removing term from history",
-        message: error instanceof Error ? error.message : "",
-      });
+
+      toast.style = Toast.Style.Failure;
+      toast.title = text.failure;
+      toast.message = error instanceof Error ? error.message : "";
     }
-  }
+  };
+
+  const removeAllItemsFromHistory = async () => {
+    const rest_requests: Array<{
+      id: string;
+      headers: { name: string; value: string }[];
+      exclude_response_headers: boolean;
+      url: string;
+      method: string;
+    }> = [];
+    data?.forEach((item: HistoryResult, index) => {
+      rest_requests.push({
+        id: `history_record_${index}`,
+        headers: [],
+        exclude_response_headers: true,
+        url: `/api/now/table/ts_query/${item.sys_id}`,
+        method: "DELETE",
+      });
+    });
+
+    const request = {
+      endpoint: "/api/now/v1/batch",
+      method: "POST",
+      body: JSON.stringify({
+        batch_request_id: "clear-history",
+        rest_requests,
+      }),
+    };
+
+    const updateData = () => {
+      return [];
+    };
+
+    _updateHistory(
+      request,
+      {
+        before: `Removing all items from history`,
+        success: `All terms removed from history`,
+        failure: "Failed removing all items from history",
+      },
+      updateData,
+    );
+  };
+
+  const removeItemFromHistory = async (id: string, title: string) => {
+    const endpoint = `/api/now/table/ts_query/${id}`;
+
+    const request = {
+      endpoint,
+      method: "DELETE",
+    };
+
+    const updateData = (data: HistoryResult[]) => {
+      return data.filter((favorite) => favorite.sys_id !== id);
+    };
+
+    _updateHistory(
+      request,
+      {
+        before: `Removing ${title} from history`,
+        success: `${title} removed from history`,
+        failure: "Failed removing item from history",
+      },
+      updateData,
+    );
+  };
 
   useEffect(() => {
     if (!data) return;
+    if (full != "true") {
+      setFilteredTerms([]);
+      return;
+    }
     if (searchTerm) {
       setFilteredTerms(filter(data, (r) => r.search_term.includes(searchTerm)));
     } else setFilteredTerms(data);
-  }, [data, searchTerm]);
+  }, [data, searchTerm, full]);
 
   const onInstanceChange = (newValue: string) => {
     const aux = instances.find((instance) => instance.id === newValue);
@@ -195,11 +230,11 @@ export default function SearchList() {
                     title={`Search for "${searchTerm}"`}
                     icon={Icon.MagnifyingGlass}
                     onPop={() => {
-                      mutate();
+                      if (full == "true") revalidate();
                       mutateInstances();
                     }}
                   />
-                  <Actions mutate={mutate} />
+                  <Actions revalidate={revalidate} />
                 </ActionPanel>
               }
             />
@@ -212,11 +247,11 @@ export default function SearchList() {
               description="Press ⏎ to refresh or try later again"
               actions={
                 <ActionPanel>
-                  <Actions mutate={mutate} />
+                  <Actions revalidate={revalidate} />
                 </ActionPanel>
               }
             />
-          ) : data?.length && data.length > 0 ? (
+          ) : full == "true" && data?.length && data.length > 0 ? (
             <List.Section title="History">
               {filteredTerms?.map((item: HistoryResult) => (
                 <List.Item
@@ -230,20 +265,20 @@ export default function SearchList() {
                     <ActionPanel>
                       <Action.Push
                         onPop={() => {
-                          mutate();
+                          revalidate();
                           mutateInstances();
                         }}
                         target={selectedInstance && <SearchResults searchTerm={item.search_term} />}
                         title={`Search for "${item.search_term}"`}
                         icon={Icon.MagnifyingGlass}
                       />
-                      <Actions mutate={mutate} />
+                      <Actions revalidate={revalidate} />
                       <List.Dropdown.Section title="Term">
                         <Action
                           title="Remove from History"
                           icon={Icon.XMarkCircle}
                           style={Action.Style.Destructive}
-                          onAction={() => removeItemFromHistory(item)}
+                          onAction={() => removeItemFromHistory(item.sys_id, item.search_term)}
                           shortcut={Keyboard.Shortcut.Common.Remove}
                         />
                         <Action
@@ -271,7 +306,7 @@ export default function SearchList() {
               description="Type something to get started"
               actions={
                 <ActionPanel>
-                  <Actions mutate={mutate} />
+                  <Actions revalidate={revalidate} cantRefresh />
                 </ActionPanel>
               }
             />

@@ -13,7 +13,9 @@
     "LunaticMuch",
     "jomifepe",
     "j3lte",
-    "litomore"
+    "litomore",
+    "ridemountainpig",
+    "dbrooks"
   ],
   "license": "MIT",
   "categories": [
@@ -130,22 +132,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.2",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1",
     "dedupe": "^4.0.3",
-    "gitlab-url-parse": "^1.0.0",
-    "parse-github-url": "^1.0.3",
+    "git-url-parse": "^16.0.0",
     "tiny-relative-date": "^1.3.0",
-    "use-debounce": "^10.0.3"
+    "use-debounce": "^10.0.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^22.7.4",
+    "@types/git-url-parse": "^9.0.3",
+    "@types/node": "^22.10.5",
     "@types/parse-github-url": "^1.0.3",
-    "@types/react": "^18.3.11",
+    "@types/react": "^18.3.18",
     "eslint": "^8.57.1",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",

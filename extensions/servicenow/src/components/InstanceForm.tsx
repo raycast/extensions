@@ -1,8 +1,9 @@
 import { useMemo } from "react";
-import { ActionPanel, Action, Form, Icon, useNavigation, Color } from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, useNavigation, Color, Keyboard, confirmAlert, Alert } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import crypto from "crypto";
 import { Instance } from "../types";
+import useInstances from "../hooks/useInstances";
 
 type InstanceFormValues = Omit<Instance, "id">;
 
@@ -13,6 +14,7 @@ type SetInstanceFormProps = {
 
 export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProps) {
   const { pop } = useNavigation();
+  const { deleteInstance } = useInstances();
 
   const { itemProps, handleSubmit } = useForm<InstanceFormValues>({
     async onSubmit(values) {
@@ -25,6 +27,7 @@ export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProp
       color: instance?.color,
       username: instance?.username,
       password: instance?.password,
+      full: instance?.full,
     },
     validation: {
       name: FormValidation.Required,
@@ -45,11 +48,35 @@ export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProp
   return (
     <Form
       navigationTitle={"Manage Instance Profiles - " + title}
-      enableDrafts
+      enableDrafts={!instance}
       isLoading={false}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.SaveDocument} title={"Save"} />
+          <ActionPanel.Section
+            title={`${instance?.alias ? instance.alias + " (" + instance.name + ")" : instance?.name}`}
+          >
+            <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.SaveDocument} title={"Save"} />
+            <Action
+              title="Delete"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+              onAction={() =>
+                confirmAlert({
+                  title: "Delete Instance Profile",
+                  message: `Are you sure you want to delete "${instance?.alias ? instance.alias + " (" + instance.name + ")" : instance?.name}"?`,
+                  primaryAction: {
+                    style: Alert.ActionStyle.Destructive,
+                    title: "Delete",
+                    onAction: () => {
+                      deleteInstance(instance?.id || "");
+                      pop();
+                    },
+                  },
+                })
+              }
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -57,7 +84,7 @@ export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProp
         {...itemProps.name}
         title="Name"
         placeholder="Enter the instance name"
-        info="The name is the unique identifier of your ServiceNow instance"
+        info={`The name is the unique identifier of your ServiceNow instance\nhttps://<name>.service-now.com`}
       />
       <Form.TextField
         {...itemProps.alias}
@@ -77,9 +104,25 @@ export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProp
           );
         })}
       </Form.Dropdown>
-
       <Form.TextField {...itemProps.username} title="Username" placeholder="Enter a username" />
       <Form.PasswordField {...itemProps.password} title="Password" />
+      <Form.Separator />
+      <Form.Description
+        title="Full Version"
+        text={`If this is an admin account or the instance has the UpdateSet of this extension installed, then you can use the full version of this extension.`}
+      />
+      <Form.Dropdown
+        {...itemProps.full}
+        info={`Full Version includes:\n- Manage your Favorites.\n- See your Search History.\n- See all your Navigation History, otherwise limited.`}
+      >
+        <Form.Dropdown.Item
+          key="yes"
+          title="Yes"
+          value="true"
+          icon={{ source: Icon.LockDisabled, tintColor: Color.Green }}
+        />
+        <Form.Dropdown.Item key="no" title="No" value="false" icon={{ source: Icon.Lock, tintColor: Color.Orange }} />
+      </Form.Dropdown>
     </Form>
   );
 }

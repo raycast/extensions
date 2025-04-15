@@ -1,5 +1,14 @@
 # Clockify Changelog
 
+## [Fix description requirement] - 2025-04-11
+
+- Made description on new tasks optional.
+
+## [Update] - 2024-11-11
+
+- Add selection for different clockify regions
+- https://clockify.me/help/getting-started/data-regions
+
 ## [Update] - 2024-07-16
 
 - Select tasks for projects when starting timer

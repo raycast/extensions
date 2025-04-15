@@ -14,19 +14,19 @@
     {
       "name": "search",
       "title": "Search",
-      "description": "View past searches, perform new queries, and switch between ServiceNow instances",
+      "description": "Search in ServiceNow, preview search results, and browse your search history.",
       "mode": "view"
     },
     {
       "name": "manage-instance-profiles",
       "title": "Manage Instance Profiles",
-      "description": "Configure and manage your ServiceNow instance profiles for use in search queries",
+      "description": "Configure and mange profiles for your ServiceNow instances.",
       "mode": "view"
     },
     {
       "name": "quickly-search",
-      "title": "Quickly Search",
-      "description": "Search your ServiceNow instance instantly from the command window by entering a query, without extra steps",
+      "title": "Quick Search",
+      "description": "Enter an instance profile and a search term to get immediate results, without browsing search history.",
       "mode": "view",
       "arguments": [
         {
@@ -45,8 +45,8 @@
     },
     {
       "name": "quickly-search-selected-instance",
-      "title": "Quickly Search in Selected Instance",
-      "description": "Search your selected ServiceNow instance instantly from the command window by entering a query, without extra steps",
+      "title": "Quick Search in Selected Instance",
+      "description": "Enter a search term to get immediate results from the currently selected instance, without browsing search history.",
       "mode": "view",
       "arguments": [
         {
@@ -60,19 +60,19 @@
     {
       "name": "open-all-instances",
       "title": "Open All Instances",
-      "description": "Open all configured ServiceNow instances in the browser",
+      "description": "Open all configured ServiceNow instances in the browser.",
       "mode": "no-view"
     },
     {
       "name": "open-selected-instance",
       "title": "Open Selected Instance",
-      "description": "Open the currently selected ServiceNow instance in the browser",
+      "description": "Open the currently selected ServiceNow instance in the browser.",
       "mode": "no-view"
     },
     {
       "name": "open-current-url",
       "title": "Open Current URL",
-      "description": "Open the current ServiceNow URL in the specified instance",
+      "description": "With the Raycast browser extension installed, open the current ServiceNow page in the specified instance.",
       "mode": "no-view",
       "arguments": [
         {
@@ -86,19 +86,19 @@
     {
       "name": "open-current-url-in-selected-instance",
       "title": "Open Current URL in Selected Instance",
-      "description": "Open the current ServiceNow URL in the selected instance",
+      "description": "With the Raycast browser extension installed, open the current ServiceNow page in the selected instance.",
       "mode": "no-view"
     },
     {
       "name": "add-instance-profile",
       "title": "Add Instance Profile",
-      "description": "Add a new instance profile for your searches",
+      "description": "Add a new instance profile.",
       "mode": "view"
     },
     {
       "name": "explore-tables",
       "title": "Explore Tables",
-      "description": "Browse and explore the tables within an instance",
+      "description": "Browse and explore the tables of the platform.",
       "mode": "view"
     },
     {
@@ -118,25 +118,45 @@
     {
       "name": "login-to-selected-instance",
       "title": "Login to Selected Instance",
-      "description": "Logs into the selected ServiceNow instance using the credentials stored in the associated instance profile, allowing quick and easy access without manual login steps.",
+      "description": "Log in to the selected instance using the credentials from the selected profile.",
       "mode": "no-view"
+    },
+    {
+      "name": "explore-navigation-history",
+      "title": "Explore Navigation History",
+      "description": "Browse the list of pages and modules you've visited.",
+      "mode": "view"
+    },
+    {
+      "name": "explore-favorites",
+      "title": "Manage Favorites",
+      "description": "View and manage your favorite items and groups.",
+      "mode": "view"
+    },
+    {
+      "name": "explore-navigation-menu",
+      "title": "Explore Navigation Menu",
+      "description": "Browse the list of application menus and their modules.",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.86.0",
+    "@raycast/utils": "^1.18.1",
     "date-fns": "^4.1.0",
+    "debug": "^4.3.7",
+    "javascript-time-ago": "^2.5.11",
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/lodash": "^4.17.7",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
+    "@types/lodash": "^4.17.13",
+    "@types/node": "22.9.3",
+    "@types/react": "18.3.12",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "ray build -e dist -o dist",

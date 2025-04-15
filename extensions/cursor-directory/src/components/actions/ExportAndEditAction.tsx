@@ -27,7 +27,7 @@ export const ExportAndEditAction = ({ cursorRule, onAction }: Props) => {
       }
     } catch (error) {
       console.error("Error exporting cursor rule:", error);
-      await showHUD("Failed to export cursor rule. Check if Cursor shell command is available.");
+      await showHUD("Failed to export cursor rule.");
     }
   };
 

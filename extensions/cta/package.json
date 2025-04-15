@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cta",
+  "title": "CTA - Chicago Transit Authority",
+  "description": "Track and view estimated times for buses and trains provided by the Chicago Transit Authority.",
+  "icon": "extension-icon.png",
+  "author": "jonathan_ochocki",
+
+  "dynamicTitle": true,
+  "version": "1.0.0",
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "cta",
+      "title": "Search Stations and Stops",
+      "subtitle": "Chicago Transit Authority",
+      "description": "Search for CTA train stations and bus stops to view arrival times",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Station, color, or stop ID",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "busApiKey",
+      "title": "Bus Tracker API Key",
+      "description": "Your CTA Bus Tracker API key. Get one at http://www.transitchicago.com/developers/bustracker.aspx",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "trainApiKey",
+      "title": "Train Tracker API Key",
+      "description": "Your CTA Train Tracker API key. Get one at http://www.transitchicago.com/developers/traintracker.aspx",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.87.5",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.9",
+    "@types/react": "18.3.3",
+    "csv-parser": "^3.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5",
+    "unzip-stream": "^0.3.1"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "generate-stations": "ts-node scripts/generateStationData.ts"
+  },
+  "keywords": [
+    "chicago",
+    "transit",
+    "train",
+    "bus",
+    "transportation",
+    "cta",
+    "l",
+    "metro",
+    "public transport"
+  ]
+}

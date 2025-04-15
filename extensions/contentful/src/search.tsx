@@ -10,16 +10,11 @@ type ContentfulContentEntry = EntryProps<KeyValueMap>;
 type ContentfulEntryStatus = "archived" | "published" | "draft" | "changed";
 
 function getEntryStatus(entry: ContentfulContentEntry): ContentfulEntryStatus {
-  const isChanged =
-    entry.sys.updatedAt && entry.sys.publishedAt && Date.parse(entry.sys.updatedAt) > Date.parse(entry.sys.publishedAt);
-
-  return entry.sys.archivedVersion
-    ? "archived"
-    : isChanged
-      ? "changed"
-      : entry.sys.publishedCounter && entry.sys.publishedCounter > 0
-        ? "published"
-        : "draft";
+  // reference: https://www.contentful.com/developers/docs/tutorials/general/determine-entry-asset-state/
+  if (!entry.sys.publishedVersion) return "draft";
+  if (entry.sys.archivedVersion) return "archived";
+  if (!!entry.sys.publishedVersion && entry.sys.version >= entry.sys.publishedVersion + 2) return "changed";
+  return "published";
 }
 
 export const ColorMapping: Record<ContentfulEntryStatus, Color> = {

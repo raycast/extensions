@@ -5,6 +5,9 @@
   "description": "A comprehensive extension for tracking La Liga matches, standings, and club information.",
   "icon": "icon.png",
   "author": "anhthang",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "categories": [
     "Fun"
@@ -46,31 +49,34 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.85.1",
+    "@raycast/utils": "^1.18.0",
     "@types/lodash.groupby": "^4.6.9",
-    "axios": "^1.7.7",
+    "axios": "^1.8.4",
     "date-fns": "^4.1.0",
     "json2md": "^2.0.1",
     "lodash.groupby": "^4.6.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.11.1",
+    "@eslint/js": "^9.14.0",
     "@raycast/eslint-config": "^1.0.11",
     "@types/json2md": "^1.5.4",
-    "@types/node": "~22.6.1",
-    "@types/react": "^18.3.8",
-    "eslint": "^9.11.1",
+    "@types/node": "~22.9.0",
+    "@types/react": "^18.3.12",
+    "eslint": "^9.14.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-react": "^7.36.1",
+    "eslint-plugin-react": "^7.37.2",
     "prettier": "^3.3.3",
-    "react-devtools": "^5.2.0",
-    "typescript": "^5.6.2",
-    "typescript-eslint": "^8.7.0"
+    "react-devtools": "5.2.0",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.13.0"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop"
-  },
-  "packageManager": "yarn@1.22.22"
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
 }

@@ -5,6 +5,9 @@
   "description": "Control Anybox with Raycast",
   "icon": "anybox-icon.png",
   "author": "anybox",
+  "contributors": [
+    "iDarkHusky"
+  ],
   "keywords": [
     "anybox",
     "bookmarks",

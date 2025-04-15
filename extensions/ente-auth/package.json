@@ -11,11 +11,21 @@
   "categories": [
     "Security"
   ],
+  "keywords": [
+    "ente",
+    "totp",
+    "2fa",
+    "security",
+    "authentication",
+    "otp",
+    "mfa",
+    "authenticator"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Get TOTP",
+      "title": "Get Totp",
       "description": "Search for an Ente Auth account and copy the TOTP code to the clipboard",
       "mode": "view"
     },
@@ -54,6 +64,24 @@
       "title": "Ente CLI Export Location",
       "description": "If you wish to change the default export path, type here the location of your local installation.",
       "placeholder": "Export Path"
+    },
+    {
+      "name": "action",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "Choose whether the primary action should copy or paste the output.",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ],
+      "default": "paste",
+      "required": false
     }
   ],
   "dependencies": {

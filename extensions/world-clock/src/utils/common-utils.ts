@@ -1,8 +1,9 @@
 import { Image, LocalStorage } from "@raycast/api";
 import { dateFormat, hour24 } from "../types/preferences";
-import { localStorageKey } from "./costants";
-import { Timezone } from "../types/types";
+import { API_TIMEZONE_BY_ZONE, localStorageKey } from "./costants";
+import { Timezone, TimezoneInfo } from "../types/types";
 import { format } from "date-fns";
+import axios from "axios";
 import Mask = Image.Mask;
 
 export const isEmpty = (string: string | null | undefined) => {
@@ -85,7 +86,7 @@ export const calculateDateTimeByOffset = (offset: string) => {
   const dateTime = new Date();
   dateTime.setDate(dateTime.getUTCDate());
   dateTime.setHours(dateTime.getUTCHours() + parseInt(offset));
-  dateTime.setMinutes(dateTime.getUTCMinutes() + parseInt(offset.split(":")[1]));
+  dateTime.setMinutes(dateTime.getUTCMinutes());
   return {
     date_time: dateTime.toLocaleTimeString("en-US", {
       hour12: !hour24,
@@ -103,7 +104,7 @@ export const calculateTimeInfoByOffset = (unixtime: number, offset: string) => {
   const dateTime = new Date(parseInt(unixtimeStr));
   dateTime.setDate(dateTime.getUTCDate());
   dateTime.setHours(dateTime.getUTCHours() + parseInt(offset));
-  dateTime.setMinutes(dateTime.getUTCMinutes() + parseInt(offset.split(":")[1]));
+  dateTime.setMinutes(dateTime.getUTCMinutes());
   //utc time
   const utc = new Date(parseInt(unixtimeStr));
   utc.setDate(utc.getDate());
@@ -147,6 +148,22 @@ export const getMenubarAvatar = (timezone: Timezone) => {
         dark: buildDayAndNightIcon(timezone.unixtime, false),
       },
     };
+  }
+};
+
+export const getTimeZoneInfo = async (timezone: string) => {
+  try {
+    const axiosResponse = await axios({
+      method: "GET",
+      url: API_TIMEZONE_BY_ZONE,
+      params: {
+        timeZone: timezone,
+      },
+    });
+    return axiosResponse.data as TimezoneInfo;
+  } catch (error) {
+    console.error("Error while fetching timezone info", error);
+    return undefined;
   }
 };
 

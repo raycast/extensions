@@ -2,7 +2,7 @@ import { OAuth } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 import { TRAKT_APP_URL, TRAKT_CLIENT_ID } from "./constants";
 
-const oauthClient = new OAuth.PKCEClient({
+const AuthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Trakt",
   providerIcon: "trakt.png",
@@ -10,8 +10,8 @@ const oauthClient = new OAuth.PKCEClient({
   providerId: "trakt",
 });
 
-export const oauthProvider = new OAuthService({
-  client: oauthClient,
+export const AuthProvider = new OAuthService({
+  client: AuthClient,
   clientId: TRAKT_CLIENT_ID,
   scope: "",
   authorizeUrl: `${TRAKT_APP_URL}/oauth/authorize`,

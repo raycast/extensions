@@ -67,7 +67,7 @@ export default function TestConnectionCommand() {
   };
 
   const testDownloadSpeed = async (baseUrl: string) => {
-    const downloadSizeInMBytes = 20;
+    const downloadSizeInMBytes = 80;
     const downloadUrl = `${baseUrl}/download/${downloadSizeInMBytes}`;
     const totalSizeInBytes = downloadSizeInMBytes * 1024 * 1024;
     const startTime = performance.now();

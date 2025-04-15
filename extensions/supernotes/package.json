@@ -4,7 +4,7 @@
   "title": "Supernotes",
   "description": "Interact with the Supernotes platform in Raycast.",
   "icon": "supernotes-icon.png",
-  "author": "acnebs",
+  "author": "connebs",
   "owner": "supernotes",
   "access": "public",
   "license": "MIT",
@@ -15,7 +15,8 @@
   ],
   "contributors": [
     "tobias",
-    "peduarte"
+    "peduarte",
+    "mattdelliott"
   ],
   "commands": [
     {
@@ -30,6 +31,27 @@
         "clipping",
         "selection",
         "clipboard",
+        "card"
+      ]
+    },
+    {
+      "name": "daily",
+      "title": "Quick Daily",
+      "subtitle": "Supernotes",
+      "description": "Quickly append content to your Supernotes daily card.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "content",
+          "placeholder": "Content",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "sn",
+        "quick",
+        "daily",
         "card"
       ]
     },
@@ -58,6 +80,40 @@
       ]
     }
   ],
+  "ai": {
+    "instructions": "Cards support markdown formatting. The name is stored separately from the content and should not be included in the content. If asking about a daily card or today card, then you should search for the date in ISO-8601 format rather than daily card. If one does not exist, then create it with the title as the ISO-8601 date.",
+    "evals": [
+      {
+        "input": "@supernotes Add a task for today to buy milk"
+      },
+      {
+        "input": "@supernotes Summarize the composition of the moon and add it to a new card"
+      },
+      {
+        "input": "@supernotes Search for cards from last week"
+      },
+      {
+        "input": "@supernotes Find my study notes"
+      }
+    ]
+  },
+  "tools": [
+    {
+      "name": "search-cards",
+      "title": "Search Cards",
+      "description": "Search your cards by keywords or date range."
+    },
+    {
+      "name": "create-card",
+      "title": "Create Card",
+      "description": "Creates a new card."
+    },
+    {
+      "name": "append-card",
+      "title": "Append Card",
+      "description": "Appends content to a card."
+    }
+  ],
   "preferences": [
     {
       "name": "apiKey",
@@ -68,10 +124,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.81.2",
-    "lodash": "^4.17.21",
-    "node-fetch": "^3.3.0",
-    "ts-pattern": "^5.3.1"
+    "@raycast/api": "^1.93.0",
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.3.1",

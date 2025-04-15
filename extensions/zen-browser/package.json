@@ -6,9 +6,10 @@
   "icon": "zen-logo.png",
   "author": "Keyruu",
   "contributors": [
-    "crisboarna",
-    "serhii_kravchenko",
-    "Laptop765"
+    "theherk",
+    "walker-tx",
+    "jimmy-b36",
+    "sdaza"
   ],
   "categories": [
     "Applications",
@@ -82,6 +83,14 @@
       "default": "Default (alpha)",
       "description": "The Zen profile directory suffix, check it with `ls ~/Library/Application Support/zen/Profiles`",
       "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "newTabShortcut",
+      "title": "New Tab Shortcut",
+      "default": "command t",
+      "type": "textfield",
+      "description": "The shortcut to use for opening a new tab. e.g command option t",
       "required": false
     },
     {

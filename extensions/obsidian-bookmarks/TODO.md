@@ -1,16 +1,5 @@
 ## Features
 
-- [ ] Better lazy handling of files.
-
-We shouldn't have to read files from the disk every time we load the search. We could store
-the `mtime` in the cache and only read from the disk up front if the `mtime` has been changed.
-
-Then we could lazily read from the files if the user has started typing into the search field
-so that we can do some kind of full text search. (This will likely require playing around with
-fuse a bit to see if we can update existing entries.)
-
----
-
 - [ ] Support for adding new tags through Raycast.
 
 Raycast doesn't support adding _new_ items to a [`TagPicker`][tagpicker] today. We might
@@ -37,7 +26,18 @@ needs to be tweaked a bit.
 
 ---
 
-- [ ] Better handling for duplicate links
+- [x] Better lazy handling of files.
+
+We shouldn't have to read files from the disk every time we load the search. We could store
+the `mtime` in the cache and only read from the disk up front if the `mtime` has been changed.
+
+Then we could lazily read from the files if the user has started typing into the search field
+so that we can do some kind of full text search. (This will likely require playing around with
+fuse a bit to see if we can update existing entries.)
+
+---
+
+- [x] Better handling for duplicate links
 
 It'd be nice if we could let you know if you're saving a link that's already in your
 bookmarks. Maybe with a Toast notification, and then it could prefill based on the

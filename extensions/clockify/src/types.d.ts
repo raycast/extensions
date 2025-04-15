@@ -39,8 +39,11 @@ export interface FetcherResponse {
   error?: string | Error;
 }
 
+export type ClockifyRegion = "GLOBAL" | "USA" | "AU" | "EU" | "UK";
+
 export interface PreferenceValues {
   token: string;
+  region: ClockifyRegion;
 }
 
 export interface DataValues {

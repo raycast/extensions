@@ -1,9 +1,9 @@
-import { fileExists } from "../utils";
+import { getPreferenceValues } from "@raycast/api";
+import * as child_process from "child_process";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
-import * as child_process from "child_process";
-import { getPreferenceValues } from "@raycast/api";
+import { fileExists } from "../utils";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -69,7 +69,12 @@ const cliPaths: Record<string, string> = {
   Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
   "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
   Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
+  Positron: "/Applications/Positron.app/Contents/Resources/app/bin/code",
+  Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
+  "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/bin/marscode",
   VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
+  "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app/bin/codium-insiders",
+  Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
 };
 
 export function getVSCodeCLIFilename(): string {
@@ -180,6 +185,10 @@ const buildSchemes: Record<string, string> = {
   "Code - Insiders": "vscode-insiders",
   Cursor: "cursor",
   VSCodium: "vscode-oss",
+  Positron: "positron",
+  Windsurf: "windsurf",
+  Trae: "trae",
+  "Trae CN": "trae-cn",
 };
 
 export function getBuildScheme(): string {

@@ -152,7 +152,7 @@
     "@aws-sdk/client-cloudformation": "^3.216.0",
     "@aws-sdk/client-cloudwatch-logs": "^3.226.0",
     "@aws-sdk/client-codeartifact": "^3.664.0",
-    "@aws-sdk/client-codepipeline": "^3.216.0",
+    "@aws-sdk/client-codepipeline": "^3.787.0",
     "@aws-sdk/client-dynamodb": "^3.216.0",
     "@aws-sdk/client-ec2": "^3.216.0",
     "@aws-sdk/client-ecr": "^3.216.0",
@@ -172,12 +172,8 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.12.12",
-    "@types/react": "^18.3.2",
-    "@typescript-eslint/eslint-plugin": "^7.9.0",
-    "@typescript-eslint/parser": "^7.9.0",
+    "@types/react": "^18.3.12",
     "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.0.2",
     "typescript": "^5.4.5"
   },

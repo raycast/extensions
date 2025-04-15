@@ -10,15 +10,18 @@ import TemperatureItem from "./components/TemperatureItem";
 import ChargeItem from "./components/ChargeItem";
 import PowerSourceItem from "./components/PowerSourceItem";
 import ConditionItem from "./components/ConditionItem";
+import MaxCapacityItem from "./components/MaxCapacityItem";
 
 type State = {
   batteryRegistry: any;
+  batteryInfo: any;
   isLoading: boolean;
 };
 
 export default function Command() {
   const [state, setState] = useState<State>({
     batteryRegistry: {},
+    batteryInfo: {},
     isLoading: true,
   });
 
@@ -26,10 +29,18 @@ export default function Command() {
     (async () => {
       try {
         const { stdout } = await execa("/usr/sbin/ioreg", ["-arn", "AppleSmartBattery"]);
+        const { stdout: battery } = await execa("/usr/sbin/system_profiler", ["SPPowerDataType", "-xml"]);
         const ioreg: any = plist.parse(stdout);
+        const sysProfiler: any = plist.parse(battery);
         const batteryRegistry = ioreg[0];
+        const batteryInfo = sysProfiler[0];
 
-        setState((previous) => ({ ...previous, batteryRegistry: batteryRegistry, isLoading: false }));
+        setState((previous) => ({
+          ...previous,
+          batteryRegistry: batteryRegistry,
+          batteryInfo: batteryInfo,
+          isLoading: false,
+        }));
       } catch (e) {
         setState((previous) => ({ ...previous, isLoading: false }));
       }
@@ -51,6 +62,13 @@ export default function Command() {
             maxCapacity={state.batteryRegistry["AppleRawMaxCapacity"] || state.batteryRegistry["MaxCapacity"]}
           />
           <CycleCountItem cycles={state.batteryRegistry["CycleCount"]} />
+          <MaxCapacityItem
+            health={
+              state.batteryInfo["_items"]?.[0]?.["sppower_battery_health_info"]?.[
+                "sppower_battery_health_maximum_capacity"
+              ]
+            }
+          />
           <PowerSourceItem
             externalConnected={state.batteryRegistry["ExternalConnected"]}
             adapter={state.batteryRegistry["AdapterDetails"]}

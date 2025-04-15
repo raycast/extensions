@@ -4,6 +4,9 @@
   "title": "Pomodoro",
   "description": "Pomodoro extension with menu-bar timer",
   "icon": "icon.png",
+  "crossExtensions": [
+    "yakitrak/do-not-disturb"
+  ],
   "author": "asubbotin",
   "contributors": [
     "pernielsentikaer",
@@ -14,7 +17,10 @@
     "nathanjms",
     "cchalop1",
     "hayden_barnes",
-    "j3lte"
+    "j3lte",
+    "litomore",
+    "ridemountainpig",
+    "meganpearson"
   ],
   "keywords": [
     "pomodoro",
@@ -44,7 +50,27 @@
       "name": "stats-pomodoro-timer",
       "title": "View Pomodoro Stats",
       "mode": "view",
-      "description": "Shows the stats of the Pomodoro timer"
+      "description": "Shows the stats of the Pomodoro timer",
+      "preferences": [
+        {
+          "name": "showWeeklyStats",
+          "type": "checkbox",
+          "required": false,
+          "title": "Weekly Stats",
+          "label": "Show weekly stats",
+          "description": "Shows the weekly stats of the Pomodoro timer",
+          "default": false
+        },
+        {
+          "name": "showDailyStats",
+          "type": "checkbox",
+          "required": false,
+          "title": "Daily Stats",
+          "label": "Show Daily stats",
+          "description": "Shows the daily stats of the Pomodoro timer",
+          "default": false
+        }
+      ]
     },
     {
       "name": "slack-pomodoro-menu-bar",
@@ -64,7 +90,172 @@
       "disabledByDefault": true
     }
   ],
+  "tools": [
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "description": "Starts a new timer"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "description": "Stops any running timer"
+    },
+    {
+      "name": "pause-timer",
+      "title": "Pause Timer",
+      "description": "Pauses the pomodoro timer"
+    },
+    {
+      "name": "continue-timer",
+      "title": "Continue Timer",
+      "description": "Continues the paused pomodoro timer"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@pomodoro start a long timer",
+        "mocks": {
+          "start-timer": "Started long-break timer"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "type": "long-break"
+              },
+              "name": "start-timer"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@pomodoro start a focus timer",
+        "mocks": {
+          "start-timer": "Started focus timer"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "type": "focus"
+              },
+              "name": "start-timer"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@pomodoro start a break",
+        "mocks": {
+          "start-timer": "Started short-break timer"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-timer",
+              "arguments": {
+                "type": "short-break"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "stop-timer"
+            }
+          }
+        ],
+        "input": "@pomodoro stop timer",
+        "mocks": {
+          "stop-timer": "Timer stopped"
+        }
+      },
+      {
+        "mocks": {
+          "pause-timer": "Timer paused"
+        },
+        "input": "@pomodoro pause break",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "pause-timer"
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "continue-timer": "Timer continued"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "continue-timer"
+            }
+          }
+        ],
+        "input": "@pomodoro continue the timer"
+      },
+      {
+        "input": "@pomodoro start a 4min 30 sec timer",
+        "mocks": {
+          "start-timer": {
+            "id": 17,
+            "length": 270,
+            "parts": [
+              {
+                "startedAt": 1737715952
+              }
+            ],
+            "type": "short-break"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-timer",
+              "arguments": {
+                "duration": 270,
+                "type": "short-break"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
+    {
+      "name": "enableTimeOnMenuBar",
+      "type": "checkbox",
+      "required": false,
+      "title": "Menu Bar Time",
+      "description": "Shows time on the Menu Bar",
+      "default": true,
+      "label": "Show time on Menu Bar"
+    },
+    {
+      "name": "hideTimeWhenStopped",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Time When Stopped",
+      "description": "Hide time on the Menu Bar when the timer is stopped",
+      "default": true,
+      "label": "Hide the time when stopped"
+    },
+    {
+      "name": "enableFocusWhileFocused",
+      "title": "Enable Mac Do Not Disturb while Focused",
+      "type": "checkbox",
+      "label": "Do Not Disturb while focused",
+      "required": false,
+      "description": "Uses the do-not-disturb extension to enable Do Not Disturb mode when starting a focus interval. Disables Do Not Disturb mode when the focus interval ends."
+    },
     {
       "name": "focusIntervalDuration",
       "type": "dropdown",
@@ -306,6 +497,59 @@
       ]
     },
     {
+      "name": "enableConfetti",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Confetti (Deprecated)",
+      "description": "Shows confetti when interval finishes",
+      "default": false,
+      "label": "Shows confetti when interval finishes"
+    },
+    {
+      "name": "enableQuote",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Quote",
+      "description": "Shows a random quote from zenquotes.io when interval finishes",
+      "default": false,
+      "label": "Shows quote when interval finishes"
+    },
+    {
+      "name": "sound",
+      "description": "Play sound",
+      "type": "dropdown",
+      "required": false,
+      "title": "Play Completion Sound",
+      "default": "",
+      "data": [
+        {
+          "title": "No Sound",
+          "value": ""
+        },
+        {
+          "title": "Submarine",
+          "value": "Submarine"
+        },
+        {
+          "title": "Tink",
+          "value": "Tink"
+        },
+        {
+          "title": "Ping",
+          "value": "Ping"
+        }
+      ]
+    },
+    {
+      "name": "enableImage",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Image",
+      "description": "Shows the image configured below when interval finishes",
+      "default": true,
+      "label": "Shows image when interval finishes"
+    },
+    {
       "name": "completionImage",
       "type": "textfield",
       "required": false,
@@ -353,83 +597,22 @@
           "title": "R"
         }
       ]
-    },
-    {
-      "name": "sound",
-      "description": "Play sound",
-      "type": "dropdown",
-      "required": false,
-      "title": "Play Completion Sound",
-      "default": "",
-      "data": [
-        {
-          "title": "No Sound",
-          "value": ""
-        },
-        {
-          "title": "Submarine",
-          "value": "Submarine"
-        },
-        {
-          "title": "Tink",
-          "value": "Tink"
-        },
-        {
-          "title": "Ping",
-          "value": "Ping"
-        }
-      ]
-    },
-    {
-      "name": "enableTimeOnMenuBar",
-      "type": "checkbox",
-      "required": false,
-      "title": "Menu Bar Time",
-      "description": "Shows time on the Menu Bar",
-      "default": true,
-      "label": "Show time on Menu Bar"
-    },
-    {
-      "name": "enableConfetti",
-      "type": "checkbox",
-      "required": false,
-      "title": "Show Confetti",
-      "description": "Shows confetti when interval finishes",
-      "default": false,
-      "label": "Shows confetti when interval finishes"
-    },
-    {
-      "name": "enableQuote",
-      "type": "checkbox",
-      "required": false,
-      "title": "Show Quote",
-      "description": "Shows a random quote from zenquotes.io when interval finishes",
-      "default": false,
-      "label": "Shows quote when interval finishes"
-    },
-    {
-      "name": "enableImage",
-      "type": "checkbox",
-      "required": false,
-      "title": "Show Image",
-      "description": "Shows the image configured above when interval finishes",
-      "default": true,
-      "label": "Shows image when interval finishes"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.76.0",
-    "@raycast/utils": "^1.12.4",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.86.1",
+    "@raycast/utils": "^1.18.1",
+    "node-fetch": "^3.3.2",
+    "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.1",
+    "@types/react": "^18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.1",
+    "react": "^18.3.1",
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "ray build -e dist",

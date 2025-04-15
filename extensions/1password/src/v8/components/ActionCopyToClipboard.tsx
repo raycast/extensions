@@ -1,7 +1,7 @@
 import { Action, Clipboard, Icon, Keyboard, showToast, Toast, showHUD } from "@raycast/api";
 import { execFileSync } from "child_process";
 
-import { CLI_PATH, ExtensionError, handleErrors, titleCaseWord } from "../utils";
+import { ExtensionError, getCliPath, handleErrors, titleCaseWord } from "../utils";
 
 export function CopyToClipboard({
   id,
@@ -16,6 +16,8 @@ export function CopyToClipboard({
   vault_id: string;
   attribute?: string;
 }) {
+  const cliPath = getCliPath();
+
   return (
     <Action
       icon={Icon.Clipboard}
@@ -30,11 +32,11 @@ export function CopyToClipboard({
           let stdout;
           if (attribute === "otp") {
             // based on OTP-type not field name
-            stdout = execFileSync(CLI_PATH, ["item", "get", id, "--otp"]);
+            stdout = execFileSync(cliPath, ["item", "get", id, "--otp"]);
           } else {
             const attributeQueryParam = attribute ? `?attribute=${attribute}` : "";
             const uri = `op://${vault_id}/${id}/${field}${attributeQueryParam}`;
-            stdout = execFileSync(CLI_PATH, ["read", uri]);
+            stdout = execFileSync(cliPath, ["read", uri]);
           }
           await Clipboard.copy(stdout.toString().trim(), { concealed: true });
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCachedState, useFetch } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 
 import { DBObjectsResponse, Instance } from "../types";
 import useInstances from "../hooks/useInstances";
@@ -9,8 +9,14 @@ import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
 
 export default function Tables() {
-  const { instances, isLoading: isLoadingInstances, addInstance, mutate: mutateInstances } = useInstances();
-  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
+  const {
+    instances,
+    isLoading: isLoadingInstances,
+    addInstance,
+    mutate: mutateInstances,
+    selectedInstance,
+    setSelectedInstance,
+  } = useInstances();
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -18,7 +24,7 @@ export default function Tables() {
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
-  const { isLoading, data, mutate, pagination } = useFetch(
+  const { isLoading, data, revalidate, pagination } = useFetch(
     (options) => {
       const terms = searchTerm.split(" ");
       const query = terms.map((t) => `^labelLIKE${t}^ORnameLIKE${t}^ORsuper_class.labelLIKE${t}`).join("");
@@ -32,7 +38,7 @@ export default function Tables() {
       onError: (error) => {
         setErrorFetching(true);
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch history", error.message);
+        showToast(Toast.Style.Failure, "Could not fetch tables", error.message);
       },
 
       mapResult(response: DBObjectsResponse) {
@@ -92,7 +98,7 @@ export default function Tables() {
             description="Press ⏎ to refresh or try later again"
             actions={
               <ActionPanel>
-                <Actions mutate={mutate} />
+                <Actions revalidate={revalidate} />
               </ActionPanel>
             }
           />
@@ -102,7 +108,7 @@ export default function Tables() {
             if (table.super_class)
               accessories.push({
                 tag: { value: table.super_class },
-                tooltip: "Super Class",
+                tooltip: `Super Class: ${table.super_class}`,
               });
             return (
               <List.Item
@@ -136,7 +142,7 @@ export default function Tables() {
                       content={`${instanceUrl}/${table.name}_list.do`}
                       shortcut={Keyboard.Shortcut.Common.CopyPath}
                     />
-                    <Actions mutate={mutate} />
+                    <Actions revalidate={revalidate} />
                   </ActionPanel>
                 }
               />

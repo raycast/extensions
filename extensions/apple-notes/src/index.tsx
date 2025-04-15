@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useMemo, useState } from "react";
 
-import { createNote } from "./api";
+import { createNote } from "./api/applescript";
 import NoteListItem from "./components/NoteListItem";
-import { useNotes } from "./useNotes";
+import { useNotes } from "./hooks/useNotes";
 
 export type NoteTitle = {
   title: string;
@@ -11,38 +12,54 @@ export type NoteTitle = {
 
 export default function Command() {
   const { data, isLoading, permissionView, mutate } = useNotes();
+  const [searchText, setSearchText] = useState<string>("");
+
+  const filteredNotes = useMemo(() => {
+    return [...(data?.pinnedNotes ?? []), ...(data?.unpinnedNotes ?? [])].filter(
+      (note) =>
+        note.title.toLowerCase().includes(searchText.toLowerCase()) ||
+        note.snippet?.toLowerCase().includes(searchText.toLowerCase()) ||
+        note.folder.toLowerCase().includes(searchText.toLowerCase()) ||
+        note.tags.some((tag) => tag.text?.toLowerCase().includes(searchText.toLowerCase())),
+    );
+  }, [searchText, data]);
 
   if (permissionView) {
     return permissionView;
   }
 
-  const noteTitles = [...(data?.pinnedNotes ?? []), ...(data?.unpinnedNotes ?? [])].map((note) => ({
-    title: note.title,
-    uuid: note.UUID,
-  }));
+  // Limit the number of notes displayed (for example, to 100)
+  const limitedNotes = filteredNotes.slice(0, 100);
 
   return (
     <List
+      onSearchTextChange={setSearchText}
       isLoading={isLoading}
       searchBarPlaceholder="Search notes by title, folder, description, tags, or accessories"
       filtering={{ keepSectionOrder: true }}
     >
       <List.Section title="Pinned">
-        {data.pinnedNotes.map((note) => (
-          <NoteListItem noteTitles={noteTitles} key={note.id} note={note} mutate={mutate} />
-        ))}
+        {limitedNotes
+          .filter((note) => note.pinned)
+          .map((note) => (
+            <NoteListItem key={note.id} note={note} mutate={mutate} />
+          ))}
       </List.Section>
 
       <List.Section title="Notes">
-        {data.unpinnedNotes.map((note) => (
-          <NoteListItem noteTitles={noteTitles} key={note.id} note={note} mutate={mutate} />
-        ))}
+        {limitedNotes
+          .filter((note) => !note.pinned)
+          .map((note) => (
+            <NoteListItem key={note.id} note={note} mutate={mutate} />
+          ))}
       </List.Section>
 
       <List.Section title="Recently Deleted">
-        {data.deletedNotes.map((note) => (
-          <NoteListItem key={note.id} note={note} mutate={mutate} isDeleted />
-        ))}
+        {limitedNotes
+          .filter((note) => note.folder === "Recently Deleted")
+          .map((note) => (
+            <NoteListItem key={note.id} note={note} mutate={mutate} isDeleted />
+          ))}
       </List.Section>
 
       <List.EmptyView
@@ -50,7 +67,7 @@ export default function Command() {
         description="Create a new note by pressing ⏎"
         actions={
           <ActionPanel>
-            <Action icon={Icon.Plus} title="Create New Note" onAction={createNote} />
+            <Action icon={Icon.Plus} title="Create New Note" onAction={() => createNote(searchText)} />
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}

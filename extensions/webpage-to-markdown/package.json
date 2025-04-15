@@ -1,0 +1,157 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "webpage-to-markdown",
+  "title": "Webpage to Markdown",
+  "description": "Convert any webpage to markdown just by providing the url.",
+  "icon": "extension-icon.png",
+  "author": "treyg",
+  "contributors": [
+    "marcmagn1"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "webpage-to-markdown",
+      "title": "Webpage to Markdown",
+      "subtitle": "Convert a webpage to markdown format",
+      "description": "Converts webpage to markdown format using Jina AI",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "Enter URL to convert",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "webpage_to_markdown_tool",
+      "title": "Webpage to Markdown",
+      "description": "Convert a webpage to markdown format"
+    }
+  ],
+  "ai": {
+    "instructions": "When calling this tool, always include an argument in the command with the `url` field. The URL must be fully qualified and start with 'http://' or 'https://'. Example: @webpage-to-markdown convert webpage { \"url\": \"https://www.example.com/article\" }.",
+    "evals": [
+      {
+        "input": "@webpage-to-markdown get the markdown for this webpage https://www.npr.org/2025/01/30/nx-s1-5280198/plane-crash-washington-dc-helicopter-potomac",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "webpage_to_markdown_tool",
+              "arguments": {
+                "url": "https://www.npr.org/2025/01/30/nx-s1-5280198/plane-crash-washington-dc-helicopter-potomac"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "webpage_to_markdown_tool": "# What we know about the midair plane and helicopter crash near Washington"
+        }
+      },
+      {
+        "input": "@webpage-to-markdown turn https://www.bbc.co.uk/sport/football/articles/cx2pee5yn42o to md",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "webpage_to_markdown_tool",
+              "arguments": {
+                "url": "https://www.bbc.co.uk/sport/football/articles/cx2pee5yn42o"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Mentiones Mathys Tel"
+          }
+        ],
+        "mocks": {
+          "webpage_to_markdown_tool": "# Mathys Tel: Bayern Munich want move that is right for all parties\n\nMathys Tel: Bayern Munich want move that is right for all parties"
+        }
+      },
+      {
+        "input": "@webpage-to-markdown https://www.raycast.com/blog/affiliate-program",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "webpage_to_markdown_tool",
+              "arguments": {
+                "url": "https://www.raycast.com/blog/affiliate-program"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Mentiones 30% commission"
+          }
+        ],
+        "mocks": {
+          "webpage_to_markdown_tool": "# Introducing our Affiliate Program - Raycast Blog\n\nWord-of-mouth is one of our most important growth channels. [Many of you](https://x.com/peduarte/status/1800126943364534731) are actively sharing and recommending Raycast on your social platforms, videos, and podcasts. And that means a lot to us.\n\nLast year, we introduced the [Raycast Referral Program](https://www.raycast.com/changelog/1-62-0), available through the `Share Raycast` command. This command gives Pro users a limited number of promo codes. When someone signs up through a promo code, they get a free month of Raycast Pro, and so does the referrer.\n\nThat was a good starting point, but you deserve more. So today, we’re introducing the Raycast Affiliate Program.\n\nAs an affiliate, you can **earn a 30% commission** on all payments coming from users you brought to Raycast Pro. In return, your referrals will get a 10% discount.\n\nYou can become an affiliate by visiting the [Affiliate Program](https://www.raycast.com/settings/affiliate) page in your settings, or via the `Become an Affiliate` command (if you don't see it, run `Check for Updates` in Raycast).\n\n### [Can anyone join?](https://www.raycast.com/blog/affiliate-program#can-anyone-join)\n\nUnlike the Referral Program, which is limited to Pro users, anyone with a Raycast account can apply to become an affiliate.\n\n### [Which affiliate management system are you using?](https://www.raycast.com/blog/affiliate-program#which-affiliate-management-system-are-you-using)\n\nWe’re using [Rewardful](https://getrewardful.com/), as it integrates with Stripe. We also looked at [FirstPromoter](https://firstpromoter.com/), which seems to be equally as good.\n\n### [Where is my affiliate URL?](https://www.raycast.com/blog/affiliate-program#where-is-my-affiliate-url)\n\nYou can get your affiliate URL from your [Rewardful Dashboard](https://affiliates.raycast.com/login). It looks like this `https://raycast.com?via=rewardful_username`.\n\nTip: Create a redirect from your domain, so it's more personally branded, eg: `ped.ro/raycast`.\n\n### [How do I get paid?](https://www.raycast.com/blog/affiliate-program#how-do-i-get-paid)\n\nCommissions are paid out via [Wise](https://wise.com/) once they exceed the threshold of £50, and will be pending for 30 days before they’re considered payable. This is to account for any cancellations or refunds.\n\n### [What if I don’t have Wise?](https://www.raycast.com/blog/affiliate-program#what-if-i-dont-have-wise)\n\nIf you don’t have a Wise account and are unable to create one (due to country restrictions) you’ll be unable to receive payment. Unfortunately at this stage we can’t handle multiple payment providers, and we have decided to use Wise over PayPal.\n\n### [Are there any affiliate resources?](https://www.raycast.com/blog/affiliate-program#are-there-any-affiliate-resources)\n\nNot yet, but we’ll get on that soon.\n\n### [Can I refer myself?](https://www.raycast.com/blog/affiliate-program#can-i-refer-myself)\n\nNo, please don’t do that. Rewardul will automatically identify self-referrals and notify us for review. Self-referrals will result in the referral and the Pro subscription being deactivated.\n\n### [Any questions?](https://www.raycast.com/blog/affiliate-program#any-questions)\n\nIf you have any more questions, reach out to us on [Twitter/𝕏](https://ray.so/x) or shoot us an email at `affiliates@raycast.com`."
+        }
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "label": "Include Metadata",
+      "name": "includeMetadata",
+      "title": "Include Metadata",
+      "description": "Show metadata like reading time and word count in sidebar",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "label": "Add Front Matter",
+      "name": "prependFrontMatter",
+      "title": "Add Front Matter",
+      "description": "Add YAML front matter with metadata to the markdown",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "label": "Include Links Summary",
+      "name": "includeLinksSummary",
+      "title": "Include Links Summary",
+      "description": "Add a 'Links' section at the end with all article links",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "label": "Jina.ai API Key",
+      "name": "jinaApiKey",
+      "title": "Jina.ai API Key",
+      "description": "Optional: Add your Jina.ai API key to avoid rate limiting",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

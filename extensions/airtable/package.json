@@ -23,7 +23,7 @@
       "description": "The base URL for the Airtable UI (you probably don't need to change this)",
       "default": "https://airtable.com",
       "placeholder": "https://airtable.com",
-      "required": false
+      "required": true
     },
     {
       "type": "textfield",
@@ -34,7 +34,7 @@
       "description": "The base URL for the Airtable API (you probably don't need to change this)",
       "default": "https://api.airtable.com",
       "placeholder": "https://api.airtable.com",
-      "required": false
+      "required": true
     },
     {
       "type": "textfield",
@@ -43,9 +43,9 @@
       "title": "Airtable OAuth Client ID",
       "label": "Airtable OAuth Integration Client ID",
       "description": "The OAuth client ID for the Airtable integration",
-      "default": "76a7c93f-0834-41ba-82a5-e23e771fb19f",
-      "placeholder": "76a7c93f-0834-41ba-82a5-e23e771fb19f",
-      "required": false
+      "default": "59e5ecce-9dc8-4881-89c8-98d44be1e68a",
+      "placeholder": "59e5ecce-9dc8-4881-89c8-98d44be1e68a",
+      "required": true
     }
   ],
   "commands": [
@@ -58,8 +58,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.84.7",
+    "@raycast/utils": "^1.18.0",
     "node-fetch": "^3.3.0"
   },
   "devDependencies": {

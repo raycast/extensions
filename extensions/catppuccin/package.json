@@ -40,9 +40,9 @@
     },
     {
       "name": "search-userstyles",
-      "title": "Search User Styles",
+      "title": "Search Userstyles",
       "subtitle": "Catppuccin",
-      "description": "Search through Catppuccin user styles",
+      "description": "Search through Catppuccin userstyles",
       "keywords": [
         "user",
         "styles",
@@ -85,6 +85,32 @@
           "title": "Large"
         }
       ]
+    },
+    {
+      "name": "flavor",
+      "type": "dropdown",
+      "required": false,
+      "title": "Catppuccin Flavor",
+      "description": "Select your favorite Catppuccin flavor to default to",
+      "default": "mocha",
+      "data": [
+        {
+          "title": "Mocha",
+          "value": "mocha"
+        },
+        {
+          "title": "Macchiato",
+          "value": "macchiato"
+        },
+        {
+          "title": "Frappé",
+          "value": "frappe"
+        },
+        {
+          "title": "Latte",
+          "value": "latte"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -92,7 +118,8 @@
     "@raycast/api": "^1.81.2",
     "@raycast/utils": "^1.16.3",
     "ajv": "^8.17.1",
-    "axios": "^1.7.7",
+    "axios": "^1.8.4",
+    "fuse.js": "^7.0.0",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {

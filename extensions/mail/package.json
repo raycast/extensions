@@ -13,7 +13,10 @@
     "lukah",
     "stelo",
     "StevenRCE0",
-    "ridemountainpig"
+    "ridemountainpig",
+    "ViGeng",
+    "dante",
+    "5z99tsb75z"
   ],
   "categories": [
     "Applications",
@@ -65,16 +68,8 @@
           "value": "10"
         },
         {
-          "title": "25",
-          "value": "25"
-        },
-        {
-          "title": "50",
-          "value": "50"
-        },
-        {
-          "title": "100",
-          "value": "100"
+          "title": "20",
+          "value": "20"
         }
       ]
     }
@@ -96,7 +91,18 @@
       "name": "see-recent-mail",
       "title": "See Recent Mail",
       "description": "See recent unread messages.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "unreadonly",
+          "label": "Only show unread messages",
+          "title": "Unread-Only",
+          "description": "Only show unread messages.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "see-important-mail",
@@ -136,22 +142,50 @@
       "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "search-emails",
+      "title": "Search Emails",
+      "description": "Search for emails in Apple Mail."
+    },
+    {
+      "name": "read-email",
+      "title": "Read Email",
+      "description": "Read the full content of an email."
+    },
+    {
+      "name": "list-addresses",
+      "title": "List Addresses",
+      "description": "List addresses in Apple Mail."
+    },
+    {
+      "name": "send-email",
+      "title": "Send Email",
+      "description": "Send an email with Apple Mail."
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.80.0",
-    "@raycast/utils": "^1.16.3",
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "execa": "^9.5.2",
+    "got": "^14.4.6",
     "javascript-time-ago": "^2.5.10",
     "json2md": "^1.13.0",
     "juice": "^9.1.0",
-    "mailparser": "^3.7.1",
+    "mailparser": "^3.7.2",
     "mime-types": "^2.1.35",
+    "plist": "^3.1.0",
+    "string-strip-html": "^13.4.12",
     "turndown": "^7.2.0",
     "utf8": "^3.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
+    "@types/got": "^9.6.12",
     "@types/json2md": "^1.5.4",
     "@types/mailparser": "^3.4.4",
     "@types/mime-types": "^2.1.4",
+    "@types/plist": "^3.0.5",
     "@types/turndown": "^5.0.5",
     "@types/utf8": "^3.0.3",
     "eslint": "^8.57.0",

@@ -1,6 +1,14 @@
 # Pocket Changelog
 
-## [Add website favicons] - 2024-08-31
+## Handle Deleted Items - 2025-03-13
+- Hide deleted items in the `Search Bookmarks` command
+
+## [Improved Type Safety] - 2024-11-23
+- Added `Preferences` type to `preferences.ts`
+- Added `zod` for runtime validation and type inference
+- Added fallback values for `List.Item`
+
+## [Add Website Favicons] - 2024-08-31
 - Add website favicons to bookmarks in the `Search Bookmarks` command
 
 ## [Fix Bookmark Creation] - 2024-07-20

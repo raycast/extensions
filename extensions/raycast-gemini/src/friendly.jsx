@@ -1,8 +1,11 @@
 import useGemini from "./api/gemini";
+import { getPreferenceValues } from "@raycast/api";
 
 export default function Friendly(props) {
+  const { prompt } = getPreferenceValues();
   return useGemini(props, {
-    context: "Make the following text seem more friendly. ONLY return the modified text and nothing else.",
+    context: prompt,
     allowPaste: true,
+    useSelected: true,
   });
 }

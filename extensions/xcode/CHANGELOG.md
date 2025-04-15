@@ -6,14 +6,15 @@
 - Improved the "Search Recent Projects" command to sort the most recent projects by their last usage.
 - Added an option to select the Swift version when creating a playground.
 - Removed the "Search Apple Developer Documentation" command due to the unavailability of the underlying API.
-- Updated Raycast Store screenshots.
-
-## [Improvements] - 2024-12-18
-
-- Improved the ordering of the "Search Recent Projects" command to show the most recent projects first.
 - Added "Open With Terminal" action to the "Search Recent Projects" command.
 - Added "Create Quicklink" action to the "Search Recent Projects" command.
 - Added "Delete" action to the "Manage Simulators" command.
+- Updated Raycast Store screenshots.
+
+## [Add Xcode Runtimes Management] - 2025-04-15
+
+- Add Xcode runtimes listing and management command
+- Add a delete unsupported Xcode runtimes command
 
 ## [Added Delete App Data] - 2024-09-30
 
@@ -44,7 +45,7 @@
 - Added Push Notifications using a payload
 - Added iCloud Sync
 - Added Open AppGroup directory
-  
+
 ## [Updated Swift Package Types] - 2023-10-03
 
 - Updated Swift Package types when creating a new Swift Package.

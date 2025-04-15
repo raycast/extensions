@@ -216,7 +216,7 @@
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5",
-    "vitest": "^1.5.0"
+    "vitest": "^1.6.1"
   },
   "scripts": {
     "build": "ray build -e dist",

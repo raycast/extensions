@@ -13,6 +13,26 @@ export const SUCCESS_SUMMARIZING_VIDEO = {
   message: "Video summarized!",
 };
 
-export const ERROR_SUMMARIZING_VIDEO = {
+export const ALERT = {
   title: "🚨",
+};
+
+export const FINDING_ANSWER = {
+  title: "🔍",
+  message: "Answering your question",
+};
+
+export const GETTING_VIDEO_URL = {
+  title: "🔗",
+  message: "Checking video URL",
+};
+
+export const GETTING_VIDEO_URL_FROM_BROWSER = {
+  title: "🔗",
+  message: "Checking Browser Extension",
+};
+
+export const GETTING_VIDEO_URL_FROM_CLIPBOARD = {
+  title: "🔗",
+  message: "Checking Clipboard",
 };

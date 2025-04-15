@@ -55,7 +55,7 @@ export default function Main() {
     <List
       isLoading={isLoading}
       isShowingDetail={isShowingDetail}
-      actions={<ActionPanel>{startExampleAction}</ActionPanel>}
+      actions={!isLoading && <ActionPanel>{startExampleAction}</ActionPanel>}
     >
       {list.map((p, index) => {
         return (

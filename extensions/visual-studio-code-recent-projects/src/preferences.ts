@@ -1,19 +1,10 @@
 import { getPreferenceValues } from "@raycast/api";
-import { VSCodeBuild } from "./types";
+import { getBundleId } from "./utils/editor";
 
 const preferences = getPreferenceValues<ExtensionPreferences>();
 
 function getBundleIdentifier() {
-  switch (preferences.build) {
-    case VSCodeBuild.Code:
-      return "com.microsoft.VSCode";
-    case VSCodeBuild.Insiders:
-      return "com.microsoft.VSCodeInsiders";
-    case VSCodeBuild.VSCodium:
-      return "VSCodium";
-    case VSCodeBuild.Cursor:
-      return "Cursor";
-  }
+  return getBundleId(preferences.build);
 }
 
 export const build = preferences.build;
@@ -22,3 +13,5 @@ export const layout = preferences.layout;
 export const keepSectionOrder = preferences.keepSectionOrder;
 export const closeOtherWindows = preferences.closeOtherWindows;
 export const terminalApp = preferences.terminalApp;
+export const showGitBranch = preferences.showGitBranch;
+export const gitBranchColor = preferences.gitBranchColor;

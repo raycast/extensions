@@ -13,7 +13,8 @@
     "itsmingjie",
     "erics118",
     "brandenw",
-    "j3lte"
+    "j3lte",
+    "itsmatteomanf"
   ],
   "categories": [
     "Developer Tools",
@@ -90,6 +91,13 @@
       "subtitle": "Tailscale",
       "description": "Tailscale down",
       "mode": "no-view"
+    },
+    {
+      "name": "netcheck",
+      "title": "Netcheck",
+      "subtitle": "Tailscale",
+      "description": "Tailscale netcheck",
+      "mode": "view"
     }
   ],
   "preferences": [

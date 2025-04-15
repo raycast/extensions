@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "penflow-ai",
+  "title": "Penflow AI",
+  "version": "1.0.0",
+  "description": "Think & Write in English, Not your First Language - AI-powered writing assistant",
+  "icon": "icon.png",
+  "author": "Fchen",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Penflow AI",
+      "description": "Start writing with Raycast AI",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "style",
+      "title": "Writing Style",
+      "description": "Choose your preferred writing style",
+      "type": "dropdown",
+      "required": true,
+      "default": "professional",
+      "data": [
+        {
+          "title": "Professional",
+          "value": "professional"
+        },
+        {
+          "title": "Casual",
+          "value": "casual"
+        },
+        {
+          "title": "Academic",
+          "value": "academic"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.87.5",
+    "@raycast/utils": "^1.4.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "5.7.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "eslint 'src/**'",
+    "format": "prettier --write 'src/**'",
+    "publish": "ray publish"
+  },
+  "keywords": [
+    "ai",
+    "writing",
+    "english",
+    "translation",
+    "productivity"
+  ],
+  "screenshots": [
+    {
+      "path": "meta/data/penflow-ai-1.png",
+      "title": "penflow-ai-1"
+    },
+    {
+      "path": "meta/data/penflow-ai-2.png", 
+      "title": "penflow-ai-2"
+    },
+    {
+      "path": "meta/data/penflow-ai-3.png",
+      "title": "penflow-ai-3"
+    }
+  ],
+  "lockfileVersion": 2,
+  "husky": {
+    "hooks": {
+      "pre-commit": "prettier --write ."
+    }
+  },
+  "config": {
+    "timeout": 300000,
+    "fetch-retries": 5
+  }
+}

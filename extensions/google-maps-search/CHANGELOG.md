@@ -1,5 +1,13 @@
 # Google Maps Search Changelog
 
+## [Chore: Fixed throttle issue] - 2025-03-10
+
+## [Added preferred starting location] - 2024-11-20
+
+### Added
+
+- Added the ability to set a preferred starting location.
+
 ## [Travel mode fixes and improvements] - 2024-08-21
 
 ### Changed

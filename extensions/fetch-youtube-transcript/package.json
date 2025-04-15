@@ -1,0 +1,137 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fetch-youtube-transcript",
+  "version": "1.1.5",
+  "title": "Fetch YouTube Transcript",
+  "description": "Fetches and saves the transcript of a YouTube video in your downaloads folder",
+  "icon": "extension_icon.png",
+  "author": "apoorv_khandelwal",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "fetch-youtube-transcript",
+      "title": "Fetch YouTube Transcript",
+      "description": "Fetches and saves the transcript of a YouTube video",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "videoUrl",
+          "type": "text",
+          "placeholder": "Enter YouTube video URL"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultDownloadFolder",
+      "type": "directory",
+      "required": false,
+      "title": "Default Download Folder",
+      "description": "Choose the default folder to save transcripts (if not set, will use Downloads folder)",
+      "placeholder": "~/Downloads"
+    },
+    {
+      "name": "defaultLanguage",
+      "type": "dropdown",
+      "required": true,
+      "title": "Default Language",
+      "description": "Choose the preferred language for transcripts",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Bengali",
+          "value": "bn"
+        },
+        {
+          "title": "Chinese",
+          "value": "zh"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Marathi",
+          "value": "mr"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Tamil",
+          "value": "ta"
+        },
+        {
+          "title": "Urdu",
+          "value": "ur"
+        }
+      ],
+      "default": "en"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.5",
+    "node-fetch": "^3.3.2",
+    "youtube-captions-scraper": "^2.0.3",
+    "ytdl-core": "^4.11.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

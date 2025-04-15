@@ -5,7 +5,8 @@ import {
   List,
   openExtensionPreferences,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Searcher } from "fast-fuzzy";
 import OtpListItems from "./OtpListItems";
 import { Service } from "../../util/service";
 import { checkError, loadData } from "./otp-helpers";
@@ -19,18 +20,47 @@ export function OtpList() {
     isLoading: true,
   });
 
+  const [searchText, setSearchText] = useState("");
+
   useEffect(() => {
     loadData(setItems);
   }, []);
 
-  // error checking
   useEffect(() => {
     checkError(items.otpList, items.isLoading);
   }, [items]);
 
+  // Create searcher when items load
+  const searcher = useMemo(
+    () =>
+      new Searcher(items.otpList, {
+        keySelector: (item) =>
+          [item.name, item.issuer, item.accountType].filter((x): x is string =>
+            Boolean(x)
+          ),
+      }),
+    [items.otpList]
+  );
+
+  // Get filtered items based on search
+  const filteredItems = searchText
+    ? searcher.search(searchText)
+    : items.otpList;
+
   return (
-    <List searchBarPlaceholder="Search" isLoading={items.isLoading}>
-      {items.otpList.length == 0 ? (
+    <List
+      searchBarPlaceholder="Search"
+      isLoading={items.isLoading}
+      onSearchTextChange={setSearchText}
+      throttle
+    >
+      {filteredItems.length === 0 && searchText !== "" ? (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="No matching items found"
+          description="Try a different search term"
+        />
+      ) : items.otpList.length === 0 ? (
         <List.EmptyView
           icon={Icon.SpeechBubbleImportant}
           title={"Add Services with Aegis"}
@@ -45,7 +75,7 @@ export function OtpList() {
           }
         />
       ) : (
-        <OtpListItems items={items.otpList} setItems={setItems} />
+        <OtpListItems items={filteredItems} setItems={setItems} />
       )}
     </List>
   );

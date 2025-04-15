@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import fetch from "node-fetch";
+import fetch, { AbortError } from "node-fetch";
 import { showToast, Toast, useNavigation } from "@raycast/api";
 import { RaceResult } from "../types";
 
@@ -25,13 +25,16 @@ const useRaceResult = (season: string | null, round: string | null): [RaceResult
       cancelRef.current = new AbortController();
       setState((previous) => ({ ...previous, isLoading: true }));
       try {
-        const res = await fetch(`https://ergast.com/api/f1/${season}/${round}/results.json`, {
+        const res = await fetch(`https://api.jolpi.ca/ergast/f1/${season}/${round}/results.json`, {
           method: "get",
           signal: cancelRef.current.signal,
         });
         const data = (await res.json()) as any;
         setState({ isLoading: false, result: data.MRData.RaceTable.Races[0] });
       } catch (error) {
+        if (error instanceof AbortError) {
+          return;
+        }
         await showToast({
           style: Toast.Style.Failure,
           title: "Error",

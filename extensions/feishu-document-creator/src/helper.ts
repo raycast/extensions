@@ -7,6 +7,6 @@ export default async function openFeishuURL(path: string) {
     lark: "https://www.larksuite.com",
   }[preference.appType];
   const feishuURL = host + path;
-  const defaultApplication = await getDefaultApplication(__filename);
+  const defaultApplication = await getDefaultApplication(feishuURL);
   await open(`${feishuURL}`, `${defaultApplication.bundleId}`);
 }

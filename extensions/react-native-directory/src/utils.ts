@@ -75,6 +75,7 @@ export const getCompatibilityTags = (library: Library): string[] => {
   if (library.dev) tags.push("Development Tool");
   if (library.template) tags.push("Template");
   if (!library.dev && !library.template && library.newArchitecture) tags.push("New Architecture");
+  if (!library.dev && !library.template && !library.newArchitecture) tags.push("Old Architecture");
   if (library.expoGo) tags.push("Expo Go");
   return tags;
 };

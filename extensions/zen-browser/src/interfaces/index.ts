@@ -4,6 +4,7 @@ import { ReactElement } from "react";
 
 export interface Preferences {
   readonly searchEngine: string;
+  readonly limitResults: number;
 }
 
 export class Tab {
@@ -33,6 +34,13 @@ export interface SearchResult<T> {
   data?: T[];
   errorView?: ReactElement;
   isLoading: boolean;
+}
+
+export interface BookmarkEntry {
+  id: number;
+  url: number;
+  title: number;
+  lastModified: Date;
 }
 
 export type GroupedEntries = Map<string, HistoryEntry[]>;

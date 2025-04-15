@@ -1,6 +1,6 @@
 import { Color, Icon, LocalStorage } from "@raycast/api";
-import { buildRegexp, calculateCharacter, camelCaseToOtherCase, isEmpty, regexPunctuation } from "./utils";
 import { Md5 } from "ts-md5";
+import { buildRegexp, calculateCharacter, camelCaseToOtherCase, isEmpty, regexPunctuation } from "./utils";
 
 import title from "title";
 

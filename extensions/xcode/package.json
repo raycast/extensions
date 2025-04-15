@@ -170,6 +170,13 @@
       "mode": "view"
     },
     {
+      "name": "manage-runtimes.command",
+      "title": "Manage Runtimes",
+      "subtitle": "Xcode",
+      "description": "Manage your Xcode Runtimes.",
+      "mode": "view"
+    },
+    {
       "name": "manage-simulators.command",
       "title": "Manage Simulators",
       "subtitle": "Xcode",
@@ -277,6 +284,13 @@
       "title": "Delete Unsupported Simulators",
       "subtitle": "Xcode",
       "description": "Deletes devices that are not supported by the current Xcode SDK.",
+      "mode": "no-view"
+    },
+    {
+      "name": "delete-unsupported-runtimes.command",
+      "title": "Delete Unsupported Runtimes",
+      "subtitle": "Xcode",
+      "description": "Deletes runtimes that are not supported by the current Xcode SDK.",
       "mode": "no-view"
     }
   ],

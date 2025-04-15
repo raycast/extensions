@@ -21,6 +21,7 @@ const DebugSection = (props: { obj: Cask | Formula }) => (
           markdown={"```json\n" + JSON.stringify(props.obj, null, 2) + "\n```"}
           actions={
             <ActionPanel>
+              {/* eslint-disable-next-line @raycast/prefer-title-case */}
               <Action.CopyToClipboard title="Copy JSON" content={JSON.stringify(props.obj, null, 2)} />
             </ActionPanel>
           }
@@ -56,8 +57,12 @@ export function CaskActionPanel(props: {
           <Action.ShowInFinder path={brewInstallPath(cask)} />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.OpenInBrowser url={cask.homepage} />
-          <Action.CopyToClipboard title="Copy URL" content={cask.homepage} />
+          <Action.OpenInBrowser title="Open Cask" url={`https://formulae.brew.sh/cask/${cask.token}`} />
+          <Action.CopyToClipboard title="Copy Cask URL" content={`https://formulae.brew.sh/cask/${cask.token}`} />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <Action.OpenInBrowser title="Open Homepage" url={cask.homepage} />
+          <Action.CopyToClipboard title="Copy Homepage URL" content={cask.homepage} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Actions.FormulaUninstallAction formula={cask} onAction={props.onAction} />
@@ -121,8 +126,12 @@ export function CaskActionPanel(props: {
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.OpenInBrowser url={cask.homepage} />
-          <Action.CopyToClipboard title="Copy URL" content={cask.homepage} />
+          <Action.OpenInBrowser title="Open Cask" url={`https://formulae.brew.sh/cask/${cask.token}`} />
+          <Action.CopyToClipboard title="Copy Cask URL" content={`https://formulae.brew.sh/cask/${cask.token}`} />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <Action.OpenInBrowser title="Open Homepage" url={cask.homepage} />
+          <Action.CopyToClipboard title="Copy Homepage URL" content={cask.homepage} />
         </ActionPanel.Section>
       </ActionPanel>
     );
@@ -159,10 +168,16 @@ export function FormulaActionPanel(props: {
           <Action.ShowInFinder path={brewInstallPath(formula)} />
           <Actions.FormulaPinAction formula={formula} onAction={props.onAction} />
         </ActionPanel.Section>
-
         <ActionPanel.Section>
-          <Action.OpenInBrowser url={formula.homepage} />
-          <Action.CopyToClipboard title="Copy URL" content={formula.homepage} />
+          <Action.OpenInBrowser title="Open Formula" url={`https://formulae.brew.sh/formula/${formula.name}`} />
+          <Action.CopyToClipboard
+            title="Copy Formula URL"
+            content={`https://formulae.brew.sh/formula/${formula.name}`}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <Action.OpenInBrowser title="Open Homepage" url={formula.homepage} />
+          <Action.CopyToClipboard title="Copy Homepage URL" content={formula.homepage} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Actions.FormulaUninstallAction formula={formula} onAction={props.onAction} />
@@ -216,8 +231,15 @@ export function FormulaActionPanel(props: {
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.OpenInBrowser url={formula.homepage} />
-          <Action.CopyToClipboard title="Copy URL" content={formula.homepage} />
+          <Action.OpenInBrowser title="Open Formula" url={`https://formulae.brew.sh/formula/${formula.name}`} />
+          <Action.CopyToClipboard
+            title="Copy Formula URL"
+            content={`https://formulae.brew.sh/formula/${formula.name}`}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <Action.OpenInBrowser title="Open Homepage" url={formula.homepage} />
+          <Action.CopyToClipboard title="Copy Homepage URL" content={formula.homepage} />
         </ActionPanel.Section>
 
         <DebugSection obj={formula} />

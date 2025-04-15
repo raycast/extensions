@@ -4,9 +4,9 @@ import { customize } from "./utils/customize";
 import { useEffect, useState } from "react";
 import { base64ToFile } from "./utils/saveFile";
 import path from "path";
-import { ReplaceAction } from "./replaceAction";
+import { ReplaceAction } from "./components/replaceAction";
 
-export default function Result({ formValues }: { formValues: FolderForm }) {
+export default function Result({ formValues, fromEmoji }: { formValues: FolderForm; fromEmoji?: boolean }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [imageResult, setImageResult] = useState<{
     baseImage: string | null;
@@ -23,7 +23,6 @@ export default function Result({ formValues }: { formValues: FolderForm }) {
     outputPath: null,
     name: null,
   });
-
   const tmpDirectory = path.resolve("/tmp");
 
   const markdown = `
@@ -113,7 +112,7 @@ export default function Result({ formValues }: { formValues: FolderForm }) {
       }
       isLoading={isLoading}
       markdown={markdown}
-      navigationTitle={`From ${formValues?.file[0]}`}
+      navigationTitle={`From ${fromEmoji ? "emoji" : formValues?.file[0]}`}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Height" text={`${imageResult?.height} px`} />
@@ -122,7 +121,10 @@ export default function Result({ formValues }: { formValues: FolderForm }) {
             <Detail.Metadata.TagList.Item text={`${imageResult?.name}`} color={"#60d0ff"} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Output" text={`${imageResult?.outputPath}`} />
+          {formValues?.targetFolderPath && formValues?.targetFolderPath.length > 0 && (
+            <Detail.Metadata.Label title="Target path" text={`${formValues?.targetFolderPath}`} />
+          )}
+          <Detail.Metadata.Label title="Download path" text={`${imageResult?.outputPath}`} />
         </Detail.Metadata>
       }
     />

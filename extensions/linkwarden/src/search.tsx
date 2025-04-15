@@ -1,20 +1,20 @@
 import {
   Action,
   ActionPanel,
-  List,
-  Icon,
   getPreferenceValues,
-  showToast,
-  Toast,
+  Icon,
+  Keyboard,
   launchCommand,
   LaunchType,
-  Keyboard,
+  List,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { getFavicon, useFetch } from "@raycast/utils";
-import { useState } from "react";
 import axios from "axios";
-import { ApiResponse, Link } from "./interfaces";
+import { useState } from "react";
 import { useCollections } from "./hooks";
+import { ApiResponse, Link } from "./interfaces";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();

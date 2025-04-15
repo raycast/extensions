@@ -6,4 +6,5 @@ export interface Habit {
   color: string;
   created_at: string;
   completed: boolean;
+  repeatable: boolean;
 }

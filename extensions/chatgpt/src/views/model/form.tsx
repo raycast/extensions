@@ -86,7 +86,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         }
       },
       keepPreviousData: true,
-    }
+    },
   );
 
   const setPrompt = useCallback(
@@ -95,7 +95,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         setValue("prompt", value);
       }
     },
-    [setValue]
+    [setValue],
   );
 
   const [showAwesomePrompts, setShowAwesomePrompts] = useState(false);
@@ -128,7 +128,12 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
           ))}
         </Form.Dropdown>
       )}
-      <Form.TextArea title="Prompt" placeholder="Describe your prompt" {...itemProps.prompt} />
+      <Form.TextArea
+        title="Prompt"
+        placeholder="Describe your prompt"
+        {...itemProps.prompt}
+        info="If you encounter issues while using certain models(o1-mini, o1-preview, etc.), you can leave this item blank."
+      />
       <Form.TextField
         title="Temperature"
         placeholder="Set your sampling temperature (0 - 2)"

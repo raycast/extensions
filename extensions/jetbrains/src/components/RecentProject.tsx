@@ -1,43 +1,45 @@
 import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import { OpenJetBrainsToolbox } from "./OpenJetBrainsToolbox";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { AppHistory, recentEntry, ToolboxApp } from "../util";
 import { OpenInJetBrainsApp } from "./OpenInJetBrainsApp";
 import { SortTools } from "../sortTools";
+import { entryAppAction, Toggles } from "../useAppHistory";
 
 interface RecentProjectProps {
   app: AppHistory;
   recent: recentEntry;
   tools: AppHistory[];
   toolbox: ToolboxApp;
-  addFav?: (item: string) => Promise<void>;
+  addFav?: (path: string, appId: string) => Promise<void>;
   remFav?: (item: string) => Promise<void>;
-  sortOrder: string;
-  setSortOrder: (currentOrder: string) => void;
-  screenshotMode: boolean;
-  toggleScreenshotMode: () => void;
+  hide?: (path: string) => Promise<void>;
+  sortOrder: string[];
+  setSortOrder: (currentOrder: string[]) => Promise<void>;
+  visit: entryAppAction;
+  toggles: Toggles;
 }
 
 interface FavActionSectionParams {
   recent?: recentEntry;
-  addFav?: ((item: string) => Promise<void>) | undefined;
+  addFav?: ((path: string, appId: string) => Promise<void>) | undefined;
   remFav?: ((item: string) => Promise<void>) | undefined;
+  hide?: ((item: string) => Promise<void>) | undefined;
   tools: AppHistory[];
-  sortOrder: string;
-  setSortOrder: (currentOrder: string) => void;
-  screenshotMode: boolean;
-  toggleScreenshotMode: () => void;
+  sortOrder: string[];
+  setSortOrder: (currentOrder: string[]) => Promise<void>;
+  toggles: Toggles;
 }
 
 function FavActionSection({
   recent,
   addFav,
   remFav,
+  hide,
   sortOrder,
   setSortOrder,
   tools,
-  screenshotMode,
-  toggleScreenshotMode,
+  toggles,
 }: FavActionSectionParams) {
   const { push, pop } = useNavigation();
   return (
@@ -47,7 +49,7 @@ function FavActionSection({
           icon={Icon.Star}
           shortcut={{ modifiers: ["cmd"], key: "f" }}
           title="Add To Fav"
-          onAction={() => addFav(recent.path)}
+          onAction={() => addFav(recent?.path, recent?.app.channelId)}
         />
       )}
       {remFav && recent && (
@@ -55,7 +57,15 @@ function FavActionSection({
           icon={Icon.Star}
           shortcut={{ modifiers: ["cmd"], key: "f" }}
           title="Remove From Fav"
-          onAction={() => remFav(recent.path)}
+          onAction={() => remFav(recent?.path)}
+        />
+      )}
+      {hide && recent && (
+        <Action
+          icon={Icon.EyeDisabled}
+          shortcut={{ modifiers: ["cmd"], key: "h" }}
+          title="Hide Project"
+          onAction={() => hide(recent?.path)}
         />
       )}
       <Action
@@ -69,17 +79,22 @@ function FavActionSection({
               saveSortOrder={setSortOrder}
               tools={tools}
               pop={pop}
-              screenshotMode={screenshotMode}
-              toggleScreenshotMode={toggleScreenshotMode}
+              screenshotMode={toggles.screenshotMode.value}
             />
           )
         }
       />
-      <Action
-        icon={Icon.Window}
-        title={`Toggle Screenshot Mode ${screenshotMode ? "Off" : "On"}`}
-        onAction={toggleScreenshotMode}
-      />
+      {Object.keys(toggles).map((key) => {
+        const toggle = toggles[key as keyof Toggles];
+        return (
+          <Action
+            key={key}
+            icon={toggle.icon}
+            title={`Toggle ${toggle.name} ${toggle.value ? "Off" : "On"}`}
+            onAction={toggle.toggle}
+          />
+        );
+      })}
     </ActionPanel.Section>
   );
 }
@@ -91,12 +106,14 @@ export function RecentProject({
   toolbox,
   addFav,
   remFav,
+  hide,
   sortOrder,
   setSortOrder,
-  screenshotMode,
-  toggleScreenshotMode,
-}: RecentProjectProps): JSX.Element {
+  toggles,
+  visit,
+}: RecentProjectProps): React.JSX.Element {
   const otherTools = tools.filter((tool) => tool.title !== app.title);
+  const showDates = toggles.showDates.value;
 
   const keywords = useMemo(() => {
     const splitPath = recent.path.split("/");
@@ -135,15 +152,9 @@ export function RecentProject({
           <ActionPanel>
             <ActionPanel.Section>
               <OpenJetBrainsToolbox app={toolbox} relaunch />
-              <OpenInJetBrainsApp tool={app} toolboxApp={toolbox} recent={null} />
+              <OpenInJetBrainsApp tool={app} visit={null} recent={null} />
             </ActionPanel.Section>
-            <FavActionSection
-              tools={tools}
-              sortOrder={sortOrder}
-              setSortOrder={setSortOrder}
-              screenshotMode={screenshotMode}
-              toggleScreenshotMode={toggleScreenshotMode}
-            />
+            <FavActionSection tools={tools} sortOrder={sortOrder} setSortOrder={setSortOrder} toggles={toggles} />
           </ActionPanel>
         }
       />
@@ -168,15 +179,9 @@ export function RecentProject({
         actions={
           <ActionPanel>
             <ActionPanel.Section>
-              <OpenInJetBrainsApp key={`${app.title}-${recent.path}`} tool={app} recent={null} toolboxApp={toolbox} />
+              <OpenInJetBrainsApp key={`${app.title}-${recent.path}`} tool={app} recent={null} visit={null} />
             </ActionPanel.Section>
-            <FavActionSection
-              tools={tools}
-              sortOrder={sortOrder}
-              setSortOrder={setSortOrder}
-              screenshotMode={screenshotMode}
-              toggleScreenshotMode={toggleScreenshotMode}
-            />
+            <FavActionSection tools={tools} sortOrder={sortOrder} setSortOrder={setSortOrder} toggles={toggles} />
           </ActionPanel>
         }
       />
@@ -186,10 +191,35 @@ export function RecentProject({
   return (
     <List.Item
       accessories={[
+        showDates
+          ? {
+              icon: Icon.Clock,
+
+              // text: 'Opened',
+              tag: {
+                value: new Date(recent.opened),
+                color: Color.Yellow,
+              },
+              tooltip: `Last opened ${new Date(recent.opened).toLocaleString()}`,
+            }
+          : {},
         {
-          tag: app.name,
+          tag: {
+            value: app.name,
+            color: [Color.PrimaryText].sort(() => 0.5 - Math.round(Math.random())).pop(),
+          },
         },
       ]}
+      detail={
+        <List.Item.Detail
+          metadata={
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.Label title={recent.appName} text={recent.title} />
+              <List.Item.Detail.Metadata.Link title="Path" text={recent.path} target={`file://${recent.path}`} />
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
       title={recent.title}
       icon={recent.icon}
       keywords={keywords}
@@ -197,7 +227,7 @@ export function RecentProject({
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInJetBrainsApp tool={app} recent={recent} toolboxApp={toolbox} />
+            <OpenInJetBrainsApp tool={app} recent={recent} visit={visit} />
             <Action.ShowInFinder path={recent.path} />
             {recent.exists ? <Action.OpenWith path={recent.path} /> : null}
             <Action.CopyToClipboard
@@ -208,12 +238,7 @@ export function RecentProject({
           </ActionPanel.Section>
           <ActionPanel.Section>
             {otherTools.map((tool) => (
-              <OpenInJetBrainsApp
-                key={`${tool.title}-${recent.path}`}
-                tool={tool}
-                recent={recent}
-                toolboxApp={toolbox}
-              />
+              <OpenInJetBrainsApp key={`${tool.title}-${recent.path}`} tool={tool} recent={recent} visit={visit} />
             ))}
             <OpenJetBrainsToolbox app={toolbox} />
           </ActionPanel.Section>
@@ -222,8 +247,8 @@ export function RecentProject({
             recent={recent}
             addFav={addFav}
             remFav={remFav}
-            screenshotMode={screenshotMode}
-            toggleScreenshotMode={toggleScreenshotMode}
+            hide={hide}
+            toggles={toggles}
             sortOrder={sortOrder}
             setSortOrder={setSortOrder}
           />

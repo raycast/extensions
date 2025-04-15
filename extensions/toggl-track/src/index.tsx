@@ -5,8 +5,10 @@ import duration from "dayjs/plugin/duration";
 import { removeTimeEntry } from "@/api/timeEntries";
 import TimeEntryForm from "@/components/CreateTimeEntryForm";
 import RunningTimeEntry from "@/components/RunningTimeEntry";
+import UpdateTimeEntryForm from "@/components/UpdateTimeEntryForm";
 import { ExtensionContextProvider } from "@/context/ExtensionContext";
 import { formatSeconds } from "@/helpers/formatSeconds";
+import Shortcut from "@/helpers/shortcuts";
 import { Verb, withToast } from "@/helpers/withToast";
 import { useProcessedTimeEntries } from "@/hooks/useProcessedTimeEntries";
 import { useTimeEntryActions } from "@/hooks/useTimeEntryActions";
@@ -74,6 +76,7 @@ function ListView() {
               accessories={[
                 ...timeEntry.tags.map((tag) => ({ tag })),
                 timeEntry.billable ? { tag: { value: "$" } } : {},
+                { text: formatSeconds(timeEntry.duration) },
               ]}
               icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
               actions={
@@ -84,8 +87,18 @@ function ListView() {
                     icon={{ source: Icon.Clock }}
                   />
                   <Action.Push
+                    title="Edit Time Entry"
+                    icon={Icon.Pencil}
+                    target={
+                      <ExtensionContextProvider>
+                        <UpdateTimeEntryForm timeEntry={timeEntry} revalidateTimeEntries={revalidateTimeEntries} />
+                      </ExtensionContextProvider>
+                    }
+                  />
+                  <Action.Push
                     title="Create Similar Time Entry"
                     icon={{ source: Icon.Plus }}
+                    shortcut={Shortcut.Duplicate}
                     target={
                       <ExtensionContextProvider>
                         <TimeEntryForm

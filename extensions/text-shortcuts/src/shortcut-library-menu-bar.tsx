@@ -1,9 +1,9 @@
 import { Clipboard, getPreferenceValues, Icon, MenuBarExtra, openCommandPreferences, showHUD } from "@raycast/api";
-import { Preferences } from "./types/preferences";
-import { getShortcuts } from "./hooks/hooks";
-import { handleLiveTemplate, runShortcut, Shortcut, Tags } from "./util/shortcut";
-import { fetchItemInput } from "./util/input";
 import { useFrecencySorting } from "@raycast/utils";
+import { getShortcuts } from "./hooks/hooks";
+import { Preferences } from "./types/preferences";
+import { fetchItemInput } from "./util/input";
+import { handleLiveTemplate, runShortcut, Shortcut, Tags } from "./util/shortcut";
 
 export default function ShortcutLibrary() {
   const preferences = getPreferenceValues<Preferences>();

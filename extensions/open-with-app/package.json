@@ -4,6 +4,10 @@
   "title": "Open With App",
   "description": "Choose an application to open the selected Finder items.",
   "icon": "extension-icon.png",
+  "categories": [
+    "System",
+    "Productivity"
+  ],
   "author": "fturcheti",
   "contributors": [
     "omarshahine",
@@ -21,13 +25,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.63.0",
+    "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.10.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "~20.10.2",
-    "@types/react": "^18.2.41",
+    "@types/react": "^18.3.3",
     "@typescript-eslint/eslint-plugin": "^6.13.1",
     "@typescript-eslint/parser": "^6.13.1",
     "eslint": "^8.55.0",

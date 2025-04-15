@@ -1,11 +1,31 @@
+/**
+ * iMessage handling module for 2FA code detection
+ * Provides functionality to fetch and process 2FA codes from iMessage database
+ */
+
 import { homedir } from "os";
 import { resolve } from "path";
 import { useSQL } from "@raycast/utils";
 import { Message, Preferences, SearchType } from "./types";
 import { getPreferenceValues } from "@raycast/api";
 import { calculateLookBackMinutes } from "./utils";
+
+// Path to the iMessage database
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
+/**
+ * Options for message hook configuration
+ */
+interface UseMessagesOptions {
+  searchText?: string; // Optional text to filter messages
+  searchType: SearchType; // Type of search (all or code-only)
+  enabled?: boolean; // Whether iMessage source is enabled
+}
+
+/**
+ * Generates the base SQL query for fetching messages
+ * Applies time-based filtering based on user preferences
+ */
 function getBaseQuery() {
   const preferences = getPreferenceValues<Preferences>();
   const lookBackUnit = preferences.lookBackUnit;
@@ -32,6 +52,10 @@ function getBaseQuery() {
   return baseQuery;
 }
 
+/**
+ * Builds the complete SQL query with search and filtering options
+ * @param options Search and filtering parameters
+ */
 function getQuery(options: { searchText?: string; searchType: SearchType }) {
   let baseQuery = getBaseQuery();
 
@@ -61,13 +85,21 @@ function getQuery(options: { searchText?: string; searchType: SearchType }) {
   return `${baseQuery} \norder by message.date desc limit 100`.trim();
 }
 
-export function useMessages(options: { searchText?: string; searchType: SearchType }) {
+/**
+ * React hook for managing iMessage data and 2FA code detection
+ * Provides real-time message monitoring using SQLite database
+ */
+export function useMessages(options: UseMessagesOptions) {
   const query = getQuery(options);
+  const enabled = options.enabled ?? true;
 
-  // uncomment the following log line to debug the query!
-  // console.log(query)
-  // console.log(DB_PATH)
-  // Clipboard.copy(query)
+  if (!enabled) {
+    return {
+      data: [],
+      permissionView: null,
+      revalidate: async () => Promise.resolve(),
+    };
+  }
 
   return useSQL<Message>(DB_PATH, query);
 }

@@ -1,84 +1,98 @@
-import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  openExtensionPreferences,
+  Keyboard,
+} from "@raycast/api";
 import { runAppleScript, useForm } from "@raycast/utils";
 import { mkdir } from "fs/promises";
 import { Readable } from "stream";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import fetch from "cross-fetch";
 import path from "path";
 import fs from "fs";
+import type { CobaltRequest, CobaltResponse, FormValues } from "./types";
 import { parse as parseContentDispositionHeader } from "content-disposition";
 
-type FormValues = {
-  mode: "auto" | "audio";
-  vCodec: "h264" | "av1" | "vp9";
-  vQuality: "max" | "2160" | "1440" | "1080" | "720" | "480" | "360" | "240" | "144";
-  aFormat: "best" | "mp3" | "ogg" | "wav" | "opus";
-  url: string;
-};
-
-type CobaltResponse =
-  | { status: "stream"; url: string }
-  | { status: "redirect"; url: string }
-  | { status: "picker"; pickerType: "various" | "images"; picker: PickerItem[] }
-  | { status: "error"; text: string }
-  | { status: "success"; text: string }
-  | { status: "rate-limit"; text: string };
-
-type PickerItem = { type: "video"; thumb: string; url: string };
-
-const preferences = getPreferenceValues<Preferences>();
+// official cobalt instance URLs that are no longer available
+const oldCobaltInstances = ["https://co.wuk.sh", "https://api.cobalt.tools"];
 
 export default function Command() {
+  const preferences = getPreferenceValues<Preferences>();
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (oldCobaltInstances.includes(preferences.apiInstanceUrl)) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Official Cobalt API no longer available",
+        message:
+          "Please update your preferences to use a self-hosted API instance.\n" +
+          "If you do not have access to a custom instance, you may use https://cobalt.aelew.dev.",
+        primaryAction: {
+          title: "Open Preferences",
+          shortcut: Keyboard.Shortcut.Common.Open,
+          onAction: openExtensionPreferences,
+        },
+      });
+    }
+  }, [preferences]);
+
   const { handleSubmit, itemProps } = useForm<FormValues>({
-    onSubmit(values) {
+    onSubmit(formValues) {
       setLoading(true);
 
-      const url = values.url.trim();
-      const payload: Record<string, unknown> = {
-        url,
-        aFormat: values.aFormat,
-        filenamePattern: preferences.filenamePattern,
-        dubLang: false,
+      const headers: Record<string, string> = {
+        Accept: "application/json",
+        "User-Agent": "raycast-cobalt/20241120",
+        "Content-Type": "application/json",
+      };
+
+      if (preferences.apiInstanceKey) {
+        headers["Authorization"] = `Api-Key ${preferences.apiInstanceKey}`;
+      }
+
+      // this is intentional. cobalt requires an API key to restrict access based on user agent
+      if (preferences.apiInstanceUrl === "https://cobalt.aelew.dev") {
+        headers["Authorization"] = "Api-Key 00000000-0000-4000-a000-000000000000";
+      }
+
+      const body: CobaltRequest = {
+        ...formValues,
+        url: formValues.url.trim(),
+        filenameStyle: preferences.filenameStyle,
+        alwaysProxy: preferences.alwaysProxy,
+        disableMetadata: preferences.disableMetadata,
+        youtubeHLS: preferences.youtubeHLS,
         twitterGif: preferences.twitterGif,
+        tiktokFullAudio: preferences.tiktokFullAudio,
         tiktokH265: preferences.tiktokH265,
       };
 
-      if (values.mode === "audio") {
-        payload.isAudioOnly = true;
-        payload.isTTFullAudio = preferences.downloadOriginalTikTokSound;
-      } else {
-        payload.vQuality = values.vQuality;
-        payload.isAudioMuted = preferences.muteVideoAudio;
-        if (url.includes("youtube.com/") || url.includes("/youtu.be/")) {
-          payload.vCodec = values.vCodec;
-        }
-      }
-
-      fetch(preferences.apiInstanceUrl + "/api/json", {
-        body: JSON.stringify(payload),
+      fetch(preferences.apiInstanceUrl, {
+        body: JSON.stringify(body),
         method: "POST",
-        headers: {
-          "user-agent": "raycast-cobalt",
-          "content-type": "application/json",
-          accept: "application/json",
-        },
+        headers,
       })
         .then((response) => response.json())
         .then((result: CobaltResponse) => {
           switch (result.status) {
-            case "stream":
+            case "tunnel":
             case "redirect":
-              downloadFile(result.url);
+              downloadFile(result.url, result.filename);
               break;
             case "picker":
               result.picker.forEach((item) => downloadFile(item.url));
+              if (result.audio) {
+                downloadFile(result.audio, result.audioFilename);
+              }
               break;
             case "error":
-            case "success":
-            case "rate-limit":
-              showToast(Toast.Style.Failure, "An unexpected error occurred", result.text);
+              showToast(Toast.Style.Failure, "An unexpected error occurred", result.error.code);
               setLoading(false);
               break;
           }
@@ -111,8 +125,12 @@ export default function Command() {
     },
   });
 
-  async function downloadFile(url: string) {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading file", message: "Starting..." });
+  async function downloadFile(url: string, filename?: string) {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Downloading file",
+      message: "Starting...",
+    });
 
     const response = await fetch(url);
     if (!response.body) {
@@ -124,25 +142,26 @@ export default function Command() {
       await mkdir(preferences.downloadDirectory);
     }
 
-    // Use the file name from the content-disposition header if available. Otherwise, use the last part of the provided URL.
-    let fileName;
-    const contentDispositionHeader = response.headers.get("content-disposition");
-    if (contentDispositionHeader) {
-      fileName = parseContentDispositionHeader(contentDispositionHeader).parameters.filename.replace(".none", ".mp3");
-    } else {
-      fileName = url.substring(url.lastIndexOf("/") + 1).split("?")[0];
+    if (!filename) {
+      const contentDispositionHeader = response.headers.get("content-disposition");
+      if (contentDispositionHeader) {
+        filename = parseContentDispositionHeader(contentDispositionHeader).parameters.filename.replace(".none", ".mp3");
+      } else {
+        filename = url.substring(url.lastIndexOf("/") + 1).split("?")[0];
+      }
     }
 
-    const destination = path.resolve(preferences.downloadDirectory, fileName);
+    const destination = path.resolve(preferences.downloadDirectory, filename);
     const writeStream = fs.createWriteStream(destination);
 
     const body = response.body as unknown as Readable;
-    const BYTES_PER_MB = 1048576;
     let bytes = 0;
+
+    const BYTES_PER_MB = 1048576;
 
     body.on("data", (chunk: Buffer) => {
       bytes += chunk.length;
-      toast.message = parseFloat((bytes / BYTES_PER_MB).toFixed(1)) + " MB";
+      toast.message = `${parseFloat((bytes / BYTES_PER_MB).toFixed(1))} MB`;
     });
 
     body.pipe(writeStream);
@@ -152,9 +171,9 @@ export default function Command() {
       writeStream.close();
       toast.style = Toast.Style.Success;
       toast.title = "Download complete";
-      toast.message = "Saved to " + fileName;
+      toast.message = `Saved to ${filename}`;
       if (preferences.notifyOnDownload) {
-        runAppleScript(`display notification "Downloaded ${fileName}!" with title "Cobalt" sound name "Glass"`);
+        runAppleScript(`display notification "Downloaded ${filename}!" with title "Cobalt" sound name "Glass"`);
       }
     });
 
@@ -175,14 +194,15 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="mode" title="Mode" storeValue>
+      <Form.Dropdown id="downloadMode" title="Mode" storeValue>
         <Form.Dropdown.Item title="Auto" value="auto" />
         <Form.Dropdown.Item title="Audio" value="audio" />
+        <Form.Dropdown.Item title="Mute" value="mute" />
       </Form.Dropdown>
       <Form.TextField title="URL" placeholder="Paste your link here" autoFocus {...itemProps.url} />
       <Form.Separator />
       <Form.Dropdown
-        id="vCodec"
+        id="youtubeVideoCodec"
         title="Video codec"
         storeValue
         info={
@@ -198,7 +218,7 @@ export default function Command() {
         <Form.Dropdown.Item title="VP9 (webm)" value="vp9" />
       </Form.Dropdown>
       <Form.Dropdown
-        id="vQuality"
+        id="videoQuality"
         title="Video quality"
         defaultValue="max"
         storeValue
@@ -217,7 +237,7 @@ export default function Command() {
         <Form.Dropdown.Item title="240p" value="240" />
         <Form.Dropdown.Item title="144p" value="144" />
       </Form.Dropdown>
-      <Form.Dropdown id="aFormat" title="Audio format" info="Only applies to audio downloads." storeValue>
+      <Form.Dropdown id="audioFormat" title="Audio format" info="Only applies to audio downloads." storeValue>
         <Form.Dropdown.Item title="Best" value="best" />
         <Form.Dropdown.Item title="mp3" value="mp3" />
         <Form.Dropdown.Item title="ogg" value="ogg" />

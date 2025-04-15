@@ -9,7 +9,7 @@ import { homedir } from "os";
 import { filePathAction, openPathInTerminal, urlPathAction } from "./utils/path-utils";
 import { closeMainWindow, getFrontmostApplication, LaunchProps, open, updateCommandMetadata } from "@raycast/api";
 import validator, { isEmpty } from "validator";
-import { fileAction, OpenIn, OpenInArguments, priorityDetection, trimText } from "./types/preference";
+import { OpenIn, OpenInArguments, priorityDetection, trimText } from "./types/preference";
 import { getFinderPath } from "./utils/applescript-utils";
 
 export default async (props: LaunchProps<{ arguments: OpenInArguments }>) => {
@@ -39,7 +39,7 @@ export default async (props: LaunchProps<{ arguments: OpenInArguments }>) => {
   const filePath = path.startsWith("~/") ? path.replace("~", homedir()) : path;
   if (fse.pathExistsSync(filePath)) {
     if (validator.isEmpty(openIn) || openIn === OpenIn.FINDER) {
-      await filePathAction(path, fileAction);
+      await filePathAction(filePath);
     } else if (openIn === OpenIn.TERMINAL) {
       await openPathInTerminal(filePath);
     }

@@ -11,16 +11,16 @@ export default class Notifications {
   }
 
   /**
-   * Displays a server error toast notification with options to launch Pieces OS or contact support.
+   * Displays a server error toast notification with options to launch PiecesOS or contact support.
    *
    * @param {string} message - The specific action that failed, to be included in the toast message.
    * @returns {Promise<void>} A promise that resolves when the toast is shown.
    */
   async serverErrorToast(message: string) {
     await showToast({
-      title: `Failed to ${message}. Please make sure that Pieces OS is installed, running, and up to date.`,
+      title: `Failed to ${message}. Please make sure that PiecesOS is installed, running, and up to date.`,
       primaryAction: {
-        title: "Launch Pieces OS",
+        title: "Launch PiecesOS",
         shortcut: Keyboard.Shortcut.Common.Open,
         onAction: () => {
           launchRuntime();

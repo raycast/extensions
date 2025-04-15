@@ -14,6 +14,15 @@ import { mainProfileId, wiseReadApiToken } from "./helpers/preferences";
 import { useCachedState } from "@raycast/utils";
 import { Transaction, activityTypes, ActivityType, fetchTransactions } from "./api/latestTransactions";
 
+const dateFormatter = Intl.DateTimeFormat("en-US", {
+  weekday: "short",
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "numeric",
+});
+
 const processTransactions = (transaction: Transaction) => {
   const tag = [];
 
@@ -36,6 +45,7 @@ const processTransactions = (transaction: Transaction) => {
     primaryAmount: transaction.primaryAmount.replace(/<.*?>/g, "").replace("+", ""),
     secondaryAmount: transaction.secondaryAmount,
     status: transaction.status,
+    createdOn: dateFormatter.format(new Date(transaction.createdOn)),
   };
 };
 
@@ -125,6 +135,7 @@ export default function Command(props: LaunchProps<{ arguments: { profileId: str
                   <List.Item.Detail.Metadata.Label title="Primary Amount" text={transaction.primaryAmount} />
                   <List.Item.Detail.Metadata.Label title="Secondary Amount" text={transaction.secondaryAmount} />
                   <List.Item.Detail.Metadata.Label title="Status" text={transaction.status} />
+                  <List.Item.Detail.Metadata.Label title="Date" text={transaction.createdOn} />
                 </List.Item.Detail.Metadata>
               }
             />

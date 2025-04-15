@@ -3,7 +3,7 @@
   "name": "spiceblow-database",
   "title": "Spiceblow - Sql Database Management",
   "description": "Search, update, insert and delete rows in your Sql database, deeply integrated with AI",
-  "icon": "./extension-icon.png",
+  "icon": "extension-icon.png",
   "author": "xmorse",
   "categories": [
     "Developer Tools",
@@ -19,23 +19,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.81.2",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.81.0",
+    "@raycast/utils": "^1.18.1",
     "color-hash": "^2.0.2",
     "google-auth-library": "^9.13.0",
+    "kebab-case": "^2.0.1",
     "mysql2": "^3.11.0",
-    "pg": "^8.12.0",
-    "spiceflow": "^1.1.12",
+    "papaparse": "^5.5.1",
+    "pg": "^8.13.1",
+    "spiceflow": "^1.6.0",
     "sql-template-strings": "^2.2.2",
     "string-dedent": "^3.0.1",
     "undici": "^6.19.7",
-    "zod": "^3.23.8",
+    "zod": "^3.24.1",
     "zustand": "^4.5.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/color-hash": "^2.0.0",
-    "@types/node": "22.7.4",
+    "@types/node": "22.10.2",
+    "@types/papaparse": "^5.3.15",
     "@types/pg": "^8.11.6",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
@@ -49,6 +52,6 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "pnpx @raycast/api@1.81.0 publish"
   }
 }

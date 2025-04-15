@@ -1,5 +1,17 @@
 # Doppler Changelog
 
+## [Routine Maintenance] - {PR_MERGE_DATE}
+
+- Migrate to `@raycast/api@1.94.0`
+- Use ESLint 9 flag config
+- Bump all dependencies to the latest
+
+## [New Logo + View Projects] - 2024-12-12
+
+- New Logo!
+- Added command to View Projects, Environments, Configs, Secrets
+- Ability to Copy Secrets and Update Secret Note
+
 ## [Added Clipboard Secret Command] - 2024-10-31
 
 - Added the `Share Clipboard Secret` command to create a secret from the clipboard.

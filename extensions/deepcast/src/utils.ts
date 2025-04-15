@@ -66,11 +66,13 @@ export async function sendTranslateRequest({
   sourceLanguage,
   targetLanguage,
   onTranslateAction,
+  formality,
 }: {
   text?: string;
   sourceLanguage?: SourceLanguage;
   targetLanguage: TargetLanguage;
   onTranslateAction?: Preferences["onTranslateAction"] | "none";
+  formality: Formality;
 }) {
   try {
     const prefs = getPreferenceValues<Preferences>();
@@ -80,7 +82,6 @@ export async function sendTranslateRequest({
     const text = initialText || (await readContent());
 
     const toast = await showToast(Toast.Style.Animated, "Fetching translation...");
-
     try {
       const {
         translations: [{ text: translation, detected_source_language: detectedSourceLanguage }],
@@ -93,6 +94,7 @@ export async function sendTranslateRequest({
             text: [text],
             source_lang: sourceLanguage,
             target_lang: targetLanguage,
+            formality,
           },
         })
         .json<{ translations: { text: string; detected_source_language: SourceLanguage }[] }>();
@@ -136,8 +138,8 @@ export async function sendTranslateRequest({
   }
 }
 
-export async function translate(target: TargetLanguage, text?: string) {
-  await sendTranslateRequest({ targetLanguage: target, text: text });
+export async function translate(target: TargetLanguage, text?: string, formality?: Formality) {
+  await sendTranslateRequest({ targetLanguage: target, text: text, formality: formality ?? "default" });
 }
 
 export const source_languages = {
@@ -209,3 +211,7 @@ export const target_languages = {
   TR: "Turkish",
 };
 export type TargetLanguage = keyof typeof target_languages;
+
+export type Formality = "default" | "prefer_more" | "prefer_less";
+
+export const SUPPORTED_FORMALITY_LANGUAGES = ["DE", "FR", "IT", "JA", "PL", "PT-PT", "PT-BR", "RU", "ES"];

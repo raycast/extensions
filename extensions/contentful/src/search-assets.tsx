@@ -1,6 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
 import { CONTENTFUL } from "./lib/contentful";
-import { ActionPanel, Grid } from "@raycast/api";
+import { ActionPanel, Color, Grid } from "@raycast/api";
 import { CONTENTFUL_LIMIT, CONTENTFUL_LINKS, CONTENTFUL_LOCALE } from "./lib/config";
 import { useState } from "react";
 import OpenInContentful from "./lib/components/open-in-contentful";
@@ -22,7 +22,7 @@ export default function SearchAssets() {
         },
       });
 
-      const hasMore = CONTENTFUL_LIMIT * options.page < response.total;
+      const hasMore = skip < response.total;
       return {
         data: response.items,
         hasMore,
@@ -47,8 +47,14 @@ export default function SearchAssets() {
         return (
           <Grid.Item
             key={asset.sys.id}
-            title={asset.fields.title[CONTENTFUL_LOCALE]}
-            content={"https:" + asset.fields.file[CONTENTFUL_LOCALE].url}
+            title={asset.fields.title[CONTENTFUL_LOCALE] || "Untitled"}
+            content={
+              !asset.fields.file
+                ? { source: "untitled.svg", tintColor: Color.SecondaryText }
+                : asset.fields.file[CONTENTFUL_LOCALE].contentType.includes("video")
+                  ? { source: "video.svg", tintColor: Color.SecondaryText }
+                  : `https:${asset.fields.file[CONTENTFUL_LOCALE].url}`
+            }
             actions={
               <ActionPanel>
                 <OpenInContentful url={`${CONTENTFUL_LINKS.space}assets/${asset.sys.id}`} />

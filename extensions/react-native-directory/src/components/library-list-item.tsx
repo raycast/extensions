@@ -32,31 +32,38 @@ const Actions = ({
       <ActionPanel.Section title="Installation">
         <ActionPanel.Submenu title="Copy Install Command" icon={Icon.Terminal}>
           <Action.CopyToClipboard
+            icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
+            // eslint-disable-next-line @raycast/prefer-title-case
+            title="expo"
+            content={`npx expo install ${library.github.name}`}
+            shortcut={{ modifiers: ["cmd"], key: "1" }}
+          />
+          <Action.CopyToClipboard
             icon={{ source: Icon.Terminal, tintColor: Color.Red }}
             title="npm"
             content={`npm install ${library.github.name}`}
-            shortcut={{ modifiers: ["cmd"], key: "1" }}
+            shortcut={{ modifiers: ["cmd"], key: "2" }}
           />
           <Action.CopyToClipboard
             icon={{ source: Icon.Terminal, tintColor: Color.Blue }}
             // eslint-disable-next-line @raycast/prefer-title-case
             title="yarn"
             content={`yarn add ${library.github.name}`}
-            shortcut={{ modifiers: ["cmd"], key: "2" }}
+            shortcut={{ modifiers: ["cmd"], key: "3" }}
           />
           <Action.CopyToClipboard
             icon={{ source: Icon.Terminal, tintColor: Color.Yellow }}
             // eslint-disable-next-line @raycast/prefer-title-case
             title="pnpm"
             content={`pnpm install ${library.github.name}`}
-            shortcut={{ modifiers: ["cmd"], key: "3" }}
+            shortcut={{ modifiers: ["cmd"], key: "4" }}
           />
           <Action.CopyToClipboard
             icon={{ source: Icon.Terminal, tintColor: Color.Magenta }}
             // eslint-disable-next-line @raycast/prefer-title-case
             title="bun"
             content={`bun install ${library.github.name}`}
-            shortcut={{ modifiers: ["cmd"], key: "4" }}
+            shortcut={{ modifiers: ["cmd"], key: "5" }}
           />
         </ActionPanel.Submenu>
       </ActionPanel.Section>

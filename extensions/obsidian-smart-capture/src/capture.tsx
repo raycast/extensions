@@ -1,27 +1,35 @@
 import {
+  Action,
   ActionPanel,
+  AI,
+  closeMainWindow,
+  Color,
+  environment,
   Form,
   getSelectedText,
-  Action,
+  Icon,
+  List,
+  LocalStorage,
   open,
+  popToRoot,
+  showHUD,
   showToast,
   Toast,
-  showHUD,
-  Color,
-  Icon,
-  LocalStorage,
-  popToRoot,
-  closeMainWindow,
-  List,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
 import { runAppleScript } from "@raycast/utils";
-import { GET_ACTIVE_APP_SCRIPT, GET_LINK_FROM_BROWSER_SCRIPT, SUPPORTED_BROWSERS } from "./scripts/browser";
-import { useObsidianVaults, vaultPluginCheck } from "./utils/utils";
-import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
+
+import { useEffect, useState } from "react";
+
+import { YoutubeTranscript } from "youtube-transcript";
 import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
+import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
+import { GET_ACTIVE_APP_SCRIPT, GET_LINK_FROM_BROWSER_SCRIPT, SUPPORTED_BROWSERS } from "./scripts/browser";
+import { SUMMARY_PROMPT } from "./utils/constants";
+
+import { urlToMarkdown, useObsidianVaults, vaultPluginCheck } from "./utils/utils";
 
 export default function Capture() {
+  const canAccessAI = environment.canAccess(AI);
   const { ready, vaults: allVaults } = useObsidianVaults();
   const [vaultsWithPlugin] = vaultPluginCheck(allVaults, "obsidian-advanced-uri");
 
@@ -36,7 +44,14 @@ export default function Capture() {
     if (savedPath) setDefaultPath(savedPath.toString());
     else setDefaultPath("inbox");
   });
-  const formatData = (content?: string, link?: string, highlight?: string) => {
+
+  const formatData = (
+    content?: string,
+    link?: string,
+    highlight?: string,
+    includePageContents = false,
+    includeSummary = false
+  ) => {
     const data = [];
     if (content) {
       data.push(content);
@@ -46,6 +61,12 @@ export default function Capture() {
     }
     if (highlight) {
       data.push(`> ${selectedText}`);
+    }
+    if (includeSummary) {
+      data.push(`---\n\n${summary}\n\n---`);
+    }
+    if (includePageContents) {
+      data.push(pageContent);
     }
     return data.join("\n\n");
   };
@@ -57,7 +78,9 @@ export default function Capture() {
 
       const target = `obsidian://advanced-uri?vault=${encodeURIComponent(vault)}&filepath=${encodeURIComponent(
         path
-      )}/${encodeURIComponent(fileName)}&data=${encodeURIComponent(formatData(content, link, highlight))}`;
+      )}/${encodeURIComponent(fileName)}&data=${encodeURIComponent(
+        formatData(content, link, highlight, includePageContents, includeSummary)
+      )}`;
       open(target);
       popToRoot();
       closeMainWindow();
@@ -75,7 +98,9 @@ export default function Capture() {
 
     const target = `obsidian://advanced-uri?vault=${encodeURIComponent(vault)}&filepath=${encodeURIComponent(
       path
-    )}/${encodeURIComponent(fileName)}&data=${encodeURIComponent(formatData(content, link, highlight))}`;
+    )}/${encodeURIComponent(fileName)}&data=${encodeURIComponent(
+      formatData(content, link, highlight, includePageContents, includeSummary)
+    )}`;
     open(target);
     popToRoot();
     showHUD("Note Captured", { clearRootSearch: true });
@@ -83,8 +108,12 @@ export default function Capture() {
 
   const [selectedText, setSelectedText] = useState<string>("");
   const [includeHighlight, setIncludeHighlight] = useState<boolean>(true);
-
+  const [includeSummary, setIncludeSummary] = useState<boolean>(false);
+  const [pageContent, setPageContent] = useState<string>("");
+  const [pageContentMessage, setPageContentMessage] = useState<string>();
+  const [summary, setSummary] = useState<string>("");
   const [selectedResource, setSelectedResource] = useState<string>("");
+  const [includePageContents, setIncludePageContents] = useState<boolean>(false);
   const [resourceInfo, setResourceInfo] = useState<string>("");
 
   useEffect(() => {
@@ -97,6 +126,7 @@ export default function Capture() {
           if (url && title) {
             setSelectedResource(url);
             setResourceInfo(title);
+            setContent(url);
           }
         }
       } catch (error) {
@@ -113,14 +143,58 @@ export default function Capture() {
       }
     };
 
+    const setContent = async (url: string) => {
+      try {
+        if (url.includes("youtube.com")) {
+          setPageContentMessage("Include video transcript");
+          const captions = await YoutubeTranscript.fetchTranscript(url);
+          const formattedCaptions = captions
+            .map((caption) => {
+              return caption.text;
+            })
+            .join("\n");
+          setPageContent(formattedCaptions);
+        } else {
+          setPageContentMessage("Include page content");
+          const markdown = await urlToMarkdown(url);
+          setPageContent(markdown);
+        }
+      } catch (error) {
+        console.error(error);
+        showToast({
+          title: "Failed to fetch page content",
+          style: Toast.Style.Failure,
+        });
+      }
+    };
     setText();
   }, []);
+
+  useEffect(() => {
+    const generateSummary = async () => {
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Generating Summary",
+      });
+      const summary = await AI.ask(SUMMARY_PROMPT + pageContent);
+      setSummary(summary);
+      if (summary) {
+        showToast({
+          style: Toast.Style.Success,
+          title: "Summary captured",
+        });
+      }
+    };
+    if (includeSummary) {
+      generateSummary();
+    }
+  }, [includeSummary]);
 
   useEffect(() => {
     if (selectedText && selectedResource) {
       showToast({
         style: Toast.Style.Success,
-        title: "Highlighted text & Source captured",
+        title: "Highlighted text, Source captured",
       });
     } else if (selectedText) {
       showToast({
@@ -132,8 +206,13 @@ export default function Capture() {
         style: Toast.Style.Success,
         title: "Link captured",
       });
+    } else if (pageContent) {
+      showToast({
+        style: Toast.Style.Success,
+        title: "Page contents captured",
+      });
     }
-  }, [selectedText, selectedResource]);
+  }, [selectedText, selectedResource, pageContent]);
 
   if (!ready) {
     return <List isLoading={true}></List>;
@@ -188,6 +267,24 @@ export default function Capture() {
             label=""
             value={includeHighlight}
             onChange={setIncludeHighlight}
+          />
+        )}
+        {pageContent && (
+          <Form.Checkbox
+            id="page-contents"
+            title={pageContentMessage}
+            label=""
+            value={includePageContents}
+            onChange={setIncludePageContents}
+          />
+        )}
+        {canAccessAI && pageContent && (
+          <Form.Checkbox
+            id="summary"
+            title="Include AI Summary"
+            label=""
+            value={includeSummary}
+            onChange={setIncludeSummary}
           />
         )}
         <Form.TextArea title="Note" id="content" placeholder={"Notes about the resource"} />
