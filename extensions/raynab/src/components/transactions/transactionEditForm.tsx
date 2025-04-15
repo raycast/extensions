@@ -1,39 +1,15 @@
 import { updateTransaction } from '@lib/api';
-import {
-  autoDistribute,
-  easyGetColorFromId,
-  formatToReadableAmount,
-  formatToYnabAmount,
-  getSubtransacionCategoryname,
-  isSplitTransaction,
-  onSubtransactionAmountChangeHandler,
-} from '@lib/utils';
+import { autoDistribute, easyGetColorFromId, formatToReadableAmount, formatToYnabAmount, getSubtransacionCategoryname, isSplitTransaction, onSubtransactionAmountChangeHandler } from '@lib/utils';
 import { TransactionClearedStatus, TransactionFlagColor } from 'ynab';
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Color,
-  Form,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-  getPreferenceValues,
-  captureException,
-} from '@raycast/api';
+import { Action, ActionPanel, confirmAlert, Color, Form, Icon, showToast, Toast, useNavigation, getPreferenceValues, captureException } from '@raycast/api';
 import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 import { CurrencyFormat, Period, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
 import { useEffect, useState } from 'react';
-
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { usePayees } from '@hooks/usePayees';
 import { useTransactions } from '@hooks/useTransactions';
 import { AutoDistributeAction } from '@components/actions/autoDistributeAction';
 import { Shortcuts } from '@constants';
-
-const preferences = getPreferenceValues<Preferences>();
 
 interface FormValues {
   date: Date | null;
@@ -61,30 +37,46 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
   const { value: timeline } = useLocalStorage<Period>('timeline', 'month');
 
   const { mutate } = useTransactions(activeBudgetId, timeline);
-  const { data: payees, isLoading: isLoadingPayees } = usePayees(activeBudgetId);
-  const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
+  const { data: payees = [], isLoading: isLoadingPayees } = usePayees(activeBudgetId || '');
+  const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId || '');
+
+  const isLoading = isLoadingCategories || isLoadingPayees;
+
   const categories = categoryGroups?.flatMap((group) => group.categories).filter((c) => !c.hidden);
 
+  const [selectOwnPayee, setselectOwnPayee] = useState(false);
+  const [isTransfer, setIsTransfer] = useState(false);
   const [amount, setAmount] = useState(() =>
     formatToReadableAmount({ amount: transaction.amount, currency: activeBudgetCurrency, includeSymbol: false }),
   );
+
   const [subtransactions, setSubtransactions] = useState<SaveSubTransactionWithReadableAmounts[]>(() => {
-    return transaction.subtransactions.map((s) => ({
-      ...s,
-      amount: formatToReadableAmount({ amount: s.amount, currency: activeBudgetCurrency, includeSymbol: false }),
-    }));
+    return (
+      transaction.subtransactions?.map((s) => ({
+        ...s,
+        amount: formatToReadableAmount({ amount: s.amount, currency: activeBudgetCurrency, includeSymbol: false }),
+      })) ?? []
+    );
   });
-  const [categoryList, setCategoryList] = useState(() => {
-    if (isSplitTransaction(transaction)) {
-      return subtransactions.map((s) => s.category_id ?? '');
+
+  const [categoryList, setCategoryList] = useState<string[]>(() => {
+    if (!categories) return [];
+    const initialCategories = transaction.subtransactions?.length
+      ? transaction.subtransactions.map((s) => s.category_id ?? '')
+      : [transaction.category_id ?? ''];
+
+    return initialCategories.filter((catId) => categories.some((cat) => cat.id === catId));
+  });
+
+  // Update categoryList when categories change
+  useEffect(() => {
+    if (categories) {
+      const validCategories = categoryList.filter((catId) => categories.some((cat) => cat.id === catId));
+      if (validCategories.length !== categoryList.length) {
+        setCategoryList(validCategories);
+      }
     }
-
-    return [transaction.category_id ?? ''];
-  });
-
-  // It can happen that the payee name is not in the list of payees
-  // creating a new payee require providing a name instead of an id
-  const [selectOwnPayee, setselectOwnPayee] = useState(false);
+  }, [categories]); // Only depend on categories
 
   const currencySymbol = activeBudgetCurrency?.currency_symbol;
 
@@ -106,26 +98,45 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
     initialValues: {
       date: new Date(transaction.date),
       amount: formatToReadableAmount({ amount: transaction.amount, locale: false }),
-      payee_id: transaction.payee_id ?? undefined,
+      payee_id: payees?.some((p) => p.id === transaction.payee_id) ? (transaction.payee_id ?? '') : '',
       memo: transaction.memo ?? '',
       flag_color: transaction.flag_color?.toString() ?? undefined,
-      categoryList:
-        categoryList.length > 0 && !!categoryList[0] ? categoryList : subtransactions.map((s) => s.category_id ?? ''),
+      categoryList: categoryList, // Use the validated category list
+    },
+    validation: {
+      date: FormValidation.Required,
+      amount: FormValidation.Required,
+      payee_id: (value) => {
+        if (!selectOwnPayee && !value) {
+          return 'Please select or enter a payee';
+        }
+      },
+      categoryList: (value) => {
+        if (!isTransfer && (!value || value.length === 0)) {
+          return 'Please add at least one category';
+        }
+      },
     },
     onSubmit: async (values) => {
       const toast = await showToast({ style: Toast.Style.Animated, title: 'Updating Transaction' });
 
       try {
         const transactionData = {
-          ...transaction,
+          ...values,
           date: (values.date ?? new Date()).toISOString(),
-          flag_color: values.flag_color ? (values.flag_color as TransactionFlagColor) : null,
           amount: formatToYnabAmount(values.amount, activeBudgetCurrency),
-          payee_id: values.payee_id,
-          memo: values.memo || null,
-          category_id: values.categoryList?.[0] || undefined,
-          payee_name: values.payee_name || transaction.payee_name,
           approved: true,
+          category_id: isTransfer ? null : values.categoryList?.[0] || undefined,
+          payee_name: values.payee_id ? undefined : values.payee_name,
+          cleared: values.cleared ? TransactionClearedStatus.Cleared : TransactionClearedStatus.Uncleared,
+          flag_color: values.flag_color ? (values.flag_color as TransactionFlagColor) : null,
+          subtransactions:
+            subtransactions.length > 0
+              ? subtransactions.map((s) => ({
+                  ...s,
+                  amount: formatToYnabAmount(s.amount, activeBudgetCurrency),
+                }))
+              : undefined,
         };
 
         if (isReconciled) {
@@ -133,120 +144,19 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
           return;
         }
 
-        /**
-         * We need make sure the total of subtransactions is equal to the transaction.
-         * That validation makes sense to keep at this level
-         * */
-        if (subtransactions.length > 0) {
-          transactionData.category_id = undefined;
-
-          /* @ts-expect-error we're not allowing updates to existing subtransactions so this doesn't matter */
-          transactionData.subtransactions = subtransactions.map((s) => ({
-            ...s,
-            amount: formatToYnabAmount(s.amount, activeBudgetCurrency),
-          }));
-
-          const subtransactionsTotal = subtransactions.reduce(
-            (total, { amount }) => total + formatToYnabAmount(amount, activeBudgetCurrency),
-            0,
-          );
-          const difference = subtransactionsTotal - transactionData.amount;
-
-          if (difference !== 0) {
-            const fmtSubTotal = formatToReadableAmount({
-              amount: subtransactionsTotal,
-              currency: activeBudgetCurrency,
-              includeSymbol: false,
-            });
-            const fmtDifference = formatToReadableAmount({
-              amount: difference,
-              currency: activeBudgetCurrency,
-              includeSymbol: false,
-            });
-
-            const onAutoDistribute = () => {
-              const distributedAmounts = autoDistribute(transactionData.amount, subtransactions.length).map((amount) =>
-                formatToReadableAmount({ amount, currency: activeBudgetCurrency, includeSymbol: false }),
-              );
-              setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
-            };
-
-            const options: Alert.Options = {
-              title: `Something Doesn't Add Up`,
-              message: `The total is ${
-                values.amount
-              }, but the splits add up to ${fmtSubTotal}. How would you like to handle the unassigned ${fmtDifference}?`,
-              primaryAction: {
-                title: 'Auto-Distribute the amounts',
-                onAction: onAutoDistribute,
-              },
-              dismissAction: {
-                title: 'Adjust manually',
-              },
-            };
-
-            await toast.hide();
-            await confirmAlert(options);
-            return;
-          }
-        }
-
-        await mutate(
-          updateTransaction(activeBudgetId, transaction.id, {
-            ...transactionData,
-            payee_id: selectOwnPayee ? null : values.payee_id,
-          }),
-          {
-            optimisticUpdate(currentData) {
-              if (!currentData) return;
-
-              const transactionIdx = currentData.findIndex((tx) => tx.id === transaction.id);
-
-              if (transactionIdx < 0) return currentData;
-
-              const newData = [...currentData];
-
-              newData.splice(transactionIdx, 1, { ...transaction, ...transactionData });
-
-              return newData;
-            },
-            shouldRevalidateAfter: !preferences.quickRevalidate,
-          },
-        );
-
+        await mutate(updateTransaction(activeBudgetId, transaction.id, transactionData));
         toast.style = Toast.Style.Success;
         toast.title = 'Transaction updated successfully';
-
-        if (forApproval) {
-          pop();
-        }
+        pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
         captureException(error);
-        toast.title = 'Failed to create transaction';
+        toast.title = 'Failed to update transaction';
 
         if (error instanceof Error) {
           toast.message = error.message;
         }
       }
-    },
-    validation: {
-      date: FormValidation.Required,
-      amount: FormValidation.Required,
-      payee_id: (value) => {
-        const errorMessage = 'Please select or enter a payee';
-
-        if (!selectOwnPayee && !value) {
-          return errorMessage;
-        }
-      },
-      categoryList: (value) => {
-        const errorMessage = 'Please add one or more categories to this transaction';
-        if (!value) {
-          return errorMessage;
-        }
-        if (value?.length === 0 && subtransactions.length === 0) return errorMessage;
-      },
     },
   });
 
@@ -261,7 +171,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
   return (
     <Form
       navigationTitle="Edit Transaction"
-      isLoading={isLoadingCategories || isLoadingPayees}
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />

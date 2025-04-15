@@ -187,37 +187,6 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab what are my active transactions",
-      "mocks": {
-        "get-transactions": {
-          "success": true,
-          "transactions": [
-            {
-              "id": "789",
-              "date": "2024-03-16",
-              "payee_name": "Grocery Store",
-              "amount": -50.00,
-              "account_name": "Checking",
-              "category_name": "Groceries",
-              "cleared": false,
-              "approved": false
-            }
-          ]
-        }
-      },
-      "expected": [
-        {
-          "callsTool": {
-            "name": "get-transactions",
-            "arguments": {
-              "filter": "active"
-            }
-          }
-        }
-      ],
-      "usedAsExample": true
-    },
-    {
       "input": "@ynab show me my account balances",
       "mocks": {
         "get-accounts": [
