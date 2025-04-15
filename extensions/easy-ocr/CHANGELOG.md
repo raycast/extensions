@@ -1,6 +1,6 @@
 # Tesseract OCR Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-04-15
 
 - Added automatic language detection option with either Raycast AI, Franc, LanguageDetect or Tinyld
 - Language used for OCR is now being displayed on successful OCR toast
