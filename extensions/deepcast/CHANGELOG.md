@@ -1,5 +1,9 @@
 # Deepcast Changelog
 
+## [Arabic Support as Default Target Language] - {PR_MERGE_DATE}
+
+- Arabic is now accepted as a default target language.
+
 ## [Formality] - 2024-12-02
 - Better icon for switch languages action
 - Added support for formality
