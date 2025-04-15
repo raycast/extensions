@@ -78,7 +78,7 @@ export default function History() {
       {history.data.length === 0 ? (
         <List.EmptyView
           title="No history"
-          description="Your recent questions will be showed up here"
+          description="Your recent questions will show up here"
           icon={Icon.Stars}
         />
       ) : (
