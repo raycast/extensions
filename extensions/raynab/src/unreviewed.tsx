@@ -2,11 +2,7 @@ import { UnreviewedTransactionView } from '@components/transactions/unreviewedTr
 import { checkForActiveBudget } from '@lib/utils/checkForActiveBudget';
 
 export default function Command() {
-  const { activeBudgetId, isLoading } = checkForActiveBudget();
-
-  if (isLoading) {
-    return null;
-  }
+  const { activeBudgetId } = checkForActiveBudget();
 
   if (!activeBudgetId) {
     return null;

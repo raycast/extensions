@@ -3,11 +3,7 @@ import { checkForActiveBudget } from '@lib/utils/checkForActiveBudget';
 import { LaunchProps } from '@raycast/api';
 
 export default function Command(props: LaunchProps) {
-  const { activeBudgetId, isLoading } = checkForActiveBudget();
-
-  if (isLoading) {
-    return null;
-  }
+  const { activeBudgetId } = checkForActiveBudget();
 
   if (!activeBudgetId) {
     return null;
