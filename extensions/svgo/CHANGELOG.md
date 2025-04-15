@@ -1,6 +1,6 @@
 # SVGO Changelog
 
-## [Enhance some commands] - {PR_MERGE_DATE}
+## [Enhance some commands] - 2025-04-15
 
 - Added live preview to `Configure SVGO`
 - Added file sizes (before, after) to `Optimize SVG string` success message
