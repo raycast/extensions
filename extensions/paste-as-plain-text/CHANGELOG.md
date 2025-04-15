@@ -1,6 +1,6 @@
 # Paste as Plain text Changelog
 
-## [Function Optimisation] - {PR_MERGE_DATE}
+## [Function Optimisation] - 2025-04-15
 
 - Update Paste as JSON, support flexible JSON-like inputs.
 
