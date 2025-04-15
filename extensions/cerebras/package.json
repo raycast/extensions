@@ -38,7 +38,7 @@
     {
       "name": "model",
       "title": "Models",
-      "description": "Collection of your custom and default model",
+      "description": "Collection of your custom and default models",
       "mode": "view"
     },
     {
