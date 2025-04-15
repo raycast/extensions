@@ -95,7 +95,7 @@
             "name": "get-transactions",
             "arguments": {
               "payee": "Amazon",
-              "query": "last year"
+              "period": "last year"
             }
           }
         }
@@ -121,7 +121,7 @@
             "name": "get-transactions",
             "arguments": {
               "payee": "Target",
-              "query": "past month"
+              "period": "past month"
             }
           }
         }
@@ -129,7 +129,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@raynab what was my transaction with Amazon on March 14",
+      "input": "@raynab what was my transaction with Amazon on March 14?",
       "mocks": {
         "get-transactions": {
           "success": true,
@@ -192,12 +192,12 @@
         "get-accounts": [
           {
             "name": "Checking",
-            "balance": 5000.00,
+            "balance": "$5,000.00",
             "on_budget": true
           },
           {
             "name": "Savings",
-            "balance": 10000.00,
+            "balance": "$10,000.00",
             "on_budget": true
           }
         ]
@@ -217,7 +217,7 @@
       "mocks": {
         "get-account-details": {
           "name": "Checking",
-          "balance": 5000.00,
+          "balance": "$5,000.00",
           "on_budget": true
         }
       },
@@ -238,7 +238,7 @@
       "mocks": {
         "get-account-details": {
           "name": "Checking",
-          "balance": 5000.00,
+          "balance": "$5,000.00",
           "on_budget": true
         }
       },
@@ -259,7 +259,7 @@
       "mocks": {
         "get-account-details": {
           "name": "Checking",
-          "balance": 5000.00,
+          "balance": "$5,000.00",
           "on_budget": true
         }
       },
@@ -341,7 +341,7 @@
             "name": "get-transactions",
             "arguments": {
               "payee": "Amazon",
-              "query": "last month"
+              "period": "last month"
             }
           }
         }
@@ -350,33 +350,55 @@
     },
     {
       "input": "@raynab what is the age of money in my current budget?",
-      "output": {
-        "success": true,
-        "month": "2024-03",
-        "note": "",
-        "income": 5000,
-        "budgeted": 4500,
-        "activity": -3000,
-        "to_be_budgeted": 500,
-        "age_of_money": 45,
-        "error": ""
+      "mocks": {
+        "get-budget": {
+          "activity": "-$1,200.00",
+          "age_of_money": 40,
+          "budgeted": "$3,800.00",
+          "income": "$5,000.00",
+          "month": "2024-03-01",
+          "note": "",
+          "success": true,
+          "to_be_budgeted": "$2,000.00"
+        }
       },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-budget",
+            "arguments": {
+              "month": "2024-03"
+            }
+          }
+        }
+      ],
       "usedAsExample": true
     },
     {
-      "input": "@raynab tell me about my this month's budget?",
-      "output": {
-        "success": true,
-        "month": "2024-03",
-        "note": "March Budget",
-        "income": 5000,
-        "budgeted": 4500,
-        "activity": -3000,
-        "to_be_budgeted": 500,
-        "age_of_money": 45,
-        "error": ""
+      "input": "@raynab tell me about my this month's budget",
+      "mocks": {
+        "get-budget": {
+          "activity": "-$1,750.25",
+          "age_of_money": 38,
+          "budgeted": "$4,200.00",
+          "income": "$6,000.00",
+          "month": "2024-03-01",
+          "note": "March Budget Overview",
+          "success": true,
+          "to_be_budgeted": "$2,050.00"
+        }
       },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-budget",
+            "arguments": {
+              "month": "2024-03"
+            }
+          }
+        }
+      ],
       "usedAsExample": true
     }
   ]
-} 
+}

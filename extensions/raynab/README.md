@@ -37,16 +37,14 @@ You can change the active budget at any time using the command. For most people 
 
 Raynab now includes AI Extensions for querying your budget information through natural language. You can ask questions like:
 
-Here are all the sample questions from the `ai.json` evals, organized by tool with bullet points:
-
 #### Transaction Management
 - "@raynab add a transaction for $25.50 at Starbucks"
 - "@raynab show me my recent transactions"
 - "@raynab show me my Amazon purchases from last year"
 - "@raynab what did I spend at Target in the past month?"
-- "@raynab what was my transaction with Amazon on March 14"
+- "@raynab what was my transaction with Amazon on March 14?"
 - "@raynab show me my transactions with Amazon this month"
-- "@raynab what did I spend at amazon last month?"
+- "@raynab what did I spend at Amazon last month?"
 
 #### Account Queries
 - "@raynab show me my account balances"
@@ -60,7 +58,7 @@ Here are all the sample questions from the `ai.json` evals, organized by tool wi
 
 #### Budget Information
 - "@raynab what is the age of money in my current budget?"
-- "@raynab tell me about my this month's budget?"
+- "@raynab tell me about my this month's budget"
 
 ### List Transactions
 

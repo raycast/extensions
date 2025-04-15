@@ -69,98 +69,32 @@
     {
       "name": "add-transaction",
       "title": "Add Transaction",
-      "description": "Add a new YNAB transaction using AI",
-      "type": "ai",
-      "input": {
-        "date": "string",
-        "payee_name": "string",
-        "amount": "number",
-        "account_name": "string",
-        "memo": "string"
-      },
-      "output": {
-        "success": "boolean",
-        "error": "string",
-        "debug": "any"
-      }
+      "description": "Add a new YNAB transaction using AI"
     },
     {
       "name": "get-transactions",
       "title": "Get Transactions",
-      "description": "Get YNAB transactions using AI",
-      "type": "ai",
-      "input": {
-        "filter": "string?",
-        "payee": "string?",
-        "category": "string?",
-        "period": "string?"
-      },
-      "output": {
-        "success": "boolean",
-        "transactions": "array",
-        "error": "string"
-      }
+      "description": "Get YNAB transactions using AI"
     },
     {
       "name": "get-accounts",
       "title": "Get Accounts",
-      "description": "Get all YNAB accounts and their balances using AI",
-      "type": "ai",
-      "input": {
-        "on_budget": "boolean?"
-      },
-      "output": {
-        "success": "boolean",
-        "accounts": "array",
-        "error": "string"
-      }
+      "description": "Get all YNAB accounts and their balances using AI"
     },
     {
       "name": "get-account-details",
       "title": "Get Account Details",
-      "description": "Get details of a specific YNAB account using AI",
-      "type": "ai",
-      "input": {
-        "account_name": "string"
-      },
-      "output": {
-        "success": "boolean",
-        "account": "object",
-        "error": "string"
-      }
+      "description": "Get details of a specific YNAB account using AI"
     },
     {
       "name": "get-big-numbers",
       "title": "Big Numbers",
-      "description": "Get spending statistics for today, this week, and this month from budget accounts",
-      "type": "ai",
-      "input": {},
-      "output": {
-        "success": "boolean",
-        "today": "string",
-        "thisWeek": "string",
-        "thisMonth": "string",
-        "error": "string",
-        "debug": "any"
-      }
+      "description": "Get spending statistics for today, this week, and this month from budget accounts"
     },
     {
       "name": "get-budget",
       "title": "Get Budget",
-      "description": "Get current budget information including age of money and monthly budget details",
-      "type": "ai",
-      "input": {},
-      "output": {
-        "success": "boolean",
-        "month": "string",
-        "note": "string",
-        "income": "number",
-        "budgeted": "number",
-        "activity": "number",
-        "to_be_budgeted": "number",
-        "age_of_money": "number",
-        "error": "string"
-      }
+      "description": "Get current budget information including age of money and monthly budget details"
     }
   ],
   "keywords": [
