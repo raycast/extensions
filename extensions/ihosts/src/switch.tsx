@@ -9,8 +9,7 @@ import {
   getSysHostFileHash,
   writeSysHostFile,
 } from "./utils/file";
-import { useEffect, useState } from "react";
-import { once } from "node:events";
+import { useState } from "react";
 
 export default function Command() {
   const [isLoadingState, updateLoadingState] = useState<boolean>(false);
