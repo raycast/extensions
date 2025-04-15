@@ -1,6 +1,6 @@
 # iHosts Changelog
 
-## [Support Remote Host] - {PR_MERGE_DATE}
+## [Support Remote Host] - 2025-04-15
 - support fetch remote hosts
 - add command `update remote hosts quickly`, quick update remote hosts
 
