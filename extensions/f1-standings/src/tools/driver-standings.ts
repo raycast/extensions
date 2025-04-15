@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import { DriverStandingResponse } from "../types";
 import { BASE_API_URL } from "../constants";
+import { showFailureToast } from "@raycast/utils";
 
 type Input = {
   /**
@@ -17,10 +18,14 @@ export default async function driverStandings(input: Input) {
     const res = await fetch(`${BASE_API_URL}/f1/${input.year}/driverStandings.json`, {
       method: "get",
     });
+    if (res.status !== 200) {
+      throw new Error("Invalid HTPTS status code");
+    }
     const data = (await res.json()) as DriverStandingResponse;
     const returnValue = data.MRData.StandingsTable.StandingsLists[0]?.DriverStandings ?? [];
     return returnValue;
   } catch (error) {
+    showFailureToast("Failed to fetch driver standings data");
     return null;
   }
 }

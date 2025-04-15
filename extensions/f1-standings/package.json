@@ -3281,6 +3281,7 @@
   },
   "dependencies": {
     "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
     "cheerio": "^1.0.0-rc.10",
     "date-fns": "^4.1.0",
     "moment": "^2.30.1",
