@@ -8,7 +8,8 @@
   "contributors": [
     "alexstrnik",
     "zach",
-    "gnostic"
+    "gnostic",
+    "theDeal"
   ],
   "categories": [
     "Media",
@@ -60,6 +61,13 @@
       "title": "Like",
       "subtitle": "YouTube Music",
       "description": "Adds current track to \"Liked\" collection in YouTube Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "remove-like",
+      "title": "Remove Like",
+      "subtitle": "YouTube Music",
+      "description": "Removes the current track from your liked songs in YouTube Music.",
       "mode": "no-view"
     },
     {
