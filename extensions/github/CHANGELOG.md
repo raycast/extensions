@@ -1,5 +1,11 @@
 # GitHub Changelog
 
+## [Add support for merge queues and auto-merge] - 2025-04-15
+
+- Adds PR actions for repositories that use merge queues
+- Adds the ability to enable auto-merge
+- Fix codegen lint hook
+
 ## [Add the ability to search for collaborators in the pull request actions] - 2025-03-19
 
 - Add the ability to search for collaborators in the pull request actions, instead of just showing the first 25.
