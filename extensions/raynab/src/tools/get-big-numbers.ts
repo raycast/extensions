@@ -12,6 +12,8 @@ interface BigNumbersOutput {
   debug?: Error | unknown;
 }
 
+// Big Three Numbers tells you how much you've spent today, this week, and this month.
+// https://9to5mac.com/2025/04/14/a-tweet-asked-for-a-simple-finance-app-two-hours-later-it-existed/
 export const getBigNumbers = async (): Promise<BigNumbersOutput> => {
   try {
     console.log('get-big-numbers tool called');

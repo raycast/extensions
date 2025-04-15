@@ -347,6 +347,36 @@
         }
       ],
       "usedAsExample": true
+    },
+    {
+      "input": "@ynab what is the age of money in my current budget?",
+      "output": {
+        "success": true,
+        "month": "2024-03",
+        "note": "",
+        "income": 5000,
+        "budgeted": 4500,
+        "activity": -3000,
+        "to_be_budgeted": 500,
+        "age_of_money": 45,
+        "error": ""
+      },
+      "usedAsExample": true
+    },
+    {
+      "input": "@ynab tell me about my this month's budget?",
+      "output": {
+        "success": true,
+        "month": "2024-03",
+        "note": "March Budget",
+        "income": 5000,
+        "budgeted": 4500,
+        "activity": -3000,
+        "to_be_budgeted": 500,
+        "age_of_money": 45,
+        "error": ""
+      },
+      "usedAsExample": true
     }
   ]
 } 

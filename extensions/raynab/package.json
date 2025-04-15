@@ -140,6 +140,24 @@
         "error": "string",
         "debug": "any"
       }
+    },
+    {
+      "name": "get-budget",
+      "title": "Get Budget",
+      "description": "Get current budget information including age of money and monthly budget details",
+      "type": "ai",
+      "input": {},
+      "output": {
+        "success": "boolean",
+        "month": "string",
+        "note": "string",
+        "income": "number",
+        "budgeted": "number",
+        "activity": "number",
+        "to_be_budgeted": "number",
+        "age_of_money": "number",
+        "error": "string"
+      }
     }
   ],
   "keywords": [
