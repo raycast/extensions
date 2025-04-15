@@ -108,15 +108,6 @@
       "placeholder": "Edit, Bearbeiten, ..."
     },
     {
-      "name": "localizedShowWritingTools",
-      "title": "Show Writing Tools Localization",
-      "description": "What is the name of the Show Writing Tools menu item in your language?",
-      "type": "textfield",
-      "required": false,
-      "default": "Show Writing Tools",
-      "placeholder": "Show Writing Tools, Schreibtools anzeigen, ..."
-    },
-    {
       "name": "localizedWritingTools",
       "title": "Writing Tools Localization",
       "description": "What is the name of the Writing Tools menu item in your language?",
