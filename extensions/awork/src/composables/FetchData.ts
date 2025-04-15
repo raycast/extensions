@@ -39,7 +39,7 @@ export const getProjects =
   (token: string, searchText: string, pageSize: number) => async (options: { page: number }) => {
     return fetch(
       new URL(
-        `${baseURI}/projects?page=${options.page + 1}&pageSize=${pageSize}&orderby=updatedOn desc${searchText ? `&filterby=substringof('${searchText}',name)` : ""}`,
+        `${baseURI}/projects?page=${options.page + 1}&pageSize=${pageSize}&orderby=updatedOn desc${searchText ? `&filterby=substringof('${encodeURIComponent(searchText)}',name)` : ""}`,
       ),
       getRequestOptions(token),
     )
@@ -88,7 +88,7 @@ export const getTasks =
       }
     }
 
-    return fetch(new URL(`${baseURI}/${route}?${pagination}&${filterBy}`), getRequestOptions(token))
+    return fetch(new URL(`${baseURI}/${route}?${pagination}&${encodeURIComponent(filterBy)}`), getRequestOptions(token))
       .then((response) => ({
         body: response.text(),
         headers: response.headers,
