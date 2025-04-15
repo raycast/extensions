@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "n8n",
+  "version": "1.0.0",
+  "title": "n8n",
+  "description": "Search, manage, and trigger n8n workflows and webhooks.",
+  "icon": "assets/n8n.png",
+  "author": "gregoryhadley",
+  "contributors": [
+    "koinzhang",
+    "xmok"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "n8n",
+    "workflow",
+    "automation",
+    "webhook",
+    "trigger",
+    "API"
+  ],
+  "preferences": [
+    {
+      "name": "instanceUrl",
+      "title": "n8n Instance URL",
+      "description": "Full URL of your n8n instance (e.g., https://n8n.example.com)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://your-n8n.example.com"
+    },
+    {
+      "name": "apiKey",
+      "title": "n8n API Key",
+      "description": "Your n8n API Key (User Settings -> API Keys)",
+      "type": "password",
+      "required": true,
+      "placeholder": "ey...xX"
+    },
+    {
+      "name": "rememberFilter",
+      "title": "Remember Workflow Tag Filter",
+      "description": "Persist the selected tag filter in the 'Search Workflows' command between sessions.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Remember Filter Selection",
+      "default": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-workflows",
+      "title": "Search Workflows",
+      "subtitle": "n8n",
+      "description": "Search, filter, activate, and deactivate n8n workflows.",
+      "mode": "view"
+    },
+    {
+      "name": "search-webhook-workflows",
+      "title": "Search Triggerable Webhooks",
+      "subtitle": "n8n",
+      "description": "Search and trigger workflows that start with a webhook.",
+      "mode": "view"
+    },
+    {
+      "name": "run-saved-command",
+      "title": "Run Saved n8n Command",
+      "subtitle": "n8n",
+      "description": "Run a previously saved webhook trigger configuration.",
+      "mode": "view"
+    },
+    {
+      "name": "reset-storage",
+      "title": "Reset n8n Extension Storage",
+      "subtitle": "n8n",
+      "description": "Reset all storage data for the n8n extension. Use this if you're experiencing issues.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

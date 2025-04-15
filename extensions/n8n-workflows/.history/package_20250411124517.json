@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "n8n",
+  "title": "n8n",
+  "description": "Control n8n via Raycast.",
+  "icon": "n8n.png",
+  "author": "koinzhang",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "instanceUrl",
+      "title": "n8n Instance URL",
+      "description": "Full URL of your n8n instance (e.g., https://n8n.example.com)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://your-n8n.example.com"
+    },
+    {
+      "name": "apiKey",
+      "title": "n8n API Key",
+      "description": "Your n8n API Key (User Settings -> API Keys)",
+      "type": "password",
+      "required": true,
+      "placeholder": "ey...xX"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-workflows",
+      "title": "Search Workflows",
+      "subtitle": "n8n",
+      "description": "Search and execute workflows via Desktop App.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "rememberFilter",
+          "type": "checkbox",
+          "required": false,
+          "label": "Remember Filter Tag",
+          "description": "Remember filter tag.",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "search-webhook-workflows",
+      "title": "Search Triggerable Webhooks",
+      "subtitle": "n8n",
+      "description": "Search and trigger workflows that start with a webhook.",
+      "mode": "view"
+    },
+    {
+      "name": "run-saved-command",
+      "title": "Run Saved n8n Command",
+      "subtitle": "n8n",
+      "description": "Run a previously saved webhook trigger configuration.",
+      "mode": "view"
+    },
+    {
+      "name": "reset-storage",
+      "title": "Reset n8n Extension Storage",
+      "subtitle": "n8n",
+      "description": "Reset all storage data for the n8n extension. Use this if you're experiencing issues.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.1",
+    "node-fetch": "^3.3.2",
+    "shell-env": "^4.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
