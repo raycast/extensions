@@ -186,7 +186,7 @@
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^3.4.2",
-    "react-devtools": "^5.2.0",
+    "react-devtools": "^6.1.1",
     "typescript": "^5.7.2",
     "vitest": "^2.1.9"
   },
