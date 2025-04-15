@@ -2,7 +2,7 @@
   "instructions": "You are a helpful assistant for managing YNAB (You Need A Budget) transactions. Always format amounts correctly and handle dates in ISO format. Be precise with payee names and account names. When showing transactions, format the information clearly and concisely.\n\nFor transaction queries, you can specify time periods using natural language. The following time periods are supported:\n- 'last year' or 'past year' for the last 12 months\n- 'last quarter' or 'past quarter' for the last 3 months\n- 'last month' or 'past month' for the last 30 days\n- 'last week' or 'past week' for the last 7 days\n- 'last day', 'past day', 'yesterday', or 'today' for the last 24 hours\n\nIf no time period is specified, the default is the last month.\n\nFor account balance queries, use get-accounts or get-account-details tools, not get-transactions.",
   "evals": [
     {
-      "input": "@ynab add a transaction for $25.50 at Starbucks",
+      "input": "@raynab add a transaction for $25.50 at Starbucks",
       "mocks": {
         "add-transaction": {
           "success": true,
@@ -32,7 +32,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab show me my recent transactions",
+      "input": "@raynab show me my recent transactions",
       "mocks": {
         "get-transactions": [
           {
@@ -66,7 +66,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab show me my Amazon purchases from last year",
+      "input": "@raynab show me my Amazon purchases from last year",
       "mocks": {
         "get-transactions": [
           {
@@ -103,7 +103,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab what did I spend at Target in the past month?",
+      "input": "@raynab what did I spend at Target in the past month?",
       "mocks": {
         "get-transactions": [
           {
@@ -129,7 +129,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab what was my transaction with Amazon on March 14",
+      "input": "@raynab what was my transaction with Amazon on March 14",
       "mocks": {
         "get-transactions": {
           "success": true,
@@ -158,7 +158,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab show me my transactions with Amazon this month",
+      "input": "@raynab show me my transactions with Amazon this month",
       "mocks": {
         "get-transactions": {
           "success": true,
@@ -187,7 +187,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab show me my account balances",
+      "input": "@raynab show me my account balances",
       "mocks": {
         "get-accounts": [
           {
@@ -213,7 +213,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab what is my checking account balance?",
+      "input": "@raynab what is my checking account balance?",
       "mocks": {
         "get-account-details": {
           "name": "Checking",
@@ -234,7 +234,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab show me my checking account",
+      "input": "@raynab show me my checking account",
       "mocks": {
         "get-account-details": {
           "name": "Checking",
@@ -255,7 +255,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab how much is in my checking?",
+      "input": "@raynab how much is in my checking?",
       "mocks": {
         "get-account-details": {
           "name": "Checking",
@@ -276,7 +276,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab what are my big three numbers?",
+      "input": "@raynab what are my big three numbers?",
       "mocks": {
         "get-big-numbers": {
           "success": true,
@@ -296,7 +296,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab show me my big numbers",
+      "input": "@raynab show me my big numbers",
       "mocks": {
         "get-big-numbers": {
           "success": true,
@@ -316,7 +316,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab what did I spend at amazon last month?",
+      "input": "@raynab what did I spend at amazon last month?",
       "mocks": {
         "get-transactions": [
           {
@@ -349,7 +349,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab what is the age of money in my current budget?",
+      "input": "@raynab what is the age of money in my current budget?",
       "output": {
         "success": true,
         "month": "2024-03",
@@ -364,7 +364,7 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab tell me about my this month's budget?",
+      "input": "@raynab tell me about my this month's budget?",
       "output": {
         "success": true,
         "month": "2024-03",

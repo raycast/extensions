@@ -1,27 +1,36 @@
 # Raynab Changelog
 
-## [Improvements & AI Integration] - {PR_MERGE_DATE}
+## [AI Budget Tools & Improvements] - {PR_MERGE_DATE}
 
-### ✨ New Features
-- Added error UX for budget selection with clear error messages
-- Added support for AI Extensions with transaction management tools
+### ✨ New Features - Ask AI - AI Tools
+- Added new AI-powered tools for natural language budget queries:
+  - `get-budget`: Query budget information including age of money and monthly details
+    - Example: "What is the age of money in my March budget?"
+    - Example: "Tell me about this month's budget?"
+  - `get-big-numbers`: Track spending for today, this week, and this month
+    - Example: "How much have I spent today?"
+    - Example: "What are my big three numbers?"
+  - `get-transactions`: Search and filter transactions with natural language
+    - Example: "Show me all transactions from Taco Bell last month"
+    - Example: "Find my largest expense this week"
+  - `get-categories`: Query category information and spending
+    - Example: "How much did I spend on groceries last month?"
+    - Example: "Which categories are over budget?"
 
 ### 💎 Improvements
-- Removed hidden categories in transaction forms
-- Improved error handling and user feedback for API calls
-- Enhanced transaction form validation and error messages
+- Enhanced budget data retrieval with proper date formatting
+- Improved error handling for budget queries by sending you to the select a budget screen
+- Added detailed logging for budget tool debugging
+- Enhanced currency formatting in budget responses
+- Added support for natural language queries across all tools
+- Improved error messages and user feedback for AI tool operations
 
 ### 🐞 Bug Fixes
-- Fixed relative time of locally created transactions being set at midnight
-- Fixed error messages of certain API calls being swallowed without proper error toast
-- Fixed transaction form validation issues
-- Resolved issues with transaction form state management
-
-### 🔧 Technical Updates
-- Updated dependencies to latest versions
-- Added AI tools configuration with TypeScript types
-- Implemented error handling for AI tool operations
-- Added comprehensive evals for AI tool testing
+- Fixed date format mismatch in budget month queries
+- Fixed budget data retrieval for specific months
+- Resolved issues with budget currency formatting
+- Fixed error handling in AI tool operations
+- Resolved issues with transaction form validation for create and edit
 
 ## [Improvements & Bug fixes] - 2025-02-14
 
