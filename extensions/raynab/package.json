@@ -99,18 +99,6 @@
       }
     },
     {
-      "name": "get-transaction-details",
-      "title": "Get Transaction Details",
-      "description": "Get details of a specific YNAB transaction using AI",
-      "type": "ai",
-      "input": {
-        "transaction_id": "string"
-      },
-      "output": {
-        "transaction": "object"
-      }
-    },
-    {
       "name": "get-accounts",
       "title": "Get Accounts",
       "description": "Get all YNAB accounts and their balances using AI",

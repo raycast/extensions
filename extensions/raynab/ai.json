@@ -129,23 +129,88 @@
       "usedAsExample": true
     },
     {
-      "input": "@ynab what was my Amazon purchase on March 14th?",
+      "input": "@ynab what was my transaction with Amazon on March 14",
       "mocks": {
-        "get-transaction-details": {
-          "id": "123",
-          "date": "2024-03-14",
-          "payee_name": "Amazon",
-          "amount": -99.99,
-          "account_name": "Credit Card",
-          "cleared": true
+        "get-transactions": {
+          "success": true,
+          "transactions": [
+            {
+              "id": "123",
+              "date": "2024-03-14",
+              "payee_name": "Amazon",
+              "amount": -85.00,
+              "account_name": "Chase Amazon card"
+            }
+          ]
         }
       },
       "expected": [
         {
           "callsTool": {
-            "name": "get-transaction-details",
+            "name": "get-transactions",
             "arguments": {
-              "transaction_id": "123"
+              "payee": "Amazon",
+              "period": "month"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@ynab show me my transactions with Amazon this month",
+      "mocks": {
+        "get-transactions": {
+          "success": true,
+          "transactions": [
+            {
+              "id": "456",
+              "date": "2024-03-15",
+              "payee_name": "Amazon",
+              "amount": -99.99,
+              "account_name": "Credit Card"
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-transactions",
+            "arguments": {
+              "payee": "Amazon",
+              "period": "month"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@ynab what are my active transactions",
+      "mocks": {
+        "get-transactions": {
+          "success": true,
+          "transactions": [
+            {
+              "id": "789",
+              "date": "2024-03-16",
+              "payee_name": "Grocery Store",
+              "amount": -50.00,
+              "account_name": "Checking",
+              "category_name": "Groceries",
+              "cleared": false,
+              "approved": false
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-transactions",
+            "arguments": {
+              "filter": "active"
             }
           }
         }

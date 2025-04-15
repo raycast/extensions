@@ -9,6 +9,7 @@ import {
   confirmAlert,
   Alert,
   captureException,
+  useNavigation,
 } from '@raycast/api';
 import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 import { useMemo, useState } from 'react';
@@ -64,6 +65,7 @@ interface TransactionCreateFormProps {
 }
 
 export function TransactionCreateForm({ accountId, transaction }: TransactionCreateFormProps) {
+  const { pop } = useNavigation();
   // 1. All hooks must be called unconditionally at the top
   const { value: activeBudgetId = '', isLoading: isLoadingBudgetId } = useLocalStorage('activeBudgetId', '');
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
@@ -220,6 +222,7 @@ export function TransactionCreateForm({ accountId, transaction }: TransactionCre
         await mutate(createTransaction(activeBudgetId, transactionData));
         toast.style = Toast.Style.Success;
         toast.title = 'Transaction created successfully';
+        pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
         captureException(error);
