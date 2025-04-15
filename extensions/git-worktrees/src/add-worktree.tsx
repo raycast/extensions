@@ -191,7 +191,9 @@ export default function Command({ directory: initialDirectory }: { directory?: s
         return undefined;
       },
       worktreeName: (value) => {
-        if (!value) return "Worktree name is required";
+        if (values.branch === WorktreeFlowType.CREATE_NEW && !value) return "Worktree name is required";
+
+        if (!value) return undefined;
 
         if (invalidBranchNameRegex.test(value))
           return "Invalid branch name. Branch names cannot contain spaces, special characters (~ ^ : ? * [ ]), consecutive dots (..), start/end with slash, end with dot, or contain @{";
