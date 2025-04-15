@@ -1,6 +1,6 @@
 # Lucide Icons Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-15
 
 - Add the preference to copy icon name in Pascal Case.
 
