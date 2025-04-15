@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Add support for merge queues and auto-merge] - {PR_MERGE_DATE}
+## [Add support for merge queues and auto-merge] - 2025-04-15
 
 - Adds PR actions for repositories that use merge queues
 - Adds the ability to enable auto-merge
