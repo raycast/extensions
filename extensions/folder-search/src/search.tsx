@@ -1,32 +1,12 @@
-import { userInfo } from "os";
-
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Form,
-  Icon,
-  List,
-  Toast,
-  closeMainWindow,
-  popToRoot,
-  showToast,
-  confirmAlert,
-  open,
-  getSelectedFinderItems,
-  Keyboard,
-} from "@raycast/api";
-
+import { Action, ActionPanel, Color, Form, Icon, List, Toast, closeMainWindow, popToRoot, showToast, confirmAlert, open, getSelectedFinderItems, Keyboard } from "@raycast/api";
+import { folderName, showFolderInfoInFinder, copyFolderToClipboard, maybeMoveResultToTrash } from "./utils";
 import { runAppleScript } from "run-applescript";
+import { SpotlightSearchResult } from "./types";
+import { useFolderSearch } from "./hooks/useFolderSearch";
+import { FolderListSection, Directory } from "./components";
 import path from "node:path";
 import fse from "fs-extra";
-
-import { SpotlightSearchResult } from "./types";
-
-import { folderName, showFolderInfoInFinder, copyFolderToClipboard, maybeMoveResultToTrash } from "./utils";
-
-import { useFolderSearch } from "./hooks/useFolderSearch";
-import { FolderListSection } from "./components/FolderListSection";
+import { userInfo } from "os";
 
 // allow string indexing on Icons
 interface IconDictionary {
@@ -94,7 +74,6 @@ export default function Command() {
 
         open(destinationFolder);
       } catch (e) {
-        console.error("ERROR " + String(e));
         await showToast(Toast.Style.Failure, "Error moving file " + String(e));
       }
     }
@@ -105,18 +84,14 @@ export default function Command() {
 
   // Render actions for the folder list items
   const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number) => {
+    const enclosingFolder = path.dirname(result.path);
     return (
       <ActionPanel title={folderName(result)}>
         <Action.Open
-          title="Open"
+          title="Open in Finder"
           icon={Icon.Folder}
           target={result.path}
           onOpen={() => popToRoot({ clearSearchBar: true })}
-        />
-        <Action.ShowInFinder
-          title="Show in Finder"
-          path={result.path}
-          onShow={() => popToRoot({ clearSearchBar: true })}
         />
         <Action
           title="Send Finder Selection to Folder"
@@ -168,6 +143,20 @@ export default function Command() {
             )}
           </>
         )}
+        <ActionPanel.Section>
+          <Action.Push
+            title="Enclosing Folder"
+            icon={Icon.ArrowUp}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+            target={<Directory path={enclosingFolder} />}
+          />
+          <Action.Push
+            title="Enter Folder"
+            icon={Icon.ArrowDown}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+            target={<Directory path={result.path} />}
+          />
+        </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard
             title="Copy Folder"
