@@ -10,6 +10,9 @@
     "Media",
     "Other"
   ],
+  "engines": {
+    "node": ">=22.14.0"
+  },
   "license": "MIT",
   "commands": [
     {
@@ -32,7 +35,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.95.0",
+    "@raycast/api": "^1.96.0",
     "@raycast/utils": "^1.19.1",
     "got": "^14.4.7",
     "js-base64": "^3.7.2",
