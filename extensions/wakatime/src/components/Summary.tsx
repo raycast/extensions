@@ -101,15 +101,12 @@ export const ActivityChange: React.FC<ShowDetailProps> = ({ showDetail, setShowD
     const { overall, languages } = activityChange;
 
     return [
-      `## You've done ${overall.quantifier} than you did yesterday!`,
+      `## You've logged ${overall.quantifier} time today than you did yesterday!`,
       `### A ${overall.duration} ${overall.quantifier === "more" ? "increase" : "decrease"}${
         overall.percent ? ` and ${overall.percent} change` : ""
       }!!`,
       `#### Languages`,
-      ...languages.map(
-        ([language, stat]) =>
-          `- ${language} - ${stat.duration} ${stat.percent ? `(${stat.percent} ${stat.quantifier})` : stat.quantifier}`
-      ),
+      ...languages.map(([language, stat]) => `- ${language} - ${stat.duration} ${stat.quantifier}`),
     ];
   }, [activityChange]);
 
