@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { getAvatarIcon } from "@raycast/utils";
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 
 import { useUser } from "./hooks";
@@ -25,7 +26,9 @@ export default function SummaryCommand() {
             subtitle={data.username}
             title={data.display_name}
             accessories={accessories}
-            icon={data.photo_public ? { source: data.photo, mask: Image.Mask.Circle } : Icon.Person}
+            icon={
+              data.photo_public ? { source: data.photo, mask: Image.Mask.Circle } : getAvatarIcon(data.display_name)
+            }
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={data.profile_url} title="Open in Browser" />

@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
-import { useState } from "react";
+import { getAvatarIcon } from "@raycast/utils";
+import { useMemo } from "react";
 
 import { getDuration, getFlagEmoji } from "../utils";
 
@@ -11,25 +12,31 @@ export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
   running_total,
   user,
 }) => {
-  const [md] = useState([
-    `# ${user.display_name}`,
-    user.is_hireable ? "**Hireable**" : "",
-    user.city ? `- From ${getFlagEmoji(user.city.country_code)} ${user.city.title}` : "",
-    `- Rank **#${rank}**`,
-    `- Daily Average (**${getDuration(running_total.daily_average)}**)`,
-    `- Hours Coded (**${getDuration(running_total.total_seconds)}**)`,
-    "## Languages",
-    ...running_total.languages.map((item) => `- ${item.name} (${getDuration(item.total_seconds)})`),
-  ]);
+  const md = useMemo(
+    () =>
+      [
+        `# ${user.display_name}`,
+        user.is_hireable ? "**Hireable**" : "",
+        user.city ? `- From ${getFlagEmoji(user.city.country_code)} ${user.city.title}` : "",
+        `- Rank **#${rank}**`,
+        `- Daily Average (**${getDuration(running_total.daily_average)}**)`,
+        `- Hours Coded (**${getDuration(running_total.total_seconds)}**)`,
+        "## Languages",
+        ...running_total.languages.map((item) => `- ${item.name} (${getDuration(item.total_seconds)})`),
+      ].join("\n\n"),
+    [user.display_name, user.is_hireable, user.city, rank, running_total],
+  );
 
-  const props: Partial<List.Item.Props> = showDetail
-    ? { detail: <List.Item.Detail markdown={md.join("\n\n")} /> }
-    : {
-        accessories: [
-          { tooltip: "Hours Coded", text: getDuration(running_total.total_seconds) },
-          user.city ? { tooltip: user.city.title, text: getFlagEmoji(user.city.country_code) } : {},
-        ],
-      };
+  const props = useMemo(() => {
+    if (showDetail) return { detail: <List.Item.Detail markdown={md} /> };
+
+    return {
+      accessories: [
+        { tooltip: "Hours Coded", text: getDuration(running_total.total_seconds) },
+        user.city ? { tooltip: user.city.title, text: getFlagEmoji(user.city.country_code) } : {},
+      ],
+    };
+  }, [md, running_total.total_seconds, showDetail, user.city]);
 
   return (
     <List.Item
@@ -37,10 +44,7 @@ export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
       id={user.id}
       subtitle={`#${rank}`}
       title={user.display_name}
-      icon={{
-        source: user.photo_public ? user.photo : `https://ui-avatars.com/api/?name=&size=16`,
-        mask: Image.Mask.Circle,
-      }}
+      icon={user.photo_public ? { source: user.photo, mask: Image.Mask.Circle } : getAvatarIcon(user.display_name)}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Item">
