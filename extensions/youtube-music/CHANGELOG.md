@@ -2,8 +2,8 @@
 
 ## [New Command and Fix] - {PR_MERGE_DATE}
 
-We fixed: If you like a Song and it was allready liked the like will be not removed, 
-New feature: If you want to unlike a song just type `remove-like`.
+- Fixed: Like command no longer removes like when song is already liked
+- Added: New command to remove like from currently playing song
 
 ## [New Commands] = 2024-03-06
 
