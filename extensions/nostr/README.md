@@ -1,4 +1,4 @@
-# nostr-raycast
+# Nostr
 
 A Raycast extension that lets users publish notes to [Nostr](https://github.com/nostr-protocol/nostr).
 

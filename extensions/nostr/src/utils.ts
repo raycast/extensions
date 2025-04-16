@@ -1,4 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from '@raycast/api';
+import { showFailureToast } from '@raycast/utils';
 
 type Preferences = {
   privateKey: string;
@@ -22,12 +23,7 @@ export function loadPrivateKey(): string | undefined {
     return privateKey;
   } catch (error) {
     console.error('Error loading the private key:', error);
-
-    showToast({
-      style: Toast.Style.Failure,
-      title: 'Failed to Load Private Key',
-      message: 'An unexpected error occurred while loading the private key.',
-    });
+    showFailureToast(error, { title: 'Failed to Load Private Key' });
 
     return undefined;
   }
@@ -47,12 +43,7 @@ export function loadRelayURLs(): string[] {
     return defaultRelays;
   } catch (error) {
     console.error('Error loading relay URLs:', error);
-
-    showToast({
-      style: Toast.Style.Failure,
-      title: 'Failed to Load Relays',
-      message: 'An unexpected error occurred while loading the relay URLs.',
-    });
+    showFailureToast(error, { title: 'Failed to Load Relays' });
 
     return defaultRelays;
   }

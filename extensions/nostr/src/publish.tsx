@@ -4,6 +4,7 @@ import { hexToBytes } from '@noble/hashes/utils';
 import { SimplePool, useWebSocketImplementation } from 'nostr-tools/pool';
 import WebSocket from 'ws';
 import { loadPrivateKey, loadRelayURLs } from './utils';
+import { showFailureToast } from '@raycast/utils';
 
 useWebSocketImplementation(WebSocket);
 
@@ -13,8 +14,8 @@ type Values = {
 
 export default function Command() {
   async function handleSubmit(values: Values) {
+    const pool = new SimplePool();
     try {
-      const pool = new SimplePool();
       const privateKey = loadPrivateKey();
       if (privateKey) {
         const event = finalizeEvent(
@@ -35,9 +36,14 @@ export default function Command() {
 
           showToast({ title: 'Note Published', message: 'Your note has been published to Nostr!' });
           popToRoot();
+        } else {
+          showToast({
+            style: Toast.Style.Failure,
+            title: 'Failed to Publish',
+            message: 'Event verification failed',
+          });
         }
       } else {
-        console.log('Private Key is missing.');
         showToast({
           style: Toast.Style.Failure,
           title: 'Failed to Publish',
@@ -46,11 +52,9 @@ export default function Command() {
       }
     } catch (error) {
       console.error('Error publishing note:', error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Failed to Publish',
-        message: 'An error occurred while publishing the note.',
-      });
+      showFailureToast(error, { title: 'Failed to Publish' });
+    } finally {
+      pool.close([]);
     }
   }
 

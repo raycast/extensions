@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nostr",
   "title": "Nostr",
-  "description": "Publish and read Nostr notes",
+  "description": "Publish notes to Nostr",
   "icon": "nostr.png",
   "author": "saadel",
   "categories": [
@@ -14,7 +14,7 @@
       "name": "publish",
       "title": "Publish Note",
       "subtitle": "Nostr",
-      "description": "Publish a note",
+      "description": "Publish a note to Nostr",
       "mode": "view"
     }
   ],
