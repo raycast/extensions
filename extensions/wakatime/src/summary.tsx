@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 
 import { useUser } from "./hooks";
@@ -8,18 +8,23 @@ export default function SummaryCommand() {
   const { data: { data } = {}, isLoading } = useUser();
   const [showDetail, setShowDetail] = useState(false);
 
+  const accessories = useMemo<List.Item.Props["accessories"]>(() => {
+    if (showDetail || data?.id == null) return null;
+
+    return [
+      { icon: Icon.Globe, tooltip: "Timezone", text: data.timezone ?? "Timezone is missing" },
+      data.has_premium_features ? { icon: Icon.Star, text: "Pro" } : null,
+    ].filter((i) => i != null);
+  }, [showDetail, data?.id, data?.timezone, data?.has_premium_features]);
+
   return (
     <List isLoading={isLoading} isShowingDetail={showDetail}>
-      {data !== undefined && (
+      {data != null && (
         <List.Section title="Profile">
           <List.Item
             subtitle={data.username}
             title={data.display_name}
-            accessories={
-              showDetail
-                ? null
-                : [{ icon: Icon.Globe, tooltip: "Timezone", text: data.timezone ?? "Timezone is missing" }]
-            }
+            accessories={accessories}
             icon={data.photo_public ? { source: data.photo, mask: Image.Mask.Circle } : Icon.Person}
             actions={
               <ActionPanel>
@@ -30,8 +35,12 @@ export default function SummaryCommand() {
           />
         </List.Section>
       )}
-      <ActivityChange {...{ showDetail, setShowDetail }} />
-      <RangeStatsList {...{ showDetail, setShowDetail }} />
+      <ActivityChange showDetail={showDetail} setShowDetail={setShowDetail} />
+      <RangeStatsList
+        isPro={data?.has_premium_features ?? false}
+        showDetail={showDetail}
+        setShowDetail={setShowDetail}
+      />
       <ProjectsStatsList />
     </List>
   );

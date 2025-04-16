@@ -1,17 +1,21 @@
 export * from "./api";
 
-export const KNOWN_RANGES = [
-  "Today",
-  "Yesterday",
-  "Last 7 Days",
-  "Last 7 Days from Yesterday",
-  "Last 14 Days",
-  "Last 30 Days",
-  "This Week",
-  "Last Week",
-  "This Month",
-  "Last Month",
-] as const;
+/**
+ * A key-value object of the known time ranges for the Wakatime Summary.
+ * A `true` value means you can query for that range without a PRO subscription
+ */
+export const KNOWN_RANGES = {
+  Today: true,
+  Yesterday: true,
+  "Last 7 Days": true,
+  "Last 7 Days from Yesterday": true,
+  "Last 14 Days": false,
+  "Last 30 Days": false,
+  "This Week": false,
+  "Last Week": false,
+  "This Month": false,
+  "Last Month": false,
+} as const;
 
 export function getDuration(seconds: number | undefined | null) {
   const getAmount = (rem: number, rate: number, unit: string) => {

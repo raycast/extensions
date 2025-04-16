@@ -5,8 +5,8 @@ import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api"
 import { useActivityChange, useProjects, useSummary } from "../hooks";
 import { cumulateSummaryDuration, getDuration } from "../utils";
 
-export const RangeStatsList: React.FC<ShowDetailProps> = (props) => {
-  const { data: summary } = useSummary();
+export const RangeStatsList: React.FC<ShowDetailProps & { isPro: boolean }> = (props) => {
+  const { data: summary } = useSummary(props.isPro);
 
   return (
     <List.Section title="Stats Summary">
