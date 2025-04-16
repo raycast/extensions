@@ -1,5 +1,9 @@
 # Window Sizer Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Fix toast emoji
+
 ## [Initial Version] - {PR_MERGE_DATE}
 
 ### Features

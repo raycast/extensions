@@ -278,7 +278,7 @@ export default function ResizeWindow() {
 
       if (!savedSizeStr) {
         console.error("No previous window size found in LocalStorage");
-        await showHUD("🔄 No previous size found");
+        await showHUD("🛑 No previous size found");
         return;
       }
 
@@ -318,7 +318,7 @@ export default function ResizeWindow() {
 
         await closeMainWindow();
         await runAppleScript(script);
-        await showHUD("🔄 Size restored");
+        await showHUD("↺ Size restored");
         await popToRoot();
       } catch (parseError) {
         console.error("Failed to parse JSON data:", parseError);
