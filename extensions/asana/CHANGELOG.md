@@ -1,6 +1,6 @@
 # Asana Changelog
 
-## [Auto-close window after task creation & configuration modernization] - {PR_MERGE_DATE}
+## [Auto-close window after task creation & configuration modernization] - 2025-04-16
 
 - Introduced a preference to automatically close the Raycast window and show a HUD notification after creating a task, streamlining the workflow.
 - Modernized the extension by adopting the latest configuration standards for improved maintainability and compatibility.
