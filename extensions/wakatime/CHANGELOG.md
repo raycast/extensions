@@ -1,6 +1,6 @@
 # WakaTime Changelog
 
-## [Summary Command Fixes] - 2025-04-16
+## [Summary Command Fixes] - {PR_MERGE_DATE}
 
 - Upgrade to `@raycast/api` - v1.96.0
 

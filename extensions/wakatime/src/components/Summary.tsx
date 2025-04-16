@@ -18,28 +18,24 @@ export const RangeStatsList: React.FC<ShowDetailProps & { isPro: boolean }> = (p
 const keys = ["categories", "editors", "languages", "projects"] as const;
 
 const RangeStatsItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, showDetail, title }) => {
-  const md = useMemo(() => {
-    return [
-      `## ${title}`,
-      getDuration(range.cumulative_total.seconds),
-      "---",
-      ...keys.flatMap((key) => [
-        `### ${key[0].toUpperCase()}${key.slice(1)}`,
-        ...cumulateSummaryDuration(range, key).map(([name, seconds]) => `- ${name} (**${getDuration(seconds)}**)`),
-      ]),
-    ];
-  }, [range, title]);
+  const md = useMemo(
+    () =>
+      [
+        `## ${title}`,
+        getDuration(range.cumulative_total.seconds),
+        "---",
+        ...keys.flatMap((key) => [
+          `### ${key[0].toUpperCase()}${key.slice(1)}`,
+          ...cumulateSummaryDuration(range, key).map(([name, seconds]) => `- ${name} (**${getDuration(seconds)}**)`),
+        ]),
+      ].join("\n\n"),
+    [range, title],
+  );
 
-  const props: Partial<List.Item.Props> = showDetail
-    ? { detail: <List.Item.Detail markdown={md.join("\n\n")} /> }
-    : {
-        accessories: [
-          {
-            tooltip: "Cumulative Total",
-            text: getDuration(range.cumulative_total.seconds),
-          },
-        ],
-      };
+  const props = useMemo<Partial<List.Item.Props>>(() => {
+    if (showDetail) return { detail: <List.Item.Detail markdown={md} /> };
+    return { accessories: [{ tooltip: "Cumulative Total", text: getDuration(range.cumulative_total.seconds) }] };
+  }, [md, range.cumulative_total.seconds, showDetail]);
 
   return (
     <List.Item

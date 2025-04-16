@@ -7,7 +7,7 @@ export function useTodaySummary() {
   const result = useBase({
     handler: useCallback(async () => {
       const data = await getSummary("Today");
-      if (!data.ok) throw new Error(data.error);
+      if (!data.ok) return { ok: false, error: data.error };
 
       return data;
     }, []),

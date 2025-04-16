@@ -27,14 +27,14 @@ export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
     [user.display_name, user.is_hireable, user.city, rank, running_total],
   );
 
-  const props = useMemo(() => {
+  const props = useMemo<Partial<List.Item.Props>>(() => {
     if (showDetail) return { detail: <List.Item.Detail markdown={md} /> };
 
     return {
       accessories: [
-        { tooltip: "Hours Coded", text: getDuration(running_total.total_seconds) },
-        user.city ? { tooltip: user.city.title, text: getFlagEmoji(user.city.country_code) } : {},
-      ],
+        { title: "", text: getDuration(running_total.total_seconds) },
+        user.city ? { title: "", tooltip: user.city.title, text: getFlagEmoji(user.city.country_code) } : null,
+      ].filter((s) => s != null),
     };
   }, [md, running_total.total_seconds, showDetail, user.city]);
 
