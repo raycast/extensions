@@ -1,6 +1,6 @@
 # Linkding Changelog
 
-## [Refactor & Features] - {PR_MERGE_DATE}
+## [Refactor & Features] - 2025-04-16
 
 - refactor!: use raycast fetch API (removes "Ignore SSL" option)
 - fix: surface API errors in UI
