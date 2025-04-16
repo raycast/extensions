@@ -152,7 +152,12 @@ export default function Command({ launchContext }: CommandProps) {
                 title="Quit All"
                 onAction={async () => {
                   for (const app of apps) {
-                    if (preferences.excludeApplications.split(",").includes(app.name)) {
+                    if (
+                      preferences.excludeApplications
+                        .split(",")
+                        .map((name: string) => name.trim())
+                        .includes(app.name)
+                    ) {
                       continue;
                     }
 
