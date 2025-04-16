@@ -1,5 +1,6 @@
 import { Form, ActionPanel, Action, popToRoot, showToast, Toast } from '@raycast/api';
 import { finalizeEvent, verifyEvent } from 'nostr-tools/pure';
+import { hexToBytes } from '@noble/hashes/utils';
 import { SimplePool, useWebSocketImplementation } from 'nostr-tools/pool';
 import WebSocket from 'ws';
 import { loadPrivateKey, loadRelayURLs } from './utils';
@@ -20,10 +21,10 @@ export default function Command() {
           {
             kind: 1,
             created_at: Math.floor(Date.now() / 1000),
-            tags: ['client', 'My Client'],
+            tags: [],
             content: values.textarea,
           },
-          privateKey,
+          hexToBytes(privateKey),
         );
 
         const verified = verifyEvent(event);
