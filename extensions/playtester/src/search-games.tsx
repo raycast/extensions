@@ -12,7 +12,7 @@ interface Game {
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [games, setGames] = useState<Game[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Function to fetch games based on search text
@@ -81,7 +81,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search games..." throttle>
-      {games.length === 0 ? (
+      {!isLoading && games.length === 0 ? (
         <List.EmptyView
           title={searchText ? "No games found" : "No trending games available"}
           description={searchText ? "Try a different search term" : "Check back later for trending games"}

@@ -1,5 +1,5 @@
 import { ActionPanel, Grid, Action, Icon, Detail } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import fetch from "node-fetch";
 import { showFailureToast } from "@raycast/utils";
 
@@ -78,86 +78,67 @@ ${game.short_description}
 
 // This export is used by Raycast, so the "unused export" warning can be ignored
 export default function Command() {
-  const [games, setGames] = useState<Game[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    isLoading,
+    data: games,
+    error,
+  } = useCachedPromise(
+    async () => {
+      // Helper function to handle HTTP errors without throwing
+      async function fetchPage(page: number) {
+        const response = await fetch(
+          `https://playtester.io/api/games?status=active&sort=date_added&sort_order=desc&page=${page}`,
+        );
 
-  useEffect(() => {
-    async function fetchGames() {
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`HTTP error for page ${page}! Status: ${response.status}, ${errorText}`);
+        }
+
+        const data = (await response.json()) as GamesResponse;
+        return data.games;
+      }
+
       try {
-        // Helper function to handle HTTP errors without throwing
-        async function fetchPage(page: number) {
-          const response = await fetch(
-            `https://playtester.io/api/games?status=active&sort=date_added&sort_order=desc&page=${page}`,
-          );
-
-          if (!response.ok) {
-            const errorText = await response.text();
-            return {
-              success: false,
-              error: `HTTP error for page ${page}! Status: ${response.status}, ${errorText}`,
-            };
-          }
-
-          const data = (await response.json()) as GamesResponse;
-          return { success: true, data };
-        }
-
         // Fetch both pages
-        const page1Result = await fetchPage(1);
-        const page2Result = await fetchPage(2);
+        const [page1Games, page2Games] = await Promise.all([
+          fetchPage(1),
+          fetchPage(2).catch(async (error) => {
+            console.error("Error fetching page 2:", error);
+            await showFailureToast(error, {
+              title: "Partially failed to load games",
+              message: "Page 2 could not be loaded. Some games might be missing.",
+            });
+            return [];
+          }),
+        ]);
 
-        // Check for errors
-        if (!page1Result.success && !page2Result.success) {
-          // Both pages failed
-          setError(page1Result.error || "Unknown error occurred");
-          return;
-        }
-
-        // Combine successfully fetched data
-        const combinedGames: Game[] = [];
-
-        if (page1Result.success && page1Result.data) {
-          combinedGames.push(...page1Result.data.games);
-        } else if (!page1Result.success) {
-          console.error("Error fetching page 1:", page1Result.error);
-          await showFailureToast(new Error(page1Result.error), {
-            title: "Partially failed to load games",
-            message: "Page 1 could not be loaded. Some games might be missing.",
-          });
-        }
-
-        if (page2Result.success && page2Result.data) {
-          combinedGames.push(...page2Result.data.games);
-        } else if (!page2Result.success) {
-          console.error("Error fetching page 2:", page2Result.error);
-          await showFailureToast(new Error(page2Result.error), {
-            title: "Partially failed to load games",
-            message: "Page 2 could not be loaded. Some games might be missing.",
-          });
-        }
-
-        setGames(combinedGames);
+        return [...page1Games, ...page2Games];
       } catch (error) {
         console.error("Error fetching games:", error);
-        setError(error instanceof Error ? error.message : "An unknown error occurred");
-        await showFailureToast(error instanceof Error ? error : new Error("An unknown error occurred"), {
+        throw error;
+      }
+    },
+    [],
+    {
+      onError: (error) => {
+        showFailureToast(error, {
           title: "Failed to fetch games",
         });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    void fetchGames();
-  }, []);
+      },
+    },
+  );
 
   return (
     <Grid isLoading={isLoading} searchBarPlaceholder="Search games..." fit={Grid.Fit.Fill}>
       {error ? (
-        <Grid.EmptyView icon={{ source: Icon.ExclamationMark }} title="Failed to load games" description={error} />
+        <Grid.EmptyView
+          icon={{ source: Icon.ExclamationMark }}
+          title="Failed to load games"
+          description={error.message}
+        />
       ) : (
-        games.map((game) => (
+        games?.map((game) => (
           <Grid.Item
             key={game.id}
             content={{ source: game.thumbnail, fallback: Icon.Play }}
