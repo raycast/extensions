@@ -5,12 +5,15 @@ export default async () => {
   try {
     const result = await runJSInYouTubeMusicTab(
       `(function() {
-        const dislikeButton = document.querySelector('#like-button-renderer > tp-yt-paper-icon-button.dislike.style-scope.ytmusic-like-button-renderer') 
-          || document.querySelector('dislike-button-view-model button');
+        const likeRenderer = document.querySelector('ytmusic-like-button-renderer#like-button-renderer');
+        if (!likeRenderer) return false;
+
+        const dislikeButton = likeRenderer.querySelector('yt-button-shape.dislike button');
         if (dislikeButton) {
           dislikeButton.click();
           return true;
         }
+
         return false;
       })();`
     );
@@ -18,7 +21,7 @@ export default async () => {
     if (result) {
       await showHUD("Disliked 👎");
     } else {
-      await showHUD("Couldn't find dislike button 🤔");
+      await showHUD("Couldn't find dislike button 🤔 is Youtube Music open?");
     }
 
     await closeMainWindow();

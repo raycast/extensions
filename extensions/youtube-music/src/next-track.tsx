@@ -1,12 +1,22 @@
-import { closeMainWindow } from "@raycast/api";
+import { closeMainWindow, showHUD } from "@raycast/api";
 import { runJSInYouTubeMusicTab } from "./utils";
 
 export default async () => {
-  if (
-    await runJSInYouTubeMusicTab(
-      "(document.querySelector('#left-controls > div > tp-yt-paper-icon-button.next-button.style-scope.ytmusic-player-bar') || document.querySelector('.ytp-next-button')).click();"
-    )
-  ) {
+  const jsCode = `(function() {
+    const nextButton = document.querySelector('yt-icon-button.next-button button');
+    if (nextButton) {
+      nextButton.click();
+      return true;
+    }
+    return false;
+  })();`;
+
+  const result = await runJSInYouTubeMusicTab(jsCode);
+
+  if (result) {
+    await showHUD("⏭ Skipped to next track");
     await closeMainWindow();
+  } else {
+    await showHUD("⚠️ Could not find next button");
   }
 };
