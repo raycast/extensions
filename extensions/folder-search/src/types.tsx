@@ -4,6 +4,10 @@ type SpotlightSearchPreferences = {
   maxResults: number;
   pluginsEnabled: boolean;
   pluginsFolder: string;
+  showNonCloudLibraryPaths: boolean;
+  pinned: SpotlightSearchResult[];
+  searchScope: string;
+  isShowingDetail: boolean;
 };
 
 type FolderSearchPlugin = {

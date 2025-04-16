@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Form, Icon, List, Toast, closeMainWindow, popToRoot, showToast, confirmAlert, open, getSelectedFinderItems, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, List, Toast, closeMainWindow, popToRoot, confirmAlert, open, getSelectedFinderItems, Keyboard } from "@raycast/api";
 import { folderName, showFolderInfoInFinder, copyFolderToClipboard, maybeMoveResultToTrash } from "./utils";
 import { runAppleScript } from "run-applescript";
 import { SpotlightSearchResult } from "./types";
@@ -7,6 +7,7 @@ import { FolderListSection, Directory } from "./components";
 import path from "node:path";
 import fse from "fs-extra";
 import { userInfo } from "os";
+import { showFailureToast } from "@raycast/utils";
 
 // allow string indexing on Icons
 interface IconDictionary {
@@ -41,7 +42,7 @@ export default function Command() {
     const selectedItems = await getSelectedFinderItems();
 
     if (selectedItems.length === 0) {
-      await showToast(Toast.Style.Failure, "No Finder selection to send");
+      await showFailureToast({ title: "No Finder selection to send" });
       return;
     }
 
@@ -59,22 +60,22 @@ export default function Command() {
 
           if (overwrite) {
             if (item.path === destinationFile) {
-              await showToast(Toast.Style.Failure, "The source and destination file are the same");
+              await showFailureToast({ title: "The source and destination file are the same" });
               continue;
             }
             fse.moveSync(item.path, destinationFile, { overwrite: true });
-            await showToast(Toast.Style.Success, "Moved file " + path.basename(item.path) + " to " + destinationFolder);
+            await showFailureToast({ title: `Moved ${path.basename(item.path)} to ${destinationFolder}` });
           } else {
-            await showToast(Toast.Style.Failure, "Cancelling move");
+            await showFailureToast({ title: "Cancelling move" });
           }
         } else {
           fse.moveSync(item.path, destinationFile);
-          await showToast(Toast.Style.Success, "Moved file " + sourceFileName + " to " + destinationFolder);
+          await showFailureToast({ title: `Moved ${sourceFileName} to ${destinationFolder}` });
         }
 
         open(destinationFolder);
       } catch (e) {
-        await showToast(Toast.Style.Failure, "Error moving file " + String(e));
+        await showFailureToast(e, { title: "Error moving file" });
       }
     }
 

@@ -1,21 +1,23 @@
 import { useEffect, useRef, useState } from "react";
-import { LocalStorage, Toast, environment, showToast, getPreferenceValues } from "@raycast/api";
+import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { FolderSearchPlugin, SpotlightSearchResult } from "../types";
+import { showFailureToast } from "@raycast/utils";
+import { FolderSearchPlugin, SpotlightSearchResult, SpotlightSearchPreferences } from "../types";
 import { loadPlugins, lastUsedSort, shouldShowPath } from "../utils";
 import { searchSpotlight } from "../search-spotlight";
 
 export function useFolderSearch() {
   const [searchText, setSearchText] = useState<string>("");
   const [pinnedResults, setPinnedResults] = useState<SpotlightSearchResult[]>([]);
-  const [selectedItemId, setSelectedItemId] = useState<string>("");
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [searchScope, setSearchScope] = useState<string>("");
-  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(true);
+  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
   const [results, setResults] = useState<SpotlightSearchResult[]>([]);
   const [plugins, setPlugins] = useState<FolderSearchPlugin[]>([]);
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
   const [hasCheckedPlugins, setHasCheckedPlugins] = useState<boolean>(false);
   const [hasCheckedPreferences, setHasCheckedPreferences] = useState<boolean>(false);
+  const [showNonCloudLibraryPaths, setShowNonCloudLibraryPaths] = useState(false);
 
   const abortable = useRef<AbortController>();
   const searchCallback = useRef((result: SpotlightSearchResult) => {
@@ -26,58 +28,44 @@ export function useFolderSearch() {
     }
   });
 
+  const searchTextRef = useRef(searchText);
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const lastProcessedText = useRef("");
+
   // check plugins
-  usePromise(
-    async () => {
-      const plugins = await loadPlugins();
-      setPlugins(plugins);
-    },
-    [],
-    {
-      onData() {
+  useEffect(() => {
+    const loadPluginsAndPreferences = async () => {
+      try {
+        const loadedPlugins = await loadPlugins();
+        setPlugins(loadedPlugins);
         setHasCheckedPlugins(true);
-      },
-      onError() {
-        showToast({
-          title: "An Error Occurred",
-          message: "Could not read plugins",
-          style: Toast.Style.Failure,
-        });
+      } catch (e) {
+        showFailureToast(e, { title: "Error loading plugins" });
         setHasCheckedPlugins(true);
-      },
-    }
-  );
+      }
+    };
+
+    loadPluginsAndPreferences();
+  }, []);
 
   // check prefs
-  usePromise(
-    async () => {
-      const maybePreferences = await LocalStorage.getItem(`${environment.extensionName}-preferences`);
-      if (maybePreferences) {
-        try {
-          return JSON.parse(maybePreferences as string);
-        } catch (_) {
-          // noop
-        }
+  useEffect(() => {
+    const loadPreferences = async () => {
+      try {
+        const preferences = await getPreferenceValues<SpotlightSearchPreferences>();
+        setShowNonCloudLibraryPaths(preferences.showNonCloudLibraryPaths);
+        setPinnedResults(preferences.pinned || []);
+        setSearchScope(preferences.searchScope || "");
+        setIsShowingDetail(preferences.isShowingDetail);
+        setHasCheckedPreferences(true);
+      } catch (e) {
+        showFailureToast(e, { title: "Error loading preferences" });
+        setHasCheckedPreferences(true);
       }
-    },
-    [],
-    {
-      onData(preferences) {
-        setPinnedResults(preferences?.pinned || []);
-        setSearchScope(preferences?.searchScope || "");
-        setIsShowingDetail(preferences?.isShowingDetail);
-        setHasCheckedPreferences(true);
-      },
-      onError() {
-        showToast({
-          title: "An Error Occurred",
-          message: "Could not read preferences",
-          style: Toast.Style.Failure,
-        });
-        setHasCheckedPreferences(true);
-      },
-    }
-  );
+    };
+
+    loadPreferences();
+  }, []);
 
   // Save preferences
   useEffect(() => {
@@ -90,9 +78,10 @@ export function useFolderSearch() {
         pinned: pinnedResults,
         searchScope,
         isShowingDetail,
+        showNonCloudLibraryPaths,
       })
     );
-  }, [pinnedResults, searchScope, isShowingDetail, hasCheckedPlugins, hasCheckedPreferences]);
+  }, [pinnedResults, searchScope, isShowingDetail, hasCheckedPlugins, hasCheckedPreferences, showNonCloudLibraryPaths]);
 
   // perform search
   usePromise(searchSpotlight, [searchText, searchScope, abortable, searchCallback.current], {
@@ -105,11 +94,7 @@ export function useFolderSearch() {
     },
     onError: (e) => {
       if (e.name !== "AbortError") {
-        showToast({
-          title: "An Error Occurred",
-          message: "Something went wrong. Try again.",
-          style: Toast.Style.Failure,
-        });
+        showFailureToast(e, { title: "Error searching folders" });
       }
       setIsQuerying(false);
     },
@@ -174,5 +159,6 @@ export function useFolderSearch() {
     movePinDown,
     hasCheckedPlugins,
     hasCheckedPreferences,
+    showNonCloudLibraryPaths,
   };
 }
