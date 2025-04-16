@@ -44,14 +44,11 @@ const loadPlugins = async () => {
   const { pluginsEnabled, pluginsFolder } = getPreferenceValues<SpotlightSearchPreferences>();
 
   if (!(pluginsEnabled && pluginsFolder && pluginsFolder !== "")) {
-    console.debug("No plugins found or plugins disabled.");
     return [];
   }
 
   const validPlugins = [];
   const invalidPluginFiles = [];
-
-  console.debug("Loading plugins from:", pluginsFolder);
 
   const files = await fs.promises.readdir(pluginsFolder);
 
@@ -59,14 +56,11 @@ const loadPlugins = async () => {
   const jsFiles = files.filter((file) => file.endsWith(".js"));
 
   for (const file of jsFiles) {
-    console.debug("Attempting to load plugin:", path.join(pluginsFolder, file));
     try {
       // load and validate
       const { FolderSearchPlugin } = await import(path.join(pluginsFolder, file));
 
       await pluginSchema.validate(FolderSearchPlugin);
-
-      console.debug("Validated plugin:", FolderSearchPlugin);
 
       validPlugins.push(FolderSearchPlugin);
     } catch (e) {

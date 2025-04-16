@@ -1,27 +1,11 @@
-import { userInfo } from "os";
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  List,
-  Toast,
-  closeMainWindow,
-  popToRoot,
-  showToast,
-  showHUD,
-  confirmAlert,
-  open,
-  getSelectedFinderItems,
-} from "@raycast/api";
-
+import { Action, ActionPanel, Form, Icon, List, Toast, closeMainWindow, popToRoot, showToast, confirmAlert, open, getSelectedFinderItems, Keyboard } from "@raycast/api";
+import { folderName} from "./utils";
+import { SpotlightSearchResult } from "./types";
+import { useFolderSearch } from "./hooks/useFolderSearch";
+import { FolderListSection, Directory } from "./components";
 import path from "node:path";
 import fse from "fs-extra";
-
-import { useFolderSearch } from "./hooks/useFolderSearch";
-import { FolderListSection } from "./components/FolderListSection";
-import { folderName } from "./utils";
-import { SpotlightSearchResult } from "./types";
+import { userInfo } from "os";
 
 export default function Command() {
   const {
@@ -82,7 +66,6 @@ export default function Command() {
           movedCount++;
         }
       } catch (e) {
-        console.error("ERROR " + String(e));
         await showToast(Toast.Style.Failure, "Error moving file " + String(e));
         return false;
       }
@@ -104,6 +87,7 @@ export default function Command() {
 
   // Render actions for the folder list items
   const renderFolderActions = (result: SpotlightSearchResult) => {
+    const enclosingFolder = path.dirname(result.path);
     return (
       <ActionPanel title={folderName(result)}>
         <Action
@@ -120,15 +104,10 @@ export default function Command() {
           }}
         />
         <Action.Open
-          title="Open"
+          title="Open in Finder"
           icon={Icon.Folder}
           target={result.path}
           onOpen={() => popToRoot({ clearSearchBar: true })}
-        />
-        <Action.ShowInFinder
-          title="Show in Finder"
-          path={result.path}
-          onShow={() => popToRoot({ clearSearchBar: true })}
         />
         <Action
           title="Toggle Details"
@@ -136,6 +115,20 @@ export default function Command() {
           shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
           onAction={() => setIsShowingDetail(!isShowingDetail)}
         />
+        <ActionPanel.Section>
+          <Action.Push
+            title="Enclosing Folder"
+            icon={Icon.ArrowUp}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+            target={<Directory path={enclosingFolder} />}
+          />
+          <Action.Push
+            title="Enter Folder"
+            icon={Icon.ArrowDown}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+            target={<Directory path={result.path} />}
+          />
+        </ActionPanel.Section>
       </ActionPanel>
     );
   };
@@ -146,7 +139,6 @@ export default function Command() {
   ) : (
     <List
       isLoading={isQuerying}
-      enableFiltering={false}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search for destination folder to move files"
       isShowingDetail={isShowingDetail}
