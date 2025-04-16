@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { format } from "date-fns";
 import { getPreferenceValues } from "@raycast/api";
 
