@@ -1,6 +1,6 @@
 # YouTube Music Changelog
 
-## [New Comand and Fix ] = 2025-04-15
+## [New Command and Fix] - {PR_MERGE_DATE}
 
 We fixed: If you like a Song and it was allready liked the like will be not removed, 
 New feature: If you want to unlike a song just type `remove-like`.
