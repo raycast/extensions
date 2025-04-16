@@ -2,6 +2,10 @@
 
 ## [Update] - 2025-04-07
 
+- Add store screenshots
+
+## [Update] - {PR_MERGE_DATE}
+
 - Optimize cache time for first search
 
 ## [Update] - 2025-04-07
