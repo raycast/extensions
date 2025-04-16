@@ -69,6 +69,12 @@
       "mode": "no-view"
     },
     {
+      "name": "paste-latest-download",
+      "title": "Paste Latest Download",
+      "description": "Pastes the last downloaded file or folder to the foremost active app",
+      "mode": "no-view"
+    },
+    {
       "name": "show-latest-download",
       "title": "Show Latest Download",
       "description": "Show the last downloaded file or folder in Finder",
