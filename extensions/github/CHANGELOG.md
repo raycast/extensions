@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Filter recently closed PRs by last update date] - {PR_MERGE_DATE}
+
+- Fixed a bug where active pull requests could be hidden: the `updated` filter is now only applied to closed PRs, so all active PRs are always shown in `My Pull Requests`.
+
 ## [Add support for merge queues and auto-merge] - 2025-04-15
 
 - Adds PR actions for repositories that use merge queues
