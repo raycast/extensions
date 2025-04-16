@@ -8,4 +8,3 @@ export default async function Command() {
     console.error(error);
   }
 }
-}

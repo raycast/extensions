@@ -141,16 +141,12 @@ export default async function tool(input: Input): Promise<string> {
 
     if (input.cc) params.push(`cc=${encodeURIComponent(input.cc)}`);
     if (input.bcc) params.push(`bcc=${encodeURIComponent(input.bcc)}`);
-    if (input.subject)
-      params.push(`subject=${encodeURIComponent(input.subject)}`);
+    if (input.subject) params.push(`subject=${encodeURIComponent(input.subject)}`);
     if (input.body) params.push(`body=${encodeURIComponent(input.body)}`);
 
     // Add debug information for URL construction
     console.log("URL being constructed:");
-    console.log(
-      "Base URL:",
-      "mailto:" + (input.recipient ? encodeURIComponent(input.recipient) : ""),
-    );
+    console.log("Base URL:", "mailto:" + (input.recipient ? encodeURIComponent(input.recipient) : ""));
     console.log("Parameters:", params);
 
     if (params.length > 0) {
@@ -161,9 +157,7 @@ export default async function tool(input: Input): Promise<string> {
 
     // Fall back to a default email if nothing is provided
     if (url === "mailto:") {
-      console.log(
-        "WARNING: No email parameters provided, using default email app behavior",
-      );
+      console.log("WARNING: No email parameters provided, using default email app behavior");
     }
 
     await open(url);
