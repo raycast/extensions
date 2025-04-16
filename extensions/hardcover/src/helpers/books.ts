@@ -69,3 +69,22 @@ export function getAvailableLists(allLists: List[] | undefined, book: Book | und
   const existingListIds = book?.list_books?.map((list_book) => list_book.list?.id) || [];
   return allLists.filter((list) => !existingListIds.includes(list.id));
 }
+
+/**
+ * Gets a formatted string of author with series position
+ *
+ * @param authorNames Author names formatted by formatAuthors
+ * @param seriesPosition Series position formatted by formatSeriesPosition
+ * @returns Formatted string of author with series position
+ */
+export function formatAuthorsWithSeries(authorNames: string, seriesPosition: string): string {
+  if (!authorNames && !seriesPosition) {
+    return "";
+  } else if (!authorNames) {
+    return seriesPosition;
+  } else if (!seriesPosition) {
+    return authorNames;
+  }
+
+  return `${authorNames} • ${seriesPosition}`;
+}

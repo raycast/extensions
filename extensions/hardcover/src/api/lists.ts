@@ -59,9 +59,7 @@ export async function createList(
 
   const { data } = await client.post<{ data: { insert_list: { errors: string; id: number } } }>(graphql_mutation);
 
-  // privacy setting. 1 = public, 2 = friends only, 3 = private.
   if (data.insert_list.errors) {
-    console.log(data.insert_list.errors);
     const msg =
       data.insert_list.errors === "Name has already been taken" ? data.insert_list.errors : UNKNOWN_ERROR_MESSAGE;
     throw new Error(msg);
@@ -84,7 +82,6 @@ export async function deleteList(listId: number) {
   const { data } = await client.post<{ data: { delete_list: { success: boolean } } }>(graphql_mutation);
 
   if (!data.delete_list.success) {
-    console.log(data);
     throw new Error(UNKNOWN_ERROR_MESSAGE);
   }
 

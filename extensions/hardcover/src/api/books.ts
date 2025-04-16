@@ -141,7 +141,7 @@ export type GetUserBookResponse = {
   };
 };
 
-export type updateBookStatusResponse = {
+export type UpdateBookStatusResponse = {
   data: {
     insert_user_book: {
       id: number;
@@ -243,7 +243,7 @@ export async function getUserBook(book_id: number, user_id: number) {
 
   const { data } = await client.post<GetUserBookResponse>(graphql_query);
 
-  return data.books[0];
+  return data.books?.[0] ?? null;
 }
 
 export async function addBookToList(listId: number, bookId: number) {
@@ -295,10 +295,9 @@ export async function updateBookStatus(bookId: number, statusId: number) {
     }
   `;
 
-  const { data } = await client.post<updateBookStatusResponse>(graphql_mutation);
+  const { data } = await client.post<UpdateBookStatusResponse>(graphql_mutation);
 
   if (data.insert_user_book.error) {
-    console.log(data.insert_user_book.error);
     throw new Error(UNKNOWN_ERROR_MESSAGE);
   }
 
@@ -317,10 +316,9 @@ export async function updateBookRating(bookId: number, rating: number | string) 
     }
   `;
 
-  const { data } = await client.post<updateBookStatusResponse>(graphql_mutation);
+  const { data } = await client.post<UpdateBookStatusResponse>(graphql_mutation);
 
   if (data.insert_user_book.error) {
-    console.log(data.insert_user_book.error);
     throw new Error(UNKNOWN_ERROR_MESSAGE);
   }
 
@@ -417,7 +415,7 @@ export async function getListBooks() {
 
   const { data } = await client.post<GetListBooksResponse>(graphql_query);
 
-  return data.me[0].lists.map((list) => ({
+  return (data.me?.[0]?.lists ?? []).map((list) => ({
     ...list,
     list_books: list.list_books.map((listBook) => {
       if (!listBook.book) {

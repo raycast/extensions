@@ -1,6 +1,6 @@
 import { Action, ActionPanel, confirmAlert, List } from "@raycast/api";
 import { Icon } from "@raycast/api";
-import { formatAuthors, formatSeriesPosition } from "../helpers/books";
+import { formatAuthors, formatAuthorsWithSeries, formatSeriesPosition } from "../helpers/books";
 import { CurrentUser } from "../api/me";
 import { removeBookFromList, TransformedListBook, TransformedList } from "../api/books";
 import BookDetail from "./BookDetail";
@@ -28,7 +28,7 @@ export default function ListBooks({ listBooks, me, mutateList }: ListBooksProps)
             key={listBook.book.id}
             icon={listBook.book?.image?.url ? { source: listBook.book.image.url } : Icon.Book}
             title={listBook.book?.title || ""}
-            subtitle={`${author_names}${series_position && ` • ${series_position}`}`}
+            subtitle={formatAuthorsWithSeries(author_names, series_position)}
             actions={
               <ActionPanel>
                 <Action.Push

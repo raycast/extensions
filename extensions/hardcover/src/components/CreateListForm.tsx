@@ -1,5 +1,5 @@
 import { Form, showToast, Toast, ActionPanel, Action, useNavigation } from "@raycast/api";
-import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
+import { FormValidation, MutatePromise, showFailureToast, useForm } from "@raycast/utils";
 import { createList } from "../api/lists";
 import { TransformedList } from "../api/books";
 
@@ -16,26 +16,30 @@ export default function CreateListForm({ mutateList }: { mutateList?: MutateProm
 
   const { handleSubmit, itemProps } = useForm<CreateListFormValues>({
     async onSubmit(values) {
-      showToast({
-        style: Toast.Style.Animated,
-        title: "Creating...",
-      });
-      const newList = await createList(
-        values.name,
-        values.privacy_setting_id,
-        values.description,
-        values.default_view,
-        values.ranked,
-      );
-      if (mutateList) {
-        await mutateList(Promise.resolve(newList));
+      try {
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Creating...",
+        });
+        const newList = await createList(
+          values.name,
+          values.privacy_setting_id,
+          values.description,
+          values.default_view,
+          values.ranked,
+        );
+        if (mutateList) {
+          await mutateList(Promise.resolve(newList));
+        }
+        showToast({
+          style: Toast.Style.Success,
+          title: "Success",
+          message: `Created list "${values.name}"`,
+        });
+        pop();
+      } catch (error) {
+        showFailureToast(error);
       }
-      showToast({
-        style: Toast.Style.Success,
-        title: "Success",
-        message: `Created list "${values.name}"`,
-      });
-      pop();
     },
     validation: {
       name: FormValidation.Required,

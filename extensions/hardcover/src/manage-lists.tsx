@@ -4,6 +4,7 @@ import useListBooks from "./hooks/useListBooks";
 import ListBooks from "./components/ListBooks";
 import CreateListForm from "./components/CreateListForm";
 import { deleteList } from "./api/lists";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   const { me, isMeLoading } = useMe();
@@ -45,16 +46,20 @@ export default function Command() {
                         title: "Are you sure?",
                       })
                     ) {
-                      showToast({
-                        style: Toast.Style.Animated,
-                        title: "Deleting...",
-                      });
-                      await mutateListBooks(deleteList(list.id));
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: "Success",
-                        message: `Deleted list "${list.name}"`,
-                      });
+                      try {
+                        showToast({
+                          style: Toast.Style.Animated,
+                          title: "Deleting...",
+                        });
+                        await mutateListBooks(deleteList(list.id));
+                        showToast({
+                          style: Toast.Style.Success,
+                          title: "Success",
+                          message: `Deleted list "${list.name}"`,
+                        });
+                      } catch (error) {
+                        showFailureToast(error);
+                      }
                     }
                   }}
                 />

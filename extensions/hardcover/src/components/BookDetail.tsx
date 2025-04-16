@@ -20,6 +20,7 @@ import {
 import useLists from "../hooks/useLists";
 import useGetUserBook from "../hooks/useGetUserBook";
 import { CurrentUser } from "../api/me";
+import { showFailureToast } from "@raycast/utils";
 
 type BookDetailProps = {
   searchBook: SearchBook;
@@ -95,16 +96,20 @@ export default function BookDetail({ searchBook, me, setListBooksState }: BookDe
                   key={key}
                   title={val}
                   onAction={async () => {
-                    showToast({
-                      style: Toast.Style.Animated,
-                      title: "Updating...",
-                    });
-                    await mutateBook(updateBookStatus(searchBook.id, Number(key)));
-                    showToast({
-                      style: Toast.Style.Success,
-                      title: "Success",
-                      message: `Updated reading status to ${val}`,
-                    });
+                    try {
+                      showToast({
+                        style: Toast.Style.Animated,
+                        title: "Updating...",
+                      });
+                      await mutateBook(updateBookStatus(searchBook.id, Number(key)));
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: "Success",
+                        message: `Updated reading status to ${val}`,
+                      });
+                    } catch (error) {
+                      showFailureToast(error);
+                    }
                   }}
                 />
               ))}
@@ -115,17 +120,21 @@ export default function BookDetail({ searchBook, me, setListBooksState }: BookDe
                   key={rating}
                   title={String(rating)}
                   onAction={async () => {
-                    showToast({
-                      style: Toast.Style.Animated,
-                      title: "Updating...",
-                    });
-                    const ratingValue = rating === "Remove rating" ? "" : rating;
-                    await mutateBook(updateBookRating(searchBook.id, ratingValue));
-                    showToast({
-                      style: Toast.Style.Success,
-                      title: "Success",
-                      message: rating === "Remove rating" ? "Removed rating" : `Updated rating to ${rating} stars`,
-                    });
+                    try {
+                      showToast({
+                        style: Toast.Style.Animated,
+                        title: "Updating...",
+                      });
+                      const ratingValue = rating === "Remove rating" ? "" : rating;
+                      await mutateBook(updateBookRating(searchBook.id, ratingValue));
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: "Success",
+                        message: rating === "Remove rating" ? "Removed rating" : `Updated rating to ${rating} stars`,
+                      });
+                    } catch (error) {
+                      showFailureToast(error);
+                    }
                   }}
                 />
               ))}

@@ -2,7 +2,7 @@ import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useState } from "react";
 import useSearchBooks from "./hooks/useSearchBooks";
 import BookDetail from "./components/BookDetail";
-import { formatSeriesPosition } from "./helpers/books";
+import { formatAuthors, formatAuthorsWithSeries, formatSeriesPosition } from "./helpers/books";
 import useMe from "./hooks/useMe";
 
 export default function Command() {
@@ -18,8 +18,9 @@ export default function Command() {
       pagination={pagination}
       throttle
     >
+      {!data?.length && <List.EmptyView title="No books found" description="Try a different search term" />}
       {data?.map((book) => {
-        const author_names = book.contributions?.map((c) => c.author?.name).join(", ");
+        const author_names = formatAuthors(book.contributions || []);
         const series_position = formatSeriesPosition(book.featured_series);
 
         return (
@@ -27,7 +28,7 @@ export default function Command() {
             key={book.id}
             icon={book.image?.url ? { source: book.image.url } : Icon.Book}
             title={book.title}
-            subtitle={`${author_names}${series_position && ` • ${series_position}`}`}
+            subtitle={formatAuthorsWithSeries(author_names, series_position)}
             actions={
               <ActionPanel>
                 <Action.Push

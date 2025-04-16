@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { UNKNOWN_ERROR_MESSAGE } from "../helpers/errors";
 
 const API_BASE_URL = "https://api.hardcover.app/v1/graphql";
 
@@ -15,7 +16,6 @@ export class HardcoverClient {
   }
 
   public async post<T>(query: string): Promise<T> {
-    const url = `${API_BASE_URL}`;
     const headers = {
       Authorization: `${this.apiKey}`,
       "Content-Type": "application/json",
@@ -25,7 +25,7 @@ export class HardcoverClient {
       query: query,
     });
 
-    const response = await fetch(url, {
+    const response = await fetch(API_BASE_URL, {
       method: "POST",
       body,
       headers,
@@ -35,7 +35,7 @@ export class HardcoverClient {
     if (response.status === 401) {
       throw new Error("Invalid API key. Please check your API key in the extension preferences.");
     } else if (!response.ok) {
-      throw new Error(data.error);
+      throw new Error(data.error || UNKNOWN_ERROR_MESSAGE);
     }
 
     return data;

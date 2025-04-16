@@ -57,7 +57,7 @@
   "preferences": [
     {
       "name": "api_key",
-      "description": "Raycast API key. You can get it from https://hardcover.app/account/api",
+      "description": "Hardcover API key. You can get it from https://hardcover.app/account/api",
       "type": "password",
       "required": true,
       "title": "API Key"
