@@ -1,11 +1,9 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getUpcomingMatches, Match } from "./lib/getUpcomingMatches";
+import { useCachedPromise } from "@raycast/utils";
 
 export default function MatchesCommand() {
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(true);
-
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
       case "Twitch":
@@ -19,20 +17,15 @@ export default function MatchesCommand() {
     }
   };
 
-  useEffect(() => {
-    getUpcomingMatches()
-      .then(setMatches)
-      .catch((e) => console.error("Failed to fetch matches:", e))
-      .finally(() => setLoading(false));
-  }, []);
+  const { isLoading, data: matches } = useCachedPromise(getUpcomingMatches);
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search upcoming matches...">
-      {matches.map((match, idx) => (
+    <List isLoading={isLoading} searchBarPlaceholder="Search upcoming matches...">
+      {matches?.map((match, idx) => (
         <List.Item
           key={idx}
           title={`${match.team1} vs ${match.team2}`}
-          accessories={[{ icon: match.team1Icon }, { text: match.time, icon: Icon.Clock }, { icon: match.team2Icon }]}
+          accessories={[{ icon: match.team1Icon }, { text: match.time }, { icon: match.team2Icon }]}
           actions={
             match.streams.length > 0 ? (
               <ActionPanel>
@@ -61,18 +54,21 @@ export default function MatchesCommand() {
         />
       ))}
 
-      {/* Attribution item */}
-      <List.Item
-        key="liquipedia-attribution"
-        title="Data provided by Liquipedia.net"
-        icon="https://liquipedia.net/favicon.ico"
-        accessories={[{ text: "CC-BY-SA 3.0" }]}
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser url="https://liquipedia.net" title="Visit Liquipedia" />
-          </ActionPanel>
-        }
-      />
+      {!isLoading && (
+        <List.Section title="Attribution">
+          <List.Item
+            key="liquipedia-attribution"
+            title="Data provided by Liquipedia.net"
+            icon="https://liquipedia.net/favicon.ico"
+            accessories={[{ text: "CC-BY-SA 3.0" }]}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url="https://liquipedia.net" title="Visit Liquipedia" />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
     </List>
   );
 }

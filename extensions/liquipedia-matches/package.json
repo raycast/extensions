@@ -5,6 +5,9 @@
   "description": "Live and upcoming CS2 matches from Liquipedia",
   "icon": "icon.png",
   "author": "eemil_suominen",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "News"
   ],
@@ -12,8 +15,8 @@
   "commands": [
     {
       "name": "matches",
-      "title": "Matches",
-      "description": "Show upcoming and live CS2 matches",
+      "title": "Search Matches",
+      "description": "Search for upcoming and live CS2 matches",
       "mode": "view",
       "path": "src/matches.tsx"
     }
@@ -45,7 +48,8 @@
         "name": "email",
         "type": "text",
         "title": "Your Email (for Liquipedia User-Agent header)",
-        "placeholder": "you@example.com"
+        "placeholder": "you@example.com",
+        "required": true
       }
     ]
   }
