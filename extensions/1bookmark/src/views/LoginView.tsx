@@ -3,28 +3,36 @@ import { ActionPanel, Action, Form, Icon } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { trpc } from "@/utils/trpc.util";
 import { handleSignIn } from "@/handle-signin";
-import { useAtom } from "jotai";
-import { sessionTokenAtom } from "@/states/session-token.state";
-import { loggingEmailAtom, loggingTokenSentAtom } from "../states/logging-email.state";
+import { useCachedState } from "@raycast/utils";
+import {
+  CACHED_KEY_LOGGING_EMAIL,
+  CACHED_KEY_LOGGING_TOKEN_SENT,
+  CACHED_KEY_SESSION_TOKEN,
+} from "../utils/constants.util";
 
 function Body() {
-  const [, setSessionToken] = useAtom(sessionTokenAtom);
-  const { mutateAsync, isPending } = trpc.login.generateMagicLink.useMutation();
+  const [, setSessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
+  const generateMagicLink = trpc.login.generateMagicLink.useMutation();
   const verificationTokenRef = useRef<Form.TextField>(null);
 
-  const [tokenSent, setTokenSent] = useAtom(loggingTokenSentAtom);
-  const [email, setEmail] = useAtom(loggingEmailAtom);
+  const [email, setEmail] = useCachedState(CACHED_KEY_LOGGING_EMAIL, "");
+  const [tokenSent, setTokenSent] = useCachedState(CACHED_KEY_LOGGING_TOKEN_SENT, false);
 
   const [code, setCode] = useState("");
 
   const emailRef = useRef<Form.TextField>(null);
 
   const [isLoginPending, setIsLoginPending] = useState(false);
-  const isLoading = isPending || isLoginPending;
-  const requestToToken = async (email: string) => {
-    await mutateAsync({ email });
-
-    setTokenSent(true);
+  const isLoading = generateMagicLink.isPending || isLoginPending;
+  const requestToToken = (email: string) => {
+    generateMagicLink.mutate(
+      { email },
+      {
+        onSuccess: () => {
+          setTokenSent(true);
+        },
+      },
+    );
   };
 
   useEffect(() => {

@@ -1,8 +1,11 @@
-import { Action, ActionPanel, Alert, Color, Icon, Keyboard, List, Toast, confirmAlert, showToast } from "@raycast/api";
-import { getCalendarClient, useEvents, withGoogleAPIs } from "./google";
-import { showFailureToast } from "@raycast/utils";
+import { Color, Icon, LaunchProps, List } from "@raycast/api";
+import { useEvents, withGoogleAPIs } from "./lib/google";
 import { calendar_v3 } from "@googleapis/calendar";
-import { formatRecurrence } from "./utils";
+import { formatRecurrence } from "./lib/utils";
+import useCalendars from "./hooks/useCalendars";
+import { useState, useMemo } from "react";
+import EventActions from "./components/EventActions";
+import CalendarSelector from "./components/CalendarSelector";
 
 function getAccessories(event: calendar_v3.Schema$Event) {
   const accessories = new Array<List.Item.Accessory>();
@@ -74,8 +77,21 @@ function getIcon(event: calendar_v3.Schema$Event) {
   };
 }
 
-function Command() {
-  const { data, isLoading, pagination, revalidate } = useEvents();
+function Command(props: LaunchProps) {
+  const { calendarId } = (props.launchContext ?? {}) as { calendarId?: string };
+  const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(calendarId ?? null);
+  const { data, isLoading, pagination, revalidate } = useEvents(selectedCalendarId);
+  const { data: calendars, isLoading: calendarsIsLoading, revalidate: revalidateCalendars } = useCalendars();
+
+  const selectedCalendar = useMemo(() => {
+    const allCalendars = [...(calendars?.selected ?? []), ...(calendars?.unselected ?? [])];
+    const primaryCalendar = allCalendars.find((calendar) => calendar.primary);
+    const selected =
+      selectedCalendarId && selectedCalendarId !== "primary"
+        ? allCalendars.find((calendar) => calendar.id === selectedCalendarId)
+        : primaryCalendar;
+    return selected ?? null;
+  }, [calendars, selectedCalendarId]);
 
   const sections =
     data?.reduce(
@@ -153,7 +169,18 @@ function Command() {
   };
 
   return (
-    <List isLoading={isLoading} pagination={pagination}>
+    <List
+      isLoading={isLoading || calendarsIsLoading}
+      pagination={pagination}
+      searchBarAccessory={
+        <CalendarSelector
+          calendars={calendars ?? []}
+          onCalendarChange={setSelectedCalendarId}
+          storeValue={typeof calendarId === "undefined"}
+          defaultValue={calendarId}
+        />
+      }
+    >
       {sectionOrder.map((section) => {
         const events = sections[section];
         if (!events?.length) return null;
@@ -167,148 +194,22 @@ function Command() {
                 title={event.summary ?? "Untitled Event"}
                 subtitle={formatEventTime(event, section)}
                 accessories={getAccessories(event)}
-                actions={<Actions event={event} revalidate={revalidate} />}
+                actions={
+                  <EventActions
+                    event={event}
+                    calendar={selectedCalendar}
+                    revalidate={() => {
+                      revalidate();
+                      revalidateCalendars();
+                    }}
+                  />
+                }
               />
             ))}
           </List.Section>
         );
       })}
     </List>
-  );
-}
-
-function Actions({ event, revalidate }: { event: calendar_v3.Schema$Event; revalidate: () => void }) {
-  return (
-    <ActionPanel>
-      {event.htmlLink && <Action.OpenInBrowser title="Open in Google Calendar" url={event.htmlLink} />}
-      <ActionPanel.Section>
-        {event.id && (
-          <ActionPanel.Submenu
-            icon={Icon.CheckCircle}
-            title="Change Response Status"
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          >
-            {["accepted", "tentative", "declined"].map((status) => {
-              const titles = {
-                accepted: "Yes",
-                tentative: "Maybe",
-                declined: "No",
-              };
-              const messages = {
-                accepted: "attending",
-                tentative: "maybe",
-                declined: "not attending",
-              };
-              const icon = {
-                accepted: Icon.CheckCircle,
-                tentative: Icon.CircleDisabled,
-                declined: Icon.XMarkCircle,
-              };
-
-              // Find current user's response status
-              const currentStatus = event.attendees?.find((attendee) => attendee.self)?.responseStatus;
-              const isCurrentStatus = status === currentStatus;
-
-              return (
-                <Action
-                  key={status}
-                  title={titles[status as keyof typeof titles]}
-                  icon={{
-                    source: icon[status as keyof typeof icon],
-                    tintColor: isCurrentStatus ? Color.Green : Color.PrimaryText,
-                  }}
-                  onAction={async () => {
-                    const calendar = getCalendarClient();
-                    try {
-                      await showToast({ style: Toast.Style.Animated, title: "Changing response status" });
-                      await calendar.events.patch({
-                        calendarId: "primary",
-                        eventId: event.id ?? undefined,
-                        requestBody: {
-                          attendees: event.attendees?.map((attendee) =>
-                            attendee.self ? { ...attendee, responseStatus: status } : attendee,
-                          ),
-                        },
-                      });
-                      await showToast({
-                        style: Toast.Style.Success,
-                        title: `Changed response status to ${messages[status as keyof typeof messages]}`,
-                      });
-                      await revalidate();
-                    } catch (error) {
-                      await showFailureToast(error, { title: "Failed changing response status" });
-                    }
-                  }}
-                />
-              );
-            })}
-          </ActionPanel.Submenu>
-        )}
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        {event.htmlLink && (
-          <Action.CopyToClipboard
-            title="Copy Event Link"
-            content={event.htmlLink}
-            shortcut={Keyboard.Shortcut.Common.Copy}
-          />
-        )}
-        {event.summary && (
-          <Action.CopyToClipboard
-            title="Copy Event Title"
-            content={event.summary}
-            shortcut={Keyboard.Shortcut.Common.CopyName}
-          />
-        )}
-        {event.conferenceData?.entryPoints?.[0]?.uri && (
-          <Action.CopyToClipboard
-            title="Copy Meeting Link"
-            content={event.conferenceData.entryPoints[0].uri}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-          />
-        )}
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        {event.id && (
-          <Action
-            title="Delete Event"
-            icon={Icon.Trash}
-            shortcut={Keyboard.Shortcut.Common.Remove}
-            style={Action.Style.Destructive}
-            onAction={async () => {
-              const isConfirmed = await confirmAlert({
-                title: "Delete Event",
-                message: "Are you sure you want to delete this event?",
-                icon: Icon.Trash,
-                primaryAction: {
-                  title: "Delete Event",
-                  style: Alert.ActionStyle.Destructive,
-                },
-              });
-              if (!isConfirmed) {
-                return;
-              }
-
-              const calendar = getCalendarClient();
-
-              try {
-                await showToast({ style: Toast.Style.Animated, title: "Deleting event" });
-                await calendar.events.delete({
-                  calendarId: "primary",
-                  eventId: event.id ?? undefined,
-                });
-
-                await showToast({ style: Toast.Style.Success, title: "Deleted event" });
-
-                revalidate();
-              } catch (error) {
-                await showFailureToast(error, { title: "Failed to delete event" });
-              }
-            }}
-          />
-        )}
-      </ActionPanel.Section>
-    </ActionPanel>
   );
 }
 

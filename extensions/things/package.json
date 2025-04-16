@@ -12,7 +12,9 @@
     "thomaslombart",
     "srikirank",
     "vimtor",
-    "samuelkraft"
+    "samuelkraft",
+    "bendrucker",
+    "vmrjnvc"
   ],
   "license": "MIT",
   "commands": [
@@ -78,7 +80,7 @@
           "type": "checkbox",
           "title": "Count",
           "label": "Display To-Do",
-          "description": "When enabled, the first Things to-do wil be displayed in the menu bar.",
+          "description": "When enabled, the first incomplete Things to-do will be displayed in the menu bar.",
           "default": true,
           "required": false
         },

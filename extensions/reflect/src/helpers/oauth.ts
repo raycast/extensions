@@ -35,7 +35,7 @@ export async function authorize() {
 
 export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
-  authCode: string
+  authCode: string,
 ): Promise<OAuth.TokenResponse> {
   const response = await fetch(OAUTH_TOKEN_URL, {
     method: "POST",

@@ -6,7 +6,8 @@
   "icon": "tailwind-icon.png",
   "author": "vimtor",
   "contributors": ["cy-98", "emilsharier", "pernielsentikaer", "erich2s", "ridemountainpig", "jor",
-    "garrill"],
+    "garrill",
+    "olafvanmidden"],
   "license": "MIT",
   "commands": [
     {
