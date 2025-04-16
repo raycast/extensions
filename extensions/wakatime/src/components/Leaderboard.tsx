@@ -50,7 +50,7 @@ export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
               title={showDetail ? "Hide Details" : "Show Details"}
             />
             {user.website ? <Action.OpenInBrowser title="Go to Website" url={user.website} /> : <></>}
-            <Action.OpenInBrowser title="Go To WakaTime Profile" url={`https://wakatime.com/@${user.username}`} />
+            <Action.OpenInBrowser title="Go to Wakatime Profile" url={`https://wakatime.com/@${user.username}`} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Page">{PageActions}</ActionPanel.Section>
         </ActionPanel>

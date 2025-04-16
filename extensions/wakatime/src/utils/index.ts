@@ -39,19 +39,22 @@ export function getDuration(seconds: number | undefined | null) {
  */
 export function cumulateSummaryDuration(
   { data }: WakaTime.Summary,
-  key: keyof Omit<(typeof data)[0], "grand_total" | "range">
+  key: keyof Omit<(typeof data)[0], "grand_total" | "range">,
 ) {
   const obj = Object.entries(
     data
       .map((item) => item[key])
       .flat()
-      .reduce((acc, item) => {
-        const { name = "", total_seconds = 0 } = item ?? {};
-        return {
-          ...acc,
-          [name]: total_seconds + (acc[name] ?? 0),
-        };
-      }, {} as { [name: string]: number })
+      .reduce(
+        (acc, item) => {
+          const { name = "", total_seconds = 0 } = item ?? {};
+          return {
+            ...acc,
+            [name]: total_seconds + (acc[name] ?? 0),
+          };
+        },
+        {} as { [name: string]: number },
+      ),
   ).sort((a, b) => b[1] - a[1]);
 
   return obj.slice(0, 5);

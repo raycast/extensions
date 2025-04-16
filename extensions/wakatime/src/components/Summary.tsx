@@ -10,9 +10,7 @@ export const RangeStatsList: React.FC<ShowDetailProps> = (props) => {
 
   return (
     <List.Section title="Stats Summary">
-      {summary?.map(([key, { result: range }]) => (
-        <RangeStatsItem key={key} title={key} range={range} {...props} />
-      ))}
+      {summary?.map(([key, { result: range }]) => <RangeStatsItem key={key} title={key} range={range} {...props} />)}
     </List.Section>
   );
 };

@@ -21,7 +21,7 @@ export function useActivityChange() {
             seconds: cur.grand_total.total_seconds,
             languages: cur.languages.reduce(
               (acc, language) => ({ ...acc, [language.name]: language.total_seconds }),
-              {} as { [K: string]: number }
+              {} as { [K: string]: number },
             ),
           },
         };
@@ -29,12 +29,15 @@ export function useActivityChange() {
 
       let title = "You haven't recorded any activity since yesterday";
       const seconds = Math.abs(today.seconds - yesterday.seconds);
-      const languages = Object.entries(yesterday.languages).reduce((acc, [name, seconds]) => {
-        return {
-          ...acc,
-          [name]: { seconds, quantifier: "equal" as const, duration: getDuration(seconds) },
-        };
-      }, {} as { [K: string]: LanguageActivityChange });
+      const languages = Object.entries(yesterday.languages).reduce(
+        (acc, [name, seconds]) => {
+          return {
+            ...acc,
+            [name]: { seconds, quantifier: "equal" as const, duration: getDuration(seconds) },
+          };
+        },
+        {} as { [K: string]: LanguageActivityChange },
+      );
 
       let percent: string | undefined;
       let duration = getDuration(0);

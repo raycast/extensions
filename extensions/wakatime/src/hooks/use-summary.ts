@@ -10,7 +10,7 @@ export function useSummary() {
         async (key) => {
           const summary = await getSummary(key);
           if (summary.ok) return [key, summary] as const;
-        }
+        },
       );
 
       const data = await Promise.all(summaries);
