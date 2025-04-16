@@ -12,10 +12,12 @@ import { colorMap, iconWidth } from "./constant";
  */
 export async function getIconWithFallback(icon: ObjectIcon, layout: string, type?: RawType): Promise<Image.ImageLike> {
   if (icon && icon.format) {
+    // type built-in icons
     if (icon.format === "icon" && icon.name) {
       return await getCustomTypeIcon(icon.name, icon.color);
     }
 
+    // file reference
     if (icon.format === "file" && icon.file) {
       const fileSource = await getFile(icon.file);
       if (fileSource) {
@@ -24,18 +26,30 @@ export async function getIconWithFallback(icon: ObjectIcon, layout: string, type
       if (type?.icon.format === "icon" && type?.icon.name) {
         return await getCustomTypeIcon(type.icon.name, "grey");
       }
-      return await getCustomTypeIcon("document", "grey");
+      return await fallbackToLayout(layout);
     }
 
+    // regular emoji
     if (icon.format === "emoji" && icon.emoji) {
       return icon.emoji;
     }
   }
 
+  // fallback to grey version of type built-in icon
   if (type?.icon && type.icon.format === "icon" && type.icon.name) {
     return await getCustomTypeIcon(type?.icon.name, "grey");
   }
 
+  // fallback to layout
+  return await fallbackToLayout(layout);
+}
+
+/**
+ * Fallback to a default icon based on the layout.
+ * @param layout The layout of the object.
+ * @returns The base64 data URI or Raycast Icon.
+ */
+async function fallbackToLayout(layout: string): Promise<Image.ImageLike> {
   switch (layout) {
     case "todo":
       return await getCustomTypeIcon("checkbox", "grey");

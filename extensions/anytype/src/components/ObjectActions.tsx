@@ -336,7 +336,7 @@ export function ObjectActions({
   const secondPrimaryAction = primaryAction === "show_details" ? openObjectAction : showDetailsAction;
 
   return (
-    <ActionPanel title={title}>
+    <ActionPanel title={title.includes("\n") ? `${title.split("\n")[0]}...` : title}>
       <ActionPanel.Section>
         {firstPrimaryAction}
         {isList && (
