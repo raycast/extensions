@@ -8,7 +8,7 @@ import { getSummary, getDuration } from "../utils";
 export function useActivityChange() {
   const result = useBase({
     handler: useCallback(async () => {
-      const summary = await getSummary("Last 1 Day", subDays(new Date(), 1));
+      const summary = await getSummary("Last Day", subDays(new Date(), 1));
       if (!summary.ok) throw new Error(summary.error);
 
       const todayKey = format(new Date(), "E MMM do yyyy").toLowerCase();

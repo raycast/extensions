@@ -2,6 +2,8 @@ import fetch from "node-fetch";
 import { format } from "date-fns";
 import { getPreferenceValues } from "@raycast/api";
 
+import { KNOWN_RANGES } from ".";
+
 /**
  * It takes an endpoint and returns a promise that resolves to an object with an ok property and either
  * a data property or an error property
@@ -62,7 +64,16 @@ export const getProjects = () => routeHandler<WakaTime.Projects>(`/users/current
  * @param {Date} start - The start date of the summary.
  * @returns A promise that resolves to a WakaTime.Summary object.
  */
-export const getSummary = (key: string, start: Date) => {
+export const getSummary: {
+  (key: WakaTime.KNOWN_RANGE): ReturnType<typeof routeHandler<WakaTime.Summary>>;
+  (key: string, start: Date): ReturnType<typeof routeHandler<WakaTime.Summary>>;
+} = (key: string, start?: Date) => {
+  if (KNOWN_RANGES.includes(key as WakaTime.KNOWN_RANGE)) {
+    return routeHandler<WakaTime.Summary>(`/users/current/summaries?range=${key}`);
+  }
+
+  if (start == null) throw new Error("Start date must be provided for custom ranges.");
+
   const end = /^last/i.test(key) ? new Date() : start;
   const query = `?start=${format(start, "yyyy-MM-dd")}&end=${format(end, "yyyy-MM-dd")}`;
 

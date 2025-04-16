@@ -1,8 +1,17 @@
 export * from "./api";
 
-export function getDuration(seconds?: number | null) {
-  const getAmount = (rate: number, unit: string) => {
-    if (seconds == null) return "";
+export const KNOWN_RANGES = [
+  "Today",
+  "Yesterday",
+  "Last 7 Days",
+  "Last 7 Days from Yesterday",
+  "Last 14 Days",
+  "Last 30 Days",
+  "This Week",
+  "Last Week",
+  "This Month",
+  "Last Month",
+] as const;
 
 export function getDuration(seconds: number | undefined | null) {
   const getAmount = (rem: number, rate: number, unit: string) => {
