@@ -66,5 +66,5 @@ export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
 type LeaderBoardItemProps = WakaTime.LeaderBoard["data"][number] & {
   showDetail: boolean;
   setShowDetail: React.Dispatch<React.SetStateAction<boolean>>;
-  PageActions: React.ReactNode;
+  PageActions: ActionPanel.Section.Children;
 };
