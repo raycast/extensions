@@ -5,7 +5,7 @@ export {};
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace WakaTime {
-    export type KNOWN_RANGE = (typeof KNOWN_RANGES)[number];
+    export type KNOWN_RANGE = keyof typeof KNOWN_RANGES;
 
     interface User {
       data: {

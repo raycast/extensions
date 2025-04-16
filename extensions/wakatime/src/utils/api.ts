@@ -17,9 +17,11 @@ async function routeHandler<T extends object>(endpoint: string): Promise<Types.R
     const res = await fetch(`${baseURL.endsWith("/") ? baseURL.slice(0, -1) : baseURL}${endpoint}`, {
       headers: getAuthToken(),
     });
-    const result = (await res.json()) as T | { error: string };
+    const result = (await res.json()) as T | { error: string } | { errors: string[] };
 
     if ("error" in result) throw new Error(result.error);
+    if ("errors" in result) throw new Error(result.errors.join(", "));
+
     return { ok: true, result };
   } catch (error) {
     return {
@@ -39,7 +41,7 @@ function getAuthToken() {
   const API_KEY_REGEX = /^(waka_)?[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const { apiKey } = getPreferenceValues<{ apiKey?: string }>();
 
-  if (!apiKey) return;
+  if (!apiKey) throw new Error("Missing API Key");
   if (!API_KEY_REGEX.test(apiKey)) throw new Error("Invalid API Key");
 
   return { Authorization: `Basic ${Buffer.from(apiKey).toString("base64")}` };
@@ -67,7 +69,7 @@ export const getSummary: {
   (key: WakaTime.KNOWN_RANGE): ReturnType<typeof routeHandler<WakaTime.Summary>>;
   (key: string, start: Date): ReturnType<typeof routeHandler<WakaTime.Summary>>;
 } = (key: string, start?: Date) => {
-  if (KNOWN_RANGES.includes(key as WakaTime.KNOWN_RANGE)) {
+  if (KNOWN_RANGES[key as WakaTime.KNOWN_RANGE] != null) {
     return routeHandler<WakaTime.Summary>(`/users/current/summaries?range=${key}`);
   }
 

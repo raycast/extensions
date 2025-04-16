@@ -6,7 +6,7 @@ import { getSummary } from "../utils";
 export function useTodaySummary() {
   const result = useBase({
     handler: useCallback(async () => {
-      const data = await getSummary("Today", new Date());
+      const data = await getSummary("Today");
       if (!data.ok) throw new Error(data.error);
 
       return data;
