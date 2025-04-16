@@ -1,6 +1,5 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { getUpcomingMatches, Match } from "./lib/getUpcomingMatches";
+import { getUpcomingMatches } from "./lib/getUpcomingMatches";
 import { useCachedPromise } from "@raycast/utils";
 
 export default function MatchesCommand() {
