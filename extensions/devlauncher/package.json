@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "devlauncher",
+  "title": "Dev Launcher",
+  "description": "Quick search and access for projects and files.",
+  "icon": "command-icon.png",
+  "author": "tanerilyazov",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "IDE",
+    "Editor",
+    "Project",
+    "Code",
+    "Repo",
+    "Developer",
+    "Dev",
+    "Launcher",
+    "Workspace"
+  ],
+  "commands": [
+    {
+      "name": "project-launch",
+      "title": "Project Launch",
+      "description": "Search local workspaces and projects - launch into them with favourite your IDE's and editors",
+      "mode": "view",
+      "icon": "extension_icon.png",
+      "preferences": [
+        {
+          "name": "projectsDirectory",
+          "type": "textfield",
+          "description": "Directory with development projects",
+          "required": true,
+          "title": "Projects directory"
+        },
+        {
+          "name": "ide",
+          "type": "appPicker",
+          "description": "Main application option to open directory with. Will usually be an IDE or any application that can open a directory.",
+          "required": true,
+          "title": "IDE Application"
+        },
+        {
+          "name": "ide2",
+          "type": "appPicker",
+          "description": "Second application option to open directory with. Will usually be an IDE or any application that can open a directory.",
+          "required": false,
+          "title": "Secondary IDE"
+        },
+        {
+          "name": "ide3",
+          "type": "appPicker",
+          "description": "Third application option to open directory with. Will usually be an IDE or any application that can open a directory.",
+          "required": false,
+          "title": "Third Application To Open With"
+        },
+        {
+          "name": "recentlyOpenLimit",
+          "type": "textfield",
+          "description": "Maximum number of recently open projects, default is 5",
+          "required": false,
+          "default": "3",
+          "placeholder": "3",
+          "title": "Maximum number of recently open projects"
+        },
+        {
+          "name": "projectContainsFilter",
+          "type": "textfield",
+          "description": "Filepatterns which a project should contain to be included. Should be a semi-colon separated list of filename patterns",
+          "placeholder": ".git;*gradle*",
+          "required": false,
+          "default": ".git",
+          "title": "Project Matcher Filter"
+        },
+        {
+          "name": "searchDepth",
+          "type": "textfield",
+          "description": "How deep should the directory be traversed. Lower depth will lead to faster results",
+          "placeholder": "3",
+          "required": false,
+          "default": "3",
+          "title": "Search depth"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.3",
+    "@raycast/utils": "^1.12.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
