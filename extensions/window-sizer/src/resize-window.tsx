@@ -40,8 +40,7 @@ function AddCustomResolutionForm({
     if (isNaN(parsedWidth) || isNaN(parsedHeight) || parsedWidth <= 0 || parsedHeight <= 0) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Invalid dimensions",
-        message: "Width and height must be positive numbers",
+        title: "Width and height must be positive numbers",
       });
       return;
     }
@@ -112,10 +111,10 @@ function AddCustomResolutionForm({
       }
       isLoading={isLoading}
     >
-      <Form.Description text="Enter dimensions for your custom resolution" />
+      <Form.Description text="Add Custom Size" />
       <Form.Separator />
-      <Form.TextField id="width" title="Width" defaultValue="1024" placeholder="Enter width in pixels" />
-      <Form.TextField id="height" title="Height" defaultValue="768" placeholder="Enter height in pixels" />
+      <Form.TextField id="width" title="Width" placeholder="Enter Width" />
+      <Form.TextField id="height" title="Height" placeholder="Enter Height" />
     </Form>
   );
 }

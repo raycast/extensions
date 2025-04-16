@@ -2,6 +2,11 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
+- Remove the default size in the add page
+- Fix typo in the add page
+
+## [Update] - {PR_MERGE_DATE}
+
 - Fix toast emoji
 
 ## [Initial Version] - {PR_MERGE_DATE}
