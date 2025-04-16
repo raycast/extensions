@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ActionPanel, List, Action, showToast, Toast, clearSearchBar } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast, clearSearchBar, getPreferenceValues, Icon } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 function applicationNameFromPath(path: string): string {
@@ -98,6 +98,7 @@ type CommandProps = {
 };
 
 export default function Command({ launchContext }: CommandProps) {
+  const preferences = getPreferenceValues();
   const [apps, setApps] = useState<
     {
       name: string;
@@ -141,6 +142,39 @@ export default function Command({ launchContext }: CommandProps) {
       onSearchTextChange={setSearchText}
       onSelectionChange={(id) => setSelectedId(id)}
     >
+      {preferences.showQuitAllApplications && (
+        <List.Item
+          title="Quit All Applications"
+          icon={Icon.XMarkCircle}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Quit All"
+                onAction={async () => {
+                  for (const app of apps) {
+                    if (preferences.excludeApplications.split(",").includes(app.name)) {
+                      continue;
+                    }
+
+                    const success = await quitAppWithToast(app.name);
+
+                    if (success) {
+                      setApps((prevApps) => {
+                        const index = prevApps.findIndex((a) => a.name === app.name);
+                        return index >= 0 ? prevApps.toSpliced(index, 1) : prevApps;
+                      });
+                    }
+                  }
+
+                  if (searchText) {
+                    clearSearchBar();
+                  }
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {apps.map((app) => (
         <List.Item
           title={app.name}
