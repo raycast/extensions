@@ -54,4 +54,5 @@ terminaldotshop
 fabric
 awork
 laravel-herd
+playtester
 exa
