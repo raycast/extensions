@@ -4,7 +4,9 @@
   "title": "Playtester",
   "description": "Discover alphas, betas, demos for upcoming indie games on Steam, Playstation, Xbox",
   "icon": "extension-icon.png",
-  "author": "shaanshivanandan",
+  "owner": "playtesterhq",
+  "access": "public",
+  "author": "playtesterteam",
   "contributors": [
     "pernielsentikaer"
   ],
