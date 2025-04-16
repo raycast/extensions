@@ -4,22 +4,22 @@ export function getDuration(seconds?: number | null) {
   const getAmount = (rate: number, unit: string) => {
     if (seconds == null) return "";
 
-    const num = Math.floor(seconds / rate);
-    seconds = Math.floor(seconds - num * rate);
-    return num === 0 ? "" : `${num} ${unit}`;
+export function getDuration(seconds: number | undefined | null) {
+  const getAmount = (rem: number, rate: number, unit: string) => {
+    const num = Math.floor(rem / rate);
+    return [num === 0 ? "" : `${num} ${unit}`, Math.floor(rem - num * rate)] as const;
   };
 
-  let duration = "0 sec";
+  let rem = seconds;
+  if (rem == null) return "0 sec";
 
-  if (seconds != null) {
-    const hours = getAmount(60 * 60, "hr");
-    const minutes = getAmount(60, "min");
-    const sec = getAmount(1, "sec");
+  let [hours, minutes, sec] = ["", "", ""];
 
-    duration = [hours, minutes, sec].filter(Boolean).join(" ");
-  }
+  [hours, rem] = getAmount(rem, 60 * 60, "hr");
+  [minutes, rem] = getAmount(rem, 60, "min");
+  [sec, rem] = getAmount(rem, 1, "sec");
 
-  return duration || "0 sec";
+  return [hours, minutes, sec].filter(Boolean).join(" ") || "0 sec";
 }
 
 /**
