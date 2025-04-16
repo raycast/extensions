@@ -1319,6 +1319,7 @@
 /extensions/planetscale                                             @vimtor
 /extensions/plausible-analytics                                     @thebrokenfinger @xmok
 /extensions/playback-duration-calculator                            @nathanwijaya
+/extensions/playtester                                              @shaanshivanandan @pernielsentikaer
 /extensions/playwright-docs                                         @AndrewUsher
 /extensions/plex                                                    @mSarheed @owain-williams @xmok
 /extensions/ploi                                                    @ploi-deploy @xmok
