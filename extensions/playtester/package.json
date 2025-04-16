@@ -5,6 +5,9 @@
   "description": "Discover alphas, betas, demos for upcoming indie games on Steam, Playstation, Xbox",
   "icon": "extension-icon.png",
   "author": "shaanshivanandan",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Fun"
   ],

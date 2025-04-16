@@ -1,5 +1,5 @@
-import { ActionPanel, Form, Action, showToast, Toast, Detail, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { ActionPanel, Form, Action, showToast, Toast, Detail, useNavigation, Icon } from "@raycast/api";
+import { useForm } from "@raycast/utils";
 import fetch from "node-fetch";
 import { showFailureToast } from "@raycast/utils";
 
@@ -43,82 +43,83 @@ This game is already available on Playtester! It was added on ${formattedDate}.
 }
 
 function SubmitGameForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { push } = useNavigation();
 
-  async function handleSubmit(values: { url: string }) {
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch("https://playtester.io/api/games/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          url: values.url,
-          // You might want to add user_id if you have it
-        }),
-      });
-
-      // Get the response data first (before any conditional logic)
-      const data = (await response.json()) as SubmissionResponse;
-
-      if (!response.ok) {
-        const errorMessage = data.message || "Failed to submit game";
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Submission Failed",
-          message: errorMessage,
+  const { handleSubmit, itemProps } = useForm({
+    onSubmit: async (values: { url: string }) => {
+      try {
+        const response = await fetch("https://playtester.io/api/games/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url: values.url,
+          }),
         });
-        setIsSubmitting(false);
-        return;
+
+        const data = (await response.json()) as SubmissionResponse;
+
+        if (!response.ok) {
+          const errorMessage = data.message || "Failed to submit game";
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Submission Failed",
+            message: errorMessage,
+          });
+          return;
+        }
+
+        if (data.exists && data.status === "approved" && data.game) {
+          push(<GameSuccessView game={data.game} />);
+          return;
+        } else if (data.exists && data.status === "pending") {
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Already Submitted",
+            message: "This game has already been submitted and is pending review.",
+          });
+        } else {
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Game Submitted",
+            message: "Your game has been submitted for review!",
+          });
+        }
+      } catch (error) {
+        console.error("Error submitting game:", error);
+        await showFailureToast(error, { title: "Submission Failed" });
       }
-
-      // Handle different response cases
-      if (data.exists && data.status === "approved" && data.game) {
-        // Game already exists in the database
-        push(<GameSuccessView game={data.game} />);
-        return;
-      } else if (data.exists && data.status === "pending") {
-        // Game is already pending review
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Already Submitted",
-          message: "This game has already been submitted and is pending review.",
-        });
-      } else {
-        // New submission successful
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Game Submitted",
-          message: "Your game has been submitted for review!",
-        });
-      }
-    } catch (error) {
-      console.error("Error submitting game:", error);
-      await showFailureToast(error, { title: "Submission Failed" });
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+    },
+    validation: {
+      url: (value) => {
+        if (!value) {
+          return "URL is required";
+        }
+        try {
+          new URL(value);
+        } catch {
+          return "Please enter a valid URL";
+        }
+      },
+    },
+  });
 
   return (
     <Form
-      isLoading={isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit Game" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Submit Game" icon={Icon.GameController} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.Description text="Submit a game to be added to Playtester." />
       <Form.TextField
-        id="url"
         title="Game URL"
         placeholder="https://store.steampowered.com/app/123456/GameName/"
         info="Enter a URL from Steam, PlayStation, Xbox, Nintendo, Epic Games, Google Play, Apple App Store, or itch.io"
         autoFocus
+        {...itemProps.url}
       />
     </Form>
   );
