@@ -5,6 +5,7 @@ import { showFailureToast } from "@raycast/utils";
 import { FolderSearchPlugin, SpotlightSearchResult, SpotlightSearchPreferences } from "../types";
 import { loadPlugins, lastUsedSort, shouldShowPath } from "../utils";
 import { searchSpotlight } from "../search-spotlight";
+import { log } from "../utils/logger";
 
 export function useFolderSearch() {
   const [searchText, setSearchText] = useState<string>("");
@@ -32,6 +33,50 @@ export function useFolderSearch() {
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
   const lastProcessedText = useRef("");
 
+  // Track setSearchText calls
+  const wrappedSetSearchText = (text: string) => {
+    const stack = new Error().stack;
+    const caller = stack?.split('\n')[2]?.trim();
+    log('debug', 'wrappedSetSearchText', 'setSearchText called', {
+      newText: text,
+      previousText: searchText,
+      caller
+    });
+    setSearchText(text);
+  };
+
+  // Add logging for search text changes
+  useEffect(() => {
+    log('debug', 'useEffect', 'Search text state changed', {
+      newText: searchText,
+      lastProcessed: lastProcessedText.current,
+      searchTextRef: searchTextRef.current
+    });
+    lastProcessedText.current = searchText;
+  }, [searchText]);
+
+  // Add logging for search text ref changes
+  useEffect(() => {
+    searchTextRef.current = searchText;
+    log('debug', 'searchTextRef', 'Search text ref updated', {
+      newText: searchText,
+      previousRef: searchTextRef.current
+    });
+  }, [searchText]);
+
+  // Add logging for debounce timer
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    debounceTimer.current = setTimeout(() => {
+      log('debug', 'debounce', 'Debounce timer triggered', {
+        currentText: searchText,
+        lastProcessed: lastProcessedText.current
+      });
+    }, 300);
+  }, [searchText]);
+
   // check plugins
   useEffect(() => {
     const loadPluginsAndPreferences = async () => {
@@ -53,6 +98,7 @@ export function useFolderSearch() {
     const loadPreferences = async () => {
       try {
         const preferences = await getPreferenceValues<SpotlightSearchPreferences>();
+        log('debug', 'preferences', 'Loading preferences', { preferences });
         setShowNonCloudLibraryPaths(preferences.showNonCloudLibraryPaths);
         setPinnedResults(preferences.pinned || []);
         setSearchScope(preferences.searchScope || "");
@@ -84,23 +130,45 @@ export function useFolderSearch() {
   }, [pinnedResults, searchScope, isShowingDetail, hasCheckedPlugins, hasCheckedPreferences, showNonCloudLibraryPaths]);
 
   // perform search
-  usePromise(searchSpotlight, [searchText, searchScope, abortable, searchCallback.current], {
-    onWillExecute: () => {
-      setIsQuerying(true);
-      setResults([]);
+  usePromise(
+    async (search: string, scope: string, abortable: React.MutableRefObject<AbortController | null | undefined>) => {
+      log('debug', 'usePromise', 'Starting search', { text: search, scope });
+      
+      const results = await searchSpotlight(search, scope as "pinned" | "user" | "all", abortable);
+      
+      log('debug', 'usePromise', 'Search completed', { resultCount: results.length });
+      
+      return results;
     },
-    onData: () => {
-      setIsQuerying(false);
-    },
-    onError: (e) => {
-      if (e.name !== "AbortError") {
-        showFailureToast(e, { title: "Error searching folders" });
-      }
-      setIsQuerying(false);
-    },
-    execute: hasCheckedPlugins && hasCheckedPreferences && !!searchText && searchScope !== "pinned",
-    abortable,
-  });
+    [searchText, searchScope, abortable],
+    {
+      onWillExecute: () => {
+        setIsQuerying(true);
+        setResults([]);
+      },
+      onData: (data) => {
+        const { filterLibraryFolders } = getPreferenceValues();
+        const filteredResults = data.filter(result => shouldShowPath(result.path, !filterLibraryFolders));
+        
+        log('debug', 'usePromise', 'Filtering results', {
+          originalCount: data.length,
+          filteredCount: filteredResults.length
+        });
+        
+        setResults(filteredResults.sort(lastUsedSort));
+        setIsQuerying(false);
+      },
+      onError: (e) => {
+        log('error', 'usePromise', 'Search error', { error: e });
+        if (e.name !== "AbortError") {
+          showFailureToast(e, { title: "Error searching folders" });
+        }
+        setIsQuerying(false);
+      },
+      execute: hasCheckedPlugins && hasCheckedPreferences && !!searchText && searchScope !== "pinned",
+      abortable,
+    }
+  );
 
   // Helper functions
   const resultIsPinned = (result: SpotlightSearchResult) => {
@@ -142,7 +210,7 @@ export function useFolderSearch() {
 
   return {
     searchText,
-    setSearchText,
+    setSearchText: wrappedSetSearchText,
     results: searchScope === "pinned" ? pinnedResults : results,
     isQuerying,
     isShowingDetail,
