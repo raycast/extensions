@@ -32,10 +32,10 @@
           "default": true
         },
         {
-          "name": "closeAfterCreate",
+          "name": "shouldCloseMainWindow",
           "type": "checkbox",
-          "label": "Close Raycast after creating task",
-          "description": "When enabled, Raycast will be closed after a task is created.",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
           "required": false,
           "default": false
         }

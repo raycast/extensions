@@ -8,7 +8,7 @@ import {
   Toast,
   showToast,
   getPreferenceValues,
-  showHUD,
+  closeMainWindow,
 } from "@raycast/api";
 import { format } from "date-fns";
 import { FormValidation, getAvatarIcon, useCachedState, useForm } from "@raycast/utils";
@@ -34,7 +34,7 @@ export default function CreateTaskForm(props: {
 
   const [lastWorkspace, setLastWorkspace] = useCachedState<string>("last-workspace");
 
-  const { closeAfterCreate } = getPreferenceValues<Preferences.CreateTask>();
+  const { shouldCloseMainWindow } = getPreferenceValues<Preferences.CreateTask>();
   const { handleSubmit, itemProps, values, focus, reset } = useForm<TaskFormValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating task" });
@@ -61,7 +61,11 @@ export default function CreateTaskForm(props: {
           ...(values.due_date ? { due_on: format(values.due_date, "yyyy-MM-dd") } : {}),
         });
 
-        if (closeAfterCreate) await showHUD("✅ Created task");
+        if (shouldCloseMainWindow) {
+          await closeMainWindow();
+          await showToast({ style: Toast.Style.Success, title: "Task created" });
+          return;
+        }
 
         toast.style = Toast.Style.Success;
         toast.title = "Created task";

@@ -268,8 +268,7 @@ function UsersSubmenu({ workspace, task, mutate }: UsersSubmenuProps) {
 
   return (
     <ActionPanel.Submenu
-      // eslint-disable-next-line @raycast/prefer-title-case
-      title="Assign To"
+      title="Assign to"
       icon={Icon.AddPerson}
       shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
       onOpen={() => setLoad(true)}
