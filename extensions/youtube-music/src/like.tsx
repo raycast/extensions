@@ -1,5 +1,5 @@
-import { closeMainWindow } from "@raycast/api";
 import { runJSInYouTubeMusicTab } from "./utils";
+import { closeMainWindow, showHUD } from "@raycast/api";
 
 export default async () => {
   const jsCode = `(function() {
@@ -23,9 +23,13 @@ export default async () => {
     const result = await runJSInYouTubeMusicTab(jsCode);
 
     if (result) {
-      await closeMainWindow();
+      await showHUD("Liked ❤️");
+    } else {
+      await showHUD("Already liked 👍");
     }
+
+    await closeMainWindow();
   } catch (error) {
-    showFailureToast(error, { title: "Failed to like song" });
+    await showHUD("❌ Failed to like");
   }
 };

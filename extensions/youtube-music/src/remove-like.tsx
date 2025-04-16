@@ -1,4 +1,4 @@
-import { closeMainWindow } from "@raycast/api";
+import { closeMainWindow, showHUD } from "@raycast/api";
 import { runJSInYouTubeMusicTab } from "./utils";
 
 export default async () => {
@@ -23,9 +23,13 @@ export default async () => {
     const result = await runJSInYouTubeMusicTab(jsCode);
 
     if (result) {
-      await closeMainWindow();
+      await showHUD("Removed like 💔");
+    } else {
+      await showHUD("Not liked yet 🤷‍♂️ try to Dislike it");
     }
+
+    await closeMainWindow();
   } catch (error) {
-    showFailureToast(error, { title: "Failed to remove like" });
+    await showHUD("❌ Failed to remove like");
   }
 };
