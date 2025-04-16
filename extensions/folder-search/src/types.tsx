@@ -20,9 +20,9 @@ type SpotlightSearchResult = {
   kMDItemFSName: string;
   kMDItemKind: string;
   kMDItemFSSize: number;
-  kMDItemFSCreationDate: Date;
-  kMDItemContentModificationDate: Date;
-  kMDItemLastUsedDate: Date;
+  kMDItemFSCreationDate: string;
+  kMDItemContentModificationDate: string;
+  kMDItemLastUsedDate: string;
   kMDItemUseCount: number;
 };
 
