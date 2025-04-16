@@ -98,6 +98,7 @@ See the [API Reference](../../api-reference/user-interface/list.md) for more inf
 
 <details>
 <summary>Renders a dynamic and searchable list of NPM packages. The command fetches new items as the search is updated by the user.</summary>
+
 ![Typeahead Results Template Render](../../.gitbook/assets/typeahead-results-template.webp)
 
 </details>
