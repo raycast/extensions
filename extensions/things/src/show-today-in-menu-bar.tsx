@@ -64,8 +64,8 @@ export default function ShowTodayInMenuBar() {
     <MenuBarExtra icon="things-flat.png" title={title} tooltip={tooltip} isLoading={isLoading}>
       {todos && todos.length > 0 ? (
         <>
-          {displayTodo ? (
-            <MenuBarExtra.Item title="Complete" icon={Icon.CheckCircle} onAction={() => completeTodo(todos[0])} />
+          {displayTodo && firstIncompleteTodo ? (
+            <MenuBarExtra.Item title="Complete" icon={Icon.CheckCircle} onAction={() => completeTodo(firstIncompleteTodo)} />
           ) : null}
           <MenuBarExtra.Section>
             <MenuBarExtra.Item title="Today" />
