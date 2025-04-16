@@ -1,0 +1,437 @@
+import { UNKNOWN_ERROR_MESSAGE } from "../helpers/errors";
+import { HardcoverClient } from "./hardcoverClient";
+import { List } from "./lists";
+
+export const UserBookStatusMapping = {
+  1: "Want to Read",
+  2: "Currently Reading",
+  3: "Read",
+  4: "Paused",
+  5: "Did Not Finish",
+  6: "Ignored",
+};
+
+export type UserBookStatusEnum = {
+  id: number;
+  slug: string;
+  status: string;
+};
+
+export type FeaturedSeries = {
+  details?: string;
+  featured?: boolean;
+  id: number;
+  position?: number;
+  series?: {
+    id?: number;
+    name?: string;
+    primary_books_count?: number;
+    slug?: string;
+  };
+};
+
+export type Author = {
+  id: number;
+  image?: {
+    id?: number;
+    url?: string;
+  };
+  name?: string;
+  slug?: string;
+};
+
+export type Contribution = {
+  author?: Author;
+};
+
+export type SearchBook = {
+  id: number;
+  title: string;
+  description?: string;
+  slug?: string;
+  image?: {
+    url?: string;
+  };
+  contributions?: Contribution[];
+  release_date?: string;
+  rating?: number;
+  ratings_count?: number;
+  reviews_count?: number;
+  genres?: string[];
+  content_warnings?: string[];
+  featured_series?: FeaturedSeries;
+};
+
+export type UserBookResponse = {
+  id: number;
+  rating: number;
+  list_book?: {
+    book_id?: number;
+    list_id?: number;
+  };
+};
+
+export type SearchBookResponse = {
+  data: {
+    search: {
+      page: number;
+      per_page: number;
+      results: {
+        found: number;
+        hits: {
+          document: SearchBook;
+        }[];
+      };
+    };
+  };
+};
+
+export type UserBookRead = {
+  id: number;
+  paused_at?: string;
+  progress?: number;
+  progress_pages?: number;
+  progress_seconds?: number;
+  started_at?: string;
+  finished_at?: string;
+};
+
+export type UserBook = {
+  id: number;
+  rating: number;
+  user_book_status: UserBookStatusEnum;
+  user_book_reads: UserBookRead[];
+};
+
+export type ListBook = {
+  id: number;
+  list?: List;
+  book?: Pick<
+    SearchBook,
+    | "id"
+    | "title"
+    | "slug"
+    | "image"
+    | "release_date"
+    | "rating"
+    | "ratings_count"
+    | "reviews_count"
+    | "content_warnings"
+    | "contributions"
+  > & {
+    featured_book_series?: FeaturedSeries;
+    taggings?: {
+      id?: number;
+      tag?: {
+        id?: number;
+        tag?: string;
+      };
+    }[];
+  };
+};
+
+export type Book = {
+  user_books: UserBook[];
+  list_books: ListBook[];
+};
+
+export type GetUserBookResponse = {
+  data: {
+    books: Book[];
+  };
+};
+
+export type updateBookStatusResponse = {
+  data: {
+    insert_user_book: {
+      id: number;
+      error: string;
+    };
+  };
+};
+
+export type GetListBooksResponse = {
+  data: {
+    me: {
+      lists: {
+        id: number;
+        slug: string;
+        name: string;
+        description: string;
+        books_count: number;
+        list_books: ListBook[];
+      }[];
+    }[];
+  };
+};
+
+export type TransformedListBook = Omit<ListBook, "book"> & {
+  book: SearchBook;
+};
+
+export type TransformedList = {
+  id: number;
+  slug: string;
+  name: string;
+  description: string;
+  books_count: number;
+  list_books: TransformedListBook[];
+};
+
+export async function searchBooks(query: string, page: number) {
+  const client = new HardcoverClient();
+
+  const apiPage = page + 1; // API is 1-indexed while Raycast is 0-indexed
+
+  const graphql_query = `
+    query MyQuery {
+      search(query: "${query}", query_type: "book", page: ${apiPage}, per_page: 25) {
+        page
+        per_page
+        results
+      }
+    }
+  `;
+
+  const { data } = await client.post<SearchBookResponse>(graphql_query);
+
+  if (!data) {
+    return { data: [], hasMore: false };
+  }
+
+  const hasMore = data.search.page * data.search.per_page < data.search.results.found;
+
+  return { data: data.search.results.hits.map((hit) => hit.document), hasMore };
+}
+
+export async function getUserBook(book_id: number, user_id: number) {
+  const client = new HardcoverClient();
+
+  const graphql_query = `
+    {
+      books(where: {id: {_eq: ${book_id}}}) {
+        user_books(where: {user_id: {_eq: ${user_id}}}) {
+          id
+          rating
+          user_book_status {
+            id
+            slug
+            status
+          }
+          user_book_reads {
+            id
+            paused_at
+            progress
+            progress_pages
+            progress_seconds
+            started_at
+            finished_at
+          }
+        }
+        list_books(where: {list: {user_id: {_eq: ${user_id}}}}) {
+          id
+          list {
+            id
+            slug
+            name
+            description
+          }
+        }
+      }
+    }
+  `;
+
+  const { data } = await client.post<GetUserBookResponse>(graphql_query);
+
+  return data.books[0];
+}
+
+export async function addBookToList(listId: number, bookId: number) {
+  const client = new HardcoverClient();
+
+  const graphql_mutation = `
+    mutation {
+      insert_list_book(object: {book_id: ${bookId}, list_id: ${listId}}) {
+        id
+        list_book {
+          book_id
+          list_id
+        }
+      }
+    }
+  `;
+
+  const { id } = await client.post<UserBookResponse>(graphql_mutation);
+
+  return id;
+}
+
+export async function removeBookFromList(listBookId: number) {
+  const client = new HardcoverClient();
+
+  const graphql_mutation = `
+    mutation {
+      delete_list_book(id: ${listBookId}) {
+        id
+        list_id
+      }
+    }
+  `;
+
+  const { id } = await client.post<{ id: number }>(graphql_mutation);
+
+  return id;
+}
+
+export async function updateBookStatus(bookId: number, statusId: number) {
+  const client = new HardcoverClient();
+
+  const graphql_mutation = `
+    mutation {
+      insert_user_book(object: {book_id: ${bookId}, status_id: ${statusId}}) {
+        id
+        error
+      }
+    }
+  `;
+
+  const { data } = await client.post<updateBookStatusResponse>(graphql_mutation);
+
+  if (data.insert_user_book.error) {
+    console.log(data.insert_user_book.error);
+    throw new Error(UNKNOWN_ERROR_MESSAGE);
+  }
+
+  return data.insert_user_book.id;
+}
+
+export async function updateBookRating(bookId: number, rating: number | string) {
+  const client = new HardcoverClient();
+
+  const graphql_mutation = `
+    mutation {
+      insert_user_book(object: {book_id: ${bookId}, rating: "${rating}"}) {
+        id
+        error
+      }
+    }
+  `;
+
+  const { data } = await client.post<updateBookStatusResponse>(graphql_mutation);
+
+  if (data.insert_user_book.error) {
+    console.log(data.insert_user_book.error);
+    throw new Error(UNKNOWN_ERROR_MESSAGE);
+  }
+
+  return data.insert_user_book.id;
+}
+
+export async function removeBookStatus(userBookId: number) {
+  const client = new HardcoverClient();
+
+  const graphql_mutation = `
+    mutation {
+      delete_user_book(id: ${userBookId}) {
+        id
+      }
+    }
+  `;
+
+  const { data } = await client.post<{ data: { delete_user_book: { id: number } } }>(graphql_mutation);
+
+  return data.delete_user_book.id;
+}
+
+export async function getListBooks() {
+  const client = new HardcoverClient();
+
+  const graphql_query = `
+  {
+    me {
+      lists {
+        books_count
+        description
+        id
+        slug
+        name
+        list_books(order_by: {position: asc}) {
+        id
+          book_id
+          book {
+            id
+            title
+            description
+            slug
+            image {
+              url
+            }
+            release_date
+            rating
+            ratings_count
+            reviews_count
+            contributions {
+              author {
+                id
+                image {
+                  id
+                  url
+                }
+                slug
+                name
+              }
+            }
+            taggings(
+              where: {tag: {tag_category: {category: {_eq: "Genre"}}}}
+              distinct_on: tag_id
+            ) {
+              id
+              tag {
+                count
+                tag
+                id
+                slug
+                tag_category {
+                  category
+                }
+              }
+            }
+            featured_book_series {
+              id
+              position
+              details
+              featured
+              series {
+                id
+                name
+                primary_books_count
+                slug
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+  const { data } = await client.post<GetListBooksResponse>(graphql_query);
+
+  return data.me[0].lists.map((list) => ({
+    ...list,
+    list_books: list.list_books.map((listBook) => {
+      if (!listBook.book) {
+        return { ...listBook, book: {} as SearchBook };
+      }
+      const { featured_book_series, taggings, ...bookData } = listBook.book;
+      return {
+        ...listBook,
+        book: {
+          ...bookData,
+          featured_series: featured_book_series as FeaturedSeries,
+          genres: taggings?.map((t) => t.tag?.tag).filter(Boolean) || [],
+        } as SearchBook,
+      };
+    }),
+  })) as TransformedList[];
+}
