@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-04-16
 
 - When opening a new incognito window, open a blank tab if no URL is given.
   - A previous update caused a regression where this behavior was no longer
