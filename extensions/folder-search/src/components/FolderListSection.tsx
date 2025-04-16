@@ -1,5 +1,5 @@
 import { Color, Icon, List } from "@raycast/api";
-import { folderName, enclosingFolderName } from "../utils";
+import { folderName, enclosingFolderName, formatDate } from "../utils";
 import { ReactNode } from "react";
 import { SpotlightSearchResult } from "../types";
 
@@ -41,17 +41,17 @@ export function FolderListSection({
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Created"
-                    text={result.kMDItemFSCreationDate?.toLocaleString()}
+                    text={formatDate(result.kMDItemFSCreationDate)}
                   />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Modified"
-                    text={result.kMDItemContentModificationDate?.toLocaleString()}
+                    text={formatDate(result.kMDItemContentModificationDate)}
                   />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Last used"
-                    text={result.kMDItemLastUsedDate?.toLocaleString() || "-"}
+                    text={formatDate(result.kMDItemLastUsedDate)}
                   />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label

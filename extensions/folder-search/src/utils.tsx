@@ -179,6 +179,19 @@ export function shouldShowPath(path: string, showNonCloudLibraryPaths: boolean):
   return showNonCloudLibraryPaths;
 }
 
+export function formatDate(dateString: string | undefined | null): string {
+  if (!dateString) return "-";
+  try {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: 'full',
+      timeStyle: 'short'
+    }).format(date);
+  } catch (e) {
+    return "-";
+  }
+}
+
 export {
   loadPlugins,
   safeSearchScope,
