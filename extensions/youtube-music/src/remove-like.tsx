@@ -19,9 +19,13 @@ export default async () => {
     return false;
   })();`;
 
-  const result = await runJSInYouTubeMusicTab(jsCode);
+  try {
+    const result = await runJSInYouTubeMusicTab(jsCode);
 
-  if (result) {
-    await closeMainWindow();
+    if (result) {
+      await closeMainWindow();
+    }
+  } catch (error) {
+    showFailureToast(error, { title: "Failed to remove like" });
   }
 };
