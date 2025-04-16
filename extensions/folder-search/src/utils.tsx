@@ -1,22 +1,12 @@
-import fs from "fs";
-import path from "path";
-import { homedir } from "node:os";
-
-import {
-  Alert,
-  Icon,
-  closeMainWindow,
-  confirmAlert,
-  getPreferenceValues,
-  trash,
-  showToast,
-  popToRoot,
-} from "@raycast/api";
-
+import { Alert, Icon, closeMainWindow, confirmAlert, getPreferenceValues, popToRoot, trash } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+import fs from "fs";
 import * as yup from "yup";
+import path from "path";
+import os from "os";
 
 import { SpotlightSearchPreferences, SpotlightSearchResult } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 // validation schemas for Plugins
 const PluginShortcutSchema = yup
@@ -38,6 +28,8 @@ const pluginSchema = yup
   .required()
   .strict()
   .noUnknown(true);
+
+const userHomeDir = os.homedir();
 
 const loadPlugins = async () => {
   // grab prefs
@@ -118,7 +110,7 @@ const maybeMoveResultToTrash = async (result: SpotlightSearchResult, resultWasTr
       style: Alert.ActionStyle.Destructive,
       onAction: () => {
         trash(result.path);
-        showToast({ title: "Moved to Trash", message: folderName(result) });
+        showFailureToast({ title: "Moved to Trash", message: folderName(result) });
         resultWasTrashed();
       },
     },
@@ -146,14 +138,14 @@ const fixDoubleConcat = (text: string): string => {
 
 const CLOUD_STORAGE_PATHS = [
   // iCloud Drive
-  `${homedir()}/Library/Mobile Documents/com~apple~CloudDocs`,
+  `${userHomeDir}/Library/Mobile Documents/com~apple~CloudDocs`,
   // Dropbox
-  `${homedir()}/Library/CloudStorage/Dropbox`,
+  `${userHomeDir}/Library/CloudStorage/Dropbox`,
   // Google Drive
-  `${homedir()}/Library/CloudStorage/GoogleDrive`,
+  `${userHomeDir}/Library/CloudStorage/GoogleDrive`,
   // OneDrive
-  `${homedir()}/Library/CloudStorage/OneDrive-Personal`,
-  `${homedir()}/Library/CloudStorage/OneDrive-Microsoft`,
+  `${userHomeDir}/Library/CloudStorage/OneDrive-Personal`,
+  `${userHomeDir}/Library/CloudStorage/OneDrive-Microsoft`,
 ];
 
 export function isCloudStoragePath(path: string): boolean {
@@ -161,7 +153,7 @@ export function isCloudStoragePath(path: string): boolean {
 }
 
 export function isLibraryPath(path: string): boolean {
-  return path.includes(`${homedir()}/Library`);
+  return path.includes(`${userHomeDir}/Library`);
 }
 
 export function shouldShowPath(path: string, showNonCloudLibraryPaths: boolean): boolean {

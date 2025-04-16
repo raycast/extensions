@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Form, Icon, List, Toast, closeMainWindow, popToRoot, showToast, confirmAlert, open, getSelectedFinderItems, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, closeMainWindow, popToRoot, confirmAlert, open, getSelectedFinderItems, Keyboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { folderName} from "./utils";
 import { SpotlightSearchResult } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
@@ -29,7 +30,7 @@ export default function Command() {
     const selectedItems = await getSelectedFinderItems();
 
     if (selectedItems.length === 0) {
-      await showHUD(`⚠️  No Finder selection to move.`);
+      await showFailureToast({ title: "No Finder selection to move" });
       return false;
     }
 
@@ -50,14 +51,14 @@ export default function Command() {
 
           if (overwrite) {
             if (item.path === destinationFile) {
-              await showHUD("The source and destination file are the same");
+              await showFailureToast({ title: "The source and destination file are the same" });
               skippedCount++;
               continue;
             }
             await fse.move(item.path, destinationFile, { overwrite: true });
             movedCount++;
           } else {
-            await showHUD("Cancelling move for " + sourceFileName);
+            await showFailureToast({ title: "Cancelling move for " + sourceFileName });
             skippedCount++;
             continue;
           }
@@ -66,20 +67,18 @@ export default function Command() {
           movedCount++;
         }
       } catch (e) {
-        await showToast(Toast.Style.Failure, "Error moving file " + String(e));
+        await showFailureToast(e, { title: "Error moving file" });
         return false;
       }
     }
 
     if (movedCount === 0) {
-      await showHUD(`No files were moved`);
+      await showFailureToast({ title: "No files were moved" });
       return false;
     } else if (skippedCount > 0) {
-      await showHUD(
-        `Moved ${movedCount} item(s) to ${path.basename(destinationFolder)}, skipped ${skippedCount} item(s)`
-      );
+      await showFailureToast({ title: `Moved ${movedCount} item(s) to ${path.basename(destinationFolder)}, skipped ${skippedCount} item(s)` });
     } else {
-      await showHUD(`Moved ${movedCount} item(s) to ${path.basename(destinationFolder)}`);
+      await showFailureToast({ title: `Moved ${movedCount} item(s) to ${path.basename(destinationFolder)}` });
     }
 
     return movedCount > 0;
@@ -100,6 +99,7 @@ export default function Command() {
               open(result.path);
               closeMainWindow();
               popToRoot({ clearSearchBar: true });
+              await showFailureToast({ title: "Moved to Trash", message: folderName(result) });
             }
           }}
         />
