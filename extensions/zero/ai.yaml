@@ -24,6 +24,7 @@ evals:
             arguments:
               recipient: "john@example.com"
               subject: "Meeting Tomorrow"
+              body: "I'm looking forward to our meeting tomorrow at 2pm."
               
     # Draft with CC and BCC recipients
     - input: "@zero Write an email to marketing@company.com with CC to team@company.com and BCC to manager@company.com about the upcoming product launch"
