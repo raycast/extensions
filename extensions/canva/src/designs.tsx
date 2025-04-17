@@ -1,6 +1,6 @@
 import { authorize, client } from "./oauth";
 import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { showFailureToast, useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
 interface Design {
@@ -28,9 +28,13 @@ export default function Index() {
   const [token, setToken] = useState<string | undefined>();
   useEffect(() => {
     (async () => {
-      await authorize();
-      const tokenSet = await client.getTokens();
-      setToken(tokenSet?.accessToken);
+      try {
+        await authorize();
+        const tokenSet = await client.getTokens();
+        setToken(tokenSet?.accessToken);
+      } catch (error) {
+        await showFailureToast(error, { title: "Failed to authorize with Canva" });
+      }
     })();
   }, []);
 
@@ -57,7 +61,7 @@ export default function Index() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser icon={Icon.Eye} title="Open View URL" url={design.urls.view_url} />
-              <Action.OpenInBrowser icon={Icon.Pencil} title="Open Edit URL" url={design.urls.view_url} />
+              <Action.OpenInBrowser icon={Icon.Pencil} title="Open Edit URL" url={design.urls.edit_url} />
             </ActionPanel>
           }
         />

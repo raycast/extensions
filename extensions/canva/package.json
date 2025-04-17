@@ -31,6 +31,7 @@
     {
       "name": "designs",
       "title": "View Designs",
+      "subtitle": "Canva",
       "description": "View Designs and Open in Browser",
       "mode": "view"
     }

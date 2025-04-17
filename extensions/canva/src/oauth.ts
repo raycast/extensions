@@ -29,7 +29,7 @@ export async function authorize(): Promise<void> {
     return;
   }
 
-  // Othwerwise, go through authorization flow
+  // Otherwise, go through authorization flow
   const authRequest = await client.authorizationRequest({
     endpoint: authorizeUrl,
     clientId: clientId,

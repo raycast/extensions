@@ -18,10 +18,10 @@ This is the **unofficial** Raycast Extension for [Canva](https://canva.com) allo
         - **design:meta Read**
     - Authentication
         - URL 1 (Default): **https://raycast.com/redirect/extension**
-4. `Go back` to 1st Tab (Configuration)
-5. `Copy` Client ID and Client secret
-11. `Open` Extension Preferences
-12. `Paste` in relevant fields
+5. `Go back` to 1st Tab (Configuration)
+6. `Copy` Client ID and Client secret
+7. `Open` Extension Preferences
+8. `Paste` in relevant fields
 
 ## ❔
 
