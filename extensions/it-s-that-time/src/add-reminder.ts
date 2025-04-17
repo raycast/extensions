@@ -6,7 +6,8 @@ import { runner } from "./timer";
 import Paths from "./Paths";
 import * as fs from "node:fs";
 
-export default function main(props: LaunchProps<{ arguments: Arguments.AddReminder }>) {
+export default async function main(props: LaunchProps<{ arguments: Arguments.AddReminder }>) {
+  try {
   if (!fs.existsSync(Paths.TIMER_PATH)) {
     fs.mkdirSync(Paths.TIMER_PATH, { recursive: true });
   }
