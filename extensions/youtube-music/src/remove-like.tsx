@@ -2,34 +2,47 @@ import { closeMainWindow, showHUD } from "@raycast/api";
 import { runJSInYouTubeMusicTab } from "./utils";
 
 export default async () => {
-  const jsCode = `(function() {
-    const likeRenderer = document.querySelector('ytmusic-like-button-renderer#like-button-renderer');
-    if (!likeRenderer) return false;
-
-    const likeStatus = likeRenderer.getAttribute('like-status');
-
-    // Only click the like button if the song is already liked (to unlike it)
-    if (likeStatus === 'LIKE') {
-      const likeButton = likeRenderer.querySelector('yt-button-shape.like button');
-      if (likeButton) {
-        likeButton.click();
-        return true;
-      }
-    }
-    return false;
-  })();`;
-
   try {
-    const result = await runJSInYouTubeMusicTab(jsCode);
+    const result = await runJSInYouTubeMusicTab(`
+      (() => {
+        const isYTM = location.hostname.includes("music.youtube.com");
 
-    if (result) {
-      await showHUD("Removed like 💔");
-    } else {
-      await showHUD("Not liked yet 🤷‍♂️ try to Dislike it");
-    }
+        if (isYTM) {
+          const likeButton = document.querySelector(
+            "ytmusic-like-button-renderer[like-status='LIKE'] #button-shape-like[aria-pressed='true'] > button"
+          );
+          if (likeButton) {
+            likeButton.click();
+            return "ytmusic-removed";
+          }
+          return "ytmusic-none";
+        }
 
+        // YouTube – neues UI: segmented-like-dislike-button-view-model
+        const newLikeButton = document.querySelector(
+          "segmented-like-dislike-button-view-model like-button-view-model button[aria-pressed='true']"
+        );
+        if (newLikeButton) {
+          newLikeButton.click();
+          return "youtube-removed";
+        }
+
+        return "youtube-none";
+      })();
+    `);
+
+    const messages = {
+      "ytmusic-removed": "👍🏻 Removed Like (YT Music)",
+      "ytmusic-none": "⚠️ Kein Like gesetzt (YT Music)",
+      "youtube-removed": "👍🏻 Removed Like (YouTube)",
+      "youtube-none": "⚠️ Kein Like gesetzt (YouTube)",
+    };
+
+    await showHUD(
+      typeof result === "string" ? messages[result as keyof typeof messages] : "❌ Fehler beim Entfernen des Likes"
+    );
     await closeMainWindow();
-  } catch (error) {
-    await showHUD("❌ Failed to remove like");
+  } catch (e) {
+    await showHUD("❌ Fehler beim Entfernen des Likes");
   }
 };
