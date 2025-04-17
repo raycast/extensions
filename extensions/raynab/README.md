@@ -33,6 +33,33 @@ You can change the active budget at any time using the command. For most people 
 
 ## Commands
 
+### AI Extensions
+
+Raynab now includes AI Extensions for querying your budget information through natural language. You can ask questions like:
+
+#### Transaction Management
+- "@raynab add a transaction for $25.50 at Starbucks"
+- "@raynab show me my recent transactions"
+- "@raynab show me my Amazon purchases from last year"
+- "@raynab what did I spend at Target in the past month?"
+- "@raynab what was my transaction with Amazon on March 14?"
+- "@raynab show me my transactions with Amazon this month"
+- "@raynab what did I spend at Amazon last month?"
+
+#### Account Queries
+- "@raynab show me my account balances"
+- "@raynab what is my checking account balance?"
+- "@raynab show me my checking account"
+- "@raynab how much is in my checking?"
+
+#### Big Numbers
+- "@raynab what are my big three numbers?"
+- "@raynab show me my big numbers"
+
+#### Budget Information
+- "@raynab what is the age of money in my current budget?"
+- "@raynab tell me about my this month's budget"
+
 ### List Transactions
 
 This command will list your transactions for up to a year. It is the heart of Raynab as this will probably the place where you will spend most of your time understanding your inflows, outflows, and transfers.

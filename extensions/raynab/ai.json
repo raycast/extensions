@@ -1,0 +1,404 @@
+{
+  "instructions": "You are a helpful assistant for managing YNAB (You Need A Budget) transactions. Always format amounts correctly and handle dates in ISO format. Be precise with payee names and account names. When showing transactions, format the information clearly and concisely.\n\nFor transaction queries, you can specify time periods using natural language. The following time periods are supported:\n- 'last year' or 'past year' for the last 12 months\n- 'last quarter' or 'past quarter' for the last 3 months\n- 'last month' or 'past month' for the last 30 days\n- 'last week' or 'past week' for the last 7 days\n- 'last day', 'past day', 'yesterday', or 'today' for the last 24 hours\n\nIf no time period is specified, the default is the last month.\n\nFor account balance queries, use get-accounts or get-account-details tools, not get-transactions.",
+  "evals": [
+    {
+      "input": "@raynab add a transaction for $25.50 at Starbucks",
+      "mocks": {
+        "add-transaction": {
+          "success": true,
+          "transaction": {
+            "date": "2024-03-15",
+            "payee_name": "Starbucks",
+            "amount": -25.50,
+            "account_name": "Checking",
+            "memo": "Morning coffee"
+          }
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "add-transaction",
+            "arguments": {
+              "date": "2024-03-15",
+              "payee_name": "Starbucks",
+              "amount": -25.50,
+              "account_name": "Checking",
+              "memo": "Morning coffee"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@raynab show me my recent transactions",
+      "mocks": {
+        "get-transactions": [
+          {
+            "id": "123",
+            "date": "2024-03-14",
+            "payee_name": "Amazon",
+            "amount": -99.99,
+            "account_name": "Credit Card",
+            "category_name": "Office Supplies",
+            "cleared": true
+          },
+          {
+            "id": "124",
+            "date": "2024-03-13",
+            "payee_name": "Whole Foods",
+            "amount": -75.25,
+            "account_name": "Checking",
+            "category_name": "Groceries",
+            "cleared": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-transactions",
+            "arguments": {}
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@raynab show me my Amazon purchases from last year",
+      "mocks": {
+        "get-transactions": [
+          {
+            "id": "123",
+            "date": "2023-12-14",
+            "payee_name": "Amazon",
+            "amount": -99.99,
+            "account_name": "Credit Card",
+            "category_name": "Office Supplies",
+            "cleared": true
+          },
+          {
+            "id": "124",
+            "date": "2023-06-13",
+            "payee_name": "Amazon",
+            "amount": -75.25,
+            "account_name": "Credit Card",
+            "category_name": "Entertainment",
+            "cleared": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-transactions",
+            "arguments": {
+              "payee": "Amazon",
+              "period": "last year"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@raynab what did I spend at Target in the past month?",
+      "mocks": {
+        "get-transactions": [
+          {
+            "date": "2024-03-10",
+            "payee_name": "Target",
+            "amount": -150.00,
+            "account_name": "Credit Card",
+            "cleared": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-transactions",
+            "arguments": {
+              "payee": "Target",
+              "period": "past month"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@raynab what was my transaction with Amazon on March 14?",
+      "mocks": {
+        "get-transactions": {
+          "success": true,
+          "transactions": [
+            {
+              "id": "123",
+              "date": "2024-03-14",
+              "payee_name": "Amazon",
+              "amount": -85.00,
+              "account_name": "Chase Amazon card"
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-transactions",
+            "arguments": {
+              "payee": "Amazon",
+              "period": "month"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@raynab show me my transactions with Amazon this month",
+      "mocks": {
+        "get-transactions": {
+          "success": true,
+          "transactions": [
+            {
+              "id": "456",
+              "date": "2024-03-15",
+              "payee_name": "Amazon",
+              "amount": -99.99,
+              "account_name": "Credit Card"
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-transactions",
+            "arguments": {
+              "payee": "Amazon",
+              "period": "month"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@raynab show me my account balances",
+      "mocks": {
+        "get-accounts": [
+          {
+            "name": "Checking",
+            "balance": "$5,000.00",
+            "on_budget": true
+          },
+          {
+            "name": "Savings",
+            "balance": "$10,000.00",
+            "on_budget": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-accounts",
+            "arguments": {}
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@raynab what is my checking account balance?",
+      "mocks": {
+        "get-account-details": {
+          "name": "Checking",
+          "balance": "$5,000.00",
+          "on_budget": true
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-account-details",
+            "arguments": {
+              "account_name": "Checking"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@raynab show me my checking account",
+      "mocks": {
+        "get-account-details": {
+          "name": "Checking",
+          "balance": "$5,000.00",
+          "on_budget": true
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-account-details",
+            "arguments": {
+              "account_name": "Checking"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@raynab how much is in my checking?",
+      "mocks": {
+        "get-account-details": {
+          "name": "Checking",
+          "balance": "$5,000.00",
+          "on_budget": true
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-account-details",
+            "arguments": {
+              "account_name": "Checking"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@raynab what are my big three numbers?",
+      "mocks": {
+        "get-big-numbers": {
+          "success": true,
+          "today": "$150.00",
+          "thisWeek": "$750.00",
+          "thisMonth": "$2,500.00"
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-big-numbers",
+            "arguments": {}
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@raynab show me my big numbers",
+      "mocks": {
+        "get-big-numbers": {
+          "success": true,
+          "today": "$150.00",
+          "thisWeek": "$750.00",
+          "thisMonth": "$2,500.00"
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-big-numbers",
+            "arguments": {}
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@raynab what did I spend at amazon last month?",
+      "mocks": {
+        "get-transactions": [
+          {
+            "date": "2024-03-10",
+            "payee_name": "Amazon",
+            "amount": -150.00,
+            "account_name": "Credit Card",
+            "cleared": true
+          },
+          {
+            "date": "2024-03-05",
+            "payee_name": "Amazon.com",
+            "amount": -75.25,
+            "account_name": "Credit Card",
+            "cleared": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-transactions",
+            "arguments": {
+              "payee": "Amazon",
+              "period": "last month"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@raynab what is the age of money in my current budget?",
+      "mocks": {
+        "get-budget": {
+          "activity": "-$1,200.00",
+          "age_of_money": 40,
+          "budgeted": "$3,800.00",
+          "income": "$5,000.00",
+          "month": "2024-03-01",
+          "note": "",
+          "success": true,
+          "to_be_budgeted": "$2,000.00"
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-budget",
+            "arguments": {
+              "month": "2024-03"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@raynab tell me about my this month's budget",
+      "mocks": {
+        "get-budget": {
+          "activity": "-$1,750.25",
+          "age_of_money": 38,
+          "budgeted": "$4,200.00",
+          "income": "$6,000.00",
+          "month": "2024-03-01",
+          "note": "March Budget Overview",
+          "success": true,
+          "to_be_budgeted": "$2,050.00"
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-budget",
+            "arguments": {
+              "month": "2024-03"
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    }
+  ]
+}

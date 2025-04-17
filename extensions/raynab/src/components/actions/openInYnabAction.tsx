@@ -1,5 +1,5 @@
-import { Action } from '@raycast/api';
-import { Shortcuts, URLs } from '@constants';
+import { Action, Icon } from '@raycast/api';
+import { URLs } from '@constants';
 import { useLocalStorage } from '@raycast/utils';
 
 interface OpenInYnabActionProps {
@@ -21,11 +21,5 @@ export function OpenInYnabAction(props: OpenInYnabActionProps) {
     return budgetPath;
   };
 
-  return (
-    <Action.OpenInBrowser
-      title={`Open ${props.accounts ? `Account${props.accountId ? '' : 's'}` : 'Budget'} In YNAB`}
-      url={constructUrl(activeBudgetId, props)}
-      shortcut={Shortcuts.ViewInBrowser}
-    />
-  );
+  return <Action.OpenInBrowser title="Open in Ynab" url={constructUrl(activeBudgetId, props)} icon={Icon.Globe} />;
 }

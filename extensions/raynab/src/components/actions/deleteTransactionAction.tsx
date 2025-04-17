@@ -10,9 +10,10 @@ const preferences = getPreferenceValues<Preferences>();
 
 interface DeleteTransactionActionProps {
   transaction: TransactionDetail;
+  onTransactionDeleted?: () => void;
 }
 
-export function DeleteTransactionAction({ transaction }: DeleteTransactionActionProps) {
+export function DeleteTransactionAction({ transaction, onTransactionDeleted }: DeleteTransactionActionProps) {
   const { value: activeBudgetId = '' } = useLocalStorage('activeBudgetId', '');
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const { value: timeline } = useLocalStorage<Period>('timeline', 'month');
@@ -57,6 +58,7 @@ export function DeleteTransactionAction({ transaction }: DeleteTransactionAction
 
             toast.style = Toast.Style.Success;
             toast.title = 'Transaction deleted successfully';
+            onTransactionDeleted?.();
             return;
           } catch (error) {
             toast.style = Toast.Style.Failure;

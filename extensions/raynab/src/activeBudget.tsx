@@ -1,4 +1,4 @@
-import { Icon, List, ActionPanel, Action, Color, showToast } from '@raycast/api';
+import { Icon, List, ActionPanel, Action, Color, showToast, popToRoot } from '@raycast/api';
 
 import { BudgetSummary, CurrencyFormat } from '@srcTypes';
 import { useBudgets } from '@hooks/useBudgets';
@@ -32,6 +32,7 @@ function BudgetList() {
         message: 'It will be used across all commands in Raynab.',
       });
     }
+    popToRoot();
   };
 
   return (
