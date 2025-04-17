@@ -1,6 +1,6 @@
-import { getPreferenceValues, showFailureToast } from "@raycast/api";
-import { fetch, FetchResult } from "@raycast/utils";
-import { Response, RequestInit } from "node-fetch";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+// fetch and FetchResult are no longer needed from @raycast/utils, use global fetch/Response
+// Response and RequestInit are globally available, no need for node-fetch import
 import { Workflow, Tag } from "../types/types";
 
 interface Preferences {
@@ -16,7 +16,7 @@ function getAPICredentials(): Preferences {
 // Base function for making authenticated API requests
 async function fetchN8nApi<T>(
   endpoint: string,
-  options: RequestInit = {} // Use imported RequestInit
+  options: RequestInit = {} // Use global RequestInit
 ): Promise<T> {
   console.log(`fetchN8nApi called for endpoint: ${endpoint}`);
 
@@ -55,11 +55,12 @@ async function fetchN8nApi<T>(
 
   try {
     console.log(`Making fetch request to: ${fullUrl}`);
-    const fetchResult: FetchResult<Response> = await fetch(fullUrl, {
+    // Use global fetch, which returns a Promise<Response> directly
+    const response: Response = await fetch(fullUrl, {
       ...options,
       headers: headers,
     });
-    const response = fetchResult.response;
+    // const response = fetchResult.response; // No longer needed
     console.log(`Fetch response status: ${response.status}`);
 
     if (!response.ok) {
@@ -84,8 +85,12 @@ async function fetchN8nApi<T>(
     return (await response.json()) as T;
   } catch (error) {
     console.error("Error fetching n8n API:", error);
-    // Use showFailureToast for consistent error reporting
-    await showFailureToast(error, { title: "API Request Failed" });
+    // Use showToast for consistent error reporting
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "API Request Failed",
+      message: error instanceof Error ? error.message : String(error),
+    });
     // Re-throw the error to be caught by the calling command
     throw error;
   }
@@ -106,7 +111,11 @@ export async function getAllTagsAPI(): Promise<Tag[]> {
   } catch (error) {
     console.error("Failed to fetch n8n tags:", error);
     // Show a toast, but allow the command to proceed without tags
-    await showFailureToast(error, { title: "Could not load tags" });
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not load tags",
+      message: error instanceof Error ? error.message : String(error),
+    });
     return []; // Return empty array on error so the command doesn't completely break
   }
 }
@@ -167,8 +176,9 @@ export async function triggerWebhook(
   }
 
   try {
-    const fetchResult: FetchResult<Response> = await fetch(webhookUrl, options);
-    const response = fetchResult.response;
+    // Use global fetch
+    const response: Response = await fetch(webhookUrl, options);
+    // const response = fetchResult.response; // No longer needed
     const responseBody = await response.text(); // Get raw response body
     return {
       ok: response.ok ?? false,
@@ -177,8 +187,12 @@ export async function triggerWebhook(
     };
   } catch (error) {
     console.error("Error triggering webhook:", error);
-    // Use showFailureToast for consistent error reporting
-    await showFailureToast(error, { title: "Webhook Request Failed" });
+    // Use showToast for consistent error reporting
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Webhook Request Failed",
+      message: error instanceof Error ? error.message : String(error),
+    });
     // Re-throw or return a specific error structure
     throw error;
   }
