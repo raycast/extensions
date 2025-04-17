@@ -32,7 +32,7 @@ export function CreateBlockView({ channel }: { channel: MinimalChannel }) {
           );
         })
         .catch((error) => {
-          showFailureToast(error, { title: "Error" });
+          showFailureToast(error, { title: "Error creating Block" });
         });
     },
     validation: {

@@ -7,8 +7,7 @@ export interface Preferences {
 }
 
 export function useArena() {
-  const preferences = getPreferenceValues<Preferences>();
-  const accessToken = preferences.accessToken;
+  const { accessToken } = getPreferenceValues<Preferences>();
 
   return useMemo(() => {
     return new Arena({

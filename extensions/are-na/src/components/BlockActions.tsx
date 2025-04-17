@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import type { Block, MinimalChannel } from "../api/types";
 import { TextBlockView } from "./text";
 import { ImageBlockView } from "./image";
@@ -44,7 +45,18 @@ export function BlockActions({ block, channel }: BlockActionsProps) {
         return (
           <>
             <Action.Push icon={Icon.Image} title="View Image" target={<ImageBlockView block={block} />} />
-            <Action title="Download Image" onAction={() => block.source?.url && downloadFile(block.source.url)} />
+            <Action
+              title="Download Image"
+              onAction={() => {
+                try {
+                  if (block.source?.url) {
+                    downloadFile(block.source.url);
+                  }
+                } catch (error) {
+                  showFailureToast(error, { title: "Failed to download image" });
+                }
+              }}
+            />
           </>
         );
       case "Attachment":
@@ -52,7 +64,15 @@ export function BlockActions({ block, channel }: BlockActionsProps) {
           <Action
             title="Download Attachment"
             icon={Icon.Download}
-            onAction={() => block.attachment?.url && downloadFile(block.attachment.url)}
+            onAction={() => {
+              try {
+                if (block.attachment?.url) {
+                  downloadFile(block.attachment.url);
+                }
+              } catch (error) {
+                showFailureToast(error, { title: "Failed to download attachment" });
+              }
+            }}
           />
         );
       default:

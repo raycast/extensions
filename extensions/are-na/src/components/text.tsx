@@ -18,6 +18,7 @@ export function TextBlockView({ block }: TextBlockViewProps) {
 
   return (
     <Detail
+      isLoading={!block.content}
       markdown={block.content ?? "No content available"}
       metadata={
         <Detail.Metadata>

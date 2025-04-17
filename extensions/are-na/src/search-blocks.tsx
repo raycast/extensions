@@ -36,11 +36,11 @@ export default function Command(props: LaunchProps<{ arguments: SearchArguments 
     <Grid columns={4} isLoading={isLoading}>
       <Grid.Section title="Search Results">
         {hasNoResults ? (
-          <Grid.EmptyView icon={{ source: "extension-icon.svg" }} title="No results found" />
+          <Grid.EmptyView icon={{ source: "extension-icon.png" }} title="No results found" />
         ) : (
-          data?.blocks.map((block) => (
+          data?.blocks.map((block, index) => (
             <Grid.Item
-              key={block.id || crypto.randomUUID()}
+              key={block.id || index}
               content={getIconSource(block)}
               title={block.title ?? ""}
               subtitle={block.class}

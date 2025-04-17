@@ -11,6 +11,7 @@ type Values = {
 
 export default function Command() {
   const { push } = useNavigation();
+  const arena = useArena();
   const { handleSubmit, itemProps } = useForm<Values>({
     onSubmit(values) {
       arena
@@ -20,7 +21,7 @@ export default function Command() {
           if (!chan) {
             return showToast({ title: "Error", message: "Channel creation failed", style: Toast.Style.Failure });
           }
-          showToast({ title: "Submitted form", message: "Channel Successfully created" });
+          showToast({ title: "Submitted form", message: "Channel successfully created" });
           push(
             <ChannelView
               channel={{
@@ -40,7 +41,6 @@ export default function Command() {
       title: FormValidation.Required,
     },
   });
-  const arena = useArena();
 
   return (
     <Form

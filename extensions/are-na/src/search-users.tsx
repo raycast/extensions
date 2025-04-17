@@ -27,7 +27,7 @@ function Actions({ user }: { user: User }) {
   );
 }
 
-function BlockListItem({ user }: { user: User }) {
+function UserListItem({ user }: { user: User }) {
   return (
     <List.Item icon={{ source: "extension-icon.svg" }} title={user.full_name ?? ""} actions={<Actions user={user} />} />
   );
@@ -49,6 +49,6 @@ export default function Command(props: LaunchProps<{ arguments: SearchArguments 
   );
 
   return (
-    <List isLoading={isLoading}>{data?.users.map((user, index) => <BlockListItem user={user} key={index} />)}</List>
+    <List isLoading={isLoading}>{data?.users.map((user, index) => <UserListItem user={user} key={index} />)}</List>
   );
 }
