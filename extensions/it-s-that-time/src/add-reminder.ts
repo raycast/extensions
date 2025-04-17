@@ -22,7 +22,12 @@ export default function main(props: LaunchProps<{ arguments: Arguments.AddRemind
     messageScriptFile: Paths.MESSAGE_SCRIPT_FILE,
   };
 
-  fs.writeFileSync(reminder.timerFile, JSON.stringify(reminder, null, 2), "utf8");
+  try {
+    fs.writeFileSync(reminder.timerFile, JSON.stringify(reminder, null, 2), "utf8");
+  } catch (error) {
+    showFailureToast(error, { title: "Failed to save reminder" });
+    return;
+  }
   exec(runner(reminder), (error, stdout, stderr) => {
     if (error) {
       console.error(`Error executing script: ${error.message}`);
