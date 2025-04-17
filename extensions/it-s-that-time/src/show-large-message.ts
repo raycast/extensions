@@ -1,5 +1,6 @@
 import { exec } from "child_process";
 import Paths from "./Paths";
+import { showFailureToast } from "@raycast/utils";
 
 export default function showLargeMessage(message = "No message") {
   exec(`python3 ${Paths.MESSAGE_SCRIPT_FILE} "${message}"`, (error, stdout, stderr) => {
