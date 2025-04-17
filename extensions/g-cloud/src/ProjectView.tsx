@@ -9,11 +9,9 @@ import { executeGcloudCommand, getProjects } from "./gcloud";
 import { CacheManager, Project } from "./utils/CacheManager";
 import { showFailureToast } from "@raycast/utils";
 
-// Create a cache instance for project details
 const cache = new Cache({ namespace: "project-details" });
 
-// Cache duration constants
-const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 interface BaseViewProps {
   projectId: string;
@@ -34,7 +32,6 @@ interface Service {
   icon: Icon;
 }
 
-// Pre-define services to avoid recreating them on each render
 const AVAILABLE_SERVICES: Service[] = [
   {
     id: "storage",
@@ -75,14 +72,12 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
   const [projects, setProjects] = useState<Project[]>([]);
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
 
-  // If no projectId is provided, fetch all projects instead
   useEffect(() => {
     if (!projectId) {
       fetchProjects();
     }
   }, [projectId]);
 
-  // Function to fetch all projects
   const fetchProjects = async () => {
     setIsLoading(true);
     try {
@@ -92,14 +87,13 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
         message: "Fetching your Google Cloud projects",
       });
 
-      // Use the getProjects function which now has built-in caching
       const result = await getProjects(gcloudPath);
 
       loadingToast.hide();
 
       if (result && result.length > 0) {
         setProjects(result);
-        // Cache the projects list
+
         CacheManager.saveProjectsList(result);
 
         showToast({
@@ -126,7 +120,6 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
     }
   };
 
-  // Function to select a project
   const selectProject = async (selectedProjectId: string) => {
     if (!selectedProjectId || typeof selectedProjectId !== "string") {
       console.error("Invalid project ID provided to selectProject:", selectedProjectId);
@@ -145,7 +138,6 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
         message: selectedProjectId,
       });
 
-      // Save to cache
       CacheManager.saveSelectedProject(selectedProjectId);
 
       loadingToast.hide();
@@ -156,7 +148,6 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
         message: selectedProjectId,
       });
 
-      // Navigate to the project view with the selected project
       push(<ProjectView projectId={selectedProjectId} gcloudPath={gcloudPath} />);
     } catch (error) {
       console.error("Error selecting project:", error);
@@ -170,9 +161,7 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
     }
   };
 
-  // Memoize the fetchProjectDetails function to avoid recreating it on each render
   const fetchProjectDetails = useCallback(async () => {
-    // Skip if no projectId is provided
     if (!projectId) {
       setIsLoading(false);
       return;
@@ -180,25 +169,20 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
 
     setIsLoading(true);
 
-    // First try to get from cache
     const cachedDetailsStr = cache.get(`project-${projectId}`);
     const timestampStr = cache.get(`project-${projectId}-timestamp`);
 
     if (cachedDetailsStr && timestampStr) {
       const timestamp = parseInt(timestampStr, 10);
 
-      // Check if cache is not expired
       if (Date.now() - timestamp <= ONE_DAY_IN_MS) {
-        // 24 hours
         try {
-          // Update the selected project in the global cache to ensure recently used list is updated
           CacheManager.saveSelectedProject(projectId);
 
           setIsLoading(false);
           return;
         } catch (error) {
           console.error("Error parsing cached project details:", error);
-          // Continue to fetch from API
         }
       }
     }
@@ -215,11 +199,9 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
       loadingToast.hide();
 
       if (result && Array.isArray(result) && result.length > 0 && result[0] && typeof result[0] === "object") {
-        // Cache the result
         cache.set(`project-${projectId}`, JSON.stringify(result[0]));
         cache.set(`project-${projectId}-timestamp`, Date.now().toString());
 
-        // Also update the selected project in the global cache
         CacheManager.saveSelectedProject(projectId);
 
         showToast({
@@ -247,7 +229,6 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
     fetchProjectDetails();
   }, [fetchProjectDetails]);
 
-  // Helper function for navigation
   const navigateToView = async <P extends BaseViewProps>(
     actionKey: string,
     title: string,
@@ -258,31 +239,25 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
     setActionInProgress(actionKey);
 
     try {
-      // Show loading toast
       activeToast = await showToast({
         style: Toast.Style.Animated,
         title: title,
         message: `Project: ${props.projectId}`,
       });
 
-      // Prepare the component to navigate to
       const component = <ViewComponent {...props} />;
 
-      // Hide the loading toast before navigation
       await activeToast?.hide();
       activeToast = null;
 
-      // Perform the navigation
       await push(component);
     } catch (error) {
-      // Handle navigation error
       console.error("Navigation error:", error);
       await showFailureToast({
         title: "Failed to navigate",
         message: error instanceof Error ? error.message : String(error),
       });
     } finally {
-      // Ensure toast is hidden and action state is cleared
       if (activeToast) {
         activeToast.hide();
       }
@@ -335,12 +310,10 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
         message: projectId ? `Project: ${projectId}` : "All projects",
       });
 
-      // Clear project-specific cache
       if (projectId) {
         cache.remove(`project-${projectId}`);
         cache.remove(`project-${projectId}-timestamp`);
       } else {
-        // Clear all project caches
         CacheManager.clearProjectsListCache();
       }
 
@@ -352,7 +325,6 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
         message: "Project cache has been cleared",
       });
 
-      // Refresh data
       if (projectId) {
         fetchProjectDetails();
       } else {

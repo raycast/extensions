@@ -5,6 +5,9 @@
   "description": "Simple translation using dict.cc",
   "icon": "icon.png",
   "author": "natterstefan",
+  "contributors": [
+    "YourMCGeek"
+  ],
   "categories": [
     "Productivity"
   ],

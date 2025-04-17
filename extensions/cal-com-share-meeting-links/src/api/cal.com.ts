@@ -88,6 +88,7 @@ export interface CalBookingResp {
     title: string;
     startTime: string;
     endTime: string;
+    createdAt: string;
     attendees: {
       email: string;
       name: string;
