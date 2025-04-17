@@ -82,6 +82,15 @@
       "mode": "no-view"
     },
     {
+      "name": "paste-latest-otp-code",
+      "title": "Paste Latest OTP Code",
+      "description": "Paste the latest OTP code from your emails.",
+      "mode": "no-view",
+      "keywords": [
+        "2fa"
+      ]
+    },
+    {
       "name": "compose-new-message",
       "title": "Compose New Message",
       "description": "Compose a new message.",
