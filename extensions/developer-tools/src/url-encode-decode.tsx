@@ -20,13 +20,17 @@ export default function Command() {
   });
 
   useEffect(() => {
-    const encoded = encodeURIComponent(values.decoded);
-    setValue("encoded", encoded);
+    const newEncoded = encodeURIComponent(values.decoded);
+    if (newEncoded !== values.encoded) {
+      setValue("encoded", newEncoded);
+    }
   }, [values.decoded]);
 
   useEffect(() => {
-    const decoded = decodeURIComponent(values.encoded);
-    setValue("decoded", decoded);
+    const newDecoded = decodeURIComponent(values.encoded);
+    if (newDecoded !== values.decoded) {
+      setValue("decoded", newDecoded);
+    }
   }, [values.encoded]);
 
   return (
