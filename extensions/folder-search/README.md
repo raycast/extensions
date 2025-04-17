@@ -40,17 +40,46 @@ A powerful Raycast extension for searching, managing, and organizing folders on 
 - Configure plugins folder location
 
 ### 🔌 Plugin System
-Create custom AppleScript plugins to extend functionality:
+Create custom AppleScript plugins to extend functionality. A sample plugin is included in the `plugins` folder:
+
 ```js
 exports.FolderSearchPlugin = {
-  title: 'Custom Action',
-  shortcut: { modifiers: ["cmd", "shift"], key: 'a' },
-  icon: 'Link',
-  appleScript: (result) => {
-    return `do shell script "open ${result.path}"`
-  }
-}
+  title: "Test Plugin",
+  shortcut: { modifiers: ["cmd", "shift"], key: "t" },
+  icon: "🔍",
+  appleScript: (result) => `
+    -- Show notification with folder details
+    display notification "Folder: ${result.kMDItemFSName}
+    Last Used: ${result.kMDItemLastUsedDate}
+    Size: ${result.kMDItemFSSize} bytes" with title "Folder Search Test"
+    
+    -- Open folder in Finder and show info
+    tell application "Finder"
+      activate
+      set targetFolder to (POSIX file "${result.path}") as alias
+      reveal targetFolder
+      open information window of targetFolder
+    end tell
+    
+    -- Log folder details to console
+    do shell script "echo 'Test Plugin: ${result.kMDItemFSName} (${result.path})' >> ~/folder-search-test.log"
+  `
+};
 ```
+
+To use plugins:
+1. Enable plugins in Raycast preferences
+2. Set the plugins folder path (see below for path format)
+3. Place your plugin files (`.js` extension) in the plugins folder
+4. Restart Raycast to load the plugins
+
+Plugin Folder Path Format:
+- Use absolute paths (starting with `/`)
+- Trailing slash is optional (both `/path/to/plugins` and `/path/to/plugins/` work)
+- The path must exist and be readable
+- Common paths:
+  - Default: `~/Library/Application Support/Raycast/extensions/folder-search/plugins/`
+  - Development: `/path/to/your/folder-search/plugins/`
 
 ### 🎯 Keyboard Shortcuts
 - `⌘ + ↑` - Move to enclosing folder
