@@ -25,7 +25,7 @@
     {
       "name": "project-launch",
       "title": "Project Launch",
-      "description": "Search local workspaces and projects - launch into them with favourite your IDE's and editors",
+      "description": "Search local workspaces and projects - launch into them with favorite your IDEs and editors",
       "mode": "view",
       "icon": "extension_icon.png",
       "preferences": [
