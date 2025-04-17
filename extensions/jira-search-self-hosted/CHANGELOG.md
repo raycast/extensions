@@ -1,4 +1,6 @@
 # Jira Search Self Hosted Changelog
+## [Update] - {PR_MERGE_DATE}
+Added new `Show Active Sprint` command that lets the user select and see a summery of the active sprint in a board. The command have configuration for customfield_Id for the fields Epic, sprint and storypoints. 
 
 ## [Fixed typo] - 2024-04-30
 

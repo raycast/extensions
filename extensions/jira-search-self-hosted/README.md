@@ -16,6 +16,9 @@ search extension built by sven to work with JIRA server instances.
   - Find issue directly by issue key (for example `DEV-1234`).
 - Find projects by title.
 - Find boards by title.
+- Show Active Sprint information with the following actions: 
+  - Configure visible fields
+  - Configure customfields_id in preferences
 - Use the following actions on found entities:
   - Open in browser
   - Copy URL
