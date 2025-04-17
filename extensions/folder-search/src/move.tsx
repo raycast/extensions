@@ -195,13 +195,29 @@ export default function Command(props: LaunchProps) {
           renderActions={renderFolderActions}
         />
       ) : (
-        <FolderListSection
-          title="Results"
-          results={results}
-          isShowingDetail={isShowingDetail}
-          resultIsPinned={resultIsPinned}
-          renderActions={renderFolderActions}
-        />
+        <>
+          {isQuerying ? (
+            <List.EmptyView
+              title="Searching..."
+              description="Looking for destination folders"
+              icon={Icon.MagnifyingGlass}
+            />
+          ) : results.length === 0 ? (
+            <List.EmptyView
+              title="No Results"
+              description="Try a different search term"
+              icon={Icon.Folder}
+            />
+          ) : (
+            <FolderListSection
+              title="Results"
+              results={results}
+              isShowingDetail={isShowingDetail}
+              resultIsPinned={resultIsPinned}
+              renderActions={renderFolderActions}
+            />
+          )}
+        </>
       )}
     </List>
   );
