@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+
 /** @module SuggestionsGetter */
-import QueryParser from "./QueryParser.js";
+import QueryParser from "./QueryParser";
 import escapeStringRegexp from "escape-string-regexp";
 
 export default class SuggestionsGetter {
@@ -87,6 +90,9 @@ export default class SuggestionsGetter {
     const [regExp, filters] = this.getRegExpAndFilters(query);
 
     for (const namespaceInfo of Object.values(this.env.namespaceInfos)) {
+      if (!namespaceInfo.shortcuts) {
+        continue;
+      }
       for (const shortcut of Object.values(namespaceInfo.shortcuts)) {
         if (shortcut.deprecated || shortcut.removed) {
           continue;
