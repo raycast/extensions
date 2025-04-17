@@ -16,11 +16,11 @@ export function useFolderSearch() {
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
   const [hasCheckedPlugins, setHasCheckedPlugins] = useState<boolean>(false);
   const [hasCheckedPreferences, setHasCheckedPreferences] = useState<boolean>(false);
-  const [showNonCloudLibraryPaths, setShowNonCloudLibraryPaths] = useState<boolean>(false);
+  const [showNonCloudLibraryPaths, setShowNonCloudLibraryPaths] = useState(false);
 
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController>(new AbortController());
   const searchTextRef = useRef<string>(searchText);
-  const debounceTimerRef = useRef<NodeJS.Timeout>();
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastProcessedText = useRef<string>("");
 
   // Update ref when searchText changes

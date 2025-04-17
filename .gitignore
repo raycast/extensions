@@ -158,6 +158,7 @@ extensions/**/.github
 
 # Raycast
 raycast-env.d.ts
+raycast.d.ts
 .build
 .raycast-swift-build
 .swiftpm
