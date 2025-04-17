@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Add new commands] - 2025-04-16
+
+- Added the command `Paste Latest Download`, which pastes the latest download to the foremost active app.
+
 ## [Enhancement] - 2025-02-25
 
 - Updated the `Show Latest Download` command to display the most recent download file.
