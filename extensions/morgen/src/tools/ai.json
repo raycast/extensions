@@ -1,0 +1,146 @@
+{
+  "instructions": "I am a tool that helps users manage their Morgen calendar. When users ask about their schedule, meetings, events, or calendar-related content, I can search and provide relevant information. I understand time expressions (like 'today', 'tomorrow', 'next week') and can search within specific date ranges. I can display users' schedules and answer questions about their calendar events.",
+  "evals": [
+    {
+      "input": "@morgen What's my schedule for today?",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-morgen-events-and-tasks",
+            "arguments": {
+              "startDate": {
+                "matches": "today|\\d{4}-\\d{2}-\\d{2}"
+              }
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@morgen List all my meetings for the next 7 days",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-morgen-events-and-tasks"
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@morgen Search for events with 'product meeting' in the title",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-morgen-events-and-tasks",
+            "arguments": {
+              "query": {
+                "includes": "product meeting"
+              }
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    }
+  ],
+  "functions": [
+    {
+      "name": "searchMorgenEventsAndTasks",
+      "description": "Search for events and tasks in the user's Morgen calendar, returning all scheduled items for the next 7 days",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query, which can include dates, event names, or task descriptions"
+          }
+        },
+        "required": ["query"]
+      },
+      "returns": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "Event title"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Event description"
+                },
+                "start": {
+                  "type": "string",
+                  "description": "Event start time"
+                },
+                "end": {
+                  "type": "string",
+                  "description": "Event end time"
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Event location"
+                },
+                "attendees": {
+                  "type": "string",
+                  "description": "List of attendees"
+                }
+              }
+            }
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "Task title"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Task description"
+                },
+                "dueDate": {
+                  "type": "string",
+                  "description": "Task due date"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Task status"
+                }
+              }
+            }
+          },
+          "period": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "string",
+                "description": "Query start date"
+              },
+              "end": {
+                "type": "string",
+                "description": "Query end date"
+              }
+            }
+          },
+          "error": {
+            "type": "string",
+            "description": "Returns error message if query fails"
+          },
+          "answer": {
+            "type": "string",
+            "description": "Direct answer to user's question"
+          }
+        }
+      }
+    }
+  ]
+}
