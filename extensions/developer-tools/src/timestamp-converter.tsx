@@ -9,9 +9,8 @@ import {
   LaunchProps,
   openExtensionPreferences,
   showHUD,
-  showToast,
 } from "@raycast/api";
-import { FormValidation, useForm, useLocalStorage } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm, useLocalStorage } from "@raycast/utils";
 import { useEffect, useMemo } from "react";
 
 interface TimestampForm {
@@ -23,7 +22,7 @@ interface TimestampForm {
   hour: string;
   minute: string;
   second: string;
-  milisecond: string;
+  millisecond: string;
   timezone: string;
 }
 
@@ -94,10 +93,7 @@ const tryGetSelectedTextAndUpdate = async (updaterFn: (text: string) => void) =>
     }
   } catch (e) {
     console.error(e);
-    showToast({
-      title: "Error",
-      message: String(e),
-    });
+    showFailureToast(e, { title: "Error getting selected text" });
   }
 };
 const STORAGE_KEY_USE_MILLISECONDS = "convert-timestamp::use-milliseconds";
@@ -118,7 +114,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
       hour: timestampDate.getHours().toString(),
       minute: timestampDate.getMinutes().toString(),
       second: timestampDate.getSeconds().toString(),
-      milisecond: timestampDate.getMilliseconds().toString(),
+      millisecond: timestampDate.getMilliseconds().toString(),
       timezone: getCurrentTimezone(),
     },
     validation: {
@@ -163,7 +159,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
           return "Second must be between 0 and 59";
         }
       },
-      milisecond: (value: string | undefined) => {
+      millisecond: (value: string | undefined) => {
         if (useMilliseconds && !value) return "Milisecond is required";
         const milisecond = parseInt(value ?? "0");
         if (isNaN(milisecond) || milisecond < 0 || milisecond > 999) {
@@ -203,7 +199,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
     setValue("hour", String(displayTime.getUTCHours()));
     setValue("minute", String(displayTime.getUTCMinutes()));
     setValue("second", String(displayTime.getUTCSeconds()));
-    setValue("milisecond", String(displayTime.getUTCMilliseconds()));
+    setValue("millisecond", String(displayTime.getUTCMilliseconds()));
   };
 
   const updateFromComponents = <K extends keyof TimestampForm>(id: K, value: TimestampForm[K]) => {
@@ -220,7 +216,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
         parseInt(newValues.hour),
         parseInt(newValues.minute),
         parseInt(newValues.second),
-        parseInt(newValues.milisecond || "0"),
+        parseInt(newValues.millisecond || "0"),
       ),
     );
 
@@ -360,10 +356,10 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
       />
       {useMilliseconds && (
         <Form.TextField
-          {...itemProps.milisecond}
+          {...itemProps.millisecond}
           title="Milisecond"
           onChange={(value) => {
-            updateFromComponents("milisecond", value);
+            updateFromComponents("millisecond", value);
           }}
         />
       )}

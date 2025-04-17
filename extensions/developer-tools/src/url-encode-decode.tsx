@@ -27,9 +27,13 @@ export default function Command() {
   }, [values.decoded]);
 
   useEffect(() => {
-    const newDecoded = decodeURIComponent(values.encoded);
-    if (newDecoded !== values.decoded) {
-      setValue("decoded", newDecoded);
+    try {
+      const newDecoded = decodeURIComponent(values.encoded);
+      if (newDecoded !== values.decoded) {
+        setValue("decoded", newDecoded);
+      }
+    } catch (e) {
+      console.error(e);
     }
   }, [values.encoded]);
 
