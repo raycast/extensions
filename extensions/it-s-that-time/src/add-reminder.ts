@@ -8,7 +8,6 @@ import * as fs from "node:fs";
 import { showFailureToast } from "@raycast/utils";
 
 export default async function main(props: LaunchProps<{ arguments: Arguments.AddReminder }>) {
-  try {
   if (!fs.existsSync(Paths.TIMER_PATH)) {
     fs.mkdirSync(Paths.TIMER_PATH, { recursive: true });
   }
@@ -53,9 +52,8 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Add
 function argumentsToSeconds(args: Arguments.AddReminder) {
   const h = parseIntOrZero(args.hours);
   const m = parseIntOrZero(args.minutes);
-  const s = parseIntOrZero(args.seconds);
 
-  return h * 3600 + m * 60 + s;
+  return h * 3600 + m * 60;
 }
 
 function parseIntOrZero(value: string): number {
