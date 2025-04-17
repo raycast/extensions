@@ -1,9 +1,9 @@
-import { Alert, Icon, closeMainWindow, confirmAlert, getPreferenceValues, popToRoot, trash, environment } from "@raycast/api";
+import { Alert, Icon, closeMainWindow, confirmAlert, getPreferenceValues, popToRoot, trash } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import fs from "fs";
 import * as yup from "yup";
 import path from "path";
-const os = require('os');
+import os from "os";
 
 import { SpotlightSearchPreferences, SpotlightSearchResult } from "./types";
 import { showFailureToast } from "@raycast/utils";
@@ -176,8 +176,8 @@ export function formatDate(dateString: string | undefined | null): string {
   try {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat(undefined, {
-      dateStyle: 'full',
-      timeStyle: 'short'
+      dateStyle: "full",
+      timeStyle: "short",
     }).format(date);
   } catch (e) {
     return "-";
@@ -187,17 +187,17 @@ export function formatDate(dateString: string | undefined | null): string {
 // Logging utility
 const LOG_ENABLED = true; // Set to true to enable all logging
 
-export const log = (level: 'debug' | 'error', component: string, message: string, data?: any) => {
+export const log = (level: "debug" | "error", component: string, message: string, data?: Record<string, unknown>) => {
   if (!LOG_ENABLED) return;
-  
+
   const timestamp = new Date().toISOString();
   const logData = {
     ...data,
     component,
-    timestamp
+    timestamp,
   };
 
-  if (level === 'debug') {
+  if (level === "debug") {
     console.debug(`[FolderSearch] ${message}:`, logData);
   } else {
     console.error(`[FolderSearch] ${message}:`, logData);

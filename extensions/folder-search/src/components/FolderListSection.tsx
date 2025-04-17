@@ -39,20 +39,14 @@ export function FolderListSection({
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label title="Type" text={result.kMDItemKind} />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Created"
-                    text={formatDate(result.kMDItemFSCreationDate)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Created" text={formatDate(result.kMDItemFSCreationDate)} />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Modified"
                     text={formatDate(result.kMDItemContentModificationDate)}
                   />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Last used"
-                    text={formatDate(result.kMDItemLastUsedDate)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Last used" text={formatDate(result.kMDItemLastUsedDate)} />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Use count"

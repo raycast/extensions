@@ -1,5 +1,18 @@
-import { Action, ActionPanel, Color, Form, Icon, List, Toast, closeMainWindow, popToRoot, confirmAlert, open, getSelectedFinderItems, Keyboard } from "@raycast/api";
-import { folderName, showFolderInfoInFinder, copyFolderToClipboard, maybeMoveResultToTrash } from "./utils";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Form,
+  Icon,
+  List,
+  closeMainWindow,
+  popToRoot,
+  confirmAlert,
+  open,
+  getSelectedFinderItems,
+  Keyboard,
+} from "@raycast/api";
+import { folderName, copyFolderToClipboard, maybeMoveResultToTrash } from "./utils";
 import { runAppleScript } from "run-applescript";
 import { SpotlightSearchResult } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";

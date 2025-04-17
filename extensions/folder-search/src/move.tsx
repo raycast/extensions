@@ -1,6 +1,17 @@
-import { Action, ActionPanel, Form, Icon, List, closeMainWindow, popToRoot, confirmAlert, open, getSelectedFinderItems, Keyboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  List,
+  closeMainWindow,
+  popToRoot,
+  confirmAlert,
+  open,
+  getSelectedFinderItems,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { folderName} from "./utils";
+import { folderName } from "./utils";
 import { SpotlightSearchResult } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
 import { FolderListSection, Directory } from "./components";
@@ -76,7 +87,9 @@ export default function Command() {
       await showFailureToast({ title: "No files were moved" });
       return false;
     } else if (skippedCount > 0) {
-      await showFailureToast({ title: `Moved ${movedCount} item(s) to ${path.basename(destinationFolder)}, skipped ${skippedCount} item(s)` });
+      await showFailureToast({
+        title: `Moved ${movedCount} item(s) to ${path.basename(destinationFolder)}, skipped ${skippedCount} item(s)`,
+      });
     } else {
       await showFailureToast({ title: `Moved ${movedCount} item(s) to ${path.basename(destinationFolder)}` });
     }

@@ -19,7 +19,7 @@ function createSpotlightResult(filePath: string): SpotlightSearchResult {
     kMDItemFSCreationDate: stats.birthtime.toISOString(),
     kMDItemContentModificationDate: stats.mtime.toISOString(),
     kMDItemLastUsedDate: stats.atime.toISOString(),
-    kMDItemUseCount: 0
+    kMDItemUseCount: 0,
   };
 }
 
@@ -29,9 +29,10 @@ export function Directory({ path: directoryPath }: DirectoryProps) {
 
   useEffect(() => {
     try {
-      const items = fs.readdirSync(directoryPath)
-        .filter(file => !file.startsWith("."))
-        .filter(file => fs.statSync(path.join(directoryPath, file)).isDirectory())
+      const items = fs
+        .readdirSync(directoryPath)
+        .filter((file) => !file.startsWith("."))
+        .filter((file) => fs.statSync(path.join(directoryPath, file)).isDirectory())
         .sort();
       setFiles(items);
     } catch (error) {
@@ -88,4 +89,4 @@ export function Directory({ path: directoryPath }: DirectoryProps) {
       </List.Section>
     </List>
   );
-} 
+}

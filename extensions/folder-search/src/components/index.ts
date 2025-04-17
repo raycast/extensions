@@ -1,2 +1,2 @@
-export { Directory } from './Directory';
-export { FolderListSection } from './FolderListSection'; 
+export { Directory } from "./Directory";
+export { FolderListSection } from "./FolderListSection";

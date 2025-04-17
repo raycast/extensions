@@ -2,14 +2,8 @@ import { getPreferenceValues } from "@raycast/api";
 import * as React from "react";
 import spotlight from "./libs/node-spotlight";
 import { SpotlightSearchResult, SpotlightSearchPreferences } from "./types";
-import { exec } from "child_process";
-import { promisify } from "util";
-import os from "os";
 import path from "path";
 import { safeSearchScope, log } from "./utils";
-
-const execAsync = promisify(exec);
-const HOME_DIR = os.homedir();
 
 const folderSpotlightSearchAttributes = [
   "kMDItemDisplayName",
@@ -29,10 +23,10 @@ export async function searchSpotlight(
   searchScope: "pinned" | "user" | "all",
   abortable?: React.MutableRefObject<AbortController | null | undefined>
 ): Promise<SpotlightSearchResult[]> {
-  log('debug', 'searchSpotlight', 'Starting search with parameters', {
+  log("debug", "searchSpotlight", "Starting search with parameters", {
     search,
     searchScope,
-    abortable: !!abortable?.current
+    abortable: !!abortable?.current,
   });
 
   const { maxResults } = getPreferenceValues<SpotlightSearchPreferences>();
@@ -42,14 +36,14 @@ export async function searchSpotlight(
     ? ["kMDItemContentType=='public.folder'", `kMDItemDisplayName == '${search.replace(/[[|\]]/gi, "")}'`]
     : ["kMDItemContentType=='public.folder'", `kMDItemDisplayName = "*${search}*"cd`];
 
-  log('debug', 'searchSpotlight', 'Generated search filter', {
+  log("debug", "searchSpotlight", "Generated search filter", {
     filter: searchFilter,
     isExactSearch,
-    maxResults
+    maxResults,
   });
 
   try {
-    log('debug', 'searchSpotlight', 'Executing Spotlight search');
+    log("debug", "searchSpotlight", "Executing Spotlight search");
 
     const results = await new Promise<SpotlightSearchResult[]>((resolve, reject) => {
       const searchResults: SpotlightSearchResult[] = [];
@@ -67,30 +61,30 @@ export async function searchSpotlight(
         if (resultsCount < maxResults) {
           resultsCount++;
           searchResults.push(result);
-          log('debug', 'searchSpotlight', 'Received result', {
+          log("debug", "searchSpotlight", "Received result", {
             resultCount: resultsCount,
-            path: result.path
+            path: result.path,
           });
         } else if (resultsCount >= maxResults) {
-          log('debug', 'searchSpotlight', 'Max results reached, aborting', {
-            maxResults
+          log("debug", "searchSpotlight", "Max results reached, aborting", {
+            maxResults,
           });
           abortable?.current?.abort();
         }
       });
 
       searchStream.on("end", () => {
-        log('debug', 'searchSpotlight', 'Spotlight search completed', {
-          resultCount: searchResults.length
+        log("debug", "searchSpotlight", "Spotlight search completed", {
+          resultCount: searchResults.length,
         });
         resolve(searchResults);
       });
 
       searchStream.on("error", (error: Error) => {
-        log('error', 'searchSpotlight', 'Error during search', {
+        log("error", "searchSpotlight", "Error during search", {
           error,
           search,
-          searchScope
+          searchScope,
         });
         reject(error);
       });
@@ -111,18 +105,18 @@ export async function searchSpotlight(
         kMDItemFSName: result.kMDItemFSName || path.basename(result.path),
       }));
 
-    log('debug', 'searchSpotlight', 'Filtered results', {
+    log("debug", "searchSpotlight", "Filtered results", {
       originalCount: results.length,
       filteredCount: filteredResults.length,
-      searchScope
+      searchScope,
     });
 
     return filteredResults;
   } catch (error) {
-    log('error', 'searchSpotlight', 'Error during search', {
+    log("error", "searchSpotlight", "Error during search", {
       error,
       search,
-      searchScope
+      searchScope,
     });
     throw error;
   }
