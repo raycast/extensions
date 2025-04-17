@@ -61,6 +61,13 @@
       "subtitle": "Google Chrome",
       "description": "Create New Window.",
       "mode": "no-view"
+    },
+    {
+      "name": "new-incognito-window",
+      "title": "Create New Incognito Window",
+      "subtitle": "Google Chrome",
+      "description": "Create New Incognito Window.",
+      "mode": "no-view"
     }
   ],
   "tools": [
