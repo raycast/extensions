@@ -2,9 +2,14 @@ import { getPreferenceValues } from "@raycast/api";
 import * as React from "react";
 import spotlight from "./libs/node-spotlight";
 import { SpotlightSearchResult, SpotlightSearchPreferences } from "./types";
+import { exec } from "child_process";
+import { promisify } from "util";
+import os from "os";
 import path from "path";
-import { safeSearchScope } from "./utils";
-import { log } from "./utils/logger";
+import { safeSearchScope, log } from "./utils";
+
+const execAsync = promisify(exec);
+const HOME_DIR = os.homedir();
 
 const folderSpotlightSearchAttributes = [
   "kMDItemDisplayName",

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
+import { LocalStorage, Toast, environment, showToast, getPreferenceValues } from "@raycast/api";
 import { usePromise, showFailureToast } from "@raycast/utils";
 import { FolderSearchPlugin, SpotlightSearchResult, SpotlightSearchPreferences } from "../types";
-import { loadPlugins, lastUsedSort, shouldShowPath } from "../utils";
+import { loadPlugins, lastUsedSort, shouldShowPath, log } from "../utils";
 import { searchSpotlight } from "../search-spotlight";
-import { log } from "../utils/logger";
+
 
 export function useFolderSearch() {
   const [searchText, setSearchText] = useState<string>("");
