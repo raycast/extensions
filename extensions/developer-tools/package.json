@@ -42,9 +42,9 @@
       "mode": "view"
     },
     {
-      "name": "json-unescape",
-      "title": "Json Unescape",
-      "description": "Unescape a JSON string",
+      "name": "json-escape-unescape",
+      "title": "Json Escape / Unescape",
+      "description": "Escape / Unescape a JSON string",
       "mode": "view"
     }
   ],
