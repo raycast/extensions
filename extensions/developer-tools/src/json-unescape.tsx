@@ -36,10 +36,10 @@ export default function Command() {
         <ActionPanel>
           <Action.SubmitForm title="Copy Unescaped Text" onSubmit={handleSubmit} />
           <Action
-            title="Copy Input"
+            title="Copy Escaped Text"
             onAction={() => {
-              Clipboard.copy(values.unescaped);
-              showHUD("Copied unescaped text to clipboard");
+              Clipboard.copy(values.escaped);
+              showHUD("Copied escaped text to clipboard");
             }}
           />
         </ActionPanel>
