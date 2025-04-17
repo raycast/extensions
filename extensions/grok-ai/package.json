@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grok-ai",
+  "title": "Grok AI",
+  "description": "Queries Grok AI API",
+  "icon": "icon.png",
+  "author": "andrei_ciobotar",
+  "email": "mail@semi-sacred.ai",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "chat",
+    "gpt",
+    "grok"
+  ],
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Query Grok",
+      "description": "Send a query to Grok and view the response",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Grok AI",
+      "description": "Collection of your recent answers",
+      "mode": "view"
+    },
+    {
+      "name": "model",
+      "title": "Models",
+      "subtitle": "Grok AI",
+      "description": "Collection of your custom and default models",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Grok API Key",
+      "label": "Input Grok API Key",
+      "description": "Your xAI Grok API key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "useStream",
+      "title": "Use Streaming",
+      "label": "Use Streaming",
+      "type": "checkbox",
+      "default": true,
+      "description": "Enable streaming for Grok responses",
+      "required": true
+    },
+    {
+      "name": "isHistoryPaused",
+      "title": "Pause History",
+      "label": "Toggle history",
+      "type": "checkbox",
+      "default": false,
+      "description": "Pause saving chat history",
+      "required": true
+    },
+    {
+      "name": "isAutoSaveConversation",
+      "label": "Enable auto-save conversation",
+      "description": "Auto-save every conversation that you had with the model",
+      "type": "checkbox",
+      "title": "Auto-save Conversation",
+      "default": true,
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.95.0",
+    "@raycast/utils": "^1.17.0",
+    "csv-parse": "^5.6.0",
+    "moment": "^2.30.1",
+    "say": "^0.16.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
