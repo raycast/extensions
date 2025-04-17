@@ -25,6 +25,28 @@
       "required": true
     },
     {
+      "name": "urlPreference",
+      "title": "URL Preference",
+      "description": "Choose which YouTube URLs to control",
+      "type": "dropdown",
+      "default": "music",
+      "required": true,
+      "data": [
+        {
+          "title": "YouTube Music Only",
+          "value": "music"
+        },
+        {
+          "title": "YouTube Only",
+          "value": "youtube"
+        },
+        {
+          "title": "Both YouTube and Music",
+          "value": "both"
+        }
+      ]
+    },
+    {
       "name": "ff-rew-seconds",
       "title": "Number of seconds to fast forward or rewind.",
       "default": "10",
@@ -60,6 +82,13 @@
       "title": "Like",
       "subtitle": "YouTube Music",
       "description": "Adds current track to \"Liked\" collection in YouTube Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "remove-like",
+      "title": "Remove Like",
+      "subtitle": "YouTube Music",
+      "description": "Removes the current track from your liked songs in YouTube Music.",
       "mode": "no-view"
     },
     {
