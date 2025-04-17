@@ -19,7 +19,7 @@ export default function Command() {
   return (
     <MenuBarExtra
       isLoading={isLoading}
-      title={nextReminder ? `remaining ${formatRemainingTime(nextReminder?.targetTimestamp)}` : ""}
+      title={nextReminder ? `remaining ${formatRemainingTime(nextReminder.targetTimestamp)}` : ""}
       icon={nextReminder ? "" : Icon.Alarm}
     >
       {nextReminder && (
