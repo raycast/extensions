@@ -5,10 +5,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 // Get User Preferences
 
-interface preferences {
-  name: string;
-  id?: string;
-}
 const preferences = getPreferenceValues<Preferences>();
 const favoriteLeague = preferences.league;
 const favoriteSport = preferences.sport;
