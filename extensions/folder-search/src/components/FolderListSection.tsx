@@ -57,7 +57,7 @@ export function FolderListSection({
               }
             />
           }
-          actions={renderActions(result, resultIndex)}
+          actions={renderActions(result, resultIndex) as any}
         />
       ))}
     </List.Section>
