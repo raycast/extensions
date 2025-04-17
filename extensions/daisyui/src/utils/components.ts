@@ -14,7 +14,7 @@ export const Components: daisyUIComponent[] = [
     name: "Button",
     description: "Buttons allow the user to take actions or make choices.",
     imageUrl: "https://img.daisyui.com/images/components/button.webp",
-    componentUrl: "https://v5.daisyui.com/components/button",
+    componentUrl: "https://daisyui.com/components/button",
     section: "Actions",
     exampleHTML: '<button class="btn">Default</button>',
     exampleJSX: `<button className="btn">Default</button>`,
@@ -23,7 +23,7 @@ export const Components: daisyUIComponent[] = [
     name: "Dropdown",
     description: "Dropdown can open a menu or any other element when the button is clicked.",
     imageUrl: "https://img.daisyui.com/images/components/dropdown.webp",
-    componentUrl: "https://v5.daisyui.com/components/dropdown",
+    componentUrl: "https://daisyui.com/components/dropdown",
     section: "Actions",
     exampleHTML: `<details class="dropdown">
     <summary class="btn m-1">open or close</summary>
@@ -44,7 +44,7 @@ export const Components: daisyUIComponent[] = [
     name: "Modal",
     description: "Modal is used to show a dialog or a box when you click a button.",
     imageUrl: "https://img.daisyui.com/images/components/modal.webp",
-    componentUrl: "https://v5.daisyui.com/components/modal",
+    componentUrl: "https://daisyui.com/components/modal",
     section: "Actions",
     exampleHTML: `<!-- Open the modal using ID.showModal() method -->
   <button class="btn" onclick="my_modal_1.showModal()">open modal</button>
@@ -79,7 +79,7 @@ export const Components: daisyUIComponent[] = [
     name: "Swap",
     description: "Swap allows you to toggle the visibility of two elements using a checkbox or a class name.",
     imageUrl: "https://img.daisyui.com/images/components/swap.webp",
-    componentUrl: "https://v5.daisyui.com/components/swap",
+    componentUrl: "https://daisyui.com/components/swap",
     section: "Actions",
     exampleHTML: `<label class="swap">
     <input type="checkbox" />
@@ -97,7 +97,7 @@ export const Components: daisyUIComponent[] = [
     description:
       "If a checked checkbox input or a checked radio input with theme-controller class exists in the page, The page will have the same theme as that input's value.",
     imageUrl: "https://img.daisyui.com/images/components/theme-controller.webp",
-    componentUrl: "https://v5.daisyui.com/components/theme-controller",
+    componentUrl: "https://daisyui.com/components/theme-controller",
     section: "Actions",
     exampleHTML: `<input type="checkbox" value="synthwave" class="toggle theme-controller" />`,
     exampleJSX: `<input type="checkbox" value="synthwave" className="toggle theme-controller" />`,
@@ -108,7 +108,7 @@ export const Components: daisyUIComponent[] = [
     name: "Accordion",
     description: "Accordion is used for showing and hiding content but only one item can stay open at a time.",
     imageUrl: "https://img.daisyui.com/images/components/accordion.webp",
-    componentUrl: "https://v5.daisyui.com/components/accordion",
+    componentUrl: "https://daisyui.com/components/accordion",
     section: "Data Display",
     exampleHTML: `<div class="collapse bg-base-100 border border-base-300">
     <input type="radio" name="my-accordion-1" checked="checked" />
@@ -145,7 +145,7 @@ export const Components: daisyUIComponent[] = [
     name: "Avatar",
     description: "Avatars are used to show a thumbnail representation of an individual or business in the interface.",
     imageUrl: "https://img.daisyui.com/images/components/avatar.webp",
-    componentUrl: "https://v5.daisyui.com/components/avatar",
+    componentUrl: "https://daisyui.com/components/avatar",
     section: "Data Display",
     exampleHTML: `<div class="avatar">
     <div class="w-24 rounded">
@@ -162,7 +162,7 @@ export const Components: daisyUIComponent[] = [
     name: "Badge",
     description: "Badges are used to inform the user of the status of specific data.",
     imageUrl: "https://img.daisyui.com/images/components/badge.webp",
-    componentUrl: "https://v5.daisyui.com/components/badge",
+    componentUrl: "https://daisyui.com/components/badge",
     section: "Data Display",
     exampleHTML: `<span class="badge">Badge</span>`,
     exampleJSX: `<span className="badge">Badge</span>`,
@@ -171,7 +171,7 @@ export const Components: daisyUIComponent[] = [
     name: "Card",
     description: "Cards are used to group and display content in a way that is easily readable.",
     imageUrl: "https://img.daisyui.com/images/components/card.webp",
-    componentUrl: "https://v5.daisyui.com/components/card",
+    componentUrl: "https://daisyui.com/components/card",
     section: "Data Display",
     exampleHTML: `<div class="card bg-base-100 w-96 shadow-sm">
     <figure>
@@ -206,7 +206,7 @@ export const Components: daisyUIComponent[] = [
     name: "Carousel",
     description: "Carousel show images or content in a scrollable area.",
     imageUrl: "https://img.daisyui.com/images/components/carousel.webp",
-    componentUrl: "https://v5.daisyui.com/components/carousel",
+    componentUrl: "https://daisyui.com/components/carousel",
     section: "Data Display",
     exampleHTML: `<div class="carousel rounded-box">
     <div class="carousel-item">
@@ -288,7 +288,7 @@ export const Components: daisyUIComponent[] = [
     description:
       "Chat bubbles are used to show one line of conversation and all its data, including the author image, author name, time, etc.",
     imageUrl: "https://img.daisyui.com/images/components/chat.webp",
-    componentUrl: "https://v5.daisyui.com/components/chat",
+    componentUrl: "https://daisyui.com/components/chat",
     section: "Data Display",
     exampleHTML: `<div class="chat chat-start">
     <div class="chat-bubble">
@@ -315,7 +315,7 @@ export const Components: daisyUIComponent[] = [
     name: "Collapse",
     description: "Collapse is used for showing and hiding content.",
     imageUrl: "https://img.daisyui.com/images/components/collapse.webp",
-    componentUrl: "https://v5.daisyui.com/components/collapse",
+    componentUrl: "https://daisyui.com/components/collapse",
     section: "Data Display",
     exampleHTML: `<div tabindex="0" class="collapse bg-base-100 border border-base-300">
     <div class="collapse-title font-semibold">How do I create an account?</div>
@@ -330,7 +330,7 @@ export const Components: daisyUIComponent[] = [
     name: "Countdown",
     description: "Countdown gives you a transition effect when you change a number between 0 to 99.",
     imageUrl: "https://img.daisyui.com/images/components/countdown.webp",
-    componentUrl: "https://v5.daisyui.com/components/countdown",
+    componentUrl: "https://daisyui.com/components/countdown",
     section: "Data Display",
     exampleHTML: `<span class="countdown">
     <span style="--value:59;">59</span>
@@ -344,7 +344,7 @@ export const Components: daisyUIComponent[] = [
     name: "Diff",
     description: "Diff component shows a side-by-side comparison of two items.",
     imageUrl: "https://img.daisyui.com/images/components/diff.webp",
-    componentUrl: "https://v5.daisyui.com/components/diff",
+    componentUrl: "https://daisyui.com/components/diff",
     section: "Data Display",
     exampleHTML: `<figure class="diff aspect-16/9" tabindex="0">
       <div class="diff-item-1" role="img">
@@ -373,7 +373,7 @@ export const Components: daisyUIComponent[] = [
     name: "Kbd",
     description: "Kbd is used to display keyboard shortcuts.",
     imageUrl: "https://img.daisyui.com/images/components/kbd.webp",
-    componentUrl: "https://v5.daisyui.com/components/kbd",
+    componentUrl: "https://daisyui.com/components/kbd",
     section: "Data Display",
     exampleHTML: `<kbd class="kbd">K</kbd>`,
     exampleJSX: `<kbd className="kbd">K</kbd>`,
@@ -382,7 +382,7 @@ export const Components: daisyUIComponent[] = [
     name: "List",
     description: "List is a vertical layout to display information in rows.",
     imageUrl: "https://img.daisyui.com/images/components/list.webp",
-    componentUrl: "https://v5.daisyui.com/components/kbd",
+    componentUrl: "https://daisyui.com/components/kbd",
     section: "Data Display",
     exampleHTML: `<ul class="list bg-base-100 rounded-box shadow-md">
 
@@ -483,7 +483,7 @@ export const Components: daisyUIComponent[] = [
     name: "Stat",
     description: "Stat is used to show numbers and data in a block.",
     imageUrl: "https://img.daisyui.com/images/components/stat.webp",
-    componentUrl: "https://v5.daisyui.com/components/stat",
+    componentUrl: "https://daisyui.com/components/stat",
     section: "Data Display",
     exampleHTML: `<div class="stats shadow">
     <div class="stat">
@@ -505,7 +505,7 @@ export const Components: daisyUIComponent[] = [
     description:
       "Status is a really small icon to visually show the current status of an element, like online, offline, error, etc.",
     imageUrl: "https://img.daisyui.com/images/components/status.webp",
-    componentUrl: "https://v5.daisyui.com/components/status",
+    componentUrl: "https://daisyui.com/components/status",
     section: "Data Display",
     exampleHTML: `<span class="status"></span>`,
     exampleJSX: `<span className="status"></span>`,
@@ -514,7 +514,7 @@ export const Components: daisyUIComponent[] = [
     name: "Table",
     description: "Table can be used to show a list of data in a table format.",
     imageUrl: "https://img.daisyui.com/images/components/table.webp",
-    componentUrl: "https://v5.daisyui.com/components/table",
+    componentUrl: "https://daisyui.com/components/table",
     section: "Data Display",
     exampleHTML: `<div class="overflow-x-auto">
     <table class="table">
@@ -593,7 +593,7 @@ export const Components: daisyUIComponent[] = [
     name: "Timeline",
     description: "Timeline component shows a list of events in chronological order.",
     imageUrl: "https://img.daisyui.com/images/components/timeline.webp",
-    componentUrl: "https://v5.daisyui.com/components/timeline",
+    componentUrl: "https://daisyui.com/components/timeline",
     section: "Data Display",
     exampleHTML: `<ul class="timeline">
     <li>
@@ -782,7 +782,7 @@ export const Components: daisyUIComponent[] = [
     name: "Breadcrumbs",
     description: "Breadcrumbs helps users to navigate through the website.",
     imageUrl: "https://img.daisyui.com/images/components/breadcrumbs.webp",
-    componentUrl: "https://v5.daisyui.com/components/breadcrumbs",
+    componentUrl: "https://daisyui.com/components/breadcrumbs",
     section: "Navigation",
     exampleHTML: `<div class="breadcrumbs text-sm">
     <ul>
@@ -804,7 +804,7 @@ export const Components: daisyUIComponent[] = [
     description:
       "Dock (also know as Bottom navigation or Bottom bar) is a UI element that provides navigation options to the user. Dock sticks to the bottom of the screen.",
     imageUrl: "https://img.daisyui.com/images/components/dock.webp",
-    componentUrl: "https://v5.daisyui.com/components/dock",
+    componentUrl: "https://daisyui.com/components/dock",
     section: "Navigation",
     exampleHTML: `<div class="dock">
     <button>
@@ -843,7 +843,7 @@ export const Components: daisyUIComponent[] = [
     name: "Link",
     description: "Link adds the missing underline style to links.",
     imageUrl: "https://img.daisyui.com/images/components/link.webp",
-    componentUrl: "https://v5.daisyui.com/components/link",
+    componentUrl: "https://daisyui.com/components/link",
     section: "Navigation",
     exampleHTML: `<a class="link">Click me</a>`,
     exampleJSX: `<a className="link">Click me</a>`,
@@ -852,7 +852,7 @@ export const Components: daisyUIComponent[] = [
     name: "Menu",
     description: "Menu is used to display a list of links vertically or horizontally.",
     imageUrl: "https://img.daisyui.com/images/components/menu.webp",
-    componentUrl: "https://v5.daisyui.com/components/menu",
+    componentUrl: "https://daisyui.com/components/menu",
     section: "Navigation",
     exampleHTML: `<ul class="menu bg-base-200 rounded-box w-56">
     <li><a>Item 1</a></li>
@@ -869,7 +869,7 @@ export const Components: daisyUIComponent[] = [
     name: "Navbar",
     description: "Navbar is used to show a navigation bar on the top of the page.",
     imageUrl: "https://img.daisyui.com/images/components/navbar.webp",
-    componentUrl: "https://v5.daisyui.com/components/navbar",
+    componentUrl: "https://daisyui.com/components/navbar",
     section: "Navigation",
     exampleHTML: `<div class="navbar bg-base-100 shadow-sm">
     <a class="btn btn-ghost text-xl">daisyUI</a>
@@ -882,7 +882,7 @@ export const Components: daisyUIComponent[] = [
     name: "Pagination",
     description: "Pagination is a group of buttons that allow the user to navigate between a set of related content.",
     imageUrl: "https://img.daisyui.com/images/components/pagination.webp",
-    componentUrl: "https://v5.daisyui.com/components/pagination",
+    componentUrl: "https://daisyui.com/components/pagination",
     section: "Navigation",
     exampleHTML: `<div class="join">
     <button class="join-item btn">1</button>
@@ -901,7 +901,7 @@ export const Components: daisyUIComponent[] = [
     name: "Steps",
     description: "Steps can be used to show a list of steps in a process.",
     imageUrl: "https://img.daisyui.com/images/components/steps.webp",
-    componentUrl: "https://v5.daisyui.com/components/steps",
+    componentUrl: "https://daisyui.com/components/steps",
     section: "Navigation",
     exampleHTML: `<ul class="steps">
     <li class="step step-primary">Register</li>
@@ -920,7 +920,7 @@ export const Components: daisyUIComponent[] = [
     name: "Tab",
     description: "Tabs can be used to show a list of links in a tabbed format.",
     imageUrl: "https://img.daisyui.com/images/components/tab.webp",
-    componentUrl: "https://v5.daisyui.com/components/tab",
+    componentUrl: "https://daisyui.com/components/tab",
     section: "Navigation",
     exampleHTML: `<div role="tablist" class="tabs">
     <a role="tab" class="tab">Tab 1</a>
@@ -939,7 +939,7 @@ export const Components: daisyUIComponent[] = [
     name: "Alert",
     description: "Alert informs users about important events.",
     imageUrl: "https://img.daisyui.com/images/components/alert.webp",
-    componentUrl: "https://v5.daisyui.com/components/alert",
+    componentUrl: "https://daisyui.com/components/alert",
     section: "Feedback",
     exampleHTML: `<div role="alert" class="alert">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info h-6 w-6 shrink-0">
@@ -958,7 +958,7 @@ export const Components: daisyUIComponent[] = [
     name: "Loading",
     description: "Loading shows an animation to indicate that something is loading.",
     imageUrl: "https://img.daisyui.com/images/components/loading.webp",
-    componentUrl: "https://v5.daisyui.com/components/loading",
+    componentUrl: "https://daisyui.com/components/loading",
     section: "Feedback",
     exampleHTML: `<span class="loading loading-spinner loading-xs"></span>
 <span class="loading loading-spinner loading-sm"></span>
@@ -973,7 +973,7 @@ export const Components: daisyUIComponent[] = [
     name: "Progress",
     description: "Progress bar can be used to show the progress of a task or to show the passing of time.",
     imageUrl: "https://img.daisyui.com/images/components/progress.webp",
-    componentUrl: "https://v5.daisyui.com/components/progress",
+    componentUrl: "https://daisyui.com/components/progress",
     section: "Feedback",
     exampleHTML: `<progress class="progress w-56" value="0" max="100"></progress>
 <progress class="progress w-56" value="10" max="100"></progress>
@@ -990,7 +990,7 @@ export const Components: daisyUIComponent[] = [
     name: "Radial progress",
     description: "Radial progress can be used to show the progress of a task or to show the passing of time.",
     imageUrl: "https://img.daisyui.com/images/components/radial-progress.webp",
-    componentUrl: "https://v5.daisyui.com/components/radial-progress",
+    componentUrl: "https://daisyui.com/components/radial-progress",
     section: "Feedback",
     exampleHTML: `<div class="radial-progress" style="--value:70;" role="progressbar">70%</div>`,
     exampleJSX: `<div className="radial-progress" style={{ "--value": 70 }} role="progressbar">
@@ -1001,7 +1001,7 @@ export const Components: daisyUIComponent[] = [
     name: "Skeleton",
     description: "Skeleton is a component that can be used to show a loading state of a component.",
     imageUrl: "https://img.daisyui.com/images/components/skeleton.webp",
-    componentUrl: "https://v5.daisyui.com/components/skeleton",
+    componentUrl: "https://daisyui.com/components/skeleton",
     section: "Feedback",
     exampleHTML: `<div class="skeleton h-32 w-32"></div>`,
     exampleJSX: `<div className="skeleton h-32 w-32"></div>`,
@@ -1010,7 +1010,7 @@ export const Components: daisyUIComponent[] = [
     name: "Toast",
     description: "Toast is a wrapper to stack elements, positioned on the corner of page.",
     imageUrl: "https://img.daisyui.com/images/components/toast.webp",
-    componentUrl: "https://v5.daisyui.com/components/toast",
+    componentUrl: "https://daisyui.com/components/toast",
     section: "Feedback",
     exampleHTML: `<div class="toast">
   <div class="alert alert-info">
@@ -1027,7 +1027,7 @@ export const Components: daisyUIComponent[] = [
     name: "Tooltip",
     description: "Tooltip can be used to show a message when hovering over an element.",
     imageUrl: "https://img.daisyui.com/images/components/tooltip.webp",
-    componentUrl: "https://v5.daisyui.com/components/tooltip",
+    componentUrl: "https://daisyui.com/components/tooltip",
     section: "Feedback",
     exampleHTML: `<div class="tooltip" data-tip="hello">
   <button class="btn">Hover me</button>
@@ -1041,7 +1041,7 @@ export const Components: daisyUIComponent[] = [
     name: "Calendar",
     description: "Calendar includes styles for different calendar libraries.",
     imageUrl: "https://img.daisyui.com/images/components/calendar.webp",
-    componentUrl: "https://v5.daisyui.com/components/calendar",
+    componentUrl: "https://daisyui.com/components/calendar",
     section: "Data Input",
     exampleHTML: `<!--
     * Import Cally web component from CDN
@@ -1078,7 +1078,7 @@ export const Components: daisyUIComponent[] = [
     name: "Checkbox",
     description: "Checkboxes are used to select or deselect a value.",
     imageUrl: "https://img.daisyui.com/images/components/checkbox.webp",
-    componentUrl: "https://v5.daisyui.com/components/checkbox",
+    componentUrl: "https://daisyui.com/components/checkbox",
     section: "Data Input",
     exampleHTML: `<input type="checkbox" checked="checked" class="checkbox" />`,
     exampleJSX: `<input type="checkbox" defaultChecked className="checkbox" />`,
@@ -1088,7 +1088,7 @@ export const Components: daisyUIComponent[] = [
     description:
       "Fieldset is a container for grouping related form elements. It includes fieldset-legend as a title and fieldset-label as a description.",
     imageUrl: "https://img.daisyui.com/images/components/fieldset.webp",
-    componentUrl: "https://v5.daisyui.com/components/fieldset",
+    componentUrl: "https://daisyui.com/components/fieldset",
     section: "Data Input",
     exampleHTML: `<fieldset class="fieldset">
     <legend class="fieldset-legend">Page title</legend>
@@ -1105,7 +1105,7 @@ export const Components: daisyUIComponent[] = [
     name: "File Input",
     description: "File Input is a an input field for uploading files.",
     imageUrl: "https://img.daisyui.com/images/components/file-input.webp",
-    componentUrl: "https://v5.daisyui.com/components/file-input",
+    componentUrl: "https://daisyui.com/components/file-input",
     section: "Data Input",
     exampleHTML: `<input type="file" class="file-input" />`,
     exampleJSX: `<input type="file" className="file-input" />`,
@@ -1115,7 +1115,7 @@ export const Components: daisyUIComponent[] = [
     description:
       "Filter is a group of radio buttons. Choosing one of the options will hide the others and shows a reset button next to the chosen option.",
     imageUrl: "https://img.daisyui.com/images/components/filter.webp",
-    componentUrl: "https://v5.daisyui.com/components/filter",
+    componentUrl: "https://daisyui.com/components/filter",
     section: "Data Input",
     exampleHTML: `<form class="filter">
     <input class="btn btn-square" type="reset" value="×"/>
@@ -1135,7 +1135,7 @@ export const Components: daisyUIComponent[] = [
     description:
       "Label is used to provide a name or title for an input field. Label can be placed before or after the field.",
     imageUrl: "https://img.daisyui.com/images/components/label.webp",
-    componentUrl: "https://v5.daisyui.com/components/label",
+    componentUrl: "https://daisyui.com/components/label",
     section: "Data Input",
     exampleHTML: `<label class="input">
     <span class="label">https://</span>
@@ -1150,7 +1150,7 @@ export const Components: daisyUIComponent[] = [
     name: "Radio",
     description: "Radio buttons allow the user to select one option from a set.",
     imageUrl: "https://img.daisyui.com/images/components/radio.webp",
-    componentUrl: "https://v5.daisyui.com/components/radio",
+    componentUrl: "https://daisyui.com/components/radio",
     section: "Data Input",
     exampleHTML: `<input type="radio" name="radio-1" class="radio" checked="checked" />
     <input type="radio" name="radio-1" class="radio" />`,
@@ -1161,7 +1161,7 @@ export const Components: daisyUIComponent[] = [
     name: "Range",
     description: "Range slider is used to select a value by sliding a handle.",
     imageUrl: "https://img.daisyui.com/images/components/range.webp",
-    componentUrl: "https://v5.daisyui.com/components/range",
+    componentUrl: "https://daisyui.com/components/range",
     section: "Data Input",
     exampleHTML: `<input type="range" min="0" max="100" value="40" class="range" />`,
     exampleJSX: `<input type="range" min={0} max="100" value="40" className="range" />`,
@@ -1170,7 +1170,7 @@ export const Components: daisyUIComponent[] = [
     name: "Rating",
     description: "Rating is a set of radio buttons that allow the user to rate something.",
     imageUrl: "https://img.daisyui.com/images/components/rating.webp",
-    componentUrl: "https://v5.daisyui.com/components/rating",
+    componentUrl: "https://daisyui.com/components/rating",
     section: "Data Input",
     exampleHTML: `<div class="rating">
     <input type="radio" name="rating-1" class="mask mask-star" aria-label="1 star" />
@@ -1191,7 +1191,7 @@ export const Components: daisyUIComponent[] = [
     name: "Select",
     description: "Select is used to pick a value from a list of options.",
     imageUrl: "https://img.daisyui.com/images/components/select.webp",
-    componentUrl: "https://v5.daisyui.com/components/select",
+    componentUrl: "https://daisyui.com/components/select",
     section: "Data Input",
     exampleHTML: `<select class="select">
     <option disabled selected>Pick a color</option>
@@ -1210,7 +1210,7 @@ export const Components: daisyUIComponent[] = [
     name: "Input Field",
     description: "Text Input is a simple input field.",
     imageUrl: "https://img.daisyui.com/images/components/input.webp",
-    componentUrl: "https://v5.daisyui.com/components/input",
+    componentUrl: "https://daisyui.com/components/input",
     section: "Data Input",
     exampleHTML: `<input type="text" placeholder="Type here" class="input" />`,
     exampleJSX: `<input type="text" placeholder="Type here" className="input" />`,
@@ -1219,7 +1219,7 @@ export const Components: daisyUIComponent[] = [
     name: "Textarea",
     description: "Textarea allows users to enter text in multiple lines.",
     imageUrl: "https://img.daisyui.com/images/components/textarea.webp",
-    componentUrl: "https://v5.daisyui.com/components/textarea",
+    componentUrl: "https://daisyui.com/components/textarea",
     section: "Data Input",
     exampleHTML: `<textarea class="textarea" placeholder="Bio"></textarea>`,
     exampleJSX: `<textarea className="textarea" placeholder="Bio"></textarea>`,
@@ -1228,7 +1228,7 @@ export const Components: daisyUIComponent[] = [
     name: "Toggle",
     description: "Toggle is a checkbox that is styled to look like a switch button.",
     imageUrl: "https://img.daisyui.com/images/components/toggle.webp",
-    componentUrl: "https://v5.daisyui.com/components/toggle",
+    componentUrl: "https://daisyui.com/components/toggle",
     section: "Data Input",
     exampleHTML: `<input type="checkbox" checked="checked" class="toggle" />`,
     exampleJSX: `<input type="checkbox" defaultChecked className="toggle" />`,
@@ -1238,7 +1238,7 @@ export const Components: daisyUIComponent[] = [
     description:
       "Validator class changes the color of form elements to error or success based on input's validation rules.",
     imageUrl: "https://img.daisyui.com/images/components/validator.webp",
-    componentUrl: "https://v5.daisyui.com/components/validator",
+    componentUrl: "https://daisyui.com/components/validator",
     section: "Data Input",
     exampleHTML: `<input class="input validator" type="email" required placeholder="mail@site.com" />`,
     exampleJSX: `<input className="input validator" type="email" required placeholder="mail@site.com" />`,
@@ -1248,7 +1248,7 @@ export const Components: daisyUIComponent[] = [
     name: "Divider",
     description: "Divider will be used to separate content vertically or horizontally.",
     imageUrl: "https://img.daisyui.com/images/components/divider.webp",
-    componentUrl: "https://v5.daisyui.com/components/divider",
+    componentUrl: "https://daisyui.com/components/divider",
     section: "Layout",
     exampleHTML: `<div class="flex w-full flex-col">
     <div class="card bg-base-300 rounded-box grid h-20 place-items-center">content</div>
@@ -1265,7 +1265,7 @@ export const Components: daisyUIComponent[] = [
     name: "Drawer",
     description: "Drawer is a grid layout that can show/hide a sidebar on the left or right side of the page.",
     imageUrl: "https://img.daisyui.com/images/components/drawer.webp",
-    componentUrl: "https://v5.daisyui.com/components/drawer",
+    componentUrl: "https://daisyui.com/components/drawer",
     section: "Layout",
     exampleHTML: `<div class="drawer">
     <input id="my-drawer" type="checkbox" class="drawer-toggle" />
@@ -1302,7 +1302,7 @@ export const Components: daisyUIComponent[] = [
     name: "Footer",
     description: "Footer can contain logo, copyright notice, and links to other pages.",
     imageUrl: "https://img.daisyui.com/images/components/footer.webp",
-    componentUrl: "https://v5.daisyui.com/components/footer",
+    componentUrl: "https://daisyui.com/components/footer",
     section: "Layout",
     exampleHTML: `<footer class="footer sm:footer-horizontal bg-neutral text-neutral-content p-10">
     <nav>
@@ -1353,7 +1353,7 @@ export const Components: daisyUIComponent[] = [
     name: "Hero",
     description: "Hero is a component for displaying a large box or image with a title and description.",
     imageUrl: "https://img.daisyui.com/images/components/hero.webp",
-    componentUrl: "https://v5.daisyui.com/components/hero",
+    componentUrl: "https://daisyui.com/components/hero",
     section: "Layout",
     exampleHTML: `<div class="hero bg-base-200 min-h-screen">
     <div class="hero-content text-center">
@@ -1384,7 +1384,7 @@ export const Components: daisyUIComponent[] = [
     name: "Indicator",
     description: "Indicators are used to place an element on the corner of another element.",
     imageUrl: "https://img.daisyui.com/images/components/indicator.webp",
-    componentUrl: "https://v5.daisyui.com/components/indicator",
+    componentUrl: "https://daisyui.com/components/indicator",
     section: "Layout",
     exampleHTML: `<div class="indicator">
     <span class="indicator-item status status-success"></span>
@@ -1400,7 +1400,7 @@ export const Components: daisyUIComponent[] = [
     description:
       "Join is a container for grouping multiple items, it can be used to group buttons, inputs, etc. Join applies border radius to the first and last item. Join can be used to create a horizontal or vertical list of items.",
     imageUrl: "https://img.daisyui.com/images/components/join.webp",
-    componentUrl: "https://v5.daisyui.com/components/join",
+    componentUrl: "https://daisyui.com/components/join",
     section: "Layout",
     exampleHTML: `<div class="join">
     <button class="btn join-item">Button</button>
@@ -1417,7 +1417,7 @@ export const Components: daisyUIComponent[] = [
     name: "Mask",
     description: "Mask crops the content of the element to common shapes.",
     imageUrl: "https://img.daisyui.com/images/components/mask.webp",
-    componentUrl: "https://v5.daisyui.com/components/mask",
+    componentUrl: "https://daisyui.com/components/mask",
     section: "Layout",
     exampleHTML: `<img
     class="mask mask-squircle"
@@ -1430,7 +1430,7 @@ export const Components: daisyUIComponent[] = [
     name: "Stack",
     description: "Stack visually puts elements on top of each other.",
     imageUrl: "https://img.daisyui.com/images/components/stack.webp",
-    componentUrl: "https://v5.daisyui.com/components/stack",
+    componentUrl: "https://daisyui.com/components/stack",
     section: "Layout",
     exampleHTML: `<div class="stack h-20 w-32">
     <div class="bg-primary text-primary-content grid place-content-center rounded-box">1</div>
@@ -1451,7 +1451,7 @@ export const Components: daisyUIComponent[] = [
     name: "Browser",
     description: "Browser mockup shows a box that looks like a browser window.",
     imageUrl: "https://img.daisyui.com/images/components/mockup-browser.webp",
-    componentUrl: "https://v5.daisyui.com/components/mockup-browser",
+    componentUrl: "https://daisyui.com/components/mockup-browser",
     section: "Mockup",
     exampleHTML: `<div class="mockup-browser border-base-300 border w-full">
     <div class="mockup-browser-toolbar">
@@ -1470,7 +1470,7 @@ export const Components: daisyUIComponent[] = [
     name: "Code",
     description: "Code mockup is used to show a block of code in a box that looks like a code editor.",
     imageUrl: "https://img.daisyui.com/images/components/mockup-code.webp",
-    componentUrl: "https://v5.daisyui.com/components/mockup-code",
+    componentUrl: "https://daisyui.com/components/mockup-code",
     section: "Mockup",
     exampleHTML: `<div class="mockup-code w-full">
     <pre data-prefix="$"><code>npm i daisyui</code></pre>
@@ -1483,7 +1483,7 @@ export const Components: daisyUIComponent[] = [
     name: "Phone",
     description: "Phone mockup shows a mockup of an iPhone.",
     imageUrl: "https://img.daisyui.com/images/components/mockup-phone.webp",
-    componentUrl: "https://v5.daisyui.com/components/mockup-phone",
+    componentUrl: "https://daisyui.com/components/mockup-phone",
     section: "Mockup",
     exampleHTML: `<div class="mockup-phone">
     <div class="mockup-phone-camera"></div>
@@ -1498,7 +1498,7 @@ export const Components: daisyUIComponent[] = [
     name: "Window",
     description: "Window mockup shows a box that looks like an operating system window.",
     imageUrl: "https://img.daisyui.com/images/components/mockup-window.webp",
-    componentUrl: "https://v5.daisyui.com/components/mockup-window",
+    componentUrl: "https://daisyui.com/components/mockup-window",
     section: "Mockup",
     exampleHTML: `<div class="mockup-window border border-base-300 w-full">
     <div class="grid place-content-center border-t border-base-300 h-80">Hello!</div>
