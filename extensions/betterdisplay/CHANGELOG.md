@@ -1,6 +1,6 @@
 # BetterDisplay Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-04-17
 
 * Added the ability to control the displays using Raycast AI (Raycast Pro required).
 
