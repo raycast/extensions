@@ -61,7 +61,7 @@ function arrayOrList<T>(list: T[]): T[] {
 export class Arena {
   private baseURL: string;
   private headers: Record<string, string>;
-  private requestHandler: (method: string, url: string, data: Params) => Promise<unknown>;
+  private requestHandler: (method: string, url: string, data: Params, options?: Params) => Promise<unknown>;
 
   constructor(config: ArenaOptions = {}) {
     this.baseURL = config.baseURL || "https://api.are.na/v2/";
