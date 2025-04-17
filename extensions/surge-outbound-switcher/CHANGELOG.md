@@ -1,10 +1,10 @@
 # Surge Outbound Mode Switcher Changelog
 
-## [Update] - 2025-04-07
+## [Update] - {PR_MERGE_DATE}
 
 - Add store screenshots
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-07
 
 - Optimize cache time for first search
 
