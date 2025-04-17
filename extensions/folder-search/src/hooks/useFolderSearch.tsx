@@ -31,6 +31,13 @@ export function useFolderSearch() {
 
   // debounce search
   useEffect(() => {
+    log('debug', 'useFolderSearch', 'Search text changed', {
+      searchText,
+      searchScope,
+      hasCheckedPlugins,
+      hasCheckedPreferences
+    });
+
     // Clear any existing timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -41,6 +48,10 @@ export function useFolderSearch() {
       // Only proceed if the text hasn't changed during the delay
       if (searchTextRef.current === searchText) {
         if (searchScope === "pinned") {
+          log('debug', 'useFolderSearch', 'Filtering pinned results', {
+            searchText,
+            pinnedCount: pinnedResults.length
+          });
           setResults(
             pinnedResults.filter((pin) =>
               pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
@@ -48,13 +59,22 @@ export function useFolderSearch() {
           );
           setIsQuerying(false);
         } else if (searchText) {
+          log('debug', 'useFolderSearch', 'Starting search', {
+            searchText,
+            searchScope
+          });
           setIsQuerying(true);
+          // Don't abort existing search immediately
+          // Let the new search start and handle the abort in the search promise
         } else {
+          log('debug', 'useFolderSearch', 'Clearing results - no search text', {
+            searchScope
+          });
           setIsQuerying(false);
         }
         lastProcessedText.current = searchText;
       }
-    }, 300);
+    }, 500); // Increased debounce time to 500ms
 
     return () => {
       if (debounceTimerRef.current) {
@@ -132,11 +152,17 @@ export function useFolderSearch() {
   // perform search
   usePromise(
     async (search: string, scope: string, abortable: React.MutableRefObject<AbortController | null | undefined>) => {
-      log('debug', 'usePromise', 'Starting search', { text: search, scope });
+      log('debug', 'useFolderSearch', 'Executing search promise', {
+        search,
+        scope,
+        abortable: !!abortable?.current
+      });
       
       const results = await searchSpotlight(search, scope as "pinned" | "user" | "all", abortable);
       
-      log('debug', 'usePromise', 'Search completed', { resultCount: results.length });
+      log('debug', 'useFolderSearch', 'Search promise completed', {
+        resultCount: results.length
+      });
       
       return results;
     },
@@ -144,6 +170,10 @@ export function useFolderSearch() {
     {
       onWillExecute: () => {
         if (searchText && searchScope !== "pinned") {
+          log('debug', 'useFolderSearch', 'Preparing to execute search', {
+            searchText,
+            searchScope
+          });
           setIsQuerying(true);
           setResults([]);
         }
@@ -152,16 +182,21 @@ export function useFolderSearch() {
         const { filterLibraryFolders } = getPreferenceValues<SpotlightSearchPreferences>();
         const filteredResults = data.filter(result => shouldShowPath(result.path, !filterLibraryFolders));
         
-        log('debug', 'usePromise', 'Filtering results', {
+        log('debug', 'useFolderSearch', 'Processing search results', {
           originalCount: data.length,
-          filteredCount: filteredResults.length
+          filteredCount: filteredResults.length,
+          filterLibraryFolders
         });
         
         setResults(filteredResults.sort(lastUsedSort));
         setIsQuerying(false);
       },
       onError: (e) => {
-        log('error', 'usePromise', 'Search error', { error: e });
+        log('error', 'useFolderSearch', 'Search error', {
+          error: e,
+          searchText,
+          searchScope
+        });
         if (e.name !== "AbortError") {
           showFailureToast(e, { title: "Error searching folders" });
         }

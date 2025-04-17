@@ -31,7 +31,8 @@ export async function searchSpotlight(
 ): Promise<SpotlightSearchResult[]> {
   log('debug', 'searchSpotlight', 'Starting search with parameters', {
     search,
-    searchScope
+    searchScope,
+    abortable: !!abortable?.current
   });
 
   const { maxResults } = getPreferenceValues<SpotlightSearchPreferences>();
@@ -43,7 +44,8 @@ export async function searchSpotlight(
 
   log('debug', 'searchSpotlight', 'Generated search filter', {
     filter: searchFilter,
-    isExactSearch
+    isExactSearch,
+    maxResults
   });
 
   try {
@@ -65,7 +67,14 @@ export async function searchSpotlight(
         if (resultsCount < maxResults) {
           resultsCount++;
           searchResults.push(result);
+          log('debug', 'searchSpotlight', 'Received result', {
+            resultCount: resultsCount,
+            path: result.path
+          });
         } else if (resultsCount >= maxResults) {
+          log('debug', 'searchSpotlight', 'Max results reached, aborting', {
+            maxResults
+          });
           abortable?.current?.abort();
         }
       });
