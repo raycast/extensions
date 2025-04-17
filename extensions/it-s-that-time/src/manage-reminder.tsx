@@ -50,5 +50,9 @@ export default function Command() {
 }
 
 function removeReminder(id: string) {
-  fs.unlinkSync(`${Paths.TIMER_PATH}/${id}`);
+  try {
+    fs.unlinkSync(`${Paths.TIMER_PATH}/${id}`);
+  } catch (error) {
+    showFailureToast(error, { title: "Failed to remove reminder" });
+  }
 }
