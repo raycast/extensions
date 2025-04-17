@@ -17,7 +17,7 @@ type Input = {
    * The site to open the profile on.
    * @example "raycast"
    * @example "threads"
-   * @example "twitter/x"
+   * @example "x"
    * @example "github"
    * @example "facebook"
    * @example "reddit"
