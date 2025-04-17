@@ -1,7 +1,7 @@
 import groupBy from "lodash/groupBy";
 import type { AggregatedPosition, Position } from "./types";
 import { ellipsis } from "./typography";
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import BigNumber from "bignumber.js";
 import { ADDRESSES_KEY, MENU_BAR_ADDRESS_KEY } from "./constants";
 import type { NormalizedAddress } from "./NormalizedAddress";
@@ -158,4 +158,12 @@ export function getSignificantValue(value: number, powShift = 0): [number, strin
 export function formatWithSignificantValue(value: number) {
   const [significantValue, symbol] = getSignificantValue(value);
   return `${Math.floor(significantValue)}${symbol}`;
+}
+
+export async function handleError({ error, title }: { error: unknown; title: string }) {
+  return showToast({
+    style: Toast.Style.Failure,
+    title: title,
+    message: error instanceof Error ? error.message : "",
+  });
 }
