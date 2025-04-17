@@ -3,7 +3,7 @@
   "name": "devlauncher",
   "title": "Dev Launcher",
   "description": "Quick search and access for projects and files.",
-  "icon": "command-icon.png",
+  "icon": "extension_icon.png",
   "author": "tanerilyazov",
   "license": "MIT",
   "categories": [
@@ -60,7 +60,7 @@
         {
           "name": "recentlyOpenLimit",
           "type": "textfield",
-          "description": "Maximum number of recently open projects, default is 5",
+          "description": "Maximum number of recently opened projects, default is 3",
           "required": false,
           "default": "3",
           "placeholder": "3",
@@ -70,7 +70,7 @@
           "name": "projectContainsFilter",
           "type": "textfield",
           "description": "Filepatterns which a project should contain to be included. Should be a semi-colon separated list of filename patterns",
-          "placeholder": ".git;*gradle*",
+          "placeholder": ".git;pom.xml;package.json",
           "required": false,
           "default": ".git",
           "title": "Project Matcher Filter"

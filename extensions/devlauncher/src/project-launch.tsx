@@ -1,35 +1,10 @@
 import {Action, ActionPanel, Application, getPreferenceValues, Icon, List, showToast, Toast} from "@raycast/api";
-import {useCachedPromise, useExec} from "@raycast/utils";
-
-import path from "path";
-import {HistoryService} from "./history";
-import {FunctionReturningPromise} from "@raycast/utils/dist/types";
+import {useExec} from "@raycast/utils";
 import * as os from "os";
+import {HistoryService} from "./history";
 import {PinnedProjectsService} from "./pinned";
-import {ExtPreferences} from "./ExtPreferences";
-
-interface ProjectItemProperties {
-	project: DirectoryInfo;
-	preferences: ExtPreferences;
-	additionalActions?: (path: string) => React.ReactNode[];
-	key?: string;
-}
-
-interface SubSectionProperties {
-	title: string;
-	subSectionItems: string[];
-	additionalActions?: (path: string) => React.ReactNode[];
-}
-
-interface DirectoryInfo {
-	path: string;
-	name: string;
-	parent: string;
-}
-
-interface DirectoryMap {
-	[parent: string]: DirectoryInfo[];
-}
+import {DirectoryInfo, DirectoryMap, ExtPreferences, ProjectItemProperties, SubSectionProperties} from "./types";
+import {convertToFindFilter, extractDirectoryInfo, nullSafeUseCachedPromise, parseDirectoryOutput} from "./utils";
 
 export default function Command() {
 	const preferences = getPreferenceValues<ExtPreferences>();
@@ -39,13 +14,12 @@ export default function Command() {
 	const includeFilters = preferences.projectContainsFilter;
 	const pruneDirectories = "'*/node_modules'";
 	const directoriesToSearch = preferences.projectsDirectory.replace(";", "\\ ");
-	console.log(preferences);
 	const {data: directories, isLoading} = useExec(
 		"find",
 		[
 			directoriesToSearch,
 			"-maxdepth",
-			preferences.searchDepth,
+			String(preferences.searchDepth),
 			"-type",
 			"d",
 			"\\(",
@@ -67,22 +41,19 @@ export default function Command() {
 		{
 			shell: true,
 			parseOutput(args) {
-				return args.stdout
-					.split("\n")
-					.filter((line) => line.trim())
-					.reduce((acc: DirectoryMap, path: string) => {
-						const directoryInfo = extractDirectoryInfo(path);
-						if (!acc[directoryInfo.parent]) {
-							acc[directoryInfo.parent] = [];
-						}
-						acc[directoryInfo.parent].push(directoryInfo);
-						return acc;
-					}, {});
+				return parseDirectoryOutput(args.stdout);
 			},
 		}
 	);
 
-	validateDirectoriesFound(directories);
+	// Only validate if we're not loading and have completed the search
+	if (!isLoading && directories && Object.keys(directories).length === 0) {
+		showToast({
+			style: Toast.Style.Failure,
+			title: "Couldn't find any directories to open",
+			message: `Please check if the file filters are defined properly`,
+		}).then((r) => r.show());
+	}
 
 	return (
 		<List isLoading={isLoading}>
@@ -141,22 +112,6 @@ export default function Command() {
 	);
 }
 
-function extractDirectoryInfo(directoryPath: string): DirectoryInfo {
-	const fullPath = path.resolve(directoryPath); // Ensures we have the absolute path
-	const name = path.basename(fullPath); // Gets the directory name
-	const parent = path.basename(path.dirname(fullPath)); // Gets the parent directory name
-
-	return {path: fullPath, parent: parent, name: name};
-}
-
-function nullSafeUseCachedPromise<T extends FunctionReturningPromise<[]>>(fn: T): string[] {
-	const {data: cachedPromise} = useCachedPromise(fn);
-	if (cachedPromise) {
-		return cachedPromise;
-	}
-	return [];
-}
-
 function storedSection(subSection: SubSectionProperties, preferences: ExtPreferences) {
 	return (
 		<List.Section title={subSection.title}>
@@ -170,23 +125,6 @@ function storedSection(subSection: SubSectionProperties, preferences: ExtPrefere
 			})}
 		</List.Section>
 	);
-}
-
-function convertToFindFilter(includeFilters: string) {
-	return includeFilters
-		.split(";")
-		.map((filter) => "-name " + filter)
-		.join(" -or ");
-}
-
-function validateDirectoriesFound(directories: DirectoryMap | undefined) {
-	if (!directories || Object.values(directories).every((directory) => directory.length === 0)) {
-		showToast({
-			style: Toast.Style.Failure,
-			title: "Couldn't find any directories to open",
-			message: `Please check the if the file filters are defined properly`,
-		}).then((r) => r.show());
-	}
 }
 
 function getProjectItem({project, preferences, additionalActions, key = project.path}: ProjectItemProperties) {

@@ -1,34 +1,21 @@
-import {LocalStorage} from "@raycast/api";
+import { StorageService } from "./storage";
 
 export class PinnedProjectsService {
-	private static pinnedProjectsStorageKey = "pinned";
+	private static storage = new StorageService("pinned");
 
 	static async pinItem(project: string) {
-		const pinnedProjectsString = await LocalStorage.getItem<string>(PinnedProjectsService.pinnedProjectsStorageKey);
-		const pinnedProjects = pinnedProjectsString ? pinnedProjectsString?.split(";") : [];
-
-		if (!pinnedProjects.includes(project)) {
-			pinnedProjects.push(project);
-		}
-
-		await LocalStorage.setItem(PinnedProjectsService.pinnedProjectsStorageKey, pinnedProjects?.join(";"));
+		await PinnedProjectsService.storage.addItem(project);
 	}
 
 	static async getPinned(): Promise<string[]> {
-		const pinnedProjectsString = await LocalStorage.getItem<string>(PinnedProjectsService.pinnedProjectsStorageKey);
-		return pinnedProjectsString ? pinnedProjectsString?.split(";") : [];
+		return await PinnedProjectsService.storage.getItems();
 	}
 
 	static async clearPinnedItems() {
-		await LocalStorage.removeItem(PinnedProjectsService.pinnedProjectsStorageKey);
+		await PinnedProjectsService.storage.clearItems();
 	}
 
 	static async removePinnedItem(project: string) {
-		const pinnedProjectsString = await LocalStorage.getItem<string>(PinnedProjectsService.pinnedProjectsStorageKey);
-		const pinnedProjects = pinnedProjectsString ? pinnedProjectsString?.split(";") : [];
-
-		await LocalStorage.setItem(PinnedProjectsService.pinnedProjectsStorageKey,
-			pinnedProjects.filter(key => key !== project).join(";"));
+		await PinnedProjectsService.storage.removeItem(project);
 	}
-
 }

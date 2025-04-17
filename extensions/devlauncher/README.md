@@ -4,7 +4,7 @@ This Raycast extension provides two commands to quickly launch projects and file
 
 ## Features
 
-* **Launch Projects:** Quickly find and open projects in IntelliJ IDEA (and other IDEs configured in preferences).  Supports filtering by project name and searching within a specified directory.
+* **Launch Projects:** Quickly find and open projects in your favorite IDEs.  Supports filtering by project name and searching within a specified directory.
 * **Recently Opened:** Keeps a history of recently opened projects and files for easy access.
 * **Pinned Items:** Pin frequently used projects and files for quick access.
 * **Customizable:** Configure your preferred IDEs, project directory, search depth, file filters, and terminal.
@@ -31,7 +31,7 @@ The extension uses the following preferences, which can be configured in the Ray
 * **`ide2`**: A secondary IDE application (optional).
 * **`ide3`**: A tertiary IDE application (optional).
 * **`recentlyOpenLimit`**: The maximum number of recently opened items to store.
-* **`projectContainsFilter`**: A semicolon-separated list of strings to filter packages with certain files (e.g., `package.json;.git;pom.xml;gradle.build`).
+* **`projectContainsFilter`**: A semicolon-separated list of strings to filter packages with certain files (e.g., `package.json;.git;pom.xml;build.grade`).
 * **`searchDepth`**: The maximum search depth (number of subdirectories) when searching for projects.
 * **`preferredTerminal`**: Your preferred terminal application (e.g., iTerm2, Terminal).
 
