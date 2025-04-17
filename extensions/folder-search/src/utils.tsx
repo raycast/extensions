@@ -1,12 +1,14 @@
-import { Alert, Icon, closeMainWindow, confirmAlert, getPreferenceValues, popToRoot, trash } from "@raycast/api";
+import { Alert, Icon, closeMainWindow, confirmAlert, getPreferenceValues, popToRoot, trash, environment } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import fs from "fs";
 import * as yup from "yup";
 import path from "path";
-import { homedir } from "node:os";
+const os = require('os');
 
 import { SpotlightSearchPreferences, SpotlightSearchResult } from "./types";
 import { showFailureToast } from "@raycast/utils";
+
+const userHomeDir = os.homedir();
 
 // validation schemas for Plugins
 const PluginShortcutSchema = yup
@@ -28,8 +30,6 @@ const pluginSchema = yup
   .required()
   .strict()
   .noUnknown(true);
-
-const userHomeDir = homedir();
 
 const loadPlugins = async () => {
   // grab prefs
@@ -138,14 +138,14 @@ const fixDoubleConcat = (text: string): string => {
 
 const CLOUD_STORAGE_PATHS = [
   // iCloud Drive
-  `${homedir()}/Library/Mobile Documents/com~apple~CloudDocs`,
+  `${userHomeDir}/Library/Mobile Documents/com~apple~CloudDocs`,
   // Dropbox
-  `${homedir()}/Library/CloudStorage/Dropbox`,
+  `${userHomeDir}/Library/CloudStorage/Dropbox`,
   // Google Drive
-  `${homedir()}/Library/CloudStorage/GoogleDrive`,
+  `${userHomeDir}/Library/CloudStorage/GoogleDrive`,
   // OneDrive
-  `${homedir()}/Library/CloudStorage/OneDrive-Personal`,
-  `${homedir()}/Library/CloudStorage/OneDrive-Microsoft`,
+  `${userHomeDir}/Library/CloudStorage/OneDrive-Personal`,
+  `${userHomeDir}/Library/CloudStorage/OneDrive-Microsoft`,
 ];
 
 export function isCloudStoragePath(path: string): boolean {
@@ -153,7 +153,7 @@ export function isCloudStoragePath(path: string): boolean {
 }
 
 export function isLibraryPath(path: string): boolean {
-  return path.includes(`${homedir()}/Library`);
+  return path.includes(`${process.env.HOME}/Library`);
 }
 
 export function shouldShowPath(path: string, showNonCloudLibraryPaths: boolean): boolean {
@@ -183,6 +183,26 @@ export function formatDate(dateString: string | undefined | null): string {
     return "-";
   }
 }
+
+// Logging utility
+const LOG_ENABLED = false; // Set to false to disable all logging
+
+export const log = (level: 'debug' | 'error', component: string, message: string, data?: any) => {
+  if (!LOG_ENABLED) return;
+  
+  const timestamp = new Date().toISOString();
+  const logData = {
+    ...data,
+    component,
+    timestamp
+  };
+
+  if (level === 'debug') {
+    console.debug(`[FolderSearch] ${message}:`, logData);
+  } else {
+    console.error(`[FolderSearch] ${message}:`, logData);
+  }
+};
 
 export {
   loadPlugins,
