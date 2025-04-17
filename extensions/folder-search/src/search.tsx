@@ -12,7 +12,6 @@ import {
   getSelectedFinderItems,
   Keyboard,
   LaunchProps,
-  getPreferenceValues,
 } from "@raycast/api";
 import { folderName, copyFolderToClipboard, maybeMoveResultToTrash, log } from "./utils";
 import { runAppleScript } from "run-applescript";
@@ -66,7 +65,7 @@ export default function Command(props: LaunchProps) {
     log("debug", "search", "Command launched", {
       launchType: props.launchType,
       fallbackText: props.fallbackText,
-      searchText
+      searchText,
     });
   }, [props.launchType, props.fallbackText, searchText]);
 
@@ -288,11 +287,7 @@ export default function Command(props: LaunchProps) {
               icon={Icon.MagnifyingGlass}
             />
           ) : results.length === 0 ? (
-            <List.EmptyView
-              title="No Results"
-              description="Try a different search term"
-              icon={Icon.Folder}
-            />
+            <List.EmptyView title="No Results" description="Try a different search term" icon={Icon.Folder} />
           ) : (
             <FolderListSection
               title="Results"

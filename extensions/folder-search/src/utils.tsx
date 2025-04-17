@@ -52,7 +52,7 @@ const loadPlugins = async () => {
 
   // Normalize the path (remove trailing slash and expand ~)
   const normalizedPath = pluginsFolder.replace(/\/$/, "").replace(/^~/, os.homedir());
-  
+
   try {
     // Check if path exists and is a directory
     const stats = await fs.promises.stat(normalizedPath);
@@ -61,9 +61,9 @@ const loadPlugins = async () => {
       return [];
     }
   } catch (error) {
-    log("error", "loadPlugins", "Failed to access plugins directory", { 
+    log("error", "loadPlugins", "Failed to access plugins directory", {
       path: normalizedPath,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
     return [];
   }
@@ -84,28 +84,28 @@ const loadPlugins = async () => {
         // load and validate
         const pluginPath = path.join(normalizedPath, file);
         log("debug", "loadPlugins", "Loading plugin", { file, pluginPath });
-        
+
         const { FolderSearchPlugin } = await import(pluginPath);
-        log("debug", "loadPlugins", "Plugin loaded", { 
-          file, 
+        log("debug", "loadPlugins", "Plugin loaded", {
+          file,
           title: FolderSearchPlugin.title,
-          shortcut: FolderSearchPlugin.shortcut 
+          shortcut: FolderSearchPlugin.shortcut,
         });
 
         await pluginSchema.validate(FolderSearchPlugin);
         validPlugins.push(FolderSearchPlugin);
       } catch (e) {
-        log("error", "loadPlugins", "Failed to load plugin", { 
-          file, 
-          error: e instanceof Error ? e.message : String(e)
+        log("error", "loadPlugins", "Failed to load plugin", {
+          file,
+          error: e instanceof Error ? e.message : String(e),
         });
         invalidPluginFiles.push(file);
       }
     }
   } catch (error) {
-    log("error", "loadPlugins", "Failed to read plugins directory", { 
+    log("error", "loadPlugins", "Failed to read plugins directory", {
       path: normalizedPath,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
     return [];
   }
