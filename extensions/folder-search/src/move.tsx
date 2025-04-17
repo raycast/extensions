@@ -12,7 +12,7 @@ import {
   LaunchProps,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { folderName } from "./utils";
+import { folderName, log } from "./utils";
 import { SpotlightSearchResult } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
 import { FolderListSection, Directory } from "./components";
@@ -47,7 +47,7 @@ export default function Command(props: LaunchProps) {
 
   // Log launch type for debugging
   useEffect(() => {
-    console.log("🚀 Command launched with:", {
+    log("debug", "move", "Command launched", {
       launchType: props.launchType,
       fallbackText: props.fallbackText,
       searchText

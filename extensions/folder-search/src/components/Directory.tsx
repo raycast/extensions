@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, List, popToRoot } from "@raycast/api";
 import path from "node:path";
 import { useEffect, useState } from "react";
 import fs from "fs";
-import { folderName } from "../utils";
+import { folderName, log } from "../utils";
 import { SpotlightSearchResult } from "../types";
 
 interface DirectoryProps {
@@ -36,7 +36,7 @@ export function Directory({ path: directoryPath }: DirectoryProps) {
         .sort();
       setFiles(items);
     } catch (error) {
-      console.error("Error reading directory:", error);
+      log("error", "Directory", "Error reading directory", { error });
     } finally {
       setIsLoading(false);
     }

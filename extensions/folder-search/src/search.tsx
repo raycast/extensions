@@ -12,8 +12,9 @@ import {
   getSelectedFinderItems,
   Keyboard,
   LaunchProps,
+  getPreferenceValues,
 } from "@raycast/api";
-import { folderName, copyFolderToClipboard, maybeMoveResultToTrash } from "./utils";
+import { folderName, copyFolderToClipboard, maybeMoveResultToTrash, log } from "./utils";
 import { runAppleScript } from "run-applescript";
 import { SpotlightSearchResult } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
@@ -62,7 +63,7 @@ export default function Command(props: LaunchProps) {
 
   // Log launch type for debugging
   useEffect(() => {
-    console.log("🚀 Command launched with:", {
+    log("debug", "search", "Command launched", {
       launchType: props.launchType,
       fallbackText: props.fallbackText,
       searchText
