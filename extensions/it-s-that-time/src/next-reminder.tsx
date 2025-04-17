@@ -25,7 +25,7 @@ export default function Command() {
       {nextReminder && (
         <MenuBarExtra.Item title={`~ ${formatDateTime(nextReminder.targetTimestamp)}`} />
       )}
-      {nextReminder && <MenuBarExtra.Item title={nextReminder?.message ?? ""} onAction={() => {}} />}
+      {nextReminder && <MenuBarExtra.Item title={nextReminder?.message ?? ""} />}
     </MenuBarExtra>
   );
 }

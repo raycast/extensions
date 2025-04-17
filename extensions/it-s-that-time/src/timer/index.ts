@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import Paths from "../Paths";
 import Reminder from "../Reminder";
+import { promises as fsPromises } from 'fs';
 
 export function runner(props: {
   timerFile: string;
@@ -34,12 +35,7 @@ export function runner(props: {
 }
 
 export async function load(): Promise<Reminder[]> {
-  const fileNames = await new Promise<string[]>((resolve, reject) =>
-    fs.readdir(Paths.TIMER_PATH, (err, files) => {
-      if (err) reject(err);
-      else resolve(files);
-    }),
-  );
+  const fileNames = await fsPromises.readdir(Paths.TIMER_PATH);
 
   const files = await Promise.all(
     fileNames.map(
