@@ -5,6 +5,7 @@ type SpotlightSearchPreferences = {
   pluginsEnabled: boolean;
   pluginsFolder: string;
   showNonCloudLibraryPaths: boolean;
+  filterLibraryFolders: boolean;
   pinned: SpotlightSearchResult[];
   searchScope: string;
   isShowingDetail: boolean;

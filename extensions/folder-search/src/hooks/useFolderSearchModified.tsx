@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { LocalStorage, Toast, environment, showToast, getPreferenceValues } from "@raycast/api";
-import { usePromise, showFailureToast } from "@raycast/utils";
+import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { showFailureToast } from "@raycast/utils";
 import { FolderSearchPlugin, SpotlightSearchResult, SpotlightSearchPreferences } from "../types";
 import { loadPlugins, lastUsedSort, shouldShowPath } from "../utils";
 import { searchSpotlight } from "../search-spotlight";
@@ -9,132 +10,123 @@ import { log } from "../utils/logger";
 export function useFolderSearch() {
   const [searchText, setSearchText] = useState<string>("");
   const [pinnedResults, setPinnedResults] = useState<SpotlightSearchResult[]>([]);
-  const [selectedItemId, setSelectedItemId] = useState<string>("");
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [searchScope, setSearchScope] = useState<string>("");
-  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(true);
+  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
   const [results, setResults] = useState<SpotlightSearchResult[]>([]);
   const [plugins, setPlugins] = useState<FolderSearchPlugin[]>([]);
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
   const [hasCheckedPlugins, setHasCheckedPlugins] = useState<boolean>(false);
   const [hasCheckedPreferences, setHasCheckedPreferences] = useState<boolean>(false);
-  const [showNonCloudLibraryPaths, setShowNonCloudLibraryPaths] = useState<boolean>(false);
+  const [showNonCloudLibraryPaths, setShowNonCloudLibraryPaths] = useState(false);
 
   const abortable = useRef<AbortController>();
-  const searchTextRef = useRef<string>(searchText);
-  const debounceTimerRef = useRef<NodeJS.Timeout>();
-  const lastProcessedText = useRef<string>("");
+  const searchCallback = useRef((result: SpotlightSearchResult) => {
+    const { filterLibraryFolders } = getPreferenceValues();
+    // Only add the result if it passes our visibility filter
+    if (shouldShowPath(result.path, !filterLibraryFolders)) {
+      setResults((prevResults) => [...prevResults, result].sort(lastUsedSort));
+    }
+  });
 
-  // Update ref when searchText changes
+  const searchTextRef = useRef(searchText);
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const lastProcessedText = useRef("");
+
+  // Track setSearchText calls
+  const wrappedSetSearchText = (text: string) => {
+    const stack = new Error().stack;
+    const caller = stack?.split('\n')[2]?.trim();
+    log('debug', 'wrappedSetSearchText', 'setSearchText called', {
+      newText: text,
+      previousText: searchText,
+      caller
+    });
+    setSearchText(text);
+  };
+
+  // Add logging for search text changes
   useEffect(() => {
-    searchTextRef.current = searchText;
+    log('debug', 'useEffect', 'Search text state changed', {
+      newText: searchText,
+      lastProcessed: lastProcessedText.current,
+      searchTextRef: searchTextRef.current
+    });
+    lastProcessedText.current = searchText;
   }, [searchText]);
 
-  // debounce search
+  // Add logging for search text ref changes
   useEffect(() => {
-    // Clear any existing timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
+    searchTextRef.current = searchText;
+    log('debug', 'searchTextRef', 'Search text ref updated', {
+      newText: searchText,
+      previousRef: searchTextRef.current
+    });
+  }, [searchText]);
+
+  // Add logging for debounce timer
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
     }
-
-    // Set a new timer
-    debounceTimerRef.current = setTimeout(() => {
-      // Only proceed if the text hasn't changed during the delay
-      if (searchTextRef.current === searchText) {
-        if (searchScope === "pinned") {
-          setResults(
-            pinnedResults.filter((pin) =>
-              pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
-            )
-          );
-          setIsQuerying(false);
-        } else if (searchText) {
-          setIsQuerying(true);
-        } else {
-          setIsQuerying(false);
-        }
-        lastProcessedText.current = searchText;
-      }
+    debounceTimer.current = setTimeout(() => {
+      log('debug', 'debounce', 'Debounce timer triggered', {
+        currentText: searchText,
+        lastProcessed: lastProcessedText.current
+      });
     }, 300);
-
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, [searchText, searchScope, pinnedResults]);
+  }, [searchText]);
 
   // check plugins
-  usePromise(
-    async () => {
-      const plugins = await loadPlugins();
-      setPlugins(plugins);
-    },
-    [],
-    {
-      onData() {
+  useEffect(() => {
+    const loadPluginsAndPreferences = async () => {
+      try {
+        const loadedPlugins = await loadPlugins();
+        setPlugins(loadedPlugins);
         setHasCheckedPlugins(true);
-      },
-      onError() {
-        showToast({
-          title: "An Error Occurred",
-          message: "Could not read plugins",
-          style: Toast.Style.Failure,
-        });
+      } catch (e) {
+        showFailureToast(e, { title: "Error loading plugins" });
         setHasCheckedPlugins(true);
-      },
-    }
-  );
+      }
+    };
+
+    loadPluginsAndPreferences();
+  }, []);
 
   // check prefs
-  usePromise(
-    async () => {
-      const maybePreferences = await LocalStorage.getItem(`${environment.extensionName}-preferences`);
-
-      if (maybePreferences) {
-        try {
-          return JSON.parse(maybePreferences as string);
-        } catch (_) {
-          // noop
-        }
+  useEffect(() => {
+    const loadPreferences = async () => {
+      try {
+        const preferences = await getPreferenceValues<SpotlightSearchPreferences>();
+        log('debug', 'preferences', 'Loading preferences', { preferences });
+        setShowNonCloudLibraryPaths(preferences.showNonCloudLibraryPaths);
+        setPinnedResults(preferences.pinned || []);
+        setSearchScope(preferences.searchScope || "");
+        setIsShowingDetail(preferences.isShowingDetail);
+        setHasCheckedPreferences(true);
+      } catch (e) {
+        showFailureToast(e, { title: "Error loading preferences" });
+        setHasCheckedPreferences(true);
       }
-    },
-    [],
-    {
-      onData(preferences) {
-        setPinnedResults(preferences?.pinned || []);
-        setSearchScope(preferences?.searchScope || "");
-        setIsShowingDetail(preferences?.isShowingDetail);
-        setShowNonCloudLibraryPaths(preferences?.showNonCloudLibraryPaths || false);
-        setHasCheckedPreferences(true);
-      },
-      onError() {
-        showToast({
-          title: "An Error Occurred",
-          message: "Could not read preferences",
-          style: Toast.Style.Failure,
-        });
-        setHasCheckedPreferences(true);
-      },
-    }
-  );
+    };
+
+    loadPreferences();
+  }, []);
 
   // Save preferences
   useEffect(() => {
-    (async () => {
-      if (!(hasCheckedPlugins && hasCheckedPreferences)) {
-        return;
-      }
-
-      await LocalStorage.setItem(
-        `${environment.extensionName}-preferences`,
-        JSON.stringify({
-          pinned: pinnedResults,
-          searchScope,
-          isShowingDetail,
-          showNonCloudLibraryPaths,
-        })
-      );
-    })();
+    if (!(hasCheckedPlugins && hasCheckedPreferences)) {
+      return;
+    }
+    LocalStorage.setItem(
+      `${environment.extensionName}-preferences`,
+      JSON.stringify({
+        pinned: pinnedResults,
+        searchScope,
+        isShowingDetail,
+        showNonCloudLibraryPaths,
+      })
+    );
   }, [pinnedResults, searchScope, isShowingDetail, hasCheckedPlugins, hasCheckedPreferences, showNonCloudLibraryPaths]);
 
   // perform search
@@ -151,13 +143,11 @@ export function useFolderSearch() {
     [searchText, searchScope, abortable],
     {
       onWillExecute: () => {
-        if (searchText && searchScope !== "pinned") {
-          setIsQuerying(true);
-          setResults([]);
-        }
+        setIsQuerying(true);
+        setResults([]);
       },
-      onData: (data: SpotlightSearchResult[]) => {
-        const { filterLibraryFolders } = getPreferenceValues<SpotlightSearchPreferences>();
+      onData: (data) => {
+        const { filterLibraryFolders } = getPreferenceValues();
         const filteredResults = data.filter(result => shouldShowPath(result.path, !filterLibraryFolders));
         
         log('debug', 'usePromise', 'Filtering results', {
@@ -220,7 +210,7 @@ export function useFolderSearch() {
 
   return {
     searchText,
-    setSearchText,
+    setSearchText: wrappedSetSearchText,
     results: searchScope === "pinned" ? pinnedResults : results,
     isQuerying,
     isShowingDetail,
@@ -228,7 +218,6 @@ export function useFolderSearch() {
     searchScope,
     setSearchScope,
     selectedItemId,
-    setSelectedItemId,
     pinnedResults,
     plugins,
     resultIsPinned,

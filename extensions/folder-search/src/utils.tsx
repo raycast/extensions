@@ -3,7 +3,7 @@ import { runAppleScript } from "run-applescript";
 import fs from "fs";
 import * as yup from "yup";
 import path from "path";
-import os from "os";
+import { homedir } from "node:os";
 
 import { SpotlightSearchPreferences, SpotlightSearchResult } from "./types";
 import { showFailureToast } from "@raycast/utils";
@@ -29,7 +29,7 @@ const pluginSchema = yup
   .strict()
   .noUnknown(true);
 
-const userHomeDir = os.homedir();
+const userHomeDir = homedir();
 
 const loadPlugins = async () => {
   // grab prefs
@@ -138,14 +138,14 @@ const fixDoubleConcat = (text: string): string => {
 
 const CLOUD_STORAGE_PATHS = [
   // iCloud Drive
-  `${userHomeDir}/Library/Mobile Documents/com~apple~CloudDocs`,
+  `${homedir()}/Library/Mobile Documents/com~apple~CloudDocs`,
   // Dropbox
-  `${userHomeDir}/Library/CloudStorage/Dropbox`,
+  `${homedir()}/Library/CloudStorage/Dropbox`,
   // Google Drive
-  `${userHomeDir}/Library/CloudStorage/GoogleDrive`,
+  `${homedir()}/Library/CloudStorage/GoogleDrive`,
   // OneDrive
-  `${userHomeDir}/Library/CloudStorage/OneDrive-Personal`,
-  `${userHomeDir}/Library/CloudStorage/OneDrive-Microsoft`,
+  `${homedir()}/Library/CloudStorage/OneDrive-Personal`,
+  `${homedir()}/Library/CloudStorage/OneDrive-Microsoft`,
 ];
 
 export function isCloudStoragePath(path: string): boolean {
@@ -153,7 +153,7 @@ export function isCloudStoragePath(path: string): boolean {
 }
 
 export function isLibraryPath(path: string): boolean {
-  return path.includes(`${userHomeDir}/Library`);
+  return path.includes(`${homedir()}/Library`);
 }
 
 export function shouldShowPath(path: string, showNonCloudLibraryPaths: boolean): boolean {
