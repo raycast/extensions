@@ -2,6 +2,11 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
+- Improved window positioning logic during resize
+- Enhanced previous window size restoration
+
+## [Update] - {PR_MERGE_DATE}
+
 - Remove the default size in the add page
 - Fix typo in the add page
 
