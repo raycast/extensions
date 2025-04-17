@@ -23,7 +23,7 @@ export default function Command() {
       icon={nextReminder ? "" : Icon.Alarm}
     >
       {nextReminder && (
-        <MenuBarExtra.Item title={`~ ${nextReminder ? formatDateTime(nextReminder.targetTimestamp) : ""}`} />
+        <MenuBarExtra.Item title={`~ ${formatDateTime(nextReminder.targetTimestamp)}`} />
       )}
       {nextReminder && <MenuBarExtra.Item title={nextReminder?.message ?? ""} onAction={() => {}} />}
     </MenuBarExtra>
