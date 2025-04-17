@@ -1,8 +1,8 @@
 # Audio Downloader
 
-> Download videos from YouTube, Twitter, Twitch, Instagram, Bilibili and more using yt-dlp CLI
+> Download audio from YouTube, Twitter, Twitch, Instagram, Bilibili and more using yt-dlp CLI
 
-![youtube-downloader-1.png](metadata%2Fyoutube-downloader-1.png)
+![audio-downloader.png](metadata%2Faudio-downloader.png)
 
 ## Installation
 
@@ -33,16 +33,16 @@ See <https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md>.
 
 ## **FAQs**
 
-### **Is there a YouTube downloader that actually works?**
+### **Is there a audio downloader that actually works?**
 
 Yes, Raycast's Audio Downloader is consistently updated to ensure reliable functionality.
 
 <!--
 ### **Can I download clips from YouTube?**
 
-Absolutely\! Our extension supports downloading full videos, clips, and even YouTube Shorts.
+Absolutely\! Our extension supports downloading full audios, clips, and even YouTube Shorts.
 -->
 
-### **How do I download a YouTube video with a manipulated URL?**
+### **How do I download audio with a manipulated URL?**
 
 Our downloader handles various URL formats. Just paste the link, and we'll take care of the rest.
