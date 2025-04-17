@@ -6,16 +6,17 @@ const supabaseUrl = "https://nswbygdrtmlsfuyqsokv.supabase.co";
 const supabaseAnonKey =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zd2J5Z2RydG1sc2Z1eXFzb2t2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzU1MjMxNzQsImV4cCI6MTk5MTA5OTE3NH0.RIVAaGlB8z6ycyeaEecG2g8vwblcYbZCsHLUUoUC2xQ";
 
-class Storage {
-  async getItem(key: string) {
-    return await LocalStorage.getItem<string>(key);
+// Custom storage implementation for Raycast's LocalStorage
+class RaycastStorage {
+  async getItem(key: string): Promise<string | null> {
+    return await LocalStorage.getItem<string>(key) || null;
   }
 
-  async removeItem(key: string) {
+  async removeItem(key: string): Promise<void> {
     await LocalStorage.removeItem(key);
   }
 
-  async setItem(key: string, value: string) {
+  async setItem(key: string, value: string): Promise<void> {
     await LocalStorage.setItem(key, value);
   }
 }
@@ -27,19 +28,18 @@ export async function authorize() {
 
   if (session && email === session.user?.email) {
     const { data, error } = await supabase.auth.setSession(session);
-    LocalStorage.setItem("session", JSON.stringify(data.session));
+    await LocalStorage.setItem("session", JSON.stringify(data.session));
     return { user: data.user, error };
   } else {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    LocalStorage.setItem("session", JSON.stringify(data.session));
+    await LocalStorage.setItem("session", JSON.stringify(data.session));
     return { user: data.user, error };
   }
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    // @ts-expect-error -- No idea
-    storage: new Storage(),
+    storage: new RaycastStorage(),
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,

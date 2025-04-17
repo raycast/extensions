@@ -73,9 +73,11 @@ export function SearchBookmarks({ user }: { user: User }) {
                         showToast({ title: "Deleting bookmark...", style: Toast.Style.Animated });
                         const res = await deleteBookmark(bookmark.id);
                         revalidate();
-                        res.error
-                          ? showToast({ title: "Failed to delete bookmark", style: Toast.Style.Failure })
-                          : showToast({ title: "Bookmark deleted", style: Toast.Style.Success });
+                        if (res.error) {
+                          showToast({ title: "Failed to delete bookmark", style: Toast.Style.Failure });
+                        } else {
+                          showToast({ title: "Bookmark deleted", style: Toast.Style.Success });
+                        }
                       }
                     }}
                   />
@@ -95,9 +97,11 @@ export function SearchBookmarks({ user }: { user: User }) {
                                   showToast({ title: "Moving bookmark...", style: Toast.Style.Animated });
                                   const res = await moveBookmarkToGroup(bookmark.id, group.id);
                                   revalidate();
-                                  res.error
-                                    ? showToast({ title: "Failed to move bookmark", style: Toast.Style.Failure })
-                                    : showToast({ title: `Moved to ${group.name}`, style: Toast.Style.Success });
+                                  if (res.error) {
+                                    showToast({ title: "Failed to move bookmark", style: Toast.Style.Failure });
+                                  } else {
+                                    showToast({ title: `Moved to ${group.name}`, style: Toast.Style.Success });
+                                  }
                                 }
                               }}
                             />
