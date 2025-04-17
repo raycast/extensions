@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wms-helper",
+  "title": "Wms Helper",
+  "description": "WMS 助手，支持 ToB 拣选任务查询、拣货容器查询、仓库查询、登录等操作",
+  "icon": "command-icon.png",
+  "author": "clanceylin",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "login",
+      "title": "Login",
+      "description": "登录 WMS 系统，并保存账号密码",
+      "mode": "view"
+    },
+    {
+      "name": "env",
+      "title": "Env",
+      "description": "切换 WMS 系统环境，并保存",
+      "mode": "view"
+    },
+    {
+      "name": "task",
+      "title": "Task Tob",
+      "description": "查询 ToB 拣选任务，并且可直接复制库位号",
+      "mode": "view"
+    },
+    {
+      "name": "container",
+      "title": "Container",
+      "description": "查询空闲拣货容器，并且可直接复制容器编码",
+      "mode": "view"
+    },
+    {
+      "name": "warehouse",
+      "title": "Warehouse",
+      "description": "查询仓库仓库，并且设置默认请求仓库",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.3",
+    "@raycast/utils": "^1.19.1",
+    "got": "^14.4.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "^19",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
