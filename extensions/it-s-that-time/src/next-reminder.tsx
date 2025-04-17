@@ -22,9 +22,7 @@ export default function Command() {
       title={nextReminder ? `remaining ${formatRemainingTime(nextReminder.targetTimestamp)}` : ""}
       icon={nextReminder ? "" : Icon.Alarm}
     >
-      {nextReminder && (
-        <MenuBarExtra.Item title={`~ ${formatDateTime(nextReminder.targetTimestamp)}`} />
-      )}
+      {nextReminder && <MenuBarExtra.Item title={`~ ${formatDateTime(nextReminder.targetTimestamp)}`} />}
       {nextReminder && <MenuBarExtra.Item title={nextReminder?.message ?? ""} />}
     </MenuBarExtra>
   );

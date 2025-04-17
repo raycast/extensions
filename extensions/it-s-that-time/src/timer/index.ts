@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import Paths from "../Paths";
 import Reminder from "../Reminder";
-import { promises as fsPromises } from 'fs';
+import { promises as fsPromises } from "fs";
 
 export function runner(props: {
   timerFile: string;
