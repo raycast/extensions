@@ -4,7 +4,7 @@ import { LibrewolfListEntries } from "./components/LibrewolfListEntries";
 import { useBookmarkSearch } from "./hooks/useBookmarkSearch";
 
 export default function Command(): ReactElement {
-  const [searchText, setSearchText] = useState<string>();
+  const [searchText, setSearchText] = useState<string>("");
   const { isLoading, errorView, data } = useBookmarkSearch(searchText);
 
   if (errorView) {

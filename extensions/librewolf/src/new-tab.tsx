@@ -4,7 +4,7 @@ import { useHistorySearch } from "./hooks/useHistorySearch";
 import { LibrewolfListEntries } from "./components/LibrewolfListEntries";
 
 export default function Command(): ReactElement {
-  const [searchText, setSearchText] = useState<string>();
+  const [searchText, setSearchText] = useState<string>("");
   const { isLoading: isLoadingHistory, errorView: errorHistory, data: entriesHistory } = useHistorySearch(searchText);
 
   if (errorHistory) {

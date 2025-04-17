@@ -37,7 +37,8 @@ export function useBookmarkSearch(query: string | undefined): SearchResult<Histo
   const dbPath = getHistoryDbPath();
   const [retryCount, setRetryCount] = useState(0);
 
-  if (!existsSync(dbPath)) {
+  // Dizin veya dosya yoksa hata bileşeni döndür
+  if (!dbPath || !existsSync(dbPath)) {
     return { data: [], isLoading: false, errorView: <NotInstalledError /> };
   }
 
@@ -46,13 +47,12 @@ export function useBookmarkSearch(query: string | undefined): SearchResult<Histo
       const isRetryableError =
         error.message?.includes("database is locked") || error.message?.includes("disk image is malformed");
 
-      // Increase max retries and use exponential backoff
       if (isRetryableError && retryCount < 5) {
         setTimeout(
           () => {
             setRetryCount(retryCount + 1);
           },
-          Math.pow(2, retryCount) * 250, // Exponential backoff: 250ms, 500ms, 1000ms, 2000ms, 4000ms
+          Math.pow(2, retryCount) * 250,
         );
       }
     },

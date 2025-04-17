@@ -28,7 +28,8 @@ export function useHistorySearch(query: string | undefined): SearchResult<Histor
   const inQuery = getHistoryQuery(query);
   const dbPath = getHistoryDbPath();
 
-  if (!existsSync(dbPath)) {
+  // Dizin veya dosya yoksa hata bileşeni döndür
+  if (!dbPath || !existsSync(dbPath)) {
     return { data: [], isLoading: false, errorView: <NotInstalledError /> };
   }
   const { isLoading, data, permissionView } = useSQL<HistoryEntry>(dbPath, inQuery);

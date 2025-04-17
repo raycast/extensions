@@ -11,36 +11,28 @@ const userDataDirectoryPath = () => {
 };
 
 const getProfileName = (userDirectoryPath: string) => {
+  if (!fs.existsSync(userDirectoryPath)) {
+    return ""; // Dizin yoksa boş string döndür
+  }
   const profiles = fs.readdirSync(userDirectoryPath);
   const preferences = getPreferenceValues<Preferences>();
 
-  // Try to find profiles in order of preference:
-  // 1. Custom profile if specified in preferences
-  // 2. Default release profile
-  // 3. Default alpha profile
-  // 4. First available profile
-  // 5. Empty string if no profiles found
+  const customProfile = profiles.find((profile) => profile.endsWith(preferences.profileDirectorySuffix));
+  const defaultReleaseProfile = profiles.find((profile) => profile.endsWith(".Default (release)"));
+  const defaultAlphaProfile = profiles.find((profile) => profile.endsWith(".Default (alpha)"));
 
-  const customProfile = profiles.filter((profile) => profile.endsWith(preferences.profileDirectorySuffix))[0];
-  const defaultReleaseProfile = profiles.filter((profile) => profile.endsWith(".Default (release)"))[0];
-  const defaultAlphaProfile = profiles.filter((profile) => profile.endsWith(".Default (alpha)"))[0];
-
-  if (customProfile) {
-    return customProfile;
-  } else if (defaultReleaseProfile) {
-    return defaultReleaseProfile;
-  } else if (defaultAlphaProfile) {
-    return defaultAlphaProfile;
-  } else if (profiles.length > 0) {
-    return profiles[0]; // Use first available profile if no default found
-  } else {
-    return "";
-  }
+  if (customProfile) return customProfile;
+  if (defaultReleaseProfile) return defaultReleaseProfile;
+  if (defaultAlphaProfile) return defaultAlphaProfile;
+  if (profiles.length > 0) return profiles[0];
+  return "";
 };
 
 export const getHistoryDbPath = (): string => {
   const userDirectoryPath = userDataDirectoryPath();
-  return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "places.sqlite");
+  const profileName = getProfileName(userDirectoryPath);
+  if (!profileName) return ""; // Profil yoksa boş string döndür
+  return path.join(userDirectoryPath, profileName, "places.sqlite");
 };
 
 export const getBookmarksDirectoryPath = (): string => {
