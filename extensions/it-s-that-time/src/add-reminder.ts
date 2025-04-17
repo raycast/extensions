@@ -5,6 +5,7 @@ import { exec } from "child_process";
 import { runner } from "./timer";
 import Paths from "./Paths";
 import * as fs from "node:fs";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function main(props: LaunchProps<{ arguments: Arguments.AddReminder }>) {
   try {
@@ -13,6 +14,10 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Add
   }
 
   const seconds = argumentsToSeconds(props.arguments);
+  if (seconds <= 0) {
+    showFailureToast(null, { title: "Failed to save reminder" });
+  }
+
   const targetTimestamp = Date.now() + seconds * 1000;
   const id = randomUUID();
   const reminder = {
