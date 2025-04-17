@@ -1,10 +1,10 @@
-import { BILI_TENAPI } from "../utils/constants";
-import { Trend } from "../types/types";
 import { useCachedPromise } from "@raycast/utils";
-import { fetchTrend } from "../utils/common-utils";
+import { Trend } from "../types/types";
+import { fetchTophubTrend } from "../utils/common-utils";
+import { BILI_HASHID } from "../utils/constants";
 
 export function useBili() {
   return useCachedPromise(() => {
-    return fetchTrend(BILI_TENAPI) as Promise<Trend[]>;
+    return fetchTophubTrend(BILI_HASHID) as Promise<Trend[]>;
   });
 }
