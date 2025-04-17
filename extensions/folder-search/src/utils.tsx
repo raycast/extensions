@@ -185,7 +185,7 @@ export function formatDate(dateString: string | undefined | null): string {
 }
 
 // Logging utility
-const LOG_ENABLED = false; // Set to false to disable all logging
+const LOG_ENABLED = true; // Set to true to enable all logging
 
 export const log = (level: 'debug' | 'error', component: string, message: string, data?: any) => {
   if (!LOG_ENABLED) return;
