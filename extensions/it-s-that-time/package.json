@@ -39,13 +39,13 @@
     {
       "name": "manage-reminder",
       "title": "Manage Reminder",
-      "description": "manage reminders",
+      "description": "Manage reminders.",
       "mode": "view"
     },
     {
       "name": "next-reminder",
       "title": "Next Reminder",
-      "description": "shows remaining time",
+      "description": "Shows remaining time.",
       "mode": "menu-bar",
       "interval": "10s"
     }
