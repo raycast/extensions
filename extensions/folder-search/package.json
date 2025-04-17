@@ -71,7 +71,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.81.2",
+    "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.19.1",
     "binary-split": "^1.0.5",
     "fs-extra": "^11.1.0",

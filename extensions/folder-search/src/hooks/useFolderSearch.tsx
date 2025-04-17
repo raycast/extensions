@@ -28,8 +28,17 @@ export function useFolderSearch() {
     searchTextRef.current = searchText;
   }, [searchText]);
 
+  // Log search text changes only when plugins and preferences are checked
+  useEffect(() => {
+    if (hasCheckedPlugins && hasCheckedPreferences) {
+      console.log("🔍 Search text update:", { searchText });
+    }
+  }, [searchText, hasCheckedPlugins, hasCheckedPreferences]);
+
   // debounce search
   useEffect(() => {
+    if (!hasCheckedPlugins || !hasCheckedPreferences) return;
+
     log("debug", "useFolderSearch", "Search text changed", {
       searchText,
       searchScope,
@@ -63,24 +72,24 @@ export function useFolderSearch() {
             searchScope,
           });
           setIsQuerying(true);
-          // Don't abort existing search immediately
-          // Let the new search start and handle the abort in the search promise
-        } else {
+        } else if (lastProcessedText.current.length > 0) {
+          // Only clear results if we previously had search text
           log("debug", "useFolderSearch", "Clearing results - no search text", {
             searchScope,
           });
           setIsQuerying(false);
+          setResults([]);
         }
         lastProcessedText.current = searchText;
       }
-    }, 500); // Increased debounce time to 500ms
+    }, 500);
 
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [searchText, searchScope, pinnedResults]);
+  }, [searchText, searchScope, pinnedResults, hasCheckedPlugins, hasCheckedPreferences]);
 
   // check plugins
   usePromise(

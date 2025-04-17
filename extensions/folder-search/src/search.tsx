@@ -11,6 +11,7 @@ import {
   open,
   getSelectedFinderItems,
   Keyboard,
+  LaunchProps,
 } from "@raycast/api";
 import { folderName, copyFolderToClipboard, maybeMoveResultToTrash } from "./utils";
 import { runAppleScript } from "run-applescript";
@@ -21,6 +22,7 @@ import path from "node:path";
 import fse from "fs-extra";
 import { userInfo } from "os";
 import { showFailureToast } from "@raycast/utils";
+import { useEffect } from "react";
 
 // allow string indexing on Icons
 interface IconDictionary {
@@ -29,7 +31,7 @@ interface IconDictionary {
 
 const IconDictionaried: IconDictionary = Icon as IconDictionary;
 
-export default function Command() {
+export default function Command(props: LaunchProps) {
   const {
     searchText,
     setSearchText,
@@ -50,6 +52,22 @@ export default function Command() {
     hasCheckedPlugins,
     hasCheckedPreferences,
   } = useFolderSearch();
+
+  // Handle fallback text from root search
+  useEffect(() => {
+    if (props.fallbackText) {
+      setSearchText(props.fallbackText);
+    }
+  }, [props.fallbackText]);
+
+  // Log launch type for debugging
+  useEffect(() => {
+    console.log("🚀 Command launched with:", {
+      launchType: props.launchType,
+      fallbackText: props.fallbackText,
+      searchText
+    });
+  }, [props.launchType, props.fallbackText, searchText]);
 
   const sendFinderSelectionToFolder = async (destinationFolder: string) => {
     const selectedItems = await getSelectedFinderItems();
@@ -252,7 +270,7 @@ export default function Command() {
         ) : null
       }
     >
-      {!searchText ? (
+      {!searchText && props.launchType === "userInitiated" ? (
         <FolderListSection
           title="Pinned"
           results={pinnedResults}

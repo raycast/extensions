@@ -9,6 +9,7 @@ import {
   confirmAlert,
   open,
   getSelectedFinderItems,
+  LaunchProps,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { folderName } from "./utils";
@@ -18,8 +19,9 @@ import { FolderListSection, Directory } from "./components";
 import path from "node:path";
 import fse from "fs-extra";
 import { userInfo } from "os";
+import { useEffect } from "react";
 
-export default function Command() {
+export default function Command(props: LaunchProps) {
   const {
     searchText,
     setSearchText,
@@ -35,6 +37,22 @@ export default function Command() {
     hasCheckedPlugins,
     hasCheckedPreferences,
   } = useFolderSearch();
+
+  // Handle fallback text from root search
+  useEffect(() => {
+    if (props.fallbackText) {
+      setSearchText(props.fallbackText);
+    }
+  }, [props.fallbackText]);
+
+  // Log launch type for debugging
+  useEffect(() => {
+    console.log("🚀 Command launched with:", {
+      launchType: props.launchType,
+      fallbackText: props.fallbackText,
+      searchText
+    });
+  }, [props.launchType, props.fallbackText, searchText]);
 
   // Function to move selected Finder items to the selected folder
   const moveSelectedFinderItemsToFolder = async (destinationFolder: string) => {
@@ -168,7 +186,7 @@ export default function Command() {
         ) : null
       }
     >
-      {!searchText ? (
+      {!searchText && props.launchType === "userInitiated" ? (
         <FolderListSection
           title="Pinned"
           results={pinnedResults}
