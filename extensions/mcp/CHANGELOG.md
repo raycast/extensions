@@ -1,5 +1,9 @@
 # Model Context Protocol Changelog
 
+## [Fix instruction] - 2025-04-12
+
+* Improve instructions and evals examples
+
 ## [Fix env issues] - 2025-03-24
 * Fix issue caused by passing `env` in `mcp-config.json` 
 
