@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { LocalStorage, Toast, environment, showToast, getPreferenceValues } from "@raycast/api";
+import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
 import { usePromise, showFailureToast } from "@raycast/utils";
 import { FolderSearchPlugin, SpotlightSearchResult, SpotlightSearchPreferences } from "../types";
 import { loadPlugins, lastUsedSort, shouldShowPath } from "../utils";
@@ -75,11 +75,7 @@ export function useFolderSearch() {
         setHasCheckedPlugins(true);
       },
       onError() {
-        showToast({
-          title: "An Error Occurred",
-          message: "Could not read plugins",
-          style: Toast.Style.Failure,
-        });
+        showFailureToast({ title: "Could not read plugins" });
         setHasCheckedPlugins(true);
       },
     }
@@ -108,11 +104,7 @@ export function useFolderSearch() {
         setHasCheckedPreferences(true);
       },
       onError() {
-        showToast({
-          title: "An Error Occurred",
-          message: "Could not read preferences",
-          style: Toast.Style.Failure,
-        });
+        showFailureToast({ title: "Could not read preferences" });
         setHasCheckedPreferences(true);
       },
     }

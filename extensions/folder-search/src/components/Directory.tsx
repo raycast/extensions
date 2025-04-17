@@ -66,12 +66,6 @@ export function Directory({ path: directoryPath }: DirectoryProps) {
                     path={filePath}
                     onOpen={() => popToRoot({ clearSearchBar: true })}
                   />
-                  <Action
-                    title="Show Info in Finder"
-                    icon={Icon.Finder}
-                    shortcut={{ modifiers: ["cmd"], key: "i" }}
-                    onAction={() => showFolderInfoInFinder(result)}
-                  />
                   <ActionPanel.Section>
                     <Action.Push
                       title="Enclosing Folder"
