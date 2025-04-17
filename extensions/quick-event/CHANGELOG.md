@@ -1,5 +1,9 @@
 # Quick Event Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Add location parsing for event creation
+
 ## [Update] - 2024-08-19
 
 - Add new timePatterns
