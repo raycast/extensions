@@ -10,6 +10,7 @@ except IndexError:
     print("Error: Please provide a message as an argument")
     sys.exit(1)
 
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -45,17 +46,17 @@ class MainWindow(QMainWindow):
             print(f"Error getting monitor info: {e}")
             sys.exit(1)
 
-        found = false
+        found = False
         for monitor in monitors:
             if monitor.x <= mouse_x <= monitor.x + monitor.width and monitor.y <= mouse_y <= monitor.y + monitor.height:
-                found = true
+                found = True
                 screen_width = monitor.width
                 screen_height = monitor.height
                 screen_x = monitor.x
                 screen_y = monitor.y
                 break
-        
-        if !found:
+
+        if not found:
             print(f"Error: Not Found Activee Monitor")
             sys.exit(1)
 
@@ -65,6 +66,7 @@ class MainWindow(QMainWindow):
 
     def keyPressEvent(self, event):
         self.close()
+
 
 app = QApplication(sys.argv)
 window = MainWindow()
