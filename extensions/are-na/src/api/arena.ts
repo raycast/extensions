@@ -120,6 +120,7 @@ export class Arena {
         message: `Error: ${error}`,
         style: Toast.Style.Failure,
       });
+      return null;
     }
   }
 
