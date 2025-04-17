@@ -18,6 +18,7 @@ import { getErrorMessage } from "./helpers/errors";
 import { getIssueStatus } from "./helpers/issue";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyRepositories } from "./hooks/useRepositories";
+import { useSharedSelections } from "./hooks/useSharedSelections";
 
 type BranchFormValues = {
   issue: string;
@@ -111,6 +112,9 @@ export function BranchForm({ draftValues }: BranchFormProps) {
   );
 
   const issues = data?.repository?.issues?.nodes?.filter((node) => node?.linkedBranches.totalCount == 0);
+
+  // Use the custom hook to share selections across commands
+  useSharedSelections(values, setValue, { collaborators: [], projects: [] });
 
   useEffect(() => {
     setValue("repoUrl", data?.repository?.url);
