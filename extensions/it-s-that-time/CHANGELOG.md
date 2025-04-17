@@ -1,3 +1,3 @@
 # It's That Time Changelog
 
-## [Initial Version] - 2024-09-16
+## [Initial Version] - {PR_MERGE_DATE}
