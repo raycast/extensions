@@ -299,7 +299,6 @@ export const getRecentMessagesContent = async () => {
     }
     return undefined;
   }
-  console.log(data);
   const messages: string[] = data.split("$end");
   messages.pop();
 
