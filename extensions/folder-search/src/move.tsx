@@ -10,6 +10,7 @@ import {
   open,
   getSelectedFinderItems,
   LaunchProps,
+  showToast,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { folderName, log } from "./utils";
@@ -56,63 +57,114 @@ export default function Command(props: LaunchProps) {
 
   // Function to move selected Finder items to the selected folder
   const moveSelectedFinderItemsToFolder = async (destinationFolder: string) => {
-    const selectedItems = await getSelectedFinderItems();
+    try {
+      log("debug", "move", "Starting move operation", {
+        destinationFolder,
+      });
 
-    if (selectedItems.length === 0) {
-      await showFailureToast({ title: "No Finder selection to move" });
-      return false;
-    }
+      const selectedItems = await getSelectedFinderItems();
+      log("debug", "move", "Got selected Finder items", {
+        count: selectedItems.length,
+        items: selectedItems.map(item => item.path),
+      });
 
-    let movedCount = 0;
-    let skippedCount = 0;
+      if (selectedItems.length === 0) {
+        log("debug", "move", "No Finder items selected");
+        await showFailureToast({ title: "No Finder selection to move" });
+        return false;
+      }
 
-    for (const item of selectedItems) {
-      const sourceFileName = path.basename(item.path);
-      const destinationFile = path.join(destinationFolder, sourceFileName);
+      let movedCount = 0;
+      let skippedCount = 0;
 
-      try {
-        const exists = await fse.pathExists(destinationFile);
-        if (exists) {
-          const overwrite = await confirmAlert({
-            title: "Overwrite the existing file?",
-            message: sourceFileName + " already exists in " + destinationFolder,
+      for (const item of selectedItems) {
+        const sourceFileName = path.basename(item.path);
+        const destinationFile = path.join(destinationFolder, sourceFileName);
+
+        try {
+          log("debug", "move", "Processing item", {
+            source: item.path,
+            destination: destinationFile,
           });
 
-          if (overwrite) {
-            if (item.path === destinationFile) {
-              await showFailureToast({ title: "The source and destination file are the same" });
+          const exists = await fse.pathExists(destinationFile);
+          if (exists) {
+            log("debug", "move", "File exists at destination", {
+              file: destinationFile,
+            });
+
+            const overwrite = await confirmAlert({
+              title: "Overwrite the existing file?",
+              message: sourceFileName + " already exists in " + destinationFolder,
+            });
+
+            if (overwrite) {
+              if (item.path === destinationFile) {
+                log("debug", "move", "Source and destination are the same", {
+                  file: item.path,
+                });
+                await showFailureToast({ title: "The source and destination file are the same" });
+                skippedCount++;
+                continue;
+              }
+              await fse.move(item.path, destinationFile, { overwrite: true });
+              movedCount++;
+              log("debug", "move", "File moved with overwrite", {
+                source: item.path,
+                destination: destinationFile,
+              });
+            } else {
+              log("debug", "move", "User cancelled overwrite", {
+                file: sourceFileName,
+              });
+              await showFailureToast({ title: "Cancelling move for " + sourceFileName });
               skippedCount++;
               continue;
             }
-            await fse.move(item.path, destinationFile, { overwrite: true });
-            movedCount++;
           } else {
-            await showFailureToast({ title: "Cancelling move for " + sourceFileName });
-            skippedCount++;
-            continue;
+            await fse.move(item.path, destinationFile);
+            movedCount++;
+            log("debug", "move", "File moved successfully", {
+              source: item.path,
+              destination: destinationFile,
+            });
           }
-        } else {
-          await fse.move(item.path, destinationFile);
-          movedCount++;
+        } catch (e) {
+          log("error", "move", "Error moving file", {
+            error: e,
+            source: item.path,
+            destination: destinationFile,
+          });
+          await showFailureToast(e, { title: "Error moving file" });
+          return false;
         }
-      } catch (e) {
-        await showFailureToast(e, { title: "Error moving file" });
-        return false;
       }
-    }
 
-    if (movedCount === 0) {
-      await showFailureToast({ title: "No files were moved" });
-      return false;
-    } else if (skippedCount > 0) {
-      await showFailureToast({
-        title: `Moved ${movedCount} item(s) to ${path.basename(destinationFolder)}, skipped ${skippedCount} item(s)`,
+      log("debug", "move", "Move operation completed", {
+        movedCount,
+        skippedCount,
+        destinationFolder,
       });
-    } else {
-      await showFailureToast({ title: `Moved ${movedCount} item(s) to ${path.basename(destinationFolder)}` });
-    }
 
-    return movedCount > 0;
+      if (movedCount === 0) {
+        await showFailureToast({ title: "No files were moved" });
+        return false;
+      } else if (skippedCount > 0) {
+        await showFailureToast({
+          title: `Moved ${movedCount} item(s) to ${path.basename(destinationFolder)}, skipped ${skippedCount} item(s)`,
+        });
+      } else {
+        await showFailureToast({ title: `Moved ${movedCount} item(s) to ${path.basename(destinationFolder)}` });
+      }
+
+      return movedCount > 0;
+    } catch (error) {
+      log("error", "move", "Unexpected error in move operation", {
+        error,
+        destinationFolder,
+      });
+      throw error;
+    }
   };
 
   // Render actions for the folder list items
@@ -130,7 +182,7 @@ export default function Command(props: LaunchProps) {
               open(result.path);
               closeMainWindow();
               popToRoot({ clearSearchBar: true });
-              await showFailureToast({ title: "Moved to Trash", message: folderName(result) });
+              await showToast({ title: "Successfully moved to folder", message: folderName(result) });
             }
           }}
         />
