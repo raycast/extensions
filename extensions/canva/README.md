@@ -22,3 +22,9 @@ This is the **unofficial** Raycast Extension for [Canva](https://canva.com) allo
 5. `Copy` Client ID and Client secret
 11. `Open` Extension Preferences
 12. `Paste` in relevant fields
+
+## ❔
+
+**Q.** Why not use the Canva logo?
+
+**Ans.** [Canva Brand Guidelines](https://www.canva.dev/docs/connect/guidelines/brand/) require explicit permission to use their logo.

@@ -1,5 +1,4 @@
 import { getPreferenceValues, OAuth } from "@raycast/api";
-import "cross-fetch/polyfill";
 
 const preferences = getPreferenceValues<Preferences>();
 
@@ -9,6 +8,7 @@ const scopes = ["design:meta:read"];
 const authorizeUrl = "https://www.canva.com/api/oauth/authorize";
 const redirectUri = "https://raycast.com/redirect/extension";
 const tokenUrl = "https://api.canva.com/rest/v1/oauth/token";
+const token = btoa(`${clientId}:${clientSecret}`);
 
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -46,8 +46,6 @@ export async function fetchTokens(
   authCode: string,
 ): Promise<OAuth.TokenResponse> {
   const bodyParams = new URLSearchParams();
-  bodyParams.append("client_id", clientId);
-  bodyParams.append("client_secret", clientSecret);
   bodyParams.append("code", authCode);
   bodyParams.append("code_verifier", authRequest.codeVerifier);
   bodyParams.append("grant_type", "authorization_code");
@@ -57,6 +55,7 @@ export async function fetchTokens(
   const response = await fetch(tokenUrl, {
     method: "POST",
     headers: {
+      Authorization: `Basic ${token}`,
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: bodyParams,
@@ -79,6 +78,9 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
 
   const response = await fetch(tokenUrl, {
     method: "POST",
+    headers: {
+      Authorization: `Basic ${token}`,
+    },
     body: bodyParams,
   });
 
