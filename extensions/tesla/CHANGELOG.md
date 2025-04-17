@@ -1,5 +1,10 @@
 # Tesla Changelog
 
+## [AI Tools Update] - 2025-02-28
+
+- Added AI tools (view car, driving history, charge history, enable/disable sentry mode, enable/disable climate control, start/stop defrosting, start/stop charging)
+- Fixed messages on charging commands
+
 ## [Flash Fix] - 2024-12-03
 
 - Fixed screen flashing when view car command was refreshing
