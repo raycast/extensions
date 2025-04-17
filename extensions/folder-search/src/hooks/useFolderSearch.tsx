@@ -31,7 +31,7 @@ export function useFolderSearch() {
   // Log search text changes only when plugins and preferences are checked
   useEffect(() => {
     if (hasCheckedPlugins && hasCheckedPreferences) {
-      console.log("🔍 Search text update:", { searchText });
+      log("debug", "useFolderSearch", "Search text update", { searchText });
     }
   }, [searchText, hasCheckedPlugins, hasCheckedPreferences]);
 
