@@ -4,7 +4,7 @@ import Paths from "./Paths";
 export default function showLargeMessage(message = "No message") {
   exec(`python3 ${Paths.MESSAGE_SCRIPT_FILE} "${message}"`, (error, stdout, stderr) => {
     if (error) {
-      console.error(`Error executing script: ${error.message}`);
+      showFailureToast(error, { title: "Could not show message" });
       return;
     }
 
