@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { runAppleScript } from "@raycast/utils";
 export async function downloadFile(url: string) {
   try {
@@ -33,7 +34,7 @@ export async function downloadFile(url: string) {
     return result;
   } catch (error) {
     console.error(`Download error: ${error}`);
-    await showToast(Toast.Style.Failure, "Download failed", String(error));
-    throw error;
+    await showFailureToast(error, { title: "Download failed" });
+    return null;
   }
 }

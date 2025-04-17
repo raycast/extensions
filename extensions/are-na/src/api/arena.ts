@@ -214,7 +214,7 @@ export class Arena {
           pullObject<Channel[]>("channels")(response as Record<string, unknown>),
         ),
       create: (channelSlug: string, content: { content: string }) => this.channel(channelSlug).createBlock(content),
-      update: (opts: { content?: unknown; title?: string; description?: string }) =>
+      update: (opts: { content?: string; title?: string; description?: string }) =>
         this._req("PUT", `blocks/${id}`, { ...params, ...opts }) as Promise<void>,
     };
   }

@@ -15,7 +15,7 @@ function Actions(props: { channel: Channel }) {
     <ActionPanel title={props.channel.title}>
       <ActionPanel.Section>
         <Action.Push
-          icon={{ source: "extension-icon.svg" }}
+          icon={{ source: "extension-icon.png" }}
           title="Enter Channel"
           target={<ChannelView channel={props.channel} />}
         />
@@ -41,7 +41,7 @@ function Actions(props: { channel: Channel }) {
 function ChannelListItem({ channel }: { channel: Channel }) {
   return (
     <List.Item
-      icon={{ source: "extension-icon.svg" }}
+      icon={{ source: "extension-icon.png" }}
       title={channel.title}
       accessories={[
         {

@@ -49,6 +49,6 @@ export default function Command(props: LaunchProps<{ arguments: SearchArguments 
   );
 
   return (
-    <List isLoading={isLoading}>{data?.users.map((block, index) => <BlockListItem user={block} key={index} />)}</List>
+    <List isLoading={isLoading}>{data?.users.map((user, index) => <BlockListItem user={user} key={index} />)}</List>
   );
 }

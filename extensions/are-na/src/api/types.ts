@@ -348,7 +348,7 @@ export interface Channel {
    */
   collaboration: boolean;
   /**
-   * The slug of the channel used in the url (e.g. http:re.na/arena-influences)
+   * The slug of the channel used in the url (e.g. http:are.na/arena-influences)
    */
   slug: string;
 
