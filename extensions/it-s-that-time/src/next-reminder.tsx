@@ -31,7 +31,7 @@ export default function Command() {
 }
 
 function findNextReminder(reminders: Reminder[]): Reminder | undefined {
-  if (reminders.length == 0) {
+  if (reminders.length === 0) {
     return undefined;
   }
   return reminders.slice().sort((a, b) => a.targetTimestamp - b.targetTimestamp)[0];
