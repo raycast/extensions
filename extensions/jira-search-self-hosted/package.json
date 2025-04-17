@@ -11,10 +11,18 @@
     "ryanp",
     "LunaticMuch",
     "nick318",
-    "marinsokol"
+    "marinsokol",
+    "Artic"
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "active-sprint",
+      "title": "Show Active Sprint",
+      "subtitle": "Jira Search (Self-Hosted)",
+      "description": "Shows a summary of the active sprint in a board",
+      "mode": "view"
+    },
     {
       "name": "issue",
       "title": "Search Issues",
@@ -68,6 +76,42 @@
       "description": "Enable to use unsafe HTTPS for self-signed certificates.",
       "default": false,
       "label": "Enable"
+    },
+    {
+      "name": "epicLinkField",
+      "type": "textfield",
+      "required": false,
+      "title": "Epic Link Field",
+      "description": "Your Jira instance's Epic Link custom field ID",
+      "placeholder": "customfield_10110",
+      "default": "customfield_10110"
+    },
+    {
+      "name": "epicNameField",
+      "type": "textfield",
+      "required": false,
+      "title": "Epic Name Field",
+      "description": "Your Jira instance's Epic Name custom field ID",
+      "placeholder": "customfield_10104",
+      "default": "customfield_10104"
+    },
+    {
+      "name": "sprintField",
+      "type": "textfield",
+      "required": false,
+      "title": "Sprint Field",
+      "description": "Your Jira instance's Sprint custom field ID",
+      "placeholder": "customfield_10020",
+      "default": "customfield_10020"
+    },
+    {
+      "name": "storyPointsField",
+      "type": "textfield",
+      "required": false,
+      "title": "Story Points Field",
+      "description": "Your Jira instance's Story Points custom field ID",
+      "placeholder": "customfield_10016",
+      "default": "customfield_10016"
     }
   ],
   "dependencies": {
@@ -90,6 +134,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "node publish.mjs"
+    "publish": "npx @raycast/api@latest publish"
   }
 }
