@@ -1,6 +1,6 @@
 # Surge Outbound Mode Switcher Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-17
 
 - Add store screenshots
 
