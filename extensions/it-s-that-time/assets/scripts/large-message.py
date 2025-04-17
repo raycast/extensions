@@ -4,7 +4,11 @@ from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QWid
 from PyQt5.QtCore import Qt
 from screeninfo import get_monitors
 
-message = sys.argv[1]
+try:
+    message = sys.argv[1]
+except IndexError:
+    print("Error: Please provide a message as an argument")
+    sys.exit(1)
 
 class MainWindow(QMainWindow):
     def __init__(self):
