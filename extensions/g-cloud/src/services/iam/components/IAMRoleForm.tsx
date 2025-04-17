@@ -15,13 +15,6 @@ interface MemberTypeInfo {
   id: string;
 }
 
-/**
- * Parses a member string to determine the member type and ID.
- * Format can be either:
- * - "type:id" (e.g. "user:alice@example.com")
- * - "email@domain.com" (treated as user)
- * - "name" (treated as serviceAccount)
- */
 function parseMemberString(memberString: string): MemberTypeInfo {
   if (memberString.includes(":")) {
     const [type, id] = memberString.split(":", 2);
@@ -40,11 +33,10 @@ export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, o
   const [availableRoles, setAvailableRoles] = useState<{ value: string; title: string }[]>([]);
   const [selectedRole, setSelectedRole] = useState<string>("");
 
-  // Update available roles when service changes
   function handleServiceChange(value: string) {
     const service = rolesByService.find((s) => s.title === value);
     setAvailableRoles(service?.roles || []);
-    setSelectedRole(""); // Reset role selection when service changes
+    setSelectedRole("");
   }
 
   async function handleSubmit(values: {
@@ -54,12 +46,10 @@ export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, o
     conditionTitle?: string;
     conditionDescription?: string;
   }) {
-    // Validate required fields
     const missingFields = [];
     if (!values.member?.trim()) missingFields.push("Member");
     if (!values.role?.trim()) missingFields.push("Role");
 
-    // Validate condition title is provided if condition exists
     if (values.condition?.trim() && !values.conditionTitle?.trim()) {
       missingFields.push("Condition Title");
     }
@@ -75,7 +65,6 @@ export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, o
 
     setIsSubmitting(true);
 
-    // Show loading toast
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Adding role...",
@@ -85,10 +74,8 @@ export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, o
     try {
       const { type: memberType, id: memberId } = parseMemberString(values.member);
 
-      // Add the member to the role
       await iamService.addMember(values.role, memberType, memberId);
 
-      // Hide loading toast
       loadingToast.hide();
 
       showToast({
@@ -101,7 +88,6 @@ export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, o
     } catch (error) {
       console.error("Error adding role:", error);
 
-      // Hide loading toast
       loadingToast.hide();
 
       showFailureToast(error, {
