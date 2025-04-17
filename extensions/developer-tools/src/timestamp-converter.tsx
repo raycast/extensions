@@ -1,6 +1,18 @@
-import { Action, ActionPanel, Clipboard, Form, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  environment,
+  Form,
+  getPreferenceValues,
+  getSelectedText,
+  LaunchProps,
+  openExtensionPreferences,
+  showHUD,
+  showToast,
+} from "@raycast/api";
 import { FormValidation, useForm, useLocalStorage } from "@raycast/utils";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 interface TimestampForm {
   dateObject: Date;
@@ -16,6 +28,7 @@ interface TimestampForm {
 }
 
 const TIMEZONE_OPTION_REGEX = /^(GMT)|(UTC[+-]\d{1,2})$/;
+const TIMESTAMP_REGEX = /^\d{10,13}$/;
 const timezoneOptions = [
   "GMT",
   "UTC-12",
@@ -65,24 +78,47 @@ const parseTimezoneOffset = (timezone: string): number => {
   return 0;
 };
 
+const tryParseTimestampOrDefault = (timestamp: string | undefined): Date => {
+  if (!timestamp || !TIMESTAMP_REGEX.test(timestamp)) return new Date();
+  const isMilliseconds = timestamp.length === 13;
+  return new Date(parseInt(timestamp) * (isMilliseconds ? 1 : 1000));
+};
+
+const tryGetSelectedTextAndUpdate = async (updaterFn: (text: string) => void) => {
+  if (!environment.canAccess(getSelectedText)) return;
+
+  try {
+    const text = await getSelectedText();
+    if (text && TIMESTAMP_REGEX.test(text)) {
+      updaterFn(text);
+    }
+  } catch (e) {
+    console.error(e);
+    showToast({
+      title: "Error",
+      message: String(e),
+    });
+  }
+};
 const STORAGE_KEY_USE_MILLISECONDS = "convert-timestamp::use-milliseconds";
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: Arguments.TimestampConverter }>) {
   const { value: useMilliseconds, setValue: setUseMilliseconds } = useLocalStorage(STORAGE_KEY_USE_MILLISECONDS, false);
-  const now = new Date();
-  const nowTimestamp = useMilliseconds ? now.getTime() : Math.floor(now.getTime() / 1000);
+
+  const timestampDate = tryParseTimestampOrDefault(props.arguments.timestamp);
+  const timestamp = useMilliseconds ? timestampDate.getTime() : Math.floor(timestampDate.getTime() / 1000);
 
   const { handleSubmit, itemProps, values, setValue } = useForm<TimestampForm>({
     initialValues: {
-      dateObject: now,
-      timestamp: nowTimestamp.toString(),
-      year: now.getFullYear().toString(),
-      month: (now.getMonth() + 1).toString(),
-      day: now.getDate().toString(),
-      hour: now.getHours().toString(),
-      minute: now.getMinutes().toString(),
-      second: now.getSeconds().toString(),
-      milisecond: now.getMilliseconds().toString(),
+      dateObject: timestampDate,
+      timestamp: timestamp.toString(),
+      year: timestampDate.getFullYear().toString(),
+      month: (timestampDate.getMonth() + 1).toString(),
+      day: timestampDate.getDate().toString(),
+      hour: timestampDate.getHours().toString(),
+      minute: timestampDate.getMinutes().toString(),
+      second: timestampDate.getSeconds().toString(),
+      milisecond: timestampDate.getMilliseconds().toString(),
       timezone: getCurrentTimezone(),
     },
     validation: {
@@ -238,12 +274,20 @@ export default function Command() {
     return isFuture ? `${days} day${days > 1 ? "s" : ""} from now` : `${days} day${days > 1 ? "s" : ""} ago`;
   }, [utcTimestamp]);
 
+  useEffect(() => {
+    const preferences = getPreferenceValues<Preferences.TimestampConverter>();
+    if (!preferences["use-selected-text"]) return;
+
+    tryGetSelectedTextAndUpdate(updateFromTimestamp);
+  }, []);
+
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Copy Timestamp" onSubmit={handleSubmit} />
           <Action title="Toggle Milliseconds" onAction={() => setUseMilliseconds(!useMilliseconds)} />
+          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >

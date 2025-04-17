@@ -14,7 +14,26 @@
       "name": "timestamp-converter",
       "title": "Timestamp Converter",
       "description": "Convert Unix timestamps and display their components with timezone support",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "use-selected-text",
+          "title": "Use Selected Text",
+          "description": "Always try to use the selected text as the input for the command first",
+          "label": "Use selected text of the frontmost application",
+          "type": "checkbox",
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "timestamp",
+          "title": "Timestamp",
+          "description": "The timestamp to convert",
+          "placeholder": "Enter a timestamp",
+          "type": "text"
+        }
+      ]
     },
     {
       "name": "url-encode-decode",
