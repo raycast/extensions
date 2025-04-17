@@ -20,13 +20,6 @@ export function useFolderSearch() {
   const [showNonCloudLibraryPaths, setShowNonCloudLibraryPaths] = useState(false);
 
   const abortable = useRef<AbortController>();
-  const searchCallback = useRef((result: SpotlightSearchResult) => {
-    const { filterLibraryFolders } = getPreferenceValues();
-    // Only add the result if it passes our visibility filter
-    if (shouldShowPath(result.path, !filterLibraryFolders)) {
-      setResults((prevResults) => [...prevResults, result].sort(lastUsedSort));
-    }
-  });
 
   const searchTextRef = useRef(searchText);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
@@ -35,21 +28,21 @@ export function useFolderSearch() {
   // Track setSearchText calls
   const wrappedSetSearchText = (text: string) => {
     const stack = new Error().stack;
-    const caller = stack?.split('\n')[2]?.trim();
-    log('debug', 'wrappedSetSearchText', 'setSearchText called', {
+    const caller = stack?.split("\n")[2]?.trim();
+    log("debug", "wrappedSetSearchText", "setSearchText called", {
       newText: text,
       previousText: searchText,
-      caller
+      caller,
     });
     setSearchText(text);
   };
 
   // Add logging for search text changes
   useEffect(() => {
-    log('debug', 'useEffect', 'Search text state changed', {
+    log("debug", "useEffect", "Search text state changed", {
       newText: searchText,
       lastProcessed: lastProcessedText.current,
-      searchTextRef: searchTextRef.current
+      searchTextRef: searchTextRef.current,
     });
     lastProcessedText.current = searchText;
   }, [searchText]);
@@ -57,9 +50,9 @@ export function useFolderSearch() {
   // Add logging for search text ref changes
   useEffect(() => {
     searchTextRef.current = searchText;
-    log('debug', 'searchTextRef', 'Search text ref updated', {
+    log("debug", "searchTextRef", "Search text ref updated", {
       newText: searchText,
-      previousRef: searchTextRef.current
+      previousRef: searchTextRef.current,
     });
   }, [searchText]);
 
@@ -69,9 +62,9 @@ export function useFolderSearch() {
       clearTimeout(debounceTimer.current);
     }
     debounceTimer.current = setTimeout(() => {
-      log('debug', 'debounce', 'Debounce timer triggered', {
+      log("debug", "debounce", "Debounce timer triggered", {
         currentText: searchText,
-        lastProcessed: lastProcessedText.current
+        lastProcessed: lastProcessedText.current,
       });
     }, 300);
   }, [searchText]);
@@ -97,7 +90,7 @@ export function useFolderSearch() {
     const loadPreferences = async () => {
       try {
         const preferences = await getPreferenceValues<SpotlightSearchPreferences>();
-        log('debug', 'preferences', 'Loading preferences', { preferences });
+        log("debug", "preferences", "Loading preferences", { preferences });
         setShowNonCloudLibraryPaths(preferences.showNonCloudLibraryPaths);
         setPinnedResults(preferences.pinned || []);
         setSearchScope(preferences.searchScope || "");
@@ -131,12 +124,12 @@ export function useFolderSearch() {
   // perform search
   usePromise(
     async (search: string, scope: string, abortable: React.MutableRefObject<AbortController | null | undefined>) => {
-      log('debug', 'usePromise', 'Starting search', { text: search, scope });
-      
+      log("debug", "usePromise", "Starting search", { text: search, scope });
+
       const results = await searchSpotlight(search, scope as "pinned" | "user" | "all", abortable);
-      
-      log('debug', 'usePromise', 'Search completed', { resultCount: results.length });
-      
+
+      log("debug", "usePromise", "Search completed", { resultCount: results.length });
+
       return results;
     },
     [searchText, searchScope, abortable],
@@ -147,18 +140,18 @@ export function useFolderSearch() {
       },
       onData: (data) => {
         const { filterLibraryFolders } = getPreferenceValues();
-        const filteredResults = data.filter(result => shouldShowPath(result.path, !filterLibraryFolders));
-        
-        log('debug', 'usePromise', 'Filtering results', {
+        const filteredResults = data.filter((result) => shouldShowPath(result.path, !filterLibraryFolders));
+
+        log("debug", "usePromise", "Filtering results", {
           originalCount: data.length,
-          filteredCount: filteredResults.length
+          filteredCount: filteredResults.length,
         });
-        
+
         setResults(filteredResults.sort(lastUsedSort));
         setIsQuerying(false);
       },
       onError: (e) => {
-        log('error', 'usePromise', 'Search error', { error: e });
+        log("error", "usePromise", "Search error", { error: e });
         if (e.name !== "AbortError") {
           showFailureToast(e, { title: "Error searching folders" });
         }
