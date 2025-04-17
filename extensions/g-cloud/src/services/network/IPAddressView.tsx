@@ -18,12 +18,10 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
   const { push } = useNavigation();
 
   useEffect(() => {
-    // Initialize service with provided gcloudPath and projectId
     const networkService = new NetworkService(gcloudPath, projectId);
     setService(networkService);
 
     const initializeData = async () => {
-      // Show initial loading toast
       const loadingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Loading IP addresses...",
@@ -31,11 +29,9 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
       });
 
       try {
-        // Fetch IPs
         const fetchedIPs = await networkService.getIPs();
         setIPs(fetchedIPs);
 
-        // Fetch regions in the background
         fetchRegions(networkService);
 
         loadingToast.hide();
@@ -63,7 +59,6 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
       setRegions(regionsList);
     } catch (error) {
       console.error("Error fetching regions:", error);
-      // Don't show error toast for regions, as it's not critical
     }
   };
 
@@ -99,7 +94,6 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
   }, [service, selectedRegion]);
 
   const handleRegionChange = async (newRegion: string | undefined) => {
-    // Convert "all" to undefined for filtering
     const regionFilter = newRegion === "all" ? undefined : newRegion;
     setSelectedRegion(regionFilter);
 
@@ -132,7 +126,6 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
     }
   };
 
-  // Filter IPs based on search text
   const filteredIPs = ips.filter(
     (ip) =>
       ip.name.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -396,12 +389,10 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
   const [selectedIpAddress, setSelectedIpAddress] = useState<string>("");
 
   useEffect(() => {
-    // Fetch subnets for internal addresses and VPCs
     const fetchNetworkResources = async () => {
       try {
         const service = new NetworkService(gcloudPath, projectId);
 
-        // Fetch subnets
         const allSubnets = await service.getSubnets();
         const formattedSubnets = allSubnets.map((subnet) => ({
           name: subnet.name,
@@ -409,7 +400,6 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
         }));
         setSubnets(formattedSubnets);
 
-        // Fetch VPCs
         const allVPCs = await service.getVPCs();
         const formattedVPCs = allVPCs.map((vpc) => ({
           name: vpc.name,
@@ -423,7 +413,6 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
     fetchNetworkResources();
   }, [gcloudPath, projectId]);
 
-  // Get IP address suggestions
   const fetchIPSuggestions = async (type: string, subnet?: string) => {
     try {
       setFetchingSuggestions(true);
@@ -437,7 +426,6 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
     }
   };
 
-  // Update suggestions when address type or subnet changes
   useEffect(() => {
     fetchIPSuggestions(addressType, selectedSubnet);
   }, [addressType, selectedSubnet]);
@@ -546,7 +534,7 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
         value={addressType}
         onChange={(value) => {
           setAddressType(value);
-          // Reset selected subnet when switching address types
+
           if (value !== "INTERNAL") {
             setSelectedSubnet("");
           }

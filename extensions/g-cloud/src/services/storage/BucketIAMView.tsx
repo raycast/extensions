@@ -10,6 +10,7 @@ import {
   Color,
   useNavigation,
   Form,
+  Alert,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -19,6 +20,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { formatRoleName, getRoleInfo } from "../../utils/iamRoles";
+import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
 
 const execPromise = promisify(exec);
 
@@ -28,9 +30,8 @@ interface BucketIAMViewProps {
   bucketName: string;
 }
 
-// Cache TTL constants (in milliseconds)
-const CACHE_TTL = 900000; // 15 minutes
-const CACHE_TTL_DETAILS = 1800000; // 30 minutes
+const CACHE_TTL = 900000;
+const CACHE_TTL_DETAILS = 1800000;
 
 interface IAMBinding {
   role: string;
@@ -75,14 +76,11 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
   const [error, setError] = useState<string | null>(null);
   const { push, pop } = useNavigation();
 
-  // Cache stored in a ref to persist between renders
   const cache = useRef<Map<string, CacheEntry>>(new Map());
 
-  // Function to clean expired cache entries
   function cleanExpiredCache() {
     const now = Date.now();
     for (const [key, entry] of cache.current.entries()) {
-      // Check if entry has expired based on its type
       const isDetailsEntry = key.startsWith("service-details:");
       const ttl = isDetailsEntry ? CACHE_TTL_DETAILS : CACHE_TTL;
 
@@ -92,12 +90,9 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
     }
   }
 
-  // Function to invalidate cache entries matching a pattern
   function invalidateCache(pattern: RegExp) {
-    // Clean expired entries first
     cleanExpiredCache();
 
-    // Then invalidate matching entries
     for (const key of Array.from(cache.current.keys())) {
       if (pattern.test(key)) {
         cache.current.delete(key);
@@ -105,33 +100,27 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
     }
   }
 
-  // Optimized command execution with caching
   async function executeCommand(gcloudPath: string, command: string, options: CommandOptions = {}) {
     const { projectId, formatJson = true, quiet = false, retries = 0 } = options;
 
-    // Clean expired cache entries before checking cache
     cleanExpiredCache();
 
-    // Build the full command
     const projectFlag = projectId ? ` --project=${projectId}` : "";
     const formatFlag = formatJson ? " --format=json" : "";
     const quietFlag = quiet ? " --quiet" : "";
 
     const fullCommand = `${gcloudPath} ${command}${projectFlag}${formatFlag}${quietFlag}`;
 
-    // Check cache first
     const cacheKey = fullCommand;
     const cachedEntry = cache.current.get(cacheKey);
 
     if (cachedEntry) {
-      // Verify the entry hasn't expired
       const isDetailsEntry = cacheKey.startsWith("service-details:");
       const ttl = isDetailsEntry ? CACHE_TTL_DETAILS : CACHE_TTL;
 
       if (Date.now() - cachedEntry.timestamp <= ttl) {
         return cachedEntry.data;
       } else {
-        // Entry has expired, remove it
         cache.current.delete(cacheKey);
       }
     }
@@ -153,7 +142,6 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
 
       const result = JSON.parse(stdout);
 
-      // Cache the result with timestamp
       cache.current.set(cacheKey, { data: result, timestamp: Date.now() });
 
       return result;
@@ -170,7 +158,6 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
     }
   }
 
-  // Memoized fetch function to avoid recreating it on every render
   const fetchIAMPolicy = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -182,7 +169,6 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
     });
 
     try {
-      // Use the optimized command execution with caching
       const result = await executeCommand(gcloudPath, `storage buckets get-iam-policy gs://${bucketName}`, {
         projectId,
         retries: 1,
@@ -216,7 +202,6 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
       loadingToast.hide();
       console.error("Error fetching IAM policy:", error);
 
-      // Provide more user-friendly error messages for common errors
       let errorMessage = String(error);
       let errorTitle = "Failed to load IAM policy";
 
@@ -236,20 +221,15 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
     }
   }, [projectId, gcloudPath, bucketName]);
 
-  // Initial load
   useEffect(() => {
     fetchIAMPolicy();
   }, [fetchIAMPolicy]);
 
-  // Add cache cleanup on component mount and unmount
   useEffect(() => {
-    // Clean expired entries on mount
     cleanExpiredCache();
 
-    // Set up periodic cache cleanup
     const cleanupInterval = setInterval(cleanExpiredCache, CACHE_TTL / 2);
 
-    // Cleanup on unmount
     return () => {
       clearInterval(cleanupInterval);
       cache.current.clear();
@@ -357,7 +337,6 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
         throw new Error("No policy loaded");
       }
 
-      // Format the member string based on the type
       let memberString = "";
       if (formValues.memberType === "allUsers") {
         memberString = "allUsers";
@@ -368,7 +347,6 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
           throw new Error("Member email is required");
         }
 
-        // Validate the member ID format
         if (!validateMemberId(formValues.memberType, formValues.member)) {
           throw new Error(`Invalid format for ${formValues.memberType}. Please check and try again.`);
         }
@@ -376,13 +354,10 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
         memberString = `${formValues.memberType}:${formValues.member}`;
       }
 
-      // Create a copy of the current policy
       const updatedPolicy = { ...policy };
 
-      // Find if the role already exists
       const existingBindingIndex = updatedPolicy.bindings.findIndex((b) => b.role === formValues.role);
 
-      // Create condition object if needed
       let condition = undefined;
       if (formValues.addCondition && formValues.conditionTitle && formValues.conditionExpression) {
         condition = {
@@ -392,10 +367,8 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
       }
 
       if (existingBindingIndex >= 0) {
-        // Role exists, add the member if it doesn't already exist
         const binding = updatedPolicy.bindings[existingBindingIndex];
 
-        // If we're adding a condition, we need to create a new binding
         if (condition) {
           updatedPolicy.bindings.push({
             role: formValues.role,
@@ -403,13 +376,11 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
             condition,
           });
         } else {
-          // Otherwise, add to existing binding if member doesn't exist
           if (!binding.members.includes(memberString)) {
             binding.members.push(memberString);
           }
         }
       } else {
-        // Role doesn't exist, create a new binding
         updatedPolicy.bindings.push({
           role: formValues.role,
           members: [memberString],
@@ -417,16 +388,12 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
         });
       }
 
-      // Create a temporary JSON file with the updated policy
       let tempFilePath = "";
       try {
-        // Generate unique temp file path
         tempFilePath = path.join(os.tmpdir(), `iam-policy-${bucketName}-${Date.now()}.json`);
 
-        // Write policy to temp file
         fs.writeFileSync(tempFilePath, JSON.stringify(updatedPolicy, null, 2));
 
-        // Update the bucket with the new IAM policy
         await executeCommand(gcloudPath, `storage buckets set-iam-policy gs://${bucketName} ${tempFilePath}`, {
           projectId,
           formatJson: false,
@@ -440,17 +407,14 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
           message: `Role "${formValues.role}" granted to ${memberString}`,
         });
 
-        // Invalidate the cache
         invalidateCache(new RegExp(`gs://${bucketName}`));
 
-        // Refresh the policy and go back to the list view
         pop();
         fetchIAMPolicy();
       } catch (error) {
         creatingToast.hide();
         console.error("Error adding IAM binding:", error);
 
-        // Provide more specific error messages
         let errorMessage = String(error);
         let errorTitle = "Failed to add IAM binding";
 
@@ -470,7 +434,6 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
 
         showFailureToast({ title: errorTitle, message: errorMessage });
       } finally {
-        // Clean up the temporary file if it exists
         if (tempFilePath) {
           try {
             if (fs.existsSync(tempFilePath)) {
@@ -485,7 +448,6 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
       creatingToast.hide();
       console.error("Error adding IAM binding:", error);
 
-      // Provide more specific error messages
       let errorMessage = String(error);
       let errorTitle = "Failed to add IAM binding";
 
@@ -501,25 +463,19 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
     }
   }
 
-  // Helper function to validate member ID format based on type
   function validateMemberId(type: string, id: string): boolean {
     switch (type) {
       case "user":
-        // Basic email validation
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id);
       case "serviceAccount":
-        // Service account email validation
         return (
           /^[a-zA-Z0-9-]+@[a-zA-Z0-9-]+\.iam\.gserviceaccount\.com$/.test(id) || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id)
         );
       case "group":
-        // Group email validation
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id);
       case "domain":
-        // Domain validation
         return /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/.test(id);
       default:
-        // For unknown types, just check it's not empty
         return id.trim() !== "";
     }
   }
@@ -531,11 +487,10 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
       icon: Icon.Trash,
       primaryAction: {
         title: "Remove",
-        style: Action.Style.Destructive,
+        style: Alert.ActionStyle.Destructive,
       },
     };
 
-    // @ts-expect-error The type definition for confirmAlert options doesn't match the actual API
     if (await confirmAlert(options)) {
       const removingToast = await showToast({
         style: Toast.Style.Animated,
@@ -548,35 +503,27 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
           throw new Error("No policy loaded");
         }
 
-        // Create a copy of the current policy
         const updatedPolicy = { ...policy };
 
-        // Find the binding for this role
         const bindingIndex = updatedPolicy.bindings.findIndex((b) => b.role === role);
 
         if (bindingIndex >= 0) {
           const binding = updatedPolicy.bindings[bindingIndex];
 
-          // Remove the member
           const memberIndex = binding.members.indexOf(member);
           if (memberIndex >= 0) {
             binding.members.splice(memberIndex, 1);
 
-            // If no members left, remove the binding
             if (binding.members.length === 0) {
               updatedPolicy.bindings.splice(bindingIndex, 1);
             }
 
-            // Create a temporary JSON file with the updated policy
             let tempFilePath = "";
             try {
-              // Generate unique temp file path
               tempFilePath = path.join(os.tmpdir(), `iam-policy-${bucketName}-${Date.now()}.json`);
 
-              // Write policy to temp file
               fs.writeFileSync(tempFilePath, JSON.stringify(updatedPolicy, null, 2));
 
-              // Update the bucket with the new IAM policy
               await executeCommand(gcloudPath, `storage buckets set-iam-policy gs://${bucketName} ${tempFilePath}`, {
                 projectId,
                 formatJson: false,
@@ -590,16 +537,13 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
                 message: `Role "${role}" removed from ${member}`,
               });
 
-              // Invalidate the cache
               invalidateCache(new RegExp(`gs://${bucketName}`));
 
-              // Refresh the policy
               fetchIAMPolicy();
             } catch (error) {
               removingToast.hide();
               console.error("Error removing IAM binding:", error);
 
-              // Provide more user-friendly error messages for common errors
               let errorMessage = String(error);
               let errorTitle = "Failed to remove IAM binding";
 
@@ -616,7 +560,6 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
 
               showFailureToast({ title: errorTitle, message: errorMessage });
             } finally {
-              // Clean up the temporary file if it exists
               if (tempFilePath) {
                 try {
                   if (fs.existsSync(tempFilePath)) {
@@ -637,7 +580,6 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
         removingToast.hide();
         console.error("Error removing IAM binding:", error);
 
-        // Provide more user-friendly error messages for common errors
         let errorMessage = String(error);
         let errorTitle = "Failed to remove IAM binding";
 
@@ -652,10 +594,8 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
   }
 
   function viewRoleDetails(role: string, binding: IAMBinding) {
-    // Format the role name for display
     const formattedRole = formatRoleName(role);
 
-    // Format the members list
     const membersText = binding.members
       .map((member) => {
         const [type, email] = member.includes(":") ? member.split(":", 2) : [member, ""];
@@ -663,7 +603,6 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
       })
       .join("\n\n");
 
-    // Format condition if present
     const conditionText = binding.condition
       ? `## Condition\n\n**Title:** ${binding.condition.title}\n\n**Expression:** \`${binding.condition.expression}\`\n\n${binding.condition.description ? `**Description:** ${binding.condition.description}` : ""}`
       : "";
@@ -721,7 +660,6 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
     );
   }
 
-  // Helper function to format member types for display
   function formatMemberType(type: string): string {
     switch (type) {
       case "user":
@@ -741,12 +679,10 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
     }
   }
 
-  // Helper function to get a description of the permissions granted by a role
   function getRolePermissionsDescription(role: string): string {
     return getRoleInfo(role).description;
   }
 
-  // Helper function to get an icon for a role
   function getRoleIcon(role: string) {
     if (role.includes("admin") || role.includes("Admin")) {
       return { source: Icon.Gear, tintColor: Color.Red };
@@ -771,7 +707,6 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
     }
   }
 
-  // Helper function to get a subtitle for a role
   function getRoleSubtitle(role: string): string {
     return formatRoleName(role);
   }
@@ -799,6 +734,16 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
       isLoading={isLoading}
       searchBarPlaceholder="Search IAM bindings..."
       navigationTitle={`IAM Policy - ${bucketName}`}
+      searchBarAccessory={
+        <QuickProjectSwitcher
+          gcloudPath={gcloudPath}
+          onProjectSelect={(selectedProjectId) => {
+            if (selectedProjectId !== projectId) {
+              push(<BucketIAMView projectId={selectedProjectId} gcloudPath={gcloudPath} bucketName={bucketName} />);
+            }
+          }}
+        />
+      }
       actions={
         <ActionPanel>
           <Action
@@ -848,9 +793,10 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
               title={formatRoleName(binding.role)}
               subtitle={`${binding.members.length} ${binding.members.length === 1 ? "member" : "members"}`}
               icon={getRoleIcon(binding.role)}
-              // @ts-expect-error The accessories array filtering causes a type incompatibility
               accessories={[
-                binding.condition ? { icon: Icon.Clock, tooltip: `Condition: ${binding.condition.title}` } : null,
+                binding.condition
+                  ? { icon: Icon.Clock, tooltip: `Condition: ${binding.condition.title}` }
+                  : { text: "" },
                 { text: `${binding.members.length} ${binding.members.length === 1 ? "member" : "members"}` },
               ].filter(Boolean)}
               actions={
@@ -888,10 +834,11 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
                 title={member}
                 subtitle={member.includes(":") ? member.split(":", 1)[0] : "Special Identity"}
                 icon={{ source: Icon.Person, tintColor: Color.Blue }}
-                // @ts-expect-error The accessories array filtering causes a type incompatibility
                 accessories={[
-                  binding.condition ? { icon: Icon.Clock, tooltip: `Condition: ${binding.condition.title}` } : null,
-                ].filter(Boolean)}
+                  binding.condition
+                    ? { icon: Icon.Clock, tooltip: `Condition: ${binding.condition.title}` }
+                    : { text: "" },
+                ]}
                 actions={
                   <ActionPanel>
                     <Action

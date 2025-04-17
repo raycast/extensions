@@ -20,6 +20,7 @@ import { ComputeInstancesView, ComputeDisksView } from "./services/compute";
 import { CacheManager, Project } from "./utils/CacheManager";
 import CachedProjectView from "./views/CachedProjectView";
 import { authenticateWithBrowser } from "./gcloud";
+import { showFailureToast } from "@raycast/utils";
 
 const execPromise = promisify(exec);
 const GCLOUD_PATH = getPreferenceValues<ExtensionPreferences>().gcloudPath;
@@ -40,7 +41,6 @@ export default function Command() {
   const [shouldNavigateToProject, setShouldNavigateToProject] = useState<string | null>(null);
   const { push, pop } = useNavigation();
 
-  // Handle navigation to project with useEffect
   useEffect(() => {
     if (shouldNavigateToProject) {
       push(<ProjectView projectId={shouldNavigateToProject} gcloudPath={GCLOUD_PATH} />);
@@ -59,49 +59,40 @@ export default function Command() {
     } catch (error) {
       setIsLoading(false);
       setError("Google Cloud SDK not found. Please install it using Homebrew: brew install google-cloud-sdk");
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Google Cloud SDK not found",
         message: "Please install it using Homebrew",
       });
     }
   }
 
-  // New function to initialize from cache
   async function initializeFromCache() {
-    // Check if we should show the projects list instead of the cached project view
     const showProjectsList = navigationCache.get("showProjectsList");
     if (showProjectsList === "true") {
-      // Clear the flag
       navigationCache.remove("showProjectsList");
-      // Skip the cached project view
+
       checkAuthStatus();
       return;
     }
 
-    // Try to get authentication status from cache
     const cachedAuth = CacheManager.getAuthStatus();
 
     if (cachedAuth && cachedAuth.isAuthenticated) {
       setIsAuthenticated(true);
 
-      // Try to get projects list from cache
       const cachedProjects = CacheManager.getProjectsList();
 
       if (cachedProjects) {
         setProjects(cachedProjects.projects);
 
-        // Try to get selected project from cache
         const cachedProject = CacheManager.getSelectedProject();
 
         if (cachedProject) {
           setPreferences({ projectId: cachedProject.projectId });
 
-          // If we have all cached data, show the cached project view
           setShowCachedProjectView(true);
           setIsLoading(false);
 
-          // Optionally refresh in background
           setTimeout(() => {
             checkAuthStatus(true);
           }, 1000);
@@ -111,7 +102,6 @@ export default function Command() {
       }
     }
 
-    // If we don't have complete cached data, check auth status normally
     checkAuthStatus();
   }
 
@@ -129,7 +119,6 @@ export default function Command() {
     }
 
     try {
-      // Only check auth status, don't make changes that could log the user out
       const { stdout } = await execPromise(
         `${GCLOUD_PATH} auth list --format="value(account)" --filter="status=ACTIVE"`,
       );
@@ -137,9 +126,7 @@ export default function Command() {
       if (stdout.trim()) {
         setIsAuthenticated(true);
 
-        // Only update cache if not already authenticated to prevent unexpected cache updates
         if (!isAuthenticated) {
-          // Cache the authentication status
           CacheManager.saveAuthStatus(true, stdout.trim());
         }
 
@@ -157,7 +144,6 @@ export default function Command() {
         setIsAuthenticated(false);
         setIsLoading(false);
 
-        // Clear auth cache only if we were previously authenticated
         if (isAuthenticated) {
           CacheManager.clearAuthCache();
         }
@@ -172,12 +158,10 @@ export default function Command() {
         }
       }
     } catch (error: unknown) {
-      // Only change auth state if there's a definitive failure
       const errorMessage = error instanceof Error ? error.message : String(error);
       if (errorMessage.includes("not logged in") || errorMessage.includes("no active account")) {
         setIsAuthenticated(false);
 
-        // Clear auth cache only if we were previously authenticated
         if (isAuthenticated) {
           CacheManager.clearAuthCache();
         }
@@ -234,10 +218,8 @@ export default function Command() {
 
         setProjects(formattedProjects);
 
-        // Cache the projects list
         CacheManager.saveProjectsList(formattedProjects);
 
-        // Try to get selected project from cache or preferences
         const cachedProject = CacheManager.getSelectedProject();
 
         if (cachedProject) {
@@ -255,7 +237,6 @@ export default function Command() {
       } else {
         setProjects([]);
 
-        // Clear projects list cache
         CacheManager.clearProjectsListCache();
 
         if (!silent && loadingToast) {
@@ -286,15 +267,14 @@ export default function Command() {
 
   async function authenticate() {
     try {
-      // Show a dedicated authentication view that will handle the process
       push(
         <AuthenticationView
           gcloudPath={GCLOUD_PATH}
           onAuthenticated={() => {
             setIsAuthenticated(true);
-            // Fetch projects with silent=false to show loading indicators
+
             fetchProjects(false);
-            // Cache auth status immediately - use an empty string as account until we get the real one
+
             CacheManager.saveAuthStatus(true, "");
           }}
         />,
@@ -316,11 +296,11 @@ export default function Command() {
   async function selectProject(projectId: string) {
     if (!projectId || typeof projectId !== "string") {
       console.error("Invalid project ID provided to selectProject:", projectId);
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Invalid project ID",
         message: "Cannot select project with invalid ID",
       });
+      setIsLoading(false);
       return;
     }
 
@@ -333,7 +313,6 @@ export default function Command() {
     try {
       await execPromise(`${GCLOUD_PATH} config set project ${projectId}`);
 
-      // Save to cache and preferences
       CacheManager.saveSelectedProject(projectId);
       setPreferences({ projectId });
 
@@ -344,12 +323,10 @@ export default function Command() {
         message: projectId,
       });
 
-      // Save to cached projects list in the background
       CacheManager.getRecentlyUsedProjectsWithDetails(GCLOUD_PATH).catch((error) => {
         console.error("Error updating cached projects:", error);
       });
 
-      // Use state to trigger navigation in useEffect
       setShouldNavigateToProject(projectId);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -366,10 +343,8 @@ export default function Command() {
   }
 
   function viewProject(projectId: string) {
-    // Save this project as recently used
     CacheManager.saveSelectedProject(projectId);
 
-    // Use state to trigger navigation in useEffect
     setShouldNavigateToProject(projectId);
   }
 
@@ -408,9 +383,9 @@ export default function Command() {
       setError(null);
       try {
         await authenticateWithBrowser(gcloudPath);
-        // Call onAuthenticated and then pop the authentication view to return to projects
+
         onAuthenticated();
-        // Use setTimeout to ensure the onAuthenticated effects have been applied
+
         setTimeout(() => pop(), 500);
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -420,7 +395,6 @@ export default function Command() {
       }
     }
 
-    // Start authentication automatically when the component mounts
     useEffect(() => {
       startAuthentication();
     }, []);
@@ -451,12 +425,9 @@ export default function Command() {
     );
   }
 
-  // Update loginWithDifferentAccount to use the new authentication view
   async function loginWithDifferentAccount() {
-    // Clear auth cache first
     CacheManager.clearAuthCache();
 
-    // First show toast for revoking current credentials
     const revokingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Logging out current account...",
@@ -464,23 +435,21 @@ export default function Command() {
     });
 
     try {
-      // Force new authentication - first revoke all existing credentials
       await execPromise(`${GCLOUD_PATH} auth revoke --all --quiet`);
       revokingToast.hide();
 
-      // Show the authentication view
       push(
         <AuthenticationView
           gcloudPath={GCLOUD_PATH}
           onAuthenticated={() => {
             setIsAuthenticated(true);
-            // Clear cached project to avoid confusion with the new account
+
             CacheManager.clearProjectCache();
-            // Reset state and navigation
+
             setShowCachedProjectView(false);
-            // Fetch projects with silent=false to show loading indicators
+
             fetchProjects(false);
-            // Cache auth status immediately with empty account
+
             CacheManager.saveAuthStatus(true, "");
           }}
         />,
@@ -535,7 +504,6 @@ export default function Command() {
     );
   }
 
-  // If we have a cached project and showCachedProjectView is true, show the cached project view
   if (showCachedProjectView) {
     return <CachedProjectView gcloudPath={GCLOUD_PATH} onLoginWithDifferentAccount={loginWithDifferentAccount} />;
   }

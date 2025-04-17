@@ -47,7 +47,6 @@ const provider = new OAuthService({
   onAuthorize(params) {
     dustApi = new DustAPI(
       {
-        nodeEnv: "",
         url: preferences.apiUrl,
       },
       {
