@@ -1,7 +1,7 @@
-import { getPreferenceValues } from "@raycast/api"; // Removed unused showToast, Toast
-import { showFailureToast, fetch, FetchResult } from "@raycast/utils"; // Import showFailureToast
-import { Response, RequestInit } from "node-fetch"; // Removed unused FetchError // Types only
-import { Workflow, Tag } from "../types/types"; // Import Tag from types.ts
+import { getPreferenceValues, showFailureToast } from "@raycast/api";
+import { fetch, FetchResult } from "@raycast/utils";
+import { Response, RequestInit } from "node-fetch";
+import { Workflow, Tag } from "../types/types";
 
 interface Preferences {
   instanceUrl: string;
