@@ -19,7 +19,8 @@
     "vineus",
     "stelo",
     "srikirank",
-    "b0lle"
+    "b0lle",
+    "2357gi"
   ],
   "pastContributors": [
     "JonathanWbn"
@@ -181,6 +182,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
