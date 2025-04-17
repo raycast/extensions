@@ -4,7 +4,7 @@ import { showFailureToast } from "@raycast/utils";
 import { getRecentMessagesContent } from "./scripts/messages";
 
 export function extractOTP(text: string): string | null {
-  const otpRegex = /\b\d{4,}\b/;
+  const otpRegex = /\b\d{4,8}\b/;
   const match = text.match(otpRegex);
   return match ? match[0] : null;
 }
@@ -22,7 +22,7 @@ export default async function Command() {
 
     for (const messageContent of recentMessagesContent) {
       // 1) Gather all digit sequences of length >= 4
-      const potentialMatches = messageContent.match(/\b\d{4,}\b/g);
+      const potentialMatches = messageContent.match(/\b\d{4,8}\b/g);
       let phoneFilteredOTP: string | null = null;
 
       if (potentialMatches) {
