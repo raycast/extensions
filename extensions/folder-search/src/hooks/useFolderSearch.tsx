@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
 import { usePromise, showFailureToast } from "@raycast/utils";
 import { FolderSearchPlugin, SpotlightSearchResult, SpotlightSearchPreferences } from "../types";
@@ -166,13 +166,19 @@ export function useFolderSearch() {
         abortable: !!abortable?.current,
       });
 
-      const results = await searchSpotlight(search, scope as "pinned" | "user" | "all", abortable);
-
-      log("debug", "useFolderSearch", "Search promise completed", {
-        resultCount: results.length,
-      });
-
-      return results;
+      try {
+        const results = await searchSpotlight(search, scope as "pinned" | "user" | "all", abortable);
+        log("debug", "useFolderSearch", "Search promise completed", {
+          resultCount: results.length,
+        });
+        return results;
+      } catch (error) {
+        // Ignore AbortError as it's expected during debouncing
+        if (error instanceof Error && error.name === 'AbortError') {
+          return [];
+        }
+        throw error;
+      }
     },
     [searchText, searchScope, abortable],
     {
@@ -234,23 +240,81 @@ export function useFolderSearch() {
   };
 
   const movePinUp = (result: SpotlightSearchResult, resultIndex: number) => {
-    const newIndex = resultIndex - 1;
-    const newPinnedResults = [...pinnedResults];
-    [newPinnedResults[resultIndex], newPinnedResults[newIndex]] = [
-      newPinnedResults[newIndex],
-      newPinnedResults[resultIndex],
-    ];
-    setPinnedResults(newPinnedResults);
+    try {
+      log("debug", "useFolderSearch", "Moving pin up", {
+        resultPath: result.path,
+        currentIndex: resultIndex,
+        newIndex: resultIndex - 1,
+      });
+
+      const newIndex = resultIndex - 1;
+      if (newIndex < 0) {
+        log("debug", "useFolderSearch", "Cannot move pin up - already at top", {
+          resultPath: result.path,
+          currentIndex: resultIndex,
+        });
+        return;
+      }
+
+      const newPinnedResults = [...pinnedResults];
+      [newPinnedResults[resultIndex], newPinnedResults[newIndex]] = [
+        newPinnedResults[newIndex],
+        newPinnedResults[resultIndex],
+      ];
+      setPinnedResults(newPinnedResults);
+
+      log("debug", "useFolderSearch", "Successfully moved pin up", {
+        resultPath: result.path,
+        oldIndex: resultIndex,
+        newIndex,
+      });
+    } catch (error) {
+      log("error", "useFolderSearch", "Error moving pin up", {
+        error,
+        resultPath: result.path,
+        currentIndex: resultIndex,
+      });
+      showFailureToast(error, { title: "Error moving item up" });
+    }
   };
 
   const movePinDown = (result: SpotlightSearchResult, resultIndex: number) => {
-    const newIndex = resultIndex + 1;
-    const newPinnedResults = [...pinnedResults];
-    [newPinnedResults[resultIndex], newPinnedResults[newIndex]] = [
-      newPinnedResults[newIndex],
-      newPinnedResults[resultIndex],
-    ];
-    setPinnedResults(newPinnedResults);
+    try {
+      log("debug", "useFolderSearch", "Moving pin down", {
+        resultPath: result.path,
+        currentIndex: resultIndex,
+        newIndex: resultIndex + 1,
+      });
+
+      const newIndex = resultIndex + 1;
+      if (newIndex >= pinnedResults.length) {
+        log("debug", "useFolderSearch", "Cannot move pin down - already at bottom", {
+          resultPath: result.path,
+          currentIndex: resultIndex,
+        });
+        return;
+      }
+
+      const newPinnedResults = [...pinnedResults];
+      [newPinnedResults[resultIndex], newPinnedResults[newIndex]] = [
+        newPinnedResults[newIndex],
+        newPinnedResults[resultIndex],
+      ];
+      setPinnedResults(newPinnedResults);
+
+      log("debug", "useFolderSearch", "Successfully moved pin down", {
+        resultPath: result.path,
+        oldIndex: resultIndex,
+        newIndex,
+      });
+    } catch (error) {
+      log("error", "useFolderSearch", "Error moving pin down", {
+        error,
+        resultPath: result.path,
+        currentIndex: resultIndex,
+      });
+      showFailureToast(error, { title: "Error moving item down" });
+    }
   };
 
   return {
