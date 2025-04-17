@@ -1,33 +1,64 @@
-import { Action, ActionPanel, Form, Icon, Image, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { useState } from "react";
-import { createObject } from "../api/createObject";
-import { Space, Type } from "../helpers/schemas";
+import { useEffect, useState } from "react";
+import { addObjectsToList, createObject } from "../api";
 import { CreateObjectFormValues } from "../create-object";
+import { IconFormat, Space, SpaceObject, Template, Type } from "../models";
+import { fetchTypeKeysForLists } from "../utils";
 
 interface CreateObjectFormProps {
   spaces: Space[];
-  objectTypes: Type[];
+  types: Type[];
+  templates: Template[];
+  lists: SpaceObject[];
   selectedSpace: string;
   setSelectedSpace: (spaceId: string) => void;
   selectedType: string;
   setSelectedType: (type: string) => void;
+  selectedTemplate: string;
+  setSelectedTemplate: (templateId: string) => void;
+  selectedList: string;
+  setSelectedList: (listId: string) => void;
+  listSearchText: string;
+  setListSearchText: (searchText: string) => void;
   isLoading: boolean;
   draftValues: CreateObjectFormValues;
+  enableDrafts: boolean;
 }
 
-export default function CreateObjectForm({
+export function CreateObjectForm({
   spaces,
-  objectTypes,
+  types,
+  templates,
+  lists,
   selectedSpace,
   setSelectedSpace,
   selectedType,
   setSelectedType,
+  selectedTemplate,
+  setSelectedTemplate,
+  selectedList,
+  setSelectedList,
+  listSearchText,
+  setListSearchText,
   isLoading,
   draftValues,
+  enableDrafts,
 }: CreateObjectFormProps) {
   const [loading, setLoading] = useState(false);
+  const [typeKeysForLists, setTypeKeysForLists] = useState<string[]>([]);
   const hasSelectedSpaceAndType = selectedSpace && selectedType;
+  const selectedTypeUniqueKey = types.reduce((acc, type) => (type.id === selectedType ? type.key : acc), "");
+
+  useEffect(() => {
+    const fetchTypesForLists = async () => {
+      if (spaces) {
+        const listsTypes = await fetchTypeKeysForLists(spaces);
+        setTypeKeysForLists(listsTypes);
+      }
+    };
+    fetchTypesForLists();
+  }, [spaces]);
 
   const { handleSubmit, itemProps } = useForm<CreateObjectFormValues>({
     initialValues: draftValues,
@@ -36,18 +67,27 @@ export default function CreateObjectForm({
       try {
         await showToast({ style: Toast.Style.Animated, title: "Creating object..." });
 
-        await createObject(selectedSpace, {
-          icon: values.icon || "",
+        const response = await createObject(selectedSpace, {
           name: values.name || "",
+          icon: { format: IconFormat.Emoji, emoji: values.icon || "" },
           description: values.description || "",
           body: values.body || "",
           source: values.source || "",
-          template_id: "",
-          object_type_unique_key: selectedType,
+          template_id: values.template || "",
+          type_key: selectedTypeUniqueKey,
         });
 
-        await showToast(Toast.Style.Success, "Object created successfully");
-        popToRoot();
+        if (response.object?.id) {
+          if (selectedList) {
+            await addObjectsToList(selectedSpace, selectedList, [response.object.id]);
+            await showToast(Toast.Style.Success, "Object created and added to collection");
+          } else {
+            await showToast(Toast.Style.Success, "Object created successfully");
+          }
+          popToRoot();
+        } else {
+          await showToast(Toast.Style.Failure, "Failed to create object");
+        }
       } catch (error) {
         await showToast(Toast.Style.Failure, "Failed to create object", String(error));
       } finally {
@@ -56,7 +96,7 @@ export default function CreateObjectForm({
     },
     validation: {
       name: (value) => {
-        if (!["ot-bookmark", "ot-note"].includes(selectedType) && !value) {
+        if (!["ot-bookmark", "ot-note"].includes(selectedTypeUniqueKey) && !value) {
           return "Name is required";
         }
       },
@@ -66,7 +106,7 @@ export default function CreateObjectForm({
         }
       },
       source: (value) => {
-        if (selectedType === "ot-bookmark" && !value) {
+        if (selectedTypeUniqueKey === "ot-bookmark" && !value) {
           return "Source is required for Bookmarks";
         }
       },
@@ -80,6 +120,7 @@ export default function CreateObjectForm({
       defaults: {
         space: selectedSpace,
         type: selectedType,
+        list: selectedList,
         name: itemProps.name.value,
         icon: itemProps.icon.value,
         description: itemProps.description.value,
@@ -89,21 +130,22 @@ export default function CreateObjectForm({
     };
 
     return {
-      name: `Create ${objectTypes.find((type) => type.unique_key === selectedType)?.name} in ${spaces.find((space) => space.id === selectedSpace)?.name}`,
+      name: `Create ${types.find((type) => type.key === selectedTypeUniqueKey)?.name} in ${spaces.find((space) => space.id === selectedSpace)?.name}`,
       link: url + "?launchContext=" + encodeURIComponent(JSON.stringify(launchContext)),
     };
   }
 
   return (
     <Form
+      navigationTitle="Create Object"
       isLoading={loading || isLoading}
-      enableDrafts
+      enableDrafts={enableDrafts}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Object" icon={Icon.Plus} onSubmit={handleSubmit} />
           {hasSelectedSpaceAndType && (
             <Action.CreateQuicklink
-              title={`Create Quicklink: ${objectTypes.find((type) => type.unique_key === selectedType)?.name}`}
+              title={`Create Quicklink: ${types.find((type) => type.key === selectedTypeUniqueKey)?.name}`}
               quicklink={getQuicklink()}
             />
           )}
@@ -116,15 +158,11 @@ export default function CreateObjectForm({
         value={selectedSpace}
         onChange={setSelectedSpace}
         storeValue={true}
+        placeholder="Search spaces..."
         info="Select the space where the object will be created"
       >
         {spaces?.map((space) => (
-          <Form.Dropdown.Item
-            key={space.id}
-            value={space.id}
-            title={space.name}
-            icon={{ source: space.icon, mask: Image.Mask.RoundedRectangle }}
-          />
+          <Form.Dropdown.Item key={space.id} value={space.id} title={space.name} icon={space.icon} />
         ))}
       </Form.Dropdown>
 
@@ -134,10 +172,43 @@ export default function CreateObjectForm({
         value={selectedType}
         onChange={setSelectedType}
         storeValue={true} // TODO: does not work
+        placeholder={`Search types in '${spaces.find((space) => space.id === selectedSpace)?.name}'...`}
         info="Select the type of object to create"
       >
-        {objectTypes.map((type) => (
-          <Form.Dropdown.Item key={type.unique_key} value={type.unique_key} title={type.name} icon={type.icon} />
+        {types.map((type) => (
+          <Form.Dropdown.Item key={type.id} value={type.id} title={type.name} icon={type.icon} />
+        ))}
+      </Form.Dropdown>
+
+      <Form.Dropdown
+        id="template"
+        title="Template"
+        value={selectedTemplate}
+        onChange={setSelectedTemplate}
+        storeValue={true}
+        placeholder={`Search templates for '${types.find((type) => type.id === selectedType)?.name}'...`}
+        info="Select the template to use for the object"
+      >
+        <Form.Dropdown.Item key="none" value="" title="No Template" icon={Icon.Dot} />
+        {templates.map((template) => (
+          <Form.Dropdown.Item key={template.id} value={template.id} title={template.name} icon={template.icon} />
+        ))}
+      </Form.Dropdown>
+
+      <Form.Dropdown
+        id="list"
+        title="Collection"
+        value={selectedList}
+        onChange={setSelectedList}
+        onSearchTextChange={setListSearchText}
+        throttle={true}
+        storeValue={true}
+        placeholder={`Search collections in '${spaces.find((space) => space.id === selectedSpace)?.name}'...`}
+        info="Select the collection where the object will be added"
+      >
+        {!listSearchText && <Form.Dropdown.Item key="none" value="" title="No Collection" icon={Icon.Dot} />}
+        {lists.map((list) => (
+          <Form.Dropdown.Item key={list.id} value={list.id} title={list.name} icon={list.icon} />
         ))}
       </Form.Dropdown>
 
@@ -145,16 +216,16 @@ export default function CreateObjectForm({
 
       {hasSelectedSpaceAndType && (
         <>
-          {selectedType === "ot-bookmark" ? (
+          {selectedTypeUniqueKey === "ot-bookmark" ? (
             <Form.TextField
               {...itemProps.source}
-              title="Source"
+              title="URL"
               placeholder="Add link"
               info="Provide the source URL for the bookmark"
             />
           ) : (
             <>
-              {!["ot-note"].includes(selectedType) && (
+              {!["ot-note"].includes(selectedTypeUniqueKey) && (
                 <Form.TextField
                   {...itemProps.name}
                   title="Name"
@@ -162,7 +233,7 @@ export default function CreateObjectForm({
                   info="Enter the name of the object"
                 />
               )}
-              {!["ot-task", "ot-note", "ot-profile"].includes(selectedType) && (
+              {!["ot-task", "ot-note", "ot-profile"].includes(selectedTypeUniqueKey) && (
                 <Form.TextField
                   {...itemProps.icon}
                   title="Icon"
@@ -176,7 +247,7 @@ export default function CreateObjectForm({
                 placeholder="Add a description"
                 info="Provide a brief description of the object"
               />
-              {!["ot-set", "ot-collection"].includes(selectedType) && (
+              {!typeKeysForLists.includes(selectedTypeUniqueKey) && (
                 <Form.TextArea
                   {...itemProps.body}
                   title="Body"
