@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - (Add future changes here)
 
-## [1.0.0] - 2025-04-15
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Initial release for the Raycast Store.

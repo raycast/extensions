@@ -1,5 +1,6 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import fetch, { Response, RequestInit } from "node-fetch"; // Removed unused FetchError
+import { getPreferenceValues } from "@raycast/api"; // Removed unused showToast, Toast
+import { showFailureToast, fetch, FetchResult } from "@raycast/utils"; // Import showFailureToast
+import { Response, RequestInit } from "node-fetch"; // Removed unused FetchError // Types only
 import { Workflow, Tag } from "../types/types"; // Import Tag from types.ts
 
 interface Preferences {
@@ -54,10 +55,11 @@ async function fetchN8nApi<T>(
 
   try {
     console.log(`Making fetch request to: ${fullUrl}`);
-    const response: Response = await fetch(fullUrl, {
+    const fetchResult: FetchResult<Response> = await fetch(fullUrl, {
       ...options,
       headers: headers,
     });
+    const response = fetchResult.response;
     console.log(`Fetch response status: ${response.status}`);
 
     if (!response.ok) {
@@ -82,11 +84,8 @@ async function fetchN8nApi<T>(
     return (await response.json()) as T;
   } catch (error) {
     console.error("Error fetching n8n API:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "API Request Failed",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    // Use showFailureToast for consistent error reporting
+    await showFailureToast(error, { title: "API Request Failed" });
     // Re-throw the error to be caught by the calling command
     throw error;
   }
@@ -106,12 +105,8 @@ export async function getAllTagsAPI(): Promise<Tag[]> {
     return response.data || []; // Return empty array if data is missing
   } catch (error) {
     console.error("Failed to fetch n8n tags:", error);
-    // Show a toast, but maybe allow the command to proceed without tags?
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not load tags",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    // Show a toast, but allow the command to proceed without tags
+    await showFailureToast(error, { title: "Could not load tags" });
     return []; // Return empty array on error so the command doesn't completely break
   }
 }
@@ -172,20 +167,18 @@ export async function triggerWebhook(
   }
 
   try {
-    const response = await fetch(webhookUrl, options);
+    const fetchResult: FetchResult<Response> = await fetch(webhookUrl, options);
+    const response = fetchResult.response;
     const responseBody = await response.text(); // Get raw response body
     return {
-      ok: response.ok,
-      status: response.status,
+      ok: response.ok ?? false,
+      status: response.status ?? 500,
       body: responseBody,
     };
   } catch (error) {
     console.error("Error triggering webhook:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Webhook Request Failed",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    // Use showFailureToast for consistent error reporting
+    await showFailureToast(error, { title: "Webhook Request Failed" });
     // Re-throw or return a specific error structure
     throw error;
   }

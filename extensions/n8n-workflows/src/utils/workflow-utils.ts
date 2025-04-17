@@ -41,7 +41,8 @@ export function getWebhookDetails(workflow: Workflow): WebhookDetails | null {
     const params = webhookNode.parameters as WebhookNodeParams;
     console.log(`Webhook node parameters: ${JSON.stringify(params)}`);
 
-    const method = params.httpMethod?.toUpperCase(); // Normalize method
+    // Normalize method, handling empty string case
+    const method = params.httpMethod?.trim() ? params.httpMethod.trim().toUpperCase() : undefined;
     const path = params.path;
 
     console.log(`Method: ${method || "undefined"}, Path: ${path || "undefined"}`);

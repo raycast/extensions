@@ -1,4 +1,5 @@
-import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api"; // Re-added Toast for Success style
+import { showFailureToast } from "@raycast/utils"; // Import showFailureToast
 import { SAVED_COMMANDS_KEY, TRIGGER_FILTERS_KEY, DETAIL_VIEW_KEY } from "./constants";
 
 /**
@@ -28,12 +29,8 @@ export async function resetAllStorageData(): Promise<void> {
     });
   } catch (error) {
     console.error("Failed to reset storage data:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Reset Failed",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-    });
-    throw new Error("Could not reset storage data.");
+    await showFailureToast(error, { title: "Reset Failed" });
+    throw error; // Re-throw original error
   }
 }
 
@@ -51,12 +48,8 @@ export async function resetSavedCommands(): Promise<void> {
     });
   } catch (error) {
     console.error("Failed to reset saved commands:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Reset Failed",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-    });
-    throw new Error("Could not reset saved commands.");
+    await showFailureToast(error, { title: "Reset Failed" });
+    throw error; // Re-throw original error
   }
 }
 
@@ -74,11 +67,7 @@ export async function resetSavedFilters(): Promise<void> {
     });
   } catch (error) {
     console.error("Failed to reset saved filters:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Reset Failed",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-    });
-    throw new Error("Could not reset saved filters.");
+    await showFailureToast(error, { title: "Reset Failed" });
+    throw error; // Re-throw original error
   }
 }

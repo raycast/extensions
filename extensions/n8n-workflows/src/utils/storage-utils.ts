@@ -1,4 +1,5 @@
 import { LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils"; // Import showFailureToast
 import { randomUUID } from "crypto"; // Use crypto for generating unique IDs
 import { SavedCommand } from "../types/types";
 
@@ -83,12 +84,9 @@ export async function addSavedCommand(commandData: Omit<SavedCommand, "id">): Pr
       throw new Error("Command URL is required");
     }
 
-    // Ensure optional fields are strings or undefined
+    // Ensure optional fields are strings or undefined.  Do not default to empty string.
     const sanitizedCommand = {
       ...commandData,
-      headers: commandData.headers || "",
-      queryParams: commandData.queryParams || "",
-      body: commandData.body || "",
     };
 
     const existingCommands = await getSavedCommands();
@@ -100,7 +98,8 @@ export async function addSavedCommand(commandData: Omit<SavedCommand, "id">): Pr
     await LocalStorage.setItem(SAVED_COMMANDS_KEY, JSON.stringify(updatedCommands));
   } catch (error) {
     console.error("Failed to add saved command:", error);
-    throw new Error(error instanceof Error ? error.message : "Could not save command."); // Re-throw for UI feedback
+    await showFailureToast(error, { title: "Could not save command" });
+    throw error; // Re-throw for UI feedback
   }
 }
 
@@ -126,7 +125,8 @@ export async function deleteSavedCommand(id: string): Promise<void> {
     await LocalStorage.setItem(SAVED_COMMANDS_KEY, JSON.stringify(updatedCommands));
   } catch (error) {
     console.error("Failed to delete saved command:", error);
-    throw new Error(error instanceof Error ? error.message : "Could not delete command."); // Re-throw for UI feedback
+    await showFailureToast(error, { title: "Could not delete command" });
+    throw error; // Re-throw for UI feedback
   }
 }
 
@@ -139,6 +139,7 @@ export async function clearAllSavedCommands(): Promise<void> {
     await LocalStorage.removeItem(SAVED_COMMANDS_KEY);
   } catch (error) {
     console.error("Failed to clear saved commands:", error);
-    throw new Error("Could not clear commands."); // Re-throw for UI feedback
+    await showFailureToast(error, { title: "Could not clear commands" });
+    throw error; // Re-throw for UI feedback
   }
 }

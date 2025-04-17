@@ -1,6 +1,7 @@
 // Storage keys
 export const SAVED_COMMANDS_KEY = "n8nSavedWebhookCommands";
 export const TRIGGER_FILTERS_KEY = "n8nTriggerWorkflowFilters"; // Added new key
+// Using LocalStorage for trigger filters because it can handle complex objects more easily than Preferences API, providing flexibility for potential future filter enhancements.
 
 // API paths
 export const WORKFLOWS_API_PATH = "/api/v1/workflows";
