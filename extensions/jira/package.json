@@ -20,7 +20,8 @@
     "EyLuismi",
     "pernielsentikaer",
     "BehnH",
-    "jokeychen"
+    "jokeychen",
+    "shlikhota"
   ],
   "pastContributors": [
     "igor9silva",
@@ -149,6 +150,14 @@
       "description": "API Token",
       "type": "password",
       "required": false
+    },
+    {
+      "name": "personalAccessToken",
+      "label": "Use token for self-hosted Jira (Experimental)",
+      "description": "Some self-hosted Jira requires PAT instead of Basic authentication with API Token. The feature is experimental and might be broken in the future updates.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     },
     {
       "name": "open_in",
