@@ -110,6 +110,7 @@ export class Arena {
           message: `Status: ${res.status}, Message: ${errorText}`,
           style: Toast.Style.Failure,
         });
+        return null;
       }
       const responseData = await res.json();
       return responseData;
