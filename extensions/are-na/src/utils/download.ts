@@ -33,7 +33,7 @@ export async function downloadFile(url: string) {
     return result;
   } catch (error) {
     console.error(`Download error: ${error}`);
-    await showToast(Toast.Style.Failure, "Download failed", String(error));
+    await showFailureToast(error, { title: "Download failed" });
     throw error;
   }
 }
