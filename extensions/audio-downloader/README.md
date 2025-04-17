@@ -35,7 +35,7 @@ See <https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md>.
 
 ### **Is there a YouTube downloader that actually works?**
 
-Yes, Raycast's Video Downloader is consistently updated to ensure reliable functionality.
+Yes, Raycast's Audio Downloader is consistently updated to ensure reliable functionality.
 
 <!--
 ### **Can I download clips from YouTube?**
