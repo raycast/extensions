@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "i18n-export",
+  "title": "Notion i18n Export",
+  "description": "Export i18n data from Notion to code files for Web and iOS",
+  "icon": "extension-icon.png",
+  "author": "bin_mack_mack",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "export-ios",
+      "title": "Export iOS i18n",
+      "description": "Export i18n data from Notion to iOS localization files",
+      "mode": "no-view"
+    },
+    {
+      "name": "export-web",
+      "title": "Export Web i18n",
+      "description": "Export i18n data from Notion to Web JSON files",
+      "mode": "no-view"
+    },
+    {
+      "name": "export-all",
+      "title": "Export All i18n",
+      "description": "Export i18n data from Notion to both iOS and Web formats",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "notionApiKey",
+      "title": "Notion API Key",
+      "description": "Your Notion integration API key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "notionDatabaseId",
+      "title": "Notion Database ID",
+      "description": "The ID of your Notion i18n database",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "iosOutputPath",
+      "title": "iOS Output Path",
+      "description": "Directory path for iOS localization files output",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "webOutputPath",
+      "title": "Web Output Path",
+      "description": "Directory path for Web JSON files output",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.96.0",
+    "@raycast/utils": "^1.17.0",
+    "@notionhq/client": "^2.2.5",
+    "fs-extra": "^11.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/fs-extra": "^11.0.2",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
