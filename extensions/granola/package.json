@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "granola",
+  "title": "Granola",
+  "description": "Create, manage, and review notes in Granola",
+  "icon": "extension-icon.png",
+  "author": "Rob",
+  "categories": [
+    "Productivity",
+    "Documentation",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "Search your notes in Granola",
+      "description": "Search your notes in Granola",
+      "mode": "view"
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "subtitle": "Create a new note in Granola",
+      "description": "Create a new note in Granola",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "ai-notes",
+      "title": "AI Notes",
+      "description": "Ask AI about your notes"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input" : "@granola Please summarize my last note",
+        "mocks" : {
+          "ai-notes" : [
+            {
+              "content" : "### Meeting Context\n\n*   Testing session for Granola application’s transcription capabilities\n*   Two participants simulating back-and-forth conversation...",
+              "date" : "2025-03-06T16:15:20.057Z",
+              "title" : "Summary"
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "ai-notes"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.19.1",
+    "@types/turndown": "^5.0.5",
+    "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
