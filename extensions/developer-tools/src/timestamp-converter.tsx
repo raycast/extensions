@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Clipboard, Form, showHUD } from "@raycast/api";
 import { FormValidation, useForm, useLocalStorage } from "@raycast/utils";
 import { useEffect, useMemo } from "react";
+import { getInputText } from "./utils";
 
 interface TimestampForm {
   dateObject: Date;
@@ -148,9 +149,8 @@ export default function Command() {
   });
 
   useEffect(() => {
-    Clipboard.read().then((text) => {
-      const textContent = text.text ?? "";
-      const timestamp = textContent.trim().match(/^\d{10,13}$/)?.[0];
+    getInputText().then((texts) => {
+      const timestamp = texts.find((text) => text.trim().match(/^\d{10,13}$/)?.[0]);
       if (timestamp) {
         updateFromTimestamp(timestamp);
       }
