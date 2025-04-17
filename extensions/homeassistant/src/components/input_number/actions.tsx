@@ -2,8 +2,9 @@ import { EntityStandardActionSections } from "@components/entity";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { Action, ActionPanel, Color, Icon } from "@raycast/api";
+import React from "react";
 
-export function InputNumberIncrementAction(props: { state: State }): JSX.Element | null {
+export function InputNumberIncrementAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("input_number")) {
     return null;
@@ -34,7 +35,7 @@ export function InputNumberIncrementAction(props: { state: State }): JSX.Element
   );
 }
 
-export function InputNumberDecrementAction(props: { state: State }): JSX.Element | null {
+export function InputNumberDecrementAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("input_number")) {
     return null;
