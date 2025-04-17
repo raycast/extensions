@@ -18,7 +18,8 @@ export default function Command() {
 
   useEffect(() => {
     refresh();
-    setInterval(() => refresh(), 1000);
+    const interval = setInterval(() => refresh(), 1000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
