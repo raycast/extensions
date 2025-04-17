@@ -30,12 +30,12 @@ export default function main(props: LaunchProps<{ arguments: Arguments.AddRemind
   }
   exec(runner(reminder), (error, stdout, stderr) => {
     if (error) {
-      console.error(`Error executing script: ${error.message}`);
+      showFailureToast(error, { title: "Failed to execute reminder script" });
       return;
     }
 
     if (stderr) {
-      console.error(`Script error output: ${stderr}`);
+      showFailureToast(new Error(stderr), { title: "Reminder script error" });
       return;
     }
     console.log(`Script output: ${stdout}`);
