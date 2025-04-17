@@ -1,10 +1,30 @@
+import { showToast, Toast } from "@raycast/api";
 import { KeyLight } from "./elgato";
-import { run } from "./utils";
 
 const command = async () => {
-  const keyLight = await KeyLight.discover();
-  await keyLight.decreaseTemperature();
-  return "Decreased color temperature";
+  try {
+    const keyLight = await KeyLight.discover();
+    try {
+      const temperature = await keyLight.decreaseTemperature();
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: temperature !== undefined ? `Temperature: ${temperature}K` : "Temperature decreased",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to decrease temperature",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to discover Key Lights",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
 };
 
-export default run(command);
+export default command;
