@@ -106,4 +106,25 @@ Paragraph under Sub Level 2.
     const expectedTanaPaste = `%%tana%%\n- !! Top Level\n  - Some intro text.\n  - !! Sub Level 1\n    - List 1 Item 1\n    - List 1 Item 2\n      - Sub List 1.1\n    - More text after list 1.\n  - !! Sub Level 2\n    - Paragraph under Sub Level 2.\n- !! Another Top Level\n  - Final List Item`;
     expect(markdownToTanaPaste(markdown)).toBe(expectedTanaPaste);
   });
+
+  it("should handle ampersands correctly without escaping them", () => {
+    const markdown = "This & that";
+    const expectedTanaPaste = `%%tana%%
+- This & that`;
+    expect(markdownToTanaPaste(markdown)).toBe(expectedTanaPaste);
+  });
+
+  it("should handle ampersands within links correctly", () => {
+    const markdown = "Link with [query params](http://example.com?p1=a&p2=b)";
+    const expectedTanaPaste = `%%tana%%
+- Link with [query params](http://example.com?p1=a&p2=b)`;
+    expect(markdownToTanaPaste(markdown)).toBe(expectedTanaPaste);
+  });
+
+  it("should handle ampersands in headings", () => {
+    const markdown = "# R&D Department";
+    const expectedTanaPaste = `%%tana%%
+- !! R&D Department`;
+    expect(markdownToTanaPaste(markdown)).toBe(expectedTanaPaste);
+  });
 });

@@ -138,5 +138,6 @@ export function markdownToTanaPaste(markdown: string): string {
   });
 
   tanaPaste += outputLines.join("\n");
-  return tanaPaste;
+  // Ensure ampersands are not escaped
+  return tanaPaste.replace(/\\&/g, "&");
 }
