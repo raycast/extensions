@@ -1,4 +1,5 @@
 export const SEARCH_ENGINE: { [key: string]: string } = {
+  default: ``,
   google: `https://google.com/search?q=`,
   bing: `https://www.bing.com/search?q=`,
   baidu: `https://www.baidu.com/s?wd=`,
@@ -10,17 +11,17 @@ export const SEARCH_ENGINE: { [key: string]: string } = {
 const ZEN_BROWSER_LOGO = "https://cdn.jsdelivr.net/gh/zen-browser/branding/Main%20icons/SVG/zen-black.svg";
 
 export const DownloadText = `
-  # 🚨Error: Zen Browser browser is not installed
+  # 🚨Error: Zen Browser is not installed
 
   ## This extension depends on Zen browser. You must install it to continue.
-  
+
   If you have [Homebrew](https://brew.sh/) installed then press ⏎ (Enter Key) to install Zen browser.
   [Click here](https://zen-browser.app/download) if you want to download manually.
 
   > **Note:** If Zen Browser is already installed but you're seeing this message,
-  > you may need to adjust the profile configuration in the exention settings. You
+  > you may need to adjust the profile configuration in the extension settings. You
   > can find your profile names by visiting \`about:profiles\` in Zen Browser.
-  
+
   [![Zen Browser](${ZEN_BROWSER_LOGO})]()
 `;
 export const NoBookmarksText = `
@@ -31,7 +32,7 @@ export const NoBookmarksText = `
 
 export const UnknownErrorText = `
 # 🚨Error: Something happened while trying to run your command
-  
+
 [![Zen Browser](${ZEN_BROWSER_LOGO})]()
 `;
 
