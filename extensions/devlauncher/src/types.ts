@@ -32,4 +32,4 @@ export interface ExtPreferences {
   projectContainsFilter: string;
   recentlyOpenLimit: number;
   searchDepth: number;
-} 
+}

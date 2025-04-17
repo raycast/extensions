@@ -38,4 +38,4 @@ export function parseDirectoryOutput(output: string): DirectoryMap {
       acc[directoryInfo.parent].push(directoryInfo);
       return acc;
     }, {});
-} 
+}

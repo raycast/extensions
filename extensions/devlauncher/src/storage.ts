@@ -29,4 +29,4 @@ export class StorageService {
   async saveItems(items: string[]): Promise<void> {
     await LocalStorage.setItem(this.storageKey, items.join(";"));
   }
-} 
+}
