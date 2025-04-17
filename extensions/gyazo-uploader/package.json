@@ -3,43 +3,59 @@
   "name": "gyazo-uploader",
   "title": "Gyazo Uploader",
   "description": "Upload clipboard image to Gyazo",
-  "icon": "gyazo-icon.png",
+  "icon": "upload-icon.png",
   "author": "udus",
+  "version": "1.0.0",
+  "contributors": [
+    "qaynam"
+  ],
   "categories": [
     "Media",
-    "Productivity"
+    "Productivity",
+    "Applications"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "upload",
-      "title": "Upload Clipboard Image",
-      "subtitle": "Gyazo",
-      "description": "Upload upload image to gyazo and copy direct link",
+      "name": "upload-gyazo-from-clipboard",
+      "title": "Upload Gyazo From Clipboard",
+      "subtitle": "upload gyazo",
+      "description": "upload screenshot from clipboard",
       "mode": "no-view"
+    },
+    {
+      "name": "gyazo-unloader",
+      "icon": "gyazo-logo.png",
+      "title": "Gyazo Raycast Plugin",
+      "subtitle": "Gyazo Raycast Plugin",
+      "description": "Raycast Plugin for Gyazo. Upload screenshot from clipboard to Gyazo. Requires Gyazo API key. Set your Gyazo API key in the preferences.",
+      "mode": "menu-bar"
     }
   ],
   "preferences": [
     {
-      "default": "",
-      "description": "You can get your own access token from https://gyazo.com/oauth/applications",
-      "name": "accessToken",
+      "name": "gyazo-api-key",
+      "type": "password",
+      "description": "Your Gyazo API key",
       "required": true,
-      "title": "Access Token",
-      "type": "textfield"
+      "title": "API Key"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.0",
-    "gyazo-api": "^0.3.1"
+    "@raycast/api": "^1.94.3",
+    "@raycast/utils": "^1.19.1",
+    "file-type": "^20.4.1",
+    "gyazo-api": "^0.3.1",
+    "gyazo-api-ts": "^0.1.4",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "^18.8.3",
+    "@types/react": "^18.0.9",
     "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "prettier": "^2.8.8",
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "build": "ray build -e dist",
