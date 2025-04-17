@@ -39,13 +39,15 @@ export function parseHHMM(input: string) {
 
 export function isValidHHMM(input: string) {
   try {
-    if (input) {
-      parseHHMM(input);
+    if (!input) {
+      return false;
     }
+    parseHHMM(input);
     return true;
   } catch {
     return false;
   }
+}
 }
 
 export function isValidUrl(url: string) {
