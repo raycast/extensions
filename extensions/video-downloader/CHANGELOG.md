@@ -1,5 +1,13 @@
 # Video Downloader Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Add support for advanced mode
+- Add support specifying clip range
+- Refactor the logic of checking executables
+- Re-organize preferences usages
+- Bump all dependencies to the latest
+
 ## [Chore] - 2025-03-10
 
 - Rename extension folder and handle to `video-downloader`

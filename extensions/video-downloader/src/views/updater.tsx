@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Clipboard, Detail, Icon, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, Icon, Toast, useNavigation } from "@raycast/api";
 import { execa } from "execa";
+import { preferences } from "../utils.js";
 
-const { homebrewPath } = getPreferenceValues<ExtensionPreferences>();
+const { homebrewPath } = preferences;
 
 export default function Updater() {
   const { pop } = useNavigation();
