@@ -1,0 +1,2073 @@
+{
+  "schema_version": "0.4.0",
+  "metadata": {
+    "name": "contract",
+    "version": "1.0.0",
+    "authors": [
+      "Mario Reder <mario.reder@pm.me>"
+    ],
+    "build": {
+      "compiler": "rustc 1.81.0",
+      "builder": "cargo-near cargo-near-build 0.2.0"
+    },
+    "wasm_hash": "GhELF9t7i24TdsYnTbwFipZo1KHbpyj5Ads128QEyynS"
+  },
+  "body": {
+    "functions": [
+      {
+        "name": "add_guardian",
+        "kind": "call",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "guardian",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "null"
+          }
+        }
+      },
+      {
+        "name": "claim",
+        "kind": "call",
+        "modifiers": [
+          "payable"
+        ],
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "meme_id",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint32",
+                "minimum": 0.0
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "$ref": "#/definitions/Promise"
+          }
+        }
+      },
+      {
+        "name": "claim_income",
+        "kind": "call",
+        "modifiers": [
+          "payable"
+        ],
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "token_ids",
+              "type_schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/AccountId"
+                }
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "$ref": "#/definitions/Promise"
+          }
+        }
+      },
+      {
+        "name": "claim_shitstars",
+        "kind": "call",
+        "modifiers": [
+          "payable"
+        ],
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "$ref": "#/definitions/Promise"
+          }
+        }
+      },
+      {
+        "name": "claim_vesting",
+        "kind": "call",
+        "modifiers": [
+          "payable"
+        ],
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "meme_id",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint32",
+                "minimum": 0.0
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "$ref": "#/definitions/Promise"
+          }
+        }
+      },
+      {
+        "name": "collect_fees",
+        "kind": "call",
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "$ref": "#/definitions/PromiseOrValueNull"
+          }
+        }
+      },
+      {
+        "name": "contract_source_metadata",
+        "kind": "view"
+      },
+      {
+        "name": "create_meme",
+        "kind": "call",
+        "modifiers": [
+          "payable"
+        ],
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "duration_ms",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "name",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "symbol",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "icon",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "decimals",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint8",
+                "minimum": 0.0
+              }
+            },
+            {
+              "name": "total_supply",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "reference",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "reference_hash",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "deposit_token_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            },
+            {
+              "name": "soft_cap",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "hard_cap",
+              "type_schema": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            {
+              "name": "team_allocation",
+              "type_schema": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": [
+                  {
+                    "type": "integer",
+                    "format": "uint16",
+                    "minimum": 0.0
+                  },
+                  {
+                    "type": "integer",
+                    "format": "uint64",
+                    "minimum": 0.0
+                  },
+                  {
+                    "type": "integer",
+                    "format": "uint64",
+                    "minimum": 0.0
+                  }
+                ],
+                "maxItems": 3,
+                "minItems": 3
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "integer",
+            "format": "uint32",
+            "minimum": 0.0
+          }
+        }
+      },
+      {
+        "name": "create_meme_storage_cost",
+        "kind": "view",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "sender_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            },
+            {
+              "name": "duration_ms",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "name",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "symbol",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "icon",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "decimals",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint8",
+                "minimum": 0.0
+              }
+            },
+            {
+              "name": "total_supply",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "reference",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "reference_hash",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "deposit_token_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            },
+            {
+              "name": "soft_cap",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "hard_cap",
+              "type_schema": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "name": "finalize",
+        "kind": "call",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "meme_id",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint32",
+                "minimum": 0.0
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "null"
+          }
+        }
+      },
+      {
+        "name": "ft_on_transfer",
+        "kind": "call",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "sender_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            },
+            {
+              "name": "amount",
+              "type_schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "msg",
+              "type_schema": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "$ref": "#/definitions/PromiseOrValueString"
+          }
+        }
+      },
+      {
+        "name": "get_account",
+        "kind": "view",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "account_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/AccountInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "get_claimable",
+        "kind": "view",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "account_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            },
+            {
+              "name": "meme_id",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint32",
+                "minimum": 0.0
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      {
+        "name": "get_claimable_withdraw_fees",
+        "kind": "view",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "account_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            },
+            {
+              "name": "meme_id",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint32",
+                "minimum": 0.0
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      {
+        "name": "get_collected_fees",
+        "kind": "view",
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": [
+                {
+                  "$ref": "#/definitions/AccountId"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "maxItems": 2,
+              "minItems": 2
+            }
+          }
+        }
+      },
+      {
+        "name": "get_fees",
+        "kind": "view",
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "$ref": "#/definitions/Fees"
+          }
+        }
+      },
+      {
+        "name": "get_finalizable_memes",
+        "kind": "view",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "skip",
+              "type_schema": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "uint",
+                "minimum": 0.0
+              }
+            },
+            {
+              "name": "limit",
+              "type_schema": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "uint",
+                "minimum": 0.0
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0.0
+            }
+          }
+        }
+      },
+      {
+        "name": "get_guardians",
+        "kind": "view",
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/AccountId"
+            }
+          }
+        }
+      },
+      {
+        "name": "get_meme",
+        "kind": "view",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "meme_id",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint32",
+                "minimum": 0.0
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/MemeInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "get_meme_stakes",
+        "kind": "view",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "meme_id",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint32",
+                "minimum": 0.0
+              }
+            },
+            {
+              "name": "skip",
+              "type_schema": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "uint",
+                "minimum": 0.0
+              }
+            },
+            {
+              "name": "limit",
+              "type_schema": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "uint",
+                "minimum": 0.0
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "array",
+              "items": [
+                {
+                  "$ref": "#/definitions/AccountId"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "maxItems": 2,
+              "minItems": 2
+            }
+          }
+        }
+      },
+      {
+        "name": "get_unclaimed",
+        "kind": "view",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "account_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0.0
+            }
+          }
+        }
+      },
+      {
+        "name": "is_running",
+        "kind": "view",
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "boolean"
+          }
+        }
+      },
+      {
+        "name": "migrate",
+        "kind": "call",
+        "modifiers": [
+          "init"
+        ],
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "launch_fee",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint8",
+                "minimum": 0.0
+              }
+            },
+            {
+              "name": "max_finalized_id",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint32",
+                "minimum": 0.0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "migrate_self",
+        "kind": "view",
+        "modifiers": [
+          "private"
+        ]
+      },
+      {
+        "name": "new",
+        "kind": "call",
+        "modifiers": [
+          "init"
+        ],
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "owner",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            },
+            {
+              "name": "guardians",
+              "type_schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/AccountId"
+                }
+              }
+            },
+            {
+              "name": "ref_contract_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            },
+            {
+              "name": "ref_locker_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            },
+            {
+              "name": "rewarder_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            },
+            {
+              "name": "deposit_fee",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint8",
+                "minimum": 0.0
+              }
+            },
+            {
+              "name": "withdraw_fee",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint8",
+                "minimum": 0.0
+              }
+            },
+            {
+              "name": "launch_fee",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint8",
+                "minimum": 0.0
+              }
+            },
+            {
+              "name": "required_stakes",
+              "type_schema": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "$ref": "#/definitions/AccountId"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ],
+                  "maxItems": 2,
+                  "minItems": 2
+                }
+              }
+            },
+            {
+              "name": "shitstar_multipliers",
+              "type_schema": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "$ref": "#/definitions/AccountId"
+                    },
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ],
+                  "maxItems": 3,
+                  "minItems": 3
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "on_claim",
+        "kind": "call",
+        "modifiers": [
+          "private"
+        ],
+        "params": {
+          "serialization_type": "borsh",
+          "args": [
+            {
+              "name": "sender_id",
+              "type_schema": {
+                "declaration": "AccountId",
+                "definitions": {
+                  "AccountId": {
+                    "Struct": [
+                      "String"
+                    ]
+                  },
+                  "String": {
+                    "Sequence": {
+                      "length_width": 4,
+                      "length_range": {
+                        "start": 0,
+                        "end": 4294967295
+                      },
+                      "elements": "u8"
+                    }
+                  },
+                  "u8": {
+                    "Primitive": 1
+                  }
+                }
+              }
+            },
+            {
+              "name": "meme_id",
+              "type_schema": {
+                "declaration": "u32",
+                "definitions": {
+                  "u32": {
+                    "Primitive": 4
+                  }
+                }
+              }
+            },
+            {
+              "name": "deposit",
+              "type_schema": {
+                "declaration": "u128",
+                "definitions": {
+                  "u128": {
+                    "Primitive": 16
+                  }
+                }
+              }
+            },
+            {
+              "name": "income",
+              "type_schema": {
+                "declaration": "u128",
+                "definitions": {
+                  "u128": {
+                    "Primitive": 16
+                  }
+                }
+              }
+            },
+            {
+              "name": "shitstars",
+              "type_schema": {
+                "declaration": "u128",
+                "definitions": {
+                  "u128": {
+                    "Primitive": 16
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "null"
+          }
+        }
+      },
+      {
+        "name": "on_claim_income",
+        "kind": "call",
+        "modifiers": [
+          "private"
+        ],
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "sender_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            },
+            {
+              "name": "token_ids",
+              "type_schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/AccountId"
+                }
+              }
+            },
+            {
+              "name": "amounts",
+              "type_schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "on_claim_shitstars",
+        "kind": "call",
+        "modifiers": [
+          "private"
+        ],
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "sender_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            },
+            {
+              "name": "amount",
+              "type_schema": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "callbacks": [
+          {
+            "serialization_type": "json",
+            "type_schema": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "maxItems": 2,
+              "minItems": 2
+            }
+          }
+        ],
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "$ref": "#/definitions/PromiseOrValueNull"
+          }
+        }
+      },
+      {
+        "name": "on_claim_vesting",
+        "kind": "call",
+        "modifiers": [
+          "private"
+        ],
+        "params": {
+          "serialization_type": "borsh",
+          "args": [
+            {
+              "name": "meme_id",
+              "type_schema": {
+                "declaration": "u32",
+                "definitions": {
+                  "u32": {
+                    "Primitive": 4
+                  }
+                }
+              }
+            },
+            {
+              "name": "claim_amount",
+              "type_schema": {
+                "declaration": "u128",
+                "definitions": {
+                  "u128": {
+                    "Primitive": 16
+                  }
+                }
+              }
+            },
+            {
+              "name": "previous_claim_ms",
+              "type_schema": {
+                "declaration": "Option<u64>",
+                "definitions": {
+                  "()": {
+                    "Primitive": 0
+                  },
+                  "Option<u64>": {
+                    "Enum": {
+                      "tag_width": 1,
+                      "variants": [
+                        [
+                          0,
+                          "None",
+                          "()"
+                        ],
+                        [
+                          1,
+                          "Some",
+                          "u64"
+                        ]
+                      ]
+                    }
+                  },
+                  "u64": {
+                    "Primitive": 8
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "null"
+          }
+        }
+      },
+      {
+        "name": "on_finalize",
+        "kind": "call",
+        "modifiers": [
+          "private"
+        ],
+        "params": {
+          "serialization_type": "borsh",
+          "args": [
+            {
+              "name": "meme",
+              "type_schema": {
+                "declaration": "Meme",
+                "definitions": {
+                  "()": {
+                    "Primitive": 0
+                  },
+                  "AccountId": {
+                    "Struct": [
+                      "String"
+                    ]
+                  },
+                  "IndexMap": {
+                    "Struct": [
+                      [
+                        "prefix",
+                        "Vec<u8>"
+                      ]
+                    ]
+                  },
+                  "IterableMap": {
+                    "Struct": [
+                      [
+                        "keys",
+                        "Vector"
+                      ],
+                      [
+                        "values",
+                        "LookupMap"
+                      ]
+                    ]
+                  },
+                  "Lazy": {
+                    "Struct": [
+                      [
+                        "storage_key",
+                        "Vec<u8>"
+                      ]
+                    ]
+                  },
+                  "LookupMap": {
+                    "Struct": [
+                      [
+                        "prefix",
+                        "Vec<u8>"
+                      ]
+                    ]
+                  },
+                  "Meme": {
+                    "Struct": [
+                      [
+                        "id",
+                        "u32"
+                      ],
+                      [
+                        "owner",
+                        "AccountId"
+                      ],
+                      [
+                        "end_timestamp_ms",
+                        "u64"
+                      ],
+                      [
+                        "name",
+                        "String"
+                      ],
+                      [
+                        "symbol",
+                        "String"
+                      ],
+                      [
+                        "icon",
+                        "Lazy"
+                      ],
+                      [
+                        "decimals",
+                        "u8"
+                      ],
+                      [
+                        "total_supply",
+                        "u128"
+                      ],
+                      [
+                        "reference",
+                        "Lazy"
+                      ],
+                      [
+                        "reference_hash",
+                        "Lazy"
+                      ],
+                      [
+                        "deposit_token_id",
+                        "AccountId"
+                      ],
+                      [
+                        "soft_cap",
+                        "u128"
+                      ],
+                      [
+                        "hard_cap",
+                        "Option<u128>"
+                      ],
+                      [
+                        "team_allocation",
+                        "Option<TeamAllocation>"
+                      ],
+                      [
+                        "vesting",
+                        "Option<Vesting>"
+                      ],
+                      [
+                        "pool_amount",
+                        "u128"
+                      ],
+                      [
+                        "amount_to_be_distributed",
+                        "u128"
+                      ],
+                      [
+                        "total_staked",
+                        "u128"
+                      ],
+                      [
+                        "total_withdrawal_fees",
+                        "u128"
+                      ],
+                      [
+                        "stakes",
+                        "IterableMap"
+                      ]
+                    ]
+                  },
+                  "Option<TeamAllocation>": {
+                    "Enum": {
+                      "tag_width": 1,
+                      "variants": [
+                        [
+                          0,
+                          "None",
+                          "()"
+                        ],
+                        [
+                          1,
+                          "Some",
+                          "TeamAllocation"
+                        ]
+                      ]
+                    }
+                  },
+                  "Option<Vesting>": {
+                    "Enum": {
+                      "tag_width": 1,
+                      "variants": [
+                        [
+                          0,
+                          "None",
+                          "()"
+                        ],
+                        [
+                          1,
+                          "Some",
+                          "Vesting"
+                        ]
+                      ]
+                    }
+                  },
+                  "Option<u128>": {
+                    "Enum": {
+                      "tag_width": 1,
+                      "variants": [
+                        [
+                          0,
+                          "None",
+                          "()"
+                        ],
+                        [
+                          1,
+                          "Some",
+                          "u128"
+                        ]
+                      ]
+                    }
+                  },
+                  "String": {
+                    "Sequence": {
+                      "length_width": 4,
+                      "length_range": {
+                        "start": 0,
+                        "end": 4294967295
+                      },
+                      "elements": "u8"
+                    }
+                  },
+                  "TeamAllocation": {
+                    "Struct": [
+                      [
+                        "amount",
+                        "u128"
+                      ],
+                      [
+                        "vesting_duration_ms",
+                        "u64"
+                      ],
+                      [
+                        "cliff_duration_ms",
+                        "u64"
+                      ]
+                    ]
+                  },
+                  "Vec<u8>": {
+                    "Sequence": {
+                      "length_width": 4,
+                      "length_range": {
+                        "start": 0,
+                        "end": 4294967295
+                      },
+                      "elements": "u8"
+                    }
+                  },
+                  "Vector": {
+                    "Struct": [
+                      [
+                        "len",
+                        "u32"
+                      ],
+                      [
+                        "values",
+                        "IndexMap"
+                      ]
+                    ]
+                  },
+                  "Vesting": {
+                    "Struct": [
+                      [
+                        "already_claimed",
+                        "u128"
+                      ],
+                      [
+                        "last_claim_ms",
+                        "u64"
+                      ]
+                    ]
+                  },
+                  "u128": {
+                    "Primitive": 16
+                  },
+                  "u32": {
+                    "Primitive": 4
+                  },
+                  "u64": {
+                    "Primitive": 8
+                  },
+                  "u8": {
+                    "Primitive": 1
+                  }
+                }
+              }
+            },
+            {
+              "name": "amounts",
+              "type_schema": {
+                "declaration": "Vec<U128>",
+                "definitions": {
+                  "U128": {
+                    "Struct": [
+                      "u128"
+                    ]
+                  },
+                  "Vec<U128>": {
+                    "Sequence": {
+                      "length_width": 4,
+                      "length_range": {
+                        "start": 0,
+                        "end": 4294967295
+                      },
+                      "elements": "U128"
+                    }
+                  },
+                  "u128": {
+                    "Primitive": 16
+                  }
+                }
+              }
+            },
+            {
+              "name": "token_id",
+              "type_schema": {
+                "declaration": "AccountId",
+                "definitions": {
+                  "AccountId": {
+                    "Struct": [
+                      "String"
+                    ]
+                  },
+                  "String": {
+                    "Sequence": {
+                      "length_width": 4,
+                      "length_range": {
+                        "start": 0,
+                        "end": 4294967295
+                      },
+                      "elements": "u8"
+                    }
+                  },
+                  "u8": {
+                    "Primitive": 1
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "null"
+          }
+        }
+      },
+      {
+        "name": "on_withdraw",
+        "kind": "call",
+        "modifiers": [
+          "private"
+        ]
+      },
+      {
+        "name": "pause",
+        "kind": "call"
+      },
+      {
+        "name": "remove_guardian",
+        "kind": "call",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "guardian",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "null"
+          }
+        }
+      },
+      {
+        "name": "required_stake",
+        "kind": "view",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "token_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      {
+        "name": "resume",
+        "kind": "call"
+      },
+      {
+        "name": "set_fees",
+        "kind": "call",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "deposit_fee",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint8",
+                "minimum": 0.0
+              }
+            },
+            {
+              "name": "withdraw_fee",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint8",
+                "minimum": 0.0
+              }
+            },
+            {
+              "name": "launch_fee",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint8",
+                "minimum": 0.0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "set_token_config",
+        "kind": "call",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "required_stakes",
+              "type_schema": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "$ref": "#/definitions/AccountId"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ],
+                  "maxItems": 2,
+                  "minItems": 2
+                }
+              }
+            },
+            {
+              "name": "shitstar_multipliers",
+              "type_schema": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "$ref": "#/definitions/AccountId"
+                    },
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ],
+                  "maxItems": 3,
+                  "minItems": 3
+                }
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "null"
+          }
+        }
+      },
+      {
+        "name": "storage_balance_bounds",
+        "kind": "view",
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "$ref": "#/definitions/StorageBalanceBounds"
+          }
+        }
+      },
+      {
+        "name": "storage_balance_of",
+        "kind": "view",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "account_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/StorageBalance"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "storage_costs",
+        "kind": "view",
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "$ref": "#/definitions/StorageCosts"
+          }
+        }
+      },
+      {
+        "name": "storage_deposit",
+        "kind": "call",
+        "modifiers": [
+          "payable"
+        ],
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "account_id",
+              "type_schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/AccountId"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "registration_only",
+              "type_schema": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "$ref": "#/definitions/StorageBalance"
+          }
+        }
+      },
+      {
+        "name": "storage_unregister",
+        "kind": "call",
+        "modifiers": [
+          "payable"
+        ],
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "force",
+              "type_schema": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "boolean"
+          }
+        }
+      },
+      {
+        "name": "storage_withdraw",
+        "kind": "call",
+        "modifiers": [
+          "payable"
+        ],
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "amount",
+              "type_schema": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "$ref": "#/definitions/StorageBalance"
+          }
+        }
+      },
+      {
+        "name": "upgrade",
+        "kind": "view",
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "$ref": "#/definitions/Promise"
+          }
+        }
+      },
+      {
+        "name": "upgrade_and_migrate",
+        "kind": "view",
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "$ref": "#/definitions/Promise"
+          }
+        }
+      },
+      {
+        "name": "whitelisted_token_ids",
+        "kind": "view",
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/AccountId"
+            }
+          }
+        }
+      },
+      {
+        "name": "withdraw",
+        "kind": "call",
+        "modifiers": [
+          "payable"
+        ],
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "meme_id",
+              "type_schema": {
+                "type": "integer",
+                "format": "uint32",
+                "minimum": 0.0
+              }
+            },
+            {
+              "name": "amount",
+              "type_schema": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "$ref": "#/definitions/Promise"
+          }
+        }
+      }
+    ],
+    "root_schema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "String",
+      "type": "string",
+      "definitions": {
+        "AccountId": {
+          "description": "NEAR Account Identifier.\n\nThis is a unique, syntactically valid, human-readable account identifier on the NEAR network.\n\n[See the crate-level docs for information about validation.](index.html#account-id-rules)\n\nAlso see [Error kind precedence](AccountId#error-kind-precedence).\n\n## Examples\n\n``` use near_account_id::AccountId;\n\nlet alice: AccountId = \"alice.near\".parse().unwrap();\n\nassert!(\"ƒelicia.near\".parse::<AccountId>().is_err()); // (ƒ is not f) ```",
+          "type": "string"
+        },
+        "AccountInfo": {
+          "type": "object",
+          "required": [
+            "account_id",
+            "deposits",
+            "income",
+            "shitstar_claim"
+          ],
+          "properties": {
+            "account_id": {
+              "$ref": "#/definitions/AccountId"
+            },
+            "deposits": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "integer",
+                    "format": "uint32",
+                    "minimum": 0.0
+                  },
+                  {
+                    "type": "string"
+                  }
+                ],
+                "maxItems": 2,
+                "minItems": 2
+              }
+            },
+            "income": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": [
+                  {
+                    "$ref": "#/definitions/AccountId"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ],
+                "maxItems": 2,
+                "minItems": 2
+              }
+            },
+            "shitstar_claim": {
+              "type": "string"
+            }
+          }
+        },
+        "Fees": {
+          "type": "object",
+          "required": [
+            "deposit_fee",
+            "withdraw_fee"
+          ],
+          "properties": {
+            "deposit_fee": {
+              "type": "integer",
+              "format": "uint8",
+              "minimum": 0.0
+            },
+            "withdraw_fee": {
+              "type": "integer",
+              "format": "uint8",
+              "minimum": 0.0
+            }
+          }
+        },
+        "MemeInfo": {
+          "type": "object",
+          "required": [
+            "amount_to_be_distributed",
+            "decimals",
+            "deposit_token_id",
+            "end_timestamp_ms",
+            "icon",
+            "id",
+            "name",
+            "owner",
+            "pool_amount",
+            "reference",
+            "reference_hash",
+            "soft_cap",
+            "symbol",
+            "total_staked",
+            "total_supply",
+            "total_withdrawal_fees"
+          ],
+          "properties": {
+            "amount_to_be_distributed": {
+              "type": "string"
+            },
+            "decimals": {
+              "type": "integer",
+              "format": "uint8",
+              "minimum": 0.0
+            },
+            "deposit_token_id": {
+              "$ref": "#/definitions/AccountId"
+            },
+            "end_timestamp_ms": {
+              "type": "string"
+            },
+            "hard_cap": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "icon": {
+              "type": "string"
+            },
+            "id": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0.0
+            },
+            "name": {
+              "type": "string"
+            },
+            "owner": {
+              "$ref": "#/definitions/AccountId"
+            },
+            "pool_amount": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "reference_hash": {
+              "type": "string"
+            },
+            "soft_cap": {
+              "type": "string"
+            },
+            "symbol": {
+              "type": "string"
+            },
+            "team_allocation": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/TeamAllocationInfo"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "total_staked": {
+              "type": "string"
+            },
+            "total_supply": {
+              "type": "string"
+            },
+            "total_withdrawal_fees": {
+              "type": "string"
+            },
+            "vesting": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/VestingInfo"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "Promise": true,
+        "PromiseOrValueNull": {
+          "type": "null"
+        },
+        "PromiseOrValueString": {
+          "type": "string"
+        },
+        "StorageBalance": {
+          "type": "object",
+          "required": [
+            "available",
+            "total"
+          ],
+          "properties": {
+            "available": {
+              "type": "string"
+            },
+            "total": {
+              "type": "string"
+            }
+          }
+        },
+        "StorageBalanceBounds": {
+          "type": "object",
+          "required": [
+            "min"
+          ],
+          "properties": {
+            "max": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "min": {
+              "type": "string"
+            }
+          }
+        },
+        "StorageCosts": {
+          "type": "object",
+          "required": [
+            "account",
+            "perMemeDeposit"
+          ],
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "perMemeDeposit": {
+              "type": "string"
+            }
+          }
+        },
+        "TeamAllocationInfo": {
+          "type": "object",
+          "required": [
+            "amount",
+            "cliff_duration_ms",
+            "vesting_duration_ms"
+          ],
+          "properties": {
+            "amount": {
+              "type": "string"
+            },
+            "cliff_duration_ms": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            "vesting_duration_ms": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          }
+        },
+        "VestingInfo": {
+          "type": "object",
+          "required": [
+            "already_claimed",
+            "last_claim_ms"
+          ],
+          "properties": {
+            "already_claimed": {
+              "type": "string"
+            },
+            "last_claim_ms": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}
