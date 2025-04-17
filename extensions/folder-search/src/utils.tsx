@@ -35,35 +35,83 @@ const loadPlugins = async () => {
   // grab prefs
   const { pluginsEnabled, pluginsFolder } = getPreferenceValues<SpotlightSearchPreferences>();
 
-  if (!(pluginsEnabled && pluginsFolder && pluginsFolder !== "")) {
+  log("debug", "loadPlugins", "Loading plugins", {
+    pluginsEnabled,
+    pluginsFolder,
+  });
+
+  if (!pluginsEnabled) {
+    log("debug", "loadPlugins", "Plugins are disabled in preferences");
+    return [];
+  }
+
+  if (!pluginsFolder || pluginsFolder.trim() === "") {
+    log("debug", "loadPlugins", "No plugins folder specified");
+    return [];
+  }
+
+  // Normalize the path (remove trailing slash and expand ~)
+  const normalizedPath = pluginsFolder.replace(/\/$/, "").replace(/^~/, os.homedir());
+  
+  try {
+    // Check if path exists and is a directory
+    const stats = await fs.promises.stat(normalizedPath);
+    if (!stats.isDirectory()) {
+      log("error", "loadPlugins", "Plugins path is not a directory", { path: normalizedPath });
+      return [];
+    }
+  } catch (error) {
+    log("error", "loadPlugins", "Failed to access plugins directory", { 
+      path: normalizedPath,
+      error: error instanceof Error ? error.message : String(error)
+    });
     return [];
   }
 
   const validPlugins = [];
   const invalidPluginFiles = [];
 
-  const files = await fs.promises.readdir(pluginsFolder);
+  try {
+    const files = await fs.promises.readdir(normalizedPath);
+    log("debug", "loadPlugins", "Found plugin files", { files });
 
-  // we only want .js/plugin files (not .DS_Store etc)
-  const jsFiles = files.filter((file) => file.endsWith(".js"));
+    // we only want .js/plugin files (not .DS_Store etc)
+    const jsFiles = files.filter((file) => file.endsWith(".js"));
+    log("debug", "loadPlugins", "Filtered JS files", { jsFiles });
 
-  for (const file of jsFiles) {
-    try {
-      // load and validate
-      const { FolderSearchPlugin } = await import(path.join(pluginsFolder, file));
+    for (const file of jsFiles) {
+      try {
+        // load and validate
+        const pluginPath = path.join(normalizedPath, file);
+        log("debug", "loadPlugins", "Loading plugin", { file, pluginPath });
+        
+        const { FolderSearchPlugin } = await import(pluginPath);
+        log("debug", "loadPlugins", "Plugin loaded", { 
+          file, 
+          title: FolderSearchPlugin.title,
+          shortcut: FolderSearchPlugin.shortcut 
+        });
 
-      await pluginSchema.validate(FolderSearchPlugin);
-
-      validPlugins.push(FolderSearchPlugin);
-    } catch (e) {
-      invalidPluginFiles.push(file);
+        await pluginSchema.validate(FolderSearchPlugin);
+        validPlugins.push(FolderSearchPlugin);
+      } catch (e) {
+        log("error", "loadPlugins", "Failed to load plugin", { 
+          file, 
+          error: e instanceof Error ? e.message : String(e)
+        });
+        invalidPluginFiles.push(file);
+      }
     }
+  } catch (error) {
+    log("error", "loadPlugins", "Failed to read plugins directory", { 
+      path: normalizedPath,
+      error: error instanceof Error ? error.message : String(error)
+    });
+    return [];
   }
 
-  console.debug("Invalid plugin files: ", invalidPluginFiles);
-
   if (invalidPluginFiles.length) {
-    throw new Error("Invalid plugins found");
+    log("error", "loadPlugins", "Some plugins failed to load", { invalidPluginFiles });
   }
 
   return validPlugins;
