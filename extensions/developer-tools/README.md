@@ -1,4 +1,4 @@
-# Raycast Developer Utilities
+# Developer Tools
 
 A collection of useful Raycast commands designed for developers.
 
@@ -30,5 +30,17 @@ Easily convert between Unix timestamps (seconds or milliseconds) and human-reada
 4.  All fields will update automatically as you make changes.
 5.  Press Enter to copy the current Unix timestamp to your clipboard.
 6.  Use the Action Panel (`⌘K`) to toggle between using seconds and milliseconds.
+
+### URL Encoder
+
+Convert text to URL-encoded format, perfect for generating safe URLs or query parameters.
+
+### URL Decoder
+
+Convert URL-encoded text back to its original form.
+
+### JSON String Unescaper
+
+Convert escaped JSON strings back to their readable form, handling escape sequences like `\n`, `\t`, `\"`, etc.
 
 *(More commands coming soon!)*
