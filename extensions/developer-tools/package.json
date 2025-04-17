@@ -6,8 +6,7 @@
   "icon": "icon.png",
   "author": "wxiaoyun",
   "categories": [
-    "Developer Tools",
-    "Productivity"
+    "Developer Tools"
   ],
   "license": "MIT",
   "commands": [
@@ -16,11 +15,24 @@
       "title": "Timestamp Converter",
       "description": "Convert Unix timestamps and display their components with timezone support",
       "mode": "view"
+    },
+    {
+      "name": "url-encode-decode",
+      "title": "Url Encode / Decode",
+      "description": "Encode / Decode a URL",
+      "mode": "view"
+    },
+    {
+      "name": "json-unescape",
+      "title": "Json Unescape",
+      "description": "Unescape a JSON string",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "latest",
-    "@raycast/utils": "latest"
+    "@raycast/utils": "latest",
+    "slashes": "^3.0.12"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
