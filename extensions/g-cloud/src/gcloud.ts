@@ -67,6 +67,13 @@ export async function executeGcloudCommand(
 
     const projectFlag =
       projectId && typeof projectId === "string" && projectId.trim() !== "" ? ` --project=${projectId}` : "";
+
+    // Use a longer timeout for VM operations
+    let effectiveTimeout = timeout;
+    if (command.includes("compute instances") && (command.includes("start") || command.includes("stop"))) {
+      effectiveTimeout = 45000; // 45 seconds for VM operations
+    }
+
     const fullCommand = `${gcloudPath} ${command}${projectFlag} --format=json`;
     const cacheKey = fullCommand;
 
@@ -89,8 +96,8 @@ export async function executeGcloudCommand(
       let timeoutId: NodeJS.Timeout;
       const promise = new Promise<never>((_, reject) => {
         timeoutId = setTimeout(() => {
-          reject(new Error(`Command timed out after ${timeout}ms: ${fullCommand}`));
-        }, timeout);
+          reject(new Error(`Command timed out after ${effectiveTimeout}ms: ${fullCommand}`));
+        }, effectiveTimeout);
       });
       return { promise, timeoutId: timeoutId! };
     };
@@ -175,7 +182,7 @@ async function executeCommand(
         fullCommand.includes("list") || (fullCommand.endsWith("--format=json") && fullCommand.includes("list"));
 
       if (expectsArray && !Array.isArray(result)) {
-        console.log("Command expected to return array but got object, wrapping in array:", fullCommand);
+        //console.log("Command expected to return array but got object, wrapping in array:", fullCommand);
         const parsedResult = [result];
         commandCache.set(cacheKey, { result: parsedResult, timestamp: Date.now() });
         return parsedResult;

@@ -1,7 +1,7 @@
 import type { Project } from "@/api/types";
 import type { RequestOptions } from "@/utils/fetch";
 
-import { createWindowLessFetcher } from "../fetcher";
+import { createWindowLessFetcher } from "../";
 
 export type CreatePlaygroundMediaType = "ts" | "js" | "tsx" | "jsx";
 

@@ -1,0 +1,162 @@
+import { useEffect, useState, useMemo } from "react";
+import {
+  Cache,
+  Icon,
+  MenuBarExtra,
+  open,
+  getPreferenceValues,
+  Keyboard,
+  Color,
+  openExtensionPreferences,
+} from "@raycast/api";
+import { getStories } from "./hackernews";
+import { Story } from "./types";
+
+const cache = new Cache();
+// Stories that the user clicked on
+const readKey = "read-stories";
+// Stories that we've seen over the past week.
+// If we've seen something more than 24 hours ago, we remove it
+// This allows for stories posted e.g. 3 days ago to hit 500 points today
+// [{ story: {}, seen: 1234567890 }]
+const seenKey = "seen-stories";
+// To cache the points to clear cache when they change
+const prefKey = "preferences";
+
+const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
+
+function getShortcut(index: number) {
+  const key = index + 1;
+  return key >= 1 && key <= 9
+    ? { modifiers: ["cmd"] as Keyboard.KeyModifier[], key: String(key) as Keyboard.KeyEquivalent }
+    : undefined;
+}
+
+export default function Command() {
+  const { points } = getPreferenceValues<Preferences>();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [stories, setStories] = useState<Story[]>([]);
+
+  // Memoize cache reads and parse operations
+  const readStories = useMemo(() => {
+    const cached = cache.get(readKey);
+    return new Set(JSON.parse(cached ?? "[]") as string[]);
+  }, []);
+
+  const seenStories = useMemo(() => {
+    const cached = cache.get(seenKey);
+    return JSON.parse(cached ?? "[]") as { story: Story; seen: number }[];
+  }, []);
+
+  // Memoize unread count calculation
+  const unreadCount = useMemo(
+    () => stories.filter((story) => !readStories.has(story.external_url)).length,
+    [stories, readStories],
+  );
+
+  // Memoize icon configuration
+  const iconConfig = useMemo(
+    () => ({
+      source: unreadCount > 0 ? "icon.png" : "icon-64-dark.png",
+      tintColor: unreadCount > 0 ? null : Color.PrimaryText,
+    }),
+    [unreadCount],
+  );
+
+  // Memoize tooltip
+  const tooltip = useMemo(
+    () => `Hacker News ${points}+ Stories${unreadCount > 0 ? ` (${unreadCount})` : ""}`,
+    [unreadCount, points],
+  );
+
+  if (cache.get(prefKey) !== points) {
+    // if the points have changed, clear the cache
+    // cache.set(readKey, JSON.stringify([]));
+    // cache.set(seenKey, JSON.stringify([]));
+    cache.clear();
+  }
+
+  useEffect(() => {
+    setError(null);
+    setLoading(true);
+    // cache the points we used
+    cache.set(prefKey, points);
+    getStories(points || "500", { cache })
+      .then((stories) => {
+        const now = Date.now();
+        const seenStoriesMap = new Map(seenStories.map((s) => [s.story.external_url, s]));
+
+        // Get list of unseen stories (they aren't in the cache)
+        const unseenStories = stories
+          .filter((story) => !seenStoriesMap.has(story.external_url))
+          .map((story) => ({ story, seen: now }));
+
+        // merge everything now with a seen prop
+        const allStoriesSeen = [...seenStories, ...unseenStories].sort((a, b) => b.seen - a.seen);
+        cache.set(seenKey, JSON.stringify(allStoriesSeen));
+
+        return allStoriesSeen.filter(({ seen }) => now - seen < twentyFourHoursInMs).map(({ story }) => story);
+      })
+      .then((stories) => setStories(stories))
+      .catch((error) => setError(`Error: ${error.message}`))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <MenuBarExtra icon={iconConfig} tooltip={tooltip} isLoading={loading}>
+      <MenuBarExtra.Section title={tooltip}>
+        <MenuItems error={error} stories={stories} setStories={setStories} readStories={readStories} points={points} />
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Open Preferences"
+          onAction={openExtensionPreferences}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+          icon={Icon.Gear}
+        />
+      </MenuBarExtra.Section>
+    </MenuBarExtra>
+  );
+}
+
+type MenuItemsProps = {
+  error: string | null;
+  stories: Story[];
+  setStories: React.Dispatch<React.SetStateAction<Story[]>>;
+  readStories: Set<string>;
+  points: string;
+};
+
+const MenuItems = ({ error, stories, setStories, readStories, points }: MenuItemsProps) => {
+  if (error) return <MenuBarExtra.Item title={error} />;
+  if (stories.length === 0) return <MenuBarExtra.Item title={`No recent stories with ${points}+ points`} />;
+
+  const getPointsFromContent = (content: string) => {
+    const match = content.match(/Points: (\d+)/);
+    return match ? match[1] : null;
+  };
+
+  return stories?.map((story: Story, index: number) => (
+    <MenuBarExtra.Item
+      key={story.external_url}
+      icon={{
+        source: Icon.Dot,
+        tintColor: readStories.has(story.external_url) ? { light: "#787794", dark: "gray" } : "#E96E37",
+      }}
+      title={story.title.length > 50 ? `${story.title.slice(0, 50)}...` : story.title}
+      subtitle={
+        getPointsFromContent(story.content_html) ? `${getPointsFromContent(story.content_html)} Points` : undefined
+      }
+      tooltip={`${readStories.has(story.external_url) ? "" : "(unread) "}${story.title}`}
+      shortcut={getShortcut(index)}
+      onAction={() => {
+        readStories.add(story.external_url);
+        cache.set(readKey, JSON.stringify(Array.from(readStories)));
+        // force update the icon
+        setStories((prev) => structuredClone(prev));
+        open(story.external_url);
+      }}
+    />
+  ));
+};

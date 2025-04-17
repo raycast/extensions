@@ -1,6 +1,11 @@
 # G-Cloud Changelog
 
-## [0.1.30] - {MERGE_DATE}
+## [0.1.31] - {MERGE_DATE}
+- feature: Commands for each service.
+- feature: QuickSwitcher, quick switch between projects inside same service.
+- fix: Storage Service now retrieves folders and sub-folders.
+
+## [0.1.30] - 2025-02-10
 - fix: SDK path now is not using Homebrew default path, allowing users to have full control.
 
 ## [0.1.29] - 2025-02-04

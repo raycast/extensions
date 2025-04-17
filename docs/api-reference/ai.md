@@ -186,6 +186,8 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 | Google_Gemini_2.0_Flash_Thinking  | Gemini 2.0 Flash Thinking is an experimental model that generates its internal reasoning process, enabling stronger analytical capabilities                                                                                  |
 | DeepSeek_R1                       | Fully open-source model with performance on par with OpenAI-o1                                                                                                                                                               |
 | DeepSeek_V3                       | Mixture-of-Experts model challenging top AI models                                                                                                                                                                           |
+| xAI_Grok_3                        | Grok-3 is xAI's flagship model that excels at enterprise use cases like data extraction, coding, and text summarization. Always uses fast-mode                                                                               |
+| xAI_Grok_3_Mini                   | Grok-3 Mini is xAI's lightweight model that thinks before responding. Fast, smart, and great for logic-based tasks that do not require deep domain knowledge. Always uses fast-mode                                          |
 | xAI_Grok_2                        | Grok-2 is xAI's frontier language model with state-of-the-art reasoning capabilities                                                                                                                                         |
 
 If a model isn't available to the user, Raycast will fallback to a similar one:
@@ -198,6 +200,7 @@ If a model isn't available to the user, Raycast will fallback to a similar one:
 - `AI.Model["Llama3.1_405B"]` -> `AI.Model["Llama3.3_70B"]`
 - `AI.Model.DeepSeek_R1` -> `AI.Model["DeepSeek_R1_Distill_Llama_3.3_70B"]`
 - `AI.Model.xAI_Grok_2` -> `AI.Model["OpenAI_GPT4o-mini"]`
+- `AI.Model.xAI_Grok_3` -> `AI.Model.xAI_Grok_3_Mini`
 - `AI.Model["Google_Gemini_2.5_Pro"]` -> `AI.Model["Google_Gemini_2.0_Flash"]`
 
 ### AI.AskOptions

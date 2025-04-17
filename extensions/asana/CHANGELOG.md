@@ -1,5 +1,10 @@
 # Asana Changelog
 
+## [Auto-close window after task creation & configuration modernization] - 2025-04-16
+
+- Introduced a preference to automatically close the Raycast window and show a HUD notification after creating a task, streamlining the workflow.
+- Modernized the extension by adopting the latest configuration standards for improved maintainability and compatibility.
+
 ## [Add option to hide the "Start Date" field] - 2025-02-12
 
 - Add a preference to allow the user to hide the `Start Date` field in the `Create Task` command

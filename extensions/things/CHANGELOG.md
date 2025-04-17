@@ -1,5 +1,13 @@
 # Things Changelog
 
+## [✨ Menu Bar Todo] - 2025-04-14
+
+- Update the menu bar to display only incomplete todos from today’s list
+
+## [Detect URL in Notes] - 2025-04-11
+
+- Detect a URL in todo notes and offer `Open URL From Notes` and `Copy URL From Notes` actions.
+
 ## [✨ Improved Error Handling] - 2025-04-07
 
 - Fixed an issue that caused the application to crash when users attempted to update a todo item from the menu bar without a valid authentication token.
