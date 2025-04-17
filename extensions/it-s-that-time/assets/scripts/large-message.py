@@ -39,15 +39,25 @@ class MainWindow(QMainWindow):
     def center_window_on_mouse(self):
         mouse_x, mouse_y = pyautogui.position()
 
-        monitors = get_monitors()
+        try:
+            monitors = get_monitors()
+        except Exception as e:
+            print(f"Error getting monitor info: {e}")
+            sys.exit(1)
 
+        found = false
         for monitor in monitors:
             if monitor.x <= mouse_x <= monitor.x + monitor.width and monitor.y <= mouse_y <= monitor.y + monitor.height:
+                found = true
                 screen_width = monitor.width
                 screen_height = monitor.height
                 screen_x = monitor.x
                 screen_y = monitor.y
                 break
+        
+        if !found:
+            print(f"Error: Not Found Activee Monitor")
+            sys.exit(1)
 
         window_x = screen_x + (screen_width // 2) - (self.window_width // 2)
         window_y = screen_y + (screen_height // 2) - (self.window_height // 2)
