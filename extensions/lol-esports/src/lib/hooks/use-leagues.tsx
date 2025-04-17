@@ -11,7 +11,7 @@ export function useLeagues() {
   };
 }
 
-interface LeaguesResponse {
+export interface LeaguesResponse {
   data: {
     leagues: League[];
   };
