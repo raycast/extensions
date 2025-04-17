@@ -68,7 +68,7 @@ export class Arena {
     this.headers = {
       Accept: "*/*",
       "Content-Type": "application/json",
-      "User-Agent": `Are.na Extension /Raycast/${environment.raycastVersion} (${os.type()} ${os.release()}`,
+      "User-Agent": `Are.na Extension /Raycast/${environment.raycastVersion} (${os.type()} ${os.release()})`,
     };
 
     if (config.accessToken) {
