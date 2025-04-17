@@ -151,35 +151,13 @@
       "default": true
     },
     {
-      "name": "timeEntriesLookbackNumber",
+      "name": "timeEntriesLookbackDays",
       "type": "textfield",
       "required": false,
-      "title": "Time Entries Lookback Amount",
-      "description": "Number of time units to look back when fetching time entries",
-      "placeholder": "Enter a number (e.g. 2)",
-      "default": "1"
-    },
-    {
-      "name": "timeEntriesLookbackUnit",
-      "type": "dropdown",
-      "required": false,
-      "title": "Time Entries Lookback Unit",
-      "description": "Time unit to use for lookback period",
-      "data": [
-        {
-          "title": "Days",
-          "value": "day"
-        },
-        {
-          "title": "Weeks",
-          "value": "week"
-        },
-        {
-          "title": "Months",
-          "value": "month"
-        }
-      ],
-      "default": "week"
+      "title": "Time Entries Lookback Days",
+      "description": "Number of days to look back when fetching time entries (default: 14, max: 60)",
+      "placeholder": "Enter a number between 1-60",
+      "default": "14"
     }
   ],
   "dependencies": {

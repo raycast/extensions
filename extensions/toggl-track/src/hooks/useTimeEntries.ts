@@ -2,14 +2,14 @@ import dayjs from "dayjs";
 import { useRef } from "react";
 
 import { getMyTimeEntries } from "@/api";
-import { timeEntriesLookbackNumber, timeEntriesLookbackUnit } from "@/helpers/preferences";
+import { timeEntriesLookbackDays } from "@/helpers/preferences";
 import { useSafeCachedPromise } from "@/hooks/useSafeCachedPromise";
 
 export function useTimeEntries() {
-  const lookbackNumber = timeEntriesLookbackNumber || 2;
-  const lookbackUnit = timeEntriesLookbackUnit || "week";
+  // Use timeEntriesLookbackDays with default of 14 days, limited to 60 days maximum
+  const lookbackDays = Math.min(timeEntriesLookbackDays || 14, 60);
 
-  const startDateRef = useRef(dayjs().subtract(lookbackNumber, lookbackUnit).toDate());
+  const startDateRef = useRef(dayjs().subtract(lookbackDays, "day").toDate());
   const { data, error, isLoading, revalidate, mutate } = useSafeCachedPromise(
     () => getMyTimeEntries({ startDate: startDateRef.current, endDate: dayjs().toDate(), includeMetadata: true }),
     [],

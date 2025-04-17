@@ -7,8 +7,7 @@ export const {
   showProjectsInForm,
   showTasksInForm,
   showTagsInForm,
-  timeEntriesLookbackNumber,
-  timeEntriesLookbackUnit,
+  timeEntriesLookbackDays,
 } = preferences;
 
 interface Preferences {
@@ -17,6 +16,5 @@ interface Preferences {
   showProjectsInForm: boolean;
   showTasksInForm: boolean;
   showTagsInForm: boolean;
-  timeEntriesLookbackNumber: number;
-  timeEntriesLookbackUnit: "day" | "week" | "month";
+  timeEntriesLookbackDays: number;
 }
