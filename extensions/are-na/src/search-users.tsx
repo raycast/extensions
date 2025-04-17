@@ -49,6 +49,12 @@ export default function Command(props: LaunchProps<{ arguments: SearchArguments 
   );
 
   return (
-    <List isLoading={isLoading}>{data?.users.map((block, index) => <BlockListItem user={block} key={index} />)}</List>
+    <List isLoading={isLoading} searchBarPlaceholder="Search users...">
+      {data?.users.length === 0 ? (
+        <List.EmptyView title="No users found" description="Try a different search term" />
+      ) : (
+        data?.users.map((block, index) => <BlockListItem user={block} key={index} />)
+      )}
+    </List>
   );
 }
