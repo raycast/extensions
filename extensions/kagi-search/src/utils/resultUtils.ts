@@ -1,4 +1,4 @@
-import { Icon } from "@raycast/api";
+import { getPreferenceValues, Icon } from "@raycast/api";
 import { SearchResult } from "./types";
 
 export const getIcon = (item: SearchResult) => {
@@ -14,3 +14,5 @@ export const getIcon = (item: SearchResult) => {
     return Icon.MagnifyingGlass;
   }
 };
+
+export const apiEnabled = getPreferenceValues()["useApiForSearch"] && getPreferenceValues()["apiKey"].length > 0;
