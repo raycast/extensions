@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "holidays",
+  "title": "Holidays",
+  "description": "Lookup holidays for a country or region (if applicable)",
+  "icon": "calendar-icon.png",
+  "author": "YourMCGeek",
+  "contributors": [
+    "rodrigouroz"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "upcoming-holidays",
+      "title": "List Upcoming Holidays",
+      "description": "Allows you to see the upcoming holidays for a country and region (if applicable)",
+      "mode": "view"
+    },
+    {
+      "name": "all-holidays",
+      "title": "List All Holidays",
+      "description": "Allows you to see all the holidays, past and future, for a country and region (if applicable)",
+      "mode": "view"
+    },
+    {
+      "name": "past-holidays",
+      "title": "List Past Holidays",
+      "description": "Allows you to see all the past holidays for a country and region (if applicable)",
+      "mode": "view"
+    },
+    {
+      "name": "today-holidays",
+      "title": "List Today's Holidays",
+      "description": "Allows you to see all holidays happening today for a country and region (if applicable)",
+      "mode": "view"
+    },
+    {
+      "name": "pinned-locations",
+      "title": "List Pinned Location Holidays",
+      "description": "Allows you to see all upcoming holidays happening in your pinned locations",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.95.0",
+    "@raycast/utils": "^1.19.1",
+    "country-locale-map": "^1.9.9",
+    "date-holidays": "^3.24.1",
+    "moment": "^2.30.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.14.1",
+    "@types/react": "19.1.1",
+    "eslint": "^9.24.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
