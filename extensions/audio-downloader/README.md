@@ -1,4 +1,4 @@
-# Video Downloader
+# Audio Downloader
 
 > Download videos from YouTube, Twitter, Twitch, Instagram, Bilibili and more using yt-dlp CLI
 
