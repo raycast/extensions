@@ -14,7 +14,7 @@ export interface BrowserBookmark {
   folder: string;
 }
 
-export type RankingDatas = Record<
+export type RankingEntries = Record<
   string,
   {
     keyword: string;

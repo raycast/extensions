@@ -3,16 +3,16 @@ import { BookmarkItemActionPanel } from "./BookmarkItemActionPanel";
 import { RouterOutputs } from "../utils/trpc.util";
 import { getFavicon } from "@raycast/utils";
 import { useMemo } from "react";
-import { RankingDatas } from "../types";
+import { RankingEntries } from "../types";
 
 export const BookmarkItem = (props: {
   bookmark: RouterOutputs["bookmark"]["listAll"][number];
   me?: RouterOutputs["user"]["me"];
   refetch: () => void;
-  rankingDatas: RankingDatas;
-  setRankingDatas: (rankingDatas: RankingDatas | ((prev: RankingDatas) => RankingDatas)) => void;
+  rankingEntries: RankingEntries;
+  setRankingEntries: (rankingEntries: RankingEntries | ((prev: RankingEntries) => RankingEntries)) => void;
 }) => {
-  const { bookmark, me, refetch, setRankingDatas, rankingDatas } = props;
+  const { bookmark, me, refetch, rankingEntries, setRankingEntries } = props;
   const { name, url, spaceId, tags } = bookmark;
   const space = me?.associatedSpaces.find((s) => s.id === spaceId);
 
@@ -44,11 +44,10 @@ export const BookmarkItem = (props: {
       actions={
         <BookmarkItemActionPanel
           bookmark={bookmark}
-          toggleBookmarkDetail={() => {}}
           me={me}
           refetch={refetch}
-          rankingDatas={rankingDatas}
-          setRankingDatas={setRankingDatas}
+          rankingEntries={rankingEntries}
+          setRankingEntries={setRankingEntries}
         />
       }
     />

@@ -1,13 +1,13 @@
 import fuzzysort from "fuzzysort";
-import { Bookmark, RankingDatas } from "../types";
+import { Bookmark, RankingEntries } from "../types";
 import { useMemo } from "react";
 import { PreparedBookmark } from "./use-prepare-bookmark-search.hook";
 
 // Maximum number of search results
 const MAX_SEARCH_RESULTS = 30;
 
-// Weight for ranking data influence (configurable)
-const RANKING_DATA_WEIGHT = 0.08;
+// Weight for ranking entry influence (configurable)
+const RANKING_ENTRY_WEIGHT = 0.08;
 
 /**
  * Function to calculate ranking score boost for a bookmark
@@ -15,22 +15,21 @@ const RANKING_DATA_WEIGHT = 0.08;
 function calculateRankingScoreBoost(params: {
   bookmark: Bookmark;
   keyword: string;
-  rankingDatas: RankingDatas;
+  rankingEntries: RankingEntries;
 }): number {
-  const { bookmark, keyword, rankingDatas } = params;
+  const { bookmark, keyword, rankingEntries } = params;
 
-  // Check if the bookmark exists in ranking data
-  const rankingData = rankingDatas[bookmark.id];
-  if (!rankingData) return 0;
+  // Check if the bookmark exists in ranking entries
+  const rankingEntry = rankingEntries[bookmark.id];
+  if (!rankingEntry) return 0;
 
-  // Find the matching ranking entry for the keyword
-  const matchings = rankingData.filter((e) => e.keyword.startsWith(keyword));
+  const matchings = rankingEntry.filter((e) => e.keyword.startsWith(keyword));
 
   if (matchings.length === 0) return 0;
 
   // Return boosted score based on count and weight
   return matchings.reduce((acc, curr) => {
-    return acc + curr.count * RANKING_DATA_WEIGHT * (keyword.length / curr.keyword.length);
+    return acc + curr.count * RANKING_ENTRY_WEIGHT * (keyword.length / curr.keyword.length);
   }, 0);
 }
 
@@ -69,9 +68,9 @@ function searchByField(params: {
 function combineSearchResults(params: {
   searchResults: Array<Array<{ item: Bookmark; score: number }>>;
   keyword: string;
-  rankingDatas: RankingDatas;
+  rankingEntries: RankingEntries;
 }) {
-  const { searchResults, keyword, rankingDatas } = params;
+  const { searchResults, keyword, rankingEntries } = params;
 
   // Combine all search results into a single array
   const allMatches = searchResults.flat();
@@ -90,7 +89,7 @@ function combineSearchResults(params: {
       rankingBoost = calculateRankingScoreBoost({
         bookmark: match.item,
         keyword,
-        rankingDatas,
+        rankingEntries,
       });
     }
 
@@ -115,9 +114,9 @@ function processSearchResults(params: {
   keyword: string;
   preparedBookmarks: PreparedBookmark[];
   bookmarks: Bookmark[];
-  rankingDatas: RankingDatas;
+  rankingEntries: RankingEntries;
 }) {
-  const { keyword, preparedBookmarks, bookmarks, rankingDatas } = params;
+  const { keyword, preparedBookmarks, bookmarks, rankingEntries } = params;
 
   const nameMatches = searchByField({ keyword, key: "name", preparedBookmarks, bookmarks });
   const urlMatches = searchByField({ keyword, key: "url", preparedBookmarks, bookmarks });
@@ -130,7 +129,7 @@ function processSearchResults(params: {
   return combineSearchResults({
     searchResults: [filteredNameMatches, filteredUrlMatches],
     keyword,
-    rankingDatas,
+    rankingEntries,
   });
 }
 
@@ -145,13 +144,13 @@ export const useBookmarkSearch = (params: {
   untaggedPrepare: PreparedBookmark[];
   taggedBookmarks: Bookmark[];
   untaggedBookmarks: Bookmark[];
-  rankingDatas: RankingDatas;
+  rankingEntries: RankingEntries;
 }): {
   searchedTaggedList: Bookmark[];
   searchedUntaggedList: Bookmark[];
   hasSearch: boolean;
 } => {
-  const { keyword, taggedPrepare, untaggedPrepare, taggedBookmarks, untaggedBookmarks, rankingDatas } = params;
+  const { keyword, taggedPrepare, untaggedPrepare, taggedBookmarks, untaggedBookmarks, rankingEntries } = params;
 
   return useMemo(() => {
     // Return all bookmarks if no search keyword is provided
@@ -168,7 +167,7 @@ export const useBookmarkSearch = (params: {
       keyword,
       preparedBookmarks: taggedPrepare,
       bookmarks: taggedBookmarks,
-      rankingDatas,
+      rankingEntries,
     });
 
     // Process untagged bookmarks if available
@@ -176,7 +175,7 @@ export const useBookmarkSearch = (params: {
       keyword,
       preparedBookmarks: untaggedPrepare,
       bookmarks: untaggedBookmarks,
-      rankingDatas,
+      rankingEntries,
     });
 
     return {
@@ -184,5 +183,5 @@ export const useBookmarkSearch = (params: {
       searchedUntaggedList: untaggedResults,
       hasSearch: true,
     };
-  }, [keyword, taggedBookmarks, untaggedBookmarks, taggedPrepare, untaggedPrepare, rankingDatas]);
+  }, [keyword, taggedBookmarks, untaggedBookmarks, taggedPrepare, untaggedPrepare, rankingEntries]);
 };

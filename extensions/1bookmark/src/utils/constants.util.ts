@@ -20,4 +20,4 @@ export const CACHED_KEY_RECENT_SELECTED_TAGS = "recent-selected-tags";
 
 export const CACHED_KEY_DISABLED_SPACE_IDS = "disabled-space-ids";
 
-export const CACHED_KEY_RANKING_DATAS = "ranking-datas";
+export const CACHED_KEY_RANKING_ENTRIES = "ranking-entries";

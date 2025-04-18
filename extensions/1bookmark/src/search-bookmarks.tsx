@@ -16,14 +16,14 @@ import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
 import { useEnabledSpaces } from "./hooks/use-enabled-spaces.hook";
 import { cache } from "./utils/cache.util";
 import { useCachedState } from "@raycast/utils";
-import { CACHED_KEY_RANKING_DATAS } from "./utils/constants.util";
-import { RankingDatas } from "./types";
+import { CACHED_KEY_RANKING_ENTRIES } from "./utils/constants.util";
+import { RankingEntries } from "./types";
 
 export function Body() {
   const me = useMe();
   const { enabledSpaceIds } = useEnabledSpaces();
   const { data, isFetching, isFetched, refetch: refetchBookmarks } = useMyBookmarks();
-  const [rankingDatas, setRankingDatas] = useCachedState<RankingDatas>(CACHED_KEY_RANKING_DATAS, {});
+  const [rankingEntries, setRankingEntries] = useCachedState<RankingEntries>(CACHED_KEY_RANKING_ENTRIES, {});
 
   const [keyword, setKeyword] = useState("");
   useEffect(() => {
@@ -61,7 +61,7 @@ export function Body() {
     untaggedPrepare: filteredData.filteredUntaggedPreparedBookmarks,
     taggedBookmarks: preparedData.taggedBookmarks,
     untaggedBookmarks: preparedData.untaggedBookmarks,
-    rankingDatas,
+    rankingEntries,
   });
 
   const { loggedOutStatus } = useLoggedOutStatus();
@@ -145,8 +145,8 @@ export function Body() {
               bookmark={item}
               me={me.data}
               refetch={refetch}
-              rankingDatas={rankingDatas}
-              setRankingDatas={setRankingDatas}
+              rankingEntries={rankingEntries}
+              setRankingEntries={setRankingEntries}
             />
           ))}
         </List.Section>
@@ -160,8 +160,8 @@ export function Body() {
               bookmark={item}
               me={me.data}
               refetch={refetch}
-              rankingDatas={rankingDatas}
-              setRankingDatas={setRankingDatas}
+              rankingEntries={rankingEntries}
+              setRankingEntries={setRankingEntries}
             />
           ))}
         </List.Section>

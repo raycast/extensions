@@ -5,7 +5,7 @@ import { Spaces } from "@/views/SpacesView";
 import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard } from "@raycast/api";
 import AddBookmark from "../add-bookmark";
 import { cache } from "../utils/cache.util";
-import { RankingDatas } from "../types";
+import { RankingEntries } from "../types";
 
 export const RequiredActions = (props: { refetch: () => void }) => {
   const { refetch } = props;
@@ -47,12 +47,11 @@ export const RequiredActions = (props: { refetch: () => void }) => {
 export const BookmarkItemActionPanel = (props: {
   bookmark: RouterOutputs["bookmark"]["listAll"][number];
   me: RouterOutputs["user"]["me"] | undefined;
-  toggleBookmarkDetail: () => void;
   refetch: () => void;
-  rankingDatas: RankingDatas;
-  setRankingDatas: (rankingDatas: RankingDatas | ((prev: RankingDatas) => RankingDatas)) => void;
+  rankingEntries: RankingEntries;
+  setRankingEntries: (rankingEntries: RankingEntries | ((prev: RankingEntries) => RankingEntries)) => void;
 }) => {
-  const { bookmark, me, refetch, setRankingDatas, rankingDatas } = props;
+  const { bookmark, me, refetch, setRankingEntries, rankingEntries } = props;
   const { url } = bookmark;
 
   const spaceIds = me?.associatedSpaces.map((s) => s.id) || [];
@@ -91,10 +90,10 @@ export const BookmarkItemActionPanel = (props: {
 
     if (!confirmed) return;
 
-    setRankingDatas((prev) => {
-      const newRankingDatas = { ...prev };
-      delete newRankingDatas[bookmark.id];
-      return newRankingDatas;
+    setRankingEntries((prev) => {
+      const newRankingEntries = { ...prev };
+      delete newRankingEntries[bookmark.id];
+      return newRankingEntries;
     });
   };
 
@@ -117,7 +116,7 @@ export const BookmarkItemActionPanel = (props: {
             },
           });
 
-          setRankingDatas((prev) => {
+          setRankingEntries((prev) => {
             const existing = prev[bookmark.id];
             if (!existing) {
               return {
@@ -162,9 +161,6 @@ export const BookmarkItemActionPanel = (props: {
         target={<CopyBookmarkToOtherSpace bookmark={bookmark} />}
       /> */}
 
-      {/* TODO: Add this feature later */}
-      {/* <Action title="Show/hide Detail" icon="ℹ️" onAction={toggleBookmarkDetail} /> */}
-
       <Action.Push
         title="Edit Bookmark"
         icon={Icon.Pencil}
@@ -172,7 +168,7 @@ export const BookmarkItemActionPanel = (props: {
         target={<EditBookmark bookmark={bookmark} refetch={refetch} />}
       />
 
-      {rankingDatas[bookmark.id] && rankingDatas[bookmark.id].length > 0 && (
+      {rankingEntries[bookmark.id] && rankingEntries[bookmark.id].length > 0 && (
         <Action
           title={"Reset Ranking"}
           icon={Icon.ArrowCounterClockwise}
