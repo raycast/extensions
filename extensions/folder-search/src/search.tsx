@@ -7,22 +7,19 @@ import {
   List,
   closeMainWindow,
   popToRoot,
-  confirmAlert,
   open,
-  getSelectedFinderItems,
   Keyboard,
   LaunchProps,
 } from "@raycast/api";
-import { folderName, copyFolderToClipboard, maybeMoveResultToTrash, log } from "./utils";
+import { folderName, copyFolderToClipboard, maybeMoveResultToTrash } from "./utils";
 import { runAppleScript } from "run-applescript";
 import { SpotlightSearchResult } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
+import { useCommandBase } from "./hooks/useCommandBase";
+import { moveFinderItems } from "./moveUtils";
 import { FolderListSection, Directory } from "./components";
 import path from "node:path";
-import fse from "fs-extra";
 import { userInfo } from "os";
-import { showFailureToast } from "@raycast/utils";
-import { useEffect, useRef } from "react";
 
 // allow string indexing on Icons
 interface IconDictionary {
@@ -53,85 +50,13 @@ export default function Command(props: LaunchProps) {
     hasCheckedPreferences,
   } = useFolderSearch();
 
-  // Handle fallback text from root search
-  const fallbackTextRef = useRef<string | undefined>(undefined);
-  const fallbackTextProcessedRef = useRef<boolean>(false);
-  
-  useEffect(() => {
-    // Only process fallbackText once per session
-    if (props.fallbackText && !fallbackTextProcessedRef.current) {
-      log("debug", "search", "Processing fallback text", {
-        fallbackText: props.fallbackText,
-        component: "search",
-        timestamp: new Date().toISOString(),
-      });
-      
-      fallbackTextRef.current = props.fallbackText;
-      fallbackTextProcessedRef.current = true;
-      setSearchText(props.fallbackText);
-    }
-  }, [props.fallbackText]);
-
-  // Log launch type for debugging
-  const hasLoggedLaunchRef = useRef<boolean>(false);
-  
-  useEffect(() => {
-    if (!hasLoggedLaunchRef.current) {
-      log("debug", "search", "Command launched", {
-        launchType: props.launchType,
-        fallbackText: props.fallbackText,
-        searchText,
-        component: "search",
-        timestamp: new Date().toISOString(),
-      });
-      hasLoggedLaunchRef.current = true;
-    }
-  }, [props.launchType, props.fallbackText, searchText]);
-
-  const sendFinderSelectionToFolder = async (destinationFolder: string) => {
-    const selectedItems = await getSelectedFinderItems();
-
-    if (selectedItems.length === 0) {
-      await showFailureToast({ title: "No Finder selection to send" });
-      return;
-    }
-
-    for (const item of selectedItems) {
-      const sourceFileName = path.basename(item.path);
-      const destinationFile = path.join(destinationFolder, sourceFileName);
-
-      try {
-        const exists = await fse.pathExists(destinationFile);
-        if (exists) {
-          const overwrite = await confirmAlert({
-            title: "Overwrite the existing file?",
-            message: sourceFileName + " already exists in " + destinationFolder,
-          });
-
-          if (overwrite) {
-            if (item.path === destinationFile) {
-              await showFailureToast({ title: "The source and destination file are the same" });
-              continue;
-            }
-            fse.moveSync(item.path, destinationFile, { overwrite: true });
-            await showFailureToast({ title: `Moved ${path.basename(item.path)} to ${destinationFolder}` });
-          } else {
-            await showFailureToast({ title: "Cancelling move" });
-          }
-        } else {
-          fse.moveSync(item.path, destinationFile);
-          await showFailureToast({ title: `Moved ${sourceFileName} to ${destinationFolder}` });
-        }
-
-        open(destinationFolder);
-      } catch (e) {
-        await showFailureToast(e, { title: "Error moving file" });
-      }
-    }
-
-    closeMainWindow();
-    popToRoot({ clearSearchBar: true });
-  };
+  // Use the shared command base hook
+  useCommandBase({
+    commandName: "search",
+    launchProps: props,
+    searchText,
+    setSearchText,
+  });
 
   // Render actions for the folder list items
   const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number) => {
@@ -148,7 +73,14 @@ export default function Command(props: LaunchProps) {
           title="Move Finder Selection"
           icon={Icon.NewFolder}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-          onAction={() => sendFinderSelectionToFolder(result.path)}
+          onAction={async () => {
+            const moveResult = await moveFinderItems(result.path);
+            if (moveResult.success) {
+              open(result.path);
+              closeMainWindow();
+              popToRoot({ clearSearchBar: true });
+            }
+          }}
         />
         <Action.OpenWith
           title="Open With…"
@@ -272,7 +204,6 @@ export default function Command(props: LaunchProps) {
   ) : (
     <List
       isLoading={isQuerying}
-      enableFiltering={false}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search folders"
       isShowingDetail={isShowingDetail}
