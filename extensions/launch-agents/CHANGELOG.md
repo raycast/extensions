@@ -1,5 +1,7 @@
 # Launch Agents Extension Changelog
 
+## [Add non existing file exception handler] - {PR_MERGE_DATE}
+
 ## [Add open file exception handler] - 2024-10-22
 
 ## [Add actions to list system and loaded lanch agents] - 2024-09-01

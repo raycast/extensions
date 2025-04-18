@@ -14,6 +14,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { execSync } from "child_process";
+import fs from "fs";
 import { useEffect, useState } from "react";
 import {
   getLaunchAgentRecurrence,
@@ -23,7 +24,6 @@ import {
   unloadLaunchAgent,
 } from "../lib/plist";
 import { getFileName } from "../lib/utils";
-
 export default function LaunchAgentDetails({
   selectedFile,
   refreshList,
@@ -33,9 +33,22 @@ export default function LaunchAgentDetails({
 }) {
   const { pop } = useNavigation();
   const [isFileLoaded, setIsFileLoaded] = useState<boolean>(false);
+  const fileExists = fs.existsSync(selectedFile);
 
-  const fileName = getFileName(selectedFile);
+  useEffect(() => {
+    if (!fileExists) {
+      showToast(Toast.Style.Failure, "File Not Found", "The selected launch agent file does not exist.");
+      refreshList();
+      pop();
+    }
+  }, [fileExists, pop, refreshList]);
+
+  if (!fileExists) {
+    return null;
+  }
+
   const isFileValid = isLaunchAgentOK(selectedFile);
+  const fileName = getFileName(selectedFile);
   const recurrence = getLaunchAgentRecurrence(selectedFile);
 
   const markdown = `
