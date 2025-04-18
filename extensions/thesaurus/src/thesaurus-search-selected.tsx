@@ -26,8 +26,5 @@ export default function ThesaurusSelected() {
   if (selectedText && selectedText.trim().length > 0) {
     return <LookUpView selectedWord={selectedText} />;
   }
-
-  if (!selectedText) {
-    return null;
-  }
+  return null;
 }
