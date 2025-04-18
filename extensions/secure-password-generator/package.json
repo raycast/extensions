@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "secure-password-generator",
-  "title": "secure-password-generator",
+  "title": "Secure Password Generator",
   "description": "Generate secure passwords with customizable options for length, numbers, uppercase letters, and special characters.",
   "icon": "secure-password-generator.png",
   "author": "chanwon",
