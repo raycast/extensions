@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "generate-password",
-      "title": "generate password",
-      "description": "generate password",
+      "title": "Generate Password",
+      "description": "Generate a secure password with customizable options",
       "mode": "view"
     }
   ],
