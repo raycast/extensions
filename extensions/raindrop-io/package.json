@@ -14,7 +14,7 @@
     "j3lte",
     "rien7",
     "teziovsky",
-    "peteroltmann"
+    "pewpeo"
   ],
   "license": "MIT",
   "commands": [
@@ -65,6 +65,14 @@
       "description": "Search on title only.",
       "default": false,
       "label": "Search on title only"
+    },
+    {
+      "name": "fetchAllResults",
+      "type": "checkbox",
+      "required": false,
+      "description": "Fetch all results. Perform multiple API requests for each result page. Disable to retrieve only the first page.",
+      "default": false,
+      "label": "Fetch all results"
     },
     {
       "name": "sortBy",
