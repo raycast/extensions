@@ -1,5 +1,5 @@
 export interface PasswordForm {
-  length: string;
+  length: number;
   useNumbers: boolean;
   useUpper: boolean;
   useChars: boolean;
