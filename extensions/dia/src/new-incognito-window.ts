@@ -1,4 +1,4 @@
-import { closeMainWindow, showHUD } from "@raycast/api";
+import { closeMainWindow } from "@raycast/api";
 import { createNewIncognitoWindow } from "./scripts";
 
 export default async function Command() {

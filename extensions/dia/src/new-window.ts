@@ -1,4 +1,4 @@
-import { closeMainWindow, showHUD } from "@raycast/api";
+import { closeMainWindow } from "@raycast/api";
 import { createNewWindow } from "./scripts";
 
 interface Arguments {
