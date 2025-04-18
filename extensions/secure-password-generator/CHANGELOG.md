@@ -1,6 +1,6 @@
 # Password Generator - Changelog
 
-## [Initial Version] - 2025-04-18
+## [Initial Version] - {PR_MERGE_DATE}
 - Initial release.
 - Generates secure passwords based on customizable options (length, numbers, uppercase letters, special characters).
 - Ensures a minimum entropy threshold for strong password security.
