@@ -45,10 +45,10 @@ function SlotListItem(props: { slot: QueueSlot; slots: QueueSlot[]; mutate: Muta
 
   const detailAction = <Action.Push title="Details" icon={Icon.Document} target={<Details slot={slot} />} />;
 
-  const first = slot.index == 0;
-  const last = slot.index == noOfSlots;
+  const first = slot.index === 0;
+  const last = slot.index === noOfSlots;
 
-  const moveUpAction = <Action title="Move up" onAction={() => onMoveUp(slot, slots, mutate)} icon={Icon.ArrowUp} />;
+  const moveUpAction = <Action title="Move Up" onAction={() => onMoveUp(slot, slots, mutate)} icon={Icon.ArrowUp} />;
   const moveDownAction = (
     <Action title="Move Down" onAction={() => onMoveDown(slot, slots, mutate)} icon={Icon.ArrowDown} />
   );
