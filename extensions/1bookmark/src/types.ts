@@ -14,5 +14,13 @@ export interface BrowserBookmark {
   folder: string;
 }
 
+export type RankingDatas = Record<
+  string,
+  {
+    keyword: string;
+    count: number;
+  }[]
+>;
+
 export type Bookmark = RouterOutputs["bookmark"]["listAll"][number];
 export type Tag = RouterOutputs["tag"]["list"][number];

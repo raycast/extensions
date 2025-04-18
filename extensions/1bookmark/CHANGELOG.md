@@ -1,5 +1,10 @@
 # 1bookmark Changelog
 
+## [Index Ranking System] - {PR_MERGE_DATE}
+
+- 0.10.0
+- 📱 Index ranking is now available. It boosts bookmarks that are more relevant to the search keyword.
+
 ## [Per-Device Enable/Disable Spaces] - 2025-04-08
 
 - 0.9.0
