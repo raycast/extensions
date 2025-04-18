@@ -9,7 +9,7 @@ export default async function Command(props: { arguments: Arguments }) {
   try {
     await closeMainWindow();
     await createNewWindow(props.arguments.profile);
-  } catch {
-    await showHUD("❌ Failed opening a new Dia window");
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not open a new Dia window" });
   }
 }
