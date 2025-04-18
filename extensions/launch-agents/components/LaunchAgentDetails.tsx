@@ -13,6 +13,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execSync } from "child_process";
 import fs from "fs";
 import { useEffect, useState } from "react";
@@ -37,7 +38,7 @@ export default function LaunchAgentDetails({
 
   useEffect(() => {
     if (!fileExists) {
-      showToast(Toast.Style.Failure, "File Not Found", "The selected launch agent file does not exist.");
+      showFailureToast("The selected launch agent file does not exist.", { title: "File Not Found" });
       refreshList();
       pop();
     }
@@ -138,10 +139,7 @@ export default function LaunchAgentDetails({
       await open(selectedFile, "code");
     } catch (e: unknown) {
       captureException(e);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: `Could not open file in ${app}.`,
-      });
+      showFailureToast(e, { title: `Could not open file in ${app}` });
     }
   };
 
