@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [AI-Powered Emoji Search] - 2025-04-16
+## [AI-Powered Emoji Search] - {PR_MERGE_DATE}
 
 - Enhanced the `Search Emojis` command with AI-powered search: If you can't find an emoji by name, describe what you're looking for and AI will suggest the most relevant Slack emojis.
 
