@@ -46,7 +46,7 @@ export async function handleSubmit(values: PasswordForm) {
   const entropy = calculateEntropy(generatedPassword, charsetSize);
 
   if (entropy < MIN_ENTROPY_BITS) {
-    await showToast(Toast.Style.Success, "Copied, but consider using a stronger password!", generatedPassword);
+    await showToast(Toast.Style.Warning, "Copied, but consider using a stronger password!", generatedPassword);
   }
 }
 
