@@ -20,7 +20,7 @@ import { FolderListSection, Directory } from "./components";
 import path from "node:path";
 import fse from "fs-extra";
 import { userInfo } from "os";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export default function Command(props: LaunchProps) {
   const {
@@ -40,19 +40,38 @@ export default function Command(props: LaunchProps) {
   } = useFolderSearch();
 
   // Handle fallback text from root search
+  const fallbackTextRef = useRef<string | undefined>(undefined);
+  const fallbackTextProcessedRef = useRef<boolean>(false);
+  
   useEffect(() => {
-    if (props.fallbackText) {
+    // Only process fallbackText once per session
+    if (props.fallbackText && !fallbackTextProcessedRef.current) {
+      log("debug", "move", "Processing fallback text", {
+        fallbackText: props.fallbackText,
+        component: "move",
+        timestamp: new Date().toISOString(),
+      });
+      
+      fallbackTextRef.current = props.fallbackText;
+      fallbackTextProcessedRef.current = true;
       setSearchText(props.fallbackText);
     }
   }, [props.fallbackText]);
 
   // Log launch type for debugging
+  const hasLoggedLaunchRef = useRef<boolean>(false);
+  
   useEffect(() => {
-    log("debug", "move", "Command launched", {
-      launchType: props.launchType,
-      fallbackText: props.fallbackText,
-      searchText,
-    });
+    if (!hasLoggedLaunchRef.current) {
+      log("debug", "move", "Command launched", {
+        launchType: props.launchType,
+        fallbackText: props.fallbackText,
+        searchText,
+        component: "move",
+        timestamp: new Date().toISOString(),
+      });
+      hasLoggedLaunchRef.current = true;
+    }
   }, [props.launchType, props.fallbackText, searchText]);
 
   // Function to move selected Finder items to the selected folder

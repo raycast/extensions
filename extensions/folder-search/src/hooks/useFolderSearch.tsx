@@ -92,14 +92,57 @@ export function useFolderSearch() {
   }, [searchText, searchScope, pinnedResults, hasCheckedPlugins, hasCheckedPreferences]);
 
   // check plugins
+  const pluginsRef = useRef<FolderSearchPlugin[]>([]);
+  const isLoadingPluginsRef = useRef<boolean>(false);
+  
   usePromise(
     async () => {
-      const plugins = await loadPlugins();
-      setPlugins(plugins);
+      // Return cached plugins if available
+      if (pluginsRef.current.length > 0) {
+        log("debug", "useFolderSearch", "Using cached plugins", {
+          count: pluginsRef.current.length,
+          component: "useFolderSearch",
+          timestamp: new Date().toISOString(),
+        });
+        return pluginsRef.current;
+      }
+      
+      // If already loading, wait for the existing call to complete
+      if (isLoadingPluginsRef.current) {
+        log("debug", "useFolderSearch", "Plugin loading already in progress", {
+          component: "useFolderSearch",
+          timestamp: new Date().toISOString(),
+        });
+        
+        // Wait for the current loading process to complete
+        while (isLoadingPluginsRef.current) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        // Return the cached plugins after waiting
+        if (pluginsRef.current.length > 0) {
+          return pluginsRef.current;
+        }
+      }
+      
+      // Set loading flag and load plugins
+      isLoadingPluginsRef.current = true;
+      try {
+        log("debug", "useFolderSearch", "Loading plugins from loadPlugins", {
+          component: "useFolderSearch",
+          timestamp: new Date().toISOString(),
+        });
+        const plugins = await loadPlugins();
+        pluginsRef.current = plugins;
+        return plugins;
+      } finally {
+        isLoadingPluginsRef.current = false;
+      }
     },
     [],
     {
-      onData() {
+      onData(plugins) {
+        setPlugins(plugins);
         setHasCheckedPlugins(true);
       },
       onError() {
@@ -110,21 +153,62 @@ export function useFolderSearch() {
   );
 
   // check prefs
+  const prefsRef = useRef<boolean>(false);
+  const isLoadingPrefsRef = useRef<boolean>(false);
+  
   usePromise(
     async () => {
-      const maybePreferences = await LocalStorage.getItem(`${environment.extensionName}-preferences`);
-
-      if (maybePreferences) {
-        try {
-          return JSON.parse(maybePreferences as string);
-        } catch (_) {
-          // noop
+      // Return if preferences already checked
+      if (prefsRef.current) {
+        log("debug", "useFolderSearch", "Preferences already checked", {
+          component: "useFolderSearch",
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+      
+      // If already loading, wait for the existing call to complete
+      if (isLoadingPrefsRef.current) {
+        log("debug", "useFolderSearch", "Preferences loading already in progress", {
+          component: "useFolderSearch",
+          timestamp: new Date().toISOString(),
+        });
+        
+        // Wait for the current loading process to complete
+        while (isLoadingPrefsRef.current) {
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
+        
+        // Return after waiting since preferences should be checked
+        if (prefsRef.current) {
+          return;
+        }
+      }
+      
+      // Set loading flag and load preferences
+      isLoadingPrefsRef.current = true;
+      try {
+        log("debug", "useFolderSearch", "Loading preferences", {
+          component: "useFolderSearch",
+          timestamp: new Date().toISOString(),
+        });
+        const maybePreferences = await LocalStorage.getItem(`${environment.extensionName}-preferences`);
+
+        if (maybePreferences) {
+          try {
+            return JSON.parse(maybePreferences as string);
+          } catch (_) {
+            // noop
+          }
+        }
+      } finally {
+        isLoadingPrefsRef.current = false;
       }
     },
     [],
     {
       onData(preferences) {
+        prefsRef.current = true;
         setPinnedResults(preferences?.pinned || []);
         setSearchScope(preferences?.searchScope || "");
         setIsShowingDetail(preferences?.isShowingDetail);
@@ -132,6 +216,7 @@ export function useFolderSearch() {
         setHasCheckedPreferences(true);
       },
       onError() {
+        prefsRef.current = true;
         showFailureToast({ title: "Could not read preferences" });
         setHasCheckedPreferences(true);
       },

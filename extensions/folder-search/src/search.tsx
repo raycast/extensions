@@ -22,7 +22,7 @@ import path from "node:path";
 import fse from "fs-extra";
 import { userInfo } from "os";
 import { showFailureToast } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 // allow string indexing on Icons
 interface IconDictionary {
@@ -54,19 +54,38 @@ export default function Command(props: LaunchProps) {
   } = useFolderSearch();
 
   // Handle fallback text from root search
+  const fallbackTextRef = useRef<string | undefined>(undefined);
+  const fallbackTextProcessedRef = useRef<boolean>(false);
+  
   useEffect(() => {
-    if (props.fallbackText) {
+    // Only process fallbackText once per session
+    if (props.fallbackText && !fallbackTextProcessedRef.current) {
+      log("debug", "search", "Processing fallback text", {
+        fallbackText: props.fallbackText,
+        component: "search",
+        timestamp: new Date().toISOString(),
+      });
+      
+      fallbackTextRef.current = props.fallbackText;
+      fallbackTextProcessedRef.current = true;
       setSearchText(props.fallbackText);
     }
   }, [props.fallbackText]);
 
   // Log launch type for debugging
+  const hasLoggedLaunchRef = useRef<boolean>(false);
+  
   useEffect(() => {
-    log("debug", "search", "Command launched", {
-      launchType: props.launchType,
-      fallbackText: props.fallbackText,
-      searchText,
-    });
+    if (!hasLoggedLaunchRef.current) {
+      log("debug", "search", "Command launched", {
+        launchType: props.launchType,
+        fallbackText: props.fallbackText,
+        searchText,
+        component: "search",
+        timestamp: new Date().toISOString(),
+      });
+      hasLoggedLaunchRef.current = true;
+    }
   }, [props.launchType, props.fallbackText, searchText]);
 
   const sendFinderSelectionToFolder = async (destinationFolder: string) => {
