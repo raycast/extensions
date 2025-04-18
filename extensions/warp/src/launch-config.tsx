@@ -12,7 +12,7 @@ import {
   VIEW_DOCS_ACTION_TITLE,
   OPEN_CONFIGS_DIR_ACTION_TITLE,
   NO_LAUNCH_CONFIGS_MESSAGE,
-  getAppName
+  getAppName,
 } from "./constants";
 
 interface SearchResult {
