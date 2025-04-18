@@ -1,4 +1,4 @@
-import { Action, Cache, ActionPanel, Icon, List, useNavigation, confirmAlert, Alert } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, useNavigation, confirmAlert, Alert } from "@raycast/api";
 import { trpc } from "@/utils/trpc.util";
 import { CachedQueryClientProvider } from "@/components/CachedQueryClientProvider";
 import { useCachedState } from "@raycast/utils";
@@ -6,8 +6,7 @@ import { EditProfileNameForm } from "./EditProfileNameForm";
 import { useSortedSpaces } from "../hooks/use-sorted-spaces.hook";
 import { useMe } from "../hooks/use-me.hook";
 import { CACHED_KEY_SESSION_TOKEN } from "../utils/constants.util";
-
-export const cache = new Cache();
+import { cache } from "../utils/cache.util";
 
 const Body = () => {
   const { data, isLoading, refetch } = useMe();

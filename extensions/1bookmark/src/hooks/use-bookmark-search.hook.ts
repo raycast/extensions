@@ -1,10 +1,37 @@
 import fuzzysort from "fuzzysort";
-import { Bookmark } from "../types";
+import { Bookmark, RankingEntries } from "../types";
 import { useMemo } from "react";
 import { PreparedBookmark } from "./use-prepare-bookmark-search.hook";
 
 // Maximum number of search results
 const MAX_SEARCH_RESULTS = 30;
+
+// Weight for ranking entry influence (configurable)
+const RANKING_ENTRY_WEIGHT = 0.08;
+
+/**
+ * Function to calculate ranking score boost for a bookmark
+ */
+function calculateRankingScoreBoost(params: {
+  bookmark: Bookmark;
+  keyword: string;
+  rankingEntries: RankingEntries;
+}): number {
+  const { bookmark, keyword, rankingEntries } = params;
+
+  // Check if the bookmark exists in ranking entries
+  const rankingEntry = rankingEntries[bookmark.id];
+  if (!rankingEntry) return 0;
+
+  const matchings = rankingEntry.filter((e) => e.keyword.startsWith(keyword));
+
+  if (matchings.length === 0) return 0;
+
+  // Return boosted score based on count and weight
+  return matchings.reduce((acc, curr) => {
+    return acc + curr.count * RANKING_ENTRY_WEIGHT * (keyword.length / curr.keyword.length);
+  }, 0);
+}
 
 /**
  * Function to search by a single field (name or URL)
@@ -38,7 +65,13 @@ function searchByField(params: {
  * Function to combine search results from multiple fields and remove duplicates
  * Designed to be easily extensible when new fields are added
  */
-function combineSearchResults(...searchResults: Array<Array<{ item: Bookmark; score: number }>>) {
+function combineSearchResults(params: {
+  searchResults: Array<Array<{ item: Bookmark; score: number }>>;
+  keyword: string;
+  rankingEntries: RankingEntries;
+}) {
+  const { searchResults, keyword, rankingEntries } = params;
+
   // Combine all search results into a single array
   const allMatches = searchResults.flat();
 
@@ -49,8 +82,21 @@ function combineSearchResults(...searchResults: Array<Array<{ item: Bookmark; sc
     const id = match.item.id;
     const existingMatch = uniqueMatches.get(id);
 
-    if (!existingMatch || match.score > existingMatch.score) {
-      uniqueMatches.set(id, match);
+    let rankingBoost = 0;
+
+    if (keyword.length > 1) {
+      // Calculate ranking score boost
+      rankingBoost = calculateRankingScoreBoost({
+        bookmark: match.item,
+        keyword,
+        rankingEntries,
+      });
+    }
+
+    const totalScore = match.score + rankingBoost;
+
+    if (!existingMatch || totalScore > existingMatch.score) {
+      uniqueMatches.set(id, { item: match.item, score: totalScore });
     }
   }
 
@@ -68,8 +114,9 @@ function processSearchResults(params: {
   keyword: string;
   preparedBookmarks: PreparedBookmark[];
   bookmarks: Bookmark[];
+  rankingEntries: RankingEntries;
 }) {
-  const { keyword, preparedBookmarks, bookmarks } = params;
+  const { keyword, preparedBookmarks, bookmarks, rankingEntries } = params;
 
   const nameMatches = searchByField({ keyword, key: "name", preparedBookmarks, bookmarks });
   const urlMatches = searchByField({ keyword, key: "url", preparedBookmarks, bookmarks });
@@ -79,7 +126,11 @@ function processSearchResults(params: {
   const filteredUrlMatches = urlMatches.filter((match) => match.score >= 0.25);
 
   // Combine and sort search results (add new fields here when needed)
-  return combineSearchResults(filteredNameMatches, filteredUrlMatches);
+  return combineSearchResults({
+    searchResults: [filteredNameMatches, filteredUrlMatches],
+    keyword,
+    rankingEntries,
+  });
 }
 
 /**
@@ -93,12 +144,13 @@ export const useBookmarkSearch = (params: {
   untaggedPrepare: PreparedBookmark[];
   taggedBookmarks: Bookmark[];
   untaggedBookmarks: Bookmark[];
+  rankingEntries: RankingEntries;
 }): {
   searchedTaggedList: Bookmark[];
   searchedUntaggedList: Bookmark[];
   hasSearch: boolean;
 } => {
-  const { keyword, taggedPrepare, untaggedPrepare, taggedBookmarks, untaggedBookmarks } = params;
+  const { keyword, taggedPrepare, untaggedPrepare, taggedBookmarks, untaggedBookmarks, rankingEntries } = params;
 
   return useMemo(() => {
     // Return all bookmarks if no search keyword is provided
@@ -115,6 +167,7 @@ export const useBookmarkSearch = (params: {
       keyword,
       preparedBookmarks: taggedPrepare,
       bookmarks: taggedBookmarks,
+      rankingEntries,
     });
 
     // Process untagged bookmarks if available
@@ -122,6 +175,7 @@ export const useBookmarkSearch = (params: {
       keyword,
       preparedBookmarks: untaggedPrepare,
       bookmarks: untaggedBookmarks,
+      rankingEntries,
     });
 
     return {
@@ -129,5 +183,5 @@ export const useBookmarkSearch = (params: {
       searchedUntaggedList: untaggedResults,
       hasSearch: true,
     };
-  }, [keyword, taggedBookmarks, untaggedBookmarks, taggedPrepare, untaggedPrepare]);
+  }, [keyword, taggedBookmarks, untaggedBookmarks, taggedPrepare, untaggedPrepare, rankingEntries]);
 };

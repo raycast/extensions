@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Spaces } from "./views/SpacesView";
 import { BookmarkItem } from "./components/BookmarkItem";
@@ -14,13 +14,21 @@ import { useFilterBookmark } from "./hooks/use-filter-bookmark.hook";
 import { RequiredActions } from "./components/BookmarkItemActionPanel";
 import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
 import { useEnabledSpaces } from "./hooks/use-enabled-spaces.hook";
+import { cache } from "./utils/cache.util";
+import { useCachedState } from "@raycast/utils";
+import { CACHED_KEY_RANKING_ENTRIES } from "./utils/constants.util";
+import { RankingEntries } from "./types";
 
 export function Body() {
   const me = useMe();
   const { enabledSpaceIds } = useEnabledSpaces();
   const { data, isFetching, isFetched, refetch: refetchBookmarks } = useMyBookmarks();
+  const [rankingEntries, setRankingEntries] = useCachedState<RankingEntries>(CACHED_KEY_RANKING_ENTRIES, {});
 
   const [keyword, setKeyword] = useState("");
+  useEffect(() => {
+    cache.set("keyword", keyword);
+  }, [keyword]);
 
   const refetch = useCallback(() => {
     refetchBookmarks();
@@ -53,6 +61,7 @@ export function Body() {
     untaggedPrepare: filteredData.filteredUntaggedPreparedBookmarks,
     taggedBookmarks: preparedData.taggedBookmarks,
     untaggedBookmarks: preparedData.untaggedBookmarks,
+    rankingEntries,
   });
 
   const { loggedOutStatus } = useLoggedOutStatus();
@@ -131,7 +140,14 @@ export function Body() {
       {searchedTaggedList.length > 0 && (
         <List.Section title={`${searchedTaggedList.length} tagged items${filterText ? ` - ${filterText}` : ""}`}>
           {searchedTaggedList.map((item) => (
-            <BookmarkItem key={item.id} bookmark={item} me={me.data} refetch={refetch} />
+            <BookmarkItem
+              key={item.id}
+              bookmark={item}
+              me={me.data}
+              refetch={refetch}
+              rankingEntries={rankingEntries}
+              setRankingEntries={setRankingEntries}
+            />
           ))}
         </List.Section>
       )}
@@ -139,7 +155,14 @@ export function Body() {
       {searchedUntaggedList.length > 0 && (
         <List.Section title={`${searchedUntaggedList.length} untagged items${filterText ? ` - ${filterText}` : ""}`}>
           {searchedUntaggedList.map((item) => (
-            <BookmarkItem key={item.id} bookmark={item} me={me.data} refetch={refetch} />
+            <BookmarkItem
+              key={item.id}
+              bookmark={item}
+              me={me.data}
+              refetch={refetch}
+              rankingEntries={rankingEntries}
+              setRankingEntries={setRankingEntries}
+            />
           ))}
         </List.Section>
       )}
