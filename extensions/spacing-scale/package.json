@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spacing-scale",
+  "version": "0.1.0",
+  "title": "Spacing Scale",
+  "description": "Popular spacing values",
+  "icon": "icon.png",
+  "author": "jvlien",
+  "access": "public",
+  "categories": [
+    "Developer Tools",
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jvlien/spacing-scale.git"
+  },
+  "commands": [
+    {
+      "name": "spacing-scale",
+      "title": "Spacing Scale",
+      "description": "Popular spacing values",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "latest",
+    "@raycast/utils": "^1.3.3",
+    "date-fns": "^2.29.2",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-plugin": "^2.0.5",
+    "@types/lodash": "^4.14.184",
+    "@types/node": "18.18.4",
+    "eslint": "^8.57.1",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish:public": "npx @raycast/api@latest publish",
+    "publish:private": "ray publish"
+  }
+}
