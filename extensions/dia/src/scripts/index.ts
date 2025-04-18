@@ -1,4 +1,4 @@
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 export async function createNewWindow(profile?: string): Promise<void> {
   try {
