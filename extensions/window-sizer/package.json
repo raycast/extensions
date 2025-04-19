@@ -4,10 +4,6 @@
   "title": "Window Sizer",
   "description": "Resize application windows to pixel-perfect presets.",
   "icon": "extension-icon.png",
-  "screenshots": [
-    "assets/screenshot1.png",
-    "assets/screenshot2.png"
-  ],
   "author": "the3ash",
   "categories": [
     "Applications",

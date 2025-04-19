@@ -2,8 +2,10 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
+- Added loading state to prevent list flicker during data fetching
+- Improved error handling for AppleScript operations
 - Refactored window info retrieval into a shared utility function
-- Improved error handling for window information retrieval
+- Enhanced logging messages for better debugging
 - Fixed window size restoration logic
 
 ## [Update] - {PR_MERGE_DATE}

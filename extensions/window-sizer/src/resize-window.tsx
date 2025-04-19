@@ -134,64 +134,69 @@ function AddCustomResolutionForm({
 
 // Get window position and size
 async function getWindowInfo(): Promise<{ x: number; y: number; width: number; height: number }> {
-  const getWindowInfoScript = `
-    tell application "System Events"
-      set frontApp to first application process whose frontmost is true
-      set frontAppName to name of frontApp
-      tell process frontAppName
-        set frontWindow to first window
-        set pos to position of frontWindow
-        set sz to size of frontWindow
-        set posX to item 1 of pos
-        set posY to item 2 of pos
-        set w to item 1 of sz
-        set h to item 2 of sz
-        return posX & "," & posY & "," & w & "," & h
+  try {
+    const getWindowInfoScript = `
+      tell application "System Events"
+        set frontApp to first application process whose frontmost is true
+        set frontAppName to name of frontApp
+        tell process frontAppName
+          set frontWindow to first window
+          set pos to position of frontWindow
+          set sz to size of frontWindow
+          set posX to item 1 of pos
+          set posY to item 2 of pos
+          set w to item 1 of sz
+          set h to item 2 of sz
+          return posX & "," & posY & "," & w & "," & h
+        end tell
       end tell
-    end tell
-  `;
+    `;
 
-  const windowInfoResult = await runAppleScript(getWindowInfoScript);
-  console.log("Window Info:", formatWindowInfo(windowInfoResult));
+    const windowInfoResult = await runAppleScript(getWindowInfoScript);
+    console.log("Window Info:", formatWindowInfo(windowInfoResult));
 
-  // Extract position and size from comma-separated values
-  const parts = windowInfoResult.split(",");
+    // Extract position and size from comma-separated values
+    const parts = windowInfoResult.split(",");
 
-  // Declare variables outside if/else blocks
-  let currentX: number;
-  let currentY: number;
-  let currentWidth: number;
-  let currentHeight: number;
+    // Declare variables outside if/else blocks
+    let currentX: number;
+    let currentY: number;
+    let currentWidth: number;
+    let currentHeight: number;
 
-  if (parts.length === 4) {
-    currentX = parseInt(parts[0], 10);
-    currentY = parseInt(parts[1], 10);
-    currentWidth = parseInt(parts[2], 10);
-    currentHeight = parseInt(parts[3], 10);
-  } else {
-    // Try alternative parsing if the format doesn't match
-    const numbersPattern = /(\d+)/g;
-    const numbers = Array.from(windowInfoResult.matchAll(numbersPattern), (m) => parseInt(m[0], 10));
+    if (parts.length === 4) {
+      currentX = parseInt(parts[0], 10);
+      currentY = parseInt(parts[1], 10);
+      currentWidth = parseInt(parts[2], 10);
+      currentHeight = parseInt(parts[3], 10);
+    } else {
+      // Try alternative parsing if the format doesn't match
+      const numbersPattern = /(\d+)/g;
+      const numbers = Array.from(windowInfoResult.matchAll(numbersPattern), (m) => parseInt(m[0], 10));
 
-    if (numbers.length < 4) {
-      throw new Error("Failed to parse window info");
+      if (numbers.length < 4) {
+        throw new Error("Failed to parse window info");
+      }
+
+      currentX = numbers[0];
+      currentY = numbers[1];
+      currentWidth = numbers[2];
+      currentHeight = numbers[3];
     }
 
-    currentX = numbers[0];
-    currentY = numbers[1];
-    currentWidth = numbers[2];
-    currentHeight = numbers[3];
-  }
+    if (isNaN(currentX) || isNaN(currentY) || isNaN(currentWidth) || isNaN(currentHeight)) {
+      throw new Error("Failed to parse dimensions as numbers");
+    }
 
-  if (isNaN(currentX) || isNaN(currentY) || isNaN(currentWidth) || isNaN(currentHeight)) {
-    throw new Error("Failed to parse dimensions as numbers");
+    return { x: currentX, y: currentY, width: currentWidth, height: currentHeight };
+  } catch (error) {
+    console.error("Error getting window info:", error);
+    throw new Error("Failed to get window information");
   }
-
-  return { x: currentX, y: currentY, width: currentWidth, height: currentHeight };
 }
 
 export default function ResizeWindow() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [customResolutions, setCustomResolutions] = useState<Resolution[]>([]);
   const { push } = useNavigation();
 
@@ -217,6 +222,8 @@ export default function ResizeWindow() {
         }
       } catch (error) {
         console.error("Error loading custom resolutions:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -271,29 +278,34 @@ export default function ResizeWindow() {
       // Close main window first to avoid showing loading state
       await closeMainWindow();
 
-      // Create a simpler AppleScript to set window position and size
-      const setWindowSizeScript = `
-        tell application "System Events"
-          set frontApp to first application process whose frontmost is true
-          set frontAppName to name of frontApp
-          tell process frontAppName
-            set frontWindow to first window
-            set position of frontWindow to {${newX}, ${newY}}
-            set size of frontWindow to {${width}, ${height}}
+      try {
+        // Create a simpler AppleScript to set window position and size
+        const setWindowSizeScript = `
+          tell application "System Events"
+            set frontApp to first application process whose frontmost is true
+            set frontAppName to name of frontApp
+            tell process frontAppName
+              set frontWindow to first window
+              set position of frontWindow to {${newX}, ${newY}}
+              set size of frontWindow to {${width}, ${height}}
+            end tell
           end tell
-        end tell
-      `;
+        `;
 
-      // Apply the new position and size
-      await runAppleScript(setWindowSizeScript);
+        // Apply the new position and size
+        await runAppleScript(setWindowSizeScript);
 
-      const sizeData = { width: currentWidth, height: currentHeight, timestamp: Date.now() };
-      console.log("Saved previous window size data:", JSON.stringify(sizeData));
-      console.log("New window position and size: X:", newX, "Y:", newY, "W:", width, "H:", height);
+        const sizeData = { width: currentWidth, height: currentHeight, timestamp: Date.now() };
+        console.log("Saved previous window size data:", JSON.stringify(sizeData));
+        console.log("New window position and size: X:", newX, "Y:", newY, "W:", width, "H:", height);
 
-      await LocalStorage.setItem("previous-window-size", JSON.stringify(sizeData));
-      await showHUD(`🔲 Resized to ${width}×${height}`);
-      await popToRoot();
+        await LocalStorage.setItem("previous-window-size", JSON.stringify(sizeData));
+        await showHUD(`🔲 Resized to ${width}×${height}`);
+        await popToRoot();
+      } catch (error) {
+        console.error("Error setting window size:", error);
+        throw new Error("Failed to set window size");
+      }
     } catch (error) {
       console.error("🛑 Error resizing window:", error);
 
@@ -361,24 +373,29 @@ export default function ResizeWindow() {
         const newX = Math.round(centerX - width / 2);
         const newY = Math.round(centerY - height / 2);
 
-        // Execute AppleScript to restore window size while maintaining the center
-        const script = `
-          tell application "System Events"
-            set frontApp to first application process whose frontmost is true
-            set frontAppName to name of frontApp
+        try {
+          // Execute AppleScript to restore window size while maintaining the center
+          const script = `
+            tell application "System Events"
+              set frontApp to first application process whose frontmost is true
+              set frontAppName to name of frontApp
 
-            tell process frontAppName
-              set frontWindow to first window
-              set position of frontWindow to {${newX}, ${newY}}
-              set size of frontWindow to {${width}, ${height}}
+              tell process frontAppName
+                set frontWindow to first window
+                set position of frontWindow to {${newX}, ${newY}}
+                set size of frontWindow to {${width}, ${height}}
+              end tell
             end tell
-          end tell
-        `;
+          `;
 
-        await closeMainWindow();
-        await runAppleScript(script);
-        await showHUD(`↺ Restored to ${width}×${height}`);
-        await popToRoot();
+          await closeMainWindow();
+          await runAppleScript(script);
+          await showHUD(`↺ Restored to ${width}×${height}`);
+          await popToRoot();
+        } catch (error) {
+          console.error("Error setting window size:", error);
+          throw new Error("Failed to set window size");
+        }
       } catch (parseError) {
         console.error("Failed to parse JSON data:", parseError);
         await showHUD("🛑 Invalid size data format");
