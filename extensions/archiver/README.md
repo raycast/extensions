@@ -7,6 +7,7 @@
 
 1. Support compress files(password is optional)
 2. Support extract files(password if need)
+3. Preview ZIP files
 
 ---
 

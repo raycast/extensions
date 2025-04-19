@@ -29,7 +29,9 @@ export default function Command() {
 
   async function init() {
     updateLoadingState(true);
-    preferences.defaultCompressSelected && (await getFinderItems());
+    if (preferences.defaultCompressSelected) {
+      await getFinderItems();
+    }
     updateLoadingState(false);
   }
 
@@ -41,7 +43,7 @@ export default function Command() {
       }
       updateFilesState(selectedFinderItems.map((item) => item.path));
       // eslint-disable-next-line no-empty
-    } catch (error) {}
+    } catch {}
   }
 
   return (
@@ -65,7 +67,7 @@ export default function Command() {
                   await showInFinder(path);
                   showHUD("🎉 Compress successfully");
                   popToRoot();
-                } catch (error) {
+                } catch {
                   showHUD("❌ Failed to compress...");
                 } finally {
                   updateLoadingState(false);
