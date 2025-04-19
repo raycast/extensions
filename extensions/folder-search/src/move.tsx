@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  List,
-  closeMainWindow,
-  popToRoot,
-  open,
-  LaunchProps,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, closeMainWindow, popToRoot, open, LaunchProps } from "@raycast/api";
 import { folderName } from "./utils";
 import { SpotlightSearchResult } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";

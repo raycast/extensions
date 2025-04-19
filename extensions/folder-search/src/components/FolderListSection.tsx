@@ -57,6 +57,7 @@ export function FolderListSection({
               }
             />
           }
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           actions={renderActions(result, resultIndex) as any}
         />
       ))}

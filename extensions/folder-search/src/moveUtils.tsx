@@ -3,7 +3,9 @@ import { showFailureToast } from "@raycast/utils";
 import path from "path";
 import fse from "fs-extra";
 
-export async function moveFinderItems(destinationFolder: string): Promise<{success: boolean; movedCount: number; skippedCount: number}> {
+export async function moveFinderItems(
+  destinationFolder: string
+): Promise<{ success: boolean; movedCount: number; skippedCount: number }> {
   try {
     console.debug(`[FolderSearch] Starting move operation:`, {
       destinationFolder,
@@ -124,9 +126,9 @@ export async function moveFinderItems(destinationFolder: string): Promise<{succe
         title: `Moved ${movedCount} item(s) to ${path.basename(destinationFolder)}, skipped ${skippedCount} item(s)`,
       });
     } else {
-      await showToast({ 
-        title: "Successfully moved to folder", 
-        message: `Moved ${movedCount} ${movedCount === 1 ? "file" : "files"} to ${path.basename(destinationFolder)}`
+      await showToast({
+        title: "Successfully moved to folder",
+        message: `Moved ${movedCount} ${movedCount === 1 ? "file" : "files"} to ${path.basename(destinationFolder)}`,
       });
     }
 
@@ -140,4 +142,4 @@ export async function moveFinderItems(destinationFolder: string): Promise<{succe
     });
     throw error;
   }
-} 
+}
