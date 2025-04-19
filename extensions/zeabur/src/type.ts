@@ -26,3 +26,21 @@ export interface PrepareUploadResponse {
 export interface ErrorResponse {
   error: string;
 }
+
+// Type definitions for the zeabur graphql API
+export interface Template {
+  data: {
+    templates: {
+      edges: {
+        node: TemplateInfo;
+      }[];
+    };
+  };
+}
+
+export interface TemplateInfo {
+  code: string;
+  name: string;
+  description: string;
+  iconURL: string;
+}

@@ -20,6 +20,13 @@
       "mode": "view"
     },
     {
+      "name": "search-templates",
+      "title": "Search Templates",
+      "subtitle": "Zeabur",
+      "description": "Search Zeabur Templates",
+      "mode": "view"
+    },
+    {
       "name": "deploy-project",
       "title": "Deploy Project",
       "subtitle": "Zeabur",
