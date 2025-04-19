@@ -17,7 +17,7 @@ export default function Command() {
           key={template.code}
           title={template.name}
           subtitle={template.description}
-          icon={{ source: template.iconURL ? template.iconURL : "extension-icon.png", fallback: "extension-icon.png" }}
+          icon={{ source: template.iconURL ?? "extension-icon.png", fallback: "extension-icon.png" }}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`https://zeabur.com/templates/${template.code}`} />
