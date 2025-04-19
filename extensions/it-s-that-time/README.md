@@ -2,7 +2,7 @@
 
 Don’t miss what’s important. Stay focused, but stay notified.
 
-## What is ITT ?
+## What is ITT?
 
 ITT is a minimalist yet powerful Raycast extension that helps you stay on track during deep work sessions. Whether it’s a meeting, a quick break, or an important task, this tool ensures you won’t miss it—even if you’re completely absorbed in your work.
 

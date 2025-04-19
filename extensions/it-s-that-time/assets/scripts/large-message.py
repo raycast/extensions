@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
                 break
 
         if not found:
-            print(f"Error: Not Found Activee Monitor")
+            print(f"Error: Not Found Active Monitor")
             sys.exit(1)
 
         window_x = screen_x + (screen_width // 2) - (self.window_width // 2)
