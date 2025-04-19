@@ -12,7 +12,7 @@ export function useCommandBase({ commandName, launchProps, searchText, setSearch
   // Handle fallback text from root search
   const fallbackTextRef = useRef<string | undefined>(undefined);
   const fallbackTextProcessedRef = useRef<boolean>(false);
-  
+
   useEffect(() => {
     // Only process fallbackText once per session
     if (launchProps.fallbackText && !fallbackTextProcessedRef.current) {
@@ -21,7 +21,7 @@ export function useCommandBase({ commandName, launchProps, searchText, setSearch
         component: commandName,
         timestamp: new Date().toISOString(),
       });
-      
+
       fallbackTextRef.current = launchProps.fallbackText;
       fallbackTextProcessedRef.current = true;
       setSearchText(launchProps.fallbackText);
@@ -30,7 +30,7 @@ export function useCommandBase({ commandName, launchProps, searchText, setSearch
 
   // Log launch type for debugging
   const hasLoggedLaunchRef = useRef<boolean>(false);
-  
+
   useEffect(() => {
     if (!hasLoggedLaunchRef.current) {
       console.debug(`[FolderSearch] Command launched:`, {
@@ -49,4 +49,4 @@ export function useCommandBase({ commandName, launchProps, searchText, setSearch
     fallbackTextProcessedRef,
     hasLoggedLaunchRef,
   };
-} 
+}

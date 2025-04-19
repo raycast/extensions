@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
 import { usePromise, showFailureToast } from "@raycast/utils";
 import { FolderSearchPlugin, SpotlightSearchResult, SpotlightSearchPreferences } from "../types";
@@ -94,7 +94,7 @@ export function useFolderSearch() {
   // check plugins
   const pluginsRef = useRef<FolderSearchPlugin[]>([]);
   const isLoadingPluginsRef = useRef<boolean>(false);
-  
+
   usePromise(
     async () => {
       // Return cached plugins if available
@@ -106,25 +106,25 @@ export function useFolderSearch() {
         });
         return pluginsRef.current;
       }
-      
+
       // If already loading, wait for the existing call to complete
       if (isLoadingPluginsRef.current) {
         log("debug", "useFolderSearch", "Plugin loading already in progress", {
           component: "useFolderSearch",
           timestamp: new Date().toISOString(),
         });
-        
+
         // Wait for the current loading process to complete
         while (isLoadingPluginsRef.current) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
-        
+
         // Return the cached plugins after waiting
         if (pluginsRef.current.length > 0) {
           return pluginsRef.current;
         }
       }
-      
+
       // Set loading flag and load plugins
       isLoadingPluginsRef.current = true;
       try {
@@ -155,7 +155,7 @@ export function useFolderSearch() {
   // check prefs
   const prefsRef = useRef<boolean>(false);
   const isLoadingPrefsRef = useRef<boolean>(false);
-  
+
   usePromise(
     async () => {
       // Return if preferences already checked
@@ -166,25 +166,25 @@ export function useFolderSearch() {
         });
         return;
       }
-      
+
       // If already loading, wait for the existing call to complete
       if (isLoadingPrefsRef.current) {
         log("debug", "useFolderSearch", "Preferences loading already in progress", {
           component: "useFolderSearch",
           timestamp: new Date().toISOString(),
         });
-        
+
         // Wait for the current loading process to complete
         while (isLoadingPrefsRef.current) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
-        
+
         // Return after waiting since preferences should be checked
         if (prefsRef.current) {
           return;
         }
       }
-      
+
       // Set loading flag and load preferences
       isLoadingPrefsRef.current = true;
       try {
@@ -259,7 +259,7 @@ export function useFolderSearch() {
         return results;
       } catch (error) {
         // Ignore AbortError as it's expected during debouncing
-        if (error instanceof Error && error.name === 'AbortError') {
+        if (error instanceof Error && error.name === "AbortError") {
           return [];
         }
         throw error;
