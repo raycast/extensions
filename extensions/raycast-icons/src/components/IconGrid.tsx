@@ -7,6 +7,7 @@ import { LoadingAnimation } from "./LoadingAnimation";
 export function IconGrid() {
   const [colorName, setColorName] = useState<string>("PrimaryText");
   const [toast, setToast] = useState<Toast | null>(null);
+  const [selectedIconName, setSelectedIconName] = useState<string | null>(null);
 
   const {
     searchText,
@@ -24,6 +25,14 @@ export function IconGrid() {
   const handleSearchTextChange = (text: string) => {
     setSearchText(text);
     setManualAISearch(false);
+  };
+
+  const handleSelectionChange = (id: string | null) => {
+    if (id === null) {
+      setSelectedIconName(null);
+    } else {
+      setSelectedIconName(id);
+    }
   };
 
   const isAIResultsSection =
@@ -44,7 +53,9 @@ export function IconGrid() {
       columns={8}
       inset={Grid.Inset.Large}
       isLoading={false}
+      navigationTitle={selectedIconName ? `Search Raycast Icons – ${selectedIconName}` : "Search Raycast Icons"}
       onSearchTextChange={handleSearchTextChange}
+      onSelectionChange={handleSelectionChange}
       throttle
       searchBarAccessory={
         <Grid.Dropdown tooltip="Change Color" value={colorName} onChange={(newColorName) => setColorName(newColorName)}>
@@ -69,8 +80,8 @@ export function IconGrid() {
           {iconEntries.map(([name, icon]) => (
             <Grid.Item
               key={name}
-              title={name}
-              content={{ source: icon, tintColor: color }}
+              content={{ tooltip: name, source: icon, tintColor: color }}
+              id={name}
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard title="Copy Icon" content={`Icon.${name}`} />
