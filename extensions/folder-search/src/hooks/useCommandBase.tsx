@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { LaunchProps } from "@raycast/api";
+import { log } from "../utils";
 
 interface CommandBaseProps {
   commandName: string;
@@ -16,9 +17,8 @@ export function useCommandBase({ commandName, launchProps, searchText, setSearch
   useEffect(() => {
     // Only process fallbackText once per session
     if (launchProps.fallbackText && !fallbackTextProcessedRef.current) {
-      console.debug(`[FolderSearch] Processing fallback text:`, {
+      log("debug", commandName, "Processing fallback text", {
         fallbackText: launchProps.fallbackText,
-        component: commandName,
         timestamp: new Date().toISOString(),
       });
 
@@ -33,11 +33,10 @@ export function useCommandBase({ commandName, launchProps, searchText, setSearch
 
   useEffect(() => {
     if (!hasLoggedLaunchRef.current) {
-      console.debug(`[FolderSearch] Command launched:`, {
+      log("debug", commandName, "Command launched", {
         launchType: launchProps.launchType,
         fallbackText: launchProps.fallbackText,
         searchText,
-        component: commandName,
         timestamp: new Date().toISOString(),
       });
       hasLoggedLaunchRef.current = true;
