@@ -1,4 +1,5 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { Bookmark, BookmarksParams, BookmarksResponse } from "../types";
 import { useCallback, useEffect, useState } from "react";
 
@@ -42,7 +43,7 @@ export function useBookmarks({ collection, search = "" }: BookmarksParams) {
 
       setBookmarks({ items: allBookmarks });
     } catch (err) {
-      showToast(Toast.Style.Failure, "Cannot fetch bookmarks");
+      showFailureToast(err, { title: "Cannot fetch bookmarks" });
     } finally {
       setIsLoading(false);
     }

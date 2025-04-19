@@ -118,7 +118,7 @@
       ],
       "title": "Sort by",
       "description": "Select the sort order for the search results.",
-      "default": "link"
+      "default": ""
     },
     {
       "name": "useLastCollection",
