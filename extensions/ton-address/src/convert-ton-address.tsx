@@ -63,6 +63,8 @@ async function convertAddress(address: string): Promise<AddressFormat[]> {
   }
 }
 
+let errorToast: Toast | undefined;
+
 export default function Command() {
   const [address, setAddress] = useState("");
   const [formats, setFormats] = useState<AddressFormat[] | undefined>(undefined);
@@ -73,13 +75,23 @@ export default function Command() {
       const initialAddress = (await Clipboard.readText())?.trim() || "";
 
       setAddress(initialAddress);
-      if (initialAddress && isValidTonAddressOrDomain(initialAddress)) {
-        setIsLoading(true);
-        const formats = await convertAddress(initialAddress);
-        if (formats.length > 0) {
-          setFormats(formats);
+      if (initialAddress) {
+        if (isValidTonAddressOrDomain(initialAddress)) {
+          setIsLoading(true);
+          const formats = await convertAddress(initialAddress);
+          if (formats.length > 0) {
+            setFormats(formats);
+          }
+          setIsLoading(false);
+        } else {
+          setIsLoading(false);
+          setFormats([]);
+          errorToast = await showToast({
+            style: Toast.Style.Failure,
+            title: "Invalid TON Address",
+            message: "Please enter a valid TON address or .ton domain",
+          });
         }
-        setIsLoading(false);
       } else {
         setFormats([]);
         setIsLoading(false);
@@ -93,6 +105,7 @@ export default function Command() {
     setAddress(trimmedAddress);
 
     if (isValidTonAddressOrDomain(trimmedAddress)) {
+      errorToast?.hide();
       setIsLoading(true);
       const newFormats = await convertAddress(trimmedAddress);
       setFormats(newFormats);
@@ -100,7 +113,7 @@ export default function Command() {
     } else {
       if (trimmedAddress) {
         setFormats([]);
-        showToast({
+        errorToast = await showToast({
           style: Toast.Style.Failure,
           title: "Invalid TON Address",
           message: "Please enter a valid TON address or .ton domain",
@@ -115,7 +128,7 @@ export default function Command() {
       searchText={address}
       onSearchTextChange={handleSearchTextChange}
       searchBarPlaceholder="Enter TON address or .ton domain"
-      isLoading={isLoading}
+      isLoading={formats === undefined || isLoading}
       throttle
     >
       {formats?.map((format) => (
