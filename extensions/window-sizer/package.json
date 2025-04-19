@@ -18,6 +18,7 @@
     {
       "name": "resize-window",
       "title": "Resize Window",
+      "subtitle": "Window Sizer",
       "description": "Resize the focused window to a specific resolution",
       "mode": "view",
       "icon": "extension-icon.png"

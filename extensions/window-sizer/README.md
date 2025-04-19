@@ -5,7 +5,7 @@
 
 # Window Sizer
 
-Quickly resize your window to pixel-perfect presets.
+Resize application windows to pixel-perfect presets.
 
 ## Features
 
@@ -20,7 +20,7 @@ This extension uses AppleScript to interact with windows, providing the followin
 
 Search for the following command in Raycast:
 
-- `Resize Window` - Open the window size selector
+- `Window Sizer` or `Resize Window` - Open the window size selector
 
 ## Predefined Sizes
 

@@ -83,8 +83,12 @@ function AddCustomResolutionForm({
         await closeMainWindow();
 
         // Apply the new resolution in the background
-        onResizeWindow(parsedWidth, parsedHeight).catch((error) => {
+        onResizeWindow(parsedWidth, parsedHeight).catch(async (error) => {
           console.error("Error applying resolution:", error);
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Error applying resolution",
+          });
         });
 
         // Return early
@@ -126,6 +130,64 @@ function AddCustomResolutionForm({
       <Form.TextField id="height" title="Height" placeholder="Enter Height" />
     </Form>
   );
+}
+
+// Get window position and size
+async function getWindowInfo(): Promise<{ x: number; y: number; width: number; height: number }> {
+  const getWindowInfoScript = `
+    tell application "System Events"
+      set frontApp to first application process whose frontmost is true
+      set frontAppName to name of frontApp
+      tell process frontAppName
+        set frontWindow to first window
+        set pos to position of frontWindow
+        set sz to size of frontWindow
+        set posX to item 1 of pos
+        set posY to item 2 of pos
+        set w to item 1 of sz
+        set h to item 2 of sz
+        return posX & "," & posY & "," & w & "," & h
+      end tell
+    end tell
+  `;
+
+  const windowInfoResult = await runAppleScript(getWindowInfoScript);
+  console.log("Window Info:", formatWindowInfo(windowInfoResult));
+
+  // Extract position and size from comma-separated values
+  const parts = windowInfoResult.split(",");
+
+  // Declare variables outside if/else blocks
+  let currentX: number;
+  let currentY: number;
+  let currentWidth: number;
+  let currentHeight: number;
+
+  if (parts.length === 4) {
+    currentX = parseInt(parts[0], 10);
+    currentY = parseInt(parts[1], 10);
+    currentWidth = parseInt(parts[2], 10);
+    currentHeight = parseInt(parts[3], 10);
+  } else {
+    // Try alternative parsing if the format doesn't match
+    const numbersPattern = /(\d+)/g;
+    const numbers = Array.from(windowInfoResult.matchAll(numbersPattern), (m) => parseInt(m[0], 10));
+
+    if (numbers.length < 4) {
+      throw new Error("Failed to parse window info");
+    }
+
+    currentX = numbers[0];
+    currentY = numbers[1];
+    currentWidth = numbers[2];
+    currentHeight = numbers[3];
+  }
+
+  if (isNaN(currentX) || isNaN(currentY) || isNaN(currentWidth) || isNaN(currentHeight)) {
+    throw new Error("Failed to parse dimensions as numbers");
+  }
+
+  return { x: currentX, y: currentY, width: currentWidth, height: currentHeight };
 }
 
 export default function ResizeWindow() {
@@ -175,8 +237,6 @@ export default function ResizeWindow() {
       });
 
       // Refresh the list and keep window open
-      setIsLoading(true);
-      setIsLoading(false);
     } catch (error) {
       console.error("Error deleting custom resolution:", error);
       await showToast({
@@ -189,63 +249,7 @@ export default function ResizeWindow() {
   // Function to resize window to specific dimensions
   async function resizeWindow(width: number, height: number) {
     try {
-      // Get current window position and size in a single script
-      const getWindowInfoScript = `
-        tell application "System Events"
-          set frontApp to first application process whose frontmost is true
-          set frontAppName to name of frontApp
-          tell process frontAppName
-            set frontWindow to first window
-            set pos to position of frontWindow
-            set sz to size of frontWindow
-            set posX to item 1 of pos
-            set posY to item 2 of pos
-            set w to item 1 of sz
-            set h to item 2 of sz
-            return posX & "," & posY & "," & w & "," & h
-          end tell
-        end tell
-      `;
-
-      const windowInfoResult = await runAppleScript(getWindowInfoScript);
-      console.log("Window Info:", formatWindowInfo(windowInfoResult));
-
-      // Extract position and size from comma-separated values
-      const parts = windowInfoResult.split(",");
-
-      // Declare variables outside if/else blocks
-      let currentX: number;
-      let currentY: number;
-      let currentWidth: number;
-      let currentHeight: number;
-
-      if (parts.length === 4) {
-        currentX = parseInt(parts[0], 10);
-        currentY = parseInt(parts[1], 10);
-        currentWidth = parseInt(parts[2], 10);
-        currentHeight = parseInt(parts[3], 10);
-      } else {
-        // Try alternative parsing if the format doesn't match
-        const numbersPattern = /(\d+)/g;
-        const numbers = Array.from(windowInfoResult.matchAll(numbersPattern), (m) => parseInt(m[0], 10));
-
-        if (numbers.length < 4) {
-          console.error("🛑 Failed to parse window info");
-          await showHUD("🛑 Couldn't get window info");
-          return;
-        }
-
-        currentX = numbers[0];
-        currentY = numbers[1];
-        currentWidth = numbers[2];
-        currentHeight = numbers[3];
-      }
-
-      if (isNaN(currentX) || isNaN(currentY) || isNaN(currentWidth) || isNaN(currentHeight)) {
-        console.error("🛑 Failed to parse dimensions as numbers");
-        await showHUD("🛑 No focused window");
-        return;
-      }
+      const { x: currentX, y: currentY, width: currentWidth, height: currentHeight } = await getWindowInfo();
 
       // Check if the window is already at the requested size
       if (currentWidth === width && currentHeight === height) {
@@ -284,8 +288,8 @@ export default function ResizeWindow() {
       await runAppleScript(setWindowSizeScript);
 
       const sizeData = { width: currentWidth, height: currentHeight, timestamp: Date.now() };
-      console.log("Saved window size data:", JSON.stringify(sizeData));
-      console.log("Current position and size: X:", currentX, "Y:", currentY, "W:", currentWidth, "H:", currentHeight);
+      console.log("Saved previous window size data:", JSON.stringify(sizeData));
+      console.log("New window position and size: X:", newX, "Y:", newY, "W:", width, "H:", height);
 
       await LocalStorage.setItem("previous-window-size", JSON.stringify(sizeData));
       await showHUD(`🔲 Resized to ${width}×${height}`);
@@ -338,63 +342,7 @@ export default function ResizeWindow() {
           return;
         }
 
-        // Get current window position and size in a single script
-        const getWindowInfoScript = `
-          tell application "System Events"
-            set frontApp to first application process whose frontmost is true
-            set frontAppName to name of frontApp
-            tell process frontAppName
-              set frontWindow to first window
-              set pos to position of frontWindow
-              set sz to size of frontWindow
-              set posX to item 1 of pos
-              set posY to item 2 of pos
-              set w to item 1 of sz
-              set h to item 2 of sz
-              return posX & "," & posY & "," & w & "," & h
-            end tell
-          end tell
-        `;
-
-        const windowInfoResult = await runAppleScript(getWindowInfoScript);
-        console.log("Window Info:", formatWindowInfo(windowInfoResult));
-
-        // Extract position and size from comma-separated values
-        const parts = windowInfoResult.split(",");
-
-        // Declare variables outside if/else blocks
-        let currentX: number;
-        let currentY: number;
-        let currentWidth: number;
-        let currentHeight: number;
-
-        if (parts.length === 4) {
-          currentX = parseInt(parts[0], 10);
-          currentY = parseInt(parts[1], 10);
-          currentWidth = parseInt(parts[2], 10);
-          currentHeight = parseInt(parts[3], 10);
-        } else {
-          // Try alternative parsing if the format doesn't match
-          const numbersPattern = /(\d+)/g;
-          const numbers = Array.from(windowInfoResult.matchAll(numbersPattern), (m) => parseInt(m[0], 10));
-
-          if (numbers.length < 4) {
-            console.error("🛑 Failed to parse window info");
-            await showHUD("🛑 Couldn't get window info");
-            return;
-          }
-
-          currentX = numbers[0];
-          currentY = numbers[1];
-          currentWidth = numbers[2];
-          currentHeight = numbers[3];
-        }
-
-        if (isNaN(currentX) || isNaN(currentY) || isNaN(currentWidth) || isNaN(currentHeight)) {
-          console.error("🛑 Failed to parse dimensions as numbers");
-          await showHUD("🛑 No focused window");
-          return;
-        }
+        const { x: currentX, y: currentY, width: currentWidth, height: currentHeight } = await getWindowInfo();
 
         // Check if the window is already at the previous size
         if (currentWidth === width && currentHeight === height) {

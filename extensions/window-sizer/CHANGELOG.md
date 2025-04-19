@@ -2,6 +2,12 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
+- Refactored window info retrieval into a shared utility function
+- Improved error handling for window information retrieval
+- Fixed window size restoration logic
+
+## [Update] - {PR_MERGE_DATE}
+
 - Improved window positioning logic during resize
 - Enhanced previous window size restoration
 
