@@ -2,28 +2,26 @@ import { confirmAlert, getSelectedFinderItems, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import path from "path";
 import fse from "fs-extra";
+import { log } from "./utils";
 
 export async function moveFinderItems(
   destinationFolder: string
 ): Promise<{ success: boolean; movedCount: number; skippedCount: number }> {
   try {
-    console.debug(`[FolderSearch] Starting move operation:`, {
+    log("debug", "moveFinderItems", "Starting move operation", {
       destinationFolder,
-      component: "moveFinderItems",
       timestamp: new Date().toISOString(),
     });
 
     const selectedItems = await getSelectedFinderItems();
-    console.debug(`[FolderSearch] Got selected Finder items:`, {
+    log("debug", "moveFinderItems", "Got selected Finder items", {
       count: selectedItems.length,
       items: selectedItems.map((item) => item.path),
-      component: "moveFinderItems",
       timestamp: new Date().toISOString(),
     });
 
     if (selectedItems.length === 0) {
-      console.debug(`[FolderSearch] No Finder items selected:`, {
-        component: "moveFinderItems",
+      log("debug", "moveFinderItems", "No Finder items selected", {
         timestamp: new Date().toISOString(),
       });
       await showFailureToast({ title: "No Finder selection to move" });
@@ -38,18 +36,16 @@ export async function moveFinderItems(
       const destinationFile = path.join(destinationFolder, sourceFileName);
 
       try {
-        console.debug(`[FolderSearch] Processing item:`, {
+        log("debug", "moveFinderItems", "Processing item", {
           source: item.path,
           destination: destinationFile,
-          component: "moveFinderItems",
           timestamp: new Date().toISOString(),
         });
 
         const exists = await fse.pathExists(destinationFile);
         if (exists) {
-          console.debug(`[FolderSearch] File exists at destination:`, {
+          log("debug", "moveFinderItems", "File exists at destination", {
             file: destinationFile,
-            component: "moveFinderItems",
             timestamp: new Date().toISOString(),
           });
 
@@ -60,9 +56,8 @@ export async function moveFinderItems(
 
           if (overwrite) {
             if (item.path === destinationFile) {
-              console.debug(`[FolderSearch] Source and destination are the same:`, {
+              log("debug", "moveFinderItems", "Source and destination are the same", {
                 file: item.path,
-                component: "moveFinderItems",
                 timestamp: new Date().toISOString(),
               });
               await showFailureToast({ title: "The source and destination file are the same" });
@@ -71,16 +66,14 @@ export async function moveFinderItems(
             }
             await fse.move(item.path, destinationFile, { overwrite: true });
             movedCount++;
-            console.debug(`[FolderSearch] File moved with overwrite:`, {
+            log("debug", "moveFinderItems", "File moved with overwrite", {
               source: item.path,
               destination: destinationFile,
-              component: "moveFinderItems",
               timestamp: new Date().toISOString(),
             });
           } else {
-            console.debug(`[FolderSearch] User cancelled overwrite:`, {
+            log("debug", "moveFinderItems", "User cancelled overwrite", {
               file: sourceFileName,
-              component: "moveFinderItems",
               timestamp: new Date().toISOString(),
             });
             await showFailureToast({ title: "Cancelling move for " + sourceFileName });
@@ -90,19 +83,17 @@ export async function moveFinderItems(
         } else {
           await fse.move(item.path, destinationFile);
           movedCount++;
-          console.debug(`[FolderSearch] File moved successfully:`, {
+          log("debug", "moveFinderItems", "File moved successfully", {
             source: item.path,
             destination: destinationFile,
-            component: "moveFinderItems",
             timestamp: new Date().toISOString(),
           });
         }
       } catch (e) {
-        console.error(`[FolderSearch] Error moving file:`, {
+        log("error", "moveFinderItems", "Error moving file", {
           error: e,
           source: item.path,
           destination: destinationFile,
-          component: "moveFinderItems",
           timestamp: new Date().toISOString(),
         });
         await showFailureToast(e, { title: "Error moving file" });
@@ -110,11 +101,10 @@ export async function moveFinderItems(
       }
     }
 
-    console.debug(`[FolderSearch] Move operation completed:`, {
+    log("debug", "moveFinderItems", "Move operation completed", {
       movedCount,
       skippedCount,
       destinationFolder,
-      component: "moveFinderItems",
       timestamp: new Date().toISOString(),
     });
 
@@ -134,10 +124,9 @@ export async function moveFinderItems(
 
     return { success: movedCount > 0, movedCount, skippedCount };
   } catch (error) {
-    console.error(`[FolderSearch] Unexpected error in move operation:`, {
+    log("error", "moveFinderItems", "Unexpected error in move operation", {
       error,
       destinationFolder,
-      component: "moveFinderItems",
       timestamp: new Date().toISOString(),
     });
     throw error;
