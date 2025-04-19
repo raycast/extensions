@@ -14,7 +14,7 @@
     {
       "name": "messages",
       "title": "All Messages",
-      "description": "Show gotify all messages",
+      "description": "Show all Gotify messages",
       "mode": "view",
       "preferences": [
         {
