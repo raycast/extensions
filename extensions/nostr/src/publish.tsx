@@ -1,9 +1,9 @@
 import { Form, ActionPanel, Action, popToRoot, showToast, Toast } from '@raycast/api';
 import { finalizeEvent, verifyEvent } from 'nostr-tools/pure';
-import { hexToBytes } from '@noble/hashes/utils';
 import { SimplePool, useWebSocketImplementation } from 'nostr-tools/pool';
+import { hexToBytes } from '@noble/hashes/utils';
 import WebSocket from 'ws';
-import { loadPrivateKey, loadRelayURLs } from './utils';
+import { decodePrivateKey, loadPrivateKey, loadRelayURLs } from './utils';
 import { showFailureToast } from '@raycast/utils';
 
 useWebSocketImplementation(WebSocket);
@@ -18,6 +18,7 @@ export default function Command() {
     try {
       const privateKey = loadPrivateKey();
       if (privateKey) {
+        const hexKey = decodePrivateKey(privateKey);
         const event = finalizeEvent(
           {
             kind: 1,
@@ -25,7 +26,7 @@ export default function Command() {
             tags: [],
             content: values.textarea,
           },
-          hexToBytes(privateKey),
+          hexToBytes(hexKey),
         );
 
         const verified = verifyEvent(event);

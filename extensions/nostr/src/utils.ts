@@ -1,10 +1,24 @@
 import { getPreferenceValues, showToast, Toast } from '@raycast/api';
 import { showFailureToast } from '@raycast/utils';
+import { nip19 } from 'nostr-tools';
+import { bytesToHex } from '@noble/hashes/utils';
 
 type Preferences = {
   privateKey: string;
   relays?: string;
 };
+
+export function decodePrivateKey(privateKey: string): string {
+  if (privateKey.startsWith('nsec')) {
+    const { type, data } = nip19.decode(privateKey);
+    if (type === 'nsec') {
+      return bytesToHex(data);
+    } else {
+      throw new Error('Invalid nsec key');
+    }
+  }
+  return privateKey;
+}
 
 export function loadPrivateKey(): string | undefined {
   try {

@@ -22,17 +22,17 @@
     {
       "name": "privateKey",
       "type": "password",
-      "title": "Private Key (in hex format)",
+      "title": "Private Key (nsec or hex)",
       "default": "",
       "required": true,
-      "description": "Enter your private key (hex) for signing events on Nostr."
+      "description": "Enter your private key (nsec or hex) for signing events on Nostr."
     },
     {
       "name": "relays",
       "type": "textfield",
       "title": "Relay URLs",
       "default": "wss://relay.nostr.band",
-      "required": false,
+      "required": true,
       "description": "Enter relay URLs (comma-separated) to publish notes to."
     }
   ],
