@@ -61,7 +61,7 @@ export function useMessage(props?: { id: string }) {
       mapResult: (result) => {
         return {
           data: result.messages,
-          hasMore: result.paging.size >= result.paging.limit,
+          hasMore: result.paging.limit > 0 && result.paging.size >= result.paging.limit,
         };
       },
     },
