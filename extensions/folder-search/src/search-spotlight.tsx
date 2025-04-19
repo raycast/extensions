@@ -81,11 +81,19 @@ export async function searchSpotlight(
       });
 
       searchStream.on("error", (error: Error) => {
-        log("error", "searchSpotlight", "Error during search", {
-          error,
-          search,
-          searchScope,
-        });
+        // Check if this is an AbortError (which is expected during typing)
+        if (error.name === "AbortError" || error.message.includes("aborted")) {
+          log("debug", "searchSpotlight", "Search aborted", {
+            search,
+            searchScope,
+          });
+        } else {
+          log("error", "searchSpotlight", "Error during search", {
+            error,
+            search,
+            searchScope,
+          });
+        }
         reject(error);
       });
     });
@@ -112,12 +120,20 @@ export async function searchSpotlight(
     });
 
     return filteredResults;
-  } catch (error) {
-    log("error", "searchSpotlight", "Error during search", {
-      error,
-      search,
-      searchScope,
-    });
+  } catch (error: unknown) {
+    // Check if this is an AbortError, which is expected during typing
+    if (error instanceof Error && (error.name === "AbortError" || error.message.includes("aborted"))) {
+      log("debug", "searchSpotlight", "Search aborted", {
+        search,
+        searchScope,
+      });
+    } else {
+      log("error", "searchSpotlight", "Error during search", {
+        error,
+        search,
+        searchScope,
+      });
+    }
     throw error;
   }
 }
