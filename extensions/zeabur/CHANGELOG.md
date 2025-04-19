@@ -1,5 +1,9 @@
 # Zeabur Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Added the search templates command to search templates in the [Zeabur Templates](https://zeabur.com/templates).
+
 ## [Update] - 2025-03-31
 
 - Updated the deploy script for the "Deploy Project" command.
