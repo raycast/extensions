@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gotify",
   "title": "Gotify",
-  "description": "Load gotify all messages",
+  "description": "Load all Gotify messages",
   "icon": "icon.png",
   "author": "Lemon",
   "categories": [
