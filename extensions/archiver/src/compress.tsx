@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import { compress, ensureBinary, processingAlert } from "./common/utils";
 import { ICompressPreferences } from "./common/types";
 import { CompressFormat, COMPRESS_FORMAT_METADATA } from "./common/const";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   const preferences: ICompressPreferences = getPreferenceValues<ICompressPreferences>();
@@ -67,8 +68,8 @@ export default function Command() {
                   await showInFinder(path);
                   showHUD("🎉 Compress successfully");
                   popToRoot();
-                } catch {
-                  showHUD("❌ Failed to compress...");
+                } catch (error) {
+                  showFailureToast(error, { title: "Failed to compress" });
                 } finally {
                   updateLoadingState(false);
                 }

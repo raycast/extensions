@@ -8,6 +8,7 @@ import { writeFile } from "fs/promises";
 import os from "os";
 import { ZipEntry, ZipFile } from "./common/types";
 import { formatFileSize, getBreadcrumb, getFileIcon, getParentDirectory } from "./common/utils";
+import { showFailureToast } from "@raycast/utils";
 
 export default function ZipDetailsView(props: { filePath: string; password?: string | undefined }) {
   const { filePath, password } = props;
@@ -22,11 +23,11 @@ export default function ZipDetailsView(props: { filePath: string; password?: str
   const entries = getCurrentEntries();
 
   async function loadZipContents(filePath: string) {
+    setIsLoading(true);
+    const fileName = path.basename(filePath);
+    const blob = new Blob([fs.readFileSync(filePath)]);
+    const reader = new ZipReader(new BlobReader(blob as globalThis.Blob), { password });
     try {
-      setIsLoading(true);
-      const fileName = path.basename(filePath);
-      const blob = new Blob([fs.readFileSync(filePath)]);
-      const reader = new ZipReader(new BlobReader(blob as globalThis.Blob), { password });
       const zipEntries = await reader.getEntries();
 
       // Process entries to create a hierarchical structure
@@ -46,10 +47,11 @@ export default function ZipDetailsView(props: { filePath: string; password?: str
       });
 
       setIsLoading(false);
-      await reader.close();
     } catch (error) {
       setIsLoading(false);
-      throw new Error(`Failed to read ZIP file: ${error instanceof Error ? error.message : String(error)}`);
+      showFailureToast(error instanceof Error ? error : new Error("Failed to read ZIP file"));
+    } finally {
+      await reader.close();
     }
   }
 
@@ -186,39 +188,41 @@ export default function ZipDetailsView(props: { filePath: string; password?: str
     const blob = new Blob([fs.readFileSync(zipFile.fullPath)]);
     const reader = new ZipReader(new BlobReader(blob as globalThis.Blob), { password });
 
-    const entries = await reader.getEntries();
+    try {
+      const entries = await reader.getEntries();
 
-    // Find matching entry
-    const zipEntry = entries.find((e) => e.filename === entry.path);
+      // Find matching entry
+      const zipEntry = entries.find((e) => e.filename === entry.path);
 
-    if (!zipEntry || !zipEntry.getData) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: "File not found in ZIP archive" });
-      return;
-    }
+      if (!zipEntry || !zipEntry.getData) {
+        showToast({ style: Toast.Style.Failure, title: "Error", message: "File not found in ZIP archive" });
+        return;
+      }
 
-    const fileBlob: Blob | undefined = await zipEntry.getData?.(new BlobWriter());
-    if (!fileBlob) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: "Failed to get file blob" });
-      return;
-    }
+      const fileBlob = await zipEntry.getData?.(new BlobWriter());
+      if (!fileBlob) {
+        showToast({ style: Toast.Style.Failure, title: "Error", message: "Failed to get file blob" });
+        return;
+      }
 
-    const arrayBuffer = await fileBlob.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    await writeFile(outputPath, buffer);
+      const arrayBuffer = await fileBlob.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      await writeFile(outputPath, buffer);
 
-    await showToast({
-      style: Toast.Style.Success,
-      title: "File Extracted",
-      message: outputPath,
-      primaryAction: {
-        title: "Open File",
-        onAction: () => {
-          raycastOpen(outputPath);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "File Extracted",
+        message: outputPath,
+        primaryAction: {
+          title: "Open File",
+          onAction: () => {
+            raycastOpen(outputPath);
+          },
         },
-      },
-    });
-
-    await reader.close();
+      });
+    } finally {
+      await reader.close();
+    }
   }
 
   return (
@@ -248,9 +252,9 @@ export default function ZipDetailsView(props: { filePath: string; password?: str
           // Alphabetically by name
           return a.name.localeCompare(b.name);
         })
-        .map((entry, index) => (
+        .map((entry) => (
           <List.Item
-            key={index}
+            key={entry.path}
             title={entry.name}
             subtitle={entry.isDirectory ? "Directory" : undefined}
             icon={entry.isDirectory ? Icon.Folder : getFileIcon(entry.name)}

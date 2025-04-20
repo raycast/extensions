@@ -24,6 +24,7 @@ import {
 import path from "node:path";
 import { IExtractPreferences, IFileInfo } from "./common/types";
 import { PRE_PWD_CHECK_THRESHOLD } from "./common/const";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   const preferences: IExtractPreferences = getPreferenceValues<IExtractPreferences>();
@@ -110,7 +111,7 @@ export default function Command() {
                   showHUD("🎉 Extract successfully");
                   popToRoot();
                 } catch {
-                  showHUD("❌ Failed to extract...");
+                  showFailureToast(new Error("Failed to Extract..."));
                 } finally {
                   updateLoadingState(false);
                 }

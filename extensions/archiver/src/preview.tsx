@@ -1,6 +1,7 @@
-import { ActionPanel, Action, Icon, showToast, Toast, getSelectedFinderItems, useNavigation, Form } from "@raycast/api";
+import { ActionPanel, Action, Icon, getSelectedFinderItems, useNavigation, Form } from "@raycast/api";
 import { useEffect, useState } from "react";
 import ZipDetailsView from "./zip-details-view";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -43,7 +44,8 @@ export default function Command() {
             title="Open Zip File"
             onSubmit={(values) => {
               if (filePath.length !== 1) {
-                showToast({ title: "Please select a single ZIP file", style: Toast.Style.Failure });
+                // showToast({ title: "Please select a single ZIP file", style: Toast.Style.Failure });
+                showFailureToast(new Error("Please select a single ZIP file"));
                 return;
               }
               const file = filePath[0];

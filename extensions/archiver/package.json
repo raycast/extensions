@@ -160,7 +160,7 @@
       "name": "preview",
       "title": "Preview Zip File",
       "subtitle": "Archiver",
-      "description": "preview contents of a ZIP file",
+      "description": "Preview Contents of a Zip File",
       "mode": "view",
       "keywords": [
         "archiver",
