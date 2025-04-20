@@ -73,7 +73,11 @@ export default function Command() {
     // Load favorites
     LocalStorage.getItem<string>("favorites").then((savedFavorites) => {
       if (savedFavorites) {
-        setFavorites(JSON.parse(savedFavorites));
+        try {
+          setFavorites(JSON.parse(savedFavorites));
+        } catch (error) {
+          showFailureToast(error, { title: "Failed to load favorites" });
+        }
       }
     });
 
