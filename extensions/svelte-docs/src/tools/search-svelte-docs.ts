@@ -8,9 +8,11 @@ type Input = {
   query: string;
 };
 
-export default async function (input: Input) {
+export default async function search_svelte_docs(input: Input) {
   const unparsed_svelte_items = await fetch(`https://svelte.dev/content.json`).then((res) => res.json());
   const svelte_items = parse(response_schema, unparsed_svelte_items);
   const keywords = input.query.split(" ");
-  return svelte_items?.blocks.filter((block) => keywords.some((keyword) => block.content.includes(keyword)));
+  return svelte_items?.blocks.filter((block) =>
+    keywords.some((keyword) => block.content.toLowerCase().includes(keyword.toLowerCase())),
+  );
 }
