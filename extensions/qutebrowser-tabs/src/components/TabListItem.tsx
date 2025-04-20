@@ -1,13 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Clipboard,
-  showToast,
-  Toast,
-  closeMainWindow,
-  Icon,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Clipboard, showToast, Toast, closeMainWindow, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
 import { Tab } from "../types";
@@ -96,11 +87,7 @@ export function TabListItem({ tab, onFocus, refreshTabs }: TabListItemProps) {
               shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
               onAction={() => openInBrowser(tab.url)}
             />
-            <Action
-              title="Copy URL"
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-              onAction={() => copyUrl(tab.url)}
-            />
+            <Action title="Copy URL" shortcut={{ modifiers: ["cmd"], key: "c" }} onAction={() => copyUrl(tab.url)} />
           </ActionPanel.Section>
 
           <ActionPanel.Section title="Refresh">

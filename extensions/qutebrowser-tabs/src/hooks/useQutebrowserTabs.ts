@@ -7,8 +7,7 @@ import SessionUtils from "../utils/sessionUtils";
 
 export function useQutebrowserTabs() {
   const preferences = getPreferenceValues<Preferences>();
-  const qutebrowserPath =
-    preferences.qutebrowserPath || "/opt/homebrew/bin/qutebrowser";
+  const qutebrowserPath = preferences.qutebrowserPath || "/opt/homebrew/bin/qutebrowser";
 
   const {
     data: tabs = [],
@@ -30,19 +29,13 @@ export function useQutebrowserTabs() {
     if (!searchText.trim()) return true;
 
     const lowerCaseSearch = searchText.toLowerCase();
-    return (
-      tab.title.toLowerCase().includes(lowerCaseSearch) ||
-      tab.url.toLowerCase().includes(lowerCaseSearch)
-    );
+    return tab.title.toLowerCase().includes(lowerCaseSearch) || tab.url.toLowerCase().includes(lowerCaseSearch);
   });
 
   const focusTab = useCallback(
     async (tab: Tab) => {
       try {
-        await SessionUtils.executeCommand(
-          qutebrowserPath,
-          `:tab-select ${tab.url}`,
-        );
+        await SessionUtils.executeCommand(qutebrowserPath, `:tab-select ${tab.url}`);
 
         return true;
       } catch (err) {
@@ -59,10 +52,7 @@ export function useQutebrowserTabs() {
   const openSearchInNewTab = useCallback(
     async (query: string) => {
       try {
-        await SessionUtils.executeCommand(
-          qutebrowserPath,
-          `:open -t DEFAULT ${query}`,
-        );
+        await SessionUtils.executeCommand(qutebrowserPath, `:open -t DEFAULT ${query}`);
         return true;
       } catch (err) {
         showFailureToast({

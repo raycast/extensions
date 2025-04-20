@@ -9,26 +9,11 @@ import { Tab, DebugInfo, SessionData } from "../types";
 const execPromise = util.promisify(exec);
 
 export const SESSION_FILE_PATHS = [
-  path.join(
-    os.homedir(),
-    "Library",
-    "Application Support",
-    "qutebrowser",
-    "sessions",
-    "_autosave.yml",
-  ),
+  path.join(os.homedir(), "Library", "Application Support", "qutebrowser", "sessions", "_autosave.yml"),
   path.join(os.homedir(), ".qutebrowser", "sessions", "_autosave.yml"),
-  path.join(
-    os.homedir(),
-    ".local",
-    "share",
-    "qutebrowser",
-    "sessions",
-    "_autosave.yml",
-  ),
+  path.join(os.homedir(), ".local", "share", "qutebrowser", "sessions", "_autosave.yml"),
 ];
-export const QUTEBROWSER_PROCESS_CHECK =
-  "ps aux | grep -v grep | grep qutebrowser";
+export const QUTEBROWSER_PROCESS_CHECK = "ps aux | grep -v grep | grep qutebrowser";
 
 const SessionUtils = {
   isRunning: async (): Promise<boolean> => {
@@ -64,14 +49,10 @@ const SessionUtils = {
         const content = fs.readFileSync(autoSavePath, "utf-8");
         return content;
       } else {
-        debugInfo.errors.push(
-          `Primary autosave file not found: ${autoSavePath}`,
-        );
+        debugInfo.errors.push(`Primary autosave file not found: ${autoSavePath}`);
       }
     } catch (e) {
-      debugInfo.errors.push(
-        `Error reading autosave file: ${SessionUtils.formatError(e)}`,
-      );
+      debugInfo.errors.push(`Error reading autosave file: ${SessionUtils.formatError(e)}`);
     }
 
     return null;
@@ -87,11 +68,8 @@ const SessionUtils = {
           if (window.tabs) {
             window.tabs.forEach((tab, tabIdx: number) => {
               if (tab.history?.length > 0) {
-                const activeHistoryEntry = tab.history.find(
-                  (entry) => entry.active,
-                );
-                const currentEntry =
-                  activeHistoryEntry || tab.history[tab.history.length - 1];
+                const activeHistoryEntry = tab.history.find((entry) => entry.active);
+                const currentEntry = activeHistoryEntry || tab.history[tab.history.length - 1];
 
                 tabs.push({
                   window: windowIdx,
@@ -115,10 +93,7 @@ const SessionUtils = {
     }
   },
 
-  executeCommand: async (
-    qutebrowserPath: string,
-    command: string,
-  ): Promise<void> => {
+  executeCommand: async (qutebrowserPath: string, command: string): Promise<void> => {
     try {
       // Sanitize the paths and command to prevent command injection
       const safePath = qutebrowserPath.replace(/"/g, '\\"');

@@ -1,12 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  closeMainWindow,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, closeMainWindow, showToast, Toast } from "@raycast/api";
 
 import { useQutebrowserTabs } from "./hooks/useQutebrowserTabs";
 import { TabListItem } from "./components/TabListItem";
@@ -80,9 +72,7 @@ export default function Command() {
                     title="Open URL with Qutebrowser"
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                     onAction={async () => {
-                      const url = searchText.includes("://")
-                        ? searchText
-                        : `https://${searchText}`;
+                      const url = searchText.includes("://") ? searchText : `https://${searchText}`;
                       const success = await openUrlInNewTab(url);
                       if (success) await closeMainWindow();
                     }}
@@ -129,9 +119,7 @@ export default function Command() {
           });
 
           // Sort window groups by window index
-          const sortedWindows = Array.from(windowGroups.entries()).sort(
-            ([windowA], [windowB]) => windowA - windowB,
-          );
+          const sortedWindows = Array.from(windowGroups.entries()).sort(([windowA], [windowB]) => windowA - windowB);
 
           return (
             <>
