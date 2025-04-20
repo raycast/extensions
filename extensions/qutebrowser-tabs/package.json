@@ -1,0 +1,56 @@
+{
+  "name": "qutebrowser-tabs",
+  "title": "Qutebrowser Tabs",
+  "description": "Search and manage qutebrowser tabs",
+  "icon": "command-icon.png",
+  "author": "alon.hearter",
+  "categories": [
+    "Web",
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "main": "src/index.tsx",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.72.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/utils": "^1.19.1",
+    "yaml": "^2.7.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.30",
+    "@typescript-eslint/eslint-plugin": "^6.1.0",
+    "@typescript-eslint/parser": "^6.3.0",
+    "eslint": "^8.43.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.0.3",
+    "sharp": "^0.34.1",
+    "typescript": "^5.8.3"
+  },
+  "preferences": [
+    {
+      "name": "qutebrowserPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Qutebrowser Path",
+      "description": "Path to the qutebrowser executable",
+      "placeholder": "/opt/homebrew/bin/qutebrowser"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Qutebrowser Tabs",
+      "description": "Search and manage open qutebrowser tabs",
+      "mode": "view"
+    }
+  ]
+}
