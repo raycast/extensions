@@ -7,7 +7,7 @@ import {
   getPreferenceValues,
   getSelectedText,
   LaunchProps,
-  openExtensionPreferences,
+  openCommandPreferences,
   showHUD,
 } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm, useLocalStorage } from "@raycast/utils";
@@ -59,6 +59,7 @@ const timezoneOptions = [
 const getCurrentTimezone = (): string => {
   const offset = -new Date().getTimezoneOffset();
   if (offset === 0) return "GMT";
+
   const sign = offset > 0 ? "+" : "-";
   return `UTC${sign}${Math.abs(offset / 60)}`;
 };
@@ -71,20 +72,23 @@ const parseTimezoneOffset = (timezone: string): number => {
   if (timezone === "GMT" || timezone === "UTC") return 0;
 
   const match = timezone.match(/^UTC([+-]\d+)$/);
-  if (match) {
-    return -parseInt(match[1]) * 60; // Convert hours to minutes and invert (UTC+8 means subtract 8 hours)
-  }
-  return 0;
+  if (!match) return 0;
+
+  return -parseInt(match[1]) * 60; // Convert hours to minutes and invert (UTC+8 means subtract 8 hours)
 };
 
 const tryParseTimestampOrDefault = (timestamp: string | undefined): Date => {
   if (!timestamp || !TIMESTAMP_REGEX.test(timestamp)) return new Date();
+
   const isMilliseconds = timestamp.length === 13;
   return new Date(parseInt(timestamp) * (isMilliseconds ? 1 : 1000));
 };
 
 const tryGetSelectedTextAndUpdate = async (updaterFn: (text: string) => void) => {
-  if (!environment.canAccess(getSelectedText)) return;
+  if (!environment.canAccess(getSelectedText)) {
+    showFailureToast(new Error("Unable to access selected text"));
+    return;
+  }
 
   try {
     const text = await getSelectedText();
@@ -93,12 +97,18 @@ const tryGetSelectedTextAndUpdate = async (updaterFn: (text: string) => void) =>
     }
   } catch (e) {
     console.error(e);
-    showFailureToast(e, { title: "Error getting selected text" });
   }
 };
+
+const copyWithFeedback = (content: string) => {
+  Clipboard.copy(content);
+  showHUD("Copied to clipboard");
+};
+
 const STORAGE_KEY_USE_MILLISECONDS = "convert-timestamp::use-milliseconds";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.TimestampConverter }>) {
+  const preferences = getPreferenceValues<Preferences.TimestampConverter>();
   const { value: useMilliseconds, setValue: setUseMilliseconds } = useLocalStorage(STORAGE_KEY_USE_MILLISECONDS, false);
 
   const timestampDate = tryParseTimestampOrDefault(props.arguments.timestamp);
@@ -174,8 +184,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
       },
     },
     onSubmit: (formValues: TimestampForm) => {
-      Clipboard.copy(formValues.timestamp);
-      showHUD("Copied to clipboard");
+      copyWithFeedback(formValues.timestamp);
     },
   });
 
@@ -271,7 +280,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
   }, [utcTimestamp]);
 
   useEffect(() => {
-    const preferences = getPreferenceValues<Preferences.TimestampConverter>();
     if (!preferences["use-selected-text"]) return;
 
     tryGetSelectedTextAndUpdate(updateFromTimestamp);
@@ -282,8 +290,17 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Copy Timestamp" onSubmit={handleSubmit} />
-          <Action title="Toggle Milliseconds" onAction={() => setUseMilliseconds(!useMilliseconds)} />
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          <Action
+            title="Copy Timestamp in Milliseconds"
+            onAction={() => copyWithFeedback(values.timestamp)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+          />
+          <Action
+            title={`Toggle Timestamp Format (${useMilliseconds ? "Milliseconds" : "Seconds"})`}
+            onAction={() => setUseMilliseconds(!useMilliseconds)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+          />
+          <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
         </ActionPanel>
       }
     >
@@ -297,6 +314,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
             updateFromTimestamp(value);
           }
         }}
+        info={`Timestamp format is ${useMilliseconds ? "milliseconds" : "seconds"}`}
       />
       {/** @ts-expect-error itemProps should be correct */}
       <Form.DatePicker
@@ -353,6 +371,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
         onChange={(value) => {
           updateFromComponents("second", value);
         }}
+        info={useMilliseconds ? undefined : "You can toggle to milliseconds with the action palette"}
       />
       {useMilliseconds && (
         <Form.TextField
@@ -361,6 +380,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
           onChange={(value) => {
             updateFromComponents("millisecond", value);
           }}
+          info={"You can toggle to seconds with the action palette"}
         />
       )}
       <Form.Dropdown
@@ -369,6 +389,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
         onChange={(value) => {
           updateFromComponents("timezone", value);
         }}
+        info={`Your local timezone is ${getCurrentTimezone()}`}
       >
         {timezoneOptions.map((option) => (
           <Form.Dropdown.Item key={option} value={option} title={option} />
