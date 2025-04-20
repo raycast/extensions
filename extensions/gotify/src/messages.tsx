@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List } from "@raycast/api";
 import { useApplication } from "./hooks/useApplication";
 import { useMessage } from "./hooks/useMessage";
 import dayjs from "dayjs";
@@ -14,7 +14,9 @@ export default function Command() {
 
   const { applications, applicationLoading } = useApplication();
 
-  const { messages, messageLoading, messagePagination, revalidate, deleteMessage } = useMessage({ id: selectApp });
+  const { messages, messageLoading, messagePagination, revalidate, deleteMessage, deleteAll, handleRead } = useMessage({
+    id: selectApp,
+  });
 
   const getAppName = useCallback(
     (appid: number) => {
@@ -22,6 +24,19 @@ export default function Command() {
     },
     [applications],
   );
+
+  const handleDeleteAll = async () => {
+    const options: Alert.Options = {
+      title: "Delete All Messages?",
+      message: (getAppName(Number(selectApp)) ?? "All") + " messages will be deleted.",
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+        onAction: deleteAll,
+      },
+    };
+    await confirmAlert(options);
+  };
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -55,13 +70,16 @@ export default function Command() {
           />
         </ActionPanel>
       }
+      onSelectionChange={handleRead}
     >
       {messages?.map((message) => (
         <List.Item
+          id={String(message.id)}
           icon={"apple-touch-icon-60x60.png"}
           key={message.id}
           title={message.title}
           keywords={[message.message, message.title, String(message.extras?.["metadata::type"])]}
+          accessories={[message._new ? { icon: Icon.Stars } : {}]}
           detail={
             <List.Item.Detail
               markdown={
@@ -105,6 +123,12 @@ export default function Command() {
             <ActionPanel>
               <Action.CopyToClipboard title="Copy Message" content={message.message} />
               <Action
+                title={"Refresh"}
+                icon={Icon.ArrowClockwise}
+                onAction={() => revalidate()}
+                shortcut={Shortcut.Common.Refresh}
+              />
+              <Action
                 title={"Delete Message"}
                 icon={Icon.Trash}
                 onAction={() => deleteMessage(message.id)}
@@ -112,10 +136,14 @@ export default function Command() {
                 shortcut={Shortcut.Common.Remove}
               />
               <Action
-                title={"Refresh"}
-                icon={Icon.ArrowClockwise}
-                onAction={() => revalidate()}
-                shortcut={Shortcut.Common.Refresh}
+                title={`Delete All Messages`}
+                icon={Icon.ExclamationMark}
+                onAction={handleDeleteAll}
+                style={Action.Style.Destructive}
+                shortcut={{
+                  modifiers: ["cmd", "shift"],
+                  key: "delete",
+                }}
               />
             </ActionPanel>
           }

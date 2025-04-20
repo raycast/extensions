@@ -1,6 +1,9 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { z } from "zod";
+import { authHeaders, endpointWithPath } from "../utils";
+import { useStream } from "./useStream";
+import { useEffect, useState } from "react";
 
 export const Message = z.object({
   id: z.number(),
@@ -23,6 +26,7 @@ export const Message = z.object({
     })
     .partial()
     .optional(),
+  _new: z.boolean().optional(),
 });
 
 export const MessageRes = z.object({
@@ -36,13 +40,10 @@ export const MessageRes = z.object({
 
 export function useMessage(props?: { id: string }) {
   const { token, endpoint } = getPreferenceValues<Preferences.Messages>();
-  let url = `${endpoint}/message`;
+  let url = endpointWithPath(endpoint, "/message");
   if (props?.id && props.id.toLowerCase() !== "all") {
-    url = `${endpoint}/application/${props.id}/message`;
+    url = endpointWithPath(url, `/application/${props.id}/message`);
   }
-  const headers = {
-    "X-Gotify-Key": token,
-  };
 
   const { data, isLoading, pagination, mutate, revalidate } = useFetch<
     z.infer<typeof MessageRes>,
@@ -50,14 +51,11 @@ export function useMessage(props?: { id: string }) {
     z.infer<typeof Message>[]
   >(
     (options) => {
-      let since = 0;
-      if (options.lastItem) {
-        since = options.lastItem.id;
-      }
-      return `${url}?since=${since}`;
+      const since = options.lastItem?.id ?? 0;
+      return `${url.href}?since=${since}`;
     },
     {
-      headers,
+      ...authHeaders(token),
       mapResult: (result) => {
         return {
           data: result.messages,
@@ -71,8 +69,8 @@ export function useMessage(props?: { id: string }) {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Delete Message" });
     try {
       await mutate(
-        fetch(`${endpoint}/message/${id}`, {
-          headers,
+        fetch(endpointWithPath(endpoint, `/message/${id}`), {
+          ...authHeaders(token),
           method: "DELETE",
         }),
         {
@@ -88,11 +86,68 @@ export function useMessage(props?: { id: string }) {
     }
   };
 
+  const deleteAll = async () => {
+    const path = props?.id && props.id.toLowerCase() !== "all" ? `/application/${props.id}/message` : "/message";
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Delete All" });
+    try {
+      await mutate(
+        fetch(endpointWithPath(endpoint, path), {
+          ...authHeaders(token),
+          method: "DELETE",
+        }),
+        {
+          shouldRevalidateAfter: true,
+        },
+      );
+      toast.style = Toast.Style.Success;
+      toast.message = "All messages deleted";
+    } catch (err) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not delete all messages";
+      toast.message = (err as Error).message;
+    }
+  };
+
+  const { data: stream } = useStream();
+  const [messages, setMessages] = useState<z.infer<typeof Message>[] | undefined>([]);
+
+  useEffect(() => {
+    setMessages(data);
+  }, [data]);
+
+  useEffect(() => {
+    setMessages((prev) => {
+      let res = [...(prev ?? [])];
+      if (stream) {
+        res = res.filter((d) => d.id !== stream.id);
+        res.push(stream);
+      }
+      return res.sort((a, b) => {
+        return b.id - a.id;
+      });
+    });
+  }, [stream]);
+
+  const handleRead = (id: string | null) => {
+    if (id) {
+      setMessages((prev) => {
+        return prev?.map((d) => {
+          if (d.id === Number(id)) {
+            d._new = false;
+          }
+          return d;
+        });
+      });
+    }
+  };
+
   return {
-    messages: data,
+    messages,
     messageLoading: isLoading,
     messagePagination: pagination,
     revalidate,
     deleteMessage,
+    deleteAll,
+    handleRead,
   };
 }
