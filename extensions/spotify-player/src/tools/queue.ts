@@ -32,11 +32,13 @@ const tool = async ({ trackId }: Input) => {
       status: "success",
       message: trackId ? "Track added to queue successfully" : "Current queue retrieved",
     };
-  } catch (error) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
     return {
       queue: [],
       status: "error",
-      message: `Queue operation failed: ${error}`,
+      message: `Queue operation failed: ${errorMessage}`,
     };
   }
 };
