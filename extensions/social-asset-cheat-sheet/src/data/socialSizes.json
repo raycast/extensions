@@ -1,0 +1,655 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-04-19",
+  "platformBestPractices": {
+    "order": [
+      "Facebook",
+      "Instagram",
+      "TikTok",
+      "LinkedIn",
+      "Twitter/X",
+      "Pinterest",
+      "Reddit",
+      "Threads",
+      "Twitch",
+      "Tumblr",
+      "BlueSky",
+      "Spotify",
+      "Etsy",
+      "Eventbrite"
+    ],
+    "Platform Groups": {
+      "Social Giants": {
+        "description": "Facebook, Instagram, and TikTok have the largest user bases"
+      },
+      "Professional": {
+        "description": "LinkedIn and Twitter/X are business-focused platforms"
+      },
+      "Creative": {
+        "description": "Pinterest, Etsy, and Tumblr focus on creative content"
+      },
+      "Community": {
+        "description": "Reddit, Threads, and BlueSky focus on community engagement"
+      },
+      "Entertainment": {
+        "description": "Twitch and Spotify focus on streaming content"
+      }
+    },
+    "Instagram": [
+      "Maximum file size: 30MB",
+      "Supported formats: JPG, PNG",
+      "Profile pictures will be cropped to circle",
+      "Recommended aspect ratios: 1:1 (square), 4:5 (portrait), 16:9 (landscape), 9:16 (stories)",
+      "Carousel posts use consistent ratios per slide"
+    ],
+    "Twitter/X": [
+      "Maximum file size: 5MB",
+      "Supported formats: JPG, PNG, GIF, WEBP",
+      "Profile pictures will be cropped to circle",
+      "Recommended aspect ratios: 1:1 (square), 16:9 (landscape), 2:1 (banner)",
+      "Link previews use 1.91:1 ratio"
+    ],
+    "Facebook": [
+      "Maximum file size: 4MB",
+      "Supported formats: JPG, PNG",
+      "Profile pictures will be cropped to circle",
+      "Recommended aspect ratios: 1:1 (square), 16:9 (landscape), 9:16 (stories)",
+      "Text should not exceed 20% of image area"
+    ],
+    "LinkedIn": [
+      "Maximum file size: 8MB",
+      "Supported formats: JPG, PNG",
+      "Profile pictures will be cropped to circle",
+      "Recommended aspect ratios: 1:1 (square), 16:9 (landscape), 2:1 (banner)",
+      "Keep designs professional and clean"
+    ],
+    "Pinterest": [
+      "Maximum file size: 32MB",
+      "Vertical pins perform best (2:3 aspect ratio)",
+      "Use high-quality, vibrant images",
+      "Include descriptive text overlay",
+      "JPG and PNG recommended"
+    ],
+    "YouTube": [
+      "Thumbnail quality: minimum 1280x720px",
+      "Keep important elements in center (mobile safe zone)",
+      "Use bright, high-contrast images",
+      "Include faces when relevant",
+      "JPG, PNG, GIF formats supported"
+    ],
+    "Reddit": [
+      "Maximum file size: 20MB",
+      "PNG and JPG recommended for best quality",
+      "Banner images should be optimized for both desktop and mobile",
+      "Avatar images will be cropped to circle",
+      "Community icons should be simple and recognizable"
+    ],
+    "Twitch": [
+      "Maximum file size: 10MB",
+      "PNG recommended for profile images",
+      "Panels should be optimized for dark mode",
+      "Keep important content in center safe zone",
+      "Use consistent branding across all assets"
+    ],
+    "Spotify": [
+      "JPEG format required for album/playlist covers",
+      "Minimum resolution: 640x640px",
+      "Square aspect ratio required",
+      "Keep designs simple and clear at small sizes",
+      "Avoid text-heavy designs"
+    ],
+    "Etsy": [
+      "Maximum file size: 20MB per image",
+      "Use white or light backgrounds",
+      "Minimum 2000px on longest side recommended",
+      "JPG format preferred (72-96 DPI)",
+      "Keep main product centered"
+    ],
+    "Tumblr": [
+      "GIF animations supported (under 3MB)",
+      "PNG recommended for graphics",
+      "JPG for photos",
+      "Dashboard posts look best at 500-540px width",
+      "Keep important content in center for theme compatibility"
+    ],
+    "BlueSky": [
+      "Maximum file size: 2.5MB",
+      "Supported formats: JPG, PNG",
+      "Profile pictures will be cropped to circle",
+      "Recommended aspect ratios: 16:9 (landscape), 1:1 (square)",
+      "Supports up to 4K resolution"
+    ],
+    "Threads": [
+      "Maximum file size: 30MB",
+      "Supported formats: JPG, PNG",
+      "Profile pictures will be cropped to circle",
+      "Recommended aspect ratios: 1:1 (square), 4:5 (portrait), 16:9 (landscape)",
+      "Similar to Instagram's guidelines"
+    ]
+  },
+  "sizes": [
+    {
+      "platform": "Facebook",
+      "type": "Profile Picture",
+      "width": 170,
+      "height": 170,
+      "icon": "Camera",
+      "id": "facebook-profile",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Facebook",
+      "type": "Banner",
+      "width": 851,
+      "height": 315,
+      "icon": "Image",
+      "id": "facebook-banner",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Facebook",
+      "type": "Story",
+      "width": 1080,
+      "height": 1920,
+      "icon": "Image",
+      "id": "facebook-story",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Facebook",
+      "type": "Link Preview",
+      "width": 1200,
+      "height": 628,
+      "icon": "Image",
+      "id": "facebook-link",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Facebook",
+      "type": "Event Banner",
+      "width": 1920,
+      "height": 1080,
+      "icon": "Image",
+      "id": "facebook-event",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Facebook",
+      "type": "Post - Square",
+      "width": 1080,
+      "height": 1080,
+      "icon": "Image",
+      "id": "facebook-post-square",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Facebook",
+      "type": "Post - Portrait",
+      "width": 1080,
+      "height": 1350,
+      "icon": "Image",
+      "id": "facebook-post-portrait",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Facebook",
+      "type": "Post - Landscape",
+      "width": 1200,
+      "height": 630,
+      "icon": "Image",
+      "id": "facebook-post",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Instagram",
+      "type": "Profile Picture",
+      "width": 320,
+      "height": 320,
+      "icon": "Camera",
+      "id": "instagram-profile",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Instagram",
+      "type": "Story",
+      "width": 1080,
+      "height": 1920,
+      "icon": "Image",
+      "id": "instagram-story",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Instagram",
+      "type": "Post - Square",
+      "width": 1080,
+      "height": 1080,
+      "icon": "Image",
+      "id": "instagram-post-square",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Instagram",
+      "type": "Post - Portrait",
+      "width": 1080,
+      "height": 1350,
+      "icon": "Image",
+      "id": "instagram-post-portrait",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Instagram",
+      "type": "Post - Landscape",
+      "width": 1920,
+      "height": 1080,
+      "icon": "Image",
+      "id": "instagram-post-landscape",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Instagram",
+      "type": "Reel Cover",
+      "width": 1080,
+      "height": 1920,
+      "icon": "Image",
+      "id": "instagram-reel-cover",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "TikTok",
+      "type": "Profile Picture",
+      "width": 200,
+      "height": 200,
+      "icon": "Camera",
+      "id": "tiktok-profile",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "TikTok",
+      "type": "Banner",
+      "width": 2048,
+      "height": 1152,
+      "icon": "Image",
+      "id": "tiktok-banner",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "TikTok",
+      "type": "Post - Square",
+      "width": 1080,
+      "height": 1080,
+      "icon": "Image",
+      "id": "tiktok-post-square",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "TikTok",
+      "type": "Post - Portrait",
+      "width": 1080,
+      "height": 1920,
+      "icon": "Image",
+      "id": "tiktok-post-portrait",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "TikTok",
+      "type": "Video",
+      "width": 1080,
+      "height": 1920,
+      "icon": "Video",
+      "id": "tiktok-video",
+      "lastVerified": "2025-04-19"
+    },
+
+    {
+      "platform": "LinkedIn",
+      "type": "Profile Picture",
+      "width": 400,
+      "height": 400,
+      "icon": "Camera",
+      "id": "linkedin-profile",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "LinkedIn",
+      "type": "Company Logo",
+      "width": 300,
+      "height": 300,
+      "icon": "Camera",
+      "id": "linkedin-company-logo",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "LinkedIn",
+      "type": "Banner",
+      "width": 1584,
+      "height": 396,
+      "icon": "Image",
+      "id": "linkedin-banner",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "LinkedIn",
+      "type": "Post - Square",
+      "width": 1080,
+      "height": 1080,
+      "icon": "Image",
+      "id": "linkedin-post-square",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "LinkedIn",
+      "type": "Post - Portrait",
+      "width": 1080,
+      "height": 1350,
+      "icon": "Image",
+      "id": "linkedin-post-portrait",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "LinkedIn",
+      "type": "Post - Landscape",
+      "width": 1200,
+      "height": 627,
+      "icon": "Image",
+      "id": "linkedin-post-landscape",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "LinkedIn",
+      "type": "Article Cover",
+      "width": 1920,
+      "height": 1080,
+      "icon": "Image",
+      "id": "linkedin-article",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "LinkedIn",
+      "type": "Link Preview",
+      "width": 1200,
+      "height": 628,
+      "icon": "Image",
+      "id": "linkedin-link",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Twitter/X",
+      "type": "Profile Picture",
+      "width": 400,
+      "height": 400,
+      "icon": "Camera",
+      "id": "twitter-profile",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Twitter/X",
+      "type": "Banner",
+      "width": 1500,
+      "height": 500,
+      "icon": "Image",
+      "id": "twitter-banner",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Twitter/X",
+      "type": "Post - Square",
+      "width": 1080,
+      "height": 1080,
+      "icon": "Image",
+      "id": "twitter-post-square",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Twitter/X",
+      "type": "Post - Landscape",
+      "width": 1600,
+      "height": 900,
+      "icon": "Image",
+      "id": "twitter-post-landscape",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Twitter/X",
+      "type": "Link Preview",
+      "width": 1200,
+      "height": 628,
+      "icon": "Image",
+      "id": "twitter-link",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Pinterest",
+      "type": "Profile Picture",
+      "width": 165,
+      "height": 165,
+      "icon": "Camera",
+      "id": "pinterest-profile",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Pinterest",
+      "type": "Banner",
+      "width": 800,
+      "height": 450,
+      "icon": "Image",
+      "id": "pinterest-banner",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Pinterest",
+      "type": "Pin - Square",
+      "width": 1000,
+      "height": 1000,
+      "icon": "Image",
+      "id": "pinterest-pin-square",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Pinterest",
+      "type": "Pin - Portrait",
+      "width": 1000,
+      "height": 1500,
+      "icon": "Image",
+      "id": "pinterest-pin-portrait",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Pinterest",
+      "type": "Pin - Long",
+      "width": 1000,
+      "height": 2100,
+      "icon": "Image",
+      "id": "pinterest-pin-long",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Pinterest",
+      "type": "Story",
+      "width": 1080,
+      "height": 1920,
+      "icon": "Image",
+      "id": "pinterest-story",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Pinterest",
+      "type": "Board Banner",
+      "width": 800,
+      "height": 600,
+      "icon": "Image",
+      "id": "pinterest-board",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Twitch",
+      "type": "Profile Picture",
+      "width": 256,
+      "height": 256,
+      "icon": "Camera",
+      "id": "twitch-profile",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Twitch",
+      "type": "Banner",
+      "width": 1200,
+      "height": 480,
+      "icon": "Image",
+      "id": "twitch-banner",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Twitch",
+      "type": "Panel",
+      "width": 320,
+      "height": 100,
+      "icon": "Image",
+      "id": "twitch-panel",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "YouTube",
+      "type": "Thumbnail",
+      "width": 1280,
+      "height": 720,
+      "icon": "Image",
+      "id": "youtube-thumbnail",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Threads",
+      "type": "Profile Picture",
+      "width": 320,
+      "height": 320,
+      "icon": "Camera",
+      "id": "threads-profile",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Threads",
+      "type": "Post - Square",
+      "width": 1080,
+      "height": 1080,
+      "icon": "Image",
+      "id": "threads-post-square",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Threads",
+      "type": "Post - Portrait",
+      "width": 1080,
+      "height": 1350,
+      "icon": "Image",
+      "id": "threads-post-portrait",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Threads",
+      "type": "Post - Landscape",
+      "width": 1920,
+      "height": 1080,
+      "icon": "Image",
+      "id": "threads-post-landscape",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Tumblr",
+      "type": "Profile Picture",
+      "width": 128,
+      "height": 128,
+      "icon": "Camera",
+      "id": "tumblr-profile",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Tumblr",
+      "type": "Post",
+      "width": 540,
+      "height": 810,
+      "icon": "Image",
+      "id": "tumblr-post",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "BlueSky",
+      "type": "Profile Picture",
+      "width": 256,
+      "height": 256,
+      "icon": "Camera",
+      "id": "bluesky-profile",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "BlueSky",
+      "type": "Banner",
+      "width": 1500,
+      "height": 500,
+      "icon": "Image",
+      "id": "bluesky-banner",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "BlueSky",
+      "type": "Post - Landscape",
+      "width": 3840,
+      "height": 2160,
+      "icon": "Image",
+      "id": "bluesky-post",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Etsy",
+      "type": "Profile Picture",
+      "width": 500,
+      "height": 500,
+      "icon": "Camera",
+      "id": "etsy-profile",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Etsy",
+      "type": "Banner",
+      "width": 1200,
+      "height": 300,
+      "icon": "Image",
+      "id": "etsy-banner",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Etsy",
+      "type": "Listing Image",
+      "width": 2000,
+      "height": 2000,
+      "icon": "Image",
+      "id": "etsy-listing",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Eventbrite",
+      "type": "Profile Picture",
+      "width": 500,
+      "height": 500,
+      "icon": "Camera",
+      "id": "eventbrite-profile",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Eventbrite",
+      "type": "Event Banner",
+      "width": 2160,
+      "height": 1080,
+      "icon": "Image",
+      "id": "eventbrite-event",
+      "lastVerified": "2025-04-19"
+    },
+    {
+      "platform": "Eventbrite",
+      "type": "Event Thumbnail",
+      "width": 512,
+      "height": 256,
+      "icon": "Image",
+      "id": "eventbrite-thumbnail",
+      "lastVerified": "2025-04-19"
+    }
+  ]
+}
