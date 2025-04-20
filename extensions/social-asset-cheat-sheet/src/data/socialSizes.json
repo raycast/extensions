@@ -70,13 +70,21 @@
       "Include descriptive text overlay",
       "JPG and PNG recommended"
     ],
-    "YouTube": [
-      "Thumbnail quality: minimum 1280x720px",
-      "Keep important elements in center (mobile safe zone)",
-      "Use bright, high-contrast images",
-      "Include faces when relevant",
-      "JPG, PNG, GIF formats supported"
-    ],
+    "Facebook",
+      "Instagram",
+      "TikTok",
+      "LinkedIn",
+      "Twitter/X",
+      "Pinterest",
+      "Reddit",
+      "Threads",
+      "Twitch",
+      "Tumblr",
+      "BlueSky",
+      "Spotify",
+      "Etsy",
+      "Eventbrite",
+      "YouTube"
     "Reddit": [
       "Maximum file size: 20MB",
       "PNG and JPG recommended for best quality",
