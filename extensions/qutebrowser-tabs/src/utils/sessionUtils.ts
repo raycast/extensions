@@ -119,7 +119,15 @@ const SessionUtils = {
     qutebrowserPath: string,
     command: string,
   ): Promise<void> => {
-    await execPromise(`"${qutebrowserPath}" "${command}"`);
+    try {
+      // Sanitize the paths and command to prevent command injection
+      const safePath = qutebrowserPath.replace(/"/g, '\\"');
+      const safeCommand = command.replace(/"/g, '\\"');
+      await execPromise(`"${safePath}" "${safeCommand}"`);
+    } catch (error) {
+      console.error("Error executing qutebrowser command:", error);
+      throw error; // Re-throw to let callers handle specific errors
+    }
   },
 };
 

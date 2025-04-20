@@ -1,6 +1,6 @@
 # Qutebrowser Tabs Changelog
 
-## [Initial Version] - 2025-04-19
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Search and manage qutebrowser tabs from Raycast
 - Focus on specific tabs with a single click

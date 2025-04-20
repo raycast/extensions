@@ -8,6 +8,7 @@ import {
   closeMainWindow,
   Icon,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
 import { Tab } from "../types";
 
@@ -27,13 +28,39 @@ export function TabListItem({ tab, onFocus, refreshTabs }: TabListItemProps) {
   };
 
   const openInBrowser = (url: string) => {
-    exec(`open "${url}"`);
+    try {
+      exec(`open "${url}"`, (error) => {
+        if (error) {
+          showFailureToast({
+            title: "Failed to open URL",
+            message: error.message,
+          });
+        }
+      });
+    } catch (err) {
+      showFailureToast({
+        title: "Failed to open URL",
+        message: err instanceof Error ? err.message : String(err),
+      });
+    }
   };
 
   const handleTabFocus = async () => {
-    const success = await onFocus(tab);
-    if (success) {
-      await closeMainWindow();
+    try {
+      const success = await onFocus(tab);
+      if (success) {
+        await closeMainWindow();
+      } else {
+        showFailureToast({
+          title: "Failed to focus tab",
+          message: "Could not focus the selected tab in qutebrowser",
+        });
+      }
+    } catch (err) {
+      showFailureToast({
+        title: "Failed to focus tab",
+        message: err instanceof Error ? err.message : String(err),
+      });
     }
   };
 

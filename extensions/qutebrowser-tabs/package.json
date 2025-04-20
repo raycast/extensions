@@ -49,6 +49,7 @@
     {
       "name": "index",
       "title": "Search Qutebrowser Tabs",
+      "subtitle": "Qutebrowser",
       "description": "Search and manage open qutebrowser tabs",
       "mode": "view"
     }

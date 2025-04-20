@@ -1,6 +1,6 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { useState, useCallback } from "react";
-import { usePromise } from "@raycast/utils";
+import { usePromise, showFailureToast } from "@raycast/utils";
 import { Preferences, Tab } from "../types";
 import { fetchQutebrowserTabs } from "../utils/tabFetcher";
 import SessionUtils from "../utils/sessionUtils";
@@ -17,8 +17,7 @@ export function useQutebrowserTabs() {
     revalidate,
   } = usePromise(fetchQutebrowserTabs, [], {
     onError: (error) => {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to fetch tabs",
         message: SessionUtils.formatError(error),
       });
@@ -47,8 +46,7 @@ export function useQutebrowserTabs() {
 
         return true;
       } catch (err) {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "Failed to focus tab",
           message: SessionUtils.formatError(err),
         });
@@ -67,8 +65,7 @@ export function useQutebrowserTabs() {
         );
         return true;
       } catch (err) {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "Failed to open search",
           message: SessionUtils.formatError(err),
         });
@@ -84,8 +81,7 @@ export function useQutebrowserTabs() {
         await SessionUtils.executeCommand(qutebrowserPath, `:open -t ${url}`);
         return true;
       } catch (err) {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "Failed to open URL",
           message: SessionUtils.formatError(err),
         });
