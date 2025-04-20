@@ -18,15 +18,17 @@ type Input = {
 const tool = async ({ trackId }: Input) => {
   try {
     // Add track to queue if trackId is provided
+    let response = null;
     if (trackId) {
-      await addToQueue({ uri: `spotify:track:${trackId}` });
+      response = await addToQueue({ uri: `spotify:track:${trackId}` });
+    } else {
+      response = await getQueue();
     }
 
     // Get current queue
-    const queueData = await getQueue();
 
     return {
-      queue: queueData,
+      queue: response || [],
       status: "success",
       message: trackId ? "Track added to queue successfully" : "Current queue retrieved",
     };
