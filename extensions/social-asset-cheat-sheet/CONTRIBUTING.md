@@ -24,11 +24,11 @@ Thank you for considering contributing to the Social Asset Cheat Sheet extension
 ## Verification Sources
 
 Please verify sizes from official documentation:
-- Instagram: developers.facebook.com/docs/instagram
-- Twitter/X: developer.twitter.com/en/docs
-- Facebook: developers.facebook.com/docs
-- LinkedIn: learn.microsoft.com/en-us/linkedin/
-- YouTube: developers.google.com/youtube
-- TikTok: developers.tiktok.com
-- Pinterest: developers.pinterest.com
-- Eventbrite: www.eventbrite.com/platform/docs
+- Instagram: https://developers.facebook.com/docs/instagram
+- Twitter/X: https://developer.twitter.com/en/docs
+- Facebook: https://developers.facebook.com/docs
+- LinkedIn: https://learn.microsoft.com/en-us/linkedin/
+- YouTube: https://developers.google.com/youtube
+- TikTok: https://developers.tiktok.com
+- Pinterest: https://developers.pinterest.com
+- Eventbrite: https://www.eventbrite.com/platform/docs
