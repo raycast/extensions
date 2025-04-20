@@ -1,24 +1,25 @@
-import { Clipboard, Alert, confirmAlert, showToast, Toast } from "@raycast/api";
+import { Clipboard, Alert, confirmAlert } from "@raycast/api";
 import { convertCocoaCoreDataDateToDate } from "./date-util";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
-  const coreDataDateNumber = Number(await Clipboard.readText());
-  if (Number.isNaN(coreDataDateNumber)) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "No number in the clipboard.",
-    });
-    return;
-  }
-  const date = convertCocoaCoreDataDateToDate(coreDataDateNumber);
-  const options: Alert.Options = {
-    title: date.toString(),
-    primaryAction: {
-      title: "Copy to clipboard",
-      onAction: () => {
-        Clipboard.copy(date.toString());
+  try {
+    const coreDataDateNumber = Number(await Clipboard.readText());
+    if (Number.isNaN(coreDataDateNumber)) {
+      throw new Error("No number in the clipboard.");
+    }
+    const date = convertCocoaCoreDataDateToDate(coreDataDateNumber);
+    const options: Alert.Options = {
+      title: date.toString(),
+      primaryAction: {
+        title: "Copy to clipboard",
+        onAction: () => {
+          Clipboard.copy(date.toString());
+        },
       },
-    },
-  };
-  await confirmAlert(options);
+    };
+    await confirmAlert(options);
+  } catch (error) {
+    showFailureToast(error);
+  }
 }

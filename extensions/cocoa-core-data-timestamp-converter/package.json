@@ -14,18 +14,21 @@
     {
       "name": "cocoa-core-data-to-human-readable",
       "title": "Cocoa Core Data Timestamp",
+      "subtitle": "Cocoa Core Data Date to Human Readable",
       "description": "Convert Cocoa Core Data Dates into Human Readable Format",
       "mode": "no-view"
     },
     {
       "name": "cocoa-core-data-to-epoch",
       "title": "Cocoa Core Data to Epoch",
+      "subtitle": "Cocoa Core Data Date to Epoch",
       "description": "Convert Cocoa Core Data Dates into Epoch",
       "mode": "no-view"
     },
     {
       "name": "epoch-to-core-data",
       "title": "Epoch to Cocoa Core Data Date",
+      "subtitle": "Epoch to Cocoa Core Data Date",
       "description": "Convert Epoch to Cocoa Core Data Date",
       "mode": "no-view"
     }
