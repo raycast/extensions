@@ -1,5 +1,9 @@
 # Messages 2FA Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Add the functionality for directly opening verification/ sign-in links that were received via Email (Apple Mail / Gmail)
+
 ## [Update] - 2025-02-17
 
 - Add ability to type the 2FA code instead of pasting it

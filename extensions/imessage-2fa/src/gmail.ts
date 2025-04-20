@@ -7,7 +7,7 @@ import { OAuth, getPreferenceValues, Icon } from "@raycast/api";
 import { gmail as gmailClient, auth, gmail_v1 } from "@googleapis/gmail";
 import { Message, Preferences, SearchType } from "./types";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { extractCode, calculateLookBackMinutes } from "./utils";
+import { calculateLookBackMinutes, stripHtmlTags, extractVerificationLink } from "./utils";
 import fetch from "node-fetch";
 
 // Create an OAuth client ID via https://console.developers.google.com/apis/credentials
@@ -111,6 +111,183 @@ async function getAuthorizedGmailClient() {
 }
 
 /**
+ * Find the most appropriate body parts from the payload.
+ * Returns both HTML and plain text parts if found.
+ */
+function findBodyParts(part: gmail_v1.Schema$MessagePart): {
+  htmlPart: gmail_v1.Schema$MessagePart | null;
+  plainPart: gmail_v1.Schema$MessagePart | null;
+} {
+  const result = {
+    htmlPart: part.mimeType === "text/html" ? part : null,
+    plainPart: part.mimeType === "text/plain" ? part : null,
+  };
+
+  if (part.parts) {
+    for (const subPart of part.parts) {
+      // If we've already found both, no need to search deeper in this branch
+      if (result.htmlPart && result.plainPart) break;
+
+      if (!result.htmlPart && subPart.mimeType === "text/html") {
+        result.htmlPart = subPart;
+      }
+      if (!result.plainPart && subPart.mimeType === "text/plain") {
+        result.plainPart = subPart;
+      }
+
+      // Recursively search if we haven't found both types yet
+      if ((!result.htmlPart || !result.plainPart) && subPart.parts) {
+        const nestedResult = findBodyParts(subPart);
+        if (!result.htmlPart && nestedResult.htmlPart) {
+          result.htmlPart = nestedResult.htmlPart;
+        }
+        if (!result.plainPart && nestedResult.plainPart) {
+          result.plainPart = nestedResult.plainPart;
+        }
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * Decode email body based on encoding.
+ * Handles base64 and quoted-printable (basic common cases).
+ */
+function decodeBody(bodyPart: gmail_v1.Schema$MessagePart | null): string {
+  if (!bodyPart?.body?.data) {
+    return "";
+  }
+
+  let bodyData = bodyPart.body.data;
+  const encoding = bodyPart.headers
+    ?.find((h) => h.name?.toLowerCase() === "content-transfer-encoding")
+    ?.value?.toLowerCase();
+
+  // Decode Base64
+  // Gmail API uses URL-safe Base64, need to convert hyphens and underscores
+  bodyData = bodyData.replace(/-/g, "+").replace(/_/g, "/");
+  let decodedBody = Buffer.from(bodyData, "base64").toString("utf-8");
+
+  // Decode Quoted-Printable (basic handling)
+  if (encoding === "quoted-printable") {
+    // Replace soft line breaks (= followed by newline)
+    decodedBody = decodedBody.replace(/=\r?\n/g, "");
+    // Replace encoded characters (=XX)
+    decodedBody = decodedBody.replace(/=([0-9A-F]{2})/g, (_, hex) => {
+      try {
+        return String.fromCharCode(parseInt(hex, 16));
+      } catch (e) {
+        return `=${hex}`; // Keep original if parsing fails
+      }
+    });
+  }
+
+  return decodedBody;
+}
+
+/**
+ * Decodes quoted-printable sequences in URLs
+ * This is especially important for Apple Mail which can break URLs with quoted-printable encoding
+ *
+ * @param url - URL that might contain quoted-printable sequences
+ * @returns Properly decoded URL
+ */
+function decodeQuotedPrintableUrl(url: string): string {
+  if (!url) return url;
+
+  // Replace =XX sequences with their actual characters
+  // This regex matches an equals sign followed by two hex digits
+  return url.replace(/=([0-9A-Fa-f]{2})/g, (_, hex) => {
+    try {
+      return String.fromCharCode(parseInt(hex, 16));
+    } catch (e) {
+      return `=${hex}`; // Keep original if parsing fails
+    }
+  });
+}
+
+/**
+ * Process email content into a standardized Message object.
+ * This function encapsulates the Gmail processing logic for email content.
+ *
+ * @param guid - Unique identifier for the message
+ * @param subject - Email subject
+ * @param from - Sender information
+ * @param date - Message date as Date object
+ * @param htmlBody - HTML content of the email, if available
+ * @param plainBody - Plain text content of the email, if available
+ * @param snippet - Optional fallback snippet if both body parts are missing
+ * @param lookbackMinutes - Optional time window for filtering
+ * @returns A processed Message object with text for link detection and displayText for UI/code detection
+ */
+export function processGmailContent(
+  guid: string,
+  subject: string,
+  from: string,
+  date: Date,
+  htmlBody: string | null,
+  plainBody: string | null,
+  snippet = "",
+  lookbackMinutes = 0
+): Message | null {
+  // Double-check message is within our time window
+  const msgTime = date.getTime();
+
+  // Only apply time window filtering if lookbackMinutes is provided
+  if (lookbackMinutes > 0) {
+    // Ensure message isn't older than our lookback window
+    const now = new Date();
+    const maxAge = lookbackMinutes * 60 * 1000;
+    if (now.getTime() - msgTime > maxAge) {
+      return null;
+    }
+  }
+
+  // Determine text for link detection (prefer raw HTML)
+  const textForLinkDetection = htmlBody || plainBody || snippet;
+
+  // Determine text for display and code detection (prefer plain text)
+  let textForDisplay = "";
+  if (plainBody) {
+    textForDisplay = plainBody;
+  } else if (htmlBody) {
+    textForDisplay = stripHtmlTags(htmlBody); // Clean HTML if no plain text
+  } else {
+    textForDisplay = snippet || ""; // Fallback to snippet
+  }
+
+  // Create the initial message object
+  const msgObject: Message = {
+    guid,
+    message_date: date.toISOString(),
+    sender: from,
+    // Use raw text (subject + best available body) for link detection
+    text: `${subject}\n${textForLinkDetection}`,
+    // Use display text (subject + preferred plain/cleaned body) for code detection and UI
+    displayText: `${subject}\n${textForDisplay}`,
+    source: "email" as const,
+  };
+
+  // Check if a link was detected in the raw text
+  const linkInfo = extractVerificationLink(msgObject.text);
+  if (linkInfo) {
+    // Fix quoted-printable encoding issues in the URL (particularly for Apple Mail)
+    if (linkInfo.url) {
+      linkInfo.url = decodeQuotedPrintableUrl(linkInfo.url);
+    }
+
+    // If a link *type* was determined, replace all URLs in the display text with a placeholder
+    const placeholder = `[${linkInfo.type === "sign-in" ? "Sign In" : "Verification"} Link]`;
+    // Use a regex to replace *all* occurrences of likely URLs in the display text
+    const urlRegex = /https?:\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#%=~_|]/gi;
+    msgObject.displayText = msgObject.displayText.replace(urlRegex, placeholder);
+  }
+
+  return msgObject;
+}
+
+/**
  * Fetches emails from Gmail API within a specific time window
  * @param searchType - Type of search (all messages or code-only)
  * @param since - Only fetch messages after this timestamp
@@ -119,7 +296,7 @@ export async function getGmailMessages(searchType: SearchType, since: Date): Pro
   try {
     const gmail = await getAuthorizedGmailClient();
     const prefs = getPreferenceValues<Preferences>();
-    const lookbackMinutes = calculateLookBackMinutes(prefs.lookBackUnit, parseInt(prefs.lookBackAmount || "1", 10));
+    // const lookbackMinutes = calculateLookBackMinutes(prefs.lookBackUnit, parseInt(prefs.lookBackAmount || "1", 10)); // This line is unused
 
     // Convert cutoff time to Unix timestamp for Gmail query
     const queryTime = Math.floor(since.getTime() / 1000);
@@ -147,7 +324,7 @@ export async function getGmailMessages(searchType: SearchType, since: Date): Pro
             const detail = await gmail.users.messages.get({
               userId: "me",
               id: msg.id || "",
-              format: "full",
+              format: "full", // Already fetching full format
             });
             return detail.data;
           } catch (error) {
@@ -164,30 +341,35 @@ export async function getGmailMessages(searchType: SearchType, since: Date): Pro
       const headers = msg.payload?.headers || [];
       const subject = headers.find((h) => h.name?.toLowerCase() === "subject")?.value || "";
       const from = headers.find((h) => h.name?.toLowerCase() === "from")?.value || "";
-      const body = msg.snippet || "";
       const date = new Date(parseInt(msg.internalDate || "0"));
 
-      // Double-check message is within our time window
-      const msgTime = date.getTime();
-      const cutoffTime = since.getTime();
-      if (msgTime < cutoffTime) {
-        return null;
+      // Find and decode both HTML and plain text parts
+      let htmlBody = "";
+      let plainBody = "";
+      if (msg.payload) {
+        const { htmlPart, plainPart } = findBodyParts(msg.payload);
+        htmlBody = decodeBody(htmlPart);
+        plainBody = decodeBody(plainPart);
       }
 
-      // Ensure message isn't older than our lookback window
-      const now = new Date();
-      const maxAge = lookbackMinutes * 60 * 1000;
-      if (now.getTime() - msgTime > maxAge) {
-        return null;
+      // Fallback to snippet if both body extractions failed
+      if (!htmlBody && !plainBody) {
+        plainBody = msg.snippet || ""; // Use snippet as plain text fallback
       }
 
-      return {
-        guid: msg.id || "",
-        message_date: date.toISOString(),
-        sender: from,
-        text: `${subject}\n${body}`,
-        source: "email" as const,
-      };
+      // Use the extracted processing function
+      const lookbackMinutes = calculateLookBackMinutes(prefs.lookBackUnit, parseInt(prefs.lookBackAmount || "1", 10));
+
+      return processGmailContent(
+        msg.id || "",
+        subject,
+        from,
+        date,
+        htmlBody || null,
+        plainBody || null,
+        msg.snippet || "",
+        lookbackMinutes
+      );
     });
 
     return convertedMessages.filter((msg): msg is Message => msg !== null);
@@ -215,15 +397,16 @@ export async function checkGmailAuth(): Promise<boolean> {
   }
 }
 
-interface CachedMessage {
-  message: Message;
-  hasCode: boolean;
-  timestamp: number;
-}
+// Comment out the unused interface
+// interface CachedMessage {
+//   message: Message;
+//   hasCode: boolean;
+//   timestamp: number;
+// }
 
 export function useGmail(options: { searchText?: string; searchType: SearchType; enabled?: boolean }) {
   const [data, setData] = useState<Message[]>([]);
-  const [permissionView, setPermissionView] = useState<JSX.Element | null>(null);
+  // const [permissionView, setPermissionView] = useState<JSX.Element | null>(null); // This state setter is unused
   const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
   const [isInitialLoadStarted, setIsInitialLoadStarted] = useState(false);
   const isLoadingRef = useRef(false);
@@ -290,7 +473,6 @@ export function useGmail(options: { searchText?: string; searchType: SearchType;
 
   return {
     data,
-    permissionView,
     revalidate: fetchMessages,
     isLoading: !isInitialLoadComplete,
   };
