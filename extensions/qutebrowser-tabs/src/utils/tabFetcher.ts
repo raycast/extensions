@@ -13,34 +13,52 @@ export async function fetchQutebrowserTabs(): Promise<Tab[]> {
   };
 
   // Check if background process already determined qutebrowser is not running
-  const notRunningMarker = path.join(os.tmpdir(), "raycast_qutebrowser_not_running");
-  if (fs.existsSync(notRunningMarker)) {
-    try {
-      const stats = fs.statSync(notRunningMarker);
-      const fileAge = Date.now() - stats.mtime.getTime();
-      const isFresh = fileAge < 5000; // 5 seconds
+  try {
+    const notRunningMarker = path.join(
+      os.tmpdir(),
+      "raycast_qutebrowser_not_running",
+    );
+    if (fs.existsSync(notRunningMarker)) {
+      try {
+        const stats = fs.statSync(notRunningMarker);
+        const fileAge = Date.now() - stats.mtime.getTime();
+        const isFresh = fileAge < 5000; // 5 seconds
 
-      if (isFresh) {
-        debugInfo.qutebrowser_running = false;
-        throw new Error("Qutebrowser is not running. Please start qutebrowser first.");
-      } else {
-        // Marker file is too old, remove it and continue with normal check
-        fs.unlinkSync(notRunningMarker);
+        if (isFresh) {
+          debugInfo.qutebrowser_running = false;
+          debugInfo.errors.push("Qutebrowser not running (marker file found)");
+          throw new Error(
+            "Qutebrowser is not running. Please start qutebrowser first.",
+          );
+        } else {
+          // Marker file is too old, remove it and continue with normal check
+          fs.unlinkSync(notRunningMarker);
+          debugInfo.note = "Removed stale not-running marker file";
+        }
+      } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        console.error("Error checking not-running marker:", e);
+        debugInfo.errors.push(`Marker file error: ${errorMessage}`);
       }
-    } catch (e) {
-      console.error("Error checking not-running marker:", e);
     }
+  } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    console.error("Error accessing tmp directory:", e);
+    debugInfo.errors.push(`Temp directory error: ${errorMessage}`);
   }
 
   const qutebrowserRunning = await SessionUtils.isRunning();
   debugInfo.qutebrowser_running = qutebrowserRunning;
 
   if (!qutebrowserRunning) {
-    throw new Error("Qutebrowser is not running. Please start qutebrowser first.");
+    throw new Error(
+      "Qutebrowser is not running. Please start qutebrowser first.",
+    );
   }
 
   const preferences = getPreferenceValues<Preferences>();
-  const qutebrowserPath = preferences.qutebrowserPath || "/opt/homebrew/bin/qutebrowser";
+  const qutebrowserPath =
+    preferences.qutebrowserPath || "/opt/homebrew/bin/qutebrowser";
   debugInfo.qutebrowser_path = qutebrowserPath;
 
   const mainAutoSavePath = SESSION_FILE_PATHS[0];
@@ -55,14 +73,17 @@ export async function fetchQutebrowserTabs(): Promise<Tab[]> {
       debugInfo.autosave_size = stats.size;
       debugInfo.autosave_modified = stats.mtime.toISOString();
 
-      console.log(`Found autosave file: ${mainAutoSavePath} (${ageInSeconds}s old, ${stats.size} bytes)`);
+      console.log(
+        `Found autosave file: ${mainAutoSavePath} (${ageInSeconds}s old, ${stats.size} bytes)`,
+      );
     } catch (e) {
       console.error("Error checking autosave file:", e);
       debugInfo.errors.push(`Autosave check error: ${e}`);
     }
   } else {
     debugInfo.autosave_exists = false;
-    debugInfo.note = "No auto-saved session file found. Is qutebrowser configured to auto-save sessions?";
+    debugInfo.note =
+      "No auto-saved session file found. Is qutebrowser configured to auto-save sessions?";
   }
 
   const content = SessionUtils.findSessionFile(debugInfo);

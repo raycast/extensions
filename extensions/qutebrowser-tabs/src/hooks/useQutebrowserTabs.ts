@@ -7,7 +7,8 @@ import SessionUtils from "../utils/sessionUtils";
 
 export function useQutebrowserTabs() {
   const preferences = getPreferenceValues<Preferences>();
-  const qutebrowserPath = preferences.qutebrowserPath || "/opt/homebrew/bin/qutebrowser";
+  const qutebrowserPath =
+    preferences.qutebrowserPath || "/opt/homebrew/bin/qutebrowser";
 
   const {
     data: tabs = [],
@@ -29,13 +30,20 @@ export function useQutebrowserTabs() {
     if (!searchText.trim()) return true;
 
     const lowerCaseSearch = searchText.toLowerCase();
-    return tab.title.toLowerCase().includes(lowerCaseSearch) || tab.url.toLowerCase().includes(lowerCaseSearch);
+    return (
+      tab.title.toLowerCase().includes(lowerCaseSearch) ||
+      tab.url.toLowerCase().includes(lowerCaseSearch)
+    );
   });
 
   const focusTab = useCallback(
     async (tab: Tab) => {
       try {
-        await SessionUtils.executeCommand(qutebrowserPath, `:tab-select ${tab.url}`);
+        const safeUrl = tab.url.replace(/"/g, '\\"').replace(/\$/g, "\\$");
+        await SessionUtils.executeCommand(
+          qutebrowserPath,
+          `:tab-select ${safeUrl}`,
+        );
 
         return true;
       } catch (err) {
@@ -52,7 +60,11 @@ export function useQutebrowserTabs() {
   const openSearchInNewTab = useCallback(
     async (query: string) => {
       try {
-        await SessionUtils.executeCommand(qutebrowserPath, `:open -t DEFAULT ${query}`);
+        const safeQuery = query.replace(/"/g, '\\"').replace(/\$/g, "\\$");
+        await SessionUtils.executeCommand(
+          qutebrowserPath,
+          `:open -t DEFAULT ${safeQuery}`,
+        );
         return true;
       } catch (err) {
         showFailureToast({
@@ -68,7 +80,11 @@ export function useQutebrowserTabs() {
   const openUrlInNewTab = useCallback(
     async (url: string) => {
       try {
-        await SessionUtils.executeCommand(qutebrowserPath, `:open -t ${url}`);
+        const safeUrl = url.replace(/"/g, '\\"').replace(/\$/g, "\\$");
+        await SessionUtils.executeCommand(
+          qutebrowserPath,
+          `:open -t ${safeUrl}`,
+        );
         return true;
       } catch (err) {
         showFailureToast({
