@@ -18,7 +18,7 @@
     "publish": "ray publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.72.0",
+    "@raycast/api": "^1.96.0",
     "@raycast/eslint-config": "^2.0.4",
     "@raycast/utils": "^1.19.1",
     "yaml": "^2.7.1"
