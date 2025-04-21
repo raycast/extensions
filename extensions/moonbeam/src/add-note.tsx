@@ -92,11 +92,11 @@ export default function Command() {
         if (!response.ok) {
           if (response.status === 401) {
             throw new Error(
-              "Invalid API token. Please check your token in the extension preferences."
+              "Invalid API token. Please check your token in the extension preferences.",
             );
           }
           throw new Error(
-            `Failed to create note: ${JSON.stringify(responseData)}`
+            `Failed to create note: ${JSON.stringify(responseData)}`,
           );
         }
 
