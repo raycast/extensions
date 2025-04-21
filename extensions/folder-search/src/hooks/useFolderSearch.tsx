@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
 import { usePromise, showFailureToast } from "@raycast/utils";
 import { FolderSearchPlugin, SpotlightSearchResult, SpotlightSearchPreferences } from "../types";
@@ -26,6 +26,9 @@ export function useFolderSearch() {
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastProcessedText = useRef<string>("");
 
+  // Keep track of pending state updates
+  const pendingPinUpdateRef = useRef<boolean>(false);
+  
   // Update ref when searchText changes
   useEffect(() => {
     searchTextRef.current = searchText;
@@ -275,54 +278,177 @@ export function useFolderSearch() {
   const toggleResultPinnedStatus = (result: SpotlightSearchResult, resultIndex: number) => {
     log("debug", "useFolderSearch", `${resultIsPinned(result) ? "Unpinning" : "Pinning"} folder: ${result.path.split('/').pop()}`);
     
+    // Mark that we have a pin update in progress
+    pendingPinUpdateRef.current = true;
+    
+    let newPins: SpotlightSearchResult[] = [];
+    
+    // Update state and capture the new pins
     if (!resultIsPinned(result)) {
-      setPinnedResults((prevPins) => [result, ...prevPins]);
+      setPinnedResults(prevPins => {
+        newPins = [result, ...prevPins];
+        return newPins;
+      });
     } else {
-      removeResultFromPinnedResults(result);
+      setPinnedResults(prevPins => {
+        newPins = prevPins.filter(pin => pin.path !== result.path);
+        return newPins;
+      });
     }
+    
+    // Immediately save to localStorage
+    (async () => {
+      try {
+        await LocalStorage.setItem(
+          `${environment.extensionName}-preferences`,
+          JSON.stringify({
+            pinned: newPins,
+            searchScope,
+            isShowingDetail,
+            showNonCloudLibraryPaths,
+          })
+        );
+        log("debug", "useFolderSearch", `Immediately saved pin change to localStorage (${newPins.length} pins)`);
+        
+        // Small delay to ensure state has updated in React
+        setTimeout(() => {
+          pendingPinUpdateRef.current = false;
+        }, 50);
+        
+      } catch (error) {
+        log("error", "useFolderSearch", "Error saving pins");
+        pendingPinUpdateRef.current = false;
+      }
+    })();
     
     setSelectedItemId(`result-${resultIndex.toString()}`);
   };
 
   // Function to refresh pins from storage
-  const refreshPinsFromStorage = async () => {
-    log("debug", "useFolderSearch", "Refreshing pins from storage");
+  const refreshPinsFromStorage = useCallback(() => {
+    log("debug", "useFolderSearch", "Explicitly refreshing pins from storage");
     
     try {
-      // Get the current preferences from localStorage
-      const maybePreferences = await LocalStorage.getItem(`${environment.extensionName}-preferences`);
+      // When we have a pending update, always fetch directly from storage
+      if (pendingPinUpdateRef.current) {
+        log("debug", "useFolderSearch", "Pending pin update detected, reading directly from localStorage");
+        
+        LocalStorage.getItem(`${environment.extensionName}-preferences`).then((maybePreferences) => {
+          if (!maybePreferences) {
+            log("debug", "useFolderSearch", "No preferences found in storage, clearing pins");
+            setPinnedResults([]);
+            pendingPinUpdateRef.current = false;
+            return;
+          }
+          
+          try {
+            const preferences = JSON.parse(maybePreferences as string);
+            const storedPins = preferences?.pinned || [];
+            log("debug", "useFolderSearch", `Loaded ${storedPins.length} pins from preferences`);
+            
+            // Check if pins have actually changed
+            const currentPaths = new Set(pinnedResults.map(pin => pin.path));
+            const storedPaths = new Set(storedPins.map((pin: SpotlightSearchResult) => pin.path));
+            
+            // Compare pin paths to determine if an update is needed
+            let pathsChanged = false;
+            
+            if (currentPaths.size !== storedPaths.size) {
+              pathsChanged = true;
+            } else {
+              // Check if any paths in storedPaths are not in currentPaths
+              for (const pathStr of storedPaths) {
+                if (!currentPaths.has(String(pathStr))) {
+                  pathsChanged = true;
+                  break;
+                }
+              }
+            }
+            
+            if (pathsChanged) {
+              log("debug", "useFolderSearch", "Pins changed, updating state");
+              setPinnedResults(storedPins);
+            } else {
+              log("debug", "useFolderSearch", "Pins unchanged, skipping update");
+            }
+          } catch (e) {
+            log("error", "useFolderSearch", "Error parsing stored pins", {
+              error: e instanceof Error ? e.message : String(e)
+            });
+          } finally {
+            pendingPinUpdateRef.current = false;
+          }
+        }).catch(e => {
+          log("error", "useFolderSearch", "Error reading preferences", {
+            error: e instanceof Error ? e.message : String(e)
+          });
+          pendingPinUpdateRef.current = false;
+        });
+        
+        return;
+      }
       
-      if (maybePreferences) {
+      // Regular refresh path - check if we need to update based on preferences
+      const currentPinPaths = new Set(pinnedResults.map((pin) => pin.path));
+      
+      // For the regular path, we just check if there are pinned folders in preferences
+      LocalStorage.getItem(`${environment.extensionName}-preferences`).then((maybePreferences) => {
+        if (!maybePreferences) {
+          log("debug", "useFolderSearch", "No preferences found in storage");
+          return;
+        }
+        
         try {
           const preferences = JSON.parse(maybePreferences as string);
+          const preferencesPins = preferences?.pinned || [];
           
-          // Ensure we have valid pinned items
-          if (preferences?.pinned && Array.isArray(preferences.pinned)) {
-            // Update state through React state setter
-            setPinnedResults(preferences.pinned);
-            log("debug", "useFolderSearch", `Updated pins from storage (${preferences.pinned.length} pins)`);
+          if (preferencesPins.length > 0) {
+            log(
+              "debug",
+              "useFolderSearch",
+              `Found ${preferencesPins.length} pins in preferences, current: ${pinnedResults.length}`
+            );
             
-            // If we're in pinned scope, we need to update the results too
-            if (searchScope === "pinned") {
-              setResults(
-                preferences.pinned.filter((pin: SpotlightSearchResult) =>
-                  pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
-                )
-              );
+            // Check if we need to update
+            if (pinnedResults.length !== preferencesPins.length) {
+              log("debug", "useFolderSearch", "Different pin count, updating from preferences");
+              setPinnedResults(preferencesPins);
+            } else {
+              // Check if the pins are the same
+              let needsUpdate = false;
+              for (const pin of preferencesPins) {
+                if (!currentPinPaths.has(pin.path)) {
+                  needsUpdate = true;
+                  break;
+                }
+              }
+              
+              if (needsUpdate) {
+                log("debug", "useFolderSearch", "Pin paths changed, updating from preferences");
+                setPinnedResults(preferencesPins);
+              } else {
+                log("debug", "useFolderSearch", "Pins unchanged, no update needed");
+              }
             }
           } else {
-            log("debug", "useFolderSearch", "No valid pinned items found in preferences");
+            log("debug", "useFolderSearch", "No pins in preferences");
           }
-        } catch (error) {
-          log("error", "useFolderSearch", "Error parsing preferences during refresh");
+        } catch (e) {
+          log("error", "useFolderSearch", "Error parsing preferences", {
+            error: e instanceof Error ? e.message : String(e)
+          });
         }
-      } else {
-        log("debug", "useFolderSearch", "No preferences found in storage");
-      }
-    } catch (error) {
-      log("error", "useFolderSearch", "Error refreshing pins from storage");
+      }).catch(e => {
+        log("error", "useFolderSearch", "Error reading preferences", {
+          error: e instanceof Error ? e.message : String(e)
+        });
+      });
+    } catch (e) {
+      log("error", "useFolderSearch", "Error refreshing pins", {
+        error: e instanceof Error ? e.message : String(e)
+      });
     }
-  };
+  }, [pinnedResults, setPinnedResults]);
 
   const movePinUp = (result: SpotlightSearchResult, resultIndex: number) => {
     try {
