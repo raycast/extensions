@@ -37,7 +37,11 @@ export function ApplyRuleAction({
           });
           return;
         }
-        await onApplyRule(rule, projectPath);
+        try {
+          await onApplyRule(rule, projectPath);
+        } catch (error) {
+          showFailureToast(error, { title: "Failed to apply rule" });
+        }
       }}
     />
   );
