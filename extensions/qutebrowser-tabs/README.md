@@ -45,3 +45,5 @@ If you experience issues:
 ## Credits
 
 Developed by Alon Hearter.
+Icon by Jad/yelo.
+With thanks to Florian Bruhin (The Compiler).
