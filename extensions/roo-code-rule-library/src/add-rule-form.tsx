@@ -41,7 +41,7 @@ export default function AddRuleForm({ onRuleAdded, initialRule }: AddRuleFormPro
           return allTags;
         });
       } catch (error) {
-        console.error(error);
+        showFailureToast(error, { title: "Failed to load tags" });
       }
     };
 
