@@ -25,17 +25,11 @@ export function useFolderSearch() {
     searchScope: preferences.searchScope,
     pinnedResults: pinManagement.pinnedResults,
   });
-  
+
   // Check if all required data is loaded
   const isReady = useCallback(() => {
-    return pinManagement.hasCheckedPins && 
-           pluginManagement.hasCheckedPlugins && 
-           preferences.hasCheckedPreferences;
-  }, [
-    pinManagement.hasCheckedPins, 
-    pluginManagement.hasCheckedPlugins, 
-    preferences.hasCheckedPreferences
-  ]);
+    return pinManagement.hasCheckedPins && pluginManagement.hasCheckedPlugins && preferences.hasCheckedPreferences;
+  }, [pinManagement.hasCheckedPins, pluginManagement.hasCheckedPlugins, preferences.hasCheckedPreferences]);
 
   // Log when all data is ready
   if (isReady()) {
@@ -54,7 +48,7 @@ export function useFolderSearch() {
     results: searchResults.results,
     isQuerying: searchResults.isQuerying,
     hasSearched: searchResults.hasSearched,
-    
+
     // Pin management
     pinnedResults: pinManagement.pinnedResults,
     resultIsPinned: pinManagement.resultIsPinned,
@@ -65,11 +59,11 @@ export function useFolderSearch() {
     refreshPinsFromStorage: pinManagement.refreshPinsFromStorage,
     selectedItemId: pinManagement.selectedItemId,
     setSelectedItemId: pinManagement.setSelectedItemId,
-    
+
     // Plugins
     plugins: pluginManagement.plugins,
     hasCheckedPlugins: pluginManagement.hasCheckedPlugins,
-    
+
     // Preferences
     searchScope: preferences.searchScope,
     setSearchScope: preferences.setSearchScope,

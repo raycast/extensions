@@ -22,7 +22,7 @@ export async function moveFinderItems(
         error: e,
         timestamp: new Date().toISOString(),
       });
-      
+
       await showToast({
         style: Toast.Style.Failure,
         title: "No items selected",
@@ -34,10 +34,10 @@ export async function moveFinderItems(
           },
         },
       });
-      
+
       return { success: false, movedCount: 0, skippedCount: 0 };
     }
-    
+
     log("debug", "moveFinderItems", "Got selected Finder items", {
       count: selectedItems.length,
       items: selectedItems.map((item) => item.path),

@@ -10,14 +10,10 @@ interface UseSearchDebounceProps {
 /**
  * Hook for debouncing search text input
  */
-export function useSearchDebounce({
-  initialText = "",
-  debounceTime = 500,
-  onDebounced,
-}: UseSearchDebounceProps = {}) {
+export function useSearchDebounce({ initialText = "", debounceTime = 500, onDebounced }: UseSearchDebounceProps = {}) {
   const [searchText, setSearchText] = useState<string>(initialText);
   const [debouncedText, setDebouncedText] = useState<string>(initialText);
-  
+
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const searchTextRef = useRef<string>(searchText);
   const lastProcessedText = useRef<string>("");
@@ -41,14 +37,14 @@ export function useSearchDebounce({
       // Only proceed if the text hasn't changed during the delay
       if (searchTextRef.current === searchText) {
         if (searchText !== lastProcessedText.current) {
-          log("debug", "useSearchDebounce", "Debounced search text update", { 
+          log("debug", "useSearchDebounce", "Debounced search text update", {
             from: lastProcessedText.current,
-            to: searchText
+            to: searchText,
           });
-          
+
           setDebouncedText(searchText);
           lastProcessedText.current = searchText;
-          
+
           if (onDebounced) {
             onDebounced(searchText);
           }
@@ -71,6 +67,6 @@ export function useSearchDebounce({
   return {
     searchText,
     debouncedText,
-    setSearchText: updateSearchText
+    setSearchText: updateSearchText,
   };
-} 
+}

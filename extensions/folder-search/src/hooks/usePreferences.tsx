@@ -2,12 +2,7 @@ import { useState, useEffect } from "react";
 import { LocalStorage, environment } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { log } from "../utils";
-
-interface Preferences {
-  searchScope: string;
-  isShowingDetail: boolean;
-  showNonCloudLibraryPaths: boolean;
-}
+import { SpotlightSearchPreferences } from "../types";
 
 /**
  * Hook for managing user preferences
@@ -30,12 +25,12 @@ export function usePreferences() {
         if (maybePreferences) {
           try {
             const preferences = JSON.parse(maybePreferences as string);
-            
+
             // Update state with loaded preferences
             setSearchScope(preferences?.searchScope || "");
             setIsShowingDetail(preferences?.isShowingDetail !== undefined ? preferences.isShowingDetail : true);
             setShowNonCloudLibraryPaths(preferences?.showNonCloudLibraryPaths || false);
-            
+
             log("debug", "usePreferences", "Loaded preferences", {
               searchScope: preferences?.searchScope,
               isShowingDetail: preferences?.isShowingDetail,
@@ -43,7 +38,7 @@ export function usePreferences() {
             });
           } catch (error) {
             log("error", "usePreferences", "Error parsing preferences from storage", {
-              error: error instanceof Error ? error.message : String(error)
+              error: error instanceof Error ? error.message : String(error),
             });
           }
         }
@@ -51,7 +46,7 @@ export function usePreferences() {
         setHasCheckedPreferences(true);
       } catch (error) {
         log("error", "usePreferences", "Error loading preferences", {
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
         showFailureToast({ title: "Could not read preferences" });
         setHasCheckedPreferences(true);
@@ -69,24 +64,23 @@ export function usePreferences() {
       try {
         // Get current preferences to update only changed values
         const maybePreferences = await LocalStorage.getItem(`${environment.extensionName}-preferences`);
-        let currentPrefs: any = {};
+        let currentPrefs: Partial<SpotlightSearchPreferences> = {};
         let hasChanged = false;
-        
+
         if (maybePreferences) {
           try {
             currentPrefs = JSON.parse(maybePreferences as string);
-            
+
             // Check if any values have actually changed
-            hasChanged = 
+            hasChanged =
               currentPrefs.searchScope !== searchScope ||
               currentPrefs.isShowingDetail !== isShowingDetail ||
               currentPrefs.showNonCloudLibraryPaths !== showNonCloudLibraryPaths;
-              
+
             if (!hasChanged) {
               log("debug", "usePreferences", "No preference changes detected, skipping save");
               return;
             }
-            
           } catch (error) {
             log("error", "usePreferences", "Error parsing existing preferences");
             hasChanged = true; // Force save if we can't parse current prefs
@@ -107,10 +101,7 @@ export function usePreferences() {
           };
 
           // Save to localStorage
-          await LocalStorage.setItem(
-            `${environment.extensionName}-preferences`,
-            JSON.stringify(updatedPrefs)
-          );
+          await LocalStorage.setItem(`${environment.extensionName}-preferences`, JSON.stringify(updatedPrefs));
 
           log("debug", "usePreferences", "Saved preferences", {
             searchScope,
@@ -120,7 +111,7 @@ export function usePreferences() {
         }
       } catch (error) {
         log("error", "usePreferences", "Error saving preferences", {
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     };
@@ -137,4 +128,4 @@ export function usePreferences() {
     setShowNonCloudLibraryPaths,
     hasCheckedPreferences,
   };
-} 
+}
