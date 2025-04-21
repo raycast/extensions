@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "moonbeam",
+  "title": "Moonbeam",
+  "description": "A Raycast extension to add tasks, notes, habits, and relationships to Lunatask",
+  "icon": "extension-icon.png",
+  "author": "afroviking",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Add a new task to Lunatask",
+      "mode": "view",
+      "main": "src/add-task.tsx"
+    },
+    {
+      "name": "add-note",
+      "title": "Add Note",
+      "description": "Add a new note to Lunatask",
+      "mode": "view",
+      "main": "src/add-note.tsx"
+    },
+    {
+      "name": "add-relationship",
+      "title": "Add Relationship",
+      "description": "Add a new relationship to Lunatask",
+      "mode": "view",
+      "main": "src/add-relationship.tsx"
+    },
+    {
+      "name": "manage-habits",
+      "title": "Manage Habits",
+      "description": "Manage your habits in Lunatask",
+      "mode": "view",
+      "main": "src/manage-habits.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Lunatask API token",
+      "placeholder": "Enter your API token"
+    },
+    {
+      "name": "areaId",
+      "type": "textfield",
+      "required": true,
+      "title": "Area ID",
+      "description": "The ID of the area where tasks will be created",
+      "placeholder": "Enter your area ID"
+    },
+    {
+      "name": "notebookId",
+      "type": "textfield",
+      "required": true,
+      "title": "Notebook ID",
+      "description": "The ID of the notebook where notes will be created",
+      "placeholder": "Enter your notebook ID"
+    },
+    {
+      "name": "habits",
+      "type": "textfield",
+      "required": false,
+      "title": "Habits",
+      "description": "Your configured habits (stored as JSON)",
+      "placeholder": "[]",
+      "default": "[]"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.0",
+    "@raycast/utils": "^1.9.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "18.2.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.3.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "ray publish"
+  }
+}
