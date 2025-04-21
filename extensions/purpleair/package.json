@@ -19,10 +19,17 @@
       "preferences": [
         {
           "name": "sensor_index",
-          "title": "Purple Sensor Index",
-          "description": "You can learn how to access a Sensor Index at https://community.purpleair.com/t/making-api-calls-with-the-purpleair-api/180#the-sensor-index-3",
+          "title": "Purple Sensor Indices",
+          "description": "Comma-separated list of sensor indices. You can learn how to access a Sensor Index at https://community.purpleair.com/t/making-api-calls-with-the-purpleair-api/180#the-sensor-index-3",
           "type": "textfield",
           "required": true
+        },
+        {
+          "name": "read_keys",
+          "title": "Read Keys for Private Sensors",
+          "description": "Comma-separated list of read keys for private sensors. Order must match the private sensor indices in the list above.",
+          "type": "password",
+          "required": false
         },
         {
           "name": "api_key",
@@ -41,10 +48,10 @@
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@types/node": "^18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@types/node": "^22.14.1",
+    "@types/react": "19.1.2",
+    "@typescript-eslint/eslint-plugin": "^8.31.0",
+    "@typescript-eslint/parser": "^8.31.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",

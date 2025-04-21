@@ -324,3 +324,114 @@ export class PurpleAir {
     return Convert.toPurpleSensor(json);
   }
 }
+
+export interface PurpleAirBatchResponse {
+  api_version: string;
+  time_stamp: number;
+  data_time_stamp: number;
+  fields: string[];
+  data: any[][];
+}
+
+export class PurpleAirBatch {
+  sensorData: Map<string, BatchSensorData> = new Map();
+
+  constructor(json: string) {
+    // Parse JSON directly and process immediately to avoid keeping the full response in memory
+    const batchResponse = JSON.parse(json) as PurpleAirBatchResponse;
+    this.processBatchData(batchResponse);
+    // Don't store the full response object to save memory
+  }
+
+  private processBatchData(batchResponse: PurpleAirBatchResponse) {
+    const fields = batchResponse.fields;
+
+    // Find indices of required fields
+    const idxMap: Record<string, number> = {};
+    fields.forEach((field, index) => {
+      idxMap[field] = index;
+    });
+
+    // Process each sensor's data
+    for (const sensorArray of batchResponse.data) {
+      const sensorId = sensorArray[0].toString();
+      const name = idxMap.name !== undefined ? (sensorArray[idxMap.name] as string) : "Unknown";
+      const humidity = idxMap.humidity !== undefined ? (sensorArray[idxMap.humidity] as number) : 0;
+      const temperature = idxMap.temperature !== undefined ? (sensorArray[idxMap.temperature] as number) : 0;
+
+      // PM2.5 values - current and time-based averages
+      const pm25 =
+        idxMap.pm2_5 !== undefined
+          ? (sensorArray[idxMap.pm2_5] as number)
+          : idxMap.pm2_5_atm !== undefined
+          ? (sensorArray[idxMap.pm2_5_atm] as number)
+          : 0;
+      const pm25_10minute = idxMap.pm2_5_10minute !== undefined ? (sensorArray[idxMap.pm2_5_10minute] as number) : 0;
+      const pm25_30minute = idxMap.pm2_5_30minute !== undefined ? (sensorArray[idxMap.pm2_5_30minute] as number) : 0;
+      const pm25_60minute = idxMap.pm2_5_60minute !== undefined ? (sensorArray[idxMap.pm2_5_60minute] as number) : 0;
+      const pm25_6hour = idxMap.pm2_5_6hour !== undefined ? (sensorArray[idxMap.pm2_5_6hour] as number) : 0;
+      const pm25_24hour = idxMap.pm2_5_24hour !== undefined ? (sensorArray[idxMap.pm2_5_24hour] as number) : 0;
+      const pm25_1week = idxMap.pm2_5_1week !== undefined ? (sensorArray[idxMap.pm2_5_1week] as number) : 0;
+
+      // Calculate AQI values using the existing aqiFromPM function
+      const currentAQI = aqiFromPM(pm25, humidity);
+      const aqi10Minutes = aqiFromPM(pm25_10minute, humidity);
+      const aqi30Minutes = aqiFromPM(pm25_30minute, humidity);
+      const aqi60Minutes = aqiFromPM(pm25_60minute, humidity);
+      const aqi6Hour = aqiFromPM(pm25_6hour, humidity);
+      const aqi24Hour = aqiFromPM(pm25_24hour, humidity);
+      const aqi1Week = aqiFromPM(pm25_1week, humidity);
+
+      // Create a BatchSensorData object and add it to the map
+      this.sensorData.set(sensorId, {
+        sensorId,
+        name,
+        humidity,
+        temperature,
+        pm25,
+        pm25_10minute,
+        pm25_30minute,
+        pm25_60minute,
+        pm25_6hour,
+        pm25_24hour,
+        pm25_1week,
+        currentAQI,
+        aqi10Minutes,
+        aqi30Minutes,
+        aqi60Minutes,
+        aqi6Hour,
+        aqi24Hour,
+        aqi1Week,
+      });
+    }
+  }
+
+  public getSensor(sensorId: string): BatchSensorData | undefined {
+    return this.sensorData.get(sensorId);
+  }
+
+  public getAllSensors(): BatchSensorData[] {
+    return Array.from(this.sensorData.values());
+  }
+}
+
+export interface BatchSensorData {
+  sensorId: string;
+  name: string;
+  humidity: number;
+  temperature: number;
+  pm25: number;
+  pm25_10minute: number;
+  pm25_30minute: number;
+  pm25_60minute: number;
+  pm25_6hour: number;
+  pm25_24hour: number;
+  pm25_1week: number;
+  currentAQI: AQIReport;
+  aqi10Minutes: AQIReport;
+  aqi30Minutes: AQIReport;
+  aqi60Minutes: AQIReport;
+  aqi6Hour: AQIReport;
+  aqi24Hour: AQIReport;
+  aqi1Week: AQIReport;
+}
