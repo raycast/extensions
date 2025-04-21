@@ -1,4 +1,5 @@
 import { showHUD, Clipboard, getSelectedText, LaunchProps } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 const superscriptMap: Record<string, string> = {
   "0": "⁰",
