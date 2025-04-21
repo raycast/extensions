@@ -6,6 +6,7 @@ import EditTagsForm from "./tag-library";
 import { Rule, Tag } from "./types";
 import { fetchTagsFromStorage } from "./tag-storage";
 import { addRuleToStorage, updateRuleInStorage } from "./rule-storage";
+import { showFailureToast } from "./utils/utils";
 
 interface AddRuleFormValues {
   title: string;
@@ -41,7 +42,7 @@ export default function AddRuleForm({ onRuleAdded, initialRule }: AddRuleFormPro
           return allTags;
         });
       } catch (error) {
-        showFailureToast(error, { title: "Failed to load tags" });
+        showFailureToast("Failed to load tags", error);
       }
     };
 
@@ -71,7 +72,7 @@ export default function AddRuleForm({ onRuleAdded, initialRule }: AddRuleFormPro
         onRuleAdded(rule);
         pop();
       } catch (error) {
-        showFailureToast(error, { title: "Failed to save rule" });
+        showFailureToast("Failed to save rule", error);
       }
     },
     validation: {
