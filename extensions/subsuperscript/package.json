@@ -13,7 +13,7 @@
     {
       "name": "subscript",
       "title": "Subscriptify",
-      "subtitle": "Convert text",
+      "subtitle": "Subsuperscript",
       "description": "Turn text and numbers into its subscript equivalent",
       "mode": "no-view",
       "arguments": [
