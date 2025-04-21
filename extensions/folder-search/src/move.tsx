@@ -43,11 +43,17 @@ export default function Command(props: LaunchProps) {
           icon={Icon.ArrowRight}
           shortcut={{ modifiers: ["cmd"], key: "return" }}
           onAction={async () => {
-            const moveResult = await moveFinderItems(result.path);
-            if (moveResult.success) {
-              open(result.path);
-              closeMainWindow();
-              popToRoot({ clearSearchBar: true });
+            try {
+              const moveResult = await moveFinderItems(result.path);
+              if (moveResult.success) {
+                open(result.path);
+                closeMainWindow();
+                popToRoot({ clearSearchBar: true });
+              }
+            } catch (error) {
+              // Error is already handled in moveFinderItems, but we need to catch it here
+              // to prevent unhandled promise rejections
+              console.error("Error in Move to This Folder action:", error);
             }
           }}
         />

@@ -1,4 +1,4 @@
-import { confirmAlert, getSelectedFinderItems, showToast } from "@raycast/api";
+import { confirmAlert, getSelectedFinderItems, showToast, Toast, open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import path from "path";
 import fse from "fs-extra";
@@ -13,7 +13,31 @@ export async function moveFinderItems(
       timestamp: new Date().toISOString(),
     });
 
-    const selectedItems = await getSelectedFinderItems();
+    // Try to get selected items - this will throw if Finder isn't frontmost
+    let selectedItems;
+    try {
+      selectedItems = await getSelectedFinderItems();
+    } catch (e) {
+      log("debug", "moveFinderItems", "Error getting Finder items", {
+        error: e,
+        timestamp: new Date().toISOString(),
+      });
+      
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No items selected",
+        message: "Please select files in Finder first",
+        primaryAction: {
+          title: "Open Finder",
+          onAction: () => {
+            open("file:///System/Library/CoreServices/Finder.app");
+          },
+        },
+      });
+      
+      return { success: false, movedCount: 0, skippedCount: 0 };
+    }
+    
     log("debug", "moveFinderItems", "Got selected Finder items", {
       count: selectedItems.length,
       items: selectedItems.map((item) => item.path),
@@ -24,7 +48,7 @@ export async function moveFinderItems(
       log("debug", "moveFinderItems", "No Finder items selected", {
         timestamp: new Date().toISOString(),
       });
-      await showFailureToast({ title: "No Finder selection to move" });
+      await showFailureToast({ title: "No files selected to move" });
       return { success: false, movedCount: 0, skippedCount: 0 };
     }
 
