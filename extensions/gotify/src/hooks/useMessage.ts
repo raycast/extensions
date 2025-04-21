@@ -5,29 +5,47 @@ import { authHeaders, endpointWithPath } from "../utils";
 import { useStream } from "./useStream";
 import { useEffect, useState } from "react";
 
-export const Message = z.object({
-  id: z.number(),
-  appid: z.number(),
-  message: z.string(),
-  title: z.string(),
-  priority: z.number(),
-  date: z.string().datetime(),
-  extras: z
-    .object({
-      "metadata::type": z.string(),
-      "client::notification": z
-        .object({
-          click: z.object({
-            url: z.string(),
-          }),
-          bigImageUrl: z.string(),
-        })
-        .partial(),
-    })
-    .partial()
-    .optional(),
-  _new: z.boolean().optional(),
-});
+export const Message = z
+  .object({
+    id: z.number(),
+    appid: z.number(),
+    message: z.string(),
+    title: z.string(),
+    priority: z.number(),
+    date: z.string().datetime(),
+    // https://gotify.net/docs/msgextras
+    extras: z
+      .object({
+        "metadata::type": z.string(),
+        "metadata::extract::regex": z.string(),
+        "client::display": z.object({
+          contentType: z.string(),
+        }),
+        "client::notification": z
+          .object({
+            click: z.object({
+              url: z.string(),
+            }),
+            bigImageUrl: z.string(),
+          })
+          .partial(),
+      })
+      .partial()
+      .optional(),
+    _new: z.boolean().optional(),
+    _originalMessage: z.string().optional(),
+  })
+  .transform((msg) => {
+    msg._originalMessage = msg.message;
+    if (msg.extras?.["metadata::extract::regex"]) {
+      const regex = new RegExp(msg.extras["metadata::extract::regex"]);
+      const match = msg.message.match(regex);
+      if (match) {
+        msg.message = match[0];
+      }
+    }
+    return msg;
+  });
 
 export const MessageRes = z.object({
   messages: z.array(Message),
@@ -142,7 +160,7 @@ export function useMessage(props?: { id: string }) {
   };
 
   return {
-    messages,
+    messages: messages?.map((m) => Message.parse(m)),
     messageLoading: isLoading,
     messagePagination: pagination,
     revalidate,

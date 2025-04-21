@@ -91,28 +91,14 @@ export default function Command() {
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="From" text={getAppName(message.appid)} />
                   <List.Item.Detail.Metadata.Label title="Date" text={dayjs(message.date).fromNow(true) + " ago"} />
+                  <List.Item.Detail.Metadata.Label title="Original" text={message._originalMessage} />
                   {message.extras && (
                     <>
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label title="Extras" />
-                      {message.extras["metadata::type"] && (
-                        <List.Item.Detail.Metadata.Label
-                          title="metadata::type"
-                          text={message.extras["metadata::type"]}
-                        />
-                      )}
-                      {message.extras["client::notification"]?.click?.url && (
-                        <List.Item.Detail.Metadata.Link
-                          title="client::notification"
-                          target={message.extras["client::notification"].click.url}
-                          text="Click Url"
-                        />
-                      )}
-                      {Object.entries(message.extras)
-                        .filter(([k]) => !["metadata::type", "client::notification"].includes(k))
-                        .map(([k, v]) => (
-                          <List.Item.Detail.Metadata.Label key={k} title={k} text={JSON.stringify(v)} />
-                        ))}
+                      {Object.entries(message.extras).map(([k, v]) => (
+                        <List.Item.Detail.Metadata.Label key={k} title={k} text={String(JSON.stringify(v))} />
+                      ))}
                     </>
                   )}
                 </List.Item.Detail.Metadata>
