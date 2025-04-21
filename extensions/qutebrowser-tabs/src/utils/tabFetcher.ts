@@ -53,26 +53,32 @@ export async function fetchQutebrowserTabs(): Promise<Tab[]> {
   const qutebrowserPath = preferences.qutebrowserPath || "/opt/homebrew/bin/qutebrowser";
   debugInfo.qutebrowser_path = qutebrowserPath;
 
-  const mainAutoSavePath = SESSION_FILE_PATHS[0];
-  if (fs.existsSync(mainAutoSavePath)) {
-    try {
-      const stats = fs.statSync(mainAutoSavePath);
-      const fileAge = Date.now() - stats.mtime.getTime();
-      const ageInSeconds = Math.round(fileAge / 1000);
-
-      debugInfo.autosave_path = mainAutoSavePath;
-      debugInfo.autosave_exists = true;
-      debugInfo.autosave_size = stats.size;
-      debugInfo.autosave_modified = stats.mtime.toISOString();
-
-      console.log(`Found autosave file: ${mainAutoSavePath} (${ageInSeconds}s old, ${stats.size} bytes)`);
-    } catch (e) {
-      console.error("Error checking autosave file:", e);
-      debugInfo.errors.push(`Autosave check error: ${e}`);
-    }
+  // Check if SESSION_FILE_PATHS array has any entries
+  if (SESSION_FILE_PATHS.length === 0) {
+    debugInfo.errors.push("No session file paths defined");
+    debugInfo.note = "Could not find any session file paths. Configuration issue.";
   } else {
-    debugInfo.autosave_exists = false;
-    debugInfo.note = "No auto-saved session file found. Is qutebrowser configured to auto-save sessions?";
+    const mainAutoSavePath = SESSION_FILE_PATHS[0];
+    if (fs.existsSync(mainAutoSavePath)) {
+      try {
+        const stats = fs.statSync(mainAutoSavePath);
+        const fileAge = Date.now() - stats.mtime.getTime();
+        const ageInSeconds = Math.round(fileAge / 1000);
+
+        debugInfo.autosave_path = mainAutoSavePath;
+        debugInfo.autosave_exists = true;
+        debugInfo.autosave_size = stats.size;
+        debugInfo.autosave_modified = stats.mtime.toISOString();
+
+        console.log(`Found autosave file: ${mainAutoSavePath} (${ageInSeconds}s old, ${stats.size} bytes)`);
+      } catch (e) {
+        console.error("Error checking autosave file:", e);
+        debugInfo.errors.push(`Autosave check error: ${e}`);
+      }
+    } else {
+      debugInfo.autosave_exists = false;
+      debugInfo.note = "No auto-saved session file found. Is qutebrowser configured to auto-save sessions?";
+    }
   }
 
   const content = SessionUtils.findSessionFile(debugInfo);
@@ -83,7 +89,7 @@ export async function fetchQutebrowserTabs(): Promise<Tab[]> {
       tabs = SessionUtils.parseSessionYaml(content);
     } catch (e) {
       debugInfo.errors.push(`Failed to parse session YAML: ${e}`);
-      console.error('Error parsing session YAML:', e);
+      console.error("Error parsing session YAML:", e);
     }
     if (tabs.length > 0) {
       debugInfo.tabs_found = tabs.length;
