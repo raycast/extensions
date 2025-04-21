@@ -28,7 +28,7 @@
     {
       "name": "superscript",
       "title": "Superscriptify",
-      "subtitle": "Convert text",
+      "subtitle": "Subsuperscript",
       "description": "Turn text and numbers into its superscript equivalent",
       "mode": "no-view",
       "arguments": [
