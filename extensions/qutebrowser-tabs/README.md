@@ -41,7 +41,6 @@ If you experience issues:
 1. Make sure qutebrowser is running
 2. Verify the qutebrowser path in extension preferences
 3. Try refreshing the tab list (⌘R)
-4. Use the "Debug Info" menu to get more information
 
 ## Credits
 
