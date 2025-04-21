@@ -10,7 +10,7 @@ import { showFailureToast } from "@raycast/utils";
 
 // Logging configuration
 const LOG_ENABLED = true; // Set to true to enable all logging
-const LOG_LEVEL = "error"; // Set to "debug" for verbose logging or "error" for less noise
+const LOG_LEVEL: "debug" | "error" = "debug"; // Set to "debug" for verbose logging or "error" for less noise
 
 const userHomeDir = os.homedir();
 
@@ -239,9 +239,9 @@ export function formatDate(dateString: string | undefined | null): string {
 // Logging utility
 export const log = (level: "debug" | "error", component: string, message: string, data?: Record<string, unknown>) => {
   if (!LOG_ENABLED) return;
-  
+
   // Skip debug messages when log level is set to error only
-  if (level === "debug" && LOG_LEVEL === "error") return;
+  if (level === "debug" && LOG_LEVEL !== "debug") return;
 
   const timestamp = new Date().toISOString();
   const logData = {
