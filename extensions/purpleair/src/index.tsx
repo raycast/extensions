@@ -20,6 +20,7 @@ interface Preferences {
   sensor_index: string;
   api_key: string;
   read_keys: string;
+  show_nearest: boolean;
 }
 
 interface SensorData {
@@ -42,11 +43,15 @@ interface SensorData {
   aqi6Hour: AQIReport;
   aqi24Hour: AQIReport;
   aqi1Week: AQIReport;
+  distance?: number; // Distance from user's location in km (for nearest sensor)
+  latitude?: number;
+  longitude?: number;
 }
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const api_key = preferences.api_key;
+  const show_nearest = preferences.show_nearest !== false; // Default to true if not specified
 
   // Parse comma-separated sensor indices
   const sensorIndices = preferences.sensor_index
@@ -81,23 +86,27 @@ export default function Command() {
     );
   }
 
-  return <SensorList sensorIndices={sensorIndices} readKeys={readKeys} apiKey={api_key} />;
+  return <SensorList sensorIndices={sensorIndices} readKeys={readKeys} apiKey={api_key} showNearest={show_nearest} />;
 }
 
 function SensorList({
   sensorIndices,
   readKeys,
   apiKey,
+  showNearest,
 }: {
   sensorIndices: string[];
   readKeys: string[];
   apiKey: string;
+  showNearest: boolean;
 }) {
   const { push } = useNavigation();
-  
+  const [nearestSensor, setNearestSensor] = useState<SensorData | null>(null);
+  const [isLoadingNearest, setIsLoadingNearest] = useState(true);
+
   // Build the URL for multiple sensors
   const fields =
-    "name,humidity,temperature,pm2.5,pm2.5_10minute,pm2.5_30minute,pm2.5_60minute,pm2.5_6hour,pm2.5_24hour,pm2.5_1week,location_type";
+    "name,humidity,temperature,pm2.5,pm2.5_10minute,pm2.5_30minute,pm2.5_60minute,pm2.5_6hour,pm2.5_24hour,pm2.5_1week,location_type,latitude,longitude";
   const baseUrl = `https://api.purpleair.com/v1/sensors?show=${sensorIndices.join(",")}`;
 
   // Add read keys to the URL if available
@@ -130,31 +139,119 @@ function SensorList({
 
   // Auto-select if there's only one sensor
   useEffect(() => {
-    if (sensorIndices.length === 1 && sensors && sensors.length > 0) {
+    if (sensorIndices.length === 1 && sensors && sensors.length > 0 && !isLoadingNearest) {
       const sensorData = sensors[0];
       push(<SensorDetail sensorData={sensorData} />);
     }
-  }, [sensors, sensorIndices.length]);
+  }, [sensors, sensorIndices.length, isLoadingNearest]);
+
+  // Fetch nearest sensor based on user location
+  useEffect(() => {
+    if (!showNearest) {
+      setIsLoadingNearest(false);
+      return;
+    }
+
+    const fetchNearest = async () => {
+      try {
+        setIsLoadingNearest(true);
+
+        // Get user's location
+        const location = await getUserLocation();
+        if (!location) {
+          console.debug("Could not determine user location");
+          setIsLoadingNearest(false);
+          return;
+        }
+
+        // Fetch the nearest sensor
+        const nearest = await fetchNearestSensor(location.latitude, location.longitude, apiKey);
+
+        if (nearest) {
+          // Add location info to the sensor name
+          nearest.name = `📍 ${nearest.name} (${location.city})`;
+
+          // Format distance nicely if available
+          if (nearest.distance !== undefined) {
+            const distanceStr =
+              nearest.distance < 1
+                ? `${Math.round(nearest.distance * 1000)}m away`
+                : `${nearest.distance.toFixed(1)}km away`;
+            nearest.name += ` - ${distanceStr}`;
+          }
+
+          setNearestSensor(nearest);
+        }
+      } catch (error) {
+        console.error("Error fetching nearest sensor:", error);
+      } finally {
+        setIsLoadingNearest(false);
+      }
+    };
+
+    fetchNearest();
+  }, [apiKey, showNearest]);
+
+  // Create list items for both your sensors and the nearest location sensor
+  const getSensorItems = () => {
+    const items = [];
+
+    // Only add the location-based sensor if showNearest is enabled
+    if (showNearest) {
+      if (isLoadingNearest) {
+        items.push(
+          <List.Item
+            key="nearest-loading"
+            title="Finding nearest sensor..."
+            subtitle="Based on your location"
+            icon={Icon.Location}
+            accessories={[{ icon: Icon.CircleProgress }]}
+          />
+        );
+      } else if (nearestSensor) {
+        items.push(
+          <SensorListItem
+            key={nearestSensor.sensorId}
+            sensorData={nearestSensor}
+            onSelect={() => push(<SensorDetail sensorData={nearestSensor} />)}
+          />
+        );
+      }
+    }
+
+    // Add the user's configured sensors
+    if (sensors) {
+      items.push(
+        ...sensors.map((sensorData) => (
+          <SensorListItem
+            key={sensorData.sensorId}
+            sensorData={sensorData}
+            onSelect={() => push(<SensorDetail sensorData={sensorData} />)}
+          />
+        ))
+      );
+    } else if (isLoading) {
+      // Show loading items for user's sensors
+      items.push(
+        ...sensorIndices.map((sensorId) => (
+          <List.Item key={sensorId} title={`Sensor ${sensorId}`} subtitle="Loading..." icon={Icon.CircleProgress} />
+        ))
+      );
+    } else if (error) {
+      // Show error items
+      items.push(
+        ...sensorIndices.map((sensorId) => (
+          <List.Item key={sensorId} title={`Sensor ${sensorId}`} subtitle="Error loading" icon={Icon.ExclamationMark} />
+        ))
+      );
+    }
+
+    return items;
+  };
 
   return (
-    <List isLoading={isLoading}>
-      {!isLoading && sensors
-        ? sensors.map((sensorData) => (
-            <SensorListItem
-              key={sensorData.sensorId}
-              sensorData={sensorData}
-              onSelect={() => push(<SensorDetail sensorData={sensorData} />)}
-            />
-          ))
-        : // Show loading items or error
-          sensorIndices.map((sensorId) => (
-            <List.Item
-              key={sensorId}
-              title={`Sensor ${sensorId}`}
-              subtitle={error ? "Error loading" : "Loading..."}
-              icon={error ? Icon.ExclamationMark : Icon.CircleProgress}
-            />
-          ))}
+    <List isLoading={false} navigationTitle="PurpleAir Sensors">
+      {getSensorItems()}
     </List>
   );
 }
@@ -243,8 +340,15 @@ function SensorDetail({ sensorData }: { sensorData: SensorData }) {
   );
 }
 
+// Define interfaces for the response types
+interface PurpleAirResponse {
+  fields: string[];
+  data: (string | number)[][];
+  // Add other fields if needed, like api_version, time_stamp, etc.
+}
+
 // Helper functions for processing sensor data
-function processSensorsData(response: any): SensorData[] {
+function processSensorsData(response: PurpleAirResponse): SensorData[] {
   if (!response || !response.fields || !response.data) {
     return [];
   }
@@ -258,13 +362,16 @@ function processSensorsData(response: any): SensorData[] {
 
   // Process each sensor
   const sensorsData: SensorData[] = [];
-  response.data.forEach((sensorArray: any[]) => {
+  response.data.forEach((sensorArray: (string | number)[]) => {
     const sensorId = sensorArray[0].toString();
     const name = fieldIndices.name !== undefined ? (sensorArray[fieldIndices.name] as string) : "Unknown";
     const humidity = fieldIndices.humidity !== undefined ? (sensorArray[fieldIndices.humidity] as number) : 0;
     const temperature = fieldIndices.temperature !== undefined ? (sensorArray[fieldIndices.temperature] as number) : 0;
     const locationType =
       fieldIndices.location_type !== undefined ? (sensorArray[fieldIndices.location_type] as number) : undefined;
+    const latitude = fieldIndices.latitude !== undefined ? (sensorArray[fieldIndices.latitude] as number) : undefined;
+    const longitude =
+      fieldIndices.longitude !== undefined ? (sensorArray[fieldIndices.longitude] as number) : undefined;
 
     // PM2.5 values
     const pm25 = fieldIndices["pm2.5"] !== undefined ? (sensorArray[fieldIndices["pm2.5"]] as number) : 0;
@@ -296,6 +403,8 @@ function processSensorsData(response: any): SensorData[] {
       humidity,
       temperature,
       locationType,
+      latitude,
+      longitude,
       pm25,
       pm25_10minute,
       pm25_30minute,
@@ -314,4 +423,109 @@ function processSensorsData(response: any): SensorData[] {
   });
 
   return sensorsData;
+}
+
+// Helper function to get user's location
+async function getUserLocation() {
+  try {
+    console.debug("Fetching user location from ipwho.is...");
+    const response = await fetch("https://ipwho.is/");
+    if (!response.ok) {
+      console.debug("Location API Error:", response.status, response.statusText);
+      throw new Error("Failed to fetch location data");
+    }
+
+    const data = await response.json();
+    console.debug("Location API response:", JSON.stringify(data, null, 2));
+
+    if (!data.success) {
+      console.debug("Location data request unsuccessful:", data);
+      throw new Error("Location data request was not successful");
+    }
+
+    console.debug(`User location: ${data.city}, ${data.region}, ${data.country} (${data.latitude}, ${data.longitude})`);
+
+    return {
+      latitude: data.latitude,
+      longitude: data.longitude,
+      city: data.city,
+      region: data.region,
+      country: data.country,
+    };
+  } catch (error) {
+    console.error("Error fetching user location:", error);
+    return null;
+  }
+}
+
+// Calculate distance between two points in km using Haversine formula
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Radius of the Earth in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Helper function to fetch the nearest sensor to a location
+async function fetchNearestSensor(lat: number, lon: number, apiKey: string) {
+  // Calculate a bounding box around the user's location (approximately 10km in each direction)
+  const boxSize = 0.1; // Roughly 10km at most latitudes
+  const nwLat = lat + boxSize;
+  const nwLng = lon - boxSize;
+  const seLat = lat - boxSize;
+  const seLng = lon + boxSize;
+
+  // Fields we want to request
+  const fields =
+    "name,latitude,longitude,pm2.5,humidity,temperature,pm2.5_10minute,pm2.5_30minute,pm2.5_60minute,pm2.5_6hour,pm2.5_24hour,pm2.5_1week,location_type";
+
+  // Build the PurpleAir API URL with the bounding box
+  const url = `https://api.purpleair.com/v1/sensors?fields=${fields}&nwlng=${nwLng}&nwlat=${nwLat}&selng=${seLng}&selat=${seLat}&max_age=3600&location_type=0`;
+
+  console.debug("Fetching nearest sensor with URL:", url);
+
+  try {
+    const response = await fetch(url, {
+      headers: { "X-API-Key": apiKey },
+    });
+
+    if (!response.ok) {
+      console.debug("PurpleAir API Error:", response.status, response.statusText);
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
+    }
+
+    const responseJson = await response.json();
+    console.debug("PurpleAir nearest sensor response:", JSON.stringify(responseJson, null, 2));
+
+    const sensors = processSensorsData(responseJson);
+    console.debug(`Found ${sensors.length} sensors in the area`);
+
+    // Add distance to each sensor
+    sensors.forEach((sensor) => {
+      if (sensor.latitude && sensor.longitude) {
+        sensor.distance = calculateDistance(lat, lon, sensor.latitude, sensor.longitude);
+        console.debug(`Sensor ${sensor.name} is ${sensor.distance.toFixed(2)}km away`);
+      } else {
+        sensor.distance = Infinity;
+      }
+    });
+
+    // Sort by distance and return the closest one
+    sensors.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
+
+    if (sensors.length > 0) {
+      console.debug(`Nearest sensor is ${sensors[0].name} at ${sensors[0].distance?.toFixed(2)}km`);
+    } else {
+      console.debug("No sensors found in the area");
+    }
+
+    return sensors.length > 0 ? sensors[0] : null;
+  } catch (error) {
+    console.error("Error fetching nearest sensor:", error);
+    return null;
+  }
 }

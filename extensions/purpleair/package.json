@@ -18,25 +18,37 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "show_nearest",
+          "title": "Show Nearest Sensor",
+          "description": "Show the nearest sensor to your location",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Show Nearest"
+        },
+        {
           "name": "sensor_index",
           "title": "Purple Sensor Indices",
           "description": "Comma-separated list of sensor indices. You can learn how to access a Sensor Index at https://community.purpleair.com/t/making-api-calls-with-the-purpleair-api/180#the-sensor-index-3",
           "type": "textfield",
-          "required": true
-        },
-        {
-          "name": "read_keys",
-          "title": "Read Keys for Private Sensors",
-          "description": "Comma-separated list of read keys for private sensors. Order must match the private sensor indices in the list above.",
-          "type": "password",
-          "required": false
+          "required": true,
+          "label": "Sensor IDs"
         },
         {
           "name": "api_key",
           "title": "PurpleAir API Key",
           "description": "API Key is used to authenticate with PurpleAir APIs",
           "type": "password",
-          "required": true
+          "required": true,
+          "label": "API Key"
+        },
+        {
+          "name": "read_keys",
+          "title": "Read Keys for Private Sensors",
+          "description": "Comma-separated list of read keys for private sensors. Order must match the private sensor indices in the list above.",
+          "type": "password",
+          "required": false,
+          "label": "Read Keys"
         }
       ]
     }
