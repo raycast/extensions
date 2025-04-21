@@ -71,7 +71,7 @@ export default function AddRuleForm({ onRuleAdded, initialRule }: AddRuleFormPro
         onRuleAdded(rule);
         pop();
       } catch (error) {
-        console.error(error);
+        showFailureToast(error, { title: "Failed to save rule" });
       }
     },
     validation: {
