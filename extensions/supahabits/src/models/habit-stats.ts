@@ -17,7 +17,7 @@ export interface HabitStats {
     current_streak: number;
     longest_streak: number;
     completion_rate: number;
-    streak_visualization: { date: string; completed: boolean }[];
+    streak_visualization: StreakVisualization[];
   };
   tracks: {
     id: number;
@@ -25,4 +25,9 @@ export interface HabitStats {
     source: string | null;
     created_at: string;
   }[];
+}
+
+interface StreakVisualization {
+  date: string;
+  completed: boolean;
 }
