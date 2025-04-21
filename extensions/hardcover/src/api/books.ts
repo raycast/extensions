@@ -184,8 +184,8 @@ export async function searchBooks(query: string, page: number) {
   const apiPage = page + 1; // API is 1-indexed while Raycast is 0-indexed
 
   const graphql_query = `
-    query MyQuery {
-      search(query: "${query}", query_type: "book", page: ${apiPage}, per_page: 25) {
+    query MyQuery($query: String = "") {
+      search(query: $query, query_type: "book", page: ${apiPage}, per_page: 25) {
         page
         per_page
         results
@@ -193,7 +193,11 @@ export async function searchBooks(query: string, page: number) {
     }
   `;
 
-  const { data } = await client.post<SearchBookResponse>(graphql_query);
+  const variables = {
+    query: query,
+  };
+
+  const { data } = await client.post<SearchBookResponse>(graphql_query, variables);
 
   if (!data) {
     return { data: [], hasMore: false };
@@ -204,13 +208,13 @@ export async function searchBooks(query: string, page: number) {
   return { data: data.search.results.hits.map((hit) => hit.document), hasMore };
 }
 
-export async function getUserBook(book_id: number, user_id: number) {
+export async function getUserBook(bookId: number, userId: number) {
   const client = new HardcoverClient();
 
   const graphql_query = `
-    {
-      books(where: {id: {_eq: ${book_id}}}) {
-        user_books(where: {user_id: {_eq: ${user_id}}}) {
+    query GetUserBooks($book_id: Int, $user_id: Int) {
+      books(where: {id: {_eq: $book_id}}) {
+        user_books(where: {user_id: {_eq: $user_id}}) {
           id
           rating
           user_book_status {
@@ -228,7 +232,7 @@ export async function getUserBook(book_id: number, user_id: number) {
             finished_at
           }
         }
-        list_books(where: {list: {user_id: {_eq: ${user_id}}}}) {
+        list_books(where: {list: {user_id: {_eq: $user_id}}}) {
           id
           list {
             id
@@ -241,7 +245,12 @@ export async function getUserBook(book_id: number, user_id: number) {
     }
   `;
 
-  const { data } = await client.post<GetUserBookResponse>(graphql_query);
+  const variables = {
+    book_id: Number(bookId),
+    user_id: Number(userId),
+  };
+
+  const { data } = await client.post<GetUserBookResponse>(graphql_query, variables);
 
   return data.books?.[0] ?? null;
 }
@@ -250,8 +259,8 @@ export async function addBookToList(listId: number, bookId: number) {
   const client = new HardcoverClient();
 
   const graphql_mutation = `
-    mutation {
-      insert_list_book(object: {book_id: ${bookId}, list_id: ${listId}}) {
+    mutation InsertListBook($list_id: Int!, $book_id: Int!) {
+      insert_list_book(object: {list_id: $list_id, book_id: $book_id}) {
         id
         list_book {
           book_id
@@ -261,7 +270,12 @@ export async function addBookToList(listId: number, bookId: number) {
     }
   `;
 
-  const { id } = await client.post<UserBookResponse>(graphql_mutation);
+  const variables = {
+    book_id: Number(bookId),
+    list_id: Number(listId),
+  };
+
+  const { id } = await client.post<UserBookResponse>(graphql_mutation, variables);
 
   return id;
 }
@@ -270,15 +284,19 @@ export async function removeBookFromList(listBookId: number) {
   const client = new HardcoverClient();
 
   const graphql_mutation = `
-    mutation {
-      delete_list_book(id: ${listBookId}) {
+    mutation DeleteListBook($id: Int!) {
+      delete_list_book(id: $id) {
         id
         list_id
       }
     }
   `;
 
-  const { id } = await client.post<{ id: number }>(graphql_mutation);
+  const variables = {
+    id: Number(listBookId),
+  };
+
+  const { id } = await client.post<{ id: number }>(graphql_mutation, variables);
 
   return id;
 }
@@ -287,15 +305,20 @@ export async function updateBookStatus(bookId: number, statusId: number) {
   const client = new HardcoverClient();
 
   const graphql_mutation = `
-    mutation {
-      insert_user_book(object: {book_id: ${bookId}, status_id: ${statusId}}) {
+    mutation InsertUserBookStatus($book_id: Int!, $status_id: Int) {
+      insert_user_book(object: {book_id: $book_id, status_id: $status_id}) {
         id
         error
       }
     }
   `;
 
-  const { data } = await client.post<UpdateBookStatusResponse>(graphql_mutation);
+  const variables = {
+    book_id: Number(bookId),
+    status_id: Number(statusId),
+  };
+
+  const { data } = await client.post<UpdateBookStatusResponse>(graphql_mutation, variables);
 
   if (data.insert_user_book.error) {
     throw new Error(UNKNOWN_ERROR_MESSAGE);
@@ -308,15 +331,20 @@ export async function updateBookRating(bookId: number, rating: number | string) 
   const client = new HardcoverClient();
 
   const graphql_mutation = `
-    mutation {
-      insert_user_book(object: {book_id: ${bookId}, rating: "${rating}"}) {
+    mutation InsertUserBookRating($book_id: Int!, $rating: numeric) {
+      insert_user_book(object: {book_id: $book_id, rating: $rating}) {
         id
         error
       }
     }
   `;
 
-  const { data } = await client.post<UpdateBookStatusResponse>(graphql_mutation);
+  const variables = {
+    book_id: Number(bookId),
+    rating: String(rating),
+  };
+
+  const { data } = await client.post<UpdateBookStatusResponse>(graphql_mutation, variables);
 
   if (data.insert_user_book.error) {
     throw new Error(UNKNOWN_ERROR_MESSAGE);
@@ -329,14 +357,18 @@ export async function removeBookStatus(userBookId: number) {
   const client = new HardcoverClient();
 
   const graphql_mutation = `
-    mutation {
-      delete_user_book(id: ${userBookId}) {
+    mutation DeleteUserbook($id: Int!) {
+      delete_user_book(id: $id) {
         id
       }
     }
   `;
 
-  const { data } = await client.post<{ data: { delete_user_book: { id: number } } }>(graphql_mutation);
+  const variables = {
+    id: Number(userBookId),
+  };
+
+  const { data } = await client.post<{ data: { delete_user_book: { id: number } } }>(graphql_mutation, variables);
 
   return data.delete_user_book.id;
 }

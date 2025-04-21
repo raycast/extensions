@@ -47,17 +47,33 @@ export async function createList(
   const client = new HardcoverClient();
 
   const graphql_mutation = `
-    mutation {
+    mutation InsertList($name: String, $default_view: String, $description: String, $privacy_setting_id: Int, $ranked: Boolean) {
       insert_list(
-        object: {name: "${name}", ranked: ${ranked}, privacy_setting_id: ${privacySettingId}, description: "${description}", default_view: "${defaultView}"}
+        object: {name: $name, default_view: $default_view, description: $description, privacy_setting_id: $privacy_setting_id, ranked: $ranked}
       ) {
         errors
         id
+        list {
+          id
+          name
+          default_view
+        }
       }
     }
   `;
 
-  const { data } = await client.post<{ data: { insert_list: { errors: string; id: number } } }>(graphql_mutation);
+  const variables = {
+    name: name,
+    privacy_setting_id: Number(privacySettingId),
+    description: description,
+    default_view: defaultView,
+    ranked: ranked,
+  };
+
+  const { data } = await client.post<{ data: { insert_list: { errors: string; id: number } } }>(
+    graphql_mutation,
+    variables,
+  );
 
   if (data.insert_list.errors) {
     const msg =
@@ -72,14 +88,18 @@ export async function deleteList(listId: number) {
   const client = new HardcoverClient();
 
   const graphql_mutation = `
-    mutation {
-      delete_list(id: ${listId}) {
+    mutation DeleteList($id: Int!) {
+      delete_list(id: $id) {
         success
       }
     }
   `;
 
-  const { data } = await client.post<{ data: { delete_list: { success: boolean } } }>(graphql_mutation);
+  const variables = {
+    id: Number(listId),
+  };
+
+  const { data } = await client.post<{ data: { delete_list: { success: boolean } } }>(graphql_mutation, variables);
 
   if (!data.delete_list.success) {
     throw new Error(UNKNOWN_ERROR_MESSAGE);

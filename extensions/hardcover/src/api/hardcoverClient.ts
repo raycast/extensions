@@ -15,7 +15,7 @@ export class HardcoverClient {
     this.apiKey = preferences.api_key;
   }
 
-  public async post<T>(query: string): Promise<T> {
+  public async post<T>(query: string, variables?: object): Promise<T> {
     const headers = {
       Authorization: `${this.apiKey}`,
       "Content-Type": "application/json",
@@ -23,6 +23,7 @@ export class HardcoverClient {
 
     const body = JSON.stringify({
       query: query,
+      ...(variables && { variables }),
     });
 
     const response = await fetch(API_BASE_URL, {
