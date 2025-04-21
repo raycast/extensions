@@ -1,0 +1,6 @@
+{
+  "extends": ["@raycast/eslint-config"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "root": true
+} 
