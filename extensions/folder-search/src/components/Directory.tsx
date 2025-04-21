@@ -56,9 +56,23 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
   // Handle return to main view with callback
   const handleReturn = () => {
     if (onReturn) {
-      log("debug", "Directory", "Calling onReturn callback");
+      console.log(`[DEBUG] Directory.tsx: handleReturn called for directory ${directoryPath}, calling onReturn callback`);
       onReturn();
+    } else {
+      console.log(`[DEBUG] Directory.tsx: handleReturn called for directory ${directoryPath}, but no onReturn callback provided`);
     }
+  };
+
+  // Function that toggles pins and calls onReturn afterward
+  const handleTogglePin = (result: SpotlightSearchResult, resultIndex: number) => {
+    console.log(`[DEBUG] Directory.tsx: handleTogglePin called for ${result.path}`);
+    
+    // Toggle the pin status
+    toggleResultPinnedStatus(result, resultIndex);
+    
+    // Always trigger return callback after pin action
+    console.log(`[DEBUG] Directory.tsx: Calling handleReturn after pin toggle`);
+    handleReturn();
   };
 
   useEffect(() => {
@@ -117,8 +131,7 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
                       icon={!resultIsPinned(parentResult) ? Icon.Star : Icon.StarDisabled}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                       onAction={() => {
-                        toggleResultPinnedStatus(parentResult, parentPinnedIndex !== -1 ? parentPinnedIndex : 0);
-                        handleReturn();
+                        handleTogglePin(parentResult, parentPinnedIndex !== -1 ? parentPinnedIndex : 0);
                       }}
                     />
                   );
@@ -165,8 +178,7 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
                     icon={!resultIsPinned(result) ? Icon.Star : Icon.StarDisabled}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                     onAction={() => {
-                      toggleResultPinnedStatus(result, pinnedIndex !== -1 ? pinnedIndex : 0);
-                      handleReturn();
+                      handleTogglePin(result, pinnedIndex !== -1 ? pinnedIndex : 0);
                     }}
                   />
                   <ActionPanel.Section>
