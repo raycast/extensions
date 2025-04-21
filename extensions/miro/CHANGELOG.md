@@ -1,5 +1,9 @@
 # Miro
 
+## [Separate Boards caches] - {PR_MERGE_DATE}
+
+- Separate caches of `My Boards` and `Recent Boards` commands
+
 ## [Add command to show recent boards] - 2025-03-27
 
 - Add a new command to show recent boards.
