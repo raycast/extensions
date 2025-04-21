@@ -8,7 +8,7 @@ interface Preferences {
 export const ensureStorageDirectoryExists = async (): Promise<void> => {
   const preferences = getPreferenceValues<Preferences>();
   const storageDirectory = preferences.storageDirectory;
-  const expandedStorageDirectory = storageDirectory.replace(/^~/, process.env.HOME || "");
+  const expandedStorageDirectory = storageDirectory.replace(/^~/, require('os').homedir());
   try {
     await fs.mkdir(expandedStorageDirectory, { recursive: true });
   } catch (error) {
