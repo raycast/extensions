@@ -1,4 +1,4 @@
-import { Alert, Icon, closeMainWindow, confirmAlert, getPreferenceValues, popToRoot, trash } from "@raycast/api";
+import { Alert, Icon, Cache, closeMainWindow, confirmAlert, getPreferenceValues, popToRoot, trash } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import fs from "fs";
 import * as yup from "yup";
@@ -11,6 +11,97 @@ import { showFailureToast } from "@raycast/utils";
 // Logging configuration
 const LOG_ENABLED = true; // Set to true to enable all logging
 const LOG_LEVEL: "debug" | "error" = "debug"; // Set to "debug" for verbose logging or "error" for less noise
+const LOG_CACHE_OPERATIONS = false; // Set to true to log detailed cache operations
+
+// Create a plugins cache instance with namespace
+const pluginsCache = new Cache({
+  namespace: "folder-search-plugins",
+  capacity: 5 * 1024 * 1024, // 5MB should be plenty for plugins
+});
+
+// Cache key for plugins
+const PLUGINS_CACHE_KEY = "plugin_paths";
+
+// Cache timestamp key to check for freshness
+const PLUGINS_CACHE_TIMESTAMP_KEY = "plugins_timestamp";
+
+// Cache validity period (12 hours in milliseconds)
+const CACHE_VALIDITY_PERIOD = 12 * 60 * 60 * 1000;
+
+// Function to check plugins cache
+const getPluginPathsFromCache = () => {
+  try {
+    // Check if we have a timestamp
+    const timestampStr = pluginsCache.get(PLUGINS_CACHE_TIMESTAMP_KEY);
+    
+    if (!timestampStr) {
+      if (LOG_CACHE_OPERATIONS) {
+        log("debug", "getPluginPathsFromCache", "No timestamp in cache");
+      }
+      return null;
+    }
+    
+    const timestamp = parseInt(timestampStr, 10);
+    const now = Date.now();
+    
+    // Check if cache is still valid
+    if (now - timestamp > CACHE_VALIDITY_PERIOD) {
+      if (LOG_CACHE_OPERATIONS) {
+        log("debug", "getPluginPathsFromCache", "Cache expired", {
+          timestamp,
+          now,
+          age: now - timestamp,
+          validityPeriod: CACHE_VALIDITY_PERIOD
+        });
+      }
+      return null;
+    }
+    
+    // Get plugin paths from cache
+    const pathsJson = pluginsCache.get(PLUGINS_CACHE_KEY);
+    if (!pathsJson) {
+      if (LOG_CACHE_OPERATIONS) {
+        log("debug", "getPluginPathsFromCache", "No plugin paths in cache");
+      }
+      return null;
+    }
+    
+    // Parse and return plugin paths
+    const pluginPaths = JSON.parse(pathsJson);
+    if (LOG_CACHE_OPERATIONS) {
+      log("debug", "getPluginPathsFromCache", "Retrieved plugin paths from cache", {
+        count: pluginPaths.length
+      });
+    }
+    return pluginPaths;
+  } catch (error) {
+    log("error", "getPluginPathsFromCache", "Error retrieving from cache", {
+      error: error instanceof Error ? error.message : String(error)
+    });
+    return null;
+  }
+};
+
+// Function to save plugin paths to cache
+const savePluginPathsToCache = (pluginPaths: string[]) => {
+  try {
+    // Save plugin paths
+    pluginsCache.set(PLUGINS_CACHE_KEY, JSON.stringify(pluginPaths));
+    
+    // Save timestamp
+    pluginsCache.set(PLUGINS_CACHE_TIMESTAMP_KEY, Date.now().toString());
+    
+    if (LOG_CACHE_OPERATIONS) {
+      log("debug", "savePluginPathsToCache", "Saved plugin paths to cache", {
+        count: pluginPaths.length
+      });
+    }
+  } catch (error) {
+    log("error", "savePluginPathsToCache", "Error saving to cache", {
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+};
 
 const userHomeDir = os.homedir();
 
@@ -36,10 +127,34 @@ const pluginSchema = yup
   .noUnknown(true);
 
 const loadPlugins = async () => {
+  // First, try to get plugin paths from cache
+  const cachedPluginPaths = getPluginPathsFromCache();
+  if (cachedPluginPaths) {
+    log("debug", "loadPlugins", `Loading ${cachedPluginPaths.length} plugins from cached paths`);
+      
+    // Load plugins from cached paths
+    const plugins = [];
+    for (const pluginPath of cachedPluginPaths) {
+      try {
+        const { FolderSearchPlugin } = await import(pluginPath);
+        await pluginSchema.validate(FolderSearchPlugin);
+        plugins.push(FolderSearchPlugin);
+      } catch (error) {
+        log("error", "loadPlugins", `Failed to load cached plugin: ${pluginPath}`, {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+      
+    log("debug", "loadPlugins", `Successfully loaded ${plugins.length} plugins from cache`);
+    return plugins;
+  }
+
+  // If not in cache, load plugins as normal
   // grab prefs
   const { pluginsEnabled, pluginsFolder } = getPreferenceValues<SpotlightSearchPreferences>();
 
-  log("debug", "loadPlugins", "Loading plugins", {
+  log("debug", "loadPlugins", "Loading plugins from disk", {
     pluginsEnabled,
     pluginsFolder,
   });
@@ -72,31 +187,27 @@ const loadPlugins = async () => {
     return [];
   }
 
+  const validPluginPaths = [];
   const validPlugins = [];
   const invalidPluginFiles = [];
 
   try {
     const files = await fs.promises.readdir(normalizedPath);
-    log("debug", "loadPlugins", "Found plugin files", { files });
-
+    
     // we only want .js/plugin files (not .DS_Store etc)
     const jsFiles = files.filter((file) => file.endsWith(".js"));
-    log("debug", "loadPlugins", "Filtered JS files", { jsFiles });
+    
+    log("debug", "loadPlugins", `Found ${jsFiles.length} plugins to load`);
 
     for (const file of jsFiles) {
       try {
         // load and validate
         const pluginPath = path.join(normalizedPath, file);
-        log("debug", "loadPlugins", "Loading plugin", { file, pluginPath });
-
+        
         const { FolderSearchPlugin } = await import(pluginPath);
-        log("debug", "loadPlugins", "Plugin loaded", {
-          file,
-          title: FolderSearchPlugin.title,
-          shortcut: FolderSearchPlugin.shortcut,
-        });
-
+        
         await pluginSchema.validate(FolderSearchPlugin);
+        validPluginPaths.push(pluginPath);
         validPlugins.push(FolderSearchPlugin);
       } catch (e) {
         log("error", "loadPlugins", "Failed to load plugin", {
@@ -117,6 +228,11 @@ const loadPlugins = async () => {
   if (invalidPluginFiles.length) {
     log("error", "loadPlugins", "Some plugins failed to load", { invalidPluginFiles });
   }
+
+  log("debug", "loadPlugins", `Successfully loaded ${validPlugins.length} plugins`);
+  
+  // Cache the loaded plugin paths
+  savePluginPathsToCache(validPluginPaths);
 
   return validPlugins;
 };

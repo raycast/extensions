@@ -11,7 +11,7 @@ import {
   Keyboard,
   LaunchProps,
 } from "@raycast/api";
-import { folderName, copyFolderToClipboard, maybeMoveResultToTrash } from "./utils";
+import { folderName, copyFolderToClipboard, maybeMoveResultToTrash, log } from "./utils";
 import { runAppleScript } from "run-applescript";
 import { SpotlightSearchResult } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
@@ -62,8 +62,7 @@ export default function Command(props: LaunchProps) {
 
   // Handle returning from directory view
   const handleReturnFromDirectory = () => {
-    console.log(`[DEBUG] search.tsx: handleReturnFromDirectory called, pins count: ${pinnedResults.length}`);
-    console.log(`[DEBUG] search.tsx: Refreshing pins from storage after directory return`);
+    log("debug", "search", `Refreshing pins from storage (current count: ${pinnedResults.length})`);
     refreshPinsFromStorage();
   };
 

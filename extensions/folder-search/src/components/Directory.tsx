@@ -56,22 +56,20 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
   // Handle return to main view with callback
   const handleReturn = () => {
     if (onReturn) {
-      console.log(`[DEBUG] Directory.tsx: handleReturn called for directory ${directoryPath}, calling onReturn callback`);
+      log("debug", "Directory", `Running return callback for ${directoryPath}`);
       onReturn();
-    } else {
-      console.log(`[DEBUG] Directory.tsx: handleReturn called for directory ${directoryPath}, but no onReturn callback provided`);
     }
   };
 
   // Function that toggles pins and calls onReturn afterward
   const handleTogglePin = (result: SpotlightSearchResult, resultIndex: number) => {
-    console.log(`[DEBUG] Directory.tsx: handleTogglePin called for ${result.path}`);
+    log("debug", "Directory", `Toggling pin for ${result.path.split('/').pop()}`);
     
     // Toggle the pin status
     toggleResultPinnedStatus(result, resultIndex);
     
     // Always trigger return callback after pin action
-    console.log(`[DEBUG] Directory.tsx: Calling handleReturn after pin toggle`);
+    log("debug", "Directory", "Calling handleReturn after pin toggle");
     handleReturn();
   };
 

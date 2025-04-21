@@ -5,6 +5,9 @@ import { FolderSearchPlugin, SpotlightSearchResult, SpotlightSearchPreferences }
 import { loadPlugins, lastUsedSort, shouldShowPath, log } from "../utils";
 import { searchSpotlight } from "../search-spotlight";
 
+// Global flag to avoid duplicate loading of plugins
+let pluginsLoaded = false;
+
 export function useFolderSearch() {
   const [searchText, setSearchText] = useState<string>("");
   const [pinnedResults, setPinnedResults] = useState<SpotlightSearchResult[]>([]);
@@ -92,51 +95,25 @@ export function useFolderSearch() {
   }, [searchText, searchScope, pinnedResults, hasCheckedPlugins, hasCheckedPreferences]);
 
   // check plugins
-  const pluginsRef = useRef<FolderSearchPlugin[]>([]);
-  const isLoadingPluginsRef = useRef<boolean>(false);
-
   usePromise(
     async () => {
-      // Return cached plugins if available
-      if (pluginsRef.current.length > 0) {
-        log("debug", "useFolderSearch", "Using cached plugins", {
-          count: pluginsRef.current.length,
-          component: "useFolderSearch",
-          timestamp: new Date().toISOString(),
-        });
-        return pluginsRef.current;
+      // Avoid duplicate loading of plugins across multiple hook instances
+      if (pluginsLoaded) {
+        return await loadPlugins(); // This will get from cache
       }
 
-      // If already loading, wait for the existing call to complete
-      if (isLoadingPluginsRef.current) {
-        log("debug", "useFolderSearch", "Plugin loading already in progress", {
-          component: "useFolderSearch",
-          timestamp: new Date().toISOString(),
-        });
-
-        // Wait for the current loading process to complete
-        while (isLoadingPluginsRef.current) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-
-        // Return the cached plugins after waiting
-        if (pluginsRef.current.length > 0) {
-          return pluginsRef.current;
-        }
-      }
-
-      // Set loading flag and load plugins
-      isLoadingPluginsRef.current = true;
       try {
-        log("debug", "useFolderSearch", "Loading plugins from loadPlugins", {
-          component: "useFolderSearch",
-          timestamp: new Date().toISOString(),
-        });
+        log("debug", "useFolderSearch", "Loading plugins for the first time");
+        
+        // Use the cached/optimized loadPlugins function
         const plugins = await loadPlugins();
-        pluginsRef.current = plugins;
+        pluginsLoaded = true;
         return plugins;
-      } finally {
-        isLoadingPluginsRef.current = false;
+      } catch (error) {
+        log("error", "useFolderSearch", "Error loading plugins", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw error;
       }
     },
     [],
@@ -153,53 +130,34 @@ export function useFolderSearch() {
   );
 
   // check prefs
-  const prefsRef = useRef<boolean>(false);
-  const isLoadingPrefsRef = useRef<boolean>(false);
-  // Track if this is the first time loading to avoid duplicate loads on mount
-  const initialPrefLoadRef = useRef<boolean>(false);
-
   usePromise(
     async () => {
-      // Skip after initial load is complete
-      if (initialPrefLoadRef.current && prefsRef.current) {
-        return;
-      }
-
-      // If already loading, wait for the existing call to complete
-      if (isLoadingPrefsRef.current) {
-        // Wait for the current loading process to complete
-        while (isLoadingPrefsRef.current) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-
-        // Return after waiting since preferences should be checked
-        if (prefsRef.current) {
-          initialPrefLoadRef.current = true;
-          return;
-        }
-      }
-
-      // Set loading flag and load preferences
-      isLoadingPrefsRef.current = true;
       try {
+        log("debug", "useFolderSearch", "Loading preferences");
+        
+        // Get preferences from LocalStorage
         const maybePreferences = await LocalStorage.getItem(`${environment.extensionName}-preferences`);
 
         if (maybePreferences) {
           try {
-            initialPrefLoadRef.current = true;
-            return JSON.parse(maybePreferences as string);
-          } catch (_) {
-            // noop
+            const preferences = JSON.parse(maybePreferences as string);
+            log("debug", "useFolderSearch", `Loaded preferences with ${preferences?.pinned?.length || 0} pins`);
+            return preferences;
+          } catch (error) {
+            log("error", "useFolderSearch", "Error parsing preferences from storage");
           }
         }
-      } finally {
-        isLoadingPrefsRef.current = false;
+        
+        // Return empty object if nothing found
+        return {};
+      } catch (error) {
+        log("error", "useFolderSearch", "Error loading preferences");
+        throw error;
       }
     },
     [],
     {
       onData(preferences) {
-        prefsRef.current = true;
         setPinnedResults(preferences?.pinned || []);
         setSearchScope(preferences?.searchScope || "");
         setIsShowingDetail(preferences?.isShowingDetail);
@@ -207,7 +165,6 @@ export function useFolderSearch() {
         setHasCheckedPreferences(true);
       },
       onError() {
-        prefsRef.current = true;
         showFailureToast({ title: "Could not read preferences" });
         setHasCheckedPreferences(true);
       },
@@ -221,15 +178,24 @@ export function useFolderSearch() {
         return;
       }
 
-      await LocalStorage.setItem(
-        `${environment.extensionName}-preferences`,
-        JSON.stringify({
-          pinned: pinnedResults,
-          searchScope,
-          isShowingDetail,
-          showNonCloudLibraryPaths,
-        })
-      );
+      try {
+        await LocalStorage.setItem(
+          `${environment.extensionName}-preferences`,
+          JSON.stringify({
+            pinned: pinnedResults,
+            searchScope,
+            isShowingDetail,
+            showNonCloudLibraryPaths,
+          })
+        );
+        
+        // Only log on significant pin count changes
+        if (pinnedResults.length % 5 === 0) {
+          log("debug", "useFolderSearch", `Saved preferences with ${pinnedResults.length} pins`);
+        }
+      } catch (error) {
+        log("error", "useFolderSearch", "Error saving preferences");
+      }
     })();
   }, [pinnedResults, searchScope, isShowingDetail, hasCheckedPlugins, hasCheckedPreferences, showNonCloudLibraryPaths]);
 
@@ -307,68 +273,37 @@ export function useFolderSearch() {
   };
 
   const toggleResultPinnedStatus = (result: SpotlightSearchResult, resultIndex: number) => {
-    console.log(`[DEBUG] useFolderSearch.tsx: toggleResultPinnedStatus called for ${result.path}`);
-    const isPinned = resultIsPinned(result);
+    log("debug", "useFolderSearch", `${resultIsPinned(result) ? "Unpinning" : "Pinning"} folder: ${result.path.split('/').pop()}`);
     
-    console.log(`[DEBUG] useFolderSearch.tsx: ${isPinned ? "Removing from" : "Adding to"} pins: ${result.path}`);
-    
-    setPinnedResults((prevPins) => {
-      // For adding: place at the beginning, for removing: filter out
-      const newPins = isPinned 
-        ? prevPins.filter((pinnedResult) => pinnedResult.path !== result.path)
-        : [result, ...prevPins];
-        
-      console.log(`[DEBUG] useFolderSearch.tsx: New pins count: ${newPins.length}`);
-      
-      // Immediately persist to localStorage
-      (async () => {
-        try {
-          await LocalStorage.setItem(
-            `${environment.extensionName}-preferences`,
-            JSON.stringify({
-              pinned: newPins,
-              searchScope,
-              isShowingDetail,
-              showNonCloudLibraryPaths,
-            })
-          );
-          console.log(`[DEBUG] useFolderSearch.tsx: Saved updated pins to localStorage`);
-        } catch (error) {
-          console.error("Error saving pins", error);
-        }
-      })();
-      
-      return newPins;
-    });
+    if (!resultIsPinned(result)) {
+      setPinnedResults((prevPins) => [result, ...prevPins]);
+    } else {
+      removeResultFromPinnedResults(result);
+    }
     
     setSelectedItemId(`result-${resultIndex.toString()}`);
   };
 
-  // Simple function to refresh pins from storage
+  // Function to refresh pins from storage
   const refreshPinsFromStorage = async () => {
-    console.log(`[DEBUG] useFolderSearch.tsx: refreshPinsFromStorage called, current pins count: ${pinnedResults.length}`);
+    log("debug", "useFolderSearch", "Refreshing pins from storage");
     
     try {
       // Get the current preferences from localStorage
       const maybePreferences = await LocalStorage.getItem(`${environment.extensionName}-preferences`);
-      console.log(`[DEBUG] useFolderSearch.tsx: Got preferences from storage: ${maybePreferences ? "yes" : "no"}`);
       
       if (maybePreferences) {
         try {
           const preferences = JSON.parse(maybePreferences as string);
-          console.log(`[DEBUG] useFolderSearch.tsx: Parsed preferences, pinned items: ${preferences?.pinned?.length || 0}`);
           
           // Ensure we have valid pinned items
           if (preferences?.pinned && Array.isArray(preferences.pinned)) {
-            console.log(`[DEBUG] useFolderSearch.tsx: Valid pinned items array with ${preferences.pinned.length} items`);
-            
-            // Force updating the state with the latest pins
-            setPinnedResults([...preferences.pinned]);
-            console.log(`[DEBUG] useFolderSearch.tsx: Set pinned results to ${preferences.pinned.length} items`);
+            // Update state through React state setter
+            setPinnedResults(preferences.pinned);
+            log("debug", "useFolderSearch", `Updated pins from storage (${preferences.pinned.length} pins)`);
             
             // If we're in pinned scope, we need to update the results too
             if (searchScope === "pinned") {
-              console.log(`[DEBUG] useFolderSearch.tsx: In pinned scope, updating results too`);
               setResults(
                 preferences.pinned.filter((pin: SpotlightSearchResult) =>
                   pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
@@ -376,16 +311,16 @@ export function useFolderSearch() {
               );
             }
           } else {
-            console.log(`[DEBUG] useFolderSearch.tsx: No valid pinned items found in preferences`);
+            log("debug", "useFolderSearch", "No valid pinned items found in preferences");
           }
         } catch (error) {
-          console.error("Error parsing preferences during refresh", error);
+          log("error", "useFolderSearch", "Error parsing preferences during refresh");
         }
       } else {
-        console.log(`[DEBUG] useFolderSearch.tsx: No preferences found in storage`);
+        log("debug", "useFolderSearch", "No preferences found in storage");
       }
     } catch (error) {
-      console.error("Error refreshing pins from storage", error);
+      log("error", "useFolderSearch", "Error refreshing pins from storage");
     }
   };
 
