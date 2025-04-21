@@ -12,12 +12,12 @@ export function usePinStorage() {
   const loadPins = async (): Promise<SpotlightSearchResult[]> => {
     try {
       const maybePreferences = await LocalStorage.getItem(`${environment.extensionName}-preferences`);
-      
+
       if (!maybePreferences) {
         log("debug", "usePinStorage", "No preferences found in storage");
         return [];
       }
-      
+
       try {
         const preferences = JSON.parse(maybePreferences as string);
         const storedPins = preferences?.pinned || [];
@@ -25,13 +25,13 @@ export function usePinStorage() {
         return storedPins;
       } catch (e) {
         log("error", "usePinStorage", "Error parsing preferences from storage", {
-          error: e instanceof Error ? e.message : String(e)
+          error: e instanceof Error ? e.message : String(e),
         });
         return [];
       }
     } catch (error) {
       log("error", "usePinStorage", "Error loading pins from storage", {
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return [];
     }
@@ -41,10 +41,10 @@ export function usePinStorage() {
    * Save pins to LocalStorage
    */
   const savePins = async (
-    pins: SpotlightSearchResult[], 
-    additionalPrefs?: { 
-      searchScope?: string; 
-      isShowingDetail?: boolean; 
+    pins: SpotlightSearchResult[],
+    additionalPrefs?: {
+      searchScope?: string;
+      isShowingDetail?: boolean;
       showNonCloudLibraryPaths?: boolean;
     }
   ): Promise<boolean> => {
@@ -58,16 +58,16 @@ export function usePinStorage() {
           showNonCloudLibraryPaths: additionalPrefs?.showNonCloudLibraryPaths || false,
         })
       );
-      
+
       // Only log on significant pin count changes
       if (pins.length % 5 === 0) {
         log("debug", "usePinStorage", `Saved preferences with ${pins.length} pins`);
       }
-      
+
       return true;
     } catch (error) {
       log("error", "usePinStorage", "Error saving pins to storage", {
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return false;
     }
@@ -77,4 +77,4 @@ export function usePinStorage() {
     loadPins,
     savePins,
   };
-} 
+}

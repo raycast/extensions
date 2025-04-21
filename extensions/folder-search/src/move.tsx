@@ -23,6 +23,7 @@ export default function Command(props: LaunchProps) {
     resultIsPinned,
     hasCheckedPlugins,
     hasCheckedPreferences,
+    hasSearched,
   } = useFolderSearch();
 
   // Use the shared command base hook
@@ -109,7 +110,7 @@ export default function Command(props: LaunchProps) {
         ) : null
       }
     >
-      {!searchText && props.launchType === "userInitiated" ? (
+      {!searchText && props.launchType === "userInitiated" && pinnedResults.length > 0 ? (
         <FolderListSection
           title="Pinned"
           results={pinnedResults}
@@ -117,16 +118,30 @@ export default function Command(props: LaunchProps) {
           resultIsPinned={resultIsPinned}
           renderActions={renderFolderActions}
         />
+      ) : !searchText && props.launchType === "userInitiated" ? (
+        // No pins and no search text
+        <List.EmptyView
+          title="No Pinned Folders"
+          description="Search to find folders or pin your favorites from the search command"
+          icon={Icon.Star}
+        />
       ) : (
         <>
-          {isQuerying ? (
+          {isQuerying || (searchText && !hasSearched) ? (
             <List.EmptyView
               title="Searching..."
               description="Looking for destination folders"
               icon={Icon.MagnifyingGlass}
             />
-          ) : results.length === 0 ? (
+          ) : hasSearched && results.length === 0 ? (
             <List.EmptyView title="No Results" description="Try a different search term" icon={Icon.Folder} />
+          ) : !searchText ? (
+            // Only show this when there's no search text at all
+            <List.EmptyView
+              title="Enter a search term"
+              description="Type to search for folders to move files to"
+              icon={Icon.MagnifyingGlass}
+            />
           ) : (
             <FolderListSection
               title="Results"

@@ -63,17 +63,17 @@ export default function Command(props: LaunchProps) {
   // Handle returning from directory view
   const handleReturnFromDirectory = () => {
     log("debug", "search", `handleReturnFromDirectory called with ${pinnedResults.length} current pins`);
-    
+
     // Add a short timestamp to help correlate logs
     const timestamp = new Date().toISOString().slice(11, 23);
     log("debug", "search", `[${timestamp}] Refreshing pins from storage via directory return`);
-    
+
     // Run full diagnostics before refreshing pins
     logDiagnostics("search", "Pre-refresh state diagnostics");
-    
+
     // Let refreshPinsFromStorage handle everything, including pending states
     refreshPinsFromStorage();
-    
+
     // Add debug logs to check state after a short delay
     setTimeout(() => {
       log("debug", "search", `[${timestamp}+250ms] Pin count after refresh: ${pinnedResults.length}`);

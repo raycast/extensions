@@ -23,7 +23,7 @@ export function useSearchResults({
   const [results, setResults] = useState<SpotlightSearchResult[]>([]);
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
-  
+
   const abortable = useRef<AbortController>(new AbortController());
 
   // Use the debounce hook
@@ -40,7 +40,7 @@ export function useSearchResults({
           searchText: text,
           pinnedCount: pinnedResults.length,
         });
-        
+
         setResults(
           pinnedResults.filter((pin) =>
             pin.kMDItemFSName.toLocaleLowerCase().includes(text.replace(/[[|\]]/gi, "").toLocaleLowerCase())
@@ -74,7 +74,7 @@ export function useSearchResults({
         searchText: debouncedText,
         pinnedCount: pinnedResults.length,
       });
-      
+
       setResults(
         pinnedResults.filter((pin) =>
           pin.kMDItemFSName.toLocaleLowerCase().includes(debouncedText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
@@ -84,76 +84,71 @@ export function useSearchResults({
   }, [pinnedResults, searchScope, debouncedText]);
 
   // Perform spotlight search
-  const performSearch = useCallback(
-    async (search: string, scope: string) => {
-      if (!search || scope === "pinned") return;
+  const performSearch = useCallback(async (search: string, scope: string) => {
+    if (!search || scope === "pinned") return;
 
-      try {
-        log("debug", "useSearchResults", "Executing search", {
-          search,
-          scope,
-        });
+    try {
+      log("debug", "useSearchResults", "Executing search", {
+        search,
+        scope,
+      });
 
-        // Cancel any ongoing searches
-        if (abortable.current) {
-          abortable.current.abort();
-        }
-        
-        // Create a new abort controller
-        abortable.current = new AbortController();
-        
-        // Start showing spinner
-        setIsQuerying(true);
-        setResults([]);
-        
-        // Perform the search
-        const searchResults = await searchSpotlight(search, scope as "pinned" | "user" | "all", abortable);
-        
-        log("debug", "useSearchResults", "Search completed", {
-          resultCount: searchResults.length,
-        });
-
-        // Get preferences for filtering
-        const { filterLibraryFolders } = getPreferenceValues<SpotlightSearchPreferences>();
-        
-        // Filter results based on preferences
-        const filteredResults = searchResults.filter((result) => 
-          shouldShowPath(result.path, !filterLibraryFolders)
-        );
-
-        log("debug", "useSearchResults", "Processing search results", {
-          originalCount: searchResults.length,
-          filteredCount: filteredResults.length,
-          filterLibraryFolders,
-        });
-
-        // Update results state
-        setResults(filteredResults.sort(lastUsedSort));
-        setIsQuerying(false);
-        setHasSearched(true);
-      } catch (error) {
-        // Ignore AbortError as it's expected during debouncing
-        if (error instanceof Error && error.name === "AbortError") {
-          log("debug", "useSearchResults", "Search aborted", { search });
-          return;
-        }
-        
-        log("error", "useSearchResults", "Search error", {
-          error: error instanceof Error ? error.message : String(error),
-          searchText: search,
-          searchScope: scope,
-        });
-        
-        if (error instanceof Error && error.name !== "AbortError") {
-          showFailureToast(error, { title: "Error searching folders" });
-        }
-        
-        setIsQuerying(false);
-        setHasSearched(true);
+      // Cancel any ongoing searches
+      if (abortable.current) {
+        abortable.current.abort();
       }
-    },
-    []
-  );
+
+      // Create a new abort controller
+      abortable.current = new AbortController();
+
+      // Start showing spinner
+      setIsQuerying(true);
+      setResults([]);
+
+      // Perform the search
+      const searchResults = await searchSpotlight(search, scope as "pinned" | "user" | "all", abortable);
+
+      log("debug", "useSearchResults", "Search completed", {
+        resultCount: searchResults.length,
+      });
+
+      // Get preferences for filtering
+      const { filterLibraryFolders } = getPreferenceValues<SpotlightSearchPreferences>();
+
+      // Filter results based on preferences
+      const filteredResults = searchResults.filter((result) => shouldShowPath(result.path, !filterLibraryFolders));
+
+      log("debug", "useSearchResults", "Processing search results", {
+        originalCount: searchResults.length,
+        filteredCount: filteredResults.length,
+        filterLibraryFolders,
+      });
+
+      // Update results state
+      setResults(filteredResults.sort(lastUsedSort));
+      setIsQuerying(false);
+      setHasSearched(true);
+    } catch (error) {
+      // Ignore AbortError as it's expected during debouncing
+      if (error instanceof Error && error.name === "AbortError") {
+        log("debug", "useSearchResults", "Search aborted", { search });
+        return;
+      }
+
+      log("error", "useSearchResults", "Search error", {
+        error: error instanceof Error ? error.message : String(error),
+        searchText: search,
+        searchScope: scope,
+      });
+
+      if (error instanceof Error && error.name !== "AbortError") {
+        showFailureToast(error, { title: "Error searching folders" });
+      }
+
+      setIsQuerying(false);
+      setHasSearched(true);
+    }
+  }, []);
 
   // Clean up abort controller
   useEffect(() => {
@@ -167,11 +162,16 @@ export function useSearchResults({
   return {
     searchText,
     setSearchText,
-    results: searchScope === "pinned" ? pinnedResults.filter((pin) =>
-      !searchText || pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
-    ) : results,
+    results:
+      searchScope === "pinned"
+        ? pinnedResults.filter(
+            (pin) =>
+              !searchText ||
+              pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
+          )
+        : results,
     isQuerying,
     hasSearched,
     performSearch,
   };
-} 
+}

@@ -26,29 +26,41 @@ export function usePluginManagement() {
   const instanceIdRef = useRef<number>(++instanceCounter);
   const [plugins, setPlugins] = useState<FolderSearchPlugin[]>([]);
   const [hasCheckedPlugins, setHasCheckedPlugins] = useState<boolean>(false);
-  
+
   // Get current preferences directly in the hook
   const { pluginsEnabled } = getPreferenceValues<SpotlightSearchPreferences>();
 
   useEffect(() => {
     // Log at mount time to help diagnose multiple instances
-    log("debug", "usePluginManagement", `Instance #${instanceIdRef.current} mounted, plugins cache status: ${pluginsLoaded ? "populated" : "empty"}`);
-    
+    log(
+      "debug",
+      "usePluginManagement",
+      `Instance #${instanceIdRef.current} mounted, plugins cache status: ${pluginsLoaded ? "populated" : "empty"}`
+    );
+
     const loadPluginsAsync = async () => {
       try {
         // Check if plugins are enabled in preferences
         if (!pluginsEnabled) {
-          log("debug", "usePluginManagement", `Instance #${instanceIdRef.current}: Plugins are disabled in preferences`);
+          log(
+            "debug",
+            "usePluginManagement",
+            `Instance #${instanceIdRef.current}: Plugins are disabled in preferences`
+          );
           setPlugins([]);
           setHasCheckedPlugins(true);
           // Clear any cached plugins to ensure they're reloaded if enabled later
           clearPluginCache();
           return;
         }
-        
+
         // Avoid duplicate loading of plugins across multiple hook instances
         if (pluginsLoaded && cachedPlugins.length > 0) {
-          log("debug", "usePluginManagement", `Instance #${instanceIdRef.current}: Using cached plugins (${cachedPlugins.length} plugins)`);
+          log(
+            "debug",
+            "usePluginManagement",
+            `Instance #${instanceIdRef.current}: Using cached plugins (${cachedPlugins.length} plugins)`
+          );
           setPlugins(cachedPlugins);
           setHasCheckedPlugins(true);
           return;
@@ -58,16 +70,20 @@ export function usePluginManagement() {
 
         // Use the loadPlugins function and pass the caller ID
         const loadedPlugins = await loadPlugins(`Instance_${instanceIdRef.current}`);
-        
+
         // Cache plugins globally
         cachedPlugins = loadedPlugins;
         pluginsLoaded = true;
-        
+
         // Update state
         setPlugins(loadedPlugins);
         setHasCheckedPlugins(true);
-        
-        log("debug", "usePluginManagement", `Instance #${instanceIdRef.current}: Finished loading ${loadedPlugins.length} plugins`);
+
+        log(
+          "debug",
+          "usePluginManagement",
+          `Instance #${instanceIdRef.current}: Finished loading ${loadedPlugins.length} plugins`
+        );
       } catch (error) {
         log("error", "usePluginManagement", `Instance #${instanceIdRef.current}: Error loading plugins`, {
           error: error instanceof Error ? error.message : String(error),
@@ -78,7 +94,7 @@ export function usePluginManagement() {
     };
 
     loadPluginsAsync();
-    
+
     // Cleanup function
     return () => {
       log("debug", "usePluginManagement", `Instance #${instanceIdRef.current} unmounted`);
@@ -88,6 +104,6 @@ export function usePluginManagement() {
   return {
     plugins,
     hasCheckedPlugins,
-    pluginsEnabled
+    pluginsEnabled,
   };
-} 
+}

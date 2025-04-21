@@ -20,4 +20,4 @@ export { useSearchDebounce } from "./useSearchDebounce";
 export { usePluginManagement } from "./usePluginManagement";
 
 // Preference management hooks
-export { usePreferences } from "./usePreferences"; 
+export { usePreferences } from "./usePreferences";

@@ -132,9 +132,9 @@ const pluginSchema = yup
 export const loadPlugins = async (callerId?: string) => {
   const loadId = ++pluginLoadCounter;
   const logPrefix = callerId ? `[${callerId} #${loadId}]` : `[load #${loadId}]`;
-  
+
   log("debug", "loadPlugins", `${logPrefix} Starting plugin load`);
-  
+
   // First, try to get plugin paths from cache
   const cachedPluginPaths = getPluginPathsFromCache();
   if (cachedPluginPaths) {
@@ -387,46 +387,45 @@ export const log = (level: "debug" | "error", component: string, message: string
  */
 export function logDiagnostics(component: string, message: string) {
   if (!LOG_ENABLED) return;
-  
+
   // Create a visual divider in logs
   log("debug", component, "=".repeat(50));
   log("debug", component, `DIAGNOSTICS: ${message}`);
   log("debug", component, "-".repeat(50));
-  
+
   // Attempt to get key state information
   try {
     // Get current preferences
     const prefs = getPreferenceValues<SpotlightSearchPreferences>();
-    
+
     // Log preference information
     log("debug", component, "Preferences:", {
       pluginsEnabled: prefs.pluginsEnabled,
       pluginsFolder: prefs.pluginsFolder,
       isShowingDetail: prefs.isShowingDetail,
       searchScope: prefs.searchScope,
-      pinCount: prefs.pinned?.length || 0
+      pinCount: prefs.pinned?.length || 0,
     });
-    
+
     // Log plugin state if we have access to it
     // We can't directly access the module variables so we'll use what we know
     log("debug", component, "Plugin system status:", {
       pluginLoadCounter: pluginLoadCounter,
-      cacheIsEnabled: LOG_CACHE_OPERATIONS
+      cacheIsEnabled: LOG_CACHE_OPERATIONS,
     });
-    
+
     // Add memory usage information
     const memoryUsage = process.memoryUsage();
     log("debug", component, "Memory usage:", {
       rss: `${Math.round(memoryUsage.rss / 1024 / 1024)} MB`,
       heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)} MB`,
-      heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)} MB`
+      heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)} MB`,
     });
-    
   } catch (error) {
     log("error", component, "Error generating diagnostics", {
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
   }
-  
+
   log("debug", component, "=".repeat(50));
 }
