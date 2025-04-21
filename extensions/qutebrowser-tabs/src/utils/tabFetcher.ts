@@ -14,10 +14,7 @@ export async function fetchQutebrowserTabs(): Promise<Tab[]> {
 
   // Check if background process already determined qutebrowser is not running
   try {
-    const notRunningMarker = path.join(
-      os.tmpdir(),
-      "raycast_qutebrowser_not_running",
-    );
+    const notRunningMarker = path.join(os.tmpdir(), "raycast_qutebrowser_not_running");
     if (fs.existsSync(notRunningMarker)) {
       try {
         const stats = fs.statSync(notRunningMarker);
@@ -27,9 +24,7 @@ export async function fetchQutebrowserTabs(): Promise<Tab[]> {
         if (isFresh) {
           debugInfo.qutebrowser_running = false;
           debugInfo.errors.push("Qutebrowser not running (marker file found)");
-          throw new Error(
-            "Qutebrowser is not running. Please start qutebrowser first.",
-          );
+          throw new Error("Qutebrowser is not running. Please start qutebrowser first.");
         } else {
           // Marker file is too old, remove it and continue with normal check
           fs.unlinkSync(notRunningMarker);
@@ -51,14 +46,11 @@ export async function fetchQutebrowserTabs(): Promise<Tab[]> {
   debugInfo.qutebrowser_running = qutebrowserRunning;
 
   if (!qutebrowserRunning) {
-    throw new Error(
-      "Qutebrowser is not running. Please start qutebrowser first.",
-    );
+    throw new Error("Qutebrowser is not running. Please start qutebrowser first.");
   }
 
   const preferences = getPreferenceValues<Preferences>();
-  const qutebrowserPath =
-    preferences.qutebrowserPath || "/opt/homebrew/bin/qutebrowser";
+  const qutebrowserPath = preferences.qutebrowserPath || "/opt/homebrew/bin/qutebrowser";
   debugInfo.qutebrowser_path = qutebrowserPath;
 
   const mainAutoSavePath = SESSION_FILE_PATHS[0];
@@ -73,17 +65,14 @@ export async function fetchQutebrowserTabs(): Promise<Tab[]> {
       debugInfo.autosave_size = stats.size;
       debugInfo.autosave_modified = stats.mtime.toISOString();
 
-      console.log(
-        `Found autosave file: ${mainAutoSavePath} (${ageInSeconds}s old, ${stats.size} bytes)`,
-      );
+      console.log(`Found autosave file: ${mainAutoSavePath} (${ageInSeconds}s old, ${stats.size} bytes)`);
     } catch (e) {
       console.error("Error checking autosave file:", e);
       debugInfo.errors.push(`Autosave check error: ${e}`);
     }
   } else {
     debugInfo.autosave_exists = false;
-    debugInfo.note =
-      "No auto-saved session file found. Is qutebrowser configured to auto-save sessions?";
+    debugInfo.note = "No auto-saved session file found. Is qutebrowser configured to auto-save sessions?";
   }
 
   const content = SessionUtils.findSessionFile(debugInfo);

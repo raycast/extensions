@@ -7,8 +7,7 @@ import SessionUtils from "../utils/sessionUtils";
 
 export function useQutebrowserTabs() {
   const preferences = getPreferenceValues<Preferences>();
-  const qutebrowserPath =
-    preferences.qutebrowserPath || "/opt/homebrew/bin/qutebrowser";
+  const qutebrowserPath = preferences.qutebrowserPath || "/opt/homebrew/bin/qutebrowser";
 
   const {
     data: tabs = [],
@@ -30,20 +29,14 @@ export function useQutebrowserTabs() {
     if (!searchText.trim()) return true;
 
     const lowerCaseSearch = searchText.toLowerCase();
-    return (
-      tab.title.toLowerCase().includes(lowerCaseSearch) ||
-      tab.url.toLowerCase().includes(lowerCaseSearch)
-    );
+    return tab.title.toLowerCase().includes(lowerCaseSearch) || tab.url.toLowerCase().includes(lowerCaseSearch);
   });
 
   const focusTab = useCallback(
     async (tab: Tab) => {
       try {
         const safeUrl = tab.url.replace(/"/g, '\\"').replace(/\$/g, "\\$");
-        await SessionUtils.executeCommand(
-          qutebrowserPath,
-          `:tab-select ${safeUrl}`,
-        );
+        await SessionUtils.executeCommand(qutebrowserPath, `:tab-select ${safeUrl}`);
 
         return true;
       } catch (err) {
@@ -61,10 +54,7 @@ export function useQutebrowserTabs() {
     async (query: string) => {
       try {
         const safeQuery = query.replace(/"/g, '\\"').replace(/\$/g, "\\$");
-        await SessionUtils.executeCommand(
-          qutebrowserPath,
-          `:open -t DEFAULT ${safeQuery}`,
-        );
+        await SessionUtils.executeCommand(qutebrowserPath, `:open -t DEFAULT ${safeQuery}`);
         return true;
       } catch (err) {
         showFailureToast({
@@ -81,10 +71,7 @@ export function useQutebrowserTabs() {
     async (url: string) => {
       try {
         const safeUrl = url.replace(/"/g, '\\"').replace(/\$/g, "\\$");
-        await SessionUtils.executeCommand(
-          qutebrowserPath,
-          `:open -t ${safeUrl}`,
-        );
+        await SessionUtils.executeCommand(qutebrowserPath, `:open -t ${safeUrl}`);
         return true;
       } catch (err) {
         showFailureToast({
