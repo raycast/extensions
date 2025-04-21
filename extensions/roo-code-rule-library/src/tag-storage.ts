@@ -157,6 +157,6 @@ export async function restoreDefaultTagsInStorage(): Promise<{ tags: Tag[]; rest
     restored = true;
     return { tags: updatedTags, restored };
   } else {
-    return { tags: existingTags, restored: restored };
+    return { tags: existingTags, restored };
   }
 }

@@ -83,9 +83,7 @@ export default function EditTagsForm() {
               await refreshTags();
             }
           }}
-          handleRestoreDefaultTags={async () => {
-            await handleRestoreDefaultTags();
-          }}
+          handleRestoreDefaultTags={handleRestoreDefaultTags}
         />
       }
     >
@@ -102,9 +100,7 @@ export default function EditTagsForm() {
                 }
               }}
               handleDeleteTag={handleDeleteTag}
-              handleRestoreDefaultTags={async () => {
-                await handleRestoreDefaultTags();
-              }}
+              handleRestoreDefaultTags={handleRestoreDefaultTags}
             />
           }
         />
@@ -119,9 +115,7 @@ export default function EditTagsForm() {
                 await refreshTags();
               }
             }}
-            handleRestoreDefaultTags={async () => {
-              await handleRestoreDefaultTags();
-            }}
+            handleRestoreDefaultTags={handleRestoreDefaultTags}
           />
         }
       />

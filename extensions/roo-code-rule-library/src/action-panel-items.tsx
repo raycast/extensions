@@ -53,7 +53,13 @@ export function TogglePinRuleAction({ rule, onTogglePin }: { rule: Rule; onToggl
     <Action
       icon={Icon.StarDisabled}
       title="Unpin Rule"
-      onAction={() => onTogglePin(rule)}
+      onAction={async () => {
+        try {
+          await onTogglePin(rule);
+        } catch (error) {
+          showFailureToast("Failed to toggle pin", error);
+        }
+      }}
       shortcut={{ modifiers: ["cmd"], key: "i" }}
     />
   ) : (
@@ -133,7 +139,7 @@ export function TagListActions({
   handleRestoreDefaultTags,
 }: {
   onTagSaved: (tag: Tag | undefined) => void;
-  handleRestoreDefaultTags: () => Promise<void>;
+  handleRestoreDefaultTags: () => Promise<{ tags: Tag[]; restored: boolean }>;
 }) {
   return (
     <ActionPanel>
@@ -152,7 +158,7 @@ export function TagItemActions({
   tag: Tag;
   onTagSaved: (tag: Tag | undefined) => void;
   handleDeleteTag: (tag: Tag) => Promise<void>;
-  handleRestoreDefaultTags: () => Promise<void>;
+  handleRestoreDefaultTags: () => Promise<{ tags: Tag[]; restored: boolean }>;
 }) {
   return (
     <ActionPanel>
@@ -166,7 +172,13 @@ export function TagItemActions({
       <Action
         icon={{ source: Icon.Trash, tintColor: Color.Red }}
         title="Delete Tag"
-        onAction={() => handleDeleteTag(tag)}
+        onAction={async () => {
+          try {
+            await handleDeleteTag(tag);
+          } catch (error) {
+            showFailureToast("Failed to delete tag", error);
+          }
+        }}
         shortcut={{ modifiers: ["cmd"], key: "d" }}
       />
       <RestoreDefaultTagAction onRestore={handleRestoreDefaultTags} />

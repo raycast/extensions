@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "roo-code-rule-library",
   "title": "Roo Code Rule Library",
-  "description": "Stores a library of Roo Code rules, and lets you place them straight into the active VScode folder",
+  "description": "Stores a library of Roo Code rules, and lets you place them straight into the active VS Code folder",
   "icon": "icon.png",
   "author": "DonDaws",
   "license": "MIT",
@@ -10,7 +10,7 @@
     {
       "name": "index",
       "title": "Roo Code Rule Library",
-      "description": "Stores a library of Roo Code rules, and lets you place them straight into the active VScode folder",
+      "description": "Stores a library of Roo Code rules, and lets you place them straight into the active VS Code folder",
       "mode": "view"
     }
   ],
