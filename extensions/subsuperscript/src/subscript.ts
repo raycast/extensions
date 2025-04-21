@@ -14,7 +14,7 @@ const subscriptMap: Record<string, string> = {
   "9": "₉",
 
   a: "ₐ",
-  b: "₆",
+  b: "ᵦ",
   c: "꜀",
   d: "ₔ",
   e: "ₑ",
