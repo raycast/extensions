@@ -63,6 +63,7 @@ export default function Command(props: LaunchProps) {
   // Handle returning from directory view
   const handleReturnFromDirectory = () => {
     log("debug", "search", `Refreshing pins from storage (current count: ${pinnedResults.length})`);
+    // Let refreshPinsFromStorage handle everything, including pending states
     refreshPinsFromStorage();
   };
 
