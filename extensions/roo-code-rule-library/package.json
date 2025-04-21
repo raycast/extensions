@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Roo Rule Library",
+      "title": "Roo Code Rule Library",
       "description": "Stores a library of Roo Code rules, and lets you place them straight into the active VScode folder",
       "mode": "view"
     }
