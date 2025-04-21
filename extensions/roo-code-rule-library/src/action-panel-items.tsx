@@ -4,6 +4,7 @@ import EditTagsForm from "./tag-library";
 import AddTagForm from "./add-tag-form";
 import { Rule, Tag } from "./types";
 import { getMostRecentProjectPath } from "./utils/vscode-utils";
+import { showFailureToast } from "./utils/utils";
 
 export function AddRuleAction({ onRuleAdded }: { onRuleAdded: (rule: Rule | undefined) => void }) {
   return (
@@ -40,7 +41,7 @@ export function ApplyRuleAction({
         try {
           await onApplyRule(rule, projectPath);
         } catch (error) {
-          showFailureToast(error, { title: "Failed to apply rule" });
+          showFailureToast("Failed to apply rule", error);
         }
       }}
     />
