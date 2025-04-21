@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionPanel, List, Icon, Color } from "@raycast/api";
+import { ActionPanel, List, Icon, Color, Form } from "@raycast/api";
 import { useState, useEffect } from "react";
 import {
   AddRuleAction,
@@ -39,6 +39,7 @@ export default function Command() {
   const [rules, setRules] = useState<Rule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
 
   const fetchRules = async () => {
     setIsLoading(true);
@@ -53,6 +54,7 @@ export default function Command() {
       setRules(fetchedRules);
     } finally {
       setIsLoading(false);
+      setPreferencesLoaded(true);
     }
   };
 
@@ -179,7 +181,9 @@ export default function Command() {
     />
   );
 
-  return (
+  return !preferencesLoaded ? (
+    <Form />
+  ) : (
     <List
       isLoading={isLoading}
       isShowingDetail={true}

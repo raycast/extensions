@@ -179,7 +179,6 @@ export async function applyRuleToFileSystem(rule: Rule): Promise<void> {
 
   try {
     await fs.mkdir(ruleDirectory, { recursive: true });
-    // Check if file exists
     let fileExists = false;
     try {
       await fs.stat(ruleFilePath);

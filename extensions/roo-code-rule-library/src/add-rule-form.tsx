@@ -27,7 +27,6 @@ export default function AddRuleForm({ onRuleAdded, initialRule }: AddRuleFormPro
   const customModes = useCustomModes();
   const [availableTags, setAvailableTags] = useState<Tag[]>(initialRule?.tags?.map((name) => ({ name })) || []);
 
-  // logic: loadAvailableTags is called only once on mount but won't refresh if tags are edited via EditTagsForm
   useEffect(() => {
     const loadAvailableTags = async () => {
       try {
