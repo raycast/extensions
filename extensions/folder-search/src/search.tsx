@@ -20,6 +20,7 @@ import { moveFinderItems } from "./moveUtils";
 import { FolderListSection, Directory } from "./components";
 import path from "node:path";
 import { userInfo } from "os";
+import { useRef } from "react";
 
 // allow string indexing on Icons
 interface IconDictionary {
@@ -48,8 +49,9 @@ export default function Command(props: LaunchProps) {
     movePinDown,
     hasCheckedPlugins,
     hasCheckedPreferences,
+    refreshPinsFromStorage,
   } = useFolderSearch();
-
+  
   // Use the shared command base hook
   useCommandBase({
     commandName: "search",
@@ -57,6 +59,13 @@ export default function Command(props: LaunchProps) {
     searchText,
     setSearchText,
   });
+
+  // Handle returning from directory view
+  const handleReturnFromDirectory = () => {
+    console.log(`[DEBUG] search.tsx: handleReturnFromDirectory called, pins count: ${pinnedResults.length}`);
+    console.log(`[DEBUG] search.tsx: Refreshing pins from storage after directory return`);
+    refreshPinsFromStorage();
+  };
 
   // Render actions for the folder list items
   const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number) => {
@@ -125,13 +134,13 @@ export default function Command(props: LaunchProps) {
             title="Enclosing Folder"
             icon={Icon.ArrowUp}
             shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
-            target={<Directory path={enclosingFolder} />}
+            target={<Directory path={enclosingFolder} onReturn={handleReturnFromDirectory} />}
           />
           <Action.Push
             title="Enter Folder"
             icon={Icon.ArrowDown}
             shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
-            target={<Directory path={result.path} />}
+            target={<Directory path={result.path} onReturn={handleReturnFromDirectory} />}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
