@@ -25,7 +25,7 @@
       "title": "Private Key (nsec or hex)",
       "default": "",
       "required": true,
-      "description": "Enter your private key (nsec or hex) for signing events on Nostr."
+      "description": "Enter your private key (nsec or hex) for signing events on Nostr"
     },
     {
       "name": "relays",
@@ -33,7 +33,16 @@
       "title": "Relay URLs",
       "default": "wss://relay.nostr.band",
       "required": true,
-      "description": "Enter relay URLs (comma-separated) to publish notes to."
+      "description": "Enter relay URLs (comma-separated) to publish notes to"
+    },
+    {
+      "name": "includeClient",
+      "type": "checkbox",
+      "title": "Client Information",
+      "label": "Include Client info in post metadata",
+      "default": true,
+      "required": false,
+      "description": "Whether nostr-raycast should be included in the posts metadata"
     }
   ],
   "dependencies": {

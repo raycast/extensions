@@ -3,7 +3,7 @@ import { finalizeEvent, verifyEvent } from 'nostr-tools/pure';
 import { SimplePool, useWebSocketImplementation } from 'nostr-tools/pool';
 import { hexToBytes } from '@noble/hashes/utils';
 import WebSocket from 'ws';
-import { decodePrivateKey, loadPrivateKey, loadRelayURLs } from './utils';
+import { decodePrivateKey, includeClient, loadPrivateKey, loadRelayURLs } from './utils';
 import { showFailureToast } from '@raycast/utils';
 
 useWebSocketImplementation(WebSocket);
@@ -19,11 +19,17 @@ export default function Command() {
       const privateKey = loadPrivateKey();
       if (privateKey) {
         const hexKey = decodePrivateKey(privateKey);
+        const tags: string[][] = [];
+
+        if (includeClient) {
+          tags.push(['client', 'nostr-raycast']);
+        }
+
         const event = finalizeEvent(
           {
             kind: 1,
             created_at: Math.floor(Date.now() / 1000),
-            tags: [],
+            tags: tags,
             content: values.textarea,
           },
           hexToBytes(hexKey),

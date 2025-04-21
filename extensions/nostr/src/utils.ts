@@ -6,7 +6,12 @@ import { bytesToHex } from '@noble/hashes/utils';
 type Preferences = {
   privateKey: string;
   relays?: string;
+  includeClient: boolean;
 };
+
+const preferences = getPreferenceValues<Preferences>();
+
+export const includeClient: boolean = preferences.includeClient;
 
 export function decodePrivateKey(privateKey: string): string {
   if (privateKey.startsWith('nsec')) {
@@ -22,7 +27,6 @@ export function decodePrivateKey(privateKey: string): string {
 
 export function loadPrivateKey(): string | undefined {
   try {
-    const preferences = getPreferenceValues<Preferences>();
     const privateKey = preferences.privateKey;
 
     if (!privateKey) {
@@ -47,7 +51,6 @@ export function loadRelayURLs(): string[] {
   const defaultRelays = ['wss://relay.nostr.band'];
 
   try {
-    const preferences = getPreferenceValues<Preferences>();
     const relays = preferences.relays;
 
     if (relays) {
