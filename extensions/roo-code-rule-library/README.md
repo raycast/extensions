@@ -47,7 +47,7 @@ The extension provides the following preferences:
     *   **Default:** `~/Library/Application Support/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/custom_modes.json`
 
 *   **Storage Directory** (`storageDirectory`)
-    Path to the directory where rules.json and tags.json will be stored. Use '~' for the home directory.
+    *   Path to the directory where rules.json and tags.json will be stored. Use '~' for the home directory.
     *   **Default:** `~/Documents/RooCodeRuleLibrary`
 
 
