@@ -81,14 +81,14 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "1.0.6",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "18.2.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
+    "@typescript-eslint/eslint-plugin": "5.62.0",
+    "@typescript-eslint/parser": "5.62.0",
+    "eslint": "8.45.0",
+    "eslint-config-prettier": "8.8.0",
     "prettier": "^3.2.0",
     "typescript": "^5.3.0"
   },
