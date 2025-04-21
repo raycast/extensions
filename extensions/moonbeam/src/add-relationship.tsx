@@ -166,16 +166,16 @@ export default function Command() {
         if (!response.ok) {
           if (response.status === 401) {
             throw new Error(
-              "Invalid API token. Please check your token in the extension preferences.",
+              "Invalid API token. Please check your token in the extension preferences."
             );
           }
           if (response.status === 402) {
             throw new Error(
-              "You've reached the free plan limit. Please upgrade to add more relationships.",
+              "You've reached the free plan limit. Please upgrade to add more relationships."
             );
           }
           throw new Error(
-            `Failed to create relationship: ${JSON.stringify(responseData)}`,
+            `Failed to create relationship: ${JSON.stringify(responseData)}`
           );
         }
 

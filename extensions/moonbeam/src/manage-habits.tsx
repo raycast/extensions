@@ -29,7 +29,7 @@ export default function Command() {
   const { apiToken } = getPreferenceValues<Preferences>();
   const { value: habits, setValue: setHabits } = useLocalStorage<Habit[]>(
     "habits",
-    [],
+    []
   );
   const [isLoading, setIsLoading] = useState(true);
 
@@ -68,7 +68,7 @@ export default function Command() {
           body: JSON.stringify({
             performed_on: new Date().toISOString().split("T")[0],
           }),
-        },
+        }
       );
 
       const responseData = await response.json();
@@ -76,11 +76,11 @@ export default function Command() {
       if (!response.ok) {
         if (response.status === 401) {
           throw new Error(
-            "Invalid API token. Please check your token in the extension preferences.",
+            "Invalid API token. Please check your token in the extension preferences."
           );
         }
         throw new Error(
-          `Failed to complete habit: ${JSON.stringify(responseData)}`,
+          `Failed to complete habit: ${JSON.stringify(responseData)}`
         );
       }
 
