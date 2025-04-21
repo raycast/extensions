@@ -10,7 +10,7 @@ import { showFailureToast } from "@raycast/utils";
 
 // Logging configuration
 const LOG_ENABLED = true; // Set to true to enable all logging
-const LOG_LEVEL: "debug" | "error" = "error"; // Set to "debug" for verbose logging or "error" for less noise
+const LOG_LEVEL: "debug" | "error" = "debug"; // Set to "debug" for verbose logging or "error" for less noise
 const LOG_CACHE_OPERATIONS = false; // Set to true to log detailed cache operations
 
 // Create a plugins cache instance with namespace
@@ -27,6 +27,9 @@ const PLUGINS_CACHE_TIMESTAMP_KEY = "plugins_timestamp";
 
 // Cache validity period (12 hours in milliseconds)
 const CACHE_VALIDITY_PERIOD = 12 * 60 * 60 * 1000;
+
+// Track plugin load calls for debugging
+let pluginLoadCounter = 0;
 
 // Function to check plugins cache
 const getPluginPathsFromCache = () => {
@@ -126,11 +129,16 @@ const pluginSchema = yup
   .strict()
   .noUnknown(true);
 
-const loadPlugins = async () => {
+export const loadPlugins = async (callerId?: string) => {
+  const loadId = ++pluginLoadCounter;
+  const logPrefix = callerId ? `[${callerId} #${loadId}]` : `[load #${loadId}]`;
+  
+  log("debug", "loadPlugins", `${logPrefix} Starting plugin load`);
+  
   // First, try to get plugin paths from cache
   const cachedPluginPaths = getPluginPathsFromCache();
   if (cachedPluginPaths) {
-    log("debug", "loadPlugins", `Loading ${cachedPluginPaths.length} plugins from cached paths`);
+    log("debug", "loadPlugins", `${logPrefix} Loading ${cachedPluginPaths.length} plugins from cached paths`);
 
     // Load plugins from cached paths
     const plugins = [];
@@ -140,13 +148,13 @@ const loadPlugins = async () => {
         await pluginSchema.validate(FolderSearchPlugin);
         plugins.push(FolderSearchPlugin);
       } catch (error) {
-        log("error", "loadPlugins", `Failed to load cached plugin: ${pluginPath}`, {
+        log("error", "loadPlugins", `${logPrefix} Failed to load cached plugin: ${pluginPath}`, {
           error: error instanceof Error ? error.message : String(error),
         });
       }
     }
 
-    log("debug", "loadPlugins", `Successfully loaded ${plugins.length} plugins from cache`);
+    log("debug", "loadPlugins", `${logPrefix} Successfully loaded ${plugins.length} plugins from cache`);
     return plugins;
   }
 
@@ -154,18 +162,18 @@ const loadPlugins = async () => {
   // grab prefs
   const { pluginsEnabled, pluginsFolder } = getPreferenceValues<SpotlightSearchPreferences>();
 
-  log("debug", "loadPlugins", "Loading plugins from disk", {
+  log("debug", "loadPlugins", `${logPrefix} Loading plugins from disk`, {
     pluginsEnabled,
     pluginsFolder,
   });
 
   if (!pluginsEnabled) {
-    log("debug", "loadPlugins", "Plugins are disabled in preferences");
+    log("debug", "loadPlugins", `${logPrefix} Plugins are disabled in preferences`);
     return [];
   }
 
   if (!pluginsFolder || pluginsFolder.trim() === "") {
-    log("debug", "loadPlugins", "No plugins folder specified");
+    log("debug", "loadPlugins", `${logPrefix} No plugins folder specified`);
     return [];
   }
 
@@ -176,11 +184,11 @@ const loadPlugins = async () => {
     // Check if path exists and is a directory
     const stats = await fs.promises.stat(normalizedPath);
     if (!stats.isDirectory()) {
-      log("error", "loadPlugins", "Plugins path is not a directory", { path: normalizedPath });
+      log("error", "loadPlugins", `${logPrefix} Plugins path is not a directory`, { path: normalizedPath });
       return [];
     }
   } catch (error) {
-    log("error", "loadPlugins", "Failed to access plugins directory", {
+    log("error", "loadPlugins", `${logPrefix} Failed to access plugins directory`, {
       path: normalizedPath,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -197,7 +205,7 @@ const loadPlugins = async () => {
     // we only want .js/plugin files (not .DS_Store etc)
     const jsFiles = files.filter((file) => file.endsWith(".js"));
 
-    log("debug", "loadPlugins", `Found ${jsFiles.length} plugins to load`);
+    log("debug", "loadPlugins", `${logPrefix} Found ${jsFiles.length} plugins to load`);
 
     for (const file of jsFiles) {
       try {
@@ -210,7 +218,7 @@ const loadPlugins = async () => {
         validPluginPaths.push(pluginPath);
         validPlugins.push(FolderSearchPlugin);
       } catch (e) {
-        log("error", "loadPlugins", "Failed to load plugin", {
+        log("error", "loadPlugins", `${logPrefix} Failed to load plugin`, {
           file,
           error: e instanceof Error ? e.message : String(e),
         });
@@ -218,7 +226,7 @@ const loadPlugins = async () => {
       }
     }
   } catch (error) {
-    log("error", "loadPlugins", "Failed to read plugins directory", {
+    log("error", "loadPlugins", `${logPrefix} Failed to read plugins directory`, {
       path: normalizedPath,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -226,10 +234,10 @@ const loadPlugins = async () => {
   }
 
   if (invalidPluginFiles.length) {
-    log("error", "loadPlugins", "Some plugins failed to load", { invalidPluginFiles });
+    log("error", "loadPlugins", `${logPrefix} Some plugins failed to load`, { invalidPluginFiles });
   }
 
-  log("debug", "loadPlugins", `Successfully loaded ${validPlugins.length} plugins`);
+  log("debug", "loadPlugins", `${logPrefix} Successfully loaded ${validPlugins.length} plugins`);
 
   // Cache the loaded plugin paths
   savePluginPathsToCache(validPluginPaths);
@@ -237,21 +245,21 @@ const loadPlugins = async () => {
   return validPlugins;
 };
 
-const safeSearchScope = (searchScope: string | undefined) => {
+export const safeSearchScope = (searchScope: string | undefined) => {
   return searchScope === "" ? undefined : searchScope;
 };
 
-const folderName = (result: SpotlightSearchResult) => {
+export const folderName = (result: SpotlightSearchResult) => {
   return result.path.slice(0).split("/").pop() || "Untitled";
 };
 
-const enclosingFolderName = (result: SpotlightSearchResult) => {
+export const enclosingFolderName = (result: SpotlightSearchResult) => {
   return [...result.path.split("/")]
     .filter((_, pathPartIndex) => pathPartIndex < [...result.path.split("/")].length - 1)
     .join("/");
 };
 
-const showFolderInfoInFinder = (result: SpotlightSearchResult) => {
+export const showFolderInfoInFinder = (result: SpotlightSearchResult) => {
   popToRoot({ clearSearchBar: true });
   closeMainWindow({ clearRootSearch: true });
 
@@ -264,11 +272,11 @@ const showFolderInfoInFinder = (result: SpotlightSearchResult) => {
   `);
 };
 
-const copyFolderToClipboard = (result: SpotlightSearchResult) => {
+export const copyFolderToClipboard = (result: SpotlightSearchResult) => {
   runAppleScript(`set the clipboard to POSIX file "${result.path}"`);
 };
 
-const maybeMoveResultToTrash = async (result: SpotlightSearchResult, resultWasTrashed: () => void) => {
+export const maybeMoveResultToTrash = async (result: SpotlightSearchResult, resultWasTrashed: () => void) => {
   const options: Alert.Options = {
     title: "Move to Trash",
     message: `Are you sure you want to move "${folderName(result)}" to the Trash?`,
@@ -287,13 +295,13 @@ const maybeMoveResultToTrash = async (result: SpotlightSearchResult, resultWasTr
   await confirmAlert(options);
 };
 
-const lastUsedSort = (a: SpotlightSearchResult, b: SpotlightSearchResult) => {
+export const lastUsedSort = (a: SpotlightSearchResult, b: SpotlightSearchResult) => {
   const [safeA, safeB] = [a.kMDItemLastUsedDate || 0, b.kMDItemLastUsedDate || 0];
 
   return new Date(safeB).getTime() - new Date(safeA).getTime();
 };
 
-const fixDoubleConcat = (text: string): string => {
+export const fixDoubleConcat = (text: string): string => {
   const regex = /^(.+)\1$/; // Matches a string followed by the same string again
 
   if (regex.test(text)) {
@@ -373,14 +381,52 @@ export const log = (level: "debug" | "error", component: string, message: string
   }
 };
 
-export {
-  loadPlugins,
-  safeSearchScope,
-  folderName,
-  enclosingFolderName,
-  showFolderInfoInFinder,
-  copyFolderToClipboard,
-  maybeMoveResultToTrash,
-  lastUsedSort,
-  fixDoubleConcat,
-};
+/**
+ * Enhanced logging function that provides a detailed summary of key components
+ * Use this for debugging complex issues with plugins, pins, and state synchronization
+ */
+export function logDiagnostics(component: string, message: string) {
+  if (!LOG_ENABLED) return;
+  
+  // Create a visual divider in logs
+  log("debug", component, "=".repeat(50));
+  log("debug", component, `DIAGNOSTICS: ${message}`);
+  log("debug", component, "-".repeat(50));
+  
+  // Attempt to get key state information
+  try {
+    // Get current preferences
+    const prefs = getPreferenceValues<SpotlightSearchPreferences>();
+    
+    // Log preference information
+    log("debug", component, "Preferences:", {
+      pluginsEnabled: prefs.pluginsEnabled,
+      pluginsFolder: prefs.pluginsFolder,
+      isShowingDetail: prefs.isShowingDetail,
+      searchScope: prefs.searchScope,
+      pinCount: prefs.pinned?.length || 0
+    });
+    
+    // Log plugin state if we have access to it
+    // We can't directly access the module variables so we'll use what we know
+    log("debug", component, "Plugin system status:", {
+      pluginLoadCounter: pluginLoadCounter,
+      cacheIsEnabled: LOG_CACHE_OPERATIONS
+    });
+    
+    // Add memory usage information
+    const memoryUsage = process.memoryUsage();
+    log("debug", component, "Memory usage:", {
+      rss: `${Math.round(memoryUsage.rss / 1024 / 1024)} MB`,
+      heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)} MB`,
+      heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)} MB`
+    });
+    
+  } catch (error) {
+    log("error", component, "Error generating diagnostics", {
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+  
+  log("debug", component, "=".repeat(50));
+}

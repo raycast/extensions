@@ -11,7 +11,7 @@ import {
   Keyboard,
   LaunchProps,
 } from "@raycast/api";
-import { folderName, copyFolderToClipboard, maybeMoveResultToTrash, log } from "./utils";
+import { folderName, copyFolderToClipboard, maybeMoveResultToTrash, log, logDiagnostics } from "./utils";
 import { runAppleScript } from "run-applescript";
 import { SpotlightSearchResult } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
@@ -49,6 +49,7 @@ export default function Command(props: LaunchProps) {
     hasCheckedPlugins,
     hasCheckedPreferences,
     refreshPinsFromStorage,
+    hasSearched,
   } = useFolderSearch();
 
   // Use the shared command base hook
@@ -61,9 +62,24 @@ export default function Command(props: LaunchProps) {
 
   // Handle returning from directory view
   const handleReturnFromDirectory = () => {
-    log("debug", "search", `Refreshing pins from storage (current count: ${pinnedResults.length})`);
+    log("debug", "search", `handleReturnFromDirectory called with ${pinnedResults.length} current pins`);
+    
+    // Add a short timestamp to help correlate logs
+    const timestamp = new Date().toISOString().slice(11, 23);
+    log("debug", "search", `[${timestamp}] Refreshing pins from storage via directory return`);
+    
+    // Run full diagnostics before refreshing pins
+    logDiagnostics("search", "Pre-refresh state diagnostics");
+    
     // Let refreshPinsFromStorage handle everything, including pending states
     refreshPinsFromStorage();
+    
+    // Add debug logs to check state after a short delay
+    setTimeout(() => {
+      log("debug", "search", `[${timestamp}+250ms] Pin count after refresh: ${pinnedResults.length}`);
+      // Run diagnostics again after refresh
+      logDiagnostics("search", "Post-refresh state diagnostics");
+    }, 250);
   };
 
   // Render actions for the folder list items
@@ -82,11 +98,17 @@ export default function Command(props: LaunchProps) {
           icon={Icon.NewFolder}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           onAction={async () => {
-            const moveResult = await moveFinderItems(result.path);
-            if (moveResult.success) {
-              open(result.path);
-              closeMainWindow();
-              popToRoot({ clearSearchBar: true });
+            try {
+              const moveResult = await moveFinderItems(result.path);
+              if (moveResult.success) {
+                open(result.path);
+                closeMainWindow();
+                popToRoot({ clearSearchBar: true });
+              }
+            } catch (error) {
+              // Error is already handled in moveFinderItems, but we need to catch it here
+              // to prevent unhandled promise rejections
+              console.error("Error in Move Finder Selection action:", error);
             }
           }}
         />
@@ -228,7 +250,7 @@ export default function Command(props: LaunchProps) {
         ) : null
       }
     >
-      {!searchText && props.launchType === "userInitiated" ? (
+      {!searchText && props.launchType === "userInitiated" && pinnedResults.length > 0 ? (
         <FolderListSection
           title="Pinned"
           results={pinnedResults}
@@ -236,16 +258,30 @@ export default function Command(props: LaunchProps) {
           resultIsPinned={resultIsPinned}
           renderActions={renderFolderActions}
         />
+      ) : !searchText && props.launchType === "userInitiated" ? (
+        // No pins and no search text
+        <List.EmptyView
+          title="No Pinned Folders"
+          description="Search to find folders or pin your favorites"
+          icon={Icon.Star}
+        />
       ) : (
         <>
-          {isQuerying ? (
+          {isQuerying || (searchText && !hasSearched) ? (
             <List.EmptyView
               title="Searching..."
               description="Looking for matching folders"
               icon={Icon.MagnifyingGlass}
             />
-          ) : results.length === 0 ? (
+          ) : hasSearched && results.length === 0 ? (
             <List.EmptyView title="No Results" description="Try a different search term" icon={Icon.Folder} />
+          ) : !searchText ? (
+            // Only show this when there's no search text at all
+            <List.EmptyView
+              title="Enter a search term"
+              description="Type to search for folders"
+              icon={Icon.MagnifyingGlass}
+            />
           ) : (
             <FolderListSection
               title="Results"

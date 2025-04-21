@@ -56,21 +56,29 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
   // Handle return to main view with callback
   const handleReturn = () => {
     if (onReturn) {
-      log("debug", "Directory", `Running return callback for ${directoryPath}`);
+      const timestamp = new Date().toISOString().slice(11, 23);
+      log("debug", "Directory", `[${timestamp}] Running return callback for ${directoryPath}`);
       onReturn();
+    } else {
+      log("debug", "Directory", `No return callback provided for ${directoryPath}`);
     }
   };
 
   // Function that toggles pins and calls onReturn afterward
   const handleTogglePin = (result: SpotlightSearchResult, resultIndex: number) => {
-    log("debug", "Directory", `Toggling pin for ${result.path.split("/").pop()}`);
+    const timestamp = new Date().toISOString().slice(11, 23);
+    const action = resultIsPinned(result) ? "Unpinning" : "Pinning";
+    log("debug", "Directory", `[${timestamp}] ${action} folder: ${result.path}`);
 
     // Toggle the pin status
     toggleResultPinnedStatus(result, resultIndex);
 
-    // Always trigger return callback after pin action
-    log("debug", "Directory", "Calling handleReturn after pin toggle");
-    handleReturn();
+    // Add a delay to ensure the pin toggle has completed
+    setTimeout(() => {
+      // Always trigger return callback after pin action
+      log("debug", "Directory", `[${timestamp}+50ms] Calling handleReturn after pin toggle`);
+      handleReturn();
+    }, 50);
   };
 
   useEffect(() => {
