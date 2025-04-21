@@ -1,125 +1,132 @@
 import { getHttpEndpoint } from "@orbs-network/ton-access";
-import { Action, ActionPanel, Clipboard, Icon, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Clipboard, Icon, List, Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { useEffect, useRef, useState } from "react";
 import TonWeb from "tonweb";
-import { Address } from "tonweb/dist/types/utils/address";
+import { getFormattedAddresses, isTestnet, isValidTonAddressOrDomain, type AddressFormat } from "./lib/utils";
 
-interface AddressFormat {
-  title: string;
-  value: string;
-}
-
-function isTestnet(address: string): boolean {
-  return address.startsWith("k") || address.startsWith("0");
-}
-
-function isValidTonAddressOrDomain(address: string): boolean {
-  if (/^.+\.ton$/i.test(address)) {
-    return true;
+class InvalidTonAddressError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidTonAddressError";
   }
+}
 
-  try {
-    new TonWeb.utils.Address(address);
-    return true;
-  } catch (error) {
-    return false;
+class TonDomainResolutionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "TonDomainResolutionError";
   }
 }
 
 async function convertAddress(address: string): Promise<AddressFormat[]> {
   try {
     if (address.toLowerCase().endsWith(".ton")) {
-      try {
-        const endpoint = await getHttpEndpoint();
-        const tonweb = new TonWeb(new TonWeb.HttpProvider(endpoint));
+      const endpoint = await getHttpEndpoint();
+      const tonweb = new TonWeb(new TonWeb.HttpProvider(endpoint));
 
-        // @ts-expect-error - TonWeb types are not complete, but the DNS functionality exists
-        const walletAddress = await tonweb.dns.getWalletAddress(address);
-        if (!walletAddress) {
-          throw new Error("Could not resolve .ton domain");
-        }
-
-        const addressObj = new TonWeb.utils.Address(walletAddress.toString());
-        return getFormattedAddresses(addressObj);
-      } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to resolve .ton domain",
-          message: "Could not resolve the .ton domain to an address",
-        });
-        return [];
+      // @ts-expect-error - TonWeb types are not complete, but the DNS functionality exists
+      const walletAddress = await tonweb.dns.getWalletAddress(address);
+      if (!walletAddress) {
+        throw new TonDomainResolutionError("Could not resolve .ton domain");
       }
+
+      const addressObj = new TonWeb.utils.Address(walletAddress.toString());
+      return getFormattedAddresses(addressObj);
     } else {
       const addressObj = new TonWeb.utils.Address(address);
       return getFormattedAddresses(addressObj);
     }
   } catch (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Invalid TON address",
-      message: "Please enter a valid TON address or .ton domain",
-    });
-    return [];
+    if (error instanceof InvalidTonAddressError) {
+      throw error;
+    }
+    throw error;
   }
 }
-
-let errorToast: Toast | undefined;
 
 export default function Command() {
   const [address, setAddress] = useState("");
   const [formats, setFormats] = useState<AddressFormat[] | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
+  const errorToast = useRef<Toast | undefined>(undefined);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const processAddress = async (inputAddress: string) => {
+    const trimmedAddress = inputAddress.trim();
+
+    if (!trimmedAddress) {
+      setFormats([]);
+      setIsLoading(false);
+      return;
+    }
+
+    if (!isValidTonAddressOrDomain(trimmedAddress)) {
+      setFormats([]);
+      errorToast.current = await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid TON Address",
+        message: "Please enter a valid TON address or .ton domain",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    errorToast.current?.hide();
+    setIsLoading(true);
+    try {
+      const newFormats = await convertAddress(trimmedAddress);
+      setFormats(newFormats);
+    } catch (error) {
+      let errorToastOptions: Toast.Options;
+
+      if (error instanceof InvalidTonAddressError) {
+        errorToastOptions = {
+          title: "Invalid TON address",
+          message: "Please enter a valid TON address or .ton domain",
+        };
+      } else if (error instanceof TonDomainResolutionError) {
+        errorToastOptions = {
+          title: "Could not resolve .ton domain",
+          message: "Try again with a different .ton domain",
+        };
+      } else {
+        errorToastOptions = {
+          title: "Error converting address",
+          message: "Please enter a valid TON address or .ton domain",
+        };
+      }
+
+      errorToast.current = await showFailureToast(error, errorToastOptions);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     async function initializeAddress() {
       const initialAddress = (await Clipboard.readText())?.trim() || "";
+      setIsInitialized(true);
+
+      if (!initialAddress || !isValidTonAddressOrDomain(initialAddress)) {
+        setAddress("");
+        setFormats([]);
+        return;
+      }
 
       setAddress(initialAddress);
-      if (initialAddress) {
-        if (isValidTonAddressOrDomain(initialAddress)) {
-          setIsLoading(true);
-          const formats = await convertAddress(initialAddress);
-          if (formats.length > 0) {
-            setFormats(formats);
-          }
-          setIsLoading(false);
-        } else {
-          setIsLoading(false);
-          setFormats([]);
-          errorToast = await showToast({
-            style: Toast.Style.Failure,
-            title: "Invalid TON Address",
-            message: "Please enter a valid TON address or .ton domain",
-          });
-        }
-      } else {
-        setFormats([]);
-        setIsLoading(false);
-      }
+      await processAddress(initialAddress);
     }
     initializeAddress();
   }, []);
 
   const handleSearchTextChange = async (newAddress: string) => {
-    const trimmedAddress = newAddress.trim();
-    setAddress(trimmedAddress);
-
-    if (isValidTonAddressOrDomain(trimmedAddress)) {
-      errorToast?.hide();
-      setIsLoading(true);
-      const newFormats = await convertAddress(trimmedAddress);
-      setFormats(newFormats);
-      setIsLoading(false);
-    } else {
-      if (trimmedAddress) {
-        setFormats([]);
-        errorToast = await showToast({
-          style: Toast.Style.Failure,
-          title: "Invalid TON Address",
-          message: "Please enter a valid TON address or .ton domain",
-        });
-      }
+    if (!isInitialized) {
+      return;
     }
+
+    setAddress(newAddress);
+    await processAddress(newAddress);
   };
 
   return (
@@ -152,15 +159,4 @@ export default function Command() {
       <List.EmptyView icon={Icon.Wallet} title={"Address not found"} />
     </List>
   );
-}
-
-function getFormattedAddresses(addressObj: Address): AddressFormat[] {
-  return [
-    // Parameters: isUserFriendly, isUrlSafe, isBounceable, isTestOnly
-    { title: "Raw Address", value: addressObj.toString(false, true, false) },
-    { title: "Mainnet Bounceable", value: addressObj.toString(true, true, true) },
-    { title: "Mainnet Non-bounceable", value: addressObj.toString(true, true, false) },
-    { title: "Testnet Bounceable", value: addressObj.toString(true, true, true, true) },
-    { title: "Testnet Non-bounceable", value: addressObj.toString(true, true, false, true) },
-  ];
 }
