@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionPanel, List, Icon, Form, Color } from "@raycast/api";
+import { ActionPanel, List, Icon, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
 import {
   AddRuleAction,
@@ -16,6 +16,7 @@ import { fetchRulesFromStorage, deleteRuleFromStorage, toggleRulePinInStorage } 
 import { restoreDefaultTagsInStorage, getTagsFilePath } from "./tag-storage";
 import * as fs from "fs/promises";
 import { constants } from "fs";
+import { showFailureToast } from "./utils/utils";
 
 (async () => {
   try {
@@ -28,7 +29,8 @@ import { constants } from "fs";
         console.log("Default tags restored successfully.");
       }
     } else {
-      console.error(error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      showFailureToast(errorMessage, { title: "Failed to restore tags" });
     }
   }
 })();
@@ -37,7 +39,6 @@ export default function Command() {
   const [rules, setRules] = useState<Rule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
-  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
 
   const fetchRules = async () => {
     setIsLoading(true);
@@ -52,7 +53,6 @@ export default function Command() {
       setRules(fetchedRules);
     } finally {
       setIsLoading(false);
-      setPreferencesLoaded(true);
     }
   };
 
@@ -76,7 +76,12 @@ export default function Command() {
   };
 
   const handleApplyRule = async (rule: Rule) => {
-    await applyRuleToFileSystem(rule);
+    try {
+      await applyRuleToFileSystem(rule);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      showFailureToast(errorMessage, { title: "Failed to apply rule" });
+    }
   };
 
   const handleTogglePin = async (ruleToPin: Rule) => {
@@ -173,10 +178,6 @@ export default function Command() {
       }
     />
   );
-
-  if (!preferencesLoaded) {
-    return <Form />;
-  }
 
   return (
     <List

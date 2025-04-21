@@ -50,7 +50,8 @@ export default function EditTagsForm() {
         showSuccessToast("Tag deleted", `Tag "${tagToDelete.name}" deleted successfully.`);
         refreshTags();
       } catch (error) {
-        console.error(error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        showFailureToast(errorMessage, { title: "Failed to delete tag" });
       }
     }
   };

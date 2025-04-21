@@ -40,6 +40,7 @@ export const saveRulesToStorage = async (rules: Rule[]): Promise<void> => {
     await fs.writeFile(rulesFilePath, JSON.stringify(rules, null, 2), "utf-8");
   } catch (error) {
     showFailureToast("Failed to save rules", error);
+    throw error;
   }
 };
 

@@ -40,6 +40,7 @@ export async function saveTagsToStorage(tags: Tag[]): Promise<void> {
     await fs.writeFile(tagsFilePath, JSON.stringify(tags, null, 2), "utf-8");
   } catch (error) {
     showFailureToast("Failed to save tags.", error);
+    throw error;
   }
 }
 

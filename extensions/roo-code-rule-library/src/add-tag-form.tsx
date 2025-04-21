@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { addTagToStorage, updateTagInStorage } from "./tag-storage";
-import { showSuccessToast } from "./utils/utils";
+import { showSuccessToast, showFailureToast } from "./utils/utils";
 import { Tag } from "./types";
 
 interface AddTagFormProps {
@@ -39,8 +39,9 @@ export default function AddTagForm({ tag, onTagSaved }: AddTagFormProps) {
       }
       onTagSaved(savedTag);
       pop();
-    } catch (error) {
-      console.error(error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      showFailureToast(errorMessage, { title: "Failed to save tag" });
     } finally {
       setIsLoading(false);
     }

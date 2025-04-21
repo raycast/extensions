@@ -3,6 +3,7 @@ import * as fs from "fs/promises";
 import * as os from "os";
 import { CustomMode } from "./types";
 import { getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "./utils/utils";
 
 interface Preferences {
   customModesPath: string;
@@ -38,8 +39,9 @@ export function useCustomModes() {
         } else {
           setCustomModes([]);
         }
-      } catch (error) {
-        console.error(error);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        showFailureToast(errorMessage, { title: "Could not load custom modes" });
         setCustomModes([]);
       }
     };

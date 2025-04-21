@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import EditTagsForm from "./tag-library";
 import { Rule, Tag } from "./types";
 import { fetchTagsFromStorage } from "./tag-storage";
-import { addRuleToStorage, updateRuleInStorage } from "./rule-storage";
+import { addRuleToStorage, updateRuleInStorage, fetchRulesFromStorage } from "./rule-storage";
 import { showFailureToast } from "./utils/utils";
 
 interface AddRuleFormValues {
@@ -27,6 +27,7 @@ export default function AddRuleForm({ onRuleAdded, initialRule }: AddRuleFormPro
   const customModes = useCustomModes();
   const [availableTags, setAvailableTags] = useState<Tag[]>(initialRule?.tags?.map((name) => ({ name })) || []);
 
+  // logic: loadAvailableTags is called only once on mount but won't refresh if tags are edited via EditTagsForm
   useEffect(() => {
     const loadAvailableTags = async () => {
       try {
@@ -58,8 +59,7 @@ export default function AddRuleForm({ onRuleAdded, initialRule }: AddRuleFormPro
       tags: initialRule?.tags || [],
     },
     onSubmit: async (values) => {
-      const selectedModeSlug = values.modeSlug;
-      const ruleData = { ...values, modeSlug: selectedModeSlug, tags: values.tags ?? [] };
+      const ruleData = { ...values, tags: values.tags ?? [] };
 
       try {
         let rule: Rule | undefined;
@@ -95,13 +95,21 @@ export default function AddRuleForm({ onRuleAdded, initialRule }: AddRuleFormPro
         title="Title"
         placeholder="Enter rule title"
         {...itemProps.title}
-        onBlur={() => {
+        onBlur={async () => {
           if (!values.ruleIdentifier && values.title) {
             const slug = values.title
               .toLowerCase()
               .replace(/\s+/g, "-")
               .replace(/[^a-z0-9-]/g, "");
-            setValue("ruleIdentifier", slug);
+
+            const existingRules = await fetchRulesFromStorage();
+            const ruleExists = existingRules.some(
+              (rule: Rule) => rule.ruleIdentifier === slug && rule.modeSlug === values.modeSlug,
+            );
+
+            if (!ruleExists) {
+              setValue("ruleIdentifier", slug);
+            }
           } else if (!values.title) {
             setValue("ruleIdentifier", "");
           }
@@ -130,9 +138,11 @@ export default function AddRuleForm({ onRuleAdded, initialRule }: AddRuleFormPro
       <Form.TextArea title="Rule Content" placeholder="Enter rule content (markdown)" {...itemProps.content} />
       <Form.TextArea title="Comment" placeholder="Enter a short comment for use cases" {...itemProps.comment} />
       <Form.TagPicker title="Tags" placeholder="Select tags" {...itemProps.tags}>
-        {availableTags.map((tag) => (
-          <Form.TagPicker.Item key={tag.name} value={tag.name} title={tag.name} />
-        ))}
+        {availableTags
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((tag) => (
+            <Form.TagPicker.Item key={tag.name} value={tag.name} title={tag.name} />
+          ))}
       </Form.TagPicker>
     </Form>
   );
