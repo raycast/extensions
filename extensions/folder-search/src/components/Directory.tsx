@@ -63,11 +63,11 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
 
   // Function that toggles pins and calls onReturn afterward
   const handleTogglePin = (result: SpotlightSearchResult, resultIndex: number) => {
-    log("debug", "Directory", `Toggling pin for ${result.path.split('/').pop()}`);
-    
+    log("debug", "Directory", `Toggling pin for ${result.path.split("/").pop()}`);
+
     // Toggle the pin status
     toggleResultPinnedStatus(result, resultIndex);
-    
+
     // Always trigger return callback after pin action
     log("debug", "Directory", "Calling handleReturn after pin toggle");
     handleReturn();

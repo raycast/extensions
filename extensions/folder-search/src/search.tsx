@@ -20,7 +20,6 @@ import { moveFinderItems } from "./moveUtils";
 import { FolderListSection, Directory } from "./components";
 import path from "node:path";
 import { userInfo } from "os";
-import { useRef } from "react";
 
 // allow string indexing on Icons
 interface IconDictionary {
@@ -51,7 +50,7 @@ export default function Command(props: LaunchProps) {
     hasCheckedPreferences,
     refreshPinsFromStorage,
   } = useFolderSearch();
-  
+
   // Use the shared command base hook
   useCommandBase({
     commandName: "search",
