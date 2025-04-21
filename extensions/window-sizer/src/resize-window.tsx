@@ -36,11 +36,14 @@ interface Resolution {
 function AddCustomResolutionForm({
   onResizeWindow,
   predefinedResolutions,
+  onCustomResolutionAdded,
 }: {
   onResizeWindow: (width: number, height: number) => Promise<void>;
   predefinedResolutions: Resolution[];
+  onCustomResolutionAdded: () => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
+  const { pop } = useNavigation();
 
   async function handleSubmit(values: { width: string; height: string }) {
     const parsedWidth = parseInt(values.width, 10);
@@ -79,19 +82,39 @@ function AddCustomResolutionForm({
         // Save updated custom resolutions
         await LocalStorage.setItem("custom-resolutions", JSON.stringify(customResolutions));
 
-        // Close Raycast window first
-        await closeMainWindow();
+        // Check if window exists by attempting to get window info
+        try {
+          // Try to get window info, this will throw an error if no window is focused
+          await getWindowInfo();
 
-        // Apply the new resolution in the background
-        onResizeWindow(parsedWidth, parsedHeight).catch(async (error) => {
-          console.error("Error applying resolution:", error);
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Error applying resolution",
-          });
-        });
+          // Trigger refresh
+          onCustomResolutionAdded();
 
-        // Return early
+          // If window info is successfully obtained, close Raycast window and apply resolution
+          await closeMainWindow();
+          await onResizeWindow(parsedWidth, parsedHeight);
+        } catch (error) {
+          console.error("Error checking window:", error);
+
+          // Check if it's a "no focused window" error
+          const errorStr = String(error);
+          if (errorStr.includes("frontmost") || errorStr.includes("window") || errorStr.includes("process")) {
+            await showToast({
+              style: Toast.Style.Success,
+              title: "Size added",
+            });
+
+            // Trigger refresh and return to main list
+            onCustomResolutionAdded();
+            pop();
+          } else {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Error resizing window",
+            });
+          }
+        }
+
         return;
       } else {
         // Resolution already exists - show toast but keep form open
@@ -199,6 +222,7 @@ export default function ResizeWindow() {
   const [isLoading, setIsLoading] = useState(true);
   const [customResolutions, setCustomResolutions] = useState<Resolution[]>([]);
   const { push } = useNavigation();
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Predefined resolutions
   const predefinedResolutions: Resolution[] = [
@@ -228,7 +252,7 @@ export default function ResizeWindow() {
     }
 
     loadCustomResolutions();
-  }, []);
+  }, [refreshTrigger]);
 
   // Function to delete a custom resolution
   async function deleteCustomResolution(resolution: Resolution) {
@@ -350,7 +374,7 @@ export default function ResizeWindow() {
           !Number.isInteger(height)
         ) {
           console.error("Invalid width or height:", { width, height });
-          await showHUD("🛑 Invalid size data");
+          await showHUD("🛑 Failed to restore size");
           return;
         }
 
@@ -398,7 +422,7 @@ export default function ResizeWindow() {
         }
       } catch (parseError) {
         console.error("Failed to parse JSON data:", parseError);
-        await showHUD("🛑 Invalid size data format");
+        await showHUD("🛑 No focused window");
       }
     } catch (error) {
       console.error("Error restoring window size:", error);
@@ -406,6 +430,11 @@ export default function ResizeWindow() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  // Refresh custom resolutions list
+  async function refreshCustomResolutions() {
+    setRefreshTrigger((prev) => prev + 1);
   }
 
   return (
@@ -477,6 +506,7 @@ export default function ResizeWindow() {
                     <AddCustomResolutionForm
                       onResizeWindow={resizeWindow}
                       predefinedResolutions={predefinedResolutions}
+                      onCustomResolutionAdded={refreshCustomResolutions}
                     />,
                   )
                 }

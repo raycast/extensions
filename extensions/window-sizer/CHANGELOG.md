@@ -2,6 +2,11 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
+- Fixed handling of window size addition when no window is in focus
+- Improved toast notification for Restore Previous Size when no focused window
+
+## [Update] - {PR_MERGE_DATE}
+
 - Added loading state to prevent list flicker during data fetching
 - Improved error handling for AppleScript operations
 - Refactored window info retrieval into a shared utility function
