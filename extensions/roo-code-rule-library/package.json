@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "roo-code-rule-library",
+  "title": "Roo Code Rule Library",
+  "description": "Stores a library of Roo Code rules, and lets you place them straight into the active VScode folder",
+  "icon": "icon.png",
+  "author": "DonDaws",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Roo Code Rule Library",
+      "description": "Stores a library of Roo Code rules, and lets you place them straight into the active VScode folder",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "preferredEditor",
+      "title": "Preferred VS Code Editor",
+      "description": "Select the VS Code editor build you use.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        { "title": "Visual Studio Code", "value": "Code" },
+        { "title": "Visual Studio Code Insiders", "value": "Code - Insiders" },
+        { "title": "VSCodium", "value": "VSCodium" },
+        { "title": "VSCodium Insiders", "value": "VSCodium - Insiders" }
+      ],
+      "default": "Code"
+    },
+    {
+      "name": "customModesPath",
+      "type": "file",
+      "title": "Custom Modes File",
+      "description": "Path to the custom_modes.json file. Use '~' for the home directory.",
+      "required": false,
+      "default": "~/Library/Application Support/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/custom_modes.json"
+    },
+    {
+      "name": "storageDirectory",
+      "type": "directory",
+      "title": "Storage Directory",
+      "description": "Path to the directory where rules.json and tags.json will be stored. Use '~' for the home directory.",
+      "required": false,
+      "default": "~/Documents/RooCodeRuleLibrary"
+    }
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.96.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
