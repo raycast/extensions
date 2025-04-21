@@ -7,6 +7,7 @@ export function useBookmarks({ collection, search = "" }: BookmarksParams) {
   const preferences: Preferences = getPreferenceValues();
   const url = new URL(`https://api.raindrop.io/rest/v1/raindrops/${collection}`);
   const perPage = 50; // maximum value `perpage`: https://developer.raindrop.io/v1/raindrops/multiple#common-parameters
+  const bookmarkLimit = 200; // limit to 4 pages, i.e. 4 API requests at once
 
   url.searchParams.set("sort", preferences.sortBy ? preferences.sortBy : "-created");
   url.searchParams.set("search", search);
@@ -18,10 +19,10 @@ export function useBookmarks({ collection, search = "" }: BookmarksParams) {
   const fetchAllPages = async () => {
     let page = 0;
     let allBookmarks: Bookmark[] = [];
-    let hasMore = true;
+    let fetchMore = true;
 
     try {
-      while (hasMore) {
+      while (fetchMore) {
         url.searchParams.set("page", page.toString());
 
         const response = await fetch(url.href, {
@@ -37,7 +38,9 @@ export function useBookmarks({ collection, search = "" }: BookmarksParams) {
         const data: BookmarksResponse = await response.json();
         allBookmarks = allBookmarks.concat(data.items);
 
-        hasMore = data.items.length === perPage && preferences.fetchAllResults;
+        const belowLimit = allBookmarks.length < bookmarkLimit;
+        const hasMore = data.items.length === perPage;
+        fetchMore = preferences.fetchAllResults && belowLimit && hasMore;
         page++;
       }
 
