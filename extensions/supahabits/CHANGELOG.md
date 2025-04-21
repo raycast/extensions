@@ -22,7 +22,7 @@ Added the ability to create and track repeatable habits.
 
 Added link to track past habits.
 
-### [Tack Mood] - 2024-08-22
+### [Track Mood] - 2024-08-22
 
 New command to track your mood.
 
