@@ -79,8 +79,12 @@ export async function fetchQutebrowserTabs(): Promise<Tab[]> {
   let tabs: Tab[] = [];
 
   if (content) {
-    tabs = SessionUtils.parseSessionYaml(content);
-
+    try {
+      tabs = SessionUtils.parseSessionYaml(content);
+    } catch (e) {
+      debugInfo.errors.push(`Failed to parse session YAML: ${e}`);
+      console.error('Error parsing session YAML:', e);
+    }
     if (tabs.length > 0) {
       debugInfo.tabs_found = tabs.length;
       console.log(`Found ${tabs.length} tabs`);
