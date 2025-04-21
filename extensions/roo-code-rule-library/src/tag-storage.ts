@@ -88,7 +88,7 @@ export async function deleteTagFromStorage(tagToDelete: Tag): Promise<Tag[]> {
 export async function updateTagInStorage(originalTagName: string, updatedTag: Tag): Promise<Tag | undefined> {
   try {
     const tags = await fetchTagsFromStorage();
-    if (tags.some(tag => tag.name === updatedTag.name && tag.name !== originalTagName)) {
+    if (tags.some((tag) => tag.name === updatedTag.name && tag.name !== originalTagName)) {
       showFailureToast("Tag Already Exists", `A tag with the name "${updatedTag.name}" already exists.`);
       return undefined;
     }
@@ -155,7 +155,7 @@ export async function restoreDefaultTagsInStorage(): Promise<{ tags: Tag[]; rest
     const updatedTags = [...existingTags, ...tagsToAdd];
     await saveTagsToStorage(updatedTags);
     restored = true;
-    return { tags: updatedTags, restored: restored };
+    return { tags: updatedTags, restored };
   } else {
     return { tags: existingTags, restored: restored };
   }
