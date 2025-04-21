@@ -6,7 +6,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { useForm } from "@raycast/utils";
 
 interface Preferences {
@@ -16,28 +16,17 @@ interface Preferences {
 
 interface FormValues {
   name: string;
-  description: string;
+  description?: string;
 }
 
-function generateSourceId(): string {
-  const timestamp = Date.now().toString(36); // Convert to base36 for shorter string
-  const random = Math.random().toString(36).substring(2, 8); // Get 6 random chars
+const generateSourceId = (): string => {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 8);
   return `${timestamp}-${random}`;
-}
+};
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-
-  useEffect(() => {
-    if (!preferences.apiToken) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "API Token Required",
-        message:
-          "Please set your Lunatask API token in the extension preferences",
-      });
-    }
-  }, [preferences.apiToken]);
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     onSubmit: async (values) => {
@@ -106,21 +95,14 @@ export default function Command() {
           title: "Task created successfully",
         });
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to create task",
-          message:
-            error instanceof Error ? error.message : "Unknown error occurred",
-        });
+        showFailureToast(error, { title: "Failed to create task" });
       }
     },
   });
 
   return (
-    // @ts-expect-error Raycast API Form component type issue
     <Form
       actions={
-        // @ts-expect-error Raycast API Form component type issue
         <ActionPanel>
           <Action.SubmitForm title="Add Task" onSubmit={handleSubmit} />
         </ActionPanel>

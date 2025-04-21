@@ -22,7 +22,7 @@ A Raycast extension for quickly adding tasks, notes, and relationships to Lunata
 4. Configure the extension:
    - Open Raycast Preferences
    - Go to Extensions → Moonbeam
-   - Enter your API token, Area ID, and Notebook ID
+   - Enter your API token, Area ID, and Notebook ID (all required for the extension to work)
 
 ## Commands
 
@@ -61,4 +61,4 @@ Features:
 
 ## Support
 
-If you encounter any issues or have suggestions, please [open an issue](https://github.com/afroviking/moonbeam/issues) on GitHub.
+If you encounter any issues or have suggestions, please [open an issue](https://github.com/raycast/extensions/issues) on GitHub.

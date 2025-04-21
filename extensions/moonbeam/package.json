@@ -13,6 +13,7 @@
     {
       "name": "add-task",
       "title": "Add Task",
+      "subtitle": "Lunatask",
       "description": "Add a new task to Lunatask",
       "mode": "view",
       "main": "src/add-task.tsx"
@@ -20,6 +21,7 @@
     {
       "name": "add-note",
       "title": "Add Note",
+      "subtitle": "Lunatask",
       "description": "Add a new note to Lunatask",
       "mode": "view",
       "main": "src/add-note.tsx"
@@ -27,6 +29,7 @@
     {
       "name": "add-relationship",
       "title": "Add Relationship",
+      "subtitle": "Lunatask",
       "description": "Add a new relationship to Lunatask",
       "mode": "view",
       "main": "src/add-relationship.tsx"
@@ -34,6 +37,7 @@
     {
       "name": "manage-habits",
       "title": "Manage Habits",
+      "subtitle": "Lunatask",
       "description": "Manage your habits in Lunatask",
       "mode": "view",
       "main": "src/manage-habits.tsx"
@@ -97,6 +101,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "prepublish": "ray lint --fix",
     "publish": "ray publish"
   }
 }

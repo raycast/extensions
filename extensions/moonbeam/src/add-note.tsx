@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useForm } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 import { useEffect } from "react";
@@ -104,12 +105,7 @@ export default function Command() {
           title: "Note created successfully",
         });
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to create note",
-          message:
-            error instanceof Error ? error.message : "Unknown error occurred",
-        });
+        showFailureToast(error, { title: "Failed to create note" });
       }
     },
   });
