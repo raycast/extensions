@@ -257,7 +257,7 @@ function SensorList({
   };
 
   return (
-    <List isLoading={false} navigationTitle="PurpleAir Sensors">
+    <List isLoading={isLoading} navigationTitle="PurpleAir Sensors">
       {getSensorItems()}
     </List>
   );
