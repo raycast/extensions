@@ -1,5 +1,4 @@
 import { withSpotifyClient } from "../helpers/withSpotifyClient";
-import { getQueue } from "../api/getQueue";
 import { addToQueue } from "../api/addTrackToQueue";
 
 /*
@@ -21,11 +20,7 @@ const tool = async ({ trackId }: Input) => {
     let response = null;
     if (trackId) {
       response = await addToQueue({ uri: `spotify:track:${trackId}` });
-    } else {
-      response = await getQueue();
     }
-
-    // Get current queue
 
     return {
       queue: response || [],

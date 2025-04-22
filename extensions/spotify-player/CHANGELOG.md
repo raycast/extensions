@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [✨ AI Enhancements] - 2025-04-22
+
+- Added AI queue interaction (e.g.,"@spotify add 10 random jazz songs to my queue").
+
 ## [Fix Select Device] - 2025-02-26
 
 - Fixed a possibly undefined issue from Select Devices command
