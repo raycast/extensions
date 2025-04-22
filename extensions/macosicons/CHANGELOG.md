@@ -1,6 +1,6 @@
 # macOSIcons.com Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2025-04-22
 
 Handle undefined downloads in subtitle formatting
 
