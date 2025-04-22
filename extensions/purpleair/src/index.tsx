@@ -130,7 +130,7 @@ function SensorList({
       }
 
       // Parse response and process sensor data
-      const responseJson = await response.json();
+      const responseJson = await response.json() as PurpleAirResponse;
       return processSensorsData(responseJson);
     },
     [url],
@@ -204,7 +204,7 @@ function SensorList({
             key="nearest-loading"
             title="Finding nearest sensor..."
             subtitle="Based on your location"
-            icon={Icon.Location}
+            icon={Icon.Pin}
             accessories={[{ icon: Icon.CircleProgress }]}
           />
         );
@@ -435,7 +435,7 @@ async function getUserLocation() {
       throw new Error("Failed to fetch location data");
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as { success: boolean; city: string; region: string; country: string; latitude: number; longitude: number };
     console.debug("Location API response:", JSON.stringify(data, null, 2));
 
     if (!data.success) {
@@ -446,7 +446,7 @@ async function getUserLocation() {
     console.debug(`User location: ${data.city}, ${data.region}, ${data.country} (${data.latitude}, ${data.longitude})`);
 
     return {
-      latitude: data.latitude,
+      latitude: (data as { latitude: number }).latitude,
       longitude: data.longitude,
       city: data.city,
       region: data.region,
@@ -501,7 +501,7 @@ async function fetchNearestSensor(lat: number, lon: number, apiKey: string) {
     const responseJson = await response.json();
     console.debug("PurpleAir nearest sensor response:", JSON.stringify(responseJson, null, 2));
 
-    const sensors = processSensorsData(responseJson);
+    const sensors = processSensorsData(responseJson as PurpleAirResponse);
     console.debug(`Found ${sensors.length} sensors in the area`);
 
     // Add distance to each sensor
