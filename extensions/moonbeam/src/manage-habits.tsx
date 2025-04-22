@@ -27,10 +27,7 @@ interface FormValues {
 
 export default function Command() {
   const { apiToken } = getPreferenceValues<Preferences>();
-  const { value: habits, setValue: setHabits } = useLocalStorage<Habit[]>(
-    "habits",
-    [],
-  );
+  const { value: habits, setValue: setHabits } = useLocalStorage<Habit[]>("habits", []);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -38,8 +35,7 @@ export default function Command() {
       showToast({
         style: Toast.Style.Failure,
         title: "API Token Required",
-        message:
-          "Please set your Lunatask API token in the extension preferences",
+        message: "Please set your Lunatask API token in the extension preferences",
       });
     }
     setIsLoading(false);
@@ -50,38 +46,32 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: "API Token Required",
-        message:
-          "Please set your Lunatask API token in the extension preferences",
+        message: "Please set your Lunatask API token in the extension preferences",
       });
       return;
     }
 
     try {
-      const response = await fetch(
-        `https://api.lunatask.app/v1/habits/${habitId}/track`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiToken}`,
-          },
-          body: JSON.stringify({
-            performed_on: new Date().toISOString().split("T")[0],
-          }),
+      const response = await fetch(`https://api.lunatask.app/v1/habits/${habitId}/track`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiToken}`,
         },
-      );
+        body: JSON.stringify({
+          performed_on: new Date().toISOString().split("T")[0],
+        }),
+      });
 
       const responseData = await response.json();
 
       if (!response.ok) {
         if (response.status === 401) {
           throw new Error(
-            "Invalid API token. Please check your token in the extension preferences.",
+            "Invalid API token. Please check your token in the extension preferences."
           );
         }
-        throw new Error(
-          `Failed to complete habit: ${JSON.stringify(responseData)}`,
-        );
+        throw new Error(`Failed to complete habit: ${JSON.stringify(responseData)}`);
       }
 
       await showToast({
@@ -92,8 +82,7 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to complete habit",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     }
   };
@@ -103,8 +92,7 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: "API Token Required",
-        message:
-          "Please set your Lunatask API token in the extension preferences",
+        message: "Please set your Lunatask API token in the extension preferences",
       });
       return;
     }
@@ -119,10 +107,7 @@ export default function Command() {
     }
 
     try {
-      const newHabits = [
-        ...(habits || []),
-        { id: values.id, name: values.name },
-      ];
+      const newHabits = [...(habits || []), { id: values.id, name: values.name }];
       await setHabits(newHabits);
       await showToast({
         style: Toast.Style.Success,
@@ -132,8 +117,7 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to add habit",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     }
   };
@@ -143,14 +127,13 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: "API Token Required",
-        message:
-          "Please set your Lunatask API token in the extension preferences",
+        message: "Please set your Lunatask API token in the extension preferences",
       });
       return;
     }
 
     try {
-      const newHabits = (habits || []).filter((h) => h.id !== habitId);
+      const newHabits = (habits || []).filter(h => h.id !== habitId);
       await setHabits(newHabits);
       await showToast({
         style: Toast.Style.Success,
@@ -160,8 +143,7 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to remove habit",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     }
   };
@@ -184,18 +166,11 @@ export default function Command() {
                   <Form
                     actions={
                       <ActionPanel>
-                        <Action.SubmitForm
-                          title="Add Habit"
-                          onSubmit={handleAddHabit}
-                        />
+                        <Action.SubmitForm title="Add Habit" onSubmit={handleAddHabit} />
                       </ActionPanel>
                     }
                   >
-                    <Form.TextField
-                      id="name"
-                      title="Habit Name"
-                      placeholder="Enter habit name"
-                    />
+                    <Form.TextField id="name" title="Habit Name" placeholder="Enter habit name" />
                     <Form.TextField
                       id="id"
                       title="Habit ID"
@@ -222,18 +197,11 @@ export default function Command() {
               <Form
                 actions={
                   <ActionPanel>
-                    <Action.SubmitForm
-                      title="Add Habit"
-                      onSubmit={handleAddHabit}
-                    />
+                    <Action.SubmitForm title="Add Habit" onSubmit={handleAddHabit} />
                   </ActionPanel>
                 }
               >
-                <Form.TextField
-                  id="name"
-                  title="Habit Name"
-                  placeholder="Enter habit name"
-                />
+                <Form.TextField id="name" title="Habit Name" placeholder="Enter habit name" />
                 <Form.TextField
                   id="id"
                   title="Habit ID"
@@ -270,18 +238,11 @@ export default function Command() {
                   <Form
                     actions={
                       <ActionPanel>
-                        <Action.SubmitForm
-                          title="Add Habit"
-                          onSubmit={handleAddHabit}
-                        />
+                        <Action.SubmitForm title="Add Habit" onSubmit={handleAddHabit} />
                       </ActionPanel>
                     }
                   >
-                    <Form.TextField
-                      id="name"
-                      title="Habit Name"
-                      placeholder="Enter habit name"
-                    />
+                    <Form.TextField id="name" title="Habit Name" placeholder="Enter habit name" />
                     <Form.TextField
                       id="id"
                       title="Habit ID"

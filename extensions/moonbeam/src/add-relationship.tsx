@@ -55,8 +55,7 @@ const parseBirthday = (dateStr: string): string | undefined => {
     "november",
     "december",
   ];
-  const datePattern =
-    /^(\d{1,2})(?:st|nd|rd|th)?\s+(?:of\s+)?([a-zA-Z]+)(?:\s+(\d{4}))?$/i;
+  const datePattern = /^(\d{1,2})(?:st|nd|rd|th)?\s+(?:of\s+)?([a-zA-Z]+)(?:\s+(\d{4}))?$/i;
   const match = dateStr.match(datePattern);
 
   if (match) {
@@ -78,9 +77,7 @@ const parseBirthday = (dateStr: string): string | undefined => {
   if (altMatch) {
     const day = parseInt(altMatch[1], 10);
     const month = parseInt(altMatch[2], 10) - 1;
-    const year = altMatch[3]
-      ? parseInt(altMatch[3], 10)
-      : new Date().getFullYear();
+    const year = altMatch[3] ? parseInt(altMatch[3], 10) : new Date().getFullYear();
 
     if (month >= 0 && month < 12 && day >= 1 && day <= 31) {
       const date = new Date(year, month, day);
@@ -99,8 +96,7 @@ export default function Command() {
       showToast({
         style: Toast.Style.Failure,
         title: "API Token Required",
-        message:
-          "Please set your Lunatask API token in the extension preferences",
+        message: "Please set your Lunatask API token in the extension preferences",
       });
     }
   }, [preferences.apiToken]);
@@ -109,13 +105,12 @@ export default function Command() {
     initialValues: {
       relationshipStrength: "casual-friends",
     },
-    onSubmit: async (values) => {
+    onSubmit: async values => {
       if (!preferences.apiToken) {
         await showToast({
           style: Toast.Style.Failure,
           title: "API Token Required",
-          message:
-            "Please set your Lunatask API token in the extension preferences",
+          message: "Please set your Lunatask API token in the extension preferences",
         });
         return;
       }
@@ -137,8 +132,7 @@ export default function Command() {
         const requestBody = {
           first_name: firstName,
           last_name: lastName && lastName.trim() !== "" ? lastName : null,
-          relationship_strength:
-            values.relationshipStrength || "casual-friends",
+          relationship_strength: values.relationshipStrength || "casual-friends",
           source: "raycast",
           source_id: generateSourceId(),
           birthday: values.birthday ? parseBirthday(values.birthday) : null,
@@ -166,17 +160,15 @@ export default function Command() {
         if (!response.ok) {
           if (response.status === 401) {
             throw new Error(
-              "Invalid API token. Please check your token in the extension preferences.",
+              "Invalid API token. Please check your token in the extension preferences."
             );
           }
           if (response.status === 402) {
             throw new Error(
-              "You've reached the free plan limit. Please upgrade to add more relationships.",
+              "You've reached the free plan limit. Please upgrade to add more relationships."
             );
           }
-          throw new Error(
-            `Failed to create relationship: ${JSON.stringify(responseData)}`,
-          );
+          throw new Error(`Failed to create relationship: ${JSON.stringify(responseData)}`);
         }
 
         await showToast({
@@ -187,8 +179,7 @@ export default function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to create relationship",
-          message:
-            error instanceof Error ? error.message : "Unknown error occurred",
+          message: error instanceof Error ? error.message : "Unknown error occurred",
         });
       }
     },
@@ -211,17 +202,14 @@ export default function Command() {
         placeholder="Enter full name (first name and last name)"
         {...itemProps.fullName}
       />
-      <Form.Dropdown
-        title="Relationship Strength"
-        {...itemProps.relationshipStrength}
-      >
-        {RELATIONSHIP_STRENGTHS.map((strength) => (
+      <Form.Dropdown title="Relationship Strength" {...itemProps.relationshipStrength}>
+        {RELATIONSHIP_STRENGTHS.map(strength => (
           <Form.Dropdown.Item
             key={strength}
             value={strength}
             title={strength
               .split("-")
-              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
               .join(" ")}
           />
         ))}

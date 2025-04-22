@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  getPreferenceValues,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useForm } from "@raycast/utils";
 import * as chrono from "chrono-node";
@@ -26,9 +19,7 @@ const generateSourceId = (): string => {
   return `${timestamp}-${random}`;
 };
 
-const parseDateFromText = (
-  text: string,
-): { cleanText: string; dueDate?: string } => {
+const parseDateFromText = (text: string): { cleanText: string; dueDate?: string } => {
   const parsedDate = chrono.parseDate(text);
   if (!parsedDate) {
     return { cleanText: text };
@@ -55,13 +46,12 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
-    onSubmit: async (values) => {
+    onSubmit: async values => {
       if (!preferences.apiToken) {
         await showToast({
           style: Toast.Style.Failure,
           title: "API Token Required",
-          message:
-            "Please set your Lunatask API token in the extension preferences",
+          message: "Please set your Lunatask API token in the extension preferences",
         });
         return;
       }
@@ -70,8 +60,7 @@ export default function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Area ID Required",
-          message:
-            "Please set your Lunatask Area ID in the extension preferences",
+          message: "Please set your Lunatask Area ID in the extension preferences",
         });
         return;
       }
@@ -111,12 +100,10 @@ export default function Command() {
         if (!response.ok) {
           if (response.status === 401) {
             throw new Error(
-              "Invalid API token. Please check your token in the extension preferences.",
+              "Invalid API token. Please check your token in the extension preferences."
             );
           }
-          throw new Error(
-            `Failed to create task: ${JSON.stringify(responseData)}`,
-          );
+          throw new Error(`Failed to create task: ${JSON.stringify(responseData)}`);
         }
 
         await showToast({
