@@ -1,6 +1,6 @@
 # Expo Changelog
 
-## [New Additions] - {PR_MERGE_DATE}
+## [New Additions] - 2025-04-22
 
 - Added support for Two-factor authentication
 - Added New Push Notification command
