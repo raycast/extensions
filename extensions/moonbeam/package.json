@@ -87,13 +87,10 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@rushstack/eslint-patch": "1.2.0",
     "@types/node": "^18.8.3",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "eslint": "8.55.0",
-    "eslint-plugin-react": "7.37.5",
-    "eslint-plugin-react-hooks": "5.2.0",
     "prettier": "3.5.3",
     "typescript": "^5.3.3"
   },
