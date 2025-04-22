@@ -1,6 +1,6 @@
 # Sportssync Changelog
 
-## [New Commands, Views, and Small Features] - {PR_MERGE_DATE}
+## [New Commands, Views, and Small Features] - 2025-04-22
 
 - Created a Live Scores Menubar Command - View live scores, final scores, and games. Clicking on games will set them as the menubar title. (Must set a favorite sport and league for it to work)
 - Created a Favorite Team Dashboard Command - View scheduled games, live scores, completed games, articles, injuries, transactions, standings and team info directly from one command. (Must set a favorite sport, league, and team for it to work)
