@@ -1,6 +1,6 @@
 # Zen Changelog
 
-## [Add Browser Default Search Engine] - {PR_MERGE_DATE}
+## [Add Browser Default Search Engine] - 2025-04-22
 
 - Added the ability to use the user's default browser search engine set within Zen as the search engine.
 - Changed the default search engine to the Browser Default.
