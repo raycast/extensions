@@ -1,6 +1,6 @@
 # Terminal Shop Changelog
 
-## [Updated README] - {PR_MERGE_DATE}
+## [Updated README] - 2024-04-22
 
 ## [Bugfix] - 2025-03-26
 
