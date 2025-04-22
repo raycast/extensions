@@ -6,6 +6,7 @@ import {
   getPreferenceValues,
   LocalStorage,
   environment,
+  showHUD,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
@@ -419,7 +420,9 @@ export default function Command() {
     try {
       setIsPlaying(true);
 
-      // Get ffplay path from preferences or use default
+      await showHUD("🔊 Playing audio...");
+
+      // Get ffplay path from preferencesor use default
       const preferences = getPreferenceValues<Preferences>();
       const ffmpegPath = preferences.ffmpegPath?.trim() || "ffmpeg";
       const ffplayPath = ffmpegPath.endsWith("ffmpeg")
@@ -431,11 +434,22 @@ export default function Command() {
       // Play directly from URL using ffplay
       try {
         await execPromise(`${ffplayPath} -nodisp -autoexit "${url}" -loglevel quiet`);
-      } catch (ffplayError) {
-        console.error("Error playing with ffplay:", ffplayError);
-        showFailureToast("Failed to play audio", {
-          message: "Make sure you have FFmpeg installed or configure a custom path in preferences.",
-        });
+      } catch (ffplayError: unknown) {
+        // When we intentionally stop playback (e.g. via pkill in stopAudio),
+        // ffplay exits with a non‑zero status (often 123 or 143). Treat these
+        // as expected and silently ignore them. Only surface *unexpected*
+        // failures to the user.
+        const expectedExitCodes = new Set([123, 137, 143]); // 123: signal caught, 137/143: SIGKILL/SIGTERM
+        const error = ffplayError as { code?: number; killed?: boolean };
+        if ((error.code !== undefined && expectedExitCodes.has(error.code)) || error.killed) {
+          // Normal termination triggered by stopAudio – no action needed.
+          console.debug("ffplay terminated by user action – ignoring non‑zero exit code.");
+        } else {
+          console.error("Error playing with ffplay:", ffplayError);
+          showFailureToast("Failed to play audio", {
+            message: "Make sure you have FFmpeg installed or configure a custom path in preferences.",
+          });
+        }
       }
     } catch (error) {
       console.error("Error in audio playback:", error);
@@ -447,11 +461,36 @@ export default function Command() {
     }
   };
 
-  // Function to play latest audio
-  const playLatestAudio = async (): Promise<void> => {
-    const latestAudio = await historyData.getLatestAudioResponse();
-    if (latestAudio) {
-      await playItemAudio(latestAudio, playAudio, historyData.markItemAsRead);
+  // Function to stop audio playback
+  const stopAudio = async (): Promise<void> => {
+    try {
+      // Get ffplay path from preferences
+      const preferences = getPreferenceValues<Preferences>();
+      const ffmpegPath = preferences.ffmpegPath?.trim() || "ffmpeg";
+      const ffplayPath = ffmpegPath.endsWith("ffmpeg")
+        ? ffmpegPath.replace(/ffmpeg$/, "ffplay")
+        : path.join(path.dirname(ffmpegPath), "ffplay");
+
+      await execPromise(`pkill -f "${ffplayPath}"`).catch(() => {
+        console.log("No ffplay processes found to kill");
+      });
+
+      setIsPlaying(false);
+      await showHUD("⏹️ Audio stopped");
+    } catch (error) {
+      console.error("Error stopping audio:", error);
+    }
+  };
+
+  // Function to toggle play/pause of latest audio
+  const togglePlayPause = async (): Promise<void> => {
+    if (isPlaying) {
+      await stopAudio();
+    } else {
+      const latestAudio = await historyData.getLatestAudioResponse();
+      if (latestAudio) {
+        await playItemAudio(latestAudio, playAudio, historyData.markItemAsRead);
+      }
     }
   };
 
@@ -520,7 +559,11 @@ export default function Command() {
 
   return (
     <MenuBarExtra icon={getMenuBarIcon()} isLoading={isLoading} title={getMenuBarTitle()}>
-      <MenuBarExtra.Item title="Play Last Audio Response" icon={Icon.Play} onAction={playLatestAudio} />
+      <MenuBarExtra.Item
+        title={isPlaying ? "Pause" : "Play Last Audio Response"}
+        icon={isPlaying ? Icon.Pause : Icon.Play}
+        onAction={togglePlayPause}
+      />
       <MenuBarExtra.Item
         title="View Message History"
         icon={Icon.Clock}
