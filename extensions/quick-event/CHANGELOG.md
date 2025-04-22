@@ -1,6 +1,6 @@
 # Quick Event Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-22
 
 - Add location parsing for event creation
 
