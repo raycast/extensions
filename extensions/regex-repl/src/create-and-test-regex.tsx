@@ -86,10 +86,6 @@ export default function Command() {
     }
 
     setHistoryItems(filteredHistory);
-    showToast({
-      title: "Saved to History",
-      style: Toast.Style.Success,
-    });
   };
 
   const validateThenShowDetails = async (values: Values) => {
@@ -136,6 +132,10 @@ export default function Command() {
             shortcut={{ modifiers: ["cmd"], key: "s" }}
             onAction={() => {
               addToHistory(pattern, flags);
+              showToast({
+                title: "Saved to History",
+                style: Toast.Style.Success,
+              });
             }}
           />
           <Action
@@ -143,6 +143,10 @@ export default function Command() {
             shortcut={Keyboard.Shortcut.Common.RemoveAll}
             onAction={() => {
               setHistoryItems([]);
+              showToast({
+                title: "History Cleared",
+                style: Toast.Style.Success,
+              });
             }}
           />
           {!error && text && pattern && <Action.SubmitForm onSubmit={validateThenShowDetails} title="Show Details" />}

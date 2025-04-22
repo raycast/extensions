@@ -122,7 +122,13 @@ export default function History() {
                   <Action
                     title="Delete"
                     shortcut={Keyboard.Shortcut.Common.Remove}
-                    onAction={() => deleteHistoryItem(index)}
+                    onAction={() => {
+                      deleteHistoryItem(index);
+                      showToast({
+                        title: "Deleted from History",
+                        style: Toast.Style.Success,
+                      });
+                    }}
                   />
                   <Action
                     title="Copy to Clipboard"
